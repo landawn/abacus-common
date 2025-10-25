@@ -31,7 +31,7 @@ package com.landawn.abacus.util;
  * <p>The status codes are designed to be stored efficiently in databases and provide
  * fast lookups through the {@link #fromCode(int)} method.
  * 
- * <p>Example usage:
+ * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * // Using status in an entity
  * Status orderStatus = Status.PROCESSING;
@@ -335,7 +335,7 @@ public enum Status {
      * Codes are designed to be efficiently stored in databases and
      * provide fast lookups.
      * 
-     * <p>Example usage:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Status status = Status.ACTIVE;
      * int code = status.getCode(); // Returns 2
@@ -360,7 +360,7 @@ public enum Status {
      * Returns the Status enum constant associated with the specified code.
      * This method provides O(1) lookup performance for valid codes.
      * 
-     * <p>Example usage:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Status status = Status.fromCode(42); // Returns PROCESSING
      * Status invalid = Status.fromCode(999); // Returns null

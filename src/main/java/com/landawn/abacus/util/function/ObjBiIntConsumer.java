@@ -26,7 +26,7 @@ import com.landawn.abacus.util.Throwables;
  * <p>The interface extends {@code Throwables.ObjBiIntConsumer} with {@code RuntimeException} as the exception type,
  * making it suitable for use in contexts where checked exceptions are not required.
  * 
- * <p>Example usage:
+ * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * ObjBiIntConsumer<String> printSubstring = (str, start, end) -> 
  *     System.out.println(str.substring(start, end));
@@ -64,7 +64,6 @@ public interface ObjBiIntConsumer<T> extends Throwables.ObjBiIntConsumer<T, Runt
      * @param t the object input argument
      * @param i the first int input argument
      * @param j the second int input argument
-     * @throws RuntimeException if any error occurs during the operation
      */
     @Override
     void accept(T t, int i, int j);
@@ -80,7 +79,7 @@ public interface ObjBiIntConsumer<T> extends Throwables.ObjBiIntConsumer<T, Runt
      * <p>This method is useful for chaining multiple operations that need to process
      * the same object and two int values in sequence.
      * 
-     * <p>Example usage:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ObjBiIntConsumer<StringBuilder> appendRange = (sb, start, end) -> 
      *     sb.append(" Range: [").append(start).append(", ").append(end).append("]");

@@ -33,6 +33,12 @@ public interface BiIntObjPredicate<T> extends Throwables.BiIntObjPredicate<T, Ru
     /**
      * Evaluates this predicate on the given arguments.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * BiIntObjPredicate<String> lengthChecker = (i, j, str) -> str.length() == (i + j);
+     * boolean result = lengthChecker.test(3, 2, "hello"); // Returns true (5 == 3+2)
+     * }</pre>
+     *
      * @param i the first input argument (int value)
      * @param j the second input argument (int value)
      * @param t the third input argument (object value)
@@ -43,6 +49,12 @@ public interface BiIntObjPredicate<T> extends Throwables.BiIntObjPredicate<T, Ru
 
     /**
      * Returns a predicate that represents the logical negation of this predicate.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * BiIntObjPredicate<String> isEqual = (i, j, str) -> str.length() == (i + j);
+     * BiIntObjPredicate<String> isNotEqual = isEqual.negate();
+     * }</pre>
      *
      * @return a predicate that represents the logical negation of this predicate
      */
@@ -58,6 +70,13 @@ public interface BiIntObjPredicate<T> extends Throwables.BiIntObjPredicate<T, Ru
      * <p>Any exceptions thrown during evaluation of either predicate are relayed to the caller;
      * if evaluation of this predicate throws an exception, the {@code other} predicate will not be evaluated.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * BiIntObjPredicate<String> positiveSum = (i, j, s) -> (i + j) > 0;
+     * BiIntObjPredicate<String> notEmpty = (i, j, s) -> !s.isEmpty();
+     * BiIntObjPredicate<String> combined = positiveSum.and(notEmpty);
+     * }</pre>
+     *
      * @param other a predicate that will be logically-ANDed with this predicate. Must not be {@code null}.
      * @return a composed predicate that represents the short-circuiting logical AND of this predicate and the {@code other} predicate
      */
@@ -72,6 +91,13 @@ public interface BiIntObjPredicate<T> extends Throwables.BiIntObjPredicate<T, Ru
      *
      * <p>Any exceptions thrown during evaluation of either predicate are relayed to the caller;
      * if evaluation of this predicate throws an exception, the {@code other} predicate will not be evaluated.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * BiIntObjPredicate<String> largeSum = (i, j, s) -> (i + j) > 100;
+     * BiIntObjPredicate<String> longString = (i, j, s) -> s.length() > 50;
+     * BiIntObjPredicate<String> combined = largeSum.or(longString);
+     * }</pre>
      *
      * @param other a predicate that will be logically-ORed with this predicate. Must not be {@code null}.
      * @return a composed predicate that represents the short-circuiting logical OR of this predicate and the {@code other} predicate

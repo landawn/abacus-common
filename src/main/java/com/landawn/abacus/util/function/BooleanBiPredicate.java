@@ -59,6 +59,12 @@ public interface BooleanBiPredicate extends Throwables.BooleanBiPredicate<Runtim
     /**
      * Evaluates this predicate on the given arguments.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * BooleanBiPredicate xor = (a, b) -> a != b;
+     * boolean result = xor.test(true, false); // Returns true
+     * }</pre>
+     *
      * @param t the first input argument
      * @param u the second input argument
      * @return {@code true} if the input arguments match the predicate, otherwise {@code false}
@@ -68,6 +74,12 @@ public interface BooleanBiPredicate extends Throwables.BooleanBiPredicate<Runtim
 
     /**
      * Returns a predicate that represents the logical negation of this predicate.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * BooleanBiPredicate bothTrue = (a, b) -> a && b;
+     * BooleanBiPredicate notBothTrue = bothTrue.negate();
+     * }</pre>
      *
      * @return a predicate that represents the logical negation of this predicate
      */
@@ -83,6 +95,13 @@ public interface BooleanBiPredicate extends Throwables.BooleanBiPredicate<Runtim
      * <p>Any exceptions thrown during evaluation of either predicate are relayed to the caller;
      * if evaluation of this predicate throws an exception, the {@code other} predicate will not be evaluated.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * BooleanBiPredicate bothTrue = (a, b) -> a && b;
+     * BooleanBiPredicate bothFalse = (a, b) -> !a && !b;
+     * BooleanBiPredicate combined = bothTrue.and(bothFalse); // Always false
+     * }</pre>
+     *
      * @param other a predicate that will be logically-ANDed with this predicate. Must not be {@code null}.
      * @return a composed predicate that represents the short-circuiting logical AND of this predicate and the {@code other} predicate
      */
@@ -97,6 +116,13 @@ public interface BooleanBiPredicate extends Throwables.BooleanBiPredicate<Runtim
      *
      * <p>Any exceptions thrown during evaluation of either predicate are relayed to the caller;
      * if evaluation of this predicate throws an exception, the {@code other} predicate will not be evaluated.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * BooleanBiPredicate anyTrue = (a, b) -> a || b;
+     * BooleanBiPredicate allTrue = (a, b) -> a && b;
+     * BooleanBiPredicate combined = anyTrue.or(allTrue);
+     * }</pre>
      *
      * @param other a predicate that will be logically-ORed with this predicate. Must not be {@code null}.
      * @return a composed predicate that represents the short-circuiting logical OR of this predicate and the {@code other} predicate

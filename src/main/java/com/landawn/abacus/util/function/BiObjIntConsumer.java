@@ -32,6 +32,15 @@ public interface BiObjIntConsumer<T, U> extends Throwables.BiObjIntConsumer<T, U
     /**
      * Performs this operation on the given arguments.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * BiObjIntConsumer<String, List<String>> repeater = (str, list, times) -> {
+     *     for (int j = 0; j < times; j++) list.add(str);
+     * };
+     * List<String> list = new ArrayList<>();
+     * repeater.accept("hello", list, 3); // Adds "hello" 3 times
+     * }</pre>
+     *
      * @param t the first input argument (object value)
      * @param u the second input argument (object value)
      * @param i the third input argument (int value)
@@ -43,6 +52,13 @@ public interface BiObjIntConsumer<T, U> extends Throwables.BiObjIntConsumer<T, U
      * Returns a composed {@code BiObjIntConsumer} that performs, in sequence, this operation followed by the {@code after} operation.
      * If performing either operation throws an exception, it is relayed to the caller of the composed operation.
      * If performing this operation throws an exception, the {@code after} operation will not be performed.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * BiObjIntConsumer<String, StringBuilder> appender = (str, sb, i) -> sb.append(str).append(i);
+     * BiObjIntConsumer<String, StringBuilder> logger = (str, sb, i) -> System.out.println(sb);
+     * BiObjIntConsumer<String, StringBuilder> combined = appender.andThen(logger);
+     * }</pre>
      *
      * @param after the operation to perform after this operation. Must not be {@code null}.
      * @return a composed {@code BiObjIntConsumer} that performs in sequence this operation followed by the {@code after} operation

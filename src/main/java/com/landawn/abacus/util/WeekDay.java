@@ -22,7 +22,7 @@ package com.landawn.abacus.util;
  * <p>The integer values correspond to the day-of-week values used in many calendar systems,
  * where Sunday is traditionally the first day of the week (value 0).</p>
  * 
- * <p>Example usage:</p>
+ * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * WeekDay today = WeekDay.MONDAY;
  * int dayValue = today.intValue(); // Returns 1
@@ -79,7 +79,7 @@ public enum WeekDay {
      * Returns the integer value associated with this weekday.
      * The values range from 0 (Sunday) to 6 (Saturday).
      * 
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * int mondayValue = WeekDay.MONDAY.intValue(); // Returns 1
      * int saturdayValue = WeekDay.SATURDAY.intValue(); // Returns 6
@@ -95,7 +95,7 @@ public enum WeekDay {
      * Returns the WeekDay enum constant corresponding to the specified integer value.
      * This method provides a way to convert from integer representation to the enum constant.
      * 
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * WeekDay day = WeekDay.valueOf(1); // Returns WeekDay.MONDAY
      * WeekDay weekend = WeekDay.valueOf(6); // Returns WeekDay.SATURDAY

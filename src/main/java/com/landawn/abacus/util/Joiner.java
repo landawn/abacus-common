@@ -105,7 +105,7 @@ public final class Joiner implements Closeable {
      * Returns a default Joiner instance with default delimiter (", ") and default key-value delimiter ("=").
      * This is a convenience method equivalent to calling {@code with(DEFAULT_DELIMITER, DEFAULT_KEY_VALUE_DELIMITER)}.
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Joiner.defauLt().appendAll("a", "b", "c").toString(); // Returns: "a, b, c"
      * }</pre>
@@ -125,7 +125,7 @@ public final class Joiner implements Closeable {
      * Creates a new Joiner instance with the specified separator.
      * The key-value separator will be set to the default value ("=").
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Joiner.with(", ").appendAll("a", "b", "c").toString(); // Returns: "a, b, c"
      * Joiner.with("-").appendAll(1, 2, 3).toString();        // Returns: "1-2-3"
@@ -143,7 +143,7 @@ public final class Joiner implements Closeable {
      * Creates a new Joiner instance with the specified separator and key-value delimiter.
      * This is useful for joining map entries or key-value pairs.
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Joiner.with(", ", "=").appendEntry("key", "value").toString(); // Returns: "key=value"
      * Joiner.with("; ", ": ").appendEntries(map).toString();         // Returns: "a: 1; b: 2"
@@ -162,7 +162,7 @@ public final class Joiner implements Closeable {
      * Creates a new Joiner instance with the specified separator, prefix, and suffix.
      * The prefix is prepended to the result and the suffix is appended to the result.
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Joiner.with(", ", "[", "]").appendAll("a", "b", "c").toString(); // Returns: "[a, b, c]"
      * Joiner.with(" | ", "{", "}").appendAll(1, 2, 3).toString();      // Returns: "{1 | 2 | 3}"
@@ -182,7 +182,7 @@ public final class Joiner implements Closeable {
      * Creates a new Joiner instance with the specified separator, key-value separator, prefix, and suffix.
      * This provides full control over all formatting aspects of the joiner.
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Joiner.with(", ", "=", "{", "}").appendEntry("a", 1).appendEntry("b", 2).toString(); 
      * // Returns: "{a=1, b=2}"
@@ -204,7 +204,7 @@ public final class Joiner implements Closeable {
      * By default, when no elements are added, the joiner returns prefix + suffix.
      * This method allows you to override that behavior.
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Joiner.with(", ").setEmptyValue("NONE").toString();                    // Returns: "NONE"
      * Joiner.with(", ").setEmptyValue("[]").appendAll(new int[0]).toString(); // Returns: "[]"
@@ -225,7 +225,7 @@ public final class Joiner implements Closeable {
      * This affects String, CharSequence, and the string representation of objects.
      * Primitive values are not affected.
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Joiner.with(", ").trimBeforeAppend().appendAll("  a  ", " b ", "c  ").toString(); 
      * // Returns: "a, b, c"
@@ -244,7 +244,7 @@ public final class Joiner implements Closeable {
      * When enabled, null values will be ignored during appending operations.
      * By default, null values are converted to the string specified by {@link #useForNull(String)}.
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Joiner.with(", ").skipNulls().appendAll("a", null, "b").toString(); // Returns: "a, b"
      * Joiner.with(", ").appendAll("a", null, "b").toString();             // Returns: "a, null, b"
@@ -263,7 +263,7 @@ public final class Joiner implements Closeable {
      * This setting is ignored if {@link #skipNulls()} has been called.
      * The default value is "null".
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Joiner.with(", ").useForNull("N/A").appendAll("a", null, "b").toString(); 
      * // Returns: "a, N/A, b"
@@ -288,7 +288,7 @@ public final class Joiner implements Closeable {
      * ({@link #toString()}, {@link #appendTo(Appendable)}, {@link #map(Function)}, {@link #mapIfNotEmpty(Function)}, 
      * or {@link #close()} to properly recycle the buffer.</p>
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Joiner joiner = Joiner.with(", ").reuseCachedBuffer();
      * try {
@@ -316,7 +316,7 @@ public final class Joiner implements Closeable {
      * Appends a boolean value to the joiner.
      * The boolean will be converted to "true" or "false" string representation.
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Joiner.with(", ").append(true).append(false).toString(); // Returns: "true, false"
      * }</pre>
@@ -332,7 +332,7 @@ public final class Joiner implements Closeable {
     /**
      * Appends a char value to the joiner.
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Joiner.with(", ").append('a').append('b').toString(); // Returns: "a, b"
      * }</pre>
@@ -348,7 +348,7 @@ public final class Joiner implements Closeable {
     /**
      * Appends an int value to the joiner.
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Joiner.with(", ").append(1).append(2).append(3).toString(); // Returns: "1, 2, 3"
      * }</pre>
@@ -364,7 +364,7 @@ public final class Joiner implements Closeable {
     /**
      * Appends a long value to the joiner.
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Joiner.with(", ").append(100L).append(200L).toString(); // Returns: "100, 200"
      * }</pre>
@@ -380,7 +380,7 @@ public final class Joiner implements Closeable {
     /**
      * Appends a float value to the joiner.
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Joiner.with(", ").append(1.5f).append(2.5f).toString(); // Returns: "1.5, 2.5"
      * }</pre>
@@ -396,7 +396,7 @@ public final class Joiner implements Closeable {
     /**
      * Appends a double value to the joiner.
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Joiner.with(", ").append(1.5).append(2.5).toString(); // Returns: "1.5, 2.5"
      * }</pre>
@@ -414,7 +414,7 @@ public final class Joiner implements Closeable {
      * If the string is null, it will be handled according to the skipNulls and useForNull settings.
      * If trimBeforeAppend is enabled, the string will be trimmed before appending.
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Joiner.with(", ").append("hello").append("world").toString(); // Returns: "hello, world"
      * Joiner.with(", ").skipNulls().append("a").append(null).append("b").toString(); // Returns: "a, b"
@@ -436,7 +436,7 @@ public final class Joiner implements Closeable {
      * If the CharSequence is null, it will be handled according to the skipNulls and useForNull settings.
      * If trimBeforeAppend is enabled, the CharSequence will be converted to string and trimmed before appending.
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * StringBuilder sb = new StringBuilder("test");
      * Joiner.with(", ").append("hello").append(sb).toString(); // Returns: "hello, test"
@@ -458,7 +458,7 @@ public final class Joiner implements Closeable {
      * Characters from start (inclusive) to end (exclusive) will be appended.
      * If the CharSequence is null, it will be handled according to the skipNulls and useForNull settings.
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Joiner.with(", ").append("hello", 0, 2).append("world", 1, 4).toString(); 
      * // Returns: "he, orl"
@@ -489,7 +489,7 @@ public final class Joiner implements Closeable {
      * If the StringBuilder is null, it will be handled according to the skipNulls and useForNull settings.
      * Note: The contents of the StringBuilder are appended directly without trimming even if trimBeforeAppend is enabled.
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * StringBuilder sb = new StringBuilder("world");
      * Joiner.with(", ").append("hello").append(sb).toString(); // Returns: "hello, world"
@@ -516,7 +516,7 @@ public final class Joiner implements Closeable {
      * If the object is null, it will be handled according to the skipNulls and useForNull settings.
      * If trimBeforeAppend is enabled, the string representation will be trimmed before appending.
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Joiner.with(", ").append(123).append("text").append(new Date()).toString();
      * // Returns something like: "123, text, Mon Jan 01 00:00:00 UTC 2024"
@@ -537,7 +537,7 @@ public final class Joiner implements Closeable {
      * Appends an object to the joiner only if it is not null.
      * This is a convenience method that ignores the skipNulls setting for this specific append operation.
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Joiner.with(", ").appendIfNotNull("a").appendIfNotNull(null).appendIfNotNull("b").toString(); 
      * // Returns: "a, b"
@@ -558,7 +558,7 @@ public final class Joiner implements Closeable {
      * Conditionally appends a value provided by a supplier if the specified condition is true.
      * The supplier is only invoked if the condition is true.
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * boolean includeDetails = true;
      * Joiner.with(", ").append("basic")
@@ -583,7 +583,7 @@ public final class Joiner implements Closeable {
      * Appends all elements from a boolean array to the joiner.
      * Each boolean value is separated by the configured separator.
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * boolean[] arr = {true, false, true};
      * Joiner.with(", ").appendAll(arr).toString(); // Returns: "true, false, true"
@@ -604,7 +604,7 @@ public final class Joiner implements Closeable {
      * Appends a range of elements from a boolean array to the joiner.
      * Elements from index fromIndex (inclusive) to toIndex (exclusive) are appended.
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * boolean[] arr = {true, false, true, false};
      * Joiner.with(", ").appendAll(arr, 1, 3).toString(); // Returns: "false, true"
@@ -644,7 +644,7 @@ public final class Joiner implements Closeable {
      * Appends all elements from a char array to the joiner.
      * Each char value is separated by the configured separator.
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * char[] arr = {'a', 'b', 'c'};
      * Joiner.with(", ").appendAll(arr).toString(); // Returns: "a, b, c"
@@ -665,7 +665,7 @@ public final class Joiner implements Closeable {
      * Appends a range of elements from a char array to the joiner.
      * Elements from index fromIndex (inclusive) to toIndex (exclusive) are appended.
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * char[] arr = {'a', 'b', 'c', 'd'};
      * Joiner.with("-").appendAll(arr, 1, 3).toString(); // Returns: "b-c"
@@ -705,7 +705,7 @@ public final class Joiner implements Closeable {
      * Appends all elements from a byte array to the joiner.
      * Each byte value is separated by the configured separator.
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * byte[] arr = {1, 2, 3};
      * Joiner.with(", ").appendAll(arr).toString(); // Returns: "1, 2, 3"
@@ -726,7 +726,7 @@ public final class Joiner implements Closeable {
      * Appends a range of elements from a byte array to the joiner.
      * Elements from index fromIndex (inclusive) to toIndex (exclusive) are appended.
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * byte[] arr = {1, 2, 3, 4};
      * Joiner.with("-").appendAll(arr, 1, 3).toString(); // Returns: "2-3"
@@ -766,7 +766,7 @@ public final class Joiner implements Closeable {
      * Appends all elements from a short array to the joiner.
      * Each short value is separated by the configured separator.
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * short[] arr = {10, 20, 30};
      * Joiner.with(", ").appendAll(arr).toString(); // Returns: "10, 20, 30"
@@ -787,7 +787,7 @@ public final class Joiner implements Closeable {
      * Appends a range of elements from a short array to the joiner.
      * Elements from index fromIndex (inclusive) to toIndex (exclusive) are appended.
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * short[] arr = {10, 20, 30, 40};
      * Joiner.with(" | ").appendAll(arr, 1, 3).toString(); // Returns: "20 | 30"
@@ -827,7 +827,7 @@ public final class Joiner implements Closeable {
      * Appends all elements from an int array to the joiner.
      * Each int value is separated by the configured separator.
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * int[] arr = {1, 2, 3};
      * Joiner.with(", ").appendAll(arr).toString(); // Returns: "1, 2, 3"
@@ -848,7 +848,7 @@ public final class Joiner implements Closeable {
      * Appends a range of elements from an int array to the joiner.
      * Elements from index fromIndex (inclusive) to toIndex (exclusive) are appended.
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * int[] arr = {1, 2, 3, 4, 5};
      * Joiner.with("-").appendAll(arr, 1, 4).toString(); // Returns: "2-3-4"
@@ -888,7 +888,7 @@ public final class Joiner implements Closeable {
      * Appends all elements from a long array to the joiner.
      * Each long value is separated by the configured separator.
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * long[] arr = {100L, 200L, 300L};
      * Joiner.with(", ").appendAll(arr).toString(); // Returns: "100, 200, 300"
@@ -909,7 +909,7 @@ public final class Joiner implements Closeable {
      * Appends a range of elements from a long array to the joiner.
      * Elements from index fromIndex (inclusive) to toIndex (exclusive) are appended.
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * long[] arr = {100L, 200L, 300L, 400L};
      * Joiner.with(" - ").appendAll(arr, 1, 3).toString(); // Returns: "200 - 300"
@@ -949,7 +949,7 @@ public final class Joiner implements Closeable {
      * Appends all elements from a float array to the joiner.
      * Each float value is separated by the configured separator.
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * float[] arr = {1.5f, 2.5f, 3.5f};
      * Joiner.with(", ").appendAll(arr).toString(); // Returns: "1.5, 2.5, 3.5"
@@ -970,7 +970,7 @@ public final class Joiner implements Closeable {
      * Appends a range of elements from a float array to the joiner.
      * Elements from index fromIndex (inclusive) to toIndex (exclusive) are appended.
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * float[] arr = {1.1f, 2.2f, 3.3f, 4.4f};
      * Joiner.with("; ").appendAll(arr, 1, 3).toString(); // Returns: "2.2; 3.3"
@@ -1010,7 +1010,7 @@ public final class Joiner implements Closeable {
      * Appends all elements from a double array to the joiner.
      * Each double value is separated by the configured separator.
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * double[] arr = {1.5, 2.5, 3.5};
      * Joiner.with(", ").appendAll(arr).toString(); // Returns: "1.5, 2.5, 3.5"
@@ -1031,7 +1031,7 @@ public final class Joiner implements Closeable {
      * Appends a range of elements from a double array to the joiner.
      * Elements from index fromIndex (inclusive) to toIndex (exclusive) are appended.
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * double[] arr = {1.1, 2.2, 3.3, 4.4};
      * Joiner.with(" | ").appendAll(arr, 0, 2).toString(); // Returns: "1.1 | 2.2"
@@ -1072,7 +1072,7 @@ public final class Joiner implements Closeable {
      * Each element is converted to string and separated by the configured separator.
      * Null elements are handled according to skipNulls and useForNull settings.
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Object[] arr = {"a", 1, null, "b"};
      * Joiner.with(", ").skipNulls().appendAll(arr).toString(); // Returns: "a, 1, b"
@@ -1094,7 +1094,7 @@ public final class Joiner implements Closeable {
      * Elements from index fromIndex (inclusive) to toIndex (exclusive) are appended.
      * Null elements are handled according to skipNulls and useForNull settings.
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String[] arr = {"a", "b", "c", "d"};
      * Joiner.with("-").appendAll(arr, 1, 3).toString(); // Returns: "b-c"
@@ -1136,7 +1136,7 @@ public final class Joiner implements Closeable {
      * Appends all elements from a BooleanList to the joiner.
      * Each boolean value is separated by the configured separator.
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * BooleanList list = BooleanList.of(true, false, true);
      * Joiner.with(", ").appendAll(list).toString(); // Returns: "true, false, true"
@@ -1158,7 +1158,7 @@ public final class Joiner implements Closeable {
      * Appends a range of elements from a BooleanList to the joiner.
      * Elements from index fromIndex (inclusive) to toIndex (exclusive) are appended.
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * BooleanList list = BooleanList.of(true, false, true, false);
      * Joiner.with("-").appendAll(list, 1, 3).toString(); // Returns: "false-true"
@@ -1185,7 +1185,7 @@ public final class Joiner implements Closeable {
      * Appends all elements from a CharList to the joiner.
      * Each char value is separated by the configured separator.
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * CharList list = CharList.of('a', 'b', 'c');
      * Joiner.with(", ").appendAll(list).toString(); // Returns: "a, b, c"
@@ -1207,7 +1207,7 @@ public final class Joiner implements Closeable {
      * Appends a range of elements from a CharList to the joiner.
      * Elements from index fromIndex (inclusive) to toIndex (exclusive) are appended.
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * CharList list = CharList.of('a', 'b', 'c', 'd');
      * Joiner.with("-").appendAll(list, 1, 3).toString(); // Returns: "b-c"
@@ -1234,7 +1234,7 @@ public final class Joiner implements Closeable {
      * Appends all elements from a ByteList to the joiner.
      * Each byte value is separated by the configured separator.
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ByteList list = ByteList.of((byte)1, (byte)2, (byte)3);
      * Joiner.with(", ").appendAll(list).toString(); // Returns: "1, 2, 3"
@@ -1256,7 +1256,7 @@ public final class Joiner implements Closeable {
      * Appends a range of elements from a ByteList to the joiner.
      * Elements from index fromIndex (inclusive) to toIndex (exclusive) are appended.
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ByteList list = ByteList.of((byte)1, (byte)2, (byte)3, (byte)4);
      * Joiner.with("-").appendAll(list, 1, 3).toString(); // Returns: "2-3"
@@ -1283,7 +1283,7 @@ public final class Joiner implements Closeable {
      * Appends all elements from a ShortList to the joiner.
      * Each short value is separated by the configured separator.
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ShortList list = ShortList.of((short)10, (short)20, (short)30);
      * Joiner.with(", ").appendAll(list).toString(); // Returns: "10, 20, 30"
@@ -1305,7 +1305,7 @@ public final class Joiner implements Closeable {
      * Appends a range of elements from a ShortList to the joiner.
      * Elements from index fromIndex (inclusive) to toIndex (exclusive) are appended.
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ShortList list = ShortList.of((short)10, (short)20, (short)30, (short)40);
      * Joiner.with("-").appendAll(list, 1, 3).toString(); // Returns: "20-30"
@@ -1332,7 +1332,7 @@ public final class Joiner implements Closeable {
      * Appends all elements from an IntList to the joiner.
      * Each int value is separated by the configured separator.
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * IntList list = IntList.of(1, 2, 3);
      * Joiner.with(", ").appendAll(list).toString(); // Returns: "1, 2, 3"
@@ -1354,7 +1354,7 @@ public final class Joiner implements Closeable {
      * Appends a range of elements from an IntList to the joiner.
      * Elements from index fromIndex (inclusive) to toIndex (exclusive) are appended.
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * IntList list = IntList.of(1, 2, 3, 4);
      * Joiner.with("-").appendAll(list, 1, 3).toString(); // Returns: "2-3"
@@ -1381,7 +1381,7 @@ public final class Joiner implements Closeable {
      * Appends all elements from a LongList to the joiner.
      * Each long value is separated by the configured separator.
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * LongList list = LongList.of(100L, 200L, 300L);
      * Joiner.with(", ").appendAll(list).toString(); // Returns: "100, 200, 300"
@@ -1403,7 +1403,7 @@ public final class Joiner implements Closeable {
      * Appends a range of elements from a LongList to the joiner.
      * Elements from index fromIndex (inclusive) to toIndex (exclusive) are appended.
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * LongList list = LongList.of(100L, 200L, 300L, 400L);
      * Joiner.with("-").appendAll(list, 1, 3).toString(); // Returns: "200-300"
@@ -1431,7 +1431,7 @@ public final class Joiner implements Closeable {
      * Each element is appended in sequence, separated by the configured separator.
      * Empty lists are ignored and the joiner remains unchanged.
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * FloatList list = FloatList.of(1.5f, 2.5f, 3.5f);
      * Joiner.with(", ").appendAll(list).toString(); // Returns: "1.5, 2.5, 3.5"
@@ -1454,7 +1454,7 @@ public final class Joiner implements Closeable {
      * Elements from index fromIndex (inclusive) to toIndex (exclusive) are appended.
      * Each element is separated by the configured separator.
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * FloatList list = FloatList.of(1.5f, 2.5f, 3.5f, 4.5f);
      * Joiner.with(", ").appendAll(list, 1, 3).toString(); // Returns: "2.5, 3.5"
@@ -1482,7 +1482,7 @@ public final class Joiner implements Closeable {
      * Each element is appended in sequence, separated by the configured separator.
      * Empty lists are ignored and the joiner remains unchanged.
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * DoubleList list = DoubleList.of(1.5, 2.5, 3.5);
      * Joiner.with(", ").appendAll(list).toString(); // Returns: "1.5, 2.5, 3.5"
@@ -1505,7 +1505,7 @@ public final class Joiner implements Closeable {
      * Elements from index fromIndex (inclusive) to toIndex (exclusive) are appended.
      * Each element is separated by the configured separator.
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * DoubleList list = DoubleList.of(1.5, 2.5, 3.5, 4.5);
      * Joiner.with(", ").appendAll(list, 1, 3).toString(); // Returns: "2.5, 3.5"
@@ -1533,7 +1533,7 @@ public final class Joiner implements Closeable {
      * Each element is appended in sequence, separated by the configured separator.
      * Null elements are handled according to skipNulls and useForNull settings.
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * List<String> list = Arrays.asList("apple", "banana", "cherry");
      * Joiner.with(", ").appendAll(list).toString(); // Returns: "apple, banana, cherry"
@@ -1555,7 +1555,7 @@ public final class Joiner implements Closeable {
      * Elements from index fromIndex (inclusive) to toIndex (exclusive) are appended.
      * Null elements are handled according to skipNulls and useForNull settings.
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * List<String> list = Arrays.asList("a", "b", "c", "d");
      * Joiner.with("-").appendAll(list, 1, 3).toString(); // Returns: "b-c"
@@ -1607,7 +1607,7 @@ public final class Joiner implements Closeable {
      * Each element is appended in sequence, separated by the configured separator.
      * Null elements are handled according to skipNulls and useForNull settings.
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Iterable<String> iterable = Arrays.asList("one", "two", "three");
      * Joiner.with(" | ").appendAll(iterable).toString(); // Returns: "one | two | three"
@@ -1643,7 +1643,7 @@ public final class Joiner implements Closeable {
      * Only elements that pass the filter test are appended to the joiner.
      * The skipNulls setting is ignored; only the filter determines inclusion.
      *
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * List<Integer> numbers = Arrays.asList(1, 2, 3, 4, 5);
      * Joiner.with(", ").appendAll(numbers, n -> n % 2 == 0).toString(); // Returns: "2, 4"
@@ -1686,7 +1686,7 @@ public final class Joiner implements Closeable {
      * Each element is appended in sequence, separated by the configured separator.
      * Null elements are handled according to skipNulls and useForNull settings.
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Iterator<String> iter = Arrays.asList("x", "y", "z").iterator();
      * Joiner.with("->").appendAll(iter).toString(); // Returns: "x->y->z"
@@ -1725,7 +1725,7 @@ public final class Joiner implements Closeable {
      * Only elements that pass the filter test are appended to the joiner.
      * The skipNulls setting is ignored; only the filter determines inclusion.
      *
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Iterator<String> iter = Arrays.asList("cat", "dog", "bird", "fish").iterator();
      * Joiner.with(", ").appendAll(iter, s -> s.length() > 3).toString(); // Returns: "bird, fish"
@@ -1769,9 +1769,10 @@ public final class Joiner implements Closeable {
     /**
      * Appends a key-value pair with a boolean value to the joiner.
      * The key and value are separated by the configured keyValueSeparator.
+     * The key is formatted according to trimBeforeAppend setting.
      * If multiple entries are appended, they are separated by the configured separator.
-     * 
-     * <p>Example:
+     *
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Joiner.with(", ").appendEntry("enabled", true).toString(); // Returns: "enabled=true"
      * }</pre>
@@ -1793,9 +1794,10 @@ public final class Joiner implements Closeable {
     /**
      * Appends a key-value pair with a char value to the joiner.
      * The key and value are separated by the configured keyValueSeparator.
+     * The key is formatted according to trimBeforeAppend setting.
      * If multiple entries are appended, they are separated by the configured separator.
-     * 
-     * <p>Example:
+     *
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Joiner.with(", ").appendEntry("grade", 'A').toString(); // Returns: "grade=A"
      * }</pre>
@@ -1817,9 +1819,10 @@ public final class Joiner implements Closeable {
     /**
      * Appends a key-value pair with an int value to the joiner.
      * The key and value are separated by the configured keyValueSeparator.
+     * The key is formatted according to trimBeforeAppend setting.
      * If multiple entries are appended, they are separated by the configured separator.
-     * 
-     * <p>Example:
+     *
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Joiner.with(", ").appendEntry("count", 42).toString(); // Returns: "count=42"
      * }</pre>
@@ -1841,9 +1844,10 @@ public final class Joiner implements Closeable {
     /**
      * Appends a key-value pair with a long value to the joiner.
      * The key and value are separated by the configured keyValueSeparator.
+     * The key is formatted according to trimBeforeAppend setting.
      * If multiple entries are appended, they are separated by the configured separator.
-     * 
-     * <p>Example:
+     *
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Joiner.with(", ").appendEntry("timestamp", 1234567890L).toString(); // Returns: "timestamp=1234567890"
      * }</pre>
@@ -1865,9 +1869,10 @@ public final class Joiner implements Closeable {
     /**
      * Appends a key-value pair with a float value to the joiner.
      * The key and value are separated by the configured keyValueSeparator.
+     * The key is formatted according to trimBeforeAppend setting.
      * If multiple entries are appended, they are separated by the configured separator.
-     * 
-     * <p>Example:
+     *
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Joiner.with(", ").appendEntry("price", 19.99f).toString(); // Returns: "price=19.99"
      * }</pre>
@@ -1889,9 +1894,10 @@ public final class Joiner implements Closeable {
     /**
      * Appends a key-value pair with a double value to the joiner.
      * The key and value are separated by the configured keyValueSeparator.
+     * The key is formatted according to trimBeforeAppend setting.
      * If multiple entries are appended, they are separated by the configured separator.
-     * 
-     * <p>Example:
+     *
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Joiner.with(", ").appendEntry("temperature", 98.6).toString(); // Returns: "temperature=98.6"
      * }</pre>
@@ -1914,8 +1920,9 @@ public final class Joiner implements Closeable {
      * Appends a key-value pair with a String value to the joiner.
      * The key and value are separated by the configured keyValueSeparator.
      * Both key and value are formatted according to trimBeforeAppend and nullText settings.
-     * 
-     * <p>Example:
+     * If multiple entries are appended, they are separated by the configured separator.
+     *
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Joiner.with(", ").appendEntry("name", "John").toString(); // Returns: "name=John"
      * }</pre>
@@ -1938,8 +1945,9 @@ public final class Joiner implements Closeable {
      * Appends a key-value pair with a CharSequence value to the joiner.
      * The key and value are separated by the configured keyValueSeparator.
      * Both key and value are formatted according to trimBeforeAppend and nullText settings.
-     * 
-     * <p>Example:
+     * If multiple entries are appended, they are separated by the configured separator.
+     *
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * StringBuilder sb = new StringBuilder("value");
      * Joiner.with(", ").appendEntry("key", sb).toString(); // Returns: "key=value"
@@ -1962,9 +1970,10 @@ public final class Joiner implements Closeable {
     /**
      * Appends a key-value pair with a StringBuilder value to the joiner.
      * The key and value are separated by the configured keyValueSeparator.
-     * Null values are replaced with nullText. If trimBeforeAppend is true, the value is trimmed.
-     * 
-     * <p>Example:
+     * Both key and value are formatted according to trimBeforeAppend and nullText settings.
+     * If multiple entries are appended, they are separated by the configured separator.
+     *
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * StringBuilder sb = new StringBuilder("dynamic content");
      * Joiner.with(", ").appendEntry("data", sb).toString(); // Returns: "data=dynamic content"
@@ -2003,9 +2012,10 @@ public final class Joiner implements Closeable {
     /**
      * Appends a key-value pair with an Object value to the joiner.
      * The key and value are separated by the configured keyValueSeparator.
-     * The value is converted to string using toString method.
-     * 
-     * <p>Example:
+     * The value is converted to string using toString method and formatted according to nullText settings.
+     * If multiple entries are appended, they are separated by the configured separator.
+     *
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Date date = new Date();
      * Joiner.with(", ").appendEntry("created", date).toString(); // Returns: "created=<date string>"
@@ -2029,8 +2039,9 @@ public final class Joiner implements Closeable {
      * Appends a Map.Entry to the joiner.
      * The entry's key and value are separated by the configured keyValueSeparator.
      * Null entries are replaced with nullText.
-     * 
-     * <p>Example:
+     * If multiple entries are appended, they are separated by the configured separator.
+     *
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Map.Entry<String, Integer> entry = new AbstractMap.SimpleEntry<>("score", 100);
      * Joiner.with(", ").appendEntry(entry).toString(); // Returns: "score=100"
@@ -2055,8 +2066,8 @@ public final class Joiner implements Closeable {
      * Appends all entries from a given map to the Joiner.
      * Each entry is appended as a key-value pair.
      * Entries are separated by the configured separator.
-     * 
-     * <p>Example:
+     *
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Map<String, Integer> map = new HashMap<>();
      * map.put("a", 1);
@@ -2064,7 +2075,7 @@ public final class Joiner implements Closeable {
      * Joiner.with(", ").appendEntries(map).toString(); // Returns: "a=1, b=2"
      * }</pre>
      *
-     * @param m The map containing the entries to be appended
+     * @param m the map containing the entries to be appended
      * @return this Joiner instance for method chaining
      */
     public Joiner appendEntries(final Map<?, ?> m) {
@@ -2080,7 +2091,7 @@ public final class Joiner implements Closeable {
      * Entries from index fromIndex (inclusive) to toIndex (exclusive) are appended.
      * The iteration order depends on the Map implementation.
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Map<String, Integer> map = new LinkedHashMap<>();
      * map.put("a", 1); map.put("b", 2); map.put("c", 3);
@@ -2137,7 +2148,7 @@ public final class Joiner implements Closeable {
      * Only entries that pass the filter test are appended to the joiner.
      * Each entry is formatted as key-value pair using the configured separators.
      *
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Map<String, Integer> map = new HashMap<>();
      * map.put("a", 1); map.put("b", 2); map.put("c", 3);
@@ -2190,7 +2201,7 @@ public final class Joiner implements Closeable {
      * Only entries whose key and value pass the filter test are appended.
      * Each entry is formatted as key-value pair using the configured separators.
      *
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Map<String, Integer> map = new HashMap<>();
      * map.put("apple", 5); map.put("banana", 3); map.put("cherry", 8);
@@ -2243,7 +2254,7 @@ public final class Joiner implements Closeable {
      * Each key and value is transformed using the provided extractors before appending.
      * Entries are formatted using the configured separators.
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Map<String, Integer> map = new HashMap<>();
      * map.put("item1", 100); map.put("item2", 200);
@@ -2299,7 +2310,7 @@ public final class Joiner implements Closeable {
      * Each property is appended as a key-value pair using the property name and value.
      * The bean must have getter/setter methods defined.
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * class Person { 
      *     String name = "John"; 
@@ -2327,7 +2338,7 @@ public final class Joiner implements Closeable {
      * If {@code selectPropNames} is {@code null} or empty, no properties are appended.
      * </p>
      * 
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * class Person {
      *     private String name = "John";
@@ -2395,7 +2406,7 @@ public final class Joiner implements Closeable {
      * Properties can be filtered based on null values and/or explicit exclusion list.
      * Each included property is formatted as a key-value pair.
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * class User { 
      *     String id = "123";
@@ -2462,24 +2473,24 @@ public final class Joiner implements Closeable {
      * Appends properties of a bean object that satisfy the given filter predicate.
      * The filter receives property name and value; only properties that pass are appended.
      * Each property is formatted as a key-value pair.
-     * 
-     * <p>Example:
+     *
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * class Product { 
+     * class Product {
      *     String name = "Laptop";
      *     double price = 999.99;
      *     int stock = 0;
      *     // getters/setters...
      * }
      * Product p = new Product();
-     * Joiner.with(", ").appendBean(p, (prop, val) -> 
+     * Joiner.with(", ").appendBean(p, (prop, val) ->
      *     !prop.equals("stock") || (Integer)val > 0).toString(); // Returns: "name=Laptop, price=999.99"
      * }</pre>
      *
      * @param bean the bean object whose properties to append
      * @param filter the bi-predicate to test property names and values; only properties that pass are appended
      * @return this Joiner instance for method chaining
-     * @throws IllegalArgumentException if filter is null or bean is not a valid bean class
+     * @throws IllegalArgumentException if filter is null, or if bean is not null and is not a valid bean class with getter/setter methods
      */
     public Joiner appendBean(final Object bean, final BiPredicate<? super String, ?> filter) throws IllegalArgumentException {
         N.checkArgNotNull(filter, cs.filter);
@@ -2529,7 +2540,7 @@ public final class Joiner implements Closeable {
      * Each repetition is separated by the configured separator.
      * If n is 0, nothing is appended.
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Joiner.with(", ").repeat("Hello", 3).toString(); // Returns: "Hello, Hello, Hello"
      * }</pre>
@@ -2562,7 +2573,7 @@ public final class Joiner implements Closeable {
      * The object is converted to string using toString method.
      * Each repetition is separated by the configured separator.
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Integer num = 42;
      * Joiner.with("-").repeat(num, 3).toString(); // Returns: "42-42-42"
@@ -2584,7 +2595,7 @@ public final class Joiner implements Closeable {
      *
      * <p>Remember to close {@code other} Joiner if {@code reuseCachedBuffer} is set to {@code true}.
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Joiner j1 = Joiner.with(", ").append("a").append("b");
      * Joiner j2 = Joiner.with(", ").append("c").append("d");
@@ -2612,7 +2623,7 @@ public final class Joiner implements Closeable {
      * The length includes prefix, all appended elements with separators, and suffix.
      * If no elements have been appended, returns the length of prefix + suffix.
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Joiner j = Joiner.with(", ", "[", "]");
      * j.append("a").append("b");
@@ -2638,7 +2649,7 @@ public final class Joiner implements Closeable {
      * if {@code reuseStringBuilder} is set to {@code true}, and should not continue 
      * to be used with this instance.
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Joiner j = Joiner.with(", ", "[", "]");
      * j.append("a").append("b").append("c");
@@ -2680,7 +2691,7 @@ public final class Joiner implements Closeable {
      * The joined string includes prefix, all elements with separators, and suffix.
      * If no elements have been appended, nothing is appended to the Appendable.
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * StringBuilder sb = new StringBuilder("Result: ");
      * Joiner.with(", ").append("a").append("b").appendTo(sb);
@@ -2707,7 +2718,7 @@ public final class Joiner implements Closeable {
      * The underlying {@code StringBuilder} will be recycled after this method is called 
      * if {@code reuseStringBuilder} is set to {@code true}.
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * int length = Joiner.with(", ").append("a").append("b").map(String::length); // Returns: 4
      * }</pre>
@@ -2726,7 +2737,7 @@ public final class Joiner implements Closeable {
      * The underlying {@code StringBuilder} will be recycled after this method is called 
      * if {@code reuseStringBuilder} is set to {@code true}.
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Optional<Integer> result1 = Joiner.with(", ").mapIfNotEmpty(String::length); // Returns: Optional.empty()
      * Optional<Integer> result1 = Joiner.with(", ", "[", "]").mapIfNotEmpty(String::length); // Returns: Optional.empty()
@@ -2750,7 +2761,7 @@ public final class Joiner implements Closeable {
      * After closing, the Joiner should not be used for further operations.
      * This method is synchronized to ensure thread safety.
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * try (Joiner j = Joiner.with(", ").reuseCachedBuffer()) {
      *     j.append("a").append("b");

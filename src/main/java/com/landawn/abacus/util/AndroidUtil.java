@@ -59,19 +59,28 @@ public final class AndroidUtil {
 
             // Register shutdown hook to properly cleanup executors
             Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-                serialExecutor.shutdown();
-                tpExecutor.shutdown();
-                try {
-                    if (!serialExecutor.awaitTermination(5, TimeUnit.SECONDS)) {
+                if (serialExecutor != null) {
+                    serialExecutor.shutdown();
+                    try {
+                        if (!serialExecutor.awaitTermination(5, TimeUnit.SECONDS)) {
+                            serialExecutor.shutdownNow();
+                        }
+                    } catch (final InterruptedException e) {
+                        Thread.currentThread().interrupt();
                         serialExecutor.shutdownNow();
                     }
-                    if (!tpExecutor.awaitTermination(5, TimeUnit.SECONDS)) {
+                }
+
+                if (tpExecutor != null) {
+                    tpExecutor.shutdown();
+                    try {
+                        if (!tpExecutor.awaitTermination(5, TimeUnit.SECONDS)) {
+                            tpExecutor.shutdownNow();
+                        }
+                    } catch (final InterruptedException e) {
+                        Thread.currentThread().interrupt();
                         tpExecutor.shutdownNow();
                     }
-                } catch (final InterruptedException e) {
-                    Thread.currentThread().interrupt();
-                    serialExecutor.shutdownNow();
-                    tpExecutor.shutdownNow();
                 }
             }));
         }
@@ -90,7 +99,7 @@ public final class AndroidUtil {
      * <p>This executor is useful when tasks must be executed sequentially and
      * thread safety is a concern.</p>
      * 
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Executor serialExecutor = AndroidUtil.getSerialExecutor();
      * serialExecutor.execute(() -> {
@@ -115,7 +124,7 @@ public final class AndroidUtil {
      * <p>This executor is suitable for CPU-bound parallel tasks that can benefit
      * from multi-core execution.</p>
      * 
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Executor threadPool = AndroidUtil.getThreadPoolExecutor();
      * threadPool.execute(() -> {

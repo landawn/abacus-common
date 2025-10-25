@@ -64,19 +64,22 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     private int size = 0;
 
     /**
-     * Constructs an empty ByteList with default initial capacity.
-     * The list will be initialized with an empty array and will grow dynamically as elements are added.
+     * Constructs an empty ByteList with an initial capacity of zero.
+     * The internal array will be initialized to an empty array and will grow
+     * as needed when elements are added.
      */
     public ByteList() {
     }
 
     /**
      * Constructs an empty ByteList with the specified initial capacity.
-     * This constructor is useful when the approximate size of the list is known in advance,
-     * as it can help avoid multiple array resizing operations during element additions.
+     *
+     * <p>This constructor is useful when the approximate size of the list is known in advance,
+     * as it can help avoid the performance overhead of array resizing during element additions.</p>
      *
      * @param initialCapacity the initial capacity of the list. Must be non-negative.
      * @throws IllegalArgumentException if the specified initial capacity is negative
+     * @throws OutOfMemoryError if the requested array size exceeds the maximum array size
      */
     public ByteList(final int initialCapacity) {
         N.checkArgNotNegative(initialCapacity, cs.initialCapacity);
@@ -127,16 +130,15 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     }
 
     /**
-     * Creates a new ByteList from a portion of the specified array.
-     * This method creates a list that contains the first 'size' elements from the array.
-     * The array is used directly without copying, making this method efficient for creating
-     * views of existing arrays.
+     * Creates a new ByteList containing the first {@code size} elements of the specified array.
+     * The array is used directly as the backing array without copying for efficiency.
+     * If the input array is {@code null}, it is treated as an empty array.
      *
-     * @param a the array containing the elements for the new list. Can be null.
-     * @param size the number of elements from the start of the array to include in the list.
-     *             Must be between 0 and the length of the array (inclusive).
-     * @return a new ByteList containing the specified number of elements from the array
-     * @throws IndexOutOfBoundsException if size is negative or greater than the array length
+     * @param a the array of byte values to be used as the backing array. Can be {@code null}.
+     * @param size the number of elements from the array to include in the list.
+     *             Must be between 0 and the array length (inclusive).
+     * @return a new ByteList containing the first {@code size} elements of the specified array
+     * @throws IndexOutOfBoundsException if {@code size} is negative or greater than the array length
      */
     public static ByteList of(final byte[] a, final int size) throws IndexOutOfBoundsException {
         N.checkFromIndexSize(0, size, N.len(a));
@@ -146,28 +148,32 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
 
     /**
      * Creates a new ByteList that is a copy of the specified array.
-     * Unlike the {@link #of(byte...)} method, this method creates a defensive copy of the array,
-     * so subsequent modifications to the original array will not affect the created list.
-     * If the input array is null, an empty list is returned.
      *
-     * @param a the array to be copied. Can be null.
-     * @return a new ByteList containing a copy of the elements from the specified array
+     * <p>Unlike {@link #of(byte...)}, this method always creates a defensive copy of the input array,
+     * ensuring that modifications to the returned list do not affect the original array.</p>
+     *
+     * <p>If the input array is {@code null}, an empty list is returned.</p>
+     *
+     * @param a the array to be copied. Can be {@code null}.
+     * @return a new ByteList containing a copy of the elements from the specified array,
+     *         or an empty list if the array is {@code null}
      */
     public static ByteList copyOf(final byte[] a) {
         return of(N.clone(a));
     }
 
     /**
-     * Creates a new ByteList containing a copy of elements from the specified range of the array.
-     * This method creates a defensive copy of the specified portion of the array.
-     * The range is defined by fromIndex (inclusive) and toIndex (exclusive).
+     * Creates a new ByteList that is a copy of the specified range within the given array.
      *
-     * @param a the source array. Can be null.
-     * @param fromIndex the initial index of the range to be copied, inclusive. Must be non-negative.
-     * @param toIndex the final index of the range to be copied, exclusive. Must not be less than fromIndex.
-     * @return a new ByteList containing the elements copied from the specified range
-     * @throws IndexOutOfBoundsException if fromIndex or toIndex is out of bounds,
-     *         or if fromIndex is greater than toIndex
+     * <p>This method creates a defensive copy of the elements in the range [fromIndex, toIndex),
+     * ensuring that modifications to the returned list do not affect the original array.</p>
+     *
+     * @param a the array from which a range is to be copied. Must not be {@code null}.
+     * @param fromIndex the initial index of the range to be copied, inclusive.
+     * @param toIndex the final index of the range to be copied, exclusive.
+     * @return a new ByteList containing a copy of the elements in the specified range
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0} or {@code toIndex > a.length}
+     *                                   or {@code fromIndex > toIndex}
      */
     public static ByteList copyOf(final byte[] a, final int fromIndex, final int toIndex) {
         return of(N.copyOfRange(a, fromIndex, toIndex));
@@ -329,6 +335,10 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      * Appends the specified element to the end of this list.
      * The list will automatically grow if necessary to accommodate the new element.
      *
+     * <p>This method runs in amortized constant time. If the internal array needs to be
+     * resized to accommodate the new element, all existing elements will be copied to
+     * a new, larger array.</p>
+     *
      * @param e the byte value to be appended to this list
      */
     public void add(final byte e) {
@@ -343,11 +353,14 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      * elements to the right (adds one to their indices). The index must be
      * within the range from 0 to size() inclusive.
      *
+     * <p>This method runs in linear time in the worst case (when inserting at the beginning
+     * of the list), as it may need to shift all existing elements.</p>
+     *
      * @param index the index at which the specified element is to be inserted.
      *              Must be between 0 and size() inclusive.
      * @param e the byte value to be inserted
-     * @throws IndexOutOfBoundsException if the index is out of range 
-     *         (index < 0 || index > size())
+     * @throws IndexOutOfBoundsException if the index is out of range
+     *         ({@code index < 0 || index > size()})
      */
     public void add(final int index, final byte e) {
         rangeCheckForAdd(index);
@@ -495,8 +508,12 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      * If the list does not contain the element, it is unchanged. This method scans the list
      * from the beginning and removes the first matching element found.
      *
+     * <p>This method runs in linear time, as it may need to search through the entire list
+     * to find the element.</p>
+     *
      * @param e the byte value to be removed from this list
-     * @return {@code true} if this list contained the specified element and it was removed
+     * @return {@code true} if this list contained the specified element (and it was removed);
+     *         {@code false} otherwise
      */
     public boolean remove(final byte e) {
         for (int i = 0; i < size; i++) {
@@ -597,11 +614,12 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      * <p>This is a functional programming approach to element removal, allowing complex
      * removal logic to be expressed concisely using lambda expressions or method references.
      *
-     * <pre>
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
      * ByteList list = ByteList.of((byte)1, (byte)-2, (byte)3, (byte)-4, (byte)5);
      * list.removeIf(b -> b < 0);  // Removes negative values
      * // list now contains: [1, 3, 5]
-     * </pre>
+     * }</pre>
      *
      * @param p the predicate which returns {@code true} for elements to be removed. Must not be null.
      * @return {@code true} if any elements were removed; {@code false} if the list was unchanged
@@ -775,11 +793,12 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      * <p>This method is useful for batch removal operations when you have multiple
      * indices to remove. It's more efficient than removing elements one by one.
      *
-     * <pre>
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
      * ByteList list = ByteList.of((byte)10, (byte)20, (byte)30, (byte)40, (byte)50);
      * list.deleteAllByIndices(1, 3);  // Remove elements at positions 1 and 3
      * // list now contains: [10, 30, 50]
-     * </pre>
+     * }</pre>
      *
      * @param indices the indices of elements to remove. Can be null or empty.
      *                Invalid indices (negative or >= size) are ignored.
@@ -838,7 +857,7 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      * so that the element originally at fromIndex will be at newPositionAfterMove.
      * Other elements are shifted as necessary to accommodate the move.
      * 
-     * <p>Examples:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ByteList list = ByteList.of((byte)1, (byte)2, (byte)3, (byte)4, (byte)5);
      * // size = 5
@@ -983,11 +1002,12 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      * <p>This method provides a functional way to transform all elements in place, useful for
      * operations like scaling, negation, or mathematical transformations.
      *
-     * <pre>
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
      * ByteList list = ByteList.of((byte)1, (byte)2, (byte)3);
      * list.replaceAll(b -> (byte)(b * 2));  // Double each value
      * // list now contains: [2, 4, 6]
-     * </pre>
+     * }</pre>
      *
      * @param operator the operator to apply to each element. Must not be null.
      *
@@ -1006,11 +1026,12 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      * <p>This method provides a convenient way to conditionally replace values without
      * manually iterating through the list.
      *
-     * <pre>
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
      * ByteList list = ByteList.of((byte)1, (byte)-2, (byte)3, (byte)-4, (byte)5);
      * list.replaceIf(b -> b < 0, (byte)0);  // Replace negative values with 0
      * // list now contains: [1, 0, 3, 0, 5]
-     * </pre>
+     * }</pre>
      *
      * @param predicate the predicate to test each element. Must not be null.
      * @param newValue the value to replace matching elements with
@@ -1223,12 +1244,12 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      * appear multiple times, the intersection contains the minimum number of occurrences
      * from either list. The order of elements from this list is preserved.
      *
-     * <p>Example:
-     * <pre>
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
      * ByteList list1 = ByteList.of((byte)1, (byte)1, (byte)2, (byte)3);
      * ByteList list2 = ByteList.of((byte)1, (byte)2, (byte)2, (byte)4);
      * ByteList result = list1.intersection(list2); // result: [(byte)1, (byte)2]
-     * </pre>
+     * }</pre>
      *
      * @param b the list to intersect with this list. Can be null.
      * @return a new ByteList containing the intersection of the two lists.
@@ -1261,12 +1282,12 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      * For elements that appear multiple times, the intersection contains the minimum number
      * of occurrences from either source. The order of elements from this list is preserved.
      *
-     * <p>Example:
-     * <pre>
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
      * ByteList list = ByteList.of((byte)1, (byte)1, (byte)2, (byte)3);
      * byte[] array = {(byte)1, (byte)2, (byte)2, (byte)4};
      * ByteList result = list.intersection(array); // result: [(byte)1, (byte)2]
-     * </pre>
+     * }</pre>
      *
      * @param b the array to intersect with this list. Can be null.
      * @return a new ByteList containing the intersection of this list and the array.
@@ -1289,12 +1310,12 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      * If an element appears m times in this list and n times in the specified list, the result will
      * contain max(0, m-n) occurrences of that element. The order of elements is preserved.
      *
-     * <p>Example:
-     * <pre>
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
      * ByteList list1 = ByteList.of((byte)1, (byte)1, (byte)2, (byte)3);
      * ByteList list2 = ByteList.of((byte)1, (byte)4);
      * ByteList result = list1.difference(list2); // result: [(byte)1, (byte)2, (byte)3]
-     * </pre>
+     * }</pre>
      *
      * @param b the list containing elements to be excluded. Can be null.
      * @return a new ByteList containing elements in this list but not in the specified list.
@@ -1327,12 +1348,12 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      * If an element appears m times in this list and n times in the array, the result will
      * contain max(0, m-n) occurrences of that element. The order of elements is preserved.
      *
-     * <p>Example:
-     * <pre>
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
      * ByteList list = ByteList.of((byte)1, (byte)1, (byte)2, (byte)3);
      * byte[] array = {(byte)1, (byte)4};
      * ByteList result = list.difference(array); // result: [(byte)1, (byte)2, (byte)3]
-     * </pre>
+     * }</pre>
      *
      * @param b the array containing elements to be excluded. Can be null.
      * @return a new ByteList containing elements in this list but not in the specified array.
@@ -1356,13 +1377,13 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      * The order is preserved with elements from this list appearing first, followed by elements
      * unique to the specified list.
      *
-     * <p>Example:
-     * <pre>
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
      * ByteList list1 = ByteList.of((byte)1, (byte)1, (byte)2, (byte)3);
      * ByteList list2 = ByteList.of((byte)2, (byte)3, (byte)3, (byte)4);
      * ByteList result = list1.symmetricDifference(list2); 
      * // result: [(byte)1, (byte)1, (byte)3, (byte)4]
-     * </pre>
+     * }</pre>
      *
      * @param b the list to compare with this list. Can be null.
      * @return a new ByteList containing elements that are in either list but not in both.
@@ -1407,13 +1428,13 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      * The order is preserved with elements from this list appearing first, followed by elements
      * unique to the array.
      *
-     * <p>Example:
-     * <pre>
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
      * ByteList list = ByteList.of((byte)1, (byte)1, (byte)2, (byte)3);
      * byte[] array = {(byte)2, (byte)3, (byte)3, (byte)4};
      * ByteList result = list.symmetricDifference(array); 
      * // result: [(byte)1, (byte)1, (byte)3, (byte)4]
-     * </pre>
+     * }</pre>
      *
      * @param b the array to compare with this list. Can be null.
      * @return a new ByteList containing elements that are in either this list or the array but not in both.
@@ -1437,10 +1458,11 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      * Returns the number of times the specified value appears in this list.
      * This method counts all occurrences of the value throughout the entire list.
      *
-     * <pre>
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
      * ByteList list = ByteList.of((byte)1, (byte)2, (byte)1, (byte)3, (byte)1);
      * int count = list.occurrencesOf((byte)1);  // Returns 3
-     * </pre>
+     * }</pre>
      *
      * @param valueToFind the value to count occurrences of
      * @return the number of times the specified value appears in this list; 0 if the value is not found
@@ -1632,12 +1654,12 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      * <p>This method iterates through all elements from index 0 to size-1, applying the specified
      * ByteConsumer action to each element. The action is performed in the order of iteration.</p>
      * 
-     * <p>This is equivalent to:
+     * <p>This is equivalent to:</>
      * <pre>{@code
      * for (int i = 0; i < size(); i++) {
      *     action.accept(get(i));
      * }
-     * }</pre></p>
+     * }</pre>
      *
      * @param action the action to be performed for each element
      */
@@ -1656,12 +1678,12 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      *   <li>If {@code toIndex == -1}: treated as backward iteration from fromIndex to the beginning of the list</li>
      * </ul>
      * 
-     * <p>Examples:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * list.forEach(0, 5, action);    // Forward: processes indices 0,1,2,3,4
      * list.forEach(5, 0, action);    // Backward: processes indices 5,4,3,2,1
      * list.forEach(5, -1, action);   // Backward: processes indices 5,4,3,2,1,0
-     * }</pre></p>
+     * }</pre>
      *
      * @param fromIndex the starting index (inclusive)
      * @param toIndex the ending index (exclusive), or -1 for backward iteration to the start
@@ -1691,10 +1713,10 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      * is empty, it returns an empty OptionalByte rather than throwing an exception. This is useful
      * when you want to safely check for and retrieve the first element without explicit size checking.</p>
      * 
-     * <p>This is equivalent to:
+     * <p>This is equivalent to:</p>
      * <pre>{@code
      * size() == 0 ? OptionalByte.empty() : OptionalByte.of(get(0))
-     * }</pre></p>
+     * }</pre>
      *
      * @return an OptionalByte containing the first element if the list is non-empty, or an empty OptionalByte if the list is empty
      */
@@ -1709,10 +1731,10 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      * is empty, it returns an empty OptionalByte rather than throwing an exception. This is useful
      * when you want to safely check for and retrieve the last element without explicit size checking.</p>
      * 
-     * <p>This is equivalent to:
+     * <p>This is equivalent to:</p>
      * <pre>{@code
      * size() == 0 ? OptionalByte.empty() : OptionalByte.of(get(size() - 1))
-     * }</pre></p>
+     * }</pre>
      *
      * @return an OptionalByte containing the last element if the list is non-empty, or an empty OptionalByte if the list is empty
      */
@@ -1755,12 +1777,12 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      * more than once. It uses an efficient algorithm that typically completes in O(n) time for byte
      * values by using a boolean array to track seen values.</p>
      * 
-     * <p>Examples:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ByteList list1 = ByteList.of(1, 2, 3, 4);      // hasDuplicates() returns false
      * ByteList list2 = ByteList.of(1, 2, 2, 3);      // hasDuplicates() returns true
      * ByteList list3 = ByteList.of();                // hasDuplicates() returns false
-     * }</pre></p>
+     * }</pre>
      *
      * @return {@code true} if this list contains at least one duplicate element, {@code false} otherwise
      */
@@ -1779,12 +1801,12 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      * <p>The check is performed in O(n) time by comparing adjacent elements. The method returns as
      * soon as it finds an element that is greater than its successor.</p>
      * 
-     * <p>Examples:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ByteList.of(-5, 0, 3, 10).isSorted()     // returns true
      * ByteList.of(3, 1, 4, 2).isSorted()       // returns false
      * ByteList.of(1, 1, 2, 2).isSorted()       // returns {@code true} (duplicates allowed)
-     * }</pre></p>
+     * }</pre>
      *
      * @return {@code true} if the list is sorted in ascending order, {@code false} otherwise
      */
@@ -1804,11 +1826,11 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      * O(n log n) time. For small lists or lists that are already nearly sorted, the performance
      * may be better.</p>
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ByteList list = ByteList.of(3, -1, 4, 1, 5);
      * list.sort();  // list now contains [-1, 1, 3, 4, 5]
-     * }</pre></p>
+     * }</pre>
      */
     @Override
     public void sort() {
@@ -1846,11 +1868,11 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      * <p>This is equivalent to calling {@link #sort()} followed by {@link #reverse()}, but may
      * be slightly more efficient as it's implemented as a single operation.</p>
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ByteList list = ByteList.of(3, -1, 4, 1, 5);
      * list.reverseSort();  // list now contains [5, 4, 3, 1, -1]
-     * }</pre></p>
+     * }</pre>
      */
     @Override
     public void reverseSort() {
@@ -1871,12 +1893,12 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      * is not found, it returns {@code (-(insertion point) - 1)}, where insertion point is the index
      * at which the key would be inserted to maintain sorted order.</p>
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ByteList list = ByteList.of(1, 3, 5, 7, 9);
      * list.binarySearch((byte)5);   // returns 2
      * list.binarySearch((byte)6);   // returns -4 (insertion point would be 3)
-     * }</pre></p>
+     * }</pre>
      *
      * @param valueToFind the byte value to search for
      * @return the index of the search key if found; otherwise, {@code (-(insertion point) - 1)}
@@ -1919,11 +1941,11 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      * 
      * <p>The operation is performed in O(n/2) time, where n is the size of the list.</p>
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ByteList list = ByteList.of(1, 2, 3, 4, 5);
      * list.reverse();  // list now contains [5, 4, 3, 2, 1]
-     * }</pre></p>
+     * }</pre>
      */
     @Override
     public void reverse() {
@@ -1939,11 +1961,11 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      * (inclusive) to {@code toIndex} (exclusive). Elements outside this range remain unchanged.
      * The reversal is done by swapping elements from both ends of the range moving toward the center.</p>
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ByteList list = ByteList.of(1, 2, 3, 4, 5, 6);
      * list.reverse(1, 5);  // list now contains [1, 5, 4, 3, 2, 6]
-     * }</pre></p>
+     * }</pre>
      *
      * @param fromIndex the starting index (inclusive) of the range to reverse
      * @param toIndex the ending index (exclusive) of the range to reverse
@@ -1988,11 +2010,11 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      * <p>This method uses a default source of randomness that is suitable for most applications
      * but not for cryptographic purposes.</p>
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ByteList list = ByteList.of(1, 2, 3, 4, 5);
      * list.shuffle();  // list might now contain [3, 1, 5, 2, 4]
-     * }</pre></p>
+     * }</pre>
      */
     @Override
     public void shuffle() {
@@ -2014,12 +2036,12 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      * 
      * <p>The shuffle is performed in-place using the Fisher-Yates algorithm in O(n) time.</p>
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ByteList list = ByteList.of(1, 2, 3, 4, 5);
      * Random rnd = new Random(12345);  // Seeded for reproducibility
      * list.shuffle(rnd);  // Will always produce the same shuffle with this seed
-     * }</pre></p>
+     * }</pre>
      *
      * @param rnd the random number generator to use for shuffling
      */
@@ -2037,11 +2059,11 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      * are equal, the list is unchanged. This operation is useful for custom sorting algorithms or
      * manual list reordering.</p>
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ByteList list = ByteList.of(1, 2, 3, 4, 5);
      * list.swap(1, 3);  // list now contains [1, 4, 3, 2, 5]
-     * }</pre></p>
+     * }</pre>
      *
      * @param i the index of the first element to swap
      * @param j the index of the second element to swap
@@ -2079,11 +2101,11 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      * to {@code toIndex} (exclusive). The returned list is independent of this list; changes to
      * either list will not affect the other.</p>
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ByteList list = ByteList.of(1, 2, 3, 4, 5);
      * ByteList subCopy = list.copy(1, 4);  // subCopy contains [2, 3, 4]
-     * }</pre></p>
+     * }</pre>
      *
      * @param fromIndex the starting index (inclusive) of the range to copy
      * @param toIndex the ending index (exclusive) of the range to copy
@@ -2115,12 +2137,12 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      * automatically adjusted, and if {@code toIndex == -1}, it's treated as reverse iteration to
      * the start of the list.</p>
      * 
-     * <p>Examples:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ByteList list = ByteList.of(0, 1, 2, 3, 4, 5);
      * list.copy(0, 6, 2);   // returns [0, 2, 4] (every other element)
      * list.copy(5, -1, -2); // returns [5, 3, 1] (reverse, every other)
-     * }</pre></p>
+     * }</pre>
      *
      * @param fromIndex the starting index (inclusive)
      * @param toIndex the ending index (exclusive), or -1 for reverse iteration to start
@@ -2147,12 +2169,12 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      * <p>Each returned ByteList is independent (a copy of the data), so modifications to the returned
      * lists do not affect this list or each other.</p>
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ByteList list = ByteList.of(1, 2, 3, 4, 5, 6, 7);
      * List<ByteList> chunks = list.split(0, 7, 3);
      * // chunks contains: [[1, 2, 3], [4, 5, 6], [7]]
-     * }</pre></p>
+     * }</pre>
      *
      * @param fromIndex the starting index (inclusive) of the range to split
      * @param toIndex the ending index (exclusive) of the range to split
@@ -2407,14 +2429,14 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      * <p>ByteStream provides specialized primitive operations that avoid boxing overhead, making it
      * more efficient than Stream<Byte> for primitive byte values.</p>
      * 
-     * <p>Example usage:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ByteList list = ByteList.of(1, 2, 3, 4, 5);
      * int sum = list.stream()
      *     .filter(b -> b > 2)
      *     .map(b -> b * 2)
      *     .sum();  // Sum of (3*2 + 4*2 + 5*2) = 24
-     * }</pre></p>
+     * }</pre>
      *
      * @return a ByteStream over all elements in this list
      */
@@ -2430,13 +2452,13 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      * not modify the original list. This is useful for applying stream operations to a subset
      * of the list without creating a temporary sublist.</p>
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ByteList list = ByteList.of(1, 2, 3, 4, 5, 6);
      * long count = list.stream(2, 5)
      *     .filter(b -> b % 2 == 0)
      *     .count();  // Counts even numbers in elements [3, 4, 5], result is 1
-     * }</pre></p>
+     * }</pre>
      *
      * @param fromIndex the starting index (inclusive) for the stream
      * @param toIndex the ending index (exclusive) for the stream
@@ -2600,12 +2622,12 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      * in square brackets ("[]"). Adjacent elements are separated by ", " (comma and space). Elements
      * are converted to strings as by {@code String.valueOf(byte)}.</p>
      * 
-     * <p>Examples:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ByteList.of().toString()           // Returns "[]"
      * ByteList.of(1).toString()          // Returns "[1]"
      * ByteList.of(1, 2, 3).toString()    // Returns "[1, 2, 3]"
-     * }</pre></p>
+     * }</pre>
      *
      * @return a string representation of this list
      */

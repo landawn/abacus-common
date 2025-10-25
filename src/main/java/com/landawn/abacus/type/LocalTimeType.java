@@ -38,12 +38,11 @@ public class LocalTimeType extends AbstractTemporalType<LocalTime> {
     /**
      * Returns the Class object representing the LocalTime type.
      *
-     * <pre>
-     * {@code
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
      * LocalTimeType type = new LocalTimeType();
      * Class<LocalTime> clazz = type.clazz();
-     * }
-     * </pre>
+     * }</pre>
      *
      * @return The Class object for LocalTime
      */
@@ -56,13 +55,12 @@ public class LocalTimeType extends AbstractTemporalType<LocalTime> {
      * Converts a LocalTime object to its string representation.
      * The string format follows the ISO-8601 standard (HH:mm:ss).
      *
-     * <pre>
-     * {@code
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
      * LocalTimeType type = new LocalTimeType();
      * LocalTime time = LocalTime.of(10, 30, 0);
      * String str = type.stringOf(time); // "10:30:00"
-     * }
-     * </pre>
+     * }</pre>
      *
      * @param x The LocalTime object to convert
      * @return The string representation of the LocalTime, or null if the input is null
@@ -77,13 +75,12 @@ public class LocalTimeType extends AbstractTemporalType<LocalTime> {
      * If the object is a Number, it is treated as milliseconds since epoch and converted to LocalTime using the default zone ID.
      * Otherwise, the object is converted to a string and parsed.
      *
-     * <pre>
-     * {@code
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
      * LocalTimeType type = new LocalTimeType();
      * LocalTime time1 = type.valueOf(1609459200000L);
      * LocalTime time2 = type.valueOf("10:30:00");
-     * }
-     * </pre>
+     * }</pre>
      *
      * @param obj The object to convert to LocalTime
      * @return The LocalTime representation of the object, or null if the input is null
@@ -105,14 +102,13 @@ public class LocalTimeType extends AbstractTemporalType<LocalTime> {
      * - Numeric strings are treated as milliseconds since epoch
      * - ISO-8601 formatted strings are parsed directly
      *
-     * <pre>
-     * {@code
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
      * LocalTimeType type = new LocalTimeType();
      * LocalTime time1 = type.valueOf("10:30:00");
      * LocalTime time2 = type.valueOf("SYS_TIME");
      * LocalTime time3 = type.valueOf("1609459200000");
-     * }
-     * </pre>
+     * }</pre>
      *
      * @param str The string to parse
      * @return The parsed LocalTime object, or null if the input is null or empty
@@ -144,13 +140,12 @@ public class LocalTimeType extends AbstractTemporalType<LocalTime> {
      * Converts a character array to a LocalTime object.
      * The character array is first converted to a string, then parsed.
      *
-     * <pre>
-     * {@code
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
      * LocalTimeType type = new LocalTimeType();
      * char[] chars = "10:30:00".toCharArray();
      * LocalTime time = type.valueOf(chars, 0, chars.length);
-     * }
-     * </pre>
+     * }</pre>
      *
      * @param cbuf The character array containing the LocalTime representation
      * @param offset The starting position in the character array
@@ -172,16 +167,15 @@ public class LocalTimeType extends AbstractTemporalType<LocalTime> {
      * First attempts to get the value as a LocalTime object directly. If that fails,
      * falls back to retrieving it as a java.sql.Time and converting it.
      *
-     * <pre>
-     * {@code
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
      * LocalTimeType type = new LocalTimeType();
      * try (ResultSet rs = stmt.executeQuery()) {
      *     if (rs.next()) {
      *         LocalTime time = type.get(rs, 1);
      *     }
      * }
-     * }
-     * </pre>
+     * }</pre>
      *
      * @param rs The ResultSet containing the data
      * @param columnIndex The column index (1-based) to retrieve the value from
@@ -204,16 +198,15 @@ public class LocalTimeType extends AbstractTemporalType<LocalTime> {
      * First attempts to get the value as a LocalTime object directly. If that fails,
      * falls back to retrieving it as a java.sql.Time and converting it.
      *
-     * <pre>
-     * {@code
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
      * LocalTimeType type = new LocalTimeType();
      * try (ResultSet rs = stmt.executeQuery()) {
      *     if (rs.next()) {
      *         LocalTime time = type.get(rs, "start_time");
      *     }
      * }
-     * }
-     * </pre>
+     * }</pre>
      *
      * @param rs The ResultSet containing the data
      * @param columnName The name of the column to retrieve the value from
@@ -236,16 +229,15 @@ public class LocalTimeType extends AbstractTemporalType<LocalTime> {
      * First attempts to set the value as a LocalTime object directly. If that fails,
      * falls back to setting it as a java.sql.Time.
      *
-     * <pre>
-     * {@code
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
      * LocalTimeType type = new LocalTimeType();
      * LocalTime time = LocalTime.of(10, 30, 0);
      * try (PreparedStatement stmt = conn.prepareStatement("INSERT INTO schedules (start_time) VALUES (?)")) {
      *     type.set(stmt, 1, time);
      *     stmt.executeUpdate();
      * }
-     * }
-     * </pre>
+     * }</pre>
      *
      * @param stmt The PreparedStatement to set the parameter on
      * @param columnIndex The parameter index (1-based) to set
@@ -266,16 +258,15 @@ public class LocalTimeType extends AbstractTemporalType<LocalTime> {
      * First attempts to set the value as a LocalTime object directly. If that fails,
      * falls back to setting it as a java.sql.Time.
      *
-     * <pre>
-     * {@code
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
      * LocalTimeType type = new LocalTimeType();
      * LocalTime time = LocalTime.of(10, 30, 0);
      * try (CallableStatement stmt = conn.prepareCall("{call update_schedule(?)}")) {
      *     type.set(stmt, "start_time", time);
      *     stmt.execute();
      * }
-     * }
-     * </pre>
+     * }</pre>
      *
      * @param stmt The CallableStatement to set the parameter on
      * @param columnName The name of the parameter to set

@@ -23,7 +23,7 @@ package com.landawn.abacus.util;
  * <p>This class extends {@link AbstractIndexed} and provides factory methods for creating
  * instances with validated non-negative indices.</p>
  * 
- * <p>Example usage:</p>
+ * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * IndexedFloat ifloat = IndexedFloat.of(3.14f, 2);
  * System.out.println(ifloat.value()); // prints: 3.14
@@ -44,7 +44,7 @@ public final class IndexedFloat extends AbstractIndexed {
     /**
      * Creates a new {@code IndexedFloat} instance with the specified value and index.
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * IndexedFloat indexed = IndexedFloat.of(2.718f, 10);
      * }</pre>
@@ -65,7 +65,7 @@ public final class IndexedFloat extends AbstractIndexed {
      * This method is useful when working with large arrays or collections where the index
      * might exceed the range of an int.
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * IndexedFloat indexed = IndexedFloat.of(1.414f, 1000000000L);
      * }</pre>

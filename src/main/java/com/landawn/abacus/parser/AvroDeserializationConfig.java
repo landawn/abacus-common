@@ -24,14 +24,14 @@ import com.landawn.abacus.util.N;
  * This class extends DeserializationConfig and adds Avro-specific configuration options,
  * particularly the Avro schema required for deserialization.
  * 
- * <p>Usage example:</p>
+ * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * Schema schema = new Schema.Parser().parse(schemaString);
  * AvroDeserializationConfig config = new AvroDeserializationConfig()
  *     .setSchema(schema)
  *     .setElementType(Person.class)
  *     .ignoreUnmatchedProperty(true);
- * 
+ *
  * List<Person> people = parser.deserialize(inputStream, config, List.class);
  * }</pre>
  * 
@@ -62,7 +62,7 @@ public class AvroDeserializationConfig extends DeserializationConfig<AvroDeseria
      * Sets the Avro schema for deserialization.
      * The schema is required for deserializing data that is not SpecificRecord instances.
      * 
-     * <p>Usage example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String schemaJson = "{\"type\":\"record\",\"name\":\"User\"," +
      *     "\"fields\":[{\"name\":\"name\",\"type\":\"string\"}," +
@@ -119,7 +119,7 @@ public class AvroDeserializationConfig extends DeserializationConfig<AvroDeseria
      * Factory class for creating AvroDeserializationConfig instances.
      * Provides convenient static factory methods for creating configurations.
      * 
-     * <p>Usage example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * AvroDeserializationConfig config = ADC.create()
      *     .setSchema(mySchema)

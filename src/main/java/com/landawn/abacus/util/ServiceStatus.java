@@ -101,7 +101,7 @@ public enum ServiceStatus {
      * <p>This value can be used for efficient storage in databases or for
      * transmission over networks where integer representation is preferred.</p>
      * 
-     * <p><b>Usage example:</b></p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ServiceStatus status = ServiceStatus.ACTIVE;
      * int value = status.intValue(); // returns 1
@@ -122,7 +122,7 @@ public enum ServiceStatus {
      * integer representation, useful when retrieving status values from storage
      * or network protocols.</p>
      * 
-     * <p><b>Usage example:</b></p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Retrieve from database
      * int storedValue = database.getStatus(serviceId);

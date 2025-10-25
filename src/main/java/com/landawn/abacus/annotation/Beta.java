@@ -51,13 +51,13 @@ import java.lang.annotation.Target;
  *   <li>Avoid using beta APIs in critical production systems</li>
  * </ul>
  * 
- * <p><b>Example usage:</b></p>
- * <pre>
+ * <p><b>Usage Examples:</b></p>
+ * <pre>{@code
  * {@literal @}Beta
  * public class ExperimentalFeature {
  *     // This class may change significantly
  * }
- * </pre>
+ * }</pre>
  * 
  * @since 2015
  * @see Internal

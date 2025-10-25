@@ -29,7 +29,7 @@ import java.io.Serial;
  * MutableLong instance concurrently, and at least one thread modifies it, external
  * synchronization is required.</p>
  * 
- * <p>Example usage:</p>
+ * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * MutableLong sum = MutableLong.of(0L);
  * list.forEach(item -> sum.add(item.getValue()));
@@ -54,7 +54,7 @@ public final class MutableLong extends Number implements Comparable<MutableLong>
     /**
      * Constructs a new MutableLong with the default value of zero.
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * MutableLong num = new MutableLong(); // value is 0L
      * }</pre>
@@ -65,7 +65,7 @@ public final class MutableLong extends Number implements Comparable<MutableLong>
     /**
      * Constructs a new MutableLong with the specified initial value.
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * MutableLong num = new MutableLong(1000000L); // value is 1000000L
      * }</pre>
@@ -80,7 +80,7 @@ public final class MutableLong extends Number implements Comparable<MutableLong>
      * Creates a new MutableLong instance with the specified value.
      * This is a factory method that provides a more fluent way to create instances.
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * MutableLong timestamp = MutableLong.of(System.currentTimeMillis());
      * }</pre>
@@ -95,7 +95,7 @@ public final class MutableLong extends Number implements Comparable<MutableLong>
     /**
      * Returns the current long value.
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * MutableLong num = MutableLong.of(42L);
      * long val = num.value(); // returns 42L
@@ -123,7 +123,7 @@ public final class MutableLong extends Number implements Comparable<MutableLong>
     /**
      * Sets the value to the specified long.
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * MutableLong num = MutableLong.of(10L);
      * num.setValue(20L); // value is now 20L
@@ -139,7 +139,7 @@ public final class MutableLong extends Number implements Comparable<MutableLong>
      * Returns the current value and then sets the new value.
      * This is an atomic-like operation for single-threaded use.
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * MutableLong num = MutableLong.of(10L);
      * long old = num.getAndSet(20L); // returns 10L, value is now 20L
@@ -158,7 +158,7 @@ public final class MutableLong extends Number implements Comparable<MutableLong>
      * Sets the value and then returns it.
      * This is useful when you want to update and immediately use the new value.
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * MutableLong num = MutableLong.of(10L);
      * long newVal = num.setAndGet(20L); // returns 20L, value is now 20L
@@ -176,7 +176,7 @@ public final class MutableLong extends Number implements Comparable<MutableLong>
      * Sets the value to newValue if the predicate evaluates to true for the current value.
      * If the predicate returns false, the value remains unchanged.
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * MutableLong num = MutableLong.of(10L);
      * boolean updated = num.setIf(20L, v -> v < 15L); // returns true, value is now 20L
@@ -203,7 +203,7 @@ public final class MutableLong extends Number implements Comparable<MutableLong>
     /**
      * Increments the value by one.
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * MutableLong num = MutableLong.of(10L);
      * num.increment(); // value is now 11L
@@ -216,7 +216,7 @@ public final class MutableLong extends Number implements Comparable<MutableLong>
     /**
      * Decrements the value by one.
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * MutableLong num = MutableLong.of(10L);
      * num.decrement(); // value is now 9L
@@ -231,7 +231,7 @@ public final class MutableLong extends Number implements Comparable<MutableLong>
     /**
      * Adds the specified operand to the current value.
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * MutableLong num = MutableLong.of(10L);
      * num.add(5L); // value is now 15L
@@ -246,7 +246,7 @@ public final class MutableLong extends Number implements Comparable<MutableLong>
     /**
      * Subtracts the specified operand from the current value.
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * MutableLong num = MutableLong.of(10L);
      * num.subtract(3L); // value is now 7L
@@ -261,7 +261,7 @@ public final class MutableLong extends Number implements Comparable<MutableLong>
     /**
      * Returns the current value and then increments it by one.
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * MutableLong num = MutableLong.of(10L);
      * long old = num.getAndIncrement(); // returns 10L, value is now 11L
@@ -276,7 +276,7 @@ public final class MutableLong extends Number implements Comparable<MutableLong>
     /**
      * Returns the current value and then decrements it by one.
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * MutableLong num = MutableLong.of(10L);
      * long old = num.getAndDecrement(); // returns 10L, value is now 9L
@@ -291,7 +291,7 @@ public final class MutableLong extends Number implements Comparable<MutableLong>
     /**
      * Increments the value by one and then returns it.
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * MutableLong num = MutableLong.of(10L);
      * long newVal = num.incrementAndGet(); // returns 11L, value is now 11L
@@ -306,7 +306,7 @@ public final class MutableLong extends Number implements Comparable<MutableLong>
     /**
      * Decrements the value by one and then returns it.
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * MutableLong num = MutableLong.of(10L);
      * long newVal = num.decrementAndGet(); // returns 9L, value is now 9L
@@ -321,7 +321,7 @@ public final class MutableLong extends Number implements Comparable<MutableLong>
     /**
      * Returns the current value and then adds the specified delta.
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * MutableLong num = MutableLong.of(10L);
      * long old = num.getAndAdd(5L); // returns 10L, value is now 15L
@@ -339,7 +339,7 @@ public final class MutableLong extends Number implements Comparable<MutableLong>
     /**
      * Adds the specified delta to the current value and then returns it.
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * MutableLong num = MutableLong.of(10L);
      * long newVal = num.addAndGet(5L); // returns 15L, value is now 15L
@@ -404,7 +404,7 @@ public final class MutableLong extends Number implements Comparable<MutableLong>
      * Returns a negative value if this is less than the other, zero if equal,
      * or a positive value if this is greater than the other.
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * MutableLong a = MutableLong.of(10L);
      * MutableLong b = MutableLong.of(20L);
@@ -426,7 +426,7 @@ public final class MutableLong extends Number implements Comparable<MutableLong>
      * the argument is not {@code null} and is a {@code MutableLong} object that contains the
      * same {@code long} value as this object.
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * MutableLong a = MutableLong.of(10L);
      * MutableLong b = MutableLong.of(10L);
@@ -460,7 +460,7 @@ public final class MutableLong extends Number implements Comparable<MutableLong>
     /**
      * Returns the String representation of this MutableLong's value.
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * MutableLong num = MutableLong.of(42L);
      * String str = num.toString(); // returns "42"

@@ -39,8 +39,7 @@ import java.util.concurrent.TimeUnit;
  *       relative values, not the absolute ones.
  * </ul>
  *
- * <p>Basic usage:
- *
+ * <p><b>Basic usage:</b></p>
  * <pre>{@code
  * Stopwatch stopwatch = Stopwatch.createStarted();
  * doSomething();
@@ -87,7 +86,7 @@ public final class Stopwatch {
     /**
      * Creates (but does not start) a new stopwatch using {@link System#nanoTime} as its time source.
      * 
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Stopwatch stopwatch = Stopwatch.createUnstarted();
      * stopwatch.start();
@@ -105,7 +104,7 @@ public final class Stopwatch {
      * Creates (but does not start) a new stopwatch, using the specified time source.
      * This is useful for testing or when you need to use an alternative time source.
      * 
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Ticker mockTicker = new Ticker() {
      *     private long time = 0;
@@ -125,7 +124,7 @@ public final class Stopwatch {
      * Creates (and starts) a new stopwatch using {@link System#nanoTime} as its time source.
      * This is a convenience method equivalent to calling {@code createUnstarted().start()}.
      * 
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Stopwatch stopwatch = Stopwatch.createStarted();
      * doSomething();
@@ -142,7 +141,7 @@ public final class Stopwatch {
      * Creates (and starts) a new stopwatch, using the specified time source.
      * This is a convenience method equivalent to calling {@code createUnstarted(ticker).start()}.
      * 
-     * <p>Example usage for Android:</p>
+     * <p><b>Example usage for Android:</b></p>
      * <pre>{@code
      * Stopwatch stopwatch = Stopwatch.createStarted(
      *     new Ticker() {
@@ -171,7 +170,7 @@ public final class Stopwatch {
      * Returns {@code true} if {@link #start()} has been called on this stopwatch, and {@link #stop()}
      * has not been called since the last call to {@code start()}.
      * 
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * if (stopwatch.isRunning()) {
      *     stopwatch.stop();
@@ -186,8 +185,8 @@ public final class Stopwatch {
 
     /**
      * Starts the stopwatch. Time measurement begins with this call.
-     * 
-     * <p>Example usage:</p>
+     *
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Stopwatch stopwatch = Stopwatch.createUnstarted();
      * stopwatch.start();
@@ -197,6 +196,8 @@ public final class Stopwatch {
      *
      * @return this {@code Stopwatch} instance for method chaining
      * @throws IllegalStateException if the stopwatch is already running
+     * @see #stop()
+     * @see #isRunning()
      */
     public Stopwatch start() {
         N.checkState(!isRunning, "This stopwatch is already running.");
@@ -208,8 +209,8 @@ public final class Stopwatch {
     /**
      * Stops the stopwatch. Future reads will return the fixed duration that had elapsed up to this
      * point. Calling {@code elapsed()} after stopping will always return the same duration.
-     * 
-     * <p>Example usage:</p>
+     *
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * stopwatch.stop();
      * Duration duration = stopwatch.elapsed(); // Time when stopped
@@ -219,6 +220,8 @@ public final class Stopwatch {
      *
      * @return this {@code Stopwatch} instance for method chaining
      * @throws IllegalStateException if the stopwatch is already stopped
+     * @see #start()
+     * @see #isRunning()
      */
     public Stopwatch stop() {
         final long tick = ticker.read();
@@ -231,19 +234,20 @@ public final class Stopwatch {
     /**
      * Sets the elapsed time for this stopwatch to zero, and places it in a stopped state.
      * This is useful for reusing a stopwatch instance.
-     * 
-     * <p>Example usage:</p>
+     *
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Stopwatch stopwatch = Stopwatch.createStarted();
      * doFirstOperation();
      * System.out.println("First: " + stopwatch.elapsed(TimeUnit.MILLISECONDS));
-     * 
+     *
      * stopwatch.reset().start();
      * doSecondOperation();
      * System.out.println("Second: " + stopwatch.elapsed(TimeUnit.MILLISECONDS));
      * }</pre>
      *
      * @return this {@code Stopwatch} instance for method chaining
+     * @see #start()
      */
     public Stopwatch reset() {
         elapsedNanos = 0;
@@ -265,8 +269,8 @@ public final class Stopwatch {
      * <p>It is generally not a good idea to use an ambiguous, unitless {@code long} to represent
      * elapsed time. Therefore, we recommend using {@link #elapsed()} instead, which returns a
      * strongly-typed {@link Duration} instance.</p>
-     * 
-     * <p>Example usage:</p>
+     *
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * long millis = stopwatch.elapsed(TimeUnit.MILLISECONDS);
      * long seconds = stopwatch.elapsed(TimeUnit.SECONDS);
@@ -274,6 +278,7 @@ public final class Stopwatch {
      *
      * @param desiredUnit the unit of time to express the elapsed time in
      * @return the elapsed time in the specified unit, rounded down
+     * @see #elapsed()
      */
     public long elapsed(final TimeUnit desiredUnit) {
         return desiredUnit.convert(elapsedNanos(), NANOSECONDS);
@@ -284,7 +289,7 @@ public final class Stopwatch {
      * Unlike {@link #elapsed(TimeUnit)}, this method returns a strongly-typed {@code Duration}
      * instance that preserves nanosecond precision.
      * 
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Duration elapsed = stopwatch.elapsed();
      * System.out.println("Elapsed: " + elapsed.toMillis() + " ms");

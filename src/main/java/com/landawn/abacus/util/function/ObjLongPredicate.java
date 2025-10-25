@@ -42,7 +42,7 @@ public interface ObjLongPredicate<T> extends Throwables.ObjLongPredicate<T, Runt
      * condition represented by this predicate. It should return {@code true} if
      * the input arguments match the predicate's criteria, {@code false} otherwise.
      *
-     * <p>Example usage:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ObjLongPredicate<Event> isAfter = (event, timestamp) -> 
      *     event.getTimestamp() > timestamp;
@@ -56,8 +56,7 @@ public interface ObjLongPredicate<T> extends Throwables.ObjLongPredicate<T, Runt
      * @param t the first input argument of type T
      * @param u the second input argument, a primitive long value
      * @return {@code true} if the input arguments match the predicate,
-     *         otherwise {@code false}
-     * @throws RuntimeException if the predicate evaluation fails
+     *         otherwise {@code false} if the predicate evaluation fails
      */
     @Override
     boolean test(T t, long u);
@@ -69,7 +68,7 @@ public interface ObjLongPredicate<T> extends Throwables.ObjLongPredicate<T, Runt
      * {@code false}, and vice versa. This is useful for inverting conditions without
      * having to write a new predicate.
      *
-     * <p>Example usage:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ObjLongPredicate<Event> isAfter = (event, timestamp) -> 
      *     event.getTimestamp() > timestamp;
@@ -93,7 +92,7 @@ public interface ObjLongPredicate<T> extends Throwables.ObjLongPredicate<T, Runt
      * to the caller; if evaluation of this predicate throws an exception, the
      * {@code other} predicate will not be evaluated.
      *
-     * <p>Example usage:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ObjLongPredicate<User> hasId = (user, id) -> 
      *     user.getId() == id;
@@ -122,7 +121,7 @@ public interface ObjLongPredicate<T> extends Throwables.ObjLongPredicate<T, Runt
      * to the caller; if evaluation of this predicate throws an exception, the
      * {@code other} predicate will not be evaluated.
      *
-     * <p>Example usage:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ObjLongPredicate<Session> isExpired = (session, currentTime) -> 
      *     session.getExpiryTime() < currentTime;

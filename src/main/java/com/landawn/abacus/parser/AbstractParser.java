@@ -339,10 +339,9 @@ abstract class AbstractParser<SC extends SerializationConfig<?>, DC extends Dese
      * @param config the serialization configuration
      * @param bw the XML writer
      * @return {@code true} if circular reference was found and handled, {@code false} otherwise
-     * @throws IOException if an I/O error occurs
      */
     protected static boolean hasCircularReference(final Object obj, final IdentityHashSet<Object> serializedObjects, final JSONXMLSerializationConfig<?> config,
-            @SuppressWarnings("unused") final CharacterWriter bw) throws IOException {
+            @SuppressWarnings("unused") final CharacterWriter bw)   {
         final Type<?> type = obj == null ? null : Type.of(obj.getClass());
         if (obj != null && serializedObjects != null //
                 && (type.isBean() || type.isMap() || type.isCollection() || type.isObjectArray() || type.isMapEntity())) {

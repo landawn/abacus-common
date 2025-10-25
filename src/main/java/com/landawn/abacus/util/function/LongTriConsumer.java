@@ -26,7 +26,7 @@ import com.landawn.abacus.util.Throwables;
  * <p>The interface extends {@code Throwables.LongTriConsumer} with {@code RuntimeException} as the exception type,
  * making it suitable for use in contexts where checked exceptions are not required.
  * 
- * <p>Example usage:
+ * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * LongTriConsumer printSum = (a, b, c) -> System.out.println("Sum: " + (a + b + c));
  * printSum.accept(10L, 20L, 30L); // prints "Sum: 60"
@@ -61,7 +61,6 @@ public interface LongTriConsumer extends Throwables.LongTriConsumer<RuntimeExcep
      * @param a the first input argument
      * @param b the second input argument
      * @param c the third input argument
-     * @throws RuntimeException if any error occurs during the operation
      */
     @Override
     void accept(long a, long b, long c);
@@ -77,7 +76,7 @@ public interface LongTriConsumer extends Throwables.LongTriConsumer<RuntimeExcep
      * <p>This method is useful for chaining multiple operations that need to process
      * the same three long values in sequence.
      * 
-     * <p>Example usage:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * LongTriConsumer logValues = (a, b, c) -> 
      *     System.out.println("Processing: " + a + ", " + b + ", " + c);

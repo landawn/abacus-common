@@ -21,7 +21,7 @@ package com.landawn.abacus.util;
  * <p>The threading mode determines whether operations run in the default thread context
  * or are submitted to a thread pool for concurrent execution.
  * 
- * <p>Example usage:
+ * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * // Execute operation in default thread mode
  * processor.execute(task, ThreadMode.DEFAULT);

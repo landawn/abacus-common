@@ -68,7 +68,7 @@ public class BinaryOperator2025Test extends TestBase {
         BiFunction<Integer, Integer, Integer> chainedFunction = operator.andThen(addTen).andThen(doubleIt);
         Integer result = chainedFunction.apply(5, 3);
 
-        assertEquals(50, result);  // (5 * 3 + 10) * 2 = 50
+        assertEquals(50, result); // (5 * 3 + 10) * 2 = 50
     }
 
     @Test
@@ -127,9 +127,12 @@ public class BinaryOperator2025Test extends TestBase {
     @Test
     public void testWithNullValues() {
         BinaryOperator<String> operator = (s1, s2) -> {
-            if (s1 == null && s2 == null) return "both null";
-            if (s1 == null) return "first null";
-            if (s2 == null) return "second null";
+            if (s1 == null && s2 == null)
+                return "both null";
+            if (s1 == null)
+                return "first null";
+            if (s2 == null)
+                return "second null";
             return s1 + s2;
         };
 

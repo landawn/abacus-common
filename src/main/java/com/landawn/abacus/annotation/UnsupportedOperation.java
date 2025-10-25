@@ -36,7 +36,7 @@ import java.lang.annotation.Target;
  * <p>This annotation serves as documentation for API users, making it clear at compile-time
  * which operations are not supported, rather than discovering it at runtime.</p>
  * 
- * <p>Example usage:</p>
+ * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * public class ImmutableList<E> implements List<E> {
  *     @UnsupportedOperation

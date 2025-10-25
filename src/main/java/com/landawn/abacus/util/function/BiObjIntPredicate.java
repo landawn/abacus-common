@@ -32,6 +32,12 @@ public interface BiObjIntPredicate<T, U> extends Throwables.BiObjIntPredicate<T,
     /**
      * Evaluates this predicate on the given arguments.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * BiObjIntPredicate<String, String, Integer> lengthCheck = (s1, s2, len) -> (s1.length() + s2.length()) >= len;
+     * boolean result = lengthCheck.test("Hello", "World", 10); // Returns true (10 >= 10)
+     * }</pre>
+     *
      * @param t the first input argument (object value)
      * @param u the second input argument (object value)
      * @param i the third input argument (int value)
@@ -42,6 +48,12 @@ public interface BiObjIntPredicate<T, U> extends Throwables.BiObjIntPredicate<T,
 
     /**
      * Returns a predicate that represents the logical negation of this predicate.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * BiObjIntPredicate<String, String> hasLength = (s1, s2, len) -> (s1 + s2).length() == len;
+     * BiObjIntPredicate<String, String> notHasLength = hasLength.negate();
+     * }</pre>
      *
      * @return a predicate that represents the logical negation of this predicate
      */
@@ -57,6 +69,13 @@ public interface BiObjIntPredicate<T, U> extends Throwables.BiObjIntPredicate<T,
      * <p>Any exceptions thrown during evaluation of either predicate are relayed to the caller;
      * if evaluation of this predicate throws an exception, the {@code other} predicate will not be evaluated.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * BiObjIntPredicate<String, String> notEmpty = (s1, s2, i) -> !s1.isEmpty() && !s2.isEmpty();
+     * BiObjIntPredicate<String, String> positiveInt = (s1, s2, i) -> i > 0;
+     * BiObjIntPredicate<String, String> combined = notEmpty.and(positiveInt);
+     * }</pre>
+     *
      * @param other a predicate that will be logically-ANDed with this predicate. Must not be {@code null}.
      * @return a composed predicate that represents the short-circuiting logical AND of this predicate and the {@code other} predicate
      */
@@ -71,6 +90,13 @@ public interface BiObjIntPredicate<T, U> extends Throwables.BiObjIntPredicate<T,
      *
      * <p>Any exceptions thrown during evaluation of either predicate are relayed to the caller;
      * if evaluation of this predicate throws an exception, the {@code other} predicate will not be evaluated.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * BiObjIntPredicate<String, String> longStrings = (s1, s2, i) -> (s1 + s2).length() > 100;
+     * BiObjIntPredicate<String, String> largeInt = (s1, s2, i) -> i > 1000;
+     * BiObjIntPredicate<String, String> combined = longStrings.or(largeInt);
+     * }</pre>
      *
      * @param other a predicate that will be logically-ORed with this predicate. Must not be {@code null}.
      * @return a composed predicate that represents the short-circuiting logical OR of this predicate and the {@code other} predicate

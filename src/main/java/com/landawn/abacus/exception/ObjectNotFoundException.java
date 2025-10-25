@@ -29,7 +29,7 @@ import java.io.Serial;
  *   <li>API calls expecting an entity that has been deleted or never existed</li>
  * </ul>
  * 
- * <p>Example usage:</p>
+ * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * // In a service method
  * User user = userRepository.findById(userId);
@@ -50,7 +50,7 @@ public class ObjectNotFoundException extends IllegalStateException {
      * Constructs a new {@code ObjectNotFoundException} with no detail message.
      * The cause is not initialized and may subsequently be initialized by a call to {@link #initCause}.
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * throw new ObjectNotFoundException();
      * }</pre>
@@ -62,7 +62,7 @@ public class ObjectNotFoundException extends IllegalStateException {
      * Constructs a new {@code ObjectNotFoundException} with the specified detail message.
      * The cause is not initialized and may subsequently be initialized by a call to {@link #initCause}.
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * throw new ObjectNotFoundException("Product with SKU '" + sku + "' not found in inventory");
      * }</pre>
@@ -80,7 +80,7 @@ public class ObjectNotFoundException extends IllegalStateException {
      * <p>Note that the detail message associated with {@code cause} is <i>not</i> automatically
      * incorporated in this exception's detail message.</p>
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * try {
      *     return cache.get(key);
@@ -106,7 +106,7 @@ public class ObjectNotFoundException extends IllegalStateException {
      * <p>This constructor is useful for exceptions that are little more than wrappers for other
      * throwables.</p>
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * catch (DataAccessException e) {
      *     throw new ObjectNotFoundException(e);

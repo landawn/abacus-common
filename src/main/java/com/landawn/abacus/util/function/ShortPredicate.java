@@ -76,8 +76,22 @@ public interface ShortPredicate extends Throwables.ShortPredicate<RuntimeExcepti
     /**
      * Evaluates this predicate on the given argument.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * ShortPredicate isPositive = ShortPredicate.IS_POSITIVE;
+     * boolean result1 = isPositive.test((short) 10); // returns true
+     * boolean result2 = isPositive.test((short) -5); // returns false
+     *
+     * ShortPredicate inRange = ShortPredicate.between((short) 10, (short) 100);
+     * boolean result3 = inRange.test((short) 50); // returns true
+     * boolean result4 = inRange.test((short) 5); // returns false
+     *
+     * ShortPredicate isEven = value -> value % 2 == 0;
+     * boolean result5 = isEven.test((short) 4); // returns true
+     * }</pre>
+     *
      * @param value the input argument
-     * @return {@code true} if the input argument matches the predicate, otherwise {@code false}
+     * @return {@code true} if the input argument matches the predicate, otherwise {@code false} if the predicate evaluation fails
      */
     @Override
     boolean test(short value);

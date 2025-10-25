@@ -43,13 +43,12 @@ public class JodaDateTimeType extends AbstractJodaDateTimeType<DateTime> {
      * This method returns the Class object representing org.joda.time.DateTime, which is used
      * for type identification and reflection operations.
      *
-     * <pre>
-     * {@code
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
      * JodaDateTimeType type = new JodaDateTimeType();
      * Class<DateTime> clazz = type.clazz();
      * System.out.println(clazz.getName()); // Outputs: org.joda.time.DateTime
-     * }
-     * </pre>
+     * }</pre>
      *
      * @return the Class object representing org.joda.time.DateTime
      */
@@ -71,8 +70,8 @@ public class JodaDateTimeType extends AbstractJodaDateTimeType<DateTime> {
      * - null: returns null
      * - Other types: converted to string first, then parsed
      *
-     * <pre>
-     * {@code
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
      * JodaDateTimeType type = new JodaDateTimeType();
      *
      * // From Number (milliseconds since epoch)
@@ -87,8 +86,7 @@ public class JodaDateTimeType extends AbstractJodaDateTimeType<DateTime> {
      *
      * // null input returns null
      * DateTime dt4 = type.valueOf(null); // returns null
-     * }
-     * </pre>
+     * }</pre>
      *
      * @param obj the object to convert to DateTime
      * @return a DateTime instance, or null if the input is null
@@ -116,8 +114,8 @@ public class JodaDateTimeType extends AbstractJodaDateTimeType<DateTime> {
      * - ISO 8601 date-time format (20 characters): parsed as yyyy-MM-dd'T'HH:mm:ss
      * - ISO 8601 timestamp format (24 characters): parsed as yyyy-MM-dd'T'HH:mm:ss.SSS
      *
-     * <pre>
-     * {@code
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
      * JodaDateTimeType type = new JodaDateTimeType();
      *
      * // Parse ISO 8601 date-time format
@@ -132,8 +130,7 @@ public class JodaDateTimeType extends AbstractJodaDateTimeType<DateTime> {
      * // Empty or null returns null
      * DateTime dt4 = type.valueOf(null); // returns null
      * DateTime dt5 = type.valueOf(""); // returns null
-     * }
-     * </pre>
+     * }</pre>
      *
      * @param str the string to parse
      * @return a DateTime instance, or null if the string is empty or null
@@ -162,8 +159,8 @@ public class JodaDateTimeType extends AbstractJodaDateTimeType<DateTime> {
      * This method first attempts to parse the character array as a long value (milliseconds since epoch).
      * If that fails, it converts the character array to a string and delegates to valueOf(String).
      *
-     * <pre>
-     * {@code
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
      * JodaDateTimeType type = new JodaDateTimeType();
      *
      * // Parse from character array containing milliseconds
@@ -180,8 +177,7 @@ public class JodaDateTimeType extends AbstractJodaDateTimeType<DateTime> {
      *
      * // null or empty array returns null
      * DateTime dt4 = type.valueOf(null, 0, 0); // returns null
-     * }
-     * </pre>
+     * }</pre>
      *
      * @param cbuf the character buffer containing the value to parse
      * @param offset the start offset in the character buffer
@@ -214,8 +210,8 @@ public class JodaDateTimeType extends AbstractJodaDateTimeType<DateTime> {
      * This method reads a Timestamp from the ResultSet and converts it to a Joda DateTime.
      * If the timestamp is null, this method returns null.
      *
-     * <pre>
-     * {@code
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
      * JodaDateTimeType type = new JodaDateTimeType();
      *
      * try (Connection conn = dataSource.getConnection();
@@ -228,8 +224,7 @@ public class JodaDateTimeType extends AbstractJodaDateTimeType<DateTime> {
      *         }
      *     }
      * }
-     * }
-     * </pre>
+     * }</pre>
      *
      * @param rs the ResultSet to read from
      * @param columnIndex the column index (1-based) to retrieve the value from
@@ -251,8 +246,8 @@ public class JodaDateTimeType extends AbstractJodaDateTimeType<DateTime> {
      * This method reads a Timestamp from the ResultSet and converts it to a Joda DateTime.
      * If the timestamp is null, this method returns null.
      *
-     * <pre>
-     * {@code
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
      * JodaDateTimeType type = new JodaDateTimeType();
      *
      * try (Connection conn = dataSource.getConnection();
@@ -266,8 +261,7 @@ public class JodaDateTimeType extends AbstractJodaDateTimeType<DateTime> {
      *         }
      *     }
      * }
-     * }
-     * </pre>
+     * }</pre>
      *
      * @param rs the ResultSet to read from
      * @param columnLabel the column label to retrieve the value from
@@ -289,8 +283,8 @@ public class JodaDateTimeType extends AbstractJodaDateTimeType<DateTime> {
      * This method converts the Joda DateTime to a SQL Timestamp before setting it in the statement.
      * If the DateTime is null, a SQL NULL is set for the parameter.
      *
-     * <pre>
-     * {@code
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
      * JodaDateTimeType type = new JodaDateTimeType();
      * DateTime eventTime = new DateTime(2021, 1, 1, 10, 30, 0);
      *
@@ -303,8 +297,7 @@ public class JodaDateTimeType extends AbstractJodaDateTimeType<DateTime> {
      *
      * // Setting null value
      * type.set(stmt, 2, null); // Sets SQL NULL
-     * }
-     * </pre>
+     * }</pre>
      *
      * @param stmt the PreparedStatement to set the parameter on
      * @param columnIndex the parameter index (1-based) to set
@@ -324,8 +317,8 @@ public class JodaDateTimeType extends AbstractJodaDateTimeType<DateTime> {
      * This method converts the Joda DateTime to a SQL Timestamp before setting it in the statement.
      * If the DateTime is null, a SQL NULL is set for the parameter.
      *
-     * <pre>
-     * {@code
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
      * JodaDateTimeType type = new JodaDateTimeType();
      * DateTime eventTime = new DateTime(2021, 1, 1, 10, 30, 0);
      *
@@ -338,8 +331,7 @@ public class JodaDateTimeType extends AbstractJodaDateTimeType<DateTime> {
      *
      * // Setting null value
      * type.set(stmt, "event_time", null); // Sets SQL NULL
-     * }
-     * </pre>
+     * }</pre>
      *
      * @param stmt the CallableStatement to set the parameter on
      * @param parameterName the name of the parameter to set

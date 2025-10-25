@@ -31,7 +31,7 @@ package com.landawn.abacus.util;
  * <p>This class provides constants for all ASCII control characters as defined in RFC 20,
  * making it easy to work with low-level ASCII protocols and data formats.</p>
  * 
- * <p>Example usage:</p>
+ * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * // Check if a character is ASCII
  * if (ch >= Ascii.MIN && ch <= Ascii.MAX) {

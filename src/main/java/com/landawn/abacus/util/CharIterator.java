@@ -32,7 +32,7 @@ import com.landawn.abacus.util.stream.CharStream;
  * transformation methods like {@code indexed()} and utility methods like
  * {@code toArray()} and {@code stream()}.</p>
  * 
- * <p>Example usage:</p>
+ * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * CharIterator iter = CharIterator.of('a', 'b', 'c');
  * while (iter.hasNext()) {
@@ -74,7 +74,7 @@ public abstract class CharIterator extends ImmutableIterator<Character> {
      *
      * <p>This method always returns the same singleton instance for efficiency.</p>
      *
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * CharIterator iter = CharIterator.empty();
      * System.out.println(iter.hasNext()); // false
@@ -93,7 +93,7 @@ public abstract class CharIterator extends ImmutableIterator<Character> {
      * <p>If the array is {@code null} or empty, returns an empty iterator.
      * The iterator will iterate over all elements in the array from start to end.</p>
      *
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * CharIterator iter = CharIterator.of('a', 'b', 'c');
      * char first = iter.nextChar(); // 'a'
@@ -113,7 +113,7 @@ public abstract class CharIterator extends ImmutableIterator<Character> {
      * {@code toIndex} (exclusive). If {@code fromIndex} equals {@code toIndex}, an empty
      * iterator is returned.</p>
      *
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * char[] chars = {'a', 'b', 'c', 'd', 'e'};
      * CharIterator iter = CharIterator.of(chars, 1, 4);
@@ -175,7 +175,7 @@ public abstract class CharIterator extends ImmutableIterator<Character> {
      *
      * <p>The supplier is called at most once, and the resulting iterator is cached for subsequent calls.</p>
      *
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * CharIterator iter = CharIterator.defer(() -> CharIterator.of('a', 'b', 'c'));
      * // Iterator is not created yet
@@ -232,7 +232,7 @@ public abstract class CharIterator extends ImmutableIterator<Character> {
      * that consume all elements (like {@code toArray()} or {@code toList()}), as they will
      * never terminate and will eventually cause an {@code OutOfMemoryError}.</p>
      *
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * CharIterator iter = CharIterator.generate(() -> 'X');
      * // Infinite iterator that always returns 'X'
@@ -273,7 +273,7 @@ public abstract class CharIterator extends ImmutableIterator<Character> {
      * (once by the user, once internally for validation), so it should be idempotent or
      * designed to handle multiple calls.</p>
      *
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * int count = 0;
      * CharIterator iter = CharIterator.generate(
@@ -326,19 +326,17 @@ public abstract class CharIterator extends ImmutableIterator<Character> {
     }
 
     /**
-     * Returns the next char value from this iterator.
+     * Returns the next char value in the iteration.
      *
-     * <p>This is the primary method for retrieving char values without boxing overhead.
-     * Implementations should throw {@code NoSuchElementException} if no more elements are available.</p>
-     *
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * CharIterator iter = CharIterator.of('a', 'b', 'c');
-     * char ch = iter.nextChar(); // 'a'
+     * char first = iter.nextChar(); // 'a'
+     * char second = iter.nextChar(); // 'b'
      * }</pre>
      *
      * @return the next char value
-     * @throws NoSuchElementException if no more elements are available
+     * @throws NoSuchElementException if the iteration has no more elements
      */
     public abstract char nextChar();
 
@@ -349,7 +347,7 @@ public abstract class CharIterator extends ImmutableIterator<Character> {
      * <p>This method consumes the first element from the iterator if present. After calling this method,
      * the iterator will be positioned at the second element (if it exists).</p>
      *
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * CharIterator iter = CharIterator.of('a', 'b', 'c');
      * OptionalChar first = iter.first(); // OptionalChar.of('a')
@@ -376,7 +374,7 @@ public abstract class CharIterator extends ImmutableIterator<Character> {
      * <p><strong>Warning:</strong> For infinite iterators, this method will never return and will
      * eventually cause an {@code OutOfMemoryError} or run indefinitely.</p>
      *
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * CharIterator iter = CharIterator.of('a', 'b', 'c');
      * OptionalChar last = iter.last(); // OptionalChar.of('c')
@@ -400,21 +398,22 @@ public abstract class CharIterator extends ImmutableIterator<Character> {
     }
 
     /**
-     * Collects all remaining elements into a char array.
+     * Converts the remaining elements to a char array.
      *
-     * <p>This method consumes all remaining elements from the iterator. After calling this method,
-     * the iterator will be exhausted.</p>
+     * <p>This method consumes the iterator. After calling this method, the iterator
+     * will be empty (hasNext() returns false). If the iterator is already empty,
+     * returns an empty array.</p>
      *
-     * <p><strong>Warning:</strong> For infinite iterators, this method will never return and will
-     * eventually cause an {@code OutOfMemoryError}.</p>
-     *
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * CharIterator iter = CharIterator.of('a', 'b', 'c');
-     * char[] array = iter.toArray(); // ['a', 'b', 'c']
+     * char[] array = CharIterator.of('a', 'b', 'c', 'd', 'e').toArray();
+     * // array = ['a', 'b', 'c', 'd', 'e']
+     *
+     * // Empty iterator returns empty array
+     * char[] empty = CharIterator.empty().toArray(); // empty.length == 0
      * }</pre>
      *
-     * @return a char array containing all remaining elements (empty array if iterator is empty)
+     * @return a char array containing all remaining elements
      */
     @SuppressWarnings("deprecation")
     public char[] toArray() {
@@ -422,22 +421,22 @@ public abstract class CharIterator extends ImmutableIterator<Character> {
     }
 
     /**
-     * Collects all remaining elements into a {@code CharList}.
+     * Converts the remaining elements to a CharList.
      *
-     * <p>This method consumes all remaining elements from the iterator. After calling this method,
-     * the iterator will be exhausted.</p>
+     * <p>This method consumes the iterator. After calling this method, the iterator
+     * will be empty (hasNext() returns false). If the iterator is already empty,
+     * returns an empty CharList.</p>
      *
-     * <p><strong>Warning:</strong> For infinite iterators, this method will never return and will
-     * eventually cause an {@code OutOfMemoryError}.</p>
-     *
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * CharIterator iter = CharIterator.of('a', 'b', 'c');
-     * CharList list = iter.toList();
-     * System.out.println(list); // [a, b, c]
+     * CharList list = CharIterator.of('a', 'b', 'c', 'd', 'e').toList();
+     * // list contains ['a', 'b', 'c', 'd', 'e']
+     *
+     * // Empty iterator returns empty list
+     * CharList empty = CharIterator.empty().toList(); // empty.size() == 0
      * }</pre>
      *
-     * @return a {@code CharList} containing all remaining elements (empty list if iterator is empty)
+     * @return a CharList containing all remaining elements
      */
     public CharList toList() {
         final CharList list = new CharList();
@@ -459,7 +458,7 @@ public abstract class CharIterator extends ImmutableIterator<Character> {
      * <p>The stream does not support parallel execution and is not thread-safe unless the
      * underlying iterator is thread-safe.</p>
      *
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * CharIterator iter = CharIterator.of('a', 'b', 'c');
      * CharStream stream = iter.stream();
@@ -481,7 +480,7 @@ public abstract class CharIterator extends ImmutableIterator<Character> {
      *
      * <p>This method is marked as {@code @Beta} and may be subject to change in future versions.</p>
      *
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * CharIterator iter = CharIterator.of('a', 'b', 'c');
      * ObjIterator<IndexedChar> indexed = iter.indexed();
@@ -508,7 +507,7 @@ public abstract class CharIterator extends ImmutableIterator<Character> {
      *
      * <p>This method is marked as {@code @Beta} and may be subject to change in future versions.</p>
      *
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * CharIterator iter = CharIterator.of('a', 'b', 'c');
      * ObjIterator<IndexedChar> indexed = iter.indexed(10);
@@ -566,7 +565,7 @@ public abstract class CharIterator extends ImmutableIterator<Character> {
      *
      * <p>The action is applied to each char value directly without boxing to {@code Character}.</p>
      *
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * CharIterator iter = CharIterator.of('a', 'b', 'c');
      * iter.foreachRemaining(ch -> System.out.print(ch)); // abc
@@ -595,7 +594,7 @@ public abstract class CharIterator extends ImmutableIterator<Character> {
      * <p>The action receives two parameters: the index (starting from 0) and the char value
      * without boxing overhead.</p>
      *
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * CharIterator iter = CharIterator.of('a', 'b', 'c');
      * iter.foreachIndexed((index, ch) ->

@@ -51,7 +51,7 @@ import com.landawn.abacus.logging.LoggerFactory;
  * <p><b>Important:</b> Objects obtained from Objectory should be properly recycled after use
  * to maintain pool efficiency. Failing to recycle objects will result in new allocations.</p>
  * 
- * <p>Example usage:</p>
+ * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * // Create and use a StringBuilder
  * StringBuilder sb = Objectory.createStringBuilder();
@@ -234,8 +234,8 @@ public final class Objectory {
      * Arrays larger than {@link #POOLABLE_ARRAY_LENGTH} are always newly allocated.
      * 
      * <p>After use, the array should be recycled using {@link #recycle(Object[])}.</p>
-     * 
-     * <p>Example usage:</p></p>
+     *
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Object[] array = Objectory.createObjectArray(10);
      * try {
@@ -290,8 +290,8 @@ public final class Objectory {
      * Buffers larger than {@link #BUFFER_SIZE} are always newly allocated.
      * 
      * <p>This is useful for character-based I/O operations where a temporary buffer is needed.</p>
-     * 
-     * <p>Example usage:</p></p>
+     *
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * char[] buffer = Objectory.createCharArrayBuffer(1024);
      * try {
@@ -341,8 +341,8 @@ public final class Objectory {
      * Buffers larger than {@link #BUFFER_SIZE} are always newly allocated.
      * 
      * <p>This is useful for binary I/O operations where a temporary buffer is needed.</p>
-     * 
-     * <p>Example usage:</p></p>
+     *
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * byte[] buffer = Objectory.createByteArrayBuffer(4096);
      * try {
@@ -390,8 +390,8 @@ public final class Objectory {
     /**
      * Creates or retrieves a StringBuilder with the specified initial capacity.
      * StringBuilders with capacity larger than {@link #BUFFER_SIZE} are always newly allocated.
-     * 
-     * <p>Example usage:</p></p>
+     *
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * StringBuilder sb = Objectory.createStringBuilder(100);
      * try {
@@ -438,8 +438,8 @@ public final class Objectory {
     /**
      * Creates or retrieves a ByteArrayOutputStream with the specified initial capacity.
      * Streams with capacity larger than {@link #BUFFER_SIZE} are always newly allocated.
-     * 
-     * <p>Example usage:</p></p>
+     *
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ByteArrayOutputStream baos = Objectory.createByteArrayOutputStream();
      * try {
@@ -520,8 +520,8 @@ public final class Objectory {
      * If the writer is already a BufferedWriter, it is returned as-is.
      * 
      * <p>After use, the writer should be recycled using {@link #recycle(java.io.BufferedWriter)}.</p>
-     * 
-     * <p>Example usage:</p></p>
+     *
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * try (Writer fileWriter = new FileWriter("output.txt")) {
      *     BufferedWriter bw = Objectory.createBufferedWriter(fileWriter);
@@ -755,10 +755,10 @@ public final class Objectory {
 
     /**
      * Creates or retrieves a BufferedReader wrapping the specified String.
-     * 
+     *
      * <p>After use, the reader should be recycled using {@link #recycle(java.io.BufferedReader)}.</p>
-     * 
-     * <p>Example usage:</p></p>
+     *
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String text = "Line 1\nLine 2\nLine 3";
      * BufferedReader reader = Objectory.createBufferedReader(text);
@@ -804,10 +804,10 @@ public final class Objectory {
     /**
      * Creates or retrieves a BufferedReader wrapping the specified Reader.
      * If the reader is already a BufferedReader, it is returned as-is.
-     * 
+     *
      * <p>After use, the reader should be recycled using {@link #recycle(java.io.BufferedReader)}.</p>
-     * 
-     * <p>Example usage:</p></p>
+     *
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * try (Reader fileReader = new FileReader("input.txt")) {
      *     BufferedReader br = Objectory.createBufferedReader(fileReader);
@@ -860,6 +860,8 @@ public final class Objectory {
      * Lists larger than {@link #POOLABLE_SIZE} are not pooled.
      * 
      * <p>This method should be called in a finally block to ensure proper recycling:</p>
+     * 
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * List<String> list = Objectory.createList();
      * try {
@@ -944,8 +946,8 @@ public final class Objectory {
      * Returns an Object array to the object pool for reuse.
      * The array is cleared (all elements set to null) before being added to the pool.
      * Arrays larger than {@link #POOLABLE_ARRAY_LENGTH} are not pooled.
-     * 
-     * <p>Example usage:</p></p>
+     *
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Object[] array = Objectory.createObjectArray(10);
      * try {
@@ -1008,8 +1010,8 @@ public final class Objectory {
      * Returns a StringBuilder to the object pool for reuse.
      * The StringBuilder is cleared before being added to the pool.
      * StringBuilders with capacity larger than {@link #BUFFER_SIZE} are not pooled.
-     * 
-     * <p>Example usage:</p></p>
+     *
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * StringBuilder sb = Objectory.createStringBuilder();
      * try {
@@ -1127,8 +1129,8 @@ public final class Objectory {
      * Returns a BufferedWriter to the object pool for reuse.
      * The writer's buffer is flushed and the writer is reset before being added to the pool.
      * This method handles all types of buffered writers (JSON, XML, CSV, and plain).
-     * 
-     * <p>Example usage:</p></p>
+     *
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * BufferedWriter writer = Objectory.createBufferedWriter(outputStream);
      * try {
@@ -1165,8 +1167,8 @@ public final class Objectory {
      * Returns a BufferedReader to the object pool for reuse.
      * The reader is reset before being added to the pool.
      * Only instances of the custom BufferedReader class are pooled.
-     * 
-     * <p>Example usage:</p></p>
+     *
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * BufferedReader reader = Objectory.createBufferedReader(inputStream);
      * try {

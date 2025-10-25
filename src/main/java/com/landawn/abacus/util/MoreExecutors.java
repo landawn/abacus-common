@@ -29,7 +29,7 @@ import java.util.concurrent.TimeUnit;
  * when the JVM exits, preventing threads from keeping the JVM alive unnecessarily. The executors
  * created by this class use daemon threads and register shutdown hooks for graceful termination.</p>
  * 
- * <p>Example usage:</p>
+ * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * ThreadPoolExecutor executor = new ThreadPoolExecutor(...);
  * ExecutorService exitingExecutor = MoreExecutors.getExitingExecutorService(executor);
@@ -62,7 +62,7 @@ public final class MoreExecutors {
      *   <li>Registers a shutdown hook to terminate the executor on JVM exit</li>
      * </ul>
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ThreadPoolExecutor threadPool = new ThreadPoolExecutor(
      *     5, 10, 60L, TimeUnit.SECONDS,
@@ -94,7 +94,7 @@ public final class MoreExecutors {
      * the specified timeout for termination. If the executor doesn't terminate within
      * the timeout, the shutdown hook will exit anyway.</p>
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ThreadPoolExecutor threadPool = new ThreadPoolExecutor(...);
      * ExecutorService exitingService = MoreExecutors.getExitingExecutorService(
@@ -125,7 +125,7 @@ public final class MoreExecutors {
      *   <li>Registers a shutdown hook to terminate the executor on JVM exit</li>
      * </ul>
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ScheduledThreadPoolExecutor scheduler = new ScheduledThreadPoolExecutor(3);
      * ScheduledExecutorService exitingScheduler = 
@@ -155,7 +155,7 @@ public final class MoreExecutors {
      * the specified timeout for termination. If the executor doesn't terminate within
      * the timeout, the shutdown hook will exit anyway.</p>
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ScheduledThreadPoolExecutor scheduler = new ScheduledThreadPoolExecutor(3);
      * ScheduledExecutorService exitingScheduler = 
@@ -188,7 +188,7 @@ public final class MoreExecutors {
      * <p>Note: Logging behavior is undefined in shutdown hooks because the logging system
      * may install its own shutdown hooks.</p>
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ExecutorService service = Executors.newFixedThreadPool(5);
      * MoreExecutors.addDelayedShutdownHook(service, 60, TimeUnit.SECONDS);

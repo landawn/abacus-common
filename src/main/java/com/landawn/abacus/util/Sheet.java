@@ -69,6 +69,7 @@ import com.landawn.abacus.util.stream.Stream;
  * 
  * <p>Notation: {@code R} = Row, {@code C} = Column, {@code H} = Horizontal, {@code V} = Vertical</p>
  *
+ * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * // Create a sheet with integer values
  * Sheet<String, String, Integer> sheet = Sheet.rows(
@@ -116,6 +117,7 @@ public final class Sheet<R, C, V> implements Cloneable {
      * Values can be added later by first adding rows and columns.
      * </p>
      * 
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Sheet<String, String, Integer> sheet = new Sheet<>();
      * sheet.addRow("row1", List.of()); // Add empty row
@@ -134,6 +136,7 @@ public final class Sheet<R, C, V> implements Cloneable {
      * as provided in the collections.
      * </p>
      *
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Sheet<String, String, Integer> sheet = new Sheet<>(
      *     List.of("row1", "row2"),
@@ -165,6 +168,7 @@ public final class Sheet<R, C, V> implements Cloneable {
      * The array can contain {@code null} values which will be stored as null cells in the Sheet.
      * </p>
      *
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Sheet<String, String, Integer> sheet = new Sheet<>(
      *     List.of("row1", "row2"),
@@ -228,6 +232,7 @@ public final class Sheet<R, C, V> implements Cloneable {
      * Useful for initialization or when an empty Sheet is needed without creating a new instance.
      * </p>
      *
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Sheet<String, String, Integer> emptySheet = Sheet.empty();
      * // emptySheet.put("row", "col", 1); // throws IllegalStateException
@@ -250,6 +255,7 @@ public final class Sheet<R, C, V> implements Cloneable {
      * Each inner array in the rows parameter represents a complete row of data.
      * </p>
      *
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Sheet<String, String, Integer> sheet = Sheet.rows(
      *     List.of("row1", "row2"),
@@ -282,6 +288,7 @@ public final class Sheet<R, C, V> implements Cloneable {
      * in each inner collection must correspond to the order of column keys.
      * </p>
      *
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Sheet<String, String, Integer> sheet = Sheet.rows(
      *     List.of("row1", "row2"),
@@ -346,6 +353,7 @@ public final class Sheet<R, C, V> implements Cloneable {
      * your data is naturally organized by columns rather than rows.
      * </p>
      *
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Sheet<String, String, Integer> sheet = Sheet.columns(
      *     List.of("row1", "row2", "row3"),
@@ -401,6 +409,7 @@ public final class Sheet<R, C, V> implements Cloneable {
      * in each inner collection must correspond to the order of row keys.
      * </p>
      *
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Sheet<String, String, Integer> sheet = Sheet.columns(
      *     List.of("row1", "row2", "row3"),
@@ -457,6 +466,7 @@ public final class Sheet<R, C, V> implements Cloneable {
      * This is useful for iterating over rows or checking row existence.
      * </p>
      *
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Sheet<String, String, Integer> sheet = Sheet.rows(
      *     List.of("row1", "row2"),
@@ -487,6 +497,7 @@ public final class Sheet<R, C, V> implements Cloneable {
      * This is useful for iterating over columns or checking column existence.
      * </p>
      *
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Sheet<String, String, Integer> sheet = Sheet.rows(
      *     List.of("row1", "row2"),
@@ -516,6 +527,7 @@ public final class Sheet<R, C, V> implements Cloneable {
      * with data yet. Returns {@code false} if the cell contains a non-null value.
      * </p>
      *
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Sheet<String, String, Integer> sheet = Sheet.rows(
      *     List.of("row1", "row2"),
@@ -552,6 +564,7 @@ public final class Sheet<R, C, V> implements Cloneable {
      * This method provides index-based access for checking null values. Indices are zero-based.
      * </p>
      *
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Sheet<String, String, Integer> sheet = Sheet.rows(
      *     List.of("row1", "row2"),
@@ -582,8 +595,10 @@ public final class Sheet<R, C, V> implements Cloneable {
      * Checks whether the cell at the specified point contains a {@code null} value.
      * <p>
      * The Point object encapsulates both row and column indices for convenient access.
+     * This is a convenience method equivalent to calling {@code isNull(point.rowIndex, point.columnIndex)}.
      * </p>
      *
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Point point = Point.of(0, 1);
      * boolean isNull = sheet.isNull(point); // checks cell at row 0, column 1
@@ -594,6 +609,7 @@ public final class Sheet<R, C, V> implements Cloneable {
      * @throws IndexOutOfBoundsException if the point's indices are out of bounds
      * @see #isNull(int, int)
      */
+    @Beta
     public boolean isNull(final Point point) throws IndexOutOfBoundsException {
         return isNull(point.rowIndex, point.columnIndex);
     }
@@ -605,6 +621,7 @@ public final class Sheet<R, C, V> implements Cloneable {
      * This method provides key-based access to cell values.
      * </p>
      *
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Sheet<String, String, Integer> sheet = Sheet.rows(
      *     List.of("row1", "row2"),
@@ -643,6 +660,7 @@ public final class Sheet<R, C, V> implements Cloneable {
      * Returns {@code null} if the cell has not been initialized or contains {@code null}.
      * </p>
      *
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Sheet<String, String, Integer> sheet = Sheet.rows(
      *     List.of("row1", "row2"),
@@ -677,6 +695,7 @@ public final class Sheet<R, C, V> implements Cloneable {
      * This is a convenience method equivalent to calling {@code get(point.rowIndex, point.columnIndex)}.
      * </p>
      *
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Point point = Point.of(0, 1);
      * Integer value = sheet.get(point); // gets value at row 0, column 1
@@ -699,6 +718,7 @@ public final class Sheet<R, C, V> implements Cloneable {
      * The Sheet must not be frozen for this operation to succeed.
      * </p>
      *
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Sheet<String, String, Integer> sheet = Sheet.rows(
      *     List.of("row1", "row2"),
@@ -717,6 +737,7 @@ public final class Sheet<R, C, V> implements Cloneable {
      * @see #put(int, int, Object)
      * @see #get(Object, Object)
      */
+    @MayReturnNull
     public V put(final R rowKey, final C columnKey, final V value) throws IllegalStateException, IllegalArgumentException {
         checkFrozen();
         final int rowIndex = getRowIndex(rowKey);
@@ -734,6 +755,7 @@ public final class Sheet<R, C, V> implements Cloneable {
      * The Sheet must not be frozen for this operation to succeed.
      * </p>
      *
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Sheet<String, String, Integer> sheet = Sheet.rows(
      *     List.of("row1", "row2"),
@@ -744,12 +766,14 @@ public final class Sheet<R, C, V> implements Cloneable {
      * }</pre>
      *
      * @param rowIndex the zero-based index of the row
-     * @param columnIndex the index of the column
+     * @param columnIndex the zero-based index of the column
      * @param value the new value to be stored in the cell
-     * @return the previous value stored in the cell
+     * @return the previous value in the cell, or {@code null} if the cell was empty
      * @throws IllegalStateException if the Sheet is frozen
      * @throws IndexOutOfBoundsException if the specified indices are out of bounds
+     * @see #put(Object, Object, Object)
      */
+    @MayReturnNull
     public V put(final int rowIndex, final int columnIndex, final V value) throws IllegalStateException, IndexOutOfBoundsException {
         checkFrozen();
         checkRowIndex(rowIndex);
@@ -764,18 +788,33 @@ public final class Sheet<R, C, V> implements Cloneable {
     }
 
     /**
-     * Inserts or updates a value in the cell identified by the specified Point.
-     * The Point represents the row index and column index of the cell.
-     * If the cell already contains a value, the existing value is replaced with the new value.
-     * If the cell does not exist, a new cell is created at the specified point with the provided value.
+     * Sets or updates the value in the cell at the specified point.
+     * <p>
+     * The Point object encapsulates both row and column indices for convenient access.
+     * This is a convenience method equivalent to calling {@code put(point.rowIndex, point.columnIndex, value)}.
+     * The Sheet must not be frozen for this operation to succeed.
+     * </p>
      *
-     * @param point the Point of the cell
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Sheet<String, String, Integer> sheet = Sheet.rows(
+     *     List.of("row1", "row2"),
+     *     List.of("col1", "col2"),
+     *     new Integer[][] {{1, 2}, {3, 4}}
+     * );
+     * Point point = Point.of(0, 1);
+     * Integer oldValue = sheet.put(point, 10); // returns 2, sets cell at row 0, column 1 to 10
+     * }</pre>
+     *
+     * @param point the Point containing row and column indices
      * @param value the new value to be stored in the cell
-     * @return the previous value stored in the cell
+     * @return the previous value in the cell, or {@code null} if the cell was empty
      * @throws IllegalStateException if the Sheet is frozen
-     * @throws IndexOutOfBoundsException if the specified indices are out of bounds
+     * @throws IndexOutOfBoundsException if the point's indices are out of bounds
+     * @see #put(int, int, Object)
      */
     @Beta
+    @MayReturnNull
     public V put(final Point point, final V value) throws IllegalStateException, IndexOutOfBoundsException {
         return put(point.rowIndex, point.columnIndex, value);
     }
@@ -787,8 +826,8 @@ public final class Sheet<R, C, V> implements Cloneable {
      * and column keys that are contained within this Sheet. Values from the source Sheet will replace any
      * existing values in the corresponding cells of this Sheet.</p>
      *
-     * <p>Example usage:</p>
-     * <pre>
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
      * // Create two sheets
      * Sheet&lt;String, String, Integer&gt; targetSheet = Sheet.rows(
      *     List.of("row1", "row2"),
@@ -813,7 +852,7 @@ public final class Sheet<R, C, V> implements Cloneable {
      * // Now targetSheet contains:
      * // [10, 2, 30]
      * // [1, 2, 3]
-     * </pre>
+     * }</pre>
      *
      * @param source the source Sheet from which to get the values
      * @throws IllegalStateException if this Sheet is frozen and cannot be modified
@@ -855,8 +894,8 @@ public final class Sheet<R, C, V> implements Cloneable {
      * the provided merge function determines how to combine them, taking the current value and source value as parameters.
      * The source Sheet must have row keys and column keys that are contained within this Sheet.</p>
      *
-     * <p>Example usage:</p>
-     * <pre>
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
      * // Create two sheets with overlapping data
      * Sheet&lt;String, String, Integer&gt; targetSheet = Sheet.rows(
      *     List.of("row1", "row2"),
@@ -882,7 +921,7 @@ public final class Sheet<R, C, V> implements Cloneable {
      * // Now targetSheet contains:
      * // col1: [6, 10]
      * // col2: [8, 12]
-     * </pre>
+     * }</pre>
      *
      * @param source the source Sheet from which to get the values
      * @param mergeFunction the function to resolve conflicts when both sheets have a value for the same cell;
@@ -927,6 +966,7 @@ public final class Sheet<R, C, V> implements Cloneable {
      * requires the Sheet to be mutable (not frozen) and the cell position to exist.
      * </p>
      *
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Sheet<String, String, Integer> sheet = Sheet.rows(
      *     List.of("row1", "row2"),
@@ -970,6 +1010,7 @@ public final class Sheet<R, C, V> implements Cloneable {
      * indexing. This operation requires the Sheet to be mutable (not frozen).
      * </p>
      *
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Sheet<String, String, Integer> sheet = Sheet.rows(
      *     List.of("row1", "row2"),
@@ -1009,6 +1050,7 @@ public final class Sheet<R, C, V> implements Cloneable {
      * encapsulates both row and column indices for convenient access.
      * </p>
      *
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Sheet<String, String, Integer> sheet = Sheet.rows(
      *     List.of("row1", "row2"),
@@ -1028,6 +1070,7 @@ public final class Sheet<R, C, V> implements Cloneable {
      * @see #put(Point, Object)
      */
     @Beta
+    @MayReturnNull
     public V remove(final Point point) throws IllegalStateException, IndexOutOfBoundsException {
         return remove(point.rowIndex, point.columnIndex);
     }
@@ -1039,6 +1082,7 @@ public final class Sheet<R, C, V> implements Cloneable {
      * It returns {@code true} if both keys are present, regardless of the cell's value (including null).
      * </p>
      *
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Sheet<String, String, Integer> sheet = new Sheet<>(
      *     List.of("row1", "row2"),
@@ -1068,6 +1112,7 @@ public final class Sheet<R, C, V> implements Cloneable {
      * correctly handles {@code null} values.
      * </p>
      *
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Sheet<String, String, Integer> sheet = Sheet.rows(
      *     List.of("row1", "row2"),
@@ -1100,6 +1145,7 @@ public final class Sheet<R, C, V> implements Cloneable {
      * For uninitialized Sheets, only returns {@code true} if searching for {@code null}.
      * </p>
      *
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Sheet<String, String, Integer> sheet = Sheet.rows(
      *     List.of("row1", "row2"),
@@ -1141,6 +1187,7 @@ public final class Sheet<R, C, V> implements Cloneable {
      * in the row are empty.
      * </p>
      *
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Sheet<String, String, Integer> sheet = Sheet.rows(
      *     List.of("row1", "row2"),
@@ -1187,6 +1234,7 @@ public final class Sheet<R, C, V> implements Cloneable {
      * in the row will be set to {@code null}.
      * </p>
      *
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Sheet<String, String, Integer> sheet = Sheet.rows(
      *     List.of("row1", "row2"),
@@ -1242,6 +1290,7 @@ public final class Sheet<R, C, V> implements Cloneable {
      * the new row will contain all {@code null} values.
      * </p>
      *
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Sheet<String, String, Integer> sheet = Sheet.rows(
      *     List.of("row1"),
@@ -1303,6 +1352,7 @@ public final class Sheet<R, C, V> implements Cloneable {
      * and rowLength() (append at end).
      * </p>
      *
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Sheet<String, String, Integer> sheet = Sheet.rows(
      *     List.of("row1", "row3"),
@@ -1382,6 +1432,7 @@ public final class Sheet<R, C, V> implements Cloneable {
      * with the result. The function is called once for each cell in the row, including {@code null} values.
      * </p>
      *
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Sheet<String, String, Integer> sheet = Sheet.rows(
      *     List.of("row1", "row2"),
@@ -1425,6 +1476,7 @@ public final class Sheet<R, C, V> implements Cloneable {
      * the Sheet and cannot be reused unless re-added. All values in the removed row are lost.
      * </p>
      *
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Sheet<String, String, Integer> sheet = Sheet.rows(
      *     List.of("row1", "row2", "row3"),
@@ -1476,6 +1528,7 @@ public final class Sheet<R, C, V> implements Cloneable {
      * shifted accordingly. The row key remains associated with the same row data.
      * </p>
      *
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Sheet<String, String, Integer> sheet = Sheet.rows(
      *     List.of("row1", "row2", "row3"),
@@ -1524,6 +1577,7 @@ public final class Sheet<R, C, V> implements Cloneable {
      * This is more efficient than using multiple move operations for a simple swap.
      * </p>
      *
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Sheet<String, String, Integer> sheet = Sheet.rows(
      *     List.of("row1", "row2", "row3"),
@@ -1580,6 +1634,7 @@ public final class Sheet<R, C, V> implements Cloneable {
      * The new key must not already exist in the Sheet.
      * </p>
      *
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Sheet<String, String, Integer> sheet = Sheet.rows(
      *     List.of("row1", "row2"),
@@ -1627,6 +1682,7 @@ public final class Sheet<R, C, V> implements Cloneable {
      * before performing row operations to avoid exceptions.
      * </p>
      *
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Sheet<String, String, Integer> sheet = Sheet.rows(
      *     List.of("row1", "row2"),
@@ -1654,6 +1710,7 @@ public final class Sheet<R, C, V> implements Cloneable {
      * The map maintains the column order as defined in the Sheet. Values may be {@code null}.
      * </p>
      *
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Sheet<String, String, Integer> sheet = Sheet.rows(
      *     List.of("row1", "row2"),
@@ -1704,6 +1761,7 @@ public final class Sheet<R, C, V> implements Cloneable {
      * This provides a complete view of the Sheet's data organized by rows.
      * </p>
      *
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Sheet<String, String, Integer> sheet = Sheet.rows(
      *     List.of("row1", "row2"),
@@ -1741,6 +1799,7 @@ public final class Sheet<R, C, V> implements Cloneable {
      * in the column are empty.
      * </p>
      *
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Sheet<String, String, Integer> sheet = Sheet.rows(
      *     List.of("row1", "row2", "row3"),
@@ -1780,6 +1839,7 @@ public final class Sheet<R, C, V> implements Cloneable {
      * in the column will be set to {@code null}.
      * </p>
      *
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Sheet<String, String, Integer> sheet = Sheet.rows(
      *     List.of("row1", "row2", "row3"),
@@ -1830,6 +1890,7 @@ public final class Sheet<R, C, V> implements Cloneable {
      * the new column will contain all {@code null} values.
      * </p>
      *
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Sheet<String, String, Integer> sheet = Sheet.rows(
      *     List.of("row1", "row2", "row3"),
@@ -1887,6 +1948,7 @@ public final class Sheet<R, C, V> implements Cloneable {
      * and columnLength() (append at end).
      * </p>
      *
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Sheet<String, String, Integer> sheet = Sheet.rows(
      *     List.of("row1", "row2", "row3"),
@@ -1961,6 +2023,7 @@ public final class Sheet<R, C, V> implements Cloneable {
      * with the result. The function is called once for each cell in the column, including {@code null} values.
      * </p>
      *
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Sheet<String, String, Integer> sheet = Sheet.rows(
      *     List.of("row1", "row2", "row3"),
@@ -2007,6 +2070,7 @@ public final class Sheet<R, C, V> implements Cloneable {
      * the Sheet and cannot be reused unless re-added. All values in the removed column are lost.
      * </p>
      *
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Sheet<String, String, Integer> sheet = Sheet.rows(
      *     List.of("row1", "row2"),
@@ -2057,6 +2121,7 @@ public final class Sheet<R, C, V> implements Cloneable {
      * shifted accordingly. The column key remains associated with the same column data.
      * </p>
      *
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Sheet<String, String, Integer> sheet = Sheet.rows(
      *     List.of("row1", "row2"),
@@ -2103,8 +2168,8 @@ public final class Sheet<R, C, V> implements Cloneable {
      * all the data in those columns. The column keys remain attached to their respective column data,
      * but their positions in the sheet's column ordering are exchanged.</p>
      *
-     * <p>Example usage:</p>
-     * <pre>
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
      * // Create a sheet with three columns
      * Sheet&lt;String, String, Integer&gt; sheet = Sheet.rows(
      *     List.of("row1", "row2", "row3"),
@@ -2124,7 +2189,7 @@ public final class Sheet<R, C, V> implements Cloneable {
      * // row1: [3, 2, 1]
      * // row2: [6, 5, 4]
      * // row3: [9, 8, 7]
-     * </pre>
+     * }</pre>
      *
      * @param columnKeyA the key of the first column to be swapped
      * @param columnKeyB the key of the second column to be swapped
@@ -2166,6 +2231,7 @@ public final class Sheet<R, C, V> implements Cloneable {
      * The new key must not already exist in the Sheet.
      * </p>
      *
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Sheet<String, String, Integer> sheet = Sheet.rows(
      *     List.of("row1", "row2"),
@@ -2214,6 +2280,7 @@ public final class Sheet<R, C, V> implements Cloneable {
      * before performing column operations to avoid exceptions.
      * </p>
      *
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Sheet<String, String, Integer> sheet = Sheet.rows(
      *     List.of("row1", "row2"),
@@ -2241,6 +2308,7 @@ public final class Sheet<R, C, V> implements Cloneable {
      * The map maintains the row order as defined in the Sheet. Values may be {@code null}.
      * </p>
      *
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Sheet<String, String, Integer> sheet = Sheet.rows(
      *     List.of("row1", "row2", "row3"),
@@ -2292,6 +2360,7 @@ public final class Sheet<R, C, V> implements Cloneable {
      * This provides a complete view of the Sheet's data organized by columns.
      * </p>
      *
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Sheet<String, String, Integer> sheet = Sheet.rows(
      *     List.of("row1", "row2"),
@@ -2328,6 +2397,7 @@ public final class Sheet<R, C, V> implements Cloneable {
      * regardless of whether the cells contain values or are null.
      * </p>
      *
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Sheet<String, String, Integer> sheet = Sheet.rows(
      *     List.of("row1", "row2", "row3"),
@@ -2352,6 +2422,7 @@ public final class Sheet<R, C, V> implements Cloneable {
      * regardless of whether the cells contain values or are null.
      * </p>
      *
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Sheet<String, String, Integer> sheet = Sheet.rows(
      *     List.of("row1", "row2"),
@@ -2379,6 +2450,7 @@ public final class Sheet<R, C, V> implements Cloneable {
      * containing {@code null} values.
      * </p>
      *
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Sheet<String, String, Integer> sheet = Sheet.rows(
      *     List.of("row1", "row2"),
@@ -2420,6 +2492,7 @@ public final class Sheet<R, C, V> implements Cloneable {
      * indices as input. This is useful when the new value depends on the cell's position.
      * </p>
      *
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Sheet<String, String, Integer> sheet = Sheet.rows(
      *     List.of("row1", "row2"),
@@ -2464,6 +2537,7 @@ public final class Sheet<R, C, V> implements Cloneable {
      * value updates based on both position and current value.
      * </p>
      *
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Sheet<String, String, String> sheet = Sheet.rows(
      *     List.of("row1", "row2"),
@@ -2512,6 +2586,7 @@ public final class Sheet<R, C, V> implements Cloneable {
      * the predicate returns {@code true}. This is useful for bulk replacements based on conditions.
      * </p>
      *
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Sheet<String, String, Integer> sheet = Sheet.rows(
      *     List.of("row1", "row2"),
@@ -2559,6 +2634,7 @@ public final class Sheet<R, C, V> implements Cloneable {
      * the predicate returns {@code true}. Useful for position-based replacements.
      * </p>
      *
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Sheet<String, String, Integer> sheet = Sheet.rows(
      *     List.of("row1", "row2", "row3"),
@@ -2608,6 +2684,7 @@ public final class Sheet<R, C, V> implements Cloneable {
      * the predicate returns {@code true}. This provides maximum flexibility for conditional replacements.
      * </p>
      *
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Sheet<String, String, Integer> sheet = Sheet.rows(
      *     List.of("row1", "row2"),
@@ -2662,6 +2739,7 @@ public final class Sheet<R, C, V> implements Cloneable {
      * the {@code Comparable} interface. All row data moves with their respective keys.
      * </p>
      *
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Sheet<String, String, Integer> sheet = Sheet.rows(
      *     List.of("charlie", "alice", "bob"),
@@ -2690,6 +2768,7 @@ public final class Sheet<R, C, V> implements Cloneable {
      * All row data moves with their respective keys to maintain data integrity.
      * </p>
      *
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Sheet<String, String, Integer> sheet = Sheet.rows(
      *     List.of("long_name", "a", "medium"),
@@ -2779,6 +2858,7 @@ public final class Sheet<R, C, V> implements Cloneable {
      * This effectively sorts the "vertical" arrangement of data based on a "horizontal" slice.
      * </p>
      *
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Sheet<String, String, Integer> sheet = Sheet.rows(
      *     List.of("row1", "row2"),
@@ -2874,6 +2954,7 @@ public final class Sheet<R, C, V> implements Cloneable {
      * Each column is represented as an array of values from the specified rows for comparison.
      * </p>
      *
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Sheet<String, String, Integer> sheet = Sheet.rows(
      *     List.of("priority", "secondary", "data"),
@@ -3142,6 +3223,7 @@ public final class Sheet<R, C, V> implements Cloneable {
      * Each row is represented as an array of values from the specified columns for comparison.
      * </p>
      *
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Sheet<String, String, Integer> sheet = Sheet.rows(
      *     List.of("row1", "row2", "row3"),
@@ -3388,6 +3470,7 @@ public final class Sheet<R, C, V> implements Cloneable {
      * Missing values are represented as {@code null} in the merge function.
      * </p>
      *
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Sheet<String, String, Integer> sheet1 = Sheet.rows(
      *     List.of("row1", "row2"),
@@ -3487,6 +3570,7 @@ public final class Sheet<R, C, V> implements Cloneable {
      * Row keys become column keys and vice versa. The data is reorganized accordingly.
      * </p>
      *
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Sheet<String, String, Integer> original = Sheet.rows(
      *     List.of("row1", "row2"),
@@ -3549,6 +3633,7 @@ public final class Sheet<R, C, V> implements Cloneable {
      * The frozen state cannot be reversed.
      * </p>
      *
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Sheet<String, String, Integer> sheet = Sheet.rows(
      *     List.of("row1"),
@@ -3574,6 +3659,7 @@ public final class Sheet<R, C, V> implements Cloneable {
      * for any modification attempts.
      * </p>
      *
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Sheet<String, String, Integer> sheet = Sheet.empty();
      * boolean frozen1 = sheet.isFrozen(); // true (empty sheet is frozen)
@@ -3596,6 +3682,7 @@ public final class Sheet<R, C, V> implements Cloneable {
      * The Sheet dimensions remain unchanged.
      * </p>
      *
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Sheet<String, String, Integer> sheet = Sheet.rows(
      *     List.of("row1", "row2"),
@@ -3629,6 +3716,7 @@ public final class Sheet<R, C, V> implements Cloneable {
      * potentially freeing unused memory. This is useful after removing many rows.
      * </p>
      *
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Sheet<String, String, Integer> sheet = new Sheet<>(rowKeys, colKeys);
      * // ... add and remove many rows ...
@@ -3654,6 +3742,7 @@ public final class Sheet<R, C, V> implements Cloneable {
      * Empty or uninitialized cells are counted as null.
      * </p>
      *
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Sheet<String, String, Integer> sheet = Sheet.rows(
      *     List.of("row1", "row2"),
@@ -3692,6 +3781,7 @@ public final class Sheet<R, C, V> implements Cloneable {
      * An empty Sheet cannot contain any data.
      * </p>
      *
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Sheet<String, String, Integer> empty1 = new Sheet<>(List.of(), List.of("col1"));
      * boolean isEmpty1 = empty1.isEmpty(); // true (no rows)
@@ -3718,6 +3808,7 @@ public final class Sheet<R, C, V> implements Cloneable {
      * The action receives the row key, column key, and value for each cell.
      * </p>
      *
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Sheet<String, String, Integer> sheet = Sheet.rows(
      *     List.of("row1", "row2"),
@@ -3758,6 +3849,7 @@ public final class Sheet<R, C, V> implements Cloneable {
      * The action receives the row key, column key, and value for each cell.
      * </p>
      *
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Sheet<String, String, Integer> sheet = Sheet.rows(
      *     List.of("row1", "row2"),
@@ -3798,6 +3890,7 @@ public final class Sheet<R, C, V> implements Cloneable {
      * Skips null and uninitialized cells. The action is guaranteed to receive non-null values.
      * </p>
      *
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Sheet<String, String, Integer> sheet = Sheet.rows(
      *     List.of("row1", "row2"),
@@ -3838,6 +3931,7 @@ public final class Sheet<R, C, V> implements Cloneable {
      * Skips null and uninitialized cells. The action is guaranteed to receive non-null values.
      * </p>
      *
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Sheet<String, String, Integer> sheet = Sheet.rows(
      *     List.of("row1", "row2"),
@@ -3878,6 +3972,7 @@ public final class Sheet<R, C, V> implements Cloneable {
      * as a Cell object containing the row key, column key, and value.
      * </p>
      *
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Sheet<String, String, Integer> sheet = Sheet.rows(
      *     List.of("row1", "row2"),
@@ -3904,6 +3999,7 @@ public final class Sheet<R, C, V> implements Cloneable {
      * ordered row by row. The toRowIndex is exclusive.
      * </p>
      *
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Sheet<String, String, Integer> sheet = Sheet.rows(
      *     List.of("row1", "row2", "row3"),
@@ -3981,6 +4077,7 @@ public final class Sheet<R, C, V> implements Cloneable {
      * as a Cell object containing the row key, column key, and value.
      * </p>
      *
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Sheet<String, String, Integer> sheet = Sheet.rows(
      *     List.of("row1", "row2"),
@@ -4008,6 +4105,7 @@ public final class Sheet<R, C, V> implements Cloneable {
      * ordered column by column. The toColumnIndex is exclusive.
      * </p>
      *
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Sheet<String, String, Integer> sheet = Sheet.rows(
      *     List.of("row1", "row2"),
@@ -4085,6 +4183,7 @@ public final class Sheet<R, C, V> implements Cloneable {
      * contains the cells of that row ordered by columns.
      * </p>
      *
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Sheet<String, String, Integer> sheet = Sheet.rows(
      *     List.of("row1", "row2"),
@@ -4114,6 +4213,7 @@ public final class Sheet<R, C, V> implements Cloneable {
      * Each inner stream contains the cells of one row ordered by columns.
      * </p>
      *
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Sheet<String, String, Integer> sheet = Sheet.rows(
      *     List.of("row1", "row2", "row3"),
@@ -4220,6 +4320,7 @@ public final class Sheet<R, C, V> implements Cloneable {
      * contains the cells of that column ordered by rows.
      * </p>
      *
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Sheet<String, String, Integer> sheet = Sheet.rows(
      *     List.of("row1", "row2"),
@@ -4249,6 +4350,7 @@ public final class Sheet<R, C, V> implements Cloneable {
      * Each inner stream contains the cells of one column ordered by rows.
      * </p>
      *
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Sheet<String, String, Integer> sheet = Sheet.rows(
      *     List.of("row1", "row2"),
@@ -4333,6 +4435,7 @@ public final class Sheet<R, C, V> implements Cloneable {
      * zero-based row and column indices. Points are ordered row by row.
      * </p>
      *
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Sheet<String, String, Integer> sheet = new Sheet<>(
      *     List.of("row1", "row2"),
@@ -4478,6 +4581,7 @@ public final class Sheet<R, C, V> implements Cloneable {
      * from empty or uninitialized cells.
      * </p>
      *
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Sheet<String, String, Integer> sheet = Sheet.rows(
      *     List.of("row1", "row2"),
@@ -4573,6 +4677,7 @@ public final class Sheet<R, C, V> implements Cloneable {
      * ordered column by column. The toColumnIndex is exclusive. Includes null values from empty cells.
      * </p>
      *
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Sheet<String, String, Integer> sheet = Sheet.rows(
      *     List.of("row1", "row2"),
@@ -4648,6 +4753,7 @@ public final class Sheet<R, C, V> implements Cloneable {
      * contains the values of that row ordered by columns. Includes null values.
      * </p>
      *
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Sheet<String, String, Integer> sheet = Sheet.rows(
      *     List.of("row1", "row2"),
@@ -4677,6 +4783,7 @@ public final class Sheet<R, C, V> implements Cloneable {
      * Each inner stream contains the values of one row ordered by columns. Includes null values.
      * </p>
      *
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Sheet<String, String, Integer> sheet = Sheet.rows(
      *     List.of("row1", "row2", "row3"),
@@ -4786,6 +4893,7 @@ public final class Sheet<R, C, V> implements Cloneable {
      * contains the values of that column ordered by rows. Useful for column-wise processing.
      * </p>
      *
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Sheet<String, String, Integer> sheet = Sheet.rows(
      *     List.of("row1", "row2"),
@@ -4815,6 +4923,7 @@ public final class Sheet<R, C, V> implements Cloneable {
      * Each inner stream contains the values of one column ordered by rows.
      * </p>
      *
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Sheet<String, String, Integer> sheet = Sheet.rows(
      *     List.of("row1", "row2"),
@@ -4892,6 +5001,7 @@ public final class Sheet<R, C, V> implements Cloneable {
      * This provides a convenient way to process rows with their identifiers.
      * </p>
      *
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Sheet<String, String, Integer> sheet = Sheet.rows(
      *     List.of("row1", "row2"),
@@ -5016,6 +5126,7 @@ public final class Sheet<R, C, V> implements Cloneable {
      * The pairs are ordered by rows.
      * </p>
      *
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Sheet<String, String, Integer> sheet = Sheet.rows(
      *     List.of("row1", "row2"),
@@ -5047,6 +5158,7 @@ public final class Sheet<R, C, V> implements Cloneable {
      * The pairs are ordered by rows.
      * </p>
      *
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Sheet<String, String, Integer> sheet = Sheet.rows(
      *     List.of("row1", "row2", "row3"),
@@ -5131,6 +5243,7 @@ public final class Sheet<R, C, V> implements Cloneable {
      * This provides a convenient way to process columns with their identifiers.
      * </p>
      *
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Sheet<String, String, Integer> sheet = Sheet.rows(
      *     List.of("row1", "row2"),
@@ -5161,6 +5274,7 @@ public final class Sheet<R, C, V> implements Cloneable {
      * Only columns in the specified range [fromColumnIndex, toColumnIndex) are included.
      * </p>
      *
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Sheet<String, String, Integer> sheet = Sheet.rows(
      *     List.of("row1", "row2"),
@@ -5241,6 +5355,7 @@ public final class Sheet<R, C, V> implements Cloneable {
      * The pairs are ordered by columns.
      * </p>
      *
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Sheet<String, String, Integer> sheet = Sheet.rows(
      *     List.of("row1", "row2"),
@@ -5272,6 +5387,7 @@ public final class Sheet<R, C, V> implements Cloneable {
      * The pairs are ordered by columns.
      * </p>
      *
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Sheet<String, String, Integer> sheet = Sheet.rows(
      *     List.of("row1", "row2", "row3"),
@@ -5427,6 +5543,7 @@ public final class Sheet<R, C, V> implements Cloneable {
      * row {@code i} and column {@code j} in the Sheet. The array dimensions match the Sheet dimensions.
      * </p>
      *
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Sheet<String, String, Integer> sheet = Sheet.rows(
      *     List.of("row1", "row2"),
@@ -5468,6 +5585,7 @@ public final class Sheet<R, C, V> implements Cloneable {
      * row {@code i} and column {@code j} in the Sheet. Values are cast to the specified type.
      * </p>
      *
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Sheet<String, String, Integer> sheet = Sheet.rows(
      *     List.of("row1", "row2"),
@@ -5516,6 +5634,7 @@ public final class Sheet<R, C, V> implements Cloneable {
      * column {@code i} and row {@code j} in the Sheet. This transposes the data compared to {@link #toArrayH()}.
      * </p>
      *
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Sheet<String, String, Integer> sheet = Sheet.rows(
      *     List.of("row1", "row2"),
@@ -5554,6 +5673,7 @@ public final class Sheet<R, C, V> implements Cloneable {
      * This transposes the data compared to {@link #toArrayH(Class)}.
      * </p>
      *
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Sheet<String, String, Integer> sheet = Sheet.rows(
      *     List.of("row1", "row2"),
@@ -5599,6 +5719,7 @@ public final class Sheet<R, C, V> implements Cloneable {
      * Useful for custom processing, aggregations, or transformations.
      * </p>
      *
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Sheet<String, String, Integer> sheet = Sheet.rows(
      *     List.of("row1", "row2"),
@@ -5629,6 +5750,7 @@ public final class Sheet<R, C, V> implements Cloneable {
      * when the Sheet contains data. Returns an empty Optional if the Sheet is empty.
      * </p>
      *
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Sheet<String, String, Integer> sheet = Sheet.rows(
      *     List.of("row1"),
@@ -5668,6 +5790,7 @@ public final class Sheet<R, C, V> implements Cloneable {
      * validation, or other operations that don't produce a return value.
      * </p>
      *
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Sheet<String, String, Integer> sheet = Sheet.rows(
      *     List.of("row1", "row2"),
@@ -5699,6 +5822,7 @@ public final class Sheet<R, C, V> implements Cloneable {
      * Returns {@link OrElse#TRUE} if the action was executed, {@link OrElse#FALSE} if the Sheet was empty.
      * </p>
      *
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Sheet<String, String, Integer> sheet = Sheet.rows(
      *     List.of("row1"),
@@ -5742,6 +5866,7 @@ public final class Sheet<R, C, V> implements Cloneable {
      * The table includes borders and proper alignment for readability.
      * </p>
      *
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Sheet<String, String, Integer> sheet = Sheet.rows(
      *     List.of("R1", "R2"),
@@ -5774,6 +5899,7 @@ public final class Sheet<R, C, V> implements Cloneable {
      * Useful for logging or when integrating Sheet output into larger formatted output.
      * </p>
      *
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Sheet<String, String, Integer> sheet = Sheet.rows(
      *     List.of("R1", "R2"),
@@ -5807,6 +5933,7 @@ public final class Sheet<R, C, V> implements Cloneable {
      * This allows for focused printing of relevant data portions.
      * </p>
      *
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Sheet<String, String, Integer> sheet = Sheet.rows(
      *     List.of("R1", "R2", "R3"),
@@ -5837,6 +5964,7 @@ public final class Sheet<R, C, V> implements Cloneable {
      * Useful for capturing Sheet output to files, strings, or other destinations.
      * </p>
      *
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Sheet<String, String, Integer> sheet = Sheet.rows(
      *     List.of("R1", "R2"),
@@ -6112,6 +6240,7 @@ public final class Sheet<R, C, V> implements Cloneable {
      * for values and considers the order of keys.
      * </p>
      *
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Sheet<String, String, Integer> sheet1 = Sheet.rows(
      *     List.of("row1"),
@@ -6155,6 +6284,7 @@ public final class Sheet<R, C, V> implements Cloneable {
      * This is primarily useful for debugging and logging purposes.
      * </p>
      *
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Sheet<String, String, Integer> sheet = Sheet.rows(
      *     List.of("row1", "row2"),

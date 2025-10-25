@@ -26,11 +26,38 @@ package com.landawn.abacus.util.function;
 public interface IntMapMultiConsumer extends java.util.stream.IntStream.IntMapMultiConsumer { //NOSONAR
 
     /**
-     * Performs this operation on the given argument, providing zero or more result values to the
-     * given {@code IntConsumer}.
+     * Performs a one-to-many transformation on the given int value.
      *
-     * @param value the input value
-     * @param ic the {@code IntConsumer} to which the mapped values should be passed
+     * <p>This method accepts an int value and a consumer, allowing the implementation
+     * to push zero or more int values to the consumer. This is particularly useful
+     * for operations that may produce multiple outputs from a single input, or may
+     * filter out certain inputs by not calling the consumer at all.
+     *
+     * <p>Common use cases include:
+     * <ul>
+     *   <li>Expanding a single value into multiple values (e.g., generating a range)</li>
+     *   <li>Conditional mapping where some values produce no output</li>
+     *   <li>Flattening nested structures without creating intermediate streams</li>
+     *   <li>Implementing custom filtering and transformation logic in one step</li>
+     * </ul>
+     *
+     * <p>Example usage in a stream:
+     * <pre>{@code
+     * IntStream.of(1, 2, 3)
+     *     .mapMulti((value, consumer) -> {
+     *         // Generate values from 0 to value-1
+     *         for (int i = 0; i < value; i++) {
+     *             consumer.accept(i);
+     *         }
+     *     })
+     *     .forEach(System.out::println);
+     * // Output: 0, 0, 1, 0, 1, 2
+     * }</pre>
+     *
+     * @param value the input int value to be transformed
+     * @param ic the consumer that accepts the transformed values. The implementation
+     *           should call {@code ic.accept(int)} for each output value. May be
+     *           called zero or more times
      */
     @Override
     void accept(int value, java.util.function.IntConsumer ic);

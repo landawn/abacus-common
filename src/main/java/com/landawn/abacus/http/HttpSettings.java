@@ -30,7 +30,7 @@ import com.landawn.abacus.util.Strings;
  * <p>HttpSettings can be used with both HttpClient and HttpRequest to customize request behavior.
  * Settings can be applied globally to an HttpClient instance or per-request.</p>
  * 
- * <p>Example usage:</p>
+ * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * HttpSettings settings = HttpSettings.create()
  *     .setConnectionTimeout(5000)
@@ -84,7 +84,7 @@ public final class HttpSettings {
      * Creates a new HttpSettings instance with default values.
      * This is a convenience factory method equivalent to calling the constructor.
      *
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * HttpSettings settings = HttpSettings.create()
      *     .setConnectionTimeout(5000)
@@ -114,7 +114,7 @@ public final class HttpSettings {
      * 
      * Note: Only for {@code HttpClient}, not for {@code OKHttpClient}.
      *
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * settings.setConnectionTimeout(5000); // 5 seconds
      * }</pre>
@@ -145,7 +145,7 @@ public final class HttpSettings {
      * 
      * Note: Only for {@code HttpClient}, not for {@code OKHttpClient}.
      *
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * settings.setReadTimeout(10000); // 10 seconds
      * }</pre>
@@ -172,7 +172,7 @@ public final class HttpSettings {
      * Sets the SSL socket factory for HTTPS connections.
      * This allows customization of SSL/TLS behavior, such as certificate validation.
      *
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * SSLContext sslContext = SSLContext.getInstance("TLS");
      * // Configure SSL context...
@@ -201,7 +201,7 @@ public final class HttpSettings {
      * Sets the proxy for HTTP connections.
      * This allows requests to be routed through a proxy server.
      *
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Proxy proxy = new Proxy(Proxy.Type.HTTP, 
      *     new InetSocketAddress("proxy.example.com", 8080));
@@ -337,7 +337,7 @@ public final class HttpSettings {
      * Sets the content format for request/response serialization.
      * This determines how request bodies are serialized and response bodies are deserialized.
      *
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * settings.setContentFormat(ContentFormat.JSON);
      * settings.setContentFormat(ContentFormat.XML);
@@ -385,7 +385,7 @@ public final class HttpSettings {
      *   <li>text/html</li>
      * </ul>
      *
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * settings.setContentType("application/json; charset=UTF-8");
      * }</pre>
@@ -431,7 +431,7 @@ public final class HttpSettings {
      *   <li>snappy</li>
      * </ul>
      *
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * settings.setContentEncoding("gzip");
      * }</pre>
@@ -449,7 +449,7 @@ public final class HttpSettings {
      * Sets HTTP Basic Authentication header using the specified username and password.
      * This method automatically encodes the credentials and sets the Authorization header.
      *
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * settings.basicAuth("username", "password");
      * // This sets the header: "Authorization: Basic dXNlcm5hbWU6cGFzc3dvcmQ="
@@ -468,14 +468,14 @@ public final class HttpSettings {
      * Sets an HTTP header with the specified name and value.
      * If this settings object already has any headers with that name, they are all replaced.
      *
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * settings.header("Authorization", "Bearer token123")
      *         .header("Accept", "application/json")
      *         .header("User-Agent", "MyApp/1.0");
      * }</pre>
      *
-     * @param name The header name
+     * @param name The header name (must not be null)
      * @param value The header value
      * @return This HttpSettings instance for method chaining
      * @see HttpHeaders
@@ -529,7 +529,7 @@ public final class HttpSettings {
      * Sets HTTP headers from the specified map.
      * If this settings object already has any headers with the same names, they are all replaced.
      *
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Map<String, String> headers = Map.of(
      *     "Authorization", "Bearer token123",
@@ -570,7 +570,7 @@ public final class HttpSettings {
      * Gets the HTTP headers configured in this settings object.
      * If no headers have been set yet, this method creates an empty HttpHeaders object.
      *
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * HttpHeaders headers = settings.headers();
      * headers.set("X-Custom-Header", "value");
@@ -591,7 +591,7 @@ public final class HttpSettings {
      * Creates a copy of this HttpSettings object.
      * The copy includes all settings including headers, timeouts, SSL configuration, etc.
      *
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * HttpSettings original = HttpSettings.create()
      *     .setConnectionTimeout(5000)

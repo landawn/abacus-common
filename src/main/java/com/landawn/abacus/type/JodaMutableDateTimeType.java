@@ -43,13 +43,12 @@ public class JodaMutableDateTimeType extends AbstractJodaDateTimeType<MutableDat
      * This method returns the Class object representing org.joda.time.MutableDateTime, which is used
      * for type identification and reflection operations.
      *
-     * <pre>
-     * {@code
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
      * JodaMutableDateTimeType type = new JodaMutableDateTimeType();
      * Class<MutableDateTime> clazz = type.clazz();
      * System.out.println(clazz.getName()); // Outputs: org.joda.time.MutableDateTime
-     * }
-     * </pre>
+     * }</pre>
      *
      * @return the Class object representing org.joda.time.MutableDateTime
      */
@@ -70,8 +69,8 @@ public class JodaMutableDateTimeType extends AbstractJodaDateTimeType<MutableDat
      * - null: returns null
      * - Other types: converted to string first, then parsed
      *
-     * <pre>
-     * {@code
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
      * JodaMutableDateTimeType type = new JodaMutableDateTimeType();
      *
      * // From Number (milliseconds since epoch)
@@ -86,8 +85,7 @@ public class JodaMutableDateTimeType extends AbstractJodaDateTimeType<MutableDat
      *
      * // Modify the mutable datetime
      * dt3.addDays(1);
-     * }
-     * </pre>
+     * }</pre>
      *
      * @param obj the object to convert to MutableDateTime
      * @return a MutableDateTime instance, or null if the input is null
@@ -114,8 +112,8 @@ public class JodaMutableDateTimeType extends AbstractJodaDateTimeType<MutableDat
      * - ISO 8601 date-time format (20 characters): parsed as yyyy-MM-dd'T'HH:mm:ss
      * - ISO 8601 timestamp format (other lengths): parsed as yyyy-MM-dd'T'HH:mm:ss.SSS
      *
-     * <pre>
-     * {@code
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
      * JodaMutableDateTimeType type = new JodaMutableDateTimeType();
      *
      * // Parse ISO 8601 date-time format
@@ -129,8 +127,7 @@ public class JodaMutableDateTimeType extends AbstractJodaDateTimeType<MutableDat
      *
      * // Modify after parsing
      * dt1.addHours(2);
-     * }
-     * </pre>
+     * }</pre>
      *
      * @param str the string to parse
      * @return a MutableDateTime instance, or null if the string is empty or null
@@ -158,8 +155,8 @@ public class JodaMutableDateTimeType extends AbstractJodaDateTimeType<MutableDat
      * This method first attempts to parse the character array as a long value (milliseconds since epoch).
      * If that fails, it converts the character array to a string and delegates to valueOf(String).
      *
-     * <pre>
-     * {@code
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
      * JodaMutableDateTimeType type = new JodaMutableDateTimeType();
      *
      * // Parse from character array containing milliseconds
@@ -169,8 +166,7 @@ public class JodaMutableDateTimeType extends AbstractJodaDateTimeType<MutableDat
      * // Parse from character array containing ISO 8601 format
      * char[] isoChars = "2021-01-01T10:30:00".toCharArray();
      * MutableDateTime dt2 = type.valueOf(isoChars, 0, isoChars.length);
-     * }
-     * </pre>
+     * }</pre>
      *
      * @param cbuf the character buffer containing the value to parse
      * @param offset the start offset in the character buffer
@@ -199,8 +195,8 @@ public class JodaMutableDateTimeType extends AbstractJodaDateTimeType<MutableDat
      * Retrieves a MutableDateTime value from the specified column in a ResultSet.
      * This method provides database-to-Java type conversion for MutableDateTime objects.
      *
-     * <pre>
-     * {@code
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
      * JodaMutableDateTimeType type = new JodaMutableDateTimeType();
      * try (ResultSet rs = stmt.executeQuery()) {
      *     if (rs.next()) {
@@ -208,8 +204,7 @@ public class JodaMutableDateTimeType extends AbstractJodaDateTimeType<MutableDat
      *         dt.addDays(1); // Can modify after retrieval
      *     }
      * }
-     * }
-     * </pre>
+     * }</pre>
      *
      * @param rs the ResultSet to read from
      * @param columnIndex the column index (1-based) to retrieve the value from
@@ -227,16 +222,15 @@ public class JodaMutableDateTimeType extends AbstractJodaDateTimeType<MutableDat
      * Retrieves a MutableDateTime value from the specified column in a ResultSet using column label.
      * This method provides database-to-Java type conversion for MutableDateTime objects by column name.
      *
-     * <pre>
-     * {@code
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
      * JodaMutableDateTimeType type = new JodaMutableDateTimeType();
      * try (ResultSet rs = stmt.executeQuery()) {
      *     if (rs.next()) {
      *         MutableDateTime dt = type.get(rs, "created_at");
      *     }
      * }
-     * }
-     * </pre>
+     * }</pre>
      *
      * @param rs the ResultSet to read from
      * @param columnLabel the column label to retrieve the value from
@@ -254,16 +248,15 @@ public class JodaMutableDateTimeType extends AbstractJodaDateTimeType<MutableDat
      * Sets a MutableDateTime parameter in a PreparedStatement.
      * This method provides Java-to-database type conversion for MutableDateTime objects.
      *
-     * <pre>
-     * {@code
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
      * JodaMutableDateTimeType type = new JodaMutableDateTimeType();
      * MutableDateTime dt = new MutableDateTime();
      * try (PreparedStatement stmt = conn.prepareStatement("INSERT INTO events (timestamp) VALUES (?)")) {
      *     type.set(stmt, 1, dt);
      *     stmt.executeUpdate();
      * }
-     * }
-     * </pre>
+     * }</pre>
      *
      * @param stmt the PreparedStatement to set the parameter on
      * @param columnIndex the parameter index (1-based) to set
@@ -280,16 +273,15 @@ public class JodaMutableDateTimeType extends AbstractJodaDateTimeType<MutableDat
      * This method provides Java-to-database type conversion for stored procedure calls
      * using named parameters.
      *
-     * <pre>
-     * {@code
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
      * JodaMutableDateTimeType type = new JodaMutableDateTimeType();
      * MutableDateTime dt = new MutableDateTime();
      * try (CallableStatement stmt = conn.prepareCall("{call log_event(?)}")) {
      *     type.set(stmt, "event_time", dt);
      *     stmt.execute();
      * }
-     * }
-     * </pre>
+     * }</pre>
      *
      * @param stmt the CallableStatement to set the parameter on
      * @param parameterName the name of the parameter to set

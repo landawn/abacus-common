@@ -40,7 +40,7 @@ public interface Predicate<T> extends Throwables.Predicate<T, RuntimeException>,
      * represented by this predicate. It should return {@code true} if the input
      * argument matches the predicate's criteria, {@code false} otherwise.
      *
-     * <p>Example usage:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Predicate<String> isEmpty = str -> str.isEmpty();
      * Predicate<Integer> isPositive = num -> num > 0;
@@ -51,8 +51,7 @@ public interface Predicate<T> extends Throwables.Predicate<T, RuntimeException>,
      *
      * @param value the input argument to be tested
      * @return {@code true} if the input argument matches the predicate,
-     *         otherwise {@code false}
-     * @throws RuntimeException if the predicate evaluation fails
+     *         otherwise {@code false} if the predicate evaluation fails
      */
     @Override
     boolean test(T value);
@@ -64,7 +63,7 @@ public interface Predicate<T> extends Throwables.Predicate<T, RuntimeException>,
      * {@code false}, and vice versa. This is useful for inverting conditions without
      * having to write a new predicate implementation.
      *
-     * <p>Example usage:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Predicate<String> isEmpty = str -> str.isEmpty();
      * Predicate<String> isNotEmpty = isEmpty.negate();
@@ -89,7 +88,7 @@ public interface Predicate<T> extends Throwables.Predicate<T, RuntimeException>,
      * to the caller; if evaluation of this predicate throws an exception, the
      * {@code other} predicate will not be evaluated.
      *
-     * <p>Example usage:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Predicate<String> isNotEmpty = str -> !str.isEmpty();
      * Predicate<String> startsWithA = str -> str.startsWith("A");
@@ -117,7 +116,7 @@ public interface Predicate<T> extends Throwables.Predicate<T, RuntimeException>,
      * to the caller; if evaluation of this predicate throws an exception, the
      * {@code other} predicate will not be evaluated.
      *
-     * <p>Example usage:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Predicate<Integer> isEven = num -> num % 2 == 0;
      * Predicate<Integer> isNegative = num -> num < 0;
@@ -145,7 +144,7 @@ public interface Predicate<T> extends Throwables.Predicate<T, RuntimeException>,
      * behavior as this predicate but with the ability to throw the specified
      * exception type.
      *
-     * <p>Example usage:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Predicate<String> validator = str -> str.matches("[A-Z]+");
      * Throwables.Predicate<String, IOException> throwableValidator = 

@@ -22,7 +22,7 @@ package com.landawn.abacus.util;
  * 
  * <p>The class is immutable and extends {@link AbstractIndexed}.</p>
  * 
- * <p>Example usage:</p>
+ * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * IndexedDouble indexedDouble = IndexedDouble.of(3.14159, 5);
  * double value = indexedDouble.value(); // 3.14159
@@ -56,7 +56,7 @@ public final class IndexedDouble extends AbstractIndexed {
     /**
      * Creates a new IndexedDouble instance with the specified value and index.
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * IndexedDouble indexed = IndexedDouble.of(3.14159, 5);
      * }</pre>
@@ -77,7 +77,7 @@ public final class IndexedDouble extends AbstractIndexed {
      * 
      * <p>This overload accepts a long index for cases where the index might exceed Integer.MAX_VALUE.</p>
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * IndexedDouble indexed = IndexedDouble.of(3.14159, 5000000000L);
      * }</pre>
@@ -96,7 +96,7 @@ public final class IndexedDouble extends AbstractIndexed {
     /**
      * Returns the double value stored in this IndexedDouble instance.
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * IndexedDouble indexed = IndexedDouble.of(3.14159, 5);
      * double value = indexed.value(); // 3.14159
@@ -127,7 +127,7 @@ public final class IndexedDouble extends AbstractIndexed {
      * Double values are compared using {@link N#equals(double, double)} which handles
      * NaN and positive/negative zero correctly.</p>
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * IndexedDouble indexed1 = IndexedDouble.of(3.14159, 5);
      * IndexedDouble indexed2 = IndexedDouble.of(3.14159, 5);
@@ -150,7 +150,7 @@ public final class IndexedDouble extends AbstractIndexed {
      * 
      * <p>The format is: [index]=value</p>
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * IndexedDouble indexed = IndexedDouble.of(3.14159, 5);
      * System.out.println(indexed); // prints: [5]=3.14159

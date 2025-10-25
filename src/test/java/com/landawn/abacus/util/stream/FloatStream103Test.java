@@ -971,9 +971,7 @@ public class FloatStream103Test extends TestBase {
         @DisplayName("toMap() with merge function should handle duplicate keys")
         public void testToMapWithMerge() {
             FloatStream stream = createFloatStream(1.1f, 1.9f, 2.1f);
-            Map<Integer, Float> result = stream.toMap(f -> (int) f,
-                    f -> f, Float::sum
-            );
+            Map<Integer, Float> result = stream.toMap(f -> (int) f, f -> f, Float::sum);
             assertEquals(2, result.size());
             assertEquals(3.0f, result.get(1), 0.001);
             assertEquals(2.1f, result.get(2), 0.001);

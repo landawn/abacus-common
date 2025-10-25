@@ -50,7 +50,7 @@ abstract class AbstractIndexed implements Immutable {
      * <p>For accessing the full range of index values without conversion, use 
      * {@link #longIndex()} instead.</p>
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Indexed<String> indexed = Indexed.of("val", 42L);
      * int idx = indexed.index();  // Returns 42
@@ -81,7 +81,7 @@ abstract class AbstractIndexed implements Immutable {
      * exceed the range of int values, or when you want to avoid the overhead of
      * range checking performed by {@link #index()}.</p>
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Indexed<String> indexed = Indexed.of("value", Long.MAX_VALUE);
      * long idx = indexed.longIndex();  // Returns Long.MAX_VALUE safely

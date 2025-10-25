@@ -23,7 +23,7 @@ package com.landawn.abacus.util;
  * <p>This class extends {@link AbstractIndexed} and provides factory methods for creating
  * instances with validated non-negative indices.</p>
  * 
- * <p>Example usage:</p>
+ * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * IndexedByte ib = IndexedByte.of((byte) 42, 5);
  * System.out.println(ib.value()); // prints: 42
@@ -44,7 +44,7 @@ public final class IndexedByte extends AbstractIndexed {
     /**
      * Creates a new {@code IndexedByte} instance with the specified value and index.
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * IndexedByte indexed = IndexedByte.of((byte) 10, 3);
      * }</pre>
@@ -65,7 +65,7 @@ public final class IndexedByte extends AbstractIndexed {
      * This method is useful when working with large collections or arrays where the index
      * might exceed the range of an int.
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * IndexedByte indexed = IndexedByte.of((byte) 25, 1000000000L);
      * }</pre>

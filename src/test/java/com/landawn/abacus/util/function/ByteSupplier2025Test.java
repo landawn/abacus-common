@@ -71,7 +71,7 @@ public class ByteSupplier2025Test extends TestBase {
 
     @Test
     public void testStatefulSupplier() {
-        final byte[] counter = {0};
+        final byte[] counter = { 0 };
         ByteSupplier supplier = () -> counter[0]++;
 
         assertEquals((byte) 0, supplier.getAsByte());

@@ -38,12 +38,11 @@ public class LocalDateType extends AbstractTemporalType<LocalDate> {
     /**
      * Returns the Class object representing the LocalDate type.
      *
-     * <pre>
-     * {@code
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
      * LocalDateType type = new LocalDateType();
      * Class<LocalDate> clazz = type.clazz();
-     * }
-     * </pre>
+     * }</pre>
      *
      * @return The Class object for LocalDate
      */
@@ -56,13 +55,12 @@ public class LocalDateType extends AbstractTemporalType<LocalDate> {
      * Converts a LocalDate object to its string representation.
      * The string format follows the ISO-8601 standard (yyyy-MM-dd).
      *
-     * <pre>
-     * {@code
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
      * LocalDateType type = new LocalDateType();
      * LocalDate date = LocalDate.of(2021, 1, 1);
      * String str = type.stringOf(date); // "2021-01-01"
-     * }
-     * </pre>
+     * }</pre>
      *
      * @param x The LocalDate object to convert
      * @return The string representation of the LocalDate, or null if the input is null
@@ -77,13 +75,12 @@ public class LocalDateType extends AbstractTemporalType<LocalDate> {
      * If the object is a Number, it is treated as milliseconds since epoch and converted to LocalDate using the default zone ID.
      * Otherwise, the object is converted to a string and parsed.
      *
-     * <pre>
-     * {@code
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
      * LocalDateType type = new LocalDateType();
      * LocalDate date1 = type.valueOf(1609459200000L);
      * LocalDate date2 = type.valueOf("2021-01-01");
-     * }
-     * </pre>
+     * }</pre>
      *
      * @param obj The object to convert to LocalDate
      * @return The LocalDate representation of the object, or null if the input is null
@@ -105,14 +102,13 @@ public class LocalDateType extends AbstractTemporalType<LocalDate> {
      * - Numeric strings are treated as milliseconds since epoch
      * - ISO-8601 formatted strings are parsed directly
      *
-     * <pre>
-     * {@code
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
      * LocalDateType type = new LocalDateType();
      * LocalDate date1 = type.valueOf("2021-01-01");
      * LocalDate date2 = type.valueOf("SYS_TIME");
      * LocalDate date3 = type.valueOf("1609459200000");
-     * }
-     * </pre>
+     * }</pre>
      *
      * @param str The string to parse
      * @return The parsed LocalDate object, or null if the input is null or empty
@@ -144,13 +140,12 @@ public class LocalDateType extends AbstractTemporalType<LocalDate> {
      * Converts a character array to a LocalDate object.
      * The character array is first converted to a string, then parsed.
      *
-     * <pre>
-     * {@code
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
      * LocalDateType type = new LocalDateType();
      * char[] chars = "2021-01-01".toCharArray();
      * LocalDate date = type.valueOf(chars, 0, chars.length);
-     * }
-     * </pre>
+     * }</pre>
      *
      * @param cbuf The character array containing the LocalDate representation
      * @param offset The starting position in the character array
@@ -172,16 +167,15 @@ public class LocalDateType extends AbstractTemporalType<LocalDate> {
      * First attempts to get the value as a LocalDate object directly. If that fails,
      * falls back to retrieving it as a java.sql.Date and converting it.
      *
-     * <pre>
-     * {@code
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
      * LocalDateType type = new LocalDateType();
      * try (ResultSet rs = stmt.executeQuery()) {
      *     if (rs.next()) {
      *         LocalDate date = type.get(rs, 1);
      *     }
      * }
-     * }
-     * </pre>
+     * }</pre>
      *
      * @param rs The ResultSet containing the data
      * @param columnIndex The column index (1-based) to retrieve the value from
@@ -204,16 +198,15 @@ public class LocalDateType extends AbstractTemporalType<LocalDate> {
      * First attempts to get the value as a LocalDate object directly. If that fails,
      * falls back to retrieving it as a java.sql.Date and converting it.
      *
-     * <pre>
-     * {@code
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
      * LocalDateType type = new LocalDateType();
      * try (ResultSet rs = stmt.executeQuery()) {
      *     if (rs.next()) {
      *         LocalDate date = type.get(rs, "birth_date");
      *     }
      * }
-     * }
-     * </pre>
+     * }</pre>
      *
      * @param rs The ResultSet containing the data
      * @param columnName The name of the column to retrieve the value from
@@ -236,16 +229,15 @@ public class LocalDateType extends AbstractTemporalType<LocalDate> {
      * First attempts to set the value as a LocalDate object directly. If that fails,
      * falls back to setting it as a java.sql.Date.
      *
-     * <pre>
-     * {@code
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
      * LocalDateType type = new LocalDateType();
      * LocalDate date = LocalDate.of(2021, 1, 1);
      * try (PreparedStatement stmt = conn.prepareStatement("INSERT INTO users (birth_date) VALUES (?)")) {
      *     type.set(stmt, 1, date);
      *     stmt.executeUpdate();
      * }
-     * }
-     * </pre>
+     * }</pre>
      *
      * @param stmt The PreparedStatement to set the parameter on
      * @param columnIndex The parameter index (1-based) to set
@@ -266,16 +258,15 @@ public class LocalDateType extends AbstractTemporalType<LocalDate> {
      * First attempts to set the value as a LocalDate object directly. If that fails,
      * falls back to setting it as a java.sql.Date.
      *
-     * <pre>
-     * {@code
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
      * LocalDateType type = new LocalDateType();
      * LocalDate date = LocalDate.of(2021, 1, 1);
      * try (CallableStatement stmt = conn.prepareCall("{call update_birth_date(?)}")) {
      *     type.set(stmt, "birth_date", date);
      *     stmt.execute();
      * }
-     * }
-     * </pre>
+     * }</pre>
      *
      * @param stmt The CallableStatement to set the parameter on
      * @param columnName The name of the parameter to set

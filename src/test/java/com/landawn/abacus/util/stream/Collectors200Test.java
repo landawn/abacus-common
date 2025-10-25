@@ -310,8 +310,7 @@ public class Collectors200Test extends TestBase {
 
         @Test
         public void test_summingInt_multiple() {
-            Tuple2<Integer, Integer> result2 = Stream.of("a", "bb", "ccc")
-                    .collect(MoreCollectors.summingInt(String::length, s -> s.hashCode() % 100));
+            Tuple2<Integer, Integer> result2 = Stream.of("a", "bb", "ccc").collect(MoreCollectors.summingInt(String::length, s -> s.hashCode() % 100));
             assertEquals(1 + 2 + 3, result2._1);
 
             Tuple3<Integer, Integer, Integer> result3 = Stream.of("a", "bb", "ccc")
@@ -329,8 +328,7 @@ public class Collectors200Test extends TestBase {
 
         @Test
         public void test_combine_two() {
-            Tuple2<Long, Integer> result = Stream.of(1, 2, 3, 4, 5)
-                    .collect(MoreCollectors.combine(Collectors.counting(), Collectors.summingInt(i -> i)));
+            Tuple2<Long, Integer> result = Stream.of(1, 2, 3, 4, 5).collect(MoreCollectors.combine(Collectors.counting(), Collectors.summingInt(i -> i)));
             assertEquals(5L, result._1);
             assertEquals(15, result._2);
         }

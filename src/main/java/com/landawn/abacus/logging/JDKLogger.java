@@ -32,7 +32,7 @@ import java.util.logging.LogRecord;
  * <p>The logger properly handles caller location information by inspecting the stack trace
  * to determine the actual calling class and method, excluding the logging framework classes.</p>
  * 
- * <p>Usage example:</p>
+ * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * Logger logger = new JDKLogger("com.example.MyClass");
  * logger.info("Application started");

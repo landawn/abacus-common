@@ -5573,7 +5573,6 @@ public class IOUtil2025Test extends TestBase {
 
         closeables.add(IOUtil.newBufferedInputStream(new ByteArrayInputStream("data3".getBytes(UTF_8))));
 
-
         IOUtil.closeAll(closeables);
 
         for (AutoCloseable c : closeables) {
@@ -5595,7 +5594,6 @@ public class IOUtil2025Test extends TestBase {
 
         closeables.add(null);
         closeables.add(IOUtil.newBufferedInputStream(new ByteArrayInputStream("data3".getBytes(UTF_8))));
-
 
         IOUtil.closeAll(closeables);
 
@@ -5709,7 +5707,6 @@ public class IOUtil2025Test extends TestBase {
 
         closeables.add(null);
         closeables.add(IOUtil.newBufferedInputStream(new ByteArrayInputStream("data3".getBytes(UTF_8))));
-
 
         IOUtil.closeAllQuietly(closeables);
 

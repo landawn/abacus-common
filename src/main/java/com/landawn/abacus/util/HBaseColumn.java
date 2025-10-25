@@ -30,7 +30,7 @@ import java.util.TreeSet;
  * <p>The class is immutable and implements {@link Comparable} based on version timestamps.
  * It provides various factory methods for creating instances and converting them to different collection types.</p>
  * 
- * <p>Example usage:</p>
+ * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * // Create a column with current timestamp
  * HBaseColumn<String> col1 = HBaseColumn.valueOf("value");
@@ -126,7 +126,7 @@ public final class HBaseColumn<T> implements Comparable<HBaseColumn<T>> {
      * Primitive types return their corresponding empty constant instances,
      * while other types return {@code EMPTY_OBJECT_COLUMN}.
      *
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * HBaseColumn<Integer> empty = HBaseColumn.emptyOf(int.class);
      * // Returns EMPTY_INT_COLUMN

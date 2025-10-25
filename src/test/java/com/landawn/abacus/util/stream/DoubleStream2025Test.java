@@ -1191,14 +1191,11 @@ public class DoubleStream2025Test extends TestBase {
 
     @Test
     public void testZipWithCollectionOfStreams() {
-        Collection<DoubleStream> streams = Arrays.asList(
-            DoubleStream.of(1.0, 2.0),
-            DoubleStream.of(10.0, 20.0),
-            DoubleStream.of(100.0, 200.0)
-        );
+        Collection<DoubleStream> streams = Arrays.asList(DoubleStream.of(1.0, 2.0), DoubleStream.of(10.0, 20.0), DoubleStream.of(100.0, 200.0));
         DoubleStream result = DoubleStream.zip(streams, doubles -> {
             double sum = 0.0;
-            for (Double d : doubles) sum += d;
+            for (Double d : doubles)
+                sum += d;
             return sum;
         });
         assertArrayEquals(new double[] { 111.0, 222.0 }, result.toArray(), 0.0001);
@@ -1206,14 +1203,12 @@ public class DoubleStream2025Test extends TestBase {
 
     @Test
     public void testZipWithCollectionDefaultValues() {
-        Collection<DoubleStream> streams = Arrays.asList(
-            DoubleStream.of(1.0, 2.0),
-            DoubleStream.of(10.0)
-        );
+        Collection<DoubleStream> streams = Arrays.asList(DoubleStream.of(1.0, 2.0), DoubleStream.of(10.0));
         double[] defaults = new double[] { 0.0, 0.0 };
         DoubleStream result = DoubleStream.zip(streams, defaults, doubles -> {
             double sum = 0.0;
-            for (Double d : doubles) sum += d;
+            for (Double d : doubles)
+                sum += d;
             return sum;
         });
         assertEquals(2, result.count());
@@ -1221,11 +1216,7 @@ public class DoubleStream2025Test extends TestBase {
 
     @Test
     public void testMergeWithCollection() {
-        Collection<DoubleStream> streams = Arrays.asList(
-            DoubleStream.of(1.0, 5.0),
-            DoubleStream.of(2.0, 6.0),
-            DoubleStream.of(3.0, 7.0)
-        );
+        Collection<DoubleStream> streams = Arrays.asList(DoubleStream.of(1.0, 5.0), DoubleStream.of(2.0, 6.0), DoubleStream.of(3.0, 7.0));
         DoubleStream result = DoubleStream.merge(streams, (a, b) -> a <= b ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND);
         assertEquals(6, result.count());
     }

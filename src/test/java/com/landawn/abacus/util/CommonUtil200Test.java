@@ -171,7 +171,8 @@ public class CommonUtil200Test extends TestBase {
             IllegalArgumentException ex1 = assertThrows(IllegalArgumentException.class, () -> CommonUtil.checkArgNotNull(null, "testObject"));
             assertEquals("'testObject' cannot be null", ex1.getMessage());
 
-            IllegalArgumentException ex2 = assertThrows(IllegalArgumentException.class, () -> CommonUtil.checkArgNotNull(null, "Custom error message for null object"));
+            IllegalArgumentException ex2 = assertThrows(IllegalArgumentException.class,
+                    () -> CommonUtil.checkArgNotNull(null, "Custom error message for null object"));
             assertEquals("Custom error message for null object", ex2.getMessage());
         }
 
@@ -438,7 +439,8 @@ public class CommonUtil200Test extends TestBase {
             IllegalArgumentException ex3 = assertThrows(IllegalArgumentException.class, () -> CommonUtil.checkArgNotBlank("   ", "notBlankStr"));
             assertEquals("'notBlankStr' cannot be null or empty or blank", ex3.getMessage());
 
-            IllegalArgumentException ex4 = assertThrows(IllegalArgumentException.class, () -> CommonUtil.checkArgNotBlank(null, "Custom error for blank string"));
+            IllegalArgumentException ex4 = assertThrows(IllegalArgumentException.class,
+                    () -> CommonUtil.checkArgNotBlank(null, "Custom error for blank string"));
             assertEquals("Custom error for blank string", ex4.getMessage());
         }
 
@@ -594,7 +596,7 @@ public class CommonUtil200Test extends TestBase {
         @Test
         public void checkElementNotNull_array_invalid() {
             IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, () -> CommonUtil.checkElementNotNull(new String[] { "a", null, "b" }));
-            assertEquals("null element is found in collection", ex.getMessage());
+            assertEquals("null element is found in array", ex.getMessage());
         }
 
         @Test
@@ -604,7 +606,8 @@ public class CommonUtil200Test extends TestBase {
 
         @Test
         public void checkElementNotNull_arrayWithMessage_invalid() {
-            IllegalArgumentException ex1 = assertThrows(IllegalArgumentException.class, () -> CommonUtil.checkElementNotNull(new String[] { "a", null }, "myArray"));
+            IllegalArgumentException ex1 = assertThrows(IllegalArgumentException.class,
+                    () -> CommonUtil.checkElementNotNull(new String[] { "a", null }, "myArray"));
             assertEquals("null element is found in myArray", ex1.getMessage());
 
             IllegalArgumentException ex2 = assertThrows(IllegalArgumentException.class,
@@ -677,7 +680,8 @@ public class CommonUtil200Test extends TestBase {
             IllegalArgumentException ex1 = assertThrows(IllegalArgumentException.class, () -> CommonUtil.checkKeyNotNull(mapWithNullKey, "myMap"));
             assertEquals("null key is found in myMap", ex1.getMessage());
 
-            IllegalArgumentException ex2 = assertThrows(IllegalArgumentException.class, () -> CommonUtil.checkKeyNotNull(mapWithNullKey, "Custom error for null key"));
+            IllegalArgumentException ex2 = assertThrows(IllegalArgumentException.class,
+                    () -> CommonUtil.checkKeyNotNull(mapWithNullKey, "Custom error for null key"));
             assertEquals("Custom error for null key", ex2.getMessage());
         }
 
@@ -760,7 +764,8 @@ public class CommonUtil200Test extends TestBase {
             IllegalArgumentException ex3 = assertThrows(IllegalArgumentException.class, () -> CommonUtil.checkArgument(false, "%s and %s", "arg1", "arg2"));
             assertEquals("arg1 and arg2", ex3.getMessage());
 
-            IllegalArgumentException ex4 = assertThrows(IllegalArgumentException.class, () -> CommonUtil.checkArgument(false, "No placeholder", "arg1", "arg2"));
+            IllegalArgumentException ex4 = assertThrows(IllegalArgumentException.class,
+                    () -> CommonUtil.checkArgument(false, "No placeholder", "arg1", "arg2"));
             assertEquals("No placeholder: [arg1, arg2]", ex4.getMessage());
 
             IllegalArgumentException ex5 = assertThrows(IllegalArgumentException.class, () -> CommonUtil.checkArgument(false, "One {} two", "arg1", "arg2"));

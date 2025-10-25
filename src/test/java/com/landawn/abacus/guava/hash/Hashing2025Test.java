@@ -481,11 +481,7 @@ public class Hashing2025Test extends TestBase {
     @Test
     @DisplayName("Test concatenating iterable of hash functions")
     public void testConcatenatingIterable() {
-        List<HashFunction> functions = Arrays.asList(
-            Hashing.murmur3_32(),
-            Hashing.murmur3_32(),
-            Hashing.murmur3_32()
-        );
+        List<HashFunction> functions = Arrays.asList(Hashing.murmur3_32(), Hashing.murmur3_32(), Hashing.murmur3_32());
 
         HashFunction concatenated = Hashing.concatenating(functions);
 
@@ -496,10 +492,7 @@ public class Hashing2025Test extends TestBase {
     @Test
     @DisplayName("Test concatenating produces consistent hashes")
     public void testConcatenatingConsistent() {
-        HashFunction concatenated = Hashing.concatenating(
-            Hashing.murmur3_128(),
-            Hashing.sha256()
-        );
+        HashFunction concatenated = Hashing.concatenating(Hashing.murmur3_128(), Hashing.sha256());
 
         byte[] data = "test".getBytes(StandardCharsets.UTF_8);
         HashCode hash1 = concatenated.hash(data);
@@ -511,10 +504,9 @@ public class Hashing2025Test extends TestBase {
     @Test
     @DisplayName("Test concatenating with different bit lengths")
     public void testConcatenatingDifferentBitLengths() {
-        HashFunction concatenated = Hashing.concatenating(
-            Hashing.murmur3_32(),    // 32 bits
-            Hashing.murmur3_128(),   // 128 bits
-            Hashing.sha256()         // 256 bits
+        HashFunction concatenated = Hashing.concatenating(Hashing.murmur3_32(), // 32 bits
+                Hashing.murmur3_128(), // 128 bits
+                Hashing.sha256() // 256 bits
         );
 
         assertNotNull(concatenated);
@@ -551,11 +543,7 @@ public class Hashing2025Test extends TestBase {
     @Test
     @DisplayName("Test combineOrdered iterable")
     public void testCombineOrderedIterable() {
-        List<HashCode> hashes = Arrays.asList(
-            Hashing.murmur3_128().hash("test1"),
-            Hashing.murmur3_128().hash("test2"),
-            Hashing.murmur3_128().hash("test3")
-        );
+        List<HashCode> hashes = Arrays.asList(Hashing.murmur3_128().hash("test1"), Hashing.murmur3_128().hash("test2"), Hashing.murmur3_128().hash("test3"));
 
         HashCode combined = Hashing.combineOrdered(hashes);
 
@@ -617,11 +605,7 @@ public class Hashing2025Test extends TestBase {
     @Test
     @DisplayName("Test combineUnordered iterable")
     public void testCombineUnorderedIterable() {
-        List<HashCode> hashes = Arrays.asList(
-            Hashing.murmur3_128().hash("test1"),
-            Hashing.murmur3_128().hash("test2"),
-            Hashing.murmur3_128().hash("test3")
-        );
+        List<HashCode> hashes = Arrays.asList(Hashing.murmur3_128().hash("test1"), Hashing.murmur3_128().hash("test2"), Hashing.murmur3_128().hash("test3"));
 
         HashCode combined = Hashing.combineUnordered(hashes);
 

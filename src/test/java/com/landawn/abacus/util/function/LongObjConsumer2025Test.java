@@ -142,7 +142,7 @@ public class LongObjConsumer2025Test extends TestBase {
 
     @Test
     public void testSideEffects() {
-        final int[] counter = {0};
+        final int[] counter = { 0 };
         LongObjConsumer<String> consumer = (l, s) -> counter[0]++;
 
         consumer.accept(1L, "a");

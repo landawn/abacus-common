@@ -26,7 +26,7 @@ import java.nio.CharBuffer;
  * <p>The class automatically handles flushing if the underlying Appendable
  * implements Flushable, and closing if it implements AutoCloseable.</p>
  * 
- * <p>Example usage:</p>
+ * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * StringBuilder sb = new StringBuilder();
  * try (Writer writer = new AppendableWriter(sb)) {
@@ -48,7 +48,7 @@ public sealed class AppendableWriter extends Writer permits StringWriter {
     /**
      * Constructs an AppendableWriter that wraps the specified Appendable.
      * 
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * StringBuilder sb = new StringBuilder();
      * AppendableWriter writer = new AppendableWriter(sb);
@@ -68,7 +68,7 @@ public sealed class AppendableWriter extends Writer permits StringWriter {
     /**
      * Appends the specified character to this writer.
      * 
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * writer.append('A').append('B').append('C');
      * }</pre>
@@ -91,7 +91,7 @@ public sealed class AppendableWriter extends Writer permits StringWriter {
      * 
      * <p>If csq is null, then the four characters "null" are appended to this writer.</p>
      * 
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * writer.append("Hello").append(" ").append("World");
      * }</pre>
@@ -112,7 +112,7 @@ public sealed class AppendableWriter extends Writer permits StringWriter {
     /**
      * Appends a subsequence of the specified character sequence to this writer.
      * 
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * writer.append("Hello World", 0, 5); // Appends "Hello"
      * }</pre>
@@ -138,7 +138,7 @@ public sealed class AppendableWriter extends Writer permits StringWriter {
     /**
      * Writes a single character.
      * 
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * writer.write('X');
      * writer.write(65); // Writes 'A'
@@ -157,7 +157,7 @@ public sealed class AppendableWriter extends Writer permits StringWriter {
     /**
      * Writes an array of characters.
      * 
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * char[] chars = {'H', 'e', 'l', 'l', 'o'};
      * writer.write(chars);
@@ -176,7 +176,7 @@ public sealed class AppendableWriter extends Writer permits StringWriter {
     /**
      * Writes a portion of an array of characters.
      * 
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * char[] chars = {'H', 'e', 'l', 'l', 'o', ' ', 'W', 'o', 'r', 'l', 'd'};
      * writer.write(chars, 6, 5); // Writes "World"
@@ -199,7 +199,7 @@ public sealed class AppendableWriter extends Writer permits StringWriter {
     /**
      * Writes a string.
      * 
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * writer.write("Hello, World!");
      * }</pre>
@@ -217,7 +217,7 @@ public sealed class AppendableWriter extends Writer permits StringWriter {
     /**
      * Writes a portion of a string.
      * 
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * writer.write("Hello, World!", 7, 5); // Writes "World"
      * }</pre>
@@ -242,7 +242,7 @@ public sealed class AppendableWriter extends Writer permits StringWriter {
      * <p>If the underlying Appendable implements Flushable, its flush method will be called.
      * Otherwise, this method does nothing.</p>
      * 
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * writer.write("Important data");
      * writer.flush(); // Ensures data is flushed if supported
@@ -267,7 +267,7 @@ public sealed class AppendableWriter extends Writer permits StringWriter {
      * 
      * <p>If the underlying Appendable implements AutoCloseable, its close method will be called.</p>
      * 
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * try (AppendableWriter writer = new AppendableWriter(appendable)) {
      *     writer.write("Data");
@@ -306,7 +306,7 @@ public sealed class AppendableWriter extends Writer permits StringWriter {
      * 
      * <p>This method calls toString() on the wrapped Appendable object.</p>
      * 
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * StringBuilder sb = new StringBuilder();
      * AppendableWriter writer = new AppendableWriter(sb);

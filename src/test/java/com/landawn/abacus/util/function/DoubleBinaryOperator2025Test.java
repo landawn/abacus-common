@@ -80,10 +80,8 @@ public class DoubleBinaryOperator2025Test extends TestBase {
         DoubleBinaryOperator operator = (left, right) -> left + right;
 
         // Infinity tests
-        assertEquals(Double.POSITIVE_INFINITY,
-                operator.applyAsDouble(Double.POSITIVE_INFINITY, 1.0), 0.0001);
-        assertEquals(Double.NEGATIVE_INFINITY,
-                operator.applyAsDouble(Double.NEGATIVE_INFINITY, 1.0), 0.0001);
+        assertEquals(Double.POSITIVE_INFINITY, operator.applyAsDouble(Double.POSITIVE_INFINITY, 1.0), 0.0001);
+        assertEquals(Double.NEGATIVE_INFINITY, operator.applyAsDouble(Double.NEGATIVE_INFINITY, 1.0), 0.0001);
 
         // NaN test
         assertTrue(Double.isNaN(operator.applyAsDouble(Double.NaN, 1.0)));

@@ -48,8 +48,7 @@ public class BiObjIntFunction2025Test extends TestBase {
 
     @Test
     public void testWithNullObjects() {
-        BiObjIntFunction<String, String, String> function = (t, u, i) ->
-            String.valueOf(t) + "," + String.valueOf(u) + "," + i;
+        BiObjIntFunction<String, String, String> function = (t, u, i) -> String.valueOf(t) + "," + String.valueOf(u) + "," + i;
 
         String result = function.apply(null, null, 42);
 
@@ -83,7 +82,8 @@ public class BiObjIntFunction2025Test extends TestBase {
             StringBuilder sb = new StringBuilder();
             for (int j = 0; j < i; j++) {
                 sb.append(t).append(u);
-                if (j < i - 1) sb.append(", ");
+                if (j < i - 1)
+                    sb.append(", ");
             }
             return sb.toString();
         };
@@ -95,8 +95,7 @@ public class BiObjIntFunction2025Test extends TestBase {
 
     @Test
     public void testWithDifferentTypes() {
-        BiObjIntFunction<Integer, Double, String> function = (t, u, i) ->
-            "sum=" + (t + u + i);
+        BiObjIntFunction<Integer, Double, String> function = (t, u, i) -> "sum=" + (t + u + i);
 
         String result = function.apply(10, 5.5, 20);
 
@@ -105,8 +104,7 @@ public class BiObjIntFunction2025Test extends TestBase {
 
     @Test
     public void testReturningDifferentType() {
-        BiObjIntFunction<String, String, Boolean> function = (t, u, i) ->
-            (t.length() + u.length()) == i;
+        BiObjIntFunction<String, String, Boolean> function = (t, u, i) -> (t.length() + u.length()) == i;
 
         assertEquals(true, function.apply("Hello", "World", 10));
         assertEquals(false, function.apply("Hi", "There", 10));

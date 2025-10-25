@@ -51,6 +51,12 @@ public interface BooleanSupplier extends Throwables.BooleanSupplier<RuntimeExcep
     /**
      * Gets a result.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * BooleanSupplier randomBool = () -> Math.random() > 0.5;
+     * boolean value = randomBool.getAsBoolean();
+     * }</pre>
+     *
      * @return a {@code boolean} value
      */
     @Override

@@ -58,7 +58,7 @@ import com.landawn.abacus.type.Type;
  *   <tr><td>Arrays (all types)</td><td>JSONArray</td><td>wrap(array) / unwrap(JSONArray, Class)</td></tr>
  * </table>
  * 
- * <h2>Usage Examples:</h2>
+ * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * // Converting a Map to JSON
  * Map<String, Object> data = new HashMap<>();
@@ -117,7 +117,7 @@ public final class JSONUtil {
      * Maps, and other JSONObject/JSONArray instances.
      * </p>
      * 
-     * <p><b>Example:</b></p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Map<String, Object> map = new HashMap<>();
      * map.put("name", "Alice");
@@ -151,7 +151,7 @@ public final class JSONUtil {
      * into their JSON-compatible representations.
      * </p>
      * 
-     * <p><b>Examples:</b></p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Example with a JavaBean
      * public class Person {
@@ -186,7 +186,7 @@ public final class JSONUtil {
      * Each element in the boolean array is added to the JSONArray in the same order.
      * </p>
      * 
-     * <p><b>Example:</b></p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * boolean[] flags = {true, false, true, true, false};
      * JSONArray json = JSONUtil.wrap(flags);
@@ -211,7 +211,7 @@ public final class JSONUtil {
      * a native character type.
      * </p>
      * 
-     * <p><b>Example:</b></p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * char[] chars = {'H', 'e', 'l', 'l', 'o'};
      * JSONArray json = JSONUtil.wrap(chars);
@@ -232,7 +232,7 @@ public final class JSONUtil {
      * Each byte value is stored as a number in the JSONArray.
      * </p>
      * 
-     * <p><b>Example:</b></p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * byte[] bytes = {10, 20, 30, 40, 50};
      * JSONArray json = JSONUtil.wrap(bytes);
@@ -253,7 +253,7 @@ public final class JSONUtil {
      * Each short value is stored as a number in the JSONArray.
      * </p>
      * 
-     * <p><b>Example:</b></p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * short[] shorts = {100, 200, 300, 400, 500};
      * JSONArray json = JSONUtil.wrap(shorts);
@@ -274,7 +274,7 @@ public final class JSONUtil {
      * Each integer value is stored as a number in the JSONArray.
      * </p>
      * 
-     * <p><b>Example:</b></p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * int[] numbers = {1, 2, 3, 4, 5};
      * JSONArray json = JSONUtil.wrap(numbers);
@@ -301,7 +301,7 @@ public final class JSONUtil {
      * number limitations.
      * </p>
      * 
-     * <p><b>Example:</b></p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * long[] timestamps = {1609459200000L, 1609545600000L, 1609632000000L};
      * JSONArray json = JSONUtil.wrap(timestamps);
@@ -323,7 +323,7 @@ public final class JSONUtil {
      * (NaN, Infinity) may be converted according to JSON specifications.
      * </p>
      * 
-     * <p><b>Example:</b></p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * float[] measurements = {98.6f, 99.1f, 97.8f, 98.2f};
      * JSONArray json = JSONUtil.wrap(measurements);
@@ -345,7 +345,7 @@ public final class JSONUtil {
      * (NaN, Infinity) may cause JSONException as they're not valid in standard JSON.
      * </p>
      * 
-     * <p><b>Example:</b></p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * double[] prices = {19.99, 29.99, 39.99, 49.99};
      * JSONArray json = JSONUtil.wrap(prices);
@@ -376,7 +376,7 @@ public final class JSONUtil {
      *   <li>Collections and Arrays: converted to JSONArray</li>
      * </ul>
      * 
-     * <p><b>Example:</b></p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Object[] mixed = {
      *     "text",
@@ -406,7 +406,7 @@ public final class JSONUtil {
      * the iteration order of the Collection.
      * </p>
      * 
-     * <p><b>Examples:</b></p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Converting a List
      * List<String> names = Arrays.asList("Alice", "Bob", "Charlie");
@@ -440,7 +440,7 @@ public final class JSONUtil {
      * converted to appropriate Java types.
      * </p>
      * 
-     * <p><b>Example:</b></p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * JSONObject json = new JSONObject("{\"name\":\"John\",\"age\":30,\"active\":true}");
      * Map<String, Object> map = JSONUtil.unwrap(json);
@@ -467,7 +467,7 @@ public final class JSONUtil {
      *   <li><b>JavaBeans:</b> Any class with proper getter/setter methods</li>
      * </ul>
      * 
-     * <p><b>Examples:</b></p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Convert to a specific Map type
      * JSONObject json = new JSONObject("{\"z\":1,\"a\":2}");
@@ -515,7 +515,7 @@ public final class JSONUtil {
      * and JSONArrays according to the specified type information.
      * </p>
      * 
-     * <p><b>Examples:</b></p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Complex generic Map
      * Type<Map<String, List<String>>> type = N.typeOf("Map<String, List<String>>");
@@ -628,7 +628,7 @@ public final class JSONUtil {
      *   <li>JSON arrays → List&lt;Object&gt;</li>
      * </ul>
      * 
-     * <p><b>Example:</b></p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * JSONArray json = new JSONArray("[\"text\",123,true,null,{\"key\":\"value\"},[1,2,3]]");
      * List<Object> list = JSONUtil.unwrap(json);
@@ -660,7 +660,7 @@ public final class JSONUtil {
      *   <li><b>Array types:</b> Both primitive arrays (int[], double[], etc.) and object arrays</li>
      * </ul>
      * 
-     * <p><b>Examples:</b></p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Convert to typed List
      * JSONArray json = new JSONArray("[\"Alice\",\"Bob\",\"Charlie\"]");
@@ -710,7 +710,7 @@ public final class JSONUtil {
      *   <li>JSONObject.NULL is converted to Java null</li>
      * </ul>
      * 
-     * <p><b>Examples:</b></p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Typed List with complex elements
      * Type<List<User>> userListType = N.typeOf("List<User>");
@@ -822,7 +822,7 @@ public final class JSONUtil {
      * from a JSONArray. Each element in the JSONArray is converted to the specified type.
      * </p>
      * 
-     * <p><b>Examples:</b></p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // List of strings
      * JSONArray json = new JSONArray("[\"apple\",\"banana\",\"orange\"]");
@@ -856,7 +856,7 @@ public final class JSONUtil {
      * of nested structures according to the provided type information.
      * </p>
      * 
-     * <p><b>Examples:</b></p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // List of Maps
      * Type<Map<String, Object>> mapType = N.typeOf("Map<String, Object>");

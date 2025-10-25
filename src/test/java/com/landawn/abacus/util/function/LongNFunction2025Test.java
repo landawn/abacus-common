@@ -45,7 +45,8 @@ public class LongNFunction2025Test extends TestBase {
         final LongNFunction<String> function = args -> {
             final StringBuilder sb = new StringBuilder();
             for (int i = 0; i < args.length; i++) {
-                if (i > 0) sb.append(",");
+                if (i > 0)
+                    sb.append(",");
                 sb.append(args[i]);
             }
             return sb.toString();
@@ -127,7 +128,8 @@ public class LongNFunction2025Test extends TestBase {
     @Test
     public void testApply_calculateAverage() {
         final LongNFunction<Double> function = args -> {
-            if (args.length == 0) return 0.0;
+            if (args.length == 0)
+                return 0.0;
             long sum = 0;
             for (final long arg : args) {
                 sum += arg;
@@ -142,10 +144,12 @@ public class LongNFunction2025Test extends TestBase {
     @Test
     public void testApply_findMax() {
         final LongNFunction<Long> function = args -> {
-            if (args.length == 0) return Long.MIN_VALUE;
+            if (args.length == 0)
+                return Long.MIN_VALUE;
             long max = args[0];
             for (final long arg : args) {
-                if (arg > max) max = arg;
+                if (arg > max)
+                    max = arg;
             }
             return max;
         };
@@ -157,10 +161,12 @@ public class LongNFunction2025Test extends TestBase {
     @Test
     public void testApply_findMin() {
         final LongNFunction<Long> function = args -> {
-            if (args.length == 0) return Long.MAX_VALUE;
+            if (args.length == 0)
+                return Long.MAX_VALUE;
             long min = args[0];
             for (final long arg : args) {
-                if (arg < min) min = arg;
+                if (arg < min)
+                    min = arg;
             }
             return min;
         };
@@ -200,7 +206,8 @@ public class LongNFunction2025Test extends TestBase {
     @Test
     public void testApply_complexCalculation() {
         final LongNFunction<Double> function = args -> {
-            if (args.length == 0) return 0.0;
+            if (args.length == 0)
+                return 0.0;
             long sumSquares = 0;
             for (final long arg : args) {
                 sumSquares += arg * arg;

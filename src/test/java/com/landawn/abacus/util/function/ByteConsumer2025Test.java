@@ -122,7 +122,7 @@ public class ByteConsumer2025Test extends TestBase {
 
     @Test
     public void testSideEffects() {
-        final byte[] counter = {0};
+        final byte[] counter = { 0 };
         ByteConsumer consumer = b -> counter[0]++;
 
         consumer.accept((byte) 1);

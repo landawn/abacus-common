@@ -79,7 +79,7 @@ public class BooleanPredicate2025Test extends TestBase {
 
         BooleanPredicate combined = isTrue.and(alwaysTrue);
 
-        assertTrue(combined.test(true));   // true && true
+        assertTrue(combined.test(true)); // true && true
         assertFalse(combined.test(false)); // false && true
     }
 
@@ -102,7 +102,7 @@ public class BooleanPredicate2025Test extends TestBase {
 
         BooleanPredicate combined = isTrue.or(isFalse);
 
-        assertTrue(combined.test(true));  // true || false
+        assertTrue(combined.test(true)); // true || false
         assertTrue(combined.test(false)); // false || true
     }
 
@@ -154,7 +154,7 @@ public class BooleanPredicate2025Test extends TestBase {
         BooleanPredicate predicate = new BooleanPredicate() {
             @Override
             public boolean test(boolean value) {
-                return !value;  // Negation
+                return !value; // Negation
             }
         };
 

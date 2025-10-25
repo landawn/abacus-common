@@ -89,7 +89,7 @@ public final class Maps {
      * The Iterables should be of the same length. If they are not, the resulting Map will have the size of the smaller Iterable.
      * The keys and values are associated in the order in which they are provided (i.e., the first key is associated with the first value, and so on)
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Example 1: Same length iterables
      * List<String> keys = Arrays.asList("name", "age", "city");
@@ -166,8 +166,8 @@ public final class Maps {
     /**
      * New target map.
      *
-     * @param m
-     * @return
+     * @param m the map to create a new instance of the same type
+     * @return a new map instance of the same type as the input map, or a HashMap if the input is {@code null}
      */
     @SuppressWarnings("rawtypes")
     static Map newTargetMap(final Map<?, ?> m) {
@@ -177,9 +177,9 @@ public final class Maps {
     /**
      * New target map.
      *
-     * @param m
-     * @param size
-     * @return
+     * @param m the map to create a new instance of the same type
+     * @param size the initial capacity of the new map
+     * @return a new map instance of the same type as the input map with the specified size, or a HashMap if the input is {@code null}
      */
     @SuppressWarnings("rawtypes")
     static Map newTargetMap(final Map<?, ?> m, final int size) {
@@ -213,8 +213,8 @@ public final class Maps {
     /**
      * New ordering map.
      *
-     * @param m
-     * @return
+     * @param m the map to create a new instance that preserves insertion order
+     * @return a new map instance that preserves insertion order, or a LinkedHashMap if the input type cannot be instantiated
      */
     @SuppressWarnings("rawtypes")
     static Map newOrderingMap(final Map<?, ?> m) {
@@ -250,7 +250,7 @@ public final class Maps {
      * Returns the key set of the specified map if it is not null or empty. Otherwise, an empty immutable set is returned.
      * This is a convenience method that avoids null checks and provides a guaranteed non-null Set result.
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Map<String, Integer> map = new HashMap<>();
      * map.put("one", 1);
@@ -278,7 +278,7 @@ public final class Maps {
      * Otherwise, an empty immutable list is returned.
      * This is a convenience method that avoids null checks and provides a guaranteed non-null Collection result.
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Map<String, Integer> map = new HashMap<>();
      * map.put("one", 1);
@@ -306,7 +306,7 @@ public final class Maps {
      * Otherwise, an empty immutable set is returned.
      * This is a convenience method that avoids null checks and provides a guaranteed non-null Set result.
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Map<String, Integer> map = new HashMap<>();
      * map.put("one", 1);
@@ -336,7 +336,7 @@ public final class Maps {
      * The Iterables should be of the same length. If they are not, the resulting Map will have the size of the smaller Iterable.
      * The keys and values are associated in the order in which they are provided.
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * List<String> keys = Arrays.asList("a", "b", "c");
      * List<Integer> values = Arrays.asList(1, 2, 3);
@@ -378,7 +378,7 @@ public final class Maps {
      * The Iterables should be of the same length. If they are not, the resulting Map will have the size of the smaller Iterable.
      * If duplicate keys are encountered, the merge function is used to resolve the conflict.
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * List<String> keys = Arrays.asList("a", "b", "a");
      * List<Integer> values = Arrays.asList(1, 2, 3);
@@ -422,7 +422,7 @@ public final class Maps {
      * The resulting Map will have the size of the longer Iterable.
      * If one Iterable is shorter, the default value is used for the missing elements.
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * List<String> keys = Arrays.asList("a", "b");
      * List<Integer> values = Arrays.asList(1, 2, 3, 4);
@@ -448,7 +448,7 @@ public final class Maps {
      * The resulting Map will have entries for all elements from both Iterables.
      * If one Iterable is shorter, default values are used. Duplicate keys are handled by the merge function.
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * List<String> keys = Arrays.asList("a", "b");
      * List<Integer> values = Arrays.asList(1, 2, 3);
@@ -501,7 +501,7 @@ public final class Maps {
      * or an empty {@code Nullable} if the map is empty or contains no mapping for the key.
      * This method properly handles null values in the map.
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Map<String, String> map = new HashMap<>();
      * map.put("key1", "value1");
@@ -538,7 +538,7 @@ public final class Maps {
      * First retrieves the inner map using the outer key, then retrieves the value using the inner key.
      * Returns an empty {@code Nullable} if either map is empty or the keys are not found.
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Map<String, Map<String, Integer>> nestedMap = new HashMap<>();
      * Map<String, Integer> innerMap = new HashMap<>();
@@ -581,7 +581,7 @@ public final class Maps {
      * Returns the value to which the specified key is mapped, or defaultValue if the key is absent.
      * A key is considered absent if the map is empty, contains no mapping for the key, or the mapped value is null.
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Map<String, String> map = new HashMap<>();
      * map.put("key1", "value1");
@@ -624,7 +624,7 @@ public final class Maps {
      * First retrieves the inner map using the outer key, then retrieves the value using the inner key.
      * Returns defaultValue if either map is empty, keys are not found, or the value is null.
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Map<String, Map<String, Integer>> nestedMap = new HashMap<>();
      * Map<String, Integer> innerMap = new HashMap<>();
@@ -671,7 +671,7 @@ public final class Maps {
      * Returns the List value to which the specified key is mapped, or an empty immutable List if the key is absent.
      * A key is considered absent if the map is empty, contains no mapping for the key, or the mapped value is null.
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Map<String, List<String>> map = new HashMap<>();
      * map.put("fruits", Arrays.asList("apple", "banana"));
@@ -708,7 +708,7 @@ public final class Maps {
      * Returns the Set value to which the specified key is mapped, or an empty immutable Set if the key is absent.
      * A key is considered absent if the map is empty, contains no mapping for the key, or the mapped value is null.
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Map<String, Set<Integer>> map = new HashMap<>();
      * map.put("primes", new HashSet<>(Arrays.asList(2, 3, 5, 7)));
@@ -745,7 +745,7 @@ public final class Maps {
      * Returns the Map value to which the specified key is mapped, or an empty immutable Map if the key is absent.
      * A key is considered absent if the map is empty, contains no mapping for the key, or the mapped value is null.
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Map<String, Map<String, Integer>> map = new HashMap<>();
      * Map<String, Integer> innerMap = new HashMap<>();
@@ -783,11 +783,11 @@ public final class Maps {
     }
 
     /**
-     * Returns an OptionalBoolean containing the boolean value mapped to the specified key.
-     * If the map is empty, the key is not found, or the mapped value is null, returns an empty OptionalBoolean.
-     * Non-Boolean values are converted to boolean using standard conversion rules.
+     * Returns an empty {@code OptionalBoolean} if the specified {@code map} is empty, or no value found by the specified {@code key}, or the mapping value is {@code null}.
+     * Otherwise returns an {@code OptionalBoolean} with the value mapped by the specified {@code key}.
+     * If the mapped value is not Boolean type, underlying conversion will be executed.
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Map<String, Object> map = new HashMap<>();
      * map.put("flag1", true);
@@ -822,11 +822,11 @@ public final class Maps {
     }
 
     /**
-     * Returns the boolean value mapped to the specified key, or defaultForNull if not found.
-     * If the map is empty, the key is not found, or the mapped value is null, returns defaultForNull.
-     * Non-Boolean values are converted to boolean using standard conversion rules.
+     * Returns the specified {@code defaultForNull} if the specified {@code map} is empty, or no value found by the specified {@code key}, or the mapping value is {@code null}.
+     * Otherwise returns the value mapped by the specified {@code key}.
+     * If the mapped value is not Boolean type, underlying conversion will be executed.
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Map<String, Object> map = new HashMap<>();
      * map.put("enabled", true);
@@ -860,11 +860,11 @@ public final class Maps {
     }
 
     /**
-     * Returns an OptionalChar containing the character value mapped to the specified key.
-     * If the map is empty, the key is not found, or the mapped value is null, returns an empty OptionalChar.
-     * Non-Character values are converted to char using standard conversion rules.
+     * Returns an empty {@code OptionalChar} if the specified {@code map} is empty, or no value found by the specified {@code key}, or the mapping value is {@code null}.
+     * Otherwise returns an {@code OptionalChar} with the value mapped by the specified {@code key}.
+     * If the mapped value is not Character type, underlying conversion will be executed.
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Map<String, Object> map = new HashMap<>();
      * map.put("letter", 'A');
@@ -899,11 +899,11 @@ public final class Maps {
     }
 
     /**
-     * Returns the character value mapped to the specified key, or defaultForNull if not found.
-     * If the map is empty, the key is not found, or the mapped value is null, returns defaultForNull.
-     * Non-Character values are converted to char using standard conversion rules.
+     * Returns the specified {@code defaultForNull} if the specified {@code map} is empty, or no value found by the specified {@code key}, or the mapping value is {@code null}.
+     * Otherwise returns the value mapped by the specified {@code key}.
+     * If the mapped value is not Character type, underlying conversion will be executed.
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Map<String, Object> map = new HashMap<>();
      * map.put("grade", 'A');
@@ -937,11 +937,11 @@ public final class Maps {
     }
 
     /**
-     * Returns an OptionalByte containing the byte value mapped to the specified key.
-     * If the map is empty, the key is not found, or the mapped value is null, returns an empty OptionalByte.
-     * Non-Number values are converted to byte using standard conversion rules.
+     * Returns an empty {@code OptionalByte} if the specified {@code map} is empty, or no value found by the specified {@code key}, or the mapping value is {@code null}.
+     * Otherwise returns an {@code OptionalByte} with the value mapped by the specified {@code key}.
+     * If the mapped value is not Byte/Number type, underlying conversion will be executed.
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Map<String, Object> map = new HashMap<>();
      * map.put("small", (byte) 10);
@@ -976,11 +976,11 @@ public final class Maps {
     }
 
     /**
-     * Returns the byte value mapped to the specified key, or defaultForNull if not found.
-     * If the map is empty, the key is not found, or the mapped value is null, returns defaultForNull.
-     * Non-Number values are converted to byte using standard conversion rules.
+     * Returns the specified {@code defaultForNull} if the specified {@code map} is empty, or no value found by the specified {@code key}, or the mapping value is {@code null}.
+     * Otherwise returns the value mapped by the specified {@code key}.
+     * If the mapped value is not Byte/Number type, underlying conversion will be executed.
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Map<String, Object> map = new HashMap<>();
      * map.put("id", (byte) 5);
@@ -1014,11 +1014,11 @@ public final class Maps {
     }
 
     /**
-     * Returns an OptionalShort containing the short value mapped to the specified key.
-     * If the map is empty, the key is not found, or the mapped value is null, returns an empty OptionalShort.
-     * Non-Number values are converted to short using standard conversion rules.
+     * Returns an empty {@code OptionalShort} if the specified {@code map} is empty, or no value found by the specified {@code key}, or the mapping value is {@code null}.
+     * Otherwise returns an {@code OptionalShort} with the value mapped by the specified {@code key}.
+     * If the mapped value is not Short/Number type, underlying conversion will be executed.
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Map<String, Object> map = new HashMap<>();
      * map.put("year", (short) 2023);
@@ -1053,11 +1053,11 @@ public final class Maps {
     }
 
     /**
-     * Returns the short value mapped to the specified key, or defaultForNull if not found.
-     * If the map is empty, the key is not found, or the mapped value is null, returns defaultForNull.
-     * Non-Number values are converted to short using standard conversion rules.
+     * Returns the specified {@code defaultForNull} if the specified {@code map} is empty, or no value found by the specified {@code key}, or the mapping value is {@code null}.
+     * Otherwise returns the value mapped by the specified {@code key}.
+     * If the mapped value is not Short/Number type, underlying conversion will be executed.
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Map<String, Object> map = new HashMap<>();
      * map.put("port", (short) 8080);
@@ -1091,11 +1091,11 @@ public final class Maps {
     }
 
     /**
-     * Returns an OptionalInt containing the integer value mapped to the specified key.
-     * If the map is empty, the key is not found, or the mapped value is null, returns an empty OptionalInt.
-     * Non-Number values are converted to int using standard conversion rules.
+     * Returns an empty {@code OptionalInt} if the specified {@code map} is empty, or no value found by the specified {@code key}, or the mapping value is {@code null}.
+     * Otherwise returns an {@code OptionalInt} with the value mapped by the specified {@code key}.
+     * If the mapped value is not Integer/Number type, underlying conversion will be executed.
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Map<String, Object> map = new HashMap<>();
      * map.put("count", 42);
@@ -1130,11 +1130,11 @@ public final class Maps {
     }
 
     /**
-     * Returns the integer value mapped to the specified key, or defaultForNull if not found.
-     * If the map is empty, the key is not found, or the mapped value is null, returns defaultForNull.
-     * Non-Number values are converted to int using standard conversion rules.
+     * Returns the specified {@code defaultForNull} if the specified {@code map} is empty, or no value found by the specified {@code key}, or the mapping value is {@code null}.
+     * Otherwise returns the value mapped by the specified {@code key}.
+     * If the mapped value is not Integer/Number type, underlying conversion will be executed.
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Map<String, Object> map = new HashMap<>();
      * map.put("age", 25);
@@ -1172,7 +1172,7 @@ public final class Maps {
      * Otherwise returns an {@code OptionalLong} with the value mapped by the specified {@code key}.
      * If the mapped value is not Long/Number type, underlying conversion will be executed.
      * 
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Map<String, Object> map = new HashMap<>();
      * map.put("count", 42L);
@@ -1214,7 +1214,7 @@ public final class Maps {
      * Otherwise returns the value mapped by the specified {@code key}.
      * If the mapped value is not Long/Number type, underlying conversion will be executed.
      * 
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Map<String, Object> map = new HashMap<>();
      * map.put("count", 42L);
@@ -1257,7 +1257,7 @@ public final class Maps {
      * Otherwise returns an {@code OptionalFloat} with the value mapped by the specified {@code key}.
      * If the mapped value is not Float/Number type, underlying conversion will be executed.
      * 
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Map<String, Object> map = new HashMap<>();
      * map.put("price", 19.99f);
@@ -1297,7 +1297,7 @@ public final class Maps {
      * Otherwise returns the value mapped by the specified {@code key}.
      * If the mapped value is not Float/Number type, underlying conversion will be executed.
      * 
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Map<String, Object> map = new HashMap<>();
      * map.put("price", 19.99f);
@@ -1338,7 +1338,7 @@ public final class Maps {
      * Otherwise returns an {@code OptionalDouble} with the value mapped by the specified {@code key}.
      * If the mapped value is not Double/Number type, underlying conversion will be executed.
      * 
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Map<String, Object> map = new HashMap<>();
      * map.put("temperature", 98.6);
@@ -1378,7 +1378,7 @@ public final class Maps {
      * Otherwise returns the value mapped by the specified {@code key}.
      * If the mapped value is not Double/Number type, underlying conversion will be executed.
      * 
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Map<String, Object> map = new HashMap<>();
      * map.put("temperature", 98.6);
@@ -1419,7 +1419,7 @@ public final class Maps {
      * Otherwise returns an {@code Optional<String>} with the value mapped by the specified {@code key}.
      * If the mapped value is not String type, underlying conversion will be executed.
      * 
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Map<String, Object> map = new HashMap<>();
      * map.put("name", "John");
@@ -1461,7 +1461,7 @@ public final class Maps {
      * or {@code defaultForNull} if the specified map is empty or contains no value for the key or the mapping value is {@code null}.
      * If the mapped value is not of String type, underlying conversion will be executed by {@code N.stringOf(value)}.
      * 
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Map<String, Object> map = new HashMap<>();
      * map.put("name", "John");
@@ -1507,7 +1507,7 @@ public final class Maps {
      * Otherwise returns an {@code Optional<T>} with the value mapped by the specified {@code key}.
      * If the mapped value is not {@code T} type, underlying conversion will be executed by {@code N.convert(val, targetType)}.
      * 
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Map<String, Object> map = new HashMap<>();
      * map.put("date", "2023-12-25");
@@ -1554,7 +1554,7 @@ public final class Maps {
      * Otherwise returns an {@code Optional<T>} with the value mapped by the specified {@code key}.
      * If the mapped value is not {@code T} type, underlying conversion will be executed by {@code N.convert(val, targetType)}.
      * 
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Map<String, Object> map = new HashMap<>();
      * map.put("items", Arrays.asList("A", "B", "C"));
@@ -1597,7 +1597,7 @@ public final class Maps {
      * or {@code defaultForNull} if the specified map is empty or contains no value for the key or the mapping value is {@code null}.
      * If the mapped value is not of type {@code T}, an underlying conversion will be executed.
      * 
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Map<String, Object> map = new HashMap<>();
      * map.put("count", "100");
@@ -1648,9 +1648,9 @@ public final class Maps {
      * Returns the value associated with the specified {@code key} if it exists and is not {@code null} in the specified {@code map},
      * otherwise puts a new value obtained from {@code defaultValueSupplier} and returns it.
      * 
-     * <p>Absent means key is not found in the specified map or found with {@code null} value.
-     * 
-     * <p>Example usage:</p>
+     * <p>Here absent means key is not found in the specified map or found with {@code null} value.
+     *
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Map<String, List<String>> map = new HashMap<>();
      * 
@@ -1689,9 +1689,9 @@ public final class Maps {
      * Returns the value associated with the specified {@code key} if it exists and is not {@code null} in the specified {@code map},
      * otherwise puts a new {@code List} and returns it.
      * 
-     * <p>Absent means key is not found in the specified map or found with {@code null} value.
+     * <p>Here absent means key is not found in the specified map or found with {@code null} value.
      * 
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Map<String, List<Integer>> map = new HashMap<>();
      * 
@@ -1726,9 +1726,9 @@ public final class Maps {
      * Returns the value associated with the specified {@code key} if it exists and is not {@code null} in the specified {@code map},
      * otherwise puts a new {@code Set} and returns it.
      * 
-     * <p>Absent means key is not found in the specified map or found with {@code null} value.
+     * <p>Here absent means key is not found in the specified map or found with {@code null} value.
      * 
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Map<String, Set<String>> map = new HashMap<>();
      * 
@@ -1762,9 +1762,9 @@ public final class Maps {
      * Returns the value associated with the specified {@code key} if it exists and is not {@code null} in the specified {@code map},
      * otherwise puts a new {@code LinkedHashSet} and returns it.
      * 
-     * <p>Absent means key is not found in the specified map or found with {@code null} value.
+     * <p>Here absent means key is not found in the specified map or found with {@code null} value.
      * 
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Map<String, Set<String>> map = new HashMap<>();
      * 
@@ -1796,9 +1796,9 @@ public final class Maps {
      * Returns the value associated with the specified {@code key} if it exists and is not {@code null} in the specified {@code map},
      * otherwise puts a new {@code Map} and returns it.
      * 
-     * <p>Absent means key is not found in the specified map or found with {@code null} value.
+     * <p>Here absent means key is not found in the specified map or found with {@code null} value.
      * 
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Map<String, Map<String, Integer>> map = new HashMap<>();
      * 
@@ -1833,9 +1833,9 @@ public final class Maps {
      * Returns the value associated with the specified {@code key} if it exists and is not {@code null} in the specified {@code map},
      * otherwise puts a new {@code LinkedHashMap} and returns it.
      * 
-     * <p>Absent means key is not found in the specified map or found with {@code null} value.
+     * <p>Here absent means key is not found in the specified map or found with {@code null} value.
      * 
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Map<String, Map<String, String>> map = new HashMap<>();
      * 
@@ -1867,16 +1867,14 @@ public final class Maps {
     /**
      * Returns a list of values of the keys which exist in the specified {@code Map}.
      * If the key doesn't exist in the {@code Map} or associated value is {@code null}, no value will be added into the returned list.
-     * 
-     * <p>Present means key is found in the specified map with {@code non-null} value.
-     * 
-     * <p>Example usage:</p>
+     *
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Map<String, Integer> map = new HashMap<>();
      * map.put("a", 1);
      * map.put("b", 2);
      * map.put("c", null);
-     * 
+     *
      * List<String> keys = Arrays.asList("a", "b", "c", "d");
      * List<Integer> values = Maps.getIfPresentForEach(map, keys);
      * // values = [1, 2] (null value for "c" and missing "d" are not included)
@@ -1887,6 +1885,7 @@ public final class Maps {
      * @param map the map to check for keys
      * @param keys the collection of keys to check in the map
      * @return a list of values corresponding to the keys found in the map
+     * @throws IllegalArgumentException if any input validation fails
      */
     public static <K, V> List<V> getIfPresentForEach(final Map<K, ? extends V> map, final Collection<?> keys) throws IllegalArgumentException {
         if (N.isEmpty(map) || N.isEmpty(keys)) {
@@ -1910,10 +1909,8 @@ public final class Maps {
 
     /**
      * Returns a list of values mapped by the keys which exist in the specified {@code Map}, or default value if the key doesn't exist in the {@code Map} or associated value is {@code null}.
-     * 
-     * <p>Absent means key is not found in the specified map or found with {@code null} value.
-     * 
-     * <p>Example usage:</p>
+     *
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Map<String, Integer> map = new HashMap<>();
      * map.put("a", 1);
@@ -1962,33 +1959,33 @@ public final class Maps {
 
     /**
      * Retrieves a value from a nested map structure using a dot-separated path. For example:
-     * <pre>
-     * <code>
-     Map map = N.asMap("key1", "val1");
-     assertEquals("val1", Maps.getByPath(map, "key1"));
-    
-     map = N.asMap("key1", N.asList("val1"));
-     assertEquals("val1", Maps.getByPath(map, "key1[0]"));
-    
-     map = N.asMap("key1", N.asSet("val1"));
-     assertEquals("val1", Maps.getByPath(map, "key1[0]"));
-    
-     map = N.asMap("key1", N.asList(N.asLinkedHashSet("val1", "val2")));
-     assertEquals("val2", Maps.getByPath(map, "key1[0][1]"));
-    
-     map = N.asMap("key1", N.asSet(N.asList(N.asSet("val1"))));
-     assertEquals("val1", Maps.getByPath(map, "key1[0][0][0]"));
-    
-     map = N.asMap("key1", N.asList(N.asLinkedHashSet("val1", N.asMap("key2", "val22"))));
-     assertEquals("val22", Maps.getByPath(map, "key1[0][1].key2"));
-    
-     map = N.asMap("key1", N.asList(N.asLinkedHashSet("val1", N.asMap("key2", N.asList("val22", N.asMap("key3", "val33"))))));
-     assertEquals("val33", Maps.getByPath(map, "key1[0][1].key2[1].key3"));
-    
-     map = N.asMap("key1", N.asList(N.asLinkedHashSet("val1", N.asMap("key2", N.asList("val22", N.asMap("key3", "val33"))))));
-     assertNull(Maps.getByPath(map, "key1[0][2].key2[1].key3"));
-     * </code>
-     * </pre>
+     * 
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Map map = N.asMap("key1", "val1");
+     * assertEquals("val1", Maps.getByPath(map, "key1"));
+     *
+     * map = N.asMap("key1", N.asList("val1"));
+     * assertEquals("val1", Maps.getByPath(map, "key1[0]"));
+     *
+     * map = N.asMap("key1", N.asSet("val1"));
+     * assertEquals("val1", Maps.getByPath(map, "key1[0]"));
+     *
+     * map = N.asMap("key1", N.asList(N.asLinkedHashSet("val1", "val2")));
+     * assertEquals("val2", Maps.getByPath(map, "key1[0][1]"));
+     *
+     * map = N.asMap("key1", N.asSet(N.asList(N.asSet("val1"))));
+     * assertEquals("val1", Maps.getByPath(map, "key1[0][0][0]"));
+     *
+     * map = N.asMap("key1", N.asList(N.asLinkedHashSet("val1", N.asMap("key2", "val22"))));
+     * assertEquals("val22", Maps.getByPath(map, "key1[0][1].key2"));
+     *
+     * map = N.asMap("key1", N.asList(N.asLinkedHashSet("val1", N.asMap("key2", N.asList("val22", N.asMap("key3", "val33"))))));
+     * assertEquals("val33", Maps.getByPath(map, "key1[0][1].key2[1].key3"));
+     *
+     * map = N.asMap("key1", N.asList(N.asLinkedHashSet("val1", N.asMap("key2", N.asList("val22", N.asMap("key3", "val33"))))));
+     * assertNull(Maps.getByPath(map, "key1[0][2].key2[1].key3"));
+     * }</pre>
      *
      * @param <T> the type of the value to be returned
      * @param map the map to retrieve the value from
@@ -2010,7 +2007,7 @@ public final class Maps {
      * Retrieves a value from a nested map structure using a dot-separated path.
      * The value is converted to the specified target type if necessary.
      * 
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Map<String, Object> map = new HashMap<>();
      * map.put("user", N.asMap("age", "25"));
@@ -2048,7 +2045,7 @@ public final class Maps {
      * Retrieves a value from a nested map structure using a dot-separated path.
      * If the path does not exist in the map, the provided default value is returned.
      * 
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Map<String, Object> map = new HashMap<>();
      * map.put("config", N.asMap("timeout", 30));
@@ -2082,7 +2079,7 @@ public final class Maps {
     /**
      * Retrieves a value from a nested map structure using a dot-separated path. If the value exists, it is returned wrapped in a {@code Nullable} object.
      * 
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Map<String, Object> map = new HashMap<>();
      * map.put("user", N.asMap("name", "John", "age", null));
@@ -2117,7 +2114,7 @@ public final class Maps {
      * Retrieves a value from a nested map structure using a dot-separated path. If the value exists, it is returned wrapped in a {@code Nullable} object.
      * The value is converted to the specified target type if necessary.
      * 
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Map<String, Object> map = new HashMap<>();
      * map.put("settings", N.asMap("maxConnections", "100"));
@@ -2219,7 +2216,7 @@ public final class Maps {
     /**
      * Checks if the specified map contains the specified entry.
      * 
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Map<String, Integer> map = new HashMap<>();
      * map.put("a", 1);
@@ -2249,7 +2246,7 @@ public final class Maps {
     /**
      * Checks if the specified map contains the specified key-value pair.
      * 
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Map<String, Integer> map = new HashMap<>();
      * map.put("a", 1);
@@ -2288,8 +2285,8 @@ public final class Maps {
      * The intersection contains entries whose keys are present in both maps with equal values.
      * The returned map's key-value pairs are taken from the first input map.
      *
-     * <p>Example usage:</p>
-     * <pre>
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
      * Map&lt;String, Integer&gt; map1 = new HashMap&lt;&gt;();
      * map1.put("a", 1);
      * map1.put("b", 2);
@@ -2313,7 +2310,7 @@ public final class Maps {
      *
      * Map&lt;String, String&gt; result2 = Maps.intersection(map3, map4); // result will be {"x": "foo"}
      * // Only "x" is included because it has the same value in both maps
-     * </pre>
+     * }</pre>
      *
      * @param <K> the type of keys in the map
      * @param <V> the type of values in the map
@@ -2354,8 +2351,8 @@ public final class Maps {
      * and the entry's value is a pair consisting of the value from the first map and the value from the second map.
      * If a key exists in the first map but not in the second, the value from the second map in the pair is an empty {@code Nullable}.
      *
-     * <p>Example usage:</p>
-     * <pre>
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
      * Map&lt;String, Integer&gt; map1 = Maps.of("a", 1, "b", 2, "c", 3);
      * Map&lt;String, Integer&gt; map2 = Maps.of("a", 1, "b", 20, "d", 4);
      * 
@@ -2363,7 +2360,7 @@ public final class Maps {
      * // diff contains:
      * // "b" -> Pair.of(2, Nullable.of(20))    // different values
      * // "c" -> Pair.of(3, Nullable.empty())   // key only in map1
-     * </pre>
+     * }</pre>
      *
      * <p>Note that this method only returns keys from the first map. Keys that exist only in the second map 
      * are not included in the result. If you need to identify keys that are unique to each map, 
@@ -2422,8 +2419,8 @@ public final class Maps {
      * <li>If the key exists in both maps with different values, the pair contains both values</li>
      * </ul>
      *
-     * <p>Example usage:</p>
-     * <pre>
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
      * Map&lt;String, Integer&gt; map1 = Maps.of("a", 1, "b", 2, "c", 3);
      * Map&lt;String, Integer&gt; map2 = Maps.of("b", 2, "c", 4, "d", 5);
      * 
@@ -2433,7 +2430,7 @@ public final class Maps {
      * // "c" -> Pair.of(Nullable.of(3), Nullable.of(4))     // different values
      * // "d" -> Pair.of(Nullable.empty(), Nullable.of(5))   // key only in map2
      * // Note: "b" is not included because it has identical values in both maps
-     * </pre>
+     * }</pre>
      *
      * <p>If either input map is null, it is treated as an empty map.
      *
@@ -2495,15 +2492,33 @@ public final class Maps {
 
     /**
      * Puts if the specified key is not already associated with a value (or is mapped to {@code null}).
+     * 
+     * <p>Here absent means key is not found in the specified map or found with {@code null} value.
      *
-     * <br />
-     * Absent -> key is not found in the specified map or found with {@code null} value.
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Map<String, String> map = new HashMap<>();
+     * map.put("key1", "value1");
+     * map.put("key2", null);
+     *
+     * String result1 = Maps.putIfAbsent(map, "key1", "newValue");
+     * // result1 = null (key1 already has a value, not changed)
+     * // map = {key1=value1, key2=null}
+     *
+     * String result2 = Maps.putIfAbsent(map, "key2", "value2");
+     * // result2 = null (key2 was null, now set to value2)
+     * // map = {key1=value1, key2=value2}
+     *
+     * String result3 = Maps.putIfAbsent(map, "key3", "value3");
+     * // result3 = null (key3 was absent, now set to value3)
+     * // map = {key1=value1, key2=value2, key3=value3}
+     * }</pre>
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param map
-     * @param key
-     * @param value
+     * @param map the map to put the value in
+     * @param key the key to associate the value with
+     * @param value the value to put if the key is absent
      * @return the previous value associated with the specified key, or {@code null} if there was no mapping for the key
      * @see Map#putIfAbsent(Object, Object)
      */
@@ -2519,15 +2534,29 @@ public final class Maps {
 
     /**
      * Puts if the specified key is not already associated with a value (or is mapped to {@code null}).
+     * 
+     * <p>Here absent means key is not found in the specified map or found with {@code null} value.
      *
-     * <br />
-     * Absent -> key is not found in the specified map or found with {@code null} value.
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Map<String, List<String>> map = new HashMap<>();
+     * map.put("key1", Arrays.asList("a", "b"));
+     *
+     * // Supplier is only called when the key is absent
+     * List<String> result1 = Maps.putIfAbsent(map, "key1", () -> new ArrayList<>());
+     * // result1 = null (key1 already has a value, supplier not called)
+     * // map = {key1=[a, b]}
+     *
+     * List<String> result2 = Maps.putIfAbsent(map, "key2", () -> new ArrayList<>());
+     * // result2 = null (key2 was absent, supplier called and value set)
+     * // map = {key1=[a, b], key2=[]}
+     * }</pre>
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param map
-     * @param key
-     * @param supplier
+     * @param map the map to put the value in
+     * @param key the key to associate the value with
+     * @param supplier the supplier to get the value from if the key is absent
      * @return the previous value associated with the specified key, or {@code null} if there was no mapping for the key
      * @see Map#putIfAbsent(Object, Object)
      */
@@ -2546,7 +2575,7 @@ public final class Maps {
      * This method iterates through all entries in the source map and adds them to the target map if the key satisfies the filter condition.
      * The target map is modified in place.
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Map<String, Integer> target = new HashMap<>();
      * target.put("a", 1);
@@ -2591,7 +2620,7 @@ public final class Maps {
      * This method iterates through all entries in the source map and adds them to the target map if both the key and value satisfy the filter condition.
      * The target map is modified in place.
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Map<String, Integer> target = new HashMap<>();
      * target.put("a", 1);
@@ -2650,7 +2679,7 @@ public final class Maps {
      * This method removes an entry from the map only if the key is mapped to the specified value.
      * If the key is not present in the map or is mapped to a different value, the map remains unchanged.
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Map<String, Integer> map = new HashMap<>();
      * map.put("a", 1);
@@ -2692,7 +2721,7 @@ public final class Maps {
      * This method removes all entries from the map whose keys are contained in the provided collection.
      * If any of the keys in the collection are not present in the map, they are ignored.
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Map<String, Integer> map = new HashMap<>();
      * map.put("a", 1);
@@ -2728,7 +2757,7 @@ public final class Maps {
      * This method removes all entries from the map that have matching key-value pairs in the entriesToRemove map.
      * An entry is removed only if both the key and value match exactly.
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Map<String, Integer> map = new HashMap<>();
      * map.put("a", 1);
@@ -2769,7 +2798,7 @@ public final class Maps {
      * This method iterates through all entries in the map and removes those that satisfy the filter condition.
      * The map is modified in place.
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Map<String, Integer> map = new HashMap<>();
      * map.put("a", 1);
@@ -2823,7 +2852,7 @@ public final class Maps {
      * This method iterates through all entries in the map and removes those whose key and value satisfy the filter condition.
      * The map is modified in place.
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Map<String, Integer> map = new HashMap<>();
      * map.put("apple", 1);
@@ -2877,7 +2906,7 @@ public final class Maps {
      * This method iterates through all entries in the map and removes those whose keys satisfy the filter condition.
      * The map is modified in place.
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Map<String, Integer> map = new HashMap<>();
      * map.put("apple", 1);
@@ -2931,7 +2960,7 @@ public final class Maps {
      * This method iterates through all entries in the map and removes those whose values satisfy the filter condition.
      * The map is modified in place.
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Map<String, Integer> map = new HashMap<>();
      * map.put("a", 1);
@@ -2986,7 +3015,7 @@ public final class Maps {
      * This method updates the value for a key only if the current value matches the oldValue parameter.
      * If the key is not present or the current value doesn't match oldValue, the map remains unchanged.
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Map<String, Integer> map = new HashMap<>();
      * map.put("a", 1);
@@ -3026,7 +3055,7 @@ public final class Maps {
      * This method updates the value for a key only if the key exists in the map.
      * If the key is not present, the map remains unchanged.
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Map<String, Integer> map = new HashMap<>();
      * map.put("a", 1);
@@ -3064,7 +3093,7 @@ public final class Maps {
      * This method applies the provided function to each key-value pair in the map and updates the value with the function's result.
      * The function receives both the key and the current value as parameters.
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Map<String, Integer> map = new HashMap<>();
      * map.put("a", 1);
@@ -3106,7 +3135,7 @@ public final class Maps {
      * The predicate is tested against each Map.Entry in the original map.
      * The returned map is of the same type as the input map if possible.
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Map<String, Integer> map = new HashMap<>();
      * map.put("a", 1);
@@ -3148,7 +3177,7 @@ public final class Maps {
      * The predicate receives both the key and value as separate parameters.
      * The returned map is of the same type as the input map if possible.
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Map<String, Integer> map = new HashMap<>();
      * map.put("apple", 5);
@@ -3189,7 +3218,7 @@ public final class Maps {
      * This method creates a new map containing only the entries whose keys satisfy the predicate condition.
      * The returned map is of the same type as the input map if possible.
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Map<String, Integer> map = new HashMap<>();
      * map.put("apple", 1);
@@ -3230,7 +3259,7 @@ public final class Maps {
      * This method creates a new map containing only the entries whose values satisfy the predicate condition.
      * The returned map is of the same type as the input map if possible.
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Map<String, Integer> map = new HashMap<>();
      * map.put("a", 10);
@@ -3272,6 +3301,25 @@ public final class Maps {
      * Note: This method does not check for duplicate values in the input map. If there are duplicate values,
      * some information may be lost in the inversion process as each value in the resulting map must be unique.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Map<String, Integer> map = new HashMap<>();
+     * map.put("Alice", 1);
+     * map.put("Bob", 2);
+     * map.put("Charlie", 3);
+     *
+     * Map<Integer, String> inverted = Maps.invert(map);
+     * // inverted = {1=Alice, 2=Bob, 3=Charlie}
+     *
+     * // Example with duplicate values (last occurrence wins)
+     * Map<String, String> map2 = new HashMap<>();
+     * map2.put("key1", "valueA");
+     * map2.put("key2", "valueA");
+     *
+     * Map<String, String> inverted2 = Maps.invert(map2);
+     * // inverted2 = {valueA=key2} (key1 was overwritten)
+     * }</pre>
+     *
      * @param <K> the key type of the input map and the value type of the resulting map.
      * @param <V> the value type of the input map and the key type of the resulting map.
      * @param map the map to be inverted.
@@ -3295,6 +3343,26 @@ public final class Maps {
      * Inverts the given map by swapping its keys with its values.
      * The resulting map's keys are the input map's values and its values are the input map's keys.
      * If there are duplicate values in the input map, the merging operation specified by mergeOp is applied.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Map<String, String> map = new HashMap<>();
+     * map.put("key1", "valueA");
+     * map.put("key2", "valueA");
+     * map.put("key3", "valueB");
+     *
+     * // Use the first key when there are duplicates
+     * Map<String, String> inverted1 = Maps.invert(map, (oldKey, newKey) -> oldKey);
+     * // inverted1 = {valueA=key1, valueB=key3}
+     *
+     * // Use the last key when there are duplicates
+     * Map<String, String> inverted2 = Maps.invert(map, (oldKey, newKey) -> newKey);
+     * // inverted2 = {valueA=key2, valueB=key3}
+     *
+     * // Concatenate keys when there are duplicates
+     * Map<String, String> inverted3 = Maps.invert(map, (oldKey, newKey) -> oldKey + "," + newKey);
+     * // inverted3 = {valueA=key1,key2, valueB=key3}
+     * }</pre>
      *
      * @param <K> the key type of the input map and the value type of the resulting map.
      * @param <V> the value type of the input map and the key type of the resulting map.
@@ -3329,6 +3397,19 @@ public final class Maps {
     /**
      * Inverts the given map by mapping each value in the Collection to the corresponding key.
      * The resulting map's keys are the values in the Collection of the input maps and its values are Lists of the corresponding keys from the input map.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Map<String, List<Integer>> map = new HashMap<>();
+     * map.put("Alice", Arrays.asList(1, 2, 3));
+     * map.put("Bob", Arrays.asList(2, 4));
+     * map.put("Charlie", Arrays.asList(3, 5));
+     *
+     * Map<Integer, List<String>> inverted = Maps.flatInvert(map);
+     * // inverted = {1=[Alice], 2=[Alice, Bob], 3=[Alice, Charlie], 4=[Bob], 5=[Charlie]}
+     *
+     * // Each value from the collections becomes a key, mapping to all original keys that contained it
+     * }</pre>
      *
      * @param <K> the key type of the input map and the element type of the List values in the resulting map.
      * @param <V> the element type of the Collection values in the input map and the key type of the resulting map.
@@ -3414,6 +3495,19 @@ public final class Maps {
      * The keys of the flattened map are the keys of the original map and the keys of any nested maps, concatenated with a dot.
      * Note: This method does not modify the original map.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Map<String, Object> map = new HashMap<>();
+     * map.put("name", "John");
+     * Map<String, Object> address = new HashMap<>();
+     * address.put("city", "New York");
+     * address.put("zip", "10001");
+     * map.put("address", address);
+     *
+     * Map<String, Object> flattened = Maps.flatten(map);
+     * // flattened = {name=John, address.city=New York, address.zip=10001}
+     * }</pre>
+     *
      * @param map the map to be flattened.
      * @return a new map which is the flattened version of the input map.
      */
@@ -3426,6 +3520,20 @@ public final class Maps {
      * This method takes a map where some values may be other maps and returns a new map where all nested maps are flattened into the top-level map.
      * The keys of the flattened map are the keys of the original map and the keys of any nested maps, concatenated with a dot.
      * Note: This method does not modify the original map.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Map<String, Object> map = new HashMap<>();
+     * map.put("name", "John");
+     * Map<String, Object> address = new HashMap<>();
+     * address.put("city", "New York");
+     * address.put("zip", "10001");
+     * map.put("address", address);
+     *
+     * // Use a LinkedHashMap to preserve insertion order
+     * LinkedHashMap<String, Object> flattened = Maps.flatten(map, LinkedHashMap::new);
+     * // flattened = {name=John, address.city=New York, address.zip=10001}
+     * }</pre>
      *
      * @param <M> the type of the map to be returned. It extends the Map with String keys and Object values.
      * @param map the map to be flattened.
@@ -3441,6 +3549,20 @@ public final class Maps {
      * This method takes a map where some values may be other maps and returns a new map where all nested maps are flattened into the top-level map.
      * The keys of the flattened map are the keys of the original map and the keys of any nested maps, concatenated with a provided delimiter.
      * Note: This method does not modify the original map.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Map<String, Object> map = new HashMap<>();
+     * map.put("name", "John");
+     * Map<String, Object> address = new HashMap<>();
+     * address.put("city", "New York");
+     * address.put("zip", "10001");
+     * map.put("address", address);
+     *
+     * // Use underscore as delimiter instead of dot
+     * Map<String, Object> flattened = Maps.flatten(map, "_", HashMap::new);
+     * // flattened = {name=John, address_city=New York, address_zip=10001}
+     * }</pre>
      *
      * @param <M> the type of the map to be returned. It extends the Map with String keys and Object values.
      * @param map the map to be flattened.
@@ -3458,10 +3580,10 @@ public final class Maps {
 
     /**
      *
-     * @param map
-     * @param prefix
-     * @param delimiter
-     * @param output
+     * @param map the map to flatten
+     * @param prefix the prefix to prepend to keys
+     * @param delimiter the delimiter to use between key parts
+     * @param output the output map to store flattened entries
      */
     private static void flatten(final Map<String, Object> map, final String prefix, final String delimiter, final Map<String, Object> output) {
         if (N.isEmpty(map)) {
@@ -3492,6 +3614,17 @@ public final class Maps {
      * This method takes a flattened map where keys are concatenated with a dot and returns a new map where all keys are nested as per their original structure.
      * Note: This method does not modify the original map.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Map<String, Object> flattened = new HashMap<>();
+     * flattened.put("name", "John");
+     * flattened.put("address.city", "New York");
+     * flattened.put("address.zip", "10001");
+     *
+     * Map<String, Object> unflattened = Maps.unflatten(flattened);
+     * // unflattened = {name=John, address={city=New York, zip=10001}}
+     * }</pre>
+     *
      * @param map the flattened map to be unflattened.
      * @return a new map which is the unflattened version of the input map.
      */
@@ -3503,6 +3636,18 @@ public final class Maps {
      * Unflattens the given map using a provided map supplier.
      * This method takes a flattened map where keys are concatenated with a delimiter and returns a new map where all keys are nested as per their original structure.
      * Note: This method does not modify the original map.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Map<String, Object> flattened = new HashMap<>();
+     * flattened.put("name", "John");
+     * flattened.put("address.city", "New York");
+     * flattened.put("address.zip", "10001");
+     *
+     * // Use a LinkedHashMap to preserve insertion order
+     * LinkedHashMap<String, Object> unflattened = Maps.unflatten(flattened, LinkedHashMap::new);
+     * // unflattened = {name=John, address={city=New York, zip=10001}}
+     * }</pre>
      *
      * @param <M> the type of the map to be returned. It extends the Map with String keys and Object values.
      * @param map the flattened map to be unflattened.
@@ -3517,6 +3662,18 @@ public final class Maps {
      * Unflattens the given map using a provided map supplier and a delimiter.
      * This method takes a flattened map where keys are concatenated with a specified delimiter and returns a new map where all keys are nested as per their original structure.
      * Note: This method does not modify the original map.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Map<String, Object> flattened = new HashMap<>();
+     * flattened.put("name", "John");
+     * flattened.put("address_city", "New York");
+     * flattened.put("address_zip", "10001");
+     *
+     * // Use underscore as delimiter
+     * Map<String, Object> unflattened = Maps.unflatten(flattened, "_", HashMap::new);
+     * // unflattened = {name=John, address={city=New York, zip=10001}}
+     * }</pre>
      *
      * @param <M> the type of the map to be returned. It extends the Map with String keys and Object values.
      * @param map the flattened map to be unflattened.
@@ -3563,7 +3720,7 @@ public final class Maps {
      * If the converted key is different from the original key, the entry is moved to the new key.
      * Note that if multiple original keys convert to the same new key, the last value will overwrite previous ones.
      * 
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Convert keys to uppercase
      * Map<String, Integer> map = new HashMap<>();
@@ -3612,7 +3769,7 @@ public final class Maps {
      * If the converted key is different from the original key, the entry is moved to the new key.
      * If there is a conflict (i.e., the new key already exists in the map), the merger function is used to resolve the conflict.
      * 
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Merge values when keys collide
      * Map<String, Integer> map = new HashMap<>();
@@ -3638,7 +3795,7 @@ public final class Maps {
      * @param <V> the type of values in the map
      * @param map the map whose keys are to be replaced. This map is modified in-place.
      * @param keyConverter the function to apply to each key. Must not return null.
-     * @param merger the function to merge values in case of key conflicts. the first argument is the existing value, the second is the new value.
+     * @param merger the function to merge values in case of key conflicts. The first argument is the existing value, the second is the new value.
      */
     @Beta
     public static <K, V> void replaceKeys(final Map<K, V> map, final Function<? super K, ? extends K> keyConverter,

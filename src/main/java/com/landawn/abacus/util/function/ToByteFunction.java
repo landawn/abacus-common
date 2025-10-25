@@ -47,6 +47,20 @@ public interface ToByteFunction<T> extends Throwables.ToByteFunction<T, RuntimeE
     /**
      * Applies this function to the given argument.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * ToByteFunction<Byte> unbox = ToByteFunction.UNBOX;
+     * byte result1 = unbox.applyAsByte((byte) 42); // returns 42
+     * byte result2 = unbox.applyAsByte(null); // returns 0
+     *
+     * ToByteFunction<Number> fromNum = ToByteFunction.FROM_NUM;
+     * byte result3 = fromNum.applyAsByte(100); // returns 100
+     * byte result4 = fromNum.applyAsByte(256); // returns 0 (overflow)
+     *
+     * ToByteFunction<String> firstByte = str -> (byte) str.charAt(0);
+     * byte result5 = firstByte.applyAsByte("Hello"); // returns 72 (ASCII 'H')
+     * }</pre>
+     *
      * @param value the function argument
      * @return the function result as a byte value
      */

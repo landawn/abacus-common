@@ -44,7 +44,7 @@ public interface ShortBiConsumer extends Throwables.ShortBiConsumer<RuntimeExcep
      * memory efficiency is important and values fit within the short range
      * (-32,768 to 32,767).
      *
-     * <p>Example usage:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ShortBiConsumer maxTracker = (a, b) -> {
      *     short max = (short) Math.max(a, b);
@@ -61,8 +61,7 @@ public interface ShortBiConsumer extends Throwables.ShortBiConsumer<RuntimeExcep
      * }</pre>
      *
      * @param t the first input argument
-     * @param u the second input argument
-     * @throws RuntimeException if the operation cannot be completed
+     * @param u the second input argument if the operation cannot be completed
      */
     @Override
     void accept(short t, short u);
@@ -78,7 +77,7 @@ public interface ShortBiConsumer extends Throwables.ShortBiConsumer<RuntimeExcep
      * consumer receives the same two short input arguments. This is useful for
      * performing multiple independent operations on the same pair of values.
      *
-     * <p>Example usage:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ShortBiConsumer printSum = (a, b) -> 
      *     System.out.println("Sum: " + (a + b));

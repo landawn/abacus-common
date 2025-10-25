@@ -77,6 +77,7 @@ abstract class AbstractJSONParser extends AbstractParser<JSONSerializationConfig
      * Deserializes a JSON string into an object of the specified target class using default deserialization configuration.
      * This method provides a convenient way to parse JSON without specifying custom configuration options.
      *
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * User user = parser.readString("{\"name\":\"John\",\"age\":30}", User.class);
      * List<String> names = parser.readString("[\"Alice\",\"Bob\"]", List.class);
@@ -96,6 +97,7 @@ abstract class AbstractJSONParser extends AbstractParser<JSONSerializationConfig
      * Deserializes a JSON string into an object of the specified target class using custom deserialization configuration.
      * This method allows fine-grained control over the deserialization process through configuration options.
      *
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * JSONDeserializationConfig config = new JSONDeserializationConfig();
      * User user = parser.readString("{\"name\":\"John\"}", config, User.class);
@@ -118,6 +120,7 @@ abstract class AbstractJSONParser extends AbstractParser<JSONSerializationConfig
      * Deserializes a JSON array string and populates the provided object array with the deserialized elements.
      * This method uses default deserialization configuration and directly populates the output array.
      *
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Object[] output = new Object[3];
      * parser.readString("[\"Alice\",\"Bob\",\"Charlie\"]", output);
@@ -135,6 +138,7 @@ abstract class AbstractJSONParser extends AbstractParser<JSONSerializationConfig
      * Deserializes a JSON array string and populates the provided object array using custom deserialization configuration.
      * This method allows fine-grained control over how array elements are deserialized.
      *
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Object[] output = new Object[3];
      * JSONDeserializationConfig config = new JSONDeserializationConfig();
@@ -155,6 +159,7 @@ abstract class AbstractJSONParser extends AbstractParser<JSONSerializationConfig
      * Deserializes a JSON array string and populates the provided collection with the deserialized elements.
      * This method uses default deserialization configuration and adds elements to the output collection.
      *
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * List<String> output = new ArrayList<>();
      * parser.readString("[\"Alice\",\"Bob\"]", output);
@@ -172,6 +177,7 @@ abstract class AbstractJSONParser extends AbstractParser<JSONSerializationConfig
      * Deserializes a JSON array string and populates the provided collection using custom deserialization configuration.
      * This method allows fine-grained control over how collection elements are deserialized.
      *
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * List<String> output = new ArrayList<>();
      * JSONDeserializationConfig config = new JSONDeserializationConfig();
@@ -192,6 +198,7 @@ abstract class AbstractJSONParser extends AbstractParser<JSONSerializationConfig
      * Deserializes a JSON object string and populates the provided map with the deserialized key-value pairs.
      * This method uses default deserialization configuration and adds entries to the output map.
      *
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Map<String, Object> output = new HashMap<>();
      * parser.readString("{\"name\":\"John\",\"age\":30}", output);
@@ -209,6 +216,7 @@ abstract class AbstractJSONParser extends AbstractParser<JSONSerializationConfig
      * Deserializes a JSON object string and populates the provided map using custom deserialization configuration.
      * This method allows fine-grained control over how map entries are deserialized.
      *
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Map<String, Object> output = new HashMap<>();
      * JSONDeserializationConfig config = new JSONDeserializationConfig();
@@ -229,6 +237,7 @@ abstract class AbstractJSONParser extends AbstractParser<JSONSerializationConfig
      * Deserializes a substring of a JSON string into an object of the specified target class using default configuration.
      * This method is useful when parsing a portion of a larger JSON string without creating a substring copy.
      *
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String json = "{\"users\":[{\"name\":\"John\"}]}";
      * User user = parser.deserialize(json, 10, 25, User.class);
@@ -250,6 +259,7 @@ abstract class AbstractJSONParser extends AbstractParser<JSONSerializationConfig
      * Deserializes a substring of a JSON string into an object using custom deserialization configuration.
      * This method allows fine-grained control over the deserialization process for a specific portion of the input.
      *
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String json = "{\"users\":[{\"name\":\"John\"}]}";
      * JSONDeserializationConfig config = new JSONDeserializationConfig();
@@ -274,6 +284,7 @@ abstract class AbstractJSONParser extends AbstractParser<JSONSerializationConfig
      * Creates a stream that lazily deserializes elements from a JSON array string.
      * This method provides efficient streaming of large JSON arrays without loading all elements into memory at once.
      *
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Stream<User> userStream = parser.stream("[{\"name\":\"John\"},{\"name\":\"Jane\"}]", Type.of(User.class));
      * userStream.forEach(System.out::println);
@@ -293,6 +304,7 @@ abstract class AbstractJSONParser extends AbstractParser<JSONSerializationConfig
      * Creates a stream that lazily deserializes elements from a JSON array file.
      * This method provides efficient streaming of large JSON files without loading the entire file into memory.
      *
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * File jsonFile = new File("users.json");
      * Stream<User> userStream = parser.stream(jsonFile, Type.of(User.class));
@@ -312,6 +324,7 @@ abstract class AbstractJSONParser extends AbstractParser<JSONSerializationConfig
      * Creates a stream that lazily deserializes elements from a JSON array input stream.
      * This method provides efficient streaming from input streams with optional automatic resource management.
      *
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * InputStream is = new FileInputStream("users.json");
      * Stream<User> userStream = parser.stream(is, true, Type.of(User.class));
@@ -332,6 +345,7 @@ abstract class AbstractJSONParser extends AbstractParser<JSONSerializationConfig
      * Creates a stream that lazily deserializes elements from a JSON array reader.
      * This method provides efficient streaming from readers with optional automatic resource management.
      *
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Reader reader = new FileReader("users.json");
      * Stream<User> userStream = parser.stream(reader, true, Type.of(User.class));

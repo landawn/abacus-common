@@ -36,7 +36,7 @@ public interface LongSupplier extends Throwables.LongSupplier<RuntimeException>,
      * 
      * <p>This is useful for providing a default or initial value in contexts requiring a long supplier.
      * 
-     * <p>Example usage:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * LongSupplier zeroSupplier = LongSupplier.ZERO;
      * long value = zeroSupplier.getAsLong(); // returns 0L
@@ -50,7 +50,7 @@ public interface LongSupplier extends Throwables.LongSupplier<RuntimeException>,
      * <p>This supplier uses an internal random number generator to produce different long values
      * on each invocation. The values are uniformly distributed across the entire range of long values.
      * 
-     * <p>Example usage:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * LongSupplier randomSupplier = LongSupplier.RANDOM;
      * long value1 = randomSupplier.getAsLong(); // returns a random long
@@ -66,8 +66,7 @@ public interface LongSupplier extends Throwables.LongSupplier<RuntimeException>,
      * The implementation may return the same value or different values on subsequent calls,
      * depending on the specific supplier implementation.
      *
-     * @return a long value
-     * @throws RuntimeException if any error occurs during value generation
+     * @return a long value if any error occurs during value generation
      */
     @Override
     long getAsLong();

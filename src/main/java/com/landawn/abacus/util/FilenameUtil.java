@@ -40,7 +40,7 @@ import java.util.Stack;
  *
  * <p>Most methods work with both Unix and Windows separators and prefixes.</p>
  *
- * <p>Example usage:</p>
+ * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * // Get file extension
  * String ext = FilenameUtil.getExtension("report.pdf"); // Returns "pdf"
@@ -135,7 +135,7 @@ public final class FilenameUtil {
      * A double dot will cause that path segment and the one before to be removed.
      * If the double dot has no parent path segment, {@code null} is returned.</p>
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * FilenameUtil.normalize("/foo//");               // Returns "/foo/"
      * FilenameUtil.normalize("/foo/./");              // Returns "/foo/"
@@ -160,7 +160,7 @@ public final class FilenameUtil {
      * The input may contain separators in either Unix or Windows format.
      * The output will contain separators in the format specified.</p>
      *
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Force Unix separators
      * FilenameUtil.normalize("C:\\foo\\bar", true);   // Returns "C:/foo/bar"
@@ -188,7 +188,7 @@ public final class FilenameUtil {
      * <p>This method is similar to {@link #normalize(String)} but removes
      * the trailing slash if present.</p>
      *
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * FilenameUtil.normalizeNoEndSeparator("/foo//");      // Returns "/foo"
      * FilenameUtil.normalizeNoEndSeparator("/foo/./");     // Returns "/foo"
@@ -206,7 +206,7 @@ public final class FilenameUtil {
     /**
      * Normalizes a path with control over the separator and trailing slash.
      *
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Unix separators, no trailing slash
      * FilenameUtil.normalizeNoEndSeparator("C:\\foo\\bar\\", true); // Returns "C:/foo/bar"
@@ -225,7 +225,7 @@ public final class FilenameUtil {
     /**
      * Internal method to perform the normalization.
      *
-     * @param filename
+     * @param filename the filename to normalize, may be {@code null}
      * @param separator The separator character to use
      * @param keepSeparator {@code true} to keep the final separator
      * @return the normalized filename. Null bytes inside string will be removed.
@@ -331,7 +331,7 @@ public final class FilenameUtil {
      * <p>If {@code fullFilenameToAdd} is absolute, it will be normalized and returned.
      * Otherwise, the paths will be joined, normalized and returned.</p>
      *
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * FilenameUtil.concat("/foo/", "bar");       // Returns "/foo/bar"
      * FilenameUtil.concat("/foo", "bar");        // Returns "/foo/bar"
@@ -380,7 +380,7 @@ public final class FilenameUtil {
      * <li>A null child file is not contained in any parent: returns false</li>
      * </ul>
      *
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * FilenameUtil.directoryContains("/Users/john", "/Users/john/documents"); // Returns true
      * FilenameUtil.directoryContains("/Users/john", "/Users/jane/documents"); // Returns false
@@ -411,7 +411,7 @@ public final class FilenameUtil {
     /**
      * Converts all separators to the Unix separator of forward slash.
      *
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * FilenameUtil.separatorsToUnix("C:\\docs\\file.txt"); // Returns "C:/docs/file.txt"
      * FilenameUtil.separatorsToUnix("/already/unix");      // Returns "/already/unix"
@@ -430,7 +430,7 @@ public final class FilenameUtil {
     /**
      * Converts all separators to the Windows separator of backslash.
      *
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * FilenameUtil.separatorsToWindows("/docs/file.txt");    // Returns "\\docs\\file.txt"
      * FilenameUtil.separatorsToWindows("C:\\already\\windows"); // Returns "C:\\already\\windows"
@@ -451,7 +451,7 @@ public final class FilenameUtil {
      * Calls either {@link #separatorsToUnix(String)} or {@link #separatorsToWindows(String)}
      * based on the current operating system.
      *
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // On Windows:
      * FilenameUtil.separatorsToSystem("/docs/file.txt"); // Returns "\\docs\\file.txt"
@@ -482,8 +482,8 @@ public final class FilenameUtil {
      * <p>This method handles files in either Unix or Windows format.
      * The prefix length includes the first slash in the full filename if applicable.</p>
      * 
-     * <p>Examples:</p>
-     * <pre>
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
      * Windows:
      * a\b\c.txt           → 0     (relative)
      * \a\b\c.txt          → 1     (current drive absolute)
@@ -496,7 +496,7 @@ public final class FilenameUtil {
      * /a/b/c.txt          → 1     (absolute)
      * ~/a/b/c.txt         → 2     (current user)
      * ~user/a/b/c.txt     → 6     (named user)
-     * </pre>
+     * }</pre>
      *
      * @param filename the filename to find the prefix in, {@code null} returns -1
      * @return the length of the prefix, -1 if invalid or null
@@ -563,7 +563,7 @@ public final class FilenameUtil {
      * <p>This method handles files in either Unix or Windows format.
      * The position of the last forward or backslash is returned.</p>
      *
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * FilenameUtil.indexOfLastSeparator("a/b/c.txt");  // Returns 3
      * FilenameUtil.indexOfLastSeparator("a\\b\\c.txt"); // Returns 3
@@ -587,7 +587,7 @@ public final class FilenameUtil {
      * 
      * <p>This method checks that there is no directory separator after the last dot.</p>
      *
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * FilenameUtil.indexOfExtension("file.txt");     // Returns 4
      * FilenameUtil.indexOfExtension("a/b/file.txt"); // Returns 8
@@ -614,7 +614,7 @@ public final class FilenameUtil {
      * 
      * <p>This method includes the first slash in the full filename where applicable.</p>
      *
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * FilenameUtil.getPrefix("C:\\a\\b\\c.txt");  // Returns "C:\\"
      * FilenameUtil.getPrefix("/a/b/c.txt");       // Returns "/"
@@ -647,7 +647,7 @@ public final class FilenameUtil {
      * 
      * <p>This method returns the text before and including the last forward or backslash.</p>
      *
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * FilenameUtil.getPath("C:\\a\\b\\c.txt"); // Returns "a\\b\\"
      * FilenameUtil.getPath("~/a/b/c.txt");     // Returns "a/b/"
@@ -667,7 +667,7 @@ public final class FilenameUtil {
     /**
      * Gets the path from a full filename, excluding the prefix and final directory separator.
      *
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * FilenameUtil.getPathNoEndSeparator("C:\\a\\b\\c.txt"); // Returns "a\\b"
      * FilenameUtil.getPathNoEndSeparator("~/a/b/c.txt");     // Returns "a/b"
@@ -687,7 +687,7 @@ public final class FilenameUtil {
     /**
      * Does the work of getting the path.
      *
-     * @param filename
+     * @param filename the filename to query, may be {@code null}
      * @param separatorAdd 0 to omit the end separator, 1 to return it
      * @return the path. Null bytes inside string will be removed
      */
@@ -714,7 +714,7 @@ public final class FilenameUtil {
      * 
      * <p>This method returns the text before and including the last forward or backslash.</p>
      *
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * FilenameUtil.getFullPath("C:\\a\\b\\c.txt"); // Returns "C:\\a\\b\\"
      * FilenameUtil.getFullPath("~/a/b/c.txt");     // Returns "~/a/b/"
@@ -732,7 +732,7 @@ public final class FilenameUtil {
     /**
      * Gets the full path from a full filename, excluding the final directory separator.
      *
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * FilenameUtil.getFullPathNoEndSeparator("C:\\a\\b\\c.txt"); // Returns "C:\\a\\b"
      * FilenameUtil.getFullPathNoEndSeparator("~/a/b/c.txt");     // Returns "~/a/b"
@@ -752,7 +752,7 @@ public final class FilenameUtil {
     /**
      * Does the work of getting the path.
      *
-     * @param filename
+     * @param filename the filename to query, may be {@code null}
      * @param includeSeparator {@code true} to include the end separator
      * @return the path
      */
@@ -787,7 +787,7 @@ public final class FilenameUtil {
      * 
      * <p>This method returns the text after the last forward or backslash.</p>
      *
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * FilenameUtil.getName("a/b/c.txt"); // Returns "c.txt"
      * FilenameUtil.getName("a.txt");     // Returns "a.txt"
@@ -826,10 +826,10 @@ public final class FilenameUtil {
 
     /**
      * Gets the base name minus the full path and extension from a full filename.
-     * 
+     *
      * <p>This method returns the text after the last separator and before the last dot.</p>
      *
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * FilenameUtil.getBaseName("a/b/c.txt"); // Returns "c"
      * FilenameUtil.getBaseName("a.txt");     // Returns "a"
@@ -839,6 +839,9 @@ public final class FilenameUtil {
      *
      * @param filename the filename to query, {@code null} returns null
      * @return the name of the file without path or extension. Null bytes inside string will be removed
+     * @see #getName(String)
+     * @see #getExtension(String)
+     * @see #removeExtension(String)
      */
     public static String getBaseName(final String filename) {
         return removeExtension(getName(filename));
@@ -846,10 +849,10 @@ public final class FilenameUtil {
 
     /**
      * Gets the extension of a filename.
-     * 
+     *
      * <p>This method returns the text after the last dot. There must be no directory separator after the dot.</p>
      *
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * FilenameUtil.getExtension("foo.txt");   // Returns "txt"
      * FilenameUtil.getExtension("a/b/c.jpg"); // Returns "jpg"
@@ -860,6 +863,8 @@ public final class FilenameUtil {
      * @param filename the filename to retrieve the extension of
      * @return the extension of the file or an empty string if none exists,
      *         or {@code null} if the filename is {@code null}
+     * @see #getBaseName(String)
+     * @see #removeExtension(String)
      */
     public static String getExtension(final String filename) {
         if (filename == null) {
@@ -877,13 +882,12 @@ public final class FilenameUtil {
 
     /**
      * Removes the file extension from a filename.
-     * 
+     *
      * <p>This method removes the extension (the suffix starting from the last dot '.')
      * from the given filename. If no extension is found, the original filename is returned
      * unchanged.</p>
-     * 
      *
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * FilenameUtil.removeExtension("foo.txt");    // Returns "foo"
      * FilenameUtil.removeExtension("a\\b\\c.jpg"); // Returns "a\\b\\c"
@@ -894,6 +898,8 @@ public final class FilenameUtil {
      *
      * @param filename the filename to query, {@code null} returns null
      * @return the filename minus the extension
+     * @see #getBaseName(String)
+     * @see #getExtension(String)
      */
     public static String removeExtension(final String filename) {
         if (filename == null) {
@@ -917,7 +923,7 @@ public final class FilenameUtil {
      * <p>No processing is performed on the filenames other than comparison.
      * This is a null-safe case-sensitive equals.</p>
      *
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * FilenameUtil.equals("file.txt", "file.txt"); // Returns true
      * FilenameUtil.equals("file.txt", "FILE.TXT"); // Returns false
@@ -938,7 +944,7 @@ public final class FilenameUtil {
      * 
      * <p>The check is case-sensitive on Unix and case-insensitive on Windows.</p>
      *
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // On Windows:
      * FilenameUtil.equalsOnSystem("file.txt", "FILE.TXT"); // Returns true
@@ -964,7 +970,7 @@ public final class FilenameUtil {
      * <p>Both filenames are first passed to {@link #normalize(String)}.
      * The check is then performed in a case-sensitive manner.</p>
      *
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * FilenameUtil.equalsNormalized("/foo/bar", "/foo/./bar");     // Returns true
      * FilenameUtil.equalsNormalized("/foo/bar", "/foo/../foo/bar"); // Returns true
@@ -984,7 +990,7 @@ public final class FilenameUtil {
      * 
      * <p>Both filenames are first normalized, then compared using system case sensitivity.</p>
      *
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // On Windows:
      * FilenameUtil.equalsNormalizedOnSystem("/foo/bar", "/FOO/./BAR"); // Returns true
@@ -1012,7 +1018,7 @@ public final class FilenameUtil {
      * <p>The comparison can be case-sensitive or case-insensitive based on the provided
      * {@code IOCase} parameter. If {@code null} is provided, defaults to case-sensitive.</p>
      *
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * FilenameUtil.equals("/foo/bar", "/foo/./bar", true, IOCase.SENSITIVE);  // Returns true
      * FilenameUtil.equals("file.txt", "FILE.TXT", false, IOCase.INSENSITIVE); // Returns true
@@ -1050,7 +1056,7 @@ public final class FilenameUtil {
      * <p>This method obtains the extension as the text after the last dot.
      * The extension check is case-sensitive on all platforms.</p>
      *
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * FilenameUtil.isExtension("file.txt", "txt");  // Returns true
      * FilenameUtil.isExtension("file.txt", "TXT");  // Returns false
@@ -1081,7 +1087,7 @@ public final class FilenameUtil {
      * 
      * <p>The extension check is case-sensitive on all platforms.</p>
      *
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String[] exts = {"txt", "xml", "json"};
      * FilenameUtil.isExtension("file.txt", exts);  // Returns true
@@ -1116,7 +1122,7 @@ public final class FilenameUtil {
      * 
      * <p>The extension check is case-sensitive on all platforms.</p>
      *
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Collection<String> exts = Arrays.asList("txt", "xml", "json");
      * FilenameUtil.isExtension("file.txt", exts);  // Returns true
@@ -1154,7 +1160,7 @@ public final class FilenameUtil {
      * <p>The wildcard matcher uses '?' and '*' to represent single or multiple wildcard characters.
      * The check is case-sensitive always.</p>
      *
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * FilenameUtil.wildcardMatch("c.txt", "*.txt");      // Returns true
      * FilenameUtil.wildcardMatch("c.txt", "*.jpg");      // Returns false
@@ -1177,7 +1183,7 @@ public final class FilenameUtil {
      * 
      * <p>The check is case-sensitive on Unix and case-insensitive on Windows.</p>
      *
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // On Windows:
      * FilenameUtil.wildcardMatchOnSystem("file.TXT", "*.txt"); // Returns true
@@ -1209,7 +1215,7 @@ public final class FilenameUtil {
      * <li>All other characters match themselves</li>
      * </ul>
      *
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * FilenameUtil.wildcardMatch("file.txt", "*.txt", IOCase.SENSITIVE);   // Returns true
      * FilenameUtil.wildcardMatch("FILE.TXT", "*.txt", IOCase.INSENSITIVE); // Returns true
@@ -1319,7 +1325,7 @@ public final class FilenameUtil {
      * <li>If no wildcards exist, returns the original text as a single-element array</li>
      * </ul>
      *
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * splitOnTokens("*.txt")        // Returns ["*", ".txt"]
      * splitOnTokens("file?.txt")    // Returns ["file", "?", ".txt"]

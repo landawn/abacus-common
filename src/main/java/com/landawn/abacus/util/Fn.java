@@ -163,7 +163,7 @@ import com.landawn.abacus.util.stream.Stream;
  *   <li>Support for both standard Java and custom functional interfaces</li>
  * </ul>
  *
- * <p>Example usage:</p>
+ * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * // Common predicate operations
  * Predicate<String> notEmpty = Fn.notEmpty();
@@ -423,9 +423,9 @@ public final class Fn {
     /**
      * Returns a {@code Supplier} which returns a single instance created by calling the specified {@code supplier.get()}.
      *
-     * @param <T>
-     * @param supplier
-     * @return
+     * @param <T> the type of the value supplied
+     * @param supplier the supplier whose result should be memoized
+     * @return a memoized Supplier that caches the result of the first invocation
      */
     public static <T> Supplier<T> memoize(final java.util.function.Supplier<T> supplier) {
         return LazyInitializer.of(supplier);
@@ -450,8 +450,7 @@ public final class Fn {
      * ensure that the delegate supplier is called at most once per expiration period, even under
      * concurrent access.
      * 
-     * 
-     * <p><b>Example Usage:</b>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Cache database query results for 5 minutes
      * Supplier<List<User>> cachedUsers = Fn.memoizeWithExpiration(
@@ -587,7 +586,7 @@ public final class Fn {
      * For scenarios where the input space is very large or unbounded, consider using
      * {@link #memoizeWithExpiration(java.util.function.Supplier, long, TimeUnit)} to prevent memory leaks.
      *
-     * <p>Example usage:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Expensive computation that we want to cache
      * Function<Integer, Integer> factorial = Fn.memoize(n -> {
@@ -2826,7 +2825,7 @@ public final class Fn {
      * <p>The returned Predicate extracts the key and value from the Map.Entry and passes them
      * to the provided BiPredicate for evaluation.
      *
-     * <p>Example usage:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Map<String, Integer> map = Map.of("apple", 5, "banana", 12, "cherry", 3);
      *
@@ -2881,7 +2880,7 @@ public final class Fn {
      * <p>The returned Function extracts the key and value from the Map.Entry and passes them
      * to the provided BiFunction to produce a result of type R.
      *
-     * <p>Example usage:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Map<String, Integer> inventory = Map.of("apple", 5, "banana", 12, "cherry", 3);
      *
@@ -3544,7 +3543,7 @@ public final class Fn {
      *   <li>{@code filterThenLimit(p, 3)} - Tests all elements, but stops after 3 matches</li>
      * </ul>
      *
-     * <p>Example usage:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Test only the first 5 elements, filter those that are even
      * List<Integer> result = Stream.of(2, 4, 6, 8, 10, 12, 14, 16)
@@ -4205,13 +4204,13 @@ public final class Fn {
      * in certain contexts. It's part of a family of shorthand methods like {@code p()} for Predicate
      * and others.</p>
      * 
-     * <p>Example usage:</p>
-     * <pre>
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
      * // Instead of explicitly typing:
      * Supplier&lt;String&gt; supplier = () -&gt; "value";
      * // You can use:
      * var supplier = Fn.s(() -&gt; "value");
-     * </pre>
+     * }</pre>
      *
      * @param <T> the type of results supplied by the supplier
      * @param supplier the supplier to return
@@ -4259,13 +4258,13 @@ public final class Fn {
      * in certain contexts. It's part of a family of shorthand methods like {@code s()} for Supplier
      * and others.</p>
      *
-     * <p>Example usage:</p>
-     * <pre>
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
      * // Instead of explicitly typing:
      * Predicate&lt;String&gt; predicate = s -> s.length() > 5;
      * // You can use:
      * var predicate = Fn.p(s -> s.length() > 5);
-     * </pre>
+     * }</pre>
      *
      * @param <T> the type of the input to the predicate
      * @param predicate the predicate to return
@@ -4284,15 +4283,15 @@ public final class Fn {
      * to a fixed value, resulting in a predicate that only requires the second parameter. This is useful
      * for creating predicates that compare an input with a specific reference value.</p>
      *
-     * <p>Example usage:</p>
-     * <pre>
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
      * // Create a predicate that checks if a string contains a specific substring
      * String searchText = "error";
      * Predicate&lt;String&gt; containsError = Fn.p(searchText, String::contains);
      * 
      * boolean result = containsError.test("runtime error occurred"); // Returns true
      * boolean result2 = containsError.test("success"); // Returns false
-     * </pre>
+     * }</pre>
      *
      * @param <A> the type of the fixed first argument to the bi-predicate
      * @param <T> the type of the input to the resulting predicate
@@ -4316,8 +4315,8 @@ public final class Fn {
      * to fixed values, resulting in a predicate that only requires the third parameter. This is useful for
      * creating predicates that incorporate two reference values in their comparison logic.</p>
      *
-     * <p>Example usage:</p>
-     * <pre>
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
      * // Create a predicate that checks if a substring appears between two indices
      * String text = "error message";
      * Predicate&lt;Integer&gt; containsErrorBetween = 
@@ -4325,7 +4324,7 @@ public final class Fn {
      *
      * boolean result = containsErrorBetween.test(5);  // Returns true
      * boolean result2 = containsErrorBetween.test(14); // Returns false
-     * </pre>
+     * }</pre>
      *
      * @param <A> the type of the first fixed argument to the tri-predicate
      * @param <B> the type of the second fixed argument to the tri-predicate
@@ -4350,13 +4349,13 @@ public final class Fn {
      * in certain contexts. It's part of a family of shorthand methods like {@code s()} for Supplier
      * and {@code p()} for Predicate.</p>
      *
-     * <p>Example usage:</p>
-     * <pre>
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
      * // Instead of explicitly typing:
      * BiPredicate&lt;String, Integer&gt; biPredicate = (str, len) -> str.length() > len;
      * // You can use:
      * var biPredicate = Fn.p((String str, Integer len) -> str.length() > len);
-     * </pre>
+     * }</pre>
      *
      * @param <T> the type of the first input to the bi-predicate
      * @param <U> the type of the second input to the bi-predicate
@@ -4377,8 +4376,8 @@ public final class Fn {
      * to a fixed value, resulting in a bi-predicate that only requires the second and third parameters.
      * This is useful for creating bi-predicates that incorporate a reference value in their comparison logic.</p>
      *
-     * <p>Example usage:</p>
-     * <pre>
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
      * // Create a bi-predicate that checks if a substring appears between two indices
      * String text = "error message";
      * BiPredicate&lt;Integer, Integer&gt; containsErrorBetween = 
@@ -4386,7 +4385,7 @@ public final class Fn {
      *
      * boolean result = containsErrorBetween.test(0, 5);  // Returns true
      * boolean result2 = containsErrorBetween.test(6, 14); // Returns false
-     * </pre>
+     * }</pre>
      *
      * @param <A> the type of the fixed first argument to the tri-predicate
      * @param <T> the type of the first input to the resulting bi-predicate
@@ -4412,15 +4411,15 @@ public final class Fn {
      * in certain contexts. It's part of a family of shorthand methods like {@code s()} for Supplier
      * and {@code p()} for Predicate and BiPredicate.</p>
      *
-     * <p>Example usage:</p>
-     * <pre>
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
      * // Instead of explicitly typing:
      * TriPredicate&lt;String, Integer, Boolean&gt; triPredicate = 
      *     (str, len, flag) -> flag && str.length() > len;
      * // You can use:
      * var triPredicate = Fn.p((String str, Integer len, Boolean flag) -> 
      *     flag && str.length() > len);
-     * </pre>
+     * }</pre>
      *
      * @param <A> the type of the first input to the tri-predicate
      * @param <B> the type of the second input to the tri-predicate
@@ -4443,13 +4442,13 @@ public final class Fn {
      * in certain contexts. It's part of a family of shorthand methods like {@code s()} for Supplier
      * and {@code p()} for Predicate.</p>
      *
-     * <p>Example usage:</p>
-     * <pre>
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
      * // Instead of explicitly typing:
      * Consumer&lt;String&gt; logger = str -> System.out.println("Log: " + str);
      * // You can use:
      * var logger = Fn.c((String str) -> System.out.println("Log: " + str));
-     * </pre>
+     * }</pre>
      *
      * @param <T> the type of the input to the consumer
      * @param consumer the consumer to return
@@ -4469,15 +4468,15 @@ public final class Fn {
      * to a fixed value, resulting in a consumer that only requires the second parameter.
      * This is useful for creating consumers that incorporate a reference value in their logic.</p>
      *
-     * <p>Example usage:</p>
-     * <pre>
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
      * // Create a consumer that adds elements to a specific list
      * List&lt;String&gt; myList = new ArrayList&lt;&gt;();
      * Consumer&lt;String&gt; addToMyList = Fn.c(myList, (list, item) -> list.add(item));
      *
      * addToMyList.accept("first");  // Adds "first" to myList
      * addToMyList.accept("second"); // Adds "second" to myList
-     * </pre>
+     * }</pre>
      *
      * @param <A> the type of the fixed first argument to the bi-consumer
      * @param <T> the type of the input to the resulting consumer
@@ -4502,8 +4501,8 @@ public final class Fn {
      * to fixed values, resulting in a consumer that only requires the third parameter.
      * This is useful for creating consumers that incorporate two reference values in their logic.</p>
      *
-     * <p>Example usage:</p>
-     * <pre>
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
      * // Create a consumer that logs messages with a specific prefix and suffix
      * String prefix = "Log: ";
      * String suffix = " [end]";
@@ -4511,7 +4510,7 @@ public final class Fn {
      *     System.out.println(p + msg + s));
      *
      * logWithPrefixAndSuffix.accept("Hello"); // Prints: Log: Hello [end]
-     * </pre>
+     * }</pre>
      *
      * @param <A> the type of the first fixed argument to the tri-consumer
      * @param <B> the type of the second fixed argument to the tri-consumer
@@ -4775,7 +4774,7 @@ public final class Fn {
      * This is a shorthand identity method for a mapper that can help with type inference in certain contexts,
      * particularly when used with stream operations like {@code Stream.mapMulti(mapper)}.
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Using mc() to help with type inference in a stream operation
      * Stream<List<String>> listStream = ...;
@@ -7254,7 +7253,7 @@ public final class Fn {
          * indicating it should not be saved, cached for reuse, or used in parallel streams. Each invocation
          * creates a new instance with its own independent counter starting at 0.
          *
-         * <p>Example usage:
+         * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * // Create indexed pairs from two lists
          * List<String> names = Arrays.asList("Alice", "Bob", "Charlie");

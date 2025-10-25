@@ -69,7 +69,7 @@ import com.landawn.abacus.util.URLEncodedUtil;
  *   <li>Compression support (GZIP, LZ4, Snappy, Brotli)</li>
  * </ul>
  * 
- * <p>Example usage:</p>
+ * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * // Create a simple HTTP client
  * HttpClient client = HttpClient.create("https://api.example.com");
@@ -182,7 +182,7 @@ public final class HttpClient {
      * Creates an HttpClient instance with the specified URL and default settings.
      * Uses default values for max connections, connection timeout, and read timeout.
      *
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * HttpClient client = HttpClient.create("https://api.example.com");
      * }</pre>
@@ -199,7 +199,7 @@ public final class HttpClient {
      * Creates an HttpClient instance with the specified URL and maximum connections.
      * Uses default values for connection timeout and read timeout.
      *
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * HttpClient client = HttpClient.create("https://api.example.com", 32);
      * }</pre>
@@ -217,7 +217,7 @@ public final class HttpClient {
      * Creates an HttpClient instance with the specified URL and timeout settings.
      * Uses default value for max connections.
      *
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * HttpClient client = HttpClient.create("https://api.example.com", 5000, 10000);
      * }</pre>
@@ -235,7 +235,7 @@ public final class HttpClient {
     /**
      * Creates an HttpClient instance with the specified URL, max connections, and timeout settings.
      *
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * HttpClient client = HttpClient.create("https://api.example.com", 32, 5000, 10000);
      * }</pre>
@@ -254,7 +254,7 @@ public final class HttpClient {
     /**
      * Creates an HttpClient instance with the specified URL, max connections, timeout settings, and HTTP settings.
      *
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * HttpSettings settings = HttpSettings.create()
      *     .setContentType("application/json")
@@ -281,7 +281,7 @@ public final class HttpClient {
      * This allows multiple HttpClient instances to share a connection limit across all instances.
      * Useful when you need to enforce a global connection limit across multiple HTTP endpoints.
      *
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * AtomicInteger sharedCounter = new AtomicInteger(0);
      * HttpClient client1 = HttpClient.create("https://api1.example.com", 10, 5000, 10000, null, sharedCounter);
@@ -308,7 +308,7 @@ public final class HttpClient {
      * Creates an HttpClient instance with a custom executor for async operations.
      * The executor will be used for all asynchronous HTTP requests initiated by this client.
      *
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Executor customExecutor = Executors.newFixedThreadPool(4);
      * HttpClient client = HttpClient.create("https://api.example.com", 16, 5000, 10000, customExecutor);
@@ -333,7 +333,7 @@ public final class HttpClient {
      * Creates an HttpClient instance with the specified URL, settings, and custom executor.
      * Combines HTTP settings configuration with a custom async executor.
      *
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * HttpSettings settings = HttpSettings.create()
      *     .setContentFormat(ContentFormat.JSON)
@@ -362,7 +362,7 @@ public final class HttpClient {
      * Creates an HttpClient instance with all configuration options.
      * This is the most comprehensive factory method allowing full control over all settings.
      *
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * AtomicInteger sharedCounter = new AtomicInteger(0);
      * HttpSettings settings = HttpSettings.create().setContentFormat(ContentFormat.JSON);
@@ -392,7 +392,7 @@ public final class HttpClient {
      * Creates an HttpClient instance with a URL object and default settings.
      * Uses default values for max connections, connection timeout, and read timeout.
      *
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * URL apiUrl = new URL("https://api.example.com");
      * HttpClient client = HttpClient.create(apiUrl);
@@ -541,7 +541,7 @@ public final class HttpClient {
     /**
      * Performs a GET request and returns the response as a String.
      *
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * HttpClient client = HttpClient.create("https://api.example.com/users");
      * String response = client.get();
@@ -557,7 +557,7 @@ public final class HttpClient {
     /**
      * Performs a GET request with custom settings and returns the response as a String.
      *
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * HttpSettings settings = HttpSettings.create()
      *     .header("Accept", "application/json");
@@ -575,7 +575,7 @@ public final class HttpClient {
     /**
      * Performs a GET request with query parameters and returns the response as a String.
      *
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Map<String, Object> params = Map.of("page", 1, "size", 10);
      * String response = client.get(params);
@@ -604,7 +604,7 @@ public final class HttpClient {
     /**
      * Performs a GET request and deserializes the response to the specified type.
      *
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * User user = client.get(User.class);
      * }</pre>
@@ -661,7 +661,7 @@ public final class HttpClient {
     /**
      * Performs a DELETE request and returns the response as a String.
      *
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String response = client.delete();
      * }</pre>
@@ -762,7 +762,7 @@ public final class HttpClient {
     /**
      * Performs a POST request with the specified request body and returns the response as a String.
      *
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * User user = new User("John", "Doe");
      * String response = client.post(user);
@@ -779,7 +779,7 @@ public final class HttpClient {
     /**
      * Performs a POST request and deserializes the response.
      *
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * User newUser = new User("John", "Doe");
      * User createdUser = client.post(newUser, User.class);
@@ -824,7 +824,7 @@ public final class HttpClient {
     /**
      * Performs a PUT request with the specified request body and returns the response as a String.
      *
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * User updatedUser = new User("John", "Smith");
      * String response = client.put(updatedUser);
@@ -881,7 +881,7 @@ public final class HttpClient {
      * Performs a HEAD request with default settings.
      * HEAD requests are used to retrieve headers without the response body.
      *
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * client.head(); // Check if resource exists
      * }</pre>
@@ -905,7 +905,7 @@ public final class HttpClient {
     /**
      * Executes an HTTP request with the specified method and request body.
      *
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String response = client.execute(HttpMethod.POST, requestBody);
      * }</pre>
@@ -966,7 +966,7 @@ public final class HttpClient {
     /**
      * Executes an HTTP request and writes the response to a file.
      *
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * File outputFile = new File("response.json");
      * client.execute(HttpMethod.GET, null, settings, outputFile);
@@ -1232,7 +1232,7 @@ public final class HttpClient {
      * Opens a new HTTP connection with the specified method and settings.
      * This method is primarily for advanced use cases where direct control over the connection is needed.
      *
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * HttpURLConnection conn = client.openConnection(HttpMethod.GET, settings, false, String.class);
      * // Manually configure and use the connection
@@ -1255,7 +1255,7 @@ public final class HttpClient {
      * Opens a new HTTP connection with query parameters and the specified settings.
      * This method is primarily for advanced use cases where direct control over the connection is needed.
      *
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Map<String, Object> params = Map.of("id", 123);
      * HttpURLConnection conn = client.openConnection(HttpMethod.GET, params, settings, false, User.class);
@@ -1392,7 +1392,7 @@ public final class HttpClient {
     /**
      * Performs an asynchronous GET request and returns the response as a String.
      *
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * client.asyncGet()
      *     .thenAccept(response -> System.out.println("Response: " + response))
@@ -1407,9 +1407,18 @@ public final class HttpClient {
 
     /**
      * Performs an asynchronous GET request with custom settings.
-     * 
-     * @param settings Additional HTTP settings for this request
-     * @return A ContinuableFuture that will complete with the response body
+     * Returns the response as a String asynchronously.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * HttpSettings settings = HttpSettings.create()
+     *     .header("Authorization", "Bearer token123");
+     * client.asyncGet(settings)
+     *     .thenAccept(response -> System.out.println("Response: " + response));
+     * }</pre>
+     *
+     * @param settings Additional HTTP settings for this request (headers, timeouts, etc.)
+     * @return A ContinuableFuture that will complete with the response body as a String
      */
     public ContinuableFuture<String> asyncGet(final HttpSettings settings) {
         return asyncGet(settings, String.class);
@@ -1417,9 +1426,17 @@ public final class HttpClient {
 
     /**
      * Performs an asynchronous GET request with query parameters.
-     * 
-     * @param queryParameters Query parameters as a String, Map, or Bean object
-     * @return A ContinuableFuture that will complete with the response body
+     * Returns the response as a String asynchronously.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Map<String, Object> params = Map.of("id", 123, "name", "John");
+     * client.asyncGet(params)
+     *     .thenAccept(response -> System.out.println("Response: " + response));
+     * }</pre>
+     *
+     * @param queryParameters Query parameters as a String, Map, or Bean object (will be URL-encoded)
+     * @return A ContinuableFuture that will complete with the response body as a String
      */
     public ContinuableFuture<String> asyncGet(final Object queryParameters) {
         return asyncGet(queryParameters, String.class);
@@ -1427,10 +1444,20 @@ public final class HttpClient {
 
     /**
      * Performs an asynchronous GET request with query parameters and custom settings.
-     * 
-     * @param queryParameters Query parameters as a String, Map, or Bean object
-     * @param settings Additional HTTP settings for this request
-     * @return A ContinuableFuture that will complete with the response body
+     * Returns the response as a String asynchronously.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Map<String, Object> params = Map.of("page", 1, "size", 10);
+     * HttpSettings settings = HttpSettings.create()
+     *     .header("Authorization", "Bearer token123");
+     * client.asyncGet(params, settings)
+     *     .thenAccept(response -> System.out.println("Response: " + response));
+     * }</pre>
+     *
+     * @param queryParameters Query parameters as a String, Map, or Bean object (will be URL-encoded)
+     * @param settings Additional HTTP settings for this request (headers, timeouts, etc.)
+     * @return A ContinuableFuture that will complete with the response body as a String
      */
     public ContinuableFuture<String> asyncGet(final Object queryParameters, final HttpSettings settings) {
         return asyncGet(queryParameters, settings, String.class);
@@ -1439,7 +1466,7 @@ public final class HttpClient {
     /**
      * Performs an asynchronous GET request and deserializes the response.
      *
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * client.asyncGet(User.class)
      *     .thenAccept(user -> System.out.println("User: " + user.getName()));
@@ -1455,10 +1482,18 @@ public final class HttpClient {
 
     /**
      * Performs an asynchronous GET request with query parameters and deserializes the response.
-     * 
+     * Automatically deserializes the JSON/XML response into the specified type.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Map<String, Object> params = Map.of("userId", 123);
+     * client.asyncGet(params, User.class)
+     *     .thenAccept(user -> System.out.println("User: " + user.getName()));
+     * }</pre>
+     *
      * @param <T> The type of the response object
-     * @param queryParameters Query parameters as a String, Map, or Bean object
-     * @param resultClass The class of the expected response object
+     * @param queryParameters Query parameters as a String, Map, or Bean object (will be URL-encoded)
+     * @param resultClass The class of the expected response object (for deserialization)
      * @return A ContinuableFuture that will complete with the deserialized response
      */
     public <T> ContinuableFuture<T> asyncGet(final Object queryParameters, final Class<T> resultClass) {
@@ -1467,10 +1502,20 @@ public final class HttpClient {
 
     /**
      * Performs an asynchronous GET request with custom settings and deserializes the response.
-     * 
+     * Automatically deserializes the JSON/XML response into the specified type.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * HttpSettings settings = HttpSettings.create()
+     *     .setContentFormat(ContentFormat.JSON)
+     *     .header("Authorization", "Bearer token123");
+     * client.asyncGet(settings, User.class)
+     *     .thenAccept(user -> System.out.println("User: " + user.getName()));
+     * }</pre>
+     *
      * @param <T> The type of the response object
-     * @param settings Additional HTTP settings for this request
-     * @param resultClass The class of the expected response object
+     * @param settings Additional HTTP settings for this request (headers, timeouts, etc.)
+     * @param resultClass The class of the expected response object (for deserialization)
      * @return A ContinuableFuture that will complete with the deserialized response
      */
     public <T> ContinuableFuture<T> asyncGet(final HttpSettings settings, final Class<T> resultClass) {
@@ -1479,11 +1524,23 @@ public final class HttpClient {
 
     /**
      * Performs an asynchronous GET request with all options and deserializes the response.
-     * 
+     * This is the most comprehensive GET method allowing full control over query parameters,
+     * settings, and response deserialization.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Map<String, Object> params = Map.of("page", 1, "size", 20);
+     * HttpSettings settings = HttpSettings.create()
+     *     .header("Authorization", "Bearer token123")
+     *     .setConnectionTimeout(10000);
+     * client.asyncGet(params, settings, UserList.class)
+     *     .thenAccept(users -> users.forEach(u -> System.out.println(u.getName())));
+     * }</pre>
+     *
      * @param <T> The type of the response object
-     * @param queryParameters Query parameters as a String, Map, or Bean object
-     * @param settings Additional HTTP settings for this request
-     * @param resultClass The class of the expected response object
+     * @param queryParameters Query parameters as a String, Map, or Bean object (will be URL-encoded)
+     * @param settings Additional HTTP settings for this request (headers, timeouts, etc.)
+     * @param resultClass The class of the expected response object (for deserialization)
      * @return A ContinuableFuture that will complete with the deserialized response
      */
     public <T> ContinuableFuture<T> asyncGet(final Object queryParameters, final HttpSettings settings, final Class<T> resultClass) {
@@ -1492,8 +1549,15 @@ public final class HttpClient {
 
     /**
      * Performs an asynchronous DELETE request and returns the response as a String.
-     * 
-     * @return A ContinuableFuture that will complete with the response body
+     * Executes the DELETE request asynchronously without blocking the calling thread.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * client.asyncDelete()
+     *     .thenAccept(response -> System.out.println("Deleted: " + response));
+     * }</pre>
+     *
+     * @return A ContinuableFuture that will complete with the response body as a String
      */
     public ContinuableFuture<String> asyncDelete() {
         return asyncDelete(String.class);
@@ -1501,9 +1565,17 @@ public final class HttpClient {
 
     /**
      * Performs an asynchronous DELETE request with query parameters.
-     * 
-     * @param queryParameters Query parameters as a String, Map, or Bean object
-     * @return A ContinuableFuture that will complete with the response body
+     * Executes the DELETE request asynchronously with the specified query parameters.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Map<String, Object> params = Map.of("id", 123);
+     * client.asyncDelete(params)
+     *     .thenAccept(response -> System.out.println("Deleted: " + response));
+     * }</pre>
+     *
+     * @param queryParameters Query parameters as a String, Map, or Bean object (will be URL-encoded)
+     * @return A ContinuableFuture that will complete with the response body as a String
      */
     public ContinuableFuture<String> asyncDelete(final Object queryParameters) {
         return asyncDelete(queryParameters, String.class);
@@ -1511,9 +1583,18 @@ public final class HttpClient {
 
     /**
      * Performs an asynchronous DELETE request with custom settings.
-     * 
-     * @param settings Additional HTTP settings for this request
-     * @return A ContinuableFuture that will complete with the response body
+     * Executes the DELETE request asynchronously with the specified HTTP settings.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * HttpSettings settings = HttpSettings.create()
+     *     .header("Authorization", "Bearer token123");
+     * client.asyncDelete(settings)
+     *     .thenAccept(response -> System.out.println("Deleted: " + response));
+     * }</pre>
+     *
+     * @param settings Additional HTTP settings for this request (headers, timeouts, etc.)
+     * @return A ContinuableFuture that will complete with the response body as a String
      */
     public ContinuableFuture<String> asyncDelete(final HttpSettings settings) {
         return asyncDelete(settings, String.class);
@@ -1581,7 +1662,7 @@ public final class HttpClient {
     /**
      * Performs an asynchronous POST request with the specified request body.
      *
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * User newUser = new User("John", "Doe");
      * client.asyncPost(newUser)

@@ -41,8 +41,7 @@ public interface LongObjFunction<T, R> extends Throwables.LongObjFunction<T, R, 
      *
      * @param t the long-valued first argument
      * @param u the object second argument of type T
-     * @return the function result of type R
-     * @throws RuntimeException if any error occurs during function execution
+     * @return the function result of type R if any error occurs during function execution
      */
     @Override
     R apply(long t, T u);
@@ -54,7 +53,7 @@ public interface LongObjFunction<T, R> extends Throwables.LongObjFunction<T, R, 
      * <p>If evaluation of either function throws an exception, it is relayed to
      * the caller of the composed function.
      * 
-     * <p>Example usage:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * LongObjFunction<String, Integer> lengthPlusLong = (l, s) -> s.length() + (int)l;
      * Function<Integer, String> intToString = Object::toString;

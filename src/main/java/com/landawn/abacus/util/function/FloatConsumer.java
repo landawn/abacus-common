@@ -49,14 +49,13 @@ public interface FloatConsumer extends Throwables.FloatConsumer<RuntimeException
      *   <li>Triggering actions based on float value thresholds</li>
      * </ul>
      * 
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * FloatConsumer printer = value -> System.out.println("Value: " + value);
      * printer.accept(3.14f); // Prints: Value: 3.14
      * }</pre>
      *
-     * @param t the float value to be processed
-     * @throws RuntimeException if the operation encounters an error during execution
+     * @param t the float value to be processed if the operation encounters an error during execution
      */
     @Override
     void accept(float t);
@@ -73,7 +72,7 @@ public interface FloatConsumer extends Throwables.FloatConsumer<RuntimeException
      *   <li>Then execute the {@code after} consumer's {@code accept} method with the same argument</li>
      * </ol>
      * 
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * List<Float> values = new ArrayList<>();
      * FloatConsumer addToList = values::add;

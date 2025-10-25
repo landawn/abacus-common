@@ -27,7 +27,7 @@ package com.landawn.abacus.util;
  * <p>Lock modes can be combined to create composite locks that restrict multiple operations.
  * For example, RU prevents both reading by ID and updating.</p>
  *
- * <p>Example usage:</p>
+ * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * LockMode mode = LockMode.RU;  // Prevents read by ID and update
  * if (mode.isXLockOf(LockMode.R)) {
@@ -168,7 +168,7 @@ public enum LockMode {
      * Returns the integer value of this lock mode. The value is a bitmask where each bit
      * represents a different lock type (R=1, A=2, U=4, D=8).
      *
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * int value = LockMode.RU.intValue(); // Returns 5 (1 + 4)
      * }</pre>
@@ -183,7 +183,7 @@ public enum LockMode {
      * Returns the LockMode corresponding to the specified integer value. The value should be
      * a valid combination of the lock mode bits (R=1, A=2, U=4, D=8).
      *
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * LockMode mode = LockMode.valueOf(5); // Returns LockMode.RU
      * LockMode mode2 = LockMode.valueOf(12); // Returns LockMode.UD
@@ -250,7 +250,7 @@ public enum LockMode {
      * This method uses bitwise AND operation to determine if all lock types in this mode
      * are also present in the specified mode.
      *
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * LockMode currentLock = LockMode.R;
      * LockMode checkLock = LockMode.RU;

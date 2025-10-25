@@ -46,7 +46,7 @@ public interface QuadConsumer<A, B, C, D> extends Throwables.QuadConsumer<A, B, 
      * updating multiple related objects, logging with multiple parameters, or
      * performing complex state changes that require four inputs.
      *
-     * <p>Example usage:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * QuadConsumer<String, Integer, Boolean, Date> logger = 
      *     (message, level, isError, timestamp) -> {
@@ -65,8 +65,7 @@ public interface QuadConsumer<A, B, C, D> extends Throwables.QuadConsumer<A, B, 
      * @param a the first input argument
      * @param b the second input argument
      * @param c the third input argument
-     * @param d the fourth input argument
-     * @throws RuntimeException if the operation cannot be completed
+     * @param d the fourth input argument if the operation cannot be completed
      */
     @Override
     void accept(A a, B b, C c, D d);
@@ -82,7 +81,7 @@ public interface QuadConsumer<A, B, C, D> extends Throwables.QuadConsumer<A, B, 
      * consumer receives the same four input arguments. This is useful for performing
      * multiple independent operations on the same set of data.
      *
-     * <p>Example usage:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * QuadConsumer<Order, Customer, Product, Integer> saveOrder = 
      *     (order, customer, product, quantity) -> 

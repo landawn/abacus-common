@@ -22,7 +22,7 @@ package com.landawn.abacus.util;
  * 
  * <p>The class is immutable and extends {@link AbstractIndexed}.</p>
  * 
- * <p>Example usage:</p>
+ * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * IndexedShort indexedShort = IndexedShort.of((short)42, 5);
  * short value = indexedShort.value(); // 42
@@ -56,7 +56,7 @@ public final class IndexedShort extends AbstractIndexed {
     /**
      * Creates a new IndexedShort instance with the specified value and index.
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * IndexedShort indexed = IndexedShort.of((short)42, 5);
      * }</pre>
@@ -77,7 +77,7 @@ public final class IndexedShort extends AbstractIndexed {
      * 
      * <p>This overload accepts a long index for cases where the index might exceed Integer.MAX_VALUE.</p>
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * IndexedShort indexed = IndexedShort.of((short)42, 5000000000L);
      * }</pre>
@@ -96,7 +96,7 @@ public final class IndexedShort extends AbstractIndexed {
     /**
      * Returns the short value stored in this IndexedShort instance.
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * IndexedShort indexed = IndexedShort.of((short)42, 5);
      * short value = indexed.value(); // 42
@@ -125,7 +125,7 @@ public final class IndexedShort extends AbstractIndexed {
      * 
      * <p>Two IndexedShort instances are equal if they have the same index and value.</p>
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * IndexedShort indexed1 = IndexedShort.of((short)42, 5);
      * IndexedShort indexed2 = IndexedShort.of((short)42, 5);
@@ -148,7 +148,7 @@ public final class IndexedShort extends AbstractIndexed {
      * 
      * <p>The format is: [index]=value</p>
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * IndexedShort indexed = IndexedShort.of((short)42, 5);
      * System.out.println(indexed); // prints: [5]=42

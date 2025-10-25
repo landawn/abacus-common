@@ -32,7 +32,30 @@ public interface IntNFunction<R> extends Throwables.IntNFunction<R, RuntimeExcep
     /**
      * Applies this function to the given arguments.
      *
-     * @param args the function arguments as a variable-length array of {@code int} values
+     * <p>The function processes a variable number of int values and produces
+     * a result of type R. The varargs parameter allows for flexible argument
+     * counts, from zero to many values.
+     *
+     * <p>Common use cases include:
+     * <ul>
+     *   <li>Aggregating multiple int values into a single result (sum, average, etc.)</li>
+     *   <li>Creating objects from arrays of int values</li>
+     *   <li>Computing statistics from groups of int values</li>
+     *   <li>Transforming arrays of int values into other representations</li>
+     * </ul>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * IntNFunction<Integer> sum = args -> {
+     *     int total = 0;
+     *     for (int value : args) total += value;
+     *     return total;
+     * };
+     * Integer result = sum.apply(1, 2, 3, 4, 5); // Returns 15
+     * }</pre>
+     *
+     * @param args the function arguments as a variable-length array of {@code int} values.
+     *             Can be empty, contain a single value, or multiple values
      * @return the function result
      */
     @Override
@@ -43,8 +66,15 @@ public interface IntNFunction<R> extends Throwables.IntNFunction<R, RuntimeExcep
      * the {@code after} function to the result. If evaluation of either function throws an exception,
      * it is relayed to the caller of the composed function.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * IntNFunction<Integer> sum = args -> Arrays.stream(args).sum();
+     * IntNFunction<String> sumAsString = sum.andThen(String::valueOf);
+     * String result = sumAsString.apply(1, 2, 3); // "6"
+     * }</pre>
+     *
      * @param <V> the type of output of the {@code after} function, and of the composed function
-     * @param after the function to apply after this function is applied
+     * @param after the function to apply after this function is applied. Must not be null
      * @return a composed function that first applies this function and then applies the {@code after}
      *         function
      */

@@ -715,7 +715,7 @@ public final class Numbers {
      * and their corresponding wrapper classes. It also supports conversion to and from BigInteger and BigDecimal.
      * If the conversion would result in an overflow, an ArithmeticException is thrown.</p>
      * 
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Convert a double to an int (throws ArithmeticException if outside int range)
      * Integer result = Numbers.convert(123.45, Integer.class);
@@ -758,7 +758,7 @@ public final class Numbers {
      * and their corresponding wrapper classes. It also supports conversion to and from BigInteger and BigDecimal.
      * If the conversion would result in an overflow, an ArithmeticException is thrown.</p>
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Convert a double to an int with a default value for null
      * Integer result = Numbers.convert(null, Integer.class, -1);
@@ -798,7 +798,7 @@ public final class Numbers {
      * as well as their corresponding wrapper classes. It also supports conversion to and from BigInteger and BigDecimal.
      * If the conversion would result in an overflow, an ArithmeticException is thrown.</p>
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Convert a double to an int (throws ArithmeticException if outside int range)
      * Type<Integer> intType = Type.of(Integer.class);
@@ -844,7 +844,7 @@ public final class Numbers {
      * as well as their corresponding wrapper classes. It also supports conversion to and from BigInteger and BigDecimal.
      * If the conversion would result in an overflow, an ArithmeticException is thrown.</p>
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Convert a double to an int with a default value for null
      * Type<Integer> intType = Type.of(Integer.class);
@@ -888,7 +888,7 @@ public final class Numbers {
      * <p>This method uses {@link java.text.DecimalFormat} to format the integer value. The format should be a valid pattern
      * for DecimalFormat, such as "0.00" for two decimal places or "#,###" for thousand separators.</p>
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Numbers.format(1234, "#,###");      // returns "1,234"
      * Numbers.format(1234, "0.00");       // returns "1234.00"
@@ -923,7 +923,7 @@ public final class Numbers {
      *
      * <p>If the Integer value is {@code null}, it will be treated as 0.</p>
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Numbers.format(1234, "#,###");      // returns "1,234"
      * Numbers.format(1234, "0.00");       // returns "1234.00"
@@ -961,7 +961,7 @@ public final class Numbers {
      * <p>This method uses {@link java.text.DecimalFormat} to format the long value. The format should be a valid pattern
      * for DecimalFormat, such as "0.00" for two decimal places or "#,###" for thousand separators.</p>
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Numbers.format(123456789L, "#,###");      // returns "123,456,789"
      * Numbers.format(123456789L, "0.00");       // returns "123456789.00"
@@ -996,7 +996,7 @@ public final class Numbers {
      *
      * <p>If the Long value is {@code null}, it will be treated as 0.</p>
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Numbers.format(123456789L, "#,###");      // returns "123,456,789"
      * Numbers.format(123456789L, "0.00");       // returns "123456789.00"
@@ -1034,20 +1034,20 @@ public final class Numbers {
      * <p>This method uses {@link java.text.DecimalFormat} to format the float value. The format should be a valid pattern
      * for DecimalFormat, such as "0.00" for two decimal places or "#.##" for up to two decimal places.
      *
-     * <p>Example usage:
-     * <pre>
-     * <code>
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
      * Numbers.format(12.105f, "0.00"); // returns "12.10"
      * Numbers.format(12.105f, "#.##"); // returns "12.1"
      * Numbers.format(0.121, "#.##%"); // returns "12.1%"
      * Numbers.format(0.12156, "#.##%"); // returns "12.16%"
-     * </code>
-     * </pre>
+     * }</pre>
      *
      * @param x the float value to be formatted.
      * @param decimalFormat the decimal format pattern to be used for formatting.
      * @return a string representation of the float value formatted according to the provided decimal format.
      * @throws IllegalArgumentException if the decimalFormat is {@code null}.
+     * @see #format(Float, String)
+     * @see #format(double, String)
      * @see java.text.DecimalFormat#format(double)
      */
     public static String format(final float x, final String decimalFormat) throws IllegalArgumentException {
@@ -1070,21 +1070,21 @@ public final class Numbers {
      *
      * <p>If the Float value is {@code null}, it will be treated as 0f.
      *
-     * <p>Example usage:
-     * <pre>
-     * <code>
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
      * Numbers.format(12.105f, "0.00"); // returns "12.10"
      * Numbers.format(12.105f, "#.##"); // returns "12.1"
      * Numbers.format(null, "0.00"); // returns "0.00"
      * Numbers.format(0.121, "#.##%"); // returns "12.1%"
      * Numbers.format(0.12156, "#.##%"); // returns "12.16%"
-     * </code>
-     * </pre>
+     * }</pre>
      *
      * @param x the Float value to be formatted. If {@code null}, it will be treated as 0f.
      * @param decimalFormat the decimal format pattern to be used for formatting.
      * @return a string representation of the Float value formatted according to the provided decimal format.
      * @throws IllegalArgumentException if the decimalFormat is {@code null}.
+     * @see #format(float, String)
+     * @see #format(Double, String)
      * @see java.text.DecimalFormat#format(double)
      */
     public static String format(final Float x, final String decimalFormat) throws IllegalArgumentException {
@@ -1109,22 +1109,23 @@ public final class Numbers {
      * <p>This method uses {@link java.text.DecimalFormat} to format the double value. The format should be a valid pattern
      * for DecimalFormat, such as "0.00" for two decimal places or "#.##" for up to two decimal places.
      *
-     * <p>Example usage:
-     * <pre>
-     * <code>
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
      * Numbers.format(12.105, "0.00"); // returns "12.11"
      * Numbers.format(12.105, "#.##"); // returns "12.11"
      * Numbers.format(0.121, "0.00%"); // returns "12.10%"
      * Numbers.format(0.121, "#.##%"); // returns "12.1%"
      * Numbers.format(0.12156, "0.00%"); // returns "12.16%"
      * Numbers.format(0.12156, "#.##%"); // returns "12.16%"
-     * </code>
-     * </pre>
+     * }</pre>
      *
      * @param x the double value to be formatted.
      * @param decimalFormat the decimal format pattern to be used for formatting.
      * @return a string representation of the double value formatted according to the provided decimal format.
      * @throws IllegalArgumentException if the decimalFormat is {@code null}.
+     * @see #format(Double, String)
+     * @see #format(int, String)
+     * @see #format(long, String)
      * @see java.text.DecimalFormat#format(double)
      */
     public static String format(final double x, final String decimalFormat) throws IllegalArgumentException {
@@ -1147,21 +1148,22 @@ public final class Numbers {
      *
      * <p>If the Double value is {@code null}, it will be treated as 0d.
      *
-     * <p>Example usage:
-     * <pre>
-     * <code>
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
      * Numbers.format(12.105, "0.00"); // returns "12.11"
      * Numbers.format(12.105, "#.##"); // returns "12.11"
      * Numbers.format(null, "0.00"); // returns "0.00"
      * Numbers.format(0.121, "#.##%"); // returns "12.1%"
      * Numbers.format(0.12156, "#.##%"); // returns "12.16%"
-     * </code>
-     * </pre>
+     * }</pre>
      *
      * @param x the Double value to be formatted. If {@code null}, it will be treated as 0d.
      * @param decimalFormat the decimal format pattern to be used for formatting.
      * @return a string representation of the Double value formatted according to the provided decimal format.
      * @throws IllegalArgumentException if the decimalFormat is {@code null}.
+     * @see #format(double, String)
+     * @see #format(Integer, String)
+     * @see #format(Long, String)
      * @see java.text.DecimalFormat#format(double)
      */
     public static String format(final Double x, final String decimalFormat) throws IllegalArgumentException {
@@ -1187,7 +1189,7 @@ public final class Numbers {
      * It uses a regular expression pattern to identify integer patterns, including negative numbers.
      * If no integer is found in the string, an empty OptionalInt is returned.</p>
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Numbers.extractFirstInt("abc123def");     // returns OptionalInt.of(123)
      * Numbers.extractFirstInt("price: $45.99"); // returns OptionalInt.of(45)
@@ -1204,7 +1206,7 @@ public final class Numbers {
      * @see #extractFirstLong(String)
      * @see Strings#extractFirstInteger(String)
      * @see RegExUtil#findFirst(String, Pattern)
-     * @see RegExUtil#findlast(String, Pattern)
+     * @see RegExUtil#findLast(String, Pattern)
      * @see RegExUtil#INTEGER_FINDER
      */
     public static u.OptionalInt extractFirstInt(final String str) {
@@ -1228,7 +1230,7 @@ public final class Numbers {
      * It uses a regular expression pattern to identify integer patterns, including negative numbers.
      * If no integer is found in the string, the specified default value is returned.</p>
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Numbers.extractFirstInt("abc123def", 0);     // returns 123
      * Numbers.extractFirstInt("price: $45.99", 0); // returns 45
@@ -1245,7 +1247,7 @@ public final class Numbers {
      * @see #extractFirstLong(String, long)
      * @see Strings#extractFirstInteger(String)
      * @see RegExUtil#findFirst(String, Pattern)
-     * @see RegExUtil#findlast(String, Pattern)
+     * @see RegExUtil#findLast(String, Pattern)
      * @see RegExUtil#INTEGER_FINDER
      */
     public static int extractFirstInt(final String str, final int defaultValue) {
@@ -1269,7 +1271,7 @@ public final class Numbers {
      * It uses a regular expression pattern to identify integer patterns, including negative numbers.
      * If no long value is found in the string, an empty OptionalLong is returned.</p>
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Numbers.extractFirstLong("abc123def");           // returns OptionalLong.of(123L)
      * Numbers.extractFirstLong("price: $4500000000");  // returns OptionalLong.of(4500000000L)
@@ -1285,7 +1287,7 @@ public final class Numbers {
      * @see #extractFirstInt(String)
      * @see Strings#extractFirstInteger(String)
      * @see RegExUtil#findFirst(String, Pattern)
-     * @see RegExUtil#findlast(String, Pattern)
+     * @see RegExUtil#findLast(String, Pattern)
      * @see RegExUtil#INTEGER_FINDER
      */
     public static u.OptionalLong extractFirstLong(final String str) {
@@ -1309,7 +1311,7 @@ public final class Numbers {
      * It uses a regular expression pattern to identify integer patterns, including negative numbers.
      * If no long value is found in the string, the specified default value is returned.</p>
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Numbers.extractFirstLong("abc123def", 0L);           // returns 123L
      * Numbers.extractFirstLong("price: $4500000000", 0L);  // returns 4500000000L
@@ -1326,7 +1328,7 @@ public final class Numbers {
      * @see #extractFirstInt(String, int)
      * @see Strings#extractFirstInteger(String)
      * @see RegExUtil#findFirst(String, Pattern)
-     * @see RegExUtil#findlast(String, Pattern)
+     * @see RegExUtil#findLast(String, Pattern)
      * @see RegExUtil#INTEGER_FINDER
      */
     public static long extractFirstLong(final String str, final long defaultValue) {
@@ -1349,7 +1351,7 @@ public final class Numbers {
      * It uses a regular expression pattern to identify decimal number patterns. If no double value is found
      * in the string, an empty OptionalDouble is returned.</p>
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Numbers.extractFirstDouble("abc123.45def");         // returns OptionalDouble.of(123.45)
      * Numbers.extractFirstDouble("value: -0.00123");      // returns OptionalDouble.of(-0.00123)
@@ -1366,7 +1368,7 @@ public final class Numbers {
      * @see #extractFirstDouble(String, double, boolean)
      * @see Strings#extractFirstDouble(String)
      * @see RegExUtil#findFirst(String, Pattern)
-     * @see RegExUtil#findlast(String, Pattern)
+     * @see RegExUtil#findLast(String, Pattern)
      * @see RegExUtil#NUMBER_FINDER
      * @see RegExUtil#SCIENTIFIC_NUMBER_FINDER
      */
@@ -1382,7 +1384,7 @@ public final class Numbers {
      * is set to {@code true}, it will also consider scientific notation (e.g., 1.23e10) as valid double values.
      * If no double value is found in the string, an empty OptionalDouble is returned.</p>
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Numbers.extractFirstDouble("abc123.45def", false);         // returns OptionalDouble.of(123.45)
      * Numbers.extractFirstDouble("value: -0.00123", false);      // returns OptionalDouble.of(-0.00123)
@@ -1401,7 +1403,7 @@ public final class Numbers {
      * @see #extractFirstDouble(String, double, boolean)
      * @see Strings#extractFirstDouble(String)
      * @see RegExUtil#findFirst(String, Pattern)
-     * @see RegExUtil#findlast(String, Pattern)
+     * @see RegExUtil#findLast(String, Pattern)
      * @see RegExUtil#NUMBER_FINDER
      * @see RegExUtil#SCIENTIFIC_NUMBER_FINDER
      */
@@ -1426,7 +1428,7 @@ public final class Numbers {
      * It uses a regular expression pattern to identify decimal number patterns. If no double value is found
      * in the string, the specified default value is returned.</p>
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Numbers.extractFirstDouble("abc123.45def", 0.0);         // returns 123.45
      * Numbers.extractFirstDouble("value: -0.00123", 0.0);      // returns -0.00123
@@ -1444,7 +1446,7 @@ public final class Numbers {
      * @see #extractFirstDouble(String, double, boolean)
      * @see Strings#extractFirstDouble(String)
      * @see RegExUtil#findFirst(String, Pattern)
-     * @see RegExUtil#findlast(String, Pattern)
+     * @see RegExUtil#findLast(String, Pattern)
      * @see RegExUtil#NUMBER_FINDER
      * @see RegExUtil#SCIENTIFIC_NUMBER_FINDER
      */
@@ -1460,7 +1462,7 @@ public final class Numbers {
      * is set to {@code true}, it will also consider scientific notation (e.g., 1.23e10) as valid double values.
      * If no double value is found in the string, the specified default value is returned.</p>
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Numbers.extractFirstDouble("abc123.45def", 0.0, false);         // returns 123.45
      * Numbers.extractFirstDouble("value: -0.00123", 0.0, false);      // returns -0.00123
@@ -1480,7 +1482,7 @@ public final class Numbers {
      * @see #extractFirstDouble(String, double)
      * @see Strings#extractFirstDouble(String)
      * @see RegExUtil#findFirst(String, Pattern)
-     * @see RegExUtil#findlast(String, Pattern)
+     * @see RegExUtil#findLast(String, Pattern)
      * @see RegExUtil#NUMBER_FINDER
      * @see RegExUtil#SCIENTIFIC_NUMBER_FINDER
      */
@@ -1504,10 +1506,20 @@ public final class Numbers {
     * <p>This method attempts to convert the provided string to a byte. If the string is {@code null} or empty,
     * default value {@code 0} is returned. Otherwise, the method attempts to parse the string as a byte.</p>
     *
+    * <p><b>Usage Examples:</b></p>
+    * <pre>{@code
+    * Numbers.toByte("12") = 12
+    * Numbers.toByte("-42") = -42
+    * Numbers.toByte("127") = 127
+    * Numbers.toByte(null) = 0
+    * Numbers.toByte("") = 0
+    * }</pre>
+    *
     * @param str the string to convert. This can be any instance of String.
     * @return the byte representation of the provided string, or {@code 0} if the object is {@code null} or empty.
     * @throws NumberFormatException if the string cannot be parsed as a byte.
     * @see #toByte(String, byte)
+    * @see #toByte(Object)
     * @see #isParsable(String)
     * @see Byte#parseByte(String)
     * @see Byte#decode(String)
@@ -1523,9 +1535,19 @@ public final class Numbers {
      * default value {@code 0} is returned. If the object is a Number, its byte value is returned.
      * Otherwise, the method attempts to parse the object's string representation as a byte.</p>
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Numbers.toByte(Integer.valueOf(42)) = 42
+     * Numbers.toByte("123") = 123
+     * Numbers.toByte(null) = 0
+     * Numbers.toByte(Byte.valueOf((byte) 100)) = 100
+     * }</pre>
+     *
      * @param obj the object to convert. This can be any instance of Object.
      * @return the byte representation of the provided object, or {@code 0} if the object is {@code null}.
      * @throws NumberFormatException if the object is not a Number and its string representation cannot be parsed as a byte.
+     * @see #toByte(String)
+     * @see #toByte(String, byte)
      * @see #toByte(Object, byte)
      * @see #isParsable(String)
      * @see Byte#parseByte(String)
@@ -1545,6 +1567,9 @@ public final class Numbers {
      * @param defaultValueForNull the default value to return if the string is {@code null} or empty.
      * @return the byte representation of the provided string, or the default value if the string is {@code null} or empty.
      * @throws NumberFormatException if the string cannot be parsed as a byte.
+     * @see #toByte(String)
+     * @see #toByte(Object)
+     * @see #toByte(Object, byte)
      * @see #isParsable(String)
      * @see Byte#parseByte(String)
      * @see Byte#decode(String)
@@ -1580,6 +1605,9 @@ public final class Numbers {
      * @param defaultValueForNull the default value to return if the object is {@code null}.
      * @return the byte representation of the provided object, or the default value if the object is {@code null}.
      * @throws NumberFormatException if the object is not a Number and its string representation cannot be parsed as a byte.
+     * @see #toByte(String)
+     * @see #toByte(String, byte)
+     * @see #toByte(Object)
      * @see #isParsable(String)
      * @see Byte#parseByte(String)
      * @see Byte#decode(String)
@@ -1610,9 +1638,20 @@ public final class Numbers {
      * <p>This method attempts to convert the provided string to a short. If the string is {@code null} or empty,
      * default value {@code 0} is returned. Otherwise, the method attempts to parse the string as a short.</p>
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Numbers.toShort("1234") = 1234
+     * Numbers.toShort("-5678") = -5678
+     * Numbers.toShort("32767") = 32767
+     * Numbers.toShort(null) = 0
+     * Numbers.toShort("") = 0
+     * }</pre>
+     *
      * @param str the string to convert. This can be any instance of String.
      * @return the short representation of the provided string, or {@code 0} if the object is {@code null} or empty.
      * @throws NumberFormatException if the string cannot be parsed as a short.
+     * @see #toShort(String, short)
+     * @see #toShort(Object)
      * @see #isParsable(String)
      * @see Short#parseShort(String)
      * @see Short#decode(String)
@@ -1628,9 +1667,20 @@ public final class Numbers {
      * default value {@code 0} is returned. If the object is a Number, its short value is returned.
      * Otherwise, the method attempts to parse the object's string representation as a short.</p>
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Numbers.toShort(Integer.valueOf(1234)) = 1234
+     * Numbers.toShort("5678") = 5678
+     * Numbers.toShort(null) = 0
+     * Numbers.toShort(Short.valueOf((short) 32767)) = 32767
+     * }</pre>
+     *
      * @param obj the object to convert. This can be any instance of Object.
      * @return the short representation of the provided object, or {@code 0} if the object is {@code null}.
      * @throws NumberFormatException if the object is not a Number and its string representation cannot be parsed as a short.
+     * @see #toShort(String)
+     * @see #toShort(String, short)
+     * @see #toShort(Object, short)
      * @see #isParsable(String)
      * @see Short#parseShort(String)
      * @see Short#decode(String)
@@ -1649,6 +1699,9 @@ public final class Numbers {
      * @param defaultValueForNull the default value to return if the string is {@code null} or empty.
      * @return the short representation of the provided string, or the default value if the string is {@code null} or empty.
      * @throws NumberFormatException if the string cannot be parsed as a short.
+     * @see #toShort(String)
+     * @see #toShort(Object)
+     * @see #toShort(Object, short)
      * @see #isParsable(String)
      * @see Short#parseShort(String)
      * @see Short#decode(String)
@@ -1684,6 +1737,9 @@ public final class Numbers {
      * @param defaultValueForNull the default value to return if the object is {@code null}.
      * @return the short representation of the provided object, or the default value if the object is {@code null}.
      * @throws NumberFormatException if the object is not a Number and its string representation cannot be parsed as a short.
+     * @see #toShort(String)
+     * @see #toShort(String, short)
+     * @see #toShort(Object)
      * @see #isParsable(String)
      * @see Short#parseShort(String)
      * @see Short#decode(String)
@@ -1714,10 +1770,20 @@ public final class Numbers {
      * <p>This method attempts to convert the provided string to an integer. If the string is {@code null} or empty,
      * default value {@code 0} is returned. Otherwise, the method attempts to parse the string as an integer.</p>
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Numbers.toInt("12345") = 12345
+     * Numbers.toInt("-98765") = -98765
+     * Numbers.toInt("2147483647") = 2147483647
+     * Numbers.toInt(null) = 0
+     * Numbers.toInt("") = 0
+     * }</pre>
+     *
      * @param str the string to convert. This can be any instance of String.
      * @return the integer representation of the provided string, or {@code 0} if the object is {@code null} or empty.
      * @throws NumberFormatException if the string cannot be parsed as an integer.
      * @see #toInt(String, int)
+     * @see #toInt(Object)
      * @see #isParsable(String)
      * @see Integer#parseInt(String)
      * @see Integer#decode(String)
@@ -1733,9 +1799,19 @@ public final class Numbers {
      * default value {@code 0} is returned. If the object is a Number, its integer value is returned.
      * Otherwise, the method attempts to parse the object's string representation as an integer.</p>
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Numbers.toInt(Long.valueOf(12345)) = 12345
+     * Numbers.toInt("98765") = 98765
+     * Numbers.toInt(null) = 0
+     * Numbers.toInt(Integer.valueOf(2147483647)) = 2147483647
+     * }</pre>
+     *
      * @param obj the object to convert. This can be any instance of Object.
      * @return the integer representation of the provided object, or {@code 0} if the object is {@code null}.
      * @throws NumberFormatException if the object is not a Number and its string representation cannot be parsed as an integer.
+     * @see #toInt(String)
+     * @see #toInt(String, int)
      * @see #toInt(Object, int)
      * @see #isParsable(String)
      * @see Integer#parseInt(String)
@@ -1755,6 +1831,9 @@ public final class Numbers {
      * @param defaultValueForNull the default value to return if the string is {@code null} or empty.
      * @return the integer representation of the provided string, or the default value if the string is {@code null} or empty.
      * @throws NumberFormatException if the string cannot be parsed as an integer.
+     * @see #toInt(String)
+     * @see #toInt(Object)
+     * @see #toInt(Object, int)
      * @see #isParsable(String)
      * @see Integer#parseInt(String)
      * @see Integer#decode(String)
@@ -1786,6 +1865,9 @@ public final class Numbers {
      * @param defaultValueForNull the default value to return if the object is {@code null}.
      * @return the integer representation of the provided object, or the default value if the object is {@code null}.
      * @throws NumberFormatException if the object is not a Number and its string representation cannot be parsed as an integer.
+     * @see #toInt(String)
+     * @see #toInt(String, int)
+     * @see #toInt(Object)
      * @see #isParsable(String)
      * @see Integer#parseInt(String)
      * @see Integer#decode(String)
@@ -1816,10 +1898,20 @@ public final class Numbers {
      * <p>This method attempts to convert the provided string to a long. If the string is {@code null} or empty,
      * default value {@code 0} is returned. Otherwise, the method attempts to parse the string as a long.</p>
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Numbers.toLong("123456789") = 123456789L
+     * Numbers.toLong("-987654321") = -987654321L
+     * Numbers.toLong("9223372036854775807") = 9223372036854775807L
+     * Numbers.toLong(null) = 0L
+     * Numbers.toLong("") = 0L
+     * }</pre>
+     *
      * @param str the string to convert. This can be any instance of String.
      * @return the long representation of the provided string, or {@code 0} if the object is {@code null} or empty.
      * @throws NumberFormatException if the string cannot be parsed as a long.
      * @see #toLong(String, long)
+     * @see #toLong(Object)
      * @see #isParsable(String)
      * @see Long#parseLong(String)
      * @see Long#decode(String)
@@ -1835,9 +1927,19 @@ public final class Numbers {
      * default value {@code 0} is returned. If the object is a Number, its long value is returned.
      * Otherwise, the method attempts to parse the object's string representation as a long.</p>
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Numbers.toLong(Integer.valueOf(123456)) = 123456L
+     * Numbers.toLong("987654321") = 987654321L
+     * Numbers.toLong(null) = 0L
+     * Numbers.toLong(Long.valueOf(9223372036854775807L)) = 9223372036854775807L
+     * }</pre>
+     *
      * @param obj the object to convert. This can be any instance of Object.
      * @return the long representation of the provided object, or {@code 0} if the object is {@code null}.
      * @throws NumberFormatException if the object is not a Number and its string representation cannot be parsed as a long.
+     * @see #toLong(String)
+     * @see #toLong(String, long)
      * @see #toLong(Object, long)
      * @see #isParsable(String)
      * @see Long#parseLong(String)
@@ -1857,6 +1959,9 @@ public final class Numbers {
      * @param defaultValueForNull the default value to return if the string is {@code null} or empty.
      * @return the long representation of the provided string, or the default value if the string is {@code null} or empty.
      * @throws NumberFormatException if the string cannot be parsed as a long.
+     * @see #toLong(String)
+     * @see #toLong(Object)
+     * @see #toLong(Object, long)
      * @see #isParsable(String)
      * @see Long#parseLong(String)
      * @see Long#decode(String)
@@ -1898,6 +2003,9 @@ public final class Numbers {
      * @param defaultValueForNull the default value to return if the object is {@code null}.
      * @return the long representation of the provided object, or the default value if the object is {@code null}.
      * @throws NumberFormatException if the object is not a Number and its string representation cannot be parsed as a long.
+     * @see #toLong(String)
+     * @see #toLong(String, long)
+     * @see #toLong(Object)
      * @see #isParsable(String)
      * @see Long#parseLong(String)
      * @see Long#decode(String)
@@ -1938,6 +2046,16 @@ public final class Numbers {
      * <p>This method attempts to convert the provided string to a float. If the string is {@code null},
      * default value {@code 0} is returned. Otherwise, the method attempts to parse the string as a float.</p>
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Numbers.toFloat("123.45") = 123.45f
+     * Numbers.toFloat("3.14159") = 3.14159f
+     * Numbers.toFloat("-42.5") = -42.5f
+     * Numbers.toFloat(null) = 0.0f
+     * Numbers.toFloat("") = 0.0f
+     * Numbers.toFloat("1.23e10") = 1.23e10f
+     * }</pre>
+     *
      * @param str the string to convert. This can be any instance of String.
      * @return the float representation of the provided string, or {@code 0} if the object is {@code null} or empty.
      * @throws NumberFormatException if the string cannot be parsed as a float.
@@ -1956,9 +2074,19 @@ public final class Numbers {
      * default value {@code 0} is returned. If the object is a Number, its float value is returned.
      * Otherwise, the method attempts to parse the object's string representation as a float.</p>
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Numbers.toFloat(Double.valueOf(123.45)) = 123.45f
+     * Numbers.toFloat("98.76") = 98.76f
+     * Numbers.toFloat(null) = 0.0f
+     * Numbers.toFloat(Float.valueOf(3.14f)) = 3.14f
+     * }</pre>
+     *
      * @param obj the object to convert. This can be any instance of Object.
      * @return the float representation of the provided object, or {@code 0} if the object is {@code null}.
      * @throws NumberFormatException if the object is not a Number and its string representation cannot be parsed as a float.
+     * @see #toFloat(String)
+     * @see #toFloat(String, float)
      * @see #toFloat(Object, float)
      * @see #isParsable(String)
      * @see Float#parseFloat(String)
@@ -1977,6 +2105,9 @@ public final class Numbers {
      * @param defaultValueForNull the default value to return if the provided string is {@code null} or empty.
      * @return the float representation of the provided string, or the default value if the string is {@code null} or empty.
      * @throws NumberFormatException if the string cannot be parsed as a float.
+     * @see #toFloat(String)
+     * @see #toFloat(Object)
+     * @see #toFloat(Object, float)
      * @see #isParsable(String)
      * @see Float#parseFloat(String)
      */
@@ -1999,6 +2130,9 @@ public final class Numbers {
      * @param defaultValueForNull the default value to return if the provided object is {@code null}.
      * @return the float representation of the provided object, or the default value if the object is {@code null}.
      * @throws NumberFormatException if the object is not a Number and its string representation cannot be parsed as a float.
+     * @see #toFloat(String)
+     * @see #toFloat(String, float)
+     * @see #toFloat(Object)
      * @see #isParsable(String)
      * @see Float#parseFloat(String)
      */
@@ -2024,6 +2158,17 @@ public final class Numbers {
      * <p>This method attempts to convert the provided string to a double. If the string is {@code null} or empty,
      * default value {@code 0} is returned. Otherwise, the method attempts to parse the string as a double.</p>
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Numbers.toDouble("123.45") = 123.45
+     * Numbers.toDouble("3.141592653589793") = 3.141592653589793
+     * Numbers.toDouble("-42.5") = -42.5
+     * Numbers.toDouble(null) = 0.0
+     * Numbers.toDouble("") = 0.0
+     * Numbers.toDouble("1.23e100") = 1.23e100
+     * Numbers.toDouble("NaN") = NaN
+     * }</pre>
+     *
      * @param str the string to convert. This can be any instance of String.
      * @return the double representation of the provided string, or {@code 0} if the object is {@code null} or empty.
      * @throws NumberFormatException if the string cannot be parsed as a double.
@@ -2042,9 +2187,19 @@ public final class Numbers {
      * default value {@code 0} is returned. If the object is a Number, its double value is returned.
      * Otherwise, the method attempts to parse the object's string representation as a double.</p>
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Numbers.toDouble(Integer.valueOf(123)) = 123.0
+     * Numbers.toDouble("456.789") = 456.789
+     * Numbers.toDouble(null) = 0.0
+     * Numbers.toDouble(Double.valueOf(3.141592)) = 3.141592
+     * }</pre>
+     *
      * @param obj the object to convert. This can be any instance of Object.
-     * @return the double representatio of the provided object, or {@code 0} if the object is {@code null}.
+     * @return the double representation of the provided object, or {@code 0} if the object is {@code null}.
      * @throws NumberFormatException if the object is not a Number and its string representation cannot be parsed as a double.
+     * @see #toDouble(String)
+     * @see #toDouble(String, double)
      * @see #toDouble(Object, double)
      * @see #isParsable(String)
      * @see Double#parseDouble(String)
@@ -2063,6 +2218,9 @@ public final class Numbers {
      * @param defaultValueForNull the default value to return if the provided string is {@code null} or empty.
      * @return the double representation of the provided string, or the default value if the string is {@code null} or empty.
      * @throws NumberFormatException if the string cannot be parsed as a double.
+     * @see #toDouble(String)
+     * @see #toDouble(Object)
+     * @see #toDouble(Object, double)
      * @see #isParsable(String)
      * @see Double#parseDouble(String)
      */
@@ -2085,6 +2243,9 @@ public final class Numbers {
      * @param defaultValueForNull the default value to return if the provided object is {@code null}.
      * @return the double representation of the provided object, or the default value if the object is {@code null}.
      * @throws NumberFormatException if the object is not a Number and its string representation cannot be parsed as a double.
+     * @see #toDouble(String)
+     * @see #toDouble(String, double)
+     * @see #toDouble(Object)
      * @see #isParsable(String)
      * @see Double#parseDouble(String)
      */
@@ -2110,10 +2271,11 @@ public final class Numbers {
      * <p>If the {@code BigDecimal} {@code value} is
      * {@code null}, then the specified default value is returned.</p>
      *
-     * <pre>
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
      *   NumberUtils.toDouble(null)                     = 0.0d
      *   NumberUtils.toDouble(BigDecimal.valueOf(8.5d)) = 8.5d
-     * </pre>
+     * }</pre>
      *
      * @param value the {@code BigDecimal} to convert, may be {@code null}.
      * @return the double represented by the {@code BigDecimal} or
@@ -2124,18 +2286,18 @@ public final class Numbers {
     }
 
     /**
-     * <p>Convert a {@code BigDecimal} to a {@code double}.</p>
+     * Convert a {@code BigDecimal} to a {@code double}.
      *
-     * <p>If the {@code BigDecimal} {@code value} is
-     * {@code null}, then the specified default value is returned.</p>
+     * <p>If the {@code BigDecimal} {@code value} is {@code null}, then the specified default value is returned.</p>
      *
-     * <pre>
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
      *   NumberUtils.toDouble(null, 1.1d)                     = 1.1d
      *   NumberUtils.toDouble(BigDecimal.valueOf(8.5d), 1.1d) = 8.5d
-     * </pre>
+     * }</pre>
      *
      * @param value the {@code BigDecimal} to convert, may be {@code null}.
-     * @param defaultValueForNull
+     * @param defaultValueForNull the default value to return if the {@code BigDecimal} is {@code null}
      * @return the double represented by the {@code BigDecimal} or the defaultValue if the {@code BigDecimal} is {@code null}.
      */
     public static double toDouble(final BigDecimal value, final double defaultValueForNull) {
@@ -2275,7 +2437,7 @@ public final class Numbers {
      * <p>This method provides overflow checking when converting a long to an int. If the long value is outside
      * the range of int values (Integer.MIN_VALUE to Integer.MAX_VALUE), an ArithmeticException is thrown.</p>
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * int result = Numbers.toIntExact(123L);              // returns 123
      * int overflow = Numbers.toIntExact(Integer.MAX_VALUE + 1L);  // throws ArithmeticException
@@ -2308,7 +2470,7 @@ public final class Numbers {
      *
      * <p>Note: Leading zeros indicate octal notation. Spaces are not trimmed from the input string.</p>
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Integer decimal = Numbers.createInteger("123");     // returns 123
      * Integer hex = Numbers.createInteger("0xFF");        // returns 255
@@ -2349,7 +2511,7 @@ public final class Numbers {
      *
      * <p>Note: Leading zeros indicate octal notation. Spaces are not trimmed from the input string.</p>
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Long decimal = Numbers.createLong("123");       // returns 123L
      * Long hex = Numbers.createLong("0xFF");          // returns 255L
@@ -2392,7 +2554,7 @@ public final class Numbers {
      * <p>This method parses a string representation of a floating-point number and returns a Float object.
      * The string can contain standard decimal notation or scientific notation (e.g., "1.23e-4").</p>
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Float f1 = Numbers.createFloat("123.45");       // returns 123.45f
      * Float f2 = Numbers.createFloat("-1.23e4");      // returns -12300.0f
@@ -2425,7 +2587,7 @@ public final class Numbers {
      * <p>This method parses a string representation of a floating-point number and returns a Double object.
      * The string can contain standard decimal notation or scientific notation (e.g., "1.23e-4").</p>
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Double d1 = Numbers.createDouble("123.45");         // returns 123.45
      * Double d2 = Numbers.createDouble("-1.23e10");       // returns -1.23e10
@@ -2465,7 +2627,7 @@ public final class Numbers {
      * <p>The method automatically detects the radix (base) based on the prefix and parses accordingly.
      * For hexadecimal, both "0x"/"0X" and "#" prefixes are supported. For octal, a leading zero is required.</p>
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * BigInteger decimal = Numbers.createBigInteger("123456789012345");  // decimal
      * BigInteger hex = Numbers.createBigInteger("0xFFFFFFFF");           // returns 4294967295
@@ -2533,7 +2695,7 @@ public final class Numbers {
      * <li>Leading/trailing zeros: "0.100", "123.000"</li>
      * </ul>
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * BigDecimal bd1 = Numbers.createBigDecimal("123.45");        // exact decimal representation
      * BigDecimal bd2 = Numbers.createBigDecimal("1.23E+10");      // scientific notation
@@ -2565,43 +2727,49 @@ public final class Numbers {
     }
 
     /**
-     * <p>
      * Turns a string value into a java.lang.Number.
-     * </p>
      *
-     * <p>
-     * If the string starts with {@code 0x} or {@code -0x} (lower or upper case)
+     * <p>If the string starts with {@code 0x} or {@code -0x} (lower or upper case)
      * or {@code #} or {@code -#}, it will be interpreted as a hexadecimal
      * Integer - or Long, if the number of digits after the prefix is more than
-     * 8 - or BigInteger if there are more than 16 digits.
-     * </p>
-     * <p>
-     * Then, the value is examined for a type qualifier on the end, i.e., one of
+     * 8 - or BigInteger if there are more than 16 digits.</p>
+     *
+     * <p>Then, the value is examined for a type qualifier on the end, i.e., one of
      * {@code 'f','F','d','D','l','L'}. If it is found, it starts trying to
      * create successively larger types from the type specified until one is
-     * found that can represent the value.
+     * found that can represent the value.</p>
      *
-     * </p>
-     *
-     * <p>
-     * If a type specifier is not found, it will check for a decimal point and
+     * <p>If a type specifier is not found, it will check for a decimal point and
      * then try successively larger types from {@code Integer} to
      * {@code BigInteger} and from {@code double} to
-     * {@code BigDecimal}.
-     * </p>
+     * {@code BigDecimal}.</p>
      *
-     * <p>
-     * Integral values with a leading {@code 0} will be interpreted as octal;
-     * the returned number will be Integer, Long or BigDecimal as appropriate.
-     * </p>
+     * <p>Integral values with a leading {@code 0} will be interpreted as octal;
+     * the returned number will be Integer, Long or BigDecimal as appropriate.</p>
      *
-     * {@code null} is returned if the specified {@code str} is {@code null}.
-     * <br />
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Number n1 = Numbers.createNumber("123");           // returns Integer
+     * Number n2 = Numbers.createNumber("123.45");        // returns Double
+     * Number n3 = Numbers.createNumber("123L");          // returns Long
+     * Number n4 = Numbers.createNumber("123.45f");       // returns Float
+     * Number n5 = Numbers.createNumber("0xFF");          // returns Integer (255)
+     * Number n6 = Numbers.createNumber("010");           // returns Integer (8, octal)
+     * Number nullValue = Numbers.createNumber(null);     // returns null
+     * Numbers.createNumber("")                           // NumberFormatException!
+     * Numbers.createNumber("abc")                        // NumberFormatException!
+     * }</pre>
      *
      * @param str a String containing a number; must not be {@code null} or empty
      * @return the parsed Number value, or {@code null} if the input string is {@code null}
      * @throws NumberFormatException if the string is empty or the value cannot be converted
      * @see #isCreatable(String)
+     * @see #createInteger(String)
+     * @see #createLong(String)
+     * @see #createFloat(String)
+     * @see #createDouble(String)
+     * @see #createBigInteger(String)
+     * @see #createBigDecimal(String)
      */
     @SuppressFBWarnings({ "SF_SWITCH_FALLTHROUGH", "SF_SWITCH_NO_DEFAULT" })
     @MayReturnNull
@@ -2791,8 +2959,21 @@ public final class Numbers {
      *
      * <p>{@code null} and empty String will return {@code false}.</p>
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Numbers.isDigits("12345") = true
+     * Numbers.isDigits("0") = true
+     * Numbers.isDigits("123.45") = false
+     * Numbers.isDigits("-123") = false
+     * Numbers.isDigits("abc") = false
+     * Numbers.isDigits(null) = false
+     * Numbers.isDigits("") = false
+     * }</pre>
+     *
      * @param str the {@link String} to check
      * @return {@code true} if str contains only Unicode numeric
+     * @see #isNumber(String)
+     * @see #isParsable(String)
      * @see Strings#isNumeric(CharSequence)
      */
     public static boolean isDigits(final String str) {
@@ -2866,18 +3047,29 @@ public final class Numbers {
     }
 
     /**
-     * Note: It's copied from NumberUtils in Apache Commons Lang under Apache
-     * License 2.0
+     * Checks whether the String is a valid Java number.
      *
-     * <br />
-     * <br />
+     * <p>Note: It's copied from NumberUtils in Apache Commons Lang under Apache License 2.0</p>
      *
-     * It's same as {@code isCreatable(String)}.
+     * <p>It's same as {@code isCreatable(String)}.</p>
      *
-     * @param str
-     * @return
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Numbers.isNumber("123") = true
+     * Numbers.isNumber("-123") = true
+     * Numbers.isNumber("123.45") = true
+     * Numbers.isNumber("1.23e10") = true
+     * Numbers.isNumber("0xFF") = true
+     * Numbers.isNumber("abc") = false
+     * Numbers.isNumber(null) = false
+     * Numbers.isNumber("") = false
+     * }</pre>
+     *
+     * @param str the string to check
+     * @return {@code true} if the string is a valid number, otherwise {@code false}
      * @see #isCreatable(String)
      * @see #isParsable(String)
+     * @see #isDigits(String)
      */
     public static boolean isNumber(final String str) {
         return isCreatable(str);
@@ -3086,7 +3278,7 @@ public final class Numbers {
     }
 
     /**
-     * <p>Checks whether the given String is a parsable number.</p>
+     * Checks whether the given String is a parsable number.
      *
      * <p>Parsable numbers include those Strings understood by {@link Integer#parseInt(String)},
      * {@link Long#parseLong(String)}, {@link Float#parseFloat(String)} or
@@ -3097,8 +3289,23 @@ public final class Numbers {
      *
      * <p>{@code Null} and empty String will return {@code false}.</p>
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Numbers.isParsable("123") = true
+     * Numbers.isParsable("-123") = true
+     * Numbers.isParsable("123.45") = true
+     * Numbers.isParsable("1.23e10") = false  // scientific notation not supported
+     * Numbers.isParsable("0xFF") = false  // hexadecimal not supported
+     * Numbers.isParsable("abc") = false
+     * Numbers.isParsable(null) = false
+     * Numbers.isParsable("") = false
+     * }</pre>
+     *
      * @param str the String to check.
      * @return {@code true} if the string is a parsable number.
+     * @see #isCreatable(String)
+     * @see #isNumber(String)
+     * @see #isDigits(String)
      */
     public static boolean isParsable(final String str) {
         if (Strings.isEmpty(str)) {
@@ -3158,7 +3365,7 @@ public final class Numbers {
      *
      * <p>Note: To test larger numbers (beyond long range), use {@link BigInteger#isProbablePrime(int)}.</p>
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * boolean b1 = Numbers.isPrime(2);      // returns true (smallest prime)
      * boolean b2 = Numbers.isPrime(17);     // returns true
@@ -3210,7 +3417,7 @@ public final class Numbers {
      * This method uses an optimized algorithm that first checks the lower 4 bits as a fast filter,
      * then performs a square root check for potential candidates.</p>
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * boolean b1 = Numbers.isPerfectSquare(16);   // returns true (4*4)
      * boolean b2 = Numbers.isPerfectSquare(25);   // returns true (5*5)
@@ -3247,7 +3454,7 @@ public final class Numbers {
      * This method uses an optimized algorithm that first checks the lower 4 bits as a fast filter,
      * then performs a square root check for potential candidates.</p>
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * boolean b1 = Numbers.isPerfectSquare(16L);          // returns true (4*4)
      * boolean b2 = Numbers.isPerfectSquare(100L);         // returns true (10*10)
@@ -3283,7 +3490,7 @@ public final class Numbers {
      * <p>A power of two is a positive integer that can be expressed as 2^k where k is a non-negative integer.
      * This method uses a bitwise trick: a power of two has exactly one bit set in its binary representation.</p>
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * boolean b1 = Numbers.isPowerOfTwo(1);      // returns true (2^0)
      * boolean b2 = Numbers.isPowerOfTwo(16);     // returns true (2^4)
@@ -3306,7 +3513,7 @@ public final class Numbers {
      * <p>A power of two is a positive integer that can be expressed as 2^k where k is a non-negative integer.
      * This method uses a bitwise trick: a power of two has exactly one bit set in its binary representation.</p>
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * boolean b1 = Numbers.isPowerOfTwo(1L);             // returns true (2^0)
      * boolean b2 = Numbers.isPowerOfTwo(1024L);          // returns true (2^10)
@@ -3331,7 +3538,7 @@ public final class Numbers {
      * <p>The method checks that the value is positive, finite (not infinity or NaN), and has a significand
      * (mantissa) that is itself a power of two.</p>
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * boolean b1 = Numbers.isPowerOfTwo(16.0);           // returns true (2^4)
      * boolean b2 = Numbers.isPowerOfTwo(0.5);            // returns true (2^-1)
@@ -3351,9 +3558,9 @@ public final class Numbers {
     /**
      * Returns {@code true} if {@code x} represents a power of two.
      *
-     * @param x
+     * @param x the value to check
      * @return {@code true}, if is power of two
-     * @throws IllegalArgumentException
+     * @throws IllegalArgumentException if {@code x} is {@code null}
      */
     public static boolean isPowerOfTwo(final BigInteger x) throws IllegalArgumentException {
         N.checkArgNotNull(x);
@@ -3378,6 +3585,10 @@ public final class Numbers {
      * @param mode the rounding mode to apply
      * @return the base-2 logarithm of the specified value, rounded according to the specified rounding mode
      * @throws IllegalArgumentException if x is not positive
+     * @see #log2(long, RoundingMode)
+     * @see #log2(double)
+     * @see #log2(double, RoundingMode)
+     * @see #log2(BigInteger, RoundingMode)
      * @see RoundingMode
      */
     @SuppressFBWarnings("SF_SWITCH_FALLTHROUGH")
@@ -3414,12 +3625,17 @@ public final class Numbers {
     /**
      * Returns the base-2 logarithm of {@code x}, rounded according to the specified rounding mode.
      *
-     * @param x
-     * @param mode
-     * @return
+     * @param x the value to calculate the logarithm for
+     * @param mode the rounding mode to apply
+     * @return the base-2 logarithm of x, rounded according to the specified mode
      * @throws IllegalArgumentException if {@code x <= 0}
      * @throws ArithmeticException if {@code mode} is {@link RoundingMode#UNNECESSARY} and {@code x}
      *     is not a power of two
+     * @see #log2(int, RoundingMode)
+     * @see #log2(double)
+     * @see #log2(double, RoundingMode)
+     * @see #log2(BigInteger, RoundingMode)
+     * @see RoundingMode
      */
     @SuppressFBWarnings("SF_SWITCH_FALLTHROUGH")
     // TODO(kevinb): remove after this warning is disabled globally
@@ -3467,8 +3683,14 @@ public final class Numbers {
      * <p>If the result of this method will be immediately rounded to an {@code int},
      * {@link #log2(double, RoundingMode)} is faster.
      *
-     * @param x
-     * @return
+     * @param x the value to compute the logarithm of
+     * @return the base-2 logarithm of the specified value
+     * @see #log2(int, RoundingMode)
+     * @see #log2(long, RoundingMode)
+     * @see #log2(double, RoundingMode)
+     * @see #log2(BigInteger, RoundingMode)
+     * @see #log10(double)
+     * @see #log(double)
      */
     public static double log2(final double x) {
         return Math.log(x) / LN_2; // surprisingly within 1 ulp according to tests
@@ -3480,11 +3702,16 @@ public final class Numbers {
      *
      * <p>Regardless of the rounding mode, this is faster than {@code (int) log2(x)}.
      *
-     * @param x
-     * @param mode
-     * @return
+     * @param x the value to compute the logarithm of, must be positive and finite
+     * @param mode the rounding mode to apply
+     * @return the base-2 logarithm of the specified value, rounded to an int
      * @throws IllegalArgumentException if {@code x <= 0.0}, {@code x} is NaN, or {@code x} is
      *     infinite
+     * @see #log2(int, RoundingMode)
+     * @see #log2(long, RoundingMode)
+     * @see #log2(double)
+     * @see #log2(BigInteger, RoundingMode)
+     * @see RoundingMode
      */
     @SuppressFBWarnings("SF_SWITCH_FALLTHROUGH")
     public static int log2(final double x, final RoundingMode mode) throws IllegalArgumentException {
@@ -3529,12 +3756,17 @@ public final class Numbers {
     /**
      * Returns the base-2 logarithm of {@code x}, rounded according to the specified rounding mode.
      *
-     * @param x
-     * @param mode
-     * @return
+     * @param x the value to compute the logarithm of, must be positive
+     * @param mode the rounding mode to apply
+     * @return the base-2 logarithm of the specified value, rounded according to the specified rounding mode
      * @throws IllegalArgumentException if {@code x <= 0}
      * @throws ArithmeticException if {@code mode} is {@link RoundingMode#UNNECESSARY} and {@code x}
      *     is not a power of two
+     * @see #log2(int, RoundingMode)
+     * @see #log2(long, RoundingMode)
+     * @see #log2(double)
+     * @see #log2(double, RoundingMode)
+     * @see RoundingMode
      */
     @SuppressFBWarnings("SF_SWITCH_FALLTHROUGH")
     @SuppressWarnings("fallthrough")
@@ -3581,6 +3813,10 @@ public final class Numbers {
      * @param mode the rounding mode to apply
      * @return the base-10 logarithm of the specified value, rounded according to the specified rounding mode
      * @throws IllegalArgumentException if x is not positive
+     * @see #log10(long, RoundingMode)
+     * @see #log10(double)
+     * @see #log10(BigInteger, RoundingMode)
+     * @see RoundingMode
      */
     @SuppressFBWarnings("SF_SWITCH_FALLTHROUGH")
     public static int log10(final int x, final RoundingMode mode) {
@@ -3627,12 +3863,16 @@ public final class Numbers {
     /**
      * Returns the base-10 logarithm of {@code x}, rounded according to the specified rounding mode.
      *
-     * @param x
-     * @param mode
-     * @return
+     * @param x the value to compute the logarithm of, must be positive
+     * @param mode the rounding mode to apply
+     * @return the base-10 logarithm of the specified value, rounded according to the specified rounding mode
      * @throws IllegalArgumentException if {@code x <= 0}
      * @throws ArithmeticException if {@code mode} is {@link RoundingMode#UNNECESSARY} and {@code x}
      *     is not a power of ten
+     * @see #log10(int, RoundingMode)
+     * @see #log10(double)
+     * @see #log10(BigInteger, RoundingMode)
+     * @see RoundingMode
      */
     @SuppressFBWarnings("SF_SWITCH_FALLTHROUGH")
     // TODO(kevinb): remove after this warning is disabled globally
@@ -3675,7 +3915,7 @@ public final class Numbers {
      * <li>If the argument is 10^n for integer n, the result is n.</li>
      * </ul>
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * double log1 = Numbers.log10(100.0);     // returns 2.0 (10^2 = 100)
      * double log2 = Numbers.log10(1000.0);    // returns 3.0 (10^3 = 1000)
@@ -3688,6 +3928,9 @@ public final class Numbers {
      * @see Math#log10(double)
      * @see #log10(int, RoundingMode)
      * @see #log10(long, RoundingMode)
+     * @see #log10(BigInteger, RoundingMode)
+     * @see #log2(double)
+     * @see #log(double)
      */
     public static double log10(final double x) {
         return Math.log10(x);
@@ -3705,12 +3948,16 @@ public final class Numbers {
     /**
      * Returns the base-10 logarithm of {@code x}, rounded according to the specified rounding mode.
      *
-     * @param x
-     * @param mode
-     * @return
+     * @param x the value to compute the logarithm of, must be positive
+     * @param mode the rounding mode to apply
+     * @return the base-10 logarithm of the specified value, rounded according to the specified rounding mode
      * @throws IllegalArgumentException if {@code x <= 0}
      * @throws ArithmeticException if {@code mode} is {@link RoundingMode#UNNECESSARY} and {@code x}
      *     is not a power of ten
+     * @see #log10(int, RoundingMode)
+     * @see #log10(long, RoundingMode)
+     * @see #log10(double)
+     * @see RoundingMode
      */
     @SuppressFBWarnings("SF_SWITCH_FALLTHROUGH")
     public static int log10(final BigInteger x, final RoundingMode mode) {
@@ -3782,8 +4029,8 @@ public final class Numbers {
     /**
      * Fits in long.
      *
-     * @param x
-     * @return
+     * @param x the value to check
+     * @return {@code true} if the value fits in a long, otherwise {@code false}
      */
     static boolean fitsInLong(final BigInteger x) {
         return x.bitLength() <= Long.SIZE - 1;
@@ -3802,7 +4049,7 @@ public final class Numbers {
      *
      * <p>Special cases are optimized for common bases (0, 1, -1, 2, -2).
      *
-     * <p>Examples:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Numbers.pow(2, 3) = 8
      * Numbers.pow(3, 4) = 81
@@ -3819,6 +4066,7 @@ public final class Numbers {
      * @param k the exponent; must be non-negative
      * @return {@code b} raised to the {@code k}th power; if overflow occurs, returns the low-order bits
      * @throws IllegalArgumentException if {@code k < 0}
+     * @see #pow(long, int)
      * @see #powExact(int, int)
      * @see #saturatedPow(int, int)
      */
@@ -3866,7 +4114,7 @@ public final class Numbers {
      *
      * <p>Special cases are optimized for common bases (0, 1, -1, 2, -2).
      *
-     * <p>Examples:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Numbers.pow(2L, 3) = 8L
      * Numbers.pow(3L, 4) = 81L
@@ -3883,6 +4131,7 @@ public final class Numbers {
      * @param k the exponent; must be non-negative
      * @return {@code b} raised to the {@code k}th power; if overflow occurs, returns the low-order bits
      * @throws IllegalArgumentException if {@code k < 0}
+     * @see #pow(int, int)
      * @see #powExact(long, int)
      * @see #saturatedPow(long, int)
      */
@@ -3925,8 +4174,8 @@ public final class Numbers {
      * Returns the smallest power of two greater than or equal to {@code x}.  This is equivalent to
      * {@code checkedPow(2, log2(x, CEILING))}.
      *
-     * @param x
-     * @return
+     * @param x the value to compute the ceiling power of two for, must be positive
+     * @return the smallest power of two greater than or equal to x
      * @throws IllegalArgumentException if {@code x <= 0}
      * @throws ArithmeticException of the next-higher power of two is not representable as a
      *         {@code long}, i.e., when {@code x > 2^62}
@@ -3945,7 +4194,7 @@ public final class Numbers {
      * <p>This method computes the ceiling of x to the nearest power of two. For example, if x is 100,
      * the result will be 128 (2^7). This is equivalent to 2^(ceiling(log2(x))).</p>
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * BigInteger result1 = Numbers.ceilingPowerOfTwo(BigInteger.valueOf(100));  // returns 128
      * BigInteger result2 = Numbers.ceilingPowerOfTwo(BigInteger.valueOf(128));  // returns 128
@@ -3967,8 +4216,8 @@ public final class Numbers {
      * Returns the largest power of two less than or equal to {@code x}.  This is equivalent to
      * {@code checkedPow(2, log2(x, FLOOR))}.
      *
-     * @param x
-     * @return
+     * @param x the value to compute the floor power of two for, must be positive
+     * @return the largest power of two less than or equal to x
      * @throws IllegalArgumentException if {@code x <= 0}
      */
     public static long floorPowerOfTwo(final long x) {
@@ -3985,7 +4234,7 @@ public final class Numbers {
      * <p>This method computes the floor of x to the nearest power of two. For example, if x is 100,
      * the result will be 64 (2^6). This is equivalent to 2^(floor(log2(x))).</p>
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * BigInteger result1 = Numbers.floorPowerOfTwo(BigInteger.valueOf(100));  // returns 64
      * BigInteger result2 = Numbers.floorPowerOfTwo(BigInteger.valueOf(128));  // returns 128
@@ -4009,7 +4258,7 @@ public final class Numbers {
      * <p>This method computes the integer square root of a non-negative integer value,
      * applying the specified rounding mode to handle non-perfect squares.
      *
-     * <p>Examples with different rounding modes:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Numbers.sqrt(9, RoundingMode.DOWN) = 3        // perfect square
      * Numbers.sqrt(10, RoundingMode.DOWN) = 3       // rounds toward zero
@@ -4027,8 +4276,9 @@ public final class Numbers {
      * @throws IllegalArgumentException if {@code x < 0}
      * @throws ArithmeticException if {@code mode} is {@link RoundingMode#UNNECESSARY} and
      *         {@code sqrt(x)} is not an integer (i.e., {@code x} is not a perfect square)
-     * @see RoundingMode
      * @see #sqrt(long, RoundingMode)
+     * @see #sqrt(BigInteger, RoundingMode)
+     * @see RoundingMode
      */
     @SuppressFBWarnings("SF_SWITCH_FALLTHROUGH")
     @SuppressWarnings("fallthrough")
@@ -4067,8 +4317,8 @@ public final class Numbers {
 
     /**
      *
-     * @param x
-     * @return
+     * @param x the value to compute the floor square root of
+     * @return the floor of the square root of x
      */
     private static int sqrtFloor(final int x) {
         // There is no loss of precision in converting an int to a double, according to
@@ -4082,7 +4332,7 @@ public final class Numbers {
      * <p>This method computes the integer square root of a non-negative long value,
      * applying the specified rounding mode to handle non-perfect squares.
      *
-     * <p>Examples with different rounding modes:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Numbers.sqrt(9L, RoundingMode.DOWN) = 3L        // perfect square
      * Numbers.sqrt(10L, RoundingMode.DOWN) = 3L       // rounds toward zero
@@ -4101,8 +4351,9 @@ public final class Numbers {
      * @throws IllegalArgumentException if {@code x < 0}
      * @throws ArithmeticException if {@code mode} is {@link RoundingMode#UNNECESSARY} and
      *         {@code sqrt(x)} is not an integer (i.e., {@code x} is not a perfect square)
-     * @see RoundingMode
      * @see #sqrt(int, RoundingMode)
+     * @see #sqrt(BigInteger, RoundingMode)
+     * @see RoundingMode
      */
     public static long sqrt(final long x, final RoundingMode mode) {
         checkNonNegative("x", x);
@@ -4174,7 +4425,7 @@ public final class Numbers {
      * applying the specified rounding mode to handle non-perfect squares. This method supports
      * arbitrary-precision arithmetic for very large values.
      *
-     * <p>Examples with different rounding modes:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * BigInteger nine = BigInteger.valueOf(9);
      * BigInteger ten = BigInteger.valueOf(10);
@@ -4237,8 +4488,8 @@ public final class Numbers {
 
     /**
      *
-     * @param x
-     * @return
+     * @param x the value to compute the floor square root of
+     * @return the floor of the square root of x
      */
     private static BigInteger sqrtFloor(final BigInteger x) {
         /*
@@ -4286,8 +4537,8 @@ public final class Numbers {
     /**
      * Sqrt approx with doubles.
      *
-     * @param x
-     * @return
+     * @param x the value to compute the approximate square root of
+     * @return the approximate square root as a BigInteger
      */
     private static BigInteger sqrtApproxWithDoubles(final BigInteger x) {
         return roundToBigInteger(Math.sqrt(bigToDouble(x)), HALF_EVEN);
@@ -4299,7 +4550,7 @@ public final class Numbers {
      * <p>This method provides precise control over rounding behavior for integer division, supporting
      * all standard rounding modes defined in {@link RoundingMode}.
      *
-     * <p>Examples with different rounding modes:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Numbers.divide(7, 3, RoundingMode.DOWN) = 2       // rounds toward zero
      * Numbers.divide(7, 3, RoundingMode.UP) = 3         // rounds away from zero
@@ -4385,7 +4636,7 @@ public final class Numbers {
      * <p>This method provides precise control over rounding behavior for long integer division, supporting
      * all standard rounding modes defined in {@link RoundingMode}.
      *
-     * <p>Examples with different rounding modes:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Numbers.divide(7L, 3L, RoundingMode.DOWN) = 2L       // rounds toward zero
      * Numbers.divide(7L, 3L, RoundingMode.UP) = 3L         // rounds away from zero
@@ -4468,7 +4719,7 @@ public final class Numbers {
      * <p>This method provides precise control over rounding behavior for arbitrary-precision integer division,
      * supporting all standard rounding modes defined in {@link RoundingMode}.
      *
-     * <p>Examples with different rounding modes:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * BigInteger seven = BigInteger.valueOf(7);
      * BigInteger three = BigInteger.valueOf(3);
@@ -4500,17 +4751,18 @@ public final class Numbers {
      * Returns {@code x mod m}, a non-negative value less than {@code m}.
      * This differs from {@code x % m}, which might be negative.
      *
-     * <p>For example:<pre> {@code
-     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
      * mod(7, 4) == 3
      * mod(-7, 4) == 1
      * mod(-1, 4) == 3
      * mod(-8, 4) == 0
-     * mod(8, 4) == 0}</pre>
+     * mod(8, 4) == 0
+     * }</pre>
      *
-     * @param x
-     * @param m
-     * @return
+     * @param x the dividend
+     * @param m the modulus, must be positive
+     * @return x mod m, a non-negative value less than m
      * @throws ArithmeticException if {@code m <= 0}
      * @see <a href="http://docs.oracle.com/javase/specs/jls/se7/html/jls-15.html#jls-15.17.3">
      *      Remainder Operator</a>
@@ -4527,19 +4779,18 @@ public final class Numbers {
      * Returns {@code x mod m}, a non-negative value less than {@code m}. This differs from
      * {@code x % m}, which might be negative.
      *
-     * <p>For example:
-     *
-     * <pre> {@code
-     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
      * mod(7, 4) == 3
      * mod(-7, 4) == 1
      * mod(-1, 4) == 3
      * mod(-8, 4) == 0
-     * mod(8, 4) == 0}</pre>
+     * mod(8, 4) == 0
+     * }</pre>
      *
-     * @param x
-     * @param m
-     * @return
+     * @param x the dividend
+     * @param m the modulus, must be positive
+     * @return x mod m, a non-negative value less than m
      * @throws ArithmeticException if {@code m <= 0}
      * @see <a href="http://docs.oracle.com/javase/specs/jls/se7/html/jls-15.html#jls-15.17.3">
      *     Remainder Operator</a>
@@ -4553,19 +4804,18 @@ public final class Numbers {
      * Returns {@code x mod m}, a non-negative value less than {@code m}. This differs from
      * {@code x % m}, which might be negative.
      *
-     * <p>For example:
-     *
-     * <pre> {@code
-     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
      * mod(7, 4) == 3
      * mod(-7, 4) == 1
      * mod(-1, 4) == 3
      * mod(-8, 4) == 0
-     * mod(8, 4) == 0}</pre>
+     * mod(8, 4) == 0
+     * }</pre>
      *
-     * @param x
-     * @param m
-     * @return
+     * @param x the dividend
+     * @param m the modulus, must be positive
+     * @return x mod m, a non-negative value less than m
      * @throws ArithmeticException if {@code m <= 0}
      * @see <a href="http://docs.oracle.com/javase/specs/jls/se7/html/jls-15.html#jls-15.17.3">
      *     Remainder Operator</a>
@@ -4586,7 +4836,7 @@ public final class Numbers {
      * which is over 40% faster than the Euclidean algorithm. The method handles negative numbers
      * by taking their absolute values before computing the GCD.
      *
-     * <p>Examples:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Numbers.gcd(12, 8) = 4
      * Numbers.gcd(17, 19) = 1  // coprime numbers
@@ -4600,6 +4850,7 @@ public final class Numbers {
      * @return the greatest common divisor of {@code a} and {@code b}; returns {@code 0} if both are zero
      * @throws ArithmeticException if {@code (a == 0 && b == Integer.MIN_VALUE) || (b == 0 && a == Integer.MIN_VALUE)}
      *         because the GCD would be 2^31 which cannot be represented as a positive int
+     * @see #gcd(long, long)
      * @see #lcm(int, int)
      */
     public static int gcd(int a, int b) throws ArithmeticException {
@@ -4664,7 +4915,7 @@ public final class Numbers {
      * which is over 40% faster than the Euclidean algorithm. The method handles negative numbers
      * by taking their absolute values before computing the GCD.
      *
-     * <p>Examples:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Numbers.gcd(12L, 8L) = 4L
      * Numbers.gcd(17L, 19L) = 1L  // coprime numbers
@@ -4679,6 +4930,7 @@ public final class Numbers {
      * @return the greatest common divisor of {@code a} and {@code b}; returns {@code 0} if both are zero
      * @throws ArithmeticException if {@code (a == 0 && b == Long.MIN_VALUE) || (b == 0 && a == Long.MIN_VALUE)}
      *         because the GCD would be 2^63 which cannot be represented as a positive long
+     * @see #gcd(int, int)
      * @see #lcm(long, long)
      */
     public static long gcd(long a, long b) throws ArithmeticException {
@@ -4743,7 +4995,7 @@ public final class Numbers {
      * the LCM from the absolute values of the inputs. The method handles negative numbers
      * by taking their absolute values before computing the LCM.
      *
-     * <p>Examples:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Numbers.lcm(4, 6) = 12
      * Numbers.lcm(3, 7) = 21  // coprime numbers: lcm equals product
@@ -4766,6 +5018,7 @@ public final class Numbers {
      *         returns {@code 0} if either is zero
      * @throws ArithmeticException if the result cannot be represented as a non-negative {@code int} value,
      *         or if the computation would overflow
+     * @see #lcm(long, long)
      * @see #gcd(int, int)
      */
     public static int lcm(final int a, final int b) throws ArithmeticException {
@@ -4790,7 +5043,7 @@ public final class Numbers {
      * the LCM from the absolute values of the inputs. The method handles negative numbers
      * by taking their absolute values before computing the LCM.
      *
-     * <p>Examples:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Numbers.lcm(4L, 6L) = 12L
      * Numbers.lcm(3L, 7L) = 21L  // coprime numbers: lcm equals product
@@ -4814,6 +5067,7 @@ public final class Numbers {
      *         returns {@code 0} if either is zero
      * @throws ArithmeticException if the result cannot be represented as a non-negative {@code long} value,
      *         or if the computation would overflow
+     * @see #lcm(int, int)
      * @see #gcd(long, long)
      */
     public static long lcm(final long a, final long b) throws ArithmeticException {
@@ -4836,7 +5090,7 @@ public final class Numbers {
      * <p>This method performs addition with overflow checking. If the result would exceed the range
      * of int values, an ArithmeticException is thrown instead of silently wrapping around.</p>
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * int sum1 = Numbers.addExact(100, 200);                    // returns 300
      * int sum2 = Numbers.addExact(Integer.MAX_VALUE, 1);        // throws ArithmeticException
@@ -4862,7 +5116,7 @@ public final class Numbers {
      * <p>This method performs addition with overflow checking. If the result would exceed the range
      * of long values, an ArithmeticException is thrown instead of silently wrapping around.</p>
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * long sum1 = Numbers.addExact(100L, 200L);                 // returns 300L
      * long sum2 = Numbers.addExact(Long.MAX_VALUE, 1L);         // throws ArithmeticException
@@ -4888,7 +5142,7 @@ public final class Numbers {
      * <p>This method performs subtraction with overflow checking. If the result would exceed the range
      * of int values, an ArithmeticException is thrown instead of silently wrapping around.</p>
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * int diff1 = Numbers.subtractExact(200, 100);              // returns 100
      * int diff2 = Numbers.subtractExact(Integer.MIN_VALUE, 1);  // throws ArithmeticException
@@ -4914,7 +5168,7 @@ public final class Numbers {
      * <p>This method performs subtraction with overflow checking. If the result would exceed the range
      * of long values, an ArithmeticException is thrown instead of silently wrapping around.</p>
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * long diff1 = Numbers.subtractExact(200L, 100L);           // returns 100L
      * long diff2 = Numbers.subtractExact(Long.MIN_VALUE, 1L);   // throws ArithmeticException
@@ -4940,7 +5194,7 @@ public final class Numbers {
      * <p>This method performs multiplication with overflow checking. If the result would exceed the range
      * of int values, an ArithmeticException is thrown instead of silently wrapping around.</p>
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * int product1 = Numbers.multiplyExact(100, 200);           // returns 20000
      * int product2 = Numbers.multiplyExact(Integer.MAX_VALUE, 2);  // throws ArithmeticException
@@ -4966,7 +5220,7 @@ public final class Numbers {
      * <p>This method performs multiplication with overflow checking. If the result would exceed the range
      * of long values, an ArithmeticException is thrown instead of silently wrapping around.</p>
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * long product1 = Numbers.multiplyExact(100L, 200L);        // returns 20000L
      * long product2 = Numbers.multiplyExact(Long.MAX_VALUE, 2L);   // throws ArithmeticException
@@ -5013,7 +5267,7 @@ public final class Numbers {
      * <p>Note: {@link #pow(int, int)} may be faster for cases where overflow is acceptable, as it
      * does not perform overflow checking.
      *
-     * <p>Examples:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Numbers.powExact(2, 3) = 8
      * Numbers.powExact(3, 4) = 81
@@ -5078,7 +5332,7 @@ public final class Numbers {
      * which silently allows overflow, this method throws an {@code ArithmeticException} if the result
      * cannot be represented as a {@code long}.
      *
-     * <p>Examples:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Numbers.powExact(2L, 3) = 8L
      * Numbers.powExact(3L, 4) = 81L
@@ -5145,7 +5399,7 @@ public final class Numbers {
      * {@code Integer.MAX_VALUE}, the method returns {@code Integer.MAX_VALUE}. If the true sum
      * would be less than {@code Integer.MIN_VALUE}, the method returns {@code Integer.MIN_VALUE}.
      *
-     * <p>Examples demonstrating saturation:
+     * <p><b>Examples demonstrating saturation:</b></p>
      * <pre>{@code
      * Numbers.saturatedAdd(100, 200) = 300
      * Numbers.saturatedAdd(Integer.MAX_VALUE, 1) = Integer.MAX_VALUE  // saturates at max
@@ -5172,8 +5426,8 @@ public final class Numbers {
      * <p>This method performs addition with saturation arithmetic. If the true sum would exceed
      * {@code Long.MAX_VALUE}, the method returns {@code Long.MAX_VALUE}. If the true sum
      * would be less than {@code Long.MIN_VALUE}, the method returns {@code Long.MIN_VALUE}.
-     *
-     * <p>Examples demonstrating saturation:
+     * 
+     * <p><b>Examples demonstrating saturation:</b></p>
      * <pre>{@code
      * Numbers.saturatedAdd(100L, 200L) = 300L
      * Numbers.saturatedAdd(Long.MAX_VALUE, 1L) = Long.MAX_VALUE  // saturates at max
@@ -5206,7 +5460,7 @@ public final class Numbers {
      * {@code Integer.MAX_VALUE}, the method returns {@code Integer.MAX_VALUE}. If the true difference
      * would be less than {@code Integer.MIN_VALUE}, the method returns {@code Integer.MIN_VALUE}.
      *
-     * <p>Examples demonstrating saturation:
+     * <p><b>Examples demonstrating saturation:</b></p>
      * <pre>{@code
      * Numbers.saturatedSubtract(200, 100) = 100
      * Numbers.saturatedSubtract(Integer.MAX_VALUE, -1) = Integer.MAX_VALUE  // saturates at max
@@ -5233,7 +5487,7 @@ public final class Numbers {
      * {@code Long.MAX_VALUE}, the method returns {@code Long.MAX_VALUE}. If the true difference
      * would be less than {@code Long.MIN_VALUE}, the method returns {@code Long.MIN_VALUE}.
      *
-     * <p>Examples demonstrating saturation:
+     * <p><b>Examples demonstrating saturation:</b></p>
      * <pre>{@code
      * Numbers.saturatedSubtract(200L, 100L) = 100L
      * Numbers.saturatedSubtract(Long.MAX_VALUE, -1L) = Long.MAX_VALUE  // saturates at max
@@ -5266,7 +5520,7 @@ public final class Numbers {
      * {@code Integer.MAX_VALUE}, the method returns {@code Integer.MAX_VALUE}. If the true product
      * would be less than {@code Integer.MIN_VALUE}, the method returns {@code Integer.MIN_VALUE}.
      *
-     * <p>Examples demonstrating saturation:
+     * <p><b>Examples demonstrating saturation:</b></p>
      * <pre>{@code
      * Numbers.saturatedMultiply(100, 200) = 20000
      * Numbers.saturatedMultiply(Integer.MAX_VALUE, 2) = Integer.MAX_VALUE  // saturates at max
@@ -5293,7 +5547,7 @@ public final class Numbers {
      * {@code Long.MAX_VALUE}, the method returns {@code Long.MAX_VALUE}. If the true product
      * would be less than {@code Long.MIN_VALUE}, the method returns {@code Long.MIN_VALUE}.
      *
-     * <p>Examples demonstrating saturation:
+     * <p><b>Examples demonstrating saturation:</b></p>
      * <pre>{@code
      * Numbers.saturatedMultiply(100L, 200L) = 20000L
      * Numbers.saturatedMultiply(Long.MAX_VALUE, 2L) = Long.MAX_VALUE  // saturates at max
@@ -5337,7 +5591,7 @@ public final class Numbers {
      * <p>This is useful when you want to avoid overflow but don't want to throw exceptions or use
      * larger data types.
      *
-     * <p>Examples demonstrating saturation:
+     * <p><b>Examples demonstrating saturation:</b></p>
      * <pre>{@code
      * Numbers.saturatedPow(2, 3) = 8
      * Numbers.saturatedPow(3, 4) = 81
@@ -5412,7 +5666,7 @@ public final class Numbers {
      * <p>This is useful when you want to avoid overflow but don't want to throw exceptions or use
      * larger data types like BigInteger.
      *
-     * <p>Examples demonstrating saturation:
+     * <p><b>Examples demonstrating saturation:</b></p>
      * <pre>{@code
      * Numbers.saturatedPow(2L, 3) = 8L
      * Numbers.saturatedPow(3L, 4) = 81L
@@ -5487,7 +5741,7 @@ public final class Numbers {
      * is less than {@code Integer.MIN_VALUE}, the method returns {@code Integer.MIN_VALUE}.
      * Otherwise, the method returns the {@code long} value cast to an {@code int}.
      *
-     * <p>Examples demonstrating saturation:
+     * <p><b>Examples demonstrating saturation:</b></p>
      * <pre>{@code
      * Numbers.saturatedCast(100L) = 100
      * Numbers.saturatedCast(2147483647L) = Integer.MAX_VALUE  // exact fit
@@ -5521,7 +5775,7 @@ public final class Numbers {
      *
      * <p>The largest value of {@code n} for which {@code n!} fits in an {@code int} is 12.
      *
-     * <p>Examples:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Numbers.factorial(0) = 1
      * Numbers.factorial(1) = 1
@@ -5552,7 +5806,7 @@ public final class Numbers {
      *
      * <p>The largest value of {@code n} for which {@code n!} fits in a {@code long} is 20.
      *
-     * <p>Examples:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Numbers.factorialToLong(0) = 1L
      * Numbers.factorialToLong(1) = 1L
@@ -5582,8 +5836,8 @@ public final class Numbers {
      *
      * <p>The result is within 1 ulp of the {@code true} value.
      *
-     * @param n
-     * @return
+     * @param n the non-negative integer to compute the factorial of
+     * @return the factorial of n as a double, or positive infinity if the result exceeds Double.MAX_VALUE
      * @throws IllegalArgumentException if {@code n < 0}
      */
     public static double factorialToDouble(final int n) {
@@ -5613,7 +5867,7 @@ public final class Numbers {
      * back in at the end. The result takes <i>O(n log n)</i> space, so use cautiously for very
      * large values of {@code n}.
      *
-     * <p>Examples:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Numbers.factorialToBigInteger(0) = 1
      * Numbers.factorialToBigInteger(5) = 120
@@ -5685,8 +5939,8 @@ public final class Numbers {
 
     /**
      *
-     * @param nums
-     * @return
+     * @param nums the list of BigIntegers to multiply
+     * @return the product of all numbers in the list
      */
     static BigInteger listProduct(final List<BigInteger> nums) {
         return listProduct(nums, 0, nums.size());
@@ -5694,10 +5948,10 @@ public final class Numbers {
 
     /**
      *
-     * @param nums
-     * @param start
-     * @param end
-     * @return
+     * @param nums the list of BigIntegers to multiply
+     * @param start the starting index (inclusive)
+     * @param end the ending index (exclusive)
+     * @return the product of numbers in the specified range
      */
     static BigInteger listProduct(final List<BigInteger> nums, final int start, final int end) {
         switch (end - start) {
@@ -5723,7 +5977,7 @@ public final class Numbers {
      * {@code n} items without regard to order. It is calculated as {@code n! / (k! * (n-k)!)}.
      * If the result would exceed {@code Integer.MAX_VALUE}, this method returns {@code Integer.MAX_VALUE}.
      *
-     * <p>Examples:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Numbers.binomial(5, 0) = 1      // only one way to choose nothing
      * Numbers.binomial(5, 1) = 5      // five ways to choose one item
@@ -5773,7 +6027,7 @@ public final class Numbers {
      * {@code n} items without regard to order. It is calculated as {@code n! / (k! * (n-k)!)}.
      * If the result would exceed {@code Long.MAX_VALUE}, this method returns {@code Long.MAX_VALUE}.
      *
-     * <p>Examples:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Numbers.binomialToLong(5, 0) = 1L      // only one way to choose nothing
      * Numbers.binomialToLong(5, 1) = 5L      // five ways to choose one item
@@ -5861,7 +6115,7 @@ public final class Numbers {
      * <p><b>Performance Note:</b> The result can take as much as <i>O(k log n)</i> space. Use
      * cautiously for very large values of {@code k} and {@code n}.
      *
-     * <p>Examples:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Numbers.binomialToBigInteger(5, 2) = 10
      * Numbers.binomialToBigInteger(10, 5) = 252
@@ -5923,22 +6177,25 @@ public final class Numbers {
     /**
      * Returns the arithmetic mean of {@code x} and {@code y}, rounded towards
      * negative infinity. This method is resilient to integer overflow.
-     * 
+     *
      * <p>This implementation uses bitwise operations to compute the mean safely:
-     * {@code (x & y) + ((x ^ y) >> 1)} which avoids the overflow issues with 
+     * {@code (x & y) + ((x ^ y) >> 1)} which avoids the overflow issues with
      * the traditional {@code (x + y) / 2} approach.
-     * 
+     *
      * <p>The method correctly handles:
      * <ul>
      *   <li>Large values where {@code (x + y)} would overflow</li>
      *   <li>Negative values where unsigned shift {@code (x + y) >>> 1} would fail</li>
      * </ul>
-     * 
+     *
      * @param x first value
      * @param y second value
      * @return the arithmetic mean of {@code x} and {@code y}, rounded towards negative infinity
-     * 
      * @see #mean(long, long)
+     * @see #mean(double, double)
+     * @see #mean(int...)
+     * @see #mean(long...)
+     * @see #mean(double...)
      */
     public static int mean(final int x, final int y) {
         // Efficient method for computing the arithmetic mean.
@@ -5961,7 +6218,7 @@ public final class Numbers {
      *   <li>Negative values where unsigned shift {@code (x + y) >>> 1} would fail</li>
      * </ul>
      *
-     * <p>Examples:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Numbers.mean(10L, 20L) = 15L
      * Numbers.mean(Long.MAX_VALUE, Long.MAX_VALUE) = Long.MAX_VALUE  // no overflow
@@ -5974,6 +6231,10 @@ public final class Numbers {
      * @param y the second long value
      * @return the arithmetic mean of {@code x} and {@code y}, rounded towards negative infinity
      * @see #mean(int, int)
+     * @see #mean(double, double)
+     * @see #mean(int...)
+     * @see #mean(long...)
+     * @see #mean(double...)
      */
     public static long mean(final long x, final long y) {
         // Efficient method for computing the arithmetic mean.
@@ -5988,7 +6249,7 @@ public final class Numbers {
      * <p>This implementation divides each value by 2 before adding to avoid overflow
      * and maintain precision. Both inputs must be finite values.
      *
-     * <p>Examples:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Numbers.mean(10.0, 20.0) = 15.0
      * Numbers.mean(1.5, 2.5) = 2.0
@@ -6000,6 +6261,11 @@ public final class Numbers {
      * @param y the second double value; must be finite
      * @return the arithmetic mean of {@code x} and {@code y}
      * @throws IllegalArgumentException if either {@code x} or {@code y} is not finite (NaN or infinite)
+     * @see #mean(int, int)
+     * @see #mean(long, long)
+     * @see #mean(int...)
+     * @see #mean(long...)
+     * @see #mean(double...)
      */
     public static double mean(final double x, final double y) {
         return checkFinite(x) / 2 + checkFinite(y) / 2;
@@ -6013,7 +6279,7 @@ public final class Numbers {
      * the arithmetic mean of the population.
      *
      * @param values a nonempty series of values
-     * @return
+     * @return the arithmetic mean of the values
      * @throws IllegalArgumentException if {@code values} is empty
      */
     public static double mean(final int... values) throws IllegalArgumentException {
@@ -6037,7 +6303,7 @@ public final class Numbers {
      *
      * @param values a nonempty series of values, which will be converted to {@code double} values
      *     (this may cause loss of precision for longs of magnitude over 2^53 (slightly over 9e15))
-     * @return
+     * @return the arithmetic mean of the values
      * @throws IllegalArgumentException if {@code values} is empty
      */
     public static double mean(final long... values) throws IllegalArgumentException {
@@ -6053,10 +6319,30 @@ public final class Numbers {
     }
 
     /**
+     * Returns the <a href="http://en.wikipedia.org/wiki/Arithmetic_mean">arithmetic mean</a> of
+     * {@code values}.
      *
-     * @param values
-     * @return
-     * @throws IllegalArgumentException
+     * <p>If these values are a sample drawn from a population, this is also an unbiased estimator of
+     * the arithmetic mean of the population.
+     *
+     * <p>This method uses Knuth's algorithm for numerical stability when computing the mean of
+     * multiple values.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Numbers.mean(1.0, 2.0, 3.0) = 2.0
+     * Numbers.mean(10.5, 20.5, 30.0) = 20.333...
+     * Numbers.mean(5.0) = 5.0
+     * }</pre>
+     *
+     * @param values a nonempty series of finite double values
+     * @return the arithmetic mean of the values
+     * @throws IllegalArgumentException if {@code values} is empty or contains any non-finite values (NaN or infinite)
+     * @see #mean(int, int)
+     * @see #mean(long, long)
+     * @see #mean(double, double)
+     * @see #mean(int...)
+     * @see #mean(long...)
      */
     public static double mean(final double... values) throws IllegalArgumentException {
         N.checkArgument(values.length > 0, "Cannot take mean of 0 values");
@@ -6073,8 +6359,8 @@ public final class Numbers {
 
     /**
      *
-     * @param argument
-     * @return
+     * @param argument the value to check
+     * @return the argument if it is finite
      */
     private static double checkFinite(final double argument) {
         N.checkArgument(isFinite(argument));
@@ -6083,9 +6369,9 @@ public final class Numbers {
 
     /**
      *
-     * @param x
-     * @param mode
-     * @return
+     * @param x the value to round
+     * @param mode the rounding mode to apply
+     * @return the rounded value
      */
     static double roundIntermediate(final double x, final RoundingMode mode) {
         if (!isFinite(x)) {
@@ -6149,10 +6435,22 @@ public final class Numbers {
     /**
      * Rounds the given float value to the specified number of decimal places.
      *
+     * <p>This method uses the {@link RoundingMode#HALF_UP} rounding mode by default.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Numbers.round(3.14159f, 2) = 3.14f
+     * Numbers.round(123.456f, 1) = 123.5f
+     * Numbers.round(10.0f, 0) = 10.0f
+     * Numbers.round(2.5f, 0) = 3.0f
+     * Numbers.round(-3.14159f, 3) = -3.142f
+     * }</pre>
+     *
      * @param x the float value to be rounded
      * @param scale the number of decimal places to round to, must be non-negative
      * @return the rounded float value
      * @throws IllegalArgumentException if the scale is negative
+     * @see #round(float, int, RoundingMode)
      * @see #round(double, int)
      * @see Math#round(double)
      */
@@ -6172,11 +6470,24 @@ public final class Numbers {
     /**
      * Rounds the given double value to the specified number of decimal places.
      *
+     * <p>This method uses the {@link RoundingMode#HALF_UP} rounding mode by default.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Numbers.round(3.14159, 2) = 3.14
+     * Numbers.round(123.456, 1) = 123.5
+     * Numbers.round(10.0, 0) = 10.0
+     * Numbers.round(2.5, 0) = 3.0
+     * Numbers.round(-3.14159, 3) = -3.142
+     * Numbers.round(1.23456789, 5) = 1.23457
+     * }</pre>
+     *
      * @param x the double value to be rounded
      * @param scale the number of decimal places to round to, must be non-negative
      * @return the rounded double value
      * @throws IllegalArgumentException if the scale is negative
      * @see #round(double, int, RoundingMode)
+     * @see #round(float, int)
      * @see Math#round(double)
      */
     public static double round(final double x, final int scale) throws IllegalArgumentException {
@@ -6193,16 +6504,17 @@ public final class Numbers {
     }
 
     /**
-     * Rounds the given double value to the specified number of decimal places.
+     * Rounds the given float value to the specified number of decimal places.
      *
-     * @param x the double value to be rounded
+     * @param x the float value to be rounded
      * @param scale the number of decimal places to round to, must be non-negative
      * @param roundingMode the rounding mode to use
-     * @return the rounded double value
+     * @return the rounded float value
      * @throws IllegalArgumentException if the scale is negative
+     * @see #round(float, int)
      * @see #round(double, int, RoundingMode)
      * @see BigDecimal#setScale(int, RoundingMode)
-     * @see BigDecimal#doubleValue()
+     * @see BigDecimal#floatValue()
      */
     public static float round(final float x, final int scale, final RoundingMode roundingMode) {
         final BigDecimal bd = new BigDecimal(Float.toString(x)).setScale(scale, roundingMode == null ? RoundingMode.HALF_UP : roundingMode);
@@ -6218,6 +6530,8 @@ public final class Numbers {
      * @param roundingMode the rounding mode to use
      * @return the rounded double value
      * @throws IllegalArgumentException if the scale is negative
+     * @see #round(double, int)
+     * @see #round(float, int, RoundingMode)
      * @see BigDecimal#setScale(int, RoundingMode)
      * @see BigDecimal#doubleValue()
      */
@@ -6329,9 +6643,9 @@ public final class Numbers {
     /**
      * Returns the {@code int} value that is equal to {@code x} rounded with the specified rounding mode, if possible.
      *
-     * @param x
-     * @param mode
-     * @return
+     * @param x the value to round
+     * @param mode the rounding mode to apply
+     * @return the rounded int value
      * @throws ArithmeticException if
      *     <ul>
      *     <li>{@code x} is infinite or NaN
@@ -6351,9 +6665,9 @@ public final class Numbers {
     /**
      * Returns the {@code long} value that is equal to {@code x} rounded with the specified rounding mode, if possible.
      *
-     * @param x
-     * @param mode
-     * @return
+     * @param x the value to round
+     * @param mode the rounding mode to apply
+     * @return the rounded long value
      * @throws ArithmeticException if
      *     <ul>
      *     <li>{@code x} is infinite or NaN
@@ -6373,9 +6687,9 @@ public final class Numbers {
     /**
      * Returns the {@code BigInteger} value that is equal to {@code x} rounded with the specified rounding mode, if possible.
      *
-     * @param x
-     * @param mode
-     * @return
+     * @param x the value to round
+     * @param mode the rounding mode to apply
+     * @return the rounded BigInteger value
      * @throws ArithmeticException if
      *     <ul>
      *     <li>{@code x} is infinite or NaN
@@ -6406,8 +6720,7 @@ public final class Numbers {
      * <p>Technically speaking, this is equivalent to
      * {@code Math.abs(a - b) <= tolerance || Float.valueOf(a).equals(Float.valueOf(b))}.
      * 
-     * <p>
-     * <h3>Example:</h3>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Returns true, the values are within tolerance
      * boolean result = Numbers.fuzzyEquals(1.0001f, 1.0002f, 0.001f);
@@ -6539,7 +6852,7 @@ public final class Numbers {
      * <p>This is equivalent to, but not necessarily implemented as, the expression {@code
      * !Double.isNaN(x) && !Double.isInfinite(x) && x == Math.rint(x)}.
      *
-     * @param x
+     * @param x the value to check
      * @return {@code true}, if is mathematical integer
      */
     public static boolean isMathematicalInteger(final double x) {
@@ -6552,9 +6865,9 @@ public final class Numbers {
      * signed long. The implementation is branch-free, and benchmarks suggest it is measurably faster
      * than the straightforward ternary expression.
      *
-     * @param x
-     * @param y
-     * @return
+     * @param x the first value
+     * @param y the second value
+     * @return 1 if x is less than y as unsigned longs, 0 otherwise
      */
     static int lessThanBranchFree(final long x, final long y) {
         // Returns the sign bit of x - y.
@@ -6580,10 +6893,10 @@ public final class Numbers {
     /**
      * Returns (x * numerator / denominator), which is assumed to come out to an integral value.
      *
-     * @param x
-     * @param numerator
-     * @param denominator
-     * @return
+     * @param x the multiplicand
+     * @param numerator the numerator of the fraction
+     * @param denominator the denominator of the fraction
+     * @return the result of x * numerator / denominator
      */
     static long multiplyFraction(long x, final long numerator, long denominator) {
         if (x == 1) {
@@ -6615,7 +6928,7 @@ public final class Numbers {
     /**
      * Checks if is finite.
      *
-     * @param d
+     * @param d the value to check
      * @return {@code true}, if is finite
      */
     static boolean isFinite(final double d) {
@@ -6625,7 +6938,7 @@ public final class Numbers {
     /**
      * Checks if is normal.
      *
-     * @param d
+     * @param d the value to check
      * @return {@code true}, if is normal
      */
     static boolean isNormal(final double d) {
@@ -6644,8 +6957,8 @@ public final class Numbers {
     /**
      * Big to double.
      *
-     * @param x
-     * @return
+     * @param x the BigInteger to convert
+     * @return the double representation of the BigInteger
      */
     static double bigToDouble(final BigInteger x) {
         // This is an extremely fast implementation of BigInteger.doubleValue(). JDK patch pending.
@@ -6693,8 +7006,8 @@ public final class Numbers {
     /**
      * Returns its argument if it is non-negative, zero if it is negative.
      *
-     * @param value
-     * @return
+     * @param value the value to check
+     * @return the value if non-negative, or 0.0 if negative
      */
     static double ensureNonNegative(final double value) {
         N.checkArgument(!isNaN(value));
@@ -6798,7 +7111,7 @@ public final class Numbers {
      *   <li>Range: all real numbers (-∞, +∞)</li>
      * </ul>
      *
-     * <p>Examples:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Numbers.asinh(0.0) = 0.0
      * Numbers.asinh(1.0) ≈ 0.88137
@@ -6856,7 +7169,7 @@ public final class Numbers {
      *   <li>For {@code x < 1}, the result is NaN</li>
      * </ul>
      *
-     * <p>Examples:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Numbers.acosh(1.0) = 0.0
      * Numbers.acosh(2.0) ≈ 1.31696
@@ -6892,7 +7205,7 @@ public final class Numbers {
      *   <li>For {@code |x| >= 1}, the result is NaN or ±∞</li>
      * </ul>
      *
-     * <p>Examples:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Numbers.atanh(0.0) = 0.0
      * Numbers.atanh(0.5) ≈ 0.54931
@@ -6952,8 +7265,8 @@ public final class Numbers {
          * longs, that is, {@code a <= b} as unsigned longs if and only if {@code flip(a) <= flip(b)} as
          * signed longs.
          *
-         * @param a
-         * @return
+         * @param a the value to flip
+         * @return the flipped value
          */
         private static long flip(final long a) {
             return a ^ Long.MIN_VALUE;
@@ -6978,7 +7291,7 @@ public final class Numbers {
          *
          * @param dividend the dividend (numerator)
          * @param divisor the divisor (denominator)
-         * @return
+         * @return the remainder of dividend divided by divisor
          * @throws ArithmeticException if divisor is 0
          */
         static long remainder(final long dividend, final long divisor) {
@@ -7107,9 +7420,9 @@ public final class Numbers {
 
         /**
          *
-         * @param base
-         * @param n
-         * @return
+         * @param base the base value
+         * @param n the value to test
+         * @return {@code true} if the test passes, otherwise {@code false}
          */
         static boolean test(final long base, final long n) {
             // Since base will be considered % n, it's okay if base > FLOOR_SQRT_MAX_LONG,
@@ -7120,29 +7433,29 @@ public final class Numbers {
         /**
          * Returns a * b mod m.
          *
-         * @param a
-         * @param b
-         * @param m
-         * @return
+         * @param a the first value
+         * @param b the second value
+         * @param m the modulus
+         * @return the result of (a * b) mod m
          */
         abstract long mulMod(long a, long b, long m);
 
         /**
          * Returns a^2 mod m.
          *
-         * @param a
-         * @param m
-         * @return
+         * @param a the value to square
+         * @param m the modulus
+         * @return the result of (a * a) mod m
          */
         abstract long squareMod(long a, long m);
 
         /**
          * Returns a^p mod m.
          *
-         * @param a
-         * @param p
-         * @param m
-         * @return
+         * @param a the base value
+         * @param p the exponent
+         * @param m the modulus
+         * @return the result of a^p mod m
          */
         private long powMod(long a, long p, final long m) {
             long res = 1;
@@ -7158,9 +7471,9 @@ public final class Numbers {
         /**
          * Returns {@code true} if n is a strong probable prime relative to the specified base.
          *
-         * @param base
-         * @param n
-         * @return
+         * @param base the base value
+         * @param n the value to test
+         * @return {@code true} if n is a strong probable prime relative to the specified base
          */
         private boolean testWitness(long base, final long n) {
             final int r = Long.numberOfTrailingZeros(n - 1);

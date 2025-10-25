@@ -41,7 +41,7 @@ import com.landawn.abacus.util.cs;
  * <p>Headers can be set individually or in bulk, and the class provides type-safe conversion
  * for various value types including strings, dates, collections, and numbers.</p>
  * 
- * <p>Example usage:</p>
+ * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * HttpHeaders headers = HttpHeaders.create()
  *     .setContentType("application/json")
@@ -540,7 +540,7 @@ public final class HttpHeaders {
     /**
      * Creates a new empty HttpHeaders instance.
      *
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * HttpHeaders headers = HttpHeaders.create();
      * }</pre>
@@ -554,7 +554,7 @@ public final class HttpHeaders {
     /**
      * Creates a new HttpHeaders instance with a single header.
      *
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * HttpHeaders headers = HttpHeaders.of("Content-Type", "application/json");
      * }</pre>
@@ -573,7 +573,7 @@ public final class HttpHeaders {
     /**
      * Creates a new HttpHeaders instance with two headers.
      *
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * HttpHeaders headers = HttpHeaders.of("Content-Type", "application/json",
      *                                      "Accept", "application/json");
@@ -618,7 +618,7 @@ public final class HttpHeaders {
      * Creates a new HttpHeaders instance from a Map of headers.
      * The original map is used directly, not copied.
      *
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Map<String, String> map = Map.of("Content-Type", "application/json");
      * HttpHeaders headers = HttpHeaders.of(map);
@@ -655,7 +655,7 @@ public final class HttpHeaders {
      * Handles special cases for Collections (joined with "; "), Dates (formatted as HTTP date),
      * and Instants (converted to Date then formatted).
      *
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String value = HttpHeaders.valueOf(Arrays.asList("gzip", "deflate")); // "gzip; deflate"
      * String date = HttpHeaders.valueOf(new Date()); // HTTP date format
@@ -681,7 +681,7 @@ public final class HttpHeaders {
     /**
      * Sets the Content-Type header.
      *
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * headers.setContentType("application/json");
      * }</pre>
@@ -701,8 +701,15 @@ public final class HttpHeaders {
 
     /**
      * Sets the Content-Encoding header.
-     * 
-     * @param acceptEncoding The content encoding value (e.g., "gzip")
+     * This header indicates what encodings have been applied to the representation,
+     * typically used for compression.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * headers.setContentEncoding("gzip");
+     * }</pre>
+     *
+     * @param acceptEncoding The content encoding value (e.g., "gzip", "deflate", "br")
      * @return This HttpHeaders instance for method chaining
      */
     public HttpHeaders setContentEncoding(final String acceptEncoding) {
@@ -713,8 +720,16 @@ public final class HttpHeaders {
 
     /**
      * Sets the Content-Language header.
-     * 
-     * @param acceptLanguage The content language value (e.g., "en-US")
+     * This header indicates the natural language(s) of the intended audience
+     * for the representation.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * headers.setContentLanguage("en-US");
+     * headers.setContentLanguage("en-US, en-GB");
+     * }</pre>
+     *
+     * @param acceptLanguage The content language value (e.g., "en-US", "fr-FR")
      * @return This HttpHeaders instance for method chaining
      */
     public HttpHeaders setContentLanguage(final String acceptLanguage) {
@@ -725,7 +740,13 @@ public final class HttpHeaders {
 
     /**
      * Sets the Content-Length header.
-     * 
+     * This header indicates the size of the representation in bytes (decimal number).
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * headers.setContentLength(1024);
+     * }</pre>
+     *
      * @param contentLength The content length in bytes
      * @return This HttpHeaders instance for method chaining
      */
@@ -738,7 +759,7 @@ public final class HttpHeaders {
     /**
      * Sets the User-Agent header.
      *
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * headers.setUserAgent("MyApp/1.0");
      * }</pre>
@@ -755,7 +776,7 @@ public final class HttpHeaders {
     /**
      * Sets the Cookie header.
      *
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * headers.setCookie("sessionId=abc123; userId=456");
      * }</pre>
@@ -772,7 +793,7 @@ public final class HttpHeaders {
     /**
      * Sets the Authorization header.
      *
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * headers.setAuthorization("Bearer eyJhbGciOiJIUzI1NiIs...");
      * }</pre>
@@ -790,7 +811,7 @@ public final class HttpHeaders {
      * Sets the Authorization header with Basic authentication.
      * The username and password are Base64-encoded as per the Basic authentication scheme.
      *
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * headers.setBasicAuthentication("user", "pass123");
      * // Results in: Authorization: Basic dXNlcjpwYXNzMTIz
@@ -808,8 +829,14 @@ public final class HttpHeaders {
 
     /**
      * Sets the Proxy-Authorization header.
-     * 
-     * @param value The proxy authorization value
+     * This header contains credentials for authenticating the client with a proxy server.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * headers.setProxyAuthorization("Basic dXNlcjpwYXNz");
+     * }</pre>
+     *
+     * @param value The proxy authorization value (e.g., "Basic base64credentials")
      * @return This HttpHeaders instance for method chaining
      */
     public HttpHeaders setProxyAuthorization(final String value) {
@@ -821,7 +848,7 @@ public final class HttpHeaders {
     /**
      * Sets the Cache-Control header.
      *
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * headers.setCacheControl("no-cache, no-store");
      * }</pre>
@@ -837,7 +864,14 @@ public final class HttpHeaders {
 
     /**
      * Sets the Connection header.
-     * 
+     * This header controls whether the network connection stays open after the current transaction.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * headers.setConnection("keep-alive");
+     * headers.setConnection("close");
+     * }</pre>
+     *
      * @param value The connection value (e.g., "keep-alive", "close")
      * @return This HttpHeaders instance for method chaining
      */
@@ -849,7 +883,14 @@ public final class HttpHeaders {
 
     /**
      * Sets the Host header.
-     * 
+     * This header specifies the domain name of the server and optionally the TCP port number.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * headers.setHost("example.com");
+     * headers.setHost("example.com:8080");
+     * }</pre>
+     *
      * @param value The host value (e.g., "example.com", "example.com:8080")
      * @return This HttpHeaders instance for method chaining
      */
@@ -861,7 +902,14 @@ public final class HttpHeaders {
 
     /**
      * Sets the From header.
-     * 
+     * This header contains the email address of the user making the request,
+     * typically used for robot/spider identification.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * headers.setFrom("bot@example.com");
+     * }</pre>
+     *
      * @param value The email address of the user making the request
      * @return This HttpHeaders instance for method chaining
      */
@@ -874,7 +922,7 @@ public final class HttpHeaders {
     /**
      * Sets the Accept header.
      *
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * headers.setAccept("application/json, text/plain);
      * }</pre>
@@ -891,7 +939,7 @@ public final class HttpHeaders {
     /**
      * Sets the Accept-Encoding header.
      *
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * headers.setAcceptEncoding("gzip, deflate, br");
      * }</pre>
@@ -907,7 +955,14 @@ public final class HttpHeaders {
 
     /**
      * Sets the Accept-Charset header.
-     * 
+     * This header indicates which character sets are acceptable in the response.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * headers.setAcceptCharset("utf-8, iso-8859-1");
+     * headers.setAcceptCharset("utf-8");
+     * }</pre>
+     *
      * @param acceptCharset The acceptable character sets (e.g., "utf-8, iso-8859-1")
      * @return This HttpHeaders instance for method chaining
      */
@@ -919,8 +974,16 @@ public final class HttpHeaders {
 
     /**
      * Sets the Accept-Language header.
-     * 
-     * @param acceptLanguage The acceptable languages (e.g., "en-US,en;q=0.9")
+     * This header indicates which natural languages are preferred in the response.
+     * Quality values (q-factors) can be used to specify preference order.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * headers.setAcceptLanguage("en-US,en;q=0.9");
+     * headers.setAcceptLanguage("fr-FR");
+     * }</pre>
+     *
+     * @param acceptLanguage The acceptable languages (e.g., "en-US,en;q=0.9", "fr-FR,fr;q=0.8,en;q=0.5")
      * @return This HttpHeaders instance for method chaining
      */
     public HttpHeaders setAcceptLanguage(final String acceptLanguage) {
@@ -931,7 +994,15 @@ public final class HttpHeaders {
 
     /**
      * Sets the Accept-Ranges header.
-     * 
+     * This header indicates whether the server accepts range requests for a resource.
+     * Typically used in responses to advertise partial content support.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * headers.setAcceptRanges("bytes");
+     * headers.setAcceptRanges("none");
+     * }</pre>
+     *
      * @param acceptRanges The acceptable range units (e.g., "bytes", "none")
      * @return This HttpHeaders instance for method chaining
      */
@@ -945,7 +1016,7 @@ public final class HttpHeaders {
      * Sets a header with the specified name and value.
      * If a header with this name already exists, it is replaced.
      *
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * headers.set("X-Custom-Header", "custom-value");
      * headers.set("X-Request-ID", UUID.randomUUID());
@@ -965,7 +1036,7 @@ public final class HttpHeaders {
      * Sets all headers from the provided map.
      * Existing headers with the same names are replaced.
      *
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Map<String, String> extraHeaders = Map.of(
      *     "X-API-Key", "key123",
@@ -986,7 +1057,7 @@ public final class HttpHeaders {
     /**
      * Gets the value of a header.
      *
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Object contentType = headers.get("Content-Type");
      * }</pre>
@@ -1000,7 +1071,13 @@ public final class HttpHeaders {
 
     /**
      * Removes a header.
-     * 
+     * This method removes the specified header from the HttpHeaders instance.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Object oldValue = headers.remove("X-Custom-Header");
+     * }</pre>
+     *
      * @param headerName The name of the header to remove
      * @return The previous value associated with the header, or null if there was no mapping
      */
@@ -1011,7 +1088,7 @@ public final class HttpHeaders {
     /**
      * Returns a set of all header names in this HttpHeaders.
      *
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Set<String> names = headers.headerNameSet();
      * for (String name : names) {
@@ -1028,7 +1105,7 @@ public final class HttpHeaders {
     /**
      * Performs the given action for each header in this HttpHeaders.
      *
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * headers.forEach((name, value) -> 
      *     System.out.println(name + ": " + value));
@@ -1042,6 +1119,12 @@ public final class HttpHeaders {
 
     /**
      * Removes all headers from this HttpHeaders.
+     * After this call, the HttpHeaders instance will be empty.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * headers.clear();
+     * }</pre>
      */
     public void clear() {
         map.clear();
@@ -1049,8 +1132,16 @@ public final class HttpHeaders {
 
     /**
      * Checks if this HttpHeaders is empty.
-     * 
-     * @return {@code true} if this HttpHeaders contains no headers
+     * Returns {@code true} if this HttpHeaders contains no header entries.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * if (headers.isEmpty()) {
+     *     // No headers present
+     * }
+     * }</pre>
+     *
+     * @return {@code true} if this HttpHeaders contains no headers; {@code false} otherwise
      */
     public boolean isEmpty() {
         return map.isEmpty();
@@ -1059,7 +1150,14 @@ public final class HttpHeaders {
     /**
      * Returns a new map containing all headers.
      * LinkedHashMap or SortedMap instances preserve their ordering in the returned map.
-     * 
+     * For other map types, a HashMap is returned.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Map<String, Object> headerMap = headers.toMap();
+     * // Modifications to headerMap won't affect the original HttpHeaders
+     * }</pre>
+     *
      * @return A new map containing all headers
      */
     public Map<String, Object> toMap() {
@@ -1070,7 +1168,7 @@ public final class HttpHeaders {
      * Creates a copy of this HttpHeaders instance.
      * The copy contains the same headers but is independent of the original.
      *
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * HttpHeaders copy = headers.copy();
      * copy.set("X-Modified", "true"); // Original is not affected

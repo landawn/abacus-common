@@ -531,7 +531,8 @@ public class DoubleStream100Test extends TestBase {
                 .toArray();
         assertArrayEquals(new double[] { 1.0d, 2.0d, 3.0d, 4.0d, 5.0d, 6.0d }, result);
 
-        result = DoubleStream.merge(N.asList(DoubleStream.of(a), DoubleStream.of(b), DoubleStream.of(c)),
+        result = DoubleStream
+                .merge(N.asList(DoubleStream.of(a), DoubleStream.of(b), DoubleStream.of(c)),
                         (p1, p2) -> p1 <= p2 ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND)
                 .toArray();
         assertArrayEquals(new double[] { 1.0d, 2.0d, 3.0d, 4.0d, 5.0d, 6.0d, 7.0d, 8.0d, 9.0d }, result);

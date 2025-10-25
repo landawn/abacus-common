@@ -35,7 +35,7 @@ import java.lang.annotation.Target;
  *   <li>Special initialization logic is required during deserialization</li>
  * </ul>
  * 
- * <p>Example usage:</p>
+ * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * public class Person {
  *     private final String name;

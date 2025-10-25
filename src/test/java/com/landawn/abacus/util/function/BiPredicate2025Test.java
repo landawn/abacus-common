@@ -55,8 +55,8 @@ public class BiPredicate2025Test extends TestBase {
 
         BiPredicate<Integer, Integer> combined = greaterThan.and(lessThan100);
 
-        assertTrue(combined.test(50, 10));   // 50 > 10 && 50 < 100
-        assertFalse(combined.test(5, 10));   // 5 > 10 is false
+        assertTrue(combined.test(50, 10)); // 50 > 10 && 50 < 100
+        assertFalse(combined.test(5, 10)); // 5 > 10 is false
         assertFalse(combined.test(150, 10)); // 150 < 100 is false
     }
 
@@ -79,8 +79,8 @@ public class BiPredicate2025Test extends TestBase {
 
         BiPredicate<String, String> combined = equals.or(bothEmpty);
 
-        assertTrue(combined.test("test", "test"));  // equals
-        assertTrue(combined.test("", ""));           // both empty
+        assertTrue(combined.test("test", "test")); // equals
+        assertTrue(combined.test("", "")); // both empty
         assertFalse(combined.test("test", "other")); // neither
     }
 
@@ -104,7 +104,7 @@ public class BiPredicate2025Test extends TestBase {
 
         BiPredicate<Integer, Integer> complex = greaterThan.and(lessThan100).and(evenSum);
 
-        assertTrue(complex.test(50, 10));  // 50 > 10, 50 < 100, (50+10) is even
+        assertTrue(complex.test(50, 10)); // 50 > 10, 50 < 100, (50+10) is even
         assertFalse(complex.test(50, 11)); // 50 > 11, 50 < 100, but (50+11) is odd
     }
 
@@ -115,8 +115,8 @@ public class BiPredicate2025Test extends TestBase {
 
         BiPredicate<Integer, Integer> combined = greaterThan.and(lessThan100).negate();
 
-        assertFalse(combined.test(50, 10));  // negation of (50 > 10 && 50 < 100)
-        assertTrue(combined.test(5, 10));     // negation of (5 > 10 && 5 < 100)
+        assertFalse(combined.test(50, 10)); // negation of (50 > 10 && 50 < 100)
+        assertTrue(combined.test(5, 10)); // negation of (5 > 10 && 5 < 100)
     }
 
     @Test

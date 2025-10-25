@@ -28,7 +28,7 @@ import com.landawn.abacus.util.Throwables;
  * <p>The interface extends {@code Throwables.NFunction} with {@code RuntimeException} as the exception type,
  * making it suitable for use in contexts where checked exceptions are not required.
  * 
- * <p>Example usage:
+ * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * NFunction<Integer, Integer> sum = args -> {
  *     int total = 0;
@@ -70,8 +70,7 @@ public interface NFunction<T, R> extends Throwables.NFunction<T, R, RuntimeExcep
      * varargs with generics can generate unchecked warnings at the call site.
      *
      * @param args the function arguments as a varargs array
-     * @return the function result of type R
-     * @throws RuntimeException if any error occurs during function execution
+     * @return the function result of type R if any error occurs during function execution
      */
     @SuppressWarnings("unchecked")
     @Override
@@ -87,7 +86,7 @@ public interface NFunction<T, R> extends Throwables.NFunction<T, R, RuntimeExcep
      * <p>This method allows for function composition, enabling the chaining of
      * operations where the output of this function becomes the input of the next.
      * 
-     * <p>Example usage:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * NFunction<Integer, Integer> sum = args -> {
      *     int total = 0;

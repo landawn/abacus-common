@@ -34,7 +34,7 @@ import org.w3c.dom.Node;
  *   <li>Dynamic type resolution using node class mappings</li>
  * </ul>
  * 
- * <p>Example usage:
+ * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * XMLParser parser = ParserFactory.createXMLParser();
  * 
@@ -71,7 +71,7 @@ public interface XMLParser extends Parser<XMLSerializationConfig, XMLDeserializa
      * populating its fields with values from the XML structure. The deserialization process
      * uses default configuration settings.
      *
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Document doc = DocumentBuilderFactory.newInstance()
      *     .newDocumentBuilder().parse(xmlFile);
@@ -94,7 +94,7 @@ public interface XMLParser extends Parser<XMLSerializationConfig, XMLDeserializa
      * parameter. The configuration can specify options such as ignoring unknown properties, handling null values,
      * date/time formats, and other deserialization behaviors.
      *
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * XMLDeserializationConfig config = new XMLDeserializationConfig()
      *     .ignoreUnmatchedProperty(true);
@@ -122,7 +122,7 @@ public interface XMLParser extends Parser<XMLSerializationConfig, XMLDeserializa
      * to determine which class to instantiate. This is particularly useful for deserializing heterogeneous
      * collections or when the target type cannot be determined statically.
      *
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Map<String, Class<?>> nodeClasses = new HashMap<>();
      * nodeClasses.put("person", Person.class);
@@ -153,7 +153,7 @@ public interface XMLParser extends Parser<XMLSerializationConfig, XMLDeserializa
      * <p>The reader-based approach allows for character encoding control and is suitable for text-based
      * XML sources where character encoding has already been handled by the Reader implementation.
      *
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Map<String, Class<?>> nodeClasses = new HashMap<>();
      * nodeClasses.put("employee", Employee.class);
@@ -185,7 +185,7 @@ public interface XMLParser extends Parser<XMLSerializationConfig, XMLDeserializa
      * is found and the node has a 'name' attribute, it will attempt to match using that attribute value.
      * This provides flexibility in XML structure design.
      *
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Map<String, Class<?>> nodeClasses = new HashMap<>();
      * nodeClasses.put("product", Product.class);

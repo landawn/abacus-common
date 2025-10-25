@@ -25,8 +25,7 @@ import com.landawn.abacus.util.N;
  * Configuration class for JSON serialization operations.
  * This class provides various settings to control how objects are serialized to JSON format.
  * All configuration methods support method chaining for convenient setup.
- * 
- * <p>The configuration supports method chaining for easy setup:</p>
+ * * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * JSONSerializationConfig config = new JSONSerializationConfig()
  *     .quotePropName(true)
@@ -85,7 +84,7 @@ public class JSONSerializationConfig extends JSONXMLSerializationConfig<JSONSeri
      *   <li>writeDatasetByRow: false</li>
      * </ul>
      * 
-     * <p>Usage example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * JSONSerializationConfig config = new JSONSerializationConfig();
      * String json = parser.serialize(object, config);
@@ -99,7 +98,7 @@ public class JSONSerializationConfig extends JSONXMLSerializationConfig<JSONSeri
      * When enabled, null values will be serialized as empty strings, empty arrays, or empty objects
      * depending on the expected type.
      * 
-     * <p>Usage example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * config.writeNullToEmpty(true);
      * // null string → ""
@@ -118,7 +117,7 @@ public class JSONSerializationConfig extends JSONXMLSerializationConfig<JSONSeri
      * When enabled, null values will be serialized as empty strings, empty arrays, or empty objects
      * depending on the expected type. This is useful when the consuming system cannot handle null values.
      * 
-     * <p>Usage example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * JSONSerializationConfig config = new JSONSerializationConfig()
      *     .writeNullToEmpty(true);
@@ -144,7 +143,7 @@ public class JSONSerializationConfig extends JSONXMLSerializationConfig<JSONSeri
      * When enabled, Dataset will be serialized as an array of row objects.
      * When disabled (default), Dataset will be serialized with column-based structure.
      * 
-     * <p>Usage example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * config.writeDatasetByRow(true);
      * // Dataset will be serialized as: [{"col1": val1, "col2": val2}, ...]
@@ -162,7 +161,7 @@ public class JSONSerializationConfig extends JSONXMLSerializationConfig<JSONSeri
      * represents a row with column names as keys. When disabled (default), Dataset will be 
      * serialized with a column-based structure.
      * 
-     * <p>Usage example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * JSONSerializationConfig config = new JSONSerializationConfig()
      *     .writeDatasetByRow(true);
@@ -195,7 +194,7 @@ public class JSONSerializationConfig extends JSONXMLSerializationConfig<JSONSeri
      * This is useful for preserving type information during round-trip serialization, allowing
      * proper deserialization of complex key types.
      * 
-     * <p>Usage example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * JSONSerializationConfig config = new JSONSerializationConfig()
      *     .writeRowColumnKeyType(true);
@@ -217,7 +216,7 @@ public class JSONSerializationConfig extends JSONXMLSerializationConfig<JSONSeri
      * Checks if column type information should be written for Dataset and Sheet objects.
      * When enabled, the type of each column will be included in the serialized output.
      * 
-     * <p>Usage example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * config.writeColumnType(true);
      * // Output will include: "columnTypes": ["String", "Integer", "Date"]
@@ -234,7 +233,7 @@ public class JSONSerializationConfig extends JSONXMLSerializationConfig<JSONSeri
      * When enabled, the type of each column will be included in the serialized output, which
      * helps preserve type information for proper deserialization.
      * 
-     * <p>Usage example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * JSONSerializationConfig config = new JSONSerializationConfig()
      *     .writeColumnType(true);
@@ -346,7 +345,7 @@ public class JSONSerializationConfig extends JSONXMLSerializationConfig<JSONSeri
      * Checks if property names should be quoted in the JSON output.
      * The default value is {@code true} if not set, which conforms to the JSON specification.
      * 
-     * <p>Usage example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * config.quotePropName(false);
      * // Output: {name: "John"} instead of {"name": "John"}
@@ -363,7 +362,7 @@ public class JSONSerializationConfig extends JSONXMLSerializationConfig<JSONSeri
      * According to strict JSON specification, property names should always be quoted.
      * Setting this to false produces non-standard JSON that may not be parseable by all JSON parsers.
      * 
-     * <p>Usage example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * JSONSerializationConfig config = new JSONSerializationConfig()
      *     .quotePropName(false);
@@ -396,7 +395,7 @@ public class JSONSerializationConfig extends JSONXMLSerializationConfig<JSONSeri
      * When serializing Map objects, this determines if the keys should be surrounded by quotes.
      * Note that setting this to false may produce non-standard JSON for non-string keys.
      * 
-     * <p>Usage example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Map<Integer, String> map = Map.of(1, "one", 2, "two");
      * JSONSerializationConfig config = new JSONSerializationConfig()
@@ -430,7 +429,7 @@ public class JSONSerializationConfig extends JSONXMLSerializationConfig<JSONSeri
      * This determines if the root element should be wrapped with brackets when it's a 
      * single value that would not normally be bracketed.
      * 
-     * <p>Usage example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * JSONSerializationConfig config = new JSONSerializationConfig()
      *     .bracketRootValue(false);
@@ -463,7 +462,7 @@ public class JSONSerializationConfig extends JSONXMLSerializationConfig<JSONSeri
      * When enabled, the output will include the class name as a wrapper property.
      * This is useful for preserving type information in the JSON output.
      * 
-     * <p>Usage example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Person person = new Person("John", 30);
      * JSONSerializationConfig config = new JSONSerializationConfig()
@@ -578,7 +577,7 @@ public class JSONSerializationConfig extends JSONXMLSerializationConfig<JSONSeri
      * Provides convenient static factory methods for creating configurations.
      * This class cannot be instantiated and serves only as a container for factory methods.
      * 
-     * <p>Usage example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * JSONSerializationConfig config = JSC.create()
      *     .quotePropName(true)
@@ -593,7 +592,7 @@ public class JSONSerializationConfig extends JSONXMLSerializationConfig<JSONSeri
          * Creates a new instance of JSONSerializationConfig with default settings.
          * This is the recommended way to create a new configuration instance.
          * 
-         * <p>Usage example:</p>
+         * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * JSONSerializationConfig config = JSC.create()
          *     .prettyFormat(true)

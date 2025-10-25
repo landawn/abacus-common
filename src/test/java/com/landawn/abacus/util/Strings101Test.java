@@ -1581,7 +1581,7 @@ public class Strings101Test extends TestBase {
         assertNotNull(reverse(unicode));
         assertNotNull(sort(unicode));
 
-        String special = "!@#$%^&*()_+-=[]{}|;:'\",.<>?/\\`~";
+        String special = "!@#$%^&*()_+-=[] {}|;:'\",.<>?/\\`~";
         assertNotNull(reverse(special));
         assertNotNull(sort(special));
     }

@@ -97,11 +97,24 @@ public abstract class AbstractFloatType extends NumberType<Number> {
 
     /**
      * Retrieves a float value from a ResultSet at the specified column index.
+     * This method uses rs.getFloat() which returns 0.0f for SQL NULL values.
+     * Subclasses may override this to return null for SQL NULL values.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * // For primitive float types
+     * PrimitiveFloatType type = TypeFactory.getType(float.class);
+     * float value = type.get(rs, 1); // Returns 0.0f for SQL NULL
+     *
+     * // For wrapper Float types
+     * FloatType type = TypeFactory.getType(Float.class);
+     * Float value = type.get(rs, 1); // Returns null for SQL NULL (overridden in subclass)
+     * }</pre>
      *
      * @param rs the ResultSet to read from
      * @param columnIndex the column index (1-based)
-     * @return the float value at the specified column
-     * @throws SQLException if a database access error occurs
+     * @return the float value at the specified column; returns 0.0f if SQL NULL (may be overridden by subclasses to return null)
+     * @throws SQLException if a database access error occurs or the columnIndex is invalid
      */
     @Override
     public Float get(final ResultSet rs, final int columnIndex) throws SQLException {
@@ -110,11 +123,24 @@ public abstract class AbstractFloatType extends NumberType<Number> {
 
     /**
      * Retrieves a float value from a ResultSet using the specified column label.
+     * This method uses rs.getFloat() which returns 0.0f for SQL NULL values.
+     * Subclasses may override this to return null for SQL NULL values.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * // For primitive float types
+     * PrimitiveFloatType type = TypeFactory.getType(float.class);
+     * float value = type.get(rs, "ratio"); // Returns 0.0f for SQL NULL
+     *
+     * // For wrapper Float types
+     * FloatType type = TypeFactory.getType(Float.class);
+     * Float value = type.get(rs, "ratio"); // Returns null for SQL NULL (overridden in subclass)
+     * }</pre>
      *
      * @param rs the ResultSet to read from
      * @param columnLabel the column label
-     * @return the float value at the specified column
-     * @throws SQLException if a database access error occurs
+     * @return the float value at the specified column; returns 0.0f if SQL NULL (may be overridden by subclasses to return null)
+     * @throws SQLException if a database access error occurs or the columnLabel is not found
      */
     @Override
     public Float get(final ResultSet rs, final String columnLabel) throws SQLException {

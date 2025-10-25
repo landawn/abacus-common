@@ -144,7 +144,7 @@ public class ObjDoubleConsumer2025Test extends TestBase {
 
     @Test
     public void testSideEffects() {
-        final double[] sum = {0.0};
+        final double[] sum = { 0.0 };
         ObjDoubleConsumer<String> consumer = (t, value) -> sum[0] += value;
 
         consumer.accept("a", 1.5);

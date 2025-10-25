@@ -71,7 +71,7 @@ public class CharSupplier2025Test extends TestBase {
 
     @Test
     public void testStatefulSupplier() {
-        final char[] counter = {'a'};
+        final char[] counter = { 'a' };
         CharSupplier supplier = () -> counter[0]++;
 
         assertEquals('a', supplier.getAsChar());

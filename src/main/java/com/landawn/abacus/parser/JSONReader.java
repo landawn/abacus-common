@@ -114,7 +114,7 @@ interface JSONReader {
      * This method allows backtracking to the last token read,
      * which can be useful for re-evaluating or skipping tokens.
      * 
-     * <p>Usage example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * int token = reader.nextToken();
      * if (token == SOME_TOKEN) {
@@ -137,7 +137,7 @@ interface JSONReader {
      * <p>The returned value will be one of the defined token constants,
      * or -1 if no next symbol is found (EOF).</p>
      * 
-     * <p>Usage example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * int token = reader.nextToken();
      * if (token == START_BRACE) {
@@ -155,7 +155,7 @@ interface JSONReader {
      * This method allows reading tokens that match a specific type,
      * which can be useful for parsing structured data.
      * 
-     * <p>Usage example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<Integer> intType = N.typeOf(Integer.class);
      * int token = reader.nextToken(intType);
@@ -174,7 +174,7 @@ interface JSONReader {
      * This is typically true after reading a string token or value token
      * (like numbers, booleans, or null).
      * 
-     * <p>Usage example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * if (reader.hasText()) {
      *     String value = reader.getText();
@@ -191,7 +191,7 @@ interface JSONReader {
      * The returned text represents the value of the last parsed token, such as
      * a string value, number, boolean, or null.
      * 
-     * <p>Usage example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * int token = reader.nextToken();
      * if (reader.hasText()) {
@@ -209,11 +209,11 @@ interface JSONReader {
      * This method reads the current token value and converts it to the
      * requested type using the type's conversion logic.
      * 
-     * <p>Usage example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<Integer> intType = N.typeOf(Integer.class);
      * Integer value = reader.readValue(intType);
-     * 
+     *
      * Type<Person> personType = N.typeOf(Person.class);
      * Person person = reader.readValue(personType);
      * }</pre>
@@ -242,7 +242,7 @@ interface JSONReader {
      * This method should be called when the reader is no longer needed
      * to ensure proper resource cleanup.
      * 
-     * <p>Usage example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * JSONReader reader = null;
      * try {
@@ -276,7 +276,7 @@ interface JSONReader {
          * This method performs a lookup to find the property metadata
          * associated with the given name.
          * 
-         * <p>Usage example:</p>
+         * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * PropInfo propInfo = symbolReader.getPropInfo("firstName");
          * if (propInfo != null) {
@@ -297,7 +297,7 @@ interface JSONReader {
          * <p>This is a performance optimization for high-throughput parsing
          * scenarios where string allocation overhead should be minimized.</p>
          * 
-         * <p>Usage example:</p>
+         * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * char[] buffer = {'f', 'i', 'r', 's', 't', 'N', 'a', 'm', 'e'};
          * PropInfo propInfo = symbolReader.readPropInfo(buffer, 0, 9);

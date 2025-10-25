@@ -28,7 +28,7 @@ package com.landawn.abacus.parser;
  *   <li>SOAP envelope elements</li>
  * </ul>
  * 
- * <p>Example usage:
+ * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * // Using constants for XML serialization
  * writer.write(XMLConstants.ARRAY_ELE_START);

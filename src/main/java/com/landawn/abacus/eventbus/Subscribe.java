@@ -33,8 +33,8 @@ import com.landawn.abacus.util.ThreadMode;
  *   <li>Should not throw checked exceptions</li>
  * </ul>
  * 
- * <p>Basic example:</p>
- * <pre>
+ * <p><b>Usage Examples:</b></p>
+ * <pre>{@code
  * {@code
  * public class EventHandler {
  *     @Subscribe
@@ -49,10 +49,10 @@ import com.landawn.abacus.util.ThreadMode;
  *     }
  * }
  * }
- * </pre>
+ * }</pre>
  * 
- * <p>Example with all parameters:</p>
- * <pre>
+ * <p><b>Usage Examples with all parameters:</b></p>
+ * <pre>{@code
  * {@code
  * public class AdvancedHandler {
  *     @Subscribe(
@@ -74,7 +74,7 @@ import com.landawn.abacus.util.ThreadMode;
  *     }
  * }
  * }
- * </pre>
+ * }</pre>
  * 
  * @see EventBus
  * @see Subscriber
@@ -95,8 +95,8 @@ public @interface Subscribe {
      *   <li>{@link ThreadMode#THREAD_POOL_EXECUTOR} - Events are delivered on a background thread from a thread pool</li>
      * </ul>
      * 
-     * <p>Example:</p>
-     * <pre>
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
      * {@code
      * @Subscribe(threadMode = ThreadMode.THREAD_POOL_EXECUTOR)
      * public void onHeavyEvent(DataEvent event) {
@@ -104,7 +104,7 @@ public @interface Subscribe {
      *     performExpensiveOperation(event.getData());
      * }
      * }
-     * </pre>
+     * }</pre>
      * 
      * @return the thread mode for event delivery
      */
@@ -116,8 +116,8 @@ public @interface Subscribe {
      * <p>When set to true, only events of the exact parameter type will be delivered.
      * When false (default), events of the parameter type and all its subtypes will be delivered.</p>
      * 
-     * <p>Example:</p>
-     * <pre>
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
      * {@code
      * // With strictEventType = false (default)
      * @Subscribe
@@ -131,7 +131,7 @@ public @interface Subscribe {
      *     // Receives only Animal, not Dog or Cat
      * }
      * }
-     * </pre>
+     * }</pre>
      * 
      * @return {@code true} to accept only exact type matches, {@code false} to accept subtypes
      */
@@ -143,8 +143,8 @@ public @interface Subscribe {
      * <p>When true, if a sticky event matching this subscriber's type and event ID was previously posted,
      * it will be immediately delivered to this subscriber upon registration.</p>
      * 
-     * <p>Example:</p>
-     * <pre>
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
      * {@code
      * // Post a sticky configuration
      * eventBus.postSticky(new AppConfig("production"));
@@ -158,7 +158,7 @@ public @interface Subscribe {
      *     }
      * }
      * }
-     * </pre>
+     * }</pre>
      * 
      * @return {@code true} to receive sticky events upon registration
      */
@@ -171,8 +171,8 @@ public @interface Subscribe {
      * <p>If empty (default), the subscriber will receive events based on type matching alone,
      * unless it was registered with a specific event ID.</p>
      * 
-     * <p>Example:</p>
-     * <pre>
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
      * {@code
      * @Subscribe(eventId = "userUpdates")
      * public void onUserUpdate(User user) {
@@ -184,7 +184,7 @@ public @interface Subscribe {
      *     // Only receives User events posted with "adminUpdates" ID
      * }
      * }
-     * </pre>
+     * }</pre>
      * 
      * @return the event ID to filter on, or empty string for no filtering
      */
@@ -196,8 +196,8 @@ public @interface Subscribe {
      * 
      * <p>This is useful for throttling high-frequency events to prevent overwhelming the subscriber.</p>
      * 
-     * <p>Example:</p>
-     * <pre>
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
      * {@code
      * @Subscribe(interval = 1000)  // Maximum one event per second
      * public void onSensorData(SensorEvent event) {
@@ -209,7 +209,7 @@ public @interface Subscribe {
      *     saveLocationToServer(location);
      * }
      * }
-     * </pre>
+     * }</pre>
      * 
      * @return the minimum interval between events in milliseconds, 0 for no throttling
      */
@@ -223,8 +223,8 @@ public @interface Subscribe {
      * 
      * <p>This is useful for preventing redundant processing of unchanged data.</p>
      * 
-     * <p>Example:</p>
-     * <pre>
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
      * {@code
      * @Subscribe(deduplicate = true)
      * public void onTemperature(Temperature temp) {
@@ -238,7 +238,7 @@ public @interface Subscribe {
      *     applyNewConfiguration(config);
      * }
      * }
-     * </pre>
+     * }</pre>
      * 
      * @return {@code true} to ignore duplicate consecutive events
      */

@@ -38,7 +38,7 @@ public interface LongToFloatFunction {
      * long values outside the range of float precision (larger than 2^24), there
      * will be loss of precision due to the limitations of float representation.
      * 
-     * <p>Example usage:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * LongToFloatFunction converter = LongToFloatFunction.DEFAULT;
      * float result = converter.applyAsFloat(42L); // returns 42.0f

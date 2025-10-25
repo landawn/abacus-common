@@ -41,7 +41,7 @@ package com.landawn.abacus.util;
  * </ul>
  * </p>
  * 
- * <p>Example usage:
+ * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * // Check if an object is immutable
  * if (myCollection instanceof Immutable) {

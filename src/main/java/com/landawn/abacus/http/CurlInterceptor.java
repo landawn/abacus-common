@@ -38,7 +38,7 @@ import okio.Buffer;
  * <p>The interceptor processes the request headers, method, URL, and body content to generate
  * a complete cURL command that can be executed from the command line.</p>
  * 
- * <p>Example usage:</p>
+ * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * OkHttpClient client = new OkHttpClient.Builder()
  *     .addInterceptor(new CurlInterceptor(curl -> System.out.println(curl)))
@@ -128,11 +128,13 @@ class CurlInterceptor implements Interceptor {
             }
 
             final Buffer buffer = new Buffer();
-            requestBody.writeTo(buffer);
-            buffer.flush();
-            bodyString = buffer.readString(charset);
-
-            IOUtil.close(buffer);
+            try {
+                requestBody.writeTo(buffer);
+                buffer.flush();
+                bodyString = buffer.readString(charset);
+            } finally {
+                IOUtil.close(buffer);
+            }
         }
 
         final String curl = WebUtil.buildCurl(httpMethod, url, httpHeaders, bodyString, bodyType, quoteChar);

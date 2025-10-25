@@ -288,7 +288,7 @@ public class GuavaHashFunction2025Test extends TestBase {
     @DisplayName("Test hash byte array with offset and length")
     public void testHashByteArrayOffsetLength() {
         GuavaHashFunction hashFunc = GuavaHashFunction.wrap(com.google.common.hash.Hashing.murmur3_128());
-        byte[] data = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
+        byte[] data = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 };
 
         HashCode hash = hashFunc.hash(data, 2, 5);
 
@@ -299,7 +299,7 @@ public class GuavaHashFunction2025Test extends TestBase {
     @DisplayName("Test hash byte array with zero length")
     public void testHashByteArrayZeroLength() {
         GuavaHashFunction hashFunc = GuavaHashFunction.wrap(com.google.common.hash.Hashing.murmur3_128());
-        byte[] data = {1, 2, 3};
+        byte[] data = { 1, 2, 3 };
 
         HashCode hash = hashFunc.hash(data, 0, 0);
 
@@ -310,7 +310,7 @@ public class GuavaHashFunction2025Test extends TestBase {
     @DisplayName("Test hash byte array full range")
     public void testHashByteArrayFullRange() {
         GuavaHashFunction hashFunc = GuavaHashFunction.wrap(com.google.common.hash.Hashing.murmur3_128());
-        byte[] data = {10, 20, 30, 40, 50};
+        byte[] data = { 10, 20, 30, 40, 50 };
 
         HashCode hash1 = hashFunc.hash(data);
         HashCode hash2 = hashFunc.hash(data, 0, data.length);
@@ -322,8 +322,8 @@ public class GuavaHashFunction2025Test extends TestBase {
     @DisplayName("Test hash byte array subset")
     public void testHashByteArraySubset() {
         GuavaHashFunction hashFunc = GuavaHashFunction.wrap(com.google.common.hash.Hashing.murmur3_128());
-        byte[] fullData = {1, 2, 3, 4, 5};
-        byte[] subsetData = {2, 3, 4};
+        byte[] fullData = { 1, 2, 3, 4, 5 };
+        byte[] subsetData = { 2, 3, 4 };
 
         HashCode hashSubset1 = hashFunc.hash(fullData, 1, 3);
         HashCode hashSubset2 = hashFunc.hash(subsetData);
@@ -573,14 +573,11 @@ public class GuavaHashFunction2025Test extends TestBase {
     public void testDifferentAlgorithms() {
         byte[] data = "test data".getBytes(StandardCharsets.UTF_8);
 
-        HashCode murmur32Hash = GuavaHashFunction.wrap(com.google.common.hash.Hashing.murmur3_32_fixed())
-            .hash(data);
+        HashCode murmur32Hash = GuavaHashFunction.wrap(com.google.common.hash.Hashing.murmur3_32_fixed()).hash(data);
 
-        HashCode murmur128Hash = GuavaHashFunction.wrap(com.google.common.hash.Hashing.murmur3_128())
-            .hash(data);
+        HashCode murmur128Hash = GuavaHashFunction.wrap(com.google.common.hash.Hashing.murmur3_128()).hash(data);
 
-        HashCode sha256Hash = GuavaHashFunction.wrap(com.google.common.hash.Hashing.sha256())
-            .hash(data);
+        HashCode sha256Hash = GuavaHashFunction.wrap(com.google.common.hash.Hashing.sha256()).hash(data);
 
         assertNotNull(murmur32Hash);
         assertNotNull(murmur128Hash);
@@ -610,9 +607,7 @@ public class GuavaHashFunction2025Test extends TestBase {
         GuavaHashFunction hashFunc = GuavaHashFunction.wrap(com.google.common.hash.Hashing.murmur3_128());
 
         // Using newHasher
-        HashCode hashViaHasher = hashFunc.newHasher()
-            .put(42)
-            .hash();
+        HashCode hashViaHasher = hashFunc.newHasher().put(42).hash();
 
         // Using convenience method
         HashCode hashDirect = hashFunc.hash(42);

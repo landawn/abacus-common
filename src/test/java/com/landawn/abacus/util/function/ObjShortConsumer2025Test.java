@@ -99,7 +99,7 @@ public class ObjShortConsumer2025Test extends TestBase {
 
     @Test
     public void testSideEffects() {
-        final int[] sum = {0};
+        final int[] sum = { 0 };
         ObjShortConsumer<String> consumer = (t, value) -> sum[0] += value;
 
         consumer.accept("a", (short) 10);

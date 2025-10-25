@@ -31,7 +31,7 @@ import com.landawn.abacus.util.stream.LongStream;
  * <p>This abstract class extends ImmutableIterator to ensure that the remove() operation is not supported,
  * making all LongIterator instances immutable in terms of structural modification.</p>
  * 
- * <p>Example usage:</p>
+ * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * LongIterator iter = LongIterator.of(1L, 2L, 3L, 4L, 5L);
  * while (iter.hasNext()) {
@@ -81,7 +81,7 @@ public abstract class LongIterator extends ImmutableIterator<Long> {
      * Creates a LongIterator from the specified long array. The iterator will iterate over
      * all elements in the array in order.
      *
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * LongIterator iter = LongIterator.of(10L, 20L, 30L);
      * // Will iterate over: 10, 20, 30
@@ -98,7 +98,7 @@ public abstract class LongIterator extends ImmutableIterator<Long> {
      * Creates a LongIterator from a portion of the specified long array. The iterator will iterate
      * over elements from the fromIndex (inclusive) to the toIndex (exclusive).
      *
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * long[] array = {1L, 2L, 3L, 4L, 5L};
      * LongIterator iter = LongIterator.of(array, 1, 4);
@@ -157,7 +157,7 @@ public abstract class LongIterator extends ImmutableIterator<Long> {
      * The actual iterator is not created until the first method call (hasNext() or nextLong()).
      * This is useful for deferring expensive iterator creation until it's actually needed.
      *
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * LongIterator iter = LongIterator.defer(() -> LongIterator.of(expensiveMethod()));
      * // expensiveMethod() is not called until iter.hasNext() or iter.nextLong() is invoked
@@ -205,7 +205,7 @@ public abstract class LongIterator extends ImmutableIterator<Long> {
      * Creates an infinite LongIterator that generates values using the provided LongSupplier.
      * The iterator will always return true for hasNext() and will generate values on demand.
      *
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * LongIterator randomLongs = LongIterator.generate(() -> ThreadLocalRandom.current().nextLong());
      * // Generates random long values infinitely
@@ -235,7 +235,7 @@ public abstract class LongIterator extends ImmutableIterator<Long> {
      * Creates a LongIterator that generates values using the provided LongSupplier while the
      * BooleanSupplier returns true. This allows for creating finite iterators with dynamic termination conditions.
      *
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * int count = 0;
      * LongIterator iter = LongIterator.generate(
@@ -287,6 +287,13 @@ public abstract class LongIterator extends ImmutableIterator<Long> {
     /**
      * Returns the next long value in the iteration.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * LongIterator iter = LongIterator.of(1L, 2L, 3L);
+     * long first = iter.nextLong(); // 1
+     * long second = iter.nextLong(); // 2
+     * }</pre>
+     *
      * @return the next long value
      * @throws NoSuchElementException if the iteration has no more elements
      */
@@ -296,7 +303,7 @@ public abstract class LongIterator extends ImmutableIterator<Long> {
      * Returns a new LongIterator that skips the first n elements. If n is greater than
      * the number of remaining elements, all elements are skipped.
      *
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * LongIterator iter = LongIterator.of(1L, 2L, 3L, 4L, 5L).skip(2);
      * // Will iterate over: 3, 4, 5
@@ -307,7 +314,7 @@ public abstract class LongIterator extends ImmutableIterator<Long> {
      * @throws IllegalArgumentException if n is negative
      */
     public LongIterator skip(final long n) throws IllegalArgumentException {
-        N.checkArgNotNegative(n, "n");
+        N.checkArgNotNegative(n, cs.n);
 
         if (n <= 0) {
             return this;
@@ -353,7 +360,7 @@ public abstract class LongIterator extends ImmutableIterator<Long> {
      * If count is 0, an empty iterator is returned. If count is greater than the number
      * of remaining elements, all remaining elements are included.
      *
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * LongIterator iter = LongIterator.of(1L, 2L, 3L, 4L, 5L).limit(3);
      * // Will iterate over: 1, 2, 3
@@ -364,7 +371,7 @@ public abstract class LongIterator extends ImmutableIterator<Long> {
      * @throws IllegalArgumentException if count is negative
      */
     public LongIterator limit(final long count) throws IllegalArgumentException {
-        N.checkArgNotNegative(count, "count");
+        N.checkArgNotNegative(count, cs.count);
 
         if (count == 0) {
             return LongIterator.EMPTY;
@@ -396,7 +403,7 @@ public abstract class LongIterator extends ImmutableIterator<Long> {
      * Returns a new LongIterator that only includes elements matching the given predicate.
      * Elements that don't match the predicate are skipped.
      *
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * LongIterator iter = LongIterator.of(1L, 2L, 3L, 4L, 5L)
      *     .filter(x -> x % 2 == 0);
@@ -408,7 +415,7 @@ public abstract class LongIterator extends ImmutableIterator<Long> {
      * @throws IllegalArgumentException if predicate is null
      */
     public LongIterator filter(final LongPredicate predicate) throws IllegalArgumentException {
-        N.checkArgNotNull(predicate, "predicate");
+        N.checkArgNotNull(predicate, cs.Predicate);
 
         final LongIterator iter = this;
 
@@ -449,7 +456,7 @@ public abstract class LongIterator extends ImmutableIterator<Long> {
      * Returns an OptionalLong containing the first element, or an empty OptionalLong if
      * this iterator is empty. This method consumes the first element if present.
      *
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * OptionalLong first = LongIterator.of(1L, 2L, 3L).first();
      * // first.get() returns 1L
@@ -469,7 +476,7 @@ public abstract class LongIterator extends ImmutableIterator<Long> {
      * Returns an OptionalLong containing the last element, or an empty OptionalLong if
      * this iterator is empty. This method consumes all elements in the iterator.
      *
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * OptionalLong last = LongIterator.of(1L, 2L, 3L).last();
      * // last.get() returns 3L
@@ -492,13 +499,19 @@ public abstract class LongIterator extends ImmutableIterator<Long> {
     }
 
     /**
-     * Converts the remaining elements in this iterator to a long array.
-     * This method consumes all remaining elements.
+     * Converts the remaining elements to a long array.
      *
-     * <p>Example:</p>
+     * <p>This method consumes the iterator. After calling this method, the iterator
+     * will be empty (hasNext() returns false). If the iterator is already empty,
+     * returns an empty array.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * long[] array = LongIterator.of(1L, 2L, 3L).toArray();
-     * // array contains [1, 2, 3]
+     * long[] array = LongIterator.of(1L, 2L, 3L, 4L, 5L).toArray();
+     * // array = [1, 2, 3, 4, 5]
+     *
+     * // Empty iterator returns empty array
+     * long[] empty = LongIterator.empty().toArray(); // empty.length == 0
      * }</pre>
      *
      * @return a long array containing all remaining elements
@@ -509,13 +522,19 @@ public abstract class LongIterator extends ImmutableIterator<Long> {
     }
 
     /**
-     * Converts the remaining elements in this iterator to a LongList.
-     * This method consumes all remaining elements.
+     * Converts the remaining elements to a LongList.
      *
-     * <p>Example:</p>
+     * <p>This method consumes the iterator. After calling this method, the iterator
+     * will be empty (hasNext() returns false). If the iterator is already empty,
+     * returns an empty LongList.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * LongList list = LongIterator.of(1L, 2L, 3L).toList();
-     * // list contains [1, 2, 3]
+     * LongList list = LongIterator.of(1L, 2L, 3L, 4L, 5L).toList();
+     * // list contains [1, 2, 3, 4, 5]
+     *
+     * // Empty iterator returns empty list
+     * LongList empty = LongIterator.empty().toList(); // empty.size() == 0
      * }</pre>
      *
      * @return a LongList containing all remaining elements
@@ -534,7 +553,7 @@ public abstract class LongIterator extends ImmutableIterator<Long> {
      * Converts this iterator to a LongStream. The stream will be sequential and
      * will consume elements from this iterator as needed.
      *
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * long sum = LongIterator.of(1L, 2L, 3L).stream().sum();
      * // sum is 6
@@ -550,7 +569,7 @@ public abstract class LongIterator extends ImmutableIterator<Long> {
      * Returns an iterator of IndexedLong objects, where each element is paired with its index
      * starting from 0. This is useful when you need both the value and its position.
      *
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ObjIterator<IndexedLong> iter = LongIterator.of(10L, 20L, 30L).indexed();
      * // Will produce: IndexedLong(10, 0), IndexedLong(20, 1), IndexedLong(30, 2)
@@ -568,7 +587,7 @@ public abstract class LongIterator extends ImmutableIterator<Long> {
      * starting from the specified startIndex. This is useful when you need both the value and 
      * its position with a custom starting index.
      *
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ObjIterator<IndexedLong> iter = LongIterator.of(10L, 20L, 30L).indexed(5);
      * // Will produce: IndexedLong(10, 5), IndexedLong(20, 6), IndexedLong(30, 7)
@@ -619,7 +638,7 @@ public abstract class LongIterator extends ImmutableIterator<Long> {
      * Performs the given action for each remaining element. The action is performed in the order
      * of iteration, if that order is specified.
      *
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * LongIterator.of(1L, 2L, 3L).foreachRemaining(System.out::println);
      * // Prints: 1, 2, 3
@@ -641,7 +660,7 @@ public abstract class LongIterator extends ImmutableIterator<Long> {
      * Performs the given action for each remaining element, providing both the element's index
      * and value. The index starts from 0 and increments for each element.
      *
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * LongIterator.of(10L, 20L, 30L).foreachIndexed((index, value) -> 
      *     System.out.println("Index: " + index + ", Value: " + value)

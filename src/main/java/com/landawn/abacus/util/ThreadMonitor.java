@@ -25,7 +25,8 @@ package com.landawn.abacus.util;
  * the <i>monitor</i> thread.
  * </p>
  *
- * <pre>
+ * <p><b>Usage Examples:</b></p>
+ * <pre>{@code
  *       long timeoutInMillis = 1000;
  *       try {
  *           Thread monitor = ThreadMonitor.start(timeoutInMillis);
@@ -34,7 +35,7 @@ package com.landawn.abacus.util;
  *       } catch (InterruptedException e) {
  *           // timed amount was reached
  *       }
- * </pre>
+ * }</pre>
  *
  * @version $Id: ThreadMonitor.java 1563227 2014-01-31 19:45:30Z ggregory $
  */

@@ -49,7 +49,8 @@ public class BooleanNFunction2025Test extends TestBase {
         BooleanNFunction<Integer> function = args -> {
             int count = 0;
             for (boolean arg : args) {
-                if (arg) count++;
+                if (arg)
+                    count++;
             }
             return count;
         };
@@ -75,7 +76,8 @@ public class BooleanNFunction2025Test extends TestBase {
         BooleanNFunction<Integer> function = args -> {
             int count = 0;
             for (boolean arg : args) {
-                if (arg) count++;
+                if (arg)
+                    count++;
             }
             return count;
         };
@@ -85,7 +87,7 @@ public class BooleanNFunction2025Test extends TestBase {
         BooleanNFunction<String> chainedFunction = function.andThen(doubleIt).andThen(toString);
         String result = chainedFunction.apply(true, true, false);
 
-        assertEquals("Count: 4", result);  // 2 trues * 2 = 4
+        assertEquals("Count: 4", result); // 2 trues * 2 = 4
     }
 
     @Test
@@ -136,28 +138,30 @@ public class BooleanNFunction2025Test extends TestBase {
     public void testAllTrue() {
         BooleanNFunction<Boolean> function = args -> {
             for (boolean arg : args) {
-                if (!arg) return false;
+                if (!arg)
+                    return false;
             }
             return true;
         };
 
         assertEquals(true, function.apply(true, true, true));
         assertEquals(false, function.apply(true, false, true));
-        assertEquals(true, function.apply());  // Empty array: all true
+        assertEquals(true, function.apply()); // Empty array: all true
     }
 
     @Test
     public void testAnyTrue() {
         BooleanNFunction<Boolean> function = args -> {
             for (boolean arg : args) {
-                if (arg) return true;
+                if (arg)
+                    return true;
             }
             return false;
         };
 
         assertEquals(true, function.apply(false, true, false));
         assertEquals(false, function.apply(false, false, false));
-        assertEquals(false, function.apply());  // Empty array: none true
+        assertEquals(false, function.apply()); // Empty array: none true
     }
 
     @Test
@@ -175,14 +179,15 @@ public class BooleanNFunction2025Test extends TestBase {
         BooleanNFunction<Double> function = args -> {
             int trueCount = 0;
             for (boolean arg : args) {
-                if (arg) trueCount++;
+                if (arg)
+                    trueCount++;
             }
             return args.length == 0 ? 0.0 : (double) trueCount / args.length;
         };
 
-        assertEquals(0.0, function.apply(), 0.001);                // 0/0
+        assertEquals(0.0, function.apply(), 0.001); // 0/0
         assertEquals(1.0, function.apply(true, true, true), 0.001); // 3/3
-        assertEquals(0.5, function.apply(true, false), 0.001);      // 1/2
+        assertEquals(0.5, function.apply(true, false), 0.001); // 1/2
         assertEquals(0.6, function.apply(true, true, false, true, false), 0.001); // 3/5
     }
 }

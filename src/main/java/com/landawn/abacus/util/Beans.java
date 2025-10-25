@@ -75,7 +75,7 @@ import com.landawn.abacus.util.stream.Stream;
  * <p>The class maintains internal caches for performance optimization and supports
  * customization through registration methods for special cases.</p>
  *
- * <p>Example usage:</p>
+ * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * // Check if a class is a bean
  * boolean isBean = Beans.isBeanClass(User.class);
@@ -214,7 +214,7 @@ public final class Beans {
      *   <li>Is not a CharSequence, Number, or Map.Entry implementation</li>
      * </ul>
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * boolean isBean = Beans.isBeanClass(User.class);  // true for typical POJO
      * boolean isNotBean = Beans.isBeanClass(String.class);  // false
@@ -248,7 +248,7 @@ public final class Beans {
      *   <li>It is annotated with {@code @Record}</li>
      * </ul>
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * record Point(int x, int y) {}
      * boolean isRec = Beans.isRecordClass(Point.class);  // true
@@ -272,7 +272,7 @@ public final class Beans {
      * The BeanInfo contains metadata about the class including property information,
      * annotations, and type details.</p>
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * BeanInfo beanInfo = Beans.getBeanInfo(User.class);
      * List<PropInfo> properties = beanInfo.propInfoList;
@@ -298,7 +298,7 @@ public final class Beans {
      *
      * <p>This method is marked as deprecated and is for internal use only.</p>
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // After dynamically modifying a class
      * Beans.refreshBeanPropInfo(ModifiedClass.class);
@@ -325,7 +325,7 @@ public final class Beans {
      *   <li>Builder classes with "build" or "create" methods</li>
      * </ul>
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Tuple3<Class<?>, Supplier<Object>, Function<Object, Object>> builderInfo =
      *     Beans.getBuilderInfo(Person.class);
@@ -457,7 +457,7 @@ public final class Beans {
      * <p>This is useful for classes that should not be treated as JavaBeans,
      * such as primitive wrappers, dates, or custom value objects.</p>
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Register a custom value class
      * Beans.registerNonBeanClass(Money.class);
@@ -490,7 +490,7 @@ public final class Beans {
      * This excludes specific methods from being considered as property accessors
      * during bean introspection.
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Exclude 'getInternal' from being treated as a property getter
      * Beans.registerNonPropGetSetMethod(MyClass.class, "internal");
@@ -516,7 +516,7 @@ public final class Beans {
      * This allows manual registration of methods as property accessors that might
      * not follow standard JavaBean naming conventions.
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Method customGetter = MyClass.class.getMethod("fetchName");
      * Beans.registerPropGetSetMethod("name", customGetter);
@@ -581,7 +581,7 @@ public final class Beans {
      * <p>This is particularly useful for JAXB-generated classes where collections
      * are typically exposed only through getters.</p>
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Register JAXB-generated class
      * Beans.registerXMLBindingClass(JAXBGeneratedClass.class);
@@ -614,7 +614,7 @@ public final class Beans {
     /**
      * Checks if the specified class is registered for XML binding.
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * if (Beans.isRegisteredXMLBindingClass(MyClass.class)) {
      *     // Handle XML binding specific logic
@@ -639,7 +639,7 @@ public final class Beans {
      *   <li>setAge(int) -> "age"</li>
      * </ul>
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Method getter = User.class.getMethod("getName");
      * String propName = Beans.getPropNameByMethod(getter);  // Returns "name"
@@ -723,7 +723,7 @@ public final class Beans {
      * following JavaBean conventions. The order is consistent with the declaration
      * order in the class.</p>
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ImmutableList<String> props = Beans.getPropNameList(User.class);
      * // Returns ["id", "name", "email", "age"] for a typical User class
@@ -748,7 +748,7 @@ public final class Beans {
     /**
      * Retrieves a list of property names for the specified class, excluding the specified property names.
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * List<String> props = Beans.getPropNames(User.class, Arrays.asList("password", "ssn"));
      * // Returns all properties except "password" and "ssn"
@@ -782,7 +782,7 @@ public final class Beans {
      * <p>This method is more efficient than the deprecated Collection-based version when
      * the excluded properties are already in a Set.</p>
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Set<String> excluded = Set.of("password", "internalId");
      * List<String> props = Beans.getPropNames(User.class, excluded);
@@ -818,7 +818,7 @@ public final class Beans {
     /**
      * Retrieves the property names of the given bean object.
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * User user = new User("John", null, "john@email.com");
      *
@@ -848,7 +848,7 @@ public final class Beans {
     /**
      * Retrieves a list of property names for the specified bean, filtered by the given predicate.
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * User user = new User("John", 25, "john@email.com");
      *
@@ -857,7 +857,7 @@ public final class Beans {
      * // Returns ["email"]
      * }</pre>
      *
-     * @param bean the bean whose property names are to be retrieved
+     * @param bean the bean object whose property names are to be retrieved
      * @param propNameFilter the predicate to filter property names
      * @return a list of property names for the specified bean, filtered by the given predicate
      */
@@ -881,7 +881,7 @@ public final class Beans {
      * <p>The BiPredicate receives both the property name and its value, allowing for
      * more sophisticated filtering based on both.</p>
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * User user = new User("John", 25, "john@email.com");
      *
@@ -896,7 +896,7 @@ public final class Beans {
      * // Returns ["age"]
      * }</pre>
      *
-     * @param bean the bean whose property names are to be retrieved
+     * @param bean the bean object whose property names are to be retrieved
      * @param propNameValueFilter the bi-predicate to filter property names and values, where the first parameter is the property name and the second parameter is the property value
      * @return a list of property names for the specified bean, filtered by the given bi-predicate
      */
@@ -919,7 +919,7 @@ public final class Beans {
      *
      * <p>Properties are ignored if they are annotated with {@code @DiffIgnore} or similar annotations.</p>
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * class User {
      *     private String name;
@@ -986,8 +986,8 @@ public final class Beans {
     /**
      * Checks if is field getter method.
      *
-     * @param method
-     * @param field
+     * @param method the method to check
+     * @param field the field to check against
      * @return {@code true}, if is field getter method
      */
     private static boolean isFieldGetMethod(final Method method, final Field field) {
@@ -1011,7 +1011,7 @@ public final class Beans {
     /**
      * Checks if it's a property getter method.
      *
-     * @param method
+     * @param method the method to check
      * @return {@code true}, if is gets the method
      */
     private static boolean isGetMethod(final Method method) {
@@ -1028,8 +1028,8 @@ public final class Beans {
     /**
      * Checks if is JAXB getter method.
      *
-     * @param instance
-     * @param method
+     * @param instance the object instance to check
+     * @param method the method to check
      * @return {@code true}, if is JAXB getter method
      */
     private static boolean isJAXBGetMethod(final Class<?> cls, final Object instance, final Method method, final Field field) {
@@ -1060,9 +1060,9 @@ public final class Beans {
     /**
      * Checks if is prop name.
      *
-     * @param cls
-     * @param inputPropName
-     * @param propNameByMethod
+     * @param cls the class to check
+     * @param inputPropName the input property name
+     * @param propNameByMethod the property name derived from the method
      * @return {@code true}, if is prop name
      */
     private static boolean isPropName(final Class<?> cls, String inputPropName, final String propNameByMethod) {
@@ -1091,7 +1091,7 @@ public final class Beans {
     /**
      * Load prop get set method list.
      *
-     * @param cls
+     * @param cls the class to load property getter and setter methods for
      */
     @SuppressFBWarnings("RV_RETURN_VALUE_IGNORED_NO_SIDE_EFFECT")
     private static void loadPropGetSetMethodList(final Class<?> cls) {
@@ -1372,8 +1372,8 @@ public final class Beans {
     /**
      * Gets the sets the method.
      *
-     * @param getMethod
-     * @return
+     * @param getMethod the getter method to find the corresponding setter for
+     * @return the corresponding setter method for the given getter method, or {@code null} if not found
      */
     private static Method getSetMethod(final Method getMethod) {
         final Class<?> declaringClass = getMethod.getDeclaringClass();
@@ -1414,9 +1414,9 @@ public final class Beans {
     /**
      * Gets the public static string fields.
      *
-     * @param <T>
-     * @param cls
-     * @return
+     * @param <T> the type parameter
+     * @param cls the class to retrieve public static String fields from
+     * @return a map of public static final String field values mapped to themselves
      */
     private static <T> Map<String, String> getPublicStaticStringFields(final Class<T> cls) {
         final Map<String, String> staticFinalFields = new HashMap<>();
@@ -1444,7 +1444,7 @@ public final class Beans {
      * <p>This method searches for fields that correspond to JavaBean property names,
      * handling various naming conventions and transformations.</p>
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Field nameField = Beans.getPropField(User.class, "name");
      * // Returns the field backing the "name" property
@@ -1455,9 +1455,10 @@ public final class Beans {
      *
      * @param cls the class from which the field is to be retrieved
      * @param propName the name of the property whose field is to be retrieved
-     * @return the field associated with the specified property name, or {@code null} if not found
+     * @return the field associated with the specified property name, or {@code null} if no field is found
      * @throws IllegalArgumentException if the class is not a bean class
      */
+    @MayReturnNull
     @SuppressWarnings("deprecation")
     public static Field getPropField(final Class<?> cls, final String propName) {
         Map<String, Field> propFieldMap = beanPropFieldPool.get(cls);
@@ -1511,7 +1512,7 @@ public final class Beans {
      *
      * <p>The map contains all fields that back bean properties, keyed by property name.</p>
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ImmutableMap<String, Field> fields = Beans.getPropFields(User.class);
      * for (Map.Entry<String, Field> entry : fields.entrySet()) {
@@ -1541,7 +1542,7 @@ public final class Beans {
      * <p>Call registerXMLBindingClassForPropGetSetMethod first to retrieve the property
      * getter/setter method for the class/bean generated/wrote by JAXB specification</p>
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Method getter = Beans.getPropGetMethod(User.class, "name");
      * // Returns the getName() method
@@ -1553,6 +1554,7 @@ public final class Beans {
      * @param propName the name of the property whose get method is to be retrieved
      * @return the property get method declared in the specified class, or {@code null} if no method is found
      */
+    @MayReturnNull
     @SuppressWarnings("deprecation")
     public static Method getPropGetMethod(final Class<?> cls, final String propName) {
         Map<String, Method> propGetMethodMap = beanPropGetMethodPool.get(cls);
@@ -1598,7 +1600,7 @@ public final class Beans {
      * <p>Call registerXMLBindingClassForPropGetSetMethod first to retrieve the property
      * getter/setter method for the class/bean generated/wrote by JAXB specification.</p>
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ImmutableMap<String, Method> getters = Beans.getPropGetMethods(User.class);
      * // Map: {"name" -> getName(), "age" -> getAge(), ...}
@@ -1626,7 +1628,7 @@ public final class Beans {
      * <p>Call registerXMLBindingClassForPropGetSetMethod first to retrieve the property
      * getter/setter method for the class/bean generated/wrote by JAXB specification.</p>
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Method setter = Beans.getPropSetMethod(User.class, "name");
      * // Returns the setName(String) method
@@ -1638,6 +1640,7 @@ public final class Beans {
      * @param propName the name of the property whose set method is to be retrieved
      * @return the property set method declared in the specified class, or {@code null} if no method is found
      */
+    @MayReturnNull
     @SuppressWarnings("deprecation")
     public static Method getPropSetMethod(final Class<?> cls, final String propName) {
         Map<String, Method> propSetMethodMap = beanPropSetMethodPool.get(cls);
@@ -1683,7 +1686,7 @@ public final class Beans {
      * <p>Call registerXMLBindingClassForPropGetSetMethod first to retrieve the property
      * getter/setter method for the class/bean generated/wrote by JAXB specification.</p>
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ImmutableMap<String, Method> setters = Beans.getPropSetMethods(User.class);
      * // Map: {"name" -> setName(String), "age" -> setAge(int), ...}
@@ -1706,7 +1709,7 @@ public final class Beans {
     /**
      * Returns the value of the specified property by invoking the given getter method on the provided bean.
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Method getName = User.class.getMethod("getName");
      * String name = Beans.getPropValue(userInstance, getName);
@@ -1731,7 +1734,7 @@ public final class Beans {
     /**
      * Returns the value of the specified property by invoking the getter method associated with the given property name on the provided bean.
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * User user = new User("John", 25);
      * String name = Beans.getPropValue(user, "name");  // Returns "John"
@@ -1755,7 +1758,7 @@ public final class Beans {
      *
      * <p>This method also supports nested properties using dot notation.</p>
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * User user = new User("John", new Address("NYC"));
      *
@@ -1847,7 +1850,7 @@ public final class Beans {
      * If the property value is {@code null}, it sets the default value of the parameter type.
      * If the initial attempt to set the property value fails, it tries to convert the property value to the appropriate type and set it again.
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Method setName = User.class.getMethod("setName", String.class);
      * Beans.setPropValue(userInstance, setName, "John");
@@ -1902,7 +1905,7 @@ public final class Beans {
      * If the property value is {@code null}, it sets the default value of the parameter type.
      * If the initial attempt to set the property value fails, it tries to convert the property value to the appropriate type and set it again.
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * User user = new User();
      * Beans.setPropValue(user, "name", "John");
@@ -1927,7 +1930,7 @@ public final class Beans {
      *
      * <p>This method supports nested properties and can handle JAXB-style collection properties.</p>
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * User user = new User();
      *
@@ -1963,7 +1966,7 @@ public final class Beans {
      * <p>This method is particularly useful for JAXB-style beans where collections
      * are exposed only through getter methods without corresponding setters.</p>
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // For a JAXB bean with: List<String> getTags() { return tags; }
      * Method getTags = bean.getClass().getMethod("getTags");
@@ -2008,7 +2011,7 @@ public final class Beans {
      *   <li>Replaces reserved keywords (e.g., "class" becomes "clazz")</li>
      * </ul>
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String formal = Beans.formalizePropName("user_name");     // Returns "userName"
      * String formal2 = Beans.formalizePropName("first_name");   // Returns "firstName"
@@ -2045,7 +2048,7 @@ public final class Beans {
     /**
      * Converts the given property name to camel case.
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String camel = Beans.toCamelCase("user_name");        // Returns "userName"
      * String camel2 = Beans.toCamelCase("FIRST_NAME");      // Returns "firstName"
@@ -2074,7 +2077,7 @@ public final class Beans {
     /**
      * Converts the given string to lower case with underscores.
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String snake = Beans.toLowerCaseWithUnderscore("userName");    // Returns "user_name"
      * String snake2 = Beans.toLowerCaseWithUnderscore("FirstName");  // Returns "first_name"
@@ -2102,7 +2105,7 @@ public final class Beans {
     /**
      * Converts the given string to upper case with underscores.
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String upper = Beans.toUpperCaseWithUnderscore("userName");    // Returns "USER_NAME"
      * String upper2 = Beans.toUpperCaseWithUnderscore("firstName");  // Returns "FIRST_NAME"
@@ -2131,7 +2134,7 @@ public final class Beans {
      * Converts the keys in the provided map to camel case.
      * This method modifies the map in-place.
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Map<String, Object> map = new HashMap<>();
      * map.put("user_name", "John");
@@ -2161,7 +2164,7 @@ public final class Beans {
      * Converts the keys in the provided map to lower case with underscores.
      * This method modifies the map in-place.
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Map<String, Object> map = new HashMap<>();
      * map.put("userName", "John");
@@ -2191,7 +2194,7 @@ public final class Beans {
      * Converts the keys in the provided map to upper case with underscores.
      * This method modifies the map in-place.
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Map<String, Object> map = new HashMap<>();
      * map.put("userName", "John");
@@ -2224,7 +2227,7 @@ public final class Beans {
      * The resulting bean object has its properties set to the values from the map.
      * Unmatched properties from the specified map are ignored by default.
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Example with a User bean class
      * Map<String, Object> userMap = new HashMap<>();
@@ -2242,6 +2245,7 @@ public final class Beans {
      * @param m the map to be converted into a bean object.
      * @param targetType the type of the bean object to be returned.
      * @return a bean object of the specified type with its properties set to the values from the map.
+     * @throws IllegalArgumentException if {@code targetType} is not a valid bean class
      * @see #map2Bean(Map, boolean, boolean, Class)
      * @see #map2Bean(Map, Collection, Class)
      */
@@ -2256,7 +2260,7 @@ public final class Beans {
      * The resulting bean object has its properties set to the values from the map.
      * You can control whether null properties should be ignored and whether unmatched properties should cause an error.
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Example with ignoring null properties
      * Map<String, Object> userMap = new HashMap<>();
@@ -2281,6 +2285,7 @@ public final class Beans {
      * @param ignoreUnmatchedProperty if {@code true}, map entries with keys that don't match any bean property will be ignored; if {@code false}, an exception will be thrown.
      * @param targetType the type of the bean object to be returned.
      * @return a bean object of the specified type with its properties set to the values from the map, or null if the input map is null.
+     * @throws IllegalArgumentException if {@code targetType} is not a valid bean class, or if {@code ignoreUnmatchedProperty} is false and an unmatched property is encountered
      * @see #map2Bean(Map, Collection, Class)
      */
     @MayReturnNull
@@ -2330,7 +2335,7 @@ public final class Beans {
      * and transforms it into a bean object of the specified type.
      * Only the properties specified in selectPropNames will be set on the bean.
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Example with selected properties
      * Map<String, Object> userMap = new HashMap<>();
@@ -2352,6 +2357,7 @@ public final class Beans {
      * @param selectPropNames a collection of property names to be included in the resulting bean objects.
      * @param targetType the type of the bean object to be returned.
      * @return a bean object of the specified type with its properties set to the values from the map, or null if the input map is null.
+     * @throws IllegalArgumentException if {@code targetType} is not a valid bean class
      */
     @MayReturnNull
     public static <T> T map2Bean(final Map<String, Object> m, final Collection<String> selectPropNames, final Class<? extends T> targetType) {
@@ -2391,7 +2397,7 @@ public final class Beans {
      * and the values are the corresponding property values.
      * Unmatched properties from the maps are ignored by default.
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Example with a list of user maps
      * List<Map<String, Object>> userMaps = new ArrayList<>();
@@ -2415,6 +2421,7 @@ public final class Beans {
      * @param mList the collection of maps to be converted into bean objects.
      * @param targetType the type of the bean objects to be returned.
      * @return a list of bean objects of the specified type with their properties set to the values from the corresponding map.
+     * @throws IllegalArgumentException if {@code targetType} is not a valid bean class
      * @see #map2Bean(Collection, Collection, Class)
      */
     public static <T> List<T> map2Bean(final Collection<? extends Map<String, Object>> mList, final Class<? extends T> targetType) {
@@ -2429,7 +2436,7 @@ public final class Beans {
      * The ignoreNullProperty parameter allows the user to specify whether {@code null} properties should be ignored.
      * The ignoreUnmatchedProperty parameter allows the user to specify whether unmatched properties should be ignored.
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Example with null handling
      * List<Map<String, Object>> userMaps = new ArrayList<>();
@@ -2473,7 +2480,7 @@ public final class Beans {
      * The keys in the map are the property names and the values are the corresponding property values.
      * Only the properties specified in selectPropNames will be set on the beans.
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Example with selected properties
      * List<Map<String, Object>> userMaps = new ArrayList<>();
@@ -2517,7 +2524,7 @@ public final class Beans {
      * The keys of the map are the property names of the bean, and the values are the corresponding property values of the bean.
      * The resulting map is a LinkedHashMap to preserve the order of properties.
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Example with a User bean
      * User user = new User();
@@ -2541,7 +2548,7 @@ public final class Beans {
      * The keys of the map are the property names of the bean, and the values are the corresponding property values of the bean.
      * The map supplier function determines the type of the map to be returned.
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Example with a custom map type
      * User user = new User();
@@ -2572,7 +2579,7 @@ public final class Beans {
      * Only the properties whose names are included in the <i>selectPropNames</i> collection are added to the map.
      * The resulting map is a LinkedHashMap to preserve the order of properties.
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Example with selected properties
      * User user = new User();
@@ -2602,7 +2609,7 @@ public final class Beans {
      * Only the properties whose names are included in the <i>selectPropNames</i> collection are added to the map.
      * The map supplier function determines the type of the map to be returned.
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Example with selected properties and custom map type
      * User user = new User();
@@ -2632,7 +2639,7 @@ public final class Beans {
      * The keys of the map are the property names of the bean, and the values are the corresponding property values of the bean.
      * The keys are named according to the provided naming policy.
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Example with naming policy
      * User user = new User();
@@ -2674,7 +2681,7 @@ public final class Beans {
      * The keys of the map are the property names of the bean, and the values are the corresponding property values of the bean.
      * All properties of the bean are included in the map.
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Example with existing map
      * User user = new User();
@@ -2690,7 +2697,7 @@ public final class Beans {
      *
      * @param <M> the type of the map to be filled.
      * @param bean the bean object to be converted into a map.
-     * @param output the map to be filled with the bean's properties.
+     * @param output the map into which the bean's properties will be put.
      */
     public static <M extends Map<String, Object>> void bean2Map(final Object bean, final M output) {
         bean2Map(bean, null, output);
@@ -2701,7 +2708,7 @@ public final class Beans {
      * The keys of the map are the property names of the bean, and the values are the corresponding property values of the bean.
      * Only the properties whose names are included in the selectPropNames collection are added to the map.
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Example with existing map and selected properties
      * User user = new User();
@@ -2721,7 +2728,7 @@ public final class Beans {
      * @param <M> the type of the map to be filled.
      * @param bean the bean object to be converted into a map.
      * @param selectPropNames a collection of property names to be included in the map. If this is {@code null}, all properties are included.
-     * @param output the map to be filled with the bean's properties.
+     * @param output the map into which the bean's properties will be put.
      */
     public static <M extends Map<String, Object>> void bean2Map(final Object bean, final Collection<String> selectPropNames, final M output) {
         bean2Map(bean, selectPropNames, NamingPolicy.LOWER_CAMEL_CASE, output);
@@ -2733,7 +2740,7 @@ public final class Beans {
      * The keys are named according to the provided naming policy.
      * The output map is provided as a parameter and will be filled with the bean's properties.
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Example with naming policy and output map
      * User user = new User();
@@ -2752,7 +2759,7 @@ public final class Beans {
      * @param bean the bean object to be converted into a map.
      * @param selectPropNames the set of property names to be included during the conversion.
      * @param keyNamingPolicy the naming policy to be used for the keys in the map.
-     * @param output the map to be filled with the bean's properties.
+     * @param output the map into which the bean's properties will be put.
      */
     public static <M extends Map<String, Object>> void bean2Map(final Object bean, final Collection<String> selectPropNames, NamingPolicy keyNamingPolicy,
             final M output) {
@@ -2794,7 +2801,7 @@ public final class Beans {
      * The keys of the map are the property names of the bean, and the values are the corresponding property values of the bean.
      * If <i>ignoreNullProperty</i> is {@code true}, properties of the bean with {@code null} values will not be included in the map.
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Example with null property filtering
      * User user = new User();
@@ -2825,7 +2832,7 @@ public final class Beans {
      * If <i>ignoreNullProperty</i> is {@code true}, properties of the bean with {@code null} values will not be included in the map.
      * Properties whose names are included in the <i>ignoredPropNames</i> set will not be added to the map.
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Example with null filtering and ignored properties
      * User user = new User();
@@ -2858,7 +2865,7 @@ public final class Beans {
      * Properties whose names are included in the <i>ignoredPropNames</i> set will not be added to the map.
      * The map is created by the provided <i>mapSupplier</i>.
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Example with custom map type
      * User user = new User();
@@ -2892,7 +2899,7 @@ public final class Beans {
      * Properties whose names are included in the <i>ignoredPropNames</i> set will not be added to the map.
      * The keys of the map are formatted according to the provided <i>keyNamingPolicy</i>.
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Example with naming policy
      * User user = new User();
@@ -2925,7 +2932,7 @@ public final class Beans {
      * The keys of the map are the property names of the bean, and the values are the corresponding property values of the bean.
      * Properties can be filtered based on null values, excluded by name, and keys can be transformed using a naming policy.
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Example with all options
      * User user = new User();
@@ -2972,7 +2979,7 @@ public final class Beans {
      * If <i>ignoreNullProperty</i> is {@code true}, properties of the bean with {@code null} values will not be included in the map.
      * The result is stored in the provided output map.
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Example with existing map and null filtering
      * User user = new User();
@@ -3004,7 +3011,7 @@ public final class Beans {
      * If <i>ignoreNullProperty</i> is {@code true}, properties of the bean with {@code null} values will not be included in the map.
      * Properties whose names are included in the <i>ignoredPropNames</i> set will not be added to the map.
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Example with existing map, null filtering, and ignored properties
      * User user = new User();
@@ -3038,7 +3045,7 @@ public final class Beans {
      * The keys are named according to the provided naming policy.
      * The output map is provided as a parameter and will be filled with the bean's properties.
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Example with all options and output map
      * User user = new User();
@@ -3104,7 +3111,7 @@ public final class Beans {
      * This method performs a deep conversion, meaning that if a property value is itself a bean, it will also be converted into a Map.
      * The resulting map uses LinkedHashMap to preserve property order.
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Example with nested beans
      * User user = new User();
@@ -3135,7 +3142,7 @@ public final class Beans {
      * This method performs a deep conversion, meaning that if a property value is itself a bean, it will also be converted into a Map.
      * The map type is determined by the provided mapSupplier.
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Example with custom map type
      * User user = new User();
@@ -3167,7 +3174,7 @@ public final class Beans {
      * This method performs a deep conversion, meaning that if a property value is itself a bean, it will also be converted into a Map.
      * Only properties specified in selectPropNames are included.
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Example with selected properties
      * User user = new User();
@@ -3200,7 +3207,7 @@ public final class Beans {
      * This method performs a deep conversion, meaning that if a property value is itself a bean, it will also be converted into a Map.
      * Only properties specified in selectPropNames are included, and the map type is determined by mapSupplier.
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Example with selected properties and custom map
      * User user = new User();
@@ -3235,7 +3242,7 @@ public final class Beans {
      * This method performs a deep conversion, meaning that if a property value is itself a bean, it will also be converted into a Map.
      * The keys in the map are transformed according to the specified naming policy.
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Example with naming policy
      * User user = new User();
@@ -3279,7 +3286,7 @@ public final class Beans {
      * This method performs a deep conversion, meaning that if a property value is itself a bean, it will also be converted into a Map.
      * All properties are included and stored in the provided output map.
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Example with output map
      * User user = new User();
@@ -3301,7 +3308,7 @@ public final class Beans {
      *
      * @param <M> the type of the output map.
      * @param bean the bean to be converted into a Map.
-     * @param output the map where the result should be stored.
+     * @param output the map into which the bean's properties will be put.
      * @see #deepBean2Map(Object, Collection, NamingPolicy, IntFunction)
      */
     public static <M extends Map<String, Object>> void deepBean2Map(final Object bean, final M output) {
@@ -3313,7 +3320,7 @@ public final class Beans {
      * This method performs a deep conversion, meaning that if a property value is itself a bean, it will also be converted into a Map.
      * Only properties specified in selectPropNames are included and stored in the provided output map.
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Example with selected properties and output map
      * User user = new User();
@@ -3336,7 +3343,7 @@ public final class Beans {
      * @param <M> the type of the output map.
      * @param bean the bean to be converted into a Map.
      * @param selectPropNames a collection of property names to be included during the conversion process.
-     * @param output the map where the result should be stored.
+     * @param output the map into which the bean's properties will be put.
      * @see #deepBean2Map(Object, Collection, NamingPolicy, IntFunction)
      */
     public static <M extends Map<String, Object>> void deepBean2Map(final Object bean, final Collection<String> selectPropNames, final M output) {
@@ -3348,7 +3355,7 @@ public final class Beans {
      * This method performs a deep conversion, meaning that if a property value is itself a bean, it will also be converted into a Map.
      * Only properties specified in selectPropNames are included, keys are transformed according to the naming policy, and results are stored in the output map.
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Example with all options
      * User user = new User();
@@ -3372,7 +3379,7 @@ public final class Beans {
      * @param bean the bean to be converted into a Map.
      * @param selectPropNames a collection of property names to be included during the conversion process.
      * @param keyNamingPolicy the naming policy to be used for the keys in the resulting Map.
-     * @param output the map where the result should be stored.
+     * @param output the map into which the bean's properties will be put.
      * @see #deepBean2Map(Object, Collection, NamingPolicy, IntFunction)
      */
     public static <M extends Map<String, Object>> void deepBean2Map(final Object bean, final Collection<String> selectPropNames,
@@ -3424,7 +3431,7 @@ public final class Beans {
      * This method performs a deep conversion, meaning that if a property value is itself a bean, it will also be converted into a Map.
      * Properties with null values will be included in the resulting Map.
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Given a User bean with nested Address
      * User user = new User("John", 25, new Address("NYC", "10001"));
@@ -3451,7 +3458,7 @@ public final class Beans {
      * This method performs a deep conversion, meaning that if a property value is itself a bean, it will also be converted into a Map.
      * Properties whose names are in the ignoredPropNames set will be excluded from the conversion.
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Given a User bean with multiple properties
      * User user = new User("John", 25, "john@example.com", new Address("NYC"));
@@ -3475,7 +3482,7 @@ public final class Beans {
      * This method performs a deep conversion, meaning that if a property value is itself a bean, it will also be converted into a Map.
      * The resulting Map type can be customized using the mapSupplier function.
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Create a TreeMap instead of default LinkedHashMap
      * User user = new User("John", 25, new Address("NYC"));
@@ -3502,7 +3509,7 @@ public final class Beans {
      * This method performs a deep conversion, meaning that if a property value is itself a bean, it will also be converted into a Map.
      * The keys in the resulting Map can be transformed according to the specified naming policy.
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Given a bean with camelCase properties
      * User user = new User();
@@ -3535,7 +3542,7 @@ public final class Beans {
      * This method performs a deep conversion, meaning that if a property value is itself a bean, it will also be converted into a Map.
      * Provides full control over the conversion process including naming policy and Map type.
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Custom conversion with all options
      * User user = new User("John", null, new Address("NYC"));
@@ -3577,7 +3584,7 @@ public final class Beans {
      * This method performs a deep conversion, meaning that if a property value is itself a bean, it will also be converted into a Map.
      * The conversion is performed in-place into the provided output Map.
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Reuse existing map
      * Map<String, Object> existingMap = new HashMap<>();
@@ -3603,7 +3610,7 @@ public final class Beans {
      * This method performs a deep conversion, meaning that if a property value is itself a bean, it will also be converted into a Map.
      * Properties whose names are in the ignoredPropNames set will be excluded from the conversion.
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Populate map with selective properties
      * Map<String, Object> output = new HashMap<>();
@@ -3631,7 +3638,7 @@ public final class Beans {
      * This method performs a deep conversion, meaning that if a property value is itself a bean, it will also be converted into a Map.
      * The conversion process can be customized by specifying properties to ignore, whether to ignore {@code null} properties, and the naming policy for keys.
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Full control over in-place conversion
      * Map<String, Object> output = new TreeMap<>(); // Sorted map
@@ -3699,7 +3706,7 @@ public final class Beans {
      * Values from nested beans are set to the resulting map with property names concatenated with a dot, e.g., {@code "address.city"}.
      * All properties from the bean are included in the result.
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Given nested beans
      * User user = new User("John", new Address("NYC", "10001"));
@@ -3728,7 +3735,7 @@ public final class Beans {
      * Values from nested beans are set to the resulting map with property names concatenated with a dot, e.g., {@code "address.city"}.
      * The type of Map returned can be customized using the mapSupplier.
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Create a sorted flat map
      * User user = new User("John", new Address("NYC", "10001"));
@@ -3752,7 +3759,7 @@ public final class Beans {
      * Values from nested beans are set to the resulting map with property names concatenated with a dot, e.g., {@code "address.city"}.
      * Only properties specified in selectPropNames are included in the result.
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Select specific properties including nested ones
      * User user = new User("John", 25, new Address("NYC", "10001"));
@@ -3779,7 +3786,7 @@ public final class Beans {
      * Values from nested beans are set to the resulting map with property names concatenated with a dot, e.g., {@code "address.city"}.
      * Combines property selection with Map type customization.
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Select properties and use custom map type
      * Employee emp = new Employee("John", "IT", new Manager("Jane"));
@@ -3807,7 +3814,7 @@ public final class Beans {
      * This method takes a bean object and transforms it into a map where the keys are the property names of the bean and the values are the corresponding property values.
      * Values from nested beans are set to the resulting map with property names concatenated with a dot, e.g., {@code "address.city"}.
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // With naming policy transformation
      * User user = new User();
@@ -3846,7 +3853,7 @@ public final class Beans {
      * Values from nested beans are set to the map with property names concatenated with a dot, e.g., {@code "address.city"}.
      * All properties from the bean are included in the output.
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Populate existing map with flattened bean
      * Map<String, Object> output = new HashMap<>();
@@ -3871,7 +3878,7 @@ public final class Beans {
      * Values from nested beans are set to the map with property names concatenated with a dot, e.g., {@code "address.city"}.
      * Only properties specified in selectPropNames are included.
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Selective flattening into existing map
      * Map<String, Object> output = new LinkedHashMap<>();
@@ -3899,7 +3906,7 @@ public final class Beans {
      * Values from nested beans are set to the map with property names concatenated with a dot, e.g., {@code "address.city"}.
      * Provides control over property selection and key naming policy.
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Full customization of flattening process
      * Map<String, Object> output = new TreeMap<>();
@@ -3963,7 +3970,7 @@ public final class Beans {
      * Values from nested beans are set to the resulting map with property names concatenated with a dot, e.g., {@code "address.city"}.
      * Properties with null values can be included or excluded based on the ignoreNullProperty parameter.
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Include null properties
      * User user = new User("John", null, new Address("NYC", null));
@@ -3989,7 +3996,7 @@ public final class Beans {
      * Values from nested beans are set to the resulting map with property names concatenated with a dot, e.g., {@code "address.city"}.
      * Combines null value filtering with property name exclusion.
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Filter nulls and exclude specific properties
      * User user = new User("John", null, "secret123", new Address("NYC"));
@@ -4015,7 +4022,7 @@ public final class Beans {
      * Values from nested beans are set to the resulting map with property names concatenated with a dot, e.g., {@code "address.city"}.
      * Provides flexibility in filtering and Map implementation.
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Custom map with filtering
      * Employee emp = new Employee("John", null, "IT", new Office("Building A"));
@@ -4045,7 +4052,7 @@ public final class Beans {
      * Values from nested beans are set to the resulting map with property names concatenated with a dot, e.g., {@code "address.city"}.
      * Provides comprehensive control over the flattening process.
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Transform to snake_case with filtering
      * UserProfile profile = new UserProfile();
@@ -4077,7 +4084,7 @@ public final class Beans {
      * Values from nested beans are set to the resulting map with property names concatenated with a dot, e.g., {@code "address.city"}.
      * This is the most flexible variant offering complete customization.
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Complete customization example
      * Order order = new Order("ORD-123", null,
@@ -4122,7 +4129,7 @@ public final class Beans {
      * Values from nested beans are set to the map with property names concatenated with a dot, e.g., {@code "address.city"}.
      * This is an in-place operation that modifies the provided output Map.
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Populate existing map with null filtering
      * Map<String, Object> output = new HashMap<>();
@@ -4137,7 +4144,7 @@ public final class Beans {
      * @param <M> the type of Map to populate.
      * @param bean the bean object to be converted into a flat map.
      * @param ignoreNullProperty if {@code true}, properties with {@code null} values will not be included in the output map.
-     * @param output the Map instance into which the flattened bean properties will be put.
+     * @param output the map into which the flattened bean properties will be put.
      * @see #bean2FlatMap(Object, Collection, NamingPolicy, IntFunction)
      */
     public static <M extends Map<String, Object>> void bean2FlatMap(final Object bean, final boolean ignoreNullProperty, final M output) {
@@ -4149,7 +4156,7 @@ public final class Beans {
      * Values from nested beans are set to the map with property names concatenated with a dot, e.g., {@code "address.city"}.
      * Combines in-place operation with null handling and property exclusion.
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // In-place population with multiple filters
      * Map<String, Object> output = new LinkedHashMap<>();
@@ -4165,7 +4172,7 @@ public final class Beans {
      * @param bean the bean object to be converted into a flat map.
      * @param ignoreNullProperty if {@code true}, properties with {@code null} values will not be included in the output map.
      * @param ignoredPropNames a set of property names to be excluded from the output map.
-     * @param output the Map instance into which the flattened bean properties will be put.
+     * @param output the map into which the flattened bean properties will be put.
      * @see #bean2FlatMap(Object, Collection, NamingPolicy, IntFunction)
      */
     public static <M extends Map<String, Object>> void bean2FlatMap(final Object bean, final boolean ignoreNullProperty, final Set<String> ignoredPropNames,
@@ -4178,7 +4185,7 @@ public final class Beans {
      * Values from nested beans are set to the map with property names concatenated with a dot, e.g., {@code "address.city"}.
      * This method provides complete control over the in-place flattening operation.
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Full control in-place flattening
      * Map<String, Object> output = new TreeMap<>(); // sorted output
@@ -4197,7 +4204,7 @@ public final class Beans {
      * @param ignoreNullProperty if {@code true}, properties with {@code null} values will not be included in the output map.
      * @param ignoredPropNames a set of property names to be excluded from the output map.
      * @param keyNamingPolicy the naming policy to apply to the keys in the output map.
-     * @param output the Map instance into which the flattened bean properties will be put.
+     * @param output the map into which the flattened bean properties will be put.
      * @see #bean2FlatMap(Object, Collection, NamingPolicy, IntFunction)
      */
     public static <M extends Map<String, Object>> void bean2FlatMap(final Object bean, final boolean ignoreNullProperty, final Set<String> ignoredPropNames,
@@ -4273,7 +4280,7 @@ public final class Beans {
      * <p>This method uses reflection to invoke the no-argument constructor of the class.
      * The class must have an accessible no-argument constructor.</p>
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * User user = Beans.newBean(User.class);
      * // Equivalent to: User user = new User();
@@ -4300,7 +4307,7 @@ public final class Beans {
      * <p>The object must be serializable through either Kryo or JSON. If Kryo serialization
      * fails, the method automatically falls back to JSON serialization.</p>
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * User originalUser = new User("John", 25);
      * originalUser.setAddress(new Address("123 Main St"));
@@ -4336,7 +4343,7 @@ public final class Beans {
      * target type using its default constructor if it's a bean class, or return the default
      * value for the type.</p>
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * UserDTO userDTO = new UserDTO("John", 25);
      *
@@ -4393,7 +4400,7 @@ public final class Beans {
      * all property values from the source to the new instance. Unlike {@link #clone(Object)},
      * this method performs a shallow copy - nested objects are not cloned but referenced.</p>
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * User originalUser = new User("John", 25);
      * originalUser.setAddress(new Address("123 Main St"));
@@ -4426,7 +4433,7 @@ public final class Beans {
      * only the specified properties. Properties not in the selection list will have their
      * default values in the new instance.</p>
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * User originalUser = new User("John", 25);
      * originalUser.setEmail("john@example.com");
@@ -4461,7 +4468,7 @@ public final class Beans {
      * only the properties that pass the filter predicate. The predicate receives the property
      * name and value and should return {@code true} to include the property in the copy.</p>
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * User originalUser = new User("John", 25);
      * originalUser.setEmail("john@example.com");
@@ -4501,7 +4508,7 @@ public final class Beans {
      * properties. Properties are matched by name - if a property exists in both source and
      * target types with the same name, its value will be copied.</p>
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * UserEntity entity = new UserEntity("John", 25, "john@example.com");
      *
@@ -4527,7 +4534,7 @@ public final class Beans {
      * Only properties whose names are in the selection list will be copied, and they must exist
      * in both source and target types.</p>
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * UserEntity entity = new UserEntity("John", 25, "john@example.com", "password123");
      *
@@ -4558,7 +4565,7 @@ public final class Beans {
      * The property name converter function transforms source property names to their corresponding
      * target property names.</p>
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Source has camelCase, target expects snake_case
      * UserEntity entity = new UserEntity();
@@ -4625,7 +4632,7 @@ public final class Beans {
      * <p>This method combines property filtering with type conversion. Only properties that pass
      * the filter predicate will be copied to the new instance of the target type.</p>
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * UserEntity entity = new UserEntity("John", 25, null, "password123");
      *
@@ -4658,7 +4665,7 @@ public final class Beans {
      * <p>This method provides the most flexible copying mechanism, combining property filtering,
      * name conversion, and type conversion in a single operation.</p>
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * UserEntity entity = new UserEntity();
      * entity.setFirstName("John");
@@ -4728,7 +4735,7 @@ public final class Beans {
      * The {@code ignoreUnmatchedProperty} parameter controls whether an exception is thrown
      * when a property exists in the source but not in the target.</p>
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * UserEntity entity = new UserEntity("John", 25, "john@example.com", "password123");
      *
@@ -4792,7 +4799,7 @@ public final class Beans {
      * Properties in the target bean are overwritten with values from the source bean.
      * Unlike {@code copy} methods which create new instances, this modifies the existing target bean.</p>
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * User existingUser = new User("John", 25);
      * User updates = new User("John", 26);
@@ -4818,7 +4825,7 @@ public final class Beans {
      * <p>The merge function determines how to combine values when a property exists in both beans.
      * It receives the source value and target value, and returns the value to set in the target.</p>
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * User existingUser = new User("John", 25);
      * existingUser.setScore(100);
@@ -4857,7 +4864,7 @@ public final class Beans {
      * <p>This method allows property name mapping during the merge operation, useful when
      * source and target beans have different naming conventions.</p>
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Source has camelCase, target has snake_case
      * SourceBean source = new SourceBean();
@@ -4892,7 +4899,7 @@ public final class Beans {
      * <p>Only properties whose names are in the selection list will be merged.
      * This is useful for partial updates where only specific fields should be modified.</p>
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * User existingUser = new User("John", 25, "john@old.com");
      * User updates = new User("Jane", 30, "jane@new.com");
@@ -4919,7 +4926,7 @@ public final class Beans {
      * <p>Combines selective property merging with custom merge logic for maximum control
      * over the merge process.</p>
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * User existingUser = new User("John", 25);
      * existingUser.setScore(100);
@@ -4960,7 +4967,7 @@ public final class Beans {
      * <p>This method combines selective property merging with name conversion, useful when
      * merging between beans with different naming conventions.</p>
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * SourceBean source = new SourceBean();
      * source.setFirstName("John");
@@ -5000,7 +5007,7 @@ public final class Beans {
      * <p>This method provides the most flexible selective merging, combining property selection,
      * name conversion, and custom merge logic.</p>
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * SourceBean source = new SourceBean();
      * source.setFirstName("John");
@@ -5050,7 +5057,7 @@ public final class Beans {
      * <p>The predicate receives each property name and value from the source bean and
      * determines whether that property should be merged into the target.</p>
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * User source = new User("John", 0, null);
      * User target = new User("Jane", 25, "jane@example.com");
@@ -5083,7 +5090,7 @@ public final class Beans {
      * <p>Combines property filtering with custom merge logic for fine-grained control
      * over the merge process.</p>
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Product source = new Product("New Name", 150, 10);
      * Product target = new Product("Old Name", 100, 5);
@@ -5123,7 +5130,7 @@ public final class Beans {
      * <p>This method allows filtering properties and converting their names during the merge,
      * useful when working with beans that have different naming conventions.</p>
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * SourceBean source = new SourceBean();
      * source.setFirstName("John");
@@ -5161,7 +5168,7 @@ public final class Beans {
      * <p>This is the most flexible merge method, providing complete control over which properties
      * are merged, how their names are converted, and how values are combined.</p>
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * SourceBean source = new SourceBean();
      * source.setFirstName("John");
@@ -5217,7 +5224,7 @@ public final class Beans {
      * {@code ignoreUnmatchedProperty} parameter controls whether an exception is thrown
      * when a property exists in the source but not in the target.</p>
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * User source = new User("John", 30, "john@example.com", "password123");
      * User target = new User("Jane", 25, "jane@example.com", "oldpass");
@@ -5249,7 +5256,7 @@ public final class Beans {
      * <p>This method combines exclusion-based merging with custom merge logic, useful when
      * you want to merge most properties with special handling for certain values.</p>
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Product source = new Product("New Product", 200, 15, "2024-01-01");
      * Product target = new Product("Old Product", 150, 10, "2023-01-01");
@@ -5463,7 +5470,7 @@ public final class Beans {
      * </ul>
      * </p>
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * User user = new User("John", 25, "john@example.com");
      *
@@ -5495,7 +5502,7 @@ public final class Beans {
      * <p>This method sets the specified properties to their default values.
      * This overload accepts a collection of property names instead of varargs.</p>
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * User user = new User("John", 25, "john@example.com");
      *
@@ -5532,7 +5539,7 @@ public final class Beans {
      * </ul>
      * </p>
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * User user = new User("John", 25, "john@example.com");
      * user.setPhone("123-456-7890");
@@ -5577,7 +5584,7 @@ public final class Beans {
      *   <li>Nested bean objects (filled recursively)</li>
      * </ul>
      *
-     * <p><b>Usage example:</b></p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Person person = new Person();
      * Beans.fill(person);
@@ -5603,7 +5610,7 @@ public final class Beans {
      * <p>Only the properties whose names are contained in the provided collection will be filled.
      * This is useful when you want to test specific scenarios with only certain fields populated.</p>
      *
-     * <p><b>Usage example:</b></p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * User user = new User();
      * Beans.fill(user, Arrays.asList("username", "email"));
@@ -5626,7 +5633,7 @@ public final class Beans {
      *
      * <p>This is a convenience method that combines object creation and property filling in one step.</p>
      *
-     * <p><b>Usage example:</b></p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Create a fully populated test object
      * Customer customer = Beans.fill(Customer.class);
@@ -5653,7 +5660,7 @@ public final class Beans {
      * <p>This method is useful for generating test data sets or when you need multiple
      * test objects with varying random data.</p>
      *
-     * <p><b>Usage example:</b></p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Generate 50 test users
      * List<User> testUsers = Beans.fill(User.class, 50);
@@ -5679,7 +5686,7 @@ public final class Beans {
      *
      * <p>Properties not included in the collection will retain their default values.</p>
      *
-     * <p><b>Usage example:</b></p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Create a user with only required fields filled
      * User user = Beans.fill(User.class, Arrays.asList("id", "username", "email"));
@@ -5709,7 +5716,7 @@ public final class Beans {
      *
      * <p>Each instance will have the same set of properties filled but with different random values.</p>
      *
-     * <p><b>Usage example:</b></p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Create test data with only essential fields
      * List<Product> products = Beans.fill(
@@ -5803,7 +5810,7 @@ public final class Beans {
      * and compares only those common properties. This is useful when comparing objects
      * of different types that share some common properties.</p>
      *
-     * <p><b>Usage example:</b></p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * UserDTO dto = new UserDTO("John", "john@example.com");
      * UserEntity entity = new UserEntity("John", "john@example.com", new Date());
@@ -5839,7 +5846,7 @@ public final class Beans {
      * Properties are compared using their equals() method. If all specified properties
      * are equal, the method returns true.</p>
      *
-     * <p><b>Usage example:</b></p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * User user1 = new User("John", 25, "john@example.com");
      * User user2 = new User("John", 30, "john@example.com");
@@ -5866,7 +5873,7 @@ public final class Beans {
      * The comparison follows the standard Comparable contract: returning negative, zero,
      * or positive values for less than, equal to, or greater than relationships.</p>
      *
-     * <p><b>Usage example:</b></p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * User user1 = new User("Alice", 25);
      * User user2 = new User("Bob", 30);
@@ -5930,7 +5937,7 @@ public final class Beans {
      * them as a stream of Map.Entry objects. Each entry contains the property name as
      * the key and the property value as the value.</p>
      *
-     * <p><b>Usage example:</b></p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * User user = new User("John", 25, "john@example.com");
      * Beans.properties(user)
@@ -5957,7 +5964,7 @@ public final class Beans {
      * of properties based on a predicate. Only properties that match the predicate
      * criteria are included in the returned stream.</p>
      *
-     * <p><b>Usage example:</b></p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * User user = new User("John", 25, null);
      * Beans.properties(user, (name, value) -> value != null)

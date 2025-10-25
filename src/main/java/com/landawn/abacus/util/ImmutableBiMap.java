@@ -38,7 +38,7 @@ import com.landawn.abacus.annotation.Internal;
  * <p>Unlike regular maps, BiMaps enforce that values are unique. If duplicate values
  * are provided during construction, an exception may be thrown.
  * 
- * <p>Example usage:
+ * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * ImmutableBiMap<String, Integer> biMap = ImmutableBiMap.of(
  *     "one", 1,
@@ -84,7 +84,7 @@ public final class ImmutableBiMap<K, V> extends ImmutableMap<K, V> {
      * Returns an empty ImmutableBiMap. This method always returns the same cached instance,
      * making it memory efficient for representing empty bidirectional maps.
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ImmutableBiMap<String, Integer> empty = ImmutableBiMap.empty();
      * System.out.println(empty.size()); // prints: 0
@@ -103,7 +103,7 @@ public final class ImmutableBiMap<K, V> extends ImmutableMap<K, V> {
      * Returns an ImmutableBiMap containing a single key-value mapping.
      * The returned BiMap is immutable and will have a size of 1.
      *
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ImmutableBiMap<String, Integer> single = ImmutableBiMap.of("one", 1);
      * System.out.println(single.get("one")); // prints: 1
@@ -127,7 +127,7 @@ public final class ImmutableBiMap<K, V> extends ImmutableMap<K, V> {
      * Both keys and values must be unique. If duplicate keys or values are provided,
      * an exception will be thrown.
      *
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ImmutableBiMap<String, Integer> biMap = ImmutableBiMap.of(
      *     "first", 1,
@@ -387,7 +387,7 @@ public final class ImmutableBiMap<K, V> extends ImmutableMap<K, V> {
      * <p>This method creates a defensive copy, so subsequent modifications to the original
      * BiMap will not affect the returned ImmutableBiMap.
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * BiMap<String, Integer> mutable = new BiMap<>();
      * mutable.put("one", 1);
@@ -436,7 +436,7 @@ public final class ImmutableBiMap<K, V> extends ImmutableMap<K, V> {
      * <p><b>Warning:</b> Use this method with caution as the immutability guarantee depends on not modifying
      * the original BiMap after wrapping. This method is marked as @Beta.
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * BiMap<String, Integer> mutable = new BiMap<>();
      * mutable.put("one", 1);
@@ -482,7 +482,7 @@ public final class ImmutableBiMap<K, V> extends ImmutableMap<K, V> {
      * <p>This is the reverse lookup operation that makes BiMap bidirectional.
      * The lookup is typically as efficient as the forward lookup (get by key).
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ImmutableBiMap<String, Integer> biMap = ImmutableBiMap.of(
      *     "one", 1,

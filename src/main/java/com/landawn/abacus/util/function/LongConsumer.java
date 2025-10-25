@@ -56,6 +56,14 @@ public interface LongConsumer extends Throwables.LongConsumer<RuntimeException>,
      *   <li>Collecting statistics from long values</li>
      * </ul>
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * LongConsumer printer = value -> System.out.println("Value: " + value);
+     * printer.accept(123456789L); // Prints: Value: 123456789
+     *
+     * LongStream.range(1, 5).forEach(printer);
+     * }</pre>
+     *
      * @param t the input argument, a long value to be processed
      */
     @Override
@@ -72,7 +80,7 @@ public interface LongConsumer extends Throwables.LongConsumer<RuntimeException>,
      * of operations that will be executed sequentially on the same input value.
      * This is useful for composing complex behaviors from simpler ones.
      *
-     * <p>Example usage:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * LongConsumer saveToDatabase = value -> database.save(value);
      * LongConsumer logValue = value -> logger.info("Processed: " + value);

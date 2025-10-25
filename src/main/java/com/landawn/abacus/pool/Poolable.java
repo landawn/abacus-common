@@ -29,7 +29,7 @@ package com.landawn.abacus.pool;
  * <p>The {@link #destroy(Caller)} method is called when an object is removed from the pool,
  * allowing for proper cleanup of resources.
  * 
- * <p>Usage example:
+ * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * public class PooledConnection implements Poolable {
  *     private final Connection connection;
@@ -103,7 +103,7 @@ public interface Poolable {
      *   <li>Max idle time: Long.MAX_VALUE (effectively infinite)</li>
      * </ul>
      * 
-     * <p>Usage example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String data = "some data";
      * PoolableWrapper<String> poolable = Poolable.wrap(data);
@@ -122,7 +122,7 @@ public interface Poolable {
      * Wraps the provided object in a PoolableWrapper with specified lifetime and idle time limits.
      * This allows fine-grained control over when wrapped objects expire.
      * 
-     * <p>Usage example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Wrap a buffer that expires after 5 minutes or 1 minute of inactivity
      * ByteBuffer buffer = ByteBuffer.allocate(1024);

@@ -270,8 +270,7 @@ public class IntStream2025Test extends TestBase {
 
     @Test
     public void testZip_WithArraysThreeWay() {
-        stream = IntStream.zip(new int[] { 1, 2 }, new int[] { 3, 4 }, new int[] { 5, 6 },
-                (a, b, c) -> a + b + c);
+        stream = IntStream.zip(new int[] { 1, 2 }, new int[] { 3, 4 }, new int[] { 5, 6 }, (a, b, c) -> a + b + c);
         assertArrayEquals(new int[] { 9, 12 }, stream.toArray());
     }
 
@@ -299,8 +298,7 @@ public class IntStream2025Test extends TestBase {
 
     @Test
     public void testMerge_WithArrays() {
-        stream = IntStream.merge(new int[] { 1, 3, 5 }, new int[] { 2, 4, 6 },
-                (a, b) -> a < b ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND);
+        stream = IntStream.merge(new int[] { 1, 3, 5 }, new int[] { 2, 4, 6 }, (a, b) -> a < b ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND);
         assertArrayEquals(new int[] { 1, 2, 3, 4, 5, 6 }, stream.toArray());
     }
 
@@ -308,8 +306,7 @@ public class IntStream2025Test extends TestBase {
     public void testMerge_WithStreams() {
         IntStream s1 = IntStream.of(1, 3, 5);
         IntStream s2 = IntStream.of(2, 4, 6);
-        stream = IntStream.merge(s1, s2,
-                (a, b) -> a < b ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND);
+        stream = IntStream.merge(s1, s2, (a, b) -> a < b ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND);
         assertArrayEquals(new int[] { 1, 2, 3, 4, 5, 6 }, stream.toArray());
     }
 
@@ -981,22 +978,19 @@ public class IntStream2025Test extends TestBase {
 
     @Test
     public void testCollect_BasicCollect() {
-        List<Integer> result = IntStream.of(1, 2, 3, 4, 5)
-                .collect(ArrayList::new, ArrayList::add, ArrayList::addAll);
+        List<Integer> result = IntStream.of(1, 2, 3, 4, 5).collect(ArrayList::new, ArrayList::add, ArrayList::addAll);
         assertEquals(Arrays.asList(1, 2, 3, 4, 5), result);
     }
 
     @Test
     public void testCollect_WithoutCombiner() {
-        List<Integer> result = IntStream.of(1, 2, 3, 4, 5)
-                .collect(ArrayList::new, ArrayList::add);
+        List<Integer> result = IntStream.of(1, 2, 3, 4, 5).collect(ArrayList::new, ArrayList::add);
         assertEquals(Arrays.asList(1, 2, 3, 4, 5), result);
     }
 
     @Test
     public void testToMap_BasicMapping() {
-        Map<Integer, String> result = IntStream.of(1, 2, 3)
-                .toMap(x -> x, x -> "Value:" + x);
+        Map<Integer, String> result = IntStream.of(1, 2, 3).toMap(x -> x, x -> "Value:" + x);
         assertEquals(3, result.size());
         assertEquals("Value:1", result.get(1));
         assertEquals("Value:2", result.get(2));
@@ -1005,16 +999,14 @@ public class IntStream2025Test extends TestBase {
 
     @Test
     public void testToMap_WithMapSupplier() {
-        Map<Integer, String> result = IntStream.of(1, 2, 3)
-                .toMap(x -> x, x -> "Value:" + x, Suppliers.ofMap());
+        Map<Integer, String> result = IntStream.of(1, 2, 3).toMap(x -> x, x -> "Value:" + x, Suppliers.ofMap());
         assertEquals(3, result.size());
         assertTrue(result instanceof HashMap);
     }
 
     @Test
     public void testToMap_WithMergeFunction() {
-        Map<Integer, Integer> result = IntStream.of(1, 2, 1, 3, 2)
-                .toMap(x -> x, x -> 1, (a, b) -> a + b);
+        Map<Integer, Integer> result = IntStream.of(1, 2, 1, 3, 2).toMap(x -> x, x -> 1, (a, b) -> a + b);
         assertEquals(3, result.size());
         assertEquals(2, result.get(1).intValue());
         assertEquals(2, result.get(2).intValue());
@@ -1090,9 +1082,7 @@ public class IntStream2025Test extends TestBase {
     public void testOnClose_MultipleHandlers() {
         AtomicInteger counter1 = new AtomicInteger(0);
         AtomicInteger counter2 = new AtomicInteger(0);
-        stream = IntStream.of(1, 2, 3)
-                .onClose(() -> counter1.incrementAndGet())
-                .onClose(() -> counter2.incrementAndGet());
+        stream = IntStream.of(1, 2, 3).onClose(() -> counter1.incrementAndGet()).onClose(() -> counter2.incrementAndGet());
         stream.count();
         stream.close();
         assertEquals(1, counter1.get());
@@ -1131,8 +1121,7 @@ public class IntStream2025Test extends TestBase {
 
     @Test
     public void testMergeWith_BasicMerge() {
-        stream = IntStream.of(1, 3, 5).mergeWith(IntStream.of(2, 4, 6),
-                (a, b) -> a < b ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND);
+        stream = IntStream.of(1, 3, 5).mergeWith(IntStream.of(2, 4, 6), (a, b) -> a < b ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND);
         assertArrayEquals(new int[] { 1, 2, 3, 4, 5, 6 }, stream.toArray());
     }
 
@@ -1144,8 +1133,7 @@ public class IntStream2025Test extends TestBase {
 
     @Test
     public void testZipWith_ThreeWay() {
-        stream = IntStream.of(1, 2).zipWith(IntStream.of(3, 4), IntStream.of(5, 6),
-                (a, b, c) -> a + b + c);
+        stream = IntStream.of(1, 2).zipWith(IntStream.of(3, 4), IntStream.of(5, 6), (a, b, c) -> a + b + c);
         assertArrayEquals(new int[] { 9, 12 }, stream.toArray());
     }
 
@@ -1157,8 +1145,7 @@ public class IntStream2025Test extends TestBase {
 
     @Test
     public void testZipWith_ThreeWayWithDefaults() {
-        stream = IntStream.of(1, 2).zipWith(IntStream.of(3, 4, 5), IntStream.of(6, 7),
-                0, 10, 20, (a, b, c) -> a + b + c);
+        stream = IntStream.of(1, 2).zipWith(IntStream.of(3, 4, 5), IntStream.of(6, 7), 0, 10, 20, (a, b, c) -> a + b + c);
         assertArrayEquals(new int[] { 10, 13, 25 }, stream.toArray());
     }
 
@@ -1210,14 +1197,11 @@ public class IntStream2025Test extends TestBase {
 
     @Test
     public void testZipWithCollectionOfStreams() {
-        Collection<IntStream> streams = Arrays.asList(
-            IntStream.of(1, 2),
-            IntStream.of(10, 20),
-            IntStream.of(100, 200)
-        );
+        Collection<IntStream> streams = Arrays.asList(IntStream.of(1, 2), IntStream.of(10, 20), IntStream.of(100, 200));
         stream = IntStream.zip(streams, ints -> {
             int sum = 0;
-            for (Integer i : ints) sum += i;
+            for (Integer i : ints)
+                sum += i;
             return sum;
         });
         assertArrayEquals(new int[] { 111, 222 }, stream.toArray());
@@ -1225,14 +1209,12 @@ public class IntStream2025Test extends TestBase {
 
     @Test
     public void testZipWithCollectionDefaultValues() {
-        Collection<IntStream> streams = Arrays.asList(
-            IntStream.of(1, 2),
-            IntStream.of(10)
-        );
+        Collection<IntStream> streams = Arrays.asList(IntStream.of(1, 2), IntStream.of(10));
         int[] defaults = new int[] { 0, 0 };
         stream = IntStream.zip(streams, defaults, ints -> {
             int sum = 0;
-            for (Integer i : ints) sum += i;
+            for (Integer i : ints)
+                sum += i;
             return sum;
         });
         assertEquals(2, stream.count());
@@ -1240,11 +1222,7 @@ public class IntStream2025Test extends TestBase {
 
     @Test
     public void testMergeWithCollection() {
-        Collection<IntStream> streams = Arrays.asList(
-            IntStream.of(1, 5),
-            IntStream.of(2, 6),
-            IntStream.of(3, 7)
-        );
+        Collection<IntStream> streams = Arrays.asList(IntStream.of(1, 5), IntStream.of(2, 6), IntStream.of(3, 7));
         stream = IntStream.merge(streams, (a, b) -> a <= b ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND);
         assertEquals(6, stream.count());
     }

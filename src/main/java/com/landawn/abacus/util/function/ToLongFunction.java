@@ -37,7 +37,7 @@ public interface ToLongFunction<T> extends Throwables.ToLongFunction<T, RuntimeE
      * A predefined ToLongFunction instance that unboxes a Long object to a primitive long.
      * Returns 0L if the input is null, otherwise returns the long value of the Long object.
      * 
-     * <p>Example usage:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Long boxed = 42L;
      * long primitive = ToLongFunction.UNBOX.applyAsLong(boxed); // returns 42L
@@ -54,7 +54,7 @@ public interface ToLongFunction<T> extends Throwables.ToLongFunction<T, RuntimeE
      * <p>Note: This conversion may result in loss of precision for floating-point numbers or
      * overflow for numbers outside the long range.
      * 
-     * <p>Example usage:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Integer intValue = 100;
      * long result1 = ToLongFunction.FROM_NUM.applyAsLong(intValue); // returns 100L
@@ -74,8 +74,7 @@ public interface ToLongFunction<T> extends Throwables.ToLongFunction<T, RuntimeE
      * Applies this function to the given argument and returns a long result.
      *
      * @param value the function argument
-     * @return the function result as a primitive long
-     * @throws RuntimeException if any error occurs during function execution
+     * @return the function result as a primitive long if any error occurs during function execution
      */
     @Override
     long applyAsLong(T value);

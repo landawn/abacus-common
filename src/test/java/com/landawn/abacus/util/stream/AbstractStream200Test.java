@@ -139,10 +139,7 @@ public class AbstractStream200Test extends TestBase {
 
     @Test
     public void test_flattMap_array() {
-        List<Integer> result = Stream.of("1,2", "3,4")
-                .flattmap(s -> s.split(","))
-                .map(i -> Numbers.toInt(i))
-                .toList();
+        List<Integer> result = Stream.of("1,2", "3,4").flattmap(s -> s.split(",")).map(i -> Numbers.toInt(i)).toList();
         assertEquals(Arrays.asList(1, 2, 3, 4), result);
     }
 
@@ -836,8 +833,8 @@ public class AbstractStream200Test extends TestBase {
     @Test
     public void test_leftJoin() {
         List<Pair<Integer, String>> result = Stream.of(Pair.of(1, "A"), Pair.of(2, "B"))
-                .leftJoin(List.of(Pair.of(1, "X"), Pair.of(3, "Y")), p -> p.left(), p -> p.left(), (p1, p2) -> Pair.of(
-                        p1.left(), p2 == null ? null : p2.right()))
+                .leftJoin(List.of(Pair.of(1, "X"), Pair.of(3, "Y")), p -> p.left(), p -> p.left(),
+                        (p1, p2) -> Pair.of(p1.left(), p2 == null ? null : p2.right()))
                 .toList();
         assertEquals(List.of(Pair.of(1, "X"), Pair.of(2, null)), result);
     }
@@ -845,8 +842,8 @@ public class AbstractStream200Test extends TestBase {
     @Test
     public void test_rightJoin() {
         List<Pair<Integer, String>> result = Stream.of(Pair.of(1, "A"))
-                .rightJoin(List.of(Pair.of(1, "X"), Pair.of(2, "Y")), p -> p.left(), p -> p.left(), (p1, p2) -> Pair.of(
-                        p2.left(), p1 == null ? null : p1.right()))
+                .rightJoin(List.of(Pair.of(1, "X"), Pair.of(2, "Y")), p -> p.left(), p -> p.left(),
+                        (p1, p2) -> Pair.of(p2.left(), p1 == null ? null : p1.right()))
                 .toList();
         assertEquals(List.of(Pair.of(1, "A"), Pair.of(2, null)), result);
     }
@@ -870,8 +867,8 @@ public class AbstractStream200Test extends TestBase {
     @Test
     public void test_groupJoin() {
         List<Pair<Integer, Long>> result = Stream.of(Pair.of(1, "Group1"), Pair.of(2, "Group2"))
-                .groupJoin(List.of(Pair.of(1, 10), Pair.of(1, 20), Pair.of(2, 30)), p -> p.left(), p -> p.left(), Collectors.summingInt(p -> (Integer) p.right()),
-                        (p1, sum) -> Pair.of(p1.left(), sum.longValue()))
+                .groupJoin(List.of(Pair.of(1, 10), Pair.of(1, 20), Pair.of(2, 30)), p -> p.left(), p -> p.left(),
+                        Collectors.summingInt(p -> (Integer) p.right()), (p1, sum) -> Pair.of(p1.left(), sum.longValue()))
                 .toList();
         assertEquals(List.of(Pair.of(1, 30L), Pair.of(2, 30L)), result);
     }

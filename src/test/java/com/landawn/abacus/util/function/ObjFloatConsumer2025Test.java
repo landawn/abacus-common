@@ -114,7 +114,7 @@ public class ObjFloatConsumer2025Test extends TestBase {
 
     @Test
     public void testSideEffects() {
-        final float[] sum = {0.0f};
+        final float[] sum = { 0.0f };
         ObjFloatConsumer<String> consumer = (t, value) -> sum[0] += value;
 
         consumer.accept("a", 1.5f);

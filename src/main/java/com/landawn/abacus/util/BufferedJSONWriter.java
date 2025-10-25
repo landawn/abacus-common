@@ -31,7 +31,7 @@ import java.io.Writer;
  * of operation: internal buffering, writing to an OutputStream, or writing to
  * another Writer.</p>
  * 
- * <p>Example usage:</p>
+ * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * try (BufferedJSONWriter writer = new BufferedJSONWriter()) {
  *     writer.write("{\"name\":\"John");
@@ -131,7 +131,7 @@ public final class BufferedJSONWriter extends CharacterWriter {
      * <p>This constructor is package-private. Use factory methods or builder
      * patterns to create instances.</p>
      * 
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * BufferedJSONWriter writer = new BufferedJSONWriter();
      * writer.write("{\"key\":\"value\"}");
@@ -150,7 +150,7 @@ public final class BufferedJSONWriter extends CharacterWriter {
      * are written to the output stream. The stream is not closed when the
      * writer is closed; this is the caller's responsibility.</p>
      * 
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * try (FileOutputStream fos = new FileOutputStream("data.json");
      *      BufferedJSONWriter writer = new BufferedJSONWriter(fos)) {
@@ -171,7 +171,7 @@ public final class BufferedJSONWriter extends CharacterWriter {
      * are written. The underlying Writer is not closed when this writer
      * is closed; this is the caller's responsibility.</p>
      * 
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * try (FileWriter fw = new FileWriter("data.json");
      *      BufferedJSONWriter writer = new BufferedJSONWriter(fw)) {

@@ -34,7 +34,7 @@ import com.landawn.abacus.util.stream.Stream;
  *   <li>The interface is generic to support any type of paginated content</li>
  * </ul>
  * 
- * <p><b>Example usage:</b></p>
+ * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * // Assuming a Paginated implementation for database results
  * Paginated<List<User>> userPages = userRepository.findAllPaginated(pageSize: 20);
@@ -74,7 +74,7 @@ public interface Paginated<T> extends Iterable<T> {
      * <p>This method provides a safe way to access the first page without throwing
      * exceptions when the data set is empty.</p>
      * 
-     * <p><b>Example usage:</b></p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Paginated<List<Product>> products = productService.getPaginatedProducts();
      * 
@@ -104,7 +104,7 @@ public interface Paginated<T> extends Iterable<T> {
      * data or check the final page of results. The implementation should efficiently
      * retrieve the last page without iterating through all pages if possible.</p>
      * 
-     * <p><b>Example usage:</b></p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Paginated<List<LogEntry>> logs = logService.getPaginatedLogs();
      * 
@@ -132,7 +132,7 @@ public interface Paginated<T> extends Iterable<T> {
      * Use {@link #totalPages()} to check the valid range before calling this method, or
      * use {@link #firstPage()} and {@link #lastPage()} for safe boundary access.</p>
      * 
-     * <p><b>Example usage:</b></p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Paginated<List<Order>> orders = orderService.getPaginatedOrders();
      * int totalPages = orders.totalPages();
@@ -165,7 +165,7 @@ public interface Paginated<T> extends Iterable<T> {
      * <p>Note that the last page may contain fewer items than the page size if the total
      * number of items is not evenly divisible by the page size.</p>
      * 
-     * <p><b>Example usage:</b></p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Paginated<List<Customer>> customers = customerService.getPaginatedCustomers();
      * int pageSize = customers.pageSize();
@@ -191,7 +191,7 @@ public interface Paginated<T> extends Iterable<T> {
      * <p><b>Migration note:</b> Use {@code totalPages()} instead of this method.
      * This method will be removed in a future version.</p>
      * 
-     * <p><b>Example migration:</b></p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Old code
      * int count = paginated.pageCount();
@@ -214,7 +214,7 @@ public interface Paginated<T> extends Iterable<T> {
      * <p>This method is essential for pagination controls, determining valid page ranges,
      * and calculating progress through large data sets.</p>
      * 
-     * <p><b>Example usage:</b></p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Paginated<List<Document>> documents = searchService.searchDocuments(query);
      * int totalPages = documents.totalPages();
@@ -247,7 +247,7 @@ public interface Paginated<T> extends Iterable<T> {
      * useful for large data sets where you want to process pages without loading all of them
      * into memory at once.</p>
      * 
-     * <p><b>Example usage:</b></p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Paginated<List<Transaction>> transactions = transactionService.getPaginatedTransactions();
      * 

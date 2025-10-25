@@ -131,7 +131,7 @@ public final class InternalUtil {
      * <p>The returned list may share the same elements array with the input array.
      * Any modification to the list/array will affect the array/list.</p>
      * 
-     * <p>Example usage:</p></p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String[] array = {"a", "b", "c"};
      * List<String> list = InternalUtil.createList(array);
@@ -160,7 +160,7 @@ public final class InternalUtil {
      * <p>This method attempts to optimize string to char array conversion.
      * The returned array should not be modified as it may be shared with the original string.</p>
      * 
-     * <p>Example usage:</p></p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * char[] chars = InternalUtil.getCharsForReadOnly("Hello");
      * // Use chars for reading only, do not modify

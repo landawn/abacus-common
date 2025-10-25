@@ -42,8 +42,17 @@ public interface Consumer<T> extends Throwables.Consumer<T, RuntimeException>, j
      * Performs this operation on the given argument.
      * This method is expected to operate via side-effects.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Consumer<String> printer = System.out::println;
+     * printer.accept("Hello, World!"); // Prints: Hello, World!
+     *
+     * List<String> list = new ArrayList<>();
+     * Consumer<String> listAdder = list::add;
+     * listAdder.accept("item");
+     * }</pre>
+     *
      * @param t the input argument
-     * @throws RuntimeException if unable to complete the operation
      */
     @Override
     void accept(T t);
@@ -52,11 +61,19 @@ public interface Consumer<T> extends Throwables.Consumer<T, RuntimeException>, j
      * Returns a composed {@code Consumer} that performs, in sequence, this operation
      * followed by the {@code after} operation. If performing either operation throws an exception,
      * it is relayed to the caller of the composed operation.
-     * 
+     *
      * <p>This method overrides the default implementation in {@link java.util.function.Consumer}
      * to return the more specific {@code Consumer} type from this package.
      *
-     * @param after the operation to perform after this operation. Must not be null.
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Consumer<String> logger = s -> System.out.println("Processing: " + s);
+     * Consumer<String> validator = s -> { if (s.isEmpty()) throw new IllegalArgumentException(); };
+     * Consumer<String> combined = logger.andThen(validator);
+     * combined.accept("data"); // Logs then validates
+     * }</pre>
+     *
+     * @param after the operation to perform after this operation. Must not be {@code null}.
      * @return a composed {@code Consumer} that performs in sequence this operation followed by
      *         the {@code after} operation
      */

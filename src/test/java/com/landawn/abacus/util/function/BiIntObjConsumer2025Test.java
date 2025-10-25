@@ -61,7 +61,7 @@ public class BiIntObjConsumer2025Test extends TestBase {
         chainedConsumer.accept(5, 3, "result");
 
         assertEquals(2, results.size());
-        assertEquals("result:8", results.get(0));  // 5 + 3
+        assertEquals("result:8", results.get(0)); // 5 + 3
         assertEquals("result:15", results.get(1)); // 5 * 3
     }
 
@@ -92,7 +92,7 @@ public class BiIntObjConsumer2025Test extends TestBase {
         BiIntObjConsumer<String> chainedConsumer = consumer1.andThen(consumer2);
 
         assertThrows(RuntimeException.class, () -> chainedConsumer.accept(5, 10, "test"));
-        assertEquals(1, results.size());  // First consumer should have executed
+        assertEquals(1, results.size()); // First consumer should have executed
         assertEquals("test", results.get(0));
     }
 

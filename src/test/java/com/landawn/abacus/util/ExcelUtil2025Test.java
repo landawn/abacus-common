@@ -312,7 +312,8 @@ public class ExcelUtil2025Test extends TestBase {
     @Test
     public void test_writeSheet_WithDataset() throws Exception {
         File tempFile = createTempFile(".xlsx");
-        Dataset dataset = CommonUtil.newDataset(CommonUtil.asList("column1", "column2"), CommonUtil.asList(CommonUtil.asList("ab", "cd"), CommonUtil.asList("ef", "gh")));
+        Dataset dataset = CommonUtil.newDataset(CommonUtil.asList("column1", "column2"),
+                CommonUtil.asList(CommonUtil.asList("ab", "cd"), CommonUtil.asList("ef", "gh")));
 
         ExcelUtil.writeSheet("DatasetSheet", dataset, tempFile);
 

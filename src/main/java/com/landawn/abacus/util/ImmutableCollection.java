@@ -34,7 +34,7 @@ import com.landawn.abacus.annotation.Beta;
  * use the static factory method {@link #wrap(Collection)} or the specific immutable
  * collection types instead.</p>
  * 
- * <p>Example usage:
+ * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * Collection<String> mutable = Arrays.asList("a", "b", "c");
  * ImmutableCollection<String> immutable = ImmutableCollection.wrap(mutable);
@@ -67,7 +67,7 @@ public class ImmutableCollection<E> extends AbstractCollection<E> implements Imm
      * This method does not create a defensive copy. For a true immutable copy, use the specific
      * immutable collection type's copyOf method (e.g., {@link ImmutableList#copyOf}).</p>
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * List<String> mutableList = new ArrayList<>();
      * mutableList.add("hello");
@@ -75,7 +75,6 @@ public class ImmutableCollection<E> extends AbstractCollection<E> implements Imm
      * mutableList.add("world"); // This change is visible in wrapped!
      * System.out.println(wrapped.size()); // 2
      * }</pre>
-     * </p>
      *
      * @param <E> the type of elements in the collection
      * @param c the collection to be wrapped into an ImmutableCollection
@@ -201,13 +200,12 @@ public class ImmutableCollection<E> extends AbstractCollection<E> implements Imm
      * at least one element {@code e} such that
      * {@code (valueToFind==null ? e==null : valueToFind.equals(e))}.
      *
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ImmutableCollection<String> collection = ImmutableList.of("a", "b", "c");
      * System.out.println(collection.contains("b")); // true
      * System.out.println(collection.contains("d")); // false
      * }</pre>
-     * </p>
      *
      * @param valueToFind element whose presence in this collection is to be tested
      * @return {@code true} if this collection contains the specified element
@@ -228,7 +226,7 @@ public class ImmutableCollection<E> extends AbstractCollection<E> implements Imm
      * collection type. For ordered collections (like List), the iteration order
      * is predictable. For unordered collections (like Set), the order may vary.</p>
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ImmutableCollection<Integer> numbers = ImmutableList.of(1, 2, 3);
      * ObjIterator<Integer> iter = numbers.iterator();
@@ -236,7 +234,6 @@ public class ImmutableCollection<E> extends AbstractCollection<E> implements Imm
      *     System.out.println(iter.next());
      * }
      * }</pre>
-     * </p>
      *
      * @return an ObjIterator over the elements in this collection
      */
@@ -250,12 +247,11 @@ public class ImmutableCollection<E> extends AbstractCollection<E> implements Imm
      * contains more than {@code Integer.MAX_VALUE} elements, returns
      * {@code Integer.MAX_VALUE}.
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ImmutableCollection<String> collection = ImmutableList.of("x", "y", "z");
      * System.out.println(collection.size()); // 3
      * }</pre>
-     * </p>
      *
      * @return the number of elements in this collection
      */
@@ -271,13 +267,12 @@ public class ImmutableCollection<E> extends AbstractCollection<E> implements Imm
      * 
      * <p>This method acts as bridge between array-based and collection-based APIs.</p>
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ImmutableCollection<String> collection = ImmutableList.of("a", "b", "c");
      * Object[] array = collection.toArray();
      * System.out.println(Arrays.toString(array)); // [a, b, c]
      * }</pre>
-     * </p>
      *
      * @return an array containing all of the elements in this collection
      */
@@ -297,13 +292,12 @@ public class ImmutableCollection<E> extends AbstractCollection<E> implements Imm
      * (i.e., the array has more elements than this collection), the element in
      * the array immediately following the end of the collection is set to {@code null}.</p>
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ImmutableCollection<String> collection = ImmutableList.of("x", "y", "z");
      * String[] array = collection.toArray(new String[0]);
      * System.out.println(Arrays.toString(array)); // [x, y, z]
      * }</pre>
-     * </p>
      *
      * @param <T> the runtime type of the array to contain the collection
      * @param a the array into which the elements of this collection are to be
@@ -327,7 +321,7 @@ public class ImmutableCollection<E> extends AbstractCollection<E> implements Imm
      * This definition ensures that the equals method works properly across 
      * different implementations of the Collection interface.
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ImmutableCollection<Integer> col1 = ImmutableList.of(1, 2, 3);
      * ImmutableCollection<Integer> col2 = ImmutableList.of(1, 2, 3);
@@ -335,7 +329,6 @@ public class ImmutableCollection<E> extends AbstractCollection<E> implements Imm
      * System.out.println(col1.equals(col2)); // true
      * System.out.println(col1.equals(col3)); // false
      * }</pre>
-     * </p>
      *
      * @param obj the object to be compared for equality with this collection
      * @return {@code true} if the specified object is equal to this collection
@@ -370,12 +363,11 @@ public class ImmutableCollection<E> extends AbstractCollection<E> implements Imm
      * representation consists of the string representation of the underlying
      * collection.
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ImmutableCollection<Integer> collection = ImmutableList.of(1, 2, 3);
      * System.out.println(collection.toString()); // [1, 2, 3]
      * }</pre>
-     * </p>
      *
      * @return a string representation of this collection
      */

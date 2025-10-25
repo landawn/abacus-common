@@ -80,7 +80,7 @@ public interface LongFunction<R> extends Throwables.LongFunction<R, RuntimeExcep
      * of the next function. This is useful for building complex transformations
      * from simpler ones.
      *
-     * <p>Example usage:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * LongFunction<Date> toDate = timestamp -> new Date(timestamp);
      * LongFunction<String> toDateString = toDate.andThen(Date::toString);

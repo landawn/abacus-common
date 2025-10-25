@@ -22,8 +22,7 @@ import com.landawn.abacus.util.WD;
  * Base configuration class for JSON and XML serialization operations.
  * This abstract class provides common configuration options that are shared between
  * JSON and XML serialization configurations.
- * 
- * <p>This class supports method chaining for easy configuration setup:</p>
+ * * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * config.prettyFormat(true)
  *       .setDateTimeFormat(DateTimeFormat.ISO_8601)
@@ -90,7 +89,7 @@ public abstract class JSONXMLSerializationConfig<C extends JSONXMLSerializationC
      * Sets the character to use for quoting char values.
      * Supported values are single quote ('), double quote ("), or 0 (no quotation).
      * 
-     * <p>Usage example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * config.setCharQuotation('\'');  // Use single quotes
      * config.setCharQuotation('"');   // Use double quotes
@@ -125,7 +124,7 @@ public abstract class JSONXMLSerializationConfig<C extends JSONXMLSerializationC
      * Supported values are single quote ('), double quote ("), or 0 (no quotation).
      * Note that JSON standard requires double quotes for strings.
      * 
-     * <p>Usage example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * config.setStringQuotation('"');   // Standard JSON
      * config.setStringQuotation('\'');  // Single quotes (non-standard)
@@ -150,7 +149,7 @@ public abstract class JSONXMLSerializationConfig<C extends JSONXMLSerializationC
      * Disables character quotation by setting the quotation character to 0.
      * Characters will be serialized without surrounding quotes.
      * 
-     * <p>Usage example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * config.noCharQuotation();
      * // Character 'A' will be serialized as: A
@@ -168,7 +167,7 @@ public abstract class JSONXMLSerializationConfig<C extends JSONXMLSerializationC
      * Strings will be serialized without surrounding quotes.
      * Warning: This produces non-standard JSON/XML.
      * 
-     * <p>Usage example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * config.noStringQuotation();
      * // String "hello" will be serialized as: hello
@@ -186,7 +185,7 @@ public abstract class JSONXMLSerializationConfig<C extends JSONXMLSerializationC
      * All string and character values will be serialized without quotes.
      * Warning: This produces non-standard JSON/XML.
      * 
-     * <p>Usage example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * config.noQuotation();
      * // All strings and chars will be unquoted
@@ -213,7 +212,7 @@ public abstract class JSONXMLSerializationConfig<C extends JSONXMLSerializationC
      * Sets the date time format for serializing date/time values.
      * This affects how Date, Calendar, and other temporal objects are formatted.
      * 
-     * <p>Usage example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * config.setDateTimeFormat(DateTimeFormat.ISO_8601);
      * // Dates will be serialized as "2023-12-25T10:30:00Z"
@@ -246,7 +245,7 @@ public abstract class JSONXMLSerializationConfig<C extends JSONXMLSerializationC
      * When enabled, the output will be formatted with line breaks and indentation,
      * making it more human-readable but larger in size.
      * 
-     * <p>Usage example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * config.prettyFormat(true).setIndentation("  ");
      * // Output will be formatted:
@@ -280,7 +279,7 @@ public abstract class JSONXMLSerializationConfig<C extends JSONXMLSerializationC
      * This is only used when pretty formatting is enabled.
      * Common values are spaces or tabs.
      * 
-     * <p>Usage example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * config.prettyFormat(true).setIndentation("\t");  // Use tabs
      * config.prettyFormat(true).setIndentation("  ");  // Use 2 spaces
@@ -309,7 +308,7 @@ public abstract class JSONXMLSerializationConfig<C extends JSONXMLSerializationC
      * Sets the property naming policy for serialization.
      * This determines how property names are transformed in the output.
      * 
-     * <p>Usage example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * config.setPropNamingPolicy(NamingPolicy.LOWER_CAMEL_CASE);
      * // Property "firstName" remains "firstName"
@@ -344,7 +343,7 @@ public abstract class JSONXMLSerializationConfig<C extends JSONXMLSerializationC
      * This is useful for JavaScript compatibility where large numbers may lose precision.
      * JavaScript can only safely represent integers up to 2^53-1.
      * 
-     * <p>Usage example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * config.writeLongAsString(true);
      * // Long value 9007199254740993L will be written as "9007199254740993"
@@ -373,7 +372,7 @@ public abstract class JSONXMLSerializationConfig<C extends JSONXMLSerializationC
      * Sets whether to write null string values as empty strings.
      * When enabled, null string properties will be serialized as "" instead of null.
      * 
-     * <p>Usage example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * config.writeNullStringAsEmpty(true);
      * // Object: {name: null} 
@@ -402,7 +401,7 @@ public abstract class JSONXMLSerializationConfig<C extends JSONXMLSerializationC
      * Sets whether to write null number values as zero.
      * When enabled, null numeric properties will be serialized as 0 (or 0.0 for decimals).
      * 
-     * <p>Usage example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * config.writeNullNumberAsZero(true);
      * // Object: {count: null, price: null}
@@ -431,7 +430,7 @@ public abstract class JSONXMLSerializationConfig<C extends JSONXMLSerializationC
      * Sets whether to write null boolean values as false.
      * When enabled, null Boolean properties will be serialized as false instead of null.
      * 
-     * <p>Usage example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * config.writeNullBooleanAsFalse(true);
      * // Object: {active: null}
@@ -460,7 +459,7 @@ public abstract class JSONXMLSerializationConfig<C extends JSONXMLSerializationC
      * Sets whether to write BigDecimal values in plain format (without scientific notation).
      * When enabled, BigDecimal values will always be written in plain decimal notation.
      * 
-     * <p>Usage example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * config.writeBigDecimalAsPlain(true);
      * // BigDecimal("1.23E+5") will be written as "123000" 
@@ -490,7 +489,7 @@ public abstract class JSONXMLSerializationConfig<C extends JSONXMLSerializationC
      * An empty bean is one with no serializable properties.
      * When disabled, empty beans will be serialized as empty objects ({}).
      * 
-     * <p>Usage example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * config.failOnEmptyBean(false);
      * // Empty beans will be serialized as {} instead of throwing exception
@@ -522,7 +521,7 @@ public abstract class JSONXMLSerializationConfig<C extends JSONXMLSerializationC
      * When enabled, circular references will be handled gracefully instead of causing stack overflow.
      * The implementation details of how circular references are represented depend on the serializer.
      * 
-     * <p>Usage example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * config.supportCircularReference(true);
      * // Objects with circular references will serialize without infinite recursion

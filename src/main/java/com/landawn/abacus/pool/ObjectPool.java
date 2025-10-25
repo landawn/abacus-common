@@ -37,7 +37,7 @@ import java.util.concurrent.TimeUnit;
  *   <li>Memory-based capacity constraints via MemoryMeasure</li>
  * </ul>
  * 
- * <p>Usage example:
+ * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * ObjectPool<MyPoolable> pool = PoolFactory.createObjectPool(10);
  * 
@@ -85,7 +85,7 @@ public interface ObjectPool<E extends Poolable> extends Pool {
      * Adds a new element to the pool with optional automatic destruction on failure.
      * This is a convenience method that ensures proper cleanup if the object cannot be pooled.
      * 
-     * <p>Usage example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * MyPoolable obj = createExpensiveObject();
      * // Object will be automatically destroyed if it can't be added
@@ -104,7 +104,7 @@ public interface ObjectPool<E extends Poolable> extends Pool {
      * Attempts to add an element to the pool, waiting if necessary for space to become available.
      * This method blocks until space is available, the timeout expires, or the thread is interrupted.
      * 
-     * <p>Usage example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * MyPoolable obj = new MyPoolable();
      * if (pool.add(obj, 5, TimeUnit.SECONDS)) {
@@ -146,7 +146,7 @@ public interface ObjectPool<E extends Poolable> extends Pool {
      * 
      * <p>If the retrieved object has expired, it will be destroyed and null will be returned.
      * 
-     * <p>Usage example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * E obj = pool.take();
      * if (obj != null) {
@@ -170,7 +170,7 @@ public interface ObjectPool<E extends Poolable> extends Pool {
      * <p>The object's activity print is updated to reflect the access.
      * Expired objects are automatically destroyed and the method continues waiting.
      * 
-     * <p>Usage example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * E obj = pool.take(10, TimeUnit.SECONDS);
      * if (obj != null) {
@@ -206,7 +206,7 @@ public interface ObjectPool<E extends Poolable> extends Pool {
      * Interface for measuring the memory size of objects in the pool.
      * This allows the pool to enforce memory-based capacity limits in addition to count-based limits.
      * 
-     * <p>Usage example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * MemoryMeasure<ByteBuffer> measure = buffer -> buffer.capacity();
      * ObjectPool<PooledBuffer> pool = PoolFactory.createObjectPool(

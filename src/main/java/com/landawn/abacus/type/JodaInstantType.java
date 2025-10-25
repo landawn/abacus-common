@@ -45,13 +45,12 @@ public class JodaInstantType extends AbstractJodaDateTimeType<Instant> {
      * This method returns the Class object representing org.joda.time.Instant, which is used
      * for type identification and reflection operations.
      *
-     * <pre>
-     * {@code
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
      * JodaInstantType type = new JodaInstantType();
      * Class<Instant> clazz = type.clazz();
      * System.out.println(clazz.getName()); // Outputs: org.joda.time.Instant
-     * }
-     * </pre>
+     * }</pre>
      *
      * @return the Class object representing org.joda.time.Instant
      */
@@ -67,8 +66,8 @@ public class JodaInstantType extends AbstractJodaDateTimeType<Instant> {
      *
      * The Instant is formatted using the ISO 8601 timestamp format with milliseconds (yyyy-MM-dd'T'HH:mm:ss.SSS).
      *
-     * <pre>
-     * {@code
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
      * JodaInstantType type = new JodaInstantType();
      * Instant instant = Instant.now();
      * String str = type.stringOf(instant);
@@ -76,8 +75,7 @@ public class JodaInstantType extends AbstractJodaDateTimeType<Instant> {
      *
      * // null input returns null
      * String nullStr = type.stringOf(null); // returns null
-     * }
-     * </pre>
+     * }</pre>
      *
      * @param x the Instant to convert
      * @return the string representation of the Instant, or null if the input is null
@@ -101,8 +99,8 @@ public class JodaInstantType extends AbstractJodaDateTimeType<Instant> {
      * - ISO 8601 timestamp format (24 characters): parsed as yyyy-MM-dd'T'HH:mm:ss.SSS
      * - Other formats: parsed using the default timestamp parser
      *
-     * <pre>
-     * {@code
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
      * JodaInstantType type = new JodaInstantType();
      *
      * // Parse milliseconds since epoch
@@ -119,8 +117,7 @@ public class JodaInstantType extends AbstractJodaDateTimeType<Instant> {
      *
      * // Empty or null returns null
      * Instant instant5 = type.valueOf(null); // returns null
-     * }
-     * </pre>
+     * }</pre>
      *
      * @param str the string to parse
      * @return an Instant instance, or null if the string is empty or null
@@ -158,8 +155,8 @@ public class JodaInstantType extends AbstractJodaDateTimeType<Instant> {
      * This method first attempts to parse the character array as a long value (milliseconds since epoch).
      * If that fails, it converts the character array to a string and delegates to valueOf(String).
      *
-     * <pre>
-     * {@code
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
      * JodaInstantType type = new JodaInstantType();
      *
      * // Parse from character array containing milliseconds
@@ -176,8 +173,7 @@ public class JodaInstantType extends AbstractJodaDateTimeType<Instant> {
      *
      * // null or empty array returns null
      * Instant instant4 = type.valueOf(null, 0, 0); // returns null
-     * }
-     * </pre>
+     * }</pre>
      *
      * @param cbuf the character buffer containing the value to parse
      * @param offset the start offset in the character buffer
@@ -207,16 +203,15 @@ public class JodaInstantType extends AbstractJodaDateTimeType<Instant> {
      * This method provides database-to-Java type conversion for Instant objects, reading
      * from SQL TIMESTAMP columns and converting them to Joda-Time Instant instances.
      *
-     * <pre>
-     * {@code
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
      * JodaInstantType type = new JodaInstantType();
      * try (ResultSet rs = stmt.executeQuery()) {
      *     if (rs.next()) {
      *         Instant timestamp = type.get(rs, 1);
      *     }
      * }
-     * }
-     * </pre>
+     * }</pre>
      *
      * @param rs the ResultSet to read from
      * @param columnIndex the column index (1-based) to retrieve the value from
@@ -234,16 +229,15 @@ public class JodaInstantType extends AbstractJodaDateTimeType<Instant> {
      * Retrieves an Instant value from the specified column in a ResultSet using column name.
      * This method provides database-to-Java type conversion for Instant objects by column name.
      *
-     * <pre>
-     * {@code
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
      * JodaInstantType type = new JodaInstantType();
      * try (ResultSet rs = stmt.executeQuery()) {
      *     if (rs.next()) {
      *         Instant timestamp = type.get(rs, "created_at");
      *     }
      * }
-     * }
-     * </pre>
+     * }</pre>
      *
      * @param rs the ResultSet to read from
      * @param columnName the column name to retrieve the value from
@@ -262,16 +256,15 @@ public class JodaInstantType extends AbstractJodaDateTimeType<Instant> {
      * This method provides Java-to-database type conversion, transforming Joda-Time Instant
      * objects into SQL TIMESTAMP values for database operations.
      *
-     * <pre>
-     * {@code
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
      * JodaInstantType type = new JodaInstantType();
      * Instant now = Instant.now();
      * try (PreparedStatement stmt = conn.prepareStatement("INSERT INTO events (timestamp) VALUES (?)")) {
      *     type.set(stmt, 1, now);
      *     stmt.executeUpdate();
      * }
-     * }
-     * </pre>
+     * }</pre>
      *
      * @param stmt the PreparedStatement to set the parameter on
      * @param columnIndex the parameter index (1-based) to set
@@ -288,16 +281,15 @@ public class JodaInstantType extends AbstractJodaDateTimeType<Instant> {
      * This method provides Java-to-database type conversion for stored procedure calls,
      * transforming Joda-Time Instant objects into SQL TIMESTAMP values using named parameters.
      *
-     * <pre>
-     * {@code
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
      * JodaInstantType type = new JodaInstantType();
      * Instant now = Instant.now();
      * try (CallableStatement stmt = conn.prepareCall("{call log_event(?)}")) {
      *     type.set(stmt, "event_time", now);
      *     stmt.execute();
      * }
-     * }
-     * </pre>
+     * }</pre>
      *
      * @param stmt the CallableStatement to set the parameter on
      * @param columnName the name of the parameter to set
@@ -314,8 +306,8 @@ public class JodaInstantType extends AbstractJodaDateTimeType<Instant> {
      * This method provides efficient text output for Instant values, useful for building
      * strings, writing to streams, or generating formatted output without intermediate String objects.
      *
-     * <pre>
-     * {@code
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
      * JodaInstantType type = new JodaInstantType();
      * Instant instant = Instant.now();
      * StringBuilder sb = new StringBuilder("Timestamp: ");
@@ -324,8 +316,7 @@ public class JodaInstantType extends AbstractJodaDateTimeType<Instant> {
      *
      * // null handling
      * type.appendTo(sb, null); // Appends "null"
-     * }
-     * </pre>
+     * }</pre>
      *
      * @param appendable the Appendable to write to
      * @param x the Instant to append
@@ -354,8 +345,8 @@ public class JodaInstantType extends AbstractJodaDateTimeType<Instant> {
      *
      * The output may be quoted based on the serialization configuration settings.
      *
-     * <pre>
-     * {@code
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
      * JodaInstantType type = new JodaInstantType();
      * Instant instant = Instant.now();
      * CharacterWriter writer = new CharacterWriter();
@@ -370,8 +361,7 @@ public class JodaInstantType extends AbstractJodaDateTimeType<Instant> {
      *     .setDateTimeFormat(DateTimeFormat.ISO_8601_TIMESTAMP)
      *     .setStringQuotation('"').build();
      * type.writeCharacter(writer, instant, config2); // Writes: "2021-01-01T10:30:00.123"
-     * }
-     * </pre>
+     * }</pre>
      *
      * @param writer the CharacterWriter to write to
      * @param x the Instant to write

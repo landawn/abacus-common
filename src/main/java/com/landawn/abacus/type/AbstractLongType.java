@@ -157,11 +157,24 @@ public abstract class AbstractLongType extends NumberType<Number> {
 
     /**
      * Retrieves a long value from a ResultSet at the specified column index.
+     * This method uses rs.getLong() which returns 0 for SQL NULL values.
+     * Subclasses may override this to return null for SQL NULL values.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * // For primitive long types
+     * PrimitiveLongType type = TypeFactory.getType(long.class);
+     * long value = type.get(rs, 1); // Returns 0L for SQL NULL
+     *
+     * // For wrapper Long types
+     * LongType type = TypeFactory.getType(Long.class);
+     * Long value = type.get(rs, 1); // Returns null for SQL NULL (overridden in subclass)
+     * }</pre>
      *
      * @param rs the ResultSet to read from
      * @param columnIndex the column index (1-based)
-     * @return the long value at the specified column
-     * @throws SQLException if a database access error occurs
+     * @return the long value at the specified column; returns 0L if SQL NULL (may be overridden by subclasses to return null)
+     * @throws SQLException if a database access error occurs or the columnIndex is invalid
      */
     @Override
     public Long get(final ResultSet rs, final int columnIndex) throws SQLException {
@@ -170,11 +183,24 @@ public abstract class AbstractLongType extends NumberType<Number> {
 
     /**
      * Retrieves a long value from a ResultSet using the specified column label.
+     * This method uses rs.getLong() which returns 0 for SQL NULL values.
+     * Subclasses may override this to return null for SQL NULL values.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * // For primitive long types
+     * PrimitiveLongType type = TypeFactory.getType(long.class);
+     * long value = type.get(rs, "timestamp"); // Returns 0L for SQL NULL
+     *
+     * // For wrapper Long types
+     * LongType type = TypeFactory.getType(Long.class);
+     * Long value = type.get(rs, "timestamp"); // Returns null for SQL NULL (overridden in subclass)
+     * }</pre>
      *
      * @param rs the ResultSet to read from
      * @param columnLabel the column label
-     * @return the long value at the specified column
-     * @throws SQLException if a database access error occurs
+     * @return the long value at the specified column; returns 0L if SQL NULL (may be overridden by subclasses to return null)
+     * @throws SQLException if a database access error occurs or the columnLabel is not found
      */
     @Override
     public Long get(final ResultSet rs, final String columnLabel) throws SQLException {

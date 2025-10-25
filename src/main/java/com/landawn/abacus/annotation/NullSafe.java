@@ -47,8 +47,8 @@ import java.lang.annotation.Target;
  *   <li>Implementing the Null Object pattern</li>
  * </ul>
  * 
- * <p><b>Example usage:</b></p>
- * <pre>
+ * <p><b>Usage Examples:</b></p>
+ * <pre>{@code
  * public class StringUtils {
  *     {@literal @}NullSafe
  *     public static String trim({@literal @}NullSafe String input) {
@@ -68,7 +68,7 @@ import java.lang.annotation.Target;
  *         return Arrays.asList(input.split(","));
  *     }
  * }
- * </pre>
+ * }</pre>
  * 
  * @since 2018
  * @see NotNull

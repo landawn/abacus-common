@@ -51,8 +51,8 @@ import java.lang.annotation.Target;
  *   <li>Database-level constraints (like triggers) can still modify these fields</li>
  * </ul>
  * 
- * <p><b>Example usage:</b></p>
- * <pre>
+ * <p><b>Usage Examples:</b></p>
+ * <pre>{@code
  * {@literal @}Entity
  * public class Article {
  *     {@literal @}Id
@@ -76,7 +76,7 @@ import java.lang.annotation.Target;
  *     {@literal @}Column(name = "view_count")
  *     private Integer viewCount;       // Updated by stored procedure
  * }
- * </pre>
+ * }</pre>
  * 
  * @since 2018
  * @see Transient

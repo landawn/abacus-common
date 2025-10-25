@@ -37,9 +37,10 @@ public final class Duration implements Comparable<Duration>, Immutable {
     }
 
     /**
+     * Creates a Duration instance from the specified milliseconds.
      *
-     * @param milliseconds
-     * @return
+     * @param milliseconds the duration in milliseconds
+     * @return a Duration instance representing the specified duration
      */
     private static Duration create(final long milliseconds) {
         if (milliseconds == 0) {
@@ -514,13 +515,12 @@ public final class Duration implements Comparable<Duration>, Immutable {
      * as this Duration. The conversion is straightforward as both use milliseconds precision.
      * This is useful for interoperability with Java's standard time API.
      * </p>
-     * <p>
-     * Example:
-     * <pre>
+     * 
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
      * Duration d = Duration.ofHours(2);
      * java.time.Duration jdkDuration = d.toJdkDuration(); // 2 hours
-     * </pre>
-     * </p>
+     * }</pre>
      *
      * @return a {@code java.time.Duration} with the same milliseconds value, not null
      */

@@ -25,7 +25,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * <p>The enum includes values from very small percentages (0.0001%) to very high percentages (99.9999%),
  * covering most common use cases in statistics, probability, and general calculations.</p>
  * 
- * <p>Example usage:</p>
+ * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * Percentage p = Percentage._95;
  * double value = p.doubleValue(); // Returns 0.95
@@ -96,7 +96,7 @@ public enum Percentage {
      * Returns an immutable set of Percentage values within the specified range.
      * The range is inclusive of the start value and exclusive of the end value.
      * 
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ImmutableSet<Percentage> mediumRange = Percentage.range(Percentage._40, Percentage._60);
      * // Returns set containing: _40, _45, _50, _55
@@ -131,7 +131,7 @@ public enum Percentage {
      * The range is inclusive of the start value and exclusive of the end value.
      * Only percentages that are at the specified step intervals from the start are included.
      * 
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ImmutableSet<Percentage> everyTenth = Percentage.range(Percentage._10, Percentage._50, Percentage._10);
      * // Returns set containing: _10, _20, _30, _40
@@ -171,7 +171,7 @@ public enum Percentage {
      * Returns an immutable set of Percentage values within the specified closed range.
      * Both the start and end values are inclusive.
      * 
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ImmutableSet<Percentage> highRange = Percentage.rangeClosed(Percentage._90, Percentage._99);
      * // Returns set containing: _90, _91, _92, _93, _94, _95, _96, _97, _98, _99
@@ -206,7 +206,7 @@ public enum Percentage {
      * Both the start and end values are inclusive.
      * Only percentages that are at the specified step intervals from the start are included.
      * 
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ImmutableSet<Percentage> everyFifth = Percentage.rangeClosed(Percentage._5, Percentage._20, Percentage._5);
      * // Returns set containing: _5, _10, _20
@@ -258,7 +258,7 @@ public enum Percentage {
      * Returns the decimal representation of this percentage.
      * For example, 95% returns 0.95, 0.1% returns 0.001.
      * 
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * double value = Percentage._75.doubleValue(); // Returns 0.75
      * double calculation = 1000 * Percentage._10.doubleValue(); // Returns 100.0

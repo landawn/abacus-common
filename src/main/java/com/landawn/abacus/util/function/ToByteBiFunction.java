@@ -32,6 +32,19 @@ public interface ToByteBiFunction<T, U> {
     /**
      * Applies this function to the given arguments.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * ToByteBiFunction<Integer, Integer> adder = (a, b) -> (byte) (a + b);
+     * byte result1 = adder.applyAsByte(10, 20); // returns 30
+     *
+     * ToByteBiFunction<String, Integer> charAt = (str, index) ->
+     *     (byte) str.charAt(index);
+     * byte result2 = charAt.applyAsByte("Hello", 0); // returns 72 (ASCII 'H')
+     *
+     * ToByteBiFunction<Byte, Byte> max = (a, b) -> (byte) Math.max(a, b);
+     * byte result3 = max.applyAsByte((byte) 5, (byte) 10); // returns 10
+     * }</pre>
+     *
      * @param t the first function argument
      * @param u the second function argument
      * @return the function result as a byte value

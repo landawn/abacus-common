@@ -45,7 +45,7 @@ public interface Pool extends Serializable {
      * <p>The lock must be released by calling {@link #unlock()} in a finally block
      * to ensure proper cleanup even if an exception occurs.
      * 
-     * <p>Usage example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * pool.lock();
      * try {
@@ -107,7 +107,7 @@ public interface Pool extends Serializable {
      * balance factor configuration. Objects are selected for removal based on
      * the pool's eviction policy.
      * 
-     * <p>Usage example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * if (pool.size() >= pool.capacity() * 0.9) {
      *     pool.vacate(); // free up some space
@@ -144,7 +144,7 @@ public interface Pool extends Serializable {
      *   <li>Memory usage (if applicable)</li>
      * </ul>
      * 
-     * <p>Usage example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * PoolStats stats = pool.stats();
      * double hitRate = stats.getCount() > 0 ? 
@@ -172,7 +172,7 @@ public interface Pool extends Serializable {
      * 
      * <p>This method is idempotent - calling it multiple times has no additional effect.
      * 
-     * <p>Usage example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * try {
      *     // use the pool

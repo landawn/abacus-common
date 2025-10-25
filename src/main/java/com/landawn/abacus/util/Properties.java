@@ -30,7 +30,7 @@ import java.util.Set;
  * 
  * <p>All arguments to all task methods must be {@code non-null}.</p>
  * 
- * <p>Example usage:</p>
+ * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * Properties<String, Object> props = new Properties<>();
  * props.set("timeout", 30);
@@ -69,7 +69,7 @@ public class Properties<K, V> implements Map<K, V> {
      * Creates a new Properties instance from the specified map.
      * The returned Properties object contains a copy of the entries from the input map.
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Map<String, Object> map = new HashMap<>();
      * map.put("name", "John");
@@ -89,7 +89,7 @@ public class Properties<K, V> implements Map<K, V> {
     /**
      * Retrieves the value associated with the specified property name.
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Properties<String, Object> props = new Properties<>();
      * props.put("name", "John");
@@ -98,6 +98,9 @@ public class Properties<K, V> implements Map<K, V> {
      *
      * @param propName the name of the property whose associated value is to be returned
      * @return the value associated with the specified property name, or {@code null} if the property is not found
+     * @see #get(Object, Class)
+     * @see #getOrDefault(Object, Object)
+     * @see #getOrDefault(Object, Object, Class)
      */
     @Override
     public V get(final Object propName) {
@@ -108,12 +111,12 @@ public class Properties<K, V> implements Map<K, V> {
      * Retrieves the value associated with the specified property name and converts it to the specified target type.
      * This method helps avoid {@code NullPointerException} for primitive types if the target property is {@code null} or not set.
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Properties<String, Object> props = new Properties<>();
      * props.put("age", "25");
      * props.put("active", true);
-     * 
+     *
      * int age = props.get("age", Integer.class); // Returns 25
      * boolean active = props.get("active", Boolean.class); // Returns true
      * double salary = props.get("salary", Double.class); // Returns 0.0 (default for double)
@@ -123,6 +126,9 @@ public class Properties<K, V> implements Map<K, V> {
      * @param propName the name of the property whose associated value is to be returned
      * @param targetType the class of the type to which the value should be converted
      * @return the value associated with the specified property name, converted to the specified target type, or default value of {@code targetType} if the property is not found or its value is {@code null}
+     * @see #get(Object)
+     * @see #getOrDefault(Object, Object)
+     * @see #getOrDefault(Object, Object, Class)
      */
     public <T> T get(final Object propName, final Class<? extends T> targetType) {
         //noinspection SuspiciousMethodCalls
@@ -132,11 +138,11 @@ public class Properties<K, V> implements Map<K, V> {
     /**
      * Retrieves the value associated with the specified property name or returns the default value if the property is not found.
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Properties<String, String> props = new Properties<>();
      * props.put("host", "localhost");
-     * 
+     *
      * String host = props.getOrDefault("host", "0.0.0.0"); // Returns "localhost"
      * String port = props.getOrDefault("port", "8080"); // Returns "8080"
      * }</pre>
@@ -144,6 +150,9 @@ public class Properties<K, V> implements Map<K, V> {
      * @param propName the name of the property whose associated value is to be returned
      * @param defaultValue the value to be returned if the specified property name is not found or its value is {@code null}
      * @return the value associated with the specified property name, or {@code defaultValue} if the property is not found or its value is {@code null}
+     * @see #get(Object)
+     * @see #get(Object, Class)
+     * @see #getOrDefault(Object, Object, Class)
      */
     @Override
     public V getOrDefault(final Object propName, final V defaultValue) {
@@ -161,11 +170,11 @@ public class Properties<K, V> implements Map<K, V> {
      * Retrieves the value associated with the specified property name or returns the default value if the property is not found.
      * Converts the value to the specified target type.
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Properties<String, Object> props = new Properties<>();
      * props.put("timeout", "30");
-     * 
+     *
      * int timeout = props.getOrDefault("timeout", 60, Integer.class); // Returns 30
      * boolean debug = props.getOrDefault("debug", false, Boolean.class); // Returns false
      * }</pre>
@@ -175,6 +184,9 @@ public class Properties<K, V> implements Map<K, V> {
      * @param defaultValue the value to be returned if the specified property name is not found or its value is {@code null}
      * @param targetType the class of the type to which the value should be converted
      * @return the value associated with the specified property name, converted to the specified target type, or {@code defaultValue} if the property is not found or its value is {@code null}
+     * @see #get(Object)
+     * @see #get(Object, Class)
+     * @see #getOrDefault(Object, Object)
      */
     public <T> T getOrDefault(final Object propName, final T defaultValue, final Class<? extends T> targetType) {
         @SuppressWarnings("SuspiciousMethodCalls")
@@ -192,7 +204,7 @@ public class Properties<K, V> implements Map<K, V> {
      * This method is a fluent alternative to {@link #put(Object, Object)} that returns the Properties instance
      * for method chaining.
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Properties<String, Object> props = new Properties<>()
      *     .set("host", "localhost")
@@ -203,6 +215,7 @@ public class Properties<K, V> implements Map<K, V> {
      * @param propName the name of the property to be set
      * @param propValue the value to be set for the specified property name
      * @return the current Properties instance with the updated property
+     * @see #put(Object, Object)
      */
     public Properties<K, V> set(final K propName, final V propValue) {
         put(propName, propValue);
@@ -214,7 +227,7 @@ public class Properties<K, V> implements Map<K, V> {
      * Associates the specified value with the specified key in this map.
      * If the map previously contained a mapping for the key, the old value is replaced.
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Properties<String, Integer> props = new Properties<>();
      * props.put("count", 10);
@@ -224,6 +237,7 @@ public class Properties<K, V> implements Map<K, V> {
      * @param key the key with which the specified value is to be associated
      * @param value the value to be associated with the specified key
      * @return the previous value associated with the specified key, or {@code null} if there was no mapping for the key
+     * @see #set(Object, Object)
      */
     @Override
     public V put(final K key, final V value) {
@@ -234,7 +248,7 @@ public class Properties<K, V> implements Map<K, V> {
      * Copies all the mappings from the specified map to this map.
      * These mappings will replace any mappings that this map had for any of the keys currently in the specified map.
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Properties<String, Object> props1 = new Properties<>();
      * props1.put("a", 1);
@@ -256,7 +270,7 @@ public class Properties<K, V> implements Map<K, V> {
     /**
      * Associates the specified value with the specified key in this map if the key is not already associated with a value.
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Properties<String, String> props = new Properties<>();
      * props.put("name", "John");
@@ -283,7 +297,7 @@ public class Properties<K, V> implements Map<K, V> {
     /**
      * Removes the mapping for the specified key from this map if present.
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Properties<String, Object> props = new Properties<>();
      * props.put("temp", "value");
@@ -302,7 +316,7 @@ public class Properties<K, V> implements Map<K, V> {
      * Removes the entry for the specified key only if it is currently
      * mapped to the specified value.
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Properties<String, String> props = new Properties<>();
      * props.put("status", "active");
@@ -332,7 +346,7 @@ public class Properties<K, V> implements Map<K, V> {
      * Replaces the entry for the specified key only if it is
      * currently mapped to some value.
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Properties<String, Integer> props = new Properties<>();
      * props.put("version", 1);
@@ -359,7 +373,7 @@ public class Properties<K, V> implements Map<K, V> {
      * Replaces the entry for the specified key only if currently
      * mapped to the specified value.
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Properties<String, String> props = new Properties<>();
      * props.put("status", "draft");
@@ -386,7 +400,7 @@ public class Properties<K, V> implements Map<K, V> {
     /**
      * Returns {@code true} if this map contains a mapping for the specified key.
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Properties<String, Object> props = new Properties<>();
      * props.put("name", "John");
@@ -406,7 +420,7 @@ public class Properties<K, V> implements Map<K, V> {
     /**
      * Returns {@code true} if this map maps one or more keys to the specified value.
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Properties<String, String> props = new Properties<>();
      * props.put("host", "localhost");
@@ -427,7 +441,7 @@ public class Properties<K, V> implements Map<K, V> {
      * Returns a Set view of the keys contained in this map.
      * The set is backed by the map, so changes to the map are reflected in the set, and vice-versa.
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Properties<String, Object> props = new Properties<>();
      * props.put("name", "John");
@@ -446,7 +460,7 @@ public class Properties<K, V> implements Map<K, V> {
      * Returns a Collection view of the values contained in this map.
      * The collection is backed by the map, so changes to the map are reflected in the collection, and vice-versa.
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Properties<String, Integer> props = new Properties<>();
      * props.put("a", 1);
@@ -465,7 +479,7 @@ public class Properties<K, V> implements Map<K, V> {
      * Returns a Set view of the mappings contained in this map.
      * The set is backed by the map, so changes to the map are reflected in the set, and vice-versa.
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Properties<String, Object> props = new Properties<>();
      * props.put("x", 10);
@@ -485,7 +499,7 @@ public class Properties<K, V> implements Map<K, V> {
     /**
      * Returns {@code true} if this map contains no key-value mappings.
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Properties<String, Object> props = new Properties<>();
      * boolean empty1 = props.isEmpty(); // Returns true
@@ -504,7 +518,7 @@ public class Properties<K, V> implements Map<K, V> {
     /**
      * Returns the number of key-value mappings in this map.
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Properties<String, Object> props = new Properties<>();
      * props.put("a", 1);
@@ -523,7 +537,7 @@ public class Properties<K, V> implements Map<K, V> {
      * Removes all of the mappings from this map.
      * The map will be empty after this call returns.
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Properties<String, Object> props = new Properties<>();
      * props.put("a", 1);
@@ -540,7 +554,7 @@ public class Properties<K, V> implements Map<K, V> {
      * Creates a shallow copy of this Properties instance.
      * The keys and values themselves are not cloned.
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Properties<String, Object> original = new Properties<>();
      * original.put("key", "value");
@@ -563,7 +577,7 @@ public class Properties<K, V> implements Map<K, V> {
      * Returns a hash code value for this Properties object.
      * The hash code is computed based on the underlying map of key-value mappings.
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Properties<String, Object> props = new Properties<>();
      * props.put("key", "value");
@@ -582,7 +596,7 @@ public class Properties<K, V> implements Map<K, V> {
      * Returns {@code true} if the given object is also a Properties instance
      * and the two Properties represent the same mappings.
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Properties<String, Object> props1 = new Properties<>();
      * props1.put("key", "value");
@@ -605,7 +619,7 @@ public class Properties<K, V> implements Map<K, V> {
      * Returns a string representation of this Properties object.
      * The string representation consists of the string representation of the underlying map.
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Properties<String, Object> props = new Properties<>();
      * props.put("name", "John");

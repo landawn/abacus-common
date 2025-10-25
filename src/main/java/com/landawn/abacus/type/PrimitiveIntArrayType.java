@@ -42,13 +42,11 @@ public final class PrimitiveIntArrayType extends AbstractPrimitiveArrayType<int[
     /**
      * Returns the Class object representing the primitive int array type (int[].class).
      *
-     * <pre>
-     * <code>
+     * <p><b>Usage Examples:</b></p>
      * PrimitiveIntArrayType type = new PrimitiveIntArrayType();
      * Class&lt;int[]&gt; clazz = type.clazz();
      * // clazz equals int[].class
-     * </code>
-     * </pre>
+     * }</pre>
      *
      * @return the Class object for int[] type
      */
@@ -61,13 +59,11 @@ public final class PrimitiveIntArrayType extends AbstractPrimitiveArrayType<int[
      * Returns the Type instance for the element type of this array, which is Integer.
      * This method provides access to the Type representation of individual array elements.
      *
-     * <pre>
-     * <code>
+     * <p><b>Usage Examples:</b></p>
      * PrimitiveIntArrayType type = new PrimitiveIntArrayType();
      * Type&lt;Integer&gt; elemType = type.getElementType();
      * // elemType can be used for element-level operations
-     * </code>
-     * </pre>
+     * }</pre>
      *
      * @return the Type instance representing Integer type for array elements
      */
@@ -79,13 +75,11 @@ public final class PrimitiveIntArrayType extends AbstractPrimitiveArrayType<int[
     /**
      * Returns the parameter types associated with this array type.
      *
-     * <pre>
-     * <code>
+     * <p><b>Usage Examples:</b></p>
      * PrimitiveIntArrayType type = new PrimitiveIntArrayType();
      * Type&lt;Integer&gt;[] paramTypes = type.getParameterTypes();
      * // paramTypes[0] represents the element type
-     * </code>
-     * </pre>
+     * }</pre>
      *
      * @return an array containing the Integer Type that describes the elements of this array type
      * @see #getElementType()
@@ -100,8 +94,7 @@ public final class PrimitiveIntArrayType extends AbstractPrimitiveArrayType<int[
      * The array is formatted as comma-separated values enclosed in square brackets.
      * For example, an array {1, 2, 3} becomes "[1, 2, 3]".
      *
-     * <pre>
-     * <code>
+     * <p><b>Usage Examples:</b></p>
      * PrimitiveIntArrayType type = new PrimitiveIntArrayType();
      * int[] arr = {1, 2, 3};
      * String str = type.stringOf(arr);
@@ -112,8 +105,7 @@ public final class PrimitiveIntArrayType extends AbstractPrimitiveArrayType<int[
      *
      * String nullStr = type.stringOf(null);
      * // nullStr equals null
-     * </code>
-     * </pre>
+     * }</pre>
      *
      * @param x the int array to convert to string
      * @return the string representation of the array, or null if the input array is null.
@@ -136,8 +128,7 @@ public final class PrimitiveIntArrayType extends AbstractPrimitiveArrayType<int[
      * The string should contain comma-separated integer values enclosed in square brackets.
      * For example, "[1, 2, 3]" will be parsed to an int array {1, 2, 3}.
      *
-     * <pre>
-     * <code>
+     * <p><b>Usage Examples:</b></p>
      * PrimitiveIntArrayType type = new PrimitiveIntArrayType();
      * int[] arr = type.valueOf("[1, 2, 3]");
      * // arr equals {1, 2, 3}
@@ -147,8 +138,7 @@ public final class PrimitiveIntArrayType extends AbstractPrimitiveArrayType<int[
      *
      * int[] nullArr = type.valueOf(null);
      * // nullArr equals null
-     * </code>
-     * </pre>
+     * }</pre>
      *
      * @param str the string to parse, expected format is "[value1, value2, ...]"
      * @return the parsed int array, or null if the input string is null.
@@ -182,8 +172,7 @@ public final class PrimitiveIntArrayType extends AbstractPrimitiveArrayType<int[
      * The array is formatted as comma-separated values enclosed in square brackets.
      * If the array is null, appends "null".
      *
-     * <pre>
-     * <code>
+     * <p><b>Usage Examples:</b></p>
      * PrimitiveIntArrayType type = new PrimitiveIntArrayType();
      * StringBuilder sb = new StringBuilder();
      * int[] arr = {10, 20, 30};
@@ -193,8 +182,7 @@ public final class PrimitiveIntArrayType extends AbstractPrimitiveArrayType<int[
      * StringBuilder sb2 = new StringBuilder();
      * type.appendTo(sb2, null);
      * // sb2.toString() equals "null"
-     * </code>
-     * </pre>
+     * }</pre>
      *
      * @param appendable the Appendable to write to (e.g., StringBuilder, Writer)
      * @param x the int array to append
@@ -224,8 +212,7 @@ public final class PrimitiveIntArrayType extends AbstractPrimitiveArrayType<int[
      * This method is optimized for performance when writing to character-based outputs.
      * The array is formatted as comma-separated values enclosed in square brackets.
      *
-     * <pre>
-     * <code>
+     * <p><b>Usage Examples:</b></p>
      * PrimitiveIntArrayType type = new PrimitiveIntArrayType();
      * CharacterWriter writer = new CharacterWriter();
      * int[] arr = {5, 10, 15};
@@ -234,8 +221,7 @@ public final class PrimitiveIntArrayType extends AbstractPrimitiveArrayType<int[
      *
      * type.writeCharacter(writer, null, null);
      * // Writes: null
-     * </code>
-     * </pre>
+     * }</pre>
      *
      * @param writer the CharacterWriter to write to
      * @param x the int array to write
@@ -265,8 +251,7 @@ public final class PrimitiveIntArrayType extends AbstractPrimitiveArrayType<int[
      * Converts a Collection of Integer objects to a primitive int array.
      * Each element in the collection is unboxed to its primitive int value.
      *
-     * <pre>
-     * <code>
+     * <p><b>Usage Examples:</b></p>
      * PrimitiveIntArrayType type = new PrimitiveIntArrayType();
      * List&lt;Integer&gt; list = Arrays.asList(1, 2, 3, 4);
      * int[] arr = type.collection2Array(list);
@@ -274,8 +259,7 @@ public final class PrimitiveIntArrayType extends AbstractPrimitiveArrayType<int[
      *
      * int[] nullArr = type.collection2Array(null);
      * // nullArr equals null
-     * </code>
-     * </pre>
+     * }</pre>
      *
      * @param c the Collection of Integer objects to convert
      * @return a primitive int array containing all elements from the collection,
@@ -304,8 +288,7 @@ public final class PrimitiveIntArrayType extends AbstractPrimitiveArrayType<int[
      * Converts a primitive int array to a Collection by adding all array elements to the provided collection.
      * Each primitive int value is autoboxed to an Integer object before being added.
      *
-     * <pre>
-     * <code>
+     * <p><b>Usage Examples:</b></p>
      * PrimitiveIntArrayType type = new PrimitiveIntArrayType();
      * int[] arr = {1, 2, 3};
      * List&lt;Integer&gt; list = new ArrayList&lt;&gt;();
@@ -314,8 +297,7 @@ public final class PrimitiveIntArrayType extends AbstractPrimitiveArrayType<int[
      *
      * type.array2Collection(null, list);
      * // list remains unchanged
-     * </code>
-     * </pre>
+     * }</pre>
      *
      * @param x the int array to convert
      * @param output the Collection to add the array elements to
@@ -338,8 +320,7 @@ public final class PrimitiveIntArrayType extends AbstractPrimitiveArrayType<int[
      * The hash code is calculated based on the contents of the array using the standard
      * array hash code algorithm, which considers all elements in the array.
      *
-     * <pre>
-     * <code>
+     * <p><b>Usage Examples:</b></p>
      * PrimitiveIntArrayType type = new PrimitiveIntArrayType();
      * int[] arr1 = {1, 2, 3};
      * int[] arr2 = {1, 2, 3};
@@ -349,8 +330,7 @@ public final class PrimitiveIntArrayType extends AbstractPrimitiveArrayType<int[
      *
      * int nullHash = type.hashCode(null);
      * // nullHash equals 0
-     * </code>
-     * </pre>
+     * }</pre>
      *
      * @param x the int array to compute hash code for
      * @return the hash code of the array, or 0 if the array is null
@@ -365,8 +345,7 @@ public final class PrimitiveIntArrayType extends AbstractPrimitiveArrayType<int[
      * Two arrays are considered equal if they have the same length and contain the same
      * elements in the same order. Two null references are considered equal.
      *
-     * <pre>
-     * <code>
+     * <p><b>Usage Examples:</b></p>
      * PrimitiveIntArrayType type = new PrimitiveIntArrayType();
      * int[] arr1 = {1, 2, 3};
      * int[] arr2 = {1, 2, 3};
@@ -379,8 +358,7 @@ public final class PrimitiveIntArrayType extends AbstractPrimitiveArrayType<int[
      *
      * boolean bothNull = type.equals(null, null);
      * // bothNull is true
-     * </code>
-     * </pre>
+     * }</pre>
      *
      * @param x the first int array to compare
      * @param y the second int array to compare

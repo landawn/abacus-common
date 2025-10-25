@@ -62,7 +62,7 @@ import okhttp3.internal.Util;
  * 
  * <p>Note: This class contains the codes and docs copied from: <a href="https://square.github.io/okhttp/">OkHttp</a> under Apache License v2 and may be modified.</p>
  * 
- * <p>Example usage:</p>
+ * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * // Simple GET request
  * Response response = OkHttpRequest.url("https://api.example.com/users")
@@ -149,7 +149,7 @@ public final class OkHttpRequest {
     /**
      * Creates a new OkHttpRequest instance with the specified URL using the default HTTP client.
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * OkHttpRequest request = OkHttpRequest.url("https://api.example.com/users");
      * }</pre>
@@ -283,7 +283,7 @@ public final class OkHttpRequest {
     /**
      * Sets the Basic Authentication header for this request.
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * OkHttpRequest.url("https://api.example.com/secure")
      *     .basicAuth("username", "password")
@@ -303,7 +303,7 @@ public final class OkHttpRequest {
      * Sets the header named {@code name} to {@code value}.
      * If this request already has any headers with that name, they are all replaced.
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * OkHttpRequest.url("https://api.example.com/data")
      *     .header("Accept", "application/json")
@@ -367,7 +367,7 @@ public final class OkHttpRequest {
      * Sets HTTP headers specified by the key/value entries from the provided Map.
      * If this request already has any headers with that name, they are all replaced.
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Map<String, String> headers = new HashMap<>();
      * headers.put("Accept", "application/json");
@@ -434,7 +434,12 @@ public final class OkHttpRequest {
      * @param name the header name
      * @param value the header value
      * @return this OkHttpRequest instance for method chaining
-     * @deprecated no use case?
+     * @deprecated This method is deprecated due to limited use cases in typical HTTP workflows.
+     *             Most scenarios require replacing headers rather than adding duplicates.
+     *             Use {@link #header(String, String)} instead, which replaces any existing header
+     *             with the same name. If you specifically need to add multiple headers with the
+     *             same name (e.g., for multiply-valued headers like "Cookie"), consider using
+     *             the underlying OkHttp RequestBuilder directly.
      */
     @Deprecated
     public OkHttpRequest addHeader(final String name, final String value) {
@@ -447,7 +452,12 @@ public final class OkHttpRequest {
      *
      * @param name the name of the headers to remove
      * @return this OkHttpRequest instance for method chaining
-     * @deprecated no use case?
+     * @deprecated This method is deprecated due to limited use cases in typical HTTP workflows.
+     *             In most scenarios, headers are set but rarely need to be explicitly removed.
+     *             If you need to override a header, use {@link #header(String, String)} which
+     *             replaces any existing header. If you have a specific use case requiring header
+     *             removal, consider restructuring your code or using the underlying OkHttp
+     *             RequestBuilder directly.
      */
     @Deprecated
     public OkHttpRequest removeHeader(final String name) {
@@ -459,7 +469,7 @@ public final class OkHttpRequest {
      * Sets query parameters for {@code GET} or {@code DELETE} request.
      * The query string will be appended to the URL.
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * OkHttpRequest.url("https://api.example.com/search")
      *     .query("q=java&limit=10")
@@ -479,7 +489,7 @@ public final class OkHttpRequest {
      * Sets query parameters for {@code GET} or {@code DELETE} request.
      * The parameters will be URL-encoded and appended to the URL.
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Map<String, Object> params = new HashMap<>();
      * params.put("q", "java programming");
@@ -502,7 +512,7 @@ public final class OkHttpRequest {
     /**
      * Sets the request body as JSON with Content-Type: application/json.
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String json = "{\"name\":\"John\",\"age\":30}";
      * OkHttpRequest.url("https://api.example.com/users")
@@ -521,7 +531,7 @@ public final class OkHttpRequest {
      * Sets the request body as JSON with Content-Type: application/json.
      * The object will be serialized to JSON using the default JSON serializer.
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * User user = new User("John", 30);
      * OkHttpRequest.url("https://api.example.com/users")
@@ -561,7 +571,7 @@ public final class OkHttpRequest {
      * Sets the request body as form data with Content-Type: application/x-www-form-urlencoded.
      * The map entries will be encoded as form fields.
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Map<String, String> formData = new HashMap<>();
      * formData.put("username", "john_doe");
@@ -596,7 +606,7 @@ public final class OkHttpRequest {
      * Sets the request body as form data with Content-Type: application/x-www-form-urlencoded.
      * The bean properties will be encoded as form fields using getter methods.
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * LoginRequest login = new LoginRequest();
      * login.setUsername("john_doe");
@@ -643,7 +653,10 @@ public final class OkHttpRequest {
      * @param formBodyByMap a map containing form field names and values
      * @return this OkHttpRequest instance for method chaining
      * @see {@code FormBody.Builder}
-     * @deprecated replaced by {@link #formBody(Map)}.
+     * @deprecated This method has been replaced by {@link #formBody(Map)} for better API clarity.
+     *             The new method name explicitly indicates that it creates form-urlencoded body data,
+     *             making the code more readable and self-documenting. Please update your code to use
+     *             {@code formBody(Map)} instead.
      */
     @Deprecated
     public OkHttpRequest body(final Map<?, ?> formBodyByMap) {
@@ -656,7 +669,10 @@ public final class OkHttpRequest {
      * @param formBodyByBean a bean object whose properties will be used as form fields
      * @return this OkHttpRequest instance for method chaining
      * @see {@code FormBody.Builder}
-     * @deprecated replaced by {@link #formBody(Object)}.
+     * @deprecated This method has been replaced by {@link #formBody(Object)} for better API clarity.
+     *             The new method name explicitly indicates that it creates form-urlencoded body data,
+     *             making the code more readable and self-documenting. Please update your code to use
+     *             {@code formBody(Object)} instead.
      */
     @Deprecated
     public OkHttpRequest body(final Object formBodyByBean) {
@@ -736,7 +752,7 @@ public final class OkHttpRequest {
     /**
      * Executes a GET request and returns the response.
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Response response = OkHttpRequest.url("https://api.example.com/users")
      *     .header("Accept", "application/json")
@@ -757,7 +773,7 @@ public final class OkHttpRequest {
     /**
      * Executes a GET request and returns the response body deserialized to the specified type.
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * List<User> users = OkHttpRequest.url("https://api.example.com/users")
      *     .get(new TypeToken<List<User>>(){}.getType());
@@ -775,7 +791,7 @@ public final class OkHttpRequest {
     /**
      * Executes a POST request and returns the response.
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * User newUser = new User("John", "Doe");
      * Response response = OkHttpRequest.url("https://api.example.com/users")
@@ -793,7 +809,7 @@ public final class OkHttpRequest {
     /**
      * Executes a POST request and returns the response body deserialized to the specified type.
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * User newUser = new User("John", "Doe");
      * User createdUser = OkHttpRequest.url("https://api.example.com/users")
@@ -857,7 +873,7 @@ public final class OkHttpRequest {
     /**
      * Executes a DELETE request and returns the response.
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Response response = OkHttpRequest.url("https://api.example.com/users/123")
      *     .delete();
@@ -1010,7 +1026,7 @@ public final class OkHttpRequest {
     /**
      * Executes a GET request asynchronously using the default executor.
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ContinuableFuture<Response> future = OkHttpRequest.url("https://api.example.com/users")
      *     .asyncGet();
@@ -1042,7 +1058,7 @@ public final class OkHttpRequest {
      * Executes a GET request asynchronously and returns the response body deserialized to the specified type.
      * Uses the default executor.
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ContinuableFuture<List<User>> future = OkHttpRequest.url("https://api.example.com/users")
      *     .asyncGet(new TypeToken<List<User>>(){}.getType());

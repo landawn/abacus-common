@@ -29,7 +29,7 @@ import java.io.Serial;
  * MutableShort instance concurrently, and at least one thread modifies it, external
  * synchronization is required.</p>
  * 
- * <p>Example usage:</p>
+ * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * MutableShort counter = MutableShort.of((short)0);
  * shortArray.forEach(s -> counter.add(s));
@@ -54,7 +54,7 @@ public final class MutableShort extends Number implements Comparable<MutableShor
     /**
      * Constructs a new MutableShort with the default value of zero.
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * MutableShort num = new MutableShort(); // value is 0
      * }</pre>
@@ -65,7 +65,7 @@ public final class MutableShort extends Number implements Comparable<MutableShor
     /**
      * Constructs a new MutableShort with the specified initial value.
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * MutableShort num = new MutableShort((short)100); // value is 100
      * }</pre>
@@ -80,7 +80,7 @@ public final class MutableShort extends Number implements Comparable<MutableShor
      * Creates a new MutableShort instance with the specified value.
      * This is a factory method that provides a more fluent way to create instances.
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * MutableShort count = MutableShort.of((short)42);
      * }</pre>
@@ -95,7 +95,7 @@ public final class MutableShort extends Number implements Comparable<MutableShor
     /**
      * Returns the current short value.
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * MutableShort num = MutableShort.of((short)42);
      * short val = num.value(); // returns 42
@@ -123,7 +123,7 @@ public final class MutableShort extends Number implements Comparable<MutableShor
     /**
      * Sets the value to the specified short.
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * MutableShort num = MutableShort.of((short)10);
      * num.setValue((short)20); // value is now 20
@@ -139,7 +139,7 @@ public final class MutableShort extends Number implements Comparable<MutableShor
      * Returns the current value and then sets the new value.
      * This is an atomic-like operation for single-threaded use.
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * MutableShort num = MutableShort.of((short)10);
      * short old = num.getAndSet((short)20); // returns 10, value is now 20
@@ -158,7 +158,7 @@ public final class MutableShort extends Number implements Comparable<MutableShor
      * Sets the value and then returns it.
      * This is useful when you want to update and immediately use the new value.
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * MutableShort num = MutableShort.of((short)10);
      * short newVal = num.setAndGet((short)20); // returns 20, value is now 20
@@ -176,7 +176,7 @@ public final class MutableShort extends Number implements Comparable<MutableShor
      * Sets the value to newValue if the predicate evaluates to true for the current value.
      * If the predicate returns false, the value remains unchanged.
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * MutableShort num = MutableShort.of((short)10);
      * boolean updated = num.setIf((short)20, v -> v < 15); // returns true, value is now 20
@@ -204,7 +204,7 @@ public final class MutableShort extends Number implements Comparable<MutableShor
      * Increments the value by one.
      * Note: short overflow will wrap around (32767 + 1 = -32768).
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * MutableShort num = MutableShort.of((short)10);
      * num.increment(); // value is now 11
@@ -218,7 +218,7 @@ public final class MutableShort extends Number implements Comparable<MutableShor
      * Decrements the value by one.
      * Note: short underflow will wrap around (-32768 - 1 = 32767).
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * MutableShort num = MutableShort.of((short)10);
      * num.decrement(); // value is now 9
@@ -234,7 +234,7 @@ public final class MutableShort extends Number implements Comparable<MutableShor
      * Adds the specified operand to the current value.
      * Note: short overflow will wrap around.
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * MutableShort num = MutableShort.of((short)10);
      * num.add((short)5); // value is now 15
@@ -250,7 +250,7 @@ public final class MutableShort extends Number implements Comparable<MutableShor
      * Subtracts the specified operand from the current value.
      * Note: short underflow will wrap around.
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * MutableShort num = MutableShort.of((short)10);
      * num.subtract((short)3); // value is now 7
@@ -265,7 +265,7 @@ public final class MutableShort extends Number implements Comparable<MutableShor
     /**
      * Returns the current value and then increments it by one.
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * MutableShort num = MutableShort.of((short)10);
      * short old = num.getAndIncrement(); // returns 10, value is now 11
@@ -280,7 +280,7 @@ public final class MutableShort extends Number implements Comparable<MutableShor
     /**
      * Returns the current value and then decrements it by one.
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * MutableShort num = MutableShort.of((short)10);
      * short old = num.getAndDecrement(); // returns 10, value is now 9
@@ -295,7 +295,7 @@ public final class MutableShort extends Number implements Comparable<MutableShor
     /**
      * Increments the value by one and then returns it.
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * MutableShort num = MutableShort.of((short)10);
      * short newVal = num.incrementAndGet(); // returns 11, value is now 11
@@ -310,7 +310,7 @@ public final class MutableShort extends Number implements Comparable<MutableShor
     /**
      * Decrements the value by one and then returns it.
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * MutableShort num = MutableShort.of((short)10);
      * short newVal = num.decrementAndGet(); // returns 9, value is now 9
@@ -325,7 +325,7 @@ public final class MutableShort extends Number implements Comparable<MutableShor
     /**
      * Returns the current value and then adds the specified delta.
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * MutableShort num = MutableShort.of((short)10);
      * short old = num.getAndAdd((short)5); // returns 10, value is now 15
@@ -343,7 +343,7 @@ public final class MutableShort extends Number implements Comparable<MutableShor
     /**
      * Adds the specified delta to the current value and then returns it.
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * MutableShort num = MutableShort.of((short)10);
      * short newVal = num.addAndGet((short)5); // returns 15, value is now 15
@@ -416,7 +416,7 @@ public final class MutableShort extends Number implements Comparable<MutableShor
      * Returns a negative value if this is less than the other, zero if equal,
      * or a positive value if this is greater than the other.
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * MutableShort a = MutableShort.of((short)10);
      * MutableShort b = MutableShort.of((short)20);
@@ -438,7 +438,7 @@ public final class MutableShort extends Number implements Comparable<MutableShor
      * the argument is not {@code null} and is a {@code MutableShort} object that contains the
      * same {@code short} value as this object.
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * MutableShort a = MutableShort.of((short)10);
      * MutableShort b = MutableShort.of((short)10);
@@ -472,7 +472,7 @@ public final class MutableShort extends Number implements Comparable<MutableShor
     /**
      * Returns the String representation of this MutableShort's value.
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * MutableShort num = MutableShort.of((short)42);
      * String str = num.toString(); // returns "42"

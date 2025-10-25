@@ -35,6 +35,18 @@ public interface ShortToIntFunction {
     /**
      * Applies this function to the given argument.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * ShortToIntFunction widener = ShortToIntFunction.DEFAULT;
+     * int result1 = widener.applyAsInt((short) 100); // returns 100
+     *
+     * ShortToIntFunction doubler = value -> value * 2;
+     * int result2 = doubler.applyAsInt((short) 50); // returns 100
+     *
+     * ShortToIntFunction absolute = value -> Math.abs(value);
+     * int result3 = absolute.applyAsInt((short) -42); // returns 42
+     * }</pre>
+     *
      * @param value the function argument as a short value
      * @return the function result as an int value
      */

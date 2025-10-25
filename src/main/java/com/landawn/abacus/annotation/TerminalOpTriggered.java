@@ -46,8 +46,8 @@ import java.lang.annotation.Target;
  *   <li><b>Buffering operations:</b> Must collect elements before releasing them</li>
  * </ul>
  * 
- * <p><b>Example usage:</b></p>
- * <pre>
+ * <p><b>Usage Examples:</b></p>
+ * <pre>{@code
  * public class StreamProcessor&lt;T&gt; {
  *     {@literal @}TerminalOpTriggered
  *     public StreamProcessor&lt;T&gt; sorted(Comparator&lt;T&gt; comparator) {
@@ -58,7 +58,7 @@ import java.lang.annotation.Target;
  *         return new StreamProcessor&lt;&gt;(sortedList.stream());
  *     }
  * }
- * </pre>
+ * }</pre>
  * 
  * <p><b>Performance implications:</b></p>
  * <ul>

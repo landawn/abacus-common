@@ -33,6 +33,13 @@ public interface BiIntObjConsumer<T> extends Throwables.BiIntObjConsumer<T, Runt
     /**
      * Performs this operation on the given arguments.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * BiIntObjConsumer<StringBuilder> appender = (i, j, sb) -> sb.append(i).append(", ").append(j);
+     * StringBuilder sb = new StringBuilder();
+     * appender.accept(10, 20, sb); // sb becomes "10, 20"
+     * }</pre>
+     *
      * @param i the first input argument (int value)
      * @param j the second input argument (int value)
      * @param t the third input argument (object value)
@@ -44,6 +51,13 @@ public interface BiIntObjConsumer<T> extends Throwables.BiIntObjConsumer<T, Runt
      * Returns a composed {@code BiIntObjConsumer} that performs, in sequence, this operation followed by the {@code after} operation.
      * If performing either operation throws an exception, it is relayed to the caller of the composed operation.
      * If performing this operation throws an exception, the {@code after} operation will not be performed.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * BiIntObjConsumer<List<String>> adder = (i, j, list) -> list.add("sum");
+     * BiIntObjConsumer<List<String>> printer = (i, j, list) -> System.out.println(list);
+     * BiIntObjConsumer<List<String>> combined = adder.andThen(printer);
+     * }</pre>
      *
      * @param after the operation to perform after this operation. Must not be {@code null}.
      * @return a composed {@code BiIntObjConsumer} that performs in sequence this operation followed by the {@code after} operation

@@ -58,7 +58,7 @@ final class GuavaHashFunction implements HashFunction {
      * Guava hash function. This method provides a more convenient way to create
      * instances compared to using the constructor directly.
      * 
-     * <p><b>Example usage (internal):</b>
+     * <p><b>Usage Examples (internal):</b></p>
      * <pre>{@code
      * com.google.common.hash.HashFunction guavaFunc = com.google.common.hash.Hashing.sha256();
      * HashFunction wrapped = GuavaHashFunction.wrap(guavaFunc);

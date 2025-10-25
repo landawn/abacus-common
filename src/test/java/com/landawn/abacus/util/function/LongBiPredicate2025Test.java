@@ -170,9 +170,7 @@ public class LongBiPredicate2025Test extends TestBase {
 
     @Test
     public void testComplexChaining() {
-        final LongBiPredicate predicate = LongBiPredicate.GREATER_THAN
-            .and((t, u) -> t + u < 100)
-            .or((t, u) -> t == u);
+        final LongBiPredicate predicate = LongBiPredicate.GREATER_THAN.and((t, u) -> t + u < 100).or((t, u) -> t == u);
 
         assertTrue(predicate.test(10L, 5L)); // 10 > 5 AND 15 < 100
         assertTrue(predicate.test(5L, 5L)); // 5 == 5

@@ -31,7 +31,7 @@ package com.landawn.abacus.util;
  *   <li>Returns 'this' from append methods for method chaining</li>
  * </ul>
  * 
- * <p>Example usage:
+ * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * StringWriter writer = new StringWriter();
  * writer.append("Hello")
@@ -51,7 +51,7 @@ public final class StringWriter extends AppendableWriter {
      * Creates a new StringWriter with a default initial capacity.
      * The initial capacity is determined by the StringBuilder's default constructor.
      * 
-     * <p>Example usage:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * StringWriter writer = new StringWriter();
      * writer.write("Hello, World!");
@@ -65,7 +65,7 @@ public final class StringWriter extends AppendableWriter {
      * Creates a new StringWriter with the specified initial capacity.
      * This can improve performance when the approximate size of the content is known.
      * 
-     * <p>Example usage:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // If expecting approximately 1000 characters
      * StringWriter writer = new StringWriter(1000);
@@ -82,7 +82,7 @@ public final class StringWriter extends AppendableWriter {
      * Any content already in the StringBuilder will be preserved, and new
      * content will be appended to it.
      * 
-     * <p>Example usage:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * StringBuilder sb = new StringBuilder("Existing content. ");
      * StringWriter writer = new StringWriter(sb);
@@ -105,7 +105,7 @@ public final class StringWriter extends AppendableWriter {
      * <p>Note: Modifying the returned StringBuilder will affect the
      * content of this StringWriter.
      * 
-     * <p>Example usage:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * StringWriter writer = new StringWriter();
      * writer.write("Hello");
@@ -123,7 +123,7 @@ public final class StringWriter extends AppendableWriter {
      * Appends a single character to this writer.
      * This method returns the writer itself to allow method chaining.
      * 
-     * <p>Example usage:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * writer.append('H').append('i').append('!');
      * }</pre>
@@ -142,7 +142,7 @@ public final class StringWriter extends AppendableWriter {
      * Appends a character sequence to this writer.
      * If the sequence is null, the string "null" is appended.
      * 
-     * <p>Example usage:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * writer.append("Hello").append(" ").append("World");
      * }</pre>
@@ -162,7 +162,7 @@ public final class StringWriter extends AppendableWriter {
      * If the sequence is null, then characters are appended as if the sequence
      * contained the four characters "null".
      * 
-     * <p>Example usage:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * writer.append("Hello World", 0, 5); // Appends "Hello"
      * }</pre>
@@ -186,7 +186,7 @@ public final class StringWriter extends AppendableWriter {
      * The character is written as the low-order 16 bits of the integer value;
      * the high-order 16 bits are ignored.
      * 
-     * <p>Example usage:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * writer.write(65); // Writes 'A'
      * writer.write('B'); // Also valid
@@ -203,7 +203,7 @@ public final class StringWriter extends AppendableWriter {
      * Writes an array of characters to this writer.
      * The entire array is written to the internal buffer.
      * 
-     * <p>Example usage:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * char[] chars = {'H', 'e', 'l', 'l', 'o'};
      * writer.write(chars);
@@ -221,7 +221,7 @@ public final class StringWriter extends AppendableWriter {
      * Characters are written starting at offset {@code off} and
      * writing {@code len} characters.
      * 
-     * <p>Example usage:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * char[] chars = {'H', 'e', 'l', 'l', 'o', ' ', 'W', 'o', 'r', 'l', 'd'};
      * writer.write(chars, 6, 5); // Writes "World"
@@ -242,7 +242,7 @@ public final class StringWriter extends AppendableWriter {
      * Writes a string to this writer.
      * If the string is null, nothing is written.
      * 
-     * <p>Example usage:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * writer.write("Hello, World!");
      * }</pre>
@@ -259,7 +259,7 @@ public final class StringWriter extends AppendableWriter {
      * Characters are written starting at offset {@code off} and
      * writing {@code len} characters.
      * 
-     * <p>Example usage:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * writer.write("Hello, World!", 7, 5); // Writes "World"
      * }</pre>
@@ -305,7 +305,7 @@ public final class StringWriter extends AppendableWriter {
      * This method creates a new String from the current content
      * of the internal StringBuilder.
      * 
-     * <p>Example usage:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * StringWriter writer = new StringWriter();
      * writer.write("Hello");

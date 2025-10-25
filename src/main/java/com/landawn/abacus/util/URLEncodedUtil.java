@@ -210,10 +210,11 @@ public final class URLEncodedUtil {
      * Supports both '&amp;' and ';' as parameter separators according to RFC 2396.
      * </p>
      *
-     * <pre>
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
      * Map&lt;String, String&gt; params = URLEncodedUtil.decode("name=John+Doe&amp;age=30");
      * // params: {name=John Doe, age=30}
-     * </pre>
+     * }</pre>
      *
      * @param urlQuery the URL query string to decode (e.g., "key1=value1&amp;key2=value2"), may be {@code null} or empty
      * @return a {@code LinkedHashMap} containing parameter names as keys and decoded parameter values as values;
@@ -238,10 +239,11 @@ public final class URLEncodedUtil {
      * Supports both '&amp;' and ';' as parameter separators according to RFC 2396.
      * </p>
      *
-     * <pre>
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
      * Map&lt;String, String&gt; params = URLEncodedUtil.decode("name=%E4%B8%AD%E6%96%87", StandardCharsets.UTF_8);
      * // params: {name=中文}
-     * </pre>
+     * }</pre>
      *
      * @param urlQuery the URL query string to decode, may be {@code null} or empty
      * @param charset the charset to use for decoding percent-encoded characters; if {@code null}, defaults to UTF-8
@@ -267,10 +269,11 @@ public final class URLEncodedUtil {
      * Supports both '&amp;' and ';' as parameter separators according to RFC 2396.
      * </p>
      *
-     * <pre>
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
      * TreeMap&lt;String, String&gt; params = URLEncodedUtil.decode("b=2&amp;a=1", StandardCharsets.UTF_8, TreeMap::new);
      * // params: {a=1, b=2} (sorted by key)
-     * </pre>
+     * }</pre>
      *
      * @param <M> the type of the Map to return, must extend {@code Map<String, String>}
      * @param urlQuery the URL query string to decode, may be {@code null} or empty
@@ -324,10 +327,11 @@ public final class URLEncodedUtil {
      * Supports both '&amp;' and ';' as parameter separators according to RFC 2396.
      * </p>
      *
-     * <pre>
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
      * ListMultimap&lt;String, String&gt; params = URLEncodedUtil.decodeToMultimap("color=red&amp;color=blue&amp;size=L");
      * // params: {color=[red, blue], size=[L]}
-     * </pre>
+     * }</pre>
      *
      * @param urlQuery the URL query string to decode (e.g., "color=red&amp;color=blue&amp;size=L"), may be {@code null} or empty
      * @return a {@code ListMultimap} containing parameter names as keys and lists of decoded parameter values;
@@ -351,10 +355,11 @@ public final class URLEncodedUtil {
      * Supports both '&amp;' and ';' as parameter separators according to RFC 2396.
      * </p>
      *
-     * <pre>
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
      * ListMultimap&lt;String, String&gt; params = URLEncodedUtil.decodeToMultimap("tag=java&amp;tag=url", StandardCharsets.UTF_8);
      * // params: {tag=[java, url]}
-     * </pre>
+     * }</pre>
      *
      * @param urlQuery the URL query string to decode, may be {@code null} or empty
      * @param charset the charset to use for decoding percent-encoded characters; if {@code null}, defaults to UTF-8
@@ -407,11 +412,12 @@ public final class URLEncodedUtil {
      * Supports both '&amp;' and ';' as parameter separators according to RFC 2396.
      * </p>
      *
-     * <pre>
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
      * class User { String name; int age; }
      * User user = URLEncodedUtil.decode("name=John&amp;age=30", User.class);
      * // user: {name="John", age=30}
-     * </pre>
+     * }</pre>
      *
      * @param <T> the type of the object to decode into (JavaBean or Map)
      * @param urlQuery the URL query string to decode, may be {@code null} or empty
@@ -440,11 +446,12 @@ public final class URLEncodedUtil {
      * Supports both '&amp;' and ';' as parameter separators according to RFC 2396.
      * </p>
      *
-     * <pre>
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
      * class Product { String name; double price; }
      * Product p = URLEncodedUtil.decode("name=Laptop&amp;price=999.99", StandardCharsets.UTF_8, Product.class);
      * // p: {name="Laptop", price=999.99}
-     * </pre>
+     * }</pre>
      *
      * @param <T> the type of the object to decode into (JavaBean or Map)
      * @param urlQuery the URL query string to decode, may be {@code null} or empty
@@ -518,13 +525,14 @@ public final class URLEncodedUtil {
      * to its default value (as determined by the property type).
      * </p>
      *
-     * <pre>
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
      * Map&lt;String, String[]&gt; params = new HashMap&lt;&gt;();
-     * params.put("name", new String[]{"Alice"});
-     * params.put("tags", new String[]{"java", "coding"});
+     * params.put("name", new String[] {"Alice"});
+     * params.put("tags", new String[] {"java", "coding"});
      * User user = URLEncodedUtil.parameters2Bean(params, User.class);
      * // user: {name="Alice", tags="java, coding"}
-     * </pre>
+     * }</pre>
      *
      * @param <T> the type of the bean to create
      * @param parameters the map of parameters to convert, where keys are property names and values are String arrays;
@@ -578,11 +586,12 @@ public final class URLEncodedUtil {
      * Characters are percent-encoded according to application/x-www-form-urlencoded rules, where spaces become '+'.
      * </p>
      *
-     * <pre>
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
      * Map&lt;String, Object&gt; params = Map.of("name", "John Doe", "age", 30);
      * String query = URLEncodedUtil.encode(params);
      * // query: "name=John+Doe&amp;age=30"
-     * </pre>
+     * }</pre>
      *
      * @param parameters the parameters to encode (Map, bean, Object array pairs, or String); may be {@code null}
      * @return a URL-encoded query string (e.g., "name=John+Doe&amp;age=30"); returns empty string if {@code parameters} is {@code null}
@@ -607,11 +616,12 @@ public final class URLEncodedUtil {
      * Characters are percent-encoded using the specified charset according to application/x-www-form-urlencoded rules.
      * </p>
      *
-     * <pre>
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
      * Map&lt;String, Object&gt; params = Map.of("name", "中文");
      * String query = URLEncodedUtil.encode(params, StandardCharsets.UTF_8);
      * // query: "name=%E4%B8%AD%E6%96%87"
-     * </pre>
+     * }</pre>
      *
      * @param parameters the parameters to encode (Map, bean, Object array pairs, or String); may be {@code null}
      * @param charset the charset to use for percent-encoding; if {@code null}, defaults to UTF-8
@@ -637,12 +647,13 @@ public final class URLEncodedUtil {
      * Characters are percent-encoded using the specified charset according to application/x-www-form-urlencoded rules.
      * </p>
      *
-     * <pre>
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
      * class User { String firstName; int userAge; }
      * User user = new User("John", 30);
      * String query = URLEncodedUtil.encode(user, StandardCharsets.UTF_8, NamingPolicy.LOWER_CASE_WITH_UNDERSCORE);
      * // query: "first_name=John&amp;user_age=30"
-     * </pre>
+     * }</pre>
      *
      * @param parameters the parameters to encode (Map, bean, Object array pairs, or String); may be {@code null}
      * @param charset the charset to use for percent-encoding; if {@code null}, defaults to UTF-8
@@ -675,11 +686,12 @@ public final class URLEncodedUtil {
      * If {@code parameters} is {@code null} or an empty Map, the original URL is returned unchanged.
      * </p>
      *
-     * <pre>
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
      * Map&lt;String, Object&gt; params = Map.of("q", "java url encoding", "page", 1);
      * String fullUrl = URLEncodedUtil.encode("http://search.example.com", params);
      * // fullUrl: "http://search.example.com?q=java+url+encoding&amp;page=1"
-     * </pre>
+     * }</pre>
      *
      * @param url the base URL to which the query string will be appended (e.g., "http://example.com/path")
      * @param parameters the parameters to encode and append (Map, bean, Object array pairs, or String); may be {@code null}
@@ -700,11 +712,12 @@ public final class URLEncodedUtil {
      * separator. If {@code parameters} is {@code null} or an empty Map, the original URL is returned unchanged.
      * </p>
      *
-     * <pre>
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
      * Map&lt;String, Object&gt; params = Map.of("name", "中文");
      * String fullUrl = URLEncodedUtil.encode("http://example.com", params, StandardCharsets.UTF_8);
      * // fullUrl: "http://example.com?name=%E4%B8%AD%E6%96%87"
-     * </pre>
+     * }</pre>
      *
      * @param url the base URL to which the query string will be appended
      * @param parameters the parameters to encode and append (Map, bean, Object array pairs, or String); may be {@code null}
@@ -727,12 +740,13 @@ public final class URLEncodedUtil {
      * If {@code parameters} is {@code null} or an empty Map, the original URL is returned unchanged.
      * </p>
      *
-     * <pre>
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
      * class User { String firstName; }
      * String url = URLEncodedUtil.encode("http://api.com/users", new User("John"),
      *                                     StandardCharsets.UTF_8, NamingPolicy.LOWER_CASE_WITH_UNDERSCORE);
      * // url: "http://api.com/users?first_name=John"
-     * </pre>
+     * }</pre>
      *
      * @param url the base URL to which the query string will be appended
      * @param parameters the parameters to encode and append (Map, bean, Object array pairs, or String); may be {@code null}
@@ -770,11 +784,12 @@ public final class URLEncodedUtil {
      * to the provided output.
      * </p>
      *
-     * <pre>
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
      * StringBuilder sb = new StringBuilder("http://example.com?");
      * URLEncodedUtil.encode(Map.of("key", "value"), sb);
      * // sb: "http://example.com?key=value"
-     * </pre>
+     * }</pre>
      *
      * @param parameters the parameters to encode (Map, bean, Object array pairs, or String); may be {@code null}
      * @param output the {@code Appendable} (e.g., {@code StringBuilder}, {@code Writer}) to which the encoded query string will be appended
@@ -793,11 +808,12 @@ public final class URLEncodedUtil {
      * and directly appended to the provided output.
      * </p>
      *
-     * <pre>
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
      * Writer writer = new FileWriter("query.txt");
      * URLEncodedUtil.encode(Map.of("name", "中文"), StandardCharsets.UTF_8, writer);
      * // writer content: "name=%E4%B8%AD%E6%96%87"
-     * </pre>
+     * }</pre>
      *
      * @param parameters the parameters to encode (Map, bean, Object array pairs, or String); may be {@code null}
      * @param charset the charset to use for percent-encoding; if {@code null}, defaults to UTF-8
@@ -827,12 +843,13 @@ public final class URLEncodedUtil {
      * </ul>
      * </p>
      *
-     * <pre>
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
      * class User { String firstName; int age; }
      * StringBuilder sb = new StringBuilder();
      * URLEncodedUtil.encode(new User("John", 30), StandardCharsets.UTF_8, NamingPolicy.LOWER_CASE_WITH_UNDERSCORE, sb);
      * // sb: "first_name=John&amp;age=30"
-     * </pre>
+     * }</pre>
      *
      * @param parameters the parameters to encode (Map, bean, Object array pairs, or String); may be {@code null}
      * @param charset the charset to use for percent-encoding; if {@code null}, defaults to UTF-8
@@ -913,10 +930,8 @@ public final class URLEncodedUtil {
     /**
      * Decode/unescape www-url-form-encoded content.
      *
-     * @param content
-     *            the content to decode, will decode '+' as space
-     * @param charset
-     *            the charset to use
+     * @param content the content to decode, will decode '+' as space
+     * @param charset the charset to use
      * @return encoded string
      */
     private static String decodeFormFields(final String content, final Charset charset) {
@@ -930,13 +945,9 @@ public final class URLEncodedUtil {
     /**
      * Decode/unescape a portion of a URL, to use with the urlQuery part ensure {@code plusAsBlank} is {@code true}.
      *
-     * @param content
-     *            the portion to decode
-     * @param charset
-     *            the charset to use
-     * @param plusAsBlank
-     *            if {@code true}, then convert '+' to space (e.g., for www-url-form-encoded content), otherwise leave as
-     *            is.
+     * @param content the portion to decode
+     * @param charset the charset to use
+     * @param plusAsBlank if {@code true}, then convert '+' to space (e.g., for www-url-form-encoded content), otherwise leave as is.
      * @return encoded string
      */
     private static String urlDecode(final String content, final Charset charset, final boolean plusAsBlank) {
@@ -980,10 +991,8 @@ public final class URLEncodedUtil {
      *
      * @param content the content to encode, will convert space to '+'
      * @param charset the charset to use
-     * @param output
-     *
-     * @return encoded string
-     * @throws IOException
+     * @param output the Appendable to which the encoded content will be written
+     * @throws IOException if an I/O error occurs while appending to the output
      */
     private static void encodeFormFields(final String content, final Charset charset, final Appendable output) throws IOException {
         urlEncode(content, (charset != null) ? charset : Charsets.DEFAULT, URL_ENCODER, true, output);
@@ -1023,10 +1032,8 @@ public final class URLEncodedUtil {
      * Used by URIBuilder to encode the userinfo segment.
      * @param content the string to encode, does not convert space to '+'
      * @param charset the charset to use
-     * @param output
-     *
-     * @return
-     * @throws IOException
+     * @param output the Appendable to which the encoded content will be written
+     * @throws IOException if an I/O error occurs while appending to the output
      */
     static void encUserInfo(final String content, final Charset charset, final Appendable output) throws IOException {
         urlEncode(content, charset, USERINFO, false, output);
@@ -1038,10 +1045,8 @@ public final class URLEncodedUtil {
      * Used by URIBuilder to encode the urlQuery and fragment segments.
      * @param content the string to encode, does not convert space to '+'
      * @param charset the charset to use
-     * @param output
-     *
-     * @return
-     * @throws IOException
+     * @param output the Appendable to which the encoded content will be written
+     * @throws IOException if an I/O error occurs while appending to the output
      */
     static void encUric(final String content, final Charset charset, final Appendable output) throws IOException {
         urlEncode(content, charset, URIC, false, output);
@@ -1053,10 +1058,8 @@ public final class URLEncodedUtil {
      * Used by URIBuilder to encode path segments.
      * @param content the string to encode, does not convert space to '+'
      * @param charset the charset to use
-     * @param output
-     *
-     * @return
-     * @throws IOException
+     * @param output the Appendable to which the encoded content will be written
+     * @throws IOException if an I/O error occurs while appending to the output
      */
     static void encPath(final String content, final Charset charset, final Appendable output) throws IOException {
         urlEncode(content, charset, PATH_SAFE, false, output);

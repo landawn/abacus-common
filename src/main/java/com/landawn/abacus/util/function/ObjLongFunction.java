@@ -43,7 +43,7 @@ public interface ObjLongFunction<T, R> extends Throwables.ObjLongFunction<T, R, 
      * produces a result of type R. The function should be deterministic, meaning
      * that for the same inputs, it should always produce the same output.
      *
-     * <p>Example usage:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ObjLongFunction<DateFormat, String> formatTimestamp = (formatter, timestamp) -> 
      *     formatter.format(new Date(timestamp));
@@ -57,7 +57,6 @@ public interface ObjLongFunction<T, R> extends Throwables.ObjLongFunction<T, R, 
      * @param t the first function argument of type T
      * @param u the second function argument, a primitive long value
      * @return the function result of type R
-     * @throws RuntimeException if the function cannot compute a result
      */
     @Override
     R apply(T t, long u);
@@ -72,7 +71,7 @@ public interface ObjLongFunction<T, R> extends Throwables.ObjLongFunction<T, R, 
      * transformations together. The output of this function becomes the input to
      * the {@code after} function.
      *
-     * <p>Example usage:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ObjLongFunction<TimeZone, Date> createDate = (timezone, millis) -> {
      *     Calendar cal = Calendar.getInstance(timezone);

@@ -96,11 +96,24 @@ public abstract class AbstractDoubleType extends NumberType<Number> {
 
     /**
      * Retrieves a double value from a ResultSet at the specified column index.
+     * This method uses rs.getDouble() which returns 0.0 for SQL NULL values.
+     * Subclasses may override this to return null for SQL NULL values.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * // For primitive double types
+     * PrimitiveDoubleType type = TypeFactory.getType(double.class);
+     * double value = type.get(rs, 1); // Returns 0.0 for SQL NULL
+     *
+     * // For wrapper Double types
+     * DoubleType type = TypeFactory.getType(Double.class);
+     * Double value = type.get(rs, 1); // Returns null for SQL NULL (overridden in subclass)
+     * }</pre>
      *
      * @param rs the ResultSet to read from
      * @param columnIndex the column index (1-based)
-     * @return the double value at the specified column
-     * @throws SQLException if a database access error occurs
+     * @return the double value at the specified column; returns 0.0 if SQL NULL (may be overridden by subclasses to return null)
+     * @throws SQLException if a database access error occurs or the columnIndex is invalid
      */
     @Override
     public Double get(final ResultSet rs, final int columnIndex) throws SQLException {
@@ -109,11 +122,24 @@ public abstract class AbstractDoubleType extends NumberType<Number> {
 
     /**
      * Retrieves a double value from a ResultSet using the specified column label.
+     * This method uses rs.getDouble() which returns 0.0 for SQL NULL values.
+     * Subclasses may override this to return null for SQL NULL values.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * // For primitive double types
+     * PrimitiveDoubleType type = TypeFactory.getType(double.class);
+     * double value = type.get(rs, "price"); // Returns 0.0 for SQL NULL
+     *
+     * // For wrapper Double types
+     * DoubleType type = TypeFactory.getType(Double.class);
+     * Double value = type.get(rs, "price"); // Returns null for SQL NULL (overridden in subclass)
+     * }</pre>
      *
      * @param rs the ResultSet to read from
      * @param columnLabel the column label
-     * @return the double value at the specified column
-     * @throws SQLException if a database access error occurs
+     * @return the double value at the specified column; returns 0.0 if SQL NULL (may be overridden by subclasses to return null)
+     * @throws SQLException if a database access error occurs or the columnLabel is not found
      */
     @Override
     public Double get(final ResultSet rs, final String columnLabel) throws SQLException {

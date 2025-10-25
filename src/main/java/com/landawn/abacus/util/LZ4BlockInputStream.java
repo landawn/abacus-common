@@ -26,7 +26,7 @@ import java.io.InputStream;
  * compression ratio and speed. This stream automatically decompresses data that
  * was compressed using LZ4BlockOutputStream or compatible LZ4 block format.</p>
  * 
- * <p>Example usage:</p>
+ * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * try (InputStream compressed = new FileInputStream("data.lz4");
  *      LZ4BlockInputStream lz4In = new LZ4BlockInputStream(compressed)) {
@@ -48,7 +48,7 @@ public final class LZ4BlockInputStream extends InputStream {
     /**
      * Creates a new LZ4BlockInputStream that will decompress data from the specified input stream.
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * FileInputStream fileIn = new FileInputStream("compressed.lz4");
      * LZ4BlockInputStream lz4In = new LZ4BlockInputStream(fileIn);
@@ -83,7 +83,7 @@ public final class LZ4BlockInputStream extends InputStream {
      * 
      * <p>This method blocks until some input is available.</p>
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * byte[] buffer = new byte[1024];
      * int bytesRead = lz4In.read(buffer);
@@ -104,7 +104,7 @@ public final class LZ4BlockInputStream extends InputStream {
      * 
      * <p>This method blocks until some input is available.</p>
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * byte[] buffer = new byte[1024];
      * int bytesRead = lz4In.read(buffer, 0, 512); // Read up to 512 bytes
@@ -129,7 +129,7 @@ public final class LZ4BlockInputStream extends InputStream {
      * <p>This method may skip more or fewer bytes than requested depending on the
      * underlying implementation and the compressed data structure.</p>
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * long skipped = lz4In.skip(1024); // Try to skip 1024 bytes
      * }</pre>

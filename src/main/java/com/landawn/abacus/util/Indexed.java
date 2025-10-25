@@ -23,7 +23,7 @@ package com.landawn.abacus.util;
  * 
  * <p>The class is immutable and extends {@link AbstractIndexed}.</p>
  * 
- * <p>Example usage:</p>
+ * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * Indexed<String> indexedValue = Indexed.of("Hello", 5);
  * String value = indexedValue.value(); // "Hello"
@@ -58,7 +58,7 @@ public final class Indexed<T> extends AbstractIndexed {
     /**
      * Creates a new Indexed instance with the specified value and index.
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Indexed<String> indexed = Indexed.of("Hello", 5);
      * }</pre>
@@ -80,7 +80,7 @@ public final class Indexed<T> extends AbstractIndexed {
      * 
      * <p>This overload accepts a long index for cases where the index might exceed Integer.MAX_VALUE.</p>
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Indexed<String> indexed = Indexed.of("Hello", 5000000000L);
      * }</pre>
@@ -100,7 +100,7 @@ public final class Indexed<T> extends AbstractIndexed {
     /**
      * Returns the value stored in this Indexed instance.
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Indexed<String> indexed = Indexed.of("Hello", 5);
      * String value = indexed.value(); // "Hello"
@@ -130,7 +130,7 @@ public final class Indexed<T> extends AbstractIndexed {
      * <p>Two Indexed instances are equal if they have the same index and equal values
      * (where null values are considered equal to each other).</p>
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Indexed<String> indexed1 = Indexed.of("Hello", 5);
      * Indexed<String> indexed2 = Indexed.of("Hello", 5);
@@ -162,7 +162,7 @@ public final class Indexed<T> extends AbstractIndexed {
      * 
      * <p>The format is: [index]=value</p>
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Indexed<String> indexed = Indexed.of("Hello", 5);
      * System.out.println(indexed); // prints: [5]=Hello

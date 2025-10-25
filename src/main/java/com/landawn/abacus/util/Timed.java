@@ -22,7 +22,7 @@ package com.landawn.abacus.util;
  * <p>The timestamp represents milliseconds since the Unix epoch (January 1, 1970 UTC).
  * Once created, both the value and timestamp are immutable.
  * 
- * <p>Example usage:
+ * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * // Create a timed value with current timestamp
  * Timed<String> timedData = Timed.of("Hello World");
@@ -61,8 +61,8 @@ public final class Timed<T> implements Immutable {
     /**
      * Creates a new Timed instance with the specified value and the current system time.
      * The timestamp is captured at the moment this method is called.
-     * 
-     * <p>Example usage:
+     *
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Timed<String> message = Timed.of("System started");
      * Timed<List<String>> snapshot = Timed.of(activeUsers);
@@ -71,6 +71,7 @@ public final class Timed<T> implements Immutable {
      * @param <T> the type of the value
      * @param value the value to associate with the current timestamp; can be null
      * @return a new Timed instance containing the value and current timestamp
+     * @see #of(Object, long)
      */
     public static <T> Timed<T> of(final T value) {
         return new Timed<>(value, System.currentTimeMillis());
@@ -80,13 +81,13 @@ public final class Timed<T> implements Immutable {
      * Creates a new Timed instance with the specified value and timestamp.
      * This allows creating timed values with historical timestamps or timestamps
      * from external sources.
-     * 
-     * <p>Example usage:
+     *
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Create with a past timestamp
      * long yesterday = System.currentTimeMillis() - TimeUnit.DAYS.toMillis(1);
      * Timed<String> historicalEvent = Timed.of("Event occurred", yesterday);
-     * 
+     *
      * // Create from a database timestamp
      * long dbTimestamp = resultSet.getTimestamp("created_at").getTime();
      * Timed<User> timedUser = Timed.of(user, dbTimestamp);
@@ -96,6 +97,7 @@ public final class Timed<T> implements Immutable {
      * @param value the value to associate with the timestamp; can be null
      * @param timeInMillis the timestamp in milliseconds since epoch
      * @return a new Timed instance containing the value and specified timestamp
+     * @see #of(Object)
      */
     public static <T> Timed<T> of(final T value, final long timeInMillis) {
         return new Timed<>(value, timeInMillis);
@@ -104,8 +106,8 @@ public final class Timed<T> implements Immutable {
     /**
      * Returns the timestamp associated with this timed value.
      * The timestamp represents milliseconds since the Unix epoch (January 1, 1970 UTC).
-     * 
-     * <p>Example usage:
+     *
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Timed<String> timedData = Timed.of("data");
      * long age = System.currentTimeMillis() - timedData.timestamp();
@@ -113,6 +115,7 @@ public final class Timed<T> implements Immutable {
      * }</pre>
      *
      * @return the timestamp in milliseconds since epoch
+     * @see #value()
      */
     public long timestamp() {
         return timeInMillis;
@@ -121,8 +124,8 @@ public final class Timed<T> implements Immutable {
     /**
      * Returns the value contained in this timed instance.
      * The returned value may be null if null was provided when creating the instance.
-     * 
-     * <p>Example usage:
+     *
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Timed<User> timedUser = Timed.of(currentUser);
      * User user = timedUser.value();
@@ -130,6 +133,7 @@ public final class Timed<T> implements Immutable {
      * }</pre>
      *
      * @return the value associated with the timestamp; may be null
+     * @see #timestamp()
      */
     public T value() {
         return value;
@@ -144,7 +148,7 @@ public final class Timed<T> implements Immutable {
      * (computed using XOR of its upper and lower 32 bits) with the value's hash code
      * using the standard multiplier of 31. If the value is null, its hash code is 0.
      *
-     * <p>Example usage:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Timed<String> t1 = Timed.of("data", 1000L);
      * Timed<String> t2 = Timed.of("data", 1000L);
@@ -165,7 +169,7 @@ public final class Timed<T> implements Immutable {
      * Two Timed instances are considered equal if they have the same timestamp
      * and their values are equal (or both null).
      * 
-     * <p>Example usage:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Timed<String> t1 = Timed.of("hello", 1000L);
      * Timed<String> t2 = Timed.of("hello", 1000L);
@@ -198,7 +202,7 @@ public final class Timed<T> implements Immutable {
      * 
      * <p>Format: {@code "timestamp: value"}
      * 
-     * <p>Example output:
+     * <p><b>Example output:</b></p>
      * <pre>{@code
      * Timed<String> t = Timed.of("Hello", 1609459200000L);
      * System.out.println(t); // Prints: "1609459200000: Hello"

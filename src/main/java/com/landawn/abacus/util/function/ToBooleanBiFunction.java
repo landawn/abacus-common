@@ -32,6 +32,19 @@ public interface ToBooleanBiFunction<T, U> {
     /**
      * Applies this function to the given arguments.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * ToBooleanBiFunction<String, String> equals = String::equals;
+     * boolean result1 = equals.applyAsBoolean("hello", "hello"); // returns true
+     * boolean result2 = equals.applyAsBoolean("hello", "world"); // returns false
+     *
+     * ToBooleanBiFunction<Integer, Integer> greaterThan = (a, b) -> a > b;
+     * boolean result3 = greaterThan.applyAsBoolean(10, 5); // returns true
+     *
+     * ToBooleanBiFunction<List, Object> contains = List::contains;
+     * boolean result4 = contains.applyAsBoolean(Arrays.asList(1, 2, 3), 2); // returns true
+     * }</pre>
+     *
      * @param t the first function argument
      * @param u the second function argument
      * @return the function result as a boolean value

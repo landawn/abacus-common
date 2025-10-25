@@ -60,7 +60,7 @@ final class GuavaHasher implements Hasher {
      * Guava hasher. This method provides a more convenient way to create
      * instances compared to using the constructor directly.
      * 
-     * <p><b>Example usage (internal):</b>
+     * <p><b>Usage Examples (internal):</b></p>
      * <pre>{@code
      * com.google.common.hash.Hasher guavaHasher = guavaHashFunction.newHasher();
      * Hasher wrapped = GuavaHasher.wrap(guavaHasher);

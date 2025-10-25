@@ -50,7 +50,7 @@ import lombok.experimental.Accessors;
  *   <li>Easier refactoring when property names change</li>
  * </ul>
  * 
- * <p>Example usage:
+ * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * // Generate inner class 'x' for a single entity
  * String code = CodeGenerationUtil.generatePropNameTableClass(User.class);
@@ -97,7 +97,7 @@ public final class CodeGenerationUtil {
      * Predefined function for generating min() property names.
      * Only applicable to properties that implement Comparable interface.
      * 
-     * <p>Example: For a property "age", it generates "min(age)"
+     * <p><b>Usage Examples:</b></p> For a property "age", it generates "min(age)"
      */
     public static final TriFunction<Class<?>, Class<?>, String, String> MIN_FUNC = (entityClass, propClass, propName) -> {
         if (Comparable.class.isAssignableFrom(propClass)) {
@@ -111,7 +111,7 @@ public final class CodeGenerationUtil {
      * Predefined function for generating max() property names.
      * Only applicable to properties that implement Comparable interface.
      * 
-     * <p>Example: For a property "age", it generates "max(age)"
+     * <p><b>Usage Examples:</b></p> For a property "age", it generates "max(age)"
      */
     public static final TriFunction<Class<?>, Class<?>, String, String> MAX_FUNC = (entityClass, propClass, propName) -> {
         if (Comparable.class.isAssignableFrom(propClass)) {
@@ -140,7 +140,7 @@ public final class CodeGenerationUtil {
      * 
      * <p>The default interface name is "x".
      * 
-     * <p>Example usage:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String code = CodeGenerationUtil.generatePropNameTableClass(User.class);
      * // Generates:
@@ -164,7 +164,7 @@ public final class CodeGenerationUtil {
      * Generates a property name table class as an inner interface for the specified entity class
      * with a custom interface name.
      * 
-     * <p>Example usage:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String code = CodeGenerationUtil.generatePropNameTableClass(User.class, "Props");
      * // Generates:
@@ -192,7 +192,7 @@ public final class CodeGenerationUtil {
      * <p>If srcDir is provided, the generated code will be inserted into the existing
      * entity class file. If the interface already exists, it will be replaced.
      * 
-     * <p>Example usage:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Generate and write to file
      * String code = CodeGenerationUtil.generatePropNameTableClass(
@@ -307,7 +307,7 @@ public final class CodeGenerationUtil {
      * 
      * <p>Uses "s" as the default class name.
      * 
-     * <p>Example usage:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * List<Class<?>> entities = Arrays.asList(User.class, Order.class);
      * String code = CodeGenerationUtil.generatePropNameTableClasses(entities);
@@ -324,7 +324,7 @@ public final class CodeGenerationUtil {
     /**
      * Generates property name table classes for multiple entity classes with a custom class name.
      * 
-     * <p>Example usage:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * List<Class<?>> entities = Arrays.asList(User.class, Order.class);
      * String code = CodeGenerationUtil.generatePropNameTableClasses(entities, "Props");
@@ -343,7 +343,7 @@ public final class CodeGenerationUtil {
      * Generates property name table classes for multiple entity classes with full customization.
      * Optionally writes the generated class to a file in the specified source directory.
      * 
-     * <p>Example usage:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * List<Class<?>> entities = Arrays.asList(User.class, Order.class);
      * String code = CodeGenerationUtil.generatePropNameTableClasses(
@@ -387,7 +387,7 @@ public final class CodeGenerationUtil {
      *   <li>Per-class property name lists</li>
      * </ul>
      * 
-     * <p>Example usage:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * PropNameTableCodeConfig config = PropNameTableCodeConfig.builder()
      *     .entityClasses(entities)
@@ -890,7 +890,7 @@ public final class CodeGenerationUtil {
      * Configuration class for property name table code generation.
      * This class provides a builder pattern for configuring all aspects of the code generation process.
      * 
-     * <p>Example configuration:
+     * <p>Example configuration:</p>
      * <pre>{@code
      * PropNameTableCodeConfig config = PropNameTableCodeConfig.builder()
      *     .entityClasses(classes)

@@ -141,7 +141,7 @@ abstract class SmoothRateLimiter extends RateLimiter {
     /**
      * This implements the following function where coldInterval = coldFactor * stableInterval.
      *
-     * <pre>
+     * <pre>{@code
      *          ^ throttling
      *          |
      *    cold  +                  /
@@ -158,7 +158,7 @@ abstract class SmoothRateLimiter extends RateLimiter {
      *          |          .       .
      *        0 +----------+-------+--------------→ storedPermits
      *          0 thresholdPermits maxPermits
-     * </pre>
+     * }</pre>
      *
      * Before going into the details of this particular function, let's keep in mind the basics:
      *
@@ -220,10 +220,10 @@ abstract class SmoothRateLimiter extends RateLimiter {
         /**
          * Instantiates a new smooth warming up.
          *
-         * @param stopwatch
-         * @param warmupPeriod
-         * @param timeUnit
-         * @param coldFactor
+         * @param stopwatch the stopwatch used for timing
+         * @param warmupPeriod the warmup period duration
+         * @param timeUnit the time unit for the warmup period
+         * @param coldFactor the cold factor multiplier
          */
         SmoothWarmingUp(final SleepingStopwatch stopwatch, final long warmupPeriod, final TimeUnit timeUnit, final double coldFactor) {
             super(stopwatch);
@@ -234,8 +234,8 @@ abstract class SmoothRateLimiter extends RateLimiter {
         /**
          * Do set rate.
          *
-         * @param permitsPerSecond
-         * @param stableIntervalMicros
+         * @param permitsPerSecond the number of permits per second
+         * @param stableIntervalMicros the stable interval in microseconds
          */
         @Override
         void doSetRate(final double permitsPerSecond, final double stableIntervalMicros) {
@@ -256,9 +256,9 @@ abstract class SmoothRateLimiter extends RateLimiter {
         /**
          * Stored permits to wait time.
          *
-         * @param storedPermits
-         * @param permitsToTake
-         * @return
+         * @param storedPermits the number of stored permits
+         * @param permitsToTake the number of permits to take
+         * @return the wait time in microseconds
          */
         @Override
         long storedPermitsToWaitTime(final double storedPermits, double permitsToTake) {
@@ -281,8 +281,8 @@ abstract class SmoothRateLimiter extends RateLimiter {
         /**
          * Permits to time.
          *
-         * @param permits
-         * @return
+         * @param permits the number of permits
+         * @return the time in microseconds
          */
         private double permitsToTime(final double permits) {
             return stableIntervalMicros + permits * slope;
@@ -291,7 +291,7 @@ abstract class SmoothRateLimiter extends RateLimiter {
         /**
          * Cool down interval micros.
          *
-         * @return
+         * @return the cooldown interval in microseconds
          */
         @Override
         double coolDownIntervalMicros() {
@@ -313,8 +313,8 @@ abstract class SmoothRateLimiter extends RateLimiter {
         /**
          * Instantiates a new smooth bursty.
          *
-         * @param stopwatch
-         * @param maxBurstSeconds
+         * @param stopwatch the stopwatch used for timing
+         * @param maxBurstSeconds the maximum burst duration in seconds
          */
         SmoothBursty(final SleepingStopwatch stopwatch, final double maxBurstSeconds) {
             super(stopwatch);
@@ -324,8 +324,8 @@ abstract class SmoothRateLimiter extends RateLimiter {
         /**
          * Do set rate.
          *
-         * @param permitsPerSecond
-         * @param stableIntervalMicros
+         * @param permitsPerSecond the number of permits per second
+         * @param stableIntervalMicros the stable interval in microseconds
          */
         @Override
         void doSetRate(final double permitsPerSecond, final double stableIntervalMicros) {
@@ -343,9 +343,9 @@ abstract class SmoothRateLimiter extends RateLimiter {
         /**
          * Stored permits to wait time.
          *
-         * @param storedPermits
-         * @param permitsToTake
-         * @return
+         * @param storedPermits the number of stored permits
+         * @param permitsToTake the number of permits to take
+         * @return the wait time in microseconds
          */
         @Override
         long storedPermitsToWaitTime(final double storedPermits, final double permitsToTake) {
@@ -355,7 +355,7 @@ abstract class SmoothRateLimiter extends RateLimiter {
         /**
          * Cool down interval micros.
          *
-         * @return
+         * @return the cooldown interval in microseconds
          */
         @Override
         double coolDownIntervalMicros() {
@@ -392,8 +392,8 @@ abstract class SmoothRateLimiter extends RateLimiter {
     /**
      * Do set rate.
      *
-     * @param permitsPerSecond
-     * @param nowMicros
+     * @param permitsPerSecond the number of permits per second
+     * @param nowMicros the current time in microseconds
      */
     @Override
     final void doSetRate(final double permitsPerSecond, final long nowMicros) {
@@ -406,15 +406,15 @@ abstract class SmoothRateLimiter extends RateLimiter {
     /**
      * Do set rate.
      *
-     * @param permitsPerSecond
-     * @param stableIntervalMicros
+     * @param permitsPerSecond the number of permits per second
+     * @param stableIntervalMicros the stable interval in microseconds
      */
     abstract void doSetRate(double permitsPerSecond, double stableIntervalMicros);
 
     /**
      * Do get rate.
      *
-     * @return
+     * @return the rate in permits per second
      */
     @Override
     final double doGetRate() {
@@ -424,8 +424,8 @@ abstract class SmoothRateLimiter extends RateLimiter {
     /**
      * Query earliest available.
      *
-     * @param nowMicros
-     * @return
+     * @param nowMicros the current time in microseconds
+     * @return the earliest available time in microseconds
      */
     @Override
     final long queryEarliestAvailable(final long nowMicros) {
@@ -435,9 +435,9 @@ abstract class SmoothRateLimiter extends RateLimiter {
     /**
      * Reserve earliest available.
      *
-     * @param requiredPermits
-     * @param nowMicros
-     * @return
+     * @param requiredPermits the number of required permits
+     * @param nowMicros the current time in microseconds
+     * @return the time in microseconds when the permits will be available
      */
     @Override
     final long reserveEarliestAvailable(final int requiredPermits, final long nowMicros) {
@@ -459,23 +459,23 @@ abstract class SmoothRateLimiter extends RateLimiter {
      *
      * <p>This always holds: {@code 0 <= permitsToTake <= storedPermits}
      *
-     * @param storedPermits
-     * @param permitsToTake
-     * @return
+     * @param storedPermits the number of stored permits
+     * @param permitsToTake the number of permits to take
+     * @return the wait time in microseconds
      */
     abstract long storedPermitsToWaitTime(double storedPermits, double permitsToTake);
 
     /**
      * Returns the number of microseconds during cooldown that we have to wait to get a new permit.
      *
-     * @return
+     * @return the cooldown interval in microseconds
      */
     abstract double coolDownIntervalMicros();
 
     /**
      * Updates {@code storedPermits} and {@code nextFreeTicketMicros} based on the current time.
      *
-     * @param nowMicros
+     * @param nowMicros the current time in microseconds
      */
     void resync(final long nowMicros) {
         // if nextFreeTicket is in the past, resync to now

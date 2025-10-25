@@ -27,9 +27,9 @@ public class ObjIteratorEx101Test extends TestBase {
 
     @Test
     public void testOfArray() {
-        String[] array = {"a", "b", "c"};
+        String[] array = { "a", "b", "c" };
         ObjIteratorEx<String> iter = ObjIteratorEx.of(array);
-        
+
         Assertions.assertTrue(iter.hasNext());
         Assertions.assertEquals("a", iter.next());
         Assertions.assertEquals("b", iter.next());
@@ -47,9 +47,9 @@ public class ObjIteratorEx101Test extends TestBase {
 
     @Test
     public void testOfArrayWithIndices() {
-        String[] array = {"a", "b", "c", "d", "e"};
+        String[] array = { "a", "b", "c", "d", "e" };
         ObjIteratorEx<String> iter = ObjIteratorEx.of(array, 1, 4);
-        
+
         Assertions.assertTrue(iter.hasNext());
         Assertions.assertEquals("b", iter.next());
         Assertions.assertEquals("c", iter.next());
@@ -59,14 +59,14 @@ public class ObjIteratorEx101Test extends TestBase {
 
     @Test
     public void testOfArrayWithIndicesEmpty() {
-        String[] array = {"a", "b", "c"};
+        String[] array = { "a", "b", "c" };
         ObjIteratorEx<String> iter = ObjIteratorEx.of(array, 1, 1);
         Assertions.assertFalse(iter.hasNext());
     }
 
     @Test
     public void testOfArrayWithIndicesInvalid() {
-        String[] array = {"a", "b", "c"};
+        String[] array = { "a", "b", "c" };
         Assertions.assertThrows(IndexOutOfBoundsException.class, () -> ObjIteratorEx.of(array, 2, 1));
         Assertions.assertThrows(IndexOutOfBoundsException.class, () -> ObjIteratorEx.of(array, -1, 2));
         Assertions.assertThrows(IndexOutOfBoundsException.class, () -> ObjIteratorEx.of(array, 0, 4));
@@ -76,7 +76,7 @@ public class ObjIteratorEx101Test extends TestBase {
     public void testOfCollection() {
         List<String> list = Arrays.asList("a", "b", "c");
         ObjIteratorEx<String> iter = ObjIteratorEx.of(list);
-        
+
         Assertions.assertTrue(iter.hasNext());
         Assertions.assertEquals("a", iter.next());
         Assertions.assertEquals("b", iter.next());
@@ -95,7 +95,7 @@ public class ObjIteratorEx101Test extends TestBase {
     public void testOfIterator() {
         List<String> list = Arrays.asList("a", "b", "c");
         ObjIteratorEx<String> iter = ObjIteratorEx.of(list.iterator());
-        
+
         Assertions.assertTrue(iter.hasNext());
         Assertions.assertEquals("a", iter.next());
         Assertions.assertEquals("b", iter.next());
@@ -121,7 +121,7 @@ public class ObjIteratorEx101Test extends TestBase {
     public void testOfIterable() {
         List<String> list = Arrays.asList("a", "b", "c");
         ObjIteratorEx<String> iter = ObjIteratorEx.of((Iterable<String>) list);
-        
+
         Assertions.assertTrue(iter.hasNext());
         Assertions.assertEquals("a", iter.next());
         Assertions.assertEquals("b", iter.next());
@@ -141,7 +141,7 @@ public class ObjIteratorEx101Test extends TestBase {
         List<String> list = Arrays.asList("a", "b", "c");
         Supplier<Iterator<String>> supplier = () -> list.iterator();
         ObjIteratorEx<String> iter = ObjIteratorEx.defer(supplier);
-        
+
         Assertions.assertTrue(iter.hasNext());
         Assertions.assertEquals("a", iter.next());
         Assertions.assertEquals("b", iter.next());
@@ -151,15 +151,15 @@ public class ObjIteratorEx101Test extends TestBase {
 
     @Test
     public void testDeferWithObjIteratorEx() {
-        String[] array = {"a", "b", "c"};
+        String[] array = { "a", "b", "c" };
         Supplier<Iterator<String>> supplier = () -> ObjIteratorEx.of(array);
         ObjIteratorEx<String> iter = ObjIteratorEx.defer(supplier);
-        
+
         iter.advance(1);
         Assertions.assertEquals("b", iter.next());
-        
+
         Assertions.assertEquals(1, iter.count());
-        
+
         iter.close();
     }
 
@@ -170,42 +170,42 @@ public class ObjIteratorEx101Test extends TestBase {
 
     @Test
     public void testAdvance() {
-        String[] array = {"a", "b", "c", "d", "e"};
+        String[] array = { "a", "b", "c", "d", "e" };
         ObjIteratorEx<String> iter = ObjIteratorEx.of(array);
-        
+
         iter.advance(2);
         Assertions.assertEquals("c", iter.next());
-        
+
         iter.advance(1);
         Assertions.assertEquals("e", iter.next());
-        
+
         iter.advance(10);
         Assertions.assertFalse(iter.hasNext());
     }
 
     @Test
     public void testAdvanceZero() {
-        String[] array = {"a", "b", "c"};
+        String[] array = { "a", "b", "c" };
         ObjIteratorEx<String> iter = ObjIteratorEx.of(array);
-        
+
         iter.advance(0);
         Assertions.assertEquals("a", iter.next());
     }
 
     @Test
     public void testCount() {
-        String[] array = {"a", "b", "c", "d", "e"};
+        String[] array = { "a", "b", "c", "d", "e" };
         ObjIteratorEx<String> iter = ObjIteratorEx.of(array, 1, 4);
-        
+
         Assertions.assertEquals(3, iter.count());
         Assertions.assertFalse(iter.hasNext());
     }
 
     @Test
     public void testToArray() {
-        String[] array = {"a", "b", "c"};
+        String[] array = { "a", "b", "c" };
         ObjIteratorEx<String> iter = ObjIteratorEx.of(array);
-        
+
         String[] result = iter.toArray(new String[0]);
         Assertions.assertArrayEquals(array, result);
         Assertions.assertFalse(iter.hasNext());
@@ -213,9 +213,9 @@ public class ObjIteratorEx101Test extends TestBase {
 
     @Test
     public void testToArrayWithSufficientSize() {
-        String[] array = {"a", "b", "c"};
+        String[] array = { "a", "b", "c" };
         ObjIteratorEx<String> iter = ObjIteratorEx.of(array);
-        
+
         String[] output = new String[5];
         String[] result = iter.toArray(output);
         Assertions.assertSame(output, result);
@@ -226,9 +226,9 @@ public class ObjIteratorEx101Test extends TestBase {
 
     @Test
     public void testToList() {
-        String[] array = {"a", "b", "c"};
+        String[] array = { "a", "b", "c" };
         ObjIteratorEx<String> iter = ObjIteratorEx.of(array);
-        
+
         List<String> result = iter.toList();
         Assertions.assertEquals(Arrays.asList("a", "b", "c"), result);
         Assertions.assertFalse(iter.hasNext());

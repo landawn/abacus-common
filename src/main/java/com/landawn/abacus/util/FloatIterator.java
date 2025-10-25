@@ -32,17 +32,17 @@ import com.landawn.abacus.util.stream.FloatStream;
  * <p>FloatIterator is immutable and all transformation methods return new iterator instances.
  * It extends {@code ImmutableIterator<Float>} but provides primitive-specific methods
  * to avoid autoboxing.</p>
- * 
- * <p>Example usage:</p>
- * <pre>
+ *
+ * <p><b>Usage Examples:</b></p>
+ * <pre>{@code
  * FloatIterator iter = FloatIterator.of(1.0f, 2.5f, 3.7f, 4.2f);
- * 
+ *
  * // Skip first element and take next two
  * FloatIterator filtered = iter.skip(1).limit(2);
- * 
+ *
  * // Convert to array
  * float[] array = filtered.toArray(); // [2.5f, 3.7f]
- * </pre>
+ * }</pre>
  * 
  * @see ObjIterator
  * @see BiIterator
@@ -72,11 +72,11 @@ public abstract class FloatIterator extends ImmutableIterator<Float> {
     /**
      * Returns an empty FloatIterator singleton instance.
      *
-     * <p>Example:</p>
-     * <pre>
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
      * FloatIterator empty = FloatIterator.empty();
      * empty.hasNext(); // false
-     * </pre>
+     * }</pre>
      *
      * @return an empty FloatIterator
      */
@@ -89,14 +89,14 @@ public abstract class FloatIterator extends ImmutableIterator<Float> {
      * Creates a FloatIterator from a float array.
      * The entire array will be used for iteration.
      *
-     * <p>Example:</p>
-     * <pre>
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
      * float[] values = {1.0f, 2.0f, 3.0f};
      * FloatIterator iter = FloatIterator.of(values);
      * while (iter.hasNext()) {
      *     System.out.println(iter.nextFloat());
      * }
-     * </pre>
+     * }</pre>
      *
      * @param a the array to create an iterator from, may be null or empty
      * @return a new FloatIterator over the array elements, or empty iterator if array is null/empty
@@ -109,12 +109,12 @@ public abstract class FloatIterator extends ImmutableIterator<Float> {
      * Creates a FloatIterator from a portion of a float array.
      * Only elements from fromIndex (inclusive) to toIndex (exclusive) will be iterated.
      *
-     * <p>Example:</p>
-     * <pre>
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
      * float[] values = {1.0f, 2.0f, 3.0f, 4.0f, 5.0f};
      * FloatIterator iter = FloatIterator.of(values, 1, 4);
      * // Will iterate over: 2.0f, 3.0f, 4.0f
-     * </pre>
+     * }</pre>
      *
      * @param a the array to create an iterator from
      * @param fromIndex the start index (inclusive)
@@ -167,8 +167,8 @@ public abstract class FloatIterator extends ImmutableIterator<Float> {
      * The Supplier is invoked only when the first method is called on the returned iterator.
      * This allows for deferred initialization of the iterator.
      *
-     * <p>Example:</p>
-     * <pre>
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
      * FloatIterator lazy = FloatIterator.defer(() -> {
      *     // Expensive computation
      *     float[] data = loadFloatData();
@@ -178,7 +178,7 @@ public abstract class FloatIterator extends ImmutableIterator<Float> {
      * if (lazy.hasNext()) { // Supplier is invoked here
      *     float value = lazy.nextFloat();
      * }
-     * </pre>
+     * }</pre>
      *
      * @param iteratorSupplier A Supplier that provides the FloatIterator when needed
      * @return A FloatIterator that is initialized on first use
@@ -222,14 +222,14 @@ public abstract class FloatIterator extends ImmutableIterator<Float> {
      * Returns an infinite FloatIterator that generates values using the provided supplier.
      * The supplier is called each time a new value is needed.
      *
-     * <p>Example:</p>
-     * <pre>
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
      * Random random = new Random();
      * FloatIterator randomFloats = FloatIterator.generate(() -> random.nextFloat());
-     * 
+     *
      * // Take first 5 random values
      * float[] fiveRandoms = randomFloats.limit(5).toArray();
-     * </pre>
+     * }</pre>
      *
      * @param supplier the supplier function to generate float values
      * @return an infinite FloatIterator
@@ -255,15 +255,15 @@ public abstract class FloatIterator extends ImmutableIterator<Float> {
      * Returns a FloatIterator that generates values while the hasNext condition is true.
      * This allows for creating finite iterators with dynamic termination conditions.
      *
-     * <p>Example:</p>
-     * <pre>
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
      * int[] counter = {0};
      * FloatIterator limited = FloatIterator.generate(
      *     () -> counter[0] < 10,
      *     () -> counter[0]++ * 1.5f
      * );
      * // Generates: 0.0, 1.5, 3.0, 4.5, 6.0, 7.5, 9.0, 10.5, 12.0, 13.5
-     * </pre>
+     * }</pre>
      *
      * @param hasNext a BooleanSupplier that determines if more elements are available
      * @param supplier the supplier function to generate float values
@@ -296,11 +296,11 @@ public abstract class FloatIterator extends ImmutableIterator<Float> {
      * This method provides compatibility with the Iterator&lt;Float&gt; interface but involves boxing overhead.
      * For better performance, use {@link #nextFloat()} instead which returns the primitive float value directly.
      *
-     * <p>Example:</p>
-     * <pre>
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
      * FloatIterator iter = FloatIterator.of(1.0f, 2.0f);
      * Float boxed = iter.next(); // 1.0f (boxed)
-     * </pre>
+     * }</pre>
      *
      * @return the next element as a Float object
      * @throws NoSuchElementException if no more elements are available
@@ -315,21 +315,16 @@ public abstract class FloatIterator extends ImmutableIterator<Float> {
 
     /**
      * Returns the next float value in the iteration.
-     * This is the primary method for retrieving primitive float values from the iterator
-     * without the boxing overhead of {@link #next()}.
      *
-     * <p>Example:</p>
-     * <pre>
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
      * FloatIterator iter = FloatIterator.of(1.0f, 2.0f, 3.0f);
-     * while (iter.hasNext()) {
-     *     float value = iter.nextFloat();
-     *     System.out.println(value);
-     * }
-     * </pre>
+     * float first = iter.nextFloat(); // 1.0f
+     * float second = iter.nextFloat(); // 2.0f
+     * }</pre>
      *
-     * @return the next float value in the iteration
+     * @return the next float value
      * @throws NoSuchElementException if the iteration has no more elements
-     *
      */
     public abstract float nextFloat();
 
@@ -338,12 +333,12 @@ public abstract class FloatIterator extends ImmutableIterator<Float> {
      * If n is greater than the number of remaining elements, an empty iterator is returned.
      * The skipping is performed lazily when the returned iterator is first accessed.
      *
-     * <p>Example:</p>
-     * <pre>
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
      * FloatIterator iter = FloatIterator.of(1.0f, 2.0f, 3.0f, 4.0f, 5.0f);
      * FloatIterator skipped = iter.skip(2);
      * // skipped will iterate over: 3.0f, 4.0f, 5.0f
-     * </pre>
+     * }</pre>
      *
      * @param n the number of elements to skip
      * @return a new FloatIterator with the first n elements skipped
@@ -395,12 +390,12 @@ public abstract class FloatIterator extends ImmutableIterator<Float> {
      * Returns a new FloatIterator that contains at most the specified number of elements.
      * If the iterator contains fewer elements than the limit, all elements are included.
      *
-     * <p>Example:</p>
-     * <pre>
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
      * FloatIterator iter = FloatIterator.of(1.0f, 2.0f, 3.0f, 4.0f, 5.0f);
      * FloatIterator limited = iter.limit(3);
      * // limited will iterate over: 1.0f, 2.0f, 3.0f
-     * </pre>
+     * }</pre>
      *
      * @param count the maximum number of elements to iterate
      * @return a new FloatIterator limited to the specified count
@@ -439,12 +434,12 @@ public abstract class FloatIterator extends ImmutableIterator<Float> {
      * Returns a new FloatIterator that only includes elements matching the given predicate.
      * The filtering is performed lazily as elements are requested.
      *
-     * <p>Example:</p>
-     * <pre>
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
      * FloatIterator iter = FloatIterator.of(1.0f, 2.5f, 3.0f, 4.5f, 5.0f);
      * FloatIterator filtered = iter.filter(x -> x > 2.5f);
      * // filtered will iterate over: 3.0f, 4.5f, 5.0f
-     * </pre>
+     * }</pre>
      *
      * @param predicate the predicate to test elements
      * @return a new FloatIterator containing only matching elements
@@ -492,14 +487,14 @@ public abstract class FloatIterator extends ImmutableIterator<Float> {
      * Returns the first element wrapped in an OptionalFloat, or empty if no elements exist.
      * This consumes the first element from the iterator if present.
      *
-     * <p>Example:</p>
-     * <pre>
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
      * FloatIterator iter = FloatIterator.of(1.5f, 2.5f, 3.5f);
      * OptionalFloat first = iter.first(); // OptionalFloat.of(1.5f)
-     * 
+     *
      * FloatIterator empty = FloatIterator.empty();
      * OptionalFloat none = empty.first(); // OptionalFloat.empty()
-     * </pre>
+     * }</pre>
      *
      * @return OptionalFloat containing the first element, or empty if iterator is empty
      */
@@ -515,11 +510,11 @@ public abstract class FloatIterator extends ImmutableIterator<Float> {
      * Returns the last element wrapped in an OptionalFloat, or empty if no elements exist.
      * This consumes all elements from the iterator.
      *
-     * <p>Example:</p>
-     * <pre>
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
      * FloatIterator iter = FloatIterator.of(1.5f, 2.5f, 3.5f);
      * OptionalFloat last = iter.last(); // OptionalFloat.of(3.5f)
-     * </pre>
+     * }</pre>
      *
      * @return OptionalFloat containing the last element, or empty if iterator is empty
      */
@@ -538,16 +533,22 @@ public abstract class FloatIterator extends ImmutableIterator<Float> {
     }
 
     /**
-     * Converts the remaining elements in this iterator to a float array.
-     * This consumes all remaining elements from the iterator.
+     * Converts the remaining elements to a float array.
      *
-     * <p>Example:</p>
-     * <pre>
-     * FloatIterator iter = FloatIterator.of(1.0f, 2.0f, 3.0f);
-     * float[] array = iter.toArray(); // [1.0f, 2.0f, 3.0f]
-     * </pre>
+     * <p>This method consumes the iterator. After calling this method, the iterator
+     * will be empty (hasNext() returns false). If the iterator is already empty,
+     * returns an empty array.</p>
      *
-     * @return a new float array containing all remaining elements
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * float[] array = FloatIterator.of(1.0f, 2.0f, 3.0f, 4.0f, 5.0f).toArray();
+     * // array = [1.0, 2.0, 3.0, 4.0, 5.0]
+     *
+     * // Empty iterator returns empty array
+     * float[] empty = FloatIterator.empty().toArray(); // empty.length == 0
+     * }</pre>
+     *
+     * @return a float array containing all remaining elements
      */
     @SuppressWarnings("deprecation")
     public float[] toArray() {
@@ -555,16 +556,22 @@ public abstract class FloatIterator extends ImmutableIterator<Float> {
     }
 
     /**
-     * Converts the remaining elements in this iterator to a FloatList.
-     * This consumes all remaining elements from the iterator.
+     * Converts the remaining elements to a FloatList.
      *
-     * <p>Example:</p>
-     * <pre>
-     * FloatIterator iter = FloatIterator.of(1.0f, 2.0f, 3.0f);
-     * FloatList list = iter.toList();
-     * </pre>
+     * <p>This method consumes the iterator. After calling this method, the iterator
+     * will be empty (hasNext() returns false). If the iterator is already empty,
+     * returns an empty FloatList.</p>
      *
-     * @return a new FloatList containing all remaining elements
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * FloatList list = FloatIterator.of(1.0f, 2.0f, 3.0f, 4.0f, 5.0f).toList();
+     * // list contains [1.0, 2.0, 3.0, 4.0, 5.0]
+     *
+     * // Empty iterator returns empty list
+     * FloatList empty = FloatIterator.empty().toList(); // empty.size() == 0
+     * }</pre>
+     *
+     * @return a FloatList containing all remaining elements
      */
     public FloatList toList() {
         final FloatList list = new FloatList();
@@ -580,13 +587,13 @@ public abstract class FloatIterator extends ImmutableIterator<Float> {
      * Converts this iterator to a FloatStream for use with the Stream API.
      * The stream is lazily populated from this iterator as elements are consumed.
      *
-     * <p>Example:</p>
-     * <pre>
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
      * FloatIterator iter = FloatIterator.of(1.0f, 2.0f, 3.0f, 4.0f);
      * double sum = iter.stream()
      *     .filter(x -> x > 2.0f)
      *     .sum();
-     * </pre>
+     * }</pre>
      *
      * @return a new FloatStream backed by this iterator
      */
@@ -598,13 +605,13 @@ public abstract class FloatIterator extends ImmutableIterator<Float> {
      * Returns an ObjIterator that yields IndexedFloat objects pairing each element with its index.
      * Indexing starts from 0.
      *
-     * <p>Example:</p>
-     * <pre>
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
      * FloatIterator iter = FloatIterator.of(1.5f, 2.5f, 3.5f);
-     * iter.indexed().forEach(indexed -> 
+     * iter.indexed().forEach(indexed ->
      *     System.out.println("Index: " + indexed.index() + ", Value: " + indexed.value())
      * );
-     * </pre>
+     * }</pre>
      *
      * @return an ObjIterator of IndexedFloat objects
      */
@@ -617,14 +624,14 @@ public abstract class FloatIterator extends ImmutableIterator<Float> {
      * Returns an ObjIterator that yields IndexedFloat objects pairing each element with its index.
      * Indexing starts from the specified startIndex.
      *
-     * <p>Example:</p>
-     * <pre>
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
      * FloatIterator iter = FloatIterator.of(1.5f, 2.5f, 3.5f);
-     * iter.indexed(10).forEach(indexed -> 
+     * iter.indexed(10).forEach(indexed ->
      *     System.out.println("Index: " + indexed.index() + ", Value: " + indexed.value())
      * );
      * // Prints indices starting from 10, 11, 12...
-     * </pre>
+     * }</pre>
      *
      * @param startIndex the starting index value
      * @return an ObjIterator of IndexedFloat objects
@@ -657,11 +664,11 @@ public abstract class FloatIterator extends ImmutableIterator<Float> {
      * This method boxes each float value which may impact performance.
      * For better performance with primitive values, use {@link #foreachRemaining(Throwables.FloatConsumer)}.
      *
-     * <p>Example:</p>
-     * <pre>
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
      * FloatIterator iter = FloatIterator.of(1.0f, 2.0f, 3.0f);
      * iter.forEachRemaining(value -> System.out.println(value)); // Boxes each float
-     * </pre>
+     * }</pre>
      *
      * @param action the action to be performed for each element, must not be null
      * @deprecated use {@link #foreachRemaining(Throwables.FloatConsumer)} instead to avoid boxing
@@ -680,11 +687,11 @@ public abstract class FloatIterator extends ImmutableIterator<Float> {
      * The action is applied to each remaining element until all elements have been processed
      * or the action throws an exception.
      *
-     * <p>Example:</p>
-     * <pre>
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
      * FloatIterator iter = FloatIterator.of(1.0f, 2.0f, 3.0f);
      * iter.foreachRemaining(value -> System.out.println(value));
-     * </pre>
+     * }</pre>
      *
      * @param <E> the type of exception the action may throw
      * @param action the action to be performed for each element, must not be null
@@ -706,8 +713,8 @@ public abstract class FloatIterator extends ImmutableIterator<Float> {
      * This method is useful when you need to track the position of elements during iteration.
      * The action receives both the current index (as int) and the float value.
      *
-     * <p>Example:</p>
-     * <pre>
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
      * FloatIterator iter = FloatIterator.of(1.0f, 2.0f, 3.0f);
      * iter.foreachIndexed((index, value) ->
      *     System.out.println("Index: " + index + ", Value: " + value)
@@ -715,7 +722,7 @@ public abstract class FloatIterator extends ImmutableIterator<Float> {
      * // Output: Index: 0, Value: 1.0
      * //         Index: 1, Value: 2.0
      * //         Index: 2, Value: 3.0
-     * </pre>
+     * }</pre>
      *
      * @param <E> the type of exception the action may throw
      * @param action the action to be performed for each element with its index, must not be null

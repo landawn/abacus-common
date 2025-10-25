@@ -42,8 +42,8 @@ import java.lang.annotation.Target;
  *   <li>columnFields takes precedence over nonColumnFields if both are specified</li>
  * </ul>
  * 
- * <p><b>Example usage:</b></p>
- * <pre>
+ * <p><b>Usage Examples:</b></p>
+ * <pre>{@code
  * {@literal @}Table(name = "user_accounts", alias = "ua")
  * public class User {
  *     private Long id;
@@ -60,7 +60,7 @@ import java.lang.annotation.Target;
  *     private transient String tempData;  // Excluded from mapping
  *     private Map cache;                   // Excluded from mapping
  * }
- * </pre>
+ * }</pre>
  * 
  * @since 2018
  * @see Entity
@@ -92,11 +92,11 @@ public @interface Table {
      *   <li>Be consistent with plural/singular naming across your schema</li>
      * </ul>
      * 
-     * <p><b>Example:</b></p>
-     * <pre>
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
      * {@literal @}Table(name = "user_accounts")  // Maps to 'user_accounts' table
      * public class User { }
-     * </pre>
+     * }</pre>
      * 
      * @return the table name, or empty string to use the simple class name as default
      */
@@ -114,12 +114,12 @@ public @interface Table {
      *   <li>Creating more readable SQL statements</li>
      * </ul>
      * 
-     * <p><b>Example:</b></p>
-     * <pre>
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
      * {@literal @}Table(name = "customer_order_details", alias = "cod")
      * public class CustomerOrderDetail { }
      * // Enables queries like: SELECT cod.* FROM customer_order_details cod WHERE ...
-     * </pre>
+     * }</pre>
      * 
      * @return the table alias, or empty string if no alias is defined
      */
@@ -137,8 +137,8 @@ public @interface Table {
      *   <li>Strict control over database schema</li>
      * </ul>
      * 
-     * <p><b>Example:</b></p>
-     * <pre>
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
      * {@literal @}Table(name = "users", columnFields = {"id", "username", "email"})
      * public class User {
      *     private Long id;
@@ -147,7 +147,7 @@ public @interface Table {
      *     private String tempToken;        // Not mapped
      *     private List<Role> roles;        // Not mapped
      * }
-     * </pre>
+     * }</pre>
      * 
      * @return an array of field names to include as columns, empty array means no whitelist filtering
      */
@@ -166,8 +166,8 @@ public @interface Table {
      *   <li>Fields mapped to other tables (relationships)</li>
      * </ul>
      * 
-     * <p><b>Example:</b></p>
-     * <pre>
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
      * {@literal @}Table(name = "products", nonColumnFields = {"displayPrice", "cache", "dirty"})
      * public class Product {
      *     private Long id;                  // Mapped
@@ -177,7 +177,7 @@ public @interface Table {
      *     private Map<String, Object> cache;// Not mapped - temporary cache
      *     private boolean dirty;            // Not mapped - state tracking
      * }
-     * </pre>
+     * }</pre>
      * 
      * <p><b>Note:</b> If both columnFields and nonColumnFields are specified,
      * columnFields takes precedence (whitelist wins over blacklist).</p>

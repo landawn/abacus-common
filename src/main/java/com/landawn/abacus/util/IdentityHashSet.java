@@ -32,7 +32,7 @@ import java.util.Iterator;
  * concurrently, and at least one of the threads modifies the set, it must be synchronized
  * externally.</p>
  * 
- * <p>Example usage:</p>
+ * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * IdentityHashSet<String> set = new IdentityHashSet<>();
  * String s1 = new String("hello");
@@ -55,7 +55,7 @@ public final class IdentityHashSet<T> extends AbstractSet<T> {
     /**
      * Constructs a new, empty identity hash set with the default initial capacity (21).
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * IdentityHashSet<Object> set = new IdentityHashSet<>();
      * }</pre>
@@ -69,7 +69,7 @@ public final class IdentityHashSet<T> extends AbstractSet<T> {
      * The actual initial capacity is the smallest power of two greater than or equal
      * to the specified value.
      *
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * IdentityHashSet<String> set = new IdentityHashSet<>(100);
      * }</pre>
@@ -86,7 +86,7 @@ public final class IdentityHashSet<T> extends AbstractSet<T> {
      * The identity hash set is created with a capacity sufficient to hold the elements
      * in the specified collection.
      *
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * List<String> list = Arrays.asList("a", "b", "c");
      * IdentityHashSet<String> set = new IdentityHashSet<>(list);
@@ -105,7 +105,7 @@ public final class IdentityHashSet<T> extends AbstractSet<T> {
      * reference-equality comparison. More formally, adds the specified element e to
      * this set if the set contains no element e2 such that (e==e2).
      *
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * IdentityHashSet<String> set = new IdentityHashSet<>();
      * String s = "hello";
@@ -126,7 +126,7 @@ public final class IdentityHashSet<T> extends AbstractSet<T> {
      * comparison. More formally, removes an element e such that (o==e), if this set contains
      * such an element.
      *
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * IdentityHashSet<String> set = new IdentityHashSet<>();
      * String s = "hello";
@@ -146,7 +146,7 @@ public final class IdentityHashSet<T> extends AbstractSet<T> {
      * Returns {@code true} if this set contains all of the elements in the specified collection.
      * The comparison uses reference-equality (==) rather than the equals() method.
      *
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * IdentityHashSet<String> set = new IdentityHashSet<>();
      * String s1 = "a", s2 = "b";
@@ -172,7 +172,7 @@ public final class IdentityHashSet<T> extends AbstractSet<T> {
      * comparison. For each element e in the collection, it is added if the set contains no
      * element e2 such that (e==e2).
      *
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * IdentityHashSet<String> set = new IdentityHashSet<>();
      * List<String> list = Arrays.asList("a", "b", "c");
@@ -202,7 +202,7 @@ public final class IdentityHashSet<T> extends AbstractSet<T> {
      * using reference-equality comparison. For each element e in the collection, removes from
      * this set any element e2 such that (e==e2).
      *
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * IdentityHashSet<String> set = new IdentityHashSet<>();
      * String s1 = "a", s2 = "b";
@@ -234,7 +234,7 @@ public final class IdentityHashSet<T> extends AbstractSet<T> {
      * using reference-equality comparison. In other words, removes from this set all of its
      * elements that are not contained in the specified collection based on reference equality.
      *
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * IdentityHashSet<String> set = new IdentityHashSet<>();
      * String s1 = "a", s2 = "b", s3 = "c";
@@ -278,7 +278,7 @@ public final class IdentityHashSet<T> extends AbstractSet<T> {
      * comparison. More formally, returns {@code true} if and only if this set contains an
      * element e such that (valueToFind==e).
      *
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * IdentityHashSet<String> set = new IdentityHashSet<>();
      * String s = "hello";
@@ -301,7 +301,7 @@ public final class IdentityHashSet<T> extends AbstractSet<T> {
      * particular order. The iterator is fail-fast: if the set is modified after the iterator
      * is created, the iterator will throw a {@link java.util.ConcurrentModificationException}.
      *
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * IdentityHashSet<String> set = new IdentityHashSet<>();
      * set.add("a");
@@ -325,7 +325,7 @@ public final class IdentityHashSet<T> extends AbstractSet<T> {
      * will be "safe" in that no references to it are maintained by this set. The caller
      * is thus free to modify the returned array.
      *
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * IdentityHashSet<String> set = new IdentityHashSet<>();
      * set.add("a");
@@ -346,7 +346,7 @@ public final class IdentityHashSet<T> extends AbstractSet<T> {
      * array, it is returned therein. Otherwise, a new array is allocated with the runtime
      * type of the specified array and the size of this set.
      *
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * IdentityHashSet<String> set = new IdentityHashSet<>();
      * set.add("a");
@@ -369,7 +369,7 @@ public final class IdentityHashSet<T> extends AbstractSet<T> {
     /**
      * Returns the number of elements in this set (its cardinality).
      *
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * IdentityHashSet<String> set = new IdentityHashSet<>();
      * set.add("a");
@@ -387,7 +387,7 @@ public final class IdentityHashSet<T> extends AbstractSet<T> {
     /**
      * Returns {@code true} if this set contains no elements.
      *
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * IdentityHashSet<String> set = new IdentityHashSet<>();
      * boolean empty = set.isEmpty(); // returns true
@@ -405,7 +405,7 @@ public final class IdentityHashSet<T> extends AbstractSet<T> {
     /**
      * Removes all of the elements from this set. The set will be empty after this call returns.
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * IdentityHashSet<String> set = new IdentityHashSet<>();
      * set.add("a");
@@ -425,7 +425,7 @@ public final class IdentityHashSet<T> extends AbstractSet<T> {
      * Note that this compares the internal maps for equality, which means it checks if both
      * sets contain the same object references.
      *
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * IdentityHashSet<String> set1 = new IdentityHashSet<>();
      * IdentityHashSet<String> set2 = new IdentityHashSet<>();
@@ -471,7 +471,7 @@ public final class IdentityHashSet<T> extends AbstractSet<T> {
      * in square brackets ("[]"). Adjacent elements are separated by the characters ", "
      * (comma and space).
      *
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * IdentityHashSet<String> set = new IdentityHashSet<>();
      * set.add("a");

@@ -131,8 +131,7 @@ public class OkHttpRequest2025Test extends TestBase {
 
     @Test
     public void testHeadersWithTwoHeaders() {
-        OkHttpRequest request = OkHttpRequest.url("https://api.example.com")
-                .headers("Accept", "application/json", "Content-Type", "application/json");
+        OkHttpRequest request = OkHttpRequest.url("https://api.example.com").headers("Accept", "application/json", "Content-Type", "application/json");
         assertNotNull(request);
     }
 
@@ -158,10 +157,7 @@ public class OkHttpRequest2025Test extends TestBase {
 
     @Test
     public void testHeadersWithOkHttpHeaders() {
-        okhttp3.Headers headers = new okhttp3.Headers.Builder()
-                .add("Accept", "application/json")
-                .add("Content-Type", "application/json")
-                .build();
+        okhttp3.Headers headers = new okhttp3.Headers.Builder().add("Accept", "application/json").add("Content-Type", "application/json").build();
 
         OkHttpRequest request = OkHttpRequest.url("https://api.example.com").headers(headers);
         assertNotNull(request);
@@ -257,8 +253,7 @@ public class OkHttpRequest2025Test extends TestBase {
 
     @Test
     public void testFormBodyWithNonBean() {
-        assertThrows(IllegalArgumentException.class, () ->
-            OkHttpRequest.url("https://api.example.com").formBody("not a bean"));
+        assertThrows(IllegalArgumentException.class, () -> OkHttpRequest.url("https://api.example.com").formBody("not a bean"));
     }
 
     @Test
@@ -270,23 +265,20 @@ public class OkHttpRequest2025Test extends TestBase {
 
     @Test
     public void testBodyWithStringAndMediaType() {
-        OkHttpRequest request = OkHttpRequest.url("https://api.example.com")
-                .body("test content", MediaType.get("text/plain"));
+        OkHttpRequest request = OkHttpRequest.url("https://api.example.com").body("test content", MediaType.get("text/plain"));
         assertNotNull(request);
     }
 
     @Test
     public void testBodyWithByteArrayAndMediaType() {
-        OkHttpRequest request = OkHttpRequest.url("https://api.example.com")
-                .body("test".getBytes(), MediaType.get("text/plain"));
+        OkHttpRequest request = OkHttpRequest.url("https://api.example.com").body("test".getBytes(), MediaType.get("text/plain"));
         assertNotNull(request);
     }
 
     @Test
     public void testBodyWithByteArrayOffsetAndMediaType() {
         byte[] data = "test data".getBytes();
-        OkHttpRequest request = OkHttpRequest.url("https://api.example.com")
-                .body(data, 0, 4, MediaType.get("text/plain"));
+        OkHttpRequest request = OkHttpRequest.url("https://api.example.com").body(data, 0, 4, MediaType.get("text/plain"));
         assertNotNull(request);
     }
 
@@ -296,8 +288,7 @@ public class OkHttpRequest2025Test extends TestBase {
         tempFile.deleteOnExit();
         Files.write(tempFile.toPath(), "test content".getBytes());
 
-        OkHttpRequest request = OkHttpRequest.url("https://api.example.com")
-                .body(tempFile, MediaType.get("text/plain"));
+        OkHttpRequest request = OkHttpRequest.url("https://api.example.com").body(tempFile, MediaType.get("text/plain"));
         assertNotNull(request);
     }
 

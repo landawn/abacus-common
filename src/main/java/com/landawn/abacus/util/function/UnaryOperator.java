@@ -39,7 +39,7 @@ public interface UnaryOperator<T> extends Function<T, T>, Throwables.UnaryOperat
      * and then applies this operator to the result. If evaluation of either operator
      * throws an exception, it is relayed to the caller of the composed operator.
      * 
-     * <p>Example usage:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * UnaryOperator<String> trim = String::trim;
      * UnaryOperator<String> upperCase = String::toUpperCase;
@@ -67,7 +67,7 @@ public interface UnaryOperator<T> extends Function<T, T>, Throwables.UnaryOperat
      * applies the after operator to the result. If evaluation of either operator throws an
      * exception, it is relayed to the caller of the composed operator.
      * 
-     * <p>Example usage:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * UnaryOperator<String> trim = String::trim;
      * UnaryOperator<String> upperCase = String::toUpperCase;
@@ -94,7 +94,7 @@ public interface UnaryOperator<T> extends Function<T, T>, Throwables.UnaryOperat
      * Returns a unary operator that always returns its input argument unchanged.
      * This is useful as a default or no-op operator in functional compositions.
      * 
-     * <p>Example usage:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * UnaryOperator<String> identity = UnaryOperator.identity();
      * String result = identity.apply("hello"); // returns "hello"
@@ -123,7 +123,7 @@ public interface UnaryOperator<T> extends Function<T, T>, Throwables.UnaryOperat
      * This method is useful when you need to use this operator in a context that expects
      * a Throwables.UnaryOperator with a specific exception type.
      * 
-     * <p>Example usage:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * UnaryOperator<String> operator = s -> s.toUpperCase();
      * Throwables.UnaryOperator<String, IOException> throwableOperator = 

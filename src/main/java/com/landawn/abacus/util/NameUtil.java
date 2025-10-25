@@ -40,11 +40,11 @@ import com.landawn.abacus.annotation.SuppressFBWarnings;
  * intended for direct use by client code. It's designed for internal framework use.</p>
  * 
  * <p>Example of name structures:</p>
- * <pre>
+ * <pre>{@code
  * Canonical name: "com.example.Person.firstName"
  * Parent name: "com.example.Person"
  * Simple name: "firstName"
- * </pre>
+ * }</pre>
  * 
  * @see ObjectPool
  */
@@ -76,7 +76,7 @@ public final class NameUtil {
      * <p>This method is useful for determining whether a string has already been
      * cached and thus can be retrieved efficiently without additional processing.</p>
      * 
-     * <p>Example usage:</p></p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * if (NameUtil.isCachedName("firstName")) {
      *     // Name is already cached
@@ -97,7 +97,7 @@ public final class NameUtil {
      * and then returned. This ensures that frequently used strings share the same
      * reference, reducing memory usage.</p>
      * 
-     * <p>Example usage:</p></p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String cached = NameUtil.getCachedName("firstName");
      * // All subsequent calls with "firstName" will return the same reference
@@ -123,7 +123,7 @@ public final class NameUtil {
      * available space. The force parameter determines whether to bypass the
      * duplicate check.</p>
      * 
-     * <p>Example usage:</p></p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String cached = NameUtil.cacheName("com.example.Person", false);
      * // The string is now interned and cached
@@ -153,12 +153,12 @@ public final class NameUtil {
      * parent name followed by a period. This is useful for validating hierarchical
      * naming structures.</p>
      * 
-     * <p>Example usage:</p></p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * boolean isCanonical = NameUtil.isCanonicalName("com.example.Person", 
+     * boolean isCanonical = NameUtil.isCanonicalName("com.example.Person",
      *                                                "com.example.Person.firstName");
      * // Returns true
-     * 
+     *
      * isCanonical = NameUtil.isCanonicalName("com.example", "com.other.Class");
      * // Returns false
      * }</pre>
@@ -180,11 +180,11 @@ public final class NameUtil {
      * 
      * <p>The result is cached for efficient repeated access.</p>
      * 
-     * <p>Example usage:</p></p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String simple = NameUtil.getSimpleName("com.example.Person.firstName");
      * // Returns "firstName"
-     * 
+     *
      * String simple2 = NameUtil.getSimpleName("name");
      * // Returns "name"
      * }</pre>
@@ -222,14 +222,14 @@ public final class NameUtil {
      * 
      * <p>The result is cached for efficient repeated access.</p>
      * 
-     * <p>Example usage:</p></p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String parent = NameUtil.getParentName("com.example.Person.firstName");
      * // Returns "com.example.Person"
-     * 
+     *
      * String parent2 = NameUtil.getParentName("simpleName");
      * // Returns ""
-     * 
+     *
      * String parent3 = NameUtil.getParentName(".hidden");
      * // Returns ""
      * }</pre>

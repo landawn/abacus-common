@@ -88,8 +88,7 @@ public class LongTriPredicate2025Test extends TestBase {
 
     @Test
     public void testTriangleInequality() {
-        final LongTriPredicate isTriangle = (a, b, c) ->
-            a + b > c && a + c > b && b + c > a;
+        final LongTriPredicate isTriangle = (a, b, c) -> a + b > c && a + c > b && b + c > a;
 
         assertTrue(isTriangle.test(3L, 4L, 5L));
         assertFalse(isTriangle.test(1L, 2L, 10L));
@@ -139,9 +138,7 @@ public class LongTriPredicate2025Test extends TestBase {
 
     @Test
     public void testComplexChaining() {
-        final LongTriPredicate predicate = LongTriPredicate.ALWAYS_TRUE
-            .and((a, b, c) -> a + b + c < 100)
-            .or((a, b, c) -> a == b && b == c);
+        final LongTriPredicate predicate = LongTriPredicate.ALWAYS_TRUE.and((a, b, c) -> a + b + c < 100).or((a, b, c) -> a == b && b == c);
 
         assertTrue(predicate.test(10L, 20L, 30L)); // sum < 100
         assertTrue(predicate.test(50L, 50L, 50L)); // all equal

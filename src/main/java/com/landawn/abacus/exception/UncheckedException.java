@@ -38,7 +38,7 @@ import com.landawn.abacus.util.cs;
  *   <li>And other checked exception wrappers</li>
  * </ul>
  * 
- * <p>Example usage:</p>
+ * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * // Wrapping a generic checked exception
  * try {
@@ -73,7 +73,7 @@ public class UncheckedException extends RuntimeException {
      * <p>The wrapped exception becomes the cause of this UncheckedException, allowing the
      * original exception information to be preserved and accessed via {@link #getCause()}.</p>
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * try {
      *     Class.forName("com.example.SomeClass");
@@ -108,7 +108,7 @@ public class UncheckedException extends RuntimeException {
      * <p>All suppressed exceptions from the original exception are also preserved and added to
      * this UncheckedException.</p>
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * try {
      *     performDatabaseOperation();

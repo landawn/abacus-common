@@ -26,7 +26,7 @@ import java.util.Set;
  * and extraction from existing entities. It's particularly useful for database operations where
  * entities may have composite keys.</p>
  * 
- * <p>Example usage:</p>
+ * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * // Single property ID
  * EntityId id1 = EntityId.of("User.id", 12345);
@@ -53,7 +53,7 @@ public interface EntityId {
      * Creates an EntityId with a single property.
      * The property name should include the entity name for clarity (e.g., "User.id").
      *
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * EntityId userId = EntityId.of("User.id", 12345);
      * }</pre>
@@ -69,7 +69,7 @@ public interface EntityId {
     /**
      * Creates an EntityId with a single property for a specific entity.
      *
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * EntityId accountId = EntityId.of("Account", "accountNumber", "AC-12345");
      * }</pre>
@@ -88,7 +88,7 @@ public interface EntityId {
      * Creates an EntityId with two properties.
      * Property names should include entity names for clarity.
      *
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * EntityId compositeId = EntityId.of("Order.customerId", 100, "Order.orderId", 5000);
      * }</pre>
@@ -106,7 +106,7 @@ public interface EntityId {
     /**
      * Creates an EntityId with two properties for a specific entity.
      *
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * EntityId orderLineId = EntityId.of("OrderLine", "orderId", 1000, "lineNumber", 1);
      * }</pre>
@@ -127,7 +127,7 @@ public interface EntityId {
      * Creates an EntityId with three properties.
      * Property names should include entity names for clarity.
      *
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * EntityId tripleId = EntityId.of(
      *     "Stock.warehouseId", 10,
@@ -152,7 +152,7 @@ public interface EntityId {
     /**
      * Creates an EntityId with three properties for a specific entity.
      *
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * EntityId inventoryId = EntityId.of("Inventory",
      *     "warehouseId", 5,
@@ -180,7 +180,7 @@ public interface EntityId {
      * Creates an EntityId from a map of property names to values.
      * The entity name is inferred from the property names if they contain dots.
      *
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Map<String, Object> props = new HashMap<>();
      * props.put("customerId", 1000);
@@ -199,7 +199,7 @@ public interface EntityId {
     /**
      * Creates an EntityId from a map of property names to values for a specific entity.
      *
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Map<String, Object> props = new HashMap<>();
      * props.put("firstName", "John");
@@ -223,7 +223,7 @@ public interface EntityId {
      * Creates an EntityId by extracting ID properties from an entity object.
      * The implementation will use reflection to find properties marked as IDs.
      *
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * User user = new User();
      * user.setUserId(12345);
@@ -241,7 +241,7 @@ public interface EntityId {
     /**
      * Creates an EntityId by extracting specific properties from an entity object.
      *
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Product product = new Product();
      * product.setProductCode("ABC");
@@ -263,7 +263,7 @@ public interface EntityId {
     /**
      * Returns the entity name associated with this EntityId.
      *
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * EntityId id = EntityId.of("User", "userId", 100);
      * String name = id.entityName(); // Returns "User"
@@ -276,7 +276,7 @@ public interface EntityId {
     /**
      * Gets the value of a property by name.
      *
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * EntityId id = EntityId.of("User.id", 12345);
      * Integer userId = id.get("id"); // Returns 12345
@@ -291,7 +291,7 @@ public interface EntityId {
     /**
      * Gets the value of a property as an int.
      *
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * EntityId id = EntityId.of("Product.quantity", 50);
      * int qty = id.getInt("quantity"); // Returns 50
@@ -305,7 +305,7 @@ public interface EntityId {
     /**
      * Gets the value of a property as a long.
      *
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * EntityId id = EntityId.of("Transaction.amount", 1000000L);
      * long amount = id.getLong("amount"); // Returns 1000000
@@ -319,7 +319,7 @@ public interface EntityId {
     /**
      * Gets the value of a property and converts it to the specified type.
      *
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * EntityId id = EntityId.of("User.birthDate", "1990-01-01");
      * LocalDate date = id.get("birthDate", LocalDate.class);
@@ -335,7 +335,7 @@ public interface EntityId {
     /**
      * Checks if this EntityId contains a property with the given name.
      *
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * EntityId id = EntityId.of("User.id", 100, "User.name", "John");
      * boolean hasId = id.containsKey("id"); // Returns true
@@ -350,7 +350,7 @@ public interface EntityId {
     /**
      * Returns a set of all property names in this EntityId.
      *
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * EntityId id = EntityId.of("User.id", 100, "User.name", "John");
      * Set<String> keys = id.keySet(); // Returns {"id", "name"}
@@ -363,7 +363,7 @@ public interface EntityId {
     /**
      * Returns a set of all property name-value entries in this EntityId.
      *
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * EntityId id = EntityId.of("User.id", 100, "User.name", "John");
      * for (Map.Entry<String, Object> entry : id.entrySet()) {
@@ -378,7 +378,7 @@ public interface EntityId {
     /**
      * Returns the number of properties in this EntityId.
      *
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * EntityId id = EntityId.of("User.id", 100, "User.name", "John");
      * int count = id.size(); // Returns 2
@@ -391,7 +391,7 @@ public interface EntityId {
     /**
      * Checks if this EntityId is empty (contains no properties).
      *
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * EntityId id1 = EntityId.builder().build();
      * boolean empty1 = id1.isEmpty(); // Returns true
@@ -409,7 +409,7 @@ public interface EntityId {
     /**
      * Creates a new EntityIdBuilder for building EntityId instances.
      *
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * EntityId id = EntityId.builder()
      *     .put("userId", 100)
@@ -426,7 +426,7 @@ public interface EntityId {
     /**
      * Creates a new EntityIdBuilder for building EntityId instances with a specific entity name.
      *
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * EntityId id = EntityId.builder("Customer")
      *     .put("customerId", 1000)
@@ -444,7 +444,7 @@ public interface EntityId {
     /**
      * Builder class for constructing EntityId instances fluently.
      * 
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * EntityId complexId = EntityId.builder("Order")
      *     .put("orderId", 5000)
@@ -467,7 +467,7 @@ public interface EntityId {
         /**
          * Adds a property to the EntityId being built.
          *
-         * <p>Example:</p>
+         * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * EntityIdBuilder builder = EntityId.builder("Product")
          *     .put("productId", "ABC123")
@@ -492,7 +492,7 @@ public interface EntityId {
         /**
          * Builds and returns the EntityId instance.
          *
-         * <p>Example:</p>
+         * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * EntityId id = EntityId.builder()
          *     .put("id", 100)

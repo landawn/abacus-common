@@ -32,7 +32,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * 
  * <p>All reflection metadata (fields, constructors, methods) is cached for performance optimization.</p>
  * 
- * <p>Example usage:</p>
+ * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * // Create instance from class name
  * MyClass obj = Reflection.on("com.example.MyClass")._new();
@@ -93,7 +93,7 @@ public final class Reflection<T> {
      * Creates a Reflection instance for the specified class name.
      * The class is loaded using the current thread's context class loader.
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Reflection<MyClass> ref = Reflection.on("com.example.MyClass");
      * MyClass instance = ref._new();
@@ -111,7 +111,7 @@ public final class Reflection<T> {
     /**
      * Creates a Reflection instance for the specified class.
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Reflection<String> ref = Reflection.on(String.class);
      * String str = ref._new("Hello");
@@ -129,7 +129,7 @@ public final class Reflection<T> {
      * Creates a Reflection instance for the specified target object.
      * The class is determined from the runtime type of the object.
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * MyClass obj = new MyClass();
      * Reflection<MyClass> ref = Reflection.on(obj);
@@ -147,7 +147,7 @@ public final class Reflection<T> {
     /**
      * Creates a new instance of the reflected class using its no-argument constructor.
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * MyClass obj = Reflection.on(MyClass.class)._new();
      * }</pre>
@@ -163,7 +163,7 @@ public final class Reflection<T> {
      * Creates a new instance of the reflected class using a constructor that matches the given arguments.
      * The constructor is selected based on the types of the provided arguments.
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Person person = Reflection.on(Person.class)._new("John", 30).instance();
      * }</pre>
@@ -187,7 +187,7 @@ public final class Reflection<T> {
      * Returns the target instance being reflected upon.
      * Returns null if this Reflection was created from a Class rather than an instance.
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * MyClass obj = Reflection.on(MyClass.class)._new().instance();
      * }</pre>
@@ -202,7 +202,7 @@ public final class Reflection<T> {
      * Gets the value of the specified field from the target instance.
      * If ReflectASM is available, it will be used for better performance.
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String name = Reflection.on(person).get("name");
      * Integer age = Reflection.on(person).get("age");
@@ -232,7 +232,7 @@ public final class Reflection<T> {
      * Sets the value of the specified field in the target instance.
      * If ReflectASM is available, it will be used for better performance.
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Reflection.on(person)
      *     .set("name", "John")
@@ -267,7 +267,7 @@ public final class Reflection<T> {
      * The method is selected based on its name and the types of the provided arguments.
      * If ReflectASM is available, it will be used for better performance.
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String result = Reflection.on(obj).invoke("toString");
      * Integer sum = Reflection.on(calculator).invoke("add", 5, 3);
@@ -299,7 +299,7 @@ public final class Reflection<T> {
      * This is a convenience method for void methods or when the return value is not needed.
      * The method is selected based on its name and the types of the provided arguments.
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Reflection.on(logger)
      *     .call("debug", "Starting process")
@@ -324,8 +324,8 @@ public final class Reflection<T> {
     /**
      * Gets the field.
      *
-     * @param fieldName
-     * @return
+     * @param fieldName the name of the field to retrieve
+     * @return the Field object corresponding to the field name
      * @throws NoSuchFieldException the no such field exception
      */
     private Field getField(final String fieldName) throws NoSuchFieldException {
@@ -344,9 +344,9 @@ public final class Reflection<T> {
     /**
      * Gets the declared constructor.
      *
-     * @param cls
-     * @param argTypes
-     * @return
+     * @param cls the class to search for the constructor
+     * @param argTypes the array of parameter types for the constructor
+     * @return the Constructor object matching the parameter types
      * @throws SecurityException the security exception
      */
     private Constructor<T> getDeclaredConstructor(final Class<T> cls, final Class<?>[] argTypes) throws SecurityException {
@@ -391,10 +391,10 @@ public final class Reflection<T> {
     /**
      * Gets the declared method.
      *
-     * @param cls
-     * @param methodName
-     * @param argTypes
-     * @return
+     * @param cls the class to search for the method
+     * @param methodName the name of the method to retrieve
+     * @param argTypes the array of parameter types for the method
+     * @return the Method object matching the name and parameter types
      * @throws SecurityException the security exception
      */
     private Method getDeclaredMethod(final Class<?> cls, final String methodName, final Class<?>[] argTypes) throws SecurityException {
@@ -441,8 +441,8 @@ public final class Reflection<T> {
     /**
      * Gets the types.
      *
-     * @param values
-     * @return
+     * @param values the array of values from which to extract types
+     * @return an array of Class objects representing the types of the values
      */
     private Class<?>[] getTypes(final Object... values) {
         if (N.isEmpty(values)) {
@@ -459,9 +459,10 @@ public final class Reflection<T> {
     }
 
     /**
+     * Wraps a primitive type to its wrapper class if applicable.
      *
-     * @param cls
-     * @return
+     * @param cls the class to wrap
+     * @return the wrapped class if primitive, otherwise the original class
      */
     private Class<?> wrap(final Class<?> cls) {
         return ClassUtil.isPrimitiveType(cls) ? ClassUtil.wrap(cls) : cls;

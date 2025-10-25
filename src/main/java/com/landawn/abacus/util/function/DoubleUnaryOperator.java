@@ -47,8 +47,7 @@ public interface DoubleUnaryOperator extends Throwables.DoubleUnaryOperator<Runt
      * </ul>
      *
      * @param operand the operand to which the operation is applied
-     * @return the result of applying this operator to the operand
-     * @throws RuntimeException if the operation encounters an error during execution
+     * @return the result of applying this operator to the operand if the operation encounters an error during execution
      */
     @Override
     double applyAsDouble(double operand);
@@ -61,7 +60,7 @@ public interface DoubleUnaryOperator extends Throwables.DoubleUnaryOperator<Runt
      * <p>This method enables right-to-left function composition. The {@code before} operator
      * is applied first, and its result becomes the input to this operator.</p>
      * 
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * DoubleUnaryOperator multiplyBy2 = x -> x * 2;
      * DoubleUnaryOperator add3 = x -> x + 3;
@@ -89,7 +88,7 @@ public interface DoubleUnaryOperator extends Throwables.DoubleUnaryOperator<Runt
      * <p>This method enables left-to-right function composition. This operator is applied first,
      * and its result becomes the input to the {@code after} operator.</p>
      * 
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * DoubleUnaryOperator multiplyBy2 = x -> x * 2;
      * DoubleUnaryOperator add3 = x -> x + 3;
@@ -116,7 +115,7 @@ public interface DoubleUnaryOperator extends Throwables.DoubleUnaryOperator<Runt
      * <p>This method is useful in scenarios where a {@code DoubleUnaryOperator} is required
      * but no transformation should be performed on the input value.</p>
      * 
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * DoubleUnaryOperator identity = DoubleUnaryOperator.identity();
      * double result = identity.applyAsDouble(42.5); // Returns 42.5

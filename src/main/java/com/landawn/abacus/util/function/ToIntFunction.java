@@ -37,7 +37,7 @@ public interface ToIntFunction<T> extends Throwables.ToIntFunction<T, RuntimeExc
      * A predefined ToIntFunction instance that unboxes an Integer object to a primitive int.
      * Returns 0 if the input is null, otherwise returns the int value of the Integer object.
      * 
-     * <p>Example usage:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Integer boxed = 42;
      * int primitive = ToIntFunction.UNBOX.applyAsInt(boxed); // returns 42
@@ -54,7 +54,7 @@ public interface ToIntFunction<T> extends Throwables.ToIntFunction<T, RuntimeExc
      * <p>Note: This conversion may result in loss of precision for floating-point numbers or
      * overflow for numbers outside the int range.
      * 
-     * <p>Example usage:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Long longValue = 100L;
      * int result1 = ToIntFunction.FROM_NUM.applyAsInt(longValue); // returns 100
@@ -74,8 +74,7 @@ public interface ToIntFunction<T> extends Throwables.ToIntFunction<T, RuntimeExc
      * Applies this function to the given argument and returns an int result.
      *
      * @param value the function argument
-     * @return the function result as a primitive int
-     * @throws RuntimeException if any error occurs during function execution
+     * @return the function result as a primitive int if any error occurs during function execution
      */
     @Override
     int applyAsInt(T value);

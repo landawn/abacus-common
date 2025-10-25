@@ -414,9 +414,7 @@ public class LongStream200Test extends TestBase {
                 synchronized (collected) {
                     collected.add(e);
                 }
-            }).map(i -> i * 2))
-                    .filter(i -> i > 50)
-                    .sum();
+            }).map(i -> i * 2)).filter(i -> i > 50).sum();
 
             assertEquals(100, collected.size());
 
@@ -730,12 +728,7 @@ public class LongStream200Test extends TestBase {
 
         @Test
         public void testPsp() {
-            long[] result = LongStream.range(1, 100)
-                    .parallel()
-                    .psp(s -> s.filter(i -> i > 10).limit(5))
-                    .map(i -> i * 10)
-                    .sorted()
-                    .toArray();
+            long[] result = LongStream.range(1, 100).parallel().psp(s -> s.filter(i -> i > 10).limit(5)).map(i -> i * 10).sorted().toArray();
 
             assertArrayEquals(new long[] { 110, 120, 130, 140, 150 }, result);
         }

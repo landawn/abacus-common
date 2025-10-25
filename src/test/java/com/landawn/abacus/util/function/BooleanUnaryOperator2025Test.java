@@ -52,8 +52,8 @@ public class BooleanUnaryOperator2025Test extends TestBase {
 
         BooleanUnaryOperator composed = identity.compose(negate);
 
-        assertFalse(composed.applyAsBoolean(true));  // negate(true) = false, identity(false) = false
-        assertTrue(composed.applyAsBoolean(false));  // negate(false) = true, identity(true) = true
+        assertFalse(composed.applyAsBoolean(true)); // negate(true) = false, identity(false) = false
+        assertTrue(composed.applyAsBoolean(false)); // negate(false) = true, identity(true) = true
     }
 
     @Test
@@ -63,7 +63,7 @@ public class BooleanUnaryOperator2025Test extends TestBase {
 
         BooleanUnaryOperator chained = identity.andThen(negate);
 
-        assertFalse(chained.applyAsBoolean(true));  // identity(true) = true, negate(true) = false
+        assertFalse(chained.applyAsBoolean(true)); // identity(true) = true, negate(true) = false
         assertTrue(chained.applyAsBoolean(false)); // identity(false) = false, negate(false) = true
     }
 
@@ -73,7 +73,7 @@ public class BooleanUnaryOperator2025Test extends TestBase {
 
         BooleanUnaryOperator doubleNegate = negate.compose(negate);
 
-        assertTrue(doubleNegate.applyAsBoolean(true));  // negate(negate(true)) = true
+        assertTrue(doubleNegate.applyAsBoolean(true)); // negate(negate(true)) = true
         assertFalse(doubleNegate.applyAsBoolean(false)); // negate(negate(false)) = false
     }
 
@@ -83,7 +83,7 @@ public class BooleanUnaryOperator2025Test extends TestBase {
 
         BooleanUnaryOperator doubleNegate = negate.andThen(negate);
 
-        assertTrue(doubleNegate.applyAsBoolean(true));  // negate(true) = false, negate(false) = true
+        assertTrue(doubleNegate.applyAsBoolean(true)); // negate(true) = false, negate(false) = true
         assertFalse(doubleNegate.applyAsBoolean(false)); // negate(false) = true, negate(true) = false
     }
 

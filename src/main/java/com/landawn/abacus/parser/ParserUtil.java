@@ -88,8 +88,7 @@ import com.landawn.abacus.util.u.Optional;
  * 
  * <p>This class is marked as {@code @Internal} and is not intended for direct use
  * by application code. It provides low-level utilities for the parser framework.</p>
- * 
- * <p>Example usage (internal only):</p>
+ * * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * // Get bean metadata
  * BeanInfo beanInfo = ParserUtil.getBeanInfo(MyBean.class);
@@ -145,7 +144,7 @@ public final class ParserUtil {
      * through various annotation mechanisms including {@code @JsonXmlField(ignore=true)},
      * {@code @JSONField(serialize=false)}, or {@code @JsonIgnore}.</p>
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Field field = MyBean.class.getDeclaredField("name");
      * JsonXmlConfig config = MyBean.class.getAnnotation(JsonXmlConfig.class);
@@ -207,7 +206,7 @@ public final class ParserUtil {
      *   <li>Global date format from {@code JsonXmlConfig}</li>
      * </ol>
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Field dateField = MyBean.class.getDeclaredField("createdDate");
      * JsonXmlConfig config = MyBean.class.getAnnotation(JsonXmlConfig.class);
@@ -261,7 +260,7 @@ public final class ParserUtil {
      *   <li>Global time zone from {@code JsonXmlConfig}</li>
      * </ol>
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Field timestampField = MyBean.class.getDeclaredField("timestamp");
      * JsonXmlConfig config = MyBean.class.getAnnotation(JsonXmlConfig.class);
@@ -305,7 +304,7 @@ public final class ParserUtil {
      *   <li>Global number format from {@code JsonXmlConfig}</li>
      * </ol>
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Field priceField = MyBean.class.getDeclaredField("price");
      * JsonXmlConfig config = MyBean.class.getAnnotation(JsonXmlConfig.class);
@@ -339,7 +338,7 @@ public final class ParserUtil {
      *   <li>Default to {@code EnumBy.NAME}</li>
      * </ol>
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Field statusField = MyBean.class.getDeclaredField("status");
      * JsonXmlConfig config = MyBean.class.getAnnotation(JsonXmlConfig.class);
@@ -373,7 +372,7 @@ public final class ParserUtil {
      *   <li>{@code @JSONField(jsonDirect=true)}</li>
      * </ul>
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Field jsonField = MyBean.class.getDeclaredField("rawJson");
      * boolean isRaw = ParserUtil.isJsonRawValue(jsonField);
@@ -425,7 +424,7 @@ public final class ParserUtil {
      * <p>This method creates an array of {@code JsonNameTag} objects, one for each
      * {@code NamingPolicy}, containing the converted name according to that policy.</p>
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * JsonNameTag[] tags = ParserUtil.getJsonNameTags("firstName");
      * // tags[0].name = "firstName" (LOWER_CAMEL_CASE)
@@ -452,7 +451,7 @@ public final class ParserUtil {
      * <p>This method creates an array of {@code XmlNameTag} objects, one for each
      * {@code NamingPolicy}, containing the converted name, type name, and bean flag.</p>
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * XmlNameTag[] tags = ParserUtil.getXmlNameTags("firstName", "string", false);
      * // tags[0].name = "firstName", typeName = "string", isBean = false
@@ -480,7 +479,7 @@ public final class ParserUtil {
      * {@code @JsonXmlField}, {@code @JSONField}, and {@code @JsonProperty}. If a custom
      * name is found, it's used for all naming policies; otherwise, standard conversion applies.</p>
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Field field = MyBean.class.getDeclaredField("firstName");
      * JsonNameTag[] tags = ParserUtil.getJsonNameTags("firstName", field);
@@ -543,7 +542,7 @@ public final class ParserUtil {
      * <p>Similar to {@link #getJsonNameTags(String, Field)} but includes XML-specific
      * information such as type name and bean flag.</p>
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Field field = MyBean.class.getDeclaredField("firstName");
      * XmlNameTag[] tags = ParserUtil.getXmlNameTags("firstName", field, "string", false);
@@ -613,7 +612,7 @@ public final class ParserUtil {
      * 
      * <p>The field's own name is automatically removed from the alias list if present.</p>
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Field field = MyBean.class.getDeclaredField("firstName");
      * String[] aliases = ParserUtil.getAliases(field);
@@ -684,7 +683,7 @@ public final class ParserUtil {
      * <p>The hash code is computed using the standard Java hash algorithm:
      * {@code result = 31 * result + element} for each character.</p>
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * char[] chars = "hello".toCharArray();
      * int hash = ParserUtil.hashCode(chars);
@@ -709,7 +708,7 @@ public final class ParserUtil {
      * <p>This method computes the hash code for the specified range within the array,
      * useful for substring operations without creating new arrays.</p>
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * char[] chars = "hello world".toCharArray();
      * int hash = ParserUtil.hashCode(chars, 0, 5); // Hash of "hello"
@@ -731,7 +730,7 @@ public final class ParserUtil {
      * The BeanInfo contains metadata about the class including property information,
      * annotations, and type details.</p>
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * BeanInfo beanInfo = ParserUtil.getBeanInfo(MyBean.class);
      * List<PropInfo> properties = beanInfo.propInfoList;
@@ -813,7 +812,7 @@ public final class ParserUtil {
      * <p>This class implements {@link JSONReader.SymbolReader} for efficient property lookup
      * during JSON parsing.</p>
      * 
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * BeanInfo beanInfo = ParserUtil.getBeanInfo(MyBean.class);
      * 
@@ -1225,7 +1224,7 @@ public final class ParserUtil {
          *   <li>Column names from database mappings</li>
          * </ul></p>
          * 
-         * <p>Example:</p>
+         * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * PropInfo nameInfo = beanInfo.getPropInfo("name");
          * PropInfo nestedInfo = beanInfo.getPropInfo("address.city");
@@ -1291,7 +1290,7 @@ public final class ParserUtil {
          * <p>This method attempts to find a matching property by first checking the
          * property name, then checking any aliases if the direct name match fails.</p>
          * 
-         * <p>Example:</p>
+         * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * BeanInfo sourceBeanInfo = ParserUtil.getBeanInfo(SourceBean.class);
          * BeanInfo targetBeanInfo = ParserUtil.getBeanInfo(TargetBean.class);
@@ -1329,7 +1328,7 @@ public final class ParserUtil {
          * If any intermediate property in a nested path is null, returns the default
          * value for the final property type.</p>
          * 
-         * <p>Example:</p>
+         * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * Person person = new Person("John", 30);
          * Object value = beanInfo.getPropValue(person, "name");
@@ -1376,7 +1375,7 @@ public final class ParserUtil {
          * <p>This method delegates to {@link #setPropValue(Object, String, Object, boolean)}
          * with {@code ignoreUnmatchedProperty} set to {@code false}.</p>
          * 
-         * <p>Example:</p>
+         * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * Person person = new Person();
          * beanInfo.setPropValue(person, "name", "John");
@@ -1398,7 +1397,7 @@ public final class ParserUtil {
          * <p>Supports nested property access using dot notation. For nested properties,
          * intermediate objects are created as needed if they are null.</p>
          * 
-         * <p>Example:</p>
+         * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * Person person = new Person();
          * beanInfo.setPropValue(person, "name", "John", false);
@@ -1479,7 +1478,7 @@ public final class ParserUtil {
          * <p>This method delegates to {@link #setPropValue(Object, PropInfo, Object, boolean)}
          * with {@code ignoreUnmatchedProperty} set to {@code false}.</p>
          * 
-         * <p>Example:</p>
+         * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * Person source = new Person("John", 30);
          * Person target = new Person();
@@ -1501,7 +1500,7 @@ public final class ParserUtil {
          * <p>This method attempts to match properties by name and aliases defined in the
          * property information from the other bean.</p>
          * 
-         * <p>Example:</p>
+         * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * Person source = new Person("John", 30);
          * Person target = new Person();
@@ -1575,7 +1574,7 @@ public final class ParserUtil {
          * <p>This method parses dot-separated property paths and returns a list of
          * PropInfo objects representing each level of the path.</p>
          * 
-         * <p>Example:</p>
+         * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * List<PropInfo> queue = beanInfo.getPropInfoQueue("address.street.name");
          * // Returns [PropInfo(address), PropInfo(street), PropInfo(name)]
@@ -1635,7 +1634,7 @@ public final class ParserUtil {
          * <p>This method is used internally by parsers for fast property lookup
          * during deserialization. It uses hash-based lookup for optimal performance.</p>
          * 
-         * <p>Example:</p>
+         * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * char[] buffer = "name".toCharArray();
          * PropInfo propInfo = beanInfo.readPropInfo(buffer, 0, buffer.length);
@@ -1686,7 +1685,7 @@ public final class ParserUtil {
          * 
          * <p>This method checks for annotations on the class and all its superclasses.</p>
          * 
-         * <p>Example:</p>
+         * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * if (beanInfo.isAnnotationPresent(Entity.class)) {
          *     // Process as entity
@@ -1705,7 +1704,7 @@ public final class ParserUtil {
          * 
          * <p>This method returns annotations from the class or any of its superclasses.</p>
          * 
-         * <p>Example:</p>
+         * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * Table tableAnnotation = beanInfo.getAnnotation(Table.class);
          * if (tableAnnotation != null) {
@@ -1751,7 +1750,7 @@ public final class ParserUtil {
         /**
          * Creates a new instance of this bean class using the no-args constructor.
          * 
-         * <p>Example:</p>
+         * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * BeanInfo beanInfo = ParserUtil.getBeanInfo(Person.class);
          * Person person = beanInfo.newInstance();
@@ -1770,7 +1769,7 @@ public final class ParserUtil {
         /**
          * Creates a new instance of this bean class using the specified arguments.
          * 
-         * <p>Example:</p>
+         * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * BeanInfo beanInfo = ParserUtil.getBeanInfo(Person.class);
          * Person person = beanInfo.newInstance("John", 30);
@@ -1796,7 +1795,7 @@ public final class ParserUtil {
          * <p>For immutable beans, this returns either a builder instance or an array
          * to collect constructor arguments. For mutable beans, returns a new instance.</p>
          * 
-         * <p>Example:</p>
+         * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * Object result = beanInfo.createBeanResult();
          * // For immutable beans: returns builder or args array
@@ -1817,7 +1816,7 @@ public final class ParserUtil {
          * beans without builders, calls the all-args constructor. For mutable beans,
          * returns the object as-is.</p>
          * 
-         * <p>Example:</p>
+         * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * Object intermediate = beanInfo.createBeanResult();
          * // Populate intermediate object...
@@ -1905,7 +1904,7 @@ public final class ParserUtil {
      *   <li>Support for immutable beans and builder patterns</li>
      * </ul>
      * 
-     * <p>Usage example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Get property value
      * PropInfo propInfo = ... // obtained from BeanInfo
@@ -2312,7 +2311,7 @@ public final class ParserUtil {
          *   <li>For regular objects, uses field access if available, otherwise uses the getter method</li>
          * </ul>
          * 
-         * <p>Usage example:</p>
+         * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * Person person = new Person("John", 30);
          * PropInfo nameProp = ... // property info for "name"
@@ -2357,7 +2356,7 @@ public final class ParserUtil {
          *   <li>Forced field access as last resort</li>
          * </ol>
          * 
-         * <p>Usage example:</p>
+         * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * Person person = new Person();
          * PropInfo ageProp = ... // property info for "age"
@@ -2706,7 +2705,7 @@ public final class ParserUtil {
          *   <li>General type conversion for other types</li>
          * </ul>
          * 
-         * <p>Usage example:</p>
+         * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * PropInfo dateProp = ... // property with date format "yyyy-MM-dd"
          * Date date = (Date) dateProp.readPropValue("2023-12-25");
@@ -2756,7 +2755,7 @@ public final class ParserUtil {
          *   <li>Standard type serialization with optional quoting</li>
          * </ul>
          * 
-         * <p>Usage example:</p>
+         * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * PropInfo dateProp = ... // property with date format
          * CharacterWriter writer = new CharacterWriter();
@@ -2816,7 +2815,7 @@ public final class ParserUtil {
          * It provides a unified way to check for property-level annotations regardless of
          * where they are declared.</p>
          * 
-         * <p>Usage example:</p>
+         * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * if (propInfo.isAnnotationPresent(NotNull.class)) {
          *     // Validate that the property is not null
@@ -2837,7 +2836,7 @@ public final class ParserUtil {
          * If the same annotation is present in multiple places, the precedence order is:
          * field annotations, getter annotations, then setter annotations.</p>
          * 
-         * <p>Usage example:</p>
+         * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * JsonXmlField jsonField = propInfo.getAnnotation(JsonXmlField.class);
          * if (jsonField != null) {

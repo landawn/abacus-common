@@ -25,7 +25,7 @@ package com.landawn.abacus.util;
  * 
  * <p>Note: This class is adapted from Apache Commons IO, licensed under Apache License 2.0.</p>
  * 
- * <p>Example usage:</p>
+ * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * // Check if two filenames are equal considering case sensitivity
  * boolean isEqual = IOCase.SYSTEM.checkEquals("File.txt", "file.txt");
@@ -79,7 +79,7 @@ public enum IOCase {
     /**
      * Factory method to create an IOCase instance from its name.
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * IOCase ioCase = IOCase.forName("Sensitive"); // returns IOCase.SENSITIVE
      * }</pre>
@@ -135,7 +135,7 @@ public enum IOCase {
     /**
      * Checks whether this IOCase represents case-sensitive comparison.
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * if (IOCase.SENSITIVE.isCaseSensitive()) {
      *     // Perform case-sensitive operations
@@ -156,7 +156,7 @@ public enum IOCase {
      * <p>This method mimics {@link String#compareTo} but takes case-sensitivity
      * into account based on this IOCase setting.</p>
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * int result = IOCase.INSENSITIVE.checkCompareTo("File.txt", "file.txt"); // returns 0
      * int result2 = IOCase.SENSITIVE.checkCompareTo("File.txt", "file.txt"); // returns negative
@@ -180,7 +180,7 @@ public enum IOCase {
      * <p>This method mimics {@link String#equals} but takes case-sensitivity
      * into account based on this IOCase setting.</p>
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * boolean equal = IOCase.INSENSITIVE.checkEquals("File.txt", "file.txt"); // true
      * boolean equal2 = IOCase.SENSITIVE.checkEquals("File.txt", "file.txt"); // false
@@ -204,7 +204,7 @@ public enum IOCase {
      * <p>This method mimics {@link String#startsWith(String)} but takes case-sensitivity
      * into account based on this IOCase setting.</p>
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * boolean starts = IOCase.INSENSITIVE.checkStartsWith("File.txt", "FILE"); // true
      * boolean starts2 = IOCase.SENSITIVE.checkStartsWith("File.txt", "FILE"); // false
@@ -229,7 +229,7 @@ public enum IOCase {
      * <p>This method mimics {@link String#endsWith} but takes case-sensitivity
      * into account based on this IOCase setting.</p>
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * boolean ends = IOCase.INSENSITIVE.checkEndsWith("File.txt", ".TXT"); // true
      * boolean ends2 = IOCase.SENSITIVE.checkEndsWith("File.txt", ".TXT"); // false
@@ -256,7 +256,7 @@ public enum IOCase {
      * <p>This method mimics parts of {@link String#indexOf(String, int)}
      * but takes case-sensitivity into account based on this IOCase setting.</p>
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * int index = IOCase.INSENSITIVE.checkIndexOf("Find a FILE here", 0, "file"); // returns 7
      * int index2 = IOCase.SENSITIVE.checkIndexOf("Find a FILE here", 0, "file"); // returns -1
@@ -291,7 +291,7 @@ public enum IOCase {
      * <p>This method mimics parts of {@link String#regionMatches(boolean, int, String, int, int)}
      * but takes case-sensitivity into account based on this IOCase setting.</p>
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * boolean matches = IOCase.INSENSITIVE.checkRegionMatches("File.txt", 0, "FILE"); // true
      * boolean matches2 = IOCase.SENSITIVE.checkRegionMatches("File.txt", 0, "FILE"); // false

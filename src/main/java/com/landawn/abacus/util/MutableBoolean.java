@@ -34,7 +34,7 @@ import java.io.Serializable;
  * <p>Note that MutableBoolean does not extend Boolean, so it is not treated by
  * {@code String.format} as a Boolean parameter.</p>
  * 
- * <p>Example usage:</p>
+ * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * MutableBoolean flag = MutableBoolean.of(false);
  * list.forEach(item -> {
@@ -63,7 +63,7 @@ public final class MutableBoolean implements Mutable, Serializable, Comparable<M
     /**
      * Constructs a new MutableBoolean with the default value of {@code false}.
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * MutableBoolean flag = new MutableBoolean(); // value is false
      * }</pre>
@@ -74,7 +74,7 @@ public final class MutableBoolean implements Mutable, Serializable, Comparable<M
     /**
      * Constructs a new MutableBoolean with the specified initial value.
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * MutableBoolean flag = new MutableBoolean(true); // value is true
      * }</pre>
@@ -89,7 +89,7 @@ public final class MutableBoolean implements Mutable, Serializable, Comparable<M
      * Creates a new MutableBoolean instance with the specified value.
      * This is a factory method that provides a more fluent way to create instances.
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * MutableBoolean enabled = MutableBoolean.of(true);
      * }</pre>
@@ -104,7 +104,7 @@ public final class MutableBoolean implements Mutable, Serializable, Comparable<M
     /**
      * Returns the current boolean value.
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * MutableBoolean flag = MutableBoolean.of(true);
      * boolean val = flag.value(); // returns true
@@ -132,7 +132,7 @@ public final class MutableBoolean implements Mutable, Serializable, Comparable<M
     /**
      * Sets the value to the specified boolean.
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * MutableBoolean flag = MutableBoolean.of(false);
      * flag.setValue(true); // value is now true
@@ -148,7 +148,7 @@ public final class MutableBoolean implements Mutable, Serializable, Comparable<M
      * Returns the current value and then sets the new value.
      * This is an atomic-like operation for single-threaded use.
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * MutableBoolean flag = MutableBoolean.of(true);
      * boolean old = flag.getAndSet(false); // returns true, value is now false
@@ -167,7 +167,7 @@ public final class MutableBoolean implements Mutable, Serializable, Comparable<M
      * Sets the value and then returns it.
      * This is useful when you want to update and immediately use the new value.
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * MutableBoolean flag = MutableBoolean.of(false);
      * boolean newVal = flag.setAndGet(true); // returns true, value is now true
@@ -184,7 +184,7 @@ public final class MutableBoolean implements Mutable, Serializable, Comparable<M
     /**
      * Returns the current value and then inverts it (true becomes false, {@code false} becomes true).
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * MutableBoolean flag = MutableBoolean.of(true);
      * boolean old = flag.getAndNegate(); // returns true, value is now false
@@ -201,7 +201,7 @@ public final class MutableBoolean implements Mutable, Serializable, Comparable<M
     /**
      * Inverts the current value and then returns it (true becomes false, {@code false} becomes true).
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * MutableBoolean flag = MutableBoolean.of(true);
      * boolean newVal = flag.negateAndGet(); // returns false, value is now false
@@ -218,7 +218,7 @@ public final class MutableBoolean implements Mutable, Serializable, Comparable<M
      * Sets the value to newValue if the predicate evaluates to true for the current value.
      * If the predicate returns false, the value remains unchanged.
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * MutableBoolean flag = MutableBoolean.of(false);
      * boolean updated = flag.setIf(true, v -> !v); // returns true, value is now true
@@ -243,7 +243,7 @@ public final class MutableBoolean implements Mutable, Serializable, Comparable<M
     /**
      * Sets the value to {@code false}.
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * MutableBoolean flag = MutableBoolean.of(true);
      * flag.setFalse(); // value is now false
@@ -256,7 +256,7 @@ public final class MutableBoolean implements Mutable, Serializable, Comparable<M
     /**
      * Sets the value to {@code true}.
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * MutableBoolean flag = MutableBoolean.of(false);
      * flag.setTrue(); // value is now true
@@ -271,7 +271,7 @@ public final class MutableBoolean implements Mutable, Serializable, Comparable<M
     /**
      * Checks if the current value is {@code true}.
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * MutableBoolean flag = MutableBoolean.of(true);
      * if (flag.isTrue()) {
@@ -288,7 +288,7 @@ public final class MutableBoolean implements Mutable, Serializable, Comparable<M
     /**
      * Checks if the current value is {@code false}.
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * MutableBoolean flag = MutableBoolean.of(false);
      * if (flag.isFalse()) {
@@ -305,7 +305,7 @@ public final class MutableBoolean implements Mutable, Serializable, Comparable<M
     /**
      * Inverts the current value (true becomes false, {@code false} becomes true).
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * MutableBoolean flag = MutableBoolean.of(true);
      * flag.invert(); // value is now false
@@ -322,7 +322,7 @@ public final class MutableBoolean implements Mutable, Serializable, Comparable<M
      * Compares this MutableBoolean to another MutableBoolean in ascending order.
      * {@code false} is considered less than {@code true}.
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * MutableBoolean a = MutableBoolean.of(false);
      * MutableBoolean b = MutableBoolean.of(true);
@@ -344,7 +344,7 @@ public final class MutableBoolean implements Mutable, Serializable, Comparable<M
      * the argument is not {@code null} and is a {@code MutableBoolean} object that contains the
      * same {@code boolean} value as this object.
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * MutableBoolean a = MutableBoolean.of(true);
      * MutableBoolean b = MutableBoolean.of(true);
@@ -379,7 +379,7 @@ public final class MutableBoolean implements Mutable, Serializable, Comparable<M
     /**
      * Returns the String representation of this MutableBoolean's value.
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * MutableBoolean flag = MutableBoolean.of(true);
      * String str = flag.toString(); // returns "true"

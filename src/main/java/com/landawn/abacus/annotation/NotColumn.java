@@ -42,8 +42,8 @@ import java.lang.annotation.Target;
  *   <li>@Column: Explicitly declares "this is a column"</li>
  * </ul>
  * 
- * <p><b>Example usage:</b></p>
- * <pre>
+ * <p><b>Usage Examples:</b></p>
+ * <pre>{@code
  * {@literal @}Entity
  * public class Product {
  *     {@literal @}Id
@@ -69,7 +69,7 @@ import java.lang.annotation.Target;
  *         return basePrice.multiply(getCurrentDiscount());
  *     }
  * }
- * </pre>
+ * }</pre>
  * 
  * @since 2020
  * @see Transient

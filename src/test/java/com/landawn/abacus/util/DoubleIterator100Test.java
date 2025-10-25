@@ -513,7 +513,7 @@ public class DoubleIterator100Test extends TestBase {
         DoubleIterator iter = DoubleIterator.of(1.0, 2.0, 3.0);
         DoubleIterator limited = iter.limit(0);
 
-        assertThrows(NullPointerException.class, () -> iter.foreachIndexed(null));
+        assertThrows(IllegalArgumentException.class, () -> iter.foreachIndexed(null));
         assertFalse(limited.hasNext());
         assertThrows(NoSuchElementException.class, () -> limited.nextDouble());
     }

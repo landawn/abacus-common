@@ -37,7 +37,7 @@ import java.sql.SQLException;
  *   <li>Complete exception chain for debugging</li>
  * </ul>
  * 
- * <p>Example usage:</p>
+ * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * // In a stream operation processing database results
  * List<User> users = userIds.stream()
@@ -90,7 +90,7 @@ public class UncheckedSQLException extends UncheckedException {
      * <p>This constructor preserves all information from the original SQLException including
      * its message, SQL state, vendor error code, stack trace, and any suppressed exceptions.</p>
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * try {
      *     statement.executeUpdate(sql);
@@ -114,7 +114,7 @@ public class UncheckedSQLException extends UncheckedException {
      * <p>This constructor allows you to provide additional context about the database operation
      * that failed, while preserving all SQL-specific information from the original exception.</p>
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * try {
      *     connection.prepareStatement(query).executeQuery();
@@ -147,7 +147,7 @@ public class UncheckedSQLException extends UncheckedException {
      *   <li>42xxx - Syntax errors or access violations</li>
      * </ul>
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * try {
      *     // database operation
@@ -179,8 +179,8 @@ public class UncheckedSQLException extends UncheckedException {
      *   <li>Detecting known database-specific errors for specialized handling</li>
      *   <li>Detailed logging of database operations</li>
      * </ul>
-     * <p>
-     * Example usage:
+     *
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * try {
      *     // Perform database operation

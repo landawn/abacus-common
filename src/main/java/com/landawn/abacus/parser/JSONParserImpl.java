@@ -89,6 +89,32 @@ import com.landawn.abacus.util.Tuple.Tuple9;
 import com.landawn.abacus.util.cs;
 import com.landawn.abacus.util.stream.Stream;
 
+/**
+ * Internal implementation of JSON parser for serialization and deserialization operations.
+ *
+ * <p>This class provides the core implementation for converting Java objects to JSON format
+ * and vice versa. It extends {@link AbstractJSONParser} and provides optimized handling for
+ * various data types including primitives, collections, maps, beans, datasets, and entity IDs.</p>
+ *
+ * <p>Key features:</p>
+ * <ul>
+ *   <li>Efficient JSON serialization with configurable formatting options</li>
+ *   <li>Robust JSON deserialization with type safety</li>
+ *   <li>Support for complex types (Dataset, Sheet, EntityId, MapEntity)</li>
+ *   <li>Circular reference detection and handling</li>
+ *   <li>Streaming support for large JSON arrays</li>
+ *   <li>Configurable null value handling and property exclusion</li>
+ *   <li>Pretty printing and indentation support</li>
+ * </ul>
+ *
+ * <p>This class is package-private and should be accessed through {@link ParserFactory} or
+ * {@link JSONParser} interface.</p>
+ *
+ * @see AbstractJSONParser
+ * @see JSONSerializationConfig
+ * @see JSONDeserializationConfig
+ * @see ParserFactory
+ */
 @SuppressWarnings("deprecation")
 final class JSONParserImpl extends AbstractJSONParser {
 
@@ -262,15 +288,28 @@ final class JSONParserImpl extends AbstractJSONParser {
     }
 
     /**
+     * Reads and deserializes a JSON string using a JSONReader into the specified target class.
      *
-     * @param source
-     * @param jr
-     * @param config
-     * @param targetClass
-     * @param output
-     * @param <T>
-     * @return
-     * @throws IOException Signals that an I/O exception has occurred.
+     * <p>This is an internal method that performs the actual JSON parsing using a JSONReader.
+     * It handles various serialization types including arrays, collections, maps, beans, datasets,
+     * sheets, and entity IDs. The method dispatches to type-specific read methods based on the
+     * serialization type of the target class.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * JSONReader jr = JSONStringReader.parse(jsonString, charBuffer);
+     * MyBean bean = readString(jsonString, jr, config, MyBean.class, null);
+     * }</pre>
+     *
+     * @param <T> the type of the target object
+     * @param source the original JSON string source
+     * @param jr the JSONReader instance for parsing the JSON
+     * @param config the deserialization configuration
+     * @param targetClass the class of the target object to deserialize into
+     * @param output optional pre-existing output object (array, collection, or map) to populate; may be {@code null}
+     * @return the deserialized object of type {@code T}
+     * @throws IOException if an I/O error occurs during reading
+     * @throws ParseException if the JSON structure doesn't match the target class or is invalid
      */
     @SuppressWarnings("unchecked")
     protected <T> T readString(final String source, final JSONReader jr, final JSONDeserializationConfig config, final Class<? extends T> targetClass,

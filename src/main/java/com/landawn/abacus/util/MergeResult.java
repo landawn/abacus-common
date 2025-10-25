@@ -78,7 +78,7 @@ public enum MergeResult {
      * value is less than or equal to the second, {@link #TAKE_FIRST} is returned;
      * otherwise, {@link #TAKE_SECOND} is returned.</p>
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * MergeResult result = MergeResult.minFirst(5, 10); // returns TAKE_FIRST
      * MergeResult result2 = MergeResult.minFirst("b", "a"); // returns TAKE_SECOND
@@ -101,7 +101,7 @@ public enum MergeResult {
      * to the second, {@link #TAKE_FIRST} is returned; otherwise, {@link #TAKE_SECOND}
      * is returned.</p>
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Comparator<String> lengthComparator = Comparator.comparing(String::length);
      * MergeResult result = MergeResult.minFirst("hello", "hi", lengthComparator); 
@@ -126,7 +126,7 @@ public enum MergeResult {
      * value is greater than or equal to the second, {@link #TAKE_FIRST} is returned;
      * otherwise, {@link #TAKE_SECOND} is returned.</p>
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * MergeResult result = MergeResult.maxFirst(5, 10); // returns TAKE_SECOND
      * MergeResult result2 = MergeResult.maxFirst("b", "a"); // returns TAKE_FIRST
@@ -149,7 +149,7 @@ public enum MergeResult {
      * to the second, {@link #TAKE_FIRST} is returned; otherwise, {@link #TAKE_SECOND}
      * is returned.</p>
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Comparator<String> lengthComparator = Comparator.comparing(String::length);
      * MergeResult result = MergeResult.maxFirst("hello", "hi", lengthComparator); 
@@ -177,7 +177,7 @@ public enum MergeResult {
      * <p>The returned function uses natural ordering for comparison. This is useful
      * when you need to pass a merge strategy to methods that accept BiFunctions.</p>
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * BiFunction<Integer, Integer, MergeResult> minMerger = MergeResult.minFirst();
      * Stream<Integer> merged = stream1.merge(stream2, minMerger);
@@ -199,7 +199,7 @@ public enum MergeResult {
      * <p>This factory method creates a reusable merge strategy that can be passed
      * to methods accepting BiFunctions.</p>
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * BiFunction<Person, Person, MergeResult> youngerFirst = 
      *     MergeResult.minFirst(Comparator.comparing(Person::getAge));
@@ -228,7 +228,7 @@ public enum MergeResult {
      * <p>The returned function uses natural ordering for comparison. This is useful
      * when you need to pass a merge strategy to methods that accept BiFunctions.</p>
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * BiFunction<Integer, Integer, MergeResult> maxMerger = MergeResult.maxFirst();
      * Stream<Integer> merged = stream1.merge(stream2, maxMerger);
@@ -250,7 +250,7 @@ public enum MergeResult {
      * <p>This factory method creates a reusable merge strategy that can be passed
      * to methods accepting BiFunctions.</p>
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * BiFunction<Person, Person, MergeResult> elderFirst = 
      *     MergeResult.maxFirst(Comparator.comparing(Person::getAge));
@@ -280,7 +280,7 @@ public enum MergeResult {
      *   <li>Shared between threads</li>
      * </ul>
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * BiFunction<String, String, MergeResult> alternator = MergeResult.alternate();
      * alternator.apply("a", "b"); // returns TAKE_FIRST

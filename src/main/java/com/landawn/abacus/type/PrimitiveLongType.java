@@ -14,6 +14,17 @@
 
 package com.landawn.abacus.type;
 
+/**
+ * Type handler for primitive long values.
+ * This class handles the primitive long type specifically, as opposed to the Long wrapper class.
+ * It provides type information and default value handling for long primitives.
+ *
+ * <p><b>Usage Examples:</b></p>
+ * <pre>{@code
+ * Type<Long> type = TypeFactory.getType(long.class);
+ * Long defaultVal = type.defaultValue(); // Returns 0L
+ * }</pre>
+ */
 @SuppressWarnings("java:S2160")
 public final class PrimitiveLongType extends AbstractLongType {
 
@@ -28,7 +39,7 @@ public final class PrimitiveLongType extends AbstractLongType {
     /**
      * Returns the Class object representing the primitive long type.
      *
-     * <p>Usage example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * PrimitiveLongType type = new PrimitiveLongType();
      * Class clazz = type.clazz();
@@ -48,7 +59,7 @@ public final class PrimitiveLongType extends AbstractLongType {
      * Indicates whether this type represents a primitive type.
      * For PrimitiveLongType, this always returns {@code true} since it represents the primitive long type.
      *
-     * <p>Usage example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * PrimitiveLongType type = new PrimitiveLongType();
      * boolean isPrimitive = type.isPrimitiveType();
@@ -66,7 +77,7 @@ public final class PrimitiveLongType extends AbstractLongType {
      * Returns the default value for the primitive long type.
      * The default value for primitive long is 0L.
      *
-     * <p>Usage example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * PrimitiveLongType type = new PrimitiveLongType();
      * Long defaultVal = type.defaultValue();

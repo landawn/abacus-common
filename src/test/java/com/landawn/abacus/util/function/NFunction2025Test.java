@@ -65,7 +65,8 @@ public class NFunction2025Test extends TestBase {
         NFunction<Integer, Double> function = new NFunction<Integer, Double>() {
             @Override
             public Double apply(Integer... args) {
-                if (args.length == 0) return 0.0;
+                if (args.length == 0)
+                    return 0.0;
                 double sum = 0;
                 for (Integer n : args) {
                     sum += n;
@@ -134,7 +135,8 @@ public class NFunction2025Test extends TestBase {
         NFunction<String, Integer> function = args -> {
             int count = 0;
             for (String s : args) {
-                if (s != null) count++;
+                if (s != null)
+                    count++;
             }
             return count;
         };
@@ -156,10 +158,12 @@ public class NFunction2025Test extends TestBase {
     @Test
     public void testComplexCalculation() {
         NFunction<Integer, Integer> function = args -> {
-            if (args.length == 0) return 0;
+            if (args.length == 0)
+                return 0;
             int max = args[0];
             for (Integer n : args) {
-                if (n > max) max = n;
+                if (n > max)
+                    max = n;
             }
             return max;
         };

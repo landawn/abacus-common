@@ -45,7 +45,23 @@ public interface ShortSupplier extends Throwables.ShortSupplier<RuntimeException
     /**
      * Gets a result as a short value.
      *
-     * @return a short value
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * ShortSupplier zero = ShortSupplier.ZERO;
+     * short value1 = zero.getAsShort(); // returns 0
+     *
+     * ShortSupplier random = ShortSupplier.RANDOM;
+     * short value2 = random.getAsShort(); // returns a random short value
+     *
+     * ShortSupplier counter = new ShortSupplier() {
+     *     private short count = 0;
+     *     public short getAsShort() { return count++; }
+     * };
+     * short value3 = counter.getAsShort(); // returns 0
+     * short value4 = counter.getAsShort(); // returns 1
+     * }</pre>
+     *
+     * @return a short value if a value cannot be supplied
      */
     @Override
     short getAsShort();

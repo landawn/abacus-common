@@ -67,7 +67,7 @@ public interface LongBiConsumer extends Throwables.LongBiConsumer<RuntimeExcepti
      * of operations that will be executed sequentially on the same two input
      * values.
      *
-     * <p>Example usage:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * LongBiConsumer logger = (a, b) -> System.out.println("Processing: " + a + ", " + b);
      * LongBiConsumer processor = (a, b) -> processValues(a, b);

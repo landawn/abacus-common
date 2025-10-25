@@ -29,7 +29,7 @@ import java.io.Serial;
  * MutableByte instance concurrently, and at least one thread modifies it, external
  * synchronization is required.</p>
  * 
- * <p>Example usage:</p>
+ * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * MutableByte counter = MutableByte.of((byte)0);
  * byteArray.forEach(b -> counter.add(b));
@@ -54,7 +54,7 @@ public final class MutableByte extends Number implements Comparable<MutableByte>
     /**
      * Constructs a new MutableByte with the default value of zero.
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * MutableByte num = new MutableByte(); // value is 0
      * }</pre>
@@ -65,7 +65,7 @@ public final class MutableByte extends Number implements Comparable<MutableByte>
     /**
      * Constructs a new MutableByte with the specified initial value.
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * MutableByte num = new MutableByte((byte)127); // value is 127
      * }</pre>
@@ -80,7 +80,7 @@ public final class MutableByte extends Number implements Comparable<MutableByte>
      * Creates a new MutableByte instance with the specified value.
      * This is a factory method that provides a more fluent way to create instances.
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * MutableByte flags = MutableByte.of((byte)0xFF);
      * }</pre>
@@ -95,7 +95,7 @@ public final class MutableByte extends Number implements Comparable<MutableByte>
     /**
      * Returns the current byte value.
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * MutableByte num = MutableByte.of((byte)42);
      * byte val = num.value(); // returns 42
@@ -126,7 +126,7 @@ public final class MutableByte extends Number implements Comparable<MutableByte>
     /**
      * Sets the value to the specified byte.
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * MutableByte num = MutableByte.of((byte)10);
      * num.setValue((byte)20); // value is now 20
@@ -142,7 +142,7 @@ public final class MutableByte extends Number implements Comparable<MutableByte>
      * Returns the current value and then sets the new value.
      * This is an atomic-like operation for single-threaded use.
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * MutableByte num = MutableByte.of((byte)10);
      * byte old = num.getAndSet((byte)20); // returns 10, value is now 20
@@ -161,7 +161,7 @@ public final class MutableByte extends Number implements Comparable<MutableByte>
      * Sets the value and then returns it.
      * This is useful when you want to update and immediately use the new value.
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * MutableByte num = MutableByte.of((byte)10);
      * byte newVal = num.setAndGet((byte)20); // returns 20, value is now 20
@@ -179,7 +179,7 @@ public final class MutableByte extends Number implements Comparable<MutableByte>
      * Sets the value to newValue if the predicate evaluates to true for the current value.
      * If the predicate returns false, the value remains unchanged.
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * MutableByte num = MutableByte.of((byte)10);
      * boolean updated = num.setIf((byte)20, v -> v < 15); // returns true, value is now 20
@@ -207,7 +207,7 @@ public final class MutableByte extends Number implements Comparable<MutableByte>
      * Increments the value by one.
      * Note: byte overflow will wrap around (127 + 1 = -128).
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * MutableByte num = MutableByte.of((byte)10);
      * num.increment(); // value is now 11
@@ -221,7 +221,7 @@ public final class MutableByte extends Number implements Comparable<MutableByte>
      * Decrements the value by one.
      * Note: byte underflow will wrap around (-128 - 1 = 127).
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * MutableByte num = MutableByte.of((byte)10);
      * num.decrement(); // value is now 9
@@ -237,7 +237,7 @@ public final class MutableByte extends Number implements Comparable<MutableByte>
      * Adds the specified operand to the current value.
      * Note: byte overflow will wrap around.
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * MutableByte num = MutableByte.of((byte)10);
      * num.add((byte)5); // value is now 15
@@ -253,7 +253,7 @@ public final class MutableByte extends Number implements Comparable<MutableByte>
      * Subtracts the specified operand from the current value.
      * Note: byte underflow will wrap around.
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * MutableByte num = MutableByte.of((byte)10);
      * num.subtract((byte)3); // value is now 7
@@ -268,7 +268,7 @@ public final class MutableByte extends Number implements Comparable<MutableByte>
     /**
      * Returns the current value and then increments it by one.
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * MutableByte num = MutableByte.of((byte)10);
      * byte old = num.getAndIncrement(); // returns 10, value is now 11
@@ -283,7 +283,7 @@ public final class MutableByte extends Number implements Comparable<MutableByte>
     /**
      * Returns the current value and then decrements it by one.
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * MutableByte num = MutableByte.of((byte)10);
      * byte old = num.getAndDecrement(); // returns 10, value is now 9
@@ -298,7 +298,7 @@ public final class MutableByte extends Number implements Comparable<MutableByte>
     /**
      * Increments the value by one and then returns it.
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * MutableByte num = MutableByte.of((byte)10);
      * byte newVal = num.incrementAndGet(); // returns 11, value is now 11
@@ -313,7 +313,7 @@ public final class MutableByte extends Number implements Comparable<MutableByte>
     /**
      * Decrements the value by one and then returns it.
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * MutableByte num = MutableByte.of((byte)10);
      * byte newVal = num.decrementAndGet(); // returns 9, value is now 9
@@ -328,7 +328,7 @@ public final class MutableByte extends Number implements Comparable<MutableByte>
     /**
      * Returns the current value and then adds the specified delta.
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * MutableByte num = MutableByte.of((byte)10);
      * byte old = num.getAndAdd((byte)5); // returns 10, value is now 15
@@ -346,7 +346,7 @@ public final class MutableByte extends Number implements Comparable<MutableByte>
     /**
      * Adds the specified delta to the current value and then returns it.
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * MutableByte num = MutableByte.of((byte)10);
      * byte newVal = num.addAndGet((byte)5); // returns 15, value is now 15
@@ -366,7 +366,7 @@ public final class MutableByte extends Number implements Comparable<MutableByte>
      * Returns the value of this MutableByte as a byte.
      * This is equivalent to calling {@link #value()}.
      *
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * MutableByte num = MutableByte.of((byte)42);
      * byte val = num.byteValue(); // returns 42
@@ -383,7 +383,7 @@ public final class MutableByte extends Number implements Comparable<MutableByte>
      * Returns the value of this MutableByte as a short after a widening primitive conversion.
      * The byte value is sign-extended to create the short value.
      *
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * MutableByte num = MutableByte.of((byte)-1);
      * short val = num.shortValue(); // returns -1 (sign-extended)
@@ -400,7 +400,7 @@ public final class MutableByte extends Number implements Comparable<MutableByte>
      * Returns the value of this MutableByte as an int after a widening primitive conversion.
      * The byte value is sign-extended to create the int value.
      *
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * MutableByte num = MutableByte.of((byte)100);
      * int val = num.intValue(); // returns 100
@@ -417,7 +417,7 @@ public final class MutableByte extends Number implements Comparable<MutableByte>
      * Returns the value of this MutableByte as a long after a widening primitive conversion.
      * The byte value is sign-extended to create the long value.
      *
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * MutableByte num = MutableByte.of((byte)50);
      * long val = num.longValue(); // returns 50L
@@ -434,7 +434,7 @@ public final class MutableByte extends Number implements Comparable<MutableByte>
      * Returns the value of this MutableByte as a float after a widening primitive conversion.
      * The conversion is exact (no loss of precision).
      *
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * MutableByte num = MutableByte.of((byte)75);
      * float val = num.floatValue(); // returns 75.0f
@@ -451,7 +451,7 @@ public final class MutableByte extends Number implements Comparable<MutableByte>
      * Returns the value of this MutableByte as a double after a widening primitive conversion.
      * The conversion is exact (no loss of precision).
      *
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * MutableByte num = MutableByte.of((byte)-128);
      * double val = num.doubleValue(); // returns -128.0
@@ -471,7 +471,7 @@ public final class MutableByte extends Number implements Comparable<MutableByte>
      * Returns a negative value if this is less than the other, zero if equal,
      * or a positive value if this is greater than the other.
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * MutableByte a = MutableByte.of((byte)10);
      * MutableByte b = MutableByte.of((byte)20);
@@ -493,7 +493,7 @@ public final class MutableByte extends Number implements Comparable<MutableByte>
      * the argument is not {@code null} and is a {@code MutableByte} object that contains the
      * same {@code byte} value as this object.
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * MutableByte a = MutableByte.of((byte)10);
      * MutableByte b = MutableByte.of((byte)10);
@@ -518,7 +518,7 @@ public final class MutableByte extends Number implements Comparable<MutableByte>
      * <p>This implementation ensures that two MutableByte objects with equal values
      * will have equal hash codes, satisfying the {@link Object#hashCode()} contract.</p>
      *
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * MutableByte num = MutableByte.of((byte)42);
      * int hash = num.hashCode(); // returns 42
@@ -536,7 +536,7 @@ public final class MutableByte extends Number implements Comparable<MutableByte>
     /**
      * Returns the String representation of this MutableByte's value.
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * MutableByte num = MutableByte.of((byte)42);
      * String str = num.toString(); // returns "42"

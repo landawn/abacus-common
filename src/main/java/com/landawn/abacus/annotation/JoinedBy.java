@@ -42,7 +42,8 @@ import java.lang.annotation.Target;
  * </ul>
  * 
  * <h3>One-to-One Join Example:</h3>
- * <pre>
+ * <p><b>Usage Examples:</b></p>
+ * <pre>{@code
  * {@literal @}Entity
  * public class User {
  *     {@literal @}Id
@@ -59,10 +60,11 @@ import java.lang.annotation.Target;
  *     private Long userId;  // Foreign key to User
  *     private String bio;
  * }
- * </pre>
+ * }</pre>
  *
  * <h3>One-to-Many Join Example:</h3>
- * <pre>
+ * <p><b>Usage Examples:</b></p>
+ * <pre>{@code
  * {@literal @}Entity
  * public class Account {
  *     {@literal @}Id
@@ -79,10 +81,11 @@ import java.lang.annotation.Target;
  *     private Long accountId;  // Foreign key to Account
  *     private String deviceName;
  * }
- * </pre>
+ * }</pre>
  *
  * <h3>Many-to-Many Join Example:</h3>
- * <pre>
+ * <p><b>Usage Examples:</b></p>
+ * <pre>{@code
  * {@literal @}Entity
  * public class Employee {
  *     {@literal @}Id
@@ -106,7 +109,7 @@ import java.lang.annotation.Target;
  *     private Long projectId;   // FK to Project
  *     private Date assignedDate;
  * }
- * </pre>
+ * }</pre>
  * 
  * @since 2019
  * @see Entity
@@ -137,8 +140,8 @@ public @interface JoinedBy {
      *   <li>Use "TableName.fieldName" for join table references</li>
      * </ul>
      * 
-     * <p><b>Examples:</b></p>
-     * <pre>
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
      * // Simple one-to-many
      * {@literal @}JoinedBy("id=customerId")
      * private List&lt;Order&gt; orders;
@@ -146,7 +149,7 @@ public @interface JoinedBy {
      * // Many-to-many with join table
      * {@literal @}JoinedBy({"id=UserRole.userId", "UserRole.roleId=id"})
      * private List&lt;Role&gt; roles;
-     * </pre>
+     * }</pre>
      * 
      * @return array of join condition strings defining the relationship
      */

@@ -358,7 +358,11 @@ public class ImmutableMap100Test extends TestBase {
 
     @Test
     public void testBuilder() {
-        ImmutableMap<String, Integer> map = ImmutableMap.<String, Integer> builder().put("one", 1).put("two", 2).putAll(CommonUtil.asMap("three", 3, "four", 4)).build();
+        ImmutableMap<String, Integer> map = ImmutableMap.<String, Integer> builder()
+                .put("one", 1)
+                .put("two", 2)
+                .putAll(CommonUtil.asMap("three", 3, "four", 4))
+                .build();
 
         Assertions.assertEquals(4, map.size());
         Assertions.assertEquals(1, map.get("one"));

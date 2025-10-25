@@ -36,7 +36,7 @@ public interface ToIntTriFunction<A, B, C> extends Throwables.ToIntTriFunction<A
     /**
      * Applies this function to the given arguments and returns an int result.
      * 
-     * <p>Example usage:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ToIntTriFunction<String, String, String> totalLength = 
      *     (s1, s2, s3) -> s1.length() + s2.length() + s3.length();
@@ -54,8 +54,7 @@ public interface ToIntTriFunction<A, B, C> extends Throwables.ToIntTriFunction<A
      * @param a the first function argument
      * @param b the second function argument
      * @param c the third function argument
-     * @return the function result as a primitive int
-     * @throws RuntimeException if any error occurs during function execution
+     * @return the function result as a primitive int if any error occurs during function execution
      */
     @Override
     int applyAsInt(A a, B b, C c);

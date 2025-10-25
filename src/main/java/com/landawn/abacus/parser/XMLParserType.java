@@ -35,7 +35,7 @@ package com.landawn.abacus.parser;
  *       good balance between performance and ease of use</li>
  * </ul>
  * 
- * <p>Example usage:
+ * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * // Create parser with specific type
  * XMLParser staxParser = new XMLParserImpl(XMLParserType.StAX);

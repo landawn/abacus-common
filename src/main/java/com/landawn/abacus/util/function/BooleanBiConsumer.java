@@ -29,6 +29,12 @@ public interface BooleanBiConsumer extends Throwables.BooleanBiConsumer<RuntimeE
     /**
      * Performs this operation on the given arguments.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * BooleanBiConsumer logger = (a, b) -> System.out.println("AND: " + (a && b));
+     * logger.accept(true, false); // Prints: AND: false
+     * }</pre>
+     *
      * @param t the first input argument (boolean value)
      * @param u the second input argument (boolean value)
      */
@@ -39,6 +45,13 @@ public interface BooleanBiConsumer extends Throwables.BooleanBiConsumer<RuntimeE
      * Returns a composed {@code BooleanBiConsumer} that performs, in sequence, this operation followed by the {@code after} operation.
      * If performing either operation throws an exception, it is relayed to the caller of the composed operation.
      * If performing this operation throws an exception, the {@code after} operation will not be performed.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * BooleanBiConsumer andPrinter = (a, b) -> System.out.println("AND: " + (a && b));
+     * BooleanBiConsumer orPrinter = (a, b) -> System.out.println("OR: " + (a || b));
+     * BooleanBiConsumer combined = andPrinter.andThen(orPrinter);
+     * }</pre>
      *
      * @param after the operation to perform after this operation. Must not be {@code null}.
      * @return a composed {@code BooleanBiConsumer} that performs in sequence this operation followed by the {@code after} operation

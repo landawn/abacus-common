@@ -628,7 +628,7 @@ public final class Iterables {
     }
 
     /**
-     * Returns the minimum value from the provided array of elements according to the key extracted by the {@code keyExtractor} function.
+     * Returns the minimum value from the provided iterable of elements according to the key extracted by the {@code keyExtractor} function.
      * Null values are considered to be maximum value.
      * If the iterable is {@code null} or empty, it returns an empty {@code Nullable}.
      *
@@ -643,7 +643,7 @@ public final class Iterables {
     }
 
     /**
-     * Returns the minimum value from the provided array of elements according to the key extracted by the {@code keyExtractor} function.
+     * Returns the minimum value from the provided iterator of elements according to the key extracted by the {@code keyExtractor} function.
      * Null values are considered to be maximum value.
      * If the iterator is {@code null} or empty, it returns an empty {@code Nullable}.
      *
@@ -980,7 +980,7 @@ public final class Iterables {
 
     /**
      * Returns the maximum value from the provided array of elements based on their natural ordering.
-     * Null values are considered to be minimum
+     * Null values are considered to be minimum value.
      * If the array is {@code null} or empty, it returns an empty {@code Nullable}.
      *
      * @param a the array of elements to evaluate
@@ -1006,7 +1006,7 @@ public final class Iterables {
 
     /**
      * Returns the maximum value from the provided iterable of elements based on their natural ordering.
-     * Null values are considered to be minimum
+     * Null values are considered to be minimum value.
      * If the iterable is {@code null} or empty, it returns an empty {@code Nullable}.
      *
      * @param c the iterable of elements to evaluate
@@ -1032,7 +1032,7 @@ public final class Iterables {
 
     /**
      * Returns the maximum value from the provided iterator of elements based on their natural ordering.
-     * Null values are considered to be minimum
+     * Null values are considered to be minimum value.
      * If the iterator is {@code null} or empty, it returns an empty {@code Nullable}.
      *
      * @param iter the iterator of elements to evaluate
@@ -1080,7 +1080,7 @@ public final class Iterables {
 
     /**
      * Returns the maximum value from the provided array of elements according to the key extracted by the {@code keyExtractor} function.
-     * Null values are considered to be minimum
+     * Null values are considered to be minimum value.
      * If the array is {@code null} or empty, it returns an empty {@code Nullable}.
      *
      * @param a the array of elements to evaluate
@@ -1094,8 +1094,8 @@ public final class Iterables {
     }
 
     /**
-     * Returns the maximum value from the provided array of elements according to the key extracted by the {@code keyExtractor} function.
-     * Null values are considered to be minimum
+     * Returns the maximum value from the provided iterable of elements according to the key extracted by the {@code keyExtractor} function.
+     * Null values are considered to be minimum value.
      * If the iterable is {@code null} or empty, it returns an empty {@code Nullable}.
      *
      * @param c the iterable of elements to evaluate
@@ -1109,8 +1109,8 @@ public final class Iterables {
     }
 
     /**
-     * Returns the maximum value from the provided array of elements according to the key extracted by the {@code keyExtractor} function.
-     * Null values are considered to be minimum
+     * Returns the maximum value from the provided iterator of elements according to the key extracted by the {@code keyExtractor} function.
+     * Null values are considered to be minimum value.
      * If the iterator is {@code null} or empty, it returns an empty {@code Nullable}.
      *
      * @param iter the iterator of elements to evaluate
@@ -1854,7 +1854,7 @@ public final class Iterables {
      * @param fromIndex the start index of the range, inclusive
      * @param toIndex the end index of the range, exclusive
      * @return the average of the integer values of the provided numbers in the specified range as an {@code OptionalDouble} if the range is not empty, otherwise an empty {@code OptionalDouble}
-     * @throws IndexOutOfBoundsException if the range is invalid: ({@code fromIndex < 0 || fromIndex > toIndex || toIndex > a.length})
+     * @throws IndexOutOfBoundsException if the range is invalid: ({@code fromIndex < 0 || fromIndex > toIndex || toIndex > c.size()})
      * @see N#averageInt(Collection, int, int)
      */
     public static <T extends Number> OptionalDouble averageInt(final Collection<? extends T> c, final int fromIndex, final int toIndex)
@@ -1872,7 +1872,7 @@ public final class Iterables {
      * @param toIndex the end index of the range, exclusive
      * @param func the function to extract an integer value from each element
      * @return the average of the integer values of the provided numbers in the specified range as an {@code OptionalDouble} if the range is not empty, otherwise an empty {@code OptionalDouble}
-     * @throws IndexOutOfBoundsException if the range is invalid: ({@code fromIndex < 0 || fromIndex > toIndex || toIndex > a.length})
+     * @throws IndexOutOfBoundsException if the range is invalid: ({@code fromIndex < 0 || fromIndex > toIndex || toIndex > c.size()})
      * @see N#averageInt(Collection, int, int, ToIntFunction)
      */
     public static <T> OptionalDouble averageInt(final Collection<? extends T> c, final int fromIndex, final int toIndex, final ToIntFunction<? super T> func)
@@ -1999,7 +1999,7 @@ public final class Iterables {
      * @param fromIndex the start index of the range, inclusive
      * @param toIndex the end index of the range, exclusive
      * @return the average of the long values of the provided numbers in the specified range as an {@code OptionalDouble} if the range is not empty, otherwise an empty {@code OptionalDouble}
-     * @throws IndexOutOfBoundsException if the range is invalid: ({@code fromIndex < 0 || fromIndex > toIndex || toIndex > a.length})
+     * @throws IndexOutOfBoundsException if the range is invalid: ({@code fromIndex < 0 || fromIndex > toIndex || toIndex > c.size()})
      * @see N#averageLong(Collection, int, int)
      */
     public static <T extends Number> OptionalDouble averageLong(final Collection<? extends T> c, final int fromIndex, final int toIndex)
@@ -2017,8 +2017,8 @@ public final class Iterables {
      * @param toIndex the end index of the range, exclusive
      * @param func the function to extract a long value from each element
      * @return the average of the long values of the provided numbers in the specified range as an {@code OptionalDouble} if the range is not empty, otherwise an empty {@code OptionalDouble}
-     * @throws IndexOutOfBoundsException if the range is invalid: ({@code fromIndex < 0 || fromIndex > toIndex || toIndex > a.length})
-     * @see N#averageLong(Object[], int, int, ToLongFunction)
+     * @throws IndexOutOfBoundsException if the range is invalid: ({@code fromIndex < 0 || fromIndex > toIndex || toIndex > c.size()})
+     * @see N#averageLong(Collection, int, int, ToLongFunction)
      */
     public static <T> OptionalDouble averageLong(final Collection<? extends T> c, final int fromIndex, final int toIndex, final ToLongFunction<? super T> func)
             throws IndexOutOfBoundsException {
@@ -2150,7 +2150,7 @@ public final class Iterables {
      * @param fromIndex the start index of the range, inclusive
      * @param toIndex the end index of the range, exclusive
      * @return the average of the double values of the provided numbers in the specified range as an {@code OptionalDouble} if the range is not empty, otherwise an empty {@code OptionalDouble}
-     * @throws IndexOutOfBoundsException if the range is invalid: ({@code fromIndex < 0 || fromIndex > toIndex || toIndex > a.length})
+     * @throws IndexOutOfBoundsException if the range is invalid: ({@code fromIndex < 0 || fromIndex > toIndex || toIndex > c.size()})
      * @see N#averageDouble(Collection, int, int)
      */
     public static <T extends Number> OptionalDouble averageDouble(final Collection<? extends T> c, final int fromIndex, final int toIndex)
@@ -2168,8 +2168,8 @@ public final class Iterables {
      * @param toIndex the end index of the range, exclusive
      * @param func the function to extract a double value from each element
      * @return the average of the double values of the provided numbers in the specified range as an {@code OptionalDouble} if the range is not empty, otherwise an empty {@code OptionalDouble}
-     * @throws IndexOutOfBoundsException if the range is invalid: ({@code fromIndex < 0 || fromIndex > toIndex || toIndex > a.length})
-     * @see N#averageDouble(Object[], int, int, ToDoubleFunction)
+     * @throws IndexOutOfBoundsException if the range is invalid: ({@code fromIndex < 0 || fromIndex > toIndex || toIndex > c.size()})
+     * @see N#averageDouble(Collection, int, int, ToDoubleFunction)
      */
     public static <T> OptionalDouble averageDouble(final Collection<? extends T> c, final int fromIndex, final int toIndex,
             final ToDoubleFunction<? super T> func) throws IndexOutOfBoundsException {
@@ -2312,7 +2312,7 @@ public final class Iterables {
      * Returns the index of the first occurrence of the specified value in the provided array as an {@code OptionalInt}.
      * If the array is {@code null} or doesn't contain the specified value, it returns an empty {@code OptionalInt}.
      *
-     * @param a the array to search
+     * @param a the array of elements to evaluate
      * @param valueToFind the value to find in the array
      * @return an {@code OptionalInt} containing the index of the first occurrence of the specified value if found, otherwise an empty {@code OptionalInt}
      * @see N#indexOf(Object[], Object)
@@ -2326,7 +2326,7 @@ public final class Iterables {
      * Returns the index of the first occurrence of the specified value in the provided collection as an {@code OptionalInt}.
      * If the collection is {@code null} or doesn't contain the specified value, it returns an empty {@code OptionalInt}.
      *
-     * @param c the collection to search
+     * @param c the collection of elements to evaluate
      * @param valueToFind the value to find in the collection
      * @return an {@code OptionalInt} containing the index of the first occurrence of the specified value if found, otherwise an empty {@code OptionalInt}
      * @see N#indexOf(Collection, Object)
@@ -2340,7 +2340,7 @@ public final class Iterables {
      * Returns the index of the last occurrence of the specified value in the provided array as an {@code OptionalInt}.
      * If the array is {@code null} or doesn't contain the specified value, it returns an empty {@code OptionalInt}.
      *
-     * @param a the array to search
+     * @param a the array of elements to evaluate
      * @param valueToFind the value to find in the array
      * @return an {@code OptionalInt} containing the index of the last occurrence of the specified value if found, otherwise an empty {@code OptionalInt}
      * @see N#lastIndexOf(Object[], Object)
@@ -2354,7 +2354,7 @@ public final class Iterables {
      * Returns the index of the last occurrence of the specified value in the provided collection as an {@code OptionalInt}.
      * If the collection is {@code null} or doesn't contain the specified value, it returns an empty {@code OptionalInt}.
      *
-     * @param c the collection to search
+     * @param c the collection of elements to evaluate
      * @param valueToFind the value to find in the collection
      * @return an {@code OptionalInt} containing the index of the last occurrence of the specified value if found, otherwise an empty {@code OptionalInt}
      * @see N#lastIndexOf(Collection, Object)
@@ -2370,7 +2370,7 @@ public final class Iterables {
      * If the array is {@code null} or doesn't contain any element that satisfies the predicates, it returns an empty {@code Nullable}.
      *
      * @param <T> the type of the elements in the array
-     * @param a the array to search
+     * @param a the array of elements to evaluate
      * @param predicateForFirst the predicate to test for the first element
      * @param predicateForLast the predicate to test for the last element
      * @return a {@code Nullable} containing the first element satisfying {@code predicateForFirst} if found,
@@ -2394,7 +2394,7 @@ public final class Iterables {
      * If the collection is {@code null} or doesn't contain any element that satisfies the predicates, it returns an empty {@code Nullable}.
      *
      * @param <T> the type of the elements in the collection
-     * @param c the collection to search
+     * @param c the collection of elements to evaluate
      * @param predicateForFirst the predicate to test for the first element
      * @param predicateForLast the predicate to test for the last element
      * @return a {@code Nullable} containing the first element satisfying {@code predicateForFirst} if found,
@@ -2419,7 +2419,7 @@ public final class Iterables {
      * If the array is {@code null} or doesn't contain any element that satisfies the predicates, it returns an empty {@code OptionalInt}.
      *
      * @param <T> the type of the elements in the array
-     * @param a the array to search
+     * @param a the array of elements to evaluate
      * @param predicateForFirst the predicate to test for the first element
      * @param predicateForLast the predicate to test for the last element
      * @return an {@code OptionalInt} containing the index of the first element satisfying {@code predicateForFirst} if found,
@@ -2443,7 +2443,7 @@ public final class Iterables {
      * If the collection is {@code null} or doesn't contain any element that satisfies the predicates, it returns an empty {@code OptionalInt}.
      *
      * @param <T> the type of the elements in the collection
-     * @param c the collection to search
+     * @param c the collection of elements to evaluate
      * @param predicateForFirst the predicate to test for the first element
      * @param predicateForLast the predicate to test for the last element
      * @return an {@code OptionalInt} containing the index of the first element satisfying {@code predicateForFirst} if found,
@@ -2467,7 +2467,7 @@ public final class Iterables {
      * If the array is {@code null} or doesn't contain any element that satisfies the predicate, it returns a pair of empty {@code Nullable} objects.
      *
      * @param <T> the type of the elements in the array
-     * @param a the array to search
+     * @param a the array of elements to evaluate
      * @param predicate the predicate to test for the first and last elements
      * @return a {@code Pair} containing a {@code Nullable} for the first element satisfying {@code predicate} if found and a {@code Nullable} for the last element satisfying {@code predicate} if found,
      *         otherwise a {@code Pair} of empty {@code Nullable} objects
@@ -2485,7 +2485,7 @@ public final class Iterables {
      * If the array is {@code null} or doesn't contain any element that satisfies the predicates, it returns a pair of empty {@code Nullable} objects.
      *
      * @param <T> the type of the elements in the array
-     * @param a the array to search
+     * @param a the array of elements to evaluate
      * @param predicateForFirst the predicate to test for the first element
      * @param predicateForLast the predicate to test for the last element
      * @return a {@code Pair} containing a {@code Nullable} for the first element satisfying {@code predicateForFirst} if found and a {@code Nullable} for the last element satisfying {@code predicateForLast} if found,
@@ -2509,7 +2509,7 @@ public final class Iterables {
      * If the collection is {@code null} or doesn't contain any element that satisfies the predicate, it returns a pair of empty {@code Nullable} objects.
      *
      * @param <T> the type of the elements in the collection
-     * @param c the collection to search
+     * @param c the collection of elements to evaluate
      * @param predicate the predicate to test for the first and last elements
      * @return a {@code Pair} containing a {@code Nullable} for the first element satisfying {@code predicate} if found and a {@code Nullable} for the last element satisfying {@code predicate} if found,
      *         otherwise a {@code Pair} of empty {@code Nullable} objects
@@ -2527,7 +2527,7 @@ public final class Iterables {
      * If the collection is {@code null} or doesn't contain any element that satisfies the predicates, it returns a pair of empty {@code Nullable} objects.
      *
      * @param <T> the type of the elements in the collection
-     * @param c the collection to search
+     * @param c the collection of elements to evaluate
      * @param predicateForFirst the predicate to test for the first element
      * @param predicateForLast the predicate to test for the last element
      * @return a {@code Pair} containing a {@code Nullable} for the first element satisfying {@code predicateForFirst} if found and a {@code Nullable} for the last element satisfying {@code predicateForLast} if found,
@@ -2551,7 +2551,7 @@ public final class Iterables {
      * If the array is {@code null} or doesn't contain any element that satisfies the predicate, it returns a pair of empty {@code OptionalInt} objects.
      *
      * @param <T> the type of the elements in the array
-     * @param a the array to search
+     * @param a the array of elements to evaluate
      * @param predicate the predicate to test for the first and last elements
      * @return a {@code Pair} containing an {@code OptionalInt} for the index of the first element satisfying {@code predicate} if found and an {@code OptionalInt} for the index of the last element satisfying {@code predicate} if found,
      *         otherwise a {@code Pair} of empty {@code OptionalInt} objects
@@ -2569,7 +2569,7 @@ public final class Iterables {
      * If the array is {@code null} or doesn't contain any element that satisfies the predicates, it returns a pair of empty {@code OptionalInt} objects.
      *
      * @param <T> the type of the elements in the array
-     * @param a the array to search
+     * @param a the array of elements to evaluate
      * @param predicateForFirst the predicate to test for the first element
      * @param predicateForLast the predicate to test for the last element
      * @return a {@code Pair} containing an {@code OptionalInt} for the index of the first element satisfying {@code predicateForFirst} if found and an {@code OptionalInt} for the index of the last element satisfying {@code predicateForLast} if found,
@@ -2593,7 +2593,7 @@ public final class Iterables {
      * If the collection is {@code null} or doesn't contain any element that satisfies the predicate, it returns a pair of empty {@code OptionalInt} objects.
      *
      * @param <T> the type of the elements in the collection
-     * @param c the collection to search
+     * @param c the collection of elements to evaluate
      * @param predicate the predicate to test for the first and last elements
      * @return a {@code Pair} containing an {@code OptionalInt} for the index of the first element satisfying {@code predicate} if found and an {@code OptionalInt} for the index of the last element satisfying {@code predicate} if found,
      *         otherwise a {@code Pair} of empty {@code OptionalInt} objects
@@ -2611,7 +2611,7 @@ public final class Iterables {
      * If the collection is {@code null} or doesn't contain any element that satisfies the predicates, it returns a pair of empty {@code OptionalInt} objects.
      *
      * @param <T> the type of the elements in the collection
-     * @param c the collection to search
+     * @param c the collection of elements to evaluate
      * @param predicateForFirst the predicate to test for the first element
      * @param predicateForLast the predicate to test for the last element
      * @return a {@code Pair} containing an {@code OptionalInt} for the index of the first element satisfying {@code predicateForFirst} if found and an {@code OptionalInt} for the index of the last element satisfying {@code predicateForLast} if found,
@@ -3046,9 +3046,9 @@ public final class Iterables {
 
         /**
          *
-         * @param <S>
-         * @param set
-         * @return
+         * @param <S> the type of the set
+         * @param set the set to copy elements into
+         * @return the set with elements copied into it
          */
         public <S extends Set<? super E>> S copyInto(final S set) {
             set.addAll(this);
@@ -3066,10 +3066,10 @@ public final class Iterables {
      * equivalence relations (as {@link HashSet}, {@link TreeSet}, and the {@link Map#keySet} of an
      * {@code IdentityHashMap} all are).
      *
-     * @param <E>
-     * @param set1
-     * @param set2
-     * @return
+     * @param <E> the type of elements in the sets
+     * @param set1 the first set
+     * @param set2 the second set
+     * @return an unmodifiable view of the union of the two sets
      * @throws IllegalArgumentException
      */
     public static <E> SetView<E> union(final Set<? extends E> set1, final Set<? extends E> set2) throws IllegalArgumentException {
@@ -3179,6 +3179,7 @@ public final class Iterables {
      * set based on the type of the first set passed, this could in rare cases force you to make a
      * cast, for example:
      *
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Set<Object> aFewBadObjects = ...
      * Set<String> manyBadStrings = ...
@@ -3191,10 +3192,10 @@ public final class Iterables {
      *
      * <p>This is unfortunate, but should come up only very rarely.
      *
-     * @param <E>
-     * @param set1
-     * @param set2
-     * @return
+     * @param <E> the type of elements in the sets
+     * @param set1 the first set
+     * @param set2 the second set
+     * @return an unmodifiable view of the intersection of the two sets
      * @throws IllegalArgumentException
      * @see N#intersection(int[], int[])
      * @see N#intersection(Collection, Collection)
@@ -3289,8 +3290,8 @@ public final class Iterables {
      * Returns an unmodifiable <b>view</b> of the difference of two sets. The returned set contains
      * all elements that are contained in {@code set1} but not in {@code set2}.
      *
-     * <p>Example usage:</p>
-     * <pre>
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
      * Set&lt;String&gt; set1 = new HashSet&lt;&gt;(Arrays.asList("a", "b", "c", "d"));
      * Set&lt;String&gt; set2 = new HashSet&lt;&gt;(Arrays.asList("b", "d", "e"));
      * 
@@ -3299,7 +3300,7 @@ public final class Iterables {
      * 
      * // The view can be copied to a new set if needed
      * Set&lt;String&gt; diffCopy = difference.copyInto(new HashSet&lt;&gt;());
-     * </pre>
+     * }</pre>
      *
      * <p>The iteration order of the returned set matches that of {@code set1}.
      * Elements in {@code set2} that are not present in {@code set1} are simply ignored.
@@ -3408,8 +3409,8 @@ public final class Iterables {
      * Returns an unmodifiable <b>view</b> of the symmetric difference of two sets. The returned set contains
      * all elements that are contained in either {@code set1} or {@code set2} but not in both.
      * 
-     * <p>Example usage:</p>
-     * <pre>
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
      * Set&lt;String&gt; set1 = new HashSet&lt;&gt;(Arrays.asList("a", "b", "c"));
      * Set&lt;String&gt; set2 = new HashSet&lt;&gt;(Arrays.asList("b", "c", "d"));
      * 
@@ -3418,7 +3419,7 @@ public final class Iterables {
      * 
      * // The view can be copied to a new set if needed
      * Set&lt;String&gt; symDiffCopy = symDiff.copyInto(new HashSet&lt;&gt;());
-     * </pre>
+     * }</pre>
      * 
      * <p>The iteration order of the returned set is undefined.
      * The returned view is backed by the input sets, so changes in the original sets may be reflected in the view.
@@ -3625,7 +3626,6 @@ public final class Iterables {
 
     /**
      * <p>Note: It's copied from Google Guava under Apache License 2.0 and may be modified.</p>
-     * 
      *
      * Returns a {@link Collection} of all the permutations of the specified
      * {@link Collection}.
@@ -3693,9 +3693,9 @@ public final class Iterables {
      * Returns a {@link Collection} of all the permutations of the specified
      * {@link Iterable} using the specified {@link Comparator} for establishing
      * the lexicographical ordering.
-     *
-     * <p>Examples: <pre>   {@code
-     *
+     * 
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code 
      *   for (List<String> perm : orderedPermutations(asList("b", "c", "a"))) {
      *     println(perm);
      *   }
@@ -3714,7 +3714,8 @@ public final class Iterables {
      *   // -> [1, 2, 2, 1]
      *   // -> [2, 1, 1, 2]
      *   // -> [2, 1, 2, 1]
-     *   // -> [2, 2, 1, 1]}</pre>
+     *   // -> [2, 2, 1, 1]
+     * }</pre>
      *
      * <p><i>Notes:</i> This is an implementation of the algorithm for
      * Lexicographical Permutations Generation, described in Knuth's "The Art of
@@ -3749,11 +3750,15 @@ public final class Iterables {
      * Returns every possible list that can be formed by choosing one element
      * from each of the given lists in order; the "n-ary
      * <a href="http://en.wikipedia.org/wiki/Cartesian_product">Cartesian
-     * product</a>" of the lists. For example: <pre>   {@code
+     * product</a>" of the lists. For example: 
+     * 
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
      *
      *   Lists.cartesianProduct(ImmutableList.of(
      *       ImmutableList.of(1, 2),
-     *       ImmutableList.of("A", "B", "C")))}</pre>
+     *       ImmutableList.of("A", "B", "C")))
+     * }</pre>
      *
      * <p>returns a list containing six lists in the following order:
      *
@@ -3768,15 +3773,17 @@ public final class Iterables {
      *
      * <p>The result is guaranteed to be in the "traditional", lexicographical
      * order for Cartesian products that you would get from nesting for loops:
-     * <pre>   {@code
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
      *   for (B b0 : lists.get(0)) {
      *     for (B b1 : lists.get(1)) {
      *       ...
      *       ImmutableList<B> tuple = ImmutableList.of(b0, b1, ...);
      *       // operate on tuple
      *     }
-     *   }}</pre>
+     *   }
+     * }</pre>
      *
      * <p>Note that if any input list is empty, the Cartesian product will also be
      * empty. If no lists at all are provided (an empty list), the resulting
@@ -3794,7 +3801,7 @@ public final class Iterables {
      * @param cs the lists to choose elements from, in the order that
      *     the elements chosen from those lists should appear in the resulting
      *     lists
-     * @return
+     * @return a list containing every possible list that can be formed by choosing one element from each of the given
      *     lists
      * @throws IllegalArgumentException if the size of the cartesian product is greater than {@link Integer#MAX_VALUE}
      */
@@ -3809,11 +3816,15 @@ public final class Iterables {
      * Returns every possible list that can be formed by choosing one element
      * from each of the given lists in order; the "n-ary
      * <a href="http://en.wikipedia.org/wiki/Cartesian_product">Cartesian
-     * product</a>" of the lists. For example: <pre>   {@code
+     * product</a>" of the lists. For example: 
+     * 
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
      *
      *   Lists.cartesianProduct(ImmutableList.of(
      *       ImmutableList.of(1, 2),
-     *       ImmutableList.of("A", "B", "C")))}</pre>
+     *       ImmutableList.of("A", "B", "C")))
+     * }</pre>
      *
      * <p>returns a list containing six lists in the following order:
      *
@@ -3828,7 +3839,7 @@ public final class Iterables {
      *
      * <p>The result is guaranteed to be in the "traditional", lexicographical
      * order for Cartesian products that you would get from nesting for loops:
-     * <pre>   {@code
+     * <pre>{@code
      *
      *   for (B b0 : lists.get(0)) {
      *     for (B b1 : lists.get(1)) {
@@ -3836,7 +3847,8 @@ public final class Iterables {
      *       ImmutableList<B> tuple = ImmutableList.of(b0, b1, ...);
      *       // operate on tuple
      *     }
-     *   }}</pre>
+     *   }
+     * }</pre>
      *
      * <p>Note that if any input list is empty, the Cartesian product will also be
      * empty. If no lists at all are provided (an empty list), the resulting
@@ -3854,7 +3866,7 @@ public final class Iterables {
      * @param cs the lists to choose elements from, in the order that
      *     the elements chosen from those lists should appear in the resulting
      *     lists
-     * @return
+     * @return a list containing every possible list that can be formed by choosing one element from each of the given
      *     lists
      * @throws IllegalArgumentException if the size of the cartesian product is greater than {@link Integer#MAX_VALUE}
      */
@@ -3865,8 +3877,8 @@ public final class Iterables {
     /**
      * Returns {@code true} if the second list is a permutation of the first.
      *
-     * @param a
-     * @param b
+     * @param a the first collection
+     * @param b the second collection
      * @return {@code true}, if is permutations
      */
     private static boolean isPermutations(final Collection<?> a, final Collection<?> b) {
@@ -3890,7 +3902,7 @@ public final class Iterables {
         /**
          * Instantiates a new power set.
          *
-         * @param input
+         * @param input the input set
          */
         PowerSet(final Set<E> input) {
             inputSet = indexMap(input);
@@ -3949,8 +3961,8 @@ public final class Iterables {
 
         /**
          *
-         * @param obj
-         * @return
+         * @param obj the object to check for containment
+         * @return {@code true} if the object is contained in this power set, otherwise {@code false}
          */
         @Override
         public boolean contains(final Object obj) {
@@ -3963,8 +3975,8 @@ public final class Iterables {
 
         /**
          *
-         * @param obj
-         * @return
+         * @param obj the object to compare with
+         * @return {@code true} if the object is equal to this power set, otherwise {@code false}
          */
         @Override
         public boolean equals(final Object obj) {
@@ -4025,8 +4037,8 @@ public final class Iterables {
         /**
          * Instantiates a new subset.
          *
-         * @param inputSet
-         * @param mask
+         * @param inputSet the input set with element indices
+         * @param mask the bitmask representing which elements are in this subset
          */
         SubSet(final ImmutableMap<E, Integer> inputSet, final int mask) {
             this.inputSet = inputSet;
@@ -4076,8 +4088,8 @@ public final class Iterables {
 
         /**
          *
-         * @param o
-         * @return
+         * @param o the object to check for containment
+         * @return {@code true} if the object is contained in this subset, otherwise {@code false}
          */
         @Override
         public boolean contains(final Object o) {
@@ -4100,7 +4112,7 @@ public final class Iterables {
         /**
          * Instantiates a new permutation collection.
          *
-         * @param input
+         * @param input the input collection
          */
         PermutationCollection(final Collection<E> input) {
             inputList = ImmutableList.copyOf(input);
@@ -4136,8 +4148,8 @@ public final class Iterables {
 
         /**
          *
-         * @param obj
-         * @return
+         * @param obj the object to check for containment
+         * @return {@code true} if the object is a permutation of the input list, otherwise {@code false}
          */
         @Override
         public boolean contains(final Object obj) {
@@ -4177,8 +4189,8 @@ public final class Iterables {
         /**
          * Instantiates a new ordered permutation collection.
          *
-         * @param input
-         * @param comparator
+         * @param input the input collection
+         * @param comparator the comparator to determine the order of the elements
          */
         OrderedPermutationCollection(final Collection<E> input, final Comparator<? super E> comparator) {
             inputList = new ArrayList<>(input);
@@ -4217,8 +4229,8 @@ public final class Iterables {
 
         /**
          *
-         * @param obj
-         * @return
+         * @param obj the object to check for containment
+         * @return {@code true} if the object is a permutation of the input list, otherwise {@code false}
          */
         @Override
         public boolean contains(final Object obj) {
@@ -4246,10 +4258,10 @@ public final class Iterables {
          * permutations is increased by a factor of (n choose r).</li>
          * </ul>
          *
-         * @param <E>
-         * @param sortedInputList
-         * @param comparator
-         * @return the int
+         * @param <E> the type of elements
+         * @param sortedInputList the sorted input list
+         * @param comparator the comparator to determine the order of the elements
+         * @return the number of permutations
          */
         private static <E> int calculateSize(final List<E> sortedInputList, final Comparator<? super E> comparator) {
             long permutations = 1;
@@ -4283,7 +4295,7 @@ public final class Iterables {
         /**
          * Checks if is positive int.
          *
-         * @param n
+         * @param n the number to check
          * @return {@code true}, if is positive int
          */
         private static boolean isPositiveInt(final long n) {
@@ -4307,7 +4319,7 @@ public final class Iterables {
         /**
          * Instantiates a new cartesian list.
          *
-         * @param cs
+         * @param cs the collection of collections to compute the cartesian product
          */
         CartesianList(final Collection<? extends Collection<? extends E>> cs) {
             final Iterator<? extends Collection<? extends E>> iter = cs.iterator();
@@ -4331,8 +4343,8 @@ public final class Iterables {
 
         /**
          *
-         * @param index
-         * @return the list
+         * @param index the index of the element to return
+         * @return the list at the specified index
          */
         @Override
         public List<E> get(final int index) throws IndexOutOfBoundsException {
@@ -4358,8 +4370,8 @@ public final class Iterables {
 
         /**
          *
-         * @param obj
-         * @return
+         * @param obj the object to check for containment
+         * @return {@code true} if the object is contained in the cartesian product, otherwise {@code false}
          */
         @Override
         public boolean contains(final Object obj) {
@@ -4389,8 +4401,8 @@ public final class Iterables {
         /**
          * Gets the axis index for product index.
          *
-         * @param index
-         * @param axis
+         * @param index the product index
+         * @param axis the axis number
          * @return the axis index for product index
          */
         private int getAxisIndexForProductIndex(final int index, final int axis) {
@@ -4415,9 +4427,9 @@ public final class Iterables {
         /**
          * Instantiates a new subcollection.
          *
-         * @param a
-         * @param fromIndex
-         * @param toIndex
+         * @param a the array
+         * @param fromIndex the starting index (inclusive)
+         * @param toIndex the ending index (exclusive)
          */
         Slice(final T[] a, final int fromIndex, final int toIndex) {
             this(Array.asList(a), fromIndex, toIndex);
@@ -4426,9 +4438,9 @@ public final class Iterables {
         /**
          * Instantiates a new subcollection.
          *
-         * @param c
-         * @param fromIndex
-         * @param toIndex
+         * @param c the source list from which to create the slice
+         * @param fromIndex the starting index (inclusive)
+         * @param toIndex the ending index (exclusive)
          */
         Slice(final List<? extends T> c, final int fromIndex, final int toIndex) {
             super(fromIndex == 0 && toIndex == c.size() ? c : c.subList(fromIndex, toIndex));
@@ -4439,9 +4451,9 @@ public final class Iterables {
         /**
          * Instantiates a new subcollection.
          *
-         * @param c
-         * @param fromIndex
-         * @param toIndex
+         * @param c the source collection from which to create the slice
+         * @param fromIndex the starting index (inclusive)
+         * @param toIndex the ending index (exclusive)
          */
         Slice(final Collection<? extends T> c, final int fromIndex, final int toIndex) {
             super(c instanceof List ? ((List<T>) c).subList(fromIndex, toIndex) : c);
@@ -4451,8 +4463,8 @@ public final class Iterables {
 
         /**
          *
-         * @param o
-         * @return
+         * @param o the object to check for containment
+         * @return {@code true} if the object is contained in this slice, otherwise {@code false}
          */
         @Override
         public boolean contains(final Object o) {
@@ -4467,8 +4479,8 @@ public final class Iterables {
 
         /**
          *
-         * @param c
-         * @return
+         * @param c the collection to check
+         * @return {@code true} if all elements are contained in this slice, otherwise {@code false}
          */
         @Override
         public boolean containsAll(final Collection<?> c) {
@@ -4541,9 +4553,9 @@ public final class Iterables {
 
         /**
          *
-         * @param <A>
-         * @param a
-         * @return the a[]
+         * @param <A> the type of the array elements
+         * @param a the array into which the elements will be stored
+         * @return the array containing all elements
          */
         @Override
         public <A> A[] toArray(A[] a) {
@@ -4564,10 +4576,10 @@ public final class Iterables {
     /**
      * Checks if the specified {@code arg} is {@code null} or empty, and throws {@code IllegalArgumentException} if it is.
      *
-     * @param <T>
-     * @param arg
-     * @param argNameOrErrorMsg
-     * @return
+     * @param <T> the type of elements
+     * @param arg the iterable to check
+     * @param argNameOrErrorMsg the parameter name or error message
+     * @return the iterator for the non-empty iterable
      * @throws IllegalArgumentException if the specified {@code arg} is {@code null} or empty.
      */
     static <T> Iterator<T> iterateNonEmpty(final Iterable<T> arg, final String argNameOrErrorMsg) {

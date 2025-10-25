@@ -42,8 +42,8 @@ import java.lang.annotation.Target;
  *   <li>Better performance by skipping complex field comparisons</li>
  * </ul>
  * 
- * <p><b>Example usage:</b></p>
- * <pre>
+ * <p><b>Usage Examples:</b></p>
+ * <pre>{@code
  * public class User {
  *     private Long id;
  *     private String username;
@@ -65,7 +65,7 @@ import java.lang.annotation.Target;
  * 
  * // Comparison will ignore lastModified, version, and sessionToken
  * BeanDifference diff = BeanDifference.of(user1, user2);
- * </pre>
+ * }</pre>
  * 
  * @since 2025
  * @see com.landawn.abacus.util.Difference.BeanDifference

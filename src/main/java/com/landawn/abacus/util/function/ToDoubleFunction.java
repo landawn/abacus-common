@@ -38,7 +38,7 @@ public interface ToDoubleFunction<T> extends Throwables.ToDoubleFunction<T, Runt
      * A predefined ToDoubleFunction instance that unboxes a Double object to a primitive double.
      * Returns 0.0 if the input is null, otherwise returns the double value of the Double object.
      * 
-     * <p>Example usage:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Double boxed = 3.14;
      * double primitive = ToDoubleFunction.UNBOX.applyAsDouble(boxed); // returns 3.14
@@ -53,7 +53,7 @@ public interface ToDoubleFunction<T> extends Throwables.ToDoubleFunction<T, Runt
      * perform the conversion. This function can handle various Number subclasses including
      * Integer, Long, Float, BigDecimal, etc.
      * 
-     * <p>Example usage:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Integer intValue = 42;
      * double result1 = ToDoubleFunction.FROM_NUM.applyAsDouble(intValue); // returns 42.0
@@ -70,8 +70,7 @@ public interface ToDoubleFunction<T> extends Throwables.ToDoubleFunction<T, Runt
      * Applies this function to the given argument and returns a double result.
      *
      * @param value the function argument
-     * @return the function result as a primitive double
-     * @throws RuntimeException if any error occurs during function execution
+     * @return the function result as a primitive double if any error occurs during function execution
      */
     @Override
     double applyAsDouble(T value);

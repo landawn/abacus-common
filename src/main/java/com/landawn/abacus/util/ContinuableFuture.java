@@ -52,7 +52,7 @@ import com.landawn.abacus.util.Tuple.Tuple4;
  *   <li>Result wrapping via {@code gett()} methods that return {@link Result} objects</li>
  * </ul>
  * 
- * <p><b>Example usage:</b>
+ * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * // Simple async execution
  * ContinuableFuture<String> future = ContinuableFuture.call(() -> {
@@ -105,7 +105,7 @@ public class ContinuableFuture<T> implements Future<T> {
      * 
      * <p>This method is useful for fire-and-forget operations that don't return a value.
      * 
-     * <p><b>Example:</b>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ContinuableFuture<Void> future = ContinuableFuture.run(() -> {
      *     System.out.println("Running async task");
@@ -128,7 +128,7 @@ public class ContinuableFuture<T> implements Future<T> {
      * <p>This method allows you to specify a custom executor for running the action, which is
      * useful when you need specific thread pool characteristics or execution policies.
      * 
-     * <p><b>Example:</b>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ExecutorService customExecutor = Executors.newFixedThreadPool(4);
      * ContinuableFuture<Void> future = ContinuableFuture.run(() -> {
@@ -158,7 +158,7 @@ public class ContinuableFuture<T> implements Future<T> {
      * 
      * <p>This method is the primary way to start an asynchronous computation that returns a value.
      * 
-     * <p><b>Example:</b>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ContinuableFuture<Integer> future = ContinuableFuture.call(() -> {
      *     // Simulate some computation
@@ -186,7 +186,7 @@ public class ContinuableFuture<T> implements Future<T> {
      * <p>This method allows you to specify a custom executor for running the callable, providing
      * control over thread pool characteristics and execution policies.
      * 
-     * <p><b>Example:</b>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(2);
      * ContinuableFuture<String> future = ContinuableFuture.call(() -> {
@@ -219,7 +219,7 @@ public class ContinuableFuture<T> implements Future<T> {
      *   <li>Returns the provided result immediately from get() methods</li>
      * </ul>
      * 
-     * <p><b>Example:</b>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Create a pre-completed future
      * ContinuableFuture<String> future = ContinuableFuture.completed("Hello");
@@ -277,7 +277,7 @@ public class ContinuableFuture<T> implements Future<T> {
      * <p>The wrapped future retains all the characteristics of the original future, including
      * its execution state, result, and cancellation behavior.
      * 
-     * <p><b>Example:</b>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Working with ExecutorService that returns Future
      * ExecutorService executor = Executors.newFixedThreadPool(4);
@@ -310,7 +310,7 @@ public class ContinuableFuture<T> implements Future<T> {
      * <p><b>Note:</b> This method only cancels this future, not any upstream futures. To cancel the
      * entire chain, use {@link #cancelAll(boolean)}.
      * 
-     * <p><b>Example:</b>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ContinuableFuture<String> future = ContinuableFuture.call(() -> {
      *     Thread.sleep(5000);
@@ -338,7 +338,7 @@ public class ContinuableFuture<T> implements Future<T> {
      * A task that has been cancelled will never complete normally and will throw
      * a {@code CancellationException} when {@link #get()} is called.
      * 
-     * <p><b>Example:</b>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ContinuableFuture<String> future = ContinuableFuture.call(() -> longRunningTask());
      * 
@@ -366,7 +366,7 @@ public class ContinuableFuture<T> implements Future<T> {
      * all cancellations were successful. If any future in the chain fails to cancel, the method
      * still attempts to cancel the remaining futures.
      * 
-     * <p><b>Example:</b>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ContinuableFuture<String> future1 = ContinuableFuture.call(() -> fetchData());
      * ContinuableFuture<String> future2 = future1.thenCall(data -> processData(data));
@@ -403,7 +403,7 @@ public class ContinuableFuture<T> implements Future<T> {
      * <p>Returns {@code true} only if every future in the chain has been cancelled. If any future
      * in the chain is not cancelled, this method returns {@code false}.
      * 
-     * <p><b>Example:</b>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ContinuableFuture<String> future1 = ContinuableFuture.call(() -> step1());
      * ContinuableFuture<String> future2 = future1.thenCall(data -> step2(data));
@@ -437,7 +437,7 @@ public class ContinuableFuture<T> implements Future<T> {
      * 
      * <p>A completed future will never transition to any other state.
      * 
-     * <p><b>Example:</b>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ContinuableFuture<String> future = ContinuableFuture.call(() -> "Done");
      * 
@@ -464,7 +464,7 @@ public class ContinuableFuture<T> implements Future<T> {
      * If the computation threw an exception, this method throws an {@code ExecutionException}
      * with the original exception as its cause.
      * 
-     * <p><b>Example:</b>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ContinuableFuture<Integer> future = ContinuableFuture.call(() -> {
      *     Thread.sleep(1000);
@@ -503,7 +503,7 @@ public class ContinuableFuture<T> implements Future<T> {
      *   <li>The thread is interrupted</li>
      * </ul>
      * 
-     * <p><b>Example:</b>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ContinuableFuture<String> future = ContinuableFuture.call(() -> fetchFromSlowService());
      * 
@@ -542,7 +542,7 @@ public class ContinuableFuture<T> implements Future<T> {
      *   <li>The exception that occurred during computation or while waiting</li>
      * </ul>
      * 
-     * <p><b>Example:</b>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ContinuableFuture<String> future = ContinuableFuture.call(() -> riskyOperation());
      * 
@@ -576,7 +576,7 @@ public class ContinuableFuture<T> implements Future<T> {
      * <p>This is the timeout version of {@link #gett()}, useful when you want to limit
      * the waiting time but still handle results in a functional style without checked exceptions.
      * 
-     * <p><b>Example:</b>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ContinuableFuture<Data> future = ContinuableFuture.call(() -> fetchData());
      * 
@@ -611,7 +611,7 @@ public class ContinuableFuture<T> implements Future<T> {
      * exceptionally. Use {@link #gett()} with {@link Result#orElseThrow()} for exception-safe
      * immediate value retrieval.
      * 
-     * <p><b>Example:</b>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ContinuableFuture<String> future = ContinuableFuture.call(() -> slowComputation());
      * 
@@ -651,7 +651,7 @@ public class ContinuableFuture<T> implements Future<T> {
      * <p>This is a convenience method that combines {@link #get()} with function application,
      * useful for transforming results in a blocking manner.
      * 
-     * <p><b>Example:</b>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ContinuableFuture<Integer> future = ContinuableFuture.call(() -> 42);
      * 
@@ -684,7 +684,7 @@ public class ContinuableFuture<T> implements Future<T> {
      * the provided function to the result. This method blocks until the future completes
      * or the timeout expires, then synchronously applies the function.
      * 
-     * <p><b>Example:</b>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ContinuableFuture<String> future = ContinuableFuture.call(() -> fetchData());
      * 
@@ -721,7 +721,7 @@ public class ContinuableFuture<T> implements Future<T> {
      * <p>This method is useful for handling both success and failure cases in a unified way,
      * without needing try-catch blocks.
      * 
-     * <p><b>Example:</b>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ContinuableFuture<Integer> future = ContinuableFuture.call(() -> {
      *     if (Math.random() > 0.5) throw new RuntimeException("Bad luck!");
@@ -753,7 +753,7 @@ public class ContinuableFuture<T> implements Future<T> {
      * the provided bi-function to both the result (if successful) and any exception that occurred.
      * This method never throws the computation's exception, instead passing it to the bi-function.
      * 
-     * <p><b>Example:</b>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ContinuableFuture<Data> future = ContinuableFuture.call(() -> fetchFromSlowService());
      * 
@@ -789,7 +789,7 @@ public class ContinuableFuture<T> implements Future<T> {
      * <p>This is useful for side effects like logging, updating UI, or triggering other actions
      * based on the result.
      * 
-     * <p><b>Example:</b>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ContinuableFuture<String> future = ContinuableFuture.call(() -> downloadFile());
      * 
@@ -815,7 +815,7 @@ public class ContinuableFuture<T> implements Future<T> {
      * the result with the provided consumer. This method blocks until the future completes
      * or the timeout expires, then synchronously executes the consumer.
      * 
-     * <p><b>Example:</b>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ContinuableFuture<List<String>> future = ContinuableFuture.call(() -> fetchLogs());
      * 
@@ -851,7 +851,7 @@ public class ContinuableFuture<T> implements Future<T> {
      * <p>This method is useful for handling both success and failure cases with side effects,
      * such as logging or updating state based on the outcome.
      * 
-     * <p><b>Example:</b>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ContinuableFuture<User> future = ContinuableFuture.call(() -> fetchUser(userId));
      * 
@@ -881,7 +881,7 @@ public class ContinuableFuture<T> implements Future<T> {
      * both the result (if successful) and any exception that occurred with the provided bi-consumer.
      * This method never throws the computation's exception, instead passing it to the bi-consumer.
      * 
-     * <p><b>Example:</b>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ContinuableFuture<Config> future = ContinuableFuture.call(() -> loadConfig());
      * 
@@ -919,7 +919,7 @@ public class ContinuableFuture<T> implements Future<T> {
      * <p>If the function throws an exception, the returned future will complete exceptionally
      * with that exception wrapped in a {@code RuntimeException}.
      * 
-     * <p><b>Example:</b>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ContinuableFuture<Integer> future = ContinuableFuture.call(() -> 21);
      * 
@@ -997,7 +997,7 @@ public class ContinuableFuture<T> implements Future<T> {
      * completes when the action finishes executing. The action is only executed after
      * this future completes successfully.
      * 
-     * <p><b>Example:</b>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ContinuableFuture.call(() -> downloadFile())
      *     .thenRun(() -> {
@@ -1020,13 +1020,14 @@ public class ContinuableFuture<T> implements Future<T> {
 
     /**
      * Executes the provided consumer asynchronously after this future completes, passing
-     * the result to the consumer. The consumer is executed using the configured executor.
-     * 
+     * the result to the consumer. The consumer is executed using the configured executor
+     * of this future.
+     *
      * <p>This method returns immediately with a new {@code ContinuableFuture<Void>} that
      * completes when the consumer finishes executing. The consumer receives the result
      * of this future if it completes successfully.
-     * 
-     * <p><b>Example:</b>
+     *
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ContinuableFuture.call(() -> fetchUserData(userId))
      *     .thenRun(userData -> {
@@ -1049,13 +1050,15 @@ public class ContinuableFuture<T> implements Future<T> {
     /**
      * Executes the provided bi-consumer asynchronously after this future completes, passing
      * both the result (if successful) and any exception that occurred. The bi-consumer is
-     * executed using the configured executor.
-     * 
-     * <p>This method is useful for handling both success and failure cases in the asynchronous
-     * chain without breaking the flow. The bi-consumer always executes, regardless of whether
-     * this future completed normally or exceptionally.
-     * 
-     * <p><b>Example:</b>
+     * executed using the configured executor of this future.
+     *
+     * <p>This method returns immediately with a new {@code ContinuableFuture<Void>} that
+     * completes when the bi-consumer finishes executing. The bi-consumer always executes,
+     * regardless of whether this future completed normally or exceptionally. This is useful
+     * for handling both success and failure cases in the asynchronous chain without breaking
+     * the flow.
+     *
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ContinuableFuture.call(() -> riskyOperation())
      *     .thenRun((result, exception) -> {
@@ -1084,14 +1087,14 @@ public class ContinuableFuture<T> implements Future<T> {
 
     /**
      * Executes the provided callable asynchronously after this future completes. The callable
-     * is executed using the configured executor, and its result becomes the result of the
-     * returned future.
-     * 
+     * is executed using the configured executor of this future, and its result becomes the
+     * result of the returned future.
+     *
      * <p>This method returns immediately with a new {@code ContinuableFuture} that completes
      * with the result of the callable. The callable is only executed after this future
      * completes successfully.
-     * 
-     * <p><b>Example:</b>
+     *
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ContinuableFuture<String> future = ContinuableFuture.call(() -> authenticate())
      *     .thenCall(() -> {
@@ -1114,13 +1117,16 @@ public class ContinuableFuture<T> implements Future<T> {
 
     /**
      * Executes the provided function asynchronously after this future completes, transforming
-     * the result. The function receives the result of this future and returns a new value
-     * that becomes the result of the returned future.
-     * 
-     * <p>This method is similar to {@link #map(Throwables.Function)} but executes asynchronously
-     * in the configured executor rather than synchronously when get() is called.
-     * 
-     * <p><b>Example:</b>
+     * the result. The function is executed using the configured executor of this future and
+     * receives the result of this future. The function's return value becomes the result of
+     * the returned future.
+     *
+     * <p>This method returns immediately with a new {@code ContinuableFuture} that completes
+     * with the transformed result. This method is similar to {@link #map(Throwables.Function)}
+     * but executes asynchronously in the configured executor rather than synchronously when
+     * get() is called.
+     *
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ContinuableFuture<User> userFuture = ContinuableFuture.call(() -> fetchUser(id))
      *     .thenCall(user -> {
@@ -1140,14 +1146,16 @@ public class ContinuableFuture<T> implements Future<T> {
 
     /**
      * Executes the provided bi-function asynchronously after this future completes, transforming
-     * the result based on both the value and any exception. The bi-function receives both the
-     * result (if successful) and any exception that occurred.
-     * 
-     * <p>This method is useful for recovery scenarios where you want to provide alternative
-     * values or transform exceptions into valid results.
-     * The bi-function always executes, regardless of whether this future completed normally or exceptionally.
-     * 
-     * <p><b>Example:</b>
+     * the result based on both the value and any exception. The bi-function is executed using
+     * the configured executor of this future and receives both the result (if successful) and
+     * any exception that occurred.
+     *
+     * <p>This method returns immediately with a new {@code ContinuableFuture} that completes
+     * with the transformed result. The bi-function always executes, regardless of whether this
+     * future completed normally or exceptionally. This is useful for recovery scenarios where
+     * you want to provide alternative values or transform exceptions into valid results.
+     *
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ContinuableFuture<Data> future = ContinuableFuture.call(() -> fetchFromPrimary())
      *     .thenCall((data, exception) -> {
@@ -1178,7 +1186,7 @@ public class ContinuableFuture<T> implements Future<T> {
      * <p>The returned future completes when the action completes.
      * If either future fails, the returned future completes exceptionally with the first exception encountered.
      * 
-     * <p><b>Example:</b>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ContinuableFuture<File> download1 = ContinuableFuture.call(() -> downloadFile1());
      * ContinuableFuture<File> download2 = ContinuableFuture.call(() -> downloadFile2());
@@ -1210,7 +1218,7 @@ public class ContinuableFuture<T> implements Future<T> {
      * <p>The returned future completes when the consumer completes.
      * If either future fails, the returned future completes exceptionally with the first exception encountered.
      * 
-     * <p><b>Example:</b>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ContinuableFuture<User> userFuture = ContinuableFuture.call(() -> fetchUser(id));
      * ContinuableFuture<Profile> profileFuture = ContinuableFuture.call(() -> fetchProfile(id));
@@ -1247,7 +1255,7 @@ public class ContinuableFuture<T> implements Future<T> {
      *   <li>If a future fails, its result is null and exception is non-null</li>
      * </ul>
      * 
-     * <p><b>Example:</b>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ContinuableFuture<Data> primary = ContinuableFuture.call(() -> fetchPrimary());
      * ContinuableFuture<Data> backup = ContinuableFuture.call(() -> fetchBackup());
@@ -1289,7 +1297,7 @@ public class ContinuableFuture<T> implements Future<T> {
      * {@link #runAfterBoth(ContinuableFuture, Throwables.Consumer)} but with individual parameters
      * instead of a tuple.
      * 
-     * <p><b>Example:</b>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ContinuableFuture<Order> orderFuture = ContinuableFuture.call(() -> createOrder());
      * ContinuableFuture<Payment> paymentFuture = ContinuableFuture.call(() -> processPayment());
@@ -1322,16 +1330,17 @@ public class ContinuableFuture<T> implements Future<T> {
 
     /**
      * Executes the provided callable after both this future and the other future complete successfully.
-     * The callable is executed asynchronously using the configured executor.
-     * 
-     * <p>The returned future completes with the result of the callable. If either input
-     * future fails, the returned future also fails without executing the callable.
-     * 
-     * <p><b>Example:</b>
+     * The callable is executed asynchronously using the configured executor of this future.
+     *
+     * <p>This method returns immediately with a new {@code ContinuableFuture} that completes
+     * with the result of the callable. If either input future fails, the returned future
+     * completes exceptionally with the first exception encountered, without executing the callable.
+     *
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ContinuableFuture<Config> configFuture = ContinuableFuture.call(() -> loadConfig());
      * ContinuableFuture<Database> dbFuture = ContinuableFuture.call(() -> connectDB());
-     * 
+     *
      * ContinuableFuture<Service> serviceFuture = configFuture.callAfterBoth(dbFuture, () -> {
      *     // Both config and database are ready
      *     return initializeService();
@@ -1352,26 +1361,29 @@ public class ContinuableFuture<T> implements Future<T> {
     }
 
     /**
-     * Executes the provided BiFunction after both this ContinuableFuture and the other ContinuableFuture complete successfully.
-     * The BiFunction receives the results of both futures as input parameters and returns a result.
-     * 
-     * <p>This method enables combining the results of two independent asynchronous computations.
-     * If either future fails, the returned future completes exceptionally with the first exception encountered.
-     * 
-     * <p><b>Example:</b>
+     * Executes the provided bi-function after both this future and the other future complete successfully,
+     * passing both results to the bi-function. The bi-function is executed asynchronously using the
+     * configured executor of this future.
+     *
+     * <p>This method returns immediately with a new {@code ContinuableFuture} that completes
+     * with the result of the bi-function. This enables combining the results of two independent
+     * asynchronous computations. If either future fails, the returned future completes exceptionally
+     * with the first exception encountered, without executing the bi-function.
+     *
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ContinuableFuture<User> userFuture = ContinuableFuture.call(() -> fetchUser(userId));
      * ContinuableFuture<Settings> settingsFuture = ContinuableFuture.call(() -> fetchSettings());
-     * 
-     * ContinuableFuture<Profile> profileFuture = userFuture.callAfterBoth(settingsFuture, 
+     *
+     * ContinuableFuture<Profile> profileFuture = userFuture.callAfterBoth(settingsFuture,
      *     (user, settings) -> createProfile(user, settings));
      * }</pre>
      *
      * @param <U> the result type of the other ContinuableFuture
-     * @param <R> the result type of the BiFunction and the returned ContinuableFuture
+     * @param <R> the result type of the bi-function and the returned ContinuableFuture
      * @param other the other ContinuableFuture that must complete before executing the action; must not be null
-     * @param action the BiFunction to execute with both results; must not be null
-     * @return a new ContinuableFuture that completes with the result of the BiFunction
+     * @param action the bi-function to execute with both results; must not be null
+     * @return a new {@code ContinuableFuture<R>} that completes with the result of the bi-function
      */
     public <U, R> ContinuableFuture<R> callAfterBoth(final ContinuableFuture<U> other,
             final Throwables.BiFunction<? super T, ? super U, ? extends R, ? extends Exception> action) {
@@ -1379,25 +1391,29 @@ public class ContinuableFuture<T> implements Future<T> {
     }
 
     /**
-     * Executes the provided function after both this ContinuableFuture and the other ContinuableFuture complete,
-     * regardless of whether they complete successfully or exceptionally.
-     * The function receives a {@link Tuple4} containing both results and their exceptions (if any).
-     * 
-     * <p>This method is useful when you need to handle the results of both futures regardless of their success/failure status.
-     * The tuple contains: (result1, exception1, result2, exception2) where results are null if the corresponding
+     * Executes the provided function after both this future and the other future complete,
+     * regardless of whether they complete successfully or exceptionally. The function is executed
+     * asynchronously using the configured executor of this future and receives a {@link Tuple4}
+     * containing both results and their exceptions (if any).
+     *
+     * <p>This method returns immediately with a new {@code ContinuableFuture} that completes
+     * with the result of the function. The function always executes, regardless of whether the
+     * futures completed normally or exceptionally. This is useful when you need to handle the
+     * results of both futures regardless of their success/failure status. The tuple contains:
+     * (result1, exception1, result2, exception2) where results are null if the corresponding
      * future failed, and exceptions are null if the corresponding future succeeded.
-     * 
-     * <p><b>Example:</b>
+     *
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ContinuableFuture<Data> primaryFuture = ContinuableFuture.call(() -> fetchPrimaryData());
      * ContinuableFuture<Data> backupFuture = ContinuableFuture.call(() -> fetchBackupData());
-     * 
+     *
      * ContinuableFuture<Data> result = primaryFuture.callAfterBoth(backupFuture, tuple -> {
      *     Data primary = tuple._1;
      *     Exception primaryError = tuple._2;
      *     Data backup = tuple._3;
      *     Exception backupError = tuple._4;
-     *     
+     *
      *     if (primary != null) return primary;
      *     if (backup != null) return backup;
      *     throw new DataUnavailableException("Both sources failed");
@@ -1408,7 +1424,7 @@ public class ContinuableFuture<T> implements Future<T> {
      * @param <R> the result type of the function and the returned ContinuableFuture
      * @param other the other ContinuableFuture to wait for; must not be null
      * @param action the function that processes the tuple of results and exceptions; must not be null
-     * @return a new ContinuableFuture that completes with the result of the function
+     * @return a new {@code ContinuableFuture<R>} that completes with the result of the function
      * @see #gett()
      */
     public <U, R> ContinuableFuture<R> callAfterBoth(final ContinuableFuture<U> other,
@@ -1429,7 +1445,7 @@ public class ContinuableFuture<T> implements Future<T> {
      * <p>This method provides maximum flexibility for handling the completion of two futures,
      * allowing custom logic based on any combination of success and failure states.
      * 
-     * <p><b>Example:</b>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ContinuableFuture<Response> apiFuture = ContinuableFuture.call(() -> callAPI());
      * ContinuableFuture<Cache> cacheFuture = ContinuableFuture.call(() -> loadCache());
@@ -1469,7 +1485,7 @@ public class ContinuableFuture<T> implements Future<T> {
      * <p>This method is useful for triggering an action as soon as any of the futures completes,
      * regardless of which one finishes first or whether it succeeds or fails.
      * 
-     * <p><b>Example:</b>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ContinuableFuture<Data> primarySource = ContinuableFuture.call(() -> fetchFromPrimary());
      * ContinuableFuture<Data> secondarySource = ContinuableFuture.call(() -> fetchFromSecondary());
@@ -1501,7 +1517,7 @@ public class ContinuableFuture<T> implements Future<T> {
      * <p>This method is useful for triggering an action as soon as any of the futures completes,
      * regardless of which one finishes first or whether it succeeds or fails.
      * 
-     * <p><b>Example:</b>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ContinuableFuture<Weather> localWeather = ContinuableFuture.call(() -> getLocalWeather());
      * ContinuableFuture<Weather> remoteWeather = ContinuableFuture.call(() -> getRemoteWeather());
@@ -1534,7 +1550,7 @@ public class ContinuableFuture<T> implements Future<T> {
      * <p>This method is useful for triggering an action as soon as any of the futures completes,
      * regardless of which one finishes first or whether it succeeds or fails.
      * 
-     * <p><b>Example:</b>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ContinuableFuture<Config> localConfig = ContinuableFuture.call(() -> loadLocalConfig());
      * ContinuableFuture<Config> remoteConfig = ContinuableFuture.call(() -> loadRemoteConfig());
@@ -1571,7 +1587,7 @@ public class ContinuableFuture<T> implements Future<T> {
      * <p>This method is useful when you need to compute a new value as soon as either future completes,
      * regardless of which one finishes first or whether it succeeds or fails.
      * 
-     * <p><b>Example:</b>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ContinuableFuture<Connection> primary = ContinuableFuture.call(() -> connectToPrimary());
      * ContinuableFuture<Connection> backup = ContinuableFuture.call(() -> connectToBackup());
@@ -1603,7 +1619,7 @@ public class ContinuableFuture<T> implements Future<T> {
      * <p>This method is useful when you need to compute a new value as soon as either future completes,
      * regardless of which one finishes first or whether it succeeds or fails.
      * 
-     * <p><b>Example:</b>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ContinuableFuture<Price> vendorA = ContinuableFuture.call(() -> getPriceFromVendorA());
      * ContinuableFuture<Price> vendorB = ContinuableFuture.call(() -> getPriceFromVendorB());
@@ -1636,7 +1652,7 @@ public class ContinuableFuture<T> implements Future<T> {
      * <p>This method is useful when you need to compute a new value as soon as either future completes,
      * regardless of which one finishes first or whether it succeeds or fails.
      * 
-     * <p><b>Example:</b>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ContinuableFuture<Data> fastSource = ContinuableFuture.call(() -> fetchFromFastSource());
      * ContinuableFuture<Data> slowSource = ContinuableFuture.call(() -> fetchFromSlowSource());
@@ -1673,7 +1689,7 @@ public class ContinuableFuture<T> implements Future<T> {
      * <p>This method waits for at least one successful completion before executing the action,
      * making it useful when you need a successful result from at least one source.
      * 
-     * <p><b>Example:</b>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ContinuableFuture<Void> saveToDatabase = ContinuableFuture.run(() -> saveToDb());
      * ContinuableFuture<Void> saveToCache = ContinuableFuture.run(() -> saveToCache());
@@ -1713,7 +1729,7 @@ public class ContinuableFuture<T> implements Future<T> {
      * <p>If both futures fail, the action is not executed and the returned future completes exceptionally
      * with the exception from the first future that completed.
      * 
-     * <p><b>Example:</b>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ContinuableFuture<User> dbUser = ContinuableFuture.call(() -> loadUserFromDatabase(id));
      * ContinuableFuture<User> cacheUser = ContinuableFuture.call(() -> loadUserFromCache(id));
@@ -1761,7 +1777,7 @@ public class ContinuableFuture<T> implements Future<T> {
      * <p>If the first future to complete succeeds, the BiConsumer receives (result, null).
      * If both futures fail, the BiConsumer receives (null, firstException).
      * 
-     * <p><b>Example:</b>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ContinuableFuture<Config> primaryConfig = ContinuableFuture.call(() -> loadPrimaryConfig());
      * ContinuableFuture<Config> fallbackConfig = ContinuableFuture.call(() -> loadFallbackConfig());
@@ -1813,7 +1829,7 @@ public class ContinuableFuture<T> implements Future<T> {
      * <p>This method ensures that the callable is only executed if at least one of the futures succeeds,
      * making it useful for dependent operations that require a successful prerequisite.
      * 
-     * <p><b>Example:</b>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ContinuableFuture<Auth> oauth = ContinuableFuture.call(() -> authenticateOAuth());
      * ContinuableFuture<Auth> apiKey = ContinuableFuture.call(() -> authenticateApiKey());
@@ -1853,7 +1869,7 @@ public class ContinuableFuture<T> implements Future<T> {
      * <p>If both futures fail, the function is not executed and the returned future completes exceptionally
      * with the exception from the first future that completed.
      * 
-     * <p><b>Example:</b>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ContinuableFuture<RawData> primarySource = ContinuableFuture.call(() -> fetchFromPrimary());
      * ContinuableFuture<RawData> backupSource = ContinuableFuture.call(() -> fetchFromBackup());
@@ -1901,7 +1917,7 @@ public class ContinuableFuture<T> implements Future<T> {
      * If both futures fail, the BiFunction receives (null, firstException).
      * This allows the BiFunction to handle both cases and produce an appropriate result.
      * 
-     * <p><b>Example:</b>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ContinuableFuture<Price> vendorPrice = ContinuableFuture.call(() -> getVendorPrice());
      * ContinuableFuture<Price> marketPrice = ContinuableFuture.call(() -> getMarketPrice());
@@ -1971,7 +1987,7 @@ public class ContinuableFuture<T> implements Future<T> {
      * <p>This method is useful for implementing timeouts, rate limiting, or introducing
      * deliberate pauses in asynchronous workflows.
      * 
-     * <p><b>Example:</b>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ContinuableFuture.call(() -> sendRequest())
      *     .thenDelay(2, TimeUnit.SECONDS)  // Wait 2 seconds after request completes
@@ -2000,7 +2016,7 @@ public class ContinuableFuture<T> implements Future<T> {
      * on different thread pools (e.g., I/O operations on an I/O pool, CPU-intensive work on
      * a computation pool).
      * 
-     * <p><b>Example:</b>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ExecutorService ioExecutor = Executors.newCachedThreadPool();
      * ExecutorService cpuExecutor = Executors.newFixedThreadPool(4);

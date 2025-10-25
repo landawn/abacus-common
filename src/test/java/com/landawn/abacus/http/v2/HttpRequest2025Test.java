@@ -99,15 +99,13 @@ public class HttpRequest2025Test extends TestBase {
 
     @Test
     public void test_connectTimeout() {
-        HttpRequest request = HttpRequest.url(TEST_URL)
-                .connectTimeout(Duration.ofSeconds(10));
+        HttpRequest request = HttpRequest.url(TEST_URL).connectTimeout(Duration.ofSeconds(10));
         assertNotNull(request);
     }
 
     @Test
     public void test_readTimeout() {
-        HttpRequest request = HttpRequest.url(TEST_URL)
-                .readTimeout(Duration.ofSeconds(30));
+        HttpRequest request = HttpRequest.url(TEST_URL).readTimeout(Duration.ofSeconds(30));
         assertNotNull(request);
     }
 
@@ -119,38 +117,31 @@ public class HttpRequest2025Test extends TestBase {
                 return new PasswordAuthentication("user", "pass".toCharArray());
             }
         };
-        HttpRequest request = HttpRequest.url(TEST_URL)
-                .authenticator(auth);
+        HttpRequest request = HttpRequest.url(TEST_URL).authenticator(auth);
         assertNotNull(request);
     }
 
     @Test
     public void test_basicAuth() {
-        HttpRequest request = HttpRequest.url(TEST_URL)
-                .basicAuth("testuser", "testpass");
+        HttpRequest request = HttpRequest.url(TEST_URL).basicAuth("testuser", "testpass");
         assertNotNull(request);
     }
 
     @Test
     public void test_header() {
-        HttpRequest request = HttpRequest.url(TEST_URL)
-                .header("Accept", "application/json");
+        HttpRequest request = HttpRequest.url(TEST_URL).header("Accept", "application/json");
         assertNotNull(request);
     }
 
     @Test
     public void test_headers_twoParams() {
-        HttpRequest request = HttpRequest.url(TEST_URL)
-                .headers("Accept", "application/json", "User-Agent", "TestAgent");
+        HttpRequest request = HttpRequest.url(TEST_URL).headers("Accept", "application/json", "User-Agent", "TestAgent");
         assertNotNull(request);
     }
 
     @Test
     public void test_headers_threeParams() {
-        HttpRequest request = HttpRequest.url(TEST_URL)
-                .headers("Accept", "application/json",
-                        "User-Agent", "TestAgent",
-                        "X-Custom", "value");
+        HttpRequest request = HttpRequest.url(TEST_URL).headers("Accept", "application/json", "User-Agent", "TestAgent", "X-Custom", "value");
         assertNotNull(request);
     }
 
@@ -160,8 +151,7 @@ public class HttpRequest2025Test extends TestBase {
         headers.put("Accept", "application/json");
         headers.put("User-Agent", "TestAgent");
 
-        HttpRequest request = HttpRequest.url(TEST_URL)
-                .headers(headers);
+        HttpRequest request = HttpRequest.url(TEST_URL).headers(headers);
         assertNotNull(request);
     }
 
@@ -171,29 +161,25 @@ public class HttpRequest2025Test extends TestBase {
         headers.set("Accept", "application/json");
         headers.set("User-Agent", "TestAgent");
 
-        HttpRequest request = HttpRequest.url(TEST_URL)
-                .headers(headers);
+        HttpRequest request = HttpRequest.url(TEST_URL).headers(headers);
         assertNotNull(request);
     }
 
     @Test
     public void test_headers_withNullMap() {
-        HttpRequest request = HttpRequest.url(TEST_URL)
-                .headers((Map<String, String>) null);
+        HttpRequest request = HttpRequest.url(TEST_URL).headers((Map<String, String>) null);
         assertNotNull(request);
     }
 
     @Test
     public void test_headers_withNullHttpHeaders() {
-        HttpRequest request = HttpRequest.url(TEST_URL)
-                .headers((HttpHeaders) null);
+        HttpRequest request = HttpRequest.url(TEST_URL).headers((HttpHeaders) null);
         assertNotNull(request);
     }
 
     @Test
     public void test_query_withString() {
-        HttpRequest request = HttpRequest.url(TEST_URL)
-                .query("param1=value1&param2=value2");
+        HttpRequest request = HttpRequest.url(TEST_URL).query("param1=value1&param2=value2");
         assertNotNull(request);
     }
 
@@ -203,29 +189,25 @@ public class HttpRequest2025Test extends TestBase {
         params.put("param1", "value1");
         params.put("param2", 123);
 
-        HttpRequest request = HttpRequest.url(TEST_URL)
-                .query(params);
+        HttpRequest request = HttpRequest.url(TEST_URL).query(params);
         assertNotNull(request);
     }
 
     @Test
     public void test_query_withEmptyString() {
-        HttpRequest request = HttpRequest.url(TEST_URL)
-                .query("");
+        HttpRequest request = HttpRequest.url(TEST_URL).query("");
         assertNotNull(request);
     }
 
     @Test
     public void test_query_withEmptyMap() {
-        HttpRequest request = HttpRequest.url(TEST_URL)
-                .query(new HashMap<>());
+        HttpRequest request = HttpRequest.url(TEST_URL).query(new HashMap<>());
         assertNotNull(request);
     }
 
     @Test
     public void test_jsonBody_withString() {
-        HttpRequest request = HttpRequest.url(POST_URL)
-                .jsonBody("{\"key\":\"value\"}");
+        HttpRequest request = HttpRequest.url(POST_URL).jsonBody("{\"key\":\"value\"}");
         assertNotNull(request);
     }
 
@@ -235,15 +217,13 @@ public class HttpRequest2025Test extends TestBase {
         data.put("name", "test");
         data.put("value", 123);
 
-        HttpRequest request = HttpRequest.url(POST_URL)
-                .jsonBody(data);
+        HttpRequest request = HttpRequest.url(POST_URL).jsonBody(data);
         assertNotNull(request);
     }
 
     @Test
     public void test_xmlBody_withString() {
-        HttpRequest request = HttpRequest.url(POST_URL)
-                .xmlBody("<root><key>value</key></root>");
+        HttpRequest request = HttpRequest.url(POST_URL).xmlBody("<root><key>value</key></root>");
         assertNotNull(request);
     }
 
@@ -252,8 +232,7 @@ public class HttpRequest2025Test extends TestBase {
         Map<String, Object> data = new HashMap<>();
         data.put("key", "value");
 
-        HttpRequest request = HttpRequest.url(POST_URL)
-                .xmlBody(data);
+        HttpRequest request = HttpRequest.url(POST_URL).xmlBody(data);
         assertNotNull(request);
     }
 
@@ -263,8 +242,7 @@ public class HttpRequest2025Test extends TestBase {
         formData.put("username", "testuser");
         formData.put("password", "testpass");
 
-        HttpRequest request = HttpRequest.url(POST_URL)
-                .formBody(formData);
+        HttpRequest request = HttpRequest.url(POST_URL).formBody(formData);
         assertNotNull(request);
     }
 
@@ -274,15 +252,13 @@ public class HttpRequest2025Test extends TestBase {
         bean.setName("test");
         bean.setValue(123);
 
-        HttpRequest request = HttpRequest.url(POST_URL)
-                .formBody(bean);
+        HttpRequest request = HttpRequest.url(POST_URL).formBody(bean);
         assertNotNull(request);
     }
 
     @Test
     public void test_body_withBodyPublisher() {
-        HttpRequest request = HttpRequest.url(POST_URL)
-                .body(BodyPublishers.ofString("test data"));
+        HttpRequest request = HttpRequest.url(POST_URL).body(BodyPublishers.ofString("test data"));
         assertNotNull(request);
     }
 
@@ -299,8 +275,7 @@ public class HttpRequest2025Test extends TestBase {
     @Test
     public void test_get_withBodyHandler() {
         try {
-            HttpResponse<String> response = HttpRequest.url(TEST_URL)
-                    .get(BodyHandlers.ofString());
+            HttpResponse<String> response = HttpRequest.url(TEST_URL).get(BodyHandlers.ofString());
             assertNotNull(response);
             assertEquals(200, response.statusCode());
         } catch (Exception e) {
@@ -310,8 +285,7 @@ public class HttpRequest2025Test extends TestBase {
     @Test
     public void test_get_withResultClass() {
         try {
-            String result = HttpRequest.url(TEST_URL)
-                    .get(String.class);
+            String result = HttpRequest.url(TEST_URL).get(String.class);
             assertNotNull(result);
         } catch (Exception e) {
         }
@@ -320,9 +294,7 @@ public class HttpRequest2025Test extends TestBase {
     @Test
     public void test_post() {
         try {
-            HttpResponse<String> response = HttpRequest.url(POST_URL)
-                    .jsonBody("{\"test\":\"data\"}")
-                    .post();
+            HttpResponse<String> response = HttpRequest.url(POST_URL).jsonBody("{\"test\":\"data\"}").post();
             assertNotNull(response);
         } catch (Exception e) {
         }
@@ -331,9 +303,7 @@ public class HttpRequest2025Test extends TestBase {
     @Test
     public void test_post_withBodyHandler() {
         try {
-            HttpResponse<String> response = HttpRequest.url(POST_URL)
-                    .jsonBody("{\"test\":\"data\"}")
-                    .post(BodyHandlers.ofString());
+            HttpResponse<String> response = HttpRequest.url(POST_URL).jsonBody("{\"test\":\"data\"}").post(BodyHandlers.ofString());
             assertNotNull(response);
         } catch (Exception e) {
         }
@@ -342,9 +312,7 @@ public class HttpRequest2025Test extends TestBase {
     @Test
     public void test_post_withResultClass() {
         try {
-            String result = HttpRequest.url(POST_URL)
-                    .jsonBody("{\"test\":\"data\"}")
-                    .post(String.class);
+            String result = HttpRequest.url(POST_URL).jsonBody("{\"test\":\"data\"}").post(String.class);
             assertNotNull(result);
         } catch (Exception e) {
         }
@@ -353,9 +321,7 @@ public class HttpRequest2025Test extends TestBase {
     @Test
     public void test_put() {
         try {
-            HttpResponse<String> response = HttpRequest.url(PUT_URL)
-                    .jsonBody("{\"test\":\"data\"}")
-                    .put();
+            HttpResponse<String> response = HttpRequest.url(PUT_URL).jsonBody("{\"test\":\"data\"}").put();
             assertNotNull(response);
         } catch (Exception e) {
         }
@@ -364,9 +330,7 @@ public class HttpRequest2025Test extends TestBase {
     @Test
     public void test_put_withBodyHandler() {
         try {
-            HttpResponse<String> response = HttpRequest.url(PUT_URL)
-                    .jsonBody("{\"test\":\"data\"}")
-                    .put(BodyHandlers.ofString());
+            HttpResponse<String> response = HttpRequest.url(PUT_URL).jsonBody("{\"test\":\"data\"}").put(BodyHandlers.ofString());
             assertNotNull(response);
         } catch (Exception e) {
         }
@@ -375,9 +339,7 @@ public class HttpRequest2025Test extends TestBase {
     @Test
     public void test_put_withResultClass() {
         try {
-            String result = HttpRequest.url(PUT_URL)
-                    .jsonBody("{\"test\":\"data\"}")
-                    .put(String.class);
+            String result = HttpRequest.url(PUT_URL).jsonBody("{\"test\":\"data\"}").put(String.class);
             assertNotNull(result);
         } catch (Exception e) {
         }
@@ -386,9 +348,7 @@ public class HttpRequest2025Test extends TestBase {
     @Test
     public void test_patch() {
         try {
-            HttpResponse<String> response = HttpRequest.url(PATCH_URL)
-                    .jsonBody("{\"test\":\"data\"}")
-                    .patch();
+            HttpResponse<String> response = HttpRequest.url(PATCH_URL).jsonBody("{\"test\":\"data\"}").patch();
             assertNotNull(response);
         } catch (Exception e) {
         }
@@ -397,9 +357,7 @@ public class HttpRequest2025Test extends TestBase {
     @Test
     public void test_patch_withBodyHandler() {
         try {
-            HttpResponse<String> response = HttpRequest.url(PATCH_URL)
-                    .jsonBody("{\"test\":\"data\"}")
-                    .patch(BodyHandlers.ofString());
+            HttpResponse<String> response = HttpRequest.url(PATCH_URL).jsonBody("{\"test\":\"data\"}").patch(BodyHandlers.ofString());
             assertNotNull(response);
         } catch (Exception e) {
         }
@@ -408,9 +366,7 @@ public class HttpRequest2025Test extends TestBase {
     @Test
     public void test_patch_withResultClass() {
         try {
-            String result = HttpRequest.url(PATCH_URL)
-                    .jsonBody("{\"test\":\"data\"}")
-                    .patch(String.class);
+            String result = HttpRequest.url(PATCH_URL).jsonBody("{\"test\":\"data\"}").patch(String.class);
             assertNotNull(result);
         } catch (Exception e) {
         }
@@ -428,8 +384,7 @@ public class HttpRequest2025Test extends TestBase {
     @Test
     public void test_delete_withBodyHandler() {
         try {
-            HttpResponse<String> response = HttpRequest.url(DELETE_URL)
-                    .delete(BodyHandlers.ofString());
+            HttpResponse<String> response = HttpRequest.url(DELETE_URL).delete(BodyHandlers.ofString());
             assertNotNull(response);
         } catch (Exception e) {
         }
@@ -438,8 +393,7 @@ public class HttpRequest2025Test extends TestBase {
     @Test
     public void test_delete_withResultClass() {
         try {
-            String result = HttpRequest.url(DELETE_URL)
-                    .delete(String.class);
+            String result = HttpRequest.url(DELETE_URL).delete(String.class);
             assertNotNull(result);
         } catch (Exception e) {
         }
@@ -457,8 +411,7 @@ public class HttpRequest2025Test extends TestBase {
     @Test
     public void test_execute_withMethod() {
         try {
-            HttpResponse<String> response = HttpRequest.url(TEST_URL)
-                    .execute(HttpMethod.GET);
+            HttpResponse<String> response = HttpRequest.url(TEST_URL).execute(HttpMethod.GET);
             assertNotNull(response);
         } catch (Exception e) {
         }
@@ -467,8 +420,7 @@ public class HttpRequest2025Test extends TestBase {
     @Test
     public void test_execute_withMethodAndBodyHandler() {
         try {
-            HttpResponse<String> response = HttpRequest.url(TEST_URL)
-                    .execute(HttpMethod.GET, BodyHandlers.ofString());
+            HttpResponse<String> response = HttpRequest.url(TEST_URL).execute(HttpMethod.GET, BodyHandlers.ofString());
             assertNotNull(response);
         } catch (Exception e) {
         }
@@ -477,8 +429,7 @@ public class HttpRequest2025Test extends TestBase {
     @Test
     public void test_execute_withMethodAndResultClass() {
         try {
-            String result = HttpRequest.url(TEST_URL)
-                    .execute(HttpMethod.GET, String.class);
+            String result = HttpRequest.url(TEST_URL).execute(HttpMethod.GET, String.class);
             assertNotNull(result);
         } catch (Exception e) {
         }
@@ -505,8 +456,7 @@ public class HttpRequest2025Test extends TestBase {
     @Test
     public void test_asyncGet_withBodyHandler() throws Exception {
         try {
-            CompletableFuture<HttpResponse<String>> future =
-                    HttpRequest.url(TEST_URL).asyncGet(BodyHandlers.ofString());
+            CompletableFuture<HttpResponse<String>> future = HttpRequest.url(TEST_URL).asyncGet(BodyHandlers.ofString());
             assertNotNull(future);
             HttpResponse<String> response = future.get();
             assertNotNull(response);
@@ -517,8 +467,7 @@ public class HttpRequest2025Test extends TestBase {
     @Test
     public void test_asyncGet_withResultClass() throws Exception {
         try {
-            CompletableFuture<String> future =
-                    HttpRequest.url(TEST_URL).asyncGet(String.class);
+            CompletableFuture<String> future = HttpRequest.url(TEST_URL).asyncGet(String.class);
             assertNotNull(future);
             String result = future.get();
             assertNotNull(result);
@@ -529,8 +478,7 @@ public class HttpRequest2025Test extends TestBase {
     @Test
     public void test_asyncGet_withPushPromiseHandler() throws Exception {
         try {
-            CompletableFuture<HttpResponse<String>> future =
-                    HttpRequest.url(TEST_URL).asyncGet(BodyHandlers.ofString(), null);
+            CompletableFuture<HttpResponse<String>> future = HttpRequest.url(TEST_URL).asyncGet(BodyHandlers.ofString(), null);
             assertNotNull(future);
         } catch (Exception e) {
         }
@@ -539,10 +487,7 @@ public class HttpRequest2025Test extends TestBase {
     @Test
     public void test_asyncPost() throws Exception {
         try {
-            CompletableFuture<HttpResponse<String>> future =
-                    HttpRequest.url(POST_URL)
-                            .jsonBody("{\"test\":\"data\"}")
-                            .asyncPost();
+            CompletableFuture<HttpResponse<String>> future = HttpRequest.url(POST_URL).jsonBody("{\"test\":\"data\"}").asyncPost();
             assertNotNull(future);
         } catch (Exception e) {
         }
@@ -551,10 +496,7 @@ public class HttpRequest2025Test extends TestBase {
     @Test
     public void test_asyncPost_withBodyHandler() throws Exception {
         try {
-            CompletableFuture<HttpResponse<String>> future =
-                    HttpRequest.url(POST_URL)
-                            .jsonBody("{\"test\":\"data\"}")
-                            .asyncPost(BodyHandlers.ofString());
+            CompletableFuture<HttpResponse<String>> future = HttpRequest.url(POST_URL).jsonBody("{\"test\":\"data\"}").asyncPost(BodyHandlers.ofString());
             assertNotNull(future);
         } catch (Exception e) {
         }
@@ -563,10 +505,7 @@ public class HttpRequest2025Test extends TestBase {
     @Test
     public void test_asyncPost_withResultClass() throws Exception {
         try {
-            CompletableFuture<String> future =
-                    HttpRequest.url(POST_URL)
-                            .jsonBody("{\"test\":\"data\"}")
-                            .asyncPost(String.class);
+            CompletableFuture<String> future = HttpRequest.url(POST_URL).jsonBody("{\"test\":\"data\"}").asyncPost(String.class);
             assertNotNull(future);
         } catch (Exception e) {
         }
@@ -575,10 +514,7 @@ public class HttpRequest2025Test extends TestBase {
     @Test
     public void test_asyncPost_withPushPromiseHandler() throws Exception {
         try {
-            CompletableFuture<HttpResponse<String>> future =
-                    HttpRequest.url(POST_URL)
-                            .jsonBody("{\"test\":\"data\"}")
-                            .asyncPost(BodyHandlers.ofString(), null);
+            CompletableFuture<HttpResponse<String>> future = HttpRequest.url(POST_URL).jsonBody("{\"test\":\"data\"}").asyncPost(BodyHandlers.ofString(), null);
             assertNotNull(future);
         } catch (Exception e) {
         }
@@ -587,10 +523,7 @@ public class HttpRequest2025Test extends TestBase {
     @Test
     public void test_asyncPut() throws Exception {
         try {
-            CompletableFuture<HttpResponse<String>> future =
-                    HttpRequest.url(PUT_URL)
-                            .jsonBody("{\"test\":\"data\"}")
-                            .asyncPut();
+            CompletableFuture<HttpResponse<String>> future = HttpRequest.url(PUT_URL).jsonBody("{\"test\":\"data\"}").asyncPut();
             assertNotNull(future);
         } catch (Exception e) {
         }
@@ -599,10 +532,7 @@ public class HttpRequest2025Test extends TestBase {
     @Test
     public void test_asyncPut_withBodyHandler() throws Exception {
         try {
-            CompletableFuture<HttpResponse<String>> future =
-                    HttpRequest.url(PUT_URL)
-                            .jsonBody("{\"test\":\"data\"}")
-                            .asyncPut(BodyHandlers.ofString());
+            CompletableFuture<HttpResponse<String>> future = HttpRequest.url(PUT_URL).jsonBody("{\"test\":\"data\"}").asyncPut(BodyHandlers.ofString());
             assertNotNull(future);
         } catch (Exception e) {
         }
@@ -611,10 +541,7 @@ public class HttpRequest2025Test extends TestBase {
     @Test
     public void test_asyncPut_withResultClass() throws Exception {
         try {
-            CompletableFuture<String> future =
-                    HttpRequest.url(PUT_URL)
-                            .jsonBody("{\"test\":\"data\"}")
-                            .asyncPut(String.class);
+            CompletableFuture<String> future = HttpRequest.url(PUT_URL).jsonBody("{\"test\":\"data\"}").asyncPut(String.class);
             assertNotNull(future);
         } catch (Exception e) {
         }
@@ -623,10 +550,7 @@ public class HttpRequest2025Test extends TestBase {
     @Test
     public void test_asyncPut_withPushPromiseHandler() throws Exception {
         try {
-            CompletableFuture<HttpResponse<String>> future =
-                    HttpRequest.url(PUT_URL)
-                            .jsonBody("{\"test\":\"data\"}")
-                            .asyncPut(BodyHandlers.ofString(), null);
+            CompletableFuture<HttpResponse<String>> future = HttpRequest.url(PUT_URL).jsonBody("{\"test\":\"data\"}").asyncPut(BodyHandlers.ofString(), null);
             assertNotNull(future);
         } catch (Exception e) {
         }
@@ -635,10 +559,7 @@ public class HttpRequest2025Test extends TestBase {
     @Test
     public void test_asyncPatch() throws Exception {
         try {
-            CompletableFuture<HttpResponse<String>> future =
-                    HttpRequest.url(PATCH_URL)
-                            .jsonBody("{\"test\":\"data\"}")
-                            .asyncPatch();
+            CompletableFuture<HttpResponse<String>> future = HttpRequest.url(PATCH_URL).jsonBody("{\"test\":\"data\"}").asyncPatch();
             assertNotNull(future);
         } catch (Exception e) {
         }
@@ -647,10 +568,7 @@ public class HttpRequest2025Test extends TestBase {
     @Test
     public void test_asyncPatch_withBodyHandler() throws Exception {
         try {
-            CompletableFuture<HttpResponse<String>> future =
-                    HttpRequest.url(PATCH_URL)
-                            .jsonBody("{\"test\":\"data\"}")
-                            .asyncPatch(BodyHandlers.ofString());
+            CompletableFuture<HttpResponse<String>> future = HttpRequest.url(PATCH_URL).jsonBody("{\"test\":\"data\"}").asyncPatch(BodyHandlers.ofString());
             assertNotNull(future);
         } catch (Exception e) {
         }
@@ -659,10 +577,7 @@ public class HttpRequest2025Test extends TestBase {
     @Test
     public void test_asyncPatch_withResultClass() throws Exception {
         try {
-            CompletableFuture<String> future =
-                    HttpRequest.url(PATCH_URL)
-                            .jsonBody("{\"test\":\"data\"}")
-                            .asyncPatch(String.class);
+            CompletableFuture<String> future = HttpRequest.url(PATCH_URL).jsonBody("{\"test\":\"data\"}").asyncPatch(String.class);
             assertNotNull(future);
         } catch (Exception e) {
         }
@@ -671,10 +586,9 @@ public class HttpRequest2025Test extends TestBase {
     @Test
     public void test_asyncPatch_withPushPromiseHandler() throws Exception {
         try {
-            CompletableFuture<HttpResponse<String>> future =
-                    HttpRequest.url(PATCH_URL)
-                            .jsonBody("{\"test\":\"data\"}")
-                            .asyncPatch(BodyHandlers.ofString(), null);
+            CompletableFuture<HttpResponse<String>> future = HttpRequest.url(PATCH_URL)
+                    .jsonBody("{\"test\":\"data\"}")
+                    .asyncPatch(BodyHandlers.ofString(), null);
             assertNotNull(future);
         } catch (Exception e) {
         }
@@ -683,8 +597,7 @@ public class HttpRequest2025Test extends TestBase {
     @Test
     public void test_asyncDelete() throws Exception {
         try {
-            CompletableFuture<HttpResponse<String>> future =
-                    HttpRequest.url(DELETE_URL).asyncDelete();
+            CompletableFuture<HttpResponse<String>> future = HttpRequest.url(DELETE_URL).asyncDelete();
             assertNotNull(future);
         } catch (Exception e) {
         }
@@ -693,9 +606,7 @@ public class HttpRequest2025Test extends TestBase {
     @Test
     public void test_asyncDelete_withBodyHandler() throws Exception {
         try {
-            CompletableFuture<HttpResponse<String>> future =
-                    HttpRequest.url(DELETE_URL)
-                            .asyncDelete(BodyHandlers.ofString());
+            CompletableFuture<HttpResponse<String>> future = HttpRequest.url(DELETE_URL).asyncDelete(BodyHandlers.ofString());
             assertNotNull(future);
         } catch (Exception e) {
         }
@@ -704,9 +615,7 @@ public class HttpRequest2025Test extends TestBase {
     @Test
     public void test_asyncDelete_withResultClass() throws Exception {
         try {
-            CompletableFuture<String> future =
-                    HttpRequest.url(DELETE_URL)
-                            .asyncDelete(String.class);
+            CompletableFuture<String> future = HttpRequest.url(DELETE_URL).asyncDelete(String.class);
             assertNotNull(future);
         } catch (Exception e) {
         }
@@ -715,9 +624,7 @@ public class HttpRequest2025Test extends TestBase {
     @Test
     public void test_asyncDelete_withPushPromiseHandler() throws Exception {
         try {
-            CompletableFuture<HttpResponse<String>> future =
-                    HttpRequest.url(DELETE_URL)
-                            .asyncDelete(BodyHandlers.ofString(), null);
+            CompletableFuture<HttpResponse<String>> future = HttpRequest.url(DELETE_URL).asyncDelete(BodyHandlers.ofString(), null);
             assertNotNull(future);
         } catch (Exception e) {
         }
@@ -726,8 +633,7 @@ public class HttpRequest2025Test extends TestBase {
     @Test
     public void test_asyncHead() throws Exception {
         try {
-            CompletableFuture<HttpResponse<Void>> future =
-                    HttpRequest.url(TEST_URL).asyncHead();
+            CompletableFuture<HttpResponse<Void>> future = HttpRequest.url(TEST_URL).asyncHead();
             assertNotNull(future);
         } catch (Exception e) {
         }
@@ -736,9 +642,7 @@ public class HttpRequest2025Test extends TestBase {
     @Test
     public void test_asyncExecute_withMethod() throws Exception {
         try {
-            CompletableFuture<HttpResponse<String>> future =
-                    HttpRequest.url(TEST_URL)
-                            .asyncExecute(HttpMethod.GET);
+            CompletableFuture<HttpResponse<String>> future = HttpRequest.url(TEST_URL).asyncExecute(HttpMethod.GET);
             assertNotNull(future);
         } catch (Exception e) {
         }
@@ -747,9 +651,7 @@ public class HttpRequest2025Test extends TestBase {
     @Test
     public void test_asyncExecute_withMethodAndBodyHandler() throws Exception {
         try {
-            CompletableFuture<HttpResponse<String>> future =
-                    HttpRequest.url(TEST_URL)
-                            .asyncExecute(HttpMethod.GET, BodyHandlers.ofString());
+            CompletableFuture<HttpResponse<String>> future = HttpRequest.url(TEST_URL).asyncExecute(HttpMethod.GET, BodyHandlers.ofString());
             assertNotNull(future);
         } catch (Exception e) {
         }
@@ -758,9 +660,7 @@ public class HttpRequest2025Test extends TestBase {
     @Test
     public void test_asyncExecute_withMethodAndResultClass() throws Exception {
         try {
-            CompletableFuture<String> future =
-                    HttpRequest.url(TEST_URL)
-                            .asyncExecute(HttpMethod.GET, String.class);
+            CompletableFuture<String> future = HttpRequest.url(TEST_URL).asyncExecute(HttpMethod.GET, String.class);
             assertNotNull(future);
         } catch (Exception e) {
         }
@@ -769,9 +669,7 @@ public class HttpRequest2025Test extends TestBase {
     @Test
     public void test_asyncExecute_withPushPromiseHandler() throws Exception {
         try {
-            CompletableFuture<HttpResponse<String>> future =
-                    HttpRequest.url(TEST_URL)
-                            .asyncExecute(HttpMethod.GET, BodyHandlers.ofString(), null);
+            CompletableFuture<HttpResponse<String>> future = HttpRequest.url(TEST_URL).asyncExecute(HttpMethod.GET, BodyHandlers.ofString(), null);
             assertNotNull(future);
         } catch (Exception e) {
         }

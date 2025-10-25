@@ -24,7 +24,7 @@ import java.util.Set;
  * deserialization options. It inherits all configuration options from its parent
  * class without adding XML-specific settings.</p>
  * 
- * <p>Example usage:</p>
+ * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * XMLDeserializationConfig config = new XMLDeserializationConfig()
  *     .ignoreUnmatchedProperty(true)
@@ -53,7 +53,7 @@ public class XMLDeserializationConfig extends DeserializationConfig<XMLDeseriali
      * <p>Provides static factory methods for convenient configuration creation.
      * This inner class is named XDC for brevity.</p>
      * 
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * XMLDeserializationConfig config = XDC.create()
      *     .ignoreUnmatchedProperty(true)

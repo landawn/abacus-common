@@ -1942,8 +1942,7 @@ public class AbstractStream103Test extends TestBase {
     @Test
     public void testInnerJoinWithPredicate() {
         stream = createStream(1, 2, 3);
-        Stream<Pair<Integer, String>> result = stream.innerJoin(Arrays.asList("a", "b", "c"), (i, s) -> true
-        );
+        Stream<Pair<Integer, String>> result = stream.innerJoin(Arrays.asList("a", "b", "c"), (i, s) -> true);
         assertEquals(9, result.toList().size());
     }
 

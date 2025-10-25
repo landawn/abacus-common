@@ -24,7 +24,7 @@ import com.landawn.abacus.annotation.SuppressFBWarnings;
  * This class centralizes string constants to avoid hardcoding strings throughout the codebase,
  * improving maintainability and reducing typos.
  * 
- * <p>Usage example:</p>
+ * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * // Instead of hardcoding strings
  * map.put("columnName", value);

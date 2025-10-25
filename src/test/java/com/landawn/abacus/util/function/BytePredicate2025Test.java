@@ -76,7 +76,7 @@ public class BytePredicate2025Test extends TestBase {
 
     @Test
     public void testAndShortCircuit() {
-        final boolean[] secondCalled = {false};
+        final boolean[] secondCalled = { false };
         BytePredicate alwaysFalse = b -> false;
         BytePredicate checkCalled = b -> {
             secondCalled[0] = true;
@@ -101,7 +101,7 @@ public class BytePredicate2025Test extends TestBase {
 
     @Test
     public void testOrShortCircuit() {
-        final boolean[] secondCalled = {false};
+        final boolean[] secondCalled = { false };
         BytePredicate alwaysTrue = b -> true;
         BytePredicate checkCalled = b -> {
             secondCalled[0] = true;

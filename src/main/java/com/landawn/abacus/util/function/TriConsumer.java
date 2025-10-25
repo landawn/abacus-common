@@ -37,7 +37,7 @@ public interface TriConsumer<A, B, C> extends Throwables.TriConsumer<A, B, C, Ru
     /**
      * Performs this operation on the given arguments.
      * 
-     * <p>Example usage:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * TriConsumer<String, Integer, Boolean> logger = 
      *     (msg, level, timestamp) -> System.out.println("[" + level + "] " + msg + " @ " + timestamp);
@@ -52,7 +52,6 @@ public interface TriConsumer<A, B, C> extends Throwables.TriConsumer<A, B, C, Ru
      * @param a the first input argument
      * @param b the second input argument
      * @param c the third input argument
-     * @throws RuntimeException if any error occurs during the operation
      */
     @Override
     void accept(A a, B b, C c);
@@ -63,7 +62,7 @@ public interface TriConsumer<A, B, C> extends Throwables.TriConsumer<A, B, C, Ru
      * relayed to the caller of the composed operation. If performing this operation throws
      * an exception, the after operation will not be performed.
      * 
-     * <p>Example usage:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * TriConsumer<String, Integer, Boolean> logger = 
      *     (msg, level, flag) -> System.out.println("Log: " + msg);
@@ -92,7 +91,7 @@ public interface TriConsumer<A, B, C> extends Throwables.TriConsumer<A, B, C, Ru
      * This method is useful when you need to use this consumer in a context that expects
      * a Throwables.TriConsumer with a specific exception type.
      * 
-     * <p>Example usage:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * TriConsumer<String, Integer, Boolean> consumer = (s, i, b) -> { ... };
      * Throwables.TriConsumer<String, Integer, Boolean, IOException> throwableConsumer = 

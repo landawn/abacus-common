@@ -86,8 +86,7 @@ public class DoubleTriPredicate2025Test extends TestBase {
 
     @Test
     public void testTriangleInequality() {
-        DoubleTriPredicate isValidTriangle = (a, b, c) ->
-            (a + b > c) && (b + c > a) && (a + c > b);
+        DoubleTriPredicate isValidTriangle = (a, b, c) -> (a + b > c) && (b + c > a) && (a + c > b);
 
         assertTrue(isValidTriangle.test(3.0, 4.0, 5.0));
         assertFalse(isValidTriangle.test(1.0, 2.0, 10.0));

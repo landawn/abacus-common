@@ -243,7 +243,7 @@ public class HashFunction2025Test extends TestBase {
     @DisplayName("Test hash byte array with offset and length")
     public void testHashByteArrayOffsetLength() {
         HashFunction hashFunc = Hashing.murmur3_128();
-        byte[] data = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
+        byte[] data = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 };
 
         HashCode hash = hashFunc.hash(data, 2, 5);
 
@@ -254,7 +254,7 @@ public class HashFunction2025Test extends TestBase {
     @DisplayName("Test hash byte array with zero length")
     public void testHashByteArrayZeroLength() {
         HashFunction hashFunc = Hashing.murmur3_128();
-        byte[] data = {1, 2, 3};
+        byte[] data = { 1, 2, 3 };
 
         HashCode hash = hashFunc.hash(data, 0, 0);
 
@@ -265,7 +265,7 @@ public class HashFunction2025Test extends TestBase {
     @DisplayName("Test hash byte array full range equals whole array")
     public void testHashByteArrayFullRange() {
         HashFunction hashFunc = Hashing.murmur3_128();
-        byte[] data = {10, 20, 30, 40, 50};
+        byte[] data = { 10, 20, 30, 40, 50 };
 
         HashCode hash1 = hashFunc.hash(data);
         HashCode hash2 = hashFunc.hash(data, 0, data.length);
@@ -277,8 +277,8 @@ public class HashFunction2025Test extends TestBase {
     @DisplayName("Test hash byte array subset equals separate array")
     public void testHashByteArraySubset() {
         HashFunction hashFunc = Hashing.murmur3_128();
-        byte[] fullData = {1, 2, 3, 4, 5};
-        byte[] subsetData = {2, 3, 4};
+        byte[] fullData = { 1, 2, 3, 4, 5 };
+        byte[] subsetData = { 2, 3, 4 };
 
         HashCode hashSubset1 = hashFunc.hash(fullData, 1, 3);
         HashCode hashSubset2 = hashFunc.hash(subsetData);

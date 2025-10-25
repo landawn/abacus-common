@@ -202,7 +202,7 @@ public abstract class AbstractPool implements Pool {
      * Acquires the lock for this pool.
      * This method blocks until the lock is available.
      * 
-     * <p>Usage example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * pool.lock();
      * try {
@@ -242,7 +242,7 @@ public abstract class AbstractPool implements Pool {
      * Returns a snapshot of the current pool statistics.
      * The statistics include capacity, current size, operation counts, and memory usage.
      * 
-     * <p>Usage example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * PoolStats stats = pool.stats();
      * System.out.println("Hit rate: " + (double)stats.hitCount() / stats.getCount());

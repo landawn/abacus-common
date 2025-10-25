@@ -160,7 +160,7 @@ public class DoubleNFunction2025Test extends TestBase {
             return sum;
         };
 
-        double[] values = {1.0, 2.0, 3.0, 4.0};
+        double[] values = { 1.0, 2.0, 3.0, 4.0 };
         Double result = function.apply(values);
         assertEquals(10.0, result, 0.0001);
     }

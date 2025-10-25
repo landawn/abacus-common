@@ -42,7 +42,7 @@ public interface ObjIntPredicate<T> extends Throwables.ObjIntPredicate<T, Runtim
      * condition represented by this predicate. It should return {@code true} if
      * the input arguments match the predicate's criteria, {@code false} otherwise.
      *
-     * <p>Example usage:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ObjIntPredicate<List<String>> hasElementAt = (list, index) -> 
      *     index >= 0 && index < list.size();
@@ -56,8 +56,7 @@ public interface ObjIntPredicate<T> extends Throwables.ObjIntPredicate<T, Runtim
      * @param t the first input argument of type T
      * @param u the second input argument, a primitive int value
      * @return {@code true} if the input arguments match the predicate,
-     *         otherwise {@code false}
-     * @throws RuntimeException if the predicate evaluation fails
+     *         otherwise {@code false} if the predicate evaluation fails
      */
     @Override
     boolean test(T t, int u);
@@ -69,7 +68,7 @@ public interface ObjIntPredicate<T> extends Throwables.ObjIntPredicate<T, Runtim
      * {@code false}, and vice versa. This is useful for inverting conditions without
      * having to write a new predicate.
      *
-     * <p>Example usage:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ObjIntPredicate<String> hasMinLength = (str, minLen) -> 
      *     str.length() >= minLen;
@@ -93,7 +92,7 @@ public interface ObjIntPredicate<T> extends Throwables.ObjIntPredicate<T, Runtim
      * to the caller; if evaluation of this predicate throws an exception, the
      * {@code other} predicate will not be evaluated.
      *
-     * <p>Example usage:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ObjIntPredicate<List<String>> validIndex = (list, index) -> 
      *     index >= 0 && index < list.size();
@@ -122,7 +121,7 @@ public interface ObjIntPredicate<T> extends Throwables.ObjIntPredicate<T, Runtim
      * to the caller; if evaluation of this predicate throws an exception, the
      * {@code other} predicate will not be evaluated.
      *
-     * <p>Example usage:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ObjIntPredicate<String> isEmpty = (str, ignored) -> 
      *     str.isEmpty();

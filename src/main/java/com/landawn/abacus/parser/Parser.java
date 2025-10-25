@@ -40,7 +40,7 @@ import com.landawn.abacus.exception.UncheckedIOException;
  * prioritized over configurability. There is no extra support for configuration files
  * or annotations beyond {@link JsonXmlField}.</p>
  * 
- * <p>Example usage:</p>
+ * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * Parser<MySerConfig, MyDeserConfig> parser = new MyParser();
  * 
@@ -66,7 +66,7 @@ public interface Parser<SC extends SerializationConfig<?>, DC extends Deserializ
      * <p>This method uses default serialization settings. The object is converted to the
      * parser's target format (JSON, XML, etc.) and returned as a string.</p>
      *
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String json = parser.serialize(myObject);
      * }</pre>
@@ -83,7 +83,7 @@ public interface Parser<SC extends SerializationConfig<?>, DC extends Deserializ
      * the configuration parameter, such as formatting options, encoding settings, and
      * field inclusion/exclusion rules.</p>
      *
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * MySerConfig config = new MySerConfig()
      *     .setPrettyFormat(true)
@@ -104,7 +104,7 @@ public interface Parser<SC extends SerializationConfig<?>, DC extends Deserializ
      * if it doesn't exist, or overwritten if it does. Parent directories must exist
      * or an exception will be thrown.</p>
      *
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * parser.serialize(myObject, new File("output.json"));
      * }</pre>
@@ -122,7 +122,7 @@ public interface Parser<SC extends SerializationConfig<?>, DC extends Deserializ
      * Parent directories must exist or an exception will be thrown. The configuration
      * parameter allows control over serialization behavior and output formatting.</p>
      *
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * MySerConfig config = new MySerConfig().setPrettyFormat(true);
      * parser.serialize(myObject, config, new File("output.json"));
@@ -142,7 +142,7 @@ public interface Parser<SC extends SerializationConfig<?>, DC extends Deserializ
      * after writing, allowing the caller to manage stream lifecycle. The stream will
      * be flushed after serialization.</p>
      *
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * try (FileOutputStream fos = new FileOutputStream("output.json")) {
      *     parser.serialize(myObject, fos);
@@ -163,7 +163,7 @@ public interface Parser<SC extends SerializationConfig<?>, DC extends Deserializ
      * parameter allows control over serialization behavior, such as character encoding
      * and formatting options.</p>
      *
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * MySerConfig config = new MySerConfig().setCharset("UTF-8");
      * try (FileOutputStream fos = new FileOutputStream("output.json")) {
@@ -185,7 +185,7 @@ public interface Parser<SC extends SerializationConfig<?>, DC extends Deserializ
      * after writing, allowing the caller to manage writer lifecycle. The writer will
      * be flushed after serialization.</p>
      *
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * try (FileWriter writer = new FileWriter("output.json")) {
      *     parser.serialize(myObject, writer);
@@ -206,7 +206,7 @@ public interface Parser<SC extends SerializationConfig<?>, DC extends Deserializ
      * parameter allows control over serialization behavior, such as indentation,
      * formatting, and field filtering.</p>
      *
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * MySerConfig config = new MySerConfig().setIndent("  ");
      * try (FileWriter writer = new FileWriter("output.json")) {
@@ -228,7 +228,7 @@ public interface Parser<SC extends SerializationConfig<?>, DC extends Deserializ
      * according to the parser's format (JSON, XML, etc.) and converted to an instance
      * of the specified target class.</p>
      *
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * MyClass obj = parser.deserialize(jsonString, MyClass.class);
      * List<String> list = parser.deserialize(jsonArray, List.class);
@@ -248,7 +248,7 @@ public interface Parser<SC extends SerializationConfig<?>, DC extends Deserializ
      * the configuration parameter, such as handling unknown properties, type information,
      * custom type converters, and collection element types.</p>
      *
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * MyDeserConfig config = new MyDeserConfig()
      *     .setIgnoreUnknownProperty(true)
@@ -271,7 +271,7 @@ public interface Parser<SC extends SerializationConfig<?>, DC extends Deserializ
      * and parsed according to the parser's format (JSON, XML, etc.) and converted to
      * an instance of the specified target class.</p>
      *
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * MyClass obj = parser.deserialize(new File("input.json"), MyClass.class);
      * }</pre>
@@ -291,7 +291,7 @@ public interface Parser<SC extends SerializationConfig<?>, DC extends Deserializ
      * The configuration parameter can specify date formats, type mappings, property
      * handling, and other parser-specific options.</p>
      *
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * MyDeserConfig config = new MyDeserConfig()
      *     .setDateFormat("yyyy-MM-dd");
@@ -314,7 +314,7 @@ public interface Parser<SC extends SerializationConfig<?>, DC extends Deserializ
      * after reading, allowing the caller to manage stream lifecycle. The stream content
      * is read and parsed according to the parser's format.</p>
      *
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * try (FileInputStream fis = new FileInputStream("input.json")) {
      *     MyClass obj = parser.deserialize(fis, MyClass.class);
@@ -336,7 +336,7 @@ public interface Parser<SC extends SerializationConfig<?>, DC extends Deserializ
      * lifecycle. The configuration parameter allows control over deserialization behavior,
      * such as character encoding, type handling, and parser-specific options.</p>
      *
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * MyDeserConfig config = new MyDeserConfig().setCharset("UTF-8");
      * try (FileInputStream fis = new FileInputStream("input.json")) {
@@ -360,7 +360,7 @@ public interface Parser<SC extends SerializationConfig<?>, DC extends Deserializ
      * after reading, allowing the caller to manage reader lifecycle. The reader content
      * is read and parsed according to the parser's format.</p>
      *
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * try (FileReader reader = new FileReader("input.json")) {
      *     MyClass obj = parser.deserialize(reader, MyClass.class);
@@ -383,7 +383,7 @@ public interface Parser<SC extends SerializationConfig<?>, DC extends Deserializ
      * such as type mappings for collections and maps, property handling, and parser-specific
      * options.</p>
      *
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * MyDeserConfig config = new MyDeserConfig()
      *     .setMapKeyType(String.class)

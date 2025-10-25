@@ -73,7 +73,7 @@ import com.landawn.abacus.util.stream.Stream;
  *   <li>Conversion between standard Java and {@code Throwables} functional interfaces</li>
  * </ul>
  *
- * <p>Example usage:</p>
+ * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * // Memoized supplier with expiration
  * Throwables.Supplier<String, IOException> supplier = Fnn.memoizeWithExpiration(
@@ -1796,7 +1796,7 @@ public final class Fnn {
      * This is a shorthand identity method for a mapper that can help with type inference in certain contexts,
      * particularly when used with stream operations like mapMulti.
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Using mc() to help with type inference in a stream operation
      * Seq<List<String>, Exception> seq = ...;

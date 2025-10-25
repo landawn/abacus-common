@@ -26,7 +26,7 @@ import java.io.InputStream;
  * speed rather than compression ratio. This input stream automatically decompresses data
  * that was compressed using Snappy compression.</p>
  * 
- * <p>Example usage:</p>
+ * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * try (FileInputStream fis = new FileInputStream("data.snappy");
  *      SnappyInputStream sis = new SnappyInputStream(fis)) {
@@ -49,7 +49,7 @@ public final class SnappyInputStream extends InputStream {
      * Creates a new SnappyInputStream that decompresses data from the specified input stream.
      * The input stream should contain data that was compressed using Snappy compression.
      * 
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * InputStream compressedStream = new FileInputStream("compressed.snappy");
      * SnappyInputStream snappyStream = new SnappyInputStream(compressedStream);
@@ -83,7 +83,7 @@ public final class SnappyInputStream extends InputStream {
      * Reads up to {@code b.length} bytes of decompressed data from this input stream
      * into an array of bytes. This method blocks until some input is available.
      * 
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * byte[] buffer = new byte[1024];
      * int bytesRead = snappyStream.read(buffer);
@@ -103,7 +103,7 @@ public final class SnappyInputStream extends InputStream {
      * Reads up to {@code len} bytes of decompressed data from this input stream
      * into an array of bytes, starting at the specified offset.
      * 
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * byte[] buffer = new byte[1024];
      * int bytesRead = snappyStream.read(buffer, 10, 100); // Read up to 100 bytes starting at index 10
@@ -128,7 +128,7 @@ public final class SnappyInputStream extends InputStream {
      * The {@code skip} method may, for a variety of reasons, end up skipping over some
      * smaller number of bytes, possibly 0. The actual number of bytes skipped is returned.
      * 
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * long skipped = snappyStream.skip(1024); // Try to skip 1024 bytes
      * }</pre>

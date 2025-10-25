@@ -32,7 +32,7 @@ import java.util.Map;
  * overhead of repeated charset lookups. The cache is pre-populated with all
  * standard charsets and grows as new charsets are requested.</p>
  * 
- * <p>Example usage:</p>
+ * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * // Using predefined constants
  * byte[] utf8Bytes = "Hello".getBytes(Charsets.UTF_8);
@@ -55,7 +55,7 @@ public final class Charsets {
      * 
      * <p>This charset is guaranteed to be available on all Java platforms.</p>
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * byte[] asciiBytes = "Hello".getBytes(Charsets.US_ASCII);
      * }</pre>
@@ -67,7 +67,7 @@ public final class Charsets {
      * 
      * <p>This charset is guaranteed to be available on all Java platforms.</p>
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * byte[] latinBytes = "Café".getBytes(Charsets.ISO_8859_1);
      * }</pre>
@@ -81,7 +81,7 @@ public final class Charsets {
      * is recommended for new applications. This charset is guaranteed to
      * be available on all Java platforms.</p>
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * byte[] utf8Bytes = "Hello 世界".getBytes(Charsets.UTF_8);
      * String text = new String(utf8Bytes, Charsets.UTF_8);
@@ -95,7 +95,7 @@ public final class Charsets {
      * 
      * <p>This charset is guaranteed to be available on all Java platforms.</p>
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * byte[] utf16Bytes = "Hello".getBytes(Charsets.UTF_16);
      * }</pre>
@@ -107,7 +107,7 @@ public final class Charsets {
      * 
      * <p>This charset is guaranteed to be available on all Java platforms.</p>
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * byte[] utf16beBytes = "Hello".getBytes(Charsets.UTF_16BE);
      * }</pre>
@@ -119,7 +119,7 @@ public final class Charsets {
      * 
      * <p>This charset is guaranteed to be available on all Java platforms.</p>
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * byte[] utf16leBytes = "Hello".getBytes(Charsets.UTF_16LE);
      * }</pre>
@@ -133,7 +133,7 @@ public final class Charsets {
      * and typically depends upon the locale and charset of the underlying
      * operating system.</p>
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Charset systemDefault = Charsets.DEFAULT;
      * System.out.println("System default charset: " + systemDefault.name());

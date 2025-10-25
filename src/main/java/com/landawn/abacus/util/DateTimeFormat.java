@@ -22,8 +22,8 @@ package com.landawn.abacus.util;
  * <p>The formats are commonly used for data serialization, API communication,
  * and standardized date/time representation across different systems.</p>
  * 
- * <p>Example usage:</p>
- * <pre>
+ * <p><b>Usage Examples:</b></p>
+ * <pre>{@code
  * // Using with a formatter
  * DateTimeFormat format = DateTimeFormat.ISO_8601_DATE_TIME;
  * 
@@ -36,7 +36,7 @@ package com.landawn.abacus.util;
  *     case ISO_8601_TIMESTAMP:
  *         return "2023-12-25T10:30:45.123Z";
  * }
- * </pre>
+ * }</pre>
  * 
  * @see java.time.format.DateTimeFormatter
  * @see java.text.SimpleDateFormat

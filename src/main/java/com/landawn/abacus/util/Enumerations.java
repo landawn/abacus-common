@@ -37,8 +37,8 @@ import java.util.function.Supplier;
  * 
  * <p>All methods in this class are static and the class cannot be instantiated.</p>
  * 
- * <p>Example usage:</p>
- * <pre>
+ * <p><b>Usage Examples:</b></p>
+ * <pre>{@code
  * // Convert a Collection to Enumeration
  * List<String> list = Arrays.asList("a", "b", "c");
  * Enumeration<String> enum1 = Enumerations.create(list);
@@ -48,7 +48,7 @@ import java.util.function.Supplier;
  * 
  * // Concatenate multiple Enumerations
  * Enumeration<String> combined = Enumerations.concat(enum1, enum2, enum3);
- * </pre>
+ * }</pre>
  * 
  * @see com.landawn.abacus.util.ObjIterator
  * @see com.landawn.abacus.util.Iterators
@@ -86,11 +86,11 @@ public final class Enumerations {
      * The returned Enumeration has no elements and calling {@code nextElement()} will throw
      * {@link NoSuchElementException}.
      *
-     * <p>Example:</p>
-     * <pre>
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
      * Enumeration<String> empty = Enumerations.empty();
      * empty.hasMoreElements(); // false
-     * </pre>
+     * }</pre>
      *
      * @param <T> the type of elements (not) enumerated
      * @return an empty Enumeration
@@ -103,13 +103,13 @@ public final class Enumerations {
      * Creates an Enumeration containing a single element.
      * The returned Enumeration will have exactly one element to enumerate.
      *
-     * <p>Example:</p>
-     * <pre>
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
      * Enumeration<String> single = Enumerations.just("Hello");
      * single.hasMoreElements(); // true
      * single.nextElement();     // "Hello"
      * single.hasMoreElements(); // false
-     * </pre>
+     * }</pre>
      *
      * @param <T> the type of the element
      * @param single the single element to enumerate
@@ -141,13 +141,13 @@ public final class Enumerations {
      * Creates an Enumeration from a varargs array of elements.
      * The elements will be enumerated in the order they appear in the array.
      *
-     * <p>Example:</p>
-     * <pre>
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
      * Enumeration<Integer> numbers = Enumerations.of(1, 2, 3, 4, 5);
      * while (numbers.hasMoreElements()) {
      *     System.out.println(numbers.nextElement());
      * }
-     * </pre>
+     * }</pre>
      *
      * @param <T> the type of elements
      * @param a the elements to enumerate
@@ -183,11 +183,11 @@ public final class Enumerations {
      * Creates an Enumeration from a Collection.
      * The enumeration order depends on the collection's iterator order.
      *
-     * <p>Example:</p>
-     * <pre>
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
      * List<String> list = Arrays.asList("a", "b", "c");
      * Enumeration<String> enum1 = Enumerations.create(list);
-     * </pre>
+     * }</pre>
      *
      * @param <T> the type of elements
      * @param c the collection to create an Enumeration from
@@ -208,11 +208,11 @@ public final class Enumerations {
      * <p>Note: The returned Enumeration is backed by the Iterator, so any modifications
      * to the underlying collection during enumeration may cause undefined behavior.</p>
      *
-     * <p>Example:</p>
-     * <pre>
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
      * Iterator<String> iter = list.iterator();
      * Enumeration<String> enum1 = Enumerations.create(iter);
-     * </pre>
+     * }</pre>
      *
      * @param <T> the type of elements
      * @param iter the iterator to wrap as an Enumeration
@@ -237,13 +237,13 @@ public final class Enumerations {
      * Elements are enumerated in order: all elements from the first Enumeration,
      * then all elements from the second, and so on.
      *
-     * <p>Example:</p>
-     * <pre>
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
      * Enumeration<String> enum1 = Enumerations.of("a", "b");
      * Enumeration<String> enum2 = Enumerations.of("c", "d");
      * Enumeration<String> combined = Enumerations.concat(enum1, enum2);
      * // combined will enumerate: "a", "b", "c", "d"
-     * </pre>
+     * }</pre>
      *
      * @param <T> the type of elements
      * @param a the Enumerations to concatenate
@@ -263,15 +263,15 @@ public final class Enumerations {
      * Elements are enumerated in the order of the Enumerations in the collection,
      * with all elements from each Enumeration being exhausted before moving to the next.
      *
-     * <p>Example:</p>
-     * <pre>
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
      * List<Enumeration<Integer>> enums = new ArrayList<>();
      * enums.add(Enumerations.of(1, 2));
      * enums.add(Enumerations.of(3, 4));
      * enums.add(Enumerations.of(5, 6));
      * Enumeration<Integer> combined = Enumerations.concat(enums);
      * // combined will enumerate: 1, 2, 3, 4, 5, 6
-     * </pre>
+     * }</pre>
      *
      * @param <T> the type of elements
      * @param c a collection of Enumerations to concatenate
@@ -311,8 +311,8 @@ public final class Enumerations {
      * This provides a bridge from the legacy Enumeration interface to the modern Iterator-based API.
      * The returned ObjIterator provides additional functional operations like map, filter, etc.
      *
-     * <p>Example:</p>
-     * <pre>
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
      * Enumeration<String> enum1 = getEnumeration();
      * ObjIterator<String> iter = Enumerations.toIterator(enum1);
      * 
@@ -320,7 +320,7 @@ public final class Enumerations {
      * List<String> filtered = iter
      *     .filter(s -> s.length() > 5)
      *     .toList();
-     * </pre>
+     * }</pre>
      *
      * @param <T> the type of elements
      * @param e the Enumeration to convert, may be null
@@ -349,12 +349,12 @@ public final class Enumerations {
      * All elements from the Enumeration are consumed and added to a new ArrayList
      * in the order they are enumerated.
      *
-     * <p>Example:</p>
-     * <pre>
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
      * Enumeration<String> enum1 = getEnumeration();
      * List<String> list = Enumerations.toList(enum1);
      * // list now contains all elements from the enumeration
-     * </pre>
+     * }</pre>
      *
      * @param <T> the type of elements
      * @param e the Enumeration to convert, may be null
@@ -379,12 +379,12 @@ public final class Enumerations {
      * All elements from the Enumeration are consumed and added to a new HashSet.
      * Duplicate elements (according to equals()) will be removed.
      *
-     * <p>Example:</p>
-     * <pre>
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
      * Enumeration<String> enum1 = Enumerations.of("a", "b", "a", "c");
      * Set<String> set = Enumerations.toSet(enum1);
      * // set contains: "a", "b", "c" (duplicates removed)
-     * </pre>
+     * }</pre>
      *
      * @param <T> the type of elements
      * @param e the Enumeration to convert, may be null
@@ -409,15 +409,15 @@ public final class Enumerations {
      * This allows converting to any Collection type by providing an appropriate supplier.
      * All elements from the Enumeration are consumed and added to the collection.
      *
-     * <p>Example:</p>
-     * <pre>
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
      * // Convert to LinkedList
      * Enumeration<String> enum1 = getEnumeration();
      * LinkedList<String> list = Enumerations.toCollection(enum1, LinkedList::new);
      * 
      * // Convert to TreeSet
      * TreeSet<String> sorted = Enumerations.toCollection(enum1, TreeSet::new);
-     * </pre>
+     * }</pre>
      *
      * @param <T> the type of elements
      * @param <C> the type of the Collection to create

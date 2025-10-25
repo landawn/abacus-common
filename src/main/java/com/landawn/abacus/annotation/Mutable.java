@@ -48,8 +48,8 @@ import java.lang.annotation.Target;
  *   <li>May cause unexpected behavior if aliased (multiple references)</li>
  * </ul>
  * 
- * <p><b>Example usage:</b></p>
- * <pre>
+ * <p><b>Usage Examples:</b></p>
+ * <pre>{@code
  * {@literal @}Mutable
  * public class Counter {
  *     private int value = 0;
@@ -63,7 +63,7 @@ import java.lang.annotation.Target;
  *         return value;
  *     }
  * }
- * </pre>
+ * }</pre>
  * 
  * <p>This annotation serves as documentation and can be used by static analysis tools
  * to verify mutability contracts and detect potential issues with concurrent access

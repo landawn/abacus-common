@@ -81,7 +81,7 @@ import com.landawn.abacus.util.XmlUtil;
  *   <li>Ignoring specific properties during serialization/deserialization</li>
  * </ul>
  * 
- * <p>Example usage:
+ * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * XMLParser parser = new XMLParserImpl(XMLParserType.StAX);
  * 

@@ -32,7 +32,7 @@ package com.landawn.abacus.util;
  * <p>This behavior differs from {@link Math#min} and {@link Math#max}, which return NaN
  * if any argument is NaN.</p>
  * 
- * <p>Example usage:</p>
+ * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * // Standard Math.min returns NaN if any argument is NaN
  * double result1 = Math.min(5.0, Double.NaN); // returns NaN
@@ -59,11 +59,11 @@ public final class IEEE754rUtil {
 
     /**
      * Returns the smaller of two float values according to IEEE-754r standard.
-     * 
+     *
      * <p>If one value is NaN and the other is not, the non-NaN value is returned.
      * If both values are NaN, NaN is returned. Otherwise, behaves like {@link Math#min}.</p>
-     * 
-     * <p>Example:</p>
+     *
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * IEEE754rUtil.min(3.0f, 5.0f);        // returns 3.0f
      * IEEE754rUtil.min(Float.NaN, 5.0f);   // returns 5.0f
@@ -74,6 +74,10 @@ public final class IEEE754rUtil {
      * @param a the first value
      * @param b the second value
      * @return the smaller of {@code a} and {@code b} according to IEEE-754r
+     * @see #min(float, float, float)
+     * @see #min(float...)
+     * @see #min(double, double)
+     * @see #max(float, float)
      */
     public static float min(final float a, final float b) {
         if (Float.isNaN(a)) {
@@ -91,7 +95,7 @@ public final class IEEE754rUtil {
      * <p>NaN values are ignored unless all three values are NaN, in which case NaN is returned.
      * This method is equivalent to calling {@code min(min(a, b), c)}.</p>
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * IEEE754rUtil.min(3.0f, 5.0f, 1.0f);  // returns 1.0f
      * IEEE754rUtil.min(Float.NaN, 5.0f, 1.0f); // returns 1.0f
@@ -112,7 +116,7 @@ public final class IEEE754rUtil {
      * <p>NaN values in the array are ignored unless all values are NaN.
      * The array must not be null or empty.</p>
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * float[] values = {3.0f, Float.NaN, 1.0f, 5.0f};
      * float min = IEEE754rUtil.min(values); // returns 1.0f
@@ -139,11 +143,11 @@ public final class IEEE754rUtil {
 
     /**
      * Returns the smaller of two double values according to IEEE-754r standard.
-     * 
+     *
      * <p>If one value is NaN and the other is not, the non-NaN value is returned.
      * If both values are NaN, NaN is returned. Otherwise, behaves like {@link Math#min}.</p>
-     * 
-     * <p>Example:</p>
+     *
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * IEEE754rUtil.min(3.0, 5.0);          // returns 3.0
      * IEEE754rUtil.min(Double.NaN, 5.0);   // returns 5.0
@@ -154,6 +158,10 @@ public final class IEEE754rUtil {
      * @param a the first value
      * @param b the second value
      * @return the smaller of {@code a} and {@code b} according to IEEE-754r
+     * @see #min(double, double, double)
+     * @see #min(double...)
+     * @see #min(float, float)
+     * @see #max(double, double)
      */
     public static double min(final double a, final double b) {
         if (Double.isNaN(a)) {
@@ -171,7 +179,7 @@ public final class IEEE754rUtil {
      * <p>NaN values are ignored unless all three values are NaN, in which case NaN is returned.
      * This method is equivalent to calling {@code min(min(a, b), c)}.</p>
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * IEEE754rUtil.min(3.0, 5.0, 1.0);  // returns 1.0
      * IEEE754rUtil.min(Double.NaN, 5.0, 1.0); // returns 1.0
@@ -192,7 +200,7 @@ public final class IEEE754rUtil {
      * <p>NaN values in the array are ignored unless all values are NaN.
      * The array must not be null or empty.</p>
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * double[] values = {3.0, Double.NaN, 1.0, 5.0};
      * double min = IEEE754rUtil.min(values); // returns 1.0
@@ -219,11 +227,11 @@ public final class IEEE754rUtil {
 
     /**
      * Returns the larger of two float values according to IEEE-754r standard.
-     * 
+     *
      * <p>If one value is NaN and the other is not, the non-NaN value is returned.
      * If both values are NaN, NaN is returned. Otherwise, behaves like {@link Math#max}.</p>
-     * 
-     * <p>Example:</p>
+     *
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * IEEE754rUtil.max(3.0f, 5.0f);        // returns 5.0f
      * IEEE754rUtil.max(Float.NaN, 5.0f);   // returns 5.0f
@@ -234,6 +242,10 @@ public final class IEEE754rUtil {
      * @param a the first value
      * @param b the second value
      * @return the larger of {@code a} and {@code b} according to IEEE-754r
+     * @see #max(float, float, float)
+     * @see #max(float...)
+     * @see #max(double, double)
+     * @see #min(float, float)
      */
     public static float max(final float a, final float b) {
         if (Float.isNaN(a)) {
@@ -251,7 +263,7 @@ public final class IEEE754rUtil {
      * <p>NaN values are ignored unless all three values are NaN, in which case NaN is returned.
      * This method is equivalent to calling {@code max(max(a, b), c)}.</p>
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * IEEE754rUtil.max(3.0f, 5.0f, 1.0f);  // returns 5.0f
      * IEEE754rUtil.max(Float.NaN, 5.0f, 1.0f); // returns 5.0f
@@ -272,7 +284,7 @@ public final class IEEE754rUtil {
      * <p>NaN values in the array are ignored unless all values are NaN.
      * The array must not be null or empty.</p>
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * float[] values = {3.0f, Float.NaN, 1.0f, 5.0f};
      * float max = IEEE754rUtil.max(values); // returns 5.0f
@@ -299,11 +311,11 @@ public final class IEEE754rUtil {
 
     /**
      * Returns the larger of two double values according to IEEE-754r standard.
-     * 
+     *
      * <p>If one value is NaN and the other is not, the non-NaN value is returned.
      * If both values are NaN, NaN is returned. Otherwise, behaves like {@link Math#max}.</p>
-     * 
-     * <p>Example:</p>
+     *
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * IEEE754rUtil.max(3.0, 5.0);          // returns 5.0
      * IEEE754rUtil.max(Double.NaN, 5.0);   // returns 5.0
@@ -314,6 +326,10 @@ public final class IEEE754rUtil {
      * @param a the first value
      * @param b the second value
      * @return the larger of {@code a} and {@code b} according to IEEE-754r
+     * @see #max(double, double, double)
+     * @see #max(double...)
+     * @see #max(float, float)
+     * @see #min(double, double)
      */
     public static double max(final double a, final double b) {
         if (Double.isNaN(a)) {
@@ -331,7 +347,7 @@ public final class IEEE754rUtil {
      * <p>NaN values are ignored unless all three values are NaN, in which case NaN is returned.
      * This method is equivalent to calling {@code max(max(a, b), c)}.</p>
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * IEEE754rUtil.max(3.0, 5.0, 1.0);  // returns 5.0
      * IEEE754rUtil.max(Double.NaN, 5.0, 1.0); // returns 5.0
@@ -352,7 +368,7 @@ public final class IEEE754rUtil {
      * <p>NaN values in the array are ignored unless all values are NaN.
      * The array must not be null or empty.</p>
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * double[] values = {3.0, Double.NaN, 1.0, 5.0};
      * double max = IEEE754rUtil.max(values); // returns 5.0

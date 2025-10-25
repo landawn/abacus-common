@@ -28,7 +28,7 @@ import java.io.Serial;
  *   <li>Stream operations expecting a single element but finding duplicates</li>
  * </ul>
  * 
- * <p>Example usage:</p>
+ * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * // In a DAO method expecting unique result
  * List<User> users = query.getResultList();
@@ -49,7 +49,7 @@ public class DuplicatedResultException extends IllegalStateException {
      * Constructs a new {@code DuplicatedResultException} with no detail message.
      * The cause is not initialized and may subsequently be initialized by a call to {@link #initCause}.
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * throw new DuplicatedResultException();
      * }</pre>
@@ -61,7 +61,7 @@ public class DuplicatedResultException extends IllegalStateException {
      * Constructs a new {@code DuplicatedResultException} with the specified detail message.
      * The cause is not initialized and may subsequently be initialized by a call to {@link #initCause}.
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * throw new DuplicatedResultException("Found 3 records for unique ID: " + id);
      * }</pre>
@@ -79,7 +79,7 @@ public class DuplicatedResultException extends IllegalStateException {
      * <p>Note that the detail message associated with {@code cause} is <i>not</i> automatically
      * incorporated in this exception's detail message.</p>
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * try {
      *     return repository.findUniqueById(id);
@@ -105,7 +105,7 @@ public class DuplicatedResultException extends IllegalStateException {
      * <p>This constructor is useful for exceptions that are little more than wrappers for other
      * throwables.</p>
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * catch (SQLException e) {
      *     throw new DuplicatedResultException(e);

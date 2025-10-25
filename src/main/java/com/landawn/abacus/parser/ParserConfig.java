@@ -29,7 +29,7 @@ import com.landawn.abacus.annotation.MayReturnNull;
  * <p>This class provides functionality for managing ignored properties during
  * parsing operations. Properties can be ignored globally or on a per-class basis.</p>
  * 
- * <p>Example usage:</p>
+ * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * ParserConfig config = new MyParserConfig()
  *     .setIgnoredPropNames(Set.of("password", "internalId"))
@@ -68,7 +68,7 @@ public abstract class ParserConfig<C extends ParserConfig<C>> implements Cloneab
      * are found, it returns the globally ignored properties (those registered
      * for {@code Object.class}).</p>
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Collection<String> ignoredProps = config.getIgnoredPropNames(User.class);
      * if (ignoredProps != null) {
@@ -100,7 +100,7 @@ public abstract class ParserConfig<C extends ParserConfig<C>> implements Cloneab
      * <p>These properties will be ignored during parsing for any class type
      * unless overridden by class-specific settings.</p>
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * config.setIgnoredPropNames(Set.of("internalId", "version", "deleted"));
      * }</pre>
@@ -118,7 +118,7 @@ public abstract class ParserConfig<C extends ParserConfig<C>> implements Cloneab
      * <p>These properties will be ignored during parsing only for the specified
      * class type. This overrides any global settings for this class.</p>
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * config.setIgnoredPropNames(User.class, Set.of("password", "salt"));
      * config.setIgnoredPropNames(Order.class, Set.of("internalNotes"));
@@ -145,7 +145,7 @@ public abstract class ParserConfig<C extends ParserConfig<C>> implements Cloneab
      * provided map. Use {@code Object.class} as a key for globally ignored
      * properties.</p>
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Map<Class<?>, Set<String>> ignoredMap = new HashMap<>();
      * ignoredMap.put(Object.class, Set.of("version"));
@@ -169,7 +169,7 @@ public abstract class ParserConfig<C extends ParserConfig<C>> implements Cloneab
      * shared with the original. Modifications to the configuration itself are
      * independent, but modifications to the property sets affect both instances.</p>
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ParserConfig copy = originalConfig.copy();
      * // copy has the same settings as originalConfig

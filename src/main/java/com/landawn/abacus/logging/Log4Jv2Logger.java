@@ -32,7 +32,7 @@ import org.apache.logging.log4j.spi.ExtendedLogger;
  *   <li>Full support for all logging levels</li>
  * </ul>
  * 
- * <p>Usage example:</p>
+ * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * // Requires Log4j 2 API and Core on classpath with proper configuration
  * Logger logger = new Log4Jv2Logger("com.example.MyClass");

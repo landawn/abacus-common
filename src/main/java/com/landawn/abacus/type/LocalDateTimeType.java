@@ -39,13 +39,12 @@ public class LocalDateTimeType extends AbstractTemporalType<LocalDateTime> {
      * Returns the Class object representing the LocalDateTime type.
      * This method provides type identification for reflection and serialization operations.
      *
-     * <pre>
-     * {@code
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
      * LocalDateTimeType type = new LocalDateTimeType();
      * Class<LocalDateTime> clazz = type.clazz();
      * System.out.println(clazz.getName()); // Outputs: java.time.LocalDateTime
-     * }
-     * </pre>
+     * }</pre>
      *
      * @return The Class object for LocalDateTime
      */
@@ -58,14 +57,13 @@ public class LocalDateTimeType extends AbstractTemporalType<LocalDateTime> {
      * Converts a LocalDateTime object to its string representation.
      * The string format follows the ISO-8601 standard (yyyy-MM-ddTHH:mm:ss).
      *
-     * <pre>
-     * {@code
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
      * LocalDateTimeType type = new LocalDateTimeType();
      * LocalDateTime dateTime = LocalDateTime.of(2021, 1, 1, 10, 30, 0);
      * String str = type.stringOf(dateTime);
      * System.out.println(str); // Outputs: 2021-01-01T10:30:00
-     * }
-     * </pre>
+     * }</pre>
      *
      * @param x The LocalDateTime object to convert
      * @return The string representation of the LocalDateTime, or null if the input is null
@@ -83,8 +81,8 @@ public class LocalDateTimeType extends AbstractTemporalType<LocalDateTime> {
      * If the object is a Number, it is treated as milliseconds since epoch and converted to LocalDateTime using the default zone ID.
      * Otherwise, the object is converted to a string and parsed.
      *
-     * <pre>
-     * {@code
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
      * LocalDateTimeType type = new LocalDateTimeType();
      *
      * // From Number (milliseconds since epoch)
@@ -92,8 +90,7 @@ public class LocalDateTimeType extends AbstractTemporalType<LocalDateTime> {
      *
      * // From String
      * LocalDateTime dt2 = type.valueOf("2021-01-01T10:30:00");
-     * }
-     * </pre>
+     * }</pre>
      *
      * @param obj The object to convert to LocalDateTime
      * @return The LocalDateTime representation of the object, or null if the input is null
@@ -117,8 +114,8 @@ public class LocalDateTimeType extends AbstractTemporalType<LocalDateTime> {
      * - Numeric strings are treated as milliseconds since epoch
      * - ISO-8601 formatted strings are parsed directly
      *
-     * <pre>
-     * {@code
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
      * LocalDateTimeType type = new LocalDateTimeType();
      *
      * // Parse ISO-8601 format
@@ -129,8 +126,7 @@ public class LocalDateTimeType extends AbstractTemporalType<LocalDateTime> {
      *
      * // Get current time
      * LocalDateTime dt3 = type.valueOf("SYS_TIME");
-     * }
-     * </pre>
+     * }</pre>
      *
      * @param str The string to parse
      * @return The parsed LocalDateTime object, or null if the input is null or empty
@@ -164,14 +160,13 @@ public class LocalDateTimeType extends AbstractTemporalType<LocalDateTime> {
      *
      * The character array is first converted to a string, then parsed.
      *
-     * <pre>
-     * {@code
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
      * LocalDateTimeType type = new LocalDateTimeType();
      *
      * char[] chars = "2021-01-01T10:30:00".toCharArray();
      * LocalDateTime dt = type.valueOf(chars, 0, chars.length);
-     * }
-     * </pre>
+     * }</pre>
      *
      * @param cbuf The character array containing the LocalDateTime representation
      * @param offset The starting position in the character array
@@ -196,16 +191,15 @@ public class LocalDateTimeType extends AbstractTemporalType<LocalDateTime> {
      * First attempts to get the value as a LocalDateTime object directly. If that fails,
      * falls back to retrieving it as a Timestamp and converting it.
      *
-     * <pre>
-     * {@code
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
      * LocalDateTimeType type = new LocalDateTimeType();
      * try (ResultSet rs = stmt.executeQuery()) {
      *     if (rs.next()) {
      *         LocalDateTime dt = type.get(rs, 1);
      *     }
      * }
-     * }
-     * </pre>
+     * }</pre>
      *
      * @param rs The ResultSet containing the data
      * @param columnIndex The column index (1-based) to retrieve the value from
@@ -230,16 +224,15 @@ public class LocalDateTimeType extends AbstractTemporalType<LocalDateTime> {
      * First attempts to get the value as a LocalDateTime object directly. If that fails,
      * falls back to retrieving it as a Timestamp and converting it.
      *
-     * <pre>
-     * {@code
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
      * LocalDateTimeType type = new LocalDateTimeType();
      * try (ResultSet rs = stmt.executeQuery()) {
      *     if (rs.next()) {
      *         LocalDateTime dt = type.get(rs, "created_at");
      *     }
      * }
-     * }
-     * </pre>
+     * }</pre>
      *
      * @param rs The ResultSet containing the data
      * @param columnName The name of the column to retrieve the value from
@@ -265,16 +258,15 @@ public class LocalDateTimeType extends AbstractTemporalType<LocalDateTime> {
      * First attempts to set the value as a LocalDateTime object directly. If that fails,
      * falls back to setting it as a Timestamp.
      *
-     * <pre>
-     * {@code
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
      * LocalDateTimeType type = new LocalDateTimeType();
      * LocalDateTime dt = LocalDateTime.now();
      * try (PreparedStatement stmt = conn.prepareStatement("INSERT INTO events (timestamp) VALUES (?)")) {
      *     type.set(stmt, 1, dt);
      *     stmt.executeUpdate();
      * }
-     * }
-     * </pre>
+     * }</pre>
      *
      * @param stmt The PreparedStatement to set the parameter on
      * @param columnIndex The parameter index (1-based) to set
@@ -298,16 +290,15 @@ public class LocalDateTimeType extends AbstractTemporalType<LocalDateTime> {
      * First attempts to set the value as a LocalDateTime object directly. If that fails,
      * falls back to setting it as a Timestamp.
      *
-     * <pre>
-     * {@code
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
      * LocalDateTimeType type = new LocalDateTimeType();
      * LocalDateTime dt = LocalDateTime.now();
      * try (CallableStatement stmt = conn.prepareCall("{call log_event(?)}")) {
      *     type.set(stmt, "event_time", dt);
      *     stmt.execute();
      * }
-     * }
-     * </pre>
+     * }</pre>
      *
      * @param stmt The CallableStatement to set the parameter on
      * @param columnName The name of the parameter to set

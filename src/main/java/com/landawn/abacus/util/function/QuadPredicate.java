@@ -45,7 +45,7 @@ public interface QuadPredicate<A, B, C, D> extends Throwables.QuadPredicate<A, B
      * represented by this predicate. It should return {@code true} if the input
      * arguments match the predicate's criteria, {@code false} otherwise.
      *
-     * <p>Example usage:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * QuadPredicate<Integer, Integer, Integer, Integer> allPositive = 
      *     (a, b, c, d) -> a > 0 && b > 0 && c > 0 && d > 0;
@@ -69,8 +69,7 @@ public interface QuadPredicate<A, B, C, D> extends Throwables.QuadPredicate<A, B
      * @param c the third input argument
      * @param d the fourth input argument
      * @return {@code true} if the input arguments match the predicate,
-     *         otherwise {@code false}
-     * @throws RuntimeException if the predicate evaluation fails
+     *         otherwise {@code false} if the predicate evaluation fails
      */
     @Override
     boolean test(A a, B b, C c, D d);
@@ -82,7 +81,7 @@ public interface QuadPredicate<A, B, C, D> extends Throwables.QuadPredicate<A, B
      * {@code false}, and vice versa. This is useful for inverting complex conditions
      * without having to rewrite the logic.
      *
-     * <p>Example usage:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * QuadPredicate<Integer, Integer, Integer, Integer> allPositive = 
      *     (a, b, c, d) -> a > 0 && b > 0 && c > 0 && d > 0;
@@ -108,7 +107,7 @@ public interface QuadPredicate<A, B, C, D> extends Throwables.QuadPredicate<A, B
      * to the caller; if evaluation of this predicate throws an exception, the
      * {@code other} predicate will not be evaluated.
      *
-     * <p>Example usage:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * QuadPredicate<User, Product, Integer, Double> hasBalance = 
      *     (user, product, quantity, discount) -> 
@@ -140,7 +139,7 @@ public interface QuadPredicate<A, B, C, D> extends Throwables.QuadPredicate<A, B
      * to the caller; if evaluation of this predicate throws an exception, the
      * {@code other} predicate will not be evaluated.
      *
-     * <p>Example usage:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * QuadPredicate<User, Product, Integer, Double> isPremiumUser = 
      *     (user, product, quantity, discount) -> user.isPremium();

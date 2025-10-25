@@ -42,7 +42,7 @@ public interface ObjDoublePredicate<T> extends Throwables.ObjDoublePredicate<T, 
      * condition represented by this predicate. It should return {@code true} if
      * the input arguments match the predicate's criteria, {@code false} otherwise.
      *
-     * <p>Example usage:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ObjDoublePredicate<Product> isPriceAbove = (product, threshold) -> 
      *     product.getPrice() > threshold;
@@ -52,8 +52,7 @@ public interface ObjDoublePredicate<T> extends Throwables.ObjDoublePredicate<T, 
      * @param t the first input argument of type T
      * @param u the second input argument, a primitive double value
      * @return {@code true} if the input arguments match the predicate,
-     *         otherwise {@code false}
-     * @throws RuntimeException if the predicate evaluation fails
+     *         otherwise {@code false} if the predicate evaluation fails
      */
     @Override
     boolean test(T t, double u);
@@ -65,7 +64,7 @@ public interface ObjDoublePredicate<T> extends Throwables.ObjDoublePredicate<T, 
      * {@code false}, and vice versa. This is useful for inverting conditions without
      * having to write a new predicate.
      *
-     * <p>Example usage:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ObjDoublePredicate<Product> isPriceAbove = (product, threshold) -> 
      *     product.getPrice() > threshold;
@@ -89,7 +88,7 @@ public interface ObjDoublePredicate<T> extends Throwables.ObjDoublePredicate<T, 
      * to the caller; if evaluation of this predicate throws an exception, the
      * {@code other} predicate will not be evaluated.
      *
-     * <p>Example usage:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ObjDoublePredicate<Product> isPriceInRange = (product, max) -> 
      *     product.getPrice() >= 0 && product.getPrice() <= max;
@@ -118,7 +117,7 @@ public interface ObjDoublePredicate<T> extends Throwables.ObjDoublePredicate<T, 
      * to the caller; if evaluation of this predicate throws an exception, the
      * {@code other} predicate will not be evaluated.
      *
-     * <p>Example usage:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ObjDoublePredicate<Product> isCheap = (product, threshold) -> 
      *     product.getPrice() < threshold;

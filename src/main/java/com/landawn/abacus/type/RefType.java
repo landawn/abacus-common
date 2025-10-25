@@ -31,7 +31,7 @@ public class RefType extends AbstractType<Ref> {
     /**
      * Returns the Class object representing the SQL Ref type.
      *
-     * <p>Usage example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * RefType type = new RefType();
      * Class<Ref> clazz = type.clazz();
@@ -49,7 +49,7 @@ public class RefType extends AbstractType<Ref> {
      * Indicates whether this type is serializable.
      * SQL Ref types are not serializable as they represent database references.
      *
-     * <p>Usage example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * RefType type = new RefType();
      * boolean serializable = type.isSerializable();
@@ -68,7 +68,7 @@ public class RefType extends AbstractType<Ref> {
      * This operation is not supported for SQL Ref types as they represent
      * database-specific references that cannot be meaningfully serialized to string.
      *
-     * <p>Usage example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * RefType type = new RefType();
      * Ref ref = ...; // some SQL Ref from database
@@ -93,7 +93,7 @@ public class RefType extends AbstractType<Ref> {
      * This operation is not supported for SQL Ref types as they represent
      * database-specific references that cannot be created from string.
      *
-     * <p>Usage example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * RefType type = new RefType();
      * try {
@@ -116,7 +116,7 @@ public class RefType extends AbstractType<Ref> {
      * Retrieves a SQL REF value from the specified column in the ResultSet.
      * A REF value represents a reference to an SQL structured type value in the database.
      *
-     * <p>Usage example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * RefType type = new RefType();
      * // Assuming rs is a ResultSet with a REF value in column 1
@@ -141,7 +141,7 @@ public class RefType extends AbstractType<Ref> {
      * Retrieves a SQL REF value from the specified column in the ResultSet.
      * A REF value represents a reference to an SQL structured type value in the database.
      *
-     * <p>Usage example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * RefType type = new RefType();
      * // Assuming rs is a ResultSet with a REF value in column "object_ref"
@@ -166,7 +166,7 @@ public class RefType extends AbstractType<Ref> {
      * Sets a Ref parameter in a PreparedStatement.
      * The Ref represents a reference to an SQL structured type value in the database.
      *
-     * <p>Usage example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * RefType type = new RefType();
      * PreparedStatement stmt = connection.prepareStatement("UPDATE table SET object_ref = ? WHERE id = ?");
@@ -191,7 +191,7 @@ public class RefType extends AbstractType<Ref> {
      * The Ref represents a reference to an SQL structured type value in the database.
      * Note: This method uses setObject instead of setRef as CallableStatement may not support setRef with parameter names.
      *
-     * <p>Usage example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * RefType type = new RefType();
      * CallableStatement stmt = connection.prepareCall("{call update_ref(?, ?)}");

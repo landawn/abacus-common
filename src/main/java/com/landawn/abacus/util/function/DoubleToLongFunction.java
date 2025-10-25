@@ -55,8 +55,7 @@ public interface DoubleToLongFunction extends Throwables.DoubleToLongFunction<Ru
      * </ul>
      * 
      * @param value the double value to be converted to long
-     * @return the long result of applying this function to the input value
-     * @throws RuntimeException if the function implementation encounters an error during conversion
+     * @return the long result of applying this function to the input value if the function implementation encounters an error during conversion
      */
     @Override
     long applyAsLong(double value);

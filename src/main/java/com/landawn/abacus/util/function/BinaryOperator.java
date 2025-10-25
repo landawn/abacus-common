@@ -35,6 +35,12 @@ public interface BinaryOperator<T> extends BiFunction<T, T, T>, Throwables.Binar
      * Converts this {@code BinaryOperator} to a {@code Throwables.BinaryOperator} that can throw a checked exception.
      * This method provides a way to use this operator in contexts that require explicit exception handling.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * BinaryOperator<String> concatenator = (s1, s2) -> s1 + s2;
+     * Throwables.BinaryOperator<String, IOException> throwableOp = concatenator.toThrowable();
+     * }</pre>
+     *
      * @param <E> the type of exception that the returned operator can throw
      * @return a {@code Throwables.BinaryOperator} view of this operator that can throw exceptions of type {@code E}
      */

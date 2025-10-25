@@ -23,7 +23,7 @@ package com.landawn.abacus.util;
  * <p>This class extends {@link AbstractIndexed} and provides factory methods for creating
  * instances with validated non-negative indices.</p>
  * 
- * <p>Example usage:</p>
+ * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * IndexedChar ic = IndexedChar.of('A', 0);
  * System.out.println(ic.value()); // prints: A
@@ -44,7 +44,7 @@ public final class IndexedChar extends AbstractIndexed {
     /**
      * Creates a new {@code IndexedChar} instance with the specified value and index.
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * IndexedChar indexed = IndexedChar.of('X', 5);
      * }</pre>
@@ -65,7 +65,7 @@ public final class IndexedChar extends AbstractIndexed {
      * This method is useful when working with large strings or character sequences where
      * the index might exceed the range of an int.
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * IndexedChar indexed = IndexedChar.of('Z', 1000000000L);
      * }</pre>

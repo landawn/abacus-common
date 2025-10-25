@@ -44,7 +44,7 @@ public interface ObjLongConsumer<T> extends Throwables.ObjLongConsumer<T, Runtim
      * timestamp operations, ID assignments, size or count updates, or any operation
      * where a long parameter modifies the state of an object.
      *
-     * <p>Example usage:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ObjLongConsumer<Event> setTimestamp = (event, timestamp) -> 
      *     event.setTimestamp(timestamp);
@@ -56,8 +56,7 @@ public interface ObjLongConsumer<T> extends Throwables.ObjLongConsumer<T, Runtim
      * }</pre>
      *
      * @param t the first input argument of type T
-     * @param value the second input argument, a primitive long value
-     * @throws RuntimeException if the operation cannot be completed
+     * @param value the second input argument, a primitive long value if the operation cannot be completed
      */
     @Override
     void accept(T t, long value);
@@ -73,7 +72,7 @@ public interface ObjLongConsumer<T> extends Throwables.ObjLongConsumer<T, Runtim
      * consumer receives the same input arguments. This is useful for performing
      * multiple independent operations on the same data.
      *
-     * <p>Example usage:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ObjLongConsumer<Logger> logTimestamp = (logger, timestamp) -> 
      *     logger.log("Timestamp: " + timestamp);

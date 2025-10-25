@@ -51,7 +51,7 @@ import com.landawn.abacus.util.stream.Stream;
  *   <li>Support for indexed iteration</li>
  * </ul>
  * 
- * <p>Example usage:</p>
+ * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * // Create an iterator from an array
  * ObjIterator<String> iter = ObjIterator.of("a", "b", "c", "d");
@@ -111,7 +111,7 @@ public abstract class ObjIterator<T> extends ImmutableIterator<T> {
     /**
      * Returns an ObjIterator containing a single element.
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ObjIterator<String> single = ObjIterator.just("Hello");
      * single.next(); // Returns "Hello"
@@ -148,7 +148,7 @@ public abstract class ObjIterator<T> extends ImmutableIterator<T> {
      * Returns an ObjIterator over the specified array.
      * The iterator will traverse all elements in the array in order.
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String[] array = {"one", "two", "three"};
      * ObjIterator<String> iter = ObjIterator.of(array);
@@ -170,7 +170,7 @@ public abstract class ObjIterator<T> extends ImmutableIterator<T> {
      * Returns an ObjIterator over a portion of the specified array.
      * The iterator will traverse elements from fromIndex (inclusive) to toIndex (exclusive).
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Integer[] numbers = {1, 2, 3, 4, 5};
      * ObjIterator<Integer> iter = ObjIterator.of(numbers, 1, 4);
@@ -276,7 +276,7 @@ public abstract class ObjIterator<T> extends ImmutableIterator<T> {
      * Returns an ObjIterator over the elements in the specified Iterable.
      * If the Iterable is null, returns an empty ObjIterator.
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * List<String> list = Arrays.asList("a", "b", "c");
      * ObjIterator<String> iter = ObjIterator.of(list);
@@ -294,7 +294,7 @@ public abstract class ObjIterator<T> extends ImmutableIterator<T> {
      * Returns an ObjIterator that defers creation of the underlying iterator
      * until the first method call. This is useful for lazy initialization.
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ObjIterator<String> lazy = ObjIterator.defer(() -> {
      *     System.out.println("Creating iterator");
@@ -346,7 +346,7 @@ public abstract class ObjIterator<T> extends ImmutableIterator<T> {
      * Returns an infinite ObjIterator that generates elements using the provided supplier.
      * The iterator will never return false from hasNext().
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Random random = new Random();
      * ObjIterator<Integer> randomNumbers = ObjIterator.generate(random::nextInt);
@@ -379,7 +379,7 @@ public abstract class ObjIterator<T> extends ImmutableIterator<T> {
      * Returns an ObjIterator that generates elements while the hasNext condition is true.
      * This allows for finite generated sequences.
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * int[] counter = {0};
      * ObjIterator<Integer> counting = ObjIterator.generate(
@@ -420,11 +420,11 @@ public abstract class ObjIterator<T> extends ImmutableIterator<T> {
      * Returns an ObjIterator that generates elements using stateful generation.
      * The initial value is passed to predicates and functions for state-based generation.
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Generate Fibonacci numbers
      * ObjIterator<Integer> fib = ObjIterator.generate(
-     *     new int[]{0, 1},                     // initial state
+     *     new int[] {0, 1},                     // initial state
      *     state -> state[1] < 100,             // continue while < 100
      *     state -> {                           // generate next
      *         int next = state[0] + state[1];
@@ -469,7 +469,7 @@ public abstract class ObjIterator<T> extends ImmutableIterator<T> {
      * Returns an ObjIterator that generates elements using both state and the previously generated value.
      * This allows for complex stateful generation patterns.
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Generate a sequence where each element depends on the previous
      * ObjIterator<String> iter = ObjIterator.generate(
@@ -517,7 +517,7 @@ public abstract class ObjIterator<T> extends ImmutableIterator<T> {
      * If n is greater than or equal to the number of remaining elements,
      * the returned iterator will be empty.
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ObjIterator<Integer> iter = ObjIterator.of(1, 2, 3, 4, 5);
      * ObjIterator<Integer> skipped = iter.skip(2);
@@ -576,7 +576,7 @@ public abstract class ObjIterator<T> extends ImmutableIterator<T> {
      * If count is greater than the number of remaining elements,
      * returns all remaining elements.
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ObjIterator<String> iter = ObjIterator.of("a", "b", "c", "d", "e");
      * ObjIterator<String> limited = iter.limit(3);
@@ -622,7 +622,7 @@ public abstract class ObjIterator<T> extends ImmutableIterator<T> {
      * 
      * <p>This is equivalent to calling skip(offset).limit(count) but may be more efficient.</p>
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ObjIterator<Integer> iter = ObjIterator.of(1, 2, 3, 4, 5, 6, 7);
      * ObjIterator<Integer> sliced = iter.skipAndLimit(2, 3);
@@ -642,7 +642,7 @@ public abstract class ObjIterator<T> extends ImmutableIterator<T> {
      * Returns a new ObjIterator that yields only elements matching the given predicate.
      * This is a lazy operation - the predicate is applied as elements are requested.
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ObjIterator<Integer> numbers = ObjIterator.of(1, 2, 3, 4, 5, 6);
      * ObjIterator<Integer> evens = numbers.filter(n -> n % 2 == 0);
@@ -660,7 +660,7 @@ public abstract class ObjIterator<T> extends ImmutableIterator<T> {
      * Returns a new ObjIterator that transforms each element using the provided mapping function.
      * This is a lazy operation - the function is applied as elements are requested.
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ObjIterator<String> words = ObjIterator.of("hello", "world");
      * ObjIterator<Integer> lengths = words.map(String::length);
@@ -681,7 +681,7 @@ public abstract class ObjIterator<T> extends ImmutableIterator<T> {
      * Elements are considered distinct based on their natural equality (equals method).
      * The first occurrence of each element is retained.
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ObjIterator<String> iter = ObjIterator.of("a", "b", "a", "c", "b");
      * ObjIterator<String> distinct = iter.distinct();
@@ -700,7 +700,7 @@ public abstract class ObjIterator<T> extends ImmutableIterator<T> {
      * Elements are considered distinct based on the keys extracted by the function.
      * The first element with each distinct key is retained.
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * class Person {
      *     String name;
@@ -730,7 +730,7 @@ public abstract class ObjIterator<T> extends ImmutableIterator<T> {
      * If the iterator is empty, returns an empty Nullable.
      * This operation consumes the first element if present.
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ObjIterator<String> iter = ObjIterator.of("first", "second");
      * Nullable<String> first = iter.first(); // Nullable.of("first")
@@ -754,7 +754,7 @@ public abstract class ObjIterator<T> extends ImmutableIterator<T> {
      * If no non-null element is found, returns an empty Optional.
      * This operation may consume multiple elements until a non-null element is found.
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ObjIterator<String> iter = ObjIterator.of(null, null, "found", "next");
      * Optional<String> first = iter.firstNonNull(); // Optional.of("found")
@@ -781,7 +781,7 @@ public abstract class ObjIterator<T> extends ImmutableIterator<T> {
      * If the iterator is empty, returns an empty Nullable.
      * This operation consumes all remaining elements.
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ObjIterator<Integer> iter = ObjIterator.of(1, 2, 3, 4);
      * Nullable<Integer> last = iter.last(); // Nullable.of(4)
@@ -807,7 +807,7 @@ public abstract class ObjIterator<T> extends ImmutableIterator<T> {
      * Returns a new ObjIterator that skips null elements.
      * Only non-null elements will be returned by the resulting iterator.
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ObjIterator<String> iter = ObjIterator.of("a", null, "b", null, "c");
      * ObjIterator<String> nonNulls = iter.skipNulls();
@@ -836,7 +836,7 @@ public abstract class ObjIterator<T> extends ImmutableIterator<T> {
      * array of the same type is allocated.
      * This operation consumes all remaining elements.
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ObjIterator<String> iter = ObjIterator.of("a", "b", "c");
      * String[] array = iter.toArray(new String[0]); // {"a", "b", "c"}
@@ -855,7 +855,7 @@ public abstract class ObjIterator<T> extends ImmutableIterator<T> {
      * This operation consumes all remaining elements.
      * The returned list is mutable and can be modified.
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ObjIterator<Integer> iter = ObjIterator.of(1, 2, 3);
      * List<Integer> list = iter.toList(); // [1, 2, 3]
@@ -878,7 +878,7 @@ public abstract class ObjIterator<T> extends ImmutableIterator<T> {
      * This operation creates a new Stream that will consume elements from this iterator.
      * The iterator should not be used after calling this method.
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ObjIterator<String> iter = ObjIterator.of("a", "b", "c");
      * long count = iter.stream()
@@ -896,7 +896,7 @@ public abstract class ObjIterator<T> extends ImmutableIterator<T> {
      * Returns a new ObjIterator where each element is paired with its index.
      * The index starts from 0 and increments for each element.
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ObjIterator<String> iter = ObjIterator.of("a", "b", "c");
      * ObjIterator<Indexed<String>> indexed = iter.indexed();
@@ -914,7 +914,7 @@ public abstract class ObjIterator<T> extends ImmutableIterator<T> {
      * Returns a new ObjIterator where each element is paired with its index,
      * starting from the specified start index.
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ObjIterator<String> iter = ObjIterator.of("a", "b", "c");
      * ObjIterator<Indexed<String>> indexed = iter.indexed(10);
@@ -952,7 +952,7 @@ public abstract class ObjIterator<T> extends ImmutableIterator<T> {
      * Performs the given action for each remaining element in this iterator.
      * This is a terminal operation that consumes all remaining elements.
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ObjIterator<String> iter = ObjIterator.of("a", "b", "c");
      * iter.foreachRemaining(System.out::println);
@@ -980,7 +980,7 @@ public abstract class ObjIterator<T> extends ImmutableIterator<T> {
      * and its index to the action. The index starts from 0.
      * This is a terminal operation that consumes all remaining elements.
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ObjIterator<String> iter = ObjIterator.of("a", "b", "c");
      * iter.foreachIndexed((index, value) -> 

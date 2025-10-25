@@ -30,7 +30,8 @@ public class BooleanBiConsumer2025Test extends TestBase {
     public void testAcceptWithLambda() {
         AtomicInteger counter = new AtomicInteger(0);
         BooleanBiConsumer consumer = (t, u) -> {
-            if (t && u) counter.incrementAndGet();
+            if (t && u)
+                counter.incrementAndGet();
         };
 
         consumer.accept(true, true);
@@ -98,7 +99,7 @@ public class BooleanBiConsumer2025Test extends TestBase {
         BooleanBiConsumer chainedConsumer = consumer1.andThen(consumer2);
 
         assertThrows(RuntimeException.class, () -> chainedConsumer.accept(true, false));
-        assertEquals(1, results.size());  // First consumer should have executed
+        assertEquals(1, results.size()); // First consumer should have executed
     }
 
     @Test
@@ -149,17 +150,21 @@ public class BooleanBiConsumer2025Test extends TestBase {
         AtomicInteger falseCount = new AtomicInteger(0);
 
         BooleanBiConsumer consumer = (t, u) -> {
-            if (t) trueCount.incrementAndGet();
-            if (u) trueCount.incrementAndGet();
-            if (!t) falseCount.incrementAndGet();
-            if (!u) falseCount.incrementAndGet();
+            if (t)
+                trueCount.incrementAndGet();
+            if (u)
+                trueCount.incrementAndGet();
+            if (!t)
+                falseCount.incrementAndGet();
+            if (!u)
+                falseCount.incrementAndGet();
         };
 
         consumer.accept(true, false);
         consumer.accept(true, true);
         consumer.accept(false, false);
 
-        assertEquals(3, trueCount.get());   // true,true,true from the three calls
-        assertEquals(3, falseCount.get());  // false,false,false from the three calls
+        assertEquals(3, trueCount.get()); // true,true,true from the three calls
+        assertEquals(3, falseCount.get()); // false,false,false from the three calls
     }
 }

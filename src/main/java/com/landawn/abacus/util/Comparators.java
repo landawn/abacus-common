@@ -315,7 +315,7 @@ public final class Comparators {
      * Null values are considered less than non-null values (nulls first).
      * This method is equivalent to {@link #nullsFirst()}.
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * List<String> list = Arrays.asList("banana", null, "apple", "cherry");
      * list.sort(Comparators.naturalOrder());
@@ -337,7 +337,7 @@ public final class Comparators {
      * with null values considered less than non-null values.
      * This method is equivalent to {@link #naturalOrder()}.
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * List<Integer> list = Arrays.asList(3, null, 1, 4, null, 2);
      * list.sort(Comparators.nullsFirst());
@@ -345,7 +345,7 @@ public final class Comparators {
      * }</pre>
      *
      * @param <T> the type of the objects being compared, must extend Comparable
-     * @return a comparator that treats null as the minimum value
+     * @return a comparator that considers null less than non-null values, comparing non-null values in natural order
      * @see #naturalOrder()
      * @see #nullsLast()
      */
@@ -358,7 +358,7 @@ public final class Comparators {
      * Returns a comparator that considers null values to be less than non-null values.
      * When both values are non-null, the specified comparator is used for comparison.
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Comparator<String> lengthComparator = Comparator.comparingInt(String::length);
      * List<String> list = Arrays.asList("long", null, "a", "medium");
@@ -368,7 +368,7 @@ public final class Comparators {
      *
      * @param <T> the type of the objects being compared
      * @param cmp the comparator to use for non-null values, may be null
-     * @return a comparator that handles null values as less than non-null values
+     * @return a comparator that considers null less than non-null values, comparing non-null values using the specified comparator
      */
     public static <T> Comparator<T> nullsFirst(final Comparator<T> cmp) {
         if (cmp == null || cmp == NULL_FIRST_COMPARATOR) { // NOSONAR
@@ -383,7 +383,7 @@ public final class Comparators {
      * The extracted keys are compared using natural ordering with null keys considered less than non-null keys.
      * This is a convenience method that combines key extraction with null-safe natural ordering comparison.
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * class Person {
      *     String name;
@@ -416,7 +416,7 @@ public final class Comparators {
      * but treats all non-null values as equal. This is useful when you only want to
      * separate null from non-null values without ordering the non-null values.
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * List<String> list = Arrays.asList("b", null, "a", null, "c");
      * list.sort(Comparators.nullsFirstOrElseEqual());
@@ -437,7 +437,7 @@ public final class Comparators {
      * Returns a comparator that compares {@link Comparable} objects in their natural order
      * with null values considered greater than non-null values.
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * List<String> list = Arrays.asList("banana", null, "apple", "cherry");
      * list.sort(Comparators.nullsLast());
@@ -445,7 +445,7 @@ public final class Comparators {
      * }</pre>
      *
      * @param <T> the type of the objects being compared, must extend Comparable
-     * @return a comparator that treats null as the maximum value
+     * @return a comparator that considers null greater than non-null values, comparing non-null values in natural order
      * @see #nullsFirst()
      */
     @SuppressWarnings("rawtypes")
@@ -457,7 +457,7 @@ public final class Comparators {
      * Returns a comparator that considers null values to be greater than non-null values.
      * When both values are non-null, the specified comparator is used for comparison.
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Comparator<String> reverseComparator = Comparator.reverseOrder();
      * List<String> list = Arrays.asList("b", null, "a", "c");
@@ -467,7 +467,7 @@ public final class Comparators {
      *
      * @param <T> the type of the objects being compared
      * @param cmp the comparator to use for non-null values, may be null
-     * @return a comparator that handles null values as greater than non-null values
+     * @return a comparator that considers null greater than non-null values, comparing non-null values using the specified comparator
      */
     public static <T> Comparator<T> nullsLast(final Comparator<T> cmp) {
         if (cmp == null || cmp == NULL_LAST_COMPARATOR) { // NOSONAR
@@ -485,7 +485,7 @@ public final class Comparators {
      * The extracted keys are compared using natural ordering with null keys considered greater than non-null keys.
      * This is a convenience method that combines key extraction with null-safe natural ordering comparison.
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * class Product {
      *     String name;
@@ -515,7 +515,7 @@ public final class Comparators {
      * but treats all non-null values as equal. This is useful when you only want to
      * separate null from non-null values without ordering the non-null values.
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * List<String> list = Arrays.asList("b", null, "a", null, "c");
      * list.sort(Comparators.nullsLastOrElseEqual());
@@ -537,7 +537,7 @@ public final class Comparators {
      * present optionals. When both optionals are present, their values are compared using
      * their natural ordering.
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * List<Optional<String>> list = Arrays.asList(
      *     Optional.of("b"), Optional.empty(), Optional.of("a")
@@ -548,10 +548,10 @@ public final class Comparators {
      *
      * @param <T> the type of the optional value, must extend Comparable
      * @return a comparator that treats empty optionals as less than present optionals
-     * @throws IllegalArgumentException if unable to create the comparator
      * @see #emptiesLast()
+     * @see #emptiesFirst(Comparator)
      */
-    public static <T extends Comparable<? super T>> Comparator<u.Optional<T>> emptiesFirst() throws IllegalArgumentException {
+    public static <T extends Comparable<? super T>> Comparator<u.Optional<T>> emptiesFirst() {
         return emptiesFirst(naturalOrder());
     }
 
@@ -560,7 +560,7 @@ public final class Comparators {
      * present optionals. When both optionals are present, their values are compared using
      * the specified comparator. Null optionals are treated the same as empty optionals.
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Comparator<String> lengthComparator = Comparator.comparingInt(String::length);
      * List<Optional<String>> list = Arrays.asList(
@@ -588,7 +588,7 @@ public final class Comparators {
      * present optionals. When both optionals are present, their values are compared using
      * their natural ordering.
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * List<Optional<Integer>> list = Arrays.asList(
      *     Optional.of(2), Optional.empty(), Optional.of(1)
@@ -599,10 +599,10 @@ public final class Comparators {
      *
      * @param <T> the type of the optional value, must extend Comparable
      * @return a comparator that treats empty optionals as greater than present optionals
-     * @throws IllegalArgumentException if unable to create the comparator
      * @see #emptiesFirst()
+     * @see #emptiesLast(Comparator)
      */
-    public static <T extends Comparable<? super T>> Comparator<u.Optional<T>> emptiesLast() throws IllegalArgumentException {
+    public static <T extends Comparable<? super T>> Comparator<u.Optional<T>> emptiesLast() {
         return emptiesLast(naturalOrder());
     }
 
@@ -611,7 +611,7 @@ public final class Comparators {
      * present optionals. When both optionals are present, their values are compared using
      * the specified comparator. Null optionals are treated the same as empty optionals.
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Comparator<String> reverseComparator = Comparator.reverseOrder();
      * List<Optional<String>> list = Arrays.asList(
@@ -639,7 +639,7 @@ public final class Comparators {
      * The extracted keys are compared using natural ordering. This method treats null keys as the minimum value
      * (equivalent to using nullsFirst for the key comparison).
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * class Person {
      *     String name;
@@ -674,7 +674,7 @@ public final class Comparators {
      * <p>This method is useful when you want to handle null objects specially while still comparing
      * their extracted keys with null-safe natural ordering.</p>
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * List<Person> people = Arrays.asList(
      *     new Person("Alice", 30),
@@ -712,7 +712,7 @@ public final class Comparators {
      * <p>This method is useful when you want to handle null objects specially while still comparing
      * their extracted keys with null-safe natural ordering.</p>
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * List<Person> people = Arrays.asList(
      *     new Person("Alice", 30),
@@ -747,7 +747,7 @@ public final class Comparators {
      * and comparing the keys with the specified comparator. This provides full control over
      * both the key extraction and the comparison logic.
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * class Person {
      *     String name;
@@ -784,7 +784,7 @@ public final class Comparators {
      * and comparing the keys with the specified comparator, but only for non-null objects.
      * If either object being compared is null, it is treated as less than any non-null object.
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Comparator<LocalDate> dateComparator = Comparator.naturalOrder();
      * List<Event> events = Arrays.asList(
@@ -817,7 +817,7 @@ public final class Comparators {
      * and comparing the keys with the specified comparator, but only for non-null objects.
      * If either object being compared is null, it is treated as greater than any non-null object.
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Comparator<BigDecimal> priceComparator = Comparator.reverseOrder();
      * List<Product> products = Arrays.asList(
@@ -847,9 +847,9 @@ public final class Comparators {
 
     /**
      * Returns a comparator that compares objects by extracting a boolean value using the provided function.
-     * In the comparison, {@code false} is considered less than true.
+     * Boolean values are compared with {@code false} considered less than {@code true}.
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * class Task {
      *     String name;
@@ -873,9 +873,10 @@ public final class Comparators {
 
     /**
      * Returns a comparator that compares objects by extracting a char value using the provided function.
-     * Characters are compared by their numeric values.
+     * Characters are compared by their numeric (Unicode code point) values.
+     * This method delegates to {@link Comparator#comparingInt(ToIntFunction)}.
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * class Grade {
      *     String student;
@@ -899,9 +900,10 @@ public final class Comparators {
 
     /**
      * Returns a comparator that compares objects by extracting a byte value using the provided function.
-     * Bytes are compared as signed values.
+     * Byte values are compared as signed values.
+     * This method delegates to {@link Comparator#comparingInt(ToIntFunction)}.
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * class Packet {
      *     byte priority;
@@ -925,9 +927,10 @@ public final class Comparators {
 
     /**
      * Returns a comparator that compares objects by extracting a short value using the provided function.
-     * Shorts are compared as signed values.
+     * Short values are compared as signed values.
+     * This method delegates to {@link Comparator#comparingInt(ToIntFunction)}.
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * class Product {
      *     String name;
@@ -951,9 +954,10 @@ public final class Comparators {
 
     /**
      * Returns a comparator that compares objects by extracting an int value using the provided function.
-     * This is a convenience method that delegates to {@link Comparator#comparingInt(ToIntFunction)}.
+     * Integer values are compared as signed values.
+     * This method delegates to {@link Comparator#comparingInt(ToIntFunction)}.
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * class Person {
      *     String name;
@@ -977,9 +981,10 @@ public final class Comparators {
 
     /**
      * Returns a comparator that compares objects by extracting a long value using the provided function.
-     * This is a convenience method that delegates to {@link Comparator#comparingLong(ToLongFunction)}.
+     * Long values are compared as signed values.
+     * This method delegates to {@link Comparator#comparingLong(ToLongFunction)}.
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * class File {
      *     String name;
@@ -1003,9 +1008,9 @@ public final class Comparators {
 
     /**
      * Returns a comparator that compares objects by extracting a float value using the provided function.
-     * Floats are compared using {@link Float#compare(float, float)} to properly handle NaN and -0.0f.
+     * Float values are compared using {@link Float#compare(float, float)} to properly handle NaN and -0.0f.
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * class Measurement {
      *     String name;
@@ -1013,7 +1018,7 @@ public final class Comparators {
      * }
      * List<Measurement> measurements = ...;
      * measurements.sort(Comparators.comparingFloat(m -> m.value));
-     * // Result: measurements sorted by value
+     * // Result: measurements sorted by value (lowest to highest)
      * }</pre>
      *
      * @param <T> the type of the objects being compared
@@ -1029,10 +1034,10 @@ public final class Comparators {
 
     /**
      * Returns a comparator that compares objects by extracting a double value using the provided function.
-     * This is a convenience method that delegates to {@link Comparator#comparingDouble(ToDoubleFunction)}.
-     * Doubles are compared using {@link Double#compare(double, double)} to properly handle NaN and -0.0.
+     * Double values are compared using {@link Double#compare(double, double)} to properly handle NaN and -0.0.
+     * This method delegates to {@link Comparator#comparingDouble(ToDoubleFunction)}.
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * class Score {
      *     String player;
@@ -1059,7 +1064,7 @@ public final class Comparators {
      * Null values are considered less than non-null values. This comparator
      * uses {@link String#compareToIgnoreCase(String)} for the comparison.
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * List<String> names = Arrays.asList("john", "Alice", null, "BOB");
      * names.sort(Comparators.comparingIgnoreCase());
@@ -1076,7 +1081,7 @@ public final class Comparators {
      * Returns a comparator that compares objects by extracting a String value using the provided function
      * and comparing them ignoring case differences. Null values are considered less than non-null values.
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * class User {
      *     String username;
@@ -1102,7 +1107,7 @@ public final class Comparators {
      * Returns a comparator for {@link Map.Entry} objects that compares entries by their keys
      * using the keys' natural ordering. Keys must implement {@link Comparable}.
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * List<Map.Entry<String, Integer>> entries = map.entrySet().stream()
      *     .collect(Collectors.toList());
@@ -1122,7 +1127,7 @@ public final class Comparators {
      * Returns a comparator for {@link Map.Entry} objects that compares entries by their values
      * using the values' natural ordering. Values must implement {@link Comparable}.
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Map<String, Integer> scores = ...;
      * List<Map.Entry<String, Integer>> sortedScores = scores.entrySet().stream()
@@ -1143,7 +1148,7 @@ public final class Comparators {
      * Returns a comparator for {@link Map.Entry} objects that compares entries by their keys
      * using the specified comparator.
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Comparator<String> lengthComparator = Comparator.comparingInt(String::length);
      * List<Map.Entry<String, Integer>> entries = ...;
@@ -1167,7 +1172,7 @@ public final class Comparators {
      * Returns a comparator for {@link Map.Entry} objects that compares entries by their values
      * using the specified comparator.
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Comparator<Integer> reverseOrder = Comparator.reverseOrder();
      * Map<String, Integer> scores = ...;
@@ -1194,7 +1199,7 @@ public final class Comparators {
      * Null values are treated as having length 0. This comparator can be used with
      * String, StringBuilder, StringBuffer, and other CharSequence implementations.
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * List<String> words = Arrays.asList("short", "a", "medium", "very long string");
      * words.sort(Comparators.comparingByLength());
@@ -1213,12 +1218,12 @@ public final class Comparators {
      * This works with any array type (primitive or object arrays).
      * Null arrays are treated as having length 0.
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * List<int[]> arrays = Arrays.asList(
-     *     new int[]{1, 2, 3},
-     *     new int[]{1},
-     *     new int[]{1, 2, 3, 4, 5}
+     *     new int[] {1, 2, 3},
+     *     new int[] {1},
+     *     new int[] {1, 2, 3, 4, 5}
      * );
      * arrays.sort(Comparators.comparingByArrayLength());
      * // Result: arrays sorted by length: [1], [1,2,3], [1,2,3,4,5]
@@ -1236,7 +1241,7 @@ public final class Comparators {
      * Null collections are treated as having size 0. This works with List, Set,
      * and other Collection implementations.
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * List<List<String>> lists = Arrays.asList(
      *     Arrays.asList("a", "b", "c"),
@@ -1259,7 +1264,7 @@ public final class Comparators {
      * Returns a comparator that compares {@link Map} objects by their size.
      * Null maps are treated as having size 0.
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * List<Map<String, Integer>> maps = Arrays.asList(
      *     Map.of("a", 1, "b", 2, "c", 3),
@@ -1283,7 +1288,7 @@ public final class Comparators {
      * for element-wise comparison. The arrays are compared lexicographically, with shorter
      * arrays considered less than longer arrays when all compared elements are equal.
      *
-     * <p>The comparison process:</p>
+     * <p>The comparison algorithm:</p>
      * <ol>
      *   <li>Empty arrays are considered less than non-empty arrays</li>
      *   <li>Elements are compared in order using the provided comparator</li>
@@ -1291,7 +1296,7 @@ public final class Comparators {
      *   <li>If all compared elements are equal, the shorter array is considered less</li>
      * </ol>
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Comparator<Object[]> cmp = Comparators.comparingObjArray(String.CASE_INSENSITIVE_ORDER);
      * Object[] arr1 = {"apple", "banana"};
@@ -1316,7 +1321,7 @@ public final class Comparators {
      * <p>This method is equivalent to calling {@code comparingArray(Comparator.naturalOrder())}
      * but is type-safe for arrays of Comparable elements.</p>
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String[] arr1 = {"apple", "banana"};
      * String[] arr2 = {"apple", "cherry"};
@@ -1344,7 +1349,7 @@ public final class Comparators {
      *   <li>If all compared elements are equal, the shorter array is considered less</li>
      * </ol>
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Comparator<Integer[]> cmp = Comparators.comparingArray(Integer::compare);
      * Integer[] arr1 = {1, 2, 3};
@@ -1391,7 +1396,7 @@ public final class Comparators {
      * <p>This method is particularly useful for comparing Lists, Sets, or other Collections
      * where element order matters. For Sets, the iteration order depends on the Set implementation.</p>
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * List<Integer> list1 = Arrays.asList(1, 2, 3);
      * List<Integer> list2 = Arrays.asList(1, 2, 4);
@@ -1412,14 +1417,14 @@ public final class Comparators {
      * comparator for element-wise comparison. The collections are compared lexicographically
      * by iterating through their elements in order.
      *
-     * <p>The comparison process:</p>
+     * <p>The comparison algorithm:</p>
      * <ol>
      *   <li>Empty collections are considered less than non-empty collections</li>
      *   <li>Elements are compared in iteration order until a difference is found</li>
      *   <li>If all compared elements are equal, the smaller collection is considered less</li>
      * </ol>
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Comparator<List<String>> cmp = Comparators.comparingCollection(String.CASE_INSENSITIVE_ORDER);
      * List<String> list1 = Arrays.asList("apple", "BANANA");
@@ -1470,7 +1475,7 @@ public final class Comparators {
      * <p>This method works with any Iterable implementation, including custom iterables.
      * The comparison continues until one iterable is exhausted or a difference is found.</p>
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Iterable<String> iter1 = Arrays.asList("apple", "banana");
      * Iterable<String> iter2 = Arrays.asList("apple", "cherry");
@@ -1499,7 +1504,7 @@ public final class Comparators {
      *   <li>If both are exhausted simultaneously with all elements equal, they are equal</li>
      * </ol>
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Comparator<Iterable<Person>> cmp = Comparators.comparingIterable(
      *     Comparator.comparing(Person::getAge)
@@ -1550,7 +1555,7 @@ public final class Comparators {
      * <p><strong>Warning:</strong> This comparator consumes elements from the iterators during
      * comparison. The iterators cannot be reused after comparison.</p>
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Iterator<Integer> iter1 = Arrays.asList(1, 2, 3).iterator();
      * Iterator<Integer> iter2 = Arrays.asList(1, 2, 4).iterator();
@@ -1576,14 +1581,14 @@ public final class Comparators {
      * comparison. The iterators cannot be reused after comparison. Consider using
      * {@link #comparingIterable(Comparator)} if you need to preserve the original data.</p>
      *
-     * <p>The comparison process:</p>
+     * <p>The comparison algorithm:</p>
      * <ol>
      *   <li>Empty iterators are considered less than non-empty iterators</li>
      *   <li>Elements are consumed and compared until a difference is found</li>
      *   <li>If one iterator is exhausted first, it is considered less</li>
      * </ol>
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Iterator<String> iter1 = getDataStream1();
      * Iterator<String> iter2 = getDataStream2();
@@ -1627,10 +1632,10 @@ public final class Comparators {
      * ordering of the keys. The maps are compared by iterating through their key sets in the
      * order returned by the map's key set iterator.
      *
-     * <p>Note: The comparison order depends on the Map implementation. For predictable results,
+     * <p><strong>Note:</strong> The comparison order depends on the Map implementation. For predictable results,
      * use sorted maps (e.g., TreeMap) or maps with consistent iteration order (e.g., LinkedHashMap).</p>
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Map<String, Integer> map1 = new TreeMap<>();
      * map1.put("apple", 1);
@@ -1664,7 +1669,7 @@ public final class Comparators {
      *   <li>If all compared keys are equal, the smaller map is considered less</li>
      * </ol>
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Comparator<Map<String, Integer>> cmp = Comparators.comparingMapByKey(
      *     String.CASE_INSENSITIVE_ORDER
@@ -1714,10 +1719,10 @@ public final class Comparators {
      * ordering of the values. The maps are compared by iterating through their value collections
      * in the order returned by the map's values iterator.
      *
-     * <p>Note: The comparison order depends on the Map implementation and may not be predictable
+     * <p><strong>Note:</strong> The comparison order depends on the Map implementation and may not be predictable
      * for hash-based maps. This comparator is most useful when the iteration order is meaningful.</p>
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Map<String, Integer> scores1 = new LinkedHashMap<>();
      * scores1.put("Alice", 85);
@@ -1747,7 +1752,7 @@ public final class Comparators {
      * <p>This comparator is useful for comparing maps based on their value content rather than
      * their keys. The iteration order of values depends on the Map implementation.</p>
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Comparator<Map<String, Person>> cmp = Comparators.comparingMapByValue(
      *     Comparator.comparing(Person::getAge).thenComparing(Person::getName)
@@ -1801,7 +1806,7 @@ public final class Comparators {
      * which can significantly impact performance. For better performance, use explicit comparators
      * with getter methods or {@link ComparisonBuilder}.</p>
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * List<String> propsToCompare = Arrays.asList("age", "name", "salary");
      * Comparator<Employee> cmp = Comparators.comparingBeanByProps(propsToCompare);
@@ -1834,7 +1839,7 @@ public final class Comparators {
      * null values. Instead, null is considered greater than any non-null value, and when both
      * values are null, they are considered equal.</p>
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * List<Integer> numbers = Arrays.asList(3, 1, null, 4, 1, 5, 9);
      * numbers.sort(Comparators.reverseOrder());
@@ -1867,7 +1872,7 @@ public final class Comparators {
      *   <li>reverseOrder(customComparator) returns reversed custom comparator</li>
      * </ul>
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Comparator<Person> byAge = Comparator.comparing(Person::getAge);
      * Comparator<Person> byAgeReversed = Comparators.reverseOrder(byAge);
@@ -1898,7 +1903,7 @@ public final class Comparators {
      * <p>This is useful when you want to sort items with a boolean property where true
      * values should appear first (since normal boolean ordering places false before true).</p>
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * List<Task> tasks = getTasks();
      * // Sort tasks with completed tasks first
@@ -1923,7 +1928,7 @@ public final class Comparators {
      * Returns a comparator that compares objects by extracting a char key and comparing
      * in reverse order. Characters are compared by their numeric values in descending order.
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * List<Student> students = getStudents();
      * // Sort students by grade in reverse order (Z to A)
@@ -1948,7 +1953,7 @@ public final class Comparators {
      * Returns a comparator that compares objects by extracting a byte key and comparing
      * in reverse order. Bytes are compared numerically in descending order.
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * List<DataPacket> packets = getPackets();
      * // Sort packets by priority byte in reverse order (highest priority first)
@@ -1973,7 +1978,7 @@ public final class Comparators {
      * Returns a comparator that compares objects by extracting a short key and comparing
      * in reverse order. Shorts are compared numerically in descending order.
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * List<Product> products = getProducts();
      * // Sort products by quantity in reverse order (highest quantity first)
@@ -2001,7 +2006,7 @@ public final class Comparators {
      * <p>This is one of the most commonly used reversed comparators, useful for sorting
      * by numeric properties in descending order.</p>
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * List<Employee> employees = getEmployees();
      * // Sort employees by salary in descending order
@@ -2029,7 +2034,7 @@ public final class Comparators {
      * <p>Commonly used for sorting by timestamps, IDs, or large numeric values in
      * descending order.</p>
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * List<Transaction> transactions = getTransactions();
      * // Sort transactions by timestamp (newest first)
@@ -2055,7 +2060,7 @@ public final class Comparators {
      * in reverse order. Floats are compared numerically in descending order, with proper
      * handling of NaN values.
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * List<Product> products = getProducts();
      * // Sort products by rating (highest rated first)
@@ -2081,7 +2086,7 @@ public final class Comparators {
      * in reverse order. Doubles are compared numerically in descending order, with proper
      * handling of NaN values.
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * List<Student> students = getStudents();
      * // Sort students by GPA (highest first)
@@ -2109,7 +2114,7 @@ public final class Comparators {
      *
      * <p>This is a general-purpose method for reversing any Comparable key extraction.</p>
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * List<Person> people = getPeople();
      * // Sort people by name in reverse alphabetical order (Z to A)
@@ -2142,7 +2147,7 @@ public final class Comparators {
      * <p>This method is useful when you need reverse ordering but want to ensure that
      * null objects appear at the beginning of the sorted collection.</p>
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * List<Employee> employees = getEmployees(); // May contain null entries
      * // Sort by salary in descending order, with null employees first
@@ -2176,7 +2181,7 @@ public final class Comparators {
      * <p>This method is useful when you need reverse ordering but want to ensure that
      * null objects appear at the end of the sorted collection.</p>
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * List<Product> products = getProducts(); // May contain null entries
      * // Sort by price in descending order, with null products last
@@ -2208,7 +2213,7 @@ public final class Comparators {
      * <p>This comparator is useful for sorting map entries by key in descending order,
      * such as when processing map entries in reverse alphabetical or reverse numeric order.</p>
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Map<String, Integer> scores = Map.of("Alice", 95, "Bob", 87, "Carol", 92);
      * List<Map.Entry<String, Integer>> entries = new ArrayList<>(scores.entrySet());
@@ -2231,7 +2236,7 @@ public final class Comparators {
      * <p>This comparator is useful for sorting map entries by value in descending order,
      * such as creating a ranking from highest to lowest values.</p>
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Map<String, Integer> scores = Map.of("Alice", 95, "Bob", 87, "Carol", 92);
      * List<Map.Entry<String, Integer>> entries = new ArrayList<>(scores.entrySet());
@@ -2252,7 +2257,7 @@ public final class Comparators {
      * reverse order using the specified comparator. This allows custom comparison
      * logic for the keys while maintaining reverse ordering.
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Sort entries by key length in reverse order (longest first)
      * Comparator<Map.Entry<String, Integer>> cmp = Comparators.reversedComparingByKey(
@@ -2285,7 +2290,7 @@ public final class Comparators {
      * reverse order using the specified comparator. This allows custom comparison
      * logic for the values while maintaining reverse ordering.
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Sort entries by person age in reverse order (oldest first)
      * Comparator<Map.Entry<String, Person>> cmp = Comparators.reversedComparingByValue(

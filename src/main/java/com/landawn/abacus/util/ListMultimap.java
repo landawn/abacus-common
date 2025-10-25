@@ -30,9 +30,28 @@ import com.landawn.abacus.annotation.Beta;
 import com.landawn.abacus.annotation.Internal;
 
 /**
+ * A {@link Multimap} implementation that uses {@link List} to store values for each key.
+ * This means that duplicate values are allowed for each key, and the insertion order
+ * of values is preserved.
+ *
+ * <p>Key characteristics of ListMultimap:</p>
+ * <ul>
+ * <li>Allows duplicate values for each key</li>
+ * <li>Maintains insertion order of values</li>
+ * <li>Values for a key are stored in a {@link List}</li>
+ * </ul>
+ *
+ * <p><b>Usage Examples:</b></p>
+ * <pre>{@code
+ * ListMultimap<String, Integer> multimap = N.newListMultimap();
+ * multimap.put("a", 1);
+ * multimap.put("a", 2);
+ * multimap.put("a", 1); // duplicate allowed
+ * // Result: "a" -> [1, 2, 1]
+ * }</pre>
  *
  * @param <K> the key type
- * @param <E>
+ * @param <E> the element type stored in the value collections
  * @see N#newListMultimap()
  * @see N#newListMultimap(Class, Class)
  * @see N#newListMultimap(Supplier, Supplier)
@@ -58,8 +77,8 @@ public final class ListMultimap<K, E> extends Multimap<K, E, List<E>> {
     /**
      * Constructs a new instance of ListMultimap with the specified map type and list type.
      *
-     * @param mapType the class of the map to be used as the backing map.
-     * @param valueType the class of the list to be used as the value collection.
+     * @param mapType The class of the map to be used as the backing map.
+     * @param valueType The class of the list to be used as the value collection.
      */
     @SuppressWarnings("rawtypes")
     ListMultimap(final Class<? extends Map> mapType, final Class<? extends List> valueType) {
@@ -69,8 +88,8 @@ public final class ListMultimap<K, E> extends Multimap<K, E, List<E>> {
     /**
      * Constructs a new instance of ListMultimap with the specified map supplier and list supplier.
      *
-     * @param mapSupplier the supplier that provides the map to be used as the backing map.
-     * @param valueSupplier the supplier that provides the list to be used as the value collection.
+     * @param mapSupplier The supplier that provides the map to be used as the backing map.
+     * @param valueSupplier The supplier that provides the list to be used as the value collection.
      */
     ListMultimap(final Supplier<? extends Map<K, List<E>>> mapSupplier, final Supplier<? extends List<E>> valueSupplier) {
         super(mapSupplier, valueSupplier);
@@ -80,8 +99,8 @@ public final class ListMultimap<K, E> extends Multimap<K, E, List<E>> {
      * Constructs a new instance of ListMultimap with the specified map and list type.
      * This constructor allows the user to specify a custom map and list type for the backing map and value collections respectively.
      *
-     * @param valueMap the map to be used as the backing map.
-     * @param valueType the class of the list to be used as the value collection.
+     * @param valueMap The map to be used as the backing map.
+     * @param valueType The class of the list to be used as the value collection.
      */
     @Internal
     @SuppressWarnings("rawtypes")
@@ -93,8 +112,8 @@ public final class ListMultimap<K, E> extends Multimap<K, E, List<E>> {
      * Constructs a new instance of ListMultimap with the specified map and list supplier.
      * This constructor allows the user to specify a custom map and list supplier for the backing map and value collections respectively.
      *
-     * @param valueMap the map to be used as the backing map.
-     * @param valueSupplier the supplier that provides the list to be used as the value collection.
+     * @param valueMap The map to be used as the backing map.
+     * @param valueSupplier The supplier that provides the list to be used as the value collection.
      */
     @Internal
     ListMultimap(final Map<K, List<E>> valueMap, final Supplier<? extends List<E>> valueSupplier) {
@@ -324,7 +343,7 @@ public final class ListMultimap<K, E> extends Multimap<K, E, List<E>> {
      * The returned ListMultimap uses the same backing map implementation as the source map (e.g., if the source is a LinkedHashMap,
      * the returned ListMultimap will maintain insertion order).
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Map<String, Integer> map = new HashMap<>();
      * map.put("one", 1);
@@ -335,7 +354,7 @@ public final class ListMultimap<K, E> extends Multimap<K, E, List<E>> {
      *
      * @param <K> the type of the keys
      * @param <E> the type of the values
-     * @param map the map containing the key-value pairs to be added to the new ListMultimap
+     * @param map The map containing the key-value pairs to be added to the new ListMultimap
      * @return a new instance of ListMultimap with the key-value pairs from the specified map
      */
     public static <K, E> ListMultimap<K, E> create(final Map<? extends K, ? extends E> map) {
@@ -355,7 +374,7 @@ public final class ListMultimap<K, E> extends Multimap<K, E, List<E>> {
      * <p>This method groups elements from the collection by keys generated from the keyExtractor function.
      * Elements sharing the same key are grouped into a list associated with that key.
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * List<String> words = Arrays.asList("apple", "banana", "apricot", "blueberry");
      * ListMultimap<Character, String> multimap = ListMultimap.create(words, s -> s.charAt(0));
@@ -390,7 +409,7 @@ public final class ListMultimap<K, E> extends Multimap<K, E, List<E>> {
      * <p>This method transforms elements from the collection into key-value pairs using the provided extractor functions.
      * Elements that map to the same key are grouped into a list associated with that key.
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * class Person {
      *     String department;
@@ -413,7 +432,7 @@ public final class ListMultimap<K, E> extends Multimap<K, E, List<E>> {
      * @param keyExtractor the function to generate keys for the ListMultimap
      * @param valueExtractor the function to extract values for the ListMultimap
      * @return a new instance of ListMultimap with keys and values from the specified collection
-     * @throws IllegalArgumentException if the keyExtractor or valueExtractor is null
+     * @throws IllegalArgumentException if the keyExtractor is null or if the valueExtractor is null
      */
     public static <T, K, E> ListMultimap<K, E> create(final Collection<? extends T> c, final Function<? super T, ? extends K> keyExtractor,
             final Function<? super T, ? extends E> valueExtractor) throws IllegalArgumentException {
@@ -437,7 +456,7 @@ public final class ListMultimap<K, E> extends Multimap<K, E, List<E>> {
      * <p>This method combines entries from two maps into a single ListMultimap. If the same key appears in both maps,
      * both values will be added to the list associated with that key.
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Map<String, Integer> map1 = Map.of("a", 1, "b", 2);
      * Map<String, Integer> map2 = Map.of("b", 3, "c", 4);
@@ -525,7 +544,7 @@ public final class ListMultimap<K, E> extends Multimap<K, E, List<E>> {
      * <p>This method creates a view of the provided map as a ListMultimap. The map must contain non-null, non-empty list values.
      * Any modifications made to the returned ListMultimap will be reflected in the underlying map and vice versa.
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Map<String, List<Integer>> map = new HashMap<>();
      * map.put("a", new ArrayList<>(Arrays.asList(1, 2)));
@@ -537,7 +556,7 @@ public final class ListMultimap<K, E> extends Multimap<K, E, List<E>> {
      * @param <K> the type of the keys in the map
      * @param <E> the type of the elements in the list
      * @param <V> the type of the list
-     * @param map the map to be wrapped into a ListMultimap
+     * @param map The map to be wrapped into a ListMultimap
      * @return a new instance of ListMultimap backed by the provided map
      * @throws IllegalArgumentException if the provided map is null or contains null or empty list values
      */
@@ -562,8 +581,8 @@ public final class ListMultimap<K, E> extends Multimap<K, E, List<E>> {
      * @param <K> the type of the keys in the map
      * @param <E> the type of the elements in the list
      * @param <V> the type of the list
-     * @param map the map to be wrapped into a ListMultimap
-     * @param valueSupplier the supplier that provides the list to be used as the value collection
+     * @param map The map to be wrapped into a ListMultimap
+     * @param valueSupplier The supplier that provides the list to be used as the value collection
      * @return a new instance of ListMultimap backed by the provided map
      * @throws IllegalArgumentException if the provided map or valueSupplier is null
      */
@@ -583,7 +602,7 @@ public final class ListMultimap<K, E> extends Multimap<K, E, List<E>> {
      * from the list associated with the specified key. If the key is not present or the list is empty,
      * {@code null} is returned.
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ListMultimap<String, Integer> multimap = ListMultimap.of("a", 1);
      * multimap.put("a", 2);
@@ -607,7 +626,7 @@ public final class ListMultimap<K, E> extends Multimap<K, E, List<E>> {
      * from the list associated with the specified key. If the key is not present or the list is empty,
      * the provided default value is returned instead.
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ListMultimap<String, Integer> multimap = ListMultimap.of("a", 1);
      * multimap.getFirstOrDefault("a", 99); // returns 1
@@ -631,7 +650,7 @@ public final class ListMultimap<K, E> extends Multimap<K, E, List<E>> {
      * and the associated original key becomes a value in the new multimap. If multiple keys in the original
      * multimap share the same value, that value will be associated with multiple keys in the inverted multimap.
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ListMultimap<String, Integer> multimap = ListMultimap.of("a", 1, "a", 2, "b", 1);
      * ListMultimap<Integer, String> inverted = multimap.inverse();
@@ -667,7 +686,7 @@ public final class ListMultimap<K, E> extends Multimap<K, E, List<E>> {
      * The new ListMultimap uses the same map supplier and value supplier as the original, ensuring it has
      * the same structural and hash characteristics.
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ListMultimap<String, Integer> original = ListMultimap.of("a", 1, "b", 2);
      * ListMultimap<String, Integer> copy = original.copy();
@@ -693,7 +712,7 @@ public final class ListMultimap<K, E> extends Multimap<K, E, List<E>> {
      * that satisfy the provided predicate. The predicate is applied to each key and its entire associated list.
      * The new ListMultimap has the same structural and hash characteristics as the current one.
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ListMultimap<String, Integer> multimap = ListMultimap.of("a", 1, "a", 2, "b", 3);
      * ListMultimap<String, Integer> filtered = multimap.filter((k, v) -> v.size() > 1);
@@ -723,7 +742,7 @@ public final class ListMultimap<K, E> extends Multimap<K, E, List<E>> {
      * where the key satisfies the provided predicate. The new ListMultimap has the same structural and
      * hash characteristics as the current one.
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ListMultimap<String, Integer> multimap = ListMultimap.of("apple", 1, "apricot", 2, "banana", 3);
      * ListMultimap<String, Integer> filtered = multimap.filterByKey(k -> k.startsWith("a"));
@@ -753,7 +772,7 @@ public final class ListMultimap<K, E> extends Multimap<K, E, List<E>> {
      * where the entire list of values associated with a key satisfies the provided predicate.
      * The new ListMultimap has the same structural and hash characteristics as the current one.
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ListMultimap<String, Integer> multimap = ListMultimap.of("a", 1, "a", 2, "b", 3);
      * ListMultimap<String, Integer> filtered = multimap.filterByValue(list -> list.size() >= 2);
@@ -783,7 +802,7 @@ public final class ListMultimap<K, E> extends Multimap<K, E, List<E>> {
      * The ImmutableList contains all the values associated with the key in the ListMultimap.
      * The returned ImmutableMap cannot be modified after creation.
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ListMultimap<String, Integer> multimap = ListMultimap.of("a", 1, "a", 2, "b", 3);
      * ImmutableMap<String, ImmutableList<Integer>> immutable = multimap.toImmutableMap();
@@ -809,7 +828,7 @@ public final class ListMultimap<K, E> extends Multimap<K, E, List<E>> {
      * The ImmutableList contains all the values associated with the key in the ListMultimap.
      * This method allows control over the underlying map implementation used for the ImmutableMap.
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ListMultimap<String, Integer> multimap = ListMultimap.of("a", 1, "b", 2);
      * ImmutableMap<String, ImmutableList<Integer>> immutable =
@@ -817,7 +836,7 @@ public final class ListMultimap<K, E> extends Multimap<K, E, List<E>> {
      * // uses LinkedHashMap to preserve insertion order
      * }</pre>
      *
-     * @param mapSupplier the supplier function that provides a Map instance. The function takes an integer argument which is the initial size of the map
+     * @param mapSupplier The supplier function that provides a Map instance. The function takes an integer argument which is the initial size of the map
      * @return an ImmutableMap where each key is associated with an ImmutableList of values from the original ListMultimap
      */
     public ImmutableMap<K, ImmutableList<E>> toImmutableMap(final IntFunction<? extends Map<K, ImmutableList<E>>> mapSupplier) {

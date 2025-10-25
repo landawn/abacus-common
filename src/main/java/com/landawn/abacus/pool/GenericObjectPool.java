@@ -55,7 +55,7 @@ import com.landawn.abacus.util.Objectory;
  *   <li>EXPIRATION_TIME - Evicts objects closest to expiration</li>
  * </ul>
  * 
- * <p>Usage example:
+ * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * // Create a pool with capacity 50, 5-minute eviction delay
  * GenericObjectPool<MyResource> pool = new GenericObjectPool<>(

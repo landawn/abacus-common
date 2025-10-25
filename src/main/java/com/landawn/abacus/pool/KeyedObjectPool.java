@@ -37,7 +37,7 @@ import java.util.Set;
  *   <li>Thread-safe operations</li>
  * </ul>
  * 
- * <p>Usage example:
+ * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * KeyedObjectPool<String, DBConnection> pool = PoolFactory.createKeyedObjectPool(100);
  * 
@@ -89,7 +89,7 @@ public interface KeyedObjectPool<K, E extends Poolable> extends Pool {
      * 
      * <p>This is a convenience method that ensures proper cleanup if the object cannot be pooled.
      * 
-     * <p>Usage example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Connection conn = createConnection();
      * // Connection will be closed if it can't be added to pool
@@ -111,7 +111,7 @@ public interface KeyedObjectPool<K, E extends Poolable> extends Pool {
      * 
      * <p>If the retrieved element has expired, it will be destroyed and null will be returned.
      * 
-     * <p>Usage example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * E cached = pool.get("myKey");
      * if (cached != null) {
@@ -159,7 +159,7 @@ public interface KeyedObjectPool<K, E extends Poolable> extends Pool {
      * Returns a Set view of the keys contained in this pool.
      * The returned set is a snapshot and will not reflect subsequent changes to the pool.
      * 
-     * <p>Usage example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Set<String> keys = pool.keySet();
      * for (String key : keys) {
@@ -194,11 +194,11 @@ public interface KeyedObjectPool<K, E extends Poolable> extends Pool {
      * Interface for measuring the memory size of key-value pairs in the pool.
      * This allows the pool to enforce memory-based capacity limits.
      * 
-     * <p>Usage example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * MemoryMeasure<String, CachedData> measure = (key, data) -> 
-     *     key.length() * 2 + data.getBytes().length;
-     *     
+     * MemoryMeasure<String, CachedData> measure = (key, data) ->
+     *     key.length() * 2 + data.getBytes().length; // * 2 for UTF-16 encoding (2 bytes per char)
+     *
      * KeyedObjectPool<String, CachedData> pool = PoolFactory.createKeyedObjectPool(
      *     1000, 3000, EvictionPolicy.LAST_ACCESS_TIME,
      *     1024 * 1024 * 500, // 500MB max

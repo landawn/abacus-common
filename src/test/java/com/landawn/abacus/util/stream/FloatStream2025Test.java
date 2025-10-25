@@ -991,8 +991,7 @@ public class FloatStream2025Test extends TestBase {
             FloatStream stream1 = createFloatStream(1.0f);
             FloatStream stream2 = createFloatStream(3.0f, 4.0f);
             FloatStream stream3 = createFloatStream(5.0f, 6.0f, 7.0f);
-            assertArrayEquals(new float[] { 9.0f, 10.0f, 7.0f },
-                    stream1.zipWith(stream2, stream3, 0.0f, 0.0f, 0.0f, (a, b, c) -> a + b + c).toArray());
+            assertArrayEquals(new float[] { 9.0f, 10.0f, 7.0f }, stream1.zipWith(stream2, stream3, 0.0f, 0.0f, 0.0f, (a, b, c) -> a + b + c).toArray());
         }
     }
 
@@ -1547,14 +1546,11 @@ public class FloatStream2025Test extends TestBase {
     @Test
     @DisplayName("zip() collection of streams with function")
     public void testZipCollectionStreamsAdditional() {
-        Collection<FloatStream> streams = Arrays.asList(
-                FloatStream.of(1.0f, 2.0f),
-                FloatStream.of(10.0f, 20.0f),
-                FloatStream.of(100.0f, 200.0f)
-        );
+        Collection<FloatStream> streams = Arrays.asList(FloatStream.of(1.0f, 2.0f), FloatStream.of(10.0f, 20.0f), FloatStream.of(100.0f, 200.0f));
         FloatStream result = FloatStream.zip(streams, floats -> {
             float sum = 0.0f;
-            for (Float f : floats) sum += f;
+            for (Float f : floats)
+                sum += f;
             return sum;
         });
         assertArrayEquals(new float[] { 111.0f, 222.0f }, result.toArray());
@@ -1563,14 +1559,12 @@ public class FloatStream2025Test extends TestBase {
     @Test
     @DisplayName("zip() collection with defaults additional")
     public void testZipCollectionDefaultsAdditional() {
-        Collection<FloatStream> streams = Arrays.asList(
-                FloatStream.of(1.0f, 2.0f, 3.0f),
-                FloatStream.of(10.0f, 20.0f)
-        );
+        Collection<FloatStream> streams = Arrays.asList(FloatStream.of(1.0f, 2.0f, 3.0f), FloatStream.of(10.0f, 20.0f));
         float[] defaults = { 0.0f, 100.0f };
         FloatStream result = FloatStream.zip(streams, defaults, floats -> {
             float sum = 0.0f;
-            for (Float f : floats) sum += f;
+            for (Float f : floats)
+                sum += f;
             return sum;
         });
         assertEquals(3, result.count());
@@ -1579,11 +1573,7 @@ public class FloatStream2025Test extends TestBase {
     @Test
     @DisplayName("merge() collection of streams additional")
     public void testMergeCollectionAdditional() {
-        Collection<FloatStream> streams = Arrays.asList(
-                FloatStream.of(1.0f, 7.0f),
-                FloatStream.of(3.0f, 8.0f),
-                FloatStream.of(5.0f, 9.0f)
-        );
+        Collection<FloatStream> streams = Arrays.asList(FloatStream.of(1.0f, 7.0f), FloatStream.of(3.0f, 8.0f), FloatStream.of(5.0f, 9.0f));
         FloatStream result = FloatStream.merge(streams, (a, b) -> a <= b ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND);
         assertEquals(6, result.count());
     }
@@ -1621,8 +1611,6 @@ public class FloatStream2025Test extends TestBase {
         assertEquals(4.0f, result[1], 0.001);
         assertEquals(6.0f, result[2], 0.001);
     }
-
-    
 
     // Parallel operations
 

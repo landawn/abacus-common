@@ -37,7 +37,7 @@ package com.landawn.abacus.util;
  *   <li>{@link #RECORD} - Structured data records or database entries (value: 5)</li>
  * </ul>
  * 
- * <p>Example usage:</p>
+ * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * // Using MediaType for content classification
  * MediaType type = MediaType.IMAGE;
@@ -146,7 +146,7 @@ public enum MediaType {
      * returned value is guaranteed to be unique for each media type and
      * consistent across different instances of the application.</p>
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * MediaType audioType = MediaType.AUDIO;
      * int audioCode = audioType.intValue(); // returns 1
@@ -172,7 +172,7 @@ public enum MediaType {
      * <p>The method performs a fast lookup using a switch statement, ensuring optimal
      * performance even when called frequently.</p>
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Reading from database
      * int typeCode = resultSet.getInt("media_type");

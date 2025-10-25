@@ -54,7 +54,6 @@ public class PasswordType extends AbstractStringType {
      * @return the password string from the database
      * @throws SQLException if a database access error occurs
      */
-    @SuppressWarnings("RedundantMethodOverride")
     @Override
     public String get(final ResultSet rs, final int columnIndex) throws SQLException {
         return rs.getString(columnIndex);
@@ -69,7 +68,6 @@ public class PasswordType extends AbstractStringType {
      * @return the password string from the database
      * @throws SQLException if a database access error occurs
      */
-    @SuppressWarnings("RedundantMethodOverride")
     @Override
     public String get(final ResultSet rs, final String columnLabel) throws SQLException {
         return rs.getString(columnLabel);

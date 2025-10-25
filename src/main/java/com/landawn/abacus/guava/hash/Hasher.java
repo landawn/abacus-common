@@ -33,8 +33,8 @@ import com.google.common.hash.HashCode;
  *   <li>Add data using put methods (can be chained)</li>
  *   <li>Call {@link #hash()} to get the final HashCode</li>
  * </ol>
- * 
- * <p><b>Example:</b>
+ *
+ * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * HashCode hash = Hashing.sha256()
  *     .newHasher()
@@ -57,6 +57,8 @@ import com.google.common.hash.HashCode;
  * 
  * <h3>Avoiding Collisions</h3>
  * <p>Since data chunks are not delimited, be careful to avoid unintended collisions:
+ * 
+ * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * // These produce the same hash:
  * hasher1.putString("foo", UTF_8).putString("bar", UTF_8).hash();
@@ -77,8 +79,8 @@ public interface Hasher {
 
     /**
      * Adds a single byte to this hasher's internal state.
-     * 
-     * <p><b>Example:</b>
+     *
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * hasher.put((byte) 0xFF).put((byte) 0x00);
      * }</pre>
@@ -92,7 +94,7 @@ public interface Hasher {
      * Adds all bytes in the given array to this hasher's internal state.
      * This is equivalent to {@code put(bytes, 0, bytes.length)}.
      * 
-     * <p><b>Example:</b>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * byte[] data = "Hello".getBytes(StandardCharsets.UTF_8);
      * hasher.put(data);
@@ -107,7 +109,7 @@ public interface Hasher {
      * Adds a portion of the given byte array to this hasher's internal state.
      * Only bytes from {@code off} to {@code off + len - 1} (inclusive) are processed.
      * 
-     * <p><b>Example:</b>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * byte[] buffer = new byte[1024];
      * int bytesRead = inputStream.read(buffer);
@@ -128,7 +130,7 @@ public interface Hasher {
      * This method reads from the buffer's current position to its limit, and advances
      * the buffer's position accordingly.
      * 
-     * <p><b>Example:</b>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ByteBuffer buffer = ByteBuffer.wrap("data".getBytes());
      * hasher.put(buffer); // Buffer position is now at limit
@@ -143,7 +145,7 @@ public interface Hasher {
      * Adds a short value to this hasher's internal state. The short is interpreted
      * in little-endian byte order.
      * 
-     * <p><b>Example:</b>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * hasher.put((short) 12345).put((short) -1);
      * }</pre>
@@ -157,7 +159,7 @@ public interface Hasher {
      * Adds an integer value to this hasher's internal state. The integer is interpreted
      * in little-endian byte order.
      * 
-     * <p><b>Example:</b>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * hasher.put(42).put(Integer.MAX_VALUE);
      * }</pre>
@@ -171,7 +173,7 @@ public interface Hasher {
      * Adds a long value to this hasher's internal state. The long is interpreted
      * in little-endian byte order.
      * 
-     * <p><b>Example:</b>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * hasher.put(System.currentTimeMillis()).put(userId);
      * }</pre>
@@ -190,7 +192,7 @@ public interface Hasher {
      * same numeric meaning. Use {@link Float#floatToRawIntBits(float)} explicitly
      * if you need consistent handling of NaN values.
      * 
-     * <p><b>Example:</b>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * hasher.put(3.14159f).put(Float.POSITIVE_INFINITY);
      * }</pre>
@@ -209,7 +211,7 @@ public interface Hasher {
      * same numeric meaning. Use {@link Double#doubleToRawLongBits(double)} explicitly
      * if you need consistent handling of NaN values.
      * 
-     * <p><b>Example:</b>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * hasher.put(Math.PI).put(Double.NaN);
      * }</pre>
@@ -223,7 +225,7 @@ public interface Hasher {
      * Adds a boolean value to this hasher's internal state. This is equivalent to
      * {@code put((byte) 1)} for true and {@code put((byte) 0)} for false.
      * 
-     * <p><b>Example:</b>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * hasher.put(user.isActive()).put(user.isVerified());
      * }</pre>
@@ -237,7 +239,7 @@ public interface Hasher {
      * Adds a character value to this hasher's internal state. The character is
      * processed by first adding its low byte, then its high byte (little-endian order).
      * 
-     * <p><b>Example:</b>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * hasher.put('A').put('\n').put('中');
      * }</pre>
@@ -253,7 +255,7 @@ public interface Hasher {
      * 
      * <p>Each character is processed in little-endian order (low byte first, then high byte).
      * 
-     * <p><b>Example:</b>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * char[] password = {'s', 'e', 'c', 'r', 'e', 't'};
      * hasher.put(password);
@@ -270,7 +272,7 @@ public interface Hasher {
      * 
      * <p>Each character is processed in little-endian order (low byte first, then high byte).
      * 
-     * <p><b>Example:</b>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * char[] buffer = new char[100];
      * int charsRead = reader.read(buffer);
@@ -298,7 +300,7 @@ public interface Hasher {
      * <p><b>Warning:</b> For cross-language compatibility, use {@link #put(CharSequence, Charset)}
      * with a specific encoding (usually UTF-8) instead.
      * 
-     * <p><b>Example:</b>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * hasher.put("fast hash").put(new StringBuilder("builder"));
      * }</pre>
@@ -321,7 +323,7 @@ public interface Hasher {
      * the encoding step. Use the unencoded version for better performance when
      * cross-language compatibility is not required.
      * 
-     * <p><b>Example:</b>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * hasher.put("Hello 世界", StandardCharsets.UTF_8)
      *       .put("Здравствуй", StandardCharsets.UTF_8);
@@ -342,7 +344,7 @@ public interface Hasher {
      * primitive values that can be hashed. This ensures consistent hashing of complex
      * objects.
      * 
-     * <p><b>Example:</b>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Funnel<Person> personFunnel = (person, into) -> {
      *     into.putString(person.name, StandardCharsets.UTF_8)
@@ -372,7 +374,7 @@ public interface Hasher {
      * <p><b>Warning:</b> The behavior of calling any methods on this hasher after
      * calling hash() is undefined. Create a new hasher for each hash computation.
      * 
-     * <p><b>Example:</b>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * HashCode result = hasher
      *     .putString("data", StandardCharsets.UTF_8)

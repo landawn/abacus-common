@@ -32,7 +32,7 @@ import com.landawn.abacus.util.stream.Stream;
  * filtering, and conversion operations. It extends ImmutableIterator to ensure that
  * the remove() operation is not supported.</p>
  * 
- * <p>Example usage:</p>
+ * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * boolean[] values = {true, false, true, true, false};
  * BooleanIterator iter = BooleanIterator.of(values);
@@ -69,7 +69,7 @@ public abstract class BooleanIterator extends ImmutableIterator<Boolean> {
     /**
      * Returns an empty BooleanIterator.
      * 
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * BooleanIterator iter = BooleanIterator.empty();
      * System.out.println(iter.hasNext()); // false
@@ -85,7 +85,7 @@ public abstract class BooleanIterator extends ImmutableIterator<Boolean> {
     /**
      * Creates a BooleanIterator from a boolean array.
      * 
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * BooleanIterator iter = BooleanIterator.of(true, false, true);
      * // Iterates over three boolean values
@@ -101,7 +101,7 @@ public abstract class BooleanIterator extends ImmutableIterator<Boolean> {
     /**
      * Creates a BooleanIterator from a portion of a boolean array.
      * 
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * boolean[] array = {true, false, true, false, true};
      * BooleanIterator iter = BooleanIterator.of(array, 1, 4);
@@ -158,7 +158,7 @@ public abstract class BooleanIterator extends ImmutableIterator<Boolean> {
      * Returns a BooleanIterator instance created lazily using the provided Supplier.
      * The Supplier is responsible for producing the BooleanIterator instance when the first method in the returned {@code BooleanIterator} is called.
      * 
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * BooleanIterator iter = BooleanIterator.defer(() -> BooleanIterator.of(true, false, true));
      * // Iterator is not created until first use
@@ -205,7 +205,7 @@ public abstract class BooleanIterator extends ImmutableIterator<Boolean> {
     /**
      * Returns an infinite {@code BooleanIterator} that generates values using the provided supplier.
      * 
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Random random = new Random();
      * BooleanIterator randomBools = BooleanIterator.generate(random::nextBoolean);
@@ -235,7 +235,7 @@ public abstract class BooleanIterator extends ImmutableIterator<Boolean> {
     /**
      * Returns a BooleanIterator that generates values while a condition is true.
      * 
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * AtomicInteger counter = new AtomicInteger(0);
      * BooleanIterator iter = BooleanIterator.generate(
@@ -286,8 +286,8 @@ public abstract class BooleanIterator extends ImmutableIterator<Boolean> {
 
     /**
      * Returns the next boolean value in the iteration.
-     * 
-     * <p>Example usage:</p>
+     *
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * BooleanIterator iter = BooleanIterator.of(true, false);
      * boolean first = iter.nextBoolean(); // true
@@ -302,7 +302,7 @@ public abstract class BooleanIterator extends ImmutableIterator<Boolean> {
     /**
      * Skips the specified number of elements in the iteration.
      * 
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * BooleanIterator iter = BooleanIterator.of(true, false, true, false);
      * BooleanIterator skipped = iter.skip(2);
@@ -358,7 +358,7 @@ public abstract class BooleanIterator extends ImmutableIterator<Boolean> {
     /**
      * Limits the number of elements returned by this iterator.
      * 
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * BooleanIterator iter = BooleanIterator.of(true, false, true, false);
      * BooleanIterator limited = iter.limit(2);
@@ -401,7 +401,7 @@ public abstract class BooleanIterator extends ImmutableIterator<Boolean> {
     /**
      * Filters elements based on the provided predicate.
      * 
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * BooleanIterator iter = BooleanIterator.of(true, false, true, false);
      * BooleanIterator filtered = iter.filter(b -> b == true);
@@ -453,7 +453,7 @@ public abstract class BooleanIterator extends ImmutableIterator<Boolean> {
     /**
      * Returns the first element as an OptionalBoolean, or empty if no elements exist.
      * 
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * BooleanIterator iter = BooleanIterator.of(true, false);
      * OptionalBoolean first = iter.first(); // OptionalBoolean.of(true)
@@ -477,7 +477,7 @@ public abstract class BooleanIterator extends ImmutableIterator<Boolean> {
      * 
      * <p>Note: This method consumes the entire iterator.</p>
      * 
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * BooleanIterator iter = BooleanIterator.of(true, false, true);
      * OptionalBoolean last = iter.last(); // OptionalBoolean.of(true)
@@ -501,12 +501,18 @@ public abstract class BooleanIterator extends ImmutableIterator<Boolean> {
 
     /**
      * Converts the remaining elements to a boolean array.
-     * 
-     * <p>Example usage:</p>
+     *
+     * <p>This method consumes the iterator. After calling this method, the iterator
+     * will be empty (hasNext() returns false). If the iterator is already empty,
+     * returns an empty array.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * BooleanIterator iter = BooleanIterator.of(true, false, true);
-     * boolean[] array = iter.toArray();
-     * // array contains [true, false, true]
+     * boolean[] array = BooleanIterator.of(true, false, true).toArray();
+     * // array = [true, false, true]
+     *
+     * // Empty iterator returns empty array
+     * boolean[] empty = BooleanIterator.empty().toArray(); // empty.length == 0
      * }</pre>
      *
      * @return a boolean array containing all remaining elements
@@ -518,12 +524,18 @@ public abstract class BooleanIterator extends ImmutableIterator<Boolean> {
 
     /**
      * Converts the remaining elements to a BooleanList.
-     * 
-     * <p>Example usage:</p>
+     *
+     * <p>This method consumes the iterator. After calling this method, the iterator
+     * will be empty (hasNext() returns false). If the iterator is already empty,
+     * returns an empty BooleanList.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * BooleanIterator iter = BooleanIterator.of(true, false, true);
-     * BooleanList list = iter.toList();
+     * BooleanList list = BooleanIterator.of(true, false, true).toList();
      * // list contains [true, false, true]
+     *
+     * // Empty iterator returns empty list
+     * BooleanList empty = BooleanIterator.empty().toList(); // empty.size() == 0
      * }</pre>
      *
      * @return a BooleanList containing all remaining elements
@@ -541,7 +553,7 @@ public abstract class BooleanIterator extends ImmutableIterator<Boolean> {
     /**
      * Converts this iterator to a Stream of Boolean values.
      * 
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * BooleanIterator iter = BooleanIterator.of(true, false, true);
      * long trueCount = iter.stream()
@@ -558,7 +570,7 @@ public abstract class BooleanIterator extends ImmutableIterator<Boolean> {
     /**
      * Returns an iterator of IndexedBoolean elements with indices starting from 0.
      * 
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * BooleanIterator iter = BooleanIterator.of(true, false);
      * ObjIterator<IndexedBoolean> indexed = iter.indexed();
@@ -575,7 +587,7 @@ public abstract class BooleanIterator extends ImmutableIterator<Boolean> {
     /**
      * Returns an iterator of IndexedBoolean elements with indices starting from the specified value.
      * 
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * BooleanIterator iter = BooleanIterator.of(true, false);
      * ObjIterator<IndexedBoolean> indexed = iter.indexed(10);
@@ -622,7 +634,7 @@ public abstract class BooleanIterator extends ImmutableIterator<Boolean> {
     /**
      * Performs the given action for each remaining element.
      * 
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * BooleanIterator iter = BooleanIterator.of(true, false, true);
      * iter.foreachRemaining(System.out::println);
@@ -644,7 +656,7 @@ public abstract class BooleanIterator extends ImmutableIterator<Boolean> {
     /**
      * Performs the given action for each remaining element, providing the element index.
      * 
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * BooleanIterator iter = BooleanIterator.of(true, false, true);
      * iter.foreachIndexed((index, value) -> 

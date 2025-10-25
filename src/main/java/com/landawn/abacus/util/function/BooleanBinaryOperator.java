@@ -29,6 +29,12 @@ public interface BooleanBinaryOperator extends Throwables.BooleanBinaryOperator<
     /**
      * Applies this operator to the given operands.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * BooleanBinaryOperator and = (a, b) -> a && b;
+     * boolean result = and.applyAsBoolean(true, false); // Returns false
+     * }</pre>
+     *
      * @param left the first operand
      * @param right the second operand
      * @return the operator result

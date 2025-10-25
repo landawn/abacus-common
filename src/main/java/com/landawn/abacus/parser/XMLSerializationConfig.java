@@ -31,7 +31,7 @@ import com.landawn.abacus.util.WD;
  * <p>Note: XML serialization does not use quotation marks for values, so the
  * quotation-related methods inherited from the parent class should not be used.</p>
  * 
- * <p>Example usage:</p>
+ * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * XMLSerializationConfig config = new XMLSerializationConfig()
  *     .tagByPropertyName(true)
@@ -146,16 +146,16 @@ public class XMLSerializationConfig extends JSONXMLSerializationConfig<XMLSerial
      * 
      * <p>When true, XML elements will use the property name as the tag name.
      * When false, a generic tag structure is used with name attributes.</p>
-     * 
-     * <p>Example with tagByPropertyName=true:</p>
+     *
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * <person>
      *   <name>John</name>
      *   <age>30</age>
      * </person>
      * }</pre>
-     * 
-     * <p>Example with tagByPropertyName=false:</p>
+     *
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * <bean name="person">
      *   <property name="name">John</property>
@@ -193,7 +193,7 @@ public class XMLSerializationConfig extends JSONXMLSerializationConfig<XMLSerial
      * <p>Type information includes class names and type hints that help with
      * accurate deserialization. When enabled, the XML output will contain type
      * attributes that specify the Java class types of objects.</p>
-     * 
+     *
      * <p>Example with writeTypeInfo=false (no type information):</p>
      * <pre>{@code
      * <items>
@@ -221,7 +221,7 @@ public class XMLSerializationConfig extends JSONXMLSerializationConfig<XMLSerial
      * <p>Type information includes class names and type hints that help with
      * accurate deserialization. When enabled, the XML output will contain type
      * attributes that specify the Java class types of objects.</p>
-     * 
+     *
      * <p>Example with writeTypeInfo=false (no type information):</p>
      * <pre>{@code
      * <items>
@@ -319,7 +319,7 @@ public class XMLSerializationConfig extends JSONXMLSerializationConfig<XMLSerial
      * <p>Provides static factory methods for convenient configuration creation.
      * This inner class is named XSC for brevity.</p>
      * 
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * XMLSerializationConfig config = XSC.create()
      *     .tagByPropertyName(true)

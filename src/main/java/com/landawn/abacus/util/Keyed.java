@@ -26,7 +26,7 @@ package com.landawn.abacus.util;
  * 
  * <p>This class is sealed and only permits {@link IndexedKeyed} as a subclass.</p>
  * 
- * <p>Example usage:</p>
+ * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * Keyed<String, User> userKeyed = Keyed.of("userId123", new User("John", "Doe"));
  * Set<Keyed<String, User>> userSet = new HashSet<>();
@@ -70,7 +70,7 @@ public sealed class Keyed<K, T> implements Immutable permits IndexedKeyed {
      * <p>Both {@code key} and {@code val} can be {@code null}. However, be aware that
      * a {@code null} key will result in a hash code of 0 and may affect collection behavior.</p>
      *
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Keyed<Integer, String> keyed = Keyed.of(42, "The Answer");
      * Keyed<String, User> withNull = Keyed.of("id", null); // value can be null
@@ -119,7 +119,7 @@ public sealed class Keyed<K, T> implements Immutable permits IndexedKeyed {
      * <p>This method uses {@link N#hashCode(Object)} to compute the hash code,
      * which properly handles {@code null} keys by returning 0.</p>
      *
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Keyed<String, Integer> k1 = Keyed.of("key", 100);
      * Keyed<String, Integer> k2 = Keyed.of("key", 200);
@@ -147,7 +147,7 @@ public sealed class Keyed<K, T> implements Immutable permits IndexedKeyed {
      *   <li>Otherwise, compares keys using {@link N#equals(Object, Object)}, which handles {@code null} keys properly</li>
      * </ul>
      *
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Keyed<String, Integer> k1 = Keyed.of("key", 100);
      * Keyed<String, Integer> k2 = Keyed.of("key", 200);
@@ -184,7 +184,7 @@ public sealed class Keyed<K, T> implements Immutable permits IndexedKeyed {
      *
      * <p>The format is: {@code "{key=<key>, val=<value>}"}</p>
      *
-     * <p>Examples:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Keyed.of("abc", 123).toString();        // returns "{key=abc, val=123}"
      * Keyed.of(null, "value").toString();     // returns "{key=null, val=value}"

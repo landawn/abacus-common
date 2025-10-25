@@ -34,6 +34,21 @@ public interface ShortTriFunction<R> extends Throwables.ShortTriFunction<R, Runt
     /**
      * Applies this function to the given arguments.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * ShortTriFunction<Integer> sum = (a, b, c) -> (int) (a + b + c);
+     * Integer result1 = sum.apply((short) 10, (short) 20, (short) 30); // returns 60
+     *
+     * ShortTriFunction<String> formatter = (x, y, z) ->
+     *     String.format("Point3D(%d, %d, %d)", x, y, z);
+     * String result2 = formatter.apply((short) 1, (short) 2, (short) 3);
+     * // returns "Point3D(1, 2, 3)"
+     *
+     * ShortTriFunction<Boolean> inRange = (value, min, max) ->
+     *     value >= min && value <= max;
+     * Boolean result3 = inRange.apply((short) 50, (short) 0, (short) 100); // returns true
+     * }</pre>
+     *
      * @param a the first function argument
      * @param b the second function argument
      * @param c the third function argument

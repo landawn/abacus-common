@@ -36,8 +36,8 @@ import com.landawn.abacus.logging.LoggerFactory;
  * <p>All close methods in this class follow the pattern of closing resources in reverse order
  * of their creation (ResultSet -> Statement -> Connection) to ensure proper cleanup.</p>
  * 
- * <p>Example usage:</p>
- * <pre>
+ * <p><b>Usage Examples:</b></p>
+ * <pre>{@code
  * Connection conn = null;
  * Statement stmt = null;
  * ResultSet rs = null;
@@ -49,7 +49,7 @@ import com.landawn.abacus.logging.LoggerFactory;
  * } finally {
  *     DataSourceUtil.closeQuietly(rs, stmt, conn);
  * }
- * </pre>
+ * }</pre>
  * 
  * @see java.sql.Connection
  * @see java.sql.Statement
@@ -87,15 +87,15 @@ public final class DataSourceUtil {
      * <p>This method should be used instead of directly calling {@code Connection.close()}
      * when working with Spring-managed data sources to ensure proper transaction handling.</p>
      *
-     * <p>Example:</p>
-     * <pre>
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
      * Connection conn = dataSource.getConnection();
      * try {
      *     // Use connection
      * } finally {
      *     DataSourceUtil.releaseConnection(conn, dataSource);
      * }
-     * </pre>
+     * }</pre>
      *
      * @param conn the Connection to release, may be null
      * @param ds the DataSource that the Connection was obtained from, may be null
@@ -120,15 +120,15 @@ public final class DataSourceUtil {
     /**
      * Closes a ResultSet.
      *
-     * <p>Example:</p>
-     * <pre>
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
      * ResultSet rs = stmt.executeQuery("SELECT * FROM users");
      * try {
      *     // Process results
      * } finally {
      *     DataSourceUtil.close(rs);
      * }
-     * </pre>
+     * }</pre>
      *
      * @param rs the ResultSet to close, may be null
      * @throws UncheckedSQLException if a database access error occurs
@@ -147,15 +147,15 @@ public final class DataSourceUtil {
      * Closes a ResultSet and optionally its associated Statement.
      * If closeStatement is true, attempts to retrieve and close the Statement that created the ResultSet.
      *
-     * <p>Example:</p>
-     * <pre>
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
      * ResultSet rs = stmt.executeQuery("SELECT * FROM users");
      * try {
      *     // Process results
      * } finally {
      *     DataSourceUtil.close(rs, true); // Also closes the statement
      * }
-     * </pre>
+     * }</pre>
      *
      * @param rs the ResultSet to close, may be null
      * @param closeStatement if true, also closes the Statement that created the ResultSet
@@ -169,8 +169,8 @@ public final class DataSourceUtil {
      * Closes a ResultSet and optionally its associated Statement and Connection.
      * Resources are closed in reverse order: ResultSet -> Statement -> Connection.
      *
-     * <p>Example:</p>
-     * <pre>
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
      * ResultSet rs = stmt.executeQuery("SELECT * FROM users");
      * try {
      *     // Process results
@@ -178,7 +178,7 @@ public final class DataSourceUtil {
      *     // Closes ResultSet, Statement, and Connection
      *     DataSourceUtil.close(rs, true, true);
      * }
-     * </pre>
+     * }</pre>
      *
      * @param rs the ResultSet to close, may be null
      * @param closeStatement if true, also closes the Statement that created the ResultSet
@@ -217,15 +217,15 @@ public final class DataSourceUtil {
     /**
      * Closes a Statement.
      *
-     * <p>Example:</p>
-     * <pre>
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
      * Statement stmt = conn.createStatement();
      * try {
      *     stmt.executeUpdate("UPDATE users SET active = true");
      * } finally {
      *     DataSourceUtil.close(stmt);
      * }
-     * </pre>
+     * }</pre>
      *
      * @param stmt the Statement to close, may be null
      * @throws UncheckedSQLException if a database access error occurs
@@ -245,15 +245,15 @@ public final class DataSourceUtil {
      * Consider using {@link #releaseConnection(Connection, javax.sql.DataSource)} instead
      * when working with Spring-managed connections.
      *
-     * <p>Example:</p>
-     * <pre>
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
      * Connection conn = dataSource.getConnection();
      * try {
      *     // Use connection
      * } finally {
      *     DataSourceUtil.close(conn);
      * }
-     * </pre>
+     * }</pre>
      *
      * @param conn the Connection to close, may be null
      * @throws UncheckedSQLException if a database access error occurs
@@ -274,8 +274,8 @@ public final class DataSourceUtil {
      * Closes a ResultSet and Statement in the proper order.
      * The ResultSet is closed first, followed by the Statement.
      *
-     * <p>Example:</p>
-     * <pre>
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
      * Statement stmt = conn.createStatement();
      * ResultSet rs = stmt.executeQuery("SELECT * FROM users");
      * try {
@@ -283,7 +283,7 @@ public final class DataSourceUtil {
      * } finally {
      *     DataSourceUtil.close(rs, stmt);
      * }
-     * </pre>
+     * }</pre>
      *
      * @param rs the ResultSet to close, may be null
      * @param stmt the Statement to close, may be null
@@ -311,8 +311,8 @@ public final class DataSourceUtil {
      * Closes a Statement and Connection in the proper order.
      * The Statement is closed first, followed by the Connection.
      *
-     * <p>Example:</p>
-     * <pre>
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
      * Connection conn = dataSource.getConnection();
      * Statement stmt = conn.createStatement();
      * try {
@@ -320,7 +320,7 @@ public final class DataSourceUtil {
      * } finally {
      *     DataSourceUtil.close(stmt, conn);
      * }
-     * </pre>
+     * }</pre>
      *
      * @param stmt the Statement to close, may be null
      * @param conn the Connection to close, may be null
@@ -349,8 +349,8 @@ public final class DataSourceUtil {
      * Resources are closed in reverse order of creation: ResultSet -> Statement -> Connection.
      * If any close operation fails, the exception is thrown after attempting to close remaining resources.
      *
-     * <p>Example:</p>
-     * <pre>
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
      * Connection conn = dataSource.getConnection();
      * Statement stmt = conn.createStatement();
      * ResultSet rs = stmt.executeQuery("SELECT * FROM users");
@@ -359,7 +359,7 @@ public final class DataSourceUtil {
      * } finally {
      *     DataSourceUtil.close(rs, stmt, conn);
      * }
-     * </pre>
+     * }</pre>
      *
      * @param rs the ResultSet to close, may be null
      * @param stmt the Statement to close, may be null
@@ -397,8 +397,8 @@ public final class DataSourceUtil {
      * Equivalent to {@link ResultSet#close()}, except any exceptions will be ignored and logged.
      * This is typically used in finally blocks where exception handling is not desired.
      *
-     * <p>Example:</p>
-     * <pre>
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
      * ResultSet rs = null;
      * try {
      *     rs = stmt.executeQuery("SELECT * FROM users");
@@ -406,7 +406,7 @@ public final class DataSourceUtil {
      * } finally {
      *     DataSourceUtil.closeQuietly(rs);
      * }
-     * </pre>
+     * }</pre>
      *
      * @param rs the ResultSet to close, may be null
      */
@@ -418,15 +418,15 @@ public final class DataSourceUtil {
      * Unconditionally closes a ResultSet and optionally its associated Statement.
      * Any exceptions during closing are ignored and logged.
      *
-     * <p>Example:</p>
-     * <pre>
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
      * ResultSet rs = stmt.executeQuery("SELECT * FROM users");
      * try {
      *     // Process results
      * } finally {
      *     DataSourceUtil.closeQuietly(rs, true); // Also closes statement
      * }
-     * </pre>
+     * }</pre>
      *
      * @param rs the ResultSet to close, may be null
      * @param closeStatement if true, also closes the Statement that created the ResultSet
@@ -440,8 +440,8 @@ public final class DataSourceUtil {
      * Unconditionally closes a ResultSet and optionally its associated Statement and Connection.
      * Any exceptions during closing are ignored and logged.
      *
-     * <p>Example:</p>
-     * <pre>
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
      * ResultSet rs = stmt.executeQuery("SELECT * FROM users");
      * try {
      *     // Process results
@@ -449,7 +449,7 @@ public final class DataSourceUtil {
      *     // Quietly closes all resources
      *     DataSourceUtil.closeQuietly(rs, true, true);
      * }
-     * </pre>
+     * }</pre>
      *
      * @param rs the ResultSet to close, may be null
      * @param closeStatement if true, also closes the Statement that created the ResultSet
@@ -488,8 +488,8 @@ public final class DataSourceUtil {
      * Equivalent to {@link Statement#close()}, except any exceptions will be ignored and logged.
      * This is typically used in finally blocks where exception handling is not desired.
      *
-     * <p>Example:</p>
-     * <pre>
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
      * Statement stmt = null;
      * try {
      *     stmt = conn.createStatement();
@@ -497,7 +497,7 @@ public final class DataSourceUtil {
      * } finally {
      *     DataSourceUtil.closeQuietly(stmt);
      * }
-     * </pre>
+     * }</pre>
      *
      * @param stmt the Statement to close, may be null
      */
@@ -511,8 +511,8 @@ public final class DataSourceUtil {
      * Consider using {@link #releaseConnection(Connection, javax.sql.DataSource)} instead
      * when working with Spring-managed connections.
      *
-     * <p>Example:</p>
-     * <pre>
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
      * Connection conn = null;
      * try {
      *     conn = dataSource.getConnection();
@@ -520,7 +520,7 @@ public final class DataSourceUtil {
      * } finally {
      *     DataSourceUtil.closeQuietly(conn);
      * }
-     * </pre>
+     * }</pre>
      *
      * @param conn the Connection to close, may be null
      * @deprecated consider using {@link #releaseConnection(Connection, javax.sql.DataSource)}
@@ -535,8 +535,8 @@ public final class DataSourceUtil {
      * Any exceptions during closing are ignored and logged.
      * Resources are closed in the proper order: ResultSet first, then Statement.
      *
-     * <p>Example:</p>
-     * <pre>
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
      * Statement stmt = null;
      * ResultSet rs = null;
      * try {
@@ -546,7 +546,7 @@ public final class DataSourceUtil {
      * } finally {
      *     DataSourceUtil.closeQuietly(rs, stmt);
      * }
-     * </pre>
+     * }</pre>
      *
      * @param rs the ResultSet to close, may be null
      * @param stmt the Statement to close, may be null
@@ -560,8 +560,8 @@ public final class DataSourceUtil {
      * Any exceptions during closing are ignored and logged.
      * Resources are closed in the proper order: Statement first, then Connection.
      *
-     * <p>Example:</p>
-     * <pre>
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
      * Connection conn = null;
      * Statement stmt = null;
      * try {
@@ -571,7 +571,7 @@ public final class DataSourceUtil {
      * } finally {
      *     DataSourceUtil.closeQuietly(stmt, conn);
      * }
-     * </pre>
+     * }</pre>
      *
      * @param stmt the Statement to close, may be null
      * @param conn the Connection to close, may be null
@@ -586,8 +586,8 @@ public final class DataSourceUtil {
      * Resources are closed in the proper order: ResultSet -> Statement -> Connection.
      * This method is typically used in finally blocks where exception handling is not desired.
      *
-     * <p>Example:</p>
-     * <pre>
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
      * Connection conn = null;
      * Statement stmt = null;
      * ResultSet rs = null;
@@ -599,7 +599,7 @@ public final class DataSourceUtil {
      * } finally {
      *     DataSourceUtil.closeQuietly(rs, stmt, conn);
      * }
-     * </pre>
+     * }</pre>
      *
      * @param rs the ResultSet to close, may be null
      * @param stmt the Statement to close, may be null
@@ -636,15 +636,15 @@ public final class DataSourceUtil {
      * This method ensures that the batch is cleared even if the execution fails,
      * preventing memory leaks from accumulated batch commands.
      *
-     * <p>Example:</p>
-     * <pre>
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
      * PreparedStatement pstmt = conn.prepareStatement("INSERT INTO users (name) VALUES (?)");
      * for (String name : names) {
      *     pstmt.setString(1, name);
      *     pstmt.addBatch();
      * }
      * int[] results = DataSourceUtil.executeBatch(pstmt);
-     * </pre>
+     * }</pre>
      *
      * @param stmt the Statement containing the batch commands to execute
      * @return an array of update counts containing one element for each command in the batch

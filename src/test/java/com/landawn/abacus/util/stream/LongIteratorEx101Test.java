@@ -35,9 +35,9 @@ public class LongIteratorEx101Test extends TestBase {
 
     @Test
     public void testOfArray() {
-        long[] array = {1L, 2L, 3L};
+        long[] array = { 1L, 2L, 3L };
         LongIteratorEx iter = LongIteratorEx.of(array);
-        
+
         Assertions.assertTrue(iter.hasNext());
         Assertions.assertEquals(1L, iter.nextLong());
         Assertions.assertEquals(2L, iter.nextLong());
@@ -56,9 +56,9 @@ public class LongIteratorEx101Test extends TestBase {
 
     @Test
     public void testOfArrayWithIndices() {
-        long[] array = {1L, 2L, 3L, 4L, 5L};
+        long[] array = { 1L, 2L, 3L, 4L, 5L };
         LongIteratorEx iter = LongIteratorEx.of(array, 1, 4);
-        
+
         Assertions.assertTrue(iter.hasNext());
         Assertions.assertEquals(2L, iter.nextLong());
         Assertions.assertEquals(3L, iter.nextLong());
@@ -68,7 +68,7 @@ public class LongIteratorEx101Test extends TestBase {
 
     @Test
     public void testOfArrayWithIndicesEmpty() {
-        long[] array = {1L, 2L, 3L};
+        long[] array = { 1L, 2L, 3L };
         LongIteratorEx iter = LongIteratorEx.of(array, 1, 1);
         Assertions.assertFalse(iter.hasNext());
         Assertions.assertSame(LongIteratorEx.EMPTY, iter);
@@ -76,7 +76,7 @@ public class LongIteratorEx101Test extends TestBase {
 
     @Test
     public void testOfArrayWithIndicesInvalid() {
-        long[] array = {1L, 2L, 3L};
+        long[] array = { 1L, 2L, 3L };
         Assertions.assertThrows(IndexOutOfBoundsException.class, () -> LongIteratorEx.of(array, 2, 1));
         Assertions.assertThrows(IndexOutOfBoundsException.class, () -> LongIteratorEx.of(array, -1, 2));
         Assertions.assertThrows(IndexOutOfBoundsException.class, () -> LongIteratorEx.of(array, 0, 4));
@@ -86,19 +86,19 @@ public class LongIteratorEx101Test extends TestBase {
     public void testOfLongIterator() {
         LongIterator baseIter = new LongIterator() {
             private int index = 0;
-            private long[] data = {10L, 20L, 30L};
-            
+            private long[] data = { 10L, 20L, 30L };
+
             @Override
             public boolean hasNext() {
                 return index < data.length;
             }
-            
+
             @Override
             public long nextLong() {
                 return data[index++];
             }
         };
-        
+
         LongIteratorEx iter = LongIteratorEx.of(baseIter);
         Assertions.assertTrue(iter.hasNext());
         Assertions.assertEquals(10L, iter.nextLong());
@@ -125,7 +125,7 @@ public class LongIteratorEx101Test extends TestBase {
     public void testFromIterator() {
         List<Long> list = Arrays.asList(1L, 2L, 3L);
         LongIteratorEx iter = LongIteratorEx.from(list.iterator());
-        
+
         Assertions.assertTrue(iter.hasNext());
         Assertions.assertEquals(1L, iter.nextLong());
         Assertions.assertEquals(2L, iter.nextLong());
@@ -144,35 +144,35 @@ public class LongIteratorEx101Test extends TestBase {
     public void testFromObjIteratorEx() {
         ObjIteratorEx<Long> objIter = ObjIteratorEx.of(1L, 2L, 3L);
         LongIteratorEx iter = LongIteratorEx.from(objIter);
-        
+
         iter.advance(1);
         Assertions.assertEquals(2L, iter.nextLong());
-        
+
         Assertions.assertEquals(1, iter.count());
-        
+
         iter.close();
     }
 
     @Test
     public void testAdvance() {
-        long[] array = {1L, 2L, 3L, 4L, 5L};
+        long[] array = { 1L, 2L, 3L, 4L, 5L };
         LongIteratorEx iter = LongIteratorEx.of(array);
-        
+
         iter.advance(2);
         Assertions.assertEquals(3L, iter.nextLong());
-        
+
         iter.advance(1);
         Assertions.assertEquals(5L, iter.nextLong());
-        
+
         iter.advance(10);
         Assertions.assertFalse(iter.hasNext());
     }
 
     @Test
     public void testAdvanceZero() {
-        long[] array = {1L, 2L, 3L};
+        long[] array = { 1L, 2L, 3L };
         LongIteratorEx iter = LongIteratorEx.of(array);
-        
+
         iter.advance(0);
         Assertions.assertEquals(1L, iter.nextLong());
     }
@@ -185,18 +185,18 @@ public class LongIteratorEx101Test extends TestBase {
 
     @Test
     public void testCount() {
-        long[] array = {1L, 2L, 3L, 4L, 5L};
+        long[] array = { 1L, 2L, 3L, 4L, 5L };
         LongIteratorEx iter = LongIteratorEx.of(array, 1, 4);
-        
+
         Assertions.assertEquals(3, iter.count());
         Assertions.assertFalse(iter.hasNext());
     }
 
     @Test
     public void testToArray() {
-        long[] array = {1L, 2L, 3L};
+        long[] array = { 1L, 2L, 3L };
         LongIteratorEx iter = LongIteratorEx.of(array);
-        
+
         long[] result = iter.toArray();
         Assertions.assertArrayEquals(array, result);
         Assertions.assertFalse(iter.hasNext());
@@ -204,19 +204,19 @@ public class LongIteratorEx101Test extends TestBase {
 
     @Test
     public void testToArrayPartial() {
-        long[] array = {1L, 2L, 3L, 4L, 5L};
+        long[] array = { 1L, 2L, 3L, 4L, 5L };
         LongIteratorEx iter = LongIteratorEx.of(array, 1, 4);
-        
+
         long[] result = iter.toArray();
-        Assertions.assertArrayEquals(new long[]{2L, 3L, 4L}, result);
+        Assertions.assertArrayEquals(new long[] { 2L, 3L, 4L }, result);
         Assertions.assertFalse(iter.hasNext());
     }
 
     @Test
     public void testToList() {
-        long[] array = {1L, 2L, 3L};
+        long[] array = { 1L, 2L, 3L };
         LongIteratorEx iter = LongIteratorEx.of(array);
-        
+
         LongList result = iter.toList();
         Assertions.assertEquals(3, result.size());
         Assertions.assertEquals(1L, result.get(0));
@@ -227,9 +227,9 @@ public class LongIteratorEx101Test extends TestBase {
 
     @Test
     public void testToListPartial() {
-        long[] array = {1L, 2L, 3L, 4L, 5L};
+        long[] array = { 1L, 2L, 3L, 4L, 5L };
         LongIteratorEx iter = LongIteratorEx.of(array, 1, 4);
-        
+
         LongList result = iter.toList();
         Assertions.assertEquals(3, result.size());
         Assertions.assertEquals(2L, result.get(0));

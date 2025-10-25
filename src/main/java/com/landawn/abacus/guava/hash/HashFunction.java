@@ -44,12 +44,14 @@ import com.google.common.hash.HashCode;
  * <h3>Usage Patterns</h3>
  * 
  * <p><b>Simple hashing:</b>
+ * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * HashFunction hf = Hashing.sha256();
  * HashCode hash = hf.hash("hello world".getBytes());
  * }</pre>
  * 
  * <p><b>Incremental hashing with Hasher:</b>
+ * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * HashFunction hf = Hashing.murmur3_128();
  * HashCode hash = hf.newHasher()
@@ -60,6 +62,7 @@ import com.google.common.hash.HashCode;
  * }</pre>
  * 
  * <p><b>Hashing complex objects with Funnel:</b>
+ * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * Funnel<Person> personFunnel = (person, hasher) -> {
  *     hasher.putString(person.firstName, Charsets.UTF_8)
@@ -91,7 +94,7 @@ public interface HashFunction {
      * <p>Each hasher instance should be used for exactly one hash computation. After
      * calling {@link Hasher#hash()}, the hasher should not be used again.
      * 
-     * <p><b>Example:</b>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * HashFunction hf = Hashing.md5();
      * HashCode hc = hf.newHasher()
@@ -113,7 +116,7 @@ public interface HashFunction {
      * <p>The hint is only an optimization; providing an incorrect value will not affect
      * correctness, only performance. If unsure, use {@link #newHasher()} instead.
      * 
-     * <p><b>Example:</b>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * byte[] largeData = new byte[1024 * 1024]; // 1MB
      * HashCode hash = hashFunction.newHasher(largeData.length)
@@ -135,7 +138,7 @@ public interface HashFunction {
      * <p>The integer is interpreted in little-endian byte order. The implementation may
      * be optimized compared to using a Hasher.
      * 
-     * <p><b>Example:</b>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * HashCode hash = Hashing.murmur3_32().hash(42);
      * }</pre>
@@ -152,7 +155,7 @@ public interface HashFunction {
      * <p>The long is interpreted in little-endian byte order. The implementation may
      * be optimized compared to using a Hasher.
      * 
-     * <p><b>Example:</b>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * HashCode hash = Hashing.sha256().hash(System.currentTimeMillis());
      * }</pre>
@@ -170,7 +173,7 @@ public interface HashFunction {
      * converted to byte arrays. The implementation may be optimized compared to using
      * a Hasher.
      * 
-     * <p><b>Example:</b>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * byte[] data = "Hello, World!".getBytes(StandardCharsets.UTF_8);
      * HashCode hash = Hashing.sha256().hash(data);
@@ -189,7 +192,7 @@ public interface HashFunction {
      * are hashed. This is useful when working with buffers or when only part of an
      * array contains valid data.
      * 
-     * <p><b>Example:</b>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * byte[] buffer = new byte[1024];
      * int bytesRead = inputStream.read(buffer);
@@ -217,7 +220,7 @@ public interface HashFunction {
      * when hashing strings. For cross-language compatibility, use {@link #hash(CharSequence, Charset)}
      * with UTF-8 encoding instead.
      * 
-     * <p><b>Example:</b>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * HashCode hash = Hashing.murmur3_128().hash("fast hash");
      * }</pre>
@@ -236,7 +239,7 @@ public interface HashFunction {
      * those bytes are hashed. This method is useful for cross-language compatibility
      * as it produces consistent results when the same encoding is used.
      * 
-     * <p><b>Example:</b>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String text = "Hello 世界";
      * HashCode hash = Hashing.sha256().hash(text, StandardCharsets.UTF_8);
@@ -256,7 +259,7 @@ public interface HashFunction {
      * <p>The funnel defines how to extract data from the object and feed it to the hasher.
      * This approach ensures consistent hashing of complex objects.
      * 
-     * <p><b>Example:</b>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * class Person {
      *     String name;
@@ -293,7 +296,7 @@ public interface HashFunction {
      *   <li>512 bits: SHA-512</li>
      * </ul>
      * 
-     * <p><b>Example:</b>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * HashFunction sha256 = Hashing.sha256();
      * System.out.println(sha256.bits()); // prints: 256

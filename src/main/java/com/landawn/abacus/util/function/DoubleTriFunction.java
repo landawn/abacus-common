@@ -52,8 +52,7 @@ public interface DoubleTriFunction<R> extends Throwables.DoubleTriFunction<R, Ru
      * @param a the first double argument
      * @param b the second double argument
      * @param c the third double argument
-     * @return the function result of type {@code R}
-     * @throws RuntimeException if the function encounters an error during computation
+     * @return the function result of type {@code R} if the function encounters an error during computation
      */
     @Override
     R apply(double a, double b, double c);
@@ -66,7 +65,7 @@ public interface DoubleTriFunction<R> extends Throwables.DoubleTriFunction<R, Ru
      * <p>This method enables function composition, allowing you to chain operations together.
      * The result of this function becomes the input to the {@code after} function.</p>
      * 
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Function that calculates volume
      * DoubleTriFunction<Double> volume = (l, w, h) -> l * w * h;

@@ -37,7 +37,7 @@ public interface ToLongBiFunction<T, U> extends Throwables.ToLongBiFunction<T, U
     /**
      * Applies this function to the given arguments and returns a long result.
      * 
-     * <p>Example usage:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ToLongBiFunction<Integer, Integer> multiplier = (a, b) -> (long) a * b;
      * long product = multiplier.applyAsLong(1000000, 1000000); // returns 1000000000000L
@@ -48,8 +48,7 @@ public interface ToLongBiFunction<T, U> extends Throwables.ToLongBiFunction<T, U
      *
      * @param t the first function argument
      * @param u the second function argument
-     * @return the function result as a primitive long
-     * @throws RuntimeException if any error occurs during function execution
+     * @return the function result as a primitive long if any error occurs during function execution
      */
     @Override
     long applyAsLong(T t, U u);

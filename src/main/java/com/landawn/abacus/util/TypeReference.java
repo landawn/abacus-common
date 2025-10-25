@@ -30,7 +30,7 @@ import com.landawn.abacus.type.TypeFactory;
  * subclasses, allowing frameworks to access complete type information including
  * generic parameters.
  * 
- * <p>To use this class, create an anonymous subclass with the desired generic type:
+ * <p><b>To use this class, create an anonymous subclass with the desired generic type:</b></p>
  * <pre>{@code
  * // Capture type information for List<String>
  * TypeReference<List<String>> listType = new TypeReference<List<String>>() {};
@@ -93,7 +93,7 @@ public abstract class TypeReference<T> {
      *   <li>Validates the resolved Type is not null</li>
      * </ol>
      *
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // This creates an anonymous subclass that captures List<String>
      * TypeReference<List<String>> ref = new TypeReference<List<String>>() {};
@@ -146,7 +146,7 @@ public abstract class TypeReference<T> {
      * frameworks, serialization libraries, or any code that needs to introspect generic types
      * at runtime.</p>
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Capture complex nested generic type
      * TypeReference<List<Map<String, Integer>>> complexType =
@@ -196,7 +196,7 @@ public abstract class TypeReference<T> {
      * <p>The returned Type is resolved using {@link TypeFactory#getType(java.lang.reflect.Type)}
      * during construction and is guaranteed to be non-null (validated in the constructor).</p>
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Capture complex nested generic type
      * TypeReference<List<Map<String, Integer>>> complexType =
@@ -247,8 +247,8 @@ public abstract class TypeReference<T> {
      *   <li>You're migrating code from Guava or Gson and want consistent naming</li>
      *   <li>You prefer the "Token" terminology for type representations</li>
      * </ul>
-     *
-     * <p><strong>Example usage:</strong></p>
+     * 
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Using TypeToken instead of TypeReference
      * TypeToken<List<String>> token = new TypeToken<List<String>>() {};

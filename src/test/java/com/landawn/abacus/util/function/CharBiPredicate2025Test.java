@@ -64,7 +64,7 @@ public class CharBiPredicate2025Test extends TestBase {
 
     @Test
     public void testAndShortCircuit() {
-        final boolean[] secondCalled = {false};
+        final boolean[] secondCalled = { false };
         CharBiPredicate alwaysFalse = (t, u) -> false;
         CharBiPredicate checkCalled = (t, u) -> {
             secondCalled[0] = true;
@@ -89,7 +89,7 @@ public class CharBiPredicate2025Test extends TestBase {
 
     @Test
     public void testOrShortCircuit() {
-        final boolean[] secondCalled = {false};
+        final boolean[] secondCalled = { false };
         CharBiPredicate alwaysTrue = (t, u) -> true;
         CharBiPredicate checkCalled = (t, u) -> {
             secondCalled[0] = true;

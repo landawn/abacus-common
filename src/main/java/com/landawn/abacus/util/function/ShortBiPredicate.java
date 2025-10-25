@@ -76,16 +76,47 @@ public interface ShortBiPredicate extends Throwables.ShortBiPredicate<RuntimeExc
     /**
      * Evaluates this predicate on the given arguments.
      *
+     * <p>This method tests whether the two input short values satisfy the condition
+     * represented by this predicate. It returns {@code true} if the arguments match
+     * the predicate's criteria, {@code false} otherwise.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * ShortBiPredicate equals = ShortBiPredicate.EQUAL;
+     * boolean result1 = equals.test((short) 5, (short) 5); // returns true
+     * boolean result2 = equals.test((short) 3, (short) 7); // returns false
+     *
+     * ShortBiPredicate lessThan = ShortBiPredicate.LESS_THAN;
+     * boolean result3 = lessThan.test((short) 3, (short) 7); // returns true
+     *
+     * ShortBiPredicate inRange = (value, max) -> value >= 0 && value <= max;
+     * boolean result4 = inRange.test((short) 50, (short) 100); // returns true
+     * }</pre>
+     *
      * @param t the first input argument
      * @param u the second input argument
-     * @return {@code true} if the input arguments match the predicate, otherwise {@code false}
+     * @return {@code true} if the input arguments match the predicate, otherwise {@code false} if the predicate evaluation fails
      */
     @Override
     boolean test(short t, short u);
 
     /**
      * Returns a predicate that represents the logical negation of this predicate.
-     * 
+     *
+     * <p>The returned predicate will return {@code true} when this predicate returns
+     * {@code false}, and vice versa. This is useful for inverting comparison logic
+     * without rewriting the condition.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * ShortBiPredicate equals = ShortBiPredicate.EQUAL;
+     * ShortBiPredicate notEquals = equals.negate();
+     *
+     * boolean result1 = equals.test((short) 5, (short) 5); // returns true
+     * boolean result2 = notEquals.test((short) 5, (short) 5); // returns false
+     * boolean result3 = notEquals.test((short) 3, (short) 7); // returns true
+     * }</pre>
+     *
      * @return a predicate that represents the logical negation of this predicate
      */
     default ShortBiPredicate negate() {
@@ -99,6 +130,17 @@ public interface ShortBiPredicate extends Throwables.ShortBiPredicate<RuntimeExc
      *
      * <p>Any exceptions thrown during evaluation of either predicate are relayed to the caller;
      * if evaluation of this predicate throws an exception, the {@code other} predicate will not be evaluated.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * ShortBiPredicate isPositive = (a, b) -> a > 0 && b > 0;
+     * ShortBiPredicate lessThan100 = (a, b) -> a < 100 && b < 100;
+     *
+     * ShortBiPredicate inRange = isPositive.and(lessThan100);
+     * boolean result1 = inRange.test((short) 10, (short) 20); // returns true (both positive and < 100)
+     * boolean result2 = inRange.test((short) -5, (short) 50); // returns false (not both positive)
+     * boolean result3 = inRange.test((short) 150, (short) 200); // returns false (not both < 100)
+     * }</pre>
      *
      * @param other a predicate that will be logically-ANDed with this predicate
      * @return a composed predicate that represents the short-circuiting logical AND of this predicate and the {@code other} predicate
@@ -114,6 +156,17 @@ public interface ShortBiPredicate extends Throwables.ShortBiPredicate<RuntimeExc
      *
      * <p>Any exceptions thrown during evaluation of either predicate are relayed to the caller;
      * if evaluation of this predicate throws an exception, the {@code other} predicate will not be evaluated.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * ShortBiPredicate equals = ShortBiPredicate.EQUAL;
+     * ShortBiPredicate bothZero = (a, b) -> a == 0 && b == 0;
+     *
+     * ShortBiPredicate equalsOrBothZero = equals.or(bothZero);
+     * boolean result1 = equalsOrBothZero.test((short) 5, (short) 5); // returns true (equal)
+     * boolean result2 = equalsOrBothZero.test((short) 0, (short) 0); // returns true (both zero AND equal)
+     * boolean result3 = equalsOrBothZero.test((short) 3, (short) 7); // returns false
+     * }</pre>
      *
      * @param other a predicate that will be logically-ORed with this predicate
      * @return a composed predicate that represents the short-circuiting logical OR of this predicate and the {@code other} predicate

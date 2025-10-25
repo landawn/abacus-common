@@ -41,6 +41,15 @@ public interface IntFunction<R> extends Throwables.IntFunction<R, RuntimeExcepti
     /**
      * Applies this function to the given argument.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * IntFunction<String> toString = value -> "Number: " + value;
+     * String result = toString.apply(42); // Returns "Number: 42"
+     *
+     * IntFunction<Integer> square = value -> value * value;
+     * Integer squared = square.apply(5); // Returns 25
+     * }</pre>
+     *
      * @param value the function argument
      * @return the function result
      */
@@ -52,10 +61,17 @@ public interface IntFunction<R> extends Throwables.IntFunction<R, RuntimeExcepti
      * the {@code after} function to the result. If evaluation of either function throws an exception,
      * it is relayed to the caller of the composed function.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * IntFunction<String> intToString = value -> String.valueOf(value);
+     * Function<String, Integer> stringLength = String::length;
+     * IntFunction<Integer> combined = intToString.andThen(stringLength);
+     * Integer length = combined.apply(12345); // Returns 5
+     * }</pre>
+     *
      * @param <V> the type of output of the {@code after} function, and of the composed function
-     * @param after the function to apply after this function is applied
-     * @return a composed function that first applies this function and then applies the {@code after}
-     *         function
+     * @param after the function to apply after this function is applied. Must not be {@code null}.
+     * @return a composed function that first applies this function and then applies the {@code after} function
      */
     default <V> IntFunction<V> andThen(final java.util.function.Function<? super R, ? extends V> after) {
         return t -> after.apply(apply(t));
@@ -64,6 +80,14 @@ public interface IntFunction<R> extends Throwables.IntFunction<R, RuntimeExcepti
     /**
      * Returns a function that always returns its input argument as an {@link Integer}.
      * This is equivalent to the {@link #BOX} function.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * IntFunction<Integer> identity = IntFunction.identity();
+     * Integer result = identity.apply(42); // Returns 42 (boxed)
+     * int[] array = {1, 2, 3};
+     * List<Integer> list = IntStream.of(array).mapToObj(identity).collect(Collectors.toList());
+     * }</pre>
      *
      * @return a function that always returns its input argument boxed as an {@link Integer}
      */

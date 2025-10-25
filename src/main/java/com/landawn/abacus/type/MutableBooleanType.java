@@ -27,7 +27,7 @@ public class MutableBooleanType extends AbstractType<MutableBoolean> {
     /**
      * Returns the Class object representing the MutableBoolean type.
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * MutableBooleanType type = new MutableBooleanType();
      * Class<MutableBoolean> clazz = type.clazz();
@@ -45,7 +45,7 @@ public class MutableBooleanType extends AbstractType<MutableBoolean> {
      * Indicates whether values of this type are comparable.
      * MutableBoolean implements Comparable, so this returns true.
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * MutableBooleanType type = new MutableBooleanType();
      * boolean comparable = type.isComparable();
@@ -63,7 +63,7 @@ public class MutableBooleanType extends AbstractType<MutableBoolean> {
      * Converts a MutableBoolean object to its string representation.
      * The boolean value is converted to "true" or "false".
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * MutableBooleanType type = new MutableBooleanType();
      *
@@ -91,7 +91,7 @@ public class MutableBooleanType extends AbstractType<MutableBoolean> {
      * Parses a string to create a MutableBoolean object.
      * The string is parsed as a boolean value using standard boolean parsing rules.
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * MutableBooleanType type = new MutableBooleanType();
      *
@@ -120,7 +120,7 @@ public class MutableBooleanType extends AbstractType<MutableBoolean> {
      * Retrieves a MutableBoolean value from a ResultSet at the specified column index.
      * The database boolean value is wrapped in a MutableBoolean object.
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * MutableBooleanType type = new MutableBooleanType();
      * ResultSet rs = ...; // obtained from database query
@@ -148,7 +148,7 @@ public class MutableBooleanType extends AbstractType<MutableBoolean> {
      * Retrieves a MutableBoolean value from a ResultSet using the specified column label.
      * The database boolean value is wrapped in a MutableBoolean object.
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * MutableBooleanType type = new MutableBooleanType();
      * ResultSet rs = ...; // obtained from database query
@@ -176,7 +176,7 @@ public class MutableBooleanType extends AbstractType<MutableBoolean> {
      * Sets a MutableBoolean parameter in a PreparedStatement at the specified position.
      * If the MutableBoolean is null, {@code false} is stored. Otherwise, the wrapped boolean value is stored.
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * MutableBooleanType type = new MutableBooleanType();
      * PreparedStatement stmt = connection.prepareStatement(
@@ -204,7 +204,7 @@ public class MutableBooleanType extends AbstractType<MutableBoolean> {
      * Sets a MutableBoolean parameter in a CallableStatement using the specified parameter name.
      * If the MutableBoolean is null, {@code false} is stored. Otherwise, the wrapped boolean value is stored.
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * MutableBooleanType type = new MutableBooleanType();
      * CallableStatement stmt = connection.prepareCall("{call update_status(?, ?)}");
@@ -231,7 +231,7 @@ public class MutableBooleanType extends AbstractType<MutableBoolean> {
      * Appends the string representation of a MutableBoolean to an Appendable.
      * The value is written as "true", "false", or "null".
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * MutableBooleanType type = new MutableBooleanType();
      * StringBuilder sb = new StringBuilder();
@@ -264,7 +264,7 @@ public class MutableBooleanType extends AbstractType<MutableBoolean> {
      * The value is written as the character arrays for "true", "false", or "null".
      * This method is optimized for character-based writing.
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * MutableBooleanType type = new MutableBooleanType();
      * CharacterWriter writer = new CharacterWriter();

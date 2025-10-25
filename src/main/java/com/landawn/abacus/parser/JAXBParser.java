@@ -56,7 +56,7 @@ import jakarta.xml.bind.Unmarshaller;
  * <p>Note: This parser requires classes to be properly annotated with JAXB annotations
  * such as {@code @XmlRootElement}, {@code @XmlElement}, etc.</p>
  * 
- * <p>Usage example:</p>
+ * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * JAXBParser parser = new JAXBParser();
  * 
@@ -106,7 +106,7 @@ final class JAXBParser extends AbstractXMLParser {
      * <p>Note: The 'ignoredPropNames' configuration option is not supported by JAXB
      * and will throw a {@link ParseException} if specified.</p>
      * 
-     * <p>Usage example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Person person = new Person("Alice", 25);
      * String xml = parser.serialize(person, null);
@@ -141,7 +141,7 @@ final class JAXBParser extends AbstractXMLParser {
      * <p>This method serializes a Java object to XML and writes it to the specified file.
      * If the file doesn't exist, it will be created. If it exists, it will be overwritten.</p>
      * 
-     * <p>Usage example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Person person = new Person("Bob", 35);
      * File outputFile = new File("person.xml");
@@ -180,7 +180,7 @@ final class JAXBParser extends AbstractXMLParser {
      * output stream. The stream is buffered internally for better performance but
      * is not closed by this method.</p>
      * 
-     * <p>Usage example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Person person = new Person("Carol", 28);
      * try (FileOutputStream fos = new FileOutputStream("person.xml")) {
@@ -216,7 +216,7 @@ final class JAXBParser extends AbstractXMLParser {
      * writer. The writer is automatically buffered if it's not already a BufferedWriter.
      * The writer is flushed but not closed by this method.</p>
      * 
-     * <p>Usage example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Person person = new Person("Dave", 40);
      * StringWriter sw = new StringWriter();
@@ -296,7 +296,7 @@ final class JAXBParser extends AbstractXMLParser {
      * using JAXB unmarshalling. The target class must be properly annotated with
      * JAXB annotations.</p>
      * 
-     * <p>Usage example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String xml = "<?xml version=\"1.0\"?><person><name>Eve</name><age>22</age></person>";
      * Person person = parser.deserialize(xml, null, Person.class);
@@ -330,7 +330,7 @@ final class JAXBParser extends AbstractXMLParser {
      * <p>This method reads XML from a file and converts it to a Java object
      * using JAXB unmarshalling.</p>
      * 
-     * <p>Usage example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * File xmlFile = new File("person.xml");
      * Person person = parser.deserialize(xmlFile, null, Person.class);
@@ -364,7 +364,7 @@ final class JAXBParser extends AbstractXMLParser {
      * using JAXB unmarshalling. The stream is buffered internally for better performance
      * but is not closed by this method.</p>
      * 
-     * <p>Usage example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * try (FileInputStream fis = new FileInputStream("person.xml")) {
      *     Person person = parser.deserialize(fis, null, Person.class);
@@ -395,7 +395,7 @@ final class JAXBParser extends AbstractXMLParser {
      * <p>This method reads XML from a reader and converts it to a Java object
      * using JAXB unmarshalling. The reader is not closed by this method.</p>
      * 
-     * <p>Usage example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * StringReader sr = new StringReader(xmlString);
      * Person person = parser.deserialize(sr, null, Person.class);

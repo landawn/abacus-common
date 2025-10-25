@@ -30,7 +30,7 @@ import java.io.OutputStream;
  * call {@link #finish()} before closing the stream to ensure all data is properly
  * compressed and written.</p>
  * 
- * <p>Example usage:</p>
+ * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * try (FileOutputStream fileOut = new FileOutputStream("data.lz4");
  *      LZ4BlockOutputStream lz4Out = new LZ4BlockOutputStream(fileOut)) {
@@ -50,7 +50,7 @@ public final class LZ4BlockOutputStream extends OutputStream {
      * Creates a new LZ4BlockOutputStream that will compress data and write it to
      * the specified output stream using the default block size.
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * FileOutputStream fileOut = new FileOutputStream("compressed.lz4");
      * LZ4BlockOutputStream lz4Out = new LZ4BlockOutputStream(fileOut);
@@ -69,7 +69,7 @@ public final class LZ4BlockOutputStream extends OutputStream {
      * Larger blocks may achieve better compression ratios but use more memory.
      * The block size must be a power of 2 and is typically between 64KB and 4MB.</p>
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * FileOutputStream fileOut = new FileOutputStream("compressed.lz4");
      * // Use 1MB blocks for better compression ratio
@@ -88,7 +88,7 @@ public final class LZ4BlockOutputStream extends OutputStream {
      * The byte is buffered internally and will be compressed when enough
      * data has been accumulated or when the stream is flushed/finished.
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * lz4Out.write(65); // Write the byte 'A'
      * }</pre>
@@ -105,7 +105,7 @@ public final class LZ4BlockOutputStream extends OutputStream {
      * Writes all bytes from the specified byte array to this output stream.
      * The bytes are buffered internally and will be compressed as needed.
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * byte[] data = "Hello, World!".getBytes();
      * lz4Out.write(data);
@@ -124,7 +124,7 @@ public final class LZ4BlockOutputStream extends OutputStream {
      * to this output stream. The bytes are buffered internally and will be
      * compressed as needed.
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * byte[] buffer = new byte[1024];
      * int bytesRead = inputStream.read(buffer);
@@ -163,7 +163,7 @@ public final class LZ4BlockOutputStream extends OutputStream {
      * <p>After calling finish(), no more data can be written to this stream, but the
      * underlying output stream remains open and can be used for other purposes.</p>
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * lz4Out.write(data);
      * lz4Out.finish(); // Ensure all data is compressed

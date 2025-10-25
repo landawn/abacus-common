@@ -38,6 +38,22 @@ public interface ShortFunction<R> extends Throwables.ShortFunction<R, RuntimeExc
     /**
      * Applies this function to the given argument.
      *
+     * <p>This method takes a short value as input and produces a result of type R.
+     * The function should be deterministic, meaning that for the same input, it
+     * should always produce the same output.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * ShortFunction<String> formatter = value -> "Number: " + value;
+     * String result1 = formatter.apply((short) 42); // returns "Number: 42"
+     *
+     * ShortFunction<Integer> widener = value -> (int) value;
+     * Integer result2 = widener.apply((short) 100); // returns 100
+     *
+     * ShortFunction<Boolean> isPositive = value -> value > 0;
+     * Boolean result3 = isPositive.apply((short) -5); // returns false
+     * }</pre>
+     *
      * @param value the function argument
      * @return the function result
      */
@@ -48,6 +64,21 @@ public interface ShortFunction<R> extends Throwables.ShortFunction<R, RuntimeExc
      * Returns a composed function that first applies this function to its input, and then applies
      * the {@code after} function to the result. If evaluation of either function throws an exception,
      * it is relayed to the caller of the composed function.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * ShortFunction<Integer> widener = value -> (int) value;
+     * Function<Integer, String> formatter = n -> "Value: " + n;
+     *
+     * ShortFunction<String> combined = widener.andThen(formatter);
+     * String result = combined.apply((short) 42); // returns "Value: 42"
+     *
+     * ShortFunction<String> toString = value -> String.valueOf(value);
+     * Function<String, Integer> length = String::length;
+     *
+     * ShortFunction<Integer> stringLength = toString.andThen(length);
+     * Integer len = stringLength.apply((short) 12345); // returns 5
+     * }</pre>
      *
      * @param <V> the type of output of the {@code after} function, and of the composed function
      * @param after the function to apply after this function is applied
@@ -60,6 +91,19 @@ public interface ShortFunction<R> extends Throwables.ShortFunction<R, RuntimeExc
     /**
      * Returns a function that always returns its input argument.
      * This is equivalent to the identity function for short values, boxing them into Short objects.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * ShortFunction<Short> identity = ShortFunction.identity();
+     * Short result1 = identity.apply((short) 42); // returns 42
+     * Short result2 = identity.apply((short) -100); // returns -100
+     *
+     * // Useful in stream operations
+     * short[] values = {1, 2, 3, 4, 5};
+     * List<Short> boxed = Arrays.stream(values)
+     *     .mapToObj(v -> ShortFunction.identity().apply((short) v))
+     *     .collect(Collectors.toList());
+     * }</pre>
      *
      * @return a function that always returns its input argument as a Short object
      */

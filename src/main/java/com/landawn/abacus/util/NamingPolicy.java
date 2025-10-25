@@ -33,7 +33,7 @@ import com.landawn.abacus.annotation.Beta;
  *   <li>{@link #NO_CHANGE} - Leaves the string unchanged</li>
  * </ul>
  * 
- * <p>Example usage:</p>
+ * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * String original = "user-name";
  * String camelCase = NamingPolicy.LOWER_CAMEL_CASE.convert(original); // "userName"
@@ -48,56 +48,95 @@ public enum NamingPolicy {
 
     /**
      * Lower camel case naming policy (e.g., "myVariableName").
-     * 
+     *
      * <p>This policy converts strings to lowerCamelCase format where the first word
      * starts with a lowercase letter and subsequent words start with uppercase letters.
      * Words are joined without any separators.</p>
-     * 
-     * <p>Example: "user_name" → "userName", "first-name" → "firstName"</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * String result1 = NamingPolicy.LOWER_CAMEL_CASE.convert("user_name");     // "userName"
+     * String result2 = NamingPolicy.LOWER_CAMEL_CASE.convert("first-name");    // "firstName"
+     * String result3 = NamingPolicy.LOWER_CAMEL_CASE.convert("MY_CONSTANT");   // "myConstant"
+     * }</pre>
+     *
+     * @see #convert(String)
+     * @see Strings#toCamelCase(String)
      */
     LOWER_CAMEL_CASE(Strings::toCamelCase),
 
     /**
      * Upper camel case naming policy (e.g., "MyVariableName").
-     * 
+     *
      * <p>This policy converts strings to UpperCamelCase format where each word starts
      * with an uppercase letter and words are joined without any separators. This is
      * commonly used in Java class names.</p>
-     * 
-     * <p>Example: "user_name" → "UserName", "first-name" → "FirstName"</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * String result1 = NamingPolicy.UPPER_CAMEL_CASE.convert("user_name");     // "UserName"
+     * String result2 = NamingPolicy.UPPER_CAMEL_CASE.convert("first-name");    // "FirstName"
+     * String result3 = NamingPolicy.UPPER_CAMEL_CASE.convert("my_constant");   // "MyConstant"
+     * }</pre>
+     *
+     * @see #convert(String)
+     * @see Strings#toPascalCase(String)
      */
     UPPER_CAMEL_CASE(Strings::toPascalCase),
 
     /**
      * Lower case with underscore naming policy (e.g., "my_variable_name").
-     * 
+     *
      * <p>This policy converts strings to snake_case format where all letters are
      * lowercase and words are separated by underscores. This is commonly used in
      * Python, Ruby, and database column names.</p>
-     * 
-     * <p>Example: "userName" → "user_name", "FirstName" → "first_name"</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * String result1 = NamingPolicy.LOWER_CASE_WITH_UNDERSCORE.convert("userName");     // "user_name"
+     * String result2 = NamingPolicy.LOWER_CASE_WITH_UNDERSCORE.convert("FirstName");    // "first_name"
+     * String result3 = NamingPolicy.LOWER_CASE_WITH_UNDERSCORE.convert("myConstant");   // "my_constant"
+     * }</pre>
+     *
+     * @see #convert(String)
+     * @see Strings#toLowerCaseWithUnderscore(String)
      */
     LOWER_CASE_WITH_UNDERSCORE(Strings::toLowerCaseWithUnderscore),
 
     /**
      * Upper case with underscore naming policy (e.g., "MY_VARIABLE_NAME").
-     * 
+     *
      * <p>This policy converts strings to UPPER_SNAKE_CASE format where all letters
      * are uppercase and words are separated by underscores. This is commonly used
      * for constants and configuration keys.</p>
-     * 
-     * <p>Example: "userName" → "USER_NAME", "firstName" → "FIRST_NAME"</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * String result1 = NamingPolicy.UPPER_CASE_WITH_UNDERSCORE.convert("userName");     // "USER_NAME"
+     * String result2 = NamingPolicy.UPPER_CASE_WITH_UNDERSCORE.convert("firstName");    // "FIRST_NAME"
+     * String result3 = NamingPolicy.UPPER_CASE_WITH_UNDERSCORE.convert("myConstant");   // "MY_CONSTANT"
+     * }</pre>
+     *
+     * @see #convert(String)
+     * @see Strings#toUpperCaseWithUnderscore(String)
      */
     UPPER_CASE_WITH_UNDERSCORE(Strings::toUpperCaseWithUnderscore),
 
     /**
      * No change naming policy - returns the string as-is.
-     * 
+     *
      * <p>This policy performs no transformation and returns the input string unchanged.
      * It can be useful when you need a policy object but don't want any transformation
      * to occur.</p>
-     * 
-     * <p>Example: "any-String_123" → "any-String_123"</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * String result1 = NamingPolicy.NO_CHANGE.convert("any-String_123");     // "any-String_123"
+     * String result2 = NamingPolicy.NO_CHANGE.convert("MixedCase");          // "MixedCase"
+     * String result3 = NamingPolicy.NO_CHANGE.convert("UPPER_CASE");         // "UPPER_CASE"
+     * }</pre>
+     *
+     * @see #convert(String)
      */
     @Beta
     NO_CHANGE(str -> str);
@@ -128,7 +167,7 @@ public enum NamingPolicy {
      *   <li>Case transitions (e.g., "camelCase" to "camel case")</li>
      * </ul>
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Convert to lower camel case
      * String result1 = NamingPolicy.LOWER_CAMEL_CASE.convert("user-name"); // "userName"
@@ -155,7 +194,7 @@ public enum NamingPolicy {
      * useful when you need to pass the converter to methods that accept functions
      * or when composing multiple transformations.</p>
      *
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Function<String, String> converter = NamingPolicy.LOWER_CAMEL_CASE.func();
      * List<String> names = Arrays.asList("user_name", "first_name");

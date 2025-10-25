@@ -419,7 +419,7 @@ public enum JavaVersion {
      * version is equal to or greater than the required version.
      * </p>
      * 
-     * <p><b>Example:</b></p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * JavaVersion current = JavaVersion.JAVA_11;
      * if (current.atLeast(JavaVersion.JAVA_1_8)) {
@@ -444,7 +444,7 @@ public enum JavaVersion {
      * version is equal to or less than the specified version.
      * </p>
      * 
-     * <p><b>Example:</b></p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * JavaVersion current = JavaVersion.JAVA_1_7;
      * if (current.atMost(JavaVersion.JAVA_1_8)) {
@@ -489,7 +489,7 @@ public enum JavaVersion {
      * <p>For versions above 39, returns {@code JAVA_RECENT}. For complex version
      * strings with multiple dots, recursively parses the major version portion.</p>
      *
-     * <p><b>Examples:</b></p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * JavaVersion.get("1.8");     // Returns JAVA_1_8
      * JavaVersion.get("8");       // Returns JAVA_1_8
@@ -621,7 +621,7 @@ public enum JavaVersion {
      *   <li>With minor versions: "11.0.2" → JAVA_11 (ignores minor/patch versions)</li>
      * </ul>
      * 
-     * <p><b>Examples:</b></p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * JavaVersion v1 = JavaVersion.of("1.8");     // Returns JAVA_1_8
      * JavaVersion v2 = JavaVersion.of("11");      // Returns JAVA_11
@@ -670,7 +670,7 @@ public enum JavaVersion {
      *   <li>For JAVA_RECENT: the detected version number as a string</li>
      * </ul>
      * 
-     * <p><b>Example:</b></p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * System.out.println(JavaVersion.JAVA_1_8);  // Prints: 1.8
      * System.out.println(JavaVersion.JAVA_11);   // Prints: 11

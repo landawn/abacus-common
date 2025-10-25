@@ -100,8 +100,10 @@ public class LongTriFunction2025Test extends TestBase {
     @Test
     public void testApply_findMedian() {
         final LongTriFunction<Long> function = (a, b, c) -> {
-            if ((a >= b && a <= c) || (a <= b && a >= c)) return a;
-            if ((b >= a && b <= c) || (b <= a && b >= c)) return b;
+            if ((a >= b && a <= c) || (a <= b && a >= c))
+                return a;
+            if ((b >= a && b <= c) || (b <= a && b >= c))
+                return b;
             return c;
         };
         final Long result = function.apply(5L, 100L, 50L);

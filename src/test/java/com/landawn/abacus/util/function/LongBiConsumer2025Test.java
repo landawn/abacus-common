@@ -131,7 +131,8 @@ public class LongBiConsumer2025Test extends TestBase {
     public void testFunctionalInterfaceContract() {
         // Test that LongBiConsumer can be used as a functional interface
         assertDoesNotThrow(() -> {
-            final LongBiConsumer consumer = (t, u) -> { };
+            final LongBiConsumer consumer = (t, u) -> {
+            };
             consumer.accept(1L, 2L);
         });
     }

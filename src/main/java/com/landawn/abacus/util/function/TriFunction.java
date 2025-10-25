@@ -37,7 +37,7 @@ public interface TriFunction<A, B, C, R> extends Throwables.TriFunction<A, B, C,
     /**
      * Applies this function to the given arguments and returns the result.
      * 
-     * <p>Example usage:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * TriFunction<Integer, Integer, Integer, Integer> sum = (a, b, c) -> a + b + c;
      * Integer result = sum.apply(1, 2, 3); // returns 6
@@ -54,8 +54,7 @@ public interface TriFunction<A, B, C, R> extends Throwables.TriFunction<A, B, C,
      * @param a the first function argument
      * @param b the second function argument
      * @param c the third function argument
-     * @return the function result
-     * @throws RuntimeException if any error occurs during function execution
+     * @return the function result if any error occurs during function execution
      */
     @Override
     R apply(A a, B b, C c);
@@ -65,7 +64,7 @@ public interface TriFunction<A, B, C, R> extends Throwables.TriFunction<A, B, C,
      * applies the after function to the result. If evaluation of either function throws an
      * exception, it is relayed to the caller of the composed function.
      * 
-     * <p>Example usage:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * TriFunction<Integer, Integer, Integer, Integer> sum = (a, b, c) -> a + b + c;
      * Function<Integer, String> formatter = n -> "Result: " + n;
@@ -94,7 +93,7 @@ public interface TriFunction<A, B, C, R> extends Throwables.TriFunction<A, B, C,
      * This method is useful when you need to use this function in a context that expects
      * a Throwables.TriFunction with a specific exception type.
      * 
-     * <p>Example usage:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * TriFunction<String, Integer, Boolean, String> function = (s, i, b) -> { ... };
      * Throwables.TriFunction<String, Integer, Boolean, String, IOException> throwableFunction = 

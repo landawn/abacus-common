@@ -39,7 +39,7 @@ import com.landawn.abacus.annotation.SuppressFBWarnings;
  * <p><strong>Note:</strong> This object is used to store the properties' values of an object.
  * It should not set or get values for another object's property.</p>
  * 
- * <p>Example usage:</p>
+ * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * MapEntity user = new MapEntity("User");
  * user.set("name", "John");
@@ -72,7 +72,7 @@ public final class MapEntity implements Serializable {
     /**
      * Constructs a new MapEntity with the specified entity name.
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * MapEntity product = new MapEntity("Product");
      * }</pre>
@@ -86,7 +86,7 @@ public final class MapEntity implements Serializable {
     /**
      * Constructs a new MapEntity with the specified entity name and initial properties.
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Map<String, Object> props = new HashMap<>();
      * props.put("id", 1);
@@ -106,7 +106,7 @@ public final class MapEntity implements Serializable {
     /**
      * Returns the entity name.
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * MapEntity user = new MapEntity("User");
      * String name = user.entityName(); // returns "User"
@@ -122,7 +122,7 @@ public final class MapEntity implements Serializable {
      * Gets the value of the specified property.
      * Supports both simple property names and canonical names (e.g., "EntityName.propertyName").
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * MapEntity user = new MapEntity("User");
      * user.set("email", "john@example.com");
@@ -148,7 +148,7 @@ public final class MapEntity implements Serializable {
      * Gets the value of the specified property and converts it to the target type.
      * If the property value is null, returns the default value for the target type.
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * MapEntity user = new MapEntity("User");
      * user.set("age", "25");
@@ -176,7 +176,7 @@ public final class MapEntity implements Serializable {
      * Sets the value of the specified property.
      * Supports both simple property names and canonical names (e.g., "EntityName.propertyName").
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * MapEntity user = new MapEntity("User");
      * user.set("name", "John")
@@ -202,7 +202,7 @@ public final class MapEntity implements Serializable {
      * Sets multiple properties from the provided map.
      * Each entry in the map will be set as a property.
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Map<String, Object> props = new HashMap<>();
      * props.put("name", "John");
@@ -224,7 +224,7 @@ public final class MapEntity implements Serializable {
      * Removes the specified property from this entity.
      * Supports both simple property names and canonical names (e.g., "EntityName.propertyName").
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * MapEntity user = new MapEntity("User");
      * user.set("tempData", "temp");
@@ -251,7 +251,7 @@ public final class MapEntity implements Serializable {
     /**
      * Removes all specified properties from this entity.
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * MapEntity user = new MapEntity("User");
      * user.set("temp1", "value1").set("temp2", "value2");
@@ -270,7 +270,7 @@ public final class MapEntity implements Serializable {
      * Checks if this entity contains a property with the specified name.
      * Supports both simple property names and canonical names (e.g., "EntityName.propertyName").
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * MapEntity user = new MapEntity("User");
      * user.set("email", "john@example.com");
@@ -299,7 +299,7 @@ public final class MapEntity implements Serializable {
      * Returns a set of all property names that have been set in this entity.
      * The returned set contains simple property names (without entity name prefix).
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * MapEntity user = new MapEntity("User");
      * user.set("name", "John").set("age", 30);
@@ -318,7 +318,7 @@ public final class MapEntity implements Serializable {
      * Returns a set view of all property entries in this entity.
      * Each entry contains a property name and its corresponding value.
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * MapEntity user = new MapEntity("User");
      * user.set("name", "John").set("age", 30);
@@ -339,7 +339,7 @@ public final class MapEntity implements Serializable {
      * The returned map is the actual internal storage, so modifications to it
      * will affect this MapEntity.
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * MapEntity user = new MapEntity("User");
      * user.set("name", "John");
@@ -357,7 +357,7 @@ public final class MapEntity implements Serializable {
     /**
      * Returns the number of properties in this entity.
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * MapEntity user = new MapEntity("User");
      * user.set("name", "John").set("age", 30);
@@ -373,7 +373,7 @@ public final class MapEntity implements Serializable {
     /**
      * Checks if this entity has no properties.
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * MapEntity user = new MapEntity("User");
      * boolean empty = user.isEmpty(); // returns true
@@ -392,7 +392,7 @@ public final class MapEntity implements Serializable {
      * Creates a copy of this MapEntity with the same entity name and properties.
      * The copy is a shallow copy - the property values themselves are not cloned.
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * MapEntity original = new MapEntity("User");
      * original.set("name", "John").set("age", 30);
@@ -425,7 +425,7 @@ public final class MapEntity implements Serializable {
      * Two MapEntity objects are equal if they have the same entity name
      * and contain the same properties with equal values.
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * MapEntity user1 = new MapEntity("User");
      * user1.set("name", "John");
@@ -458,7 +458,7 @@ public final class MapEntity implements Serializable {
      * The string representation is the same as the string representation
      * of the underlying properties map.
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * MapEntity user = new MapEntity("User");
      * user.set("name", "John").set("age", 30);
@@ -476,7 +476,7 @@ public final class MapEntity implements Serializable {
      * Creates a builder for constructing MapEntity instances.
      * The builder provides a fluent API for setting properties.
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * MapEntity user = MapEntity.builder("User")
      *     .put("name", "John")
@@ -497,7 +497,7 @@ public final class MapEntity implements Serializable {
      * This builder allows chaining multiple property settings before building
      * the final MapEntity instance.
      * 
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * MapEntity product = MapEntity.builder("Product")
      *     .put("id", 123)
@@ -521,7 +521,7 @@ public final class MapEntity implements Serializable {
         /**
          * Adds a property to the entity being built.
          * 
-         * <p>Example:</p>
+         * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * builder.put("name", "John")
          *        .put("age", 30);
@@ -540,7 +540,7 @@ public final class MapEntity implements Serializable {
         /**
          * Builds and returns the MapEntity instance.
          * 
-         * <p>Example:</p>
+         * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * MapEntity entity = builder.build();
          * }</pre>

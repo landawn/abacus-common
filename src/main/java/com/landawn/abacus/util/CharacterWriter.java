@@ -109,7 +109,7 @@ public abstract sealed class CharacterWriter extends BufferedWriter permits Buff
      * <p>If the character needs escaping according to the replacement table,
      * the escape sequence is written instead of the original character.</p>
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // In a JSON writer where " is escaped as \"
      * writer.writeCharacter('"'); // Writes: \"
@@ -134,7 +134,7 @@ public abstract sealed class CharacterWriter extends BufferedWriter permits Buff
      * and escaped if necessary. This method is optimized to minimize the number
      * of write operations by batching non-escaped characters.</p>
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * char[] chars = "Hello \"World\"".toCharArray();
      * writer.writeCharacter(chars); // Writes: Hello \"World\"
@@ -180,7 +180,7 @@ public abstract sealed class CharacterWriter extends BufferedWriter permits Buff
      * <p>Only the specified portion of the array is processed for escaping.
      * Characters outside the specified range are not written.</p>
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * char[] chars = "prefix<data>suffix".toCharArray();
      * writer.writeCharacter(chars, 6, 6); // Writes: <data> (with escaping)
@@ -228,7 +228,7 @@ public abstract sealed class CharacterWriter extends BufferedWriter permits Buff
      * <p>Each character in the string is checked against the replacement table,
      * and escaped if necessary. If the string is null, "null" is written.</p>
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * writer.writeCharacter("Hello \"World\""); // Writes escaped version
      * writer.writeCharacter(null); // Writes: null
@@ -252,7 +252,7 @@ public abstract sealed class CharacterWriter extends BufferedWriter permits Buff
      * <p>Only the specified portion of the string is processed for escaping.
      * Characters outside the specified range are not written.</p>
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String text = "prefix<data>suffix";
      * writer.writeCharacter(text, 6, 6); // Writes: <data> (with escaping)
@@ -277,7 +277,7 @@ public abstract sealed class CharacterWriter extends BufferedWriter permits Buff
      * Converts a character to its hexadecimal string representation.
      * Used for numeric character references in XML.
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String hex = getHexString(0x1F); // Returns "&#x1f;"
      * }</pre>
@@ -293,7 +293,7 @@ public abstract sealed class CharacterWriter extends BufferedWriter permits Buff
      * Converts a character to its Unicode escape sequence.
      * Used for JSON Unicode escapes.
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String unicode = getCharNum('\u2028'); // Returns "\\u2028"
      * }</pre>

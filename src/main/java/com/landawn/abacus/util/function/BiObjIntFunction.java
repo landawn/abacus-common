@@ -33,6 +33,12 @@ public interface BiObjIntFunction<T, U, R> extends Throwables.BiObjIntFunction<T
     /**
      * Applies this function to the given arguments.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * BiObjIntFunction<String, String, String> repeater = (s1, s2, times) -> (s1 + s2).repeat(times);
+     * String result = repeater.apply("Hello", "World", 2); // Returns "HelloWorldHelloWorld"
+     * }</pre>
+     *
      * @param t the first function argument (object value)
      * @param u the second function argument (object value)
      * @param i the third function argument (int value)
@@ -44,6 +50,13 @@ public interface BiObjIntFunction<T, U, R> extends Throwables.BiObjIntFunction<T
     /**
      * Returns a composed function that first applies this function to its input, and then applies the {@code after} function to the result.
      * If evaluation of either function throws an exception, it is relayed to the caller of the composed function.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * BiObjIntFunction<String, String, Integer> lengthCalc = (s1, s2, i) -> (s1 + s2).length() + i;
+     * Function<Integer, String> toString = Object::toString;
+     * BiObjIntFunction<String, String, String> combined = lengthCalc.andThen(toString);
+     * }</pre>
      *
      * @param <V> the type of output of the {@code after} function, and of the composed function
      * @param after the function to apply after this function is applied. Must not be {@code null}.

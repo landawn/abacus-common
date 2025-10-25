@@ -35,6 +35,12 @@ public interface BooleanFunction<R> extends Throwables.BooleanFunction<R, Runtim
     /**
      * Applies this function to the given argument.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * BooleanFunction<String> formatter = b -> b ? "YES" : "NO";
+     * String result = formatter.apply(true); // Returns "YES"
+     * }</pre>
+     *
      * @param value the function argument
      * @return the function result
      */
@@ -44,6 +50,13 @@ public interface BooleanFunction<R> extends Throwables.BooleanFunction<R, Runtim
     /**
      * Returns a composed function that first applies this function to its input, and then applies the {@code after} function to the result.
      * If evaluation of either function throws an exception, it is relayed to the caller of the composed function.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * BooleanFunction<String> toString = b -> String.valueOf(b);
+     * Function<String, Integer> length = String::length;
+     * BooleanFunction<Integer> combined = toString.andThen(length);
+     * }</pre>
      *
      * @param <V> the type of output of the {@code after} function, and of the composed function
      * @param after the function to apply after this function is applied. Must not be {@code null}.
@@ -56,6 +69,12 @@ public interface BooleanFunction<R> extends Throwables.BooleanFunction<R, Runtim
     /**
      * Returns a function that always returns its input argument.
      * This is equivalent to the identity function for {@code boolean} values.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * BooleanFunction<Boolean> id = BooleanFunction.identity();
+     * Boolean result = id.apply(true); // Returns true
+     * }</pre>
      *
      * @return a function that always returns its input argument
      */

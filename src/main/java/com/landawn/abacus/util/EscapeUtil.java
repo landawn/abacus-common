@@ -243,7 +243,9 @@ public final class EscapeUtil {
      * standard programming.</p>
      *
      * <p>Instead, the class should be used as:</p>
-     * <pre>StringEscapeUtils.escapeJava("foo");</pre>
+     * 
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code StringEscapeUtils.escapeJava("foo"); }</pre>
      *
      * <p>This constructor is public to permit tools that require a JavaBean
      * instance to operate.</p>
@@ -265,13 +267,13 @@ public final class EscapeUtil {
      *
      * <p>The resulting string can be safely embedded in Java source code as a string literal.</p>
      *
-     * <p><strong>Examples:</strong></p>
-     * <pre>
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
      * EscapeUtil.escapeJava("Hello\nWorld")      = "Hello\\nWorld"
      * EscapeUtil.escapeJava("He said \"Hi\"")    = "He said \\\"Hi\\\""
      * EscapeUtil.escapeJava("C:\\temp\\file")    = "C:\\\\temp\\\\file"
      * EscapeUtil.escapeJava(null)                = null
-     * </pre>
+     * }</pre>
      *
      * @param input the string to escape, which may be null
      * @return the escaped string safe for use in Java code, or {@code null} if {@code null} input
@@ -293,13 +295,13 @@ public final class EscapeUtil {
      *
      * <p>The resulting string can be safely embedded in JavaScript or ActionScript code.</p>
      *
-     * <p><strong>Examples:</strong></p>
-     * <pre>
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
      * EscapeUtil.escapeEcmaScript("Don't stop")     = "Don\\'t stop"
      * EscapeUtil.escapeEcmaScript("&lt;/script&gt;")     = "&lt;\\/script&gt;"
      * EscapeUtil.escapeEcmaScript("He said \"Hi\"") = "He said \\\"Hi\\\""
      * EscapeUtil.escapeEcmaScript(null)             = null
-     * </pre>
+     * }</pre>
      *
      * @param input the string to escape, which may be null
      * @return the escaped string safe for use in EcmaScript code, or {@code null} if {@code null} input
@@ -321,13 +323,13 @@ public final class EscapeUtil {
      *
      * <p>The resulting string can be safely embedded as a JSON string value.</p>
      *
-     * <p><strong>Examples:</strong></p>
-     * <pre>
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
      * EscapeUtil.escapeJson("Hello\nWorld")    = "Hello\\nWorld"
      * EscapeUtil.escapeJson("path/to/file")    = "path\\/to\\/file"
      * EscapeUtil.escapeJson("Say \"Hello\"")   = "Say \\\"Hello\\\""
      * EscapeUtil.escapeJson(null)              = null
-     * </pre>
+     * }</pre>
      *
      * @param input the string to escape, which may be null
      * @return the escaped string safe for use in JSON, or {@code null} if {@code null} input
@@ -347,13 +349,13 @@ public final class EscapeUtil {
      * {@code \\}, {@code \"}, {@code \'}, octal sequences ({@code \0} to {@code \377}), and
      * Unicode sequences ({@code \\uXXXX}).</p>
      *
-     * <p><strong>Examples:</strong></p>
-     * <pre>
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
      * EscapeUtil.unescapeJava("Hello\\nWorld")    = "Hello\nWorld"
      * EscapeUtil.unescapeJava("He said \\\"Hi\\\"") = "He said \"Hi\""
      * EscapeUtil.unescapeJava("\\u0048\\u0065\\u006C\\u006C\\u006F") = "Hello"
      * EscapeUtil.unescapeJava(null)               = null
-     * </pre>
+     * }</pre>
      *
      * @param input the string to unescape, which may be null
      * @return the unescaped string, or {@code null} if {@code null} input
@@ -371,12 +373,12 @@ public final class EscapeUtil {
      * It processes escape sequences including {@code \'}, {@code \"}, {@code \/}, {@code \\},
      * {@code \t}, {@code \n}, {@code \r}, {@code \f}, and Unicode sequences.</p>
      *
-     * <p><strong>Examples:</strong></p>
-     * <pre>
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
      * EscapeUtil.unescapeEcmaScript("Don\\'t stop")  = "Don't stop"
      * EscapeUtil.unescapeEcmaScript("&lt;\\/script&gt;")  = "&lt;/script&gt;"
      * EscapeUtil.unescapeEcmaScript(null)            = null
-     * </pre>
+     * }</pre>
      *
      * @param input the string to unescape, which may be null
      * @return the unescaped string, or {@code null} if {@code null} input
@@ -396,13 +398,13 @@ public final class EscapeUtil {
      * {@code \b}, {@code \f}, {@code \n}, {@code \r}, {@code \t}, and Unicode sequences
      * ({@code \\uXXXX}).</p>
      *
-     * <p><strong>Examples:</strong></p>
-     * <pre>
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
      * EscapeUtil.unescapeJson("Hello\\nWorld")       = "Hello\nWorld"
      * EscapeUtil.unescapeJson("path\\/to\\/file")    = "path/to/file"
      * EscapeUtil.unescapeJson("Say \\\"Hello\\\"")   = "Say \"Hello\""
      * EscapeUtil.unescapeJson(null)                  = null
-     * </pre>
+     * }</pre>
      *
      * @param input the string to unescape, which may be null
      * @return the unescaped string, or {@code null} if {@code null} input
@@ -428,13 +430,13 @@ public final class EscapeUtil {
      * For XML escaping that includes {@code &apos;}, use {@link #escapeXml10(String)} or
      * {@link #escapeXml11(String)}.</p>
      *
-     * <p><strong>Examples:</strong></p>
-     * <pre>
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
      * EscapeUtil.escapeHtml4("&lt;p&gt;Hello&lt;/p&gt;")  = "&amp;lt;p&amp;gt;Hello&amp;lt;/p&amp;gt;"
      * EscapeUtil.escapeHtml4("bread &amp; butter")    = "bread &amp;amp; butter"
      * EscapeUtil.escapeHtml4("\"quoted\"")        = "&amp;quot;quoted&amp;quot;"
      * EscapeUtil.escapeHtml4(null)                = null
-     * </pre>
+     * }</pre>
      *
      * @param input the string to escape, which may be null
      * @return the escaped string safe for use in HTML 4.0, or {@code null} if {@code null} input
@@ -453,12 +455,12 @@ public final class EscapeUtil {
      * {@code &}, {@code "}) and ISO-8859-1 characters. For more comprehensive entity support including
      * symbols, mathematical characters, and Greek letters, use {@link #escapeHtml4(String)}.</p>
      *
-     * <p><strong>Examples:</strong></p>
-     * <pre>
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
      * EscapeUtil.escapeHtml3("&lt;div&gt;")  = "&amp;lt;div&amp;gt;"
      * EscapeUtil.escapeHtml3("A &amp; B")    = "A &amp;amp; B"
      * EscapeUtil.escapeHtml3(null)       = null
-     * </pre>
+     * }</pre>
      *
      * @param input the string to escape, which may be null
      * @return the escaped string safe for use in HTML 3.0, or {@code null} if {@code null} input
@@ -482,14 +484,14 @@ public final class EscapeUtil {
      *
      * <p>Unrecognized entities are left unchanged in the output string.</p>
      *
-     * <p><strong>Examples:</strong></p>
-     * <pre>
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
      * EscapeUtil.unescapeHtml4("&amp;lt;p&amp;gt;Hello&amp;lt;/p&amp;gt;")  = "&lt;p&gt;Hello&lt;/p&gt;"
      * EscapeUtil.unescapeHtml4("bread &amp;amp; butter")            = "bread &amp; butter"
      * EscapeUtil.unescapeHtml4("&amp;copy; 2024")                   = "© 2024"
      * EscapeUtil.unescapeHtml4("&amp;#65;")                         = "A"
      * EscapeUtil.unescapeHtml4(null)                            = null
-     * </pre>
+     * }</pre>
      *
      * @param input the string to unescape, which may be null
      * @return the unescaped string, or {@code null} if {@code null} input
@@ -507,12 +509,12 @@ public final class EscapeUtil {
      * It supports only HTML 3.0 entities (basic entities and ISO-8859-1 entities) and
      * numeric character references. For extended HTML 4.0 entities, use {@link #unescapeHtml4(String)}.</p>
      *
-     * <p><strong>Examples:</strong></p>
-     * <pre>
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
      * EscapeUtil.unescapeHtml3("&amp;lt;div&amp;gt;")  = "&lt;div&gt;"
      * EscapeUtil.unescapeHtml3("A &amp;amp; B")    = "A &amp; B"
      * EscapeUtil.unescapeHtml3(null)           = null
-     * </pre>
+     * }</pre>
      *
      * @param input the string to unescape, which may be null
      * @return the unescaped string, or {@code null} if {@code null} input
@@ -539,13 +541,13 @@ public final class EscapeUtil {
      * <li>Additionally escapes: {@code [#x7F-#x84] | [#x86-#x9F]}</li>
      * </ul>
      *
-     * <p><strong>Examples:</strong></p>
-     * <pre>
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
      * EscapeUtil.escapeXml10("&lt;root&gt;data&lt;/root&gt;")  = "&amp;lt;root&amp;gt;data&amp;lt;/root&amp;gt;"
      * EscapeUtil.escapeXml10("A &amp; B")                 = "A &amp;amp; B"
      * EscapeUtil.escapeXml10("It's \"cool\"")        = "It&amp;apos;s &amp;quot;cool&amp;quot;"
      * EscapeUtil.escapeXml10(null)                   = null
-     * </pre>
+     * }</pre>
      *
      * @param input the string to escape, which may be null
      * @return the escaped string safe for XML 1.0, or {@code null} if {@code null} input
@@ -574,12 +576,12 @@ public final class EscapeUtil {
      *
      * <p><strong>Note:</strong> The result is only valid for XML 1.1 documents. Do not use for XML 1.0.</p>
      *
-     * <p><strong>Examples:</strong></p>
-     * <pre>
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
      * EscapeUtil.escapeXml11("&lt;tag&gt;value&lt;/tag&gt;")  = "&amp;lt;tag&amp;gt;value&amp;lt;/tag&amp;gt;"
      * EscapeUtil.escapeXml11("A &amp; B")                 = "A &amp;amp; B"
      * EscapeUtil.escapeXml11(null)                   = null
-     * </pre>
+     * }</pre>
      *
      * @param input the string to escape, which may be null
      * @return the escaped string safe for XML 1.1, or {@code null} if {@code null} input
@@ -603,14 +605,14 @@ public final class EscapeUtil {
      *
      * <p>Note: This method does not support DTDs or external entities for security reasons.</p>
      *
-     * <p><strong>Examples:</strong></p>
-     * <pre>
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
      * EscapeUtil.unescapeXml("&amp;lt;root&amp;gt;")     = "&lt;root&gt;"
      * EscapeUtil.unescapeXml("A &amp;amp; B")        = "A &amp; B"
      * EscapeUtil.unescapeXml("&amp;apos;quoted&amp;apos;") = "'quoted'"
      * EscapeUtil.unescapeXml("&amp;#65;")           = "A"
      * EscapeUtil.unescapeXml(null)              = null
-     * </pre>
+     * }</pre>
      *
      * @param input the string to unescape, which may be null
      * @return the unescaped string, or {@code null} if {@code null} input
@@ -634,13 +636,13 @@ public final class EscapeUtil {
      * <p>If the input does not contain any special CSV characters (comma, newline, or double quote),
      * it is returned unchanged without quotes.</p>
      *
-     * <p><strong>Examples:</strong></p>
-     * <pre>
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
      * EscapeUtil.escapeCsv("simple")        = "simple"
      * EscapeUtil.escapeCsv("hello,world")   = "\"hello,world\""
      * EscapeUtil.escapeCsv("say \"hi\"")    = "\"say \"\"hi\"\"\""
      * EscapeUtil.escapeCsv(null)            = null
-     * </pre>
+     * }</pre>
      *
      * @param input the input CSV column String, which may be null
      * @return the escaped CSV string with quotes if needed, or {@code null} if {@code null} input
@@ -661,13 +663,13 @@ public final class EscapeUtil {
      *
      * <p>If the input is not enclosed in double quotes, it is returned unchanged.</p>
      *
-     * <p><strong>Examples:</strong></p>
-     * <pre>
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
      * EscapeUtil.unescapeCsv("simple")           = "simple"
      * EscapeUtil.unescapeCsv("\"hello,world\"")  = "hello,world"
      * EscapeUtil.unescapeCsv("\"say \"\"hi\"\"\"")  = "say \"hi\""
      * EscapeUtil.unescapeCsv(null)               = null
-     * </pre>
+     * }</pre>
      *
      * @param input the input CSV column String, which may be null
      * @return the unescaped CSV string with quotes removed and internal quotes unescaped,
@@ -838,9 +840,8 @@ public final class EscapeUtil {
          * Constructs a {@code JavaUnicodeEscaper} above the specified value (exclusive).
          * </p>
          *
-         * @param codepoint
-         *            above which to escape
-         * @return
+         * @param codepoint above which to escape
+         * @return a {@code JavaUnicodeEscaper} that escapes all codepoints above the specified value
          */
         public static JavaUnicodeEscaper above(final int codepoint) {
             return outsideOf(0, codepoint);
@@ -851,9 +852,8 @@ public final class EscapeUtil {
          * Constructs a {@code JavaUnicodeEscaper} below the specified value (exclusive).
          * </p>
          *
-         * @param codepoint
-         *            below which to escape
-         * @return
+         * @param codepoint below which to escape
+         * @return a {@code JavaUnicodeEscaper} that escapes all codepoints below the specified value
          */
         public static JavaUnicodeEscaper below(final int codepoint) {
             return outsideOf(codepoint, Integer.MAX_VALUE);
@@ -864,11 +864,9 @@ public final class EscapeUtil {
          * Constructs a {@code JavaUnicodeEscaper} between the specified values (inclusive).
          * </p>
          *
-         * @param codepointLow
-         *            above which to escape
-         * @param codepointHigh
-         *            below which to escape
-         * @return
+         * @param codepointLow above which to escape
+         * @param codepointHigh below which to escape
+         * @return a {@code JavaUnicodeEscaper} that escapes all codepoints between the specified values (inclusive)
          */
         public static JavaUnicodeEscaper between(final int codepointLow, final int codepointHigh) {
             return new JavaUnicodeEscaper(codepointLow, codepointHigh, true);
@@ -879,11 +877,9 @@ public final class EscapeUtil {
          * Constructs a {@code JavaUnicodeEscaper} outside the specified values (exclusive).
          * </p>
          *
-         * @param codepointLow
-         *            below which to escape
-         * @param codepointHigh
-         *            above which to escape
-         * @return
+         * @param codepointLow below which to escape
+         * @param codepointHigh above which to escape
+         * @return a {@code JavaUnicodeEscaper} that escapes all codepoints outside the specified range (exclusive)
          */
         public static JavaUnicodeEscaper outsideOf(final int codepointLow, final int codepointHigh) {
             return new JavaUnicodeEscaper(codepointLow, codepointHigh, false);
@@ -896,12 +892,9 @@ public final class EscapeUtil {
          * {@code between} is {@code true} and exclusive when it is {@code false}.
          * </p>
          *
-         * @param below
-         *            int value representing the lowest codepoint boundary
-         * @param above
-         *            int value representing the highest codepoint boundary
-         * @param between
-         *            whether to escape between the boundaries or outside them
+         * @param below int value representing the lowest codepoint boundary
+         * @param above int value representing the highest codepoint boundary
+         * @param between whether to escape between the boundaries or outside them
          */
         public JavaUnicodeEscaper(final int below, final int above, final boolean between) {
             super(below, above, between);
@@ -911,7 +904,7 @@ public final class EscapeUtil {
          * Converts the given codepoint to a hex string of the form {@code "\\uXXXX\\uXXXX"}.
          *
          * @param codepoint a Unicode code point
-         * @return
+         * @return the Unicode escape string representation of the codepoint
          */
         @Override
         protected String toUtf16Escape(final int codepoint) {
@@ -962,7 +955,7 @@ public final class EscapeUtil {
          * <p>Constructs a {@code NumericBeanEscaper} below the specified value (exclusive). </p>
          *
          * @param codepoint below which to escape
-         * @return
+         * @return a {@code NumericBeanEscaper} that escapes all codepoints below the specified value
          */
         public static NumericBeanEscaper below(final int codepoint) {
             return outsideOf(codepoint, Integer.MAX_VALUE);
@@ -972,7 +965,7 @@ public final class EscapeUtil {
          * <p>Constructs a {@code NumericBeanEscaper} above the specified value (exclusive). </p>
          *
          * @param codepoint above which to escape
-         * @return
+         * @return a {@code NumericBeanEscaper} that escapes all codepoints above the specified value
          */
         public static NumericBeanEscaper above(final int codepoint) {
             return outsideOf(0, codepoint);
@@ -983,7 +976,7 @@ public final class EscapeUtil {
          *
          * @param codepointLow above which to escape
          * @param codepointHigh below which to escape
-         * @return
+         * @return a {@code NumericBeanEscaper} that escapes all codepoints between the specified values (inclusive)
          */
         public static NumericBeanEscaper between(final int codepointLow, final int codepointHigh) {
             return new NumericBeanEscaper(codepointLow, codepointHigh, true);
@@ -994,7 +987,7 @@ public final class EscapeUtil {
          *
          * @param codepointLow below which to escape
          * @param codepointHigh above which to escape
-         * @return
+         * @return a {@code NumericBeanEscaper} that escapes all codepoints outside the specified range (exclusive)
          */
         public static NumericBeanEscaper outsideOf(final int codepointLow, final int codepointHigh) {
             return new NumericBeanEscaper(codepointLow, codepointHigh, false);
@@ -1121,7 +1114,7 @@ public final class EscapeUtil {
          * <p>Constructs a {@code UnicodeEscaper} below the specified value (exclusive). </p>
          *
          * @param codepoint below which to escape
-         * @return
+         * @return a {@code UnicodeEscaper} that escapes all codepoints below the specified value
          */
         public static UnicodeEscaper below(final int codepoint) {
             return outsideOf(codepoint, Integer.MAX_VALUE);
@@ -1131,7 +1124,7 @@ public final class EscapeUtil {
          * <p>Constructs a {@code UnicodeEscaper} above the specified value (exclusive). </p>
          *
          * @param codepoint above which to escape
-         * @return
+         * @return a {@code UnicodeEscaper} that escapes all codepoints above the specified value
          */
         public static UnicodeEscaper above(final int codepoint) {
             return outsideOf(0, codepoint);
@@ -1142,7 +1135,7 @@ public final class EscapeUtil {
          *
          * @param codepointLow below which to escape
          * @param codepointHigh above which to escape
-         * @return
+         * @return a {@code UnicodeEscaper} that escapes all codepoints outside the specified range (exclusive)
          */
         public static UnicodeEscaper outsideOf(final int codepointLow, final int codepointHigh) {
             return new UnicodeEscaper(codepointLow, codepointHigh, false);
@@ -1153,7 +1146,7 @@ public final class EscapeUtil {
          *
          * @param codepointLow above which to escape
          * @param codepointHigh below which to escape
-         * @return
+         * @return a {@code UnicodeEscaper} that escapes all codepoints between the specified values (inclusive)
          */
         public static UnicodeEscaper between(final int codepointLow, final int codepointHigh) {
             return new UnicodeEscaper(codepointLow, codepointHigh, true);
@@ -1191,7 +1184,7 @@ public final class EscapeUtil {
          * Converts the given codepoint to a hex string of the form {@code "\\uXXXX"}.
          *
          * @param codepoint a Unicode code point
-         * @return
+         * @return the Unicode escape string representation of the codepoint
          */
         protected String toUtf16Escape(final int codepoint) {
             return "\\u" + hex(codepoint);
@@ -1507,10 +1500,10 @@ public final class EscapeUtil {
 
         /**
          *
-         * @param input
-         * @param index
-         * @param out
-         * @return
+         * @param input the CharSequence being translated
+         * @param index the index of the current character in the sequence
+         * @param out the Writer to write the escaped output to
+         * @return the number of codepoints consumed
          * @throws IOException Signals that an I/O exception has occurred.
          */
         @Override
@@ -1550,10 +1543,10 @@ public final class EscapeUtil {
 
         /**
          *
-         * @param input
-         * @param index
-         * @param out
-         * @return
+         * @param input the CharSequence being translated
+         * @param index the index of the current character in the sequence
+         * @param out the Writer to write the unescaped output to
+         * @return the number of codepoints consumed
          * @throws IOException Signals that an I/O exception has occurred.
          */
         @Override
@@ -1595,7 +1588,7 @@ public final class EscapeUtil {
         /**
          * Mapping to escape <a href="https://secure.wikimedia.org/wikipedia/en/wiki/ISO/IEC_8859-1">ISO-8859-1</a>
          * characters to their named HTML 3.x equivalents.
-         * @return
+         * @return the mapping array for ISO-8859-1 character escape sequences
          */
         public static String[][] ISO8859_1_ESCAPE() {
             return ISO8859_1_ESCAPE.clone();
@@ -1702,7 +1695,7 @@ public final class EscapeUtil {
 
         /**
          * Reverse of {@link #ISO8859_1_ESCAPE()} for unescaping purposes.
-         * @return
+         * @return the mapping array for ISO-8859-1 character unescape sequences
          */
         public static String[][] ISO8859_1_UNESCAPE() {
             return ISO8859_1_UNESCAPE.clone();
@@ -1715,7 +1708,7 @@ public final class EscapeUtil {
          * Mapping to escape additional <a href="http://www.w3.org/TR/REC-html40/sgml/entities.html">character bean
          * references</a>. Note that this must be used with {@link #ISO8859_1_ESCAPE()} to get the full list of
          * HTML 4.0 character entities.
-         * @return
+         * @return the mapping array for HTML 4.0 extended character escape sequences
          */
         public static String[][] HTML40_EXTENDED_ESCAPE() {
             return HTML40_EXTENDED_ESCAPE.clone();
@@ -1921,7 +1914,7 @@ public final class EscapeUtil {
 
         /**
          * Reverse of {@link #HTML40_EXTENDED_ESCAPE()} for unescaping purposes.
-         * @return
+         * @return the mapping array for HTML 4.0 extended character unescape sequences
          */
         public static String[][] HTML40_EXTENDED_UNESCAPE() {
             return HTML40_EXTENDED_UNESCAPE.clone();
@@ -1934,7 +1927,7 @@ public final class EscapeUtil {
          * Mapping to escape the basic XML and HTML character entities.
          *
          * Namely: {@code " & < >}
-         * @return
+         * @return the mapping array for basic XML and HTML character escape sequences
          */
         public static String[][] BASIC_ESCAPE() {
             return BASIC_ESCAPE.clone();
@@ -1949,7 +1942,7 @@ public final class EscapeUtil {
 
         /**
          * Reverse of {@link #BASIC_ESCAPE()} for unescaping purposes.
-         * @return
+         * @return the mapping array for basic XML and HTML character unescape sequences
          */
         public static String[][] BASIC_UNESCAPE() {
             return BASIC_UNESCAPE.clone();
@@ -1960,7 +1953,7 @@ public final class EscapeUtil {
 
         /**
          * Mapping to escape the apostrophe character to its XML character bean.
-         * @return
+         * @return the mapping array for apostrophe character escape sequences
          */
         public static String[][] APOS_ESCAPE() {
             return APOS_ESCAPE.clone();
@@ -1972,7 +1965,7 @@ public final class EscapeUtil {
 
         /**
          * Reverse of {@link #APOS_ESCAPE()} for unescaping purposes.
-         * @return
+         * @return the mapping array for apostrophe character unescape sequences
          */
         public static String[][] APOS_UNESCAPE() {
             return APOS_UNESCAPE.clone();
@@ -1985,7 +1978,7 @@ public final class EscapeUtil {
          * Mapping to escape the Java control characters.
          *
          * Namely: {@code \b \n \t \f \r}
-         * @return
+         * @return the mapping array for Java control character escape sequences
          */
         public static String[][] JAVA_CTRL_CHARS_ESCAPE() {
             return JAVA_CTRL_CHARS_ESCAPE.clone();
@@ -1996,7 +1989,7 @@ public final class EscapeUtil {
 
         /**
          * Reverse of {@link #JAVA_CTRL_CHARS_ESCAPE()} for unescaping purposes.
-         * @return
+         * @return the mapping array for Java control character unescape sequences
          */
         public static String[][] JAVA_CTRL_CHARS_UNESCAPE() {
             return JAVA_CTRL_CHARS_UNESCAPE.clone();

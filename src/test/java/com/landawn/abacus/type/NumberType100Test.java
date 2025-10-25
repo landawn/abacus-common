@@ -128,7 +128,6 @@ public class NumberType100Test extends TestBase {
         intNumberType.writeCharacter(writer, 123, config);
         verify(writer).writeInt(123);
 
-
         doubleNumberType.writeCharacter(writer, 123.45, config);
         verify(writer).write(123.45);
     }

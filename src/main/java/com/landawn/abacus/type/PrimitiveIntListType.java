@@ -39,13 +39,11 @@ public final class PrimitiveIntListType extends AbstractPrimitiveListType<IntLis
     /**
      * Returns the Class object representing the IntList type.
      *
-     * <pre>
-     * <code>
+     * <p><b>Usage Examples:</b></p>
      * PrimitiveIntListType type = new PrimitiveIntListType();
      * Class&lt;IntList&gt; clazz = type.clazz();
      * // clazz equals IntList.class
-     * </code>
-     * </pre>
+     * }</pre>
      *
      * @return the Class object for IntList.class
      */
@@ -58,13 +56,11 @@ public final class PrimitiveIntListType extends AbstractPrimitiveListType<IntLis
      * Returns the Type instance for the element type of this list, which is primitive int.
      * This method provides access to the Type representation of individual list elements.
      *
-     * <pre>
-     * <code>
+     * <p><b>Usage Examples:</b></p>
      * PrimitiveIntListType type = new PrimitiveIntListType();
      * Type&lt;Integer&gt; elemType = type.getElementType();
      * // elemType can be used for element-level operations
-     * </code>
-     * </pre>
+     * }</pre>
      *
      * @return the Type instance representing int type for list elements
      */
@@ -76,13 +72,11 @@ public final class PrimitiveIntListType extends AbstractPrimitiveListType<IntLis
     /**
      * Returns the parameter types associated with this list type.
      *
-     * <pre>
-     * <code>
+     * <p><b>Usage Examples:</b></p>
      * PrimitiveIntListType type = new PrimitiveIntListType();
      * Type&lt;Integer&gt;[] paramTypes = type.getParameterTypes();
      * // paramTypes[0] represents the element type
-     * </code>
-     * </pre>
+     * }</pre>
      *
      * @return an array containing the Integer Type that describes the elements of this list type
      * @see #getElementType()
@@ -98,8 +92,7 @@ public final class PrimitiveIntListType extends AbstractPrimitiveListType<IntLis
      * enclosed in square brackets. For example, an IntList containing {1, 2, 3}
      * becomes "[1, 2, 3]".
      *
-     * <pre>
-     * <code>
+     * <p><b>Usage Examples:</b></p>
      * PrimitiveIntListType type = new PrimitiveIntListType();
      * IntList list = IntList.of(1, 2, 3);
      * String str = type.stringOf(list);
@@ -107,8 +100,7 @@ public final class PrimitiveIntListType extends AbstractPrimitiveListType<IntLis
      *
      * String nullStr = type.stringOf(null);
      * // nullStr equals null
-     * </code>
-     * </pre>
+     * }</pre>
      *
      * @param x the IntList to convert to string
      * @return the string representation of the list, or null if the input list is null
@@ -123,8 +115,7 @@ public final class PrimitiveIntListType extends AbstractPrimitiveListType<IntLis
      * The string should contain comma-separated integer values enclosed in square brackets.
      * For example, "[1, 2, 3]" will be parsed to an IntList containing {1, 2, 3}.
      *
-     * <pre>
-     * <code>
+     * <p><b>Usage Examples:</b></p>
      * PrimitiveIntListType type = new PrimitiveIntListType();
      * IntList list = type.valueOf("[1, 2, 3]");
      * // list contains {1, 2, 3}
@@ -134,8 +125,7 @@ public final class PrimitiveIntListType extends AbstractPrimitiveListType<IntLis
      *
      * IntList nullList = type.valueOf(null);
      * // nullList equals null
-     * </code>
-     * </pre>
+     * }</pre>
      *
      * @param str the string to parse, expected format is "[value1, value2, ...]"
      * @return the parsed IntList, or null if the input string is null or empty
@@ -151,8 +141,7 @@ public final class PrimitiveIntListType extends AbstractPrimitiveListType<IntLis
      * The list is formatted as comma-separated values enclosed in square brackets.
      * If the list is null, appends "null".
      *
-     * <pre>
-     * <code>
+     * <p><b>Usage Examples:</b></p>
      * PrimitiveIntListType type = new PrimitiveIntListType();
      * StringBuilder sb = new StringBuilder();
      * IntList list = IntList.of(10, 20, 30);
@@ -162,8 +151,7 @@ public final class PrimitiveIntListType extends AbstractPrimitiveListType<IntLis
      * StringBuilder sb2 = new StringBuilder();
      * type.appendTo(sb2, null);
      * // sb2.toString() equals "null"
-     * </code>
-     * </pre>
+     * }</pre>
      *
      * @param appendable the Appendable to write to (e.g., StringBuilder, Writer)
      * @param x the IntList to append
@@ -184,8 +172,7 @@ public final class PrimitiveIntListType extends AbstractPrimitiveListType<IntLis
      * The list is converted to an array and then written as comma-separated values
      * enclosed in square brackets.
      *
-     * <pre>
-     * <code>
+     * <p><b>Usage Examples:</b></p>
      * PrimitiveIntListType type = new PrimitiveIntListType();
      * CharacterWriter writer = new CharacterWriter();
      * IntList list = IntList.of(5, 10, 15);
@@ -194,8 +181,7 @@ public final class PrimitiveIntListType extends AbstractPrimitiveListType<IntLis
      *
      * type.writeCharacter(writer, null, null);
      * // Writes: null
-     * </code>
-     * </pre>
+     * }</pre>
      *
      * @param writer the CharacterWriter to write to
      * @param x the IntList to write

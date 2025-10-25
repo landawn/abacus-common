@@ -29,7 +29,7 @@ import com.landawn.abacus.util.Throwables;
  * <p>Note: Unlike some other primitive specializations, this interface does not provide default methods
  * for composition as the JDK does not provide a standard ObjByteConsumer interface.
  * 
- * <p>Example usage:
+ * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * ObjByteConsumer<ByteBuffer> putByte = (buffer, value) -> buffer.put(value);
  * ByteBuffer buffer = ByteBuffer.allocate(10);
@@ -82,7 +82,6 @@ public interface ObjByteConsumer<T> extends Throwables.ObjByteConsumer<T, Runtim
      *
      * @param t the object input argument
      * @param value the byte input argument
-     * @throws RuntimeException if any error occurs during the operation
      */
     @Override
     void accept(T t, byte value);

@@ -50,7 +50,7 @@ import com.landawn.abacus.util.stream.Stream;
  *   <li>Configurable HTTP header filtering</li>
  * </ul>
  * 
- * <p>Example usage:</p>
+ * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * // Send a single request from HAR file
  * String response = HARUtil.sendRequestByHAR(new File("capture.har"), "https://api.example.com/data");
@@ -65,7 +65,6 @@ import com.landawn.abacus.util.stream.Stream;
  * @see <a href="http://www.softwareishard.com/har/viewer/">HAR Viewer</a>
  * @see <a href="https://confluence.atlassian.com/kb/generating-har-files-and-analyzing-web-requests-720420612.html">Generating HAR files</a>
  */
-@SuppressWarnings("JavadocLinkAsPlainText")
 public final class HARUtil {
 
     private static final Logger logger = LoggerFactory.getLogger(HARUtil.class);
@@ -93,7 +92,7 @@ public final class HARUtil {
      * <p>The filter receives the header name and value as parameters and should return
      * {@code true} to include the header or {@code false} to exclude it.</p>
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Exclude authorization headers when replaying requests
      * HARUtil.setHttpHeaderFilterForHARRequest((name, value) -> 
@@ -152,7 +151,7 @@ public final class HARUtil {
      * <p>This method provides full control over curl command logging, including the
      * ability to specify a custom log handler for processing the generated curl commands.</p>
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Log curl commands to a file instead of standard logger
      * HARUtil.logRequestCurlForHARRequest(true, '"', curl -> {
@@ -176,7 +175,7 @@ public final class HARUtil {
      * <p>This method reads the HAR file, finds the first request entry matching the exact
      * target URL, and replays that request with all its original headers and body.</p>
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String response = HARUtil.sendRequestByHAR(
      *     new File("capture.har"), 
@@ -201,7 +200,7 @@ public final class HARUtil {
      * <p>This method reads the HAR file, finds the first request entry whose URL matches
      * the provided filter predicate, and replays that request.</p>
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Send request for first URL containing "/api/users"
      * String response = HARUtil.sendRequestByHAR(
@@ -282,7 +281,7 @@ public final class HARUtil {
      * provided filter predicate. Each matching request is sent with its original
      * HTTP method, headers, and body.</p>
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Send all API requests from the HAR file
      * List<String> responses = HARUtil.sendMultiRequestsByHAR(
@@ -334,7 +333,7 @@ public final class HARUtil {
      * in the stream is a tuple containing the request entry map and the corresponding
      * HTTP response after the request is sent.</p>
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * HARUtil.streamMultiRequestsByHAR(harFile, url -> url.contains("/api/"))
      *     .forEach(tuple -> {
@@ -447,7 +446,7 @@ public final class HARUtil {
      * request entry whose URL matches the provided filter predicate. This is useful for
      * inspecting request details without sending the actual HTTP request.</p>
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Optional<Map<String, Object>> requestOpt = HARUtil.getRequestEntryByUrlFromHAR(
      *     harContent, 
@@ -537,7 +536,7 @@ public final class HARUtil {
      * the text content and the MIME type. These values are typically found at
      * "postData.text" and "postData.mimeType" paths in the HAR structure.</p>
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Tuple2<String, String> bodyAndType = HARUtil.getBodyAndMimeTypeByRequestEntry(requestEntry);
      * String requestBody = bodyAndType._1;  // e.g., {"user":"john","pass":"secret"}

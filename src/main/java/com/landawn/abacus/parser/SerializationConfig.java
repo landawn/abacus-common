@@ -24,7 +24,7 @@ import com.landawn.abacus.util.N;
  * <p>This class extends {@link ParserConfig} and provides additional serialization-specific
  * settings such as field exclusion and transient field handling.</p>
  * 
- * <p>Example usage:</p>
+ * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * SerializationConfig config = new MySerializationConfig()
  *     .setExclusion(Exclusion.NULL)
@@ -66,7 +66,7 @@ public abstract class SerializationConfig<C extends SerializationConfig<C>> exte
      * <p>The exclusion strategy allows you to control which fields are included
      * or excluded during serialization based on their values or other criteria.</p>
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * config.setExclusion(Exclusion.NULL); // Exclude null fields
      * config.setExclusion(Exclusion.EMPTY); // Exclude empty collections/strings
@@ -101,7 +101,7 @@ public abstract class SerializationConfig<C extends SerializationConfig<C>> exte
      * {@code @Transient} annotation will be excluded from serialization.
      * This is useful for excluding fields that should not be persisted or transmitted.</p>
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * config.skipTransientField(true); // Skip transient fields
      * config.skipTransientField(false); // Include transient fields

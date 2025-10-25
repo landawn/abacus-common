@@ -126,11 +126,24 @@ public abstract class AbstractShortType extends NumberType<Number> {
 
     /**
      * Retrieves a short value from a ResultSet at the specified column index.
+     * This method uses rs.getShort() which returns 0 for SQL NULL values.
+     * Subclasses may override this to return null for SQL NULL values.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * // For primitive short types
+     * PrimitiveShortType type = TypeFactory.getType(short.class);
+     * short value = type.get(rs, 1); // Returns 0 for SQL NULL
+     *
+     * // For wrapper Short types
+     * ShortType type = TypeFactory.getType(Short.class);
+     * Short value = type.get(rs, 1); // Returns null for SQL NULL (overridden in subclass)
+     * }</pre>
      *
      * @param rs the ResultSet to read from
      * @param columnIndex the column index (1-based)
-     * @return the short value at the specified column
-     * @throws SQLException if a database access error occurs
+     * @return the short value at the specified column; returns 0 if SQL NULL (may be overridden by subclasses to return null)
+     * @throws SQLException if a database access error occurs or the columnIndex is invalid
      */
     @Override
     public Short get(final ResultSet rs, final int columnIndex) throws SQLException {
@@ -139,11 +152,24 @@ public abstract class AbstractShortType extends NumberType<Number> {
 
     /**
      * Retrieves a short value from a ResultSet using the specified column label.
+     * This method uses rs.getShort() which returns 0 for SQL NULL values.
+     * Subclasses may override this to return null for SQL NULL values.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * // For primitive short types
+     * PrimitiveShortType type = TypeFactory.getType(short.class);
+     * short value = type.get(rs, "port"); // Returns 0 for SQL NULL
+     *
+     * // For wrapper Short types
+     * ShortType type = TypeFactory.getType(Short.class);
+     * Short value = type.get(rs, "port"); // Returns null for SQL NULL (overridden in subclass)
+     * }</pre>
      *
      * @param rs the ResultSet to read from
      * @param columnLabel the column label
-     * @return the short value at the specified column
-     * @throws SQLException if a database access error occurs
+     * @return the short value at the specified column; returns 0 if SQL NULL (may be overridden by subclasses to return null)
+     * @throws SQLException if a database access error occurs or the columnLabel is not found
      */
     @Override
     public Short get(final ResultSet rs, final String columnLabel) throws SQLException {

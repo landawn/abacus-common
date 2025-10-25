@@ -956,7 +956,8 @@ public class Seq200Test extends TestBase {
 
         Seq<Integer, Exception> seqActual = Seq.of(1, 2, 3, 2, 1).dropWhile(x -> x < 3, dropped::add);
         assertEquals(Arrays.asList(3, 2, 1), drainWithException(seqActual));
-        assertEquals(CommonUtil.asList(1, 2), dropped, "Action should be called on the first element not satisfying the drop condition, based on current impl.");
+        assertEquals(CommonUtil.asList(1, 2), dropped,
+                "Action should be called on the first element not satisfying the drop condition, based on current impl.");
     }
 
     @Test

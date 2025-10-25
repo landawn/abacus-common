@@ -51,8 +51,8 @@ import java.lang.annotation.Target;
  *   <li>Enforce access restrictions in modular systems</li>
  * </ul>
  * 
- * <p><b>Example usage:</b></p>
- * <pre>
+ * <p><b>Usage Examples:</b></p>
+ * <pre>{@code
  * {@literal @}Internal
  * public class InternalHelper {
  *     // This class should not be used by external code
@@ -64,7 +64,7 @@ import java.lang.annotation.Target;
  *         // This method is for framework use only
  *     }
  * }
- * </pre>
+ * }</pre>
  * 
  * @since 2015
  * @see Beta

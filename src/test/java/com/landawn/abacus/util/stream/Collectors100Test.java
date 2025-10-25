@@ -1600,8 +1600,7 @@ public class Collectors100Test extends TestBase {
     @Test
     public void testComplexNestedCollectors() {
         Map<String, Map<Integer, Long>> nestedResult = personList.stream()
-                .collect(Collectors.groupingBy(Person::getDepartment, Collectors.groupingBy(p -> p.getAge() / 10 * 10,
-                        Collectors.counting())));
+                .collect(Collectors.groupingBy(Person::getDepartment, Collectors.groupingBy(p -> p.getAge() / 10 * 10, Collectors.counting())));
 
         assertNotNull(nestedResult);
         assertEquals(3, nestedResult.size());

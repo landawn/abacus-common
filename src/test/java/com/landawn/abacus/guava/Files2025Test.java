@@ -96,9 +96,7 @@ public class Files2025Test extends TestBase {
     @DisplayName("Test newReader with non-existent file")
     public void testNewReaderFileNotFound() {
         File nonExistentFile = new File(tempDir.toFile(), "nonexistent.txt");
-        assertThrows(FileNotFoundException.class, () ->
-            Files.newReader(nonExistentFile, StandardCharsets.UTF_8)
-        );
+        assertThrows(FileNotFoundException.class, () -> Files.newReader(nonExistentFile, StandardCharsets.UTF_8));
     }
 
     // Tests for newWriter methods
@@ -178,8 +176,7 @@ public class Files2025Test extends TestBase {
     @DisplayName("Test asByteSink with Path and options")
     public void testAsByteSinkPathOptions() throws IOException {
         Path outputPath = tempDir.resolve("sink2.txt");
-        ByteSink sink = Files.asByteSink(outputPath,
-            StandardOpenOption.CREATE, StandardOpenOption.WRITE);
+        ByteSink sink = Files.asByteSink(outputPath, StandardOpenOption.CREATE, StandardOpenOption.WRITE);
         assertNotNull(sink);
 
         sink.write("Path sink test".getBytes());
@@ -204,8 +201,7 @@ public class Files2025Test extends TestBase {
     @Test
     @DisplayName("Test asCharSource with Path and options")
     public void testAsCharSourcePathOptions() throws IOException {
-        CharSource source = Files.asCharSource(testPath, StandardCharsets.UTF_8,
-            StandardOpenOption.READ);
+        CharSource source = Files.asCharSource(testPath, StandardCharsets.UTF_8, StandardOpenOption.READ);
         assertNotNull(source);
 
         try (BufferedReader reader = source.openBufferedStream()) {
@@ -232,8 +228,7 @@ public class Files2025Test extends TestBase {
     @DisplayName("Test asCharSink with Path and options")
     public void testAsCharSinkPathOptions() throws IOException {
         Path outputPath = tempDir.resolve("charsink2.txt");
-        CharSink sink = Files.asCharSink(outputPath, StandardCharsets.UTF_8,
-            StandardOpenOption.CREATE, StandardOpenOption.WRITE);
+        CharSink sink = Files.asCharSink(outputPath, StandardCharsets.UTF_8, StandardOpenOption.CREATE, StandardOpenOption.WRITE);
         assertNotNull(sink);
 
         sink.writeLines(Arrays.asList("Line A", "Line B"));
@@ -403,9 +398,7 @@ public class Files2025Test extends TestBase {
     @Test
     @DisplayName("Test copy with same source and destination throws exception")
     public void testCopySameFile() {
-        assertThrows(IllegalArgumentException.class, () ->
-            Files.copy(testFile, testFile)
-        );
+        assertThrows(IllegalArgumentException.class, () -> Files.copy(testFile, testFile));
     }
 
     // Tests for move operation
@@ -450,7 +443,7 @@ public class Files2025Test extends TestBase {
 
         // Read first byte
         byte firstByte = buffer.get(0);
-        assertEquals('L', (char)firstByte);
+        assertEquals('L', (char) firstByte);
 
         unmap(buffer);
     }
@@ -479,8 +472,8 @@ public class Files2025Test extends TestBase {
         assertEquals(1024, buffer.capacity());
 
         // Write and read data
-        buffer.put(0, (byte)'X');
-        assertEquals('X', (char)buffer.get(0));
+        buffer.put(0, (byte) 'X');
+        assertEquals('X', (char) buffer.get(0));
 
         unmap(buffer);
     }
@@ -609,9 +602,7 @@ public class Files2025Test extends TestBase {
         assertTrue(files.size() >= 2);
 
         // Should contain files but not necessarily in any order
-        List<String> fileNames = files.stream()
-            .map(p -> p.getFileName().toString())
-            .collect(Collectors.toList());
+        List<String> fileNames = files.stream().map(p -> p.getFileName().toString()).collect(Collectors.toList());
 
         assertTrue(fileNames.contains("list1.txt"));
         assertTrue(fileNames.contains("list2.txt"));
@@ -621,9 +612,7 @@ public class Files2025Test extends TestBase {
     @DisplayName("Test listFiles with non-existent directory")
     public void testListFilesNonExistent() {
         Path nonExistent = tempDir.resolve("nonexistent");
-        assertThrows(NoSuchFileException.class, () ->
-            Files.listFiles(nonExistent)
-        );
+        assertThrows(NoSuchFileException.class, () -> Files.listFiles(nonExistent));
     }
 
     // Tests for delete operations
@@ -782,13 +771,9 @@ public class Files2025Test extends TestBase {
     @Test
     @DisplayName("Test operations with null parameters")
     public void testNullParameters() {
-        assertThrows(NullPointerException.class, () ->
-            Files.newReader(null, StandardCharsets.UTF_8)
-        );
+        assertThrows(NullPointerException.class, () -> Files.newReader(null, StandardCharsets.UTF_8));
 
-        assertThrows(NullPointerException.class, () ->
-            Files.toByteArray(null)
-        );
+        assertThrows(NullPointerException.class, () -> Files.toByteArray(null));
     }
 
     @Test

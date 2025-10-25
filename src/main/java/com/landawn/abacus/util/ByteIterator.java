@@ -33,7 +33,7 @@ import com.landawn.abacus.util.stream.ByteStream;
  * transformation methods like {@code skip()}, {@code limit()}, {@code filter()},
  * and utility methods like {@code toArray()} and {@code stream()}.</p>
  * 
- * <p>Example usage:</p>
+ * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * ByteIterator iter = ByteIterator.of((byte)1, (byte)2, (byte)3);
  * while (iter.hasNext()) {
@@ -70,7 +70,7 @@ public abstract class ByteIterator extends ImmutableIterator<Byte> {
     /**
      * Returns an empty {@code ByteIterator}.
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ByteIterator iter = ByteIterator.empty();
      * System.out.println(iter.hasNext()); // false
@@ -86,7 +86,7 @@ public abstract class ByteIterator extends ImmutableIterator<Byte> {
     /**
      * Creates a {@code ByteIterator} from the specified byte array.
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ByteIterator iter = ByteIterator.of((byte)1, (byte)2, (byte)3);
      * byte first = iter.nextByte(); // 1
@@ -102,7 +102,7 @@ public abstract class ByteIterator extends ImmutableIterator<Byte> {
     /**
      * Creates a {@code ByteIterator} from a subsequence of the specified byte array.
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * byte[] bytes = {1, 2, 3, 4, 5};
      * ByteIterator iter = ByteIterator.of(bytes, 1, 4);
@@ -161,7 +161,7 @@ public abstract class ByteIterator extends ImmutableIterator<Byte> {
      * 
      * <p>This is useful for deferring expensive iterator creation until actually needed.</p>
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ByteIterator iter = ByteIterator.defer(() -> ByteIterator.of((byte)1, (byte)2, (byte)3));
      * // Iterator is not created yet
@@ -211,7 +211,7 @@ public abstract class ByteIterator extends ImmutableIterator<Byte> {
     /**
      * Returns an infinite {@code ByteIterator} that generates values using the provided supplier.
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ByteIterator iter = ByteIterator.generate(() -> (byte)42);
      * // Infinite iterator that always returns 42
@@ -244,7 +244,7 @@ public abstract class ByteIterator extends ImmutableIterator<Byte> {
      * Returns a {@code ByteIterator} that generates values using the provided supplier
      * while the hasNext condition returns true.
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * int[] count = {0};
      * ByteIterator iter = ByteIterator.generate(
@@ -287,7 +287,7 @@ public abstract class ByteIterator extends ImmutableIterator<Byte> {
      * performance overhead. It is provided for compatibility with the Iterator interface
      * but should generally be avoided in favor of {@link #nextByte()}.</p>
      *
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ByteIterator iter = ByteIterator.of((byte)1, (byte)2);
      * Byte boxed = iter.next(); // Returns Byte.valueOf((byte)1) - avoid this
@@ -305,22 +305,16 @@ public abstract class ByteIterator extends ImmutableIterator<Byte> {
     }
 
     /**
-     * Returns the next byte value without boxing.
+     * Returns the next byte value in the iteration.
      *
-     * <p>This is the primary method for retrieving elements from a ByteIterator.
-     * It returns primitive byte values directly, avoiding the performance overhead
-     * of object allocation and boxing that would occur with {@link #next()}.</p>
-     *
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ByteIterator iter = ByteIterator.of((byte)1, (byte)2, (byte)3);
-     * while (iter.hasNext()) {
-     *     byte b = iter.nextByte(); // Efficient primitive access
-     *     System.out.println(b);
-     * }
+     * byte first = iter.nextByte(); // 1
+     * byte second = iter.nextByte(); // 2
      * }</pre>
      *
-     * @return the next byte value in the iteration
+     * @return the next byte value
      * @throws NoSuchElementException if the iteration has no more elements
      */
     public abstract byte nextByte();
@@ -334,7 +328,7 @@ public abstract class ByteIterator extends ImmutableIterator<Byte> {
      * unchanged. If n is greater than the number of remaining elements, all elements
      * are consumed and the returned iterator will be empty.</p>
      *
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ByteIterator iter = ByteIterator.of((byte)1, (byte)2, (byte)3, (byte)4, (byte)5);
      * ByteIterator skipped = iter.skip(2);
@@ -395,7 +389,7 @@ public abstract class ByteIterator extends ImmutableIterator<Byte> {
      * If this iterator has fewer than {@code count} elements remaining, all remaining elements
      * will be included. If count is 0, an empty iterator is returned immediately.</p>
      *
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ByteIterator iter = ByteIterator.of((byte)1, (byte)2, (byte)3, (byte)4, (byte)5);
      * ByteIterator limited = iter.limit(3);
@@ -442,7 +436,7 @@ public abstract class ByteIterator extends ImmutableIterator<Byte> {
      * and only returns elements for which the predicate returns {@code true}. Elements
      * are tested lazily as the returned iterator is consumed.</p>
      *
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ByteIterator iter = ByteIterator.of((byte)1, (byte)2, (byte)3, (byte)4, (byte)5);
      * ByteIterator evens = iter.filter(b -> b % 2 == 0);
@@ -498,7 +492,7 @@ public abstract class ByteIterator extends ImmutableIterator<Byte> {
      * this method, the iterator is positioned at the second element (if it exists). If the
      * iterator is empty, an empty OptionalByte is returned.</p>
      *
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ByteIterator iter = ByteIterator.of((byte)1, (byte)2, (byte)3);
      * OptionalByte first = iter.first(); // OptionalByte.of(1)
@@ -522,7 +516,7 @@ public abstract class ByteIterator extends ImmutableIterator<Byte> {
      * After calling this method, the iterator is completely exhausted (hasNext() will return false).
      * If the iterator is empty when this method is called, an empty OptionalByte is returned.</p>
      *
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ByteIterator iter = ByteIterator.of((byte)1, (byte)2, (byte)3);
      * OptionalByte last = iter.last(); // OptionalByte.of(3)
@@ -546,21 +540,22 @@ public abstract class ByteIterator extends ImmutableIterator<Byte> {
     }
 
     /**
-     * Collects all remaining elements into a byte array.
+     * Converts the remaining elements to a byte array.
      *
-     * <p>This method consumes all remaining elements from this iterator and returns them
-     * as a primitive byte array. After calling this method, the iterator is exhausted
-     * (hasNext() will return false). The returned array's length equals the number of
-     * remaining elements.</p>
+     * <p>This method consumes the iterator. After calling this method, the iterator
+     * will be empty (hasNext() returns false). If the iterator is already empty,
+     * returns an empty array.</p>
      *
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * ByteIterator iter = ByteIterator.of((byte)1, (byte)2, (byte)3);
-     * byte[] array = iter.toArray(); // [1, 2, 3]
-     * boolean hasMore = iter.hasNext(); // false
+     * byte[] array = ByteIterator.of((byte)1, (byte)2, (byte)3, (byte)4, (byte)5).toArray();
+     * // array = [1, 2, 3, 4, 5]
+     *
+     * // Empty iterator returns empty array
+     * byte[] empty = ByteIterator.empty().toArray(); // empty.length == 0
      * }</pre>
      *
-     * @return a byte array containing all remaining elements in iteration order
+     * @return a byte array containing all remaining elements
      */
     @SuppressWarnings("deprecation")
     public byte[] toArray() {
@@ -568,21 +563,22 @@ public abstract class ByteIterator extends ImmutableIterator<Byte> {
     }
 
     /**
-     * Collects all remaining elements into a ByteList.
+     * Converts the remaining elements to a ByteList.
      *
-     * <p>This method consumes all remaining elements from this iterator and collects them
-     * into a ByteList. After calling this method, the iterator is exhausted (hasNext() will
-     * return false). The returned ByteList can be further manipulated or converted to other
-     * collections.</p>
+     * <p>This method consumes the iterator. After calling this method, the iterator
+     * will be empty (hasNext() returns false). If the iterator is already empty,
+     * returns an empty ByteList.</p>
      *
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * ByteIterator iter = ByteIterator.of((byte)1, (byte)2, (byte)3);
-     * ByteList list = iter.toList();
-     * System.out.println(list); // [1, 2, 3]
+     * ByteList list = ByteIterator.of((byte)1, (byte)2, (byte)3, (byte)4, (byte)5).toList();
+     * // list contains [1, 2, 3, 4, 5]
+     *
+     * // Empty iterator returns empty list
+     * ByteList empty = ByteIterator.empty().toList(); // empty.size() == 0
      * }</pre>
      *
-     * @return a ByteList containing all remaining elements in iteration order
+     * @return a ByteList containing all remaining elements
      */
     public ByteList toList() {
         final ByteList list = new ByteList();
@@ -601,7 +597,7 @@ public abstract class ByteIterator extends ImmutableIterator<Byte> {
      * stream can be used to perform various functional operations like filtering, mapping,
      * and reducing. The stream consumes elements from this iterator as needed.</p>
      *
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ByteIterator iter = ByteIterator.of((byte)1, (byte)2, (byte)3);
      * ByteStream stream = iter.stream();
@@ -621,7 +617,7 @@ public abstract class ByteIterator extends ImmutableIterator<Byte> {
      * iteration sequence. The index starts from 0 and increments by 1 for each element. This
      * is equivalent to calling {@link #indexed(long) indexed(0)}.</p>
      *
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ByteIterator iter = ByteIterator.of((byte)10, (byte)20, (byte)30);
      * ObjIterator<IndexedByte> indexed = iter.indexed();
@@ -648,7 +644,7 @@ public abstract class ByteIterator extends ImmutableIterator<Byte> {
      * each subsequent element. This is useful when you need custom index numbering, such as
      * when processing a subset of a larger sequence.</p>
      *
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ByteIterator iter = ByteIterator.of((byte)10, (byte)20, (byte)30);
      * ObjIterator<IndexedByte> indexed = iter.indexed(100);
@@ -689,7 +685,7 @@ public abstract class ByteIterator extends ImmutableIterator<Byte> {
      * with the standard Iterator interface. For better performance, use
      * {@link #foreachRemaining(Throwables.ByteConsumer)} instead.</p>
      *
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ByteIterator iter = ByteIterator.of((byte)1, (byte)2);
      * iter.forEachRemaining((Byte b) -> System.out.print(b + " ")); // Avoid - causes boxing
@@ -712,7 +708,7 @@ public abstract class ByteIterator extends ImmutableIterator<Byte> {
      * avoiding the performance overhead of boxing. After calling this method, the iterator
      * is exhausted (hasNext() will return false).</p>
      *
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ByteIterator iter = ByteIterator.of((byte)1, (byte)2, (byte)3);
      * iter.foreachRemaining(b -> System.out.print(b + " ")); // Output: 1 2 3
@@ -739,7 +735,7 @@ public abstract class ByteIterator extends ImmutableIterator<Byte> {
      * starts from 0 and increments by 1 for each element. After calling this method, the
      * iterator is exhausted (hasNext() will return false).</p>
      *
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ByteIterator iter = ByteIterator.of((byte)10, (byte)20, (byte)30);
      * iter.foreachIndexed((index, b) ->

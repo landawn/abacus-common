@@ -444,16 +444,14 @@ public class CharStream201Test extends TestBase {
     @Test
     public void testIterateInitBooleanSupplierCharUnaryOperator() {
         AtomicInteger callCount = new AtomicInteger(0);
-        CharStream iteratedStream = CharStream.iterate('A', () -> callCount.incrementAndGet() <= 3,
-                c -> (char) (c + 1));
+        CharStream iteratedStream = CharStream.iterate('A', () -> callCount.incrementAndGet() <= 3, c -> (char) (c + 1));
         List<Character> result = iteratedStream.boxed().toList();
         assertEquals(Arrays.asList('A', 'B', 'C'), result);
     }
 
     @Test
     public void testIterateInitCharPredicateCharUnaryOperator() {
-        CharStream iteratedStream = CharStream.iterate('A', c -> c <= 'C',
-                c -> (char) (c + 1));
+        CharStream iteratedStream = CharStream.iterate('A', c -> c <= 'C', c -> (char) (c + 1));
         List<Character> result = iteratedStream.boxed().toList();
         assertEquals(Arrays.asList('A', 'B', 'C'), result);
 

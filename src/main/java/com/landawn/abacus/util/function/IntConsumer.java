@@ -36,6 +36,17 @@ public interface IntConsumer extends Throwables.IntConsumer<RuntimeException>, j
 
     /**
      * Performs this operation on the given argument.
+     * This method is expected to operate via side-effects.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * IntConsumer printer = value -> System.out.println("Value: " + value);
+     * printer.accept(42); // Prints: Value: 42
+     *
+     * List<Integer> numbers = new ArrayList<>();
+     * IntConsumer collector = numbers::add;
+     * collector.accept(10);
+     * }</pre>
      *
      * @param t the input argument
      */
@@ -48,9 +59,16 @@ public interface IntConsumer extends Throwables.IntConsumer<RuntimeException>, j
      * to the caller of the composed operation. If performing this operation throws an exception,
      * the {@code after} operation will not be performed.
      *
-     * @param after the operation to perform after this operation
-     * @return a composed {@code IntConsumer} that performs in sequence this operation followed by
-     *         the {@code after} operation
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * IntConsumer logger = value -> System.out.println("Processing: " + value);
+     * IntConsumer validator = value -> { if (value < 0) throw new IllegalArgumentException(); };
+     * IntConsumer combined = logger.andThen(validator);
+     * combined.accept(100); // Logs then validates
+     * }</pre>
+     *
+     * @param after the operation to perform after this operation. Must not be {@code null}.
+     * @return a composed {@code IntConsumer} that performs in sequence this operation followed by the {@code after} operation
      */
     @Override
     default IntConsumer andThen(final java.util.function.IntConsumer after) {

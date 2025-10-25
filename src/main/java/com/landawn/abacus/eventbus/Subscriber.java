@@ -23,8 +23,8 @@ package com.landawn.abacus.eventbus;
  * or anonymous inner classes. When using lambda expressions, the subscriber must be registered
  * with an event ID to avoid ambiguity.</p>
  * 
- * <p>Example usage with lambda expression:</p>
- * <pre>
+ * <p><b>Usage Examples with lambda expression:</b></p>
+ * <pre>{@code
  * {@code
  * EventBus eventBus = EventBus.getDefault();
  * 
@@ -38,10 +38,10 @@ package com.landawn.abacus.eventbus;
  *     System.out.println("User logged in: " + event.getUserId());
  * }, "userEvents");
  * }
- * </pre>
+ * }</pre>
  * 
- * <p>Example usage with anonymous inner class:</p>
- * <pre>
+ * <p><b>Usage Examples with anonymous inner class:</b></p>
+ * <pre>{@code
  * {@code
  * Subscriber<Integer> numberSubscriber = new Subscriber<Integer>() {
  *     @Override
@@ -51,10 +51,10 @@ package com.landawn.abacus.eventbus;
  * };
  * eventBus.register(numberSubscriber, "numberEvents");
  * }
- * </pre>
+ * }</pre>
  * 
- * <p>Example usage with method reference:</p>
- * <pre>
+ * <p><b>Usage Examples with method reference:</b></p>
+ * <pre>{@code
  * {@code
  * public class MyHandler {
  *     public void handleString(String message) {
@@ -65,7 +65,7 @@ package com.landawn.abacus.eventbus;
  * MyHandler handler = new MyHandler();
  * eventBus.register((Subscriber<String>) handler::handleString, "messages");
  * }
- * </pre>
+ * }</pre>
  * 
  * @param <E> the type of event this subscriber will receive
  * @see EventBus
@@ -85,8 +85,8 @@ public interface Subscriber<E> {
      * <p>Implementations should handle the event appropriately and should not throw
      * unchecked exceptions. Any exceptions thrown will be caught and logged by the EventBus.</p>
      * 
-     * <p>Example implementation:</p>
-     * <pre>
+     * <p><b>Usage Examples for implementation:</b></p>
+     * <pre>{@code
      * {@code
      * public void on(UserEvent event) {
      *     // Process the user event
@@ -94,7 +94,7 @@ public interface Subscriber<E> {
      *     logUserActivity(event);
      * }
      * }
-     * </pre>
+     * }</pre>
      *
      * @param event the event instance posted to the EventBus. Never null.
      */

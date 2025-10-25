@@ -42,7 +42,7 @@ public interface FloatFunction<R> extends Throwables.FloatFunction<R, RuntimeExc
      * A function that boxes a primitive float value into a {@link Float} object.
      * This is useful when you need to convert primitive float values to their object wrapper.
      * 
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * FloatFunction<Float> boxer = FloatFunction.BOX;
      * Float boxed = boxer.apply(3.14f); // Returns Float.valueOf(3.14f)
@@ -73,8 +73,7 @@ public interface FloatFunction<R> extends Throwables.FloatFunction<R, RuntimeExc
      * }</pre>
      *
      * @param value the float value to be processed
-     * @return the function result of type {@code R}
-     * @throws RuntimeException if the function encounters an error during execution
+     * @return the function result of type {@code R} if the function encounters an error during execution
      */
     @Override
     R apply(float value);
@@ -87,7 +86,7 @@ public interface FloatFunction<R> extends Throwables.FloatFunction<R, RuntimeExc
      * <p>This method enables function composition, allowing you to chain operations together.
      * The result of this function becomes the input to the {@code after} function.</p>
      * 
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * FloatFunction<Double> toDouble = value -> (double) value;
      * Function<Double, String> format = d -> String.format("%.4f", d);
@@ -113,7 +112,7 @@ public interface FloatFunction<R> extends Throwables.FloatFunction<R, RuntimeExc
      * <p>This method is useful when you need a {@code FloatFunction<Float>} that performs
      * no transformation other than boxing the primitive value.</p>
      * 
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * FloatFunction<Float> identity = FloatFunction.identity();
      * Float result = identity.apply(42.0f); // Returns Float.valueOf(42.0f)

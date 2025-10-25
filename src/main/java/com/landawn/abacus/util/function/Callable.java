@@ -38,7 +38,6 @@ public interface Callable<R> extends java.util.concurrent.Callable<R>, Throwable
      * not checked exceptions.
      *
      * @return the computed result
-     * @throws RuntimeException if unable to compute a result
      */
     @Override
     R call();

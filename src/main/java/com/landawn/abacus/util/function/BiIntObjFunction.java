@@ -34,6 +34,12 @@ public interface BiIntObjFunction<T, R> extends Throwables.BiIntObjFunction<T, R
     /**
      * Applies this function to the given arguments.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * BiIntObjFunction<String, String> formatter = (i, j, prefix) -> prefix + (i + j);
+     * String result = formatter.apply(10, 20, "Sum: "); // Returns "Sum: 30"
+     * }</pre>
+     *
      * @param i the first function argument (int value)
      * @param j the second function argument (int value)
      * @param t the third function argument (object value)
@@ -45,6 +51,13 @@ public interface BiIntObjFunction<T, R> extends Throwables.BiIntObjFunction<T, R
     /**
      * Returns a composed function that first applies this function to its input, and then applies the {@code after} function to the result.
      * If evaluation of either function throws an exception, it is relayed to the caller of the composed function.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * BiIntObjFunction<String, Integer> summer = (i, j, s) -> i + j + s.length();
+     * Function<Integer, String> toString = Object::toString;
+     * BiIntObjFunction<String, String> combined = summer.andThen(toString);
+     * }</pre>
      *
      * @param <V> the type of output of the {@code after} function, and of the composed function
      * @param after the function to apply after this function is applied. Must not be {@code null}.

@@ -36,7 +36,7 @@ import java.lang.annotation.Target;
  * <p>This annotation helps maintain clear boundaries between production and test code,
  * making it easier to identify code that should not be used in production contexts.</p>
  * 
- * <p>Example usage:</p>
+ * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * public class UserService {
  *     @Test

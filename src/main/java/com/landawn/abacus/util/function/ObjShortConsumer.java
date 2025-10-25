@@ -28,7 +28,7 @@ public interface ObjShortConsumer<T> extends Throwables.ObjShortConsumer<T, Runt
      * ranges, or processing data where memory efficiency is important and values fit
      * within the short range (-32,768 to 32,767).
      *
-     * <p>Example usage:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ObjShortConsumer<ShortBuffer> addToBuffer = (buffer, value) -> buffer.put(value);
      * ObjShortConsumer<Config> setPort = (config, port) -> config.setPort(port);
@@ -38,8 +38,7 @@ public interface ObjShortConsumer<T> extends Throwables.ObjShortConsumer<T, Runt
      * }</pre>
      *
      * @param t the first input argument of type T
-     * @param value the second input argument, a primitive short value
-     * @throws RuntimeException if the operation cannot be completed
+     * @param value the second input argument, a primitive short value if the operation cannot be completed
      */
     @Override
     void accept(T t, short value);

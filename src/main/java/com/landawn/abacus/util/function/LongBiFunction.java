@@ -68,7 +68,7 @@ public interface LongBiFunction<R> extends Throwables.LongBiFunction<R, RuntimeE
      * where the output of this function becomes the input of the next function.
      * This is useful for building complex transformations from simpler ones.
      *
-     * <p>Example usage:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * LongBiFunction<Long> difference = (a, b) -> Math.abs(a - b);
      * LongBiFunction<String> differenceAsString = difference.andThen(String::valueOf);

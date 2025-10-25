@@ -25,7 +25,7 @@ import com.landawn.abacus.util.Throwables;
  * <p>The interface extends {@code Throwables.ObjBiIntPredicate} with {@code RuntimeException} as the exception type,
  * making it suitable for use in contexts where checked exceptions are not required.
  * 
- * <p>Example usage:
+ * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * ObjBiIntPredicate<String> isSubstringValid = (str, start, end) -> 
  *     start >= 0 && end <= str.length() && start < end;
@@ -65,8 +65,7 @@ public interface ObjBiIntPredicate<T> extends Throwables.ObjBiIntPredicate<T, Ru
      * @param t the object input argument
      * @param i the first int input argument (often used as start index, row, or x-coordinate)
      * @param j the second int input argument (often used as end index, column, or y-coordinate)
-     * @return {@code true} if the input arguments match the predicate, otherwise {@code false}
-     * @throws RuntimeException if any error occurs during predicate evaluation
+     * @return {@code true} if the input arguments match the predicate, otherwise {@code false} if any error occurs during predicate evaluation
      */
     @Override
     boolean test(T t, int i, int j);
@@ -77,7 +76,7 @@ public interface ObjBiIntPredicate<T> extends Throwables.ObjBiIntPredicate<T, Ru
      * <p>The returned predicate will return {@code true} when this predicate returns {@code false},
      * and {@code false} when this predicate returns {@code true}.
      * 
-     * <p>Example usage:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ObjBiIntPredicate<String> isInBounds = (str, start, end) -> 
      *     start >= 0 && end <= str.length();
@@ -102,7 +101,7 @@ public interface ObjBiIntPredicate<T> extends Throwables.ObjBiIntPredicate<T, Ru
      * to the caller; if evaluation of this predicate throws an exception, the
      * {@code other} predicate will not be evaluated.
      * 
-     * <p>Example usage:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ObjBiIntPredicate<String> isValidRange = (str, start, end) -> 
      *     start >= 0 && end <= str.length() && start <= end;
@@ -132,7 +131,7 @@ public interface ObjBiIntPredicate<T> extends Throwables.ObjBiIntPredicate<T, Ru
      * to the caller; if evaluation of this predicate throws an exception, the
      * {@code other} predicate will not be evaluated.
      * 
-     * <p>Example usage:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ObjBiIntPredicate<List<?>> isEmpty = (list, from, to) -> 
      *     list.isEmpty();

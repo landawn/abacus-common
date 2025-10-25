@@ -900,7 +900,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * <p>The returned collector is not concurrent, and the collection returned is determined
      * by the factory function provided.</p>
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Collect to a LinkedList
      * LinkedList<Integer> numbers = Stream.of(1, 2, 3, 4, 5)
@@ -935,7 +935,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * {@code List}, the combiner uses {@code subList} for efficiency. For other collection
      * types, it iterates through elements until the size limit is reached.</p>
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Collect first 10 elements from a large stream
      * List<Integer> firstTen = Stream.iterate(1, n -> n + 1)
@@ -996,7 +996,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * <p>The combiner uses the default behavior of adding all elements from one collection
      * to another, with the larger collection being used as the target.</p>
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Collect only even numbers
      * List<Integer> evens = Stream.of(1, 2, 3, 4, 5, 6)
@@ -1031,7 +1031,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * The combiner function defines how two collections are merged together, which is
      * essential for parallel stream processing.</p>
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Custom collector that adds elements in reverse order
      * List<String> reversed = Stream.of("a", "b", "c")
@@ -1090,7 +1090,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * <p>For streams with defined encounter order, the elements will appear in the
      * resulting list in the same order. For unordered streams, no order is guaranteed.</p>
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Collect stream elements to a list
      * List<String> list = Stream.of("apple", "banana", "orange")
@@ -1118,7 +1118,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * <p>Unlike the generic {@code toList()} collector, this method guarantees that the
      * returned collection will be a {@code LinkedList}.</p>
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Collect to a LinkedList for efficient head/tail operations
      * LinkedList<Integer> linkedList = Stream.of(1, 2, 3, 4, 5)
@@ -1146,7 +1146,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * <p>This is useful when you need to ensure that the collected data cannot be
      * accidentally modified after collection. Elements are preserved in encounter order.</p>
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Create an immutable list from stream elements
      * ImmutableList<String> immutable = Stream.of("a", "b", "c")
@@ -1176,7 +1176,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * <p>This method delegates to the JDK's {@code Collectors.toUnmodifiableList()} method
      * and provides the same guarantees. Elements are preserved in encounter order.</p>
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Create an unmodifiable list
      * List<Integer> unmodifiable = Stream.of(1, 2, 3)
@@ -1204,7 +1204,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * are inherently unordered collections (unless a specific ordered set implementation
      * is used).</p>
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Collect unique elements to a set
      * Set<Integer> uniqueNumbers = Stream.of(1, 2, 2, 3, 3, 3)
@@ -1233,7 +1233,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * <p>Elements are compared using their {@code equals} method for uniqueness, and the
      * iteration order matches the order in which elements were first encountered in the stream.</p>
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Collect unique elements preserving order
      * Set<String> orderedSet = Stream.of("c", "a", "b", "a", "c")
@@ -1263,7 +1263,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * <p>Duplicate elements are removed based on their {@code equals} method. The iteration
      * order of the resulting set is not specified.</p>
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Create an immutable set from stream elements
      * ImmutableSet<String> immutable = Stream.of("a", "b", "b", "c")
@@ -1294,7 +1294,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * <p>This method delegates to the JDK's {@code Collectors.toUnmodifiableSet()} method
      * and provides the same guarantees.</p>
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Create an unmodifiable set
      * Set<Integer> unmodifiable = Stream.of(1, 2, 2, 3)
@@ -1321,7 +1321,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * <p>The returned queue supports all optional {@code Queue} operations. There are no
      * guarantees on the thread-safety of the {@code Queue} returned.</p>
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Collect elements into a queue for FIFO processing
      * Queue<String> taskQueue = Stream.of("task1", "task2", "task3")
@@ -1348,7 +1348,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * <p>Elements are added to the deque in encounter order. The deque can be used for
      * both FIFO and LIFO (Last-In-First-Out) operations.</p>
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Collect elements into a deque for flexible processing
      * Deque<Integer> deque = Stream.of(1, 2, 3, 4)
@@ -1376,7 +1376,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * <p>The initial capacity of the list is optimized based on the {@code atMostSize}
      * parameter to avoid unnecessary resizing. Elements are collected in encounter order.</p>
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Collect at most 5 elements from a potentially large stream
      * List<Integer> topFive = Stream.iterate(1, n -> n + 1)
@@ -1407,7 +1407,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * <p>Note that due to the nature of sets removing duplicates, the final size may be
      * less than {@code atMostSize} if the stream contains duplicate elements.</p>
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Collect at most 3 unique elements
      * Set<Integer> limitedSet = Stream.of(1, 2, 2, 3, 4, 5)
@@ -1436,7 +1436,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * <p>This collector is useful for frequency counting and when you need to know not just
      * which elements are present, but how many times each appears.</p>
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Count frequency of elements
      * Multiset<String> wordCounts = Stream.of("apple", "banana", "apple", "apple", "banana")
@@ -1465,7 +1465,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * <p>The collector handles merging of multisets correctly in parallel operations,
      * combining the counts of elements from different segments of the stream.</p>
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Use a custom Multiset implementation
      * Multiset<Integer> counts = Stream.of(1, 2, 2, 3, 3, 3)
@@ -1496,7 +1496,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * <p>The collector first accumulates elements into a list for efficiency, then converts
      * to an array as the final step.</p>
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Collect stream elements to an Object array
      * Object[] array = Stream.of("a", "b", "c")
@@ -1524,7 +1524,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * <p>Elements are collected in encounter order. This method uses reflection to create
      * arrays of the appropriate type when necessary.</p>
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Collect to a String array
      * String[] strings = Stream.of("a", "b", "c")
@@ -1567,7 +1567,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * <p>Elements are collected in encounter order. This is the preferred method when
      * you know the component type of the array at compile time.</p>
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Collect to an Integer array with exact sizing
      * Integer[] numbers = Stream.of(1, 2, 3, 4, 5)
@@ -1601,7 +1601,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * <p>Elements are collected in encounter order. The collector handles both combining
      * partial results in parallel streams and converting to the final {@code BooleanList}.</p>
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Collect boolean values efficiently
      * BooleanList flags = Stream.of(true, false, true, true, false)
@@ -1630,7 +1630,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * <p>The collector internally uses a {@code BooleanList} for accumulation, then converts
      * to an array as the final step, ensuring efficient memory usage throughout the process.</p>
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Convert Boolean stream to primitive array
      * boolean[] array = Stream.of(true, false, true)
@@ -1660,7 +1660,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * <p>Elements are collected in encounter order. This is particularly useful when
      * working with character data that needs to be processed as a list.</p>
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Collect characters efficiently
      * CharList chars = Stream.of('a', 'b', 'c', 'd')
@@ -1689,7 +1689,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * <p>Elements are collected in encounter order. The collector internally uses a
      * {@code CharList} for efficient accumulation.</p>
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Convert Character stream to primitive array
      * char[] array = Stream.of('H', 'e', 'l', 'l', 'o')
@@ -1719,7 +1719,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * <p>Elements are collected in encounter order. This is particularly useful when
      * working with binary data or byte-oriented operations.</p>
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Collect bytes efficiently
      * ByteList bytes = Stream.of((byte)1, (byte)2, (byte)3)
@@ -1748,7 +1748,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * <p>Elements are collected in encounter order. The collector internally uses a
      * {@code ByteList} for efficient accumulation.</p>
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Convert Byte stream to primitive array
      * byte[] array = Stream.of((byte)10, (byte)20, (byte)30)
@@ -1778,7 +1778,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * <p>Elements are collected in encounter order. This is useful when working with
      * numeric data that fits within the short range (-32,768 to 32,767).</p>
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Collect shorts efficiently
      * ShortList shorts = Stream.of((short)100, (short)200, (short)300)
@@ -1807,7 +1807,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * <p>The collector internally uses a {@code ShortList} for efficient accumulation
      * before converting to the final array format.</p>
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Convert Short stream to primitive array
      * short[] array = Stream.of((short)1, (short)2, (short)3)
@@ -1837,7 +1837,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * <p>Elements are collected in encounter order. This is one of the most commonly
      * used primitive collectors for numeric operations.</p>
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Collect integers efficiently
      * IntList ints = Stream.of(1, 2, 3, 4, 5)
@@ -1866,7 +1866,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * <p>Elements are collected in encounter order. The collector internally uses an
      * {@code IntList} for efficient accumulation.</p>
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Convert Integer stream to primitive array
      * int[] array = Stream.of(10, 20, 30, 40, 50)
@@ -1896,7 +1896,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * <p>Elements are collected in encounter order. This is useful for working with
      * large numeric values or timestamps.</p>
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Collect longs efficiently
      * LongList longs = Stream.of(1000L, 2000L, 3000L)
@@ -1925,7 +1925,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * <p>Elements are collected in encounter order. The collector internally uses a
      * {@code LongList} for efficient accumulation.</p>
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Convert Long stream to primitive array
      * long[] array = Stream.of(100L, 200L, 300L)
@@ -1955,7 +1955,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * <p>Elements are collected in encounter order. This is useful for scientific
      * calculations and graphics programming where float precision is sufficient.</p>
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Collect floats efficiently
      * FloatList floats = Stream.of(1.5f, 2.5f, 3.5f)
@@ -1984,7 +1984,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * <p>Elements are collected in encounter order. The collector internally uses a
      * {@code FloatList} for efficient accumulation.</p>
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Convert Float stream to primitive array
      * float[] array = Stream.of(1.0f, 2.0f, 3.0f)
@@ -2014,7 +2014,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * <p>Elements are collected in encounter order. This is useful for high-precision
      * numeric calculations where double precision is required.</p>
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Collect doubles efficiently
      * DoubleList doubles = Stream.of(1.5, 2.5, 3.5)
@@ -2043,7 +2043,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * <p>Elements are collected in encounter order. The collector internally uses a
      * {@code DoubleList} for efficient accumulation.</p>
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Convert Double stream to primitive array
      * double[] array = Stream.of(1.1, 2.2, 3.3)
@@ -2094,7 +2094,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * <p>This collector enforces uniqueness and is suitable for queries that should return
      * a single result or no result at all.</p>
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Find the only element matching a condition
      * Optional<String> result = list.stream()
@@ -2129,7 +2129,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * <p>This is a combination of filtering and the onlyOne collector, useful for
      * finding a unique element matching specific criteria.</p>
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Find the only even number in a specific range
      * Optional<Integer> onlyEven = Stream.of(1, 3, 4, 5, 7)
@@ -2180,7 +2180,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * <p>Note that this is different from {@code findFirst()} as it's implemented as a
      * collector and can be combined with other collectors.</p>
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Get the first element as a collector
      * Optional<String> first = Stream.of("a", "b", "c")
@@ -2214,7 +2214,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * <p>Each element encountered replaces the previous one, so the final result is
      * the last element in encounter order.</p>
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Get the last element as a collector
      * Optional<String> last = Stream.of("a", "b", "c")
@@ -2248,7 +2248,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * <p>The collector stops accumulating once n elements have been collected, making
      * it efficient for large streams when you only need the first few elements.</p>
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Get the first 3 elements
      * List<Integer> firstThree = Stream.of(1, 2, 3, 4, 5)
@@ -2296,7 +2296,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * <p>This collector is designed for sequential streams only and will throw an
      * {@code UnsupportedOperationException} if used with parallel streams.</p>
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Get the last 3 elements
      * List<Integer> lastThree = Stream.of(1, 2, 3, 4, 5)
@@ -2351,7 +2351,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * 
      * <p>This is useful for simple string concatenation where no formatting is needed.</p>
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Concatenate characters into a string
      * String result = Stream.of("H", "e", "l", "l", "o")
@@ -2376,7 +2376,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * <p>This is one of the most commonly used string collectors for creating
      * comma-separated values, space-separated words, etc.</p>
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Create comma-separated values
      * String csv = Stream.of("apple", "banana", "orange")
@@ -2404,7 +2404,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * internal buffers for better performance. Elements are converted to strings using
      * their {@code toString()} method.</p>
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Create a formatted list
      * String list = Stream.of("apple", "banana", "orange")
@@ -2442,7 +2442,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * short-circuiting collector as well. This is similar to the JDK 9+ filtering
      * collector but with short-circuiting support.</p>
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Collect only even numbers to a list
      * List<Integer> evens = Stream.of(1, 2, 3, 4, 5, 6)
@@ -2482,7 +2482,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * <p>There are no guarantees on the type, mutability, serializability, or
      * thread-safety of the {@code List} returned.</p>
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Filter and collect positive numbers
      * List<Integer> positives = Stream.of(-1, 2, -3, 4, -5, 6)
@@ -2514,7 +2514,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * <p>The mapping is done lazily during accumulation, which can be more efficient
      * than mapping the entire stream first.</p>
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Collect string lengths to a list
      * List<Integer> lengths = Stream.of("apple", "banana", "orange")
@@ -2550,7 +2550,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * <p>There are no guarantees on the type, mutability, serializability, or
      * thread-safety of the {@code List} returned.</p>
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Extract and collect first characters
      * List<Character> firstChars = Stream.of("apple", "banana", "cherry")
@@ -2580,7 +2580,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * <p>The streams returned by the mapper function are automatically closed after
      * their elements have been consumed. This ensures proper resource management.</p>
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Flatten nested lists during collection
      * List<Integer> flattened = Stream.of(Arrays.asList(1, 2), Arrays.asList(3, 4))
@@ -2624,7 +2624,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * transformed into a stream by the mapper function, and all elements from all streams
      * are collected into a single list.</p>
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Split strings into characters and collect
      * List<Character> chars = Stream.of("abc", "def")
@@ -2656,7 +2656,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * <p>Empty collections returned by the mapper are handled efficiently and don't
      * contribute any elements to the downstream collector.</p>
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Flatten a map's values
      * Map<String, List<Integer>> map = new HashMap<>();
@@ -2703,7 +2703,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * collecting to a list. Each element is transformed into a collection by the mapper
      * function, and all elements from all collections are collected into a single list.</p>
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Collect all tags from multiple posts
      * List<Post> posts = getPosts();
@@ -2736,7 +2736,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * <p>The characteristics of the returned collector are derived from the downstream
      * collector, with {@code IDENTITY_FINISH} removed if present.</p>
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Collect to a list then get its size
      * Integer count = Stream.of("a", "b", "c")
@@ -2789,7 +2789,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * the collected result otherwise. This is useful when you want to distinguish between
      * an empty collection result and no elements being processed.</p>
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Returns Optional.empty() for empty stream
      * Optional<List<String>> result = Stream.<String>empty()
@@ -2854,7 +2854,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * were collected, it returns the specified default value instead of the collector's
      * normal empty result. This is useful for providing fallback values.</p>
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Returns default list when stream is empty
      * List<String> result = Stream.<String>empty()
@@ -2886,7 +2886,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * collector's normal empty result. The supplier is only called if needed, allowing
      * for lazy evaluation of the default.</p>
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Compute default only if needed
      * List<String> result = Stream.<String>empty()
@@ -2950,7 +2950,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * were collected, it throws a {@code NoSuchElementException}. This is useful when
      * an empty result is an error condition.</p>
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Throws if no elements match
      * List<String> result = Stream.of("a", "b", "c")
@@ -2981,7 +2981,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * were collected, it throws the exception provided by the supplier. This allows
      * for custom error handling when empty results are not acceptable.</p>
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Throws custom exception if no valid data found
      * List<Data> result = dataStream
@@ -3019,7 +3019,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * <p>This operation is equivalent to {@code stream.distinct(keyMapper).toList()},
      * but may work faster as it's implemented as a single collector.</p>
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Keep first person of each age
      * List<Person> distinctByAge = people.stream()
@@ -3046,7 +3046,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * <p>For ordered streams, this preserves the encounter order of the first occurrence
      * of each distinct element.</p>
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Collect distinct strings by length to a TreeSet
      * Set<String> distinctByLength = words.stream()
@@ -3105,7 +3105,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * <p>The operation is equivalent to {@code stream.map(mapper).distinct().count()},
      * but is implemented as a single collector which can be more efficient.</p>
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Count unique departments
      * Integer uniqueDepartments = employees.stream()
@@ -3140,7 +3140,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * <p>The implementation optimizes by incrementing a counter rather than storing
      * elements, making it memory efficient for large streams.</p>
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Count total elements
      * Long count = stream.collect(Collectors.counting());
@@ -3169,7 +3169,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * <p>Be aware that this collector may overflow for streams with more than
      * {@code Integer.MAX_VALUE} elements.</p>
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Count elements as int
      * Integer count = stream.collect(Collectors.countingToInt());
@@ -3199,7 +3199,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * <p>Elements must implement {@code Comparable}. For custom comparison logic,
      * use {@link #min(Comparator)} instead.</p>
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Find minimum value
      * Optional<Integer> min = Stream.of(3, 1, 4, 1, 5)
@@ -3224,7 +3224,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * The comparator is used for all comparisons, including handling of null values
      * if present.</p>
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Find shortest string
      * Optional<String> shortest = Stream.of("apple", "pie", "banana")
@@ -3254,7 +3254,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * If the stream is empty, it returns the specified default value instead of
      * an empty {@code Optional}. This is useful when you always need a value.</p>
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Find minimum with default
      * Integer min = Stream.<Integer>empty()
@@ -3279,7 +3279,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * If the stream is empty, it returns the specified default value. This combines
      * custom comparison with a fallback value.</p>
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Find shortest string with default
      * String shortest = emptyStream
@@ -3310,7 +3310,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * <p>The returned collector handles null values by placing them last in the
      * ordering (nulls are considered greater than non-null values).</p>
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Get minimum or default value
      * Integer min = Stream.of(5, 3, 8, 2)
@@ -3339,7 +3339,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * <p>This collector provides more flexibility than {@code minOrElseGet(Supplier)}
      * by allowing custom comparison logic through the comparator parameter.</p>
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Find minimum by string length or return default
      * String shortest = Stream.of("apple", "pi", "banana")
@@ -3374,7 +3374,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * <p>The returned collector handles null values by placing them last in the
      * ordering (nulls are considered greater than non-null values).</p>
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Find minimum element
      * Integer min = Stream.of(5, 3, 8, 2)
@@ -3401,7 +3401,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * <p>This collector provides more flexibility than {@code minOrElseThrow()}
      * by allowing custom comparison logic through the comparator parameter.</p>
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Find minimum by string length
      * String shortest = Stream.of("apple", "pi", "banana")
@@ -3425,7 +3425,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * <p>This collector allows you to specify both the comparison logic and the
      * exception to throw when the stream is empty, providing maximum flexibility.</p>
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Find minimum with custom exception
      * Person youngest = people.stream()
@@ -3462,7 +3462,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * <p>The returned collector handles null keys by placing them last in the
      * ordering (null keys are considered greater than non-null keys).</p>
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Find person with minimum age
      * Optional<Person> youngest = people.stream()
@@ -3486,7 +3486,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * <p>This collector combines the convenience of key-based comparison with
      * a default value for empty streams.</p>
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Find person with minimum age or return default
      * Person youngest = people.stream()
@@ -3514,7 +3514,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * <p>This collector is useful when you need to find the minimum based on a
      * property and want to treat empty streams as exceptional cases.</p>
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Find person with minimum age or throw
      * Person youngest = people.stream()
@@ -3538,7 +3538,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * <p>This collector provides maximum flexibility for key-based minimum finding
      * with custom exception handling.</p>
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Find product with minimum price or throw custom exception
      * Product cheapest = products.stream()
@@ -3568,7 +3568,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * <p>The returned collector handles null values by placing them first in the
      * ordering (nulls are considered less than non-null values).</p>
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Find maximum element
      * Optional<Integer> max = Stream.of(5, 3, 8, 2)
@@ -3591,7 +3591,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * element. If multiple elements are considered equal according to the comparator,
      * the first encountered element is returned.</p>
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Find longest string
      * Optional<String> longest = Stream.of("apple", "pi", "banana")
@@ -3619,7 +3619,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * <p>This collector is a convenience method that provides a default value
      * directly instead of using a supplier.</p>
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Find maximum with default value
      * Integer max = Stream.of(5, 3, 8, 2)
@@ -3647,7 +3647,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * <p>This collector combines custom comparison logic with a simple default value
      * for empty streams.</p>
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Find longest string with default
      * String longest = Stream.of("apple", "pi", "banana")
@@ -3674,7 +3674,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * <p>This collector is useful when you need a default value instead of dealing
      * with an empty {@code Optional}. The elements must be {@code Comparable}.</p>
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Find maximum or compute default
      * Integer max = Stream.of(5, 3, 8, 2)
@@ -3698,7 +3698,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * <p>This collector provides full flexibility for finding maximum elements with
      * custom comparison and default value logic.</p>
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Find person with maximum age or create default
      * Person oldest = people.stream()
@@ -3729,7 +3729,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * <p>This collector is useful when the absence of elements should be treated as
      * an exceptional condition. The elements must be {@code Comparable}.</p>
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Find maximum element
      * Integer max = Stream.of(5, 3, 8, 2)
@@ -3756,7 +3756,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * <p>This collector provides more flexibility than {@code maxOrElseThrow()}
      * by allowing custom comparison logic.</p>
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Find longest string or throw
      * String longest = Stream.of("apple", "pi", "banana")
@@ -3780,7 +3780,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * <p>This collector allows you to specify both the comparison logic and the
      * exception to throw when the stream is empty.</p>
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Find maximum with custom exception
      * Product mostExpensive = products.stream()
@@ -3812,7 +3812,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * on a specific property. The key extractor function should return a
      * {@code Comparable} value.</p>
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Find person with maximum age
      * Optional<Person> oldest = people.stream()
@@ -3836,7 +3836,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * <p>This collector combines the convenience of key-based comparison with
      * a default value for empty streams.</p>
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Find person with maximum age or return default
      * Person oldest = people.stream()
@@ -3864,7 +3864,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * <p>This collector is useful when you need to find the maximum based on a
      * property and want to treat empty streams as exceptional cases.</p>
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Find person with maximum age or throw
      * Person oldest = people.stream()
@@ -3888,7 +3888,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * <p>This collector provides maximum flexibility for key-based maximum finding
      * with custom exception handling.</p>
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Find product with maximum price or throw custom exception
      * Product mostExpensive = products.stream()
@@ -3954,7 +3954,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * <p>This collector is useful when you want to find all minimal elements but
      * limit the result size for memory efficiency.</p>
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Find at most 5 minimum values
      * List<Integer> mins = Stream.of(1, 3, 1, 5, 1, 2, 1)
@@ -4028,7 +4028,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * <p>This collector is useful when you need both the minimum element and
      * some aggregation of all minimum elements.</p>
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Find minimum value and count of occurrences
      * Optional<Pair<Integer, Long>> result = Stream.of(1, 3, 1, 5, 1)
@@ -4055,7 +4055,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * <p>This collector provides both the minimum element and an aggregation
      * of all elements that are equal to the minimum.</p>
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Find shortest string and concatenate all shortest strings
      * Optional<Pair<String, String>> result = Stream.of("a", "bb", "a", "ccc")
@@ -4084,7 +4084,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * <p>This collector provides maximum flexibility by allowing transformation
      * of the final result.</p>
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Find minimum and format result
      * String result = Stream.of(1, 3, 1, 5, 1)
@@ -4155,7 +4155,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * <p>This collector is useful when you want to find all maximal elements but
      * limit the result size for memory efficiency.</p>
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Find at most 3 maximum values
      * List<Integer> maxs = Stream.of(5, 3, 5, 1, 5, 2)
@@ -4362,7 +4362,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * <p>This collector is useful when you need both the maximum element and
      * some aggregation of all maximum elements.</p>
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Find maximum value and sum of all maximums
      * Optional<Pair<Integer, Integer>> result = Stream.of(5, 3, 5, 1, 5)
@@ -4389,7 +4389,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * <p>This collector provides both the maximum element and an aggregation
      * of all elements that are equal to the maximum.</p>
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Find longest strings and join them
      * Optional<Pair<String, String>> result = Stream.of("abc", "xy", "def")
@@ -4418,7 +4418,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * <p>This collector provides maximum flexibility by allowing transformation
      * of the final result.</p>
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Find maximum and create custom result
      * boolean hasMax = Stream.of(1, 3, 5, 5, 2)
@@ -4538,7 +4538,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * minimal or maximal elements appear, the collector always selects the
      * first encountered.</p>
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Find min and max from a stream of integers
      * Optional<Pair<Integer, Integer>> result = Stream.of(5, 2, 8, 1, 9)
@@ -4567,7 +4567,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * minimal or maximal elements appear, the collector always selects the
      * first encountered.</p>
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Find shortest and longest strings
      * Optional<Pair<String, String>> result = Stream.of("a", "abc", "ab", "abcd")
@@ -4602,7 +4602,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * empty {@code Optional} is returned. Otherwise, the finisher result is
      * wrapped into {@code Optional}.</p>
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Calculate the range (difference between max and min)
      * Optional<Integer> range = Stream.of(5, 2, 8, 1, 9)
@@ -4633,7 +4633,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * and maximum values based on a specific property. The key mapper function extracts
      * a {@code Comparable} value from each element for comparison.</p>
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Find the person with minimum and maximum age
      * Optional<Pair<Person, Person>> result = people.stream()
@@ -4659,7 +4659,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * a custom finisher operation. The finisher is only called if the stream contains
      * at least one element.</p>
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Find the age difference between youngest and oldest person
      * Optional<Integer> ageDiff = people.stream()
@@ -4690,7 +4690,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * is empty. This is useful when you want to avoid dealing with {@code Optional}
      * and have a sensible default value.</p>
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Find min and max with default values
      * Pair<Integer, Integer> result = Stream.<Integer>empty()
@@ -4715,7 +4715,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * <p>This collector processes the stream to find both extremes in a single pass.
      * If the stream is empty, the supplier function is called to provide a default result.</p>
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Find shortest and longest strings with defaults
      * Pair<String, String> result = Stream.<String>empty()
@@ -4750,7 +4750,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * in your application logic. It guarantees that the result will always contain
      * valid minimum and maximum values.</p>
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // This will throw NoSuchElementException if stream is empty
      * Pair<Integer, Integer> result = Stream.of(5, 2, 8, 1, 9)
@@ -4773,7 +4773,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * <p>This collector processes the stream to find both extremes in a single pass.
      * If the stream is empty, a {@code NoSuchElementException} is thrown.</p>
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Find shortest and longest strings (throws if empty)
      * Pair<String, String> result = Stream.of("a", "abc", "ab")
@@ -4804,7 +4804,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * If no elements are present, the result is 0. The sum is computed using
      * integer arithmetic, which may overflow for large values.</p>
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Sum the lengths of all strings
      * Integer totalLength = Stream.of("hello", "world", "!")
@@ -4830,7 +4830,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * a {@code Long} result to avoid integer overflow issues when summing large
      * numbers of elements or large values.</p>
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Sum large numbers safely
      * Long total = Stream.of(1_000_000, 2_000_000, 3_000_000)
@@ -4856,7 +4856,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * If no elements are present, the result is 0L. The sum is computed using
      * long arithmetic, which may overflow for very large values.</p>
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Sum file sizes
      * Long totalSize = files.stream()
@@ -4877,7 +4877,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * Returns a {@code Collector} that produces the sum of a double-valued function
      * applied to the input elements.
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Sum prices with decimal values
      * Double totalPrice = items.stream()
@@ -4902,7 +4902,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * the range of primitive types. If no elements are present, the result is
      * {@code BigInteger.ZERO}.</p>
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Sum very large numbers
      * BigInteger total = Stream.of("1000000000000000000", "2000000000000000000")
@@ -4928,7 +4928,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * financial calculations. If no elements are present, the result is
      * {@code BigDecimal.ZERO}.</p>
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Sum monetary values precisely
      * BigDecimal totalAmount = transactions.stream()
@@ -4952,7 +4952,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * <p>If no elements are present, the result is 0.0.
      * The average is calculated as a double to preserve precision.</p>
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Calculate average length of strings
      * Double avgLength = Stream.of("hello", "world", "!")
@@ -4978,7 +4978,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * <p>If no elements are present, the result is an empty {@code OptionalDouble}.
      * The average is calculated as a double to preserve precision.</p>
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Calculate average length of strings
      * OptionalDouble avgLength = Stream.of("hello", "world", "!")
@@ -5008,7 +5008,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * <p>This collector is useful when an empty stream represents an error condition.
      * The average is calculated as a double to preserve precision.</p>
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Calculate average age (throws if no people)
      * Double avgAge = people.stream()
@@ -5038,7 +5038,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * <p>If no elements are present, the result is 0.0.
      * The average is calculated as a double to preserve precision.</p>
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Calculate average file size
      * Double avgSize = files.stream()
@@ -5063,7 +5063,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * <p>If no elements are present, the result is an empty {@code OptionalDouble}.
      * The average is calculated as a double to preserve precision.</p>
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Calculate average file size
      * OptionalDouble avgSize = files.stream()
@@ -5092,7 +5092,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * <p>This collector is useful when an empty stream represents an error condition.
      * The average is calculated as a double to preserve precision.</p>
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Calculate average processing time (throws if no data)
      * Double avgTime = records.stream()
@@ -5122,7 +5122,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * <p>If no elements are present, the result is 0.0.
      * The average is calculated as a double to preserve precision.</p>
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Calculate average price
      * Double avgPrice = products.stream()
@@ -5147,7 +5147,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * <p>If no elements are present, the result is an empty {@code OptionalDouble}.
      * The average is calculated as a double to preserve precision.</p>
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Calculate average price
      * OptionalDouble avgPrice = products.stream()
@@ -5170,7 +5170,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * Returns a {@code Collector} that produces the arithmetic mean of a double-valued
      * function applied to the input elements, throwing an exception if no elements are present.
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Calculate average score (throws if no scores)
      * Double avgScore = students.stream()
@@ -5197,7 +5197,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * <p>The average is calculated as a {@code BigDecimal} to preserve precision.
      * If no elements are present, the result is {@code BigDecimal.ZERO}.</p>
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Calculate average of very large numbers
      * BigDecimal avg = Stream.of("1000000000000", "2000000000000")
@@ -5228,7 +5228,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * <p>The average is calculated as a {@code BigDecimal} to preserve precision.
      * If no elements are present, the result is an empty {@code Optional}.</p>
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Calculate average of very large numbers
      * Optional<BigDecimal> avg = Stream.of("1000000000000", "2000000000000")
@@ -5258,7 +5258,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * <p>The average is calculated as a {@code BigDecimal} to preserve precision.
      * This collector is useful when an empty stream represents an error condition.</p>
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Calculate average balance (throws if no accounts)
      * BigDecimal avgBalance = accounts.stream()
@@ -5289,7 +5289,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * financial calculations. If no elements are present, the result is
      * {@code BigDecimal.ZERO}.</p>
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Calculate average transaction amount
      * BigDecimal avgAmount = transactions.stream()
@@ -5319,7 +5319,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * <p>This collector is useful for precise decimal arithmetic, especially for
      * financial calculations. If no elements are present, the result is an empty {@code Optional}.</p>
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Calculate average transaction amount
      * Optional<BigDecimal> avgAmount = transactions.stream()
@@ -5348,7 +5348,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * <p>This collector is useful for precise decimal arithmetic when an empty stream
      * represents an error condition.</p>
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Calculate average price (throws if no items)
      * BigDecimal avgPrice = items.stream()
@@ -5379,7 +5379,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * and average of the char values. This is useful for getting multiple statistics
      * in a single pass through the data.</p>
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Get statistics of first characters
      * CharSummaryStatistics stats = words.stream()
@@ -5410,7 +5410,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * and average of the byte values. This is useful for getting multiple statistics
      * in a single pass through the data.</p>
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Get statistics of byte values
      * ByteSummaryStatistics stats = Stream.of((byte)1, (byte)2, (byte)3)
@@ -5441,7 +5441,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * and average of the short values. This is useful for getting multiple statistics
      * in a single pass through the data.</p>
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Get statistics of short values
      * ShortSummaryStatistics stats = Stream.of((short)100, (short)200, (short)300)
@@ -5472,7 +5472,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * and average of the integer values. This is useful for getting multiple statistics
      * in a single pass through the data.</p>
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Get statistics of string lengths
      * IntSummaryStatistics stats = strings.stream()
@@ -5503,7 +5503,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * and average of the long values. This is useful for getting multiple statistics
      * in a single pass through the data.</p>
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Get statistics of file sizes
      * LongSummaryStatistics stats = files.stream()
@@ -5534,7 +5534,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * and average of the float values. This is useful for getting multiple statistics
      * in a single pass through the data.</p>
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Get statistics of float values
      * FloatSummaryStatistics stats = measurements.stream()
@@ -5565,7 +5565,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * and average of the double values. This is useful for getting multiple statistics
      * in a single pass through the data.</p>
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Get statistics of prices
      * DoubleSummaryStatistics stats = products.stream()
@@ -5596,7 +5596,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * and average of the {@code BigInteger} values. This is useful for getting multiple
      * statistics for very large integer values in a single pass.</p>
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Get statistics of large numbers
      * BigIntegerSummaryStatistics stats = Stream.of("1000000000000", "2000000000000")
@@ -5627,7 +5627,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * and average of the {@code BigDecimal} values. This is useful for getting multiple
      * statistics for precise decimal values in a single pass.</p>
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Get statistics of monetary amounts
      * BigDecimalSummaryStatistics stats = transactions.stream()
@@ -5658,7 +5658,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * starting with the identity value. The identity value must be an identity for
      * the combiner function, meaning {@code op.apply(identity, x)} equals {@code x}.</p>
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Calculate product of all numbers
      * Integer product = Stream.of(1, 2, 3, 4)
@@ -5693,7 +5693,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * If the stream is empty, an empty {@code Optional} is returned. The first element
      * encountered becomes the initial value for the reduction.</p>
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Find the longest string
      * Optional<String> longest = Stream.of("a", "abc", "ab")
@@ -5725,7 +5725,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * the result of the supplier function instead of an empty {@code Optional} when
      * the stream is empty.</p>
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Find maximum with default
      * Integer max = Stream.<Integer>empty()
@@ -5757,7 +5757,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * <p>This collector is useful when an empty stream represents an error condition.
      * It guarantees that a result will be produced or an exception will be thrown.</p>
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Find minimum (throws if empty)
      * Integer min = Stream.of(5, 2, 8, 1)
@@ -5785,7 +5785,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * <p>The returned collector is unordered, meaning the order of reduction may vary in parallel
      * streams unless the binary operator is associative and commutative.</p>
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Find the maximum value, throw if empty
      * Integer max = Stream.of(3, 1, 4, 1, 5)
@@ -5832,7 +5832,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * <p>The returned collector is unordered, meaning the order of reduction may vary in parallel
      * streams unless the binary operator is associative and commutative.</p>
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Sum the lengths of strings
      * Integer totalLength = Stream.of("hello", "world", "java")
@@ -5873,7 +5873,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * <p>The returned collector is unordered, meaning the order of reduction may vary in parallel
      * streams unless the binary operator is associative and commutative.</p>
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Find the longest string
      * Optional<String> longest = Stream.of("apple", "banana", "pear")
@@ -5958,7 +5958,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * <p>The returned collector is unordered, meaning the order of reduction may vary in parallel
      * streams unless the binary operator is associative and commutative.</p>
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Get the product of all values, or 1 if empty
      * Integer product = Stream.<Integer>empty()
@@ -6000,7 +6000,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * <p>The returned collector is unordered, meaning the order of reduction may vary in parallel
      * streams unless the binary operator is associative and commutative.</p>
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Find the minimum after mapping, throw if empty
      * Integer minLength = Stream.of("apple", "pie", "banana")
@@ -6049,7 +6049,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * <p>The returned collector is unordered, meaning the order of reduction may vary in parallel
      * streams unless the binary operator is associative and commutative.</p>
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Concatenate all strings
      * String result = Stream.of("Hello", " ", "World")
@@ -6083,7 +6083,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * <p>This is a short-circuiting collector: it may stop processing elements once it
      * determines that the common prefix is empty.</p>
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Find common prefix
      * String prefix = Stream.of("prefix_test", "prefix_example", "prefix_demo")
@@ -6137,7 +6137,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * <p>This is a short-circuiting collector: it may stop processing elements once it
      * determines that the common suffix is empty.</p>
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Find common suffix
      * String suffix = Stream.of("test_suffix", "example_suffix", "demo_suffix")
@@ -6198,7 +6198,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * 
      * <p>The returned collector is not concurrent and produces an unordered map.</p>
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Group strings by their length
      * Map<Integer, List<String>> groupedByLength = 
@@ -6229,7 +6229,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * 
      * <p>The returned collector is not concurrent.</p>
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Group strings by first letter into a TreeMap
      * TreeMap<Character, List<String>> groupedByFirstLetter = 
@@ -6267,7 +6267,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * 
      * <p>The returned collector is not concurrent and produces an unordered map.</p>
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Count strings by their length
      * Map<Integer, Long> countByLength = 
@@ -6305,7 +6305,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * 
      * <p>The returned collector is not concurrent.</p>
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Group persons by city and collect names in a TreeMap
      * TreeMap<String, Set<String>> namesByCity = 
@@ -6346,7 +6346,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * 
      * <p>The returned collector is concurrent and unordered.</p>
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Group strings by length in parallel
      * ConcurrentMap<Integer, List<String>> groupedByLength = 
@@ -6376,7 +6376,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * 
      * <p>The returned collector is concurrent and unordered.</p>
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Group strings by first letter into a ConcurrentSkipListMap
      * ConcurrentSkipListMap<Character, List<String>> groupedByFirstLetter = 
@@ -6413,7 +6413,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * 
      * <p>The returned collector is concurrent and unordered.</p>
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Count strings by length in parallel
      * ConcurrentMap<Integer, Long> countByLength = 
@@ -6450,7 +6450,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * 
      * <p>The returned collector is concurrent and unordered.</p>
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Group persons by department and sum salaries in parallel
      * ConcurrentHashMap<String, Double> salaryByDept = 
@@ -6491,7 +6491,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * 
      * <p>The returned collector is unordered.</p>
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Partition numbers into even and odd
      * Map<Boolean, List<Integer>> evenOddPartition = 
@@ -6522,7 +6522,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * 
      * <p>The returned collector is unordered.</p>
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Partition strings by length and count each partition
      * Map<Boolean, Long> lengthPartitionCount = 
@@ -6583,7 +6583,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * 
      * <p>The returned collector is unordered and produces a map with no guaranteed order.</p>
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Count strings by their first letter
      * Map<Character, Long> letterCounts = 
@@ -6612,7 +6612,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * 
      * <p>The returned collector is unordered.</p>
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Count strings by length into a TreeMap
      * TreeMap<Integer, Long> lengthCounts = 
@@ -6648,7 +6648,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * 
      * <p>The returned collector is unordered and produces a map with no guaranteed order.</p>
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Count words by length (as integers)
      * Map<Integer, Integer> wordLengthCounts = 
@@ -6677,7 +6677,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * 
      * <p>The returned collector is unordered.</p>
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Count items by category into a LinkedHashMap (as integers)
      * LinkedHashMap<String, Integer> categoryCounts = 
@@ -6711,7 +6711,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * 
      * <p>The returned collector produces an unordered map.</p>
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Convert a list of entries to a map
      * Map<String, Integer> map = entryList.stream()
@@ -6741,7 +6741,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * 
      * <p>The returned collector produces an unordered map.</p>
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Merge entries, keeping the maximum value for duplicate keys
      * Map<String, Integer> maxValues = entries.stream()
@@ -6770,7 +6770,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * 
      * <p>The returned collector produces an unordered map.</p>
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Convert entries to a TreeMap
      * TreeMap<String, Integer> sortedMap = entries.stream()
@@ -6802,7 +6802,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * 
      * <p>The returned collector produces an unordered map.</p>
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Merge entries into a LinkedHashMap, summing values for duplicate keys
      * LinkedHashMap<String, Integer> summedMap = entries.stream()
@@ -6834,7 +6834,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * 
      * <p>The returned collector produces an unordered map.</p>
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Create a map from student ID to student name
      * Map<Integer, String> studentMap = students.stream()
@@ -6867,7 +6867,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * <p>The returned map is a general-purpose {@code Map} implementation. The map is created
      * using the default map factory which typically returns a {@code HashMap}.</p>
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Sum values for duplicate keys
      * Map<String, Integer> result = Stream.of("apple", "banana", "apple")
@@ -6906,7 +6906,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * <p>The Map is created by the provided supplier function. This allows you to specify
      * the exact type of Map to be created (e.g., {@code HashMap}, {@code TreeMap}, etc.).</p>
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Collect to a TreeMap
      * TreeMap<String, Integer> result = Stream.of("apple", "banana", "cherry")
@@ -6947,7 +6947,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * <p>The merge function is used to resolve collisions between values associated with the same key.
      * The map is created by the provided supplier function.</p>
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Collect to a LinkedHashMap, concatenating values for duplicate keys
      * LinkedHashMap<String, String> result = Stream.of("a:1", "b:2", "a:3")
@@ -6992,7 +6992,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * <p>The resulting map is immutable and cannot be modified after creation.
      * Any attempt to modify the returned map will result in an {@code UnsupportedOperationException}.</p>
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Convert a map to an immutable map
      * ImmutableMap<String, Integer> result = originalMap.entrySet().stream()
@@ -7024,7 +7024,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * <p>The resulting map is immutable and cannot be modified after creation.
      * Any attempt to modify the returned map will result in an {@code UnsupportedOperationException}.</p>
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Merge entries with duplicate keys by summing values
      * ImmutableMap<String, Integer> result = entries.stream()
@@ -7052,7 +7052,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * <p>If duplicate keys are encountered, an {@code IllegalStateException} is thrown.
      * The resulting map is immutable and cannot be modified after creation.</p>
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Create an immutable map from a list of strings
      * ImmutableMap<String, Integer> result = Stream.of("apple", "banana", "cherry")
@@ -7087,7 +7087,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * <p>When duplicate keys are encountered, the provided merge function is used to
      * combine the values. The resulting map is immutable and cannot be modified after creation.</p>
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Create an immutable map, concatenating values for duplicate keys
      * ImmutableMap<String, String> result = Stream.of("a:1", "b:2", "a:3")
@@ -7124,7 +7124,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * If duplicate keys are encountered, an {@code IllegalStateException} is thrown.
      * The returned map does not permit null keys or values.</p>
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Create an unmodifiable map
      * Map<String, Integer> result = Stream.of("apple", "banana", "cherry")
@@ -7155,7 +7155,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * When duplicate keys are encountered, the provided merge function is used to combine values.
      * The returned map does not permit null keys or values.</p>
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Create an unmodifiable map, summing values for duplicate keys
      * Map<String, Integer> result = items.stream()
@@ -7190,7 +7190,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * <p>The returned map is a {@code LinkedHashMap}, which maintains a doubly-linked list
      * running through all of its entries, defining the iteration ordering.</p>
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Create a LinkedHashMap maintaining insertion order
      * Map<String, Integer> result = Stream.of("apple", "banana", "cherry")
@@ -7223,7 +7223,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * <p>This collector maintains the insertion order of the elements. When duplicate keys
      * are encountered, the provided merge function is used to combine the values.</p>
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Create a LinkedHashMap, keeping the last value for duplicate keys
      * Map<String, String> result = Stream.of("a:1", "b:2", "a:3")
@@ -7259,7 +7259,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * are encountered, an {@code IllegalStateException} is thrown. The returned map is
      * thread-safe and can be safely accessed by multiple threads concurrently.</p>
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Create a thread-safe concurrent map
      * ConcurrentMap<String, Integer> result = Stream.of("apple", "banana", "cherry")
@@ -7291,7 +7291,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * <p>This collector allows you to specify the exact type of {@code ConcurrentMap} to use.
      * If duplicate keys are encountered, an {@code IllegalStateException} is thrown.</p>
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Create a specific type of concurrent map
      * ConcurrentSkipListMap<String, Integer> result = Stream.of("apple", "banana", "cherry")
@@ -7327,7 +7327,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * are encountered, the provided merge function is used to combine the values. The returned
      * map is thread-safe.</p>
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Create a concurrent map, summing values for duplicate keys
      * ConcurrentMap<String, Integer> result = items.parallelStream()
@@ -7362,7 +7362,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * all aspects of the collection process. The collector is suitable for parallel streams
      * and produces a thread-safe result.</p>
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Create a ConcurrentSkipListMap with custom merge logic
      * ConcurrentSkipListMap<String, String> result = items.parallelStream()
@@ -7403,7 +7403,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * as that of its keys. If duplicate keys or values are encountered, an
      * {@code IllegalStateException} is thrown.</p>
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Create a bidirectional map
      * BiMap<Integer, String> result = Stream.of("apple", "banana", "cherry")
@@ -7436,7 +7436,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * <p>This collector allows you to specify the exact type of {@code BiMap} to use.
      * If duplicate keys or values are encountered, an {@code IllegalStateException} is thrown.</p>
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Create a specific type of BiMap
      * BiMap<String, Integer> result = Stream.of("apple", "banana", "cherry")
@@ -7471,7 +7471,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * combine the values. Note that the resulting value must still be unique across
      * the map, or an {@code IllegalStateException} will be thrown.</p>
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Create a BiMap, using merge function for duplicate keys
      * BiMap<String, String> result = Stream.of("a:1", "b:2", "a:3")
@@ -7507,7 +7507,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * <p>This is the most general form of BiMap collector, allowing you to specify
      * all aspects of the collection process.</p>
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Create a custom BiMap with merge logic
      * BiMap<String, Integer> result = items.stream()
@@ -7577,7 +7577,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * using the entry's key and value directly. Multiple values for the same key are
      * collected into a list in encounter order.</p>
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Convert entries to a multimap
      * ListMultimap<String, Integer> result = entries.stream()
@@ -7605,7 +7605,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * Multiple values for the same key are collected into the collection type specified
      * by the multimap implementation.</p>
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Create a specific type of multimap from entries
      * SetMultimap<String, Integer> result = entries.stream()
@@ -7637,7 +7637,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * <p>The values in the multimap are the input elements themselves. Multiple elements
      * that map to the same key are collected into a list in encounter order.</p>
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Group strings by their first character
      * ListMultimap<Character, String> result = Stream.of("apple", "apricot", "banana")
@@ -7664,7 +7664,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * <p>The values in the multimap are the input elements themselves. This collector
      * allows you to specify the exact type of {@code Multimap} to use.</p>
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Group strings by length into a SetMultimap
      * SetMultimap<Integer, String> result = Stream.of("apple", "banana", "cherry", "apple")
@@ -7698,7 +7698,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * <p>Multiple values that map to the same key are collected into a list in encounter order.
      * This is the default multimap collector that creates a {@code ListMultimap}.</p>
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Create a multimap from person objects
      * ListMultimap<String, String> result = persons.stream()
@@ -7730,7 +7730,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * <p>This is the most general form of multimap collector, allowing you to specify
      * the key mapper, value mapper, and the exact type of {@code Multimap} to create.</p>
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Create a TreeMultimap with sorted keys
      * TreeMultimap<String, Integer> result = items.stream()
@@ -7770,7 +7770,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * values for the same key. The flat value extractor should return a {@code Stream}
      * of values for each input element.</p>
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Map each person to multiple skills
      * ListMultimap<String, String> result = persons.stream()
@@ -7802,7 +7802,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * while flat mapping values. The flat value extractor should return a {@code Stream}
      * of values for each input element.</p>
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Create a SetMultimap with flat mapped values
      * SetMultimap<String, String> result = items.stream()
@@ -7855,7 +7855,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * collections instead of streams. Each input element is mapped to a collection of values
      * that are all associated with the same key.</p>
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Map each person to their list of phone numbers
      * ListMultimap<String, String> result = persons.stream()
@@ -7886,7 +7886,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * <p>This collector allows you to specify the exact type of {@code Multimap} to use
      * while flat mapping collections of values.</p>
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Create a TreeMultimap with flat mapped collections
      * TreeMultimap<String, String> result = items.stream()
@@ -7942,7 +7942,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * when populating the multimap. The resulting multimap allows duplicate key-value
      * pairs and preserves the encounter order of values for each key.</p>
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Map products to multiple categories
      * ListMultimap<String, Product> productsByCategory = products.stream()
@@ -7980,7 +7980,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * it allows duplicate key-value pairs) depends on the implementation provided by the
      * map factory.</p>
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Map users to multiple roles using a SetMultimap
      * SetMultimap<String, User> usersByRole = users.stream()
@@ -8037,7 +8037,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * to the multimap for such elements. The resulting multimap allows duplicate key-value
      * pairs and preserves the encounter order of values for each key.</p>
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Map employees to multiple departments
      * ListMultimap<String, Employee> employeesByDept = employees.stream()
@@ -8076,7 +8076,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * whether it allows duplicate key-value pairs) depends on the implementation provided
      * by the map factory.</p>
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Map documents to multiple tags using a custom multimap
      * SetMultimap<String, Document> docsByTag = documents.stream()
@@ -8196,7 +8196,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * <p>The characteristics of the returned collector are determined by the intersection
      * of characteristics from both downstream collectors, excluding IDENTITY_FINISH.</p>
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Calculate both sum and count in one pass
      * Pair<Integer, Long> result = Stream.of(1, 2, 3, 4, 5)
@@ -8238,7 +8238,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * <li>Combining multiple collectors with custom merging functions</li>
      * </ul>
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Calculate both sum and average in one pass
      * Tuple2<Integer, Integer> result = orders.stream()
@@ -8268,7 +8268,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
          * integer arithmetic rules. The computation is performed in encounter order
          * and is not affected by stream ordering.</p>
          * 
-         * <p>Example:
+         * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * // Calculate total price and quantity from orders
          * Tuple2<Integer, Integer> totals = orders.stream()
@@ -8305,7 +8305,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
          * integer arithmetic rules. The computation is performed in encounter order
          * and is not affected by stream ordering.</p>
          * 
-         * <p>Example:
+         * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * // Calculate total sales, units, and returns from transactions
          * Tuple3<Integer, Integer, Integer> stats = transactions.stream()
@@ -8345,7 +8345,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
          * <p>The computation is performed in encounter order and is not affected by
          * stream ordering. Each integer value is widened to long before addition.</p>
          * 
-         * <p>Example:
+         * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * // Calculate large totals without overflow risk
          * Tuple2<Long, Long> largeTotals = largeDataset.stream()
@@ -8381,7 +8381,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
          * <p>The computation is performed in encounter order and is not affected by
          * stream ordering. Each integer value is widened to long before addition.</p>
          * 
-         * <p>Example:
+         * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * // Calculate large metrics without overflow
          * Tuple3<Long, Long, Long> metrics = dataset.stream()
@@ -8422,7 +8422,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
          * long arithmetic rules. The computation is performed in encounter order
          * and is not affected by stream ordering.</p>
          * 
-         * <p>Example:
+         * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * // Calculate total bytes read and written
          * Tuple2<Long, Long> ioStats = files.stream()
@@ -8459,7 +8459,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
          * long arithmetic rules. The computation is performed in encounter order
          * and is not affected by stream ordering.</p>
          * 
-         * <p>Example:
+         * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * // Calculate storage metrics
          * Tuple3<Long, Long, Long> storage = servers.stream()
@@ -8495,7 +8495,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
          * stream ordering. Special floating-point values (NaN, infinity) are handled
          * according to IEEE 754 standard.</p>
          * 
-         * <p>Example:
+         * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * // Calculate total revenue and tax
          * Tuple2<Double, Double> financials = sales.stream()
@@ -8528,7 +8528,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
          * stream ordering. Special floating-point values (NaN, infinity) are handled
          * according to IEEE 754 standard.</p>
          * 
-         * <p>Example:
+         * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * // Calculate geometric measurements
          * Tuple3<Double, Double, Double> dims = shapes.stream()
@@ -8568,7 +8568,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
          * <p>The computation is performed in encounter order and is not affected by
          * stream ordering. BigInteger arithmetic is exact and does not overflow.</p>
          * 
-         * <p>Example:
+         * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * // Calculate large cryptographic values
          * Tuple2<BigInteger, BigInteger> crypto = keys.stream()
@@ -8605,7 +8605,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
          * <p>The computation is performed in encounter order and is not affected by
          * stream ordering. BigInteger arithmetic is exact and does not overflow.</p>
          * 
-         * <p>Example:
+         * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * // Calculate blockchain statistics
          * Tuple3<BigInteger, BigInteger, BigInteger> blockchain = blocks.stream()
@@ -8645,7 +8645,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
          * <p>The computation is performed in encounter order and is not affected by
          * stream ordering. BigDecimal arithmetic preserves all decimal places.</p>
          * 
-         * <p>Example:
+         * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * // Calculate financial totals with exact precision
          * Tuple2<BigDecimal, BigDecimal> totals = invoices.stream()
@@ -8683,7 +8683,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
          * <p>The computation is performed in encounter order and is not affected by
          * stream ordering. BigDecimal arithmetic preserves all decimal places.</p>
          * 
-         * <p>Example:
+         * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * // Calculate currency conversions with precision
          * Tuple3<BigDecimal, BigDecimal, BigDecimal> currencies = exchanges.stream()
@@ -8724,7 +8724,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
          * averages only in the final step. This approach minimizes rounding errors during
          * parallel computation.</p>
          * 
-         * <p>Example:
+         * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * // Calculate average age and salary
          * Tuple2<Double, Double> averages = employees.stream()
@@ -8763,7 +8763,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
          * averages only in the final step. This approach minimizes rounding errors during
          * parallel computation.</p>
          * 
-         * <p>Example:
+         * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * // Calculate average scores
          * Tuple3<Double, Double, Double> avgScores = students.stream()
@@ -8807,7 +8807,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
          * averages only in the final step. This approach minimizes rounding errors during
          * parallel computation and handles large long values correctly.</p>
          * 
-         * <p>Example:
+         * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * // Calculate average file sizes
          * Tuple2<Double, Double> avgSizes = files.stream()
@@ -8847,7 +8847,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
          * averages only in the final step. This approach minimizes rounding errors during
          * parallel computation and handles large long values correctly.</p>
          * 
-         * <p>Example:
+         * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * // Calculate average network metrics
          * Tuple3<Double, Double, Double> avgMetrics = connections.stream()
@@ -8887,7 +8887,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
          * arithmetic to handle the division. If no elements are collected, all averages
          * will be 0.0.</p>
          * 
-         * <p>Example:
+         * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * // Calculate average temperatures
          * Tuple2<Double, Double> avgTemps = readings.stream()
@@ -8921,7 +8921,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
          * arithmetic to handle the division. If no elements are collected, all averages
          * will be 0.0.</p>
          * 
-         * <p>Example:
+         * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * // Calculate average sensor readings
          * Tuple3<Double, Double, Double> avgReadings = sensors.stream()
@@ -8963,7 +8963,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
          * the sum divided by the count of elements.
          * If no elements are collected, all averages will be BigDecimal.ZERO.</p>
          * 
-         * <p>Example:
+         * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * // Calculate average of price and quantity for large values
          * Tuple2<BigDecimal, BigDecimal> averages = orders.stream()
@@ -9005,7 +9005,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
          * the sum divided by the count of elements.
          * If no elements are collected, all averages will be BigDecimal.ZERO.</p>
          * 
-         * <p>Example:
+         * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * // Calculate average of price, quantity, and discount for large values
          * Tuple3<BigDecimal, BigDecimal, BigDecimal> averages = orders.stream()
@@ -9051,7 +9051,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
          * the sum divided by the count of elements using {@code BigDecimal} arithmetic.
          * If no elements are collected, all averages will be BigDecimal.ZERO.</p>
          * 
-         * <p>Example:
+         * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * // Calculate average of price and tax amount with high precision
          * Tuple2<BigDecimal, BigDecimal> averages = transactions.stream()
@@ -9093,7 +9093,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
          * the sum divided by the count of elements using {@code BigDecimal} arithmetic.
          * If no elements are collected, all averages will be BigDecimal.ZERO.</p>
          * 
-         * <p>Example:
+         * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * // Calculate average of price, tax, and shipping cost with high precision
          * Tuple3<BigDecimal, BigDecimal, BigDecimal> averages = orders.stream()
@@ -9139,7 +9139,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
          * returned collector are the intersection of the characteristics of the two
          * downstream collectors.</p>
          * 
-         * <p>Example:
+         * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * // Count elements and calculate sum in one pass
          * Tuple2<Long, Integer> result = Stream.of(1, 2, 3, 4, 5)
@@ -9177,7 +9177,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
          * returned collector are the intersection of the characteristics of all three
          * downstream collectors.</p>
          * 
-         * <p>Example:
+         * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * // Count, sum, and find max in one pass
          * Tuple3<Long, Integer, Optional<Integer>> result = Stream.of(1, 2, 3, 4, 5)
@@ -9217,7 +9217,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
          * returned collector are the intersection of the characteristics of all four
          * downstream collectors.</p>
          * 
-         * <p>Example:
+         * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * // Multiple statistics in one pass
          * Tuple4<Long, Integer, Optional<Integer>, Double> stats = 
@@ -9261,7 +9261,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
          * returned collector are the intersection of the characteristics of all five
          * downstream collectors.</p>
          * 
-         * <p>Example:
+         * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * // Comprehensive statistics in one pass
          * Tuple5<Long, Integer, Optional<Integer>, Optional<Integer>, Double> stats = 
@@ -9320,7 +9320,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
          * returned collector are the intersection of the characteristics of all six
          * downstream collectors.</p>
          * 
-         * <p>Example:
+         * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * // Multiple aggregations for product analysis
          * Tuple6<Long, Double, Double, Optional<Product>, Optional<Product>, List<String>> result = 
@@ -9384,7 +9384,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
          * returned collector are the intersection of the characteristics of all seven
          * downstream collectors.</p>
          * 
-         * <p>Example:
+         * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * // Comprehensive order statistics
          * Tuple7<Long, Double, Double, LocalDate, LocalDate, 
@@ -9457,7 +9457,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
          * returned collector are the intersection of the characteristics of the two
          * downstream collectors, excluding {@code IDENTITY_FINISH}.</p>
          * 
-         * <p>Example:
+         * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * // Calculate count and average, returning formatted string
          * String summary = Stream.of(1, 2, 3, 4, 5)
@@ -9528,7 +9528,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
          * returned collector are the intersection of the characteristics of all three
          * downstream collectors, excluding {@code IDENTITY_FINISH}.</p>
          * 
-         * <p>Example:
+         * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * // Create custom statistics object
          * Statistics stats = Stream.of(1, 2, 3, 4, 5)
@@ -9610,7 +9610,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
          * returned collector are the intersection of the characteristics of all four
          * downstream collectors, excluding {@code IDENTITY_FINISH}.</p>
          * 
-         * <p>Example:
+         * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * // Create comprehensive product analysis
          * ProductAnalysis analysis = products.stream()
@@ -9673,7 +9673,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
          * are the intersection of the characteristics of all downstream collectors,
          * excluding {@code IDENTITY_FINISH}.</p>
          * 
-         * <p>Example:
+         * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * // Multiple collectors with dynamic combination
          * List<Collector<Order, ?, ?>> collectors = Arrays.asList(
@@ -9766,7 +9766,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
          * {@code Dataset} from that list. The column names are automatically determined
          * based on the structure of the elements.</p>
          * 
-         * <p>Example:
+         * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * // Convert stream of objects to Dataset
          * Dataset dataset = persons.stream()
@@ -9792,7 +9792,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
          * {@code Dataset} from that list using the specified column names. If column names
          * are not provided (null), they will be auto-generated based on the element structure.</p>
          * 
-         * <p>Example:
+         * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * // Convert stream to Dataset with custom column names
          * List<String> columnNames = Arrays.asList("ID", "Name", "Age", "Department");

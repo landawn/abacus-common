@@ -62,7 +62,8 @@ public class BooleanNConsumer2025Test extends TestBase {
         AtomicInteger trueCount = new AtomicInteger(0);
         BooleanNConsumer consumer = args -> {
             for (boolean arg : args) {
-                if (arg) trueCount.incrementAndGet();
+                if (arg)
+                    trueCount.incrementAndGet();
             }
         };
 
@@ -112,7 +113,7 @@ public class BooleanNConsumer2025Test extends TestBase {
         BooleanNConsumer chainedConsumer = consumer1.andThen(consumer2);
 
         assertThrows(RuntimeException.class, () -> chainedConsumer.accept(true, false));
-        assertEquals(1, results.size());  // First consumer should have executed
+        assertEquals(1, results.size()); // First consumer should have executed
     }
 
     @Test

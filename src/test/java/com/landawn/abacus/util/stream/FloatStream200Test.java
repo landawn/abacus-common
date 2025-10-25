@@ -463,12 +463,7 @@ public class FloatStream200Test extends TestBase {
 
         @Test
         public void testToMapWithFactoryAndMerge() {
-            Map<Integer, Float> map = FloatStream.of(1.1f, 2.9f, 1.8f, 3.5f)
-                    .toMap(f -> (int) Math.floor(f),
-                            f -> f,
-                            (v1, v2) -> v1 + v2,
-                            HashMap::new
-                    );
+            Map<Integer, Float> map = FloatStream.of(1.1f, 2.9f, 1.8f, 3.5f).toMap(f -> (int) Math.floor(f), f -> f, (v1, v2) -> v1 + v2, HashMap::new);
 
             assertEquals(1.1f + 1.8f, map.get(1), DELTA);
             assertEquals(2.9f, map.get(2), DELTA);

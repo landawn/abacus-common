@@ -26,7 +26,7 @@ import com.landawn.abacus.util.function.ByteConsumer;
  * <p>This implementation is not thread-safe. If used in parallel stream operations,
  * proper synchronization or thread-safe alternatives should be used.</p>
  * 
- * <p>Example usage:</p>
+ * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * ByteSummaryStatistics stats = new ByteSummaryStatistics();
  * stats.accept((byte) 10);
@@ -53,7 +53,7 @@ public class ByteSummaryStatistics implements ByteConsumer {
      * Constructs an empty instance with zero count, zero sum,
      * {@code Byte.MAX_VALUE} min, and {@code Byte.MIN_VALUE} max.
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ByteSummaryStatistics stats = new ByteSummaryStatistics();
      * }</pre>
@@ -67,7 +67,7 @@ public class ByteSummaryStatistics implements ByteConsumer {
      * <p>This constructor is useful when creating a summary from pre-calculated
      * statistics or when merging multiple summaries.</p>
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ByteSummaryStatistics stats = new ByteSummaryStatistics(5, (byte)10, (byte)50, 150);
      * // Creates statistics for 5 values ranging from 10 to 50 with sum of 150
@@ -92,7 +92,7 @@ public class ByteSummaryStatistics implements ByteConsumer {
      * the new value. It implements the {@link ByteConsumer} interface, making
      * this class suitable for use with stream reduction operations.</p>
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ByteSummaryStatistics stats = new ByteSummaryStatistics();
      * stats.accept((byte) 42);
@@ -117,7 +117,7 @@ public class ByteSummaryStatistics implements ByteConsumer {
      * merging statistics from multiple sources. After combining, this instance
      * will reflect statistics for all values from both instances.</p>
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ByteSummaryStatistics stats1 = new ByteSummaryStatistics();
      * stats1.accept((byte) 10);
@@ -145,7 +145,7 @@ public class ByteSummaryStatistics implements ByteConsumer {
      * Returns the minimum value recorded, or {@code Byte.MAX_VALUE} if no
      * values have been recorded.
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ByteSummaryStatistics stats = new ByteSummaryStatistics();
      * stats.accept((byte) 50);
@@ -164,7 +164,7 @@ public class ByteSummaryStatistics implements ByteConsumer {
      * Returns the maximum value recorded, or {@code Byte.MIN_VALUE} if no
      * values have been recorded.
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ByteSummaryStatistics stats = new ByteSummaryStatistics();
      * stats.accept((byte) 50);
@@ -182,7 +182,7 @@ public class ByteSummaryStatistics implements ByteConsumer {
     /**
      * Returns the count of values recorded.
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ByteSummaryStatistics stats = new ByteSummaryStatistics();
      * stats.accept((byte) 1);
@@ -203,7 +203,7 @@ public class ByteSummaryStatistics implements ByteConsumer {
      * <p>Note that the sum is maintained as a {@code long} to avoid overflow
      * for large numbers of byte values.</p>
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ByteSummaryStatistics stats = new ByteSummaryStatistics();
      * stats.accept((byte) 10);
@@ -224,7 +224,7 @@ public class ByteSummaryStatistics implements ByteConsumer {
      * 
      * <p>The average is calculated as a {@code double} to preserve precision.</p>
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ByteSummaryStatistics stats = new ByteSummaryStatistics();
      * stats.accept((byte) 10);
@@ -245,7 +245,7 @@ public class ByteSummaryStatistics implements ByteConsumer {
      * <p>The format includes min, max, count, sum, and average values in a
      * readable format.</p>
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ByteSummaryStatistics stats = new ByteSummaryStatistics();
      * stats.accept((byte) 10);

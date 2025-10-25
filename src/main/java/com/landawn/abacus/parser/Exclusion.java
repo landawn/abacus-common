@@ -18,15 +18,15 @@ package com.landawn.abacus.parser;
  * Enumeration defining property exclusion policies for serialization.
  * This enum controls which bean properties should be excluded during the serialization process.
  * 
- * <p>Usage example:</p>
+ * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * // Exclude properties with null values
  * SerializationConfig config = new SerializationConfig()
  *     .setExclusion(Exclusion.NULL);
- * 
+ *
  * // Exclude properties with default values (including null)
  * config.setExclusion(Exclusion.DEFAULT);
- * 
+ *
  * // Include all properties
  * config.setExclusion(Exclusion.NONE);
  * }</pre>
@@ -38,7 +38,7 @@ public enum Exclusion {
      * Excludes bean properties with {@code null} values during serialization.
      * Properties that are null will not be included in the serialized output.
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Person person = new Person();
      * person.setName("John");
@@ -53,7 +53,7 @@ public enum Exclusion {
      * Excludes bean properties with default values during serialization.
      * This includes null values and primitive type default values (0, false, etc.).
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Person person = new Person();
      * person.setName("John");
@@ -69,7 +69,7 @@ public enum Exclusion {
      * No bean properties are excluded during serialization.
      * All properties will be included in the serialized output regardless of their values.
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Person person = new Person();
      * person.setName("John");

@@ -42,7 +42,7 @@ public interface ObjDoubleFunction<T, R> extends Throwables.ObjDoubleFunction<T,
      * produces a result of type R. The function should be deterministic, meaning
      * that for the same inputs, it should always produce the same output.
      *
-     * <p>Example usage:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ObjDoubleFunction<String, String> formatter = (str, value) -> 
      *     String.format("%s: %.2f", str, value);
@@ -52,7 +52,6 @@ public interface ObjDoubleFunction<T, R> extends Throwables.ObjDoubleFunction<T,
      * @param t the first function argument of type T
      * @param u the second function argument, a primitive double value
      * @return the function result of type R
-     * @throws RuntimeException if the function cannot compute a result
      */
     @Override
     R apply(T t, double u);
@@ -67,7 +66,7 @@ public interface ObjDoubleFunction<T, R> extends Throwables.ObjDoubleFunction<T,
      * transformations together. The output of this function becomes the input to
      * the {@code after} function.
      *
-     * <p>Example usage:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ObjDoubleFunction<Product, Double> priceCalculator = (product, discount) -> 
      *     product.getPrice() * (1 - discount);

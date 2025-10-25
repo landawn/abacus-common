@@ -36,7 +36,7 @@ import com.landawn.abacus.util.Strings;
  *   <li>Dynamically determined at runtime</li>
  * </ul>
  * 
- * <p>Example usage:</p>
+ * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * // Convert Type to string
  * Type stringType = TypeFactory.getType(String.class);

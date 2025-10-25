@@ -221,7 +221,7 @@ public final class HttpUtil {
      * Checks if the HTTP response code indicates success.
      * A response code is considered successful if it's in the range [200, 300).
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * if (HttpUtil.isSuccessfulResponseCode(response.getResponseCode())) {
      *     // Process successful response
@@ -278,7 +278,7 @@ public final class HttpUtil {
      * If the value is a Collection, joins multiple values with commas.
      * Otherwise, converts the value to a string.
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Single value
      * String header1 = HttpUtil.readHttpHeadValue("text/plain");
@@ -373,6 +373,7 @@ public final class HttpUtil {
      * @param connection The HTTP connection
      * @return The Content-Type value, or null if not found
      */
+    @MayReturnNull
     public static String getContentType(final HttpURLConnection connection) {
         return getContentType(connection.getHeaderFields());
     }
@@ -441,6 +442,7 @@ public final class HttpUtil {
      * @param connection The HTTP connection
      * @return The Content-Encoding value, or null if not found
      */
+    @MayReturnNull
     public static String getContentEncoding(final HttpURLConnection connection) {
         return getContentEncoding(connection.getHeaderFields());
     }
@@ -509,6 +511,7 @@ public final class HttpUtil {
      * @param connection The HTTP connection
      * @return The Accept value, or null if not found
      */
+    @MayReturnNull
     public static String getAccept(final HttpURLConnection connection) {
         return getAccept(connection.getHeaderFields());
     }
@@ -577,6 +580,7 @@ public final class HttpUtil {
      * @param connection The HTTP connection
      * @return The Accept-Encoding value, or null if not found
      */
+    @MayReturnNull
     public static String getAcceptEncoding(final HttpURLConnection connection) {
         return getAcceptEncoding(connection.getHeaderFields());
     }
@@ -645,6 +649,7 @@ public final class HttpUtil {
      * @param connection The HTTP connection
      * @return The Accept-Charset value, or null if not found
      */
+    @MayReturnNull
     public static String getAcceptCharset(final HttpURLConnection connection) {
         return getAcceptCharset(connection.getHeaderFields());
     }
@@ -685,7 +690,7 @@ public final class HttpUtil {
      * Determines the ContentFormat from content type and encoding strings.
      * This method matches the content type and encoding to find the appropriate ContentFormat.
      *
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ContentFormat format = HttpUtil.getContentFormat("application/json", "gzip");
      * // Returns ContentFormat.JSON_GZIP
@@ -817,7 +822,7 @@ public final class HttpUtil {
      * Wraps an input stream with decompression based on the content format.
      * Supports GZIP, Brotli, Snappy, and LZ4 decompression.
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * InputStream wrapped = HttpUtil.wrapInputStream(inputStream, ContentFormat.JSON_GZIP);
      * // wrapped stream will automatically decompress GZIP data
@@ -855,7 +860,7 @@ public final class HttpUtil {
      * Wraps an output stream with compression based on the content format.
      * Supports GZIP, Snappy, and LZ4 compression. Brotli compression is not supported for output.
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * OutputStream wrapped = HttpUtil.wrapOutputStream(outputStream, ContentFormat.JSON_GZIP);
      * // Data written to wrapped stream will be automatically compressed
@@ -994,7 +999,7 @@ public final class HttpUtil {
      * Extracts the charset from a Content-Type header value with a specified default.
      * Parses strings like "text/html; charset=UTF-8" to extract the charset.
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Charset charset = HttpUtil.getCharset("application/json; charset=ISO-8859-1", Charsets.UTF_8);
      * // Returns Charset for ISO-8859-1
@@ -1128,7 +1133,7 @@ public final class HttpUtil {
          * Parses an HTTP date string into a Date object.
          * Supports multiple date formats for compatibility.
          *
-         * <p>Example:</p>
+         * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * Date date = HttpDate.parse("Wed, 21 Oct 2015 07:28:00 GMT");
          * }</pre>
@@ -1178,7 +1183,7 @@ public final class HttpUtil {
          * Formats a Date into an HTTP date string.
          * Uses the standard RFC 7231 format.
          *
-         * <p>Example:</p>
+         * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * String dateStr = HttpDate.format(new Date());
          * // Returns something like "Wed, 21 Oct 2015 07:28:00 GMT"

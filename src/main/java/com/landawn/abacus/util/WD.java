@@ -26,7 +26,7 @@ import com.landawn.abacus.annotation.Internal;
  * <p>All fields in this class are public static final constants representing either
  * single characters (prefixed with underscore) or their string equivalents.</p>
  * 
- * <p>Example usage:</p>
+ * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * String query = WD.SELECT + WD.SPACE + "*" + WD.SPACE + WD.FROM + WD.SPACE + "users";
  * String csv = "John" + WD.COMMA_SPACE + "Doe" + WD.COMMA_SPACE + "30";
@@ -63,7 +63,7 @@ public final class WD {
     /**
      * Represents the space character: {@code ' '}.
      * 
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * char space = WD._SPACE;
      * String text = "Hello" + space + "World";
@@ -75,7 +75,7 @@ public final class WD {
      * Represents the space string: {@code " "}.
      * Useful for string concatenation operations.
      * 
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String fullName = firstName + WD.SPACE + lastName;
      * }</pre>
@@ -91,7 +91,7 @@ public final class WD {
     /**
      * Represents the period string: {@code "."}.
      * 
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String filename = "document" + WD.PERIOD + "pdf";
      * }</pre>
@@ -107,7 +107,7 @@ public final class WD {
     /**
      * Represents the comma string: {@code ","}.
      * 
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String csv = value1 + WD.COMMA + value2 + WD.COMMA + value3;
      * }</pre>
@@ -118,7 +118,7 @@ public final class WD {
      * Represents comma followed by space: {@code ", "}.
      * Commonly used for readable list formatting.
      * 
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String list = "apple" + WD.COMMA_SPACE + "banana" + WD.COMMA_SPACE + "orange";
      * }</pre>
@@ -140,7 +140,7 @@ public final class WD {
      * Represents colon followed by space: {@code ": "}.
      * Commonly used in key-value formatting.
      * 
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String keyValue = "Name" + WD.COLON_SPACE + "John Doe";
      * }</pre>
@@ -522,7 +522,7 @@ public final class WD {
      * SQL WITH keyword: {@code "WITH"}.
      * Used for common table expressions (CTEs).
      * 
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String cte = WD.WITH + " temp_table AS (SELECT * FROM users)";
      * }</pre>
@@ -539,7 +539,7 @@ public final class WD {
      * SQL SELECT keyword: {@code "SELECT"}.
      * Used to query data from database tables.
      * 
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String query = WD.SELECT + " * " + WD.FROM + " users";
      * }</pre>
@@ -748,7 +748,7 @@ public final class WD {
      * SQL WHERE keyword: {@code "WHERE"}.
      * Used to filter query results.
      * 
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String query = WD.SELECT + " * " + WD.FROM + " users " + WD.WHERE + " age > 18";
      * }</pre>

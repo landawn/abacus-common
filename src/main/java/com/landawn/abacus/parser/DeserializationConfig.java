@@ -29,6 +29,8 @@ import com.landawn.abacus.util.N;
  * into Java objects across different formats (JSON, XML, etc.).
  * 
  * <p>The configuration supports method chaining for easy setup:</p>
+ * 
+ * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * DeserializationConfig config = new MyDeserializationConfig()
  *     .ignoreUnmatchedProperty(true)
@@ -70,7 +72,7 @@ public abstract class DeserializationConfig<C extends DeserializationConfig<C>> 
      * any property in the target class will be silently ignored. When false,
      * unmatched properties will cause an error.
      * 
-     * <p>Usage example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * if (config.ignoreUnmatchedProperty()) {
      *     // Extra properties in JSON will be ignored
@@ -88,7 +90,7 @@ public abstract class DeserializationConfig<C extends DeserializationConfig<C>> 
      * This is useful when deserializing data that may contain extra fields not
      * present in the target class.
      * 
-     * <p>Usage example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // JSON: {"name": "John", "age": 30, "unknownField": "value"}
      * // Target class only has name and age properties
@@ -122,7 +124,7 @@ public abstract class DeserializationConfig<C extends DeserializationConfig<C>> 
      * This is used when deserializing to collections or arrays to specify
      * the type of elements they contain.
      * 
-     * <p>Usage example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // For deserializing JSON array to List<Person>
      * config.setElementType(Person.class);
@@ -140,7 +142,7 @@ public abstract class DeserializationConfig<C extends DeserializationConfig<C>> 
      * Sets the element type for collection and array deserialization using a Type.
      * This allows for more complex type specifications including generic types.
      * 
-     * <p>Usage example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // For complex generic types
      * Type<List<String>> listType = N.typeOf("List<String>");
@@ -160,7 +162,7 @@ public abstract class DeserializationConfig<C extends DeserializationConfig<C>> 
      * Sets the element type for collection and array deserialization using a type name string.
      * The type name can be a simple class name or a complex generic type expression.
      * 
-     * <p>Usage example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * config.setElementType("Person");
      * config.setElementType("List<String>");
@@ -191,7 +193,7 @@ public abstract class DeserializationConfig<C extends DeserializationConfig<C>> 
      * This is used when deserializing to Map instances to specify
      * the type of keys they contain.
      * 
-     * <p>Usage example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // For deserializing to Map<Long, String>
      * config.setMapKeyType(Long.class);
@@ -221,7 +223,7 @@ public abstract class DeserializationConfig<C extends DeserializationConfig<C>> 
     /**
      * Sets the key type for map deserialization using a type name string.
      * 
-     * <p>Usage example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * config.setMapKeyType("String");
      * config.setMapKeyType("Integer");
@@ -251,7 +253,7 @@ public abstract class DeserializationConfig<C extends DeserializationConfig<C>> 
      * This is used when deserializing to Map instances to specify
      * the type of values they contain.
      * 
-     * <p>Usage example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // For deserializing to Map<String, Person>
      * config.setMapKeyType(String.class);
@@ -282,7 +284,7 @@ public abstract class DeserializationConfig<C extends DeserializationConfig<C>> 
     /**
      * Sets the value type for map deserialization using a type name string.
      * 
-     * <p>Usage example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * config.setMapValueType("Person");
      * config.setMapValueType("List<String>");
@@ -313,7 +315,7 @@ public abstract class DeserializationConfig<C extends DeserializationConfig<C>> 
      * 
      * <p>The key name supports nested properties using dot notation.</p>
      * 
-     * <p>Usage example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<Address> addressType = config.getValueType("address");
      * Type<String> cityType = config.getValueType("address.city");
@@ -331,7 +333,7 @@ public abstract class DeserializationConfig<C extends DeserializationConfig<C>> 
      * Gets the value type for a specific property by its key name with a default type.
      * If no type is configured for the specified property, returns the default type.
      * 
-     * <p>Usage example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<String> stringType = N.typeOf(String.class);
      * Type<?> type = config.getValueType("unknownProp", stringType);
@@ -366,7 +368,7 @@ public abstract class DeserializationConfig<C extends DeserializationConfig<C>> 
      * This is a convenience method that returns the raw class type
      * instead of the Type wrapper.
      * 
-     * <p>Usage example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Class<Address> addressClass = config.getValueTypeClass("address");
      * }</pre>
@@ -383,7 +385,7 @@ public abstract class DeserializationConfig<C extends DeserializationConfig<C>> 
      * Gets the value type class for a specific property with a default class.
      * If no type is configured for the specified property, returns the default class.
      * 
-     * <p>Usage example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Class<?> typeClass = config.getValueTypeClass("data", HashMap.class);
      * // Returns HashMap.class if "data" property type is not configured
@@ -404,7 +406,7 @@ public abstract class DeserializationConfig<C extends DeserializationConfig<C>> 
      * Sets the value type for a specific property using a Class.
      * This allows fine-grained control over deserialization of nested properties.
      * 
-     * <p>Usage example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * config.setValueType("address", Address.class);
      * config.setValueType("phoneNumbers", List.class);
@@ -423,7 +425,7 @@ public abstract class DeserializationConfig<C extends DeserializationConfig<C>> 
      * Sets the value type for a specific property using a Type.
      * This allows for complex type specifications including generics.
      * 
-     * <p>Usage example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<List<String>> listType = N.typeOf("List<String>");
      * config.setValueType("tags", listType);
@@ -446,7 +448,7 @@ public abstract class DeserializationConfig<C extends DeserializationConfig<C>> 
     /**
      * Sets the value type for a specific property using a type name string.
      * 
-     * <p>Usage example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * config.setValueType("items", "List<Product>");
      * config.setValueType("metadata", "Map<String, Object>");
@@ -464,7 +466,7 @@ public abstract class DeserializationConfig<C extends DeserializationConfig<C>> 
      * Sets multiple value types at once using a map.
      * This is useful when configuring types for many properties at once.
      * 
-     * <p>Usage example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Map<String, Type<?>> types = new HashMap<>();
      * types.put("address", N.typeOf(Address.class));
@@ -486,7 +488,7 @@ public abstract class DeserializationConfig<C extends DeserializationConfig<C>> 
      * This method extracts type information from all properties of the specified
      * bean class and uses it for deserialization type resolution.
      * 
-     * <p>Usage example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // If Person class has properties: name (String), age (int), address (Address)
      * config.setValueTypesByBeanClass(Person.class);

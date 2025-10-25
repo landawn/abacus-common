@@ -48,8 +48,8 @@ import com.landawn.abacus.util.N;
  *   <li>Hash function composition (concatenating)</li>
  *   <li>Hash code combination methods</li>
  * </ul>
- * 
- * <p><b>Example usage:</b>
+ *
+ * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * // Simple hashing
  * HashCode hash = Hashing.sha256().hash("Hello World".getBytes());
@@ -92,7 +92,7 @@ public final class Hashing {
      * <p>Multiple calls to this method with the same {@code minimumBits} value within the
      * same JVM instance will return identically-behaving HashFunction instances.
      * 
-     * <p><b>Example:</b>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * HashFunction hashFunc = Hashing.goodFastHash(128);
      * HashCode hash = hashFunc.hash("data".getBytes());
@@ -119,7 +119,7 @@ public final class Hashing {
      * <p>This method returns the fixed version that corrects a bug in the original
      * implementation, hence the internal name {@code murmur3_32_fixed}.
      * 
-     * <p><b>Example:</b>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * HashFunction murmur = Hashing.murmur3_32(42); // seed = 42
      * HashCode hash = murmur.hash("example".getBytes());
@@ -140,7 +140,7 @@ public final class Hashing {
      * <p>This is a convenient method for when you don't need a specific seed value.
      * The zero seed is commonly used as a default.
      * 
-     * <p><b>Example:</b>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * HashCode hash = Hashing.murmur3_32().hash("data".getBytes());
      * }</pre>
@@ -160,7 +160,7 @@ public final class Hashing {
      * <p>The implementation corresponds to the MurmurHash3_x64_128 function (Murmur3F) from
      * the original C++ implementation. This is the little-endian variant.
      * 
-     * <p><b>Example:</b>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * HashFunction murmur128 = Hashing.murmur3_128(12345);
      * HashCode hash = murmur128.hash("large data set".getBytes());
@@ -177,7 +177,7 @@ public final class Hashing {
      * Returns a hash function implementing the 128-bit Murmur3 algorithm (x64 variant) with
      * a seed value of zero. This is equivalent to calling {@code murmur3_128(0)}.
      * 
-     * <p><b>Example:</b>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * HashCode hash128 = Hashing.murmur3_128().hash("data".getBytes());
      * }</pre>
@@ -197,7 +197,7 @@ public final class Hashing {
      * <p>SipHash-2-4 refers to 2 compression rounds and 4 finalization rounds. It provides
      * a good balance between security and performance.
      * 
-     * <p><b>Example:</b>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * HashCode sipHash = Hashing.sipHash24().hash("secure data".getBytes());
      * }</pre>
@@ -214,7 +214,7 @@ public final class Hashing {
      * specified 128-bit key (provided as two 64-bit values). This allows for keyed hashing
      * which can be useful for hash tables with untrusted input.
      * 
-     * <p><b>Example:</b>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * long k0 = 0x0706050403020100L;
      * long k1 = 0x0f0e0d0c0b0a0908L;
@@ -239,7 +239,7 @@ public final class Hashing {
      * For new applications, prefer {@link #sha256()} for security or {@link #goodFastHash(int)}
      * for performance.
      * 
-     * <p><b>Example:</b>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * HashCode md5Hash = Hashing.md5().hash("legacy data".getBytes());
      * }</pre>
@@ -261,7 +261,7 @@ public final class Hashing {
      * attacks have been demonstrated. Use this method only for compatibility with legacy systems.
      * For new applications, prefer {@link #sha256()} or higher.
      * 
-     * <p><b>Example:</b>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * HashCode sha1Hash = Hashing.sha1().hash("legacy data".getBytes());
      * }</pre>
@@ -283,7 +283,7 @@ public final class Hashing {
      * <p>This implementation delegates to the SHA-256 {@link MessageDigest} provided by
      * the Java security framework.
      * 
-     * <p><b>Example:</b>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * HashCode sha256Hash = Hashing.sha256().hash("secure data".getBytes());
      * byte[] hashBytes = sha256Hash.asBytes(); // 32 bytes
@@ -303,7 +303,7 @@ public final class Hashing {
      * <p>This implementation delegates to the SHA-384 {@link MessageDigest} provided by
      * the Java security framework.
      * 
-     * <p><b>Example:</b>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * HashCode sha384Hash = Hashing.sha384().hash("high security data".getBytes());
      * }</pre>
@@ -322,7 +322,7 @@ public final class Hashing {
      * <p>This implementation delegates to the SHA-512 {@link MessageDigest} provided by
      * the Java security framework.
      * 
-     * <p><b>Example:</b>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * HashCode sha512Hash = Hashing.sha512().hash("maximum security data".getBytes());
      * }</pre>
@@ -338,7 +338,7 @@ public final class Hashing {
      * algorithm using MD5 as the underlying hash function (128 hash bits). HMAC provides
      * message authentication using a secret key.
      * 
-     * <p><b>Example:</b>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Key secretKey = new SecretKeySpec("secret".getBytes(), "HmacMD5");
      * HashFunction hmac = Hashing.hmacMd5(secretKey);
@@ -359,7 +359,7 @@ public final class Hashing {
      * created from the given byte array. This is a convenience method that creates the
      * key specification internally.
      * 
-     * <p><b>Example:</b>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * byte[] keyBytes = "secret key".getBytes(StandardCharsets.UTF_8);
      * HashFunction hmac = Hashing.hmacMd5(keyBytes);
@@ -378,7 +378,7 @@ public final class Hashing {
      * Returns a hash function implementing the HMAC algorithm using SHA-1 as the underlying
      * hash function (160 hash bits). Provides better security than HMAC-MD5.
      * 
-     * <p><b>Example:</b>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Key secretKey = new SecretKeySpec("secret".getBytes(), "HmacSHA1");
      * HashFunction hmac = Hashing.hmacSha1(secretKey);
@@ -397,7 +397,7 @@ public final class Hashing {
      * Returns a hash function implementing HMAC-SHA1 using a {@link javax.crypto.spec.SecretKeySpec}
      * created from the given byte array.
      * 
-     * <p><b>Example:</b>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * HashFunction hmac = Hashing.hmacSha1("mySecretKey".getBytes());
      * HashCode mac = hmac.hash("authenticated message".getBytes());
@@ -416,7 +416,7 @@ public final class Hashing {
      * hash function (256 hash bits). This provides strong message authentication and is
      * recommended for new applications.
      * 
-     * <p><b>Example:</b>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Key secretKey = new SecretKeySpec("secret".getBytes(), "HmacSHA256");
      * HashFunction hmac = Hashing.hmacSha256(secretKey);
@@ -435,7 +435,7 @@ public final class Hashing {
      * Returns a hash function implementing HMAC-SHA256 using a {@link javax.crypto.spec.SecretKeySpec}
      * created from the given byte array.
      * 
-     * <p><b>Example:</b>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * byte[] key = "strongSecretKey".getBytes(StandardCharsets.UTF_8);
      * HashFunction hmac = Hashing.hmacSha256(key);
@@ -455,7 +455,7 @@ public final class Hashing {
      * hash function (512 hash bits). This provides the highest level of security among the
      * HMAC variants offered.
      * 
-     * <p><b>Example:</b>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Key secretKey = new SecretKeySpec("topsecret".getBytes(), "HmacSHA512");
      * HashFunction hmac = Hashing.hmacSha512(secretKey);
@@ -474,7 +474,7 @@ public final class Hashing {
      * Returns a hash function implementing HMAC-SHA512 using a {@link javax.crypto.spec.SecretKeySpec}
      * created from the given byte array.
      * 
-     * <p><b>Example:</b>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * byte[] key = new byte[64]; // 512-bit key
      * new SecureRandom().nextBytes(key);
@@ -500,7 +500,7 @@ public final class Hashing {
      * 
      * <p>As described by RFC 3720, Section 12.1.
      * 
-     * <p><b>Example:</b>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * HashCode checksum = Hashing.crc32c().hash("data to check".getBytes());
      * int crc32cValue = checksum.asInt();
@@ -522,7 +522,7 @@ public final class Hashing {
      * <p>To get the {@code long} value equivalent to {@link Checksum#getValue()} for a
      * {@code HashCode} produced by this function, use {@link HashCode#padToLong()}.
      * 
-     * <p><b>Example:</b>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * HashCode crc = Hashing.crc32().hash("file contents".getBytes());
      * long crcValue = crc.padToLong();
@@ -544,7 +544,7 @@ public final class Hashing {
      * <p>To get the {@code long} value equivalent to {@link Checksum#getValue()} for a
      * {@code HashCode} produced by this function, use {@link HashCode#padToLong()}.
      * 
-     * <p><b>Example:</b>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * HashCode adler = Hashing.adler32().hash("compressed data".getBytes());
      * long adlerValue = adler.padToLong();
@@ -569,7 +569,7 @@ public final class Hashing {
      * (see {@link com.google.common.primitives.UnsignedInts}), which should be considered
      * when comparing with signed integer implementations.
      * 
-     * <p><b>Example:</b>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * HashCode fingerprint = Hashing.farmHashFingerprint64()
      *     .hash("unique identifier".getBytes());
@@ -589,7 +589,7 @@ public final class Hashing {
      * <p>The resulting hash function will have a bit length equal to the sum of the bit
      * lengths of the input functions.
      * 
-     * <p><b>Example:</b>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Create a 512-bit hash function by combining two SHA-256 functions
      * HashFunction hash512 = Hashing.concatenating(
@@ -611,7 +611,7 @@ public final class Hashing {
      * Returns a hash function that computes its hash code by concatenating the hash codes
      * of three underlying hash functions.
      * 
-     * <p><b>Example:</b>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Create a 384-bit hash by combining three 128-bit functions
      * HashFunction hash384 = Hashing.concatenating(
@@ -640,7 +640,7 @@ public final class Hashing {
      * lengths of all input functions. The hash codes are concatenated in the order the
      * functions appear in the iterable.
      * 
-     * <p><b>Example:</b>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Create a 1024-bit hash function
      * List<HashFunction> functions = Arrays.asList(
@@ -670,7 +670,7 @@ public final class Hashing {
      * same bit length as the input hash codes. The combination is order-dependent, meaning
      * that {@code combineOrdered(a, b)} is different from {@code combineOrdered(b, a)}.
      * 
-     * <p><b>Example:</b>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * HashCode hash1 = Hashing.sha256().hash("first".getBytes());
      * HashCode hash2 = Hashing.sha256().hash("second".getBytes());
@@ -691,7 +691,7 @@ public final class Hashing {
      * Combines three hash codes in an ordered fashion to produce a new hash code with the
      * same bit length as the input hash codes.
      * 
-     * <p><b>Example:</b>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * HashCode hash1 = Hashing.md5().hash("part1".getBytes());
      * HashCode hash2 = Hashing.md5().hash("part2".getBytes());
@@ -720,7 +720,7 @@ public final class Hashing {
      * same input hash codes in the same order. This makes it suitable for scenarios where
      * the order of inputs matters.
      * 
-     * <p><b>Example:</b>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * List<HashCode> hashes = new ArrayList<>();
      * for (String part : dataParts) {
@@ -743,7 +743,7 @@ public final class Hashing {
      * same bit length as the input hash codes. The combination is order-independent, meaning
      * that {@code combineUnordered(a, b)} equals {@code combineUnordered(b, a)}.
      * 
-     * <p><b>Example:</b>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * HashCode hash1 = Hashing.sha256().hash("item1".getBytes());
      * HashCode hash2 = Hashing.sha256().hash("item2".getBytes());
@@ -764,7 +764,7 @@ public final class Hashing {
      * Combines three hash codes in an unordered fashion to produce a new hash code with the
      * same bit length as the input hash codes.
      * 
-     * <p><b>Example:</b>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * HashCode hash1 = Hashing.murmur3_128().hash("a".getBytes());
      * HashCode hash2 = Hashing.murmur3_128().hash("b".getBytes());
@@ -793,7 +793,7 @@ public final class Hashing {
      * same set of input hash codes, regardless of order. This makes it suitable for
      * combining hash codes of set elements or other unordered collections.
      * 
-     * <p><b>Example:</b>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Set<String> items = new HashSet<>(Arrays.asList("x", "y", "z"));
      * List<HashCode> hashes = new ArrayList<>();
@@ -831,7 +831,7 @@ public final class Hashing {
      * from the end. It's not suitable for scenarios where arbitrary buckets might be removed
      * (e.g., specific servers going offline in a cluster).
      * 
-     * <p><b>Example:</b>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * HashCode itemHash = Hashing.sha256().hash("user123".getBytes());
      * int serverCount = 10;
@@ -858,7 +858,7 @@ public final class Hashing {
      * {@link #consistentHash(HashCode, int)}, minimizing redistribution when the number
      * of buckets changes.
      * 
-     * <p><b>Example:</b>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * long userId = 12345L;
      * int shardCount = 100;

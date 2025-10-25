@@ -22,7 +22,7 @@ public class ByteNConsumer2025Test extends TestBase {
 
         consumer.accept((byte) 1, (byte) 2, (byte) 3);
         assertEquals(1, result.size());
-        assertArrayEquals(new byte[]{1, 2, 3}, result.get(0));
+        assertArrayEquals(new byte[] { 1, 2, 3 }, result.get(0));
     }
 
     @Test
@@ -76,7 +76,7 @@ public class ByteNConsumer2025Test extends TestBase {
 
         consumer.accept((byte) 42);
         assertEquals(1, result.size());
-        assertArrayEquals(new byte[]{42}, result.get(0));
+        assertArrayEquals(new byte[] { 42 }, result.get(0));
     }
 
     @Test
@@ -146,7 +146,7 @@ public class ByteNConsumer2025Test extends TestBase {
 
         consumer.accept(Byte.MIN_VALUE, (byte) 0, Byte.MAX_VALUE);
         assertEquals(1, result.size());
-        assertArrayEquals(new byte[]{Byte.MIN_VALUE, 0, Byte.MAX_VALUE}, result.get(0));
+        assertArrayEquals(new byte[] { Byte.MIN_VALUE, 0, Byte.MAX_VALUE }, result.get(0));
     }
 
     @Test

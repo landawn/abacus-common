@@ -35,6 +35,12 @@ public interface BiPredicate<T, U> extends Throwables.BiPredicate<T, U, RuntimeE
     /**
      * Evaluates this predicate on the given arguments.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * BiPredicate<String, Integer> lengthEquals = (str, len) -> str.length() == len;
+     * boolean result = lengthEquals.test("hello", 5); // Returns true
+     * }</pre>
+     *
      * @param t the first input argument
      * @param u the second input argument
      * @return {@code true} if the input arguments match the predicate, otherwise {@code false}
@@ -44,6 +50,12 @@ public interface BiPredicate<T, U> extends Throwables.BiPredicate<T, U, RuntimeE
 
     /**
      * Returns a predicate that represents the logical negation of this predicate.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * BiPredicate<String, String> equals = (s1, s2) -> s1.equals(s2);
+     * BiPredicate<String, String> notEquals = equals.negate();
+     * }</pre>
      *
      * @return a predicate that represents the logical negation of this predicate
      */
@@ -59,6 +71,13 @@ public interface BiPredicate<T, U> extends Throwables.BiPredicate<T, U, RuntimeE
      *
      * <p>Any exceptions thrown during evaluation of either predicate are relayed to the caller;
      * if evaluation of this predicate throws an exception, the {@code other} predicate will not be evaluated.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * BiPredicate<String, String> notNull = (s1, s2) -> s1 != null && s2 != null;
+     * BiPredicate<String, String> notEmpty = (s1, s2) -> !s1.isEmpty() && !s2.isEmpty();
+     * BiPredicate<String, String> valid = notNull.and(notEmpty);
+     * }</pre>
      *
      * @param other a predicate that will be logically-ANDed with this predicate. Must not be {@code null}.
      * @return a composed predicate that represents the short-circuiting logical AND of this predicate and the {@code other} predicate
@@ -76,6 +95,13 @@ public interface BiPredicate<T, U> extends Throwables.BiPredicate<T, U, RuntimeE
      * <p>Any exceptions thrown during evaluation of either predicate are relayed to the caller;
      * if evaluation of this predicate throws an exception, the {@code other} predicate will not be evaluated.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * BiPredicate<String, Integer> isLong = (str, len) -> str.length() > 100;
+     * BiPredicate<String, Integer> hasMinLength = (str, len) -> str.length() >= len;
+     * BiPredicate<String, Integer> combined = isLong.or(hasMinLength);
+     * }</pre>
+     *
      * @param other a predicate that will be logically-ORed with this predicate. Must not be {@code null}.
      * @return a composed predicate that represents the short-circuiting logical OR of this predicate and the {@code other} predicate
      */
@@ -87,6 +113,12 @@ public interface BiPredicate<T, U> extends Throwables.BiPredicate<T, U, RuntimeE
     /**
      * Converts this {@code BiPredicate} to a {@code Throwables.BiPredicate} that can throw a checked exception.
      * This method provides a way to use this predicate in contexts that require explicit exception handling.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * BiPredicate<String, String> fileExists = (dir, name) -> Files.exists(Paths.get(dir, name));
+     * Throwables.BiPredicate<String, String, IOException> throwablePredicate = fileExists.toThrowable();
+     * }</pre>
      *
      * @param <E> the type of exception that the returned predicate can throw
      * @return a {@code Throwables.BiPredicate} view of this predicate that can throw exceptions of type {@code E}

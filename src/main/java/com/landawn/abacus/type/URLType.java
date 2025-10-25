@@ -40,8 +40,8 @@ public class URLType extends AbstractType<URL> {
      * This method returns {@code URL.class}, which is the Class object for the
      * {@link java.net.URL} class that this URLType handles.
      * </p>
-     * <p>
-     * Usage example:
+     *
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * URLType type = new URLType();
      * Class<URL> clazz = type.clazz(); // Returns URL.class
@@ -61,8 +61,8 @@ public class URLType extends AbstractType<URL> {
      * which produces a string representation of the URL suitable for use in creating new URL instances.
      * If the input URL is null, this method returns null.
      * </p>
-     * <p>
-     * Usage example:
+     *
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * URLType type = new URLType();
      * URL url = new URL("https://example.com/path");
@@ -83,8 +83,8 @@ public class URLType extends AbstractType<URL> {
      * This method creates a URL instance from the provided string by first creating a URI
      * and then converting it to a URL. If the string is null or empty, this method returns null.
      * </p>
-     * <p>
-     * Usage example:
+     *
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * URLType type = new URLType();
      * URL url = type.valueOf("https://example.com/path"); // Creates a URL
@@ -114,8 +114,8 @@ public class URLType extends AbstractType<URL> {
      * This method uses the ResultSet's {@code getURL} method to directly retrieve
      * the URL value from the database.
      * </p>
-     * <p>
-     * Usage example:
+     *
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * URLType type = new URLType();
      * ResultSet rs = statement.executeQuery("SELECT website FROM companies");
@@ -138,8 +138,8 @@ public class URLType extends AbstractType<URL> {
      * This method uses the ResultSet's {@code getURL} method to directly retrieve
      * the URL value from the database using the column name.
      * </p>
-     * <p>
-     * Usage example:
+     *
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * URLType type = new URLType();
      * ResultSet rs = statement.executeQuery("SELECT website FROM companies");
@@ -162,8 +162,8 @@ public class URLType extends AbstractType<URL> {
      * This method uses the PreparedStatement's {@code setURL} method to directly set
      * the URL value. If the URL is null, a NULL value is set in the database.
      * </p>
-     * <p>
-     * Usage example:
+     *
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * URLType type = new URLType();
      * PreparedStatement stmt = conn.prepareStatement("INSERT INTO companies (website) VALUES (?)");
@@ -186,8 +186,8 @@ public class URLType extends AbstractType<URL> {
      * This method uses the CallableStatement's {@code setURL} method to directly set
      * the URL value. If the URL is null, a NULL value is set in the database.
      * </p>
-     * <p>
-     * Usage example:
+     *
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * URLType type = new URLType();
      * CallableStatement stmt = conn.prepareCall("{call update_company(?)}");

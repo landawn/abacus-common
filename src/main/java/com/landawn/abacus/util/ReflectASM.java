@@ -45,7 +45,7 @@ import com.esotericsoftware.reflectasm.MethodAccess;
  *   <li>Initial setup has overhead due to bytecode generation</li>
  * </ul>
  * 
- * <p><b>Example usage:</b></p>
+ * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * // Create instance and access fields/methods
  * public class Person {
@@ -110,7 +110,7 @@ final class ReflectASM<T> {
      * <p>This method is useful when you have the class name as a string, such as when
      * working with configuration files or dynamic class loading scenarios.</p>
      * 
-     * <p><b>Example usage:</b></p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Load and instantiate a class by name
      * ReflectASM<?> reflect = ReflectASM.on("com.example.MyClass");
@@ -137,7 +137,7 @@ final class ReflectASM<T> {
      * <p>The returned ReflectASM instance can be used to create new instances of the class
      * using the {@link #_new()} method, or to access static fields and methods.</p>
      * 
-     * <p><b>Example usage:</b></p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Create new instance
      * Person person = ReflectASM.on(Person.class)._new().get();
@@ -169,7 +169,7 @@ final class ReflectASM<T> {
      * <p>The class type is inferred from the target object's runtime type. This method
      * provides a convenient way to start reflection operations on an existing object.</p>
      * 
-     * <p><b>Example usage:</b></p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Person person = new Person();
      * 
@@ -203,7 +203,7 @@ final class ReflectASM<T> {
      * <p>This method uses bytecode generation for faster instantiation compared to
      * standard reflection. The generated constructor accessor is cached for reuse.</p>
      * 
-     * <p><b>Example usage:</b></p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Simple instantiation
      * Person person = ReflectASM.on(Person.class)._new().get();
@@ -236,7 +236,7 @@ final class ReflectASM<T> {
      * <p>This method uses bytecode-generated accessors for high-performance field access.
      * The returned value is cast to the specified type parameter.</p>
      * 
-     * <p><b>Example usage:</b></p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * public class Product {
      *     public String name;
@@ -277,7 +277,7 @@ final class ReflectASM<T> {
      * <p>This method returns the same ReflectASM instance, allowing for method chaining
      * to set multiple fields in a fluent manner.</p>
      * 
-     * <p><b>Example usage:</b></p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * public class Configuration {
      *     public String host;
@@ -324,7 +324,7 @@ final class ReflectASM<T> {
      * If the method returns void, null is returned. Otherwise, the return value is
      * automatically cast to the specified type parameter.</p>
      * 
-     * <p><b>Example usage:</b></p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * public class Calculator {
      *     public int add(int a, int b) {
@@ -371,7 +371,7 @@ final class ReflectASM<T> {
      * <p>This method returns the same ReflectASM instance, allowing for method chaining
      * to perform multiple operations in sequence.</p>
      * 
-     * <p><b>Example usage:</b></p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * public class Service {
      *     public void initialize() { ... }
@@ -413,7 +413,7 @@ final class ReflectASM<T> {
     /**
      * Gets the field access.
      *
-     * @return
+     * @return the cached or newly created FieldAccess instance for this class
      */
     private FieldAccess getFieldAccess() {
         FieldAccess fieldAccess = clsFieldPool.get(cls);
@@ -429,8 +429,8 @@ final class ReflectASM<T> {
     /**
      * Gets the constructor access.
      *
-     * @param cls
-     * @return
+     * @param cls the class for which to get the constructor access
+     * @return the cached or newly created ConstructorAccess instance for the specified class
      * @throws SecurityException the security exception
      */
     private ConstructorAccess<T> getConstructorAccess(final Class<T> cls) throws SecurityException {
@@ -447,8 +447,8 @@ final class ReflectASM<T> {
     /**
      * Gets the method access.
      *
-     * @param cls
-     * @return
+     * @param cls the class for which to get the method access
+     * @return the cached or newly created MethodAccess instance for the specified class
      */
     private MethodAccess getMethodAccess(final Class<?> cls) {
         MethodAccess methodAccess = clsMethodPool.get(cls);

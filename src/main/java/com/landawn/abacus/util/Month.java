@@ -21,7 +21,7 @@ package com.landawn.abacus.util;
  * <p>This enum provides a convenient way to work with months in a type-safe manner,
  * avoiding the use of raw integer values which can be error-prone.</p>
  * 
- * <p>Example usage:</p>
+ * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * Month month = Month.JANUARY;
  * int monthNumber = month.intValue(); // returns 1
@@ -45,7 +45,7 @@ public enum Month {
      * Returns the numeric value of this month.
      * January is 1, February is 2, and so on through December which is 12.
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Month.MARCH.intValue(); // returns 3
      * Month.DECEMBER.intValue(); // returns 12
@@ -64,7 +64,7 @@ public enum Month {
      * the corresponding Month enum constant. This is useful when working with
      * legacy code or external systems that use numeric month representations.</p>
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Month jan = Month.valueOf(1); // returns JANUARY
      * Month dec = Month.valueOf(12); // returns DECEMBER

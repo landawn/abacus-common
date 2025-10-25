@@ -31,7 +31,7 @@ import java.util.Arrays;
  * <p>Unlike the standard implementation, this class is not thread-safe. If multiple
  * threads access an instance concurrently, external synchronization is required.</p>
  * 
- * <p>Example usage:</p>
+ * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * ByteArrayOutputStream baos = new ByteArrayOutputStream();
  * baos.write("Hello".getBytes());
@@ -54,7 +54,7 @@ public final class ByteArrayOutputStream extends OutputStream {
      * 
      * <p>The buffer will grow automatically as needed when data is written.</p>
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ByteArrayOutputStream baos = new ByteArrayOutputStream();
      * }</pre>
@@ -69,7 +69,7 @@ public final class ByteArrayOutputStream extends OutputStream {
      * <p>The buffer will grow automatically as needed when data is written
      * beyond the initial capacity.</p>
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ByteArrayOutputStream baos = new ByteArrayOutputStream(1024);
      * // Creates a stream with 1KB initial buffer
@@ -92,7 +92,7 @@ public final class ByteArrayOutputStream extends OutputStream {
      * <p>The byte is written as the low-order byte of the argument b.
      * The 24 high-order bits of b are ignored.</p>
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ByteArrayOutputStream baos = new ByteArrayOutputStream();
      * baos.write(65); // Writes 'A'
@@ -111,7 +111,7 @@ public final class ByteArrayOutputStream extends OutputStream {
     /**
      * Writes a portion of the specified byte array to this output stream.
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ByteArrayOutputStream baos = new ByteArrayOutputStream();
      * byte[] data = "Hello World".getBytes();
@@ -140,7 +140,7 @@ public final class ByteArrayOutputStream extends OutputStream {
      * 
      * <p>This method provides a more type-safe alternative to {@link #write(int)}.</p>
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ByteArrayOutputStream baos = new ByteArrayOutputStream();
      * baos.write((byte) 0xFF);
@@ -160,7 +160,7 @@ public final class ByteArrayOutputStream extends OutputStream {
      * <p>This method writes all bytes from the internal buffer up to the current
      * position to the specified output stream.</p>
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ByteArrayOutputStream baos = new ByteArrayOutputStream();
      * baos.write("Hello".getBytes());
@@ -183,7 +183,7 @@ public final class ByteArrayOutputStream extends OutputStream {
      * <p>The capacity is the size of the internal array and may be larger
      * than the current size of valid data.</p>
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ByteArrayOutputStream baos = new ByteArrayOutputStream(100);
      * System.out.println(baos.capacity()); // 100
@@ -205,7 +205,7 @@ public final class ByteArrayOutputStream extends OutputStream {
      * the implications. Only bytes from index 0 to {@link #size()} - 1 contain
      * valid data.</p>
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ByteArrayOutputStream baos = new ByteArrayOutputStream();
      * baos.write("Hello".getBytes());
@@ -222,7 +222,7 @@ public final class ByteArrayOutputStream extends OutputStream {
     /**
      * Returns the current size (number of valid bytes) in the buffer.
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ByteArrayOutputStream baos = new ByteArrayOutputStream();
      * System.out.println(baos.size()); // 0
@@ -242,7 +242,7 @@ public final class ByteArrayOutputStream extends OutputStream {
      * <p>After reset, the size becomes 0, but the internal buffer capacity
      * remains unchanged. This allows reuse of the buffer without reallocation.</p>
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ByteArrayOutputStream baos = new ByteArrayOutputStream();
      * baos.write("Hello".getBytes());
@@ -261,7 +261,7 @@ public final class ByteArrayOutputStream extends OutputStream {
      * <p>This method creates a new array of the exact size needed and copies
      * the valid data into it. The internal buffer remains unchanged.</p>
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ByteArrayOutputStream baos = new ByteArrayOutputStream();
      * baos.write("Hello".getBytes());
@@ -277,7 +277,7 @@ public final class ByteArrayOutputStream extends OutputStream {
     /**
      * Converts the buffer contents to a string using the platform's default charset.
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ByteArrayOutputStream baos = new ByteArrayOutputStream();
      * baos.write("Hello World".getBytes());
@@ -294,7 +294,7 @@ public final class ByteArrayOutputStream extends OutputStream {
     /**
      * Converts the buffer contents to a string using the specified charset.
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ByteArrayOutputStream baos = new ByteArrayOutputStream();
      * baos.write("Hello".getBytes("UTF-8"));
@@ -312,7 +312,7 @@ public final class ByteArrayOutputStream extends OutputStream {
     /**
      * Converts the buffer contents to a string using the specified charset.
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ByteArrayOutputStream baos = new ByteArrayOutputStream();
      * baos.write("Hello".getBytes(StandardCharsets.UTF_8));

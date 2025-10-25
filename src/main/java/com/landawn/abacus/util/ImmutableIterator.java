@@ -34,7 +34,7 @@ import com.landawn.abacus.annotation.Beta;
  * <p>Subclasses must implement the hasNext() and next() methods to provide iteration
  * functionality. The remove() method is final and always throws an exception.</p>
  * 
- * <p>Example usage:
+ * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * ImmutableIterator<String> iter = new ImmutableIterator<String>() {
  *     private int index = 0;
@@ -81,13 +81,12 @@ abstract class ImmutableIterator<T> implements java.util.Iterator<T>, Immutable 
      * <p>This method consumes the iterator. After calling this method,
      * the iterator will be exhausted and hasNext() will return false.</p>
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ImmutableIterator<String> iter = ImmutableList.of("a", "b", "a", "c").iterator();
      * Set<String> set = iter.toSet();
      * System.out.println(set); // [a, b, c] (order may vary)
      * }</pre>
-     * </p>
      *
      * @return a Set containing all remaining elements from this iterator
      */
@@ -102,13 +101,12 @@ abstract class ImmutableIterator<T> implements java.util.Iterator<T>, Immutable 
      * <p>This method consumes the iterator. After calling this method,
      * the iterator will be exhausted and hasNext() will return false.</p>
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ImmutableIterator<String> iter = ImmutableList.of("a", "b", "c").iterator();
      * LinkedList<String> list = iter.toCollection(LinkedList::new);
      * System.out.println(list); // [a, b, c]
      * }</pre>
-     * </p>
      *
      * @param <C> the type of the collection to create
      * @param supplier a supplier that creates a new empty collection instance
@@ -130,13 +128,12 @@ abstract class ImmutableIterator<T> implements java.util.Iterator<T>, Immutable 
      * <p>This method consumes the iterator. After calling this method,
      * the iterator will be exhausted and hasNext() will return false.</p>
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ImmutableIterator<Integer> iter = ImmutableSet.of(1, 2, 3).iterator();
      * ImmutableList<Integer> list = iter.toImmutableList();
      * System.out.println(list); // [1, 2, 3] (order depends on source)
      * }</pre>
-     * </p>
      *
      * @return an ImmutableList containing all remaining elements from this iterator
      */
@@ -151,13 +148,12 @@ abstract class ImmutableIterator<T> implements java.util.Iterator<T>, Immutable 
      * <p>This method consumes the iterator. After calling this method,
      * the iterator will be exhausted and hasNext() will return false.</p>
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ImmutableIterator<String> iter = ImmutableList.of("a", "b", "a", "c").iterator();
      * ImmutableSet<String> set = iter.toImmutableSet();
      * System.out.println(set.size()); // 3 (duplicates removed)
      * }</pre>
-     * </p>
      *
      * @return an ImmutableSet containing all remaining unique elements from this iterator
      */
@@ -173,7 +169,7 @@ abstract class ImmutableIterator<T> implements java.util.Iterator<T>, Immutable 
      * the iterator will be exhausted and hasNext() will return false. If you need
      * both the count and the elements, consider collecting to a list first.</p>
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ImmutableIterator<String> iter = ImmutableList.of("a", "b", "c").iterator();
      * iter.next(); // Skip first element
@@ -181,7 +177,6 @@ abstract class ImmutableIterator<T> implements java.util.Iterator<T>, Immutable 
      * System.out.println(remaining); // 2
      * System.out.println(iter.hasNext()); // false (iterator exhausted)
      * }</pre>
-     * </p>
      *
      * @return the number of remaining elements
      */

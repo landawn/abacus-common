@@ -36,7 +36,7 @@ import java.util.Map;
  * 
  * <p>This class is serializable if both the key and value are serializable.
  * 
- * <p>Example usage:
+ * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * // Create an immutable entry
  * ImmutableEntry<String, Integer> entry = ImmutableEntry.of("count", 42);
@@ -77,7 +77,7 @@ public final class ImmutableEntry<K, V> extends AbstractMap.SimpleImmutableEntry
      * Creates an ImmutableEntry with the specified key and value.
      * Both the key and value may be null.
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ImmutableEntry<String, Integer> entry = ImmutableEntry.of("age", 25);
      * System.out.println(entry.getKey());   // prints: age
@@ -105,7 +105,7 @@ public final class ImmutableEntry<K, V> extends AbstractMap.SimpleImmutableEntry
      * <p>If the provided entry contains null key or value, the ImmutableEntry will
      * also contain null for those fields.
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Map<String, Integer> map = new HashMap<>();
      * map.put("count", 100);

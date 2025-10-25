@@ -30,6 +30,12 @@ public interface BooleanBiFunction<R> extends Throwables.BooleanBiFunction<R, Ru
     /**
      * Applies this function to the given arguments.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * BooleanBiFunction<String> formatter = (a, b) -> "AND: " + (a && b) + ", OR: " + (a || b);
+     * String result = formatter.apply(true, false); // Returns "AND: false, OR: true"
+     * }</pre>
+     *
      * @param t the first function argument (boolean value)
      * @param u the second function argument (boolean value)
      * @return the function result
@@ -40,6 +46,13 @@ public interface BooleanBiFunction<R> extends Throwables.BooleanBiFunction<R, Ru
     /**
      * Returns a composed function that first applies this function to its input, and then applies the {@code after} function to the result.
      * If evaluation of either function throws an exception, it is relayed to the caller of the composed function.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * BooleanBiFunction<Boolean> and = (a, b) -> a && b;
+     * Function<Boolean, String> toString = Object::toString;
+     * BooleanBiFunction<String> combined = and.andThen(toString);
+     * }</pre>
      *
      * @param <V> the type of output of the {@code after} function, and of the composed function
      * @param after the function to apply after this function is applied. Must not be {@code null}.

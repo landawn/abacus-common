@@ -1237,8 +1237,7 @@ public class RegExUtil2025Test extends TestBase {
         // With single match, both should return the same
         Pattern singleMatchPattern = Pattern.compile("unique");
         String singleMatchText = "This is a unique test";
-        assertEquals(RegExUtil.findFirst(singleMatchText, singleMatchPattern),
-                     RegExUtil.findLast(singleMatchText, singleMatchPattern));
+        assertEquals(RegExUtil.findFirst(singleMatchText, singleMatchPattern), RegExUtil.findLast(singleMatchText, singleMatchPattern));
 
         // With no match, both should return null
         Pattern noMatchPattern = Pattern.compile("\\d+");
@@ -1338,7 +1337,7 @@ public class RegExUtil2025Test extends TestBase {
         assertEquals("TARGET", RegExUtil.findLast(longString, targetPattern));
 
         // String with special characters
-        String specialChars = "!@#$%^&*()_+-=[]{}|;':\",./<>?";
+        String specialChars = "!@#$%^&*()_+-=[] {}|;':\",./<>?";
         Pattern specialPattern = Pattern.compile("[!@#$%^&*()]+");
         assertEquals("!@#$%^&*()", RegExUtil.findFirst(specialChars, specialPattern));
 
@@ -1591,8 +1590,7 @@ public class RegExUtil2025Test extends TestBase {
     @DisplayName("Test findLast(String, String) with greedy vs non-greedy")
     public void testFindLastStringRegexGreedyVsNonGreedy() {
         // Greedy - matches from first < to last >
-        assertEquals("<tag>content</tag> and <other>text</other>",
-                     RegExUtil.findLast("<tag>content</tag> and <other>text</other> extra", "<.*>"));
+        assertEquals("<tag>content</tag> and <other>text</other>", RegExUtil.findLast("<tag>content</tag> and <other>text</other> extra", "<.*>"));
 
         // Non-greedy - matches individual tags
         assertEquals("</other>", RegExUtil.findLast("<tag>content</tag> and <other>text</other>", "<.*?>"));
@@ -1627,8 +1625,7 @@ public class RegExUtil2025Test extends TestBase {
     public void testFindFirstAndLastStringRegexConsistency() {
         // With single match, both should return the same
         String singleMatchText = "This is a unique test";
-        assertEquals(RegExUtil.findFirst(singleMatchText, "unique"),
-                     RegExUtil.findLast(singleMatchText, "unique"));
+        assertEquals(RegExUtil.findFirst(singleMatchText, "unique"), RegExUtil.findLast(singleMatchText, "unique"));
 
         // With no match, both should return null
         String noMatchText = "No numbers here";
@@ -1689,7 +1686,7 @@ public class RegExUtil2025Test extends TestBase {
         assertEquals("TARGET", RegExUtil.findLast(longString, "TARGET"));
 
         // String with special characters
-        String specialChars = "!@#$%^&*()_+-=[]{}|;':\",./<>?";
+        String specialChars = "!@#$%^&*()_+-=[] {}|;':\",./<>?";
         assertEquals("!@#$%^&*()", RegExUtil.findFirst(specialChars, "[!@#$%^&*()]+"));
 
         // Consecutive matches

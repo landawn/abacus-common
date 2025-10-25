@@ -22,7 +22,7 @@ package com.landawn.abacus.util;
  * <p>Each color is assigned a unique integer value from 0 to 8, allowing for
  * consistent numeric representation across different systems.</p>
  * 
- * <p>Example usage:</p>
+ * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * Color myColor = Color.RED;
  * int colorCode = myColor.intValue(); // returns 2
@@ -88,7 +88,7 @@ public enum Color {
      * Returns the integer value associated with this color.
      * This method is useful when you need to store or transmit colors as numeric values.
      * 
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Color color = Color.BLUE;
      * int value = color.intValue(); // returns 7
@@ -104,7 +104,7 @@ public enum Color {
      * Returns the Color enum constant corresponding to the specified integer value.
      * This method performs a reverse lookup from integer code to Color instance.
      * 
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Color red = Color.valueOf(2);    // returns Color.RED
      * Color green = Color.valueOf(5);  // returns Color.GREEN

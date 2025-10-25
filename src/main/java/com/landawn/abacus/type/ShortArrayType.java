@@ -33,8 +33,8 @@ public final class ShortArrayType extends ObjectArrayType<Short> {
      * Converts a Short object array to its string representation.
      * The array is formatted as comma-separated values enclosed in square brackets.
      * Null elements are represented as "null" in the output.
-     * <p>
-     * Usage example:
+     *
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ShortArrayType type = new ShortArrayType();
      * Short[] array = {1, null, 3};
@@ -61,8 +61,8 @@ public final class ShortArrayType extends ObjectArrayType<Short> {
      * Parses a string representation of a Short array and returns the corresponding Short array.
      * The string should contain comma-separated values enclosed in square brackets.
      * The string "null" (case-sensitive, exactly 4 characters) is parsed as a null element.
-     * <p>
-     * Usage example:
+     *
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ShortArrayType type = new ShortArrayType();
      * Short[] array = type.valueOf("[1, null, 3]"); // Returns {1, null, 3}
@@ -103,12 +103,12 @@ public final class ShortArrayType extends ObjectArrayType<Short> {
      * Appends the string representation of a Short array to the given Appendable.
      * The array is formatted as comma-separated values enclosed in square brackets.
      * Null elements are appended as "null". If the array itself is null, appends "null".
-     * <p>
-     * Usage example:
+     *
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ShortArrayType type = new ShortArrayType();
      * StringBuilder sb = new StringBuilder();
-     * type.appendTo(sb, new Short[]{1, 2, 3}); // Appends "[1, 2, 3]"
+     * type.appendTo(sb, new Short[] {1, 2, 3}); // Appends "[1, 2, 3]"
      * }</pre>
      *
      * @param appendable the Appendable to write to (e.g., StringBuilder, Writer)
@@ -143,12 +143,12 @@ public final class ShortArrayType extends ObjectArrayType<Short> {
      * This method is optimized for performance when writing to character-based outputs.
      * The array is formatted as comma-separated values enclosed in square brackets.
      * Null elements are written as "null".
-     * <p>
-     * Usage example:
+     *
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ShortArrayType type = new ShortArrayType();
      * CharacterWriter writer = new CharacterWriter();
-     * type.writeCharacter(writer, new Short[]{1, 2, 3}, config); // Writes "[1, 2, 3]"
+     * type.writeCharacter(writer, new Short[] {1, 2, 3}, config); // Writes "[1, 2, 3]"
      * }</pre>
      *
      * @param writer the CharacterWriter to write to

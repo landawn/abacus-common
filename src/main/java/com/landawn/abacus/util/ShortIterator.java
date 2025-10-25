@@ -33,7 +33,7 @@ import com.landawn.abacus.util.stream.ShortStream;
  * It provides specialized methods like {@code nextShort()} to avoid boxing overhead,
  * and various transformation methods like {@code skip()}, {@code limit()}, and {@code filter()}.
  * 
- * <p>Example usage:
+ * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * short[] array = {1, 2, 3, 4, 5};
  * ShortIterator iter = ShortIterator.of(array);
@@ -72,7 +72,7 @@ public abstract class ShortIterator extends ImmutableIterator<Short> {
      * Returns an empty ShortIterator instance.
      * This method returns the same singleton instance as {@link #EMPTY}.
      * 
-     * <p>Example usage:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ShortIterator empty = ShortIterator.empty();
      * assert !empty.hasNext();
@@ -89,7 +89,7 @@ public abstract class ShortIterator extends ImmutableIterator<Short> {
      * Creates a ShortIterator from a short array.
      * If the array is null or empty, returns an empty iterator.
      * 
-     * <p>Example usage:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * short[] values = {1, 2, 3};
      * ShortIterator iter = ShortIterator.of(values);
@@ -106,7 +106,7 @@ public abstract class ShortIterator extends ImmutableIterator<Short> {
      * Creates a ShortIterator from a portion of a short array.
      * Iterates over elements from fromIndex (inclusive) to toIndex (exclusive).
      * 
-     * <p>Example usage:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * short[] values = {1, 2, 3, 4, 5};
      * ShortIterator iter = ShortIterator.of(values, 1, 4); // iterates over 2, 3, 4
@@ -163,7 +163,7 @@ public abstract class ShortIterator extends ImmutableIterator<Short> {
      * The actual iterator is not created until the first method call on the returned iterator.
      * This is useful for deferring expensive iterator creation until it's actually needed.
      * 
-     * <p>Example usage:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ShortIterator iter = ShortIterator.defer(() -> ShortIterator.of(computeExpensiveArray()));
      * // The expensive computation is not performed until iter.hasNext() or iter.nextShort() is called
@@ -211,7 +211,7 @@ public abstract class ShortIterator extends ImmutableIterator<Short> {
      * Creates an infinite ShortIterator that generates values using the provided supplier.
      * The iterator will continuously return values from the supplier and never return false from hasNext().
      * 
-     * <p>Example usage:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ShortIterator randomShorts = ShortIterator.generate(() -> (short)(Math.random() * 100));
      * // Use with limit to avoid infinite iteration
@@ -242,7 +242,7 @@ public abstract class ShortIterator extends ImmutableIterator<Short> {
      * Creates a ShortIterator that generates values using the provided supplier while the hasNext condition is true.
      * This allows for creating finite iterators with custom termination conditions.
      * 
-     * <p>Example usage:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * int[] counter = {0};
      * ShortIterator iter = ShortIterator.generate(
@@ -293,16 +293,13 @@ public abstract class ShortIterator extends ImmutableIterator<Short> {
     }
 
     /**
-     * Returns the next primitive short value in the iteration.
-     * This is the preferred method for retrieving values as it avoids boxing overhead.
-     * 
-     * <p>Example usage:
+     * Returns the next short value in the iteration.
+     *
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * ShortIterator iter = ShortIterator.of(new short[]{1, 2, 3});
-     * while (iter.hasNext()) {
-     *     short value = iter.nextShort();
-     *     System.out.println(value);
-     * }
+     * ShortIterator iter = ShortIterator.of((short)1, (short)2, (short)3);
+     * short first = iter.nextShort(); // 1
+     * short second = iter.nextShort(); // 2
      * }</pre>
      *
      * @return the next short value
@@ -314,9 +311,9 @@ public abstract class ShortIterator extends ImmutableIterator<Short> {
      * Returns a new ShortIterator that skips the first n elements.
      * If n is greater than the number of remaining elements, all elements are skipped.
      * 
-     * <p>Example usage:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * ShortIterator iter = ShortIterator.of(new short[]{1, 2, 3, 4, 5});
+     * ShortIterator iter = ShortIterator.of(new short[] {1, 2, 3, 4, 5});
      * ShortIterator skipped = iter.skip(2); // Will iterate over 3, 4, 5
      * }</pre>
      *
@@ -370,7 +367,7 @@ public abstract class ShortIterator extends ImmutableIterator<Short> {
      * Returns a new ShortIterator that limits the number of elements to iterate over.
      * The returned iterator will iterate over at most count elements.
      * 
-     * <p>Example usage:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ShortIterator iter = ShortIterator.generate(() -> (short)1);
      * ShortIterator limited = iter.limit(3); // Will only return three 1s
@@ -413,9 +410,9 @@ public abstract class ShortIterator extends ImmutableIterator<Short> {
      * Returns a new ShortIterator that only includes elements matching the given predicate.
      * Elements that don't satisfy the predicate are skipped.
      * 
-     * <p>Example usage:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * ShortIterator iter = ShortIterator.of(new short[]{1, 2, 3, 4, 5});
+     * ShortIterator iter = ShortIterator.of(new short[] {1, 2, 3, 4, 5});
      * ShortIterator evens = iter.filter(x -> x % 2 == 0); // Will iterate over 2, 4
      * }</pre>
      *
@@ -465,9 +462,9 @@ public abstract class ShortIterator extends ImmutableIterator<Short> {
      * Returns the first element as an OptionalShort, or empty if the iterator has no elements.
      * This method consumes the first element if present.
      * 
-     * <p>Example usage:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * OptionalShort first = ShortIterator.of(new short[]{1, 2, 3}).first(); // OptionalShort.of(1)
+     * OptionalShort first = ShortIterator.of(new short[] {1, 2, 3}).first(); // OptionalShort.of(1)
      * OptionalShort empty = ShortIterator.empty().first(); // OptionalShort.empty()
      * }</pre>
      *
@@ -485,9 +482,9 @@ public abstract class ShortIterator extends ImmutableIterator<Short> {
      * Returns the last element as an OptionalShort, or empty if the iterator has no elements.
      * This method consumes all remaining elements to find the last one.
      * 
-     * <p>Example usage:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * OptionalShort last = ShortIterator.of(new short[]{1, 2, 3}).last(); // OptionalShort.of(3)
+     * OptionalShort last = ShortIterator.of(new short[] {1, 2, 3}).last(); // OptionalShort.of(3)
      * OptionalShort empty = ShortIterator.empty().last(); // OptionalShort.empty()
      * }</pre>
      *
@@ -508,13 +505,19 @@ public abstract class ShortIterator extends ImmutableIterator<Short> {
     }
 
     /**
-     * Converts the remaining elements in this iterator to a short array.
-     * This method consumes all remaining elements.
-     * 
-     * <p>Example usage:
+     * Converts the remaining elements to a short array.
+     *
+     * <p>This method consumes the iterator. After calling this method, the iterator
+     * will be empty (hasNext() returns false). If the iterator is already empty,
+     * returns an empty array.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * short[] array = ShortIterator.of(new short[]{1, 2, 3}).toArray();
-     * // array contains {1, 2, 3}
+     * short[] array = ShortIterator.of((short)1, (short)2, (short)3, (short)4, (short)5).toArray();
+     * // array = [1, 2, 3, 4, 5]
+     *
+     * // Empty iterator returns empty array
+     * short[] empty = ShortIterator.empty().toArray(); // empty.length == 0
      * }</pre>
      *
      * @return a short array containing all remaining elements
@@ -525,13 +528,19 @@ public abstract class ShortIterator extends ImmutableIterator<Short> {
     }
 
     /**
-     * Converts the remaining elements in this iterator to a ShortList.
-     * This method consumes all remaining elements.
-     * 
-     * <p>Example usage:
+     * Converts the remaining elements to a ShortList.
+     *
+     * <p>This method consumes the iterator. After calling this method, the iterator
+     * will be empty (hasNext() returns false). If the iterator is already empty,
+     * returns an empty ShortList.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * ShortList list = ShortIterator.of(new short[]{1, 2, 3}).toList();
-     * // list contains [1, 2, 3]
+     * ShortList list = ShortIterator.of((short)1, (short)2, (short)3, (short)4, (short)5).toList();
+     * // list contains [1, 2, 3, 4, 5]
+     *
+     * // Empty iterator returns empty list
+     * ShortList empty = ShortIterator.empty().toList(); // empty.size() == 0
      * }</pre>
      *
      * @return a ShortList containing all remaining elements
@@ -550,9 +559,9 @@ public abstract class ShortIterator extends ImmutableIterator<Short> {
      * Creates a ShortStream from the remaining elements in this iterator.
      * This provides access to stream operations like map, filter, reduce, etc.
      * 
-     * <p>Example usage:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * double average = ShortIterator.of(new short[]{1, 2, 3, 4, 5})
+     * double average = ShortIterator.of(new short[] {1, 2, 3, 4, 5})
      *     .stream()
      *     .average()
      *     .orElse(0.0);
@@ -568,9 +577,9 @@ public abstract class ShortIterator extends ImmutableIterator<Short> {
      * Returns an iterator of IndexedShort objects pairing each element with its index.
      * Indexing starts from 0.
      * 
-     * <p>Example usage:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * ShortIterator iter = ShortIterator.of(new short[]{10, 20, 30});
+     * ShortIterator iter = ShortIterator.of(new short[] {10, 20, 30});
      * ObjIterator<IndexedShort> indexed = iter.indexed();
      * // Will produce: IndexedShort(10, 0), IndexedShort(20, 1), IndexedShort(30, 2)
      * }</pre>
@@ -586,9 +595,9 @@ public abstract class ShortIterator extends ImmutableIterator<Short> {
      * Returns an iterator of IndexedShort objects pairing each element with its index.
      * Indexing starts from the specified startIndex.
      * 
-     * <p>Example usage:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * ShortIterator iter = ShortIterator.of(new short[]{10, 20, 30});
+     * ShortIterator iter = ShortIterator.of(new short[] {10, 20, 30});
      * ObjIterator<IndexedShort> indexed = iter.indexed(100);
      * // Will produce: IndexedShort(10, 100), IndexedShort(20, 101), IndexedShort(30, 102)
      * }</pre>
@@ -637,9 +646,9 @@ public abstract class ShortIterator extends ImmutableIterator<Short> {
      * Performs the given action for each remaining short element.
      * This method avoids boxing overhead by using a specialized ShortConsumer.
      * 
-     * <p>Example usage:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * ShortIterator iter = ShortIterator.of(new short[]{1, 2, 3});
+     * ShortIterator iter = ShortIterator.of(new short[] {1, 2, 3});
      * iter.foreachRemaining(value -> System.out.println(value));
      * }</pre>
      *
@@ -657,9 +666,9 @@ public abstract class ShortIterator extends ImmutableIterator<Short> {
      * Performs the given action for each remaining element along with its index.
      * The index starts from 0 and increments for each element.
      * 
-     * <p>Example usage:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * ShortIterator iter = ShortIterator.of(new short[]{10, 20, 30});
+     * ShortIterator iter = ShortIterator.of(new short[] {10, 20, 30});
      * iter.foreachIndexed((index, value) -> 
      *     System.out.println("Element at " + index + " is " + value));
      * // Prints:

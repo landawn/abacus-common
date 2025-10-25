@@ -49,7 +49,7 @@ public interface FloatBiFunction<R> extends Throwables.FloatBiFunction<R, Runtim
      *   <li>Aggregating two float values into a single result</li>
      * </ul>
      * 
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * FloatBiFunction<Float> average = (a, b) -> (a + b) / 2.0f;
      * Float result = average.apply(10.0f, 20.0f); // Returns 15.0f
@@ -57,8 +57,7 @@ public interface FloatBiFunction<R> extends Throwables.FloatBiFunction<R, Runtim
      *
      * @param t the first float argument
      * @param u the second float argument
-     * @return the function result of type {@code R}
-     * @throws RuntimeException if the function encounters an error during computation
+     * @return the function result of type {@code R} if the function encounters an error during computation
      */
     @Override
     R apply(float t, float u);
@@ -71,7 +70,7 @@ public interface FloatBiFunction<R> extends Throwables.FloatBiFunction<R, Runtim
      * <p>This method enables function composition, allowing you to chain operations together.
      * The result of this function becomes the input to the {@code after} function.</p>
      * 
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Function that calculates the hypotenuse
      * FloatBiFunction<Float> hypotenuse = (a, b) -> (float) Math.sqrt(a * a + b * b);

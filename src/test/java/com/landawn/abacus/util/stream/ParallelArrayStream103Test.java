@@ -1845,11 +1845,7 @@ public class ParallelArrayStream103Test extends TestBase {
         @DisplayName("should handle stress test with many operations")
         public void testStressTest() {
             assertDoesNotThrow(() -> {
-                Integer result = stream.filter(x -> x % 2 == 0)
-                        .map(x -> x * 2)
-                        .peek(Fn.println())
-                        .filter(x -> x > 5)
-                        .reduce(0, Integer::sum, Integer::sum);
+                Integer result = stream.filter(x -> x % 2 == 0).map(x -> x * 2).peek(Fn.println()).filter(x -> x > 5).reduce(0, Integer::sum, Integer::sum);
 
                 assertEquals(Integer.valueOf(56), result);
             });

@@ -22,7 +22,7 @@ package com.landawn.abacus.util;
  * 
  * <p>The class is immutable and extends {@link AbstractIndexed}.</p>
  * 
- * <p>Example usage:</p>
+ * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * IndexedLong indexedLong = IndexedLong.of(123456789L, 5);
  * long value = indexedLong.value(); // 123456789L
@@ -56,7 +56,7 @@ public final class IndexedLong extends AbstractIndexed {
     /**
      * Creates a new IndexedLong instance with the specified value and index.
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * IndexedLong indexed = IndexedLong.of(123456789L, 5);
      * }</pre>
@@ -77,7 +77,7 @@ public final class IndexedLong extends AbstractIndexed {
      * 
      * <p>This overload accepts a long index for cases where the index might exceed Integer.MAX_VALUE.</p>
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * IndexedLong indexed = IndexedLong.of(123456789L, 5000000000L);
      * }</pre>
@@ -96,7 +96,7 @@ public final class IndexedLong extends AbstractIndexed {
     /**
      * Returns the long value stored in this IndexedLong instance.
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * IndexedLong indexed = IndexedLong.of(123456789L, 5);
      * long value = indexed.value(); // 123456789L
@@ -125,7 +125,7 @@ public final class IndexedLong extends AbstractIndexed {
      * 
      * <p>Two IndexedLong instances are equal if they have the same index and value.</p>
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * IndexedLong indexed1 = IndexedLong.of(123456789L, 5);
      * IndexedLong indexed2 = IndexedLong.of(123456789L, 5);
@@ -148,7 +148,7 @@ public final class IndexedLong extends AbstractIndexed {
      * 
      * <p>The format is: [index]=value</p>
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * IndexedLong indexed = IndexedLong.of(123456789L, 5);
      * System.out.println(indexed); // prints: [5]=123456789

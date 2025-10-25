@@ -32,7 +32,7 @@ import java.io.Serial;
  *   <li>Query language or expression parsing failures</li>
  * </ul>
  * 
- * <p>Example usage:</p>
+ * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * // Basic usage
  * if (!isValidFormat(input)) {
@@ -60,7 +60,7 @@ public class ParseException extends RuntimeException {
      * Constructs a new {@code ParseException} with no detail message.
      * The cause is not initialized, and the token value is set to the default of -2.
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * throw new ParseException();
      * }</pre>
@@ -72,7 +72,7 @@ public class ParseException extends RuntimeException {
      * Constructs a new {@code ParseException} with the specified detail message.
      * The cause is not initialized, and the token value is set to the default of -2.
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * throw new ParseException("Malformed JSON at line " + lineNumber);
      * }</pre>
@@ -89,7 +89,7 @@ public class ParseException extends RuntimeException {
      * This constructor is useful when you want to indicate the specific token or position
      * where the parsing error occurred.
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Token could represent a position, token type, or error code
      * throw new ParseException(42, "Unexpected character '}' at position 42");
@@ -112,7 +112,7 @@ public class ParseException extends RuntimeException {
      * <p>Note that the detail message associated with {@code cause} is <i>not</i> automatically
      * incorporated in this exception's detail message.</p>
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * try {
      *     return xmlParser.parse(document);
@@ -138,7 +138,7 @@ public class ParseException extends RuntimeException {
      * <p>This constructor is useful for exceptions that are little more than wrappers for other
      * throwables.</p>
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * catch (IOException e) {
      *     throw new ParseException(e);
@@ -162,7 +162,7 @@ public class ParseException extends RuntimeException {
      *   <li>-2 if no token was specified (default value)</li>
      * </ul>
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * try {
      *     parseExpression(input);

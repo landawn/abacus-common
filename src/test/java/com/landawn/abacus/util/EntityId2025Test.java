@@ -59,11 +59,7 @@ public class EntityId2025Test extends TestBase {
 
     @Test
     public void test_of_threeProperties() {
-        EntityId id = EntityId.of(
-            "Stock.warehouseId", 10,
-            "Stock.productId", "PROD-123",
-            "Stock.batchId", "BATCH-2023"
-        );
+        EntityId id = EntityId.of("Stock.warehouseId", 10, "Stock.productId", "PROD-123", "Stock.batchId", "BATCH-2023");
 
         Assertions.assertNotNull(id);
         Assertions.assertEquals("Stock", id.entityName());
@@ -75,11 +71,7 @@ public class EntityId2025Test extends TestBase {
 
     @Test
     public void test_of_threeProperties_withEntityName() {
-        EntityId id = EntityId.of("Inventory",
-            "warehouseId", 5,
-            "productId", "SKU-789",
-            "locationId", "A-10-3"
-        );
+        EntityId id = EntityId.of("Inventory", "warehouseId", 5, "productId", "SKU-789", "locationId", "A-10-3");
 
         Assertions.assertNotNull(id);
         Assertions.assertEquals("Inventory", id.entityName());
@@ -209,10 +201,7 @@ public class EntityId2025Test extends TestBase {
 
     @Test
     public void test_builder_basic() {
-        EntityId id = EntityId.builder()
-            .put("userId", 100)
-            .put("accountId", 200)
-            .build();
+        EntityId id = EntityId.builder().put("userId", 100).put("accountId", 200).build();
 
         Assertions.assertNotNull(id);
         Assertions.assertEquals(100, (Integer) id.get("userId"));
@@ -222,10 +211,7 @@ public class EntityId2025Test extends TestBase {
 
     @Test
     public void test_builder_withEntityName() {
-        EntityId id = EntityId.builder("Customer")
-            .put("customerId", 1000)
-            .put("regionCode", "US")
-            .build();
+        EntityId id = EntityId.builder("Customer").put("customerId", 1000).put("regionCode", "US").build();
 
         Assertions.assertNotNull(id);
         Assertions.assertEquals("Customer", id.entityName());
@@ -245,12 +231,7 @@ public class EntityId2025Test extends TestBase {
 
     @Test
     public void test_builder_multipleProperties() {
-        EntityId id = EntityId.builder("Order")
-            .put("orderId", 5000)
-            .put("customerId", 100)
-            .put("orderDate", "2025-01-01")
-            .put("status", "PENDING")
-            .build();
+        EntityId id = EntityId.builder("Order").put("orderId", 5000).put("customerId", 100).put("orderDate", "2025-01-01").put("status", "PENDING").build();
 
         Assertions.assertNotNull(id);
         Assertions.assertEquals("Order", id.entityName());
@@ -273,12 +254,7 @@ public class EntityId2025Test extends TestBase {
 
     @Test
     public void test_differentPropertyTypes() {
-        EntityId id = EntityId.builder("Test")
-            .put("intVal", 123)
-            .put("longVal", 123456789L)
-            .put("stringVal", "test")
-            .put("boolVal", true)
-            .build();
+        EntityId id = EntityId.builder("Test").put("intVal", 123).put("longVal", 123456789L).put("stringVal", "test").put("boolVal", true).build();
 
         Assertions.assertEquals(123, (Integer) id.get("intVal"));
         Assertions.assertEquals(123456789L, (Long) id.get("longVal"));

@@ -35,7 +35,7 @@ import com.landawn.abacus.exception.ParseException;
  * <li>Can ignore quotation marks entirely for simple parsing</li>
  * </ul>
  * 
- * <p>Example usage:</p>
+ * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * // Basic usage with default settings (comma separator, double-quote, backslash escape)
  * CSVParser parser = new CSVParser();
@@ -142,7 +142,7 @@ public class CSVParser {
      * Constructs a CSVParser using default settings.
      * Uses comma as separator, double-quote for quoting, and backslash for escaping.
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * CSVParser parser = new CSVParser();
      * List<String> fields = parser.parseLine("a,b,c");
@@ -156,7 +156,7 @@ public class CSVParser {
      * Constructs a CSVParser with a custom separator.
      * Uses default quote (") and escape (\) characters.
      *
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * CSVParser parser = new CSVParser('|');
      * List<String> fields = parser.parseLine("a|b|c");
@@ -172,7 +172,7 @@ public class CSVParser {
      * Constructs a CSVParser with custom separator and quote characters.
      * Uses default escape character (\).
      *
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * CSVParser parser = new CSVParser(',', '\'');
      * List<String> fields = parser.parseLine("a,'b,c',d");
@@ -189,7 +189,7 @@ public class CSVParser {
     /**
      * Constructs a CSVParser with custom separator, quote, and escape characters.
      *
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * CSVParser parser = new CSVParser(',', '"', '\\');
      * List<String> fields = parser.parseLine("a,\"b\\\"c\",d");
@@ -208,7 +208,7 @@ public class CSVParser {
      * Constructs a CSVParser with custom settings including strict quotes mode.
      * In strict quotes mode, characters outside the quotes are ignored.
      *
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * CSVParser parser = new CSVParser(',', '"', '\\', true);
      * List<String> fields = parser.parseLine("\"clean\"dirty,\"text\"");
@@ -228,7 +228,7 @@ public class CSVParser {
     /**
      * Constructs a CSVParser with custom settings including whitespace handling.
      *
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * CSVParser parser = new CSVParser(',', '"', '\\', false, true);
      * List<String> fields = parser.parseLine("  a  ,  b  ,  c  ");
@@ -249,7 +249,7 @@ public class CSVParser {
     /**
      * Constructs a CSVParser with full control over all parsing options.
      *
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Parser that ignores quotes entirely
      * CSVParser parser = new CSVParser(',', '"', '\\', false, true, true);
@@ -369,7 +369,7 @@ public class CSVParser {
      * This method handles quoted fields, escaped characters, and separators according
      * to the parser's configuration.
      *
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * CSVParser parser = new CSVParser();
      * List<String> fields = parser.parseLine("John,\"Doe, Jr.\",30,\"New York\"");
@@ -388,7 +388,7 @@ public class CSVParser {
      * Parses a CSV line into an array of fields.
      * This is a convenience method that returns an array instead of a List.
      *
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * CSVParser parser = new CSVParser();
      * String[] fields = parser.parseLineToArray("a,b,c");
@@ -410,7 +410,7 @@ public class CSVParser {
      * This method is useful for performance when parsing many lines with the same
      * number of fields, as it avoids array allocation.
      *
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * CSVParser parser = new CSVParser();
      * String[] output = new String[4];
@@ -541,7 +541,7 @@ public class CSVParser {
     /**
      * Determines if we can process as if we were in quotes.
      *
-     * @param inQuotes
+     * @param inQuotes whether the parser is currently inside quotes
      * @return True if we should process as if we are inside quotes.
      */
     private boolean inQuotes(final boolean inQuotes) {

@@ -407,10 +407,7 @@ public class AbstractByteStream103Test extends TestBase {
 
     @Test
     public void testChainedOperations() {
-        ByteStream result = stream.filter(v -> v % 2 == 1)
-                .map(v -> (byte) (v * 2))
-                .sorted()
-                .reversed();
+        ByteStream result = stream.filter(v -> v % 2 == 1).map(v -> (byte) (v * 2)).sorted().reversed();
         assertArrayEquals(new byte[] { 10, 6, 2 }, result.toArray());
     }
 
@@ -419,10 +416,7 @@ public class AbstractByteStream103Test extends TestBase {
         byte[] data = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
         stream = createByteStream(data);
 
-        ByteStream result = stream.filter(v -> v % 2 == 0)
-                .step(2)
-                .scan((a, b) -> (byte) (a + b))
-                .distinct();
+        ByteStream result = stream.filter(v -> v % 2 == 0).step(2).scan((a, b) -> (byte) (a + b)).distinct();
 
         assertArrayEquals(new byte[] { 2, 8, 18 }, result.toArray());
     }

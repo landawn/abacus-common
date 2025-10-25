@@ -1244,8 +1244,8 @@ public final class TypeFactory {
      * The provided functions will be used by the Type system for serialization and deserialization operations.
      * A JSONParser instance is provided to the functions for complex parsing scenarios.
      * </p>
-     * <p>
-     * Example usage:
+     *
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * TypeFactory.registerType(
      *     MyCustomClass.class,
@@ -1253,7 +1253,6 @@ public final class TypeFactory {
      *     (str, parser) -> MyCustomClass.fromString(str)
      * );
      * }</pre>
-     * </p>
      *
      * @param <T> the type parameter
      * @param targetClass the class for which to register the custom type
@@ -1293,8 +1292,8 @@ public final class TypeFactory {
      * This method provides a simpler alternative to {@link #registerType(Class, BiFunction, BiFunction)}
      * when you don't need access to a JSONParser instance for serialization/deserialization.
      * </p>
-     * <p>
-     * Example usage:
+     *
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * TypeFactory.registerType(
      *     LocalDate.class,
@@ -1302,7 +1301,6 @@ public final class TypeFactory {
      *     str -> LocalDate.parse(str)
      * );
      * }</pre>
-     * </p>
      *
      * @param <T> the type parameter
      * @param cls the class for which to register the custom type
@@ -1375,8 +1373,8 @@ public final class TypeFactory {
      * The type will be accessible by both the custom type name and potentially by the target class
      * (if no other type is already registered for that class).
      * </p>
-     * <p>
-     * Example usage:
+     *
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * TypeFactory.registerType(
      *     "CustomDate",
@@ -1385,7 +1383,6 @@ public final class TypeFactory {
      *     (str, parser) -> LocalDate.parse(str, DateTimeFormatter.ISO_DATE)
      * );
      * }</pre>
-     * </p>
      *
      * @param <T> the type parameter
      * @param typeName the custom name for this type registration
@@ -1435,8 +1432,8 @@ public final class TypeFactory {
      * when you don't need access to a JSONParser instance. The type will be accessible by the custom
      * type name and potentially by the target class if no other type is registered for it.
      * </p>
-     * <p>
-     * Example usage:
+     *
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * TypeFactory.registerType(
      *     "ISODate",
@@ -1445,7 +1442,6 @@ public final class TypeFactory {
      *     LocalDate::parse
      * );
      * }</pre>
-     * </p>
      *
      * @param <T> the type parameter
      * @param typeName the custom name for this type registration

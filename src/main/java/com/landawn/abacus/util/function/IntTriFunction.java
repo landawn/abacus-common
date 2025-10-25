@@ -68,7 +68,7 @@ public interface IntTriFunction<R> extends Throwables.IntTriFunction<R, RuntimeE
      * where the output of this function becomes the input of the next function.
      * This is useful for building complex transformations from simpler ones.
      *
-     * <p>Example usage:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * IntTriFunction<Integer> sum = (a, b, c) -> a + b + c;
      * IntTriFunction<String> sumToString = sum.andThen(String::valueOf);

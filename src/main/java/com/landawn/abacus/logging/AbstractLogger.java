@@ -33,7 +33,7 @@ import com.landawn.abacus.util.Objectory;
  *   <li>%s - printf style placeholders</li>
  * </ul>
  * 
- * <p>Implementation example:</p>
+ * <p><b>Usage Examples for implementation:</b></p>
  * <pre>{@code
  * public class MyLogger extends AbstractLogger {
  *     public MyLogger(String name) {
@@ -78,7 +78,7 @@ public abstract class AbstractLogger implements Logger {
      * 
      * <p>The message template can use {} or %s as placeholder.</p>
      * 
-     * <p>Usage example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * logger.trace("User {} logged in", username);
      * }</pre>
@@ -96,7 +96,7 @@ public abstract class AbstractLogger implements Logger {
     /**
      * Logs a message at TRACE level with two parameters.
      * 
-     * <p>Usage example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * logger.trace("Processing {} items for user {}", itemCount, userId);
      * }</pre>
@@ -201,7 +201,7 @@ public abstract class AbstractLogger implements Logger {
     /**
      * Logs a message at TRACE level with variable number of parameters.
      * 
-     * <p>Usage example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * logger.trace("Processing batch: id={}, size={}, status={}, timestamp={}", 
      *              batchId, size, status, timestamp);
@@ -280,7 +280,7 @@ public abstract class AbstractLogger implements Logger {
      * 
      * <p>The supplier is only called if TRACE level is enabled.</p>
      * 
-     * <p>Usage example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * logger.trace(() -> "Expensive calculation result: " + calculateExpensiveValue());
      * }</pre>
@@ -325,7 +325,7 @@ public abstract class AbstractLogger implements Logger {
     /**
      * Logs a message at DEBUG level with one parameter.
      * 
-     * <p>Usage example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * logger.debug("Loading configuration from: {}", configPath);
      * }</pre>
@@ -552,7 +552,7 @@ public abstract class AbstractLogger implements Logger {
     /**
      * Logs a message at INFO level with one parameter.
      * 
-     * <p>Usage example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * logger.info("Application started on port {}", port);
      * }</pre>
@@ -779,7 +779,7 @@ public abstract class AbstractLogger implements Logger {
     /**
      * Logs a message at WARN level with one parameter.
      * 
-     * <p>Usage example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * logger.warn("Connection pool exhausted, size: {}", poolSize);
      * }</pre>
@@ -1006,7 +1006,7 @@ public abstract class AbstractLogger implements Logger {
     /**
      * Logs a message at ERROR level with one parameter.
      * 
-     * <p>Usage example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * logger.error("Failed to connect to database: {}", dbUrl);
      * }</pre>
@@ -1425,7 +1425,7 @@ public abstract class AbstractLogger implements Logger {
      * placeholders, the unmatched arguments will be appended to the end of the formatted
      * message in square brackets.</p>
      * 
-     * <p>Usage example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String msg = format("User {} performed {} operations in {}ms", 
      *                     username, opCount, duration);

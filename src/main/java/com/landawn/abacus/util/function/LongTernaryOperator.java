@@ -25,7 +25,7 @@ import com.landawn.abacus.util.Throwables;
  * <p>The interface extends {@code Throwables.LongTernaryOperator} with {@code RuntimeException} as the exception type,
  * making it suitable for use in contexts where checked exceptions are not required.
  * 
- * <p>Example usage:
+ * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * LongTernaryOperator sum = (a, b, c) -> a + b + c;
  * long result = sum.applyAsLong(10L, 20L, 30L); // returns 60L
@@ -60,8 +60,7 @@ public interface LongTernaryOperator extends Throwables.LongTernaryOperator<Runt
      * @param a the first operand
      * @param b the second operand
      * @param c the third operand
-     * @return the operator result as a long value
-     * @throws RuntimeException if any error occurs during the operation
+     * @return the operator result as a long value if any error occurs during the operation
      */
     @Override
     long applyAsLong(long a, long b, long c);

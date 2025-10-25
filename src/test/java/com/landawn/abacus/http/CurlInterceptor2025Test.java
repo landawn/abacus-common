@@ -38,14 +38,9 @@ public class CurlInterceptor2025Test extends TestBase {
         AtomicReference<String> capturedCurl = new AtomicReference<>();
         CurlInterceptor interceptor = new CurlInterceptor(capturedCurl::set);
 
-        OkHttpClient client = new OkHttpClient.Builder()
-                .addInterceptor(interceptor)
-                .build();
+        OkHttpClient client = new OkHttpClient.Builder().addInterceptor(interceptor).build();
 
-        Request request = new Request.Builder()
-                .url("https://httpbin.org/get")
-                .get()
-                .build();
+        Request request = new Request.Builder().url("https://httpbin.org/get").get().build();
 
         try {
             client.newCall(request).execute();
@@ -65,15 +60,10 @@ public class CurlInterceptor2025Test extends TestBase {
         AtomicReference<String> capturedCurl = new AtomicReference<>();
         CurlInterceptor interceptor = new CurlInterceptor(capturedCurl::set);
 
-        OkHttpClient client = new OkHttpClient.Builder()
-                .addInterceptor(interceptor)
-                .build();
+        OkHttpClient client = new OkHttpClient.Builder().addInterceptor(interceptor).build();
 
         RequestBody body = RequestBody.create("{\"key\":\"value\"}", MediaType.get("application/json"));
-        Request request = new Request.Builder()
-                .url("https://httpbin.org/post")
-                .post(body)
-                .build();
+        Request request = new Request.Builder().url("https://httpbin.org/post").post(body).build();
 
         try {
             client.newCall(request).execute();
@@ -94,12 +84,9 @@ public class CurlInterceptor2025Test extends TestBase {
         AtomicReference<String> capturedCurl = new AtomicReference<>();
         CurlInterceptor interceptor = new CurlInterceptor(capturedCurl::set);
 
-        OkHttpClient client = new OkHttpClient.Builder()
-                .addInterceptor(interceptor)
-                .build();
+        OkHttpClient client = new OkHttpClient.Builder().addInterceptor(interceptor).build();
 
-        Request request = new Request.Builder()
-                .url("https://httpbin.org/get")
+        Request request = new Request.Builder().url("https://httpbin.org/get")
                 .header("Accept", "application/json")
                 .header("Authorization", "Bearer token")
                 .get()
@@ -123,14 +110,9 @@ public class CurlInterceptor2025Test extends TestBase {
         AtomicReference<String> capturedCurl = new AtomicReference<>();
         CurlInterceptor interceptor = new CurlInterceptor('"', capturedCurl::set);
 
-        OkHttpClient client = new OkHttpClient.Builder()
-                .addInterceptor(interceptor)
-                .build();
+        OkHttpClient client = new OkHttpClient.Builder().addInterceptor(interceptor).build();
 
-        Request request = new Request.Builder()
-                .url("https://httpbin.org/get")
-                .get()
-                .build();
+        Request request = new Request.Builder().url("https://httpbin.org/get").get().build();
 
         try {
             client.newCall(request).execute();
@@ -151,15 +133,10 @@ public class CurlInterceptor2025Test extends TestBase {
         AtomicReference<String> capturedCurl = new AtomicReference<>();
         CurlInterceptor interceptor = new CurlInterceptor(capturedCurl::set);
 
-        OkHttpClient client = new OkHttpClient.Builder()
-                .addInterceptor(interceptor)
-                .build();
+        OkHttpClient client = new OkHttpClient.Builder().addInterceptor(interceptor).build();
 
         RequestBody body = RequestBody.create("test data", MediaType.get("text/plain"));
-        Request request = new Request.Builder()
-                .url("https://httpbin.org/post")
-                .post(body)
-                .build();
+        Request request = new Request.Builder().url("https://httpbin.org/post").post(body).build();
 
         try {
             client.newCall(request).execute();
@@ -179,16 +156,10 @@ public class CurlInterceptor2025Test extends TestBase {
         AtomicReference<String> capturedCurl = new AtomicReference<>();
         CurlInterceptor interceptor = new CurlInterceptor(capturedCurl::set);
 
-        OkHttpClient client = new OkHttpClient.Builder()
-                .addInterceptor(interceptor)
-                .build();
+        OkHttpClient client = new OkHttpClient.Builder().addInterceptor(interceptor).build();
 
         RequestBody body = RequestBody.create("test data", MediaType.parse("text/plain; charset=UTF-8"));
-        Request request = new Request.Builder()
-                .url("https://httpbin.org/post")
-                .header("Content-Type", "text/plain; charset=ISO-8859-1")
-                .post(body)
-                .build();
+        Request request = new Request.Builder().url("https://httpbin.org/post").header("Content-Type", "text/plain; charset=ISO-8859-1").post(body).build();
 
         try {
             client.newCall(request).execute();
@@ -212,26 +183,18 @@ public class CurlInterceptor2025Test extends TestBase {
     @Test
     public void testMultipleInterceptsOnSameInterceptor() throws IOException {
         AtomicReference<String> capturedCurl = new AtomicReference<>();
-        int[] count = {0};
+        int[] count = { 0 };
 
         CurlInterceptor interceptor = new CurlInterceptor(curl -> {
             capturedCurl.set(curl);
             count[0]++;
         });
 
-        OkHttpClient client = new OkHttpClient.Builder()
-                .addInterceptor(interceptor)
-                .build();
+        OkHttpClient client = new OkHttpClient.Builder().addInterceptor(interceptor).build();
 
-        Request request1 = new Request.Builder()
-                .url("https://httpbin.org/get")
-                .get()
-                .build();
+        Request request1 = new Request.Builder().url("https://httpbin.org/get").get().build();
 
-        Request request2 = new Request.Builder()
-                .url("https://httpbin.org/post")
-                .post(RequestBody.create("", MediaType.get("text/plain")))
-                .build();
+        Request request2 = new Request.Builder().url("https://httpbin.org/post").post(RequestBody.create("", MediaType.get("text/plain"))).build();
 
         try {
             client.newCall(request1).execute();

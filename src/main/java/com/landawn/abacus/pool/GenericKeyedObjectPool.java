@@ -53,7 +53,7 @@ import com.landawn.abacus.util.Objectory;
  *   <li>EXPIRATION_TIME - Evicts entries closest to expiration</li>
  * </ul>
  * 
- * <p>Usage example:
+ * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * // Create a keyed pool for database connections by schema
  * GenericKeyedObjectPool<String, DBConnection> pool = new GenericKeyedObjectPool<>(

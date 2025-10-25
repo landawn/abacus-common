@@ -22,7 +22,7 @@ public class CharNConsumer2025Test extends TestBase {
 
         consumer.accept('a', 'b', 'c');
         assertEquals(1, result.size());
-        assertArrayEquals(new char[]{'a', 'b', 'c'}, result.get(0));
+        assertArrayEquals(new char[] { 'a', 'b', 'c' }, result.get(0));
     }
 
     @Test
@@ -76,7 +76,7 @@ public class CharNConsumer2025Test extends TestBase {
 
         consumer.accept('X');
         assertEquals(1, result.size());
-        assertArrayEquals(new char[]{'X'}, result.get(0));
+        assertArrayEquals(new char[] { 'X' }, result.get(0));
     }
 
     @Test
@@ -131,7 +131,7 @@ public class CharNConsumer2025Test extends TestBase {
 
         consumer.accept('\n', '\t', ' ');
         assertEquals(1, result.size());
-        assertArrayEquals(new char[]{'\n', '\t', ' '}, result.get(0));
+        assertArrayEquals(new char[] { '\n', '\t', ' ' }, result.get(0));
     }
 
     @Test
@@ -141,7 +141,7 @@ public class CharNConsumer2025Test extends TestBase {
 
         consumer.accept(Character.MIN_VALUE, 'M', Character.MAX_VALUE);
         assertEquals(1, result.size());
-        assertArrayEquals(new char[]{Character.MIN_VALUE, 'M', Character.MAX_VALUE}, result.get(0));
+        assertArrayEquals(new char[] { Character.MIN_VALUE, 'M', Character.MAX_VALUE }, result.get(0));
     }
 
     @Test

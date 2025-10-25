@@ -23,7 +23,7 @@ import com.landawn.abacus.util.function.ShortConsumer;
  * <p>This class is mutable and not thread-safe. It's designed to be used with sequential streams
  * or with proper synchronization in parallel contexts.</p>
  * 
- * <p>Example usage:</p>
+ * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * ShortSummaryStatistics stats = new ShortSummaryStatistics();
  * short[] values = {10, 20, 30, 40, 50};
@@ -63,7 +63,7 @@ public class ShortSummaryStatistics implements ShortConsumer {
      * Constructs a non-empty instance with the specified count, min, max, and sum.
      * This constructor is useful for creating a statistics object from pre-computed values.
      * 
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Create statistics from known values
      * ShortSummaryStatistics stats = new ShortSummaryStatistics(5, (short)10, (short)50, 150);
@@ -86,7 +86,7 @@ public class ShortSummaryStatistics implements ShortConsumer {
      * Records a new short value into the summary information.
      * Updates the count, sum, min, and max values accordingly.
      * 
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ShortSummaryStatistics stats = new ShortSummaryStatistics();
      * stats.accept((short)10);
@@ -109,7 +109,7 @@ public class ShortSummaryStatistics implements ShortConsumer {
      * This method is useful for combining statistics computed separately,
      * for example in parallel stream operations.
      * 
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ShortSummaryStatistics stats1 = new ShortSummaryStatistics();
      * stats1.accept((short)10);
@@ -135,7 +135,7 @@ public class ShortSummaryStatistics implements ShortConsumer {
     /**
      * Returns the minimum value recorded, or {@code Short.MAX_VALUE} if no values have been recorded.
      * 
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ShortSummaryStatistics stats = new ShortSummaryStatistics();
      * stats.accept((short)10);
@@ -152,7 +152,7 @@ public class ShortSummaryStatistics implements ShortConsumer {
     /**
      * Returns the maximum value recorded, or {@code Short.MIN_VALUE} if no values have been recorded.
      * 
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ShortSummaryStatistics stats = new ShortSummaryStatistics();
      * stats.accept((short)10);
@@ -169,7 +169,7 @@ public class ShortSummaryStatistics implements ShortConsumer {
     /**
      * Returns the count of values recorded.
      * 
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ShortSummaryStatistics stats = new ShortSummaryStatistics();
      * stats.accept((short)10);
@@ -186,7 +186,7 @@ public class ShortSummaryStatistics implements ShortConsumer {
     /**
      * Returns the sum of values recorded.
      * 
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ShortSummaryStatistics stats = new ShortSummaryStatistics();
      * stats.accept((short)10);
@@ -204,7 +204,7 @@ public class ShortSummaryStatistics implements ShortConsumer {
     /**
      * Returns the arithmetic mean of values recorded, or 0.0 if no values have been recorded.
      * 
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ShortSummaryStatistics stats = new ShortSummaryStatistics();
      * stats.accept((short)10);
@@ -223,7 +223,7 @@ public class ShortSummaryStatistics implements ShortConsumer {
      * Returns a string representation of this statistics object.
      * The format includes all computed statistics: min, max, count, sum, and average.
      * 
-     * <p>Example output:</p>
+     * <p><b>Example output:</b></p>
      * <pre>{@code
      * {min=10, max=50, count=5, sum=150, average=30.000000}
      * }</pre>

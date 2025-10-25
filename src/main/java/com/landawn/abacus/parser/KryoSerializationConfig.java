@@ -26,7 +26,7 @@ import com.landawn.abacus.util.N;
  * <p>This class extends {@link SerializationConfig} to provide Kryo-specific
  * serialization options such as whether to write class information.</p>
  * 
- * <p>Example usage:</p>
+ * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * KryoSerializationConfig config = new KryoSerializationConfig()
  *     .writeClass(true)
@@ -75,7 +75,7 @@ public class KryoSerializationConfig extends SerializationConfig<KryoSerializati
      * data. This allows deserializing objects without knowing their type in advance,
      * but increases the size of the serialized data.</p>
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * config.writeClass(true);  // Include class information
      * config.writeClass(false); // Omit class information (more compact)
@@ -150,7 +150,7 @@ public class KryoSerializationConfig extends SerializationConfig<KryoSerializati
      * <p>Provides static factory methods for convenient configuration creation.
      * This inner class is named KSC for brevity.</p>
      * 
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * KryoSerializationConfig config = KSC.create()
      *     .writeClass(true)

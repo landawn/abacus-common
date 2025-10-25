@@ -49,8 +49,8 @@ import java.lang.annotation.Target;
  *   <li>Only affects ORM-generated update statements</li>
  * </ul>
  * 
- * <p><b>Example usage:</b></p>
- * <pre>
+ * <p><b>Usage Examples:</b></p>
+ * <pre>{@code
  * {@literal @}Entity
  * public class Order {
  *     {@literal @}Id
@@ -74,7 +74,7 @@ import java.lang.annotation.Target;
  *     {@literal @}Column(name = "total_amount")
  *     private BigDecimal totalAmount;  // Can be updated
  * }
- * </pre>
+ * }</pre>
  * 
  * @since 2018
  * @see ReadOnly

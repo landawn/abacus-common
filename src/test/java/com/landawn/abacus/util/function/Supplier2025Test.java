@@ -42,7 +42,7 @@ public class Supplier2025Test extends TestBase {
 
     @Test
     public void testGet_WithState() {
-        final int[] counter = {0};
+        final int[] counter = { 0 };
         Supplier<Integer> supplier = () -> ++counter[0];
 
         assertEquals(1, supplier.get());

@@ -29,7 +29,7 @@ import com.landawn.abacus.util.Throwables;
  * <p>Note: Unlike some other primitive specializations, this interface does not provide default methods
  * for composition as the JDK does not provide a standard ObjBooleanConsumer interface.
  * 
- * <p>Example usage:
+ * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * ObjBooleanConsumer<String> conditionalPrinter = (message, shouldPrint) -> {
  *     if (shouldPrint) {
@@ -81,7 +81,6 @@ public interface ObjBooleanConsumer<T> extends Throwables.ObjBooleanConsumer<T, 
      *
      * @param t the object input argument
      * @param value the boolean input argument
-     * @throws RuntimeException if any error occurs during the operation
      */
     @Override
     void accept(T t, boolean value);

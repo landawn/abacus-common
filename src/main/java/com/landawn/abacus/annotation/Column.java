@@ -41,8 +41,8 @@ import java.lang.annotation.Target;
  *   <li>Explicitly documenting field-to-column mappings</li>
  * </ul>
  * 
- * <p><b>Example usage:</b></p>
- * <pre>
+ * <p><b>Usage Examples:</b></p>
+ * <pre>{@code
  * {@literal @}Entity
  * public class User {
  *     {@literal @}Column(name = "user_id")
@@ -54,7 +54,7 @@ import java.lang.annotation.Target;
  *     {@literal @}Column  // Uses field name "email" as column name
  *     private String email;
  * }
- * </pre>
+ * }</pre>
  * 
  * @since 2018
  * @see Entity
@@ -87,11 +87,11 @@ public @interface Column {
      *   <li>PascalCase for SQL Server</li>
      * </ul>
      * 
-     * <p><b>Example:</b></p>
-     * <pre>
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
      * {@literal @}Column(name = "created_date")
      * private LocalDateTime createdDate;
-     * </pre>
+     * }</pre>
      * 
      * @return the column name, or empty string to use the field name as default
      */

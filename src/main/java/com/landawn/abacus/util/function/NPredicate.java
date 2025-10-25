@@ -23,7 +23,7 @@ package com.landawn.abacus.util.function;
  * <p>The 'N' in NPredicate stands for 'N-ary', indicating that this predicate can accept
  * any number of arguments of the same type.
  * 
- * <p>Example usage:
+ * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * NPredicate<Integer> allPositive = args -> {
  *     for (Integer n : args) {
@@ -79,7 +79,7 @@ public interface NPredicate<T> {
      * <p>The returned predicate will return {@code true} when this predicate returns {@code false},
      * and {@code false} when this predicate returns {@code true}.
      * 
-     * <p>Example usage:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * NPredicate<Integer> allEven = args -> {
      *     for (Integer n : args) {
@@ -108,7 +108,7 @@ public interface NPredicate<T> {
      * to the caller; if evaluation of this predicate throws an exception, the
      * {@code other} predicate will not be evaluated.
      * 
-     * <p>Example usage:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * NPredicate<Integer> allPositive = args -> {
      *     for (Integer n : args) {
@@ -146,7 +146,7 @@ public interface NPredicate<T> {
      * to the caller; if evaluation of this predicate throws an exception, the
      * {@code other} predicate will not be evaluated.
      * 
-     * <p>Example usage:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * NPredicate<String> anyEmpty = args -> {
      *     for (String s : args) {

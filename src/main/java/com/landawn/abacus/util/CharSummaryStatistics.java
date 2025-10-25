@@ -26,7 +26,7 @@ import com.landawn.abacus.util.function.CharConsumer;
  * <p>This implementation is not thread-safe. If used in parallel stream operations,
  * proper synchronization or thread-safe alternatives should be used.</p>
  * 
- * <p>Example usage:</p>
+ * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * CharSummaryStatistics stats = new CharSummaryStatistics();
  * stats.accept('A');
@@ -54,7 +54,7 @@ public class CharSummaryStatistics implements CharConsumer {
      * Constructs an empty instance with zero count, zero sum,
      * {@code Character.MAX_VALUE} min, and {@code Character.MIN_VALUE} max.
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * CharSummaryStatistics stats = new CharSummaryStatistics();
      * }</pre>
@@ -68,7 +68,7 @@ public class CharSummaryStatistics implements CharConsumer {
      * <p>This constructor is useful when creating a summary from pre-calculated
      * statistics or when merging multiple summaries.</p>
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * CharSummaryStatistics stats = new CharSummaryStatistics(5, 'A', 'E', 335);
      * // Creates statistics for 5 chars ranging from 'A' to 'E' with sum of 335
@@ -93,7 +93,7 @@ public class CharSummaryStatistics implements CharConsumer {
      * the new value. It implements the {@link CharConsumer} interface, making
      * this class suitable for use with stream reduction operations.</p>
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * CharSummaryStatistics stats = new CharSummaryStatistics();
      * stats.accept('X');
@@ -118,7 +118,7 @@ public class CharSummaryStatistics implements CharConsumer {
      * merging statistics from multiple sources. After combining, this instance
      * will reflect statistics for all values from both instances.</p>
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * CharSummaryStatistics stats1 = new CharSummaryStatistics();
      * stats1.accept('A');
@@ -147,7 +147,7 @@ public class CharSummaryStatistics implements CharConsumer {
      * Returns the minimum char value recorded, or {@code Character.MAX_VALUE} if no
      * values have been recorded.
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * CharSummaryStatistics stats = new CharSummaryStatistics();
      * stats.accept('M');
@@ -166,7 +166,7 @@ public class CharSummaryStatistics implements CharConsumer {
      * Returns the maximum char value recorded, or {@code Character.MIN_VALUE} if no
      * values have been recorded.
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * CharSummaryStatistics stats = new CharSummaryStatistics();
      * stats.accept('M');
@@ -184,7 +184,7 @@ public class CharSummaryStatistics implements CharConsumer {
     /**
      * Returns the count of values recorded.
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * CharSummaryStatistics stats = new CharSummaryStatistics();
      * stats.accept('X');
@@ -205,7 +205,7 @@ public class CharSummaryStatistics implements CharConsumer {
      * <p>Note that the sum is maintained as a {@code long} to avoid overflow.
      * The sum represents the total of the numeric values of all recorded chars.</p>
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * CharSummaryStatistics stats = new CharSummaryStatistics();
      * stats.accept('A'); // ASCII value 65
@@ -227,7 +227,7 @@ public class CharSummaryStatistics implements CharConsumer {
      * <p>The average is calculated as a {@code double} to preserve precision.
      * The average represents the mean of the numeric values of all recorded chars.</p>
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * CharSummaryStatistics stats = new CharSummaryStatistics();
      * stats.accept('A'); // ASCII value 65
@@ -248,7 +248,7 @@ public class CharSummaryStatistics implements CharConsumer {
      * <p>The format includes min, max, count, sum, and average values in a
      * readable format. The min and max values are displayed as characters.</p>
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * CharSummaryStatistics stats = new CharSummaryStatistics();
      * stats.accept('A');

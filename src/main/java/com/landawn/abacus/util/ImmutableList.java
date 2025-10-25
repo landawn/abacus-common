@@ -49,7 +49,7 @@ import com.landawn.abacus.annotation.SuppressFBWarnings;
  *   <li>{@link #subList(int, int)} - returns an immutable view of a portion of the list</li>
  * </ul>
  * 
- * <p>Example usage:
+ * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * // Create using factory methods
  * ImmutableList<String> list1 = ImmutableList.of("a", "b", "c");
@@ -110,7 +110,7 @@ public sealed class ImmutableList<E> extends ImmutableCollection<E> implements L
      * Returns an empty ImmutableList. This method always returns the same cached instance,
      * making it memory efficient for representing empty lists.
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ImmutableList<String> empty = ImmutableList.empty();
      * System.out.println(empty.size()); // prints: 0
@@ -128,7 +128,7 @@ public sealed class ImmutableList<E> extends ImmutableCollection<E> implements L
      * Returns an ImmutableList containing a single element.
      * This is a convenience method equivalent to {@link #of(Object)}.
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ImmutableList<String> single = ImmutableList.just("hello");
      * System.out.println(single.get(0)); // prints: hello
@@ -146,7 +146,7 @@ public sealed class ImmutableList<E> extends ImmutableCollection<E> implements L
      * Returns an ImmutableList containing a single element.
      * The returned list is immutable and will have a size of 1.
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ImmutableList<Integer> single = ImmutableList.of(42);
      * // single.add(43); // Would throw UnsupportedOperationException
@@ -320,7 +320,7 @@ public sealed class ImmutableList<E> extends ImmutableCollection<E> implements L
      * will not affect the returned list. If the array is null or empty, an empty ImmutableList is returned.
      * Unlike some collection frameworks, this method supports null elements in the array.
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String[] array = {"one", "two", "three"};
      * ImmutableList<String> list = ImmutableList.of(array);
@@ -349,7 +349,7 @@ public sealed class ImmutableList<E> extends ImmutableCollection<E> implements L
      * Otherwise, a new ImmutableList is created with a defensive copy of the collection's elements.
      * The order of elements is preserved as provided by the collection's iterator.
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * List<Integer> mutable = new ArrayList<>(Arrays.asList(1, 2, 3));
      * ImmutableList<Integer> immutable = ImmutableList.copyOf(mutable);
@@ -380,7 +380,7 @@ public sealed class ImmutableList<E> extends ImmutableCollection<E> implements L
      * <p><b>Warning:</b> Use this method with caution as the immutability guarantee depends on not modifying
      * the original list after wrapping. This method is marked as @Beta.
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * List<String> mutable = new ArrayList<>();
      * mutable.add("initial");
@@ -424,7 +424,7 @@ public sealed class ImmutableList<E> extends ImmutableCollection<E> implements L
      * Returns the element at the specified position in this list.
      * The index must be valid (between 0 inclusive and size() exclusive).
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ImmutableList<String> list = ImmutableList.of("a", "b", "c");
      * String second = list.get(1); // returns "b"
@@ -446,7 +446,7 @@ public sealed class ImmutableList<E> extends ImmutableCollection<E> implements L
      * the equals() method of the element (or null comparison for null elements).
      * If multiple equal elements exist, the index of the first one is returned.
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ImmutableList<String> list = ImmutableList.of("a", "b", "c", "b");
      * int index = list.indexOf("b"); // returns 1
@@ -469,7 +469,7 @@ public sealed class ImmutableList<E> extends ImmutableCollection<E> implements L
      * the equals() method of the element (or null comparison for null elements).
      * If multiple equal elements exist, the index of the last one is returned.
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ImmutableList<String> list = ImmutableList.of("a", "b", "c", "b");
      * int lastIndex = list.lastIndexOf("b"); // returns 3
@@ -490,7 +490,7 @@ public sealed class ImmutableList<E> extends ImmutableCollection<E> implements L
      * The returned iterator does not support the remove() operation and will throw
      * UnsupportedOperationException if remove() is called.
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ImmutableList<String> list = ImmutableList.of("a", "b", "c");
      * ImmutableListIterator<String> iter = list.listIterator();
@@ -514,7 +514,7 @@ public sealed class ImmutableList<E> extends ImmutableCollection<E> implements L
      * would return the element with the specified index minus one.
      * The returned iterator does not support remove(), add(), or set() operations.
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ImmutableList<String> list = ImmutableList.of("a", "b", "c", "d");
      * ImmutableListIterator<String> iter = list.listIterator(2);
@@ -542,7 +542,7 @@ public sealed class ImmutableList<E> extends ImmutableCollection<E> implements L
      * <p>The semantics of the sublist are consistent with List.subList(), including
      * the behavior when fromIndex equals toIndex (returns an empty list).
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ImmutableList<String> list = ImmutableList.of("a", "b", "c", "d", "e");
      * ImmutableList<String> sub = list.subList(1, 4);
@@ -660,7 +660,7 @@ public sealed class ImmutableList<E> extends ImmutableCollection<E> implements L
      * <p>If this list has one or zero elements, this same instance is returned.
      * Calling reverse() on an already reversed list returns the original list.
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ImmutableList<String> original = ImmutableList.of("a", "b", "c");
      * ImmutableList<String> reversed = original.reverse();
@@ -745,7 +745,7 @@ public sealed class ImmutableList<E> extends ImmutableCollection<E> implements L
      * This is useful when the number of elements is not known at compile time.
      * The builder uses an ArrayList internally for efficient element addition.
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ImmutableList<String> list = ImmutableList.<String>builder()
      *     .add("first")
@@ -767,7 +767,7 @@ public sealed class ImmutableList<E> extends ImmutableCollection<E> implements L
      * This allows reusing an existing list instance as the backing storage.
      * Note that the provided list should not be modified outside the builder after this call.
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * List<Integer> backingList = new ArrayList<>();
      * ImmutableList<Integer> numbers = ImmutableList.builder(backingList)
@@ -789,7 +789,7 @@ public sealed class ImmutableList<E> extends ImmutableCollection<E> implements L
      * The builder pattern allows for flexible construction of immutable lists,
      * especially useful when elements are added conditionally or in loops.
      * 
-     * <p>Example usage:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ImmutableList<String> list = ImmutableList.<String>builder()
      *     .add("one")
@@ -811,7 +811,7 @@ public sealed class ImmutableList<E> extends ImmutableCollection<E> implements L
          * Adds a single element to the list being built.
          * The element is added to the end of the list.
          * 
-         * <p>Example:
+         * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * builder.add("hello").add("world");
          * }</pre>
@@ -830,7 +830,7 @@ public sealed class ImmutableList<E> extends ImmutableCollection<E> implements L
          * The elements are added to the end of the list in the order they appear in the array.
          * If the array is null or empty, no elements are added.
          * 
-         * <p>Example:
+         * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * builder.add("one", "two", "three");
          * }</pre>
@@ -852,7 +852,7 @@ public sealed class ImmutableList<E> extends ImmutableCollection<E> implements L
          * The elements are added to the end of the list in the order returned by
          * the collection's iterator. If the collection is null or empty, no elements are added.
          * 
-         * <p>Example:
+         * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * List<String> moreElements = Arrays.asList("four", "five");
          * builder.addAll(moreElements);
@@ -875,7 +875,7 @@ public sealed class ImmutableList<E> extends ImmutableCollection<E> implements L
          * The iterator is consumed by this operation. If the iterator is null or has no elements,
          * no elements are added.
          * 
-         * <p>Example:
+         * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * Iterator<String> iter = someCollection.iterator();
          * builder.addAll(iter);
@@ -902,7 +902,7 @@ public sealed class ImmutableList<E> extends ImmutableCollection<E> implements L
          * <p>The returned list is immutable and will throw UnsupportedOperationException
          * for any modification attempts.
          * 
-         * <p>Example:
+         * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * ImmutableList<String> finalList = builder.build();
          * System.out.println(finalList.size()); // Number of elements added

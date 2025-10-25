@@ -1641,7 +1641,7 @@ public class Files2025Test extends TestBase {
     public void testReadString_SpecialCharacters() throws IOException {
         File file = new File(tempDir.toFile(), "special.txt");
         filesToCleanup.add(file);
-        String content = "Special chars: !@#$%^&*()_+-=[]{}|;':\",./<>?";
+        String content = "Special chars: !@#$%^&*()_+-=[] {}|;':\",./<>?";
         Files.write(content.getBytes(), file);
 
         String read = Files.readString(file);

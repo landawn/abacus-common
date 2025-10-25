@@ -32,7 +32,7 @@ import com.landawn.abacus.util.stream.Stream;
  * those objects themselves can still be modified. For true immutability, ensure that the
  * array contains only immutable objects.</p>
  * 
- * <p>Example usage:</p>
+ * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * ImmutableArray<String> array = ImmutableArray.of("apple", "banana", "cherry");
  * String first = array.get(0); // "apple"
@@ -61,7 +61,7 @@ public final class ImmutableArray<T> implements Iterable<T>, Immutable {
     /**
      * Creates an ImmutableArray containing a single element.
      *
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ImmutableArray<String> single = ImmutableArray.of("hello");
      * }</pre>
@@ -77,7 +77,7 @@ public final class ImmutableArray<T> implements Iterable<T>, Immutable {
     /**
      * Creates an ImmutableArray containing two elements.
      *
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ImmutableArray<Integer> pair = ImmutableArray.of(1, 2);
      * }</pre>
@@ -94,7 +94,7 @@ public final class ImmutableArray<T> implements Iterable<T>, Immutable {
     /**
      * Creates an ImmutableArray containing three elements.
      *
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ImmutableArray<String> triple = ImmutableArray.of("a", "b", "c");
      * }</pre>
@@ -234,7 +234,7 @@ public final class ImmutableArray<T> implements Iterable<T>, Immutable {
      * Changes to the original array after this call will not affect the returned
      * ImmutableArray.
      *
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String[] original = {"a", "b", "c"};
      * ImmutableArray<String> immutable = ImmutableArray.copyOf(original);
@@ -259,6 +259,7 @@ public final class ImmutableArray<T> implements Iterable<T>, Immutable {
      * when you can guarantee that the provided array will not be modified after wrapping.
      * In most cases, use {@link #copyOf(Object[])} instead.</p>
      *
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String[] original = {"a", "b", "c"};
      * ImmutableArray<String> wrapped = ImmutableArray.wrap(original);
@@ -281,7 +282,7 @@ public final class ImmutableArray<T> implements Iterable<T>, Immutable {
     /**
      * Returns the number of elements in this array.
      *
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ImmutableArray<String> array = ImmutableArray.of("a", "b", "c");
      * int len = array.length(); // returns 3
@@ -296,7 +297,7 @@ public final class ImmutableArray<T> implements Iterable<T>, Immutable {
     /**
      * Returns {@code true} if this array contains no elements.
      *
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ImmutableArray<String> empty = ImmutableArray.copyOf(new String[0]);
      * boolean isEmpty = empty.isEmpty(); // returns true
@@ -311,7 +312,7 @@ public final class ImmutableArray<T> implements Iterable<T>, Immutable {
     /**
      * Returns the element at the specified position in this array.
      *
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ImmutableArray<String> array = ImmutableArray.of("a", "b", "c");
      * String second = array.get(1); // returns "b"
@@ -331,7 +332,7 @@ public final class ImmutableArray<T> implements Iterable<T>, Immutable {
      * or -1 if this array does not contain the element. The comparison uses the
      * {@code equals} method.
      *
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ImmutableArray<String> array = ImmutableArray.of("a", "b", "c", "b");
      * int index = array.indexOf("b"); // returns 1
@@ -350,7 +351,7 @@ public final class ImmutableArray<T> implements Iterable<T>, Immutable {
      * or -1 if this array does not contain the element. The comparison uses the
      * {@code equals} method.
      *
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ImmutableArray<String> array = ImmutableArray.of("a", "b", "c", "b");
      * int lastIndex = array.lastIndexOf("b"); // returns 3
@@ -367,7 +368,7 @@ public final class ImmutableArray<T> implements Iterable<T>, Immutable {
      * Returns {@code true} if this array contains the specified element.
      * The comparison uses the {@code equals} method.
      *
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ImmutableArray<String> array = ImmutableArray.of("a", "b", "c");
      * boolean hasB = array.contains("b"); // returns true
@@ -385,7 +386,7 @@ public final class ImmutableArray<T> implements Iterable<T>, Immutable {
      * Returns a new ImmutableArray containing the elements from the specified range
      * of this array. The range is half-open: [fromIndex, toIndex).
      *
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ImmutableArray<String> array = ImmutableArray.of("a", "b", "c", "d", "e");
      * ImmutableArray<String> subArray = array.copy(1, 4); // contains ["b", "c", "d"]
@@ -407,7 +408,7 @@ public final class ImmutableArray<T> implements Iterable<T>, Immutable {
      * Returns an immutable view of this array as a list. The returned list is backed
      * by this array, so it reflects the array's contents but cannot be modified.
      *
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ImmutableArray<String> array = ImmutableArray.of("a", "b", "c");
      * ImmutableList<String> list = array.asList();
@@ -424,7 +425,7 @@ public final class ImmutableArray<T> implements Iterable<T>, Immutable {
      * Returns an iterator over the elements in this array in proper sequence.
      * The returned iterator does not support the {@code remove} operation.
      *
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ImmutableArray<String> array = ImmutableArray.of("a", "b", "c");
      * ObjIterator<String> it = array.iterator();
@@ -444,7 +445,7 @@ public final class ImmutableArray<T> implements Iterable<T>, Immutable {
      * Returns a sequential Stream with this array as its source. This method provides
      * a convenient way to perform functional operations on the array's elements.
      *
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ImmutableArray<String> array = ImmutableArray.of("apple", "banana", "cherry");
      * List<String> filtered = array.stream()
@@ -467,7 +468,7 @@ public final class ImmutableArray<T> implements Iterable<T>, Immutable {
      * }
      * }</pre>
      *
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ImmutableArray<String> array = ImmutableArray.of("a", "b", "c");
      * array.forEach(System.out::println); // prints each element
@@ -489,7 +490,7 @@ public final class ImmutableArray<T> implements Iterable<T>, Immutable {
      * Performs the given action for each element of the array in order.
      * Unlike {@link #forEach(Consumer)}, this method can throw checked exceptions.
      *
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ImmutableArray<String> array = ImmutableArray.of("file1.txt", "file2.txt");
      * array.foreach(fileName -> {
@@ -517,7 +518,7 @@ public final class ImmutableArray<T> implements Iterable<T>, Immutable {
      * and the element to the consumer. This is useful when you need to know the position
      * of each element during iteration.
      *
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ImmutableArray<String> array = ImmutableArray.of("a", "b", "c");
      * array.foreachIndexed((index, value) -> {
@@ -560,7 +561,7 @@ public final class ImmutableArray<T> implements Iterable<T>, Immutable {
      * Returns {@code true} if and only if the specified object is also an
      * ImmutableArray and both arrays contain the same elements in the same order.
      *
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ImmutableArray<String> array1 = ImmutableArray.of("a", "b", "c");
      * ImmutableArray<String> array2 = ImmutableArray.of("a", "b", "c");
@@ -583,7 +584,7 @@ public final class ImmutableArray<T> implements Iterable<T>, Immutable {
      * consists of the array's elements, enclosed in square brackets ("[]").
      * Adjacent elements are separated by the characters ", " (comma and space).
      *
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ImmutableArray<Integer> array = ImmutableArray.of(1, 2, 3);
      * String str = array.toString(); // returns "[1, 2, 3]"

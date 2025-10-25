@@ -37,7 +37,7 @@ public interface ToDoubleBiFunction<T, U> extends Throwables.ToDoubleBiFunction<
     /**
      * Applies this function to the given arguments and returns a double result.
      * 
-     * <p>Example usage:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ToDoubleBiFunction<String, Integer> lengthMultiplier = (str, num) -> str.length() * num;
      * double result = lengthMultiplier.applyAsDouble("Hello", 2); // returns 10.0
@@ -45,8 +45,7 @@ public interface ToDoubleBiFunction<T, U> extends Throwables.ToDoubleBiFunction<
      *
      * @param t the first function argument
      * @param u the second function argument
-     * @return the function result as a primitive double
-     * @throws RuntimeException if any error occurs during function execution
+     * @return the function result as a primitive double if any error occurs during function execution
      */
     @Override
     double applyAsDouble(T t, U u);

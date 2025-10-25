@@ -63,7 +63,7 @@ public class NConsumer2025Test extends TestBase {
 
     @Test
     public void testAcceptWithLambda() {
-        final int[] sum = {0};
+        final int[] sum = { 0 };
         NConsumer<Integer> consumer = args -> {
             for (Integer n : args) {
                 sum[0] += n;
@@ -161,7 +161,7 @@ public class NConsumer2025Test extends TestBase {
 
     @Test
     public void testSideEffects() {
-        final int[] counter = {0};
+        final int[] counter = { 0 };
         NConsumer<String> consumer = args -> counter[0] = args.length;
 
         consumer.accept("a", "b", "c", "d", "e");

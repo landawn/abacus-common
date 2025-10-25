@@ -28,13 +28,11 @@ public class MutableDoubleType extends NumberType<MutableDouble> {
     /**
      * Returns the Class object representing the MutableDouble type.
      *
-     * <pre>
-     * <code>
+     * <p><b>Usage Examples:</b></p>
      * MutableDoubleType type = new MutableDoubleType();
      * Class&lt;MutableDouble&gt; clazz = type.clazz();
      * // clazz equals MutableDouble.class
-     * </code>
-     * </pre>
+     * }</pre>
      *
      * @return The Class object for MutableDouble
      */
@@ -47,8 +45,7 @@ public class MutableDoubleType extends NumberType<MutableDouble> {
      * Converts a MutableDouble object to its string representation.
      * The double value is converted to a decimal string representation.
      *
-     * <pre>
-     * <code>
+     * <p><b>Usage Examples:</b></p>
      * MutableDoubleType type = new MutableDoubleType();
      * MutableDouble md = MutableDouble.of(3.14);
      * String str = type.stringOf(md);
@@ -56,8 +53,7 @@ public class MutableDoubleType extends NumberType<MutableDouble> {
      *
      * String nullStr = type.stringOf(null);
      * // nullStr equals null
-     * </code>
-     * </pre>
+     * }</pre>
      *
      * @param x The MutableDouble object to convert
      * @return The string representation of the double value, or null if the input is null
@@ -71,8 +67,7 @@ public class MutableDoubleType extends NumberType<MutableDouble> {
      * Parses a string to create a MutableDouble object.
      * The string is parsed as a double value.
      *
-     * <pre>
-     * <code>
+     * <p><b>Usage Examples:</b></p>
      * MutableDoubleType type = new MutableDoubleType();
      * MutableDouble md = type.valueOf("123.45");
      * // md.value() equals 123.45
@@ -82,8 +77,7 @@ public class MutableDoubleType extends NumberType<MutableDouble> {
      *
      * MutableDouble emptyMd = type.valueOf("");
      * // emptyMd equals null
-     * </code>
-     * </pre>
+     * }</pre>
      *
      * @param str The string to parse
      * @return A MutableDouble containing the parsed value, or null if the input is null or empty
@@ -98,16 +92,14 @@ public class MutableDoubleType extends NumberType<MutableDouble> {
      * Retrieves a MutableDouble value from a ResultSet at the specified column index.
      * The database double value is wrapped in a MutableDouble object.
      *
-     * <pre>
-     * <code>
+     * <p><b>Usage Examples:</b></p>
      * MutableDoubleType type = new MutableDoubleType();
      * ResultSet rs = statement.executeQuery("SELECT price FROM products");
      * if (rs.next()) {
      *     MutableDouble price = type.get(rs, 1);
      *     // price contains the double value from the first column
      * }
-     * </code>
-     * </pre>
+     * }</pre>
      *
      * @param rs The ResultSet containing the data
      * @param columnIndex The column index (1-based) to retrieve the value from
@@ -123,16 +115,14 @@ public class MutableDoubleType extends NumberType<MutableDouble> {
      * Retrieves a MutableDouble value from a ResultSet using the specified column label.
      * The database double value is wrapped in a MutableDouble object.
      *
-     * <pre>
-     * <code>
+     * <p><b>Usage Examples:</b></p>
      * MutableDoubleType type = new MutableDoubleType();
      * ResultSet rs = statement.executeQuery("SELECT price FROM products");
      * if (rs.next()) {
      *     MutableDouble price = type.get(rs, "price");
      *     // price contains the double value from the named column
      * }
-     * </code>
-     * </pre>
+     * }</pre>
      *
      * @param rs The ResultSet containing the data
      * @param columnLabel The label of the column to retrieve the value from
@@ -148,8 +138,7 @@ public class MutableDoubleType extends NumberType<MutableDouble> {
      * Sets a MutableDouble parameter in a PreparedStatement at the specified position.
      * If the MutableDouble is null, 0.0 is stored. Otherwise, the wrapped double value is stored.
      *
-     * <pre>
-     * <code>
+     * <p><b>Usage Examples:</b></p>
      * MutableDoubleType type = new MutableDoubleType();
      * PreparedStatement stmt = conn.prepareStatement("INSERT INTO products (price) VALUES (?)");
      * MutableDouble price = MutableDouble.of(99.99);
@@ -159,8 +148,7 @@ public class MutableDoubleType extends NumberType<MutableDouble> {
      * // For null value
      * type.set(stmt, 1, null);
      * // This sets the parameter to 0.0
-     * </code>
-     * </pre>
+     * }</pre>
      *
      * @param stmt The PreparedStatement to set the parameter on
      * @param columnIndex The parameter index (1-based) to set
@@ -176,8 +164,7 @@ public class MutableDoubleType extends NumberType<MutableDouble> {
      * Sets a MutableDouble parameter in a CallableStatement using the specified parameter name.
      * If the MutableDouble is null, 0.0 is stored. Otherwise, the wrapped double value is stored.
      *
-     * <pre>
-     * <code>
+     * <p><b>Usage Examples:</b></p>
      * MutableDoubleType type = new MutableDoubleType();
      * CallableStatement stmt = conn.prepareCall("{call calculate_total(?)}");
      * MutableDouble amount = MutableDouble.of(250.75);
@@ -187,8 +174,7 @@ public class MutableDoubleType extends NumberType<MutableDouble> {
      * // For null value
      * type.set(stmt, "amount", null);
      * // This sets the parameter to 0.0
-     * </code>
-     * </pre>
+     * }</pre>
      *
      * @param stmt The CallableStatement to set the parameter on
      * @param parameterName The name of the parameter to set
@@ -204,8 +190,7 @@ public class MutableDoubleType extends NumberType<MutableDouble> {
      * Appends the string representation of a MutableDouble to an Appendable.
      * The value is written as a decimal string or "null".
      *
-     * <pre>
-     * <code>
+     * <p><b>Usage Examples:</b></p>
      * MutableDoubleType type = new MutableDoubleType();
      * StringBuilder sb = new StringBuilder();
      * MutableDouble md = MutableDouble.of(42.5);
@@ -215,8 +200,7 @@ public class MutableDoubleType extends NumberType<MutableDouble> {
      * StringBuilder sb2 = new StringBuilder();
      * type.appendTo(sb2, null);
      * // sb2.toString() equals "null"
-     * </code>
-     * </pre>
+     * }</pre>
      *
      * @param appendable The Appendable to write to
      * @param x The MutableDouble to append
@@ -236,8 +220,7 @@ public class MutableDoubleType extends NumberType<MutableDouble> {
      * The value is written as numeric characters or the null character array.
      * This method is optimized for character-based writing.
      *
-     * <pre>
-     * <code>
+     * <p><b>Usage Examples:</b></p>
      * MutableDoubleType type = new MutableDoubleType();
      * CharacterWriter writer = new CharacterWriter();
      * MutableDouble md = MutableDouble.of(3.14159);
@@ -246,8 +229,7 @@ public class MutableDoubleType extends NumberType<MutableDouble> {
      *
      * type.writeCharacter(writer, null, null);
      * // Writes: null
-     * </code>
-     * </pre>
+     * }</pre>
      *
      * @param writer The CharacterWriter to write to
      * @param x The MutableDouble to write

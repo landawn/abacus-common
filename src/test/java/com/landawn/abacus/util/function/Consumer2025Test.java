@@ -85,7 +85,8 @@ public class Consumer2025Test extends TestBase {
 
     @Test
     public void testToThrowable() {
-        Consumer<String> consumer = s -> {};
+        Consumer<String> consumer = s -> {
+        };
         com.landawn.abacus.util.Throwables.Consumer<String, ?> throwableConsumer = consumer.toThrowable();
         assertNotNull(throwableConsumer);
     }
@@ -104,7 +105,8 @@ public class Consumer2025Test extends TestBase {
 
     @Test
     public void testFunctionalInterfaceContract() {
-        Consumer<String> lambda = s -> {};
+        Consumer<String> lambda = s -> {
+        };
         assertNotNull(lambda);
         assertDoesNotThrow(() -> lambda.accept("test"));
     }

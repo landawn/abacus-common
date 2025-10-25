@@ -38,7 +38,7 @@ import com.landawn.abacus.util.stream.ObjIteratorEx;
  * for large collections. The generated lists are new instances and modifications to them do not
  * affect the original collection.</p>
  * 
- * <p>Example usage:</p>
+ * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * List<String> items = Arrays.asList("A", "B", "C");
  * ObjIterator<List<String>> perms = PermutationIterator.of(items);
@@ -68,7 +68,7 @@ public final class PermutationIterator {
      * <p>The returned iterator generates permutations lazily and does not store all permutations
      * in memory, making it suitable for large collections.</p>
      * 
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * List<Integer> numbers = Arrays.asList(1, 2, 3);
      * ObjIterator<List<Integer>> perms = PermutationIterator.of(numbers);
@@ -186,7 +186,7 @@ public final class PermutationIterator {
      * 
      * <p>An empty collection has only one permutation: an empty list.</p>
      * 
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * List<Integer> numbers = Arrays.asList(3, 1, 2);
      * ObjIterator<List<Integer>> perms = PermutationIterator.ordered(numbers);
@@ -206,7 +206,7 @@ public final class PermutationIterator {
      * Returns an iterator over all permutations of the specified collection using the specified
      * {@link Comparator} for establishing the lexicographical ordering.
      * 
-     * <p>Examples:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // String permutations in alphabetical order
      * List<String> words = Arrays.asList("b", "c", "a");

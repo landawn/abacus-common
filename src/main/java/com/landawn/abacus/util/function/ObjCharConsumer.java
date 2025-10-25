@@ -38,8 +38,7 @@ public interface ObjCharConsumer<T> extends Throwables.ObjCharConsumer<T, Runtim
      * the char value within the object.
      *
      * @param t the first input argument of type T
-     * @param value the second input argument, a primitive char value
-     * @throws RuntimeException if the operation cannot be completed
+     * @param value the second input argument, a primitive char value if the operation cannot be completed
      */
     @Override
     void accept(T t, char value);

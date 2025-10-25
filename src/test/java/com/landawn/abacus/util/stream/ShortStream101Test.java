@@ -66,6 +66,7 @@ public class ShortStream101Test extends TestBase {
     protected ShortStream createShortStream(ShortBuffer buff) {
         return ShortStream.of(buff);
     }
+
     @Test
     public void testOfShortBuffer() {
         java.nio.ShortBuffer buffer = java.nio.ShortBuffer.wrap(new short[] { 1, 2, 3, 4, 5 });
@@ -407,8 +408,8 @@ public class ShortStream101Test extends TestBase {
 
     @Test
     public void testGroupTo() {
-        Map<String, List<Short>> map = createShortStream((short) 1, (short) 2, (short) 3, (short) 4)
-                .groupTo(n -> n % 2 == 0 ? "even" : "odd", java.util.stream.Collectors.toList());
+        Map<String, List<Short>> map = createShortStream((short) 1, (short) 2, (short) 3, (short) 4).groupTo(n -> n % 2 == 0 ? "even" : "odd",
+                java.util.stream.Collectors.toList());
 
         assertEquals(2, map.size());
         assertEquals(Arrays.asList((short) 1, (short) 3), map.get("odd"));
@@ -596,9 +597,7 @@ public class ShortStream101Test extends TestBase {
     public void testRateLimitedWithPermitsPerSecond() throws InterruptedException {
         long startTime = System.currentTimeMillis();
 
-        createShortStream((short) 1, (short) 2, (short) 3)
-                .rateLimited(10.0)
-                .toArray();
+        createShortStream((short) 1, (short) 2, (short) 3).rateLimited(10.0).toArray();
 
         long elapsedTime = System.currentTimeMillis() - startTime;
         assertTrue(elapsedTime >= 200);
@@ -760,8 +759,7 @@ public class ShortStream101Test extends TestBase {
 
     @Test
     public void testPsp() {
-        short[] result = createShortStream((short) 1, (short) 2, (short) 3, (short) 4, (short) 5)
-                .parallel()
+        short[] result = createShortStream((short) 1, (short) 2, (short) 3, (short) 4, (short) 5).parallel()
                 .psp(s -> s.map(n -> (short) (n * 2)))
                 .sequential()
                 .toArray();

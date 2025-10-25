@@ -21,7 +21,7 @@ package com.landawn.abacus.http;
  * <p>This enum is used to define how data should be serialized/deserialized 
  * and compressed/decompressed during HTTP communication.</p>
  * 
- * <p>Example usage:</p>
+ * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * ContentFormat format = ContentFormat.JSON_GZIP;
  * String contentType = format.contentType(); // returns "application/json"

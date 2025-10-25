@@ -21,7 +21,7 @@ package com.landawn.abacus.parser;
  * <p>The configuration allows control over various aspects of the deserialization process,
  * including property handling, type mappings, and value conversions inherited from the parent class.
  * 
- * <p>Example usage:
+ * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * KryoDeserializationConfig config = KryoDeserializationConfig.create()
  *     .ignoreUnmatchedProperty(true)
@@ -41,7 +41,7 @@ public class KryoDeserializationConfig extends DeserializationConfig<KryoDeseria
      * Factory class for creating {@link KryoDeserializationConfig} instances.
      * Provides convenient static factory methods for configuration creation.
      * 
-     * <p>Example usage:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Create a default configuration
      * KryoDeserializationConfig config = KDC.create();

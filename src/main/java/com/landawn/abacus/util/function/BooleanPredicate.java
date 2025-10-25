@@ -51,6 +51,12 @@ public interface BooleanPredicate extends Throwables.BooleanPredicate<RuntimeExc
     /**
      * Evaluates this predicate on the given argument.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * BooleanPredicate isTrue = value -> value;
+     * boolean result = isTrue.test(true); // Returns true
+     * }</pre>
+     *
      * @param value the input argument
      * @return {@code true} if the input argument matches the predicate, otherwise {@code false}
      */
@@ -61,6 +67,12 @@ public interface BooleanPredicate extends Throwables.BooleanPredicate<RuntimeExc
      * Returns the specified predicate instance.
      * This method is useful for type inference in lambda expressions and method references.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * BooleanPredicate pred = BooleanPredicate.of(v -> v);
+     * boolean result = pred.test(true);
+     * }</pre>
+     *
      * @param predicate the predicate to return
      * @return the specified predicate
      */
@@ -70,6 +82,12 @@ public interface BooleanPredicate extends Throwables.BooleanPredicate<RuntimeExc
 
     /**
      * Returns a predicate that represents the logical negation of this predicate.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * BooleanPredicate isTrue = value -> value;
+     * BooleanPredicate isFalse = isTrue.negate();
+     * }</pre>
      *
      * @return a predicate that represents the logical negation of this predicate
      */
@@ -85,6 +103,13 @@ public interface BooleanPredicate extends Throwables.BooleanPredicate<RuntimeExc
      * <p>Any exceptions thrown during evaluation of either predicate are relayed to the caller;
      * if evaluation of this predicate throws an exception, the {@code other} predicate will not be evaluated.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * BooleanPredicate isTrue = value -> value;
+     * BooleanPredicate alwaysTrue = value -> true;
+     * BooleanPredicate combined = isTrue.and(alwaysTrue);
+     * }</pre>
+     *
      * @param other a predicate that will be logically-ANDed with this predicate. Must not be {@code null}.
      * @return a composed predicate that represents the short-circuiting logical AND of this predicate and the {@code other} predicate
      */
@@ -99,6 +124,13 @@ public interface BooleanPredicate extends Throwables.BooleanPredicate<RuntimeExc
      *
      * <p>Any exceptions thrown during evaluation of either predicate are relayed to the caller;
      * if evaluation of this predicate throws an exception, the {@code other} predicate will not be evaluated.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * BooleanPredicate isTrue = value -> value;
+     * BooleanPredicate alwaysFalse = value -> false;
+     * BooleanPredicate combined = isTrue.or(alwaysFalse);
+     * }</pre>
      *
      * @param other a predicate that will be logically-ORed with this predicate. Must not be {@code null}.
      * @return a composed predicate that represents the short-circuiting logical OR of this predicate and the {@code other} predicate

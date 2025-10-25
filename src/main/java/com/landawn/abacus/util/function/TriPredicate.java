@@ -36,7 +36,7 @@ public interface TriPredicate<A, B, C> extends Throwables.TriPredicate<A, B, C, 
     /**
      * Evaluates this predicate on the given arguments.
      * 
-     * <p>Example usage:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * TriPredicate<Integer, Integer, Integer> isValidTriangle = 
      *     (a, b, c) -> a + b > c && a + c > b && b + c > a;
@@ -52,8 +52,7 @@ public interface TriPredicate<A, B, C> extends Throwables.TriPredicate<A, B, C, 
      * @param a the first input argument
      * @param b the second input argument
      * @param c the third input argument
-     * @return {@code true} if the input arguments match the predicate, otherwise false
-     * @throws RuntimeException if any error occurs during predicate evaluation
+     * @return {@code true} if the input arguments match the predicate, otherwise {@code false} if any error occurs during predicate evaluation
      */
     @Override
     boolean test(A a, B b, C c);
@@ -61,7 +60,7 @@ public interface TriPredicate<A, B, C> extends Throwables.TriPredicate<A, B, C, 
     /**
      * Returns a predicate that represents the logical negation of this predicate.
      * 
-     * <p>Example usage:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * TriPredicate<Integer, Integer, Integer> isSum = (a, b, c) -> a + b == c;
      * TriPredicate<Integer, Integer, Integer> isNotSum = isSum.negate();
@@ -85,7 +84,7 @@ public interface TriPredicate<A, B, C> extends Throwables.TriPredicate<A, B, C, 
      * <p>Any exceptions thrown during evaluation of either predicate are relayed to the caller;
      * if evaluation of this predicate throws an exception, the other predicate will not be evaluated.
      * 
-     * <p>Example usage:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * TriPredicate<Integer, Integer, Integer> isPositive = (a, b, c) -> a > 0 && b > 0 && c > 0;
      * TriPredicate<Integer, Integer, Integer> sumGreaterThan10 = (a, b, c) -> a + b + c > 10;
@@ -112,7 +111,7 @@ public interface TriPredicate<A, B, C> extends Throwables.TriPredicate<A, B, C, 
      * <p>Any exceptions thrown during evaluation of either predicate are relayed to the caller;
      * if evaluation of this predicate throws an exception, the other predicate will not be evaluated.
      * 
-     * <p>Example usage:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * TriPredicate<String, String, String> hasEmptyString = 
      *     (s1, s2, s3) -> s1.isEmpty() || s2.isEmpty() || s3.isEmpty();
@@ -138,7 +137,7 @@ public interface TriPredicate<A, B, C> extends Throwables.TriPredicate<A, B, C, 
      * This method is useful when you need to use this predicate in a context that expects
      * a Throwables.TriPredicate with a specific exception type.
      * 
-     * <p>Example usage:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * TriPredicate<String, Integer, Boolean> predicate = (s, i, b) -> { ... };
      * Throwables.TriPredicate<String, Integer, Boolean, IOException> throwablePredicate = 

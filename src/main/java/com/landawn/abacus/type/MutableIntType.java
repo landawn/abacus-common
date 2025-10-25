@@ -28,13 +28,11 @@ public class MutableIntType extends NumberType<MutableInt> {
     /**
      * Returns the Class object representing the MutableInt type.
      *
-     * <pre>
-     * <code>
+     * <p><b>Usage Examples:</b></p>
      * MutableIntType type = new MutableIntType();
      * Class&lt;MutableInt&gt; clazz = type.clazz();
      * // clazz equals MutableInt.class
-     * </code>
-     * </pre>
+     * }</pre>
      *
      * @return The Class object for MutableInt
      */
@@ -47,8 +45,7 @@ public class MutableIntType extends NumberType<MutableInt> {
      * Converts a MutableInt object to its string representation.
      * The integer value is converted to a decimal string representation.
      *
-     * <pre>
-     * <code>
+     * <p><b>Usage Examples:</b></p>
      * MutableIntType type = new MutableIntType();
      * MutableInt mi = MutableInt.of(42);
      * String str = type.stringOf(mi);
@@ -56,8 +53,7 @@ public class MutableIntType extends NumberType<MutableInt> {
      *
      * String nullStr = type.stringOf(null);
      * // nullStr equals null
-     * </code>
-     * </pre>
+     * }</pre>
      *
      * @param x The MutableInt object to convert
      * @return The string representation of the integer value, or null if the input is null
@@ -71,8 +67,7 @@ public class MutableIntType extends NumberType<MutableInt> {
      * Parses a string to create a MutableInt object.
      * The string is parsed as an integer value.
      *
-     * <pre>
-     * <code>
+     * <p><b>Usage Examples:</b></p>
      * MutableIntType type = new MutableIntType();
      * MutableInt mi = type.valueOf("123");
      * // mi.value() equals 123
@@ -82,8 +77,7 @@ public class MutableIntType extends NumberType<MutableInt> {
      *
      * MutableInt emptyMi = type.valueOf("");
      * // emptyMi equals null
-     * </code>
-     * </pre>
+     * }</pre>
      *
      * @param str The string to parse
      * @return A MutableInt containing the parsed value, or null if the input is null or empty
@@ -98,16 +92,14 @@ public class MutableIntType extends NumberType<MutableInt> {
      * Retrieves a MutableInt value from a ResultSet at the specified column index.
      * The database integer value is wrapped in a MutableInt object.
      *
-     * <pre>
-     * <code>
+     * <p><b>Usage Examples:</b></p>
      * MutableIntType type = new MutableIntType();
      * ResultSet rs = statement.executeQuery("SELECT age FROM users");
      * if (rs.next()) {
      *     MutableInt age = type.get(rs, 1);
      *     // age contains the integer value from the first column
      * }
-     * </code>
-     * </pre>
+     * }</pre>
      *
      * @param rs The ResultSet containing the data
      * @param columnIndex The column index (1-based) to retrieve the value from
@@ -123,16 +115,14 @@ public class MutableIntType extends NumberType<MutableInt> {
      * Retrieves a MutableInt value from a ResultSet using the specified column label.
      * The database integer value is wrapped in a MutableInt object.
      *
-     * <pre>
-     * <code>
+     * <p><b>Usage Examples:</b></p>
      * MutableIntType type = new MutableIntType();
      * ResultSet rs = statement.executeQuery("SELECT age FROM users");
      * if (rs.next()) {
      *     MutableInt age = type.get(rs, "age");
      *     // age contains the integer value from the named column
      * }
-     * </code>
-     * </pre>
+     * }</pre>
      *
      * @param rs The ResultSet containing the data
      * @param columnLabel The label of the column to retrieve the value from
@@ -148,8 +138,7 @@ public class MutableIntType extends NumberType<MutableInt> {
      * Sets a MutableInt parameter in a PreparedStatement at the specified position.
      * If the MutableInt is null, 0 is stored. Otherwise, the wrapped integer value is stored.
      *
-     * <pre>
-     * <code>
+     * <p><b>Usage Examples:</b></p>
      * MutableIntType type = new MutableIntType();
      * PreparedStatement stmt = conn.prepareStatement("INSERT INTO users (age) VALUES (?)");
      * MutableInt age = MutableInt.of(25);
@@ -159,8 +148,7 @@ public class MutableIntType extends NumberType<MutableInt> {
      * // For null value
      * type.set(stmt, 1, null);
      * // This sets the parameter to 0
-     * </code>
-     * </pre>
+     * }</pre>
      *
      * @param stmt The PreparedStatement to set the parameter on
      * @param columnIndex The parameter index (1-based) to set
@@ -176,8 +164,7 @@ public class MutableIntType extends NumberType<MutableInt> {
      * Sets a MutableInt parameter in a CallableStatement using the specified parameter name.
      * If the MutableInt is null, 0 is stored. Otherwise, the wrapped integer value is stored.
      *
-     * <pre>
-     * <code>
+     * <p><b>Usage Examples:</b></p>
      * MutableIntType type = new MutableIntType();
      * CallableStatement stmt = conn.prepareCall("{call update_counter(?)}");
      * MutableInt counter = MutableInt.of(100);
@@ -187,8 +174,7 @@ public class MutableIntType extends NumberType<MutableInt> {
      * // For null value
      * type.set(stmt, "counter", null);
      * // This sets the parameter to 0
-     * </code>
-     * </pre>
+     * }</pre>
      *
      * @param stmt The CallableStatement to set the parameter on
      * @param parameterName The name of the parameter to set
@@ -204,8 +190,7 @@ public class MutableIntType extends NumberType<MutableInt> {
      * Appends the string representation of a MutableInt to an Appendable.
      * The value is written as a decimal string or "null".
      *
-     * <pre>
-     * <code>
+     * <p><b>Usage Examples:</b></p>
      * MutableIntType type = new MutableIntType();
      * StringBuilder sb = new StringBuilder();
      * MutableInt mi = MutableInt.of(42);
@@ -215,8 +200,7 @@ public class MutableIntType extends NumberType<MutableInt> {
      * StringBuilder sb2 = new StringBuilder();
      * type.appendTo(sb2, null);
      * // sb2.toString() equals "null"
-     * </code>
-     * </pre>
+     * }</pre>
      *
      * @param appendable The Appendable to write to
      * @param x The MutableInt to append
@@ -236,8 +220,7 @@ public class MutableIntType extends NumberType<MutableInt> {
      * The value is written as numeric characters or the null character array.
      * This method is optimized for character-based writing and uses a specialized writeInt method.
      *
-     * <pre>
-     * <code>
+     * <p><b>Usage Examples:</b></p>
      * MutableIntType type = new MutableIntType();
      * CharacterWriter writer = new CharacterWriter();
      * MutableInt mi = MutableInt.of(12345);
@@ -246,8 +229,7 @@ public class MutableIntType extends NumberType<MutableInt> {
      *
      * type.writeCharacter(writer, null, null);
      * // Writes: null
-     * </code>
-     * </pre>
+     * }</pre>
      *
      * @param writer The CharacterWriter to write to
      * @param x The MutableInt to write

@@ -132,7 +132,8 @@ public class CharNFunction2025Test extends TestBase {
         CharNFunction<String> toString = args -> {
             StringBuilder sb = new StringBuilder();
             for (int i = 0; i < args.length; i++) {
-                if (i > 0) sb.append(",");
+                if (i > 0)
+                    sb.append(",");
                 sb.append((int) args[i]);
             }
             return sb.toString();

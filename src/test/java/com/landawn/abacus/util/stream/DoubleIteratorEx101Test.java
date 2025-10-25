@@ -35,9 +35,9 @@ public class DoubleIteratorEx101Test extends TestBase {
 
     @Test
     public void testOfArray() {
-        double[] array = {1.1, 2.2, 3.3};
+        double[] array = { 1.1, 2.2, 3.3 };
         DoubleIteratorEx iter = DoubleIteratorEx.of(array);
-        
+
         Assertions.assertTrue(iter.hasNext());
         Assertions.assertEquals(1.1, iter.nextDouble());
         Assertions.assertEquals(2.2, iter.nextDouble());
@@ -56,9 +56,9 @@ public class DoubleIteratorEx101Test extends TestBase {
 
     @Test
     public void testOfArrayWithIndices() {
-        double[] array = {1.0, 2.0, 3.0, 4.0, 5.0};
+        double[] array = { 1.0, 2.0, 3.0, 4.0, 5.0 };
         DoubleIteratorEx iter = DoubleIteratorEx.of(array, 1, 4);
-        
+
         Assertions.assertTrue(iter.hasNext());
         Assertions.assertEquals(2.0, iter.nextDouble());
         Assertions.assertEquals(3.0, iter.nextDouble());
@@ -68,7 +68,7 @@ public class DoubleIteratorEx101Test extends TestBase {
 
     @Test
     public void testOfArrayWithIndicesEmpty() {
-        double[] array = {1.0, 2.0, 3.0};
+        double[] array = { 1.0, 2.0, 3.0 };
         DoubleIteratorEx iter = DoubleIteratorEx.of(array, 1, 1);
         Assertions.assertFalse(iter.hasNext());
         Assertions.assertSame(DoubleIteratorEx.EMPTY, iter);
@@ -76,7 +76,7 @@ public class DoubleIteratorEx101Test extends TestBase {
 
     @Test
     public void testOfArrayWithIndicesInvalid() {
-        double[] array = {1.0, 2.0, 3.0};
+        double[] array = { 1.0, 2.0, 3.0 };
         Assertions.assertThrows(IndexOutOfBoundsException.class, () -> DoubleIteratorEx.of(array, 2, 1));
         Assertions.assertThrows(IndexOutOfBoundsException.class, () -> DoubleIteratorEx.of(array, -1, 2));
         Assertions.assertThrows(IndexOutOfBoundsException.class, () -> DoubleIteratorEx.of(array, 0, 4));
@@ -86,19 +86,19 @@ public class DoubleIteratorEx101Test extends TestBase {
     public void testOfDoubleIterator() {
         DoubleIterator baseIter = new DoubleIterator() {
             private int index = 0;
-            private double[] data = {1.5, 2.5, 3.5};
-            
+            private double[] data = { 1.5, 2.5, 3.5 };
+
             @Override
             public boolean hasNext() {
                 return index < data.length;
             }
-            
+
             @Override
             public double nextDouble() {
                 return data[index++];
             }
         };
-        
+
         DoubleIteratorEx iter = DoubleIteratorEx.of(baseIter);
         Assertions.assertTrue(iter.hasNext());
         Assertions.assertEquals(1.5, iter.nextDouble());
@@ -125,7 +125,7 @@ public class DoubleIteratorEx101Test extends TestBase {
     public void testFromIterator() {
         List<Double> list = Arrays.asList(1.1, 2.2, 3.3);
         DoubleIteratorEx iter = DoubleIteratorEx.from(list.iterator());
-        
+
         Assertions.assertTrue(iter.hasNext());
         Assertions.assertEquals(1.1, iter.nextDouble());
         Assertions.assertEquals(2.2, iter.nextDouble());
@@ -144,35 +144,35 @@ public class DoubleIteratorEx101Test extends TestBase {
     public void testFromObjIteratorEx() {
         ObjIteratorEx<Double> objIter = ObjIteratorEx.of(1.0, 2.0, 3.0);
         DoubleIteratorEx iter = DoubleIteratorEx.from(objIter);
-        
+
         iter.advance(1);
         Assertions.assertEquals(2.0, iter.nextDouble());
-        
+
         Assertions.assertEquals(1, iter.count());
-        
+
         iter.close();
     }
 
     @Test
     public void testAdvance() {
-        double[] array = {1.0, 2.0, 3.0, 4.0, 5.0};
+        double[] array = { 1.0, 2.0, 3.0, 4.0, 5.0 };
         DoubleIteratorEx iter = DoubleIteratorEx.of(array);
-        
+
         iter.advance(2);
         Assertions.assertEquals(3.0, iter.nextDouble());
-        
+
         iter.advance(1);
         Assertions.assertEquals(5.0, iter.nextDouble());
-        
+
         iter.advance(10);
         Assertions.assertFalse(iter.hasNext());
     }
 
     @Test
     public void testAdvanceZero() {
-        double[] array = {1.0, 2.0, 3.0};
+        double[] array = { 1.0, 2.0, 3.0 };
         DoubleIteratorEx iter = DoubleIteratorEx.of(array);
-        
+
         iter.advance(0);
         Assertions.assertEquals(1.0, iter.nextDouble());
     }
@@ -185,18 +185,18 @@ public class DoubleIteratorEx101Test extends TestBase {
 
     @Test
     public void testCount() {
-        double[] array = {1.0, 2.0, 3.0, 4.0, 5.0};
+        double[] array = { 1.0, 2.0, 3.0, 4.0, 5.0 };
         DoubleIteratorEx iter = DoubleIteratorEx.of(array, 1, 4);
-        
+
         Assertions.assertEquals(3, iter.count());
         Assertions.assertFalse(iter.hasNext());
     }
 
     @Test
     public void testToArray() {
-        double[] array = {1.1, 2.2, 3.3};
+        double[] array = { 1.1, 2.2, 3.3 };
         DoubleIteratorEx iter = DoubleIteratorEx.of(array);
-        
+
         double[] result = iter.toArray();
         Assertions.assertArrayEquals(array, result);
         Assertions.assertFalse(iter.hasNext());
@@ -204,19 +204,19 @@ public class DoubleIteratorEx101Test extends TestBase {
 
     @Test
     public void testToArrayPartial() {
-        double[] array = {1.0, 2.0, 3.0, 4.0, 5.0};
+        double[] array = { 1.0, 2.0, 3.0, 4.0, 5.0 };
         DoubleIteratorEx iter = DoubleIteratorEx.of(array, 1, 4);
-        
+
         double[] result = iter.toArray();
-        Assertions.assertArrayEquals(new double[]{2.0, 3.0, 4.0}, result);
+        Assertions.assertArrayEquals(new double[] { 2.0, 3.0, 4.0 }, result);
         Assertions.assertFalse(iter.hasNext());
     }
 
     @Test
     public void testToList() {
-        double[] array = {1.1, 2.2, 3.3};
+        double[] array = { 1.1, 2.2, 3.3 };
         DoubleIteratorEx iter = DoubleIteratorEx.of(array);
-        
+
         DoubleList result = iter.toList();
         Assertions.assertEquals(3, result.size());
         Assertions.assertEquals(1.1, result.get(0));
@@ -227,9 +227,9 @@ public class DoubleIteratorEx101Test extends TestBase {
 
     @Test
     public void testToListPartial() {
-        double[] array = {1.0, 2.0, 3.0, 4.0, 5.0};
+        double[] array = { 1.0, 2.0, 3.0, 4.0, 5.0 };
         DoubleIteratorEx iter = DoubleIteratorEx.of(array, 1, 4);
-        
+
         DoubleList result = iter.toList();
         Assertions.assertEquals(3, result.size());
         Assertions.assertEquals(2.0, result.get(0));

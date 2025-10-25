@@ -63,7 +63,9 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
     private int size = 0;
 
     /**
-     * Constructs an empty ShortList with an initial capacity of ten.
+     * Constructs an empty ShortList with an initial capacity of zero.
+     * The internal array will be initialized to an empty array and will grow
+     * as needed when elements are added.
      */
     public ShortList() {
     }
@@ -71,8 +73,12 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
     /**
      * Constructs an empty ShortList with the specified initial capacity.
      *
+     * <p>This constructor is useful when the approximate size of the list is known in advance,
+     * as it can help avoid the performance overhead of array resizing during element additions.</p>
+     *
      * @param initialCapacity the initial capacity of the list. Must be non-negative.
      * @throws IllegalArgumentException if the specified initial capacity is negative
+     * @throws OutOfMemoryError if the requested array size exceeds the maximum array size
      */
     public ShortList(final int initialCapacity) {
         N.checkArgNotNegative(initialCapacity, cs.initialCapacity);
@@ -120,12 +126,14 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
 
     /**
      * Creates a new ShortList containing the first {@code size} elements of the specified array.
-     * If the array is null, it's treated as an empty array.
+     * The array is used directly as the backing array without copying for efficiency.
+     * If the input array is {@code null}, it is treated as an empty array.
      *
-     * @param a the array of shorts to be contained in the new list. Can be null.
-     * @param size the number of elements from the array to include in the list. Must be non-negative.
-     * @return a new ShortList containing the specified number of elements from the array
-     * @throws IndexOutOfBoundsException if size is negative or greater than the length of the array
+     * @param a the array of short values to be used as the backing array. Can be {@code null}.
+     * @param size the number of elements from the array to include in the list.
+     *             Must be between 0 and the array length (inclusive).
+     * @return a new ShortList containing the first {@code size} elements of the specified array
+     * @throws IndexOutOfBoundsException if {@code size} is negative or greater than the array length
      */
     public static ShortList of(final short[] a, final int size) throws IndexOutOfBoundsException {
         N.checkFromIndexSize(0, size, N.len(a));
@@ -134,25 +142,33 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
     }
 
     /**
-     * Creates a new ShortList that is a copy of the specified array. The returned list is independent
-     * of the original array; modifications to the list will not affect the original array.
+     * Creates a new ShortList that is a copy of the specified array.
      *
-     * @param a the array to be copied. Can be null, in which case an empty list is returned.
-     * @return a new ShortList containing a copy of the elements from the specified array
+     * <p>Unlike {@link #of(short...)}, this method always creates a defensive copy of the input array,
+     * ensuring that modifications to the returned list do not affect the original array.</p>
+     *
+     * <p>If the input array is {@code null}, an empty list is returned.</p>
+     *
+     * @param a the array to be copied. Can be {@code null}.
+     * @return a new ShortList containing a copy of the elements from the specified array,
+     *         or an empty list if the array is {@code null}
      */
     public static ShortList copyOf(final short[] a) {
         return of(N.clone(a));
     }
 
     /**
-     * Creates a new ShortList that is a copy of the specified range of the array. The returned list
-     * is independent of the original array; modifications to the list will not affect the original array.
+     * Creates a new ShortList that is a copy of the specified range within the given array.
      *
-     * @param a the array from which a range is to be copied
-     * @param fromIndex the initial index of the range to be copied, inclusive
-     * @param toIndex the final index of the range to be copied, exclusive
-     * @return a new ShortList containing the specified range of the array
-     * @throws IndexOutOfBoundsException if fromIndex < 0 or toIndex > a.length or fromIndex > toIndex
+     * <p>This method creates a defensive copy of the elements in the range [fromIndex, toIndex),
+     * ensuring that modifications to the returned list do not affect the original array.</p>
+     *
+     * @param a the array from which a range is to be copied. Must not be {@code null}.
+     * @param fromIndex the initial index of the range to be copied, inclusive.
+     * @param toIndex the final index of the range to be copied, exclusive.
+     * @return a new ShortList containing a copy of the elements in the specified range
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0} or {@code toIndex > a.length}
+     *                                   or {@code fromIndex > toIndex}
      */
     public static ShortList copyOf(final short[] a, final int fromIndex, final int toIndex) {
         return of(N.copyOfRange(a, fromIndex, toIndex));
@@ -243,12 +259,20 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
     }
 
     /**
-     * Returns the underlying array backing this list. This method provides direct access to the internal
-     * array for performance-critical operations. Modifications to the returned array will affect this list.
-     * The array may be larger than the list size; only elements from index 0 to size-1 are valid.
+     * Returns the underlying short array backing this list without creating a copy.
+     * This method provides direct access to the internal array for performance-critical operations.
      *
-     * @return the underlying short array backing this list
-     * @deprecated should call {@code toArray()}
+     * <p><b>Warning:</b> The returned array is the actual internal storage of this list.
+     * Modifications to the returned array will directly affect this list's contents.
+     * The array may be larger than the list size; only indices from 0 to size()-1 contain valid elements.</p>
+     *
+     * <p>This method is marked as {@code @Beta} and should be used with caution.</p>
+     *
+     * @return the internal short array backing this list
+     * @deprecated This method is deprecated because it exposes internal state and can lead to bugs.
+     *             Use {@link #toArray()} instead to get a safe copy of the list elements.
+     *             If you need the internal array for performance reasons and understand the risks,
+     *             consider using a custom implementation or wrapping this list appropriately.
      */
     @Beta
     @Deprecated
@@ -291,6 +315,10 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
     /**
      * Appends the specified element to the end of this list. The list will automatically grow if necessary.
      *
+     * <p>This method runs in amortized constant time. If the internal array needs to be
+     * resized to accommodate the new element, all existing elements will be copied to
+     * a new, larger array.</p>
+     *
      * @param e the element to be appended to this list
      */
     public void add(final short e) {
@@ -304,9 +332,13 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      * at that position (if any) and any subsequent elements to the right (adds one to their indices).
      * The list will automatically grow if necessary.
      *
+     * <p>This method runs in linear time in the worst case (when inserting at the beginning
+     * of the list), as it may need to shift all existing elements.</p>
+     *
      * @param index the index at which the specified element is to be inserted
      * @param e the element to be inserted
-     * @throws IndexOutOfBoundsException if the index is out of range (index < 0 || index > size())
+     * @throws IndexOutOfBoundsException if the index is out of range
+     *         ({@code index < 0 || index > size()})
      */
     public void add(final int index, final short e) {
         rangeCheckForAdd(index);
@@ -444,8 +476,12 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      * If the list does not contain the element, it is unchanged. More formally, removes the element
      * with the lowest index i such that elementData[i] == e.
      *
+     * <p>This method runs in linear time, as it may need to search through the entire list
+     * to find the element.</p>
+     *
      * @param e the element to be removed from this list, if present
-     * @return {@code true} if this list contained the specified element
+     * @return {@code true} if this list contained the specified element (and it was removed);
+     *         {@code false} otherwise
      */
     public boolean remove(final short e) {
         for (int i = 0; i < size; i++) {
@@ -488,8 +524,9 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
     }
 
     /**
+     * Removes the element at the specified index without bounds checking.
      *
-     * @param index
+     * @param index the index of the element to remove
      */
     private void fastRemove(final int index) {
         final int numMoved = size - index - 1;
@@ -534,11 +571,22 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
     }
 
     /**
-     * Removes all elements from this list that satisfy the given predicate. The elements are tested
-     * in order from first to last, and removed elements are compacted so no gaps remain.
+     * Removes all elements from this list that satisfy the given predicate.
+     * Elements are tested in order from first to last, and those for which the predicate
+     * returns {@code true} are removed. The order of the remaining elements is preserved.
      *
-     * @param p the predicate which returns {@code true} for elements to be removed
-     * @return {@code true} if any elements were removed
+     * <p>This is a functional programming approach to element removal, allowing complex
+     * removal logic to be expressed concisely using lambda expressions or method references.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * ShortList list = ShortList.of((short)1, (short)-2, (short)3, (short)-4, (short)5);
+     * list.removeIf(s -> s < 0);  // Removes negative values
+     * // list now contains: [1, 3, 5]
+     * }</pre>
+     *
+     * @param p the predicate which returns {@code true} for elements to be removed. Must not be {@code null}.
+     * @return {@code true} if any elements were removed; {@code false} if the list was unchanged
      */
     public boolean removeIf(final ShortPredicate p) {
         final ShortList tmp = new ShortList(size());
@@ -643,10 +691,11 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
     }
 
     /**
+     * Performs a batch removal operation based on the specified collection and complement flag.
      *
-     * @param c
-     * @param complement
-     * @return
+     * @param c the collection of elements to check against
+     * @param complement if true, retain elements in c; if false, remove elements in c
+     * @return the number of elements removed
      */
     private int batchRemove(final ShortList c, final boolean complement) {
         final short[] elementData = this.elementData;//NOSONAR
@@ -757,12 +806,12 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      * so that the element originally at fromIndex will be at newPositionAfterMove.
      * Other elements are shifted as necessary to accommodate the move.
      * 
-     * <p>Example: 
-     * <pre>
+     * <p><b>Usage Examples:</b></p> 
+     * <pre>{@code
      * ShortList list = ShortList.of((short) 0, (short) 1, (Short) 2, (Short) 3, (Short) 4, (Short) 5);
      * list.moveRange(1, 3, 3);  // Moves elements [1, 2] to position starting at index 3
      * // Result: [0, 3, 4, 1, 2, 5]
-     * </pre>
+     * }</pre>
      * 
      * @param fromIndex the starting index (inclusive) of the range to be moved
      * @param toIndex the ending index (exclusive) of the range to be moved
@@ -1094,8 +1143,8 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      * For elements that appear multiple times, the intersection contains the minimum number of occurrences
      * present in both lists. The order of elements from this list is preserved.
      *
-     * <p>Example:
-     * <pre>
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
      * ShortList list1 = ShortList.of((short)0, (short)1, (short)2, (short)2, (short)3);
      * ShortList list2 = ShortList.of((short)1, (short)2, (short)2, (short)4);
      * ShortList result = list1.intersection(list2); // result will be [(short)1, (short)2, (short)2]
@@ -1105,7 +1154,7 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      * ShortList list4 = ShortList.of((short)5, (short)7);
      * ShortList result2 = list3.intersection(list4); // result will be [(short)5]
      * // One occurrence of '5' (minimum count in both lists)
-     * </pre>
+     * }</pre>
      *
      * @param b the list to find common elements with this list
      * @return a new ShortList containing elements present in both this list and the specified list,
@@ -1141,18 +1190,18 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      * For elements that appear multiple times, the intersection contains the minimum number of occurrences
      * present in both sources. The order of elements from this list is preserved.
      *
-     * <p>Example:
-     * <pre>
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
      * ShortList list1 = ShortList.of((short)0, (short)1, (short)2, (short)2, (short)3);
-     * short[] array = new short[]{(short)1, (short)2, (short)2, (short)4};
+     * short[] array = new short[] {(short)1, (short)2, (short)2, (short)4};
      * ShortList result = list1.intersection(array); // result will be [(short)1, (short)2, (short)2]
      * // One occurrence of '1' (minimum count in both sources) and two occurrences of '2'
      *
      * ShortList list2 = ShortList.of((short)5, (short)5, (short)6);
-     * short[] array2 = new short[]{(short)5, (short)7};
+     * short[] array2 = new short[] {(short)5, (short)7};
      * ShortList result2 = list2.intersection(array2); // result will be [(short)5]
      * // One occurrence of '5' (minimum count in both sources)
-     * </pre>
+     * }</pre>
      *
      * @param b the array to find common elements with this list
      * @return a new ShortList containing elements present in both this list and the specified array,
@@ -1178,8 +1227,8 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      * If an element appears multiple times, the difference considers the count of occurrences -
      * only the excess occurrences remain in the result. The order of elements from this list is preserved.
      *
-     * <p>Example:
-     * <pre>
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
      * ShortList list1 = ShortList.of((short)1, (short)1, (short)2, (short)3);
      * ShortList list2 = ShortList.of((short)1, (short)4);
      * ShortList result = list1.difference(list2); // result will be [(short)1, (short)2, (short)3]
@@ -1189,7 +1238,7 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      * ShortList list4 = ShortList.of((short)5, (short)5, (short)6);
      * ShortList result2 = list3.difference(list4); // result will be [] (empty)
      * // No elements remain because list4 has at least as many occurrences of each value as list3
-     * </pre>
+     * }</pre>
      *
      * @param b the list to compare against this list
      * @return a new ShortList containing the elements that are present in this list but not in the specified list,
@@ -1224,18 +1273,18 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      * If an element appears multiple times, the difference considers the count of occurrences -
      * only the excess occurrences remain in the result. The order of elements from this list is preserved.
      *
-     * <p>Example:
-     * <pre>
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
      * ShortList list1 = ShortList.of((short)1, (short)1, (short)2, (short)3);
-     * short[] array = new short[]{(short)1, (short)4};
+     * short[] array = new short[] {(short)1, (short)4};
      * ShortList result = list1.difference(array); // result will be [(short)1, (short)2, (short)3]
      * // One '1' remains because list1 has two occurrences and array has one
      *
      * ShortList list2 = ShortList.of((short)5, (short)6);
-     * short[] array2 = new short[]{(short)5, (short)5, (short)6};
+     * short[] array2 = new short[] {(short)5, (short)5, (short)6};
      * ShortList result2 = list2.difference(array2); // result will be [] (empty)
      * // No elements remain because array2 has at least as many occurrences of each value as list2
-     * </pre>
+     * }</pre>
      *
      * @param b the array to compare against this list
      * @return a new ShortList containing the elements that are present in this list but not in the specified array,
@@ -1265,8 +1314,8 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      * <p>The order of elements is preserved, with elements from this list appearing first,
      * followed by elements from the specified list.
      *
-     * <p>Example:
-     * <pre>
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
      * ShortList list1 = ShortList.of((short)1, (short)1, (short)2, (short)3);
      * ShortList list2 = ShortList.of((short)1, (short)2, (short)2, (short)4);
      * ShortList result = list1.symmetricDifference(list2);
@@ -1276,7 +1325,7 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      * // - (short)3 appears only in list1, so it remains
      * // - (short)2 appears once in list1 and twice in list2, so one occurrence remains
      * // - (short)4 appears only in list2, so it remains
-     * </pre>
+     * }</pre>
      *
      * @param b the list to compare with this list for symmetric difference
      * @return a new ShortList containing elements that are present in either this list or the specified list,
@@ -1326,10 +1375,10 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      * <p>The order of elements is preserved, with elements from this list appearing first,
      * followed by elements from the specified array.
      *
-     * <p>Example:
-     * <pre>
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
      * ShortList list1 = ShortList.of((short)1, (short)1, (short)2, (short)3);
-     * short[] array = new short[]{(short)1, (short)2, (short)2, (short)4};
+     * short[] array = new short[] {(short)1, (short)2, (short)2, (short)4};
      * ShortList result = list1.symmetricDifference(array);
      * // result will contain: [(short)1, (short)3, (short)2, (short)4]
      * // Elements explanation:
@@ -1337,7 +1386,7 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      * // - (short)3 appears only in list1, so it remains
      * // - (short)2 appears once in list1 and twice in array, so one occurrence remains
      * // - (short)4 appears only in array, so it remains
-     * </pre>
+     * }</pre>
      *
      * @param b the array to compare with this list for symmetric difference
      * @return a new ShortList containing elements that are present in either this list or the specified array,
@@ -1554,16 +1603,28 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
     }
 
     /**
-     * Performs the given action for each element in the specified range of this list.
-     * 
-     * <p>The action is performed on elements from fromIndex (inclusive) to toIndex (exclusive).
-     * If fromIndex is greater than toIndex, the elements are processed in reverse order,
-     * from fromIndex down to (but not including) toIndex.</p>
+     * Performs the given action for each element within the specified range of this list.
      *
-     * @param fromIndex the starting index (inclusive) of the range
-     * @param toIndex the ending index (exclusive) of the range
+     * <p>This method supports both forward and backward iteration based on the relative values of
+     * fromIndex and toIndex:</p>
+     * <ul>
+     *   <li>If {@code fromIndex <= toIndex}: iterates forward from fromIndex (inclusive) to toIndex (exclusive)</li>
+     *   <li>If {@code fromIndex > toIndex}: iterates backward from fromIndex (inclusive) to toIndex (exclusive)</li>
+     *   <li>If {@code toIndex == -1}: treated as backward iteration from fromIndex to the beginning of the list</li>
+     * </ul>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * ShortList list = ShortList.of((short)10, (short)20, (short)30, (short)40, (short)50);
+     * list.forEach(0, 3, action);    // Forward: processes indices 0,1,2
+     * list.forEach(3, 0, action);    // Backward: processes indices 3,2,1
+     * list.forEach(4, -1, action);   // Backward: processes indices 4,3,2,1,0
+     * }</pre>
+     *
+     * @param fromIndex the starting index (inclusive)
+     * @param toIndex the ending index (exclusive), or -1 for backward iteration to the start
      * @param action the action to be performed for each element
-     * @throws IndexOutOfBoundsException if the range is invalid
+     * @throws IndexOutOfBoundsException if the indices are out of range
      */
     public void forEach(final int fromIndex, final int toIndex, final ShortConsumer action) throws IndexOutOfBoundsException {
         N.checkFromToIndex(fromIndex < toIndex ? fromIndex : (toIndex == -1 ? 0 : toIndex), Math.max(fromIndex, toIndex), size);

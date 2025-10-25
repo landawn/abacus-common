@@ -79,7 +79,7 @@ import com.landawn.abacus.util.function.Supplier;
  *   <li>Custom supplier registration for non-standard types</li>
  * </ul>
  *
- * <p>Example usage:</p>
+ * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * // Create a supplier for ArrayList
  * Supplier<List<String>> listSupplier = Suppliers.ofList();

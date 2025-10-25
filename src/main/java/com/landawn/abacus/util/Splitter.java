@@ -39,7 +39,7 @@ import com.landawn.abacus.util.stream.Stream;
  * configuration options such as trimming, stripping whitespace, omitting empty strings,
  * and limiting the number of resulting substrings.
  * 
- * <p>Example usage:</p>
+ * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * // Split by comma
  * List<String> parts = Splitter.with(",").split("a,b,c");
@@ -100,13 +100,20 @@ public final class Splitter {
     }
 
     /**
-     * Creates a Splitter with the default delimiter: ", " (comma followed by space).
+     * Returns a new Splitter instance configured with the default delimiter: ", " (comma followed by space).
      * This is the standard delimiter used in many contexts such as CSV files or
      * comma-separated lists.
      *
-     * @return a new Splitter instance configured with the default delimiter
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * List<String> parts = Splitter.defauLt().split("apple, banana, cherry");
+     * // Returns ["apple", "banana", "cherry"]
+     * }</pre>
+     *
+     * @return a new Splitter instance configured with the default delimiter ", "
+     * @see #with(CharSequence)
+     * @see #forLines()
      * @see Joiner#DEFAULT_DELIMITER
-     * @see Joiner#DEFAULT_KEY_VALUE_DELIMITER
      * @see Joiner#defauLt()
      */
     @Beta
@@ -115,11 +122,20 @@ public final class Splitter {
     }
 
     /**
-     * Creates a Splitter configured to split text by line separators.
+     * Returns a new Splitter instance configured to split text by line separators.
      * This method recognizes various line separator patterns including \n, \r, and \r\n.
      * Useful for splitting multi-line text into individual lines.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * String multiLine = "line1\nline2\r\nline3\rline4";
+     * List<String> lines = Splitter.forLines().split(multiLine);
+     * // Returns ["line1", "line2", "line3", "line4"]
+     * }</pre>
+     *
      * @return a new Splitter instance configured to split by line separators
+     * @see #with(Pattern)
+     * @see #defauLt()
      */
     @Beta
     public static Splitter forLines() {
@@ -127,11 +143,19 @@ public final class Splitter {
     }
 
     /**
-     * Creates a Splitter that uses the specified character as a delimiter.
+     * Returns a new Splitter instance that uses the specified character as a delimiter.
      * This is the most efficient option when splitting by a single character.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * List<String> parts = Splitter.with(',').split("apple,banana,cherry");
+     * // Returns ["apple", "banana", "cherry"]
+     * }</pre>
      *
      * @param delimiter the character to use as a delimiter for splitting
      * @return a new Splitter instance configured with the specified character delimiter
+     * @see #with(CharSequence)
+     * @see #with(Pattern)
      */
     public static Splitter with(final char delimiter) {
         return new Splitter((source, omitEmptyStrings, trim, strip, limit) -> {
@@ -196,14 +220,26 @@ public final class Splitter {
     }
 
     /**
-     * Creates a Splitter that uses the specified character sequence as a delimiter.
+     * Returns a new Splitter instance that uses the specified character sequence as a delimiter.
      * The delimiter is treated as a literal string, not as a pattern.
      * If the delimiter is a single character, this method delegates to the more
      * efficient single-character version.
      *
-     * @param delimiter the character sequence to use as a delimiter for splitting
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * List<String> parts = Splitter.with("::").split("a::b::c");
+     * // Returns ["a", "b", "c"]
+     *
+     * List<String> words = Splitter.with(" AND ").split("red AND green AND blue");
+     * // Returns ["red", "green", "blue"]
+     * }</pre>
+     *
+     * @param delimiter the character sequence to use as a delimiter for splitting, not {@code null} or empty
      * @return a new Splitter instance configured with the specified delimiter
-     * @throws IllegalArgumentException if the specified delimiter is null or empty
+     * @throws IllegalArgumentException if the specified delimiter is {@code null} or empty
+     * @see #with(char)
+     * @see #with(Pattern)
+     * @see #pattern(CharSequence)
      */
     public static Splitter with(final CharSequence delimiter) throws IllegalArgumentException {
         N.checkArgNotEmpty(delimiter, cs.delimiter);
@@ -294,14 +330,27 @@ public final class Splitter {
     }
 
     /**
-     * Creates a Splitter that uses the specified regular expression pattern as a delimiter.
+     * Returns a new Splitter instance that uses the specified regular expression pattern as a delimiter.
      * The pattern is applied using Java's regular expression engine. Empty strings
      * cannot be matched by the pattern.
      *
-     * @param delimiter the Pattern to use as a delimiter for splitting
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Pattern comma = Pattern.compile(",");
+     * List<String> parts = Splitter.with(comma).split("a,b,c");
+     * // Returns ["a", "b", "c"]
+     *
+     * Pattern whitespace = Pattern.compile("\\s+");
+     * List<String> words = Splitter.with(whitespace).split("one  two   three");
+     * // Returns ["one", "two", "three"]
+     * }</pre>
+     *
+     * @param delimiter the Pattern to use as a delimiter for splitting, not {@code null}
      * @return a new Splitter instance configured with the specified pattern delimiter
-     * @throws IllegalArgumentException if the specified delimiter is null, or if the
+     * @throws IllegalArgumentException if the specified delimiter is {@code null}, or if the
      *         pattern can match an empty string
+     * @see #pattern(CharSequence)
+     * @see #with(CharSequence)
      */
     public static Splitter with(final Pattern delimiter) throws IllegalArgumentException {
         N.checkArgNotNull(delimiter, cs.delimiter);
@@ -387,14 +436,25 @@ public final class Splitter {
     }
 
     /**
-     * Creates a Splitter that uses the specified regular expression as a delimiter.
+     * Returns a new Splitter instance that uses the specified regular expression as a delimiter.
      * This is a convenience method that compiles the provided regular expression
      * string into a Pattern and then creates a Splitter with it.
      *
-     * @param delimiterRegex the regular expression to use as a delimiter for splitting
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * List<String> words = Splitter.pattern("\\s+").split("one  two   three");
+     * // Returns ["one", "two", "three"]
+     *
+     * List<String> parts = Splitter.pattern("[,;]").split("a,b;c");
+     * // Returns ["a", "b", "c"]
+     * }</pre>
+     *
+     * @param delimiterRegex the regular expression to use as a delimiter for splitting, not {@code null} or empty
      * @return a new Splitter instance configured with the compiled pattern delimiter
-     * @throws IllegalArgumentException if the specified delimiter regex is null or empty,
+     * @throws IllegalArgumentException if the specified delimiter regex is {@code null} or empty,
      *         or if the resulting pattern can match an empty string
+     * @see #with(Pattern)
+     * @see #with(CharSequence)
      */
     public static Splitter pattern(final CharSequence delimiterRegex) throws IllegalArgumentException {
         N.checkArgNotEmpty(delimiterRegex, cs.delimiterRegex);
@@ -423,13 +483,17 @@ public final class Splitter {
      * Empty strings can occur when there are consecutive delimiters or when
      * delimiters appear at the beginning or end of the input.
      *
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Splitter.with(",").omitEmptyStrings().split("a,,b,")
+     * List<String> result = Splitter.with(",")
+     *     .omitEmptyStrings()
+     *     .split("a,,b,");
      * // Returns ["a", "b"] instead of ["a", "", "b", ""]
      * }</pre>
      *
      * @return this Splitter instance for method chaining
+     * @see #trimResults()
+     * @see #stripResults()
      */
     public Splitter omitEmptyStrings() {
         omitEmptyStrings = true;
@@ -458,13 +522,17 @@ public final class Splitter {
      * resulting substring. Only space characters (not all whitespace) are trimmed.
      * For trimming all whitespace characters, use {@link #stripResults()}.
      *
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Splitter.with(",").trimResults().split("a , b , c")
+     * List<String> result = Splitter.with(",")
+     *     .trimResults()
+     *     .split("a , b , c");
      * // Returns ["a", "b", "c"] instead of ["a ", " b ", " c"]
      * }</pre>
      *
      * @return this Splitter instance for method chaining
+     * @see #stripResults()
+     * @see #omitEmptyStrings()
      */
     public Splitter trimResults() {
         trimResults = true;
@@ -495,13 +563,18 @@ public final class Splitter {
      * from each resulting substring. This method removes all whitespace as defined
      * by {@link Character#isWhitespace(char)}, including spaces, tabs, newlines, etc.
      *
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Splitter.with(",").stripResults().split("a\t,\nb\t,\tc")
+     * List<String> result = Splitter.with(",")
+     *     .stripResults()
+     *     .split("a\t,\nb\t,\tc");
      * // Returns ["a", "b", "c"] with all whitespace removed
      * }</pre>
      *
      * @return this Splitter instance for method chaining
+     * @see #trimResults()
+     * @see #omitEmptyStrings()
+     * @see Character#isWhitespace(char)
      */
     public Splitter stripResults() {
         stripResults = true;
@@ -510,19 +583,22 @@ public final class Splitter {
     }
 
     /**
-     * Sets the maximum number of substrings to return when splitting. If the limit
-     * is reached, the remainder of the input string will be included in the last
+     * Configures this Splitter to limit the maximum number of substrings to return when splitting.
+     * If the limit is reached, the remainder of the input string will be included in the last
      * substring, without further splitting.
      *
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Splitter.with(",").limit(2).split("a,b,c,d")
+     * List<String> result = Splitter.with(",")
+     *     .limit(2)
+     *     .split("a,b,c,d");
      * // Returns ["a", "b,c,d"]
      * }</pre>
      *
      * @param limit the maximum number of substrings to return; must be positive
      * @return this Splitter instance for method chaining
      * @throws IllegalArgumentException if the provided limit is not a positive integer
+     * @see #split(CharSequence)
      */
     public Splitter limit(final int limit) throws IllegalArgumentException {
         N.checkArgPositive(limit, cs.limit);
@@ -541,14 +617,19 @@ public final class Splitter {
      * including the delimiter type, whether to omit empty strings, whether to trim
      * or strip whitespace, and any configured limit on the number of results.</p>
      *
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * List<String> parts = Splitter.with(",").split("a,b,c");
      * // Returns ["a", "b", "c"]
      * }</pre>
      *
-     * @param source the CharSequence to split; may be null
-     * @return a new ArrayList containing the split results; returns an empty list if source is null
+     * @param source the CharSequence to split; may be {@code null}
+     * @return a new ArrayList containing the split results; returns an empty list if source is {@code null}
+     * @see #split(CharSequence, Supplier)
+     * @see #split(CharSequence, Function)
+     * @see #split(CharSequence, Class)
+     * @see #splitToArray(CharSequence)
+     * @see #splitToStream(CharSequence)
      */
     public List<String> split(final CharSequence source) {
         final List<String> result = new ArrayList<>();
@@ -563,7 +644,7 @@ public final class Splitter {
      * returns the results in a Collection created by the provided supplier. This
      * method allows control over the type of collection used to store the results.
      *
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * LinkedHashSet<String> uniqueParts = Splitter.with(",")
      *     .split("a,b,a,c", LinkedHashSet::new);
@@ -571,9 +652,11 @@ public final class Splitter {
      * }</pre>
      *
      * @param <C> the type of Collection to return
-     * @param source the CharSequence to split; may be null
+     * @param source the CharSequence to split; may be {@code null}
      * @param supplier a Supplier that creates a new Collection instance to hold the results
      * @return the Collection created by the supplier, populated with the split results
+     * @see #split(CharSequence)
+     * @see #split(CharSequence, Class, Supplier)
      */
     public <C extends Collection<String>> C split(final CharSequence source, final Supplier<? extends C> supplier) {
         final C result = supplier.get();
@@ -588,7 +671,7 @@ public final class Splitter {
      * applies the provided mapping function to each resulting substring. This allows
      * transformation of split strings into a different type in a single operation.
      *
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * List<Integer> numbers = Splitter.with(",")
      *     .split("1,2,3", Integer::parseInt);
@@ -596,9 +679,12 @@ public final class Splitter {
      * }</pre>
      *
      * @param <T> the type of elements in the result list
-     * @param source the CharSequence to split; may be null
+     * @param source the CharSequence to split; may be {@code null}
      * @param mapper a function to apply to each split string
-     * @return a List containing the mapped results
+     * @return a new List containing the mapped results
+     * @see #split(CharSequence)
+     * @see #split(CharSequence, Class)
+     * @see #splitThenApply(CharSequence, Function)
      */
     public <T> List<T> split(final CharSequence source, final Function<? super String, ? extends T> mapper) {
         final List<String> tmp = new ArrayList<>();
@@ -620,7 +706,7 @@ public final class Splitter {
      * type system's valueOf method. This is useful for parsing strings into
      * primitive wrappers, enums, or other types with standard string conversion.
      *
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * List<Integer> numbers = Splitter.with(",").split("10,20,30", Integer.class);
      * // Returns [10, 20, 30]
@@ -630,10 +716,13 @@ public final class Splitter {
      * }</pre>
      *
      * @param <T> the target type for conversion
-     * @param source the CharSequence to split; may be null
-     * @param targetType the Class representing the type to convert each substring to
-     * @return a List containing the converted results
-     * @throws IllegalArgumentException if targetType is null
+     * @param source the CharSequence to split; may be {@code null}
+     * @param targetType the Class representing the type to convert each substring to, not {@code null}
+     * @return a new List containing the converted results
+     * @throws IllegalArgumentException if targetType is {@code null}
+     * @see #split(CharSequence, Type)
+     * @see #split(CharSequence, Class, Supplier)
+     * @see #splitToArray(CharSequence, Class)
      */
     public <T> List<T> split(final CharSequence source, final Class<? extends T> targetType) throws IllegalArgumentException {
         N.checkArgNotNull(targetType, cs.targetType);
@@ -649,7 +738,7 @@ public final class Splitter {
      * the results in a Collection created by the provided supplier. This provides
      * control over both the conversion type and the collection type.
      *
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Set<Integer> uniqueNumbers = Splitter.with(",")
      *     .split("1,2,1,3", Integer.class, HashSet::new);
@@ -658,7 +747,7 @@ public final class Splitter {
      *
      * @param <T> the target type for conversion
      * @param <C> the type of Collection to return
-     * @param source the CharSequence to split; may be null
+     * @param source the CharSequence to split; may be {@code null}
      * @param targetType the Class representing the type to convert each substring to
      * @param supplier a Supplier that creates a new Collection instance to hold the results
      * @return the Collection created by the supplier, populated with the converted results
@@ -682,7 +771,7 @@ public final class Splitter {
      * process compared to using Class objects.</p>
      *
      * @param <T> the target type for conversion
-     * @param source the CharSequence to split; may be null
+     * @param source the CharSequence to split; may be {@code null}
      * @param targetType the Type instance used for converting strings to the target type
      * @return a List containing the converted results
      * @throws IllegalArgumentException if targetType is null
@@ -706,7 +795,7 @@ public final class Splitter {
      *
      * @param <T> the target type for conversion
      * @param <C> the type of Collection to return
-     * @param source the CharSequence to split; may be null
+     * @param source the CharSequence to split; may be {@code null}
      * @param targetType the Type instance used for converting strings to the target type
      * @param supplier a Supplier that creates a new Collection instance to hold the results
      * @return the Collection created by the supplier, populated with the converted results
@@ -725,7 +814,7 @@ public final class Splitter {
      * is useful when you want to append split results to an existing collection
      * rather than creating a new one.
      *
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * List<String> allParts = new ArrayList<>();
      * Splitter.with(",").split("a,b", allParts);
@@ -734,9 +823,11 @@ public final class Splitter {
      * }</pre>
      *
      * @param <C> the type of Collection to populate
-     * @param source the CharSequence to split; may be null
-     * @param output the Collection to add the split results to
-     * @throws IllegalArgumentException if output is null
+     * @param source the CharSequence to split; may be {@code null}
+     * @param output the Collection to add the split results to, not {@code null}
+     * @throws IllegalArgumentException if output is {@code null}
+     * @see #split(CharSequence)
+     * @see #split(CharSequence, Supplier)
      */
     public <C extends Collection<String>> void split(final CharSequence source, final C output) throws IllegalArgumentException {
         N.checkArgNotNull(output, cs.output);
@@ -754,7 +845,7 @@ public final class Splitter {
      * the converted values to the provided output collection. This method is
      * useful for appending parsed values to an existing collection.
      *
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * List<Integer> numbers = new ArrayList<>();
      * Splitter.with(",").split("1,2,3", Integer.class, numbers);
@@ -764,7 +855,7 @@ public final class Splitter {
      *
      * @param <T> the target type for conversion
      * @param <C> the type of Collection to populate
-     * @param source the CharSequence to split; may be null
+     * @param source the CharSequence to split; may be {@code null}
      * @param targetType the Class representing the type to convert each substring to
      * @param output the Collection to add the converted results to
      * @throws IllegalArgumentException if targetType or output is null
@@ -788,7 +879,7 @@ public final class Splitter {
      *
      * @param <T> the target type for conversion
      * @param <C> the type of Collection to populate
-     * @param source the CharSequence to split; may be null
+     * @param source the CharSequence to split; may be {@code null}
      * @param targetType the Type instance used for converting strings to the target type
      * @param output the Collection to add the converted results to
      * @throws IllegalArgumentException if targetType or output is null
@@ -810,14 +901,16 @@ public final class Splitter {
      * returns the results as an ImmutableList. The returned list cannot be modified,
      * providing a safe, read-only view of the split results.
      *
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ImmutableList<String> parts = Splitter.with(",").splitToImmutableList("a,b,c");
      * // Returns an immutable list ["a", "b", "c"]
      * }</pre>
      *
-     * @param source the CharSequence to split; may be null
+     * @param source the CharSequence to split; may be {@code null}
      * @return an ImmutableList containing the split results
+     * @see #split(CharSequence)
+     * @see #splitToImmutableList(CharSequence, Class)
      */
     public ImmutableList<String> splitToImmutableList(final CharSequence source) {
         return ImmutableList.wrap(split(source));
@@ -829,7 +922,7 @@ public final class Splitter {
      * the results as an ImmutableList. The returned list cannot be modified,
      * providing a safe, read-only view of the converted results.
      *
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ImmutableList<Integer> numbers = Splitter.with(",")
      *     .splitToImmutableList("1,2,3", Integer.class);
@@ -837,7 +930,7 @@ public final class Splitter {
      * }</pre>
      *
      * @param <T> the target type for conversion
-     * @param source the CharSequence to split; may be null
+     * @param source the CharSequence to split; may be {@code null}
      * @param targetType the Class representing the type to convert each substring to
      * @return an ImmutableList containing the converted results
      */
@@ -850,14 +943,17 @@ public final class Splitter {
      * returns the results as a String array. This is useful when an array is
      * preferred over a List.
      *
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String[] parts = Splitter.with(",").splitToArray("a,b,c");
      * // Returns ["a", "b", "c"]
      * }</pre>
      *
-     * @param source the CharSequence to split; may be null
-     * @return a String array containing the split results; returns an empty array if source is null
+     * @param source the CharSequence to split; may be {@code null}
+     * @return a String array containing the split results; returns an empty array if source is {@code null}
+     * @see #split(CharSequence)
+     * @see #splitToArray(CharSequence, Function)
+     * @see #splitToArray(CharSequence, Class)
      */
     public String[] splitToArray(final CharSequence source) {
         final List<String> substrs = split(source);
@@ -871,14 +967,14 @@ public final class Splitter {
      * returns the results as a String array. This combines splitting, mapping,
      * and array conversion in a single operation.
      *
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String[] upper = Splitter.with(",")
      *     .splitToArray("a,b,c", String::toUpperCase);
      * // Returns ["A", "B", "C"]
      * }</pre>
      *
-     * @param source the CharSequence to split; may be null
+     * @param source the CharSequence to split; may be {@code null}
      * @param mapper a function to apply to each split string
      * @return a String array containing the mapped results
      */
@@ -897,7 +993,7 @@ public final class Splitter {
      * <p>This method handles both primitive arrays (e.g., int[], double[]) and
      * object arrays (e.g., Integer[], String[]).</p>
      *
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Integer[] numbers = Splitter.with(",").splitToArray("1,2,3", Integer[].class);
      * // Returns [1, 2, 3]
@@ -907,7 +1003,7 @@ public final class Splitter {
      * }</pre>
      *
      * @param <T> the array type
-     * @param source the CharSequence to split; may be null
+     * @param source the CharSequence to split; may be {@code null}
      * @param arrayType the Class object representing the desired array type
      * @return an array of the specified type containing the split and converted results
      * @throws IllegalArgumentException if arrayType is null or not an array type
@@ -949,14 +1045,14 @@ public final class Splitter {
      * array.length results are stored. This method is useful when you want to
      * reuse an existing array or have pre-allocated storage.
      *
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String[] parts = new String[3];
      * Splitter.with(",").splitToArray("a,b,c,d", parts);
      * // parts now contains ["a", "b", "c"] (4th element "d" is not stored)
      * }</pre>
      *
-     * @param source the CharSequence to split; may be null
+     * @param source the CharSequence to split; may be {@code null}
      * @param output the String array to populate with split results
      * @throws IllegalArgumentException if output is null or empty
      */
@@ -979,7 +1075,7 @@ public final class Splitter {
      * <p>The stream evaluation is lazy - substrings are produced on-demand as
      * the stream is consumed, making this memory-efficient for large inputs.</p>
      *
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * long count = Splitter.with(",")
      *     .splitToStream("a,b,c,d,e")
@@ -988,8 +1084,10 @@ public final class Splitter {
      * // Returns 5
      * }</pre>
      *
-     * @param source the CharSequence to split; may be null
-     * @return a Stream containing the split results
+     * @param source the CharSequence to split; may be {@code null}
+     * @return a Stream containing the split results; returns an empty stream if source is {@code null}
+     * @see #split(CharSequence)
+     * @see #splitAndForEach(CharSequence, Consumer)
      */
     public Stream<String> splitToStream(final CharSequence source) {
         return Stream.of(iterate(source));
@@ -1001,7 +1099,7 @@ public final class Splitter {
      * useful for transforming or aggregating the split results in a single operation,
      * combining the split and transformation steps.
      *
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String joined = Splitter.with(",")
      *     .splitThenApply("a,b,c", list -> String.join("-", list));
@@ -1015,9 +1113,11 @@ public final class Splitter {
      * }</pre>
      *
      * @param <R> the type of the result
-     * @param source the CharSequence to split; may be null
+     * @param source the CharSequence to split; may be {@code null}
      * @param converter a function that transforms the list of split strings into a result
      * @return the result of applying the converter function to the split results
+     * @see #split(CharSequence)
+     * @see #splitThenAccept(CharSequence, Consumer)
      */
     public <R> R splitThenApply(final CharSequence source, final Function<? super List<String>, R> converter) {
         return converter.apply(split(source));
@@ -1029,7 +1129,7 @@ public final class Splitter {
      * useful for performing side effects with the split results, such as logging
      * or validation operations.
      *
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Splitter.with(",").splitThenAccept("a,b,c", list -> {
      *     System.out.println("Split into " + list.size() + " parts");
@@ -1037,8 +1137,11 @@ public final class Splitter {
      * });
      * }</pre>
      *
-     * @param source the CharSequence to split; may be null
+     * @param source the CharSequence to split; may be {@code null}
      * @param consumer a consumer that processes the list of split strings
+     * @see #split(CharSequence)
+     * @see #splitThenApply(CharSequence, Function)
+     * @see #splitAndForEach(CharSequence, Consumer)
      */
     public void splitThenAccept(final CharSequence source, final Consumer<? super List<String>> consumer) {
         consumer.accept(split(source));
@@ -1053,7 +1156,7 @@ public final class Splitter {
      * <p>This method provides lazy evaluation - the action is applied to each
      * substring immediately as it's split, without storing all results in memory.</p>
      *
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Splitter.with(",").splitAndForEach("a,b,c", part -> {
      *     System.out.println("Processing: " + part);
@@ -1061,8 +1164,10 @@ public final class Splitter {
      * // Prints each part as it's split
      * }</pre>
      *
-     * @param source the CharSequence to split; may be null
+     * @param source the CharSequence to split; may be {@code null}
      * @param action the Consumer to apply to each resulting substring
+     * @see #splitToStream(CharSequence)
+     * @see #splitThenAccept(CharSequence, Consumer)
      */
     @Beta
     public void splitAndForEach(final CharSequence source, final Consumer<? super String> action) {
@@ -1095,7 +1200,7 @@ public final class Splitter {
      * strings into Map objects, with support for various configuration options
      * such as trimming, stripping whitespace, and omitting empty entries.</p>
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Map<String, String> map = MapSplitter.with(",", "=")
      *     .split("a=1,b=2,c=3");
@@ -1118,8 +1223,8 @@ public final class Splitter {
         /**
          * Instantiates a new map splitter.
          *
-         * @param entrySplitter
-         * @param keyValueSplitter
+         * @param entrySplitter the Splitter to use for splitting entries
+         * @param keyValueSplitter the Splitter to use for splitting key-value pairs
          */
         MapSplitter(final Splitter entrySplitter, final Splitter keyValueSplitter) {
             this.entrySplitter = entrySplitter;
@@ -1127,11 +1232,18 @@ public final class Splitter {
         }
 
         /**
-         * Creates a MapSplitter with the default entry and key-value delimiters.
+         * Returns a new MapSplitter instance configured with the default entry and key-value delimiters.
          * The default entry delimiter is ", " (comma followed by space) and the
          * default key-value delimiter is "=" (equals sign).
          *
-         * @return a new MapSplitter instance with default delimiters
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * Map<String, String> map = MapSplitter.defauLt().split("name=John, age=30, city=NYC");
+         * // Returns {name=John, age=30, city=NYC}
+         * }</pre>
+         *
+         * @return a new MapSplitter instance with default delimiters ", " and "="
+         * @see #with(CharSequence, CharSequence)
          * @see Joiner#DEFAULT_DELIMITER
          * @see Joiner#DEFAULT_KEY_VALUE_DELIMITER
          * @see Joiner#defauLt()
@@ -1142,14 +1254,25 @@ public final class Splitter {
         }
 
         /**
-         * Creates a MapSplitter with the specified entry and key-value delimiters.
+         * Returns a new MapSplitter instance with the specified entry and key-value delimiters.
          * The entry delimiter separates different key-value pairs, while the
          * key-value delimiter separates keys from values within each pair.
          *
-         * @param entryDelimiter the delimiter that separates entries (key-value pairs)
-         * @param keyValueDelimiter the delimiter that separates keys from values
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * Map<String, String> map = MapSplitter.with(",", "=").split("a=1,b=2,c=3");
+         * // Returns {a=1, b=2, c=3}
+         *
+         * Map<String, String> config = MapSplitter.with(";", ":").split("host:localhost;port:8080");
+         * // Returns {host=localhost, port=8080}
+         * }</pre>
+         *
+         * @param entryDelimiter the delimiter that separates entries (key-value pairs), not {@code null} or empty
+         * @param keyValueDelimiter the delimiter that separates keys from values, not {@code null} or empty
          * @return a new MapSplitter instance with the specified delimiters
-         * @throws IllegalArgumentException if either delimiter is null or empty
+         * @throws IllegalArgumentException if either delimiter is {@code null} or empty
+         * @see #with(Pattern, Pattern)
+         * @see #pattern(CharSequence, CharSequence)
          * @see Splitter#with(CharSequence)
          */
         public static MapSplitter with(final CharSequence entryDelimiter, final CharSequence keyValueDelimiter) throws IllegalArgumentException {
@@ -1157,14 +1280,25 @@ public final class Splitter {
         }
 
         /**
-         * Creates a MapSplitter with the specified entry and key-value delimiter patterns.
+         * Returns a new MapSplitter instance with the specified entry and key-value delimiter patterns.
          * The patterns are used as regular expressions for splitting.
          *
-         * @param entryDelimiter the Pattern that separates entries (key-value pairs)
-         * @param keyValueDelimiter the Pattern that separates keys from values
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * Pattern comma = Pattern.compile("[,;]");
+         * Pattern equals = Pattern.compile("[=:]");
+         * Map<String, String> map = MapSplitter.with(comma, equals)
+         *     .split("a=1,b:2;c=3");
+         * // Returns {a=1, b=2, c=3}
+         * }</pre>
+         *
+         * @param entryDelimiter the Pattern that separates entries (key-value pairs), not {@code null}
+         * @param keyValueDelimiter the Pattern that separates keys from values, not {@code null}
          * @return a new MapSplitter instance with the specified pattern delimiters
-         * @throws IllegalArgumentException if either delimiter is null, or if either
+         * @throws IllegalArgumentException if either delimiter is {@code null}, or if either
          *         pattern can match an empty string
+         * @see #with(CharSequence, CharSequence)
+         * @see #pattern(CharSequence, CharSequence)
          * @see Splitter#with(Pattern)
          */
         public static MapSplitter with(final Pattern entryDelimiter, final Pattern keyValueDelimiter) throws IllegalArgumentException {
@@ -1172,15 +1306,24 @@ public final class Splitter {
         }
 
         /**
-         * Creates a MapSplitter with the specified entry and key-value delimiter
+         * Returns a new MapSplitter instance with the specified entry and key-value delimiter
          * regular expressions. The regular expressions are compiled into Patterns
          * and used for splitting.
          *
-         * @param entryDelimiterRegex the regular expression that separates entries
-         * @param keyValueDelimiterRegex the regular expression that separates keys from values
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * Map<String, String> map = MapSplitter.pattern("[,;]", "[=:]")
+         *     .split("a=1,b:2;c=3");
+         * // Returns {a=1, b=2, c=3}
+         * }</pre>
+         *
+         * @param entryDelimiterRegex the regular expression that separates entries, not {@code null} or empty
+         * @param keyValueDelimiterRegex the regular expression that separates keys from values, not {@code null} or empty
          * @return a new MapSplitter instance with the compiled pattern delimiters
-         * @throws IllegalArgumentException if either regex is null or empty, or if
+         * @throws IllegalArgumentException if either regex is {@code null} or empty, or if
          *         the compiled patterns can match an empty string
+         * @see #with(Pattern, Pattern)
+         * @see #with(CharSequence, CharSequence)
          * @see Splitter#pattern(CharSequence)
          */
         public static MapSplitter pattern(final CharSequence entryDelimiterRegex, final CharSequence keyValueDelimiterRegex) throws IllegalArgumentException {
@@ -1207,7 +1350,7 @@ public final class Splitter {
          * This applies to the entries splitting phase, filtering out entries
          * that would result in empty strings after splitting.
          *
-         * <p>Example:</p>
+         * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * Map<String, String> map = MapSplitter.with(",", "=")
          *     .omitEmptyStrings()
@@ -1216,6 +1359,8 @@ public final class Splitter {
          * }</pre>
          *
          * @return this MapSplitter instance for method chaining
+         * @see #trimResults()
+         * @see #stripResults()
          */
         public MapSplitter omitEmptyStrings() {
             entrySplitter.omitEmptyStrings();
@@ -1245,7 +1390,7 @@ public final class Splitter {
          * without surrounding spaces. Only space characters are trimmed, not all
          * whitespace.
          *
-         * <p>Example:</p>
+         * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * Map<String, String> map = MapSplitter.with(",", "=")
          *     .trimResults()
@@ -1254,6 +1399,8 @@ public final class Splitter {
          * }</pre>
          *
          * @return this MapSplitter instance for method chaining
+         * @see #stripResults()
+         * @see #omitEmptyStrings()
          */
         public MapSplitter trimResults() {
             entrySplitter.trimResults();
@@ -1286,7 +1433,7 @@ public final class Splitter {
          * of whitespace as defined by {@link Character#isWhitespace(char)}, including
          * spaces, tabs, newlines, and other Unicode whitespace characters.
          *
-         * <p>Example:</p>
+         * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * Map<String, String> map = MapSplitter.with(",", "=")
          *     .stripResults()
@@ -1295,6 +1442,9 @@ public final class Splitter {
          * }</pre>
          *
          * @return this MapSplitter instance for method chaining
+         * @see #trimResults()
+         * @see #omitEmptyStrings()
+         * @see Character#isWhitespace(char)
          */
         public MapSplitter stripResults() {
             entrySplitter.stripResults();
@@ -1321,7 +1471,7 @@ public final class Splitter {
          *   <li>This is consistent with {@code String.split()} limit behavior</li>
          * </ul>
          *
-         * <p>Examples:</p>
+         * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * MapSplitter splitter = MapSplitter.with(",", "=");
          *
@@ -1383,15 +1533,19 @@ public final class Splitter {
          * strings. Each entry is split by the entry delimiter, then each entry is
          * split by the key-value delimiter to produce key-value pairs.</p>
          *
-         * <p>Example:</p>
+         * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * Map<String, String> map = MapSplitter.with(",", "=")
          *     .split("name=John,age=30,city=NYC");
          * // Returns {name=John, age=30, city=NYC}
          * }</pre>
          *
-         * @param source the CharSequence to split into a map; may be null
+         * @param source the CharSequence to split into a map; may be {@code null}
          * @return a LinkedHashMap containing the parsed key-value pairs
+         * @see #split(CharSequence, Supplier)
+         * @see #split(CharSequence, Class, Class)
+         * @see #splitToImmutableMap(CharSequence)
+         * @see #splitToStream(CharSequence)
          */
         public Map<String, String> split(final CharSequence source) {
             final LinkedHashMap<String, String> result = new LinkedHashMap<>();
@@ -1407,7 +1561,7 @@ public final class Splitter {
          * created by the provided supplier. This allows control over the Map
          * implementation used to store results.
          *
-         * <p>Example:</p>
+         * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * TreeMap<String, String> sorted = MapSplitter.with(",", "=")
          *     .split("z=3,a=1,m=2", TreeMap::new);
@@ -1415,7 +1569,7 @@ public final class Splitter {
          * }</pre>
          *
          * @param <M> the type of Map to return
-         * @param source the CharSequence to split into a map; may be null
+         * @param source the CharSequence to split into a map; may be {@code null}
          * @param supplier a Supplier that creates a new Map instance to hold the results
          * @return the Map created by the supplier, populated with the parsed key-value pairs
          */
@@ -1433,7 +1587,7 @@ public final class Splitter {
          * value string is automatically converted to the target types using the type
          * system's valueOf method.
          *
-         * <p>Example:</p>
+         * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * Map<Integer, Double> map = MapSplitter.with(",", ":")
          *     .split("1:1.5,2:2.5,3:3.5", Integer.class, Double.class);
@@ -1442,11 +1596,14 @@ public final class Splitter {
          *
          * @param <K> the key type
          * @param <V> the value type
-         * @param source the CharSequence to split into a map; may be null
-         * @param keyType the Class representing the type to convert keys to
-         * @param valueType the Class representing the type to convert values to
+         * @param source the CharSequence to split into a map; may be {@code null}
+         * @param keyType the Class representing the type to convert keys to, not {@code null}
+         * @param valueType the Class representing the type to convert values to, not {@code null}
          * @return a LinkedHashMap containing the parsed and converted key-value pairs
-         * @throws IllegalArgumentException if keyType or valueType is null
+         * @throws IllegalArgumentException if keyType or valueType is {@code null}
+         * @see #split(CharSequence)
+         * @see #split(CharSequence, Type, Type)
+         * @see #split(CharSequence, Class, Class, Supplier)
          */
         public <K, V> Map<K, V> split(final CharSequence source, final Class<K> keyType, final Class<V> valueType) throws IllegalArgumentException {
             N.checkArgNotNull(keyType, cs.keyType);
@@ -1466,7 +1623,7 @@ public final class Splitter {
          *
          * @param <K> the key type
          * @param <V> the value type
-         * @param source the CharSequence to split into a map; may be null
+         * @param source the CharSequence to split into a map; may be {@code null}
          * @param keyType the Type instance used for converting strings to keys
          * @param valueType the Type instance used for converting strings to values
          * @return a LinkedHashMap containing the parsed and converted key-value pairs
@@ -1489,7 +1646,7 @@ public final class Splitter {
          * provided supplier. This provides control over both the conversion types and
          * the Map implementation.
          *
-         * <p>Example:</p>
+         * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * TreeMap<String, Integer> sorted = MapSplitter.with(",", "=")
          *     .split("z=3,a=1,m=2", String.class, Integer.class, TreeMap::new);
@@ -1499,7 +1656,7 @@ public final class Splitter {
          * @param <K> the key type
          * @param <V> the value type
          * @param <M> the type of Map to return
-         * @param source the CharSequence to split into a map; may be null
+         * @param source the CharSequence to split into a map; may be {@code null}
          * @param keyType the Class representing the type to convert keys to
          * @param valueType the Class representing the type to convert values to
          * @param supplier a Supplier that creates a new Map instance to hold the results
@@ -1523,7 +1680,7 @@ public final class Splitter {
          * @param <K> the key type
          * @param <V> the value type
          * @param <M> the type of Map to return
-         * @param source the CharSequence to split into a map; may be null
+         * @param source the CharSequence to split into a map; may be {@code null}
          * @param keyType the Type instance used for converting strings to keys
          * @param valueType the Type instance used for converting strings to values
          * @param supplier a Supplier that creates a new Map instance to hold the results
@@ -1546,7 +1703,7 @@ public final class Splitter {
          * <p>Each entry must contain exactly one key-value delimiter. Entries with
          * no delimiter or more than one delimiter will cause an IllegalArgumentException.</p>
          *
-         * <p>Example:</p>
+         * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * Map<String, String> config = new HashMap<>();
          * MapSplitter.with(",", "=").split("a=1,b=2", config);
@@ -1555,7 +1712,7 @@ public final class Splitter {
          * }</pre>
          *
          * @param <M> the type of Map to populate
-         * @param source the CharSequence to split into a map; may be null
+         * @param source the CharSequence to split into a map; may be {@code null}
          * @param output the Map to add the parsed key-value pairs to
          * @throws IllegalArgumentException if output is null, or if any entry string
          *         cannot be properly parsed into a key-value pair
@@ -1599,7 +1756,7 @@ public final class Splitter {
          * the specified types, and adds them to the provided output map. This method
          * is useful for appending converted entries to an existing map.
          *
-         * <p>Example:</p>
+         * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * Map<Integer, String> data = new HashMap<>();
          * MapSplitter.with(",", ":").split("1:apple,2:banana", Integer.class, String.class, data);
@@ -1609,7 +1766,7 @@ public final class Splitter {
          * @param <K> the key type
          * @param <V> the value type
          * @param <M> the type of Map to populate
-         * @param source the CharSequence to split into a map; may be null
+         * @param source the CharSequence to split into a map; may be {@code null}
          * @param keyType the Class representing the type to convert keys to
          * @param valueType the Class representing the type to convert values to
          * @param output the Map to add the converted key-value pairs to
@@ -1636,7 +1793,7 @@ public final class Splitter {
          * @param <K> the key type
          * @param <V> the value type
          * @param <M> the type of Map to populate
-         * @param source the CharSequence to split into a map; may be null
+         * @param source the CharSequence to split into a map; may be {@code null}
          * @param keyType the Type instance used for converting strings to keys
          * @param valueType the Type instance used for converting strings to values
          * @param output the Map to add the converted key-value pairs to
@@ -1685,14 +1842,14 @@ public final class Splitter {
          * and returns the results as an ImmutableMap. The returned map cannot be modified,
          * providing a safe, read-only view of the parsed entries.
          *
-         * <p>Example:</p>
+         * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * ImmutableMap<String, String> config = MapSplitter.with(",", "=")
          *     .splitToImmutableMap("host=localhost,port=8080");
          * // Returns an immutable map {host=localhost, port=8080}
          * }</pre>
          *
-         * @param source the CharSequence to split into a map; may be null
+         * @param source the CharSequence to split into a map; may be {@code null}
          * @return an ImmutableMap containing the parsed key-value pairs
          */
         public ImmutableMap<String, String> splitToImmutableMap(final CharSequence source) {
@@ -1705,7 +1862,7 @@ public final class Splitter {
          * The returned map cannot be modified, providing a safe, read-only view
          * of the converted entries.
          *
-         * <p>Example:</p>
+         * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * ImmutableMap<Integer, String> data = MapSplitter.with(",", ":")
          *     .splitToImmutableMap("1:apple,2:banana", Integer.class, String.class);
@@ -1714,7 +1871,7 @@ public final class Splitter {
          *
          * @param <K> the key type
          * @param <V> the value type
-         * @param source the CharSequence to split into a map; may be null
+         * @param source the CharSequence to split into a map; may be {@code null}
          * @param keyType the Class representing the type to convert keys to
          * @param valueType the Class representing the type to convert values to
          * @return an ImmutableMap containing the parsed and converted key-value pairs
@@ -1732,7 +1889,7 @@ public final class Splitter {
          * <p>The stream evaluation is lazy - entries are produced on-demand as the
          * stream is consumed, making this memory-efficient for large inputs.</p>
          *
-         * <p>Example:</p>
+         * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * long count = MapSplitter.with(",", "=")
          *     .splitToStream("a=1,b=2,c=3")
@@ -1741,10 +1898,12 @@ public final class Splitter {
          * // Returns 1
          * }</pre>
          *
-         * @param source the CharSequence to split into entries; may be null
-         * @return a Stream of Map.Entry objects containing the parsed key-value pairs
+         * @param source the CharSequence to split into entries; may be {@code null}
+         * @return a Stream of Map.Entry objects containing the parsed key-value pairs; returns an empty stream if source is {@code null}
          * @throws IllegalArgumentException if any entry string cannot be properly
          *         parsed into a key-value pair during iteration
+         * @see #split(CharSequence)
+         * @see #splitToEntryStream(CharSequence)
          */
         public Stream<Map.Entry<String, String>> splitToStream(final CharSequence source) {
             entrySplitter.omitEmptyStrings();
@@ -1806,7 +1965,7 @@ public final class Splitter {
          * key-value pairs, such as filtering by keys or values, mapping entries,
          * and collecting to maps.
          *
-         * <p>Example:</p>
+         * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * Map<String, String> filtered = MapSplitter.with(",", "=")
          *     .splitToEntryStream("a=1,b=2,c=3")
@@ -1815,7 +1974,7 @@ public final class Splitter {
          * // Returns {a=1, c=3}
          * }</pre>
          *
-         * @param source the CharSequence to split into entries; may be null
+         * @param source the CharSequence to split into entries; may be {@code null}
          * @return an EntryStream containing the parsed key-value pairs
          */
         public EntryStream<String, String> splitToEntryStream(final CharSequence source) {
@@ -1829,7 +1988,7 @@ public final class Splitter {
          * or aggregating the map in a single operation, combining the split and
          * transformation steps.
          *
-         * <p>Example:</p>
+         * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * int valueSum = MapSplitter.with(",", "=")
          *     .splitThenApply("a=1,b=2,c=3", map ->
@@ -1840,9 +1999,11 @@ public final class Splitter {
          * }</pre>
          *
          * @param <T> the type of the result
-         * @param source the CharSequence to split into a map; may be null
+         * @param source the CharSequence to split into a map; may be {@code null}
          * @param converter a function that transforms the parsed map into a result
          * @return the result of applying the converter function to the parsed map
+         * @see #split(CharSequence)
+         * @see #splitThenAccept(CharSequence, Consumer)
          */
         public <T> T splitThenApply(final CharSequence source, final Function<? super Map<String, String>, T> converter) {
             return converter.apply(split(source));
@@ -1853,7 +2014,7 @@ public final class Splitter {
          * consumer. This is useful for performing side effects with the parsed map,
          * such as logging, validation, or populating external data structures.
          *
-         * <p>Example:</p>
+         * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * MapSplitter.with(",", "=").splitThenAccept("a=1,b=2", map -> {
          *     System.out.println("Parsed " + map.size() + " entries");
@@ -1861,8 +2022,10 @@ public final class Splitter {
          * });
          * }</pre>
          *
-         * @param source the CharSequence to split into a map; may be null
+         * @param source the CharSequence to split into a map; may be {@code null}
          * @param consumer a consumer that processes the parsed map
+         * @see #split(CharSequence)
+         * @see #splitThenApply(CharSequence, Function)
          */
         public void splitThenAccept(final CharSequence source, final Consumer<? super Map<String, String>> consumer) {
             consumer.accept(split(source));
@@ -1881,7 +2044,7 @@ public final class Splitter {
          * and the provided configuration options. This method returns an iterator that
          * produces split substrings lazily on-demand.
          *
-         * @param toSplit the CharSequence to be split; may be null
+         * @param toSplit the CharSequence to be split; may be {@code null}
          * @param omitEmptyStrings true to omit empty strings from results
          * @param trim true to trim leading and trailing spaces from each substring
          * @param strip true to strip all whitespace from each substring

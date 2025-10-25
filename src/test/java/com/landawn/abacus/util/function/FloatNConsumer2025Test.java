@@ -68,7 +68,8 @@ public class FloatNConsumer2025Test extends TestBase {
     @Test
     public void testFunctionalInterfaceContract() {
         assertDoesNotThrow(() -> {
-            final FloatNConsumer consumer = args -> { };
+            final FloatNConsumer consumer = args -> {
+            };
             consumer.accept(1.0f, 2.0f, 3.0f);
         });
     }

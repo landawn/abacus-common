@@ -22,7 +22,7 @@ package com.landawn.abacus.util;
  * 
  * <p>The class is immutable and extends {@link AbstractIndexed}.</p>
  * 
- * <p>Example usage:</p>
+ * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * IndexedInt indexedInt = IndexedInt.of(42, 5);
  * int value = indexedInt.value(); // 42
@@ -56,7 +56,7 @@ public final class IndexedInt extends AbstractIndexed {
     /**
      * Creates a new IndexedInt instance with the specified value and index.
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * IndexedInt indexed = IndexedInt.of(42, 5);
      * }</pre>
@@ -77,7 +77,7 @@ public final class IndexedInt extends AbstractIndexed {
      * 
      * <p>This overload accepts a long index for cases where the index might exceed Integer.MAX_VALUE.</p>
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * IndexedInt indexed = IndexedInt.of(42, 5000000000L);
      * }</pre>
@@ -96,7 +96,7 @@ public final class IndexedInt extends AbstractIndexed {
     /**
      * Returns the int value stored in this IndexedInt instance.
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * IndexedInt indexed = IndexedInt.of(42, 5);
      * int value = indexed.value(); // 42
@@ -125,7 +125,7 @@ public final class IndexedInt extends AbstractIndexed {
      * 
      * <p>Two IndexedInt instances are equal if they have the same index and value.</p>
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * IndexedInt indexed1 = IndexedInt.of(42, 5);
      * IndexedInt indexed2 = IndexedInt.of(42, 5);
@@ -148,7 +148,7 @@ public final class IndexedInt extends AbstractIndexed {
      * 
      * <p>The format is: [index]=value</p>
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * IndexedInt indexed = IndexedInt.of(42, 5);
      * System.out.println(indexed); // prints: [5]=42

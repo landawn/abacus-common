@@ -36,7 +36,7 @@ public interface ToShortBiFunction<T, U> {
      * <p>Note: Care should be taken to ensure the result fits within the short range
      * (-32,768 to 32,767) to avoid overflow.
      * 
-     * <p>Example usage:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ToShortBiFunction<Integer, Integer> adder = (a, b) -> (short)(a + b);
      * short sum = adder.applyAsShort(100, 200); // returns 300

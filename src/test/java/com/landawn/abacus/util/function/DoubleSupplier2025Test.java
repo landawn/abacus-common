@@ -112,7 +112,7 @@ public class DoubleSupplier2025Test extends TestBase {
 
     @Test
     public void testGetAsDouble_WithExternalState() {
-        final double[] counter = {0.0};
+        final double[] counter = { 0.0 };
         DoubleSupplier supplier = () -> {
             counter[0] += 1.0;
             return counter[0];

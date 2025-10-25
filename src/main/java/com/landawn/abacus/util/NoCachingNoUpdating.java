@@ -52,7 +52,7 @@ public interface NoCachingNoUpdating {
      * This class provides a read-only view of an array with utility methods for accessing
      * and transforming the data. The array itself should never be cached or modified.
      * 
-     * <p>Usage example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String[] array = {"a", "b", "c"};
      * DisposableArray<String> disposable = DisposableArray.wrap(array);
@@ -87,7 +87,7 @@ public interface NoCachingNoUpdating {
         /**
          * Creates a new DisposableArray with a new array of the specified component type and length.
          * 
-         * <p>Example:</p>
+         * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * DisposableArray<String> array = DisposableArray.create(String.class, 10);
          * }</pre>
@@ -108,7 +108,7 @@ public interface NoCachingNoUpdating {
          * Wraps an existing array in a DisposableArray.
          * The array is not copied; the DisposableArray provides a view of the original array.
          * 
-         * <p>Example:</p>
+         * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * Integer[] numbers = {1, 2, 3, 4, 5};
          * DisposableArray<Integer> disposable = DisposableArray.wrap(numbers);
@@ -146,9 +146,9 @@ public interface NoCachingNoUpdating {
          * Copies the elements to the specified array.
          * If the target array is too small, a new array of the same type is allocated.
          * 
-         * <p>Example:</p>
+         * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * DisposableArray<String> disposable = DisposableArray.wrap(new String[]{"a", "b", "c"});
+         * DisposableArray<String> disposable = DisposableArray.wrap(new String[] {"a", "b", "c"});
          * String[] copy = disposable.toArray(new String[0]);
          * }</pre>
          *
@@ -203,9 +203,9 @@ public interface NoCachingNoUpdating {
         /**
          * Converts the array to a Collection of the specified type.
          * 
-         * <p>Example:</p>
+         * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * DisposableArray<String> disposable = DisposableArray.wrap(new String[]{"a", "b", "c"});
+         * DisposableArray<String> disposable = DisposableArray.wrap(new String[] {"a", "b", "c"});
          * LinkedList<String> list = disposable.toCollection(LinkedList::new);
          * }</pre>
          *
@@ -222,9 +222,9 @@ public interface NoCachingNoUpdating {
         /**
          * Performs the given action for each element of the array.
          * 
-         * <p>Example:</p>
+         * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * DisposableArray<String> disposable = DisposableArray.wrap(new String[]{"a", "b", "c"});
+         * DisposableArray<String> disposable = DisposableArray.wrap(new String[] {"a", "b", "c"});
          * disposable.foreach(System.out::println); // Prints each element
          * }</pre>
          *
@@ -242,9 +242,9 @@ public interface NoCachingNoUpdating {
          * Applies the given function to the wrapped array and returns the result.
          * This is useful for performing operations that need access to the entire array.
          * 
-         * <p>Example:</p>
+         * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * DisposableArray<Integer> disposable = DisposableArray.wrap(new Integer[]{1, 2, 3});
+         * DisposableArray<Integer> disposable = DisposableArray.wrap(new Integer[] {1, 2, 3});
          * int sum = disposable.apply(arr -> Arrays.stream(arr).mapToInt(Integer::intValue).sum());
          * }</pre>
          *
@@ -273,9 +273,9 @@ public interface NoCachingNoUpdating {
         /**
          * Joins the string representations of the array elements using the specified delimiter.
          * 
-         * <p>Example:</p>
+         * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * DisposableArray<String> disposable = DisposableArray.wrap(new String[]{"a", "b", "c"});
+         * DisposableArray<String> disposable = DisposableArray.wrap(new String[] {"a", "b", "c"});
          * String joined = disposable.join(", "); // "a, b, c"
          * }</pre>
          *
@@ -290,9 +290,9 @@ public interface NoCachingNoUpdating {
          * Joins the string representations of the array elements using the specified delimiter,
          * prefix, and suffix.
          * 
-         * <p>Example:</p>
+         * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * DisposableArray<String> disposable = DisposableArray.wrap(new String[]{"a", "b", "c"});
+         * DisposableArray<String> disposable = DisposableArray.wrap(new String[] {"a", "b", "c"});
          * String joined = disposable.join(", ", "[", "]"); // "[a, b, c]"
          * }</pre>
          *
@@ -340,7 +340,7 @@ public interface NoCachingNoUpdating {
      * A specialized DisposableArray for Object arrays.
      * This class provides optimized handling for arrays of type Object[].
      * 
-     * <p>Usage example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * DisposableObjArray array = DisposableObjArray.create(10);
      * // or
@@ -409,7 +409,7 @@ public interface NoCachingNoUpdating {
      * This class provides a read-only view of a boolean array with utility methods for accessing
      * and transforming the data.
      * 
-     * <p>Usage example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * boolean[] array = {true, false, true};
      * DisposableBooleanArray disposable = DisposableBooleanArray.wrap(array);
@@ -514,9 +514,9 @@ public interface NoCachingNoUpdating {
          * Converts the array to a Collection of the specified type.
          * Each boolean value is boxed to Boolean.
          * 
-         * <p>Example:</p>
+         * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * DisposableBooleanArray array = DisposableBooleanArray.wrap(new boolean[]{true, false});
+         * DisposableBooleanArray array = DisposableBooleanArray.wrap(new boolean[] {true, false});
          * ArrayList<Boolean> list = array.toCollection(ArrayList::new);
          * }</pre>
          *
@@ -619,7 +619,7 @@ public interface NoCachingNoUpdating {
      * This class provides a read-only view of a char array with utility methods for accessing,
      * transforming, and performing calculations on the data.
      * 
-     * <p>Usage example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * char[] array = {'a', 'b', 'c'};
      * DisposableCharArray disposable = DisposableCharArray.wrap(array);
@@ -861,7 +861,7 @@ public interface NoCachingNoUpdating {
      * This class provides a read-only view of a byte array with utility methods for accessing,
      * transforming, and performing calculations on the data.
      * 
-     * <p>Usage example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * byte[] array = {1, 2, 3, 4, 5};
      * DisposableByteArray disposable = DisposableByteArray.wrap(array);
@@ -1101,7 +1101,7 @@ public interface NoCachingNoUpdating {
      * This class provides a read-only view of a short array with utility methods for accessing,
      * transforming, and performing calculations on the data.
      * 
-     * <p>Usage example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * short[] array = {100, 200, 300};
      * DisposableShortArray disposable = DisposableShortArray.wrap(array);
@@ -1341,7 +1341,7 @@ public interface NoCachingNoUpdating {
      * This class provides a read-only view of an int array with utility methods for accessing,
      * transforming, and performing calculations on the data.
      * 
-     * <p>Usage example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * int[] array = {10, 20, 30, 40, 50};
      * DisposableIntArray disposable = DisposableIntArray.wrap(array);
@@ -1582,7 +1582,7 @@ public interface NoCachingNoUpdating {
      * This class provides a read-only view of a long array with utility methods for accessing,
      * transforming, and performing calculations on the data.
      * 
-     * <p>Usage example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * long[] array = {1000L, 2000L, 3000L};
      * DisposableLongArray disposable = DisposableLongArray.wrap(array);
@@ -1822,7 +1822,7 @@ public interface NoCachingNoUpdating {
      * This class provides a read-only view of a float array with utility methods for accessing,
      * transforming, and performing calculations on the data.
      * 
-     * <p>Usage example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * float[] array = {1.5f, 2.5f, 3.5f};
      * DisposableFloatArray disposable = DisposableFloatArray.wrap(array);
@@ -2062,7 +2062,7 @@ public interface NoCachingNoUpdating {
      * This class provides a read-only view of a double array with utility methods for accessing,
      * transforming, and performing calculations on the data.
      * 
-     * <p>Usage example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * double[] array = {1.1, 2.2, 3.3, 4.4};
      * DisposableDoubleArray disposable = DisposableDoubleArray.wrap(array);
@@ -2303,7 +2303,7 @@ public interface NoCachingNoUpdating {
      * This class provides a read-only view of a Deque with utility methods for accessing
      * and transforming the data. The Deque itself should never be cached or modified externally.
      * 
-     * <p>Usage example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Deque<String> deque = new ArrayDeque<>();
      * deque.add("first");
@@ -2511,7 +2511,7 @@ public interface NoCachingNoUpdating {
      * This class provides a read-only view of a Map.Entry. The entry itself should never
      * be cached, and setValue() is not supported.
      * 
-     * <p>Usage example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Map.Entry<String, Integer> entry = Map.entry("key", 100);
      * DisposableEntry<String, Integer> disposable = DisposableEntry.wrap(entry);
@@ -2596,7 +2596,7 @@ public interface NoCachingNoUpdating {
         /**
          * Applies the given bi-function to the key and value of this entry and returns the result.
          * 
-         * <p>Example:</p>
+         * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * DisposableEntry<String, Integer> entry = DisposableEntry.wrap(Map.entry("age", 25));
          * String result = entry.apply((k, v) -> k + "=" + v); // "age=25"
@@ -2649,7 +2649,7 @@ public interface NoCachingNoUpdating {
      * A wrapper class for Pair that enforces no-caching and no-updating semantics.
      * This class provides a read-only view of a Pair. The pair itself should never be cached.
      * 
-     * <p>Usage example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Pair<String, Integer> pair = Pair.of("left", 100);
      * DisposablePair<String, Integer> disposable = DisposablePair.wrap(pair);
@@ -2721,7 +2721,7 @@ public interface NoCachingNoUpdating {
         /**
          * Applies the given bi-function to the left and right elements and returns the result.
          * 
-         * <p>Example:</p>
+         * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * DisposablePair<Integer, Integer> pair = DisposablePair.wrap(Pair.of(3, 4));
          * Integer sum = pair.apply((l, r) -> l + r); // 7
@@ -2764,7 +2764,7 @@ public interface NoCachingNoUpdating {
      * A wrapper class for Triple that enforces no-caching and no-updating semantics.
      * This class provides a read-only view of a Triple. The triple itself should never be cached.
      * 
-     * <p>Usage example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Triple<String, Integer, Boolean> triple = Triple.of("left", 100, true);
      * DisposableTriple<String, Integer, Boolean> disposable = DisposableTriple.wrap(triple);
@@ -2851,7 +2851,7 @@ public interface NoCachingNoUpdating {
         /**
          * Applies the given tri-function to the left, middle, and right elements and returns the result.
          * 
-         * <p>Example:</p>
+         * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * DisposableTriple<Integer, Integer, Integer> triple = DisposableTriple.wrap(Triple.of(1, 2, 3));
          * Integer sum = triple.apply((l, m, r) -> l + m + r); // 6
@@ -2895,7 +2895,7 @@ public interface NoCachingNoUpdating {
      * is important. Like other NoCachingNoUpdating implementations, instances should not
      * be cached or updated directly.
      * 
-     * <p>Usage example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Timed<String> timedValue = Timed.of("Hello", System.currentTimeMillis());
      * String value = timedValue.value(); // "Hello"

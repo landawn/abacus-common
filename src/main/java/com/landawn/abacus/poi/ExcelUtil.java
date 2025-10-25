@@ -63,7 +63,7 @@ import lombok.Data;
  * 
  * <p>This class is thread-safe as all methods are stateless.</p>
  * 
- * <p>Example usage:</p>
+ * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * // Read Excel file into Dataset
  * Dataset data = ExcelUtil.loadSheet(new File("data.xlsx"));
@@ -81,7 +81,7 @@ public final class ExcelUtil {
      * Returns appropriate Java objects: String for STRING cells, Double for NUMERIC cells,
      * Boolean for BOOLEAN cells, String for FORMULA cells, and empty string for BLANK cells.
      * 
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Object value = CELL_GETTER.apply(cell);
      * }</pre>
@@ -99,7 +99,7 @@ public final class ExcelUtil {
      * Cell to String converter function that converts any cell value to its string representation.
      * Handles all cell types including STRING, NUMERIC, BOOLEAN, FORMULA, and BLANK.
      * 
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String stringValue = CELL2STRING.apply(cell);
      * }</pre>
@@ -126,7 +126,7 @@ public final class ExcelUtil {
      * <p>The method automatically handles Excel file format detection and resource cleanup.
      * The resulting Dataset provides column-based access to the data with type preservation.</p>
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Dataset dataset = ExcelUtil.loadSheet(new File("sales_data.xlsx"));
      * // Access data by column name
@@ -150,7 +150,7 @@ public final class ExcelUtil {
      * <p>The row extractor receives the header names, current row, and an output array to populate.
      * This allows for conditional extraction, computed values, or format-specific parsing.</p>
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * TriConsumer<String[], Row, Object[]> customExtractor = (headers, row, output) -> {
      *     for (int i = 0; i < headers.length; i++) {
@@ -189,7 +189,7 @@ public final class ExcelUtil {
      * <p>The row extractor provides full control over data extraction and transformation,
      * enabling custom parsing, validation, or type conversion logic per cell or row.</p>
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Dataset dataset = ExcelUtil.loadSheet(
      *     new File("workbook.xlsx"),
@@ -265,7 +265,7 @@ public final class ExcelUtil {
      * provides direct access to row data. Useful for simple row-by-row processing without
      * column-based access requirements.</p>
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * List<List<Object>> rows = ExcelUtil.readSheet(new File("data.xlsx"));
      * for (List<Object> row : rows) {
@@ -290,7 +290,7 @@ public final class ExcelUtil {
      * cells, formatting information, and row metadata. This enables sophisticated mapping logic
      * including conditional processing based on cell types or values.</p>
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Function<Row, String> rowToString = row -> {
      *     StringBuilder sb = new StringBuilder();
@@ -329,7 +329,7 @@ public final class ExcelUtil {
      * <p>The row mapper provides full control over the transformation process, enabling
      * validation, default value handling, and complex object construction from row data.</p>
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Function<Row, Product> rowToProduct = row -> new Product(
      *     row.getCell(0).getStringCellValue(),  // name
@@ -393,7 +393,7 @@ public final class ExcelUtil {
      * and workbook resources. Always use try-with-resources or explicitly call {@code close()}
      * on the stream when done.</p>
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * try (Stream<Row> stream = ExcelUtil.streamSheet(new File("large_data.xlsx"), 0, true)) {
      *     stream.filter(row -> row.getCell(0).getNumericCellValue() > 1000)
@@ -440,7 +440,7 @@ public final class ExcelUtil {
      * and workbook resources. Always use try-with-resources or explicitly call {@code close()}
      * on the stream when done.</p>
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * try (Stream<Row> stream = ExcelUtil.streamSheet(new File("data.xlsx"), "Sales", true)) {
      *     long count = stream.map(row -> row.getCell(2).getNumericCellValue())
@@ -485,7 +485,7 @@ public final class ExcelUtil {
      * Date, Calendar, Integer, and Double are set using type-specific cell methods, while
      * other types are converted to strings.</p>
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * List<Object> headers = Arrays.asList("Name", "Age", "City");
      * List<List<String>> rows = Arrays.asList(
@@ -515,7 +515,7 @@ public final class ExcelUtil {
      * auto-sizing columns to fit content, freezing rows/columns for easier navigation,
      * and adding auto-filters for data filtering capabilities.</p>
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * SheetCreateOptions options = SheetCreateOptions.builder()
      *     .autoSizeColumn(true)
@@ -578,7 +578,7 @@ public final class ExcelUtil {
      * to apply formatting based on the actual content. This is useful for advanced scenarios
      * like conditional formatting, merged cells, or complex styling requirements.</p>
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Consumer<Sheet> customFormatter = sheet -> {
      *     sheet.setDefaultColumnWidth(15);
@@ -643,7 +643,7 @@ public final class ExcelUtil {
      * Excel file without any special formatting. For formatted output, use the overloaded
      * methods that accept SheetCreateOptions or a custom sheetSetter.</p>
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Dataset dataset = Dataset.fromCSV(new File("data.csv"));
      * ExcelUtil.writeSheet("ImportedData", dataset, new File("output.xlsx"));
@@ -668,7 +668,7 @@ public final class ExcelUtil {
      * auto-sizing columns to fit content, freezing panes for better navigation of large
      * datasets, and adding auto-filters for interactive data exploration.</p>
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * SheetCreateOptions options = SheetCreateOptions.builder()
      *     .autoSizeColumn(true)
@@ -703,7 +703,7 @@ public final class ExcelUtil {
      * enabling context-aware formatting decisions based on the actual content and structure.
      * This is the most flexible write method for creating sophisticated Excel reports.</p>
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Consumer<Sheet> formatter = sheet -> {
      *     // Apply conditional formatting
@@ -784,7 +784,7 @@ public final class ExcelUtil {
      * become empty strings. The CSV format uses comma as delimiter and proper quoting
      * for values containing special characters.</p>
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ExcelUtil.saveSheetAsCsv(
      *     new File("data.xlsx"),
@@ -813,7 +813,7 @@ public final class ExcelUtil {
      * strings remain as text, numbers are formatted, and formulas are exported as their text
      * representation. The output CSV uses standard comma delimiting with proper escaping.</p>
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ExcelUtil.saveSheetAsCsv(
      *     new File("workbook.xlsx"),
@@ -843,7 +843,7 @@ public final class ExcelUtil {
      * the CSV will be consumed by systems with specific encoding requirements. Common
      * choices include UTF-8 for universal compatibility or ISO-8859-1 for legacy systems.</p>
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * List<String> customHeaders = Arrays.asList("Product ID", "Product Name", "Price");
      * ExcelUtil.saveSheetAsCsv(
@@ -885,7 +885,7 @@ public final class ExcelUtil {
      * adapting to target system naming conventions. The charset parameter ensures proper
      * handling of special characters and international text.</p>
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Export with custom headers in ISO-8859-1 encoding
      * List<String> headers = Arrays.asList("Código", "Nombre", "Precio");
@@ -975,7 +975,7 @@ public final class ExcelUtil {
      * Collection of predefined row mapping functions for common use cases.
      * Provides ready-to-use mappers for converting Excel rows to various formats.
      * 
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Use default mapper to get list of objects
      * List<List<Object>> rows = ExcelUtil.readSheet(
@@ -1021,7 +1021,7 @@ public final class ExcelUtil {
          * (STRING, NUMERIC, BOOLEAN, FORMULA, BLANK) and converts them to appropriate string
          * representations.</p>
          *
-         * <p>Example usage:</p>
+         * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * Function<Row, String> pipeMapper = RowMappers.toString("|");
          * List<String> rows = ExcelUtil.readSheet(file, 0, true, pipeMapper);
@@ -1045,7 +1045,7 @@ public final class ExcelUtil {
          * control over formatting numbers, dates, handling null cells, or applying business logic
          * during the conversion process.</p>
          *
-         * <p>Example usage:</p>
+         * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * Function<Cell, String> customCellMapper = cell ->
          *     cell.getCellType() == CellType.NUMERIC
@@ -1092,7 +1092,7 @@ public final class ExcelUtil {
          * collected into a List. This allows for strongly-typed data extraction and ensures
          * consistent processing of all cells in each row.</p>
          *
-         * <p>Example usage:</p>
+         * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * // Extract only numeric values as Double
          * Function<Cell, Double> numericMapper = cell ->
@@ -1125,7 +1125,7 @@ public final class ExcelUtil {
      * Collection of row extractors for use with loadSheet methods.
      * Extractors process rows and populate output arrays for Dataset creation.
      * 
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Use default extractor
      * Dataset ds = ExcelUtil.loadSheet(file, 0, RowExtractors.DEFAULT);
@@ -1158,7 +1158,7 @@ public final class ExcelUtil {
          * value to store in the output array. This enables custom type conversions,
          * default value handling, data validation, or any other per-cell transformation logic.</p>
          *
-         * <p>Example usage:</p>
+         * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * // Extract all values as strings, with empty string for null cells
          * TriConsumer<String[], Row, Object[]> stringExtractor =
@@ -1187,7 +1187,7 @@ public final class ExcelUtil {
      * Configuration options for creating Excel sheets with specific formatting.
      * Uses the builder pattern to provide a fluent API for configuration.
      * 
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * SheetCreateOptions options = SheetCreateOptions.builder()
      *     .autoSizeColumn(true)
@@ -1236,7 +1236,7 @@ public final class ExcelUtil {
      * Represents freeze pane configuration for Excel sheets.
      * Specifies the number of columns and rows to freeze from the top-left corner.
      * 
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Freeze first column and first row
      * FreezePane freezeHeaders = new FreezePane(1, 1);

@@ -1690,21 +1690,14 @@ public class CharStream2025Test extends TestBase {
 
     @Test
     public void testZipWithCollectionOfStreamsForCoverage() {
-        Collection<CharStream> streams = Arrays.asList(
-                CharStream.of('a', 'b'),
-                CharStream.of('x', 'y'),
-                CharStream.of('1', '2')
-        );
+        Collection<CharStream> streams = Arrays.asList(CharStream.of('a', 'b'), CharStream.of('x', 'y'), CharStream.of('1', '2'));
         CharStream result = CharStream.zip(streams, chars -> chars[0]);
         assertArrayEquals(new char[] { 'a', 'b' }, result.toArray());
     }
 
     @Test
     public void testZipCollectionWithDefaultsForCoverage() {
-        Collection<CharStream> streams = Arrays.asList(
-                CharStream.of('a', 'b', 'c'),
-                CharStream.of('x', 'y')
-        );
+        Collection<CharStream> streams = Arrays.asList(CharStream.of('a', 'b', 'c'), CharStream.of('x', 'y'));
         char[] defaults = { '0', '9' };
         CharStream result = CharStream.zip(streams, defaults, chars -> chars[1]);
         assertEquals(3, result.count());
@@ -1712,11 +1705,7 @@ public class CharStream2025Test extends TestBase {
 
     @Test
     public void testMergeCollectionForCoverage() {
-        Collection<CharStream> streams = Arrays.asList(
-                CharStream.of('a', 'e'),
-                CharStream.of('b', 'f'),
-                CharStream.of('c', 'g')
-        );
+        Collection<CharStream> streams = Arrays.asList(CharStream.of('a', 'e'), CharStream.of('b', 'f'), CharStream.of('c', 'g'));
         CharStream result = CharStream.merge(streams, (a, b) -> a < b ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND);
         assertEquals(6, result.count());
     }

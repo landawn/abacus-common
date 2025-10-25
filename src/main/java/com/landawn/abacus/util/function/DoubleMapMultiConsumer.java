@@ -28,12 +28,38 @@ package com.landawn.abacus.util.function;
 public interface DoubleMapMultiConsumer extends java.util.stream.DoubleStream.DoubleMapMultiConsumer { //NOSONAR
 
     /**
-     * Performs a one-to-many transformation operation. Accepts a double value and passes
-     * zero or more double values to the provided DoubleConsumer. This method can be used
-     * to expand a single double value into multiple values in a stream pipeline.
+     * Performs a one-to-many transformation on the given double value.
      *
-     * @param value the double input value to be transformed
-     * @param ic the DoubleConsumer that will receive the transformed values
+     * <p>This method accepts a double value and a consumer, allowing the implementation
+     * to push zero or more double values to the consumer. This is particularly useful
+     * for operations that may produce multiple outputs from a single input, or may
+     * filter out certain inputs by not calling the consumer at all.
+     *
+     * <p>Common use cases include:
+     * <ul>
+     *   <li>Expanding a single value into multiple values (e.g., generating a sequence)</li>
+     *   <li>Conditional mapping where some values produce no output</li>
+     *   <li>Flattening nested structures without creating intermediate streams</li>
+     *   <li>Implementing custom filtering and transformation logic in one step</li>
+     * </ul>
+     *
+     * <p>Example usage in a stream:
+     * <pre>{@code
+     * DoubleStream.of(1.5, 2.5, 3.5)
+     *     .mapMulti((value, consumer) -> {
+     *         // Generate values from 0.0 to value with step 1.0
+     *         for (double i = 0.0; i < value; i += 1.0) {
+     *             consumer.accept(i);
+     *         }
+     *     })
+     *     .forEach(System.out::println);
+     * // Output: 0.0, 0.0, 1.0, 0.0, 1.0, 2.0
+     * }</pre>
+     *
+     * @param value the input double value to be transformed
+     * @param ic the consumer that accepts the transformed values. The implementation
+     *           should call {@code ic.accept(double)} for each output value. May be
+     *           called zero or more times
      */
     @Override
     void accept(double value, java.util.function.DoubleConsumer ic);

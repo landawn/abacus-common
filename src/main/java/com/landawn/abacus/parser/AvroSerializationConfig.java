@@ -27,7 +27,7 @@ import com.landawn.abacus.util.N;
  * This class extends SerializationConfig and adds Avro-specific configuration options,
  * particularly the Avro schema required for serialization.
  * 
- * <p>Usage example:</p>
+ * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * Schema schema = new Schema.Parser().parse(schemaString);
  * AvroSerializationConfig config = new AvroSerializationConfig()
@@ -61,7 +61,7 @@ public class AvroSerializationConfig extends SerializationConfig<AvroSerializati
      * Sets the Avro schema for serialization.
      * The schema is required for serializing objects that are not SpecificRecord instances.
      * 
-     * <p>Usage example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String schemaJson = "{\"type\":\"record\",\"name\":\"User\"," +
      *     "\"fields\":[{\"name\":\"name\",\"type\":\"string\"}," +
@@ -121,7 +121,7 @@ public class AvroSerializationConfig extends SerializationConfig<AvroSerializati
      * Factory class for creating AvroSerializationConfig instances.
      * Provides convenient static factory methods for creating configurations.
      * 
-     * <p>Usage example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * AvroSerializationConfig config = ASC.create()
      *     .setSchema(mySchema)

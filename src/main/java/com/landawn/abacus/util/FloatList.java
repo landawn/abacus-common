@@ -75,11 +75,13 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
 
     /**
      * Constructs an empty FloatList with the specified initial capacity.
-     * The list will be empty but the internal array will have the specified capacity
-     * to avoid resizing when elements are added up to this capacity.
+     *
+     * <p>This constructor is useful when the approximate size of the list is known in advance,
+     * as it can help avoid the performance overhead of array resizing during element additions.</p>
      *
      * @param initialCapacity the initial capacity of the list. Must be non-negative.
      * @throws IllegalArgumentException if the specified initial capacity is negative
+     * @throws OutOfMemoryError if the requested array size exceeds the maximum array size
      */
     public FloatList(final int initialCapacity) {
         N.checkArgNotNegative(initialCapacity, cs.initialCapacity);
@@ -128,13 +130,15 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
     }
 
     /**
-     * Creates a new FloatList containing the specified number of elements from the given array.
-     * The values are copied into a new array. If the input array is null, it is treated as an empty array.
+     * Creates a new FloatList containing the first {@code size} elements of the specified array.
+     * The array is used directly as the backing array without copying for efficiency.
+     * If the input array is {@code null}, it is treated as an empty array.
      *
-     * @param a the array of float values to be placed into the new list. May be null.
-     * @param size the number of elements to include from the array. Must be between 0 and a.length (inclusive).
-     * @return a new FloatList containing the first 'size' elements of the specified array
-     * @throws IndexOutOfBoundsException if size is negative or greater than the length of the array
+     * @param a the array of float values to be used as the backing array. Can be {@code null}.
+     * @param size the number of elements from the array to include in the list.
+     *             Must be between 0 and the array length (inclusive).
+     * @return a new FloatList containing the first {@code size} elements of the specified array
+     * @throws IndexOutOfBoundsException if {@code size} is negative or greater than the array length
      */
     public static FloatList of(final float[] a, final int size) throws IndexOutOfBoundsException {
         N.checkFromIndexSize(0, size, N.len(a));
@@ -143,12 +147,16 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
     }
 
     /**
-     * Creates a new FloatList that is a copy of the specified array. The array is cloned,
-     * so modifications to the returned list will not affect the original array.
-     * If the input array is null, an empty list is returned.
+     * Creates a new FloatList that is a copy of the specified array.
      *
-     * @param a the array to be copied. May be null.
-     * @return a new FloatList containing a copy of the elements from the specified array
+     * <p>Unlike {@link #of(float...)}, this method always creates a defensive copy of the input array,
+     * ensuring that modifications to the returned list do not affect the original array.</p>
+     *
+     * <p>If the input array is {@code null}, an empty list is returned.</p>
+     *
+     * @param a the array to be copied. Can be {@code null}.
+     * @return a new FloatList containing a copy of the elements from the specified array,
+     *         or an empty list if the array is {@code null}
      */
     public static FloatList copyOf(final float[] a) {
         return of(N.clone(a));
@@ -156,14 +164,16 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
 
     /**
      * Creates a new FloatList that is a copy of the specified range within the given array.
-     * The specified range is copied into a new array, so modifications to the returned list
-     * will not affect the original array.
      *
-     * @param a the array from which a range is to be copied. Must not be null.
-     * @param fromIndex the initial index of the range to be copied, inclusive. Must be non-negative.
-     * @param toIndex the final index of the range to be copied, exclusive. Must be >= fromIndex.
-     * @return a new FloatList containing the elements from the specified range of the array
-     * @throws IndexOutOfBoundsException if fromIndex < 0, toIndex > a.length, or fromIndex > toIndex
+     * <p>This method creates a defensive copy of the elements in the range [fromIndex, toIndex),
+     * ensuring that modifications to the returned list do not affect the original array.</p>
+     *
+     * @param a the array from which a range is to be copied. Must not be {@code null}.
+     * @param fromIndex the initial index of the range to be copied, inclusive.
+     * @param toIndex the final index of the range to be copied, exclusive.
+     * @return a new FloatList containing a copy of the elements in the specified range
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0} or {@code toIndex > a.length}
+     *                                   or {@code fromIndex > toIndex}
      */
     public static FloatList copyOf(final float[] a, final int fromIndex, final int toIndex) {
         return of(N.copyOfRange(a, fromIndex, toIndex));
@@ -201,12 +211,20 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
     }
 
     /**
-     * Returns the internal array backing this list without copying. This method is marked as @Beta
-     * and should be used with caution as modifications to the returned array will directly affect
-     * the list's contents. The returned array may have a capacity larger than the list's size.
+     * Returns the underlying float array backing this list without creating a copy.
+     * This method provides direct access to the internal array for performance-critical operations.
      *
-     * @return the internal array backing this list
-     * @deprecated should call {@code toArray()}
+     * <p><b>Warning:</b> The returned array is the actual internal storage of this list.
+     * Modifications to the returned array will directly affect this list's contents.
+     * The array may be larger than the list size; only indices from 0 to size()-1 contain valid elements.</p>
+     *
+     * <p>This method is marked as {@code @Beta} and should be used with caution.</p>
+     *
+     * @return the internal float array backing this list
+     * @deprecated This method is deprecated because it exposes internal state and can lead to bugs.
+     *             Use {@link #toArray()} instead to get a safe copy of the list elements.
+     *             If you need the internal array for performance reasons and understand the risks,
+     *             consider using a custom implementation or wrapping this list appropriately.
      */
     @Beta
     @Deprecated
@@ -250,6 +268,10 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
      * Appends the specified element to the end of this list. The list will be automatically
      * resized if necessary to accommodate the new element.
      *
+     * <p>This method runs in amortized constant time. If the internal array needs to be
+     * resized to accommodate the new element, all existing elements will be copied to
+     * a new, larger array.</p>
+     *
      * @param e the element to be appended to this list
      */
     public void add(final float e) {
@@ -263,9 +285,13 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
      * currently at that position (if any) and any subsequent elements to the right (adds one
      * to their indices). The list will be automatically resized if necessary.
      *
+     * <p>This method runs in linear time in the worst case (when inserting at the beginning
+     * of the list), as it may need to shift all existing elements.</p>
+     *
      * @param index the index at which the specified element is to be inserted. Must be between 0 and size (inclusive).
      * @param e the element to be inserted
-     * @throws IndexOutOfBoundsException if the index is out of range (index < 0 || index > size())
+     * @throws IndexOutOfBoundsException if the index is out of range
+     *         ({@code index < 0 || index > size()})
      */
     public void add(final int index, final float e) {
         rangeCheckForAdd(index);
@@ -402,8 +428,12 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
      * If this list does not contain the element, it is unchanged. The comparison is done using
      * Float.compare() to handle NaN values correctly.
      *
+     * <p>This method runs in linear time, as it may need to search through the entire list
+     * to find the element.</p>
+     *
      * @param e the element to be removed from this list, if present
-     * @return {@code true} if this list contained the specified element and it was removed
+     * @return {@code true} if this list contained the specified element (and it was removed);
+     *         {@code false} otherwise
      */
     public boolean remove(final float e) {
         for (int i = 0; i < size; i++) {
@@ -447,8 +477,9 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
     }
 
     /**
+     * Removes the element at the specified index without bounds checking.
      *
-     * @param index
+     * @param index the index of the element to remove
      */
     private void fastRemove(final int index) {
         final int numMoved = size - index - 1;
@@ -604,10 +635,11 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
     }
 
     /**
+     * Performs a batch removal operation based on the specified collection and complement flag.
      *
-     * @param c
-     * @param complement
-     * @return
+     * @param c the collection of elements to check against
+     * @param complement if true, retain elements in c; if false, remove elements in c
+     * @return the number of elements removed
      */
     private int batchRemove(final FloatList c, final boolean complement) {
         final float[] elementData = this.elementData;//NOSONAR
@@ -720,12 +752,12 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
      * so that the element originally at fromIndex will be at newPositionAfterMove.
      * Other elements are shifted as necessary to accommodate the move.
      * 
-     * <p>Example: 
-     * <pre>
+     * <p><b>Usage Examples:</b></p> 
+     * <pre>{@code
      * FloatList list = FloatList.of(0f, 1f, 2f, 3f, 4f, 5f);
      * list.moveRange(1, 3, 3);  // Moves elements [1, 2] to position starting at index 3
      * // Result: [0, 3, 4, 1, 2, 5]
-     * </pre>
+     * }</pre>
      *
      * @param fromIndex the starting index (inclusive) of the range to be moved
      * @param toIndex the ending index (exclusive) of the range to be moved
@@ -955,11 +987,11 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
 
     /**
      * Returns true if this list contains all of the elements in the specified FloatList.
-     * For multiple occurrences, this list must contain at least as many occurrences as in the specified FloatList.
+     * The frequency of elements is not considered; only presence is checked.
      * The comparison is done using Float.compare() to handle NaN values correctly.
      *
      * @param c the FloatList to be checked for containment in this list. Must not be null.
-     * @return {@code true} if this list contains all elements from the specified FloatList (including duplicates),
+     * @return {@code true} if this list contains all distinct elements from the specified FloatList,
      *         false otherwise. Returns true if c is empty.
      */
     @Override
@@ -991,11 +1023,11 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
 
     /**
      * Returns true if this list contains all of the elements in the specified array.
-     * For multiple occurrences, this list must contain at least as many occurrences as in the array.
+     * The frequency of elements is not considered; only presence is checked.
      * The comparison is done using Float.compare() to handle NaN values correctly.
      *
      * @param a the array to be checked for containment in this list. May be null or empty.
-     * @return {@code true} if this list contains all elements from the specified array (including duplicates),
+     * @return {@code true} if this list contains all distinct elements from the specified array,
      *         false otherwise. Returns true if the array is null or empty.
      */
     @Override
@@ -1064,8 +1096,8 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
      * Returns a new list containing elements that are present in both this list and the specified list.
      * For elements that appear multiple times, the intersection contains the minimum number of occurrences present in both lists.
      *
-     * <p>Example:
-     * <pre>
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
      * FloatList list1 = FloatList.of(1.0f, 1.0f, 2.0f, 3.0f);
      * FloatList list2 = FloatList.of(1.0f, 2.0f, 2.0f, 4.0f);
      * FloatList result = list1.intersection(list2); // result will be [1.0f, 2.0f]
@@ -1075,7 +1107,7 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
      * FloatList list4 = FloatList.of(5.0f, 7.0f);
      * FloatList result2 = list3.intersection(list4); // result will be [5.0f]
      * // One occurrence of '5.0f' (minimum count in both lists)
-     * </pre>
+     * }</pre>
      *
      * @param b the list to find common elements with this list
      * @return a new FloatList containing elements present in both this list and the specified list,
@@ -1110,18 +1142,18 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
      * Returns a new list containing elements that are present in both this list and the specified array.
      * For elements that appear multiple times, the intersection contains the minimum number of occurrences present in both sources.
      *
-     * <p>Example:
-     * <pre>
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
      * FloatList list1 = FloatList.of(1.0f, 1.0f, 2.0f, 3.0f);
-     * float[] array = new float[]{1.0f, 2.0f, 2.0f, 4.0f};
+     * float[] array = new float[] {1.0f, 2.0f, 2.0f, 4.0f};
      * FloatList result = list1.intersection(array); // result will be [1.0f, 2.0f]
      * // One occurrence of '1.0f' (minimum count in both sources) and one occurrence of '2.0f'
      *
      * FloatList list2 = FloatList.of(5.0f, 5.0f, 6.0f);
-     * float[] array2 = new float[]{5.0f, 7.0f};
+     * float[] array2 = new float[] {5.0f, 7.0f};
      * FloatList result2 = list2.intersection(array2); // result will be [5.0f]
      * // One occurrence of '5.0f' (minimum count in both sources)
-     * </pre>
+     * }</pre>
      *
      * @param b the array to find common elements with this list
      * @return a new FloatList containing elements present in both this list and the specified array,
@@ -1146,8 +1178,8 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
      * Returns a new list with the elements in this list but not in the specified list {@code b},
      * considering the number of occurrences of each element.
      *
-     * <p>Example:
-     * <pre>
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
      * FloatList list1 = FloatList.of(1.0f, 1.0f, 2.0f, 3.0f);
      * FloatList list2 = FloatList.of(1.0f, 4.0f);
      * FloatList result = list1.difference(list2); // result will be [1.0f, 2.0f, 3.0f]
@@ -1157,7 +1189,7 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
      * FloatList list4 = FloatList.of(5.0f, 5.0f, 6.0f);
      * FloatList result2 = list3.difference(list4); // result will be [] (empty)
      * // No elements remain because list4 has at least as many occurrences of each value as list3
-     * </pre>
+     * }</pre>
      *
      * @param b the list to compare against this list
      * @return a new FloatList containing the elements that are present in this list but not in the specified list,
@@ -1191,18 +1223,18 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
      * Returns a new list with the elements in this list but not in the specified array {@code b},
      * considering the number of occurrences of each element.
      *
-     * <p>Example:
-     * <pre>
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
      * FloatList list1 = FloatList.of(1.0f, 1.0f, 2.0f, 3.0f);
-     * float[] array = new float[]{1.0f, 4.0f};
+     * float[] array = new float[] {1.0f, 4.0f};
      * FloatList result = list1.difference(array); // result will be [1.0f, 2.0f, 3.0f]
      * // One '1.0f' remains because list1 has two occurrences and array has one
      *
      * FloatList list2 = FloatList.of(5.0f, 6.0f);
-     * float[] array2 = new float[]{5.0f, 5.0f, 6.0f};
+     * float[] array2 = new float[] {5.0f, 5.0f, 6.0f};
      * FloatList result2 = list2.difference(array2); // result will be [] (empty)
      * // No elements remain because array2 has at least as many occurrences of each value as list2
-     * </pre>
+     * }</pre>
      *
      * @param b the array to compare against this list
      * @return a new FloatList containing the elements that are present in this list but not in the specified array,
@@ -1232,8 +1264,8 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
      * <p>The order of elements is preserved, with elements from this list appearing first,
      * followed by elements from the specified list.
      *
-     * <p>Example:
-     * <pre>
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
      * FloatList list1 = FloatList.of(1.0f, 1.0f, 2.0f, 3.0f);
      * FloatList list2 = FloatList.of(1.0f, 2.0f, 2.0f, 4.0f);
      * FloatList result = list1.symmetricDifference(list2);
@@ -1243,7 +1275,7 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
      * // - 3.0f appears only in list1, so it remains
      * // - 2.0f appears once in list1 and twice in list2, so one occurrence remains
      * // - 4.0f appears only in list2, so it remains
-     * </pre>
+     * }</pre>
      *
      * @param b the list to compare with this list for symmetric difference
      * @return a new FloatList containing elements that are present in either this list or the specified list,
@@ -1293,10 +1325,10 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
      * <p>The order of elements is preserved, with elements from this list appearing first,
      * followed by elements from the specified array.
      *
-     * <p>Example:
-     * <pre>
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
      * FloatList list1 = FloatList.of(1.0f, 1.0f, 2.0f, 3.0f);
-     * float[] array = new float[]{1.0f, 2.0f, 2.0f, 4.0f};
+     * float[] array = new float[] {1.0f, 2.0f, 2.0f, 4.0f};
      * FloatList result = list1.symmetricDifference(array);
      * // result will contain: [1.0f, 3.0f, 2.0f, 4.0f]
      * // Elements explanation:
@@ -1304,7 +1336,7 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
      * // - 3.0f appears only in list1, so it remains
      * // - 2.0f appears once in list1 and twice in array, so one occurrence remains
      * // - 4.0f appears only in array, so it remains
-     * </pre>
+     * }</pre>
      *
      * @param b the array to compare with this list for symmetric difference
      * @return a new FloatList containing elements that are present in either this list or the specified array,
@@ -1351,12 +1383,12 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
 
     /**
      * Returns the index of the first occurrence of the specified element in this list,
-     * or -1 if this list does not contain the element. The comparison is done using
-     * Float.compare() to handle NaN values correctly.
+     * or {@code N.INDEX_NOT_FOUND} (-1) if this list does not contain the element.
+     * The comparison is done using Float.compare() to handle NaN values correctly.
      *
      * @param valueToFind the element to search for
      * @return the index of the first occurrence of the specified element in this list,
-     *         or -1 if this list does not contain the element
+     *         or {@code N.INDEX_NOT_FOUND} (-1) if this list does not contain the element
      */
     public int indexOf(final float valueToFind) {
         return indexOf(valueToFind, 0);
@@ -1364,13 +1396,13 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
 
     /**
      * Returns the index of the first occurrence of the specified element in this list,
-     * searching forwards from the specified index, or -1 if the element is not found.
+     * searching forwards from the specified index, or {@code N.INDEX_NOT_FOUND} (-1) if the element is not found.
      * The comparison is done using Float.compare() to handle NaN values correctly.
      *
      * @param valueToFind the element to search for
      * @param fromIndex the index to start searching from (inclusive). May be negative, in which case it is treated as 0.
      * @return the index of the first occurrence of the element at position >= fromIndex,
-     *         or -1 if the element is not found
+     *         or {@code N.INDEX_NOT_FOUND} (-1) if the element is not found
      */
     public int indexOf(final float valueToFind, final int fromIndex) {
         if (fromIndex >= size) {
@@ -1515,12 +1547,26 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
     }
 
     /**
-     * Performs the given action for each element in the specified range of this list.
-     * The action is performed in sequential order when {@code fromIndex <= toIndex},
-     * or in reverse order when {@code fromIndex > toIndex}.
+     * Performs the given action for each element within the specified range of this list.
      *
-     * @param fromIndex the index of the first element (inclusive) to process. If {@code fromIndex > toIndex}, iteration starts from this index and goes backwards
-     * @param toIndex the index of the last element (exclusive) to process. If {@code toIndex == -1} and {@code fromIndex > toIndex}, it's treated as 0
+     * <p>This method supports both forward and backward iteration based on the relative values of
+     * fromIndex and toIndex:</p>
+     * <ul>
+     *   <li>If {@code fromIndex <= toIndex}: iterates forward from fromIndex (inclusive) to toIndex (exclusive)</li>
+     *   <li>If {@code fromIndex > toIndex}: iterates backward from fromIndex (inclusive) to toIndex (exclusive)</li>
+     *   <li>If {@code toIndex == -1}: treated as backward iteration from fromIndex to the beginning of the list</li>
+     * </ul>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * FloatList list = FloatList.of(1.0f, 2.0f, 3.0f, 4.0f, 5.0f);
+     * list.forEach(0, 3, action);    // Forward: processes indices 0,1,2
+     * list.forEach(3, 0, action);    // Backward: processes indices 3,2,1
+     * list.forEach(4, -1, action);   // Backward: processes indices 4,3,2,1,0
+     * }</pre>
+     *
+     * @param fromIndex the starting index (inclusive)
+     * @param toIndex the ending index (exclusive), or -1 for backward iteration to the start
      * @param action the action to be performed for each element
      * @throws IndexOutOfBoundsException if the indices are out of range
      */
@@ -1639,6 +1685,9 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
      * Searches for the specified value in this list using the binary search algorithm.
      * The list must be sorted in ascending order prior to making this call.
      * If it is not sorted, the results are undefined.
+     *
+     * <p>If the list contains multiple elements equal to the specified value, there is no
+     * guarantee which one will be found.</p>
      *
      * @param valueToFind the value to search for
      * @return the index of the search key, if it is contained in the list;
@@ -1998,6 +2047,11 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
 
     /**
      * Returns an iterator over the elements in this list in proper sequence.
+     *
+     * <p>The returned iterator is fail-fast: if the list is structurally modified
+     * at any time after the iterator is created, the iterator may throw a
+     * {@code ConcurrentModificationException}. This behavior is not guaranteed
+     * and should not be relied upon for correctness.</p>
      *
      * @return a FloatIterator over the elements in this list
      */

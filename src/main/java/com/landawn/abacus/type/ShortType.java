@@ -24,8 +24,8 @@ public final class ShortType extends AbstractShortType {
 
     /**
      * Returns the Class object representing the Short wrapper type.
-     * <p>
-     * Usage example:
+     *
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ShortType type = new ShortType();
      * Class<Short> clazz = type.clazz(); // Returns Short.class

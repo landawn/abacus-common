@@ -33,7 +33,7 @@ import com.landawn.abacus.annotation.Beta;
  * 
  * <p>All operations are synchronized on the provided mutex object, ensuring thread-safe execution.
  * 
- * <p>Example usage:
+ * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * // Static usage
  * List<String> list = new ArrayList<>();
@@ -67,7 +67,7 @@ public final class Synchronized<T> {
      * <p>The returned Synchronized instance provides instance methods to perform various
      * synchronized operations on the mutex object.
      * 
-     * <p>Example usage:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Map<String, Integer> map = new HashMap<>();
      * Synchronized<Map<String, Integer>> syncMap = Synchronized.on(map);
@@ -95,7 +95,7 @@ public final class Synchronized<T> {
      * ensuring thread-safe execution. Any exception thrown by the command is propagated
      * to the caller.
      * 
-     * <p>Example usage:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * List<String> list = new ArrayList<>();
      * Synchronized.run(list, () -> {
@@ -129,7 +129,7 @@ public final class Synchronized<T> {
      * ensuring thread-safe execution. The result of the callable is returned to the caller,
      * and any exception thrown by the callable is propagated.
      * 
-     * <p>Example usage:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Map<String, Integer> map = new HashMap<>();
      * map.put("count", 0);
@@ -166,7 +166,7 @@ public final class Synchronized<T> {
      * <p>This method is useful for performing synchronized conditional checks where the
      * predicate needs access to the mutex object itself.
      * 
-     * <p>Example usage:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * List<String> list = new ArrayList<>();
      * list.add("item");
@@ -198,7 +198,7 @@ public final class Synchronized<T> {
      * <p>This method is useful for performing synchronized conditional checks where the
      * predicate needs access to both the mutex object and an additional parameter.
      * 
-     * <p>Example usage:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Map<String, Integer> map = new HashMap<>();
      * map.put("count", 5);
@@ -234,7 +234,7 @@ public final class Synchronized<T> {
      * <p>This method is useful for performing synchronized operations where the
      * consumer needs access to the mutex object itself.
      * 
-     * <p>Example usage:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * StringBuilder sb = new StringBuilder();
      * Synchronized.accept(sb, s -> s.append("Hello").append(" World"));
@@ -264,7 +264,7 @@ public final class Synchronized<T> {
      * <p>This method is useful for performing synchronized operations where the
      * consumer needs access to both the mutex object and an additional parameter.
      * 
-     * <p>Example usage:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Map<String, String> map = new HashMap<>();
      * Synchronized.accept(map, "key", (m, k) -> m.put(k, "value"));
@@ -297,7 +297,7 @@ public final class Synchronized<T> {
      * <p>This method is useful for performing synchronized transformations where the
      * function needs access to the mutex object itself.
      * 
-     * <p>Example usage:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * List<String> list = Arrays.asList("a", "b", "c");
      * Integer size = Synchronized.apply(list, l -> l.size());
@@ -330,7 +330,7 @@ public final class Synchronized<T> {
      * <p>This method is useful for performing synchronized transformations where the
      * function needs access to both the mutex object and an additional parameter.
      * 
-     * <p>Example usage:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Map<String, Integer> map = new HashMap<>();
      * map.put("count", 10);
@@ -367,7 +367,7 @@ public final class Synchronized<T> {
      * <p>The command is executed while holding the monitor lock on the mutex object,
      * ensuring thread-safe execution.
      * 
-     * <p>Example usage:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * List<String> list = new ArrayList<>();
      * Synchronized<List<String>> syncList = Synchronized.on(list);
@@ -397,7 +397,7 @@ public final class Synchronized<T> {
      * <p>The callable is executed while holding the monitor lock on the mutex object,
      * ensuring thread-safe execution.
      * 
-     * <p>Example usage:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Map<String, Integer> map = new HashMap<>();
      * Synchronized<Map<String, Integer>> syncMap = Synchronized.on(map);
@@ -426,7 +426,7 @@ public final class Synchronized<T> {
      * <p>This instance method is useful for repeated synchronized conditional checks
      * on the same object where the predicate needs access to the mutex.
      *
-     * <p>Example usage:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * List<String> list = new ArrayList<>();
      * Synchronized<List<String>> syncList = Synchronized.on(list);
@@ -454,7 +454,7 @@ public final class Synchronized<T> {
      * <p>This instance method is useful for repeated synchronized operations on the same object
      * where the consumer needs access to the mutex.
      * 
-     * <p>Example usage:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * StringBuilder sb = new StringBuilder();
      * Synchronized<StringBuilder> syncSb = Synchronized.on(sb);
@@ -480,7 +480,7 @@ public final class Synchronized<T> {
      * 
      * <p>This instance method is useful for repeated synchronized transformations on the same object.
      * 
-     * <p>Example usage:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Map<String, Integer> map = new HashMap<>();
      * map.put("count", 10);

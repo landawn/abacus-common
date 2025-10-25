@@ -183,7 +183,7 @@ public class DoubleNConsumer2025Test extends TestBase {
             }
         };
 
-        double[] values = {1.0, 2.0, 3.0, 4.0};
+        double[] values = { 1.0, 2.0, 3.0, 4.0 };
         consumer.accept(values);
 
         assertEquals(4, results.size());
@@ -193,7 +193,8 @@ public class DoubleNConsumer2025Test extends TestBase {
 
     @Test
     public void testFunctionalInterfaceContract() {
-        DoubleNConsumer lambda = args -> {};
+        DoubleNConsumer lambda = args -> {
+        };
         assertNotNull(lambda);
         assertDoesNotThrow(() -> lambda.accept(1.0, 2.0, 3.0));
     }

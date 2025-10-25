@@ -37,7 +37,7 @@ public interface ToIntBiFunction<T, U> extends Throwables.ToIntBiFunction<T, U, 
     /**
      * Applies this function to the given arguments and returns an int result.
      * 
-     * <p>Example usage:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ToIntBiFunction<String, String> combinedLength = (s1, s2) -> s1.length() + s2.length();
      * int total = combinedLength.applyAsInt("Hello", "World"); // returns 10
@@ -48,8 +48,7 @@ public interface ToIntBiFunction<T, U> extends Throwables.ToIntBiFunction<T, U, 
      *
      * @param t the first function argument
      * @param u the second function argument
-     * @return the function result as a primitive int
-     * @throws RuntimeException if any error occurs during function execution
+     * @return the function result as a primitive int if any error occurs during function execution
      */
     @Override
     int applyAsInt(T t, U u);

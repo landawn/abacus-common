@@ -57,7 +57,7 @@ public class Result<T, E extends Throwable> implements Immutable {
      * If both are null, it represents a successful operation with a null result.
      * If both are non-null, the Result is considered to be in failure state (exception takes precedence).
      *
-     * <p>Example usage:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Result<String, IOException> result = Result.of("success", null);
      * Result<String, IOException> failure = Result.of(null, new IOException("error"));
@@ -77,7 +77,7 @@ public class Result<T, E extends Throwable> implements Immutable {
      * Checks if this Result represents a failed operation.
      * A Result is considered a failure if it contains a non-null exception.
      *
-     * <p>Example usage:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * if (result.isFailure()) {
      *     // handle failure case
@@ -95,7 +95,7 @@ public class Result<T, E extends Throwable> implements Immutable {
      * A Result is considered successful if it does not contain an exception (exception is null).
      * Note that a successful Result may still have a null value.
      *
-     * <p>Example usage:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * if (result.isSuccess()) {
      *     processValue(result.orElseThrow());
@@ -113,7 +113,7 @@ public class Result<T, E extends Throwable> implements Immutable {
      * The action receives the exception contained in this Result as its parameter.
      * If this Result is successful (no exception), the action is not executed.
      *
-     * <p>Example usage:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * result.ifFailure(ex -> log.error("Operation failed", ex));
      * }</pre>
@@ -132,7 +132,7 @@ public class Result<T, E extends Throwable> implements Immutable {
      * If the Result is successful, actionOnSuccess is executed with the value.
      * Exactly one action will be executed.
      *
-     * <p>Example usage:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * result.ifFailureOrElse(
      *     ex -> log.error("Failed", ex),
@@ -165,7 +165,7 @@ public class Result<T, E extends Throwable> implements Immutable {
      * The action receives the value contained in this Result as its parameter.
      * If this Result is a failure (contains an exception), the action is not executed.
      *
-     * <p>Example usage:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * result.ifSuccess(val -> System.out.println("Success: " + val));
      * }</pre>
@@ -184,7 +184,7 @@ public class Result<T, E extends Throwable> implements Immutable {
      * If the Result contains an exception, actionOnFailure is executed with the exception.
      * Exactly one action will be executed.
      *
-     * <p>Example usage:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * result.ifSuccessOrElse(
      *     val -> processValue(val),
@@ -216,7 +216,7 @@ public class Result<T, E extends Throwable> implements Immutable {
      * Returns the value if this Result is successful, otherwise returns the specified default value.
      * This method provides a way to handle failure cases with a fallback value.
      *
-     * <p>Example usage:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String value = result.orElseIfFailure("default");
      * }</pre>
@@ -237,7 +237,7 @@ public class Result<T, E extends Throwable> implements Immutable {
      * This method provides a way to handle failure cases with a lazily computed fallback value.
      * The supplier is only invoked if this Result contains an exception.
      *
-     * <p>Example usage:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String value = result.orElseGetIfFailure(() -> computeDefault());
      * }</pre>
@@ -260,7 +260,7 @@ public class Result<T, E extends Throwable> implements Immutable {
      * Returns the value if this Result is successful, otherwise throws the contained exception.
      * This method provides a way to unwrap the Result, propagating any exception that occurred.
      *
-     * <p>Example usage:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String value = result.orElseThrow(); // throws exception if failed
      * }</pre>
@@ -281,7 +281,7 @@ public class Result<T, E extends Throwable> implements Immutable {
      * the contained exception to the provided exception mapper function.
      * This method allows transforming the original exception into a different exception type.
      *
-     * <p>Example usage:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String value = result.orElseThrow(ex -> new RuntimeException("Failed", ex));
      * }</pre>
@@ -307,7 +307,7 @@ public class Result<T, E extends Throwable> implements Immutable {
      * This method provides a way to throw a custom exception when the Result represents a failure.
      * The supplier is only invoked if this Result contains an exception.
      *
-     * <p>Example usage:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String value = result.orElseThrow(() -> new IllegalStateException("Failed"));
      * }</pre>
@@ -355,7 +355,7 @@ public class Result<T, E extends Throwable> implements Immutable {
      * Returns the exception contained in this Result, or null if the Result is successful.
      * This method provides direct access to the exception without wrapping it in an Optional.
      *
-     * <p>Example usage:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * if (result.isFailure()) {
      *     Exception ex = result.getException();
@@ -392,7 +392,7 @@ public class Result<T, E extends Throwable> implements Immutable {
      * The first element of the Pair is the value (which may be null), and the second element is the exception (which may be null).
      * Typically, only one of these will be non-null, but both could be null or non-null depending on how the Result was created.
      *
-     * <p>Example usage:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Pair<String, Exception> pair = result.toPair();
      * String value = pair._1;
@@ -410,7 +410,7 @@ public class Result<T, E extends Throwable> implements Immutable {
      * The first element of the Tuple2 is the value (which may be null), and the second element is the exception (which may be null).
      * Typically, only one of these will be non-null, but both could be null or non-null depending on how the Result was created.
      *
-     * <p>Example usage:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Tuple2<String, Exception> tuple = result.toTuple();
      * String value = tuple._1;
@@ -442,7 +442,7 @@ public class Result<T, E extends Throwable> implements Immutable {
      * or both failures with equal exceptions. For equality, both the value and exception
      * must match between the two Result instances.
      *
-     * <p>Example usage:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Result<String, Exception> r1 = Result.of("value", null);
      * Result<String, Exception> r2 = Result.of("value", null);
@@ -472,8 +472,8 @@ public class Result<T, E extends Throwable> implements Immutable {
      * The string representation includes both the value and the exception in the format:
      * {@code {value=<value>, exception=<exception>}}.
      * This is useful for debugging and logging purposes.
-     *
-     * <p>Example output:
+     * 
+     * <p><b>Example output:</b></p>
      * <pre>{@code
      * {value=success, exception=null}
      * {value=null, exception=java.io.IOException: Error}
@@ -505,7 +505,7 @@ public class Result<T, E extends Throwable> implements Immutable {
          * This factory method provides a convenient way to create Results for operations that may throw RuntimeExceptions,
          * which don't need to be declared in method signatures.
          *
-         * <p>Example usage:
+         * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * Result.RR<String> result = Result.RR.of("success", null);
          * Result.RR<String> failure = Result.RR.of(null, new RuntimeException("error"));

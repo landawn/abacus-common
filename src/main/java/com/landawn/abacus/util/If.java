@@ -29,7 +29,7 @@ import com.landawn.abacus.annotation.Beta;
  * <p><strong>Note:</strong> While this class provides a functional approach, traditional if-else statements
  * or ternary operators are generally preferred for better readability and performance.</p>
  * 
- * <p>Example usage:</p>
+ * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * // Basic condition checking
  * If.is(x > 0)
@@ -70,7 +70,7 @@ public final class If {
     /**
      * Creates an If instance based on the given boolean condition.
      * 
-     * <p>Example usage:</p></p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * If.is(temperature > 30)
      *   .then(() -> System.out.println("It's hot!"));
@@ -88,7 +88,7 @@ public final class If {
      * 
      * <p>This is equivalent to {@code is(!b)} but can be more readable in certain contexts.</p>
      * 
-     * <p>Example usage:</p></p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * If.not(list.isEmpty())
      *   .then(() -> processList(list));
@@ -107,7 +107,7 @@ public final class If {
      * <p>Returns {@code true} for {@code index >= 0}, {@code false} for {@code index < 0}.
      * This is commonly used for checking the result of indexOf operations.</p>
      * 
-     * <p>Example usage:</p></p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * If.exists(list.indexOf(element))
      *   .then(() -> System.out.println("Element found"))
@@ -124,7 +124,7 @@ public final class If {
     /**
      * Creates an If instance that checks if the given object is null.
      * 
-     * <p>Example usage:</p></p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * If.isNull(result)
      *   .then(() -> handleNullResult())
@@ -143,7 +143,7 @@ public final class If {
      * 
      * <p>A CharSequence is considered empty if it is null or has zero length.</p>
      * 
-     * <p>Example usage:</p></p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * If.isEmpty(username)
      *   .then(() -> System.out.println("Username is required"));
@@ -159,6 +159,13 @@ public final class If {
     /**
      * Creates an If instance that checks if the given boolean array is null or empty.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * boolean[] flags = {true, false};
+     * If.isEmpty(flags).thenRun(() -> System.out.println("Empty"));  // does nothing
+     * If.isEmpty(null).thenRun(() -> System.out.println("Empty"));   // prints "Empty"
+     * }</pre>
+     *
      * @param a the boolean array to check
      * @return an If instance that is true if the array is null or has zero length
      */
@@ -168,6 +175,13 @@ public final class If {
 
     /**
      * Creates an If instance that checks if the given char array is null or empty.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * char[] chars = {'a', 'b', 'c'};
+     * If.isEmpty(chars).thenRun(() -> System.out.println("Empty"));  // does nothing
+     * If.isEmpty(null).thenRun(() -> System.out.println("Empty"));   // prints "Empty"
+     * }</pre>
      *
      * @param a the char array to check
      * @return an If instance that is true if the array is null or has zero length
@@ -179,6 +193,13 @@ public final class If {
     /**
      * Creates an If instance that checks if the given byte array is null or empty.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * byte[] data = {1, 2, 3};
+     * If.isEmpty(data).thenRun(() -> System.out.println("Empty"));  // does nothing
+     * If.isEmpty(null).thenRun(() -> System.out.println("Empty"));  // prints "Empty"
+     * }</pre>
+     *
      * @param a the byte array to check
      * @return an If instance that is true if the array is null or has zero length
      */
@@ -188,6 +209,13 @@ public final class If {
 
     /**
      * Creates an If instance that checks if the given short array is null or empty.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * short[] values = {10, 20, 30};
+     * If.isEmpty(values).thenRun(() -> System.out.println("Empty"));  // does nothing
+     * If.isEmpty(null).thenRun(() -> System.out.println("Empty"));    // prints "Empty"
+     * }</pre>
      *
      * @param a the short array to check
      * @return an If instance that is true if the array is null or has zero length
@@ -199,6 +227,13 @@ public final class If {
     /**
      * Creates an If instance that checks if the given int array is null or empty.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * int[] numbers = {1, 2, 3};
+     * If.isEmpty(numbers).thenRun(() -> System.out.println("Empty"));  // does nothing
+     * If.isEmpty(null).thenRun(() -> System.out.println("Empty"));     // prints "Empty"
+     * }</pre>
+     *
      * @param a the int array to check
      * @return an If instance that is true if the array is null or has zero length
      */
@@ -208,6 +243,13 @@ public final class If {
 
     /**
      * Creates an If instance that checks if the given long array is null or empty.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * long[] ids = {100L, 200L, 300L};
+     * If.isEmpty(ids).thenRun(() -> System.out.println("Empty"));  // does nothing
+     * If.isEmpty(null).thenRun(() -> System.out.println("Empty")); // prints "Empty"
+     * }</pre>
      *
      * @param a the long array to check
      * @return an If instance that is true if the array is null or has zero length
@@ -219,6 +261,13 @@ public final class If {
     /**
      * Creates an If instance that checks if the given float array is null or empty.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * float[] prices = {1.5f, 2.5f, 3.5f};
+     * If.isEmpty(prices).thenRun(() -> System.out.println("Empty"));  // does nothing
+     * If.isEmpty(null).thenRun(() -> System.out.println("Empty"));    // prints "Empty"
+     * }</pre>
+     *
      * @param a the float array to check
      * @return an If instance that is true if the array is null or has zero length
      */
@@ -228,6 +277,13 @@ public final class If {
 
     /**
      * Creates an If instance that checks if the given double array is null or empty.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * double[] scores = {98.5, 87.3, 92.1};
+     * If.isEmpty(scores).thenRun(() -> System.out.println("Empty"));  // does nothing
+     * If.isEmpty(null).thenRun(() -> System.out.println("Empty"));    // prints "Empty"
+     * }</pre>
      *
      * @param a the double array to check
      * @return an If instance that is true if the array is null or has zero length
@@ -239,7 +295,7 @@ public final class If {
     /**
      * Creates an If instance that checks if the given object array is null or empty.
      * 
-     * <p>Example usage:</p></p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * If.isEmpty(args)
      *   .then(() -> System.out.println("No arguments provided"));
@@ -255,7 +311,7 @@ public final class If {
     /**
      * Creates an If instance that checks if the given Collection is null or empty.
      * 
-     * <p>Example usage:</p></p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * If.isEmpty(resultList)
      *   .then(() -> System.out.println("No results found"))
@@ -272,7 +328,7 @@ public final class If {
     /**
      * Creates an If instance that checks if the given Map is null or empty.
      * 
-     * <p>Example usage:</p></p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * If.isEmpty(configMap)
      *   .then(() -> loadDefaultConfig());
@@ -322,7 +378,7 @@ public final class If {
      * <p>A CharSequence is considered blank if it is null, has zero length, or contains only
      * whitespace characters as defined by {@link Character#isWhitespace(char)}.</p>
      * 
-     * <p>Example usage:</p></p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * If.isBlank(userInput)
      *   .then(() -> System.out.println("Please enter valid input"));
@@ -339,7 +395,7 @@ public final class If {
     /**
      * Creates an If instance that checks if the given object is not null.
      * 
-     * <p>Example usage:</p></p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * If.notNull(user)
      *   .then(u -> System.out.println("User: " + u.getName()))
@@ -356,7 +412,7 @@ public final class If {
     /**
      * Creates an If instance that checks if the given CharSequence is not null and not empty.
      * 
-     * <p>Example usage:</p></p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * If.notEmpty(searchQuery)
      *   .then(() -> performSearch(searchQuery));
@@ -372,6 +428,13 @@ public final class If {
     /**
      * Creates an If instance that checks if the given boolean array is not null and not empty.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * boolean[] flags = {true, false};
+     * If.notEmpty(flags).thenRun(() -> System.out.println("Has data"));  // prints "Has data"
+     * If.notEmpty(null).thenRun(() -> System.out.println("Has data"));   // does nothing
+     * }</pre>
+     *
      * @param a the boolean array to check
      * @return an If instance that is true if the array is not null and has length > 0
      */
@@ -381,6 +444,13 @@ public final class If {
 
     /**
      * Creates an If instance that checks if the given char array is not null and not empty.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * char[] chars = {'a', 'b', 'c'};
+     * If.notEmpty(chars).thenRun(() -> System.out.println("Has data"));  // prints "Has data"
+     * If.notEmpty(null).thenRun(() -> System.out.println("Has data"));   // does nothing
+     * }</pre>
      *
      * @param a the char array to check
      * @return an If instance that is true if the array is not null and has length > 0
@@ -392,6 +462,13 @@ public final class If {
     /**
      * Creates an If instance that checks if the given byte array is not null and not empty.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * byte[] data = {1, 2, 3};
+     * If.notEmpty(data).thenRun(() -> System.out.println("Has data"));  // prints "Has data"
+     * If.notEmpty(null).thenRun(() -> System.out.println("Has data"));  // does nothing
+     * }</pre>
+     *
      * @param a the byte array to check
      * @return an If instance that is true if the array is not null and has length > 0
      */
@@ -401,6 +478,13 @@ public final class If {
 
     /**
      * Creates an If instance that checks if the given short array is not null and not empty.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * short[] values = {10, 20, 30};
+     * If.notEmpty(values).thenRun(() -> System.out.println("Has data"));  // prints "Has data"
+     * If.notEmpty(null).thenRun(() -> System.out.println("Has data"));    // does nothing
+     * }</pre>
      *
      * @param a the short array to check
      * @return an If instance that is true if the array is not null and has length > 0
@@ -412,6 +496,13 @@ public final class If {
     /**
      * Creates an If instance that checks if the given int array is not null and not empty.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * int[] numbers = {1, 2, 3};
+     * If.notEmpty(numbers).thenRun(() -> System.out.println("Has data"));  // prints "Has data"
+     * If.notEmpty(null).thenRun(() -> System.out.println("Has data"));     // does nothing
+     * }</pre>
+     *
      * @param a the int array to check
      * @return an If instance that is true if the array is not null and has length > 0
      */
@@ -421,6 +512,13 @@ public final class If {
 
     /**
      * Creates an If instance that checks if the given long array is not null and not empty.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * long[] ids = {100L, 200L, 300L};
+     * If.notEmpty(ids).thenRun(() -> System.out.println("Has data"));  // prints "Has data"
+     * If.notEmpty(null).thenRun(() -> System.out.println("Has data")); // does nothing
+     * }</pre>
      *
      * @param a the long array to check
      * @return an If instance that is true if the array is not null and has length > 0
@@ -432,6 +530,13 @@ public final class If {
     /**
      * Creates an If instance that checks if the given float array is not null and not empty.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * float[] prices = {1.5f, 2.5f, 3.5f};
+     * If.notEmpty(prices).thenRun(() -> System.out.println("Has data"));  // prints "Has data"
+     * If.notEmpty(null).thenRun(() -> System.out.println("Has data"));    // does nothing
+     * }</pre>
+     *
      * @param a the float array to check
      * @return an If instance that is true if the array is not null and has length > 0
      */
@@ -441,6 +546,13 @@ public final class If {
 
     /**
      * Creates an If instance that checks if the given double array is not null and not empty.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * double[] scores = {98.5, 87.3, 92.1};
+     * If.notEmpty(scores).thenRun(() -> System.out.println("Has data"));  // prints "Has data"
+     * If.notEmpty(null).thenRun(() -> System.out.println("Has data"));    // does nothing
+     * }</pre>
      *
      * @param a the double array to check
      * @return an If instance that is true if the array is not null and has length > 0
@@ -452,7 +564,7 @@ public final class If {
     /**
      * Creates an If instance that checks if the given object array is not null and not empty.
      * 
-     * <p>Example usage:</p></p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * If.notEmpty(files)
      *   .then(() -> processFiles(files));
@@ -468,7 +580,7 @@ public final class If {
     /**
      * Creates an If instance that checks if the given Collection is not null and not empty.
      * 
-     * <p>Example usage:</p></p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * If.notEmpty(selectedItems)
      *   .then(() -> processSelection(selectedItems))
@@ -485,7 +597,7 @@ public final class If {
     /**
      * Creates an If instance that checks if the given Map is not null and not empty.
      * 
-     * <p>Example usage:</p></p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * If.notEmpty(properties)
      *   .then(() -> applyProperties(properties));
@@ -535,7 +647,7 @@ public final class If {
      * <p>A CharSequence is considered not blank if it is not null, has length > 0, and contains
      * at least one non-whitespace character.</p>
      * 
-     * <p>Example usage:</p></p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * If.notBlank(username)
      *   .then(() -> loginUser(username))
@@ -555,7 +667,7 @@ public final class If {
      * 
      * <p>This method is useful when you only want to execute an action in the false case.</p>
      * 
-     * <p>Example usage:</p></p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * If.is(cache.contains(key))
      *   .thenDoNothing()
@@ -571,7 +683,7 @@ public final class If {
     /**
      * Executes the given runnable if the condition is true.
      * 
-     * <p>Example usage:</p></p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * If.is(debugMode)
      *   .then(() -> logger.debug("Debug information"))
@@ -599,7 +711,7 @@ public final class If {
      * 
      * <p>This method is useful for conditional processing of a value.</p>
      * 
-     * <p>Example usage:</p></p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * If.notNull(user)
      *   .then(user, u -> saveUser(u))
@@ -631,7 +743,7 @@ public final class If {
      * <p>This method is useful for validation scenarios where an exception should be thrown
      * when a certain condition is met.</p>
      * 
-     * <p>Example usage:</p></p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * If.isEmpty(requiredField)
      *   .thenThrow(() -> new ValidationException("Required field is empty"));
@@ -717,7 +829,7 @@ public final class If {
         /**
          * Executes the given runnable if the initial condition was false.
          * 
-         * <p>Example usage:</p></p>
+         * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * If.is(hasPermission)
          *   .then(() -> performAction())
@@ -740,7 +852,7 @@ public final class If {
         /**
          * Executes the given consumer with the provided input if the initial condition was false.
          * 
-         * <p>Example usage:</p></p>
+         * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * If.isNull(cachedValue)
          *   .then(() -> value = loadFromCache())
@@ -769,7 +881,7 @@ public final class If {
          * <p>This method is useful for validation scenarios where an exception should be thrown
          * when a required condition is not met.</p>
          * 
-         * <p>Example usage:</p></p>
+         * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * If.notEmpty(results)
          *   .then(() -> processResults(results))

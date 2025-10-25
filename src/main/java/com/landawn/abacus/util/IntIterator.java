@@ -29,7 +29,7 @@ import com.landawn.abacus.util.stream.IntStream;
  * by avoiding boxing/unboxing overhead. This abstract class provides various utility methods for
  * creating, transforming, and consuming int iterators.
  * 
- * <p>Example usage:</p>
+ * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * IntIterator iter = IntIterator.of(1, 2, 3, 4, 5);
  * while (iter.hasNext()) {
@@ -71,7 +71,7 @@ public abstract class IntIterator extends ImmutableIterator<Integer> {
     /**
      * Returns an empty IntIterator instance.
      * 
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * IntIterator empty = IntIterator.empty();
      * empty.hasNext(); // returns false
@@ -87,7 +87,7 @@ public abstract class IntIterator extends ImmutableIterator<Integer> {
     /**
      * Creates an IntIterator from an int array.
      * 
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * IntIterator iter = IntIterator.of(1, 2, 3, 4, 5);
      * IntList list = iter.toList(); // [1, 2, 3, 4, 5]
@@ -103,7 +103,7 @@ public abstract class IntIterator extends ImmutableIterator<Integer> {
     /**
      * Creates an IntIterator from a specified range of an int array.
      * 
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * int[] array = {1, 2, 3, 4, 5};
      * IntIterator iter = IntIterator.of(array, 1, 4); // iterates over 2, 3, 4
@@ -159,7 +159,7 @@ public abstract class IntIterator extends ImmutableIterator<Integer> {
      * Creates a deferred IntIterator that is initialized lazily using the provided Supplier.
      * The Supplier is called only when the first method of the iterator is invoked.
      * 
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * IntIterator iter = IntIterator.defer(() -> IntIterator.of(computeExpensiveArray()));
      * // Array computation happens only when iter is first used
@@ -209,7 +209,7 @@ public abstract class IntIterator extends ImmutableIterator<Integer> {
     /**
      * Creates an infinite IntIterator that generates values using the provided IntSupplier.
      * 
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Random rand = new Random();
      * IntIterator randomInts = IntIterator.generate(rand::nextInt);
@@ -242,7 +242,7 @@ public abstract class IntIterator extends ImmutableIterator<Integer> {
     /**
      * Creates an IntIterator that generates values while a condition is true.
      * 
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * int[] counter = {0};
      * IntIterator iter = IntIterator.generate(
@@ -293,7 +293,7 @@ public abstract class IntIterator extends ImmutableIterator<Integer> {
     /**
      * Returns the next int value in the iteration.
      * 
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * IntIterator iter = IntIterator.of(1, 2, 3);
      * int first = iter.nextInt(); // 1
@@ -312,7 +312,7 @@ public abstract class IntIterator extends ImmutableIterator<Integer> {
      * the number of remaining elements, all elements will be skipped and the returned
      * iterator will be empty.</p>
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * IntIterator iter = IntIterator.of(1, 2, 3, 4, 5);
      * IntIterator skipped = iter.skip(2); // Skips 1 and 2
@@ -375,7 +375,7 @@ public abstract class IntIterator extends ImmutableIterator<Integer> {
      * <p>If count is 0, returns an empty iterator. If count is greater than or equal to
      * the number of remaining elements, all remaining elements will be included.</p>
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Limit infinite iterator
      * IntIterator iter = IntIterator.generate(() -> 1);
@@ -422,7 +422,7 @@ public abstract class IntIterator extends ImmutableIterator<Integer> {
     /**
      * Filters elements based on the given predicate.
      * 
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * IntIterator iter = IntIterator.of(1, 2, 3, 4, 5);
      * IntIterator evens = iter.filter(x -> x % 2 == 0);
@@ -474,7 +474,7 @@ public abstract class IntIterator extends ImmutableIterator<Integer> {
     /**
      * Returns the first element as an OptionalInt, or empty if no elements exist.
      * 
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * OptionalInt first = IntIterator.of(1, 2, 3).first(); // OptionalInt.of(1)
      * OptionalInt empty = IntIterator.empty().first(); // OptionalInt.empty()
@@ -494,7 +494,7 @@ public abstract class IntIterator extends ImmutableIterator<Integer> {
      * Returns the last element as an OptionalInt, or empty if no elements exist.
      * This method consumes the entire iterator.
      * 
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * OptionalInt last = IntIterator.of(1, 2, 3).last(); // OptionalInt.of(3)
      * OptionalInt empty = IntIterator.empty().last(); // OptionalInt.empty()
@@ -523,7 +523,7 @@ public abstract class IntIterator extends ImmutableIterator<Integer> {
      * will be empty (hasNext() returns false). If the iterator is already empty,
      * returns an empty array.</p>
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * int[] array = IntIterator.of(1, 2, 3, 4, 5).toArray();
      * // array = [1, 2, 3, 4, 5]
@@ -546,7 +546,7 @@ public abstract class IntIterator extends ImmutableIterator<Integer> {
      * will be empty (hasNext() returns false). If the iterator is already empty,
      * returns an empty IntList.</p>
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * IntList list = IntIterator.of(1, 2, 3).toList();
      * // list contains [1, 2, 3]
@@ -570,7 +570,7 @@ public abstract class IntIterator extends ImmutableIterator<Integer> {
     /**
      * Converts this iterator to an IntStream for further processing.
      * 
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * int sum = IntIterator.of(1, 2, 3, 4, 5)
      *     .stream()
@@ -588,7 +588,7 @@ public abstract class IntIterator extends ImmutableIterator<Integer> {
      * Returns an iterator that provides indexed access to elements.
      * Each element is paired with its index starting from 0.
      * 
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * IntIterator.of(10, 20, 30)
      *     .indexed()
@@ -607,7 +607,7 @@ public abstract class IntIterator extends ImmutableIterator<Integer> {
      * Returns an iterator that provides indexed access to elements.
      * Each element is paired with its index starting from the specified value.
      * 
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * IntIterator.of(10, 20, 30)
      *     .indexed(100)
@@ -658,7 +658,7 @@ public abstract class IntIterator extends ImmutableIterator<Integer> {
      * <p>This method consumes the iterator. After calling this method, the iterator
      * will be empty (hasNext() returns false).</p>
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * IntIterator.of(1, 2, 3, 4, 5)
      *     .foreachRemaining(System.out::println);
@@ -689,7 +689,7 @@ public abstract class IntIterator extends ImmutableIterator<Integer> {
      * will be empty (hasNext() returns false). The index starts at 0 for the first
      * remaining element.</p>
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * IntIterator.of(10, 20, 30)
      *     .foreachIndexed((index, value) -> System.out.println(index + ": " + value));

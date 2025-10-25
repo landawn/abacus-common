@@ -35,7 +35,7 @@ import java.io.Writer;
  * <p>The escape mode (double quote vs backslash) is determined by the
  * CSVUtil.isBackSlashEscapeCharForWrite() setting.</p>
  * 
- * <p>Example usage:</p>
+ * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * try (BufferedCSVWriter writer = new BufferedCSVWriter()) {
  *     writer.write("Name,Description\n");
@@ -118,7 +118,7 @@ public final class BufferedCSVWriter extends CharacterWriter {
      * The escape mode (double quote vs backslash) is determined by the
      * current CSVUtil configuration.
      * 
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * BufferedCSVWriter writer = new BufferedCSVWriter();
      * writer.write("field1,field2\n");
@@ -135,7 +135,7 @@ public final class BufferedCSVWriter extends CharacterWriter {
      * Characters are encoded using the default character encoding.
      * The escape mode is determined by the current CSVUtil configuration.
      * 
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * try (FileOutputStream fos = new FileOutputStream("data.csv");
      *      BufferedCSVWriter writer = new BufferedCSVWriter(fos)) {
@@ -154,7 +154,7 @@ public final class BufferedCSVWriter extends CharacterWriter {
      * Creates a new BufferedCSVWriter that writes to the specified Writer.
      * The escape mode is determined by the current CSVUtil configuration.
      * 
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * try (FileWriter fw = new FileWriter("data.csv");
      *      BufferedCSVWriter writer = new BufferedCSVWriter(fw)) {
@@ -176,7 +176,7 @@ public final class BufferedCSVWriter extends CharacterWriter {
      * When false, double quotes are escaped as "" (double-double-quote),
      * which is the standard CSV escaping method.</p>
      * 
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * BufferedCSVWriter writer = new BufferedCSVWriter();
      * if (writer.isBackSlash()) {

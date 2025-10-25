@@ -39,7 +39,7 @@ import java.security.SecureRandom;
  *   <li>Thread-safe implementation for concurrent environments</li>
  * </ul>
  * 
- * <p>Example usage:</p>
+ * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * // Generate a nonce
  * byte[] nonce = WSSecurityUtil.generateNonce(16);
@@ -100,7 +100,7 @@ public final class WSSecurityUtil {
      * <p>This method is thread-safe through class-level synchronization. The SecureRandom instance
      * is cached for improved performance across multiple calls while maintaining cryptographic strength.</p>
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Generate a 16-byte nonce for WS-Security
      * byte[] nonce = WSSecurityUtil.generateNonce(16);
@@ -140,7 +140,7 @@ public final class WSSecurityUtil {
      *
      * <p>This method is thread-safe through class-level synchronization.</p>
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String data = "Hello World";
      * byte[] hash = WSSecurityUtil.generateDigest(data.getBytes(StandardCharsets.UTF_8));
@@ -174,15 +174,15 @@ public final class WSSecurityUtil {
      * WS-Security UsernameToken Profile specification.
      *
      * <p>This method implements the WS-Security UsernameToken password digest algorithm:</p>
-     * <pre>
+     * <pre>{@code
      * PasswordDigest = Base64(SHA-1(nonce + created + password))
-     * </pre>
+     * }</pre>
      *
      * <p>The three components are concatenated in the specific order: nonce, then created,
      * then password. This order is defined by the WS-Security specification and must be
      * strictly followed for interoperability.</p>
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Generate components
      * byte[] nonce = WSSecurityUtil.generateNonce(16);
@@ -235,7 +235,7 @@ public final class WSSecurityUtil {
      * converting all string parameters to byte arrays using the default charset. The resulting
      * digest follows the WS-Security UsernameToken specification.</p>
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Using string inputs
      * byte[] nonceBytes = WSSecurityUtil.generateNonce(16);

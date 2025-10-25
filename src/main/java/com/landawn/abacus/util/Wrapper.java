@@ -39,7 +39,7 @@ import java.util.function.ToIntFunction;
  *   <li>Immutable design to ensure collection safety</li>
  * </ul>
  * 
- * <p>Example usage:</p>
+ * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * // Wrapping arrays for use as map keys
  * int[] array1 = {1, 2, 3};
@@ -82,7 +82,7 @@ public abstract class Wrapper<T> implements Immutable {
      * This method automatically detects arrays and applies appropriate deep hash code
      * and deep equals implementations. Zero-length arrays are cached for efficiency.
      * 
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * int[] nums = {1, 2, 3};
      * Wrapper<int[]> wrapper = Wrapper.of(nums);
@@ -123,7 +123,7 @@ public abstract class Wrapper<T> implements Immutable {
      * This method is useful when the wrapped value's natural hashCode and equals methods
      * are not suitable for use in collections.
      * 
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Wrap a Person object but only consider the ID for equality
      * Person person = new Person(123, "John", 30);
@@ -153,7 +153,7 @@ public abstract class Wrapper<T> implements Immutable {
      * This provides complete control over how the wrapped object behaves in collections
      * and how it's represented as a string.
      * 
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ComplexObject obj = new ComplexObject();
      * Wrapper<ComplexObject> wrapper = Wrapper.of(obj,
@@ -183,7 +183,7 @@ public abstract class Wrapper<T> implements Immutable {
     /**
      * Returns the wrapped value.
      * 
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * int[] array = {1, 2, 3};
      * Wrapper<int[]> wrapper = Wrapper.of(array);
@@ -208,7 +208,7 @@ public abstract class Wrapper<T> implements Immutable {
      * suitable for use in hash-based collections. For arrays, the hash code is computed
      * based on the contents rather than the array reference.</p>
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * int[] arr1 = {1, 2, 3};
      * int[] arr2 = {1, 2, 3};
@@ -235,7 +235,7 @@ public abstract class Wrapper<T> implements Immutable {
      * making wrapped objects behave correctly in collections. For arrays, the comparison
      * is performed element-by-element, including nested arrays.</p>
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * int[] arr1 = {1, 2, 3};
      * int[] arr2 = {1, 2, 3};

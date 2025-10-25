@@ -41,7 +41,7 @@ import java.lang.annotation.Target;
  *   <li>Be aware that stateful objects may not be suitable for functional programming patterns. In particular, avoid using stateful objects or interfaces within parallel streams.</li>
  * </ul>
  * 
- * <p>Example usage:</p>
+ * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * @Stateful
  * public class Counter {

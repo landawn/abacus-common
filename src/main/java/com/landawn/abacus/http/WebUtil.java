@@ -79,7 +79,7 @@ public final class WebUtil {
      * request body is present, it's declared as a separate {@code requestBody}
      * variable for readability.</p>
      *
-     * <p>Example input:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * curl -X POST https://api.example.com/users \
      *   -H "Content-Type: application/json" \
@@ -87,7 +87,7 @@ public final class WebUtil {
      *   -d '{"name":"John","age":30}'
      * }</pre>
      *
-     * <p>Example output:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String requestBody = "{\"name\":\"John\",\"age\":30}";
      *
@@ -178,7 +178,6 @@ public final class WebUtil {
                     sb.append("requestBody");
                 }
             } else {
-                //noinspection DataFlowIssue
                 sb.append(indent).append(".execute(HttpMethod.").append(httpMethod.name());
 
                 if (Strings.isNotEmpty(body)) {
@@ -222,14 +221,14 @@ public final class WebUtil {
      *   <li>Otherwise defaults to GET</li>
      * </ul>
      *
-     * <p>Example input:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * curl -X POST https://api.example.com/users \
      *   -H "Content-Type: application/json" \
      *   -d '{"name":"John"}'
      * }</pre>
      *
-     * <p>Example output:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * RequestBody requestBody = RequestBody.create(MediaType.parse("application/json"), "{\"name\":\"John\"}");
      *
@@ -321,7 +320,6 @@ public final class WebUtil {
         } else if (httpMethod == HttpMethod.PUT) {
             sb.append(indent).append(".put();");
         } else {
-            //noinspection DataFlowIssue
             sb.append(indent).append(".execute(HttpMethod.").append(httpMethod.name()).append(");");
         }
 
@@ -356,6 +354,10 @@ public final class WebUtil {
                 cursor = ++i;
 
                 do {
+                    if (i >= len) {
+                        throw new IllegalArgumentException("Unclosed quote starting at position: " + (cursor - 1) + ". String ends at position: " + len);
+                    }
+
                     ch = str.charAt(i);
 
                     if (ch == '\\') {
@@ -420,7 +422,7 @@ public final class WebUtil {
      * <p>The interceptor is added to a new {@code OkHttpClient} instance specifically
      * created for this request, ensuring the logging doesn't affect other clients.</p>
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Create request with cURL logging
      * OkHttpRequest request = WebUtil.createOkHttpRequestForCurl(
@@ -474,7 +476,7 @@ public final class WebUtil {
      *   <li>Request body data</li>
      * </ul>
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Use double quotes in generated cURL commands (e.g., for Windows compatibility)
      * OkHttpRequest request = WebUtil.createOkHttpRequestForCurl(
@@ -534,7 +536,7 @@ public final class WebUtil {
      *   <li>The command is formatted with line separators at the beginning and end</li>
      * </ul>
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Map<String, String> headers = new HashMap<>();
      * headers.put("Content-Type", "application/json");
@@ -550,7 +552,7 @@ public final class WebUtil {
      * );
      * }</pre>
      *
-     * <p>Example output:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * curl -X POST 'https://api.example.com/users' \
      *   -H 'Content-Type: application/json' \
@@ -634,7 +636,7 @@ public final class WebUtil {
      * does nothing, preserving the existing header value. This ensures that explicitly set
      * Content-Type headers are never overwritten.</p>
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Case 1: Setting Content-Type when not present
      * HttpHeaders headers = HttpHeaders.create();

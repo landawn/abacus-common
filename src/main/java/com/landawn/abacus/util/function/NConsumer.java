@@ -24,7 +24,7 @@ package com.landawn.abacus.util.function;
  * <p>The 'N' in NConsumer stands for 'N-ary', indicating that this consumer can accept
  * any number of arguments of the same type.
  * 
- * <p>Example usage:
+ * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * NConsumer<String> printAll = args -> {
  *     for (String s : args) {
@@ -84,7 +84,7 @@ public interface NConsumer<T> {
      * <p>This method is useful for chaining multiple operations that need to process
      * the same variable number of arguments in sequence.
      * 
-     * <p>Example usage:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * NConsumer<String> logger = args -> {
      *     System.out.println("Processing " + args.length + " items");

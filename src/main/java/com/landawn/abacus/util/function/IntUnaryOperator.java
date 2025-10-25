@@ -67,7 +67,7 @@ public interface IntUnaryOperator extends Throwables.IntUnaryOperator<RuntimeExc
      * <p>This method enables operator composition, creating a pipeline where
      * the output of the {@code before} operator becomes the input to this operator.
      *
-     * <p>Example usage:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * IntUnaryOperator multiplyBy2 = x -> x * 2;
      * IntUnaryOperator add5 = x -> x + 5;
@@ -96,7 +96,7 @@ public interface IntUnaryOperator extends Throwables.IntUnaryOperator<RuntimeExc
      * <p>This method enables operator composition, creating a pipeline where
      * the output of this operator becomes the input to the {@code after} operator.
      *
-     * <p>Example usage:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * IntUnaryOperator multiplyBy2 = x -> x * 2;
      * IntUnaryOperator add5 = x -> x + 5;
@@ -122,7 +122,7 @@ public interface IntUnaryOperator extends Throwables.IntUnaryOperator<RuntimeExc
      * <p>This is useful as a default operator or when an operator is required
      * but no transformation is needed.
      *
-     * <p>Example usage:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * IntUnaryOperator identity = IntUnaryOperator.identity();
      * int result = identity.applyAsInt(42); // 42

@@ -28,7 +28,7 @@ public class MutableByteType extends NumberType<MutableByte> {
     /**
      * Returns the Class object representing the MutableByte type.
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * MutableByteType type = new MutableByteType();
      * Class<MutableByte> clazz = type.clazz();
@@ -46,7 +46,7 @@ public class MutableByteType extends NumberType<MutableByte> {
      * Converts a MutableByte object to its string representation.
      * The byte value is converted to a decimal string.
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * MutableByteType type = new MutableByteType();
      *
@@ -74,7 +74,7 @@ public class MutableByteType extends NumberType<MutableByte> {
      * Parses a string to create a MutableByte object.
      * The string is parsed as a byte value.
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * MutableByteType type = new MutableByteType();
      *
@@ -104,7 +104,7 @@ public class MutableByteType extends NumberType<MutableByte> {
      * Retrieves a MutableByte value from a ResultSet at the specified column index.
      * The database byte value is wrapped in a MutableByte object.
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * MutableByteType type = new MutableByteType();
      * ResultSet rs = ...; // obtained from database query
@@ -132,7 +132,7 @@ public class MutableByteType extends NumberType<MutableByte> {
      * Retrieves a MutableByte value from a ResultSet using the specified column label.
      * The database byte value is wrapped in a MutableByte object.
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * MutableByteType type = new MutableByteType();
      * ResultSet rs = ...; // obtained from database query
@@ -160,7 +160,7 @@ public class MutableByteType extends NumberType<MutableByte> {
      * Sets a MutableByte parameter in a PreparedStatement at the specified position.
      * If the MutableByte is null, 0 is stored. Otherwise, the wrapped byte value is stored.
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * MutableByteType type = new MutableByteType();
      * PreparedStatement stmt = connection.prepareStatement(
@@ -188,7 +188,7 @@ public class MutableByteType extends NumberType<MutableByte> {
      * Sets a MutableByte parameter in a CallableStatement using the specified parameter name.
      * If the MutableByte is null, 0 is stored. Otherwise, the wrapped byte value is stored.
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * MutableByteType type = new MutableByteType();
      * CallableStatement stmt = connection.prepareCall("{call update_status(?, ?)}");
@@ -215,7 +215,7 @@ public class MutableByteType extends NumberType<MutableByte> {
      * Appends the string representation of a MutableByte to an Appendable.
      * The value is written as a decimal string or "null".
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * MutableByteType type = new MutableByteType();
      * StringBuilder sb = new StringBuilder();
@@ -252,7 +252,7 @@ public class MutableByteType extends NumberType<MutableByte> {
      * The value is written as numeric characters or the null character array.
      * This method is optimized for character-based writing.
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * MutableByteType type = new MutableByteType();
      * CharacterWriter writer = new CharacterWriter();

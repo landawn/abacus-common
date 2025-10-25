@@ -39,7 +39,7 @@ import com.landawn.abacus.util.cs;
  *   <li>Kryo support (requires Kryo library)</li>
  * </ul>
  * 
- * <p>Example usage:
+ * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * // Check availability before creating parsers
  * if (ParserFactory.isKryoAvailable()) {
@@ -210,7 +210,7 @@ public final class ParserFactory {
      * Creates a new Avro parser instance.
      * Avro provides schema evolution and is particularly useful for data interchange.
      *
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * if (ParserFactory.isAvroAvailable()) {
      *     AvroParser parser = ParserFactory.createAvroParser();
@@ -229,7 +229,7 @@ public final class ParserFactory {
      * Creates a new Kryo parser instance.
      * Kryo provides fast binary serialization with automatic deep copying.
      *
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * if (ParserFactory.isKryoAvailable()) {
      *     KryoParser parser = ParserFactory.createKryoParser();
@@ -248,7 +248,7 @@ public final class ParserFactory {
      * Creates a new JSON parser instance with default configuration.
      * JSON parser is always available as it has no external dependencies.
      *
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * JSONParser parser = ParserFactory.createJSONParser();
      * String json = parser.serialize(myObject);
@@ -264,7 +264,7 @@ public final class ParserFactory {
     /**
      * Creates a new JSON parser instance with specified configurations.
      *
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * JSONSerializationConfig jsc = new JSONSerializationConfig()
      *     .prettyFormat(true)
@@ -287,7 +287,7 @@ public final class ParserFactory {
      * Creates a new Abacus XML parser instance with default configuration.
      * Uses StAX (Streaming API for XML) as the default parser type.
      *
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * if (ParserFactory.isAbacusXMLAvailable()) {
      *     XMLParser parser = ParserFactory.createAbacusXMLParser();
@@ -305,7 +305,7 @@ public final class ParserFactory {
     /**
      * Creates a new Abacus XML parser instance with specified configurations.
      *
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * XMLSerializationConfig xsc = new XMLSerializationConfig()
      *     .tagByPropertyName(true)
@@ -359,7 +359,7 @@ public final class ParserFactory {
      * Creates a new standard XML parser instance with default configuration.
      * Uses StAX (Streaming API for XML) as the default parser type.
      *
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * if (ParserFactory.isXMLAvailable()) {
      *     XMLParser parser = ParserFactory.createXMLParser();
@@ -377,7 +377,7 @@ public final class ParserFactory {
     /**
      * Creates a new standard XML parser instance with specified configurations.
      *
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * XMLSerializationConfig xsc = new XMLSerializationConfig()
      *     .prettyFormat(true);
@@ -418,7 +418,7 @@ public final class ParserFactory {
      * Creates a new JAXB parser instance with default configuration.
      * JAXB (Java Architecture for XML Binding) provides annotation-based XML binding.
      *
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * XMLParser parser = ParserFactory.createJAXBParser();
      * // Use with JAXB-annotated classes
@@ -434,7 +434,7 @@ public final class ParserFactory {
      * Creates a new JAXB parser instance with specified configurations.
      * JAXB (Java Architecture for XML Binding) provides annotation-based XML binding with customizable behavior.
      *
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * XMLSerializationConfig xsc = new XMLSerializationConfig().prettyFormat(true);
      * XMLDeserializationConfig xdc = new XMLDeserializationConfig();
@@ -453,7 +453,7 @@ public final class ParserFactory {
      * Registers a class with Kryo for serialization.
      * Registration can improve performance and reduce serialized size.
      *
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Register commonly used classes
      * ParserFactory.registerKryo(MyDomainObject.class);
@@ -473,7 +473,7 @@ public final class ParserFactory {
      * Registers a class with Kryo using a specific ID.
      * Using fixed IDs ensures compatibility across different JVM instances.
      *
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Register with fixed IDs for compatibility
      * ParserFactory.registerKryo(User.class, 100);
@@ -495,7 +495,7 @@ public final class ParserFactory {
      * Registers a class with Kryo using a custom serializer.
      * Custom serializers can handle special serialization requirements.
      *
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Register with custom serializer
      * ParserFactory.registerKryo(DateTime.class, new DateTimeSerializer());
@@ -517,7 +517,7 @@ public final class ParserFactory {
      * Registers a class with Kryo using a custom serializer and specific ID.
      * Combines the benefits of custom serialization and fixed IDs.
      *
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Register with both custom serializer and ID
      * ParserFactory.registerKryo(BigDecimal.class, new BigDecimalSerializer(), 200);

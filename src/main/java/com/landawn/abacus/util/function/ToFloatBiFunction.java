@@ -33,7 +33,7 @@ public interface ToFloatBiFunction<T, U> {
     /**
      * Applies this function to the given arguments and returns a float result.
      * 
-     * <p>Example usage:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ToFloatBiFunction<Integer, Integer> divider = (a, b) -> (float) a / b;
      * float result = divider.applyAsFloat(10, 3); // returns 3.3333333

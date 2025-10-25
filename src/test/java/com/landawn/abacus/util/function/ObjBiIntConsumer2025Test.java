@@ -30,8 +30,7 @@ public class ObjBiIntConsumer2025Test extends TestBase {
     @Test
     public void testAcceptWithLambda() {
         final StringBuilder result = new StringBuilder();
-        ObjBiIntConsumer<String> consumer = (t, i, j) ->
-            result.append(t.substring(i, j));
+        ObjBiIntConsumer<String> consumer = (t, i, j) -> result.append(t.substring(i, j));
 
         consumer.accept("Hello World", 0, 5);
 
@@ -130,7 +129,7 @@ public class ObjBiIntConsumer2025Test extends TestBase {
 
     @Test
     public void testSideEffects() {
-        final int[] counter = {0};
+        final int[] counter = { 0 };
         ObjBiIntConsumer<String> consumer = (t, i, j) -> counter[0] = i + j;
 
         consumer.accept("test", 10, 20);

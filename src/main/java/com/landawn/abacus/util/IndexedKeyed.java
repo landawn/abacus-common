@@ -23,7 +23,7 @@ package com.landawn.abacus.util;
  * in {@code hashCode/equals} method, ignoring the value. This makes it ideal for use in
  * collections where you need to track both the position and a unique identifier for elements.</p>
  * 
- * <p>Example usage:</p>
+ * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * IndexedKeyed<String, User> indexed = IndexedKeyed.of(0, "user123", new User("John"));
  * System.out.println(indexed.index()); // prints: 0
@@ -58,7 +58,7 @@ public final class IndexedKeyed<K, T> extends Keyed<K, T> {
      * stored but not considered in identity operations. This design is optimized for performance
      * in collections where elements are uniquely identified by their index and key combination.</p>
      *
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Create an indexed keyed element for a user at position 5
      * IndexedKeyed<String, User> item = IndexedKeyed.of(5, "user-123", new User("John"));
@@ -85,7 +85,7 @@ public final class IndexedKeyed<K, T> extends Keyed<K, T> {
      * <p>This index value is included in hash code computation and equality checks
      * alongside the key, making it part of the object's identity.</p>
      *
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * IndexedKeyed<String, String> item = IndexedKeyed.of(3, "key", "value");
      * int pos = item.index(); // returns 3
@@ -110,7 +110,7 @@ public final class IndexedKeyed<K, T> extends Keyed<K, T> {
      * according to {@link #equals(Object)}, they will have the same hash code, fulfilling
      * the general contract of {@code hashCode}.</p>
      *
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * IndexedKeyed<String, String> item1 = IndexedKeyed.of(1, "key", "value1");
      * IndexedKeyed<String, String> item2 = IndexedKeyed.of(1, "key", "value2");
@@ -142,7 +142,7 @@ public final class IndexedKeyed<K, T> extends Keyed<K, T> {
      *   <li>Otherwise, compares both index and key using null-safe equality</li>
      * </ol>
      *
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * IndexedKeyed<String, String> item1 = IndexedKeyed.of(1, "key", "value1");
      * IndexedKeyed<String, String> item2 = IndexedKeyed.of(1, "key", "value2");
@@ -184,7 +184,7 @@ public final class IndexedKeyed<K, T> extends Keyed<K, T> {
      * <p>This method is useful for debugging, logging, and displaying the complete state
      * of an {@code IndexedKeyed} instance.</p>
      *
-     * <p>Examples:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * IndexedKeyed<String, Integer> item1 = IndexedKeyed.of(2, "abc", 42);
      * System.out.println(item1); // Output: {index=2, key=abc, val=42}

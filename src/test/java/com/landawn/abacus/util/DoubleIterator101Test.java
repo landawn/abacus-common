@@ -413,7 +413,7 @@ public class DoubleIterator101Test extends TestBase {
             Assertions.fail("Should not be called");
         });
 
-        Assertions.assertThrows(NullPointerException.class, () -> DoubleIterator.of(1.0).foreachRemaining((Throwables.DoubleConsumer<Exception>) null));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> DoubleIterator.of(1.0).foreachRemaining((Throwables.DoubleConsumer<Exception>) null));
     }
 
     @Test
@@ -436,7 +436,7 @@ public class DoubleIterator101Test extends TestBase {
             Assertions.fail("Should not be called");
         });
 
-        Assertions.assertThrows(NullPointerException.class, () -> DoubleIterator.of(1.0).foreachIndexed(null));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> DoubleIterator.of(1.0).foreachIndexed(null));
     }
 
     @Test

@@ -48,8 +48,8 @@ import java.lang.annotation.Target;
  *   <li>Ideal for use as Map keys or Set elements</li>
  * </ul>
  * 
- * <p><b>Example usage:</b></p>
- * <pre>
+ * <p><b>Usage Examples:</b></p>
+ * <pre>{@code
  * {@literal @}Immutable
  * public final class Point {
  *     private final int x;
@@ -65,7 +65,7 @@ import java.lang.annotation.Target;
  *         return new Point(x + dx, y + dy);
  *     }
  * }
- * </pre>
+ * }</pre>
  * 
  * <p>This annotation serves as documentation and can be used by static analysis tools
  * to verify immutability constraints and detect potential violations.</p>

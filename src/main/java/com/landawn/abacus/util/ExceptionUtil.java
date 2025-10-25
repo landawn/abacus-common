@@ -45,7 +45,7 @@ import com.landawn.abacus.util.u.Optional;
  * 
  * <p>This class contains methods copied from Apache Commons and Google Guava under Apache License v2.</p>
  * 
- * <p>Example usage:</p>
+ * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * // Convert checked exception to runtime exception
  * try {
@@ -119,7 +119,7 @@ public final class ExceptionUtil {
      * Registers a custom mapper for converting specific exception types to RuntimeException.
      * This allows customization of how checked exceptions are converted to unchecked exceptions.
      *
-     * <p>Example usage:</p></p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Register custom mapper for MyCheckedException
      * ExceptionUtil.registerRuntimeExceptionMapper(
@@ -141,7 +141,7 @@ public final class ExceptionUtil {
      * Registers a custom mapper for converting specific exception types to RuntimeException,
      * with an option to force overwrite existing mappings.
      *
-     * <p>Example usage:</p></p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Force registration even if mapper already exists
      * ExceptionUtil.registerRuntimeExceptionMapper(
@@ -179,7 +179,7 @@ public final class ExceptionUtil {
      * Converts the specified Exception to a RuntimeException if it's a checked exception.
      * If it's already a RuntimeException, returns itself.
      *
-     * <p>Example usage:</p></p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * try {
      *     Files.readAllLines(path);
@@ -200,7 +200,7 @@ public final class ExceptionUtil {
      * Converts the specified Exception to a RuntimeException with option to call Thread.interrupt().
      * Useful when handling InterruptedException to preserve interrupted status.
      *
-     * <p>Example usage:</p></p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * try {
      *     Thread.sleep(1000);
@@ -222,7 +222,7 @@ public final class ExceptionUtil {
      * Converts the specified Throwable to a RuntimeException if it's a checked exception.
      * If it's already a RuntimeException, returns itself.
      *
-     * <p>Example usage:</p></p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * try {
      *     reflectiveOperation();
@@ -242,7 +242,7 @@ public final class ExceptionUtil {
      * Converts the specified Throwable to a RuntimeException with option to call Thread.interrupt().
      * If it's an Error and throwIfItIsError is false, wraps it in RuntimeException.
      *
-     * <p>Example usage:</p></p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * try {
      *     riskyOperation();
@@ -263,7 +263,7 @@ public final class ExceptionUtil {
      * Converts the specified Throwable to a RuntimeException with full control over behavior.
      * Provides options to handle InterruptedException and Error cases.
      *
-     * <p>Example usage:</p></p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * try {
      *     criticalOperation();
@@ -323,7 +323,7 @@ public final class ExceptionUtil {
      * Attempts to extract the original checked exception from a runtime exception wrapper.
      * This is useful when dealing with wrapped exceptions from reflection or concurrent operations.
      *
-     * <p>Example usage:</p></p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * try {
      *     future.get();
@@ -374,7 +374,7 @@ public final class ExceptionUtil {
     /**
      * Checks if the exception or any of its causes is of the specified type.
      *
-     * <p>Example usage:</p></p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * try {
      *     complexDatabaseOperation();
@@ -408,7 +408,7 @@ public final class ExceptionUtil {
     /**
      * Checks if the exception or any of its causes matches the specified predicate.
      *
-     * <p>Example usage:</p></p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * try {
      *     operation();
@@ -442,7 +442,7 @@ public final class ExceptionUtil {
     /**
      * Checks if the exception or any of its causes is a SQLException or UncheckedSQLException.
      *
-     * <p>Example usage:</p></p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * try {
      *     databaseOperation();
@@ -475,7 +475,7 @@ public final class ExceptionUtil {
     /**
      * Checks if the exception or any of its causes is an IOException or UncheckedIOException.
      *
-     * <p>Example usage:</p></p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * try {
      *     fileOperation();
@@ -509,7 +509,7 @@ public final class ExceptionUtil {
      * Checks if the throwable is either NullPointerException or IllegalArgumentException.
      * Useful for identifying common programming errors.
      *
-     * <p>Example usage:</p></p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * try {
      *     validateInput(input);
@@ -532,7 +532,7 @@ public final class ExceptionUtil {
      * Returns a list containing all exceptions in the cause chain.
      * The list starts with the given exception and includes all causes.
      *
-     * <p>Example usage:</p></p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * try {
      *     complexOperation();
@@ -563,7 +563,7 @@ public final class ExceptionUtil {
      * Returns the first cause in the exception chain (the root cause).
      * If there is no cause, returns the input throwable itself.
      *
-     * <p>Example usage:</p></p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * try {
      *     wrappedOperation();
@@ -591,7 +591,7 @@ public final class ExceptionUtil {
     /**
      * Finds the first occurrence of the specified exception type in the cause chain.
      *
-     * <p>Example usage:</p></p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * try {
      *     serviceCall();
@@ -627,7 +627,7 @@ public final class ExceptionUtil {
     /**
      * Finds the first exception in the cause chain that matches the specified predicate.
      *
-     * <p>Example usage:</p></p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * try {
      *     complexOperation();
@@ -672,7 +672,7 @@ public final class ExceptionUtil {
      * On JDK1.3 and earlier, the cause exception will not be shown
      * unless the specified throwable alters printStackTrace.</p>
      *
-     * <p>Example usage:</p></p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * try {
      *     riskyOperation();
@@ -700,7 +700,7 @@ public final class ExceptionUtil {
      * Gets the error message from an exception.
      * If the exception has no message, attempts to get the message from its cause.
      *
-     * <p>Example usage:</p></p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * try {
      *     operation();
@@ -721,7 +721,7 @@ public final class ExceptionUtil {
      * Gets the error message from an exception with optional exception class name prefix.
      * For SQLException, includes the error code.
      *
-     * <p>Example usage:</p></p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * try {
      *     databaseOperation();

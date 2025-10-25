@@ -39,7 +39,7 @@ public interface ToShortFunction<T> extends Throwables.ToShortFunction<T, Runtim
      * A predefined ToShortFunction instance that unboxes a Short object to a primitive short.
      * Returns 0 if the input is null, otherwise returns the short value of the Short object.
      * 
-     * <p>Example usage:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Short boxed = 42;
      * short primitive = ToShortFunction.UNBOX.applyAsShort(boxed); // returns 42
@@ -56,7 +56,7 @@ public interface ToShortFunction<T> extends Throwables.ToShortFunction<T, Runtim
      * <p>Note: This conversion may result in loss of precision for floating-point numbers or
      * overflow for numbers outside the short range (-32,768 to 32,767).
      * 
-     * <p>Example usage:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Integer intValue = 100;
      * short result1 = ToShortFunction.FROM_NUM.applyAsShort(intValue); // returns 100
@@ -76,8 +76,7 @@ public interface ToShortFunction<T> extends Throwables.ToShortFunction<T, Runtim
      * Applies this function to the given argument and returns a short result.
      *
      * @param value the function argument
-     * @return the function result as a primitive short
-     * @throws RuntimeException if any error occurs during function execution
+     * @return the function result as a primitive short if any error occurs during function execution
      */
     @Override
     short applyAsShort(T value);

@@ -27,7 +27,7 @@ import com.landawn.abacus.annotation.MayReturnNull;
  * 
  * <p>This class is immutable and thread-safe for password operations.</p>
  * 
- * <p>Example usage:</p>
+ * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * Password password = new Password("SHA-256");
  * String encrypted = password.encrypt("myPassword123");
@@ -48,7 +48,7 @@ public final class Password {
      * The algorithm must be one supported by the Java security provider
      * (e.g., "MD5", "SHA-1", "SHA-256", "SHA-512").
      * 
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Password sha256Password = new Password("SHA-256");
      * Password md5Password = new Password("MD5");
@@ -71,7 +71,7 @@ public final class Password {
     /**
      * Returns the name of the hashing algorithm used by this Password instance.
      * 
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Password password = new Password("SHA-256");
      * String algo = password.getAlgorithm(); // Returns "SHA-256"
@@ -88,7 +88,7 @@ public final class Password {
      * and returns the result encoded in Base64 format. This method is thread-safe
      * due to synchronization.
      * 
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Password password = new Password("SHA-256");
      * String encrypted = password.encrypt("mySecretPassword");
@@ -116,7 +116,7 @@ public final class Password {
      * This method encrypts the plain password and compares it with the provided
      * encrypted password for equality.
      * 
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Password password = new Password("SHA-256");
      * String encrypted = password.encrypt("myPassword");
@@ -149,7 +149,7 @@ public final class Password {
      * Compares this Password instance with the specified object for equality.
      * Two Password instances are considered equal if they use the same algorithm.
      * 
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Password p1 = new Password("SHA-256");
      * Password p2 = new Password("SHA-256");

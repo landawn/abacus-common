@@ -121,11 +121,24 @@ public abstract class AbstractByteType extends NumberType<Number> {
 
     /**
      * Retrieves a byte value from a ResultSet at the specified column index.
+     * This method uses rs.getByte() which returns 0 for SQL NULL values.
+     * Subclasses may override this to return null for SQL NULL values.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * // For primitive byte types
+     * PrimitiveByteType type = TypeFactory.getType(byte.class);
+     * byte value = type.get(rs, 1); // Returns 0 for SQL NULL
+     *
+     * // For wrapper Byte types
+     * ByteType type = TypeFactory.getType(Byte.class);
+     * Byte value = type.get(rs, 1); // Returns null for SQL NULL (overridden in subclass)
+     * }</pre>
      *
      * @param rs the ResultSet to read from
      * @param columnIndex the column index (1-based)
-     * @return the byte value at the specified column
-     * @throws SQLException if a database access error occurs
+     * @return the byte value at the specified column; returns 0 if SQL NULL (may be overridden by subclasses to return null)
+     * @throws SQLException if a database access error occurs or the columnIndex is invalid
      */
     @Override
     public Byte get(final ResultSet rs, final int columnIndex) throws SQLException {
@@ -139,11 +152,24 @@ public abstract class AbstractByteType extends NumberType<Number> {
 
     /**
      * Retrieves a byte value from a ResultSet using the specified column label.
+     * This method uses rs.getByte() which returns 0 for SQL NULL values.
+     * Subclasses may override this to return null for SQL NULL values.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * // For primitive byte types
+     * PrimitiveByteType type = TypeFactory.getType(byte.class);
+     * byte value = type.get(rs, "status"); // Returns 0 for SQL NULL
+     *
+     * // For wrapper Byte types
+     * ByteType type = TypeFactory.getType(Byte.class);
+     * Byte value = type.get(rs, "status"); // Returns null for SQL NULL (overridden in subclass)
+     * }</pre>
      *
      * @param rs the ResultSet to read from
      * @param columnLabel the column label
-     * @return the byte value at the specified column
-     * @throws SQLException if a database access error occurs
+     * @return the byte value at the specified column; returns 0 if SQL NULL (may be overridden by subclasses to return null)
+     * @throws SQLException if a database access error occurs or the columnLabel is not found
      */
     @Override
     public Byte get(final ResultSet rs, final String columnLabel) throws SQLException {

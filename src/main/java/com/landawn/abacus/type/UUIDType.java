@@ -18,6 +18,19 @@ import java.util.UUID;
 
 import com.landawn.abacus.util.Strings;
 
+/**
+ * Type handler for {@link java.util.UUID} objects.
+ * This class provides serialization, deserialization, and type conversion capabilities
+ * for UUID instances. It handles conversion between UUID objects and their standard
+ * string representation in the format "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx".
+ *
+ * <p><b>Usage Examples:</b></p>
+ * <pre>{@code
+ * Type<UUID> type = TypeFactory.getType(UUID.class);
+ * UUID uuid = type.valueOf("550e8400-e29b-41d4-a716-446655440000");
+ * String str = type.stringOf(uuid); // Returns the UUID string representation
+ * }</pre>
+ */
 public class UUIDType extends AbstractType<UUID> {
 
     public static final String UUID = "UUID";
@@ -33,7 +46,7 @@ public class UUIDType extends AbstractType<UUID> {
      * {@link java.util.UUID} class that this UUIDType handles.
      * </p>
      *
-     * <pre>{@code
+     * <p><b>Usage Examples:</b></p>
      * UUIDType uuidType = new UUIDType();
      * Class<UUID> clazz = uuidType.clazz(); // Returns UUID.class
      * }</pre>
@@ -53,7 +66,7 @@ public class UUIDType extends AbstractType<UUID> {
      * If the input UUID is null, this method returns null.
      * </p>
      *
-     * <pre>{@code
+     * <p><b>Usage Examples:</b></p>
      * UUID uuid = UUID.fromString("550e8400-e29b-41d4-a716-446655440000");
      * String str = uuidType.stringOf(uuid); // Returns "550e8400-e29b-41d4-a716-446655440000"
      * }</pre>
@@ -74,7 +87,7 @@ public class UUIDType extends AbstractType<UUID> {
      * where 'x' is a hexadecimal digit. If the string is null or empty, this method returns null.
      * </p>
      *
-     * <pre>{@code
+     * <p><b>Usage Examples:</b></p>
      * UUID uuid = uuidType.valueOf("550e8400-e29b-41d4-a716-446655440000");
      * // uuid represents the parsed UUID object
      * }</pre>

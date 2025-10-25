@@ -34,7 +34,7 @@ import com.landawn.abacus.annotation.SuppressFBWarnings;
  * <p>The factory maintains a cache of logger instances to avoid creating multiple instances
  * for the same logger name.</p>
  * 
- * <p>Usage example:</p>
+ * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * Logger logger = LoggerFactory.getLogger(MyClass.class);
  * logger.info("Application started");
@@ -68,7 +68,7 @@ public final class LoggerFactory {
      * <p>This method creates a logger with the fully qualified class name. If a logger
      * with the same name already exists, the cached instance is returned.</p>
      * 
-     * <p>Usage example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * public class MyService {
      *     private static final Logger logger = LoggerFactory.getLogger(MyService.class);
@@ -101,7 +101,7 @@ public final class LoggerFactory {
      *   <li>JDK Logger (fallback)</li>
      * </ol>
      * 
-     * <p>Usage example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Logger logger = LoggerFactory.getLogger("com.mycompany.MyComponent");
      * logger.warn("Configuration not found, using defaults");

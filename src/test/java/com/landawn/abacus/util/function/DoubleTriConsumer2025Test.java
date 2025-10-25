@@ -74,7 +74,8 @@ public class DoubleTriConsumer2025Test extends TestBase {
 
     @Test
     public void testFunctionalInterfaceContract() {
-        DoubleTriConsumer lambda = (a, b, c) -> {};
+        DoubleTriConsumer lambda = (a, b, c) -> {
+        };
         assertNotNull(lambda);
         assertDoesNotThrow(() -> lambda.accept(1.0, 2.0, 3.0));
     }

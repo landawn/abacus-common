@@ -35,7 +35,7 @@ import com.landawn.abacus.annotation.Beta;
  * elements in sorted order according to their natural ordering or by a Comparator provided
  * at creation time.</p>
  * 
- * <p>Example usage:
+ * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * ImmutableNavigableMap<Integer, String> map = ImmutableNavigableMap.of(
  *     1, "one", 2, "two", 3, "three", 4, "four"
@@ -74,12 +74,11 @@ public class ImmutableNavigableMap<K, V> extends ImmutableSortedMap<K, V> implem
      * Returns an empty ImmutableNavigableMap. This method always returns the same cached instance,
      * making it memory efficient for representing empty navigable maps.
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ImmutableNavigableMap<String, Integer> emptyMap = ImmutableNavigableMap.empty();
      * System.out.println(emptyMap.size()); // 0
      * }</pre>
-     * </p>
      *
      * @param <K> the type of the keys in the ImmutableNavigableMap
      * @param <V> the type of the values in the ImmutableNavigableMap
@@ -93,12 +92,11 @@ public class ImmutableNavigableMap<K, V> extends ImmutableSortedMap<K, V> implem
      * Returns an ImmutableNavigableMap containing the provided key-value pair.
      * The key must implement Comparable to determine its natural ordering.
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ImmutableNavigableMap<String, Integer> map = ImmutableNavigableMap.of("count", 42);
      * System.out.println(map.firstKey()); // "count"
      * }</pre>
-     * </p>
      *
      * @param <K> the type of the key in the ImmutableNavigableMap, must extend Comparable
      * @param <V> the type of the value in the ImmutableNavigableMap
@@ -119,14 +117,13 @@ public class ImmutableNavigableMap<K, V> extends ImmutableSortedMap<K, V> implem
      * The keys must implement Comparable to determine their natural ordering.
      * If duplicate keys are provided, the last value for a key wins.
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ImmutableNavigableMap<Integer, String> map = ImmutableNavigableMap.of(
      *     2, "two", 1, "one"
      * );
      * System.out.println(map); // {1=one, 2=two}
      * }</pre>
-     * </p>
      *
      * @param <K> the type of the keys in the ImmutableNavigableMap, must extend Comparable
      * @param <V> the type of the values in the ImmutableNavigableMap
@@ -359,7 +356,7 @@ public class ImmutableNavigableMap<K, V> extends ImmutableSortedMap<K, V> implem
      * If the provided Map is {@code null} or empty, an empty ImmutableNavigableMap is returned.
      * Otherwise, a new ImmutableNavigableMap is created with the elements of the provided Map.
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Map<String, Integer> map = new HashMap<>();
      * map.put("b", 2);
@@ -367,7 +364,6 @@ public class ImmutableNavigableMap<K, V> extends ImmutableSortedMap<K, V> implem
      * ImmutableNavigableMap<String, Integer> immutable = ImmutableNavigableMap.copyOf(map);
      * System.out.println(immutable); // {a=1, b=2}
      * }</pre>
-     * </p>
      *
      * @param <K> the type of keys in the Map
      * @param <V> the type of values in the Map
@@ -397,13 +393,12 @@ public class ImmutableNavigableMap<K, V> extends ImmutableSortedMap<K, V> implem
      * NavigableMap will be visible through the returned ImmutableNavigableMap, which violates the
      * immutability contract. Use {@link #copyOf(Map)} for a true immutable copy.</p>
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * NavigableMap<Integer, String> mutable = new TreeMap<>();
      * ImmutableNavigableMap<Integer, String> wrapped = ImmutableNavigableMap.wrap(mutable);
      * mutable.put(1, "one"); // This change is visible in wrapped!
      * }</pre>
-     * </p>
      *
      * @param <K> the type of keys in the NavigableMap
      * @param <V> the type of values in the NavigableMap
@@ -443,7 +438,7 @@ public class ImmutableNavigableMap<K, V> extends ImmutableSortedMap<K, V> implem
      * or {@code null} if there is no such key. The returned entry is immutable and does not support
      * the {@code setValue} operation.
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ImmutableNavigableMap<Integer, String> map = ImmutableNavigableMap.of(
      *     1, "one", 3, "three", 5, "five"
@@ -452,7 +447,6 @@ public class ImmutableNavigableMap<K, V> extends ImmutableSortedMap<K, V> implem
      * System.out.println(map.lowerEntry(4));  // 3=three
      * System.out.println(map.lowerEntry(1));  // null
      * }</pre>
-     * </p>
      *
      * @param key the key
      * @return an entry with the greatest key less than {@code key}, or {@code null} if there is no such key
@@ -469,7 +463,7 @@ public class ImmutableNavigableMap<K, V> extends ImmutableSortedMap<K, V> implem
     /**
      * Returns the greatest key strictly less than the given key, or {@code null} if there is no such key.
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ImmutableNavigableMap<Integer, String> map = ImmutableNavigableMap.of(
      *     1, "one", 3, "three", 5, "five"
@@ -478,7 +472,6 @@ public class ImmutableNavigableMap<K, V> extends ImmutableSortedMap<K, V> implem
      * System.out.println(map.lowerKey(4));  // 3
      * System.out.println(map.lowerKey(1));  // null
      * }</pre>
-     * </p>
      *
      * @param key the key
      * @return the greatest key less than {@code key}, or {@code null} if there is no such key
@@ -495,7 +488,7 @@ public class ImmutableNavigableMap<K, V> extends ImmutableSortedMap<K, V> implem
      * or {@code null} if there is no such key. The returned entry is immutable and does not support
      * the {@code setValue} operation.
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ImmutableNavigableMap<Integer, String> map = ImmutableNavigableMap.of(
      *     1, "one", 3, "three", 5, "five"
@@ -504,7 +497,6 @@ public class ImmutableNavigableMap<K, V> extends ImmutableSortedMap<K, V> implem
      * System.out.println(map.floorEntry(4));  // 3=three
      * System.out.println(map.floorEntry(0));  // null
      * }</pre>
-     * </p>
      *
      * @param key the key
      * @return an entry with the greatest key less than or equal to {@code key}, or {@code null} if there is no such key
@@ -521,7 +513,7 @@ public class ImmutableNavigableMap<K, V> extends ImmutableSortedMap<K, V> implem
     /**
      * Returns the greatest key less than or equal to the given key, or {@code null} if there is no such key.
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ImmutableNavigableMap<Integer, String> map = ImmutableNavigableMap.of(
      *     1, "one", 3, "three", 5, "five"
@@ -530,7 +522,6 @@ public class ImmutableNavigableMap<K, V> extends ImmutableSortedMap<K, V> implem
      * System.out.println(map.floorKey(4));  // 3
      * System.out.println(map.floorKey(0));  // null
      * }</pre>
-     * </p>
      *
      * @param key the key
      * @return the greatest key less than or equal to {@code key}, or {@code null} if there is no such key
@@ -547,7 +538,7 @@ public class ImmutableNavigableMap<K, V> extends ImmutableSortedMap<K, V> implem
      * or {@code null} if there is no such key. The returned entry is immutable and does not support
      * the {@code setValue} operation.
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ImmutableNavigableMap<Integer, String> map = ImmutableNavigableMap.of(
      *     1, "one", 3, "three", 5, "five"
@@ -556,7 +547,6 @@ public class ImmutableNavigableMap<K, V> extends ImmutableSortedMap<K, V> implem
      * System.out.println(map.ceilingEntry(4));  // 5=five
      * System.out.println(map.ceilingEntry(6));  // null
      * }</pre>
-     * </p>
      *
      * @param key the key
      * @return an entry with the least key greater than or equal to {@code key}, or {@code null} if there is no such key
@@ -573,7 +563,7 @@ public class ImmutableNavigableMap<K, V> extends ImmutableSortedMap<K, V> implem
     /**
      * Returns the least key greater than or equal to the given key, or {@code null} if there is no such key.
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ImmutableNavigableMap<Integer, String> map = ImmutableNavigableMap.of(
      *     1, "one", 3, "three", 5, "five"
@@ -582,7 +572,6 @@ public class ImmutableNavigableMap<K, V> extends ImmutableSortedMap<K, V> implem
      * System.out.println(map.ceilingKey(4));  // 5
      * System.out.println(map.ceilingKey(6));  // null
      * }</pre>
-     * </p>
      *
      * @param key the key
      * @return the least key greater than or equal to {@code key}, or {@code null} if there is no such key
@@ -599,7 +588,7 @@ public class ImmutableNavigableMap<K, V> extends ImmutableSortedMap<K, V> implem
      * or {@code null} if there is no such key. The returned entry is immutable and does not support
      * the {@code setValue} operation.
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ImmutableNavigableMap<Integer, String> map = ImmutableNavigableMap.of(
      *     1, "one", 3, "three", 5, "five"
@@ -608,7 +597,6 @@ public class ImmutableNavigableMap<K, V> extends ImmutableSortedMap<K, V> implem
      * System.out.println(map.higherEntry(4));  // 5=five
      * System.out.println(map.higherEntry(5));  // null
      * }</pre>
-     * </p>
      *
      * @param key the key
      * @return an entry with the least key greater than {@code key}, or {@code null} if there is no such key
@@ -625,7 +613,7 @@ public class ImmutableNavigableMap<K, V> extends ImmutableSortedMap<K, V> implem
     /**
      * Returns the least key strictly greater than the given key, or {@code null} if there is no such key.
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ImmutableNavigableMap<Integer, String> map = ImmutableNavigableMap.of(
      *     1, "one", 3, "three", 5, "five"
@@ -634,7 +622,6 @@ public class ImmutableNavigableMap<K, V> extends ImmutableSortedMap<K, V> implem
      * System.out.println(map.higherKey(4));  // 5
      * System.out.println(map.higherKey(5));  // null
      * }</pre>
-     * </p>
      *
      * @param key the key
      * @return the least key greater than {@code key}, or {@code null} if there is no such key
@@ -650,14 +637,13 @@ public class ImmutableNavigableMap<K, V> extends ImmutableSortedMap<K, V> implem
      * Returns a key-value mapping associated with the least key in this map, or {@code null} if the map is empty.
      * The returned entry is immutable and does not support the {@code setValue} operation.
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ImmutableNavigableMap<Integer, String> map = ImmutableNavigableMap.of(
      *     3, "three", 1, "one", 2, "two"
      * );
      * System.out.println(map.firstEntry()); // 1=one
      * }</pre>
-     * </p>
      *
      * @return an entry with the least key, or {@code null} if this map is empty
      */
@@ -672,14 +658,13 @@ public class ImmutableNavigableMap<K, V> extends ImmutableSortedMap<K, V> implem
      * Returns a key-value mapping associated with the greatest key in this map, or {@code null} if the map is empty.
      * The returned entry is immutable and does not support the {@code setValue} operation.
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ImmutableNavigableMap<Integer, String> map = ImmutableNavigableMap.of(
      *     3, "three", 1, "one", 2, "two"
      * );
      * System.out.println(map.lastEntry()); // 3=three
      * }</pre>
-     * </p>
      *
      * @return an entry with the greatest key, or {@code null} if this map is empty
      */
@@ -723,7 +708,7 @@ public class ImmutableNavigableMap<K, V> extends ImmutableSortedMap<K, V> implem
      * The descending map is backed by this map, so it remains immutable.
      * The returned map has an ordering equivalent to Collections.reverseOrder(comparator()).
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ImmutableNavigableMap<Integer, String> map = ImmutableNavigableMap.of(
      *     1, "one", 2, "two", 3, "three"
@@ -731,7 +716,6 @@ public class ImmutableNavigableMap<K, V> extends ImmutableSortedMap<K, V> implem
      * ImmutableNavigableMap<Integer, String> descending = map.descendingMap();
      * System.out.println(descending); // {3=three, 2=two, 1=one}
      * }</pre>
-     * </p>
      *
      * @return a reverse order view of this map
      */
@@ -750,7 +734,7 @@ public class ImmutableNavigableMap<K, V> extends ImmutableSortedMap<K, V> implem
      * {@code lower}, {@code floor}, {@code ceiling}, {@code higher}, etc., allowing
      * navigation operations on the keys without requiring individual map lookups.</p>
      *
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ImmutableNavigableMap<Integer, String> map = ImmutableNavigableMap.of(
      *     1, "one", 3, "three", 5, "five"
@@ -761,7 +745,6 @@ public class ImmutableNavigableMap<K, V> extends ImmutableSortedMap<K, V> implem
      * System.out.println(keySet.ceiling(2));      // 3
      * System.out.println(keySet.descendingSet()); // [5, 3, 1]
      * }</pre>
-     * </p>
      *
      * @return an immutable navigable set view of the keys in this map
      */
@@ -779,7 +762,7 @@ public class ImmutableNavigableMap<K, V> extends ImmutableSortedMap<K, V> implem
      * <p>The returned set supports all of the navigable set operations, providing
      * descending order navigation of the keys without requiring individual map lookups.</p>
      *
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ImmutableNavigableMap<Integer, String> map = ImmutableNavigableMap.of(
      *     1, "one", 3, "three", 5, "five"
@@ -789,7 +772,6 @@ public class ImmutableNavigableMap<K, V> extends ImmutableSortedMap<K, V> implem
      * System.out.println(descKeys.first());  // 5
      * System.out.println(descKeys.last());   // 1
      * }</pre>
-     * </p>
      *
      * @return an immutable navigable set view of the keys in this map in descending order
      */
@@ -808,7 +790,7 @@ public class ImmutableNavigableMap<K, V> extends ImmutableSortedMap<K, V> implem
      * <p>The returned map will throw an {@code IllegalArgumentException} if the starting key is greater
      * than the ending key considering the order of this map's comparator.
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ImmutableNavigableMap<Integer, String> map = ImmutableNavigableMap.of(
      *     1, "one", 3, "three", 5, "five", 7, "seven", 9, "nine"
@@ -822,7 +804,6 @@ public class ImmutableNavigableMap<K, V> extends ImmutableSortedMap<K, V> implem
      * ImmutableNavigableMap<Integer, String> subMap2 = map.subMap(3, false, 7, false);
      * System.out.println(subMap2); // {5=five}
      * }</pre>
-     * </p>
      *
      * @param fromKey low endpoint of the keys in the returned map
      * @param fromInclusive {@code true} if the low endpoint is to be included in the returned view
@@ -845,7 +826,7 @@ public class ImmutableNavigableMap<K, V> extends ImmutableSortedMap<K, V> implem
      * so changes in the returned map are reflected in this map, and vice-versa.
      * The returned map supports all optional map operations that this map supports.
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ImmutableNavigableMap<Integer, String> map = ImmutableNavigableMap.of(
      *     1, "one", 3, "three", 5, "five", 7, "seven"
@@ -859,7 +840,6 @@ public class ImmutableNavigableMap<K, V> extends ImmutableSortedMap<K, V> implem
      * ImmutableNavigableMap<Integer, String> headMap2 = map.headMap(5, false);
      * System.out.println(headMap2); // {1=one, 3=three}
      * }</pre>
-     * </p>
      *
      * @param toKey high endpoint of the keys in the returned map
      * @param inclusive {@code true} if the high endpoint is to be included in the returned view
@@ -879,7 +859,7 @@ public class ImmutableNavigableMap<K, V> extends ImmutableSortedMap<K, V> implem
      * so changes in the returned map are reflected in this map, and vice-versa.
      * The returned map supports all optional map operations that this map supports.
      *
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ImmutableNavigableMap<Integer, String> map = ImmutableNavigableMap.of(
      *     1, "one", 3, "three", 5, "five", 7, "seven"
@@ -893,7 +873,6 @@ public class ImmutableNavigableMap<K, V> extends ImmutableSortedMap<K, V> implem
      * ImmutableNavigableMap<Integer, String> tailMap2 = map.tailMap(3, false);
      * System.out.println(tailMap2); // {5=five, 7=seven}
      * }</pre>
-     * </p>
      *
      * @param fromKey low endpoint of the keys in the returned map
      * @param inclusive {@code true} if the low endpoint is to be included in the returned view

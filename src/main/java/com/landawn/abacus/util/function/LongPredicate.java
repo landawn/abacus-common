@@ -34,7 +34,7 @@ public interface LongPredicate extends Throwables.LongPredicate<RuntimeException
     /**
      * A predicate that always returns {@code true} regardless of the input value.
      * 
-     * <p>Example usage:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * LongPredicate alwaysPass = LongPredicate.ALWAYS_TRUE;
      * alwaysPass.test(42L); // returns true
@@ -46,7 +46,7 @@ public interface LongPredicate extends Throwables.LongPredicate<RuntimeException
     /**
      * A predicate that always returns {@code false} regardless of the input value.
      * 
-     * <p>Example usage:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * LongPredicate alwaysFail = LongPredicate.ALWAYS_FALSE;
      * alwaysFail.test(42L); // returns false
@@ -101,8 +101,7 @@ public interface LongPredicate extends Throwables.LongPredicate<RuntimeException
      * Evaluates this predicate on the given argument.
      *
      * @param value the input argument
-     * @return {@code true} if the input argument matches the predicate, otherwise {@code false}
-     * @throws RuntimeException if any error occurs during predicate evaluation
+     * @return {@code true} if the input argument matches the predicate, otherwise {@code false} if any error occurs during predicate evaluation
      */
     @Override
     boolean test(long value);
@@ -122,24 +121,8 @@ public interface LongPredicate extends Throwables.LongPredicate<RuntimeException
 
     /**
      * Returns a composed predicate that represents a short-circuiting logical
-     * OR of this predicate and another.
-     * 
-     * <p>When evaluating the composed predicate, if this predicate is {@code true},
-     * then the {@code other} predicate is not evaluated.
-     *
-     * @param other a predicate that will be logically-ORed with this predicate
-     * @return a composed predicate that represents the short-circuiting logical
-     *         OR of this predicate and the {@code other} predicate
-     */
-    @Override
-    default LongPredicate or(final java.util.function.LongPredicate other) {
-        return value -> test(value) || other.test(value);
-    }
-
-    /**
-     * Returns a composed predicate that represents a short-circuiting logical
      * AND of this predicate and another.
-     * 
+     *
      * <p>When evaluating the composed predicate, if this predicate is {@code false},
      * then the {@code other} predicate is not evaluated.
      *
@@ -150,6 +133,22 @@ public interface LongPredicate extends Throwables.LongPredicate<RuntimeException
     @Override
     default LongPredicate and(final java.util.function.LongPredicate other) {
         return value -> test(value) && other.test(value);
+    }
+
+    /**
+     * Returns a composed predicate that represents a short-circuiting logical
+     * OR of this predicate and another.
+     *
+     * <p>When evaluating the composed predicate, if this predicate is {@code true},
+     * then the {@code other} predicate is not evaluated.
+     *
+     * @param other a predicate that will be logically-ORed with this predicate
+     * @return a composed predicate that represents the short-circuiting logical
+     *         OR of this predicate and the {@code other} predicate
+     */
+    @Override
+    default LongPredicate or(final java.util.function.LongPredicate other) {
+        return value -> test(value) || other.test(value);
     }
 
     /**
@@ -168,7 +167,7 @@ public interface LongPredicate extends Throwables.LongPredicate<RuntimeException
     /**
      * Returns a predicate that tests if the input value is equal to the specified target value.
      * 
-     * <p>Example usage:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * LongPredicate isFortyTwo = LongPredicate.equal(42L);
      * isFortyTwo.test(42L); // returns true
@@ -185,7 +184,7 @@ public interface LongPredicate extends Throwables.LongPredicate<RuntimeException
     /**
      * Returns a predicate that tests if the input value is not equal to the specified target value.
      * 
-     * <p>Example usage:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * LongPredicate notFortyTwo = LongPredicate.notEqual(42L);
      * notFortyTwo.test(42L); // returns false
@@ -202,7 +201,7 @@ public interface LongPredicate extends Throwables.LongPredicate<RuntimeException
     /**
      * Returns a predicate that tests if the input value is greater than the specified target value.
      * 
-     * <p>Example usage:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * LongPredicate greaterThanTen = LongPredicate.greaterThan(10L);
      * greaterThanTen.test(11L); // returns true
@@ -219,7 +218,7 @@ public interface LongPredicate extends Throwables.LongPredicate<RuntimeException
     /**
      * Returns a predicate that tests if the input value is greater than or equal to the specified target value.
      * 
-     * <p>Example usage:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * LongPredicate atLeastTen = LongPredicate.greaterEqual(10L);
      * atLeastTen.test(10L); // returns true
@@ -236,7 +235,7 @@ public interface LongPredicate extends Throwables.LongPredicate<RuntimeException
     /**
      * Returns a predicate that tests if the input value is less than the specified target value.
      * 
-     * <p>Example usage:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * LongPredicate lessThanTen = LongPredicate.lessThan(10L);
      * lessThanTen.test(9L);  // returns true
@@ -253,7 +252,7 @@ public interface LongPredicate extends Throwables.LongPredicate<RuntimeException
     /**
      * Returns a predicate that tests if the input value is less than or equal to the specified target value.
      * 
-     * <p>Example usage:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * LongPredicate atMostTen = LongPredicate.lessEqual(10L);
      * atMostTen.test(10L); // returns true
@@ -273,7 +272,7 @@ public interface LongPredicate extends Throwables.LongPredicate<RuntimeException
      * <p>The predicate returns {@code true} if the input value is strictly greater than {@code minValue}
      * and strictly less than {@code maxValue}.
      * 
-     * <p>Example usage:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * LongPredicate inRange = LongPredicate.between(10L, 20L);
      * inRange.test(15L); // returns true

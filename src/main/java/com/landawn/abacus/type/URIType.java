@@ -37,8 +37,8 @@ public class URIType extends AbstractType<URI> {
      * This method returns {@code URI.class}, which is the Class object for the
      * {@link java.net.URI} class that this URIType handles.
      * </p>
-     * <p>
-     * Usage example:
+     *
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * URIType type = new URIType();
      * Class<URI> clazz = type.clazz(); // Returns URI.class
@@ -57,8 +57,8 @@ public class URIType extends AbstractType<URI> {
      * This method returns the string representation of the URI by calling its {@code toString()} method.
      * If the input URI is null, this method returns null.
      * </p>
-     * <p>
-     * Usage example:
+     *
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * URIType type = new URIType();
      * URI uri = URI.create("https://example.com/path");
@@ -79,8 +79,8 @@ public class URIType extends AbstractType<URI> {
      * This method creates a URI instance from the provided string using {@link URI#create(String)}.
      * If the string is null or empty, this method returns null.
      * </p>
-     * <p>
-     * Usage example:
+     *
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * URIType type = new URIType();
      * URI uri = type.valueOf("https://example.com/path"); // Creates a URI
@@ -106,8 +106,8 @@ public class URIType extends AbstractType<URI> {
      * This method reads a string value from the ResultSet and converts it to a URI
      * using the {@link #valueOf(String)} method.
      * </p>
-     * <p>
-     * Usage example:
+     *
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * URIType type = new URIType();
      * ResultSet rs = statement.executeQuery("SELECT homepage FROM websites");
@@ -130,8 +130,8 @@ public class URIType extends AbstractType<URI> {
      * This method reads a string value from the ResultSet and converts it to a URI
      * using the {@link #valueOf(String)} method.
      * </p>
-     * <p>
-     * Usage example:
+     *
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * URIType type = new URIType();
      * ResultSet rs = statement.executeQuery("SELECT homepage FROM websites");
@@ -154,8 +154,8 @@ public class URIType extends AbstractType<URI> {
      * This method converts the URI to its string representation and sets it in the
      * PreparedStatement. If the URI is null, a NULL value is set.
      * </p>
-     * <p>
-     * Usage example:
+     *
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * URIType type = new URIType();
      * PreparedStatement stmt = conn.prepareStatement("INSERT INTO websites (homepage) VALUES (?)");
@@ -178,8 +178,8 @@ public class URIType extends AbstractType<URI> {
      * This method converts the URI to its string representation and sets it in the
      * CallableStatement. If the URI is null, a NULL value is set.
      * </p>
-     * <p>
-     * Usage example:
+     *
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * URIType type = new URIType();
      * CallableStatement stmt = conn.prepareCall("{call update_website(?)}");

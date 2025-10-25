@@ -42,10 +42,25 @@ public interface ShortTriPredicate extends Throwables.ShortTriPredicate<RuntimeE
     /**
      * Evaluates this predicate on the given arguments.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * ShortTriPredicate allPositive = (a, b, c) -> a > 0 && b > 0 && c > 0;
+     * boolean result1 = allPositive.test((short) 1, (short) 2, (short) 3); // returns true
+     * boolean result2 = allPositive.test((short) -1, (short) 2, (short) 3); // returns false
+     *
+     * ShortTriPredicate isValidTriangle = (a, b, c) ->
+     *     a + b > c && a + c > b && b + c > a;
+     * boolean result3 = isValidTriangle.test((short) 3, (short) 4, (short) 5); // returns true
+     *
+     * ShortTriPredicate inRange = (value, min, max) ->
+     *     value >= min && value <= max;
+     * boolean result4 = inRange.test((short) 50, (short) 0, (short) 100); // returns true
+     * }</pre>
+     *
      * @param a the first input argument
      * @param b the second input argument
      * @param c the third input argument
-     * @return {@code true} if the input arguments match the predicate, otherwise {@code false}
+     * @return {@code true} if the input arguments match the predicate, otherwise {@code false} if the predicate evaluation fails
      */
     @Override
     boolean test(short a, short b, short c);

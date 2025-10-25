@@ -31,7 +31,7 @@ import java.util.NoSuchElementException;
  * capabilities over a list while ensuring the underlying data cannot be modified
  * through the iterator.
  * 
- * <p>Example usage:
+ * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * List<String> list = Arrays.asList("one", "two", "three");
  * ImmutableListIterator<String> iter = ImmutableListIterator.of(list.listIterator());
@@ -92,7 +92,7 @@ public abstract class ImmutableListIterator<T> extends ObjIterator<T> implements
      * 
      * <p>The returned iterator is a singleton instance and can be safely shared.
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ImmutableListIterator<String> empty = ImmutableListIterator.empty();
      * System.out.println(empty.hasNext()); // prints: false
@@ -118,7 +118,7 @@ public abstract class ImmutableListIterator<T> extends ObjIterator<T> implements
      * including its current position. Modifications to the underlying collection
      * after creating the immutable iterator may lead to undefined behavior.
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * List<Integer> numbers = new ArrayList<>(Arrays.asList(1, 2, 3));
      * ListIterator<Integer> mutableIter = numbers.listIterator();

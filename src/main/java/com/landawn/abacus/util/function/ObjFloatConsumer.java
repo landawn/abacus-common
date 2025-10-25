@@ -42,15 +42,14 @@ public interface ObjFloatConsumer<T> extends Throwables.ObjFloatConsumer<T, Runt
      * updating the object's state based on the float value, accumulating float values,
      * or performing calculations where the result is stored within the object.
      *
-     * <p>Example usage:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ObjFloatConsumer<FloatBuffer> addToBuffer = (buffer, value) -> buffer.put(value);
      * ObjFloatConsumer<Statistics> updateStats = (stats, value) -> stats.addSample(value);
      * }</pre>
      *
      * @param t the first input argument of type T
-     * @param value the second input argument, a primitive float value
-     * @throws RuntimeException if the operation cannot be completed
+     * @param value the second input argument, a primitive float value if the operation cannot be completed
      */
     @Override
     void accept(T t, float value);

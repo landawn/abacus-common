@@ -47,7 +47,7 @@ public interface Runnable extends java.lang.Runnable, Throwables.Runnable<Runtim
      * action whatsoever. This method performs its task without returning any result
      * and without accepting any parameters.
      *
-     * <p>Example usage:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Runnable printTask = () -> System.out.println("Hello, World!");
      * Runnable complexTask = () -> {
@@ -66,8 +66,7 @@ public interface Runnable extends java.lang.Runnable, Throwables.Runnable<Runtim
      * ExecutorService executor = Executors.newSingleThreadExecutor();
      * executor.execute(printTask);
      * }</pre>
-     *
-     * @throws RuntimeException if the task cannot be executed
+     * if the task cannot be executed
      * @see java.lang.Thread#run()
      */
     @Override
@@ -82,7 +81,7 @@ public interface Runnable extends java.lang.Runnable, Throwables.Runnable<Runtim
      * only accepts {@link Callable} tasks, or when you need to obtain a
      * {@link java.util.concurrent.Future} for a task that doesn't produce a result.
      *
-     * <p>Example usage:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Runnable task = () -> System.out.println("Executing task");
      * Callable<Void> callable = task.toCallable();
@@ -111,7 +110,7 @@ public interface Runnable extends java.lang.Runnable, Throwables.Runnable<Runtim
      * behavior as this runnable but with the ability to throw the specified
      * exception type.
      *
-     * <p>Example usage:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Runnable task = () -> System.out.println("Task executed");
      * Throwables.Runnable<IOException> throwableTask = task.toThrowable();

@@ -60,8 +60,7 @@ public interface FloatBinaryOperator extends Throwables.FloatBinaryOperator<Runt
      *
      * @param left the first operand (left-hand side of the operation)
      * @param right the second operand (right-hand side of the operation)
-     * @return the result of applying this operator to the operands
-     * @throws RuntimeException if the operation encounters an error during execution
+     * @return the result of applying this operator to the operands if the operation encounters an error during execution
      */
     @Override
     float applyAsFloat(float left, float right);

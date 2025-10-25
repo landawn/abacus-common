@@ -114,8 +114,7 @@ public interface FloatBiPredicate extends Throwables.FloatBiPredicate<RuntimeExc
      *
      * @param t the first float argument to test
      * @param u the second float argument to test
-     * @return {@code true} if the input arguments match the predicate, otherwise {@code false}
-     * @throws RuntimeException if the predicate evaluation encounters an error
+     * @return {@code true} if the input arguments match the predicate, otherwise {@code false} if the predicate evaluation encounters an error
      */
     @Override
     boolean test(float t, float u);
@@ -126,7 +125,7 @@ public interface FloatBiPredicate extends Throwables.FloatBiPredicate<RuntimeExc
      * <p>The returned predicate will return {@code true} when this predicate returns {@code false},
      * and {@code false} when this predicate returns {@code true}.</p>
      * 
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * FloatBiPredicate isClose = (a, b) -> Math.abs(a - b) < 0.001f;
      * FloatBiPredicate notClose = isClose.negate();
@@ -146,7 +145,7 @@ public interface FloatBiPredicate extends Throwables.FloatBiPredicate<RuntimeExc
      * <p>Any exceptions thrown during evaluation of either predicate are relayed to the caller;
      * if evaluation of this predicate throws an exception, the {@code other} predicate will not be evaluated.</p>
      * 
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * FloatBiPredicate bothPositive = (a, b) -> a > 0 && b > 0;
      * FloatBiPredicate sumLessThan10 = (a, b) -> a + b < 10;
@@ -171,7 +170,7 @@ public interface FloatBiPredicate extends Throwables.FloatBiPredicate<RuntimeExc
      * <p>Any exceptions thrown during evaluation of either predicate are relayed to the caller;
      * if evaluation of this predicate throws an exception, the {@code other} predicate will not be evaluated.</p>
      * 
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * FloatBiPredicate eitherZero = (a, b) -> a == 0 || b == 0;
      * FloatBiPredicate bothNegative = (a, b) -> a < 0 && b < 0;

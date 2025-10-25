@@ -38,6 +38,7 @@ class JSONStreamReader extends JSONStringReader {
      * Creates a JSON reader that parses JSON content from a character stream.
      * This method provides streaming JSON parsing capabilities for efficient processing of large JSON documents.
      *
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Reader reader = new FileReader("data.json");
      * JSONReader jsonReader = JSONStreamReader.parse(reader, new char[8192], new char[8192]);

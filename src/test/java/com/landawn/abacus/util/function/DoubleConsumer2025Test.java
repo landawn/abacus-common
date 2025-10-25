@@ -165,7 +165,8 @@ public class DoubleConsumer2025Test extends TestBase {
 
     @Test
     public void testFunctionalInterfaceContract() {
-        DoubleConsumer lambda = t -> {};
+        DoubleConsumer lambda = t -> {
+        };
         assertNotNull(lambda);
         assertDoesNotThrow(() -> lambda.accept(1.0));
     }

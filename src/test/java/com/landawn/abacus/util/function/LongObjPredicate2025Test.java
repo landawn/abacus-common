@@ -69,7 +69,7 @@ public class LongObjPredicate2025Test extends TestBase {
 
     @Test
     public void testAndShortCircuit() {
-        final boolean[] secondCalled = {false};
+        final boolean[] secondCalled = { false };
         LongObjPredicate<String> predicate1 = (l, s) -> false;
         LongObjPredicate<String> predicate2 = (l, s) -> {
             secondCalled[0] = true;
@@ -96,7 +96,7 @@ public class LongObjPredicate2025Test extends TestBase {
 
     @Test
     public void testOrShortCircuit() {
-        final boolean[] secondCalled = {false};
+        final boolean[] secondCalled = { false };
         LongObjPredicate<String> predicate1 = (l, s) -> true;
         LongObjPredicate<String> predicate2 = (l, s) -> {
             secondCalled[0] = true;

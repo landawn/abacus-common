@@ -42,7 +42,7 @@ import com.landawn.abacus.util.stream.Stream;
  *   <li><b>Depth-First Post-Order</b>: Visits nodes after all their descendants have been visited</li>
  * </ul>
  * 
- * <p>Example usage:
+ * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * // Traverse a file system
  * Traverser<File> fileTraverser = Traverser.FILES;
@@ -70,7 +70,7 @@ public final class Traverser<T> {
      * Files (non-directories) are treated as leaf nodes with no children.
      * If a directory cannot be read, it is treated as having no children.
      * 
-     * <p>Example usage:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Find all .java files in a directory tree
      * Traverser.FILES.breadthFirst(new File("src"))
@@ -132,6 +132,7 @@ public final class Traverser<T> {
      * <p><b>Examples</b>
      *
      * <p>This is a valid input graph (all edges are directed facing downwards):
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      *    a     b      c
      *   / \   / \     |
@@ -143,6 +144,7 @@ public final class Traverser<T> {
      * }</pre>
      *
      * <p>This is <b>not</b> a valid input graph (all edges are directed facing downwards):
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      *    a     b
      *   / \   / \
@@ -161,11 +163,12 @@ public final class Traverser<T> {
      * <p>This method can be used to traverse over a binary tree. Given methods {@code
      * leftChild(node)} and {@code rightChild(node)}, this method can be called as
      *
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Traverser.forTree(node -> ImmutableList.of(leftChild(node), rightChild(node)));
      * }</pre>
      * 
-     * <p>Example usage:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Traverse an organizational hierarchy
      * class Employee {
@@ -181,6 +184,7 @@ public final class Traverser<T> {
      * @param tree {@link Function} representing a directed acyclic graph that has at most
      *     one path between any two nodes. The function takes a node and returns its children.
      * @return a new Traverser for the specified tree structure
+     * @see #forGraph(Function)
      */
     public static <T> Traverser<T> forTree(final Function<? super T, ? extends Iterable<T>> tree) {
         return new Traverser<>(com.google.common.graph.Traverser.forGraph(tree::apply));
@@ -206,7 +210,7 @@ public final class Traverser<T> {
      *       number of nodes that have been seen but not yet visited, that is, the "horizon").</li>
      * </ul>
      *
-     * <p>Example usage:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Traverse a social network graph (which may have cycles)
      * class Person {
@@ -225,6 +229,7 @@ public final class Traverser<T> {
      * @param graph {@link Function} representing a general graph that may have cycles.
      *     The function takes a node and returns its adjacent nodes (successors).
      * @return a new Traverser for the specified graph structure
+     * @see #forTree(Function)
      */
     public static <T> Traverser<T> forGraph(final Function<? super T, ? extends Iterable<T>> graph) {
         return new Traverser<>(com.google.common.graph.Traverser.forGraph(graph::apply));
@@ -268,6 +273,8 @@ public final class Traverser<T> {
      * @param startNode the node to start traversal from
      * @return a Stream of nodes in breadth-first order
      * @throws IllegalArgumentException if {@code startNode} is not an element of the graph
+     * @see #depthFirstPreOrder(Object)
+     * @see #depthFirstPostOrder(Object)
      */
     public Stream<T> breadthFirst(final T startNode) {
         return Stream.of(gTraverser.breadthFirst(startNode).iterator());
@@ -309,6 +316,8 @@ public final class Traverser<T> {
      * @param startNode the node to start traversal from
      * @return a Stream of nodes in depth-first pre-order
      * @throws IllegalArgumentException if {@code startNode} is not an element of the graph
+     * @see #breadthFirst(Object)
+     * @see #depthFirstPostOrder(Object)
      */
     public Stream<T> depthFirstPreOrder(final T startNode) {
         return Stream.of(gTraverser.depthFirstPreOrder(startNode).iterator());
@@ -354,6 +363,8 @@ public final class Traverser<T> {
      * @param startNode the node to start traversal from
      * @return a Stream of nodes in depth-first post-order
      * @throws IllegalArgumentException if {@code startNode} is not an element of the graph
+     * @see #breadthFirst(Object)
+     * @see #depthFirstPreOrder(Object)
      */
     public Stream<T> depthFirstPostOrder(final T startNode) {
         return Stream.of(gTraverser.depthFirstPostOrder(startNode).iterator());

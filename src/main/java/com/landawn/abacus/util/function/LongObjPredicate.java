@@ -40,8 +40,7 @@ public interface LongObjPredicate<T> extends Throwables.LongObjPredicate<T, Runt
      *
      * @param t the long-valued first argument
      * @param u the object second argument of type T
-     * @return {@code true} if the input arguments match the predicate, otherwise {@code false}
-     * @throws RuntimeException if any error occurs during predicate evaluation
+     * @return {@code true} if the input arguments match the predicate, otherwise {@code false} if any error occurs during predicate evaluation
      */
     @Override
     boolean test(long t, T u);
@@ -52,7 +51,7 @@ public interface LongObjPredicate<T> extends Throwables.LongObjPredicate<T, Runt
      * <p>The returned predicate will return {@code true} when this predicate returns {@code false},
      * and {@code false} when this predicate returns {@code true}.
      * 
-     * <p>Example usage:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * LongObjPredicate<String> isLongGreaterThanLength = (l, s) -> l > s.length();
      * LongObjPredicate<String> isLongNotGreaterThanLength = isLongGreaterThanLength.negate();
@@ -76,7 +75,7 @@ public interface LongObjPredicate<T> extends Throwables.LongObjPredicate<T, Runt
      * to the caller; if evaluation of this predicate throws an exception, the
      * {@code other} predicate will not be evaluated.
      * 
-     * <p>Example usage:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * LongObjPredicate<String> isPositive = (l, s) -> l > 0;
      * LongObjPredicate<String> isLongerThanLong = (l, s) -> s.length() > l;
@@ -103,7 +102,7 @@ public interface LongObjPredicate<T> extends Throwables.LongObjPredicate<T, Runt
      * to the caller; if evaluation of this predicate throws an exception, the
      * {@code other} predicate will not be evaluated.
      * 
-     * <p>Example usage:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * LongObjPredicate<String> isZero = (l, s) -> l == 0;
      * LongObjPredicate<String> isEmpty = (l, s) -> s.isEmpty();

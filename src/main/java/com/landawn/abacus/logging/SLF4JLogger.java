@@ -34,7 +34,7 @@ import org.slf4j.spi.LocationAwareLogger;
  *   <li>Throws RuntimeException if SLF4J is not properly initialized</li>
  * </ul>
  * 
- * <p>Usage example:</p>
+ * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * // Requires SLF4J API and an implementation (e.g., Logback) on classpath
  * Logger logger = new SLF4JLogger("com.example.MyClass");

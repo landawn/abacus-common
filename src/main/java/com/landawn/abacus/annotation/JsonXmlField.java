@@ -36,8 +36,8 @@ import com.landawn.abacus.annotation.Type.EnumBy;
  *   <li>Handle raw JSON values</li>
  * </ul>
  * 
- * <p><b>Example usage:</b></p>
- * <pre>
+ * <p><b>Usage Examples:</b></p>
+ * <pre>{@code
  * public class User {
  *     {@literal @}JsonXmlField(name = "user_id")
  *     private Long id;
@@ -54,7 +54,7 @@ import com.landawn.abacus.annotation.Type.EnumBy;
  *     {@literal @}JsonXmlField(ignore = true)
  *     private String password;
  * }
- * </pre>
+ * }</pre>
  * 
  * @since 2019
  * @see JsonXmlConfig
@@ -69,11 +69,11 @@ public @interface JsonXmlField {
      * Specifies the field name to use in JSON/XML serialization.
      * If not specified (empty string), the Java field name is used.
      * 
-     * <p><b>Example:</b></p>
-     * <pre>
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
      * {@literal @}JsonXmlField(name = "user_id")
      * private Long id;  // Serialized as "user_id" instead of "id"
-     * </pre>
+     * }</pre>
      * 
      * @return the field name for serialization, empty string for default Java field name
      */
@@ -83,12 +83,12 @@ public @interface JsonXmlField {
      * Defines alternative names that can be used during deserialization.
      * This allows the field to be deserialized from JSON/XML using any of the specified alias names.
      * 
-     * <p><b>Example:</b></p>
-     * <pre>
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
      * {@literal @}JsonXmlField(name = "full_name", alias = {"name", "userName", "user_name"})
      * private String fullName;
      * // Can be deserialized from any of: "full_name", "name", "userName", "user_name"
-     * </pre>
+     * }</pre>
      * 
      * @return array of alias names for deserialization
      */
@@ -98,11 +98,11 @@ public @interface JsonXmlField {
      * Specifies the explicit type for field serialization/deserialization.
      * This can be used to override the default type inference.
      * 
-     * <p><b>Example:</b></p>
-     * <pre>
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
      * {@literal @}JsonXmlField(type = "java.util.Date")
      * private Object dateValue;  // Forces treatment as Date type
-     * </pre>
+     * }</pre>
      * 
      * @return the explicit type string, empty string for automatic type detection
      */
@@ -118,11 +118,11 @@ public @interface JsonXmlField {
      *   <li>TO_STRING - Use the enum's toString() method</li>
      * </ul>
      * 
-     * <p><b>Example:</b></p>
-     * <pre>
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
      * {@literal @}JsonXmlField(enumerated = EnumBy.ORDINAL)
      * private Status status;  // Serialized as 0, 1, 2... instead of "ACTIVE", "INACTIVE"...
-     * </pre>
+     * }</pre>
      * 
      * @return the enum serialization strategy
      */
@@ -132,14 +132,14 @@ public @interface JsonXmlField {
      * Specifies the date format pattern for date/time field serialization.
      * Uses SimpleDateFormat pattern syntax.
      * 
-     * <p><b>Example:</b></p>
-     * <pre>
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
      * {@literal @}JsonXmlField(dateFormat = "yyyy-MM-dd HH:mm:ss")
      * private Date created;  // Serialized as "2023-12-25 10:30:45"
      * 
      * {@literal @}JsonXmlField(dateFormat = "ISO_INSTANT")
      * private Instant timestamp;  // Serialized as "2023-12-25T10:30:45.123Z"
-     * </pre>
+     * }</pre>
      * 
      * @return the date format pattern, empty string for default format
      * @see java.text.SimpleDateFormat
@@ -150,14 +150,14 @@ public @interface JsonXmlField {
     /**
      * Specifies the time zone for date/time field serialization.
      * 
-     * <p><b>Example:</b></p>
-     * <pre>
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
      * {@literal @}JsonXmlField(dateFormat = "yyyy-MM-dd HH:mm:ss", timeZone = "UTC")
      * private Date eventTime;  // Always serialized in UTC timezone
      * 
      * {@literal @}JsonXmlField(timeZone = "America/New_York")
      * private LocalDateTime meetingTime;
-     * </pre>
+     * }</pre>
      * 
      * @return the time zone ID (e.g., "UTC", "America/New_York"), empty string for system default
      */
@@ -167,14 +167,14 @@ public @interface JsonXmlField {
      * Specifies the number format pattern for numeric field serialization.
      * Uses DecimalFormat pattern syntax.
      * 
-     * <p><b>Example:</b></p>
-     * <pre>
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
      * {@literal @}JsonXmlField(numberFormat = "#.##")
      * private Double price;  // Serialized with 2 decimal places: "19.99"
      * 
      * {@literal @}JsonXmlField(numberFormat = "###,###.00")
      * private BigDecimal amount;  // Serialized with comma separators: "1,234.56"
-     * </pre>
+     * }</pre>
      * 
      * @return the number format pattern, empty string for default formatting
      * @see DecimalFormat
@@ -185,8 +185,8 @@ public @interface JsonXmlField {
      * Specifies whether this field should be completely ignored during serialization and deserialization.
      * When set to {@code true}, the field will be excluded from JSON/XML processing.
      * 
-     * <p><b>Example:</b></p>
-     * <pre>
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
      * public class User {
      *     private String username;
      *     
@@ -196,7 +196,7 @@ public @interface JsonXmlField {
      *     {@literal @}JsonXmlField(ignore = true)
      *     private String internalId;  // Hidden from serialization
      * }
-     * </pre>
+     * }</pre>
      * 
      * @return {@code true} to ignore this field during JSON/XML processing, {@code false} to include it
      */
@@ -210,8 +210,8 @@ public @interface JsonXmlField {
      * <p>This is useful when a field contains pre-serialized JSON/XML that should be
      * embedded as-is in the output.</p>
      * 
-     * <p><b>Example:</b></p>
-     * <pre>
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
      * public class Document {
      *     private String title;
      *     
@@ -220,7 +220,7 @@ public @interface JsonXmlField {
      *     // Result: {"title":"My Doc","metadata":{"key":"value"}}
      *     // Instead of: {"title":"My Doc","metadata":"{\"key\":\"value\"}"}
      * }
-     * </pre>
+     * }</pre>
      * 
      * @return {@code true} if the field contains raw JSON/XML content, {@code false} for normal processing
      */
@@ -236,8 +236,8 @@ public @interface JsonXmlField {
      *   <li>DESERIALIZE_ONLY - Include only when reading from JSON/XML input</li>
      * </ul>
      * 
-     * <p><b>Example:</b></p>
-     * <pre>
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
      * public class User {
      *     {@literal @}JsonXmlField(expose = Expose.SERIALIZE_ONLY)
      *     private String displayName;  // Written to JSON but not read from it
@@ -245,7 +245,7 @@ public @interface JsonXmlField {
      *     {@literal @}JsonXmlField(expose = Expose.DESERIALIZE_ONLY)
      *     private String tempPassword;  // Read from JSON but not written to it
      * }
-     * </pre>
+     * }</pre>
      * 
      * @return the exposure mode for this field
      */

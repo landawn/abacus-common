@@ -49,8 +49,8 @@ import java.lang.annotation.Target;
  *   <li>Natural keys should be truly unique and unchanging</li>
  * </ul>
  * 
- * <p><b>Example usage:</b></p>
- * <pre>
+ * <p><b>Usage Examples:</b></p>
+ * <pre>{@code
  * // Single primary key
  * {@literal @}Entity
  * public class User {
@@ -65,7 +65,7 @@ import java.lang.annotation.Target;
  *     private Long companyId;
  *     private Long employeeId;
  * }
- * </pre>
+ * }</pre>
  * 
  * @since 2018
  * @see Entity
@@ -87,8 +87,8 @@ public @interface Id {
      *   <li>Multiple elements: Defines a composite primary key with multiple columns</li>
      * </ul>
      * 
-     * <p><b>Examples:</b></p>
-     * <pre>
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
      * {@literal @}Id  // Uses field name as column name
      * private Long id;
      * 
@@ -97,7 +97,7 @@ public @interface Id {
      * 
      * {@literal @}Id({"dept_id", "emp_id"})  // Composite key
      * public class Employee { }
-     * </pre>
+     * }</pre>
      * 
      * @return an array of column names forming the primary key, empty array uses field name as default
      */

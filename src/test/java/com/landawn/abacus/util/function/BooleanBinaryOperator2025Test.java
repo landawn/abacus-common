@@ -153,17 +153,11 @@ public class BooleanBinaryOperator2025Test extends TestBase {
     public void testAllCombinations() {
         BooleanBinaryOperator operator = (left, right) -> left && right;
 
-        boolean[][] testCases = {
-            {true, true, true},
-            {true, false, false},
-            {false, true, false},
-            {false, false, false}
-        };
+        boolean[][] testCases = { { true, true, true }, { true, false, false }, { false, true, false }, { false, false, false } };
 
         for (boolean[] testCase : testCases) {
             boolean result = operator.applyAsBoolean(testCase[0], testCase[1]);
-            assertEquals(testCase[2], result,
-                String.format("Expected %b for inputs (%b, %b)", testCase[2], testCase[0], testCase[1]));
+            assertEquals(testCase[2], result, String.format("Expected %b for inputs (%b, %b)", testCase[2], testCase[0], testCase[1]));
         }
     }
 }

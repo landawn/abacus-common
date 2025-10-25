@@ -22,7 +22,7 @@ package com.landawn.abacus.util;
  * 
  * <p>The class is immutable and extends {@link AbstractIndexed}.</p>
  * 
- * <p>Example usage:</p>
+ * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * IndexedBoolean indexedBool = IndexedBoolean.of(true, 5);
  * boolean value = indexedBool.value(); // true
@@ -56,7 +56,7 @@ public final class IndexedBoolean extends AbstractIndexed {
     /**
      * Creates a new IndexedBoolean instance with the specified value and index.
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * IndexedBoolean indexed = IndexedBoolean.of(true, 5);
      * }</pre>
@@ -77,7 +77,7 @@ public final class IndexedBoolean extends AbstractIndexed {
      * 
      * <p>This overload accepts a long index for cases where the index might exceed Integer.MAX_VALUE.</p>
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * IndexedBoolean indexed = IndexedBoolean.of(true, 5000000000L);
      * }</pre>
@@ -96,7 +96,7 @@ public final class IndexedBoolean extends AbstractIndexed {
     /**
      * Returns the boolean value stored in this IndexedBoolean instance.
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * IndexedBoolean indexed = IndexedBoolean.of(true, 5);
      * boolean value = indexed.value(); // true
@@ -126,7 +126,7 @@ public final class IndexedBoolean extends AbstractIndexed {
      * 
      * <p>Two IndexedBoolean instances are equal if they have the same index and value.</p>
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * IndexedBoolean indexed1 = IndexedBoolean.of(true, 5);
      * IndexedBoolean indexed2 = IndexedBoolean.of(true, 5);
@@ -149,7 +149,7 @@ public final class IndexedBoolean extends AbstractIndexed {
      * 
      * <p>The format is: [index]=value</p>
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * IndexedBoolean indexed = IndexedBoolean.of(true, 5);
      * System.out.println(indexed); // prints: [5]=true

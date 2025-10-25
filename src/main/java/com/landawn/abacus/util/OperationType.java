@@ -22,7 +22,7 @@ package com.landawn.abacus.util;
  * <p>This enum is typically used in ORM frameworks and data access layers to specify
  * what type of operation is being performed on entities or database records.</p>
  * 
- * <p>Example usage:</p>
+ * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * OperationType opType = OperationType.UPDATE;
  * int intValue = opType.intValue(); // Returns 4
@@ -64,7 +64,7 @@ public enum OperationType {
      * The values are designed to be used in bitwise operations, allowing
      * multiple operation types to be combined into a single integer.
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * int readWrite = OperationType.QUERY.intValue() | OperationType.UPDATE.intValue();
      * // readWrite = 5 (binary: 101)
@@ -80,7 +80,7 @@ public enum OperationType {
      * Returns the OperationType corresponding to the specified integer value.
      * This method is the inverse of {@link #intValue()}.
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * OperationType op = OperationType.valueOf(2);
      * // op = OperationType.ADD

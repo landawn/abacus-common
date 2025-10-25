@@ -27,8 +27,8 @@ import com.landawn.abacus.util.function.FloatConsumer;
  * <p>This class is mutable and not thread-safe. It's designed to be used
  * as a reduction target in stream operations.</p>
  * 
- * <p>Example usage:</p>
- * <pre>
+ * <p><b>Usage Examples:</b></p>
+ * <pre>{@code
  * FloatSummaryStatistics stats = new FloatSummaryStatistics();
  * floatStream.forEach(stats::accept);
  * 
@@ -37,7 +37,7 @@ import com.landawn.abacus.util.function.FloatConsumer;
  * System.out.println("Min: " + stats.getMin());
  * System.out.println("Max: " + stats.getMax());
  * System.out.println("Average: " + stats.getAverage());
- * </pre>
+ * }</pre>
  * 
  * @see java.util.DoubleSummaryStatistics
  * @see java.util.IntSummaryStatistics
@@ -56,10 +56,10 @@ public class FloatSummaryStatistics implements FloatConsumer {
      * {@code Float.POSITIVE_INFINITY} min, {@code Float.NEGATIVE_INFINITY} max,
      * and zero average.
      * 
-     * <p>Example:</p>
-     * <pre>
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
      * FloatSummaryStatistics stats = new FloatSummaryStatistics();
-     * </pre>
+     * }</pre>
      */
     public FloatSummaryStatistics() {
     }
@@ -69,11 +69,11 @@ public class FloatSummaryStatistics implements FloatConsumer {
      * This constructor is useful for creating a summary from pre-calculated values
      * or for combining multiple summaries.
      *
-     * <p>Example:</p>
-     * <pre>
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
      * // Create statistics from known values
      * FloatSummaryStatistics stats = new FloatSummaryStatistics(5, 1.0f, 10.0f, 30.0);
-     * </pre>
+     * }</pre>
      *
      * @param count the count of values (must be non-negative)
      * @param min the minimum value
@@ -92,13 +92,13 @@ public class FloatSummaryStatistics implements FloatConsumer {
      * Records a new float value into the summary information.
      * Updates the count, sum, min, and max accordingly.
      *
-     * <p>Example:</p>
-     * <pre>
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
      * FloatSummaryStatistics stats = new FloatSummaryStatistics();
      * stats.accept(3.14f);
      * stats.accept(2.71f);
      * stats.accept(1.41f);
-     * </pre>
+     * }</pre>
      *
      * @param value the input value to be recorded
      */
@@ -115,8 +115,8 @@ public class FloatSummaryStatistics implements FloatConsumer {
      * This method is useful for parallel processing where multiple statistics
      * objects are computed independently and then combined.
      *
-     * <p>Example:</p>
-     * <pre>
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
      * FloatSummaryStatistics stats1 = new FloatSummaryStatistics();
      * FloatSummaryStatistics stats2 = new FloatSummaryStatistics();
      * 
@@ -126,7 +126,7 @@ public class FloatSummaryStatistics implements FloatConsumer {
      * 
      * // Combine results
      * stats1.combine(stats2);
-     * </pre>
+     * }</pre>
      *
      * @param other another {@code FloatSummaryStatistics} to be combined with this one
      */
@@ -143,13 +143,13 @@ public class FloatSummaryStatistics implements FloatConsumer {
      * 
      * <p>Note: If any recorded value was NaN, then the result will be NaN.</p>
      *
-     * <p>Example:</p>
-     * <pre>
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
      * FloatSummaryStatistics stats = new FloatSummaryStatistics();
      * stats.accept(5.0f);
      * stats.accept(2.0f);
      * float min = stats.getMin(); // Returns 2.0f
-     * </pre>
+     * }</pre>
      *
      * @return the minimum value, or {@code Float.POSITIVE_INFINITY} if none
      */
@@ -163,13 +163,13 @@ public class FloatSummaryStatistics implements FloatConsumer {
      * 
      * <p>Note: If any recorded value was NaN, then the result will be NaN.</p>
      *
-     * <p>Example:</p>
-     * <pre>
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
      * FloatSummaryStatistics stats = new FloatSummaryStatistics();
      * stats.accept(5.0f);
      * stats.accept(8.0f);
      * float max = stats.getMax(); // Returns 8.0f
-     * </pre>
+     * }</pre>
      *
      * @return the maximum value, or {@code Float.NEGATIVE_INFINITY} if none
      */
@@ -181,14 +181,14 @@ public class FloatSummaryStatistics implements FloatConsumer {
      * Returns the count of values recorded.
      * This represents the number of times {@link #accept(float)} has been called.
      *
-     * <p>Example:</p>
-     * <pre>
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
      * FloatSummaryStatistics stats = new FloatSummaryStatistics();
      * stats.accept(1.0f);
      * stats.accept(2.0f);
      * stats.accept(3.0f);
      * long count = stats.getCount(); // Returns 3
-     * </pre>
+     * }</pre>
      *
      * @return the count of values
      */
@@ -204,14 +204,14 @@ public class FloatSummaryStatistics implements FloatConsumer {
      * <p>Note: The sum is returned as a Double to maintain precision.
      * If no values have been recorded, returns 0.0.</p>
      *
-     * <p>Example:</p>
-     * <pre>
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
      * FloatSummaryStatistics stats = new FloatSummaryStatistics();
      * stats.accept(1.1f);
      * stats.accept(2.2f);
      * stats.accept(3.3f);
      * Double sum = stats.getSum(); // Returns 6.6 (approximately)
-     * </pre>
+     * }</pre>
      *
      * @return the sum of values, or zero if none
      */
@@ -226,14 +226,14 @@ public class FloatSummaryStatistics implements FloatConsumer {
      * <p>Note: If the sum is NaN or infinite, or if the count is zero,
      * special rules apply as per floating-point arithmetic.</p>
      *
-     * <p>Example:</p>
-     * <pre>
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
      * FloatSummaryStatistics stats = new FloatSummaryStatistics();
      * stats.accept(2.0f);
      * stats.accept(4.0f);
      * stats.accept(6.0f);
      * Double avg = stats.getAverage(); // Returns 4.0
-     * </pre>
+     * }</pre>
      *
      * @return the arithmetic mean of values, or zero if none
      */
@@ -248,14 +248,14 @@ public class FloatSummaryStatistics implements FloatConsumer {
      * 
      * <p>Format: {@code {min=<min>, max=<max>, count=<count>, sum=<sum>, average=<average>}}</p>
      *
-     * <p>Example:</p>
-     * <pre>
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
      * FloatSummaryStatistics stats = new FloatSummaryStatistics();
      * stats.accept(1.0f);
      * stats.accept(2.0f);
      * System.out.println(stats);
      * // Output: {min=1.000000, max=2.000000, count=2, sum=3.000000, average=1.500000}
-     * </pre>
+     * }</pre>
      *
      * @return a string representation of this object
      */

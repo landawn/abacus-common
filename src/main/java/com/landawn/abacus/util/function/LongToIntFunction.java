@@ -39,7 +39,7 @@ public interface LongToIntFunction extends Throwables.LongToIntFunction<RuntimeE
      * If the long value is outside the range of int (Integer.MIN_VALUE to Integer.MAX_VALUE),
      * the result will be the low-order 32 bits of the long value, which may produce unexpected results.
      * 
-     * <p>Example usage:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * LongToIntFunction converter = LongToIntFunction.DEFAULT;
      * int result1 = converter.applyAsInt(42L);        // returns 42
@@ -72,8 +72,7 @@ public interface LongToIntFunction extends Throwables.LongToIntFunction<RuntimeE
      * </ul>
      *
      * @param value the function argument as a long
-     * @return the function result as an int
-     * @throws RuntimeException if any error occurs during the function execution
+     * @return the function result as an int if any error occurs during the function execution
      */
     @Override
     int applyAsInt(long value);

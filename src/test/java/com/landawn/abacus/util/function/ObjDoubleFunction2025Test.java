@@ -20,7 +20,7 @@ public class ObjDoubleFunction2025Test extends TestBase {
 
     @Test
     public void testApplyWithLambda() {
-        ObjDoubleFunction<String, Integer> function = (t, u) -> (int)(t.length() * u);
+        ObjDoubleFunction<String, Integer> function = (t, u) -> (int) (t.length() * u);
         assertEquals(25, function.apply("hello", 5.0));
     }
 

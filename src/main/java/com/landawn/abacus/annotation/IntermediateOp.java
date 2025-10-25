@@ -53,8 +53,8 @@ import java.lang.annotation.Target;
  *   <li>skip() - Discards initial elements</li>
  * </ul>
  * 
- * <p><b>Example usage:</b></p>
- * <pre>
+ * <p><b>Usage Examples:</b></p>
+ * <pre>{@code
  * public class StreamProcessor&lt;T&gt; {
  *     {@literal @}IntermediateOp
  *     public StreamProcessor&lt;T&gt; filter(Predicate&lt;T&gt; predicate) {
@@ -68,7 +68,7 @@ import java.lang.annotation.Target;
  *         return new MappedStream&lt;&gt;(this, mapper);
  *     }
  * }
- * </pre>
+ * }</pre>
  * 
  * @see TerminalOp
  * @see LazyEvaluation

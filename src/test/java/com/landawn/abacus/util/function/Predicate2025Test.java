@@ -101,14 +101,11 @@ public class Predicate2025Test extends TestBase {
 
     @Test
     public void testComplex_AndOrNegate() {
-        Predicate<Integer> predicate = ((Predicate<Integer>) n -> n > 5)
-                .and(n -> n < 10)
-                .or(n -> n == 15)
-                .negate();
+        Predicate<Integer> predicate = ((Predicate<Integer>) n -> n > 5).and(n -> n < 10).or(n -> n == 15).negate();
 
-        assertFalse(predicate.test(7));   // (7>5 && 7<10) = true, negated = false
-        assertFalse(predicate.test(15));  // (15==15) = true, negated = false
-        assertTrue(predicate.test(3));    // (3>5 && 3<10) = false, (3==15) = false, negated = true
+        assertFalse(predicate.test(7)); // (7>5 && 7<10) = true, negated = false
+        assertFalse(predicate.test(15)); // (15==15) = true, negated = false
+        assertTrue(predicate.test(3)); // (3>5 && 3<10) = false, (3==15) = false, negated = true
     }
 
     @Test

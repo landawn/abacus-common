@@ -35,9 +35,9 @@ public class FloatIteratorEx100Test extends TestBase {
 
     @Test
     public void testOfArray() {
-        float[] array = {1.1f, 2.2f, 3.3f};
+        float[] array = { 1.1f, 2.2f, 3.3f };
         FloatIteratorEx iter = FloatIteratorEx.of(array);
-        
+
         Assertions.assertTrue(iter.hasNext());
         Assertions.assertEquals(1.1f, iter.nextFloat());
         Assertions.assertEquals(2.2f, iter.nextFloat());
@@ -56,9 +56,9 @@ public class FloatIteratorEx100Test extends TestBase {
 
     @Test
     public void testOfArrayWithIndices() {
-        float[] array = {1.0f, 2.0f, 3.0f, 4.0f, 5.0f};
+        float[] array = { 1.0f, 2.0f, 3.0f, 4.0f, 5.0f };
         FloatIteratorEx iter = FloatIteratorEx.of(array, 1, 4);
-        
+
         Assertions.assertTrue(iter.hasNext());
         Assertions.assertEquals(2.0f, iter.nextFloat());
         Assertions.assertEquals(3.0f, iter.nextFloat());
@@ -68,7 +68,7 @@ public class FloatIteratorEx100Test extends TestBase {
 
     @Test
     public void testOfArrayWithIndicesEmpty() {
-        float[] array = {1.0f, 2.0f, 3.0f};
+        float[] array = { 1.0f, 2.0f, 3.0f };
         FloatIteratorEx iter = FloatIteratorEx.of(array, 1, 1);
         Assertions.assertFalse(iter.hasNext());
         Assertions.assertSame(FloatIteratorEx.EMPTY, iter);
@@ -76,7 +76,7 @@ public class FloatIteratorEx100Test extends TestBase {
 
     @Test
     public void testOfArrayWithIndicesInvalid() {
-        float[] array = {1.0f, 2.0f, 3.0f};
+        float[] array = { 1.0f, 2.0f, 3.0f };
         Assertions.assertThrows(IndexOutOfBoundsException.class, () -> FloatIteratorEx.of(array, 2, 1));
         Assertions.assertThrows(IndexOutOfBoundsException.class, () -> FloatIteratorEx.of(array, -1, 2));
         Assertions.assertThrows(IndexOutOfBoundsException.class, () -> FloatIteratorEx.of(array, 0, 4));
@@ -86,19 +86,19 @@ public class FloatIteratorEx100Test extends TestBase {
     public void testOfFloatIterator() {
         FloatIterator baseIter = new FloatIterator() {
             private int index = 0;
-            private float[] data = {1.5f, 2.5f, 3.5f};
-            
+            private float[] data = { 1.5f, 2.5f, 3.5f };
+
             @Override
             public boolean hasNext() {
                 return index < data.length;
             }
-            
+
             @Override
             public float nextFloat() {
                 return data[index++];
             }
         };
-        
+
         FloatIteratorEx iter = FloatIteratorEx.of(baseIter);
         Assertions.assertTrue(iter.hasNext());
         Assertions.assertEquals(1.5f, iter.nextFloat());
@@ -125,7 +125,7 @@ public class FloatIteratorEx100Test extends TestBase {
     public void testFromIterator() {
         List<Float> list = Arrays.asList(1.1f, 2.2f, 3.3f);
         FloatIteratorEx iter = FloatIteratorEx.from(list.iterator());
-        
+
         Assertions.assertTrue(iter.hasNext());
         Assertions.assertEquals(1.1f, iter.nextFloat());
         Assertions.assertEquals(2.2f, iter.nextFloat());
@@ -144,35 +144,35 @@ public class FloatIteratorEx100Test extends TestBase {
     public void testFromObjIteratorEx() {
         ObjIteratorEx<Float> objIter = ObjIteratorEx.of(1.0f, 2.0f, 3.0f);
         FloatIteratorEx iter = FloatIteratorEx.from(objIter);
-        
+
         iter.advance(1);
         Assertions.assertEquals(2.0f, iter.nextFloat());
-        
+
         Assertions.assertEquals(1, iter.count());
-        
+
         iter.close();
     }
 
     @Test
     public void testAdvance() {
-        float[] array = {1.0f, 2.0f, 3.0f, 4.0f, 5.0f};
+        float[] array = { 1.0f, 2.0f, 3.0f, 4.0f, 5.0f };
         FloatIteratorEx iter = FloatIteratorEx.of(array);
-        
+
         iter.advance(2);
         Assertions.assertEquals(3.0f, iter.nextFloat());
-        
+
         iter.advance(1);
         Assertions.assertEquals(5.0f, iter.nextFloat());
-        
+
         iter.advance(10);
         Assertions.assertFalse(iter.hasNext());
     }
 
     @Test
     public void testAdvanceZero() {
-        float[] array = {1.0f, 2.0f, 3.0f};
+        float[] array = { 1.0f, 2.0f, 3.0f };
         FloatIteratorEx iter = FloatIteratorEx.of(array);
-        
+
         iter.advance(0);
         Assertions.assertEquals(1.0f, iter.nextFloat());
     }
@@ -185,18 +185,18 @@ public class FloatIteratorEx100Test extends TestBase {
 
     @Test
     public void testCount() {
-        float[] array = {1.0f, 2.0f, 3.0f, 4.0f, 5.0f};
+        float[] array = { 1.0f, 2.0f, 3.0f, 4.0f, 5.0f };
         FloatIteratorEx iter = FloatIteratorEx.of(array, 1, 4);
-        
+
         Assertions.assertEquals(3, iter.count());
         Assertions.assertFalse(iter.hasNext());
     }
 
     @Test
     public void testToArray() {
-        float[] array = {1.1f, 2.2f, 3.3f};
+        float[] array = { 1.1f, 2.2f, 3.3f };
         FloatIteratorEx iter = FloatIteratorEx.of(array);
-        
+
         float[] result = iter.toArray();
         Assertions.assertArrayEquals(array, result);
         Assertions.assertFalse(iter.hasNext());
@@ -204,19 +204,19 @@ public class FloatIteratorEx100Test extends TestBase {
 
     @Test
     public void testToArrayPartial() {
-        float[] array = {1.0f, 2.0f, 3.0f, 4.0f, 5.0f};
+        float[] array = { 1.0f, 2.0f, 3.0f, 4.0f, 5.0f };
         FloatIteratorEx iter = FloatIteratorEx.of(array, 1, 4);
-        
+
         float[] result = iter.toArray();
-        Assertions.assertArrayEquals(new float[]{2.0f, 3.0f, 4.0f}, result);
+        Assertions.assertArrayEquals(new float[] { 2.0f, 3.0f, 4.0f }, result);
         Assertions.assertFalse(iter.hasNext());
     }
 
     @Test
     public void testToList() {
-        float[] array = {1.1f, 2.2f, 3.3f};
+        float[] array = { 1.1f, 2.2f, 3.3f };
         FloatIteratorEx iter = FloatIteratorEx.of(array);
-        
+
         FloatList result = iter.toList();
         Assertions.assertEquals(3, result.size());
         Assertions.assertEquals(1.1f, result.get(0));
@@ -227,9 +227,9 @@ public class FloatIteratorEx100Test extends TestBase {
 
     @Test
     public void testToListPartial() {
-        float[] array = {1.0f, 2.0f, 3.0f, 4.0f, 5.0f};
+        float[] array = { 1.0f, 2.0f, 3.0f, 4.0f, 5.0f };
         FloatIteratorEx iter = FloatIteratorEx.of(array, 1, 4);
-        
+
         FloatList result = iter.toList();
         Assertions.assertEquals(3, result.size());
         Assertions.assertEquals(2.0f, result.get(0));
@@ -246,9 +246,9 @@ public class FloatIteratorEx100Test extends TestBase {
 
     @Test
     public void testFloatSpecialValues() {
-        float[] array = {Float.NaN, Float.POSITIVE_INFINITY, Float.NEGATIVE_INFINITY, 0.0f, -0.0f};
+        float[] array = { Float.NaN, Float.POSITIVE_INFINITY, Float.NEGATIVE_INFINITY, 0.0f, -0.0f };
         FloatIteratorEx iter = FloatIteratorEx.of(array);
-        
+
         Assertions.assertTrue(Float.isNaN(iter.nextFloat()));
         Assertions.assertEquals(Float.POSITIVE_INFINITY, iter.nextFloat());
         Assertions.assertEquals(Float.NEGATIVE_INFINITY, iter.nextFloat());
@@ -263,11 +263,11 @@ public class FloatIteratorEx100Test extends TestBase {
         for (int i = 0; i < array.length; i++) {
             array[i] = i * 1.0f;
         }
-        
+
         FloatIteratorEx iter = FloatIteratorEx.of(array);
         iter.advance(500);
         Assertions.assertEquals(500.0f, iter.nextFloat());
-        
+
         iter.advance(498);
         Assertions.assertEquals(999.0f, iter.nextFloat());
         Assertions.assertFalse(iter.hasNext());

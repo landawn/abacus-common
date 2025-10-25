@@ -91,7 +91,7 @@ import jakarta.xml.bind.Unmarshaller;
  * 
  * <p>The class employs object pooling for parsers and contexts to improve performance in high-throughput scenarios.</p>
  * 
- * <p>Example usage:</p>
+ * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * // JAXB marshalling
  * Person person = new Person("John", 30);
@@ -187,7 +187,7 @@ public final class XmlUtil {
      * Marshals the given JAXB bean into an XML string.
      * The JAXBContext is cached for the bean's class to improve performance on repeated operations.
      * 
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * @XmlRootElement
      * public class Person {
@@ -236,7 +236,7 @@ public final class XmlUtil {
      * Unmarshal the given XML string into an object of the specified class.
      * The JAXBContext is cached for the target class to improve performance on repeated operations.
      * 
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String xml = "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?><person><age>30</age><name>John</name></person>";
      * Person person = XmlUtil.unmarshal(Person.class, xml);
@@ -274,7 +274,7 @@ public final class XmlUtil {
      * Creates a JAXB Marshaller for the given context path.
      * The JAXBContext is cached to improve performance on repeated operations.
      * 
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Marshaller marshaller = XmlUtil.createMarshaller("com.example.model");
      * marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
@@ -306,7 +306,7 @@ public final class XmlUtil {
      * Creates a JAXB Marshaller for the given class.
      * The JAXBContext is cached to improve performance on repeated operations.
      * 
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Marshaller marshaller = XmlUtil.createMarshaller(Person.class);
      * marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
@@ -338,7 +338,7 @@ public final class XmlUtil {
      * Creates a JAXB Unmarshaller for the given context path.
      * The JAXBContext is cached to improve performance on repeated operations.
      * 
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Unmarshaller unmarshaller = XmlUtil.createUnmarshaller("com.example.model");
      * Object result = unmarshaller.unmarshal(new File("data.xml"));
@@ -369,7 +369,7 @@ public final class XmlUtil {
      * Creates a JAXB Unmarshaller for the given class.
      * The JAXBContext is cached to improve performance on repeated operations.
      * 
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Unmarshaller unmarshaller = XmlUtil.createUnmarshaller(Person.class);
      * Person person = (Person) unmarshaller.unmarshal(new StringReader(xmlString));
@@ -400,7 +400,7 @@ public final class XmlUtil {
      * Creates a new instance of {@code DocumentBuilder} with default configuration.
      * The parser is configured with the factory's default settings.
      * 
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * DocumentBuilder parser = XmlUtil.createDOMParser();
      * Document doc = parser.parse(new File("data.xml"));
@@ -425,7 +425,7 @@ public final class XmlUtil {
      * Creates a new instance of {@code DocumentBuilder} with the specified configuration.
      * This method allows control over comment and whitespace handling.
      * 
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Create parser that ignores comments and whitespace
      * DocumentBuilder parser = XmlUtil.createDOMParser(true, true);
@@ -468,7 +468,7 @@ public final class XmlUtil {
      * 
      * <p>Important: Call {@link #recycleContentParser(DocumentBuilder)} when done to return the parser to the pool.</p>
      * 
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * DocumentBuilder parser = XmlUtil.createContentParser();
      * try {
@@ -516,7 +516,7 @@ public final class XmlUtil {
      * Recycles the given DocumentBuilder instance by resetting it and adding it back to the pool.
      * This method should be called after using a DocumentBuilder obtained from {@link #createContentParser()}.
      * 
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * DocumentBuilder parser = XmlUtil.createContentParser();
      * try {
@@ -547,7 +547,7 @@ public final class XmlUtil {
      * 
      * <p>Important: Call {@link #recycleSAXParser(SAXParser)} when done to return the parser to the pool.</p>
      * 
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * SAXParser parser = XmlUtil.createSAXParser();
      * try {
@@ -584,7 +584,7 @@ public final class XmlUtil {
      * Recycles the given SAXParser instance by resetting it and adding it back to the pool.
      * This method should be called after using a SAXParser obtained from {@link #createSAXParser()}.
      * 
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * SAXParser parser = XmlUtil.createSAXParser();
      * try {
@@ -613,7 +613,7 @@ public final class XmlUtil {
      * Creates an XMLStreamReader from the given Reader source.
      * This is used for StAX (Streaming API for XML) parsing.
      * 
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * StringReader reader = new StringReader(xmlString);
      * XMLStreamReader xmlReader = XmlUtil.createXMLStreamReader(reader);
@@ -640,7 +640,7 @@ public final class XmlUtil {
      * Creates an XMLStreamReader from the given InputStream source.
      * This is used for StAX (Streaming API for XML) parsing.
      * 
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * FileInputStream fis = new FileInputStream("data.xml");
      * XMLStreamReader xmlReader = XmlUtil.createXMLStreamReader(fis);
@@ -664,7 +664,7 @@ public final class XmlUtil {
      * Creates an XMLStreamReader from the given InputStream source with the specified encoding.
      * This is used for StAX (Streaming API for XML) parsing with explicit character encoding.
      * 
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * FileInputStream fis = new FileInputStream("data.xml");
      * XMLStreamReader xmlReader = XmlUtil.createXMLStreamReader(fis, "UTF-8");
@@ -688,7 +688,7 @@ public final class XmlUtil {
      * Creates a filtered XMLStreamReader from the given source XMLStreamReader and StreamFilter.
      * The filter allows selective processing of XML events.
      * 
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * XMLStreamReader reader = XmlUtil.createXMLStreamReader(inputStream);
      * StreamFilter filter = new StreamFilter() {
@@ -717,7 +717,7 @@ public final class XmlUtil {
      * Creates an XMLStreamWriter from the given Writer output.
      * This is used for StAX (Streaming API for XML) writing.
      * 
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * StringWriter writer = new StringWriter();
      * XMLStreamWriter xmlWriter = XmlUtil.createXMLStreamWriter(writer);
@@ -745,7 +745,7 @@ public final class XmlUtil {
      * Creates an XMLStreamWriter from the given OutputStream.
      * This is used for StAX (Streaming API for XML) writing with default encoding.
      * 
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * FileOutputStream fos = new FileOutputStream("output.xml");
      * XMLStreamWriter xmlWriter = XmlUtil.createXMLStreamWriter(fos);
@@ -770,7 +770,7 @@ public final class XmlUtil {
      * Creates an XMLStreamWriter from the given OutputStream with the specified encoding.
      * This is used for StAX (Streaming API for XML) writing with explicit character encoding.
      * 
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * FileOutputStream fos = new FileOutputStream("output.xml");
      * XMLStreamWriter xmlWriter = XmlUtil.createXMLStreamWriter(fos, "UTF-8");
@@ -796,7 +796,7 @@ public final class XmlUtil {
      * Creates a new instance of Transformer for XML transformation operations.
      * The Transformer can be used to transform XML documents using XSLT or for serialization.
      * 
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Transformer transformer = XmlUtil.createXMLTransformer();
      * transformer.setOutputProperty(OutputKeys.INDENT, "yes");
@@ -819,7 +819,7 @@ public final class XmlUtil {
      * Transforms the given XML Document to the specified output file.
      * The file will be created if it doesn't exist, or overwritten if it does.
      * 
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Document doc = parser.parse(inputFile);
      * // Modify document
@@ -855,7 +855,7 @@ public final class XmlUtil {
      * Transforms the given XML Document to the specified OutputStream.
      * The stream is not closed by this method.
      * 
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Document doc = createDocument();
      * ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -885,7 +885,7 @@ public final class XmlUtil {
      * Transforms the given XML Document to the specified Writer.
      * The writer is not closed by this method.
      * 
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Document doc = createDocument();
      * StringWriter writer = new StringWriter();
@@ -918,7 +918,7 @@ public final class XmlUtil {
      * <p>Note: This uses Java's built-in XMLEncoder, not JAXB. The output format is specific
      * to Java serialization and may not be suitable for interoperability with non-Java systems.</p>
      * 
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Person person = new Person("John", 30);
      * String xml = XmlUtil.xmlEncode(person);
@@ -951,7 +951,7 @@ public final class XmlUtil {
      * <p>Note: This uses Java's built-in XMLDecoder, not JAXB. The XML format must be
      * compatible with Java's XMLEncoder output.</p>
      * 
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String xml = XmlUtil.xmlEncode(originalPerson);
      * Person decodedPerson = XmlUtil.xmlDecode(xml);
@@ -981,7 +981,7 @@ public final class XmlUtil {
      * This method only returns elements that are immediate children of the parent node,
      * not descendants at deeper levels.
      * 
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Element parent = doc.getDocumentElement();
      * List<Element> childElements = XmlUtil.getElementsByTagName(parent, "child");
@@ -1011,7 +1011,7 @@ public final class XmlUtil {
      * Gets all nodes with the specified name from the given node and its descendants.
      * This method performs a recursive search through the entire node tree.
      * 
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Document doc = parser.parse(xmlFile);
      * List<Node> allPriceNodes = XmlUtil.getNodesByName(doc, "price");
@@ -1045,7 +1045,7 @@ public final class XmlUtil {
      * Gets the first node with the specified name from the given node or its descendants.
      * This method performs a depth-first search and returns the first matching node found.
      * 
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Document doc = parser.parse(xmlFile);
      * Node firstPriceNode = XmlUtil.getNextNodeByName(doc, "price");
@@ -1091,7 +1091,7 @@ public final class XmlUtil {
     /**
      * Gets the attribute value of the specified attribute name from the given XML node.
      * 
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Element element = doc.getElementById("myElement");
      * String id = XmlUtil.getAttribute(element, "id");
@@ -1119,7 +1119,7 @@ public final class XmlUtil {
      * Reads all attributes of the given XML node and returns them as a map.
      * The map keys are attribute names and values are attribute values.
      * 
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Element element = doc.getElementById("myElement");
      * Map<String, String> attrs = XmlUtil.readAttributes(element);
@@ -1163,7 +1163,7 @@ public final class XmlUtil {
      * This method recursively processes the element and all its child elements,
      * creating a flattened map with dot-notation keys for nested elements.
      * 
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Element root = doc.getDocumentElement();
      * Map<String, String> data = XmlUtil.readElement(root);
@@ -1213,7 +1213,7 @@ public final class XmlUtil {
      * A text element is defined as an element that does not contain any child elements,
      * only text content or other non-element nodes (like comments or text nodes).
      * 
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Element elem = doc.createElement("name");
      * elem.setTextContent("John");
@@ -1243,7 +1243,7 @@ public final class XmlUtil {
      * Gets the text content of the given XML node.
      * This method returns the text content with leading and trailing whitespace preserved.
      * 
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Element elem = doc.createElement("message");
      * elem.setTextContent("  Hello World  ");
@@ -1262,7 +1262,7 @@ public final class XmlUtil {
      * When ignoreWhiteChar is true, all whitespace characters (tabs, newlines, etc.) within
      * the text content are normalized to single spaces, and leading/trailing spaces are removed.
      * 
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Element elem = doc.createElement("message");
      * elem.setTextContent("  Hello\n\tWorld  ");
@@ -1341,7 +1341,7 @@ public final class XmlUtil {
      * Writes XML-escaped characters from the specified character array to the given StringBuilder.
      * Special XML characters (&lt;, &gt;, &amp;, ', ") are escaped to their XML entity representations.
      * 
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * char[] chars = "Hello <world> & \"friends\"".toCharArray();
      * StringBuilder sb = new StringBuilder();
@@ -1361,7 +1361,7 @@ public final class XmlUtil {
      * Writes XML-escaped characters from a portion of a character array to the given StringBuilder.
      * Special XML characters (&lt;, &gt;, &amp;, ', ") are escaped to their XML entity representations.
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * char[] chars = "Data: <value> & 'text'".toCharArray();
      * StringBuilder sb = new StringBuilder();
@@ -1384,7 +1384,7 @@ public final class XmlUtil {
      * Special XML characters (&lt;, &gt;, &amp;, ', ") are escaped to their XML entity representations.
      * If the string is null, the text "null" is written.
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * StringBuilder sb = new StringBuilder();
      * XmlUtil.writeCharacters("<tag attr='value'>text & more</tag>", sb);
@@ -1404,7 +1404,7 @@ public final class XmlUtil {
      * Writes XML-escaped characters from a portion of a string to the given StringBuilder.
      * Special XML characters (&lt;, &gt;, &amp;, ', ") are escaped to their XML entity representations.
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String text = "Hello <world> & friends";
      * StringBuilder sb = new StringBuilder();
@@ -1426,7 +1426,7 @@ public final class XmlUtil {
      * Writes XML-escaped characters from the specified character array to the given OutputStream.
      * Special XML characters (&lt;, &gt;, &amp;, ', ") are escaped to their XML entity representations.
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * char[] chars = "<data>value & more</data>".toCharArray();
      * ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -1447,7 +1447,7 @@ public final class XmlUtil {
      * Special XML characters (&lt;, &gt;, &amp;, ', ") are escaped to their XML entity representations.
      * Uses a BufferedXMLWriter internally for efficient writing.
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * char[] chars = "Data: <value> & 'text'".toCharArray();
      * FileOutputStream fos = new FileOutputStream("output.xml");
@@ -1478,7 +1478,7 @@ public final class XmlUtil {
      * Special XML characters (&lt;, &gt;, &amp;, ', ") are escaped to their XML entity representations.
      * If the string is null, the text "null" is written.
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String data = "<message>Hello & goodbye</message>";
      * FileOutputStream fos = new FileOutputStream("output.xml");
@@ -1501,7 +1501,7 @@ public final class XmlUtil {
      * Special XML characters (&lt;, &gt;, &amp;, ', ") are escaped to their XML entity representations.
      * Uses a BufferedXMLWriter internally for efficient writing.
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String text = "Prefix <tag>content</tag> suffix";
      * FileOutputStream fos = new FileOutputStream("output.xml");
@@ -1531,7 +1531,7 @@ public final class XmlUtil {
      * Writes XML-escaped characters from the specified character array to the given Writer.
      * Special XML characters (&lt;, &gt;, &amp;, ', ") are escaped to their XML entity representations.
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * char[] chars = "Test: <value> & 'more'".toCharArray();
      * StringWriter writer = new StringWriter();
@@ -1553,7 +1553,7 @@ public final class XmlUtil {
      * Special XML characters (&lt;, &gt;, &amp;, ', ") are escaped to their XML entity representations.
      * Uses a BufferedXMLWriter for efficient writing if the output is not already a BufferedXMLWriter.
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * char[] chars = "Data: <tag>value</tag> end".toCharArray();
      * StringWriter writer = new StringWriter();
@@ -1586,7 +1586,7 @@ public final class XmlUtil {
      * Special XML characters (&lt;, &gt;, &amp;, ', ") are escaped to their XML entity representations.
      * If the string is null, the text "null" is written.
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String xml = "<book title='Java & XML'>Content</book>";
      * StringWriter writer = new StringWriter();
@@ -1608,7 +1608,7 @@ public final class XmlUtil {
      * Writes XML-escaped characters from a portion of a string to the given Writer.
      * Uses a BufferedXMLWriter for efficient writing if the output is not already a BufferedXMLWriter.
      * 
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * StringWriter writer = new StringWriter();
      * XmlUtil.writeCharacters("Hello <world>", 0, 13, writer);
@@ -1638,8 +1638,8 @@ public final class XmlUtil {
     /**
      * Gets the attribute type class.
      *
-     * @param node
-     * @return
+     * @param node the XML node from which to extract the type attribute
+     * @return the Class corresponding to the type attribute, or null if not found or invalid
      */
     static Class<?> getAttributeTypeClass(final Node node) {
         final String typeAttr = XmlUtil.getAttribute(node, TYPE);
@@ -1664,9 +1664,9 @@ public final class XmlUtil {
     /**
      * Gets the concrete class.
      *
-     * @param targetClass
-     * @param typeClass
-     * @return
+     * @param targetClass the target class to check against
+     * @param typeClass the type class extracted from attributes
+     * @return the concrete class to use, preferring targetClass if typeClass is null or not assignable
      */
     /*
      * static Class<?> getAttributeTypeClass(Attributes attrs) { if (attrs == null) { return null; }
@@ -1692,9 +1692,9 @@ public final class XmlUtil {
     /**
      * Gets the concrete class.
      *
-     * @param targetClass
-     * @param node
-     * @return
+     * @param targetClass the target class to check against
+     * @param node the XML node containing type information
+     * @return the concrete class to use based on the node's type attribute
      */
     static Class<?> getConcreteClass(final Class<?> targetClass, final Node node) {
         if (node == null) {
@@ -1709,9 +1709,9 @@ public final class XmlUtil {
     /**
      * Gets the node type.
      *
-     * @param nodeName
-     * @param previousNodeType
-     * @return
+     * @param nodeName the name of the XML node
+     * @param previousNodeType the previous node type in the hierarchy
+     * @return the NodeType enum value corresponding to the node name and context
      */
     /*
      * static Class<?> getConcreteClass(Class<?> targetClass, Attributes attrs) { if (attrs == null) { return targetClass;

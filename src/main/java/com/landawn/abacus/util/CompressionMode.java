@@ -26,7 +26,7 @@ package com.landawn.abacus.util;
  *   <li>{@link #GZIP} - GNU zip compression (better compression ratio)</li>
  * </ul>
  * 
- * <p>Example usage:
+ * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * CompressionMode mode = CompressionMode.GZIP;
  * // Use with compression utilities

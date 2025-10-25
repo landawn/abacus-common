@@ -28,7 +28,7 @@ package com.landawn.abacus.pool;
  * eviction priority. Objects with lower values according to the policy's criteria are
  * evicted first.
  * 
- * <p>Usage example:
+ * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * // LRU-style pool - evicts least recently used objects
  * ObjectPool<Resource> lruPool = PoolFactory.createObjectPool(

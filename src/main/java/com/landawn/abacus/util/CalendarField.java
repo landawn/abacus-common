@@ -25,7 +25,7 @@ import java.util.Map;
  * to the corresponding {@link Calendar} field constants. Each enum value has the same
  * integer value as its corresponding Calendar constant, ensuring compatibility.</p>
  * 
- * <p>Example usage:</p>
+ * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * Calendar cal = Calendar.getInstance();
  *
@@ -46,7 +46,7 @@ public enum CalendarField {
      * Field for milliseconds within a second (0-999).
      * Has the same int value as {@link Calendar#MILLISECOND}.
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * calendar.set(CalendarField.MILLISECOND.value(), 500); // Set to 500ms
      * }</pre>
@@ -59,7 +59,7 @@ public enum CalendarField {
      * Field for seconds within a minute (0-59).
      * Has the same int value as {@link Calendar#SECOND}.
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * calendar.add(CalendarField.SECOND.value(), 30); // Add 30 seconds
      * }</pre>
@@ -72,7 +72,7 @@ public enum CalendarField {
      * Field for minutes within an hour (0-59).
      * Has the same int value as {@link Calendar#MINUTE}.
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * calendar.set(CalendarField.MINUTE.value(), 45); // Set to 45 minutes
      * }</pre>
@@ -85,7 +85,7 @@ public enum CalendarField {
      * Field for hour of the day in 24-hour format (0-23).
      * Has the same int value as {@link Calendar#HOUR_OF_DAY}.
      *
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * calendar.set(CalendarField.HOUR_OF_DAY.value(), 15); // Set to 3 PM
      * }</pre>
@@ -98,7 +98,7 @@ public enum CalendarField {
      * Field for day of the month (1-31).
      * Has the same int value (5) as {@link Calendar#DATE} and {@link Calendar#DAY_OF_MONTH}.
      *
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * calendar.add(CalendarField.DAY_OF_MONTH.value(), 7); // Add one week
      * int dayOfMonth = calendar.get(CalendarField.DAY_OF_MONTH.value());
@@ -112,7 +112,7 @@ public enum CalendarField {
      * Field for week of the year (1-53).
      * Has the same int value as {@link Calendar#WEEK_OF_YEAR}.
      *
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * int weekNumber = calendar.get(CalendarField.WEEK_OF_YEAR.value());
      * calendar.add(CalendarField.WEEK_OF_YEAR.value(), 2); // Add 2 weeks
@@ -126,7 +126,7 @@ public enum CalendarField {
      * Field for month of the year (0-11, where 0 is January).
      * Has the same int value as {@link Calendar#MONTH}.
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * calendar.set(CalendarField.MONTH.value(), Calendar.DECEMBER);
      * calendar.add(CalendarField.MONTH.value(), 3); // Add 3 months
@@ -140,7 +140,7 @@ public enum CalendarField {
      * Field for year.
      * Has the same int value as {@link Calendar#YEAR}.
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * calendar.set(CalendarField.YEAR.value(), 2024);
      * calendar.add(CalendarField.YEAR.value(), 1); // Next year

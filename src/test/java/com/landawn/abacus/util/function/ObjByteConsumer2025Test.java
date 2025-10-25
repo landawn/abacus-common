@@ -99,7 +99,7 @@ public class ObjByteConsumer2025Test extends TestBase {
 
     @Test
     public void testSideEffects() {
-        final int[] sum = {0};
+        final int[] sum = { 0 };
         ObjByteConsumer<String> consumer = (t, value) -> sum[0] += value;
 
         consumer.accept("a", (byte) 10);

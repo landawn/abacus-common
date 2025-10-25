@@ -52,8 +52,8 @@ import com.landawn.abacus.util.u.OptionalShort;
  * <p>The input arrays or collections do not need to be sorted beforehand. The implementation efficiently
  * finds the median without fully sorting the input data using a min-heap of size k = (length / 2) + 1.</p>
  * 
- * <p>Example usage:</p>
- * <pre>
+ * <p><b>Usage Examples:</b></p>
+ * <pre>{@code
  * // With array of odd length
  * Pair&lt;Integer, OptionalInt&gt; result1 = Median.of(1, 3, 5);
  * // result1: [3, OptionalInt.empty()]
@@ -70,7 +70,7 @@ import com.landawn.abacus.util.u.OptionalShort;
  * List&lt;String&gt; words = Arrays.asList("apple", "banana", "cherry");
  * Pair&lt;String, Optional&lt;String&gt;&gt; result4 = Median.of(words);
  * // result4: ["banana", Optional.empty()]
- * </pre>
+ * }</pre>
  * 
  * <p><strong>Thread Safety:</strong> This class is thread-safe as it contains only static methods and 
  * maintains no state. Multiple threads can safely call these methods concurrently.</p>
@@ -100,31 +100,22 @@ public final class Median {
 
     /**
      * Finds the median value(s) from an array of characters using natural ordering.
-     * 
+     *
      * <p>The median represents the middle value(s) when the array elements are arranged in sorted order.
      * The input array does not need to be pre-sorted. This method uses an efficient priority queue-based
-     * algorithm that avoids full sorting.</p>
-     * 
+     * algorithm that processes the array in O(n) time complexity by maintaining a bounded heap of size (length/2 + 1).</p>
+     *
      * <p>For arrays with an odd number of elements, returns the single median value in the {@code left}
      * component of the pair, with the {@code right} component empty.</p>
-     * 
+     *
      * <p>For arrays with an even number of elements, returns the two median values, with the smaller
      * value in the {@code left} component and the larger value in the {@code right} component.</p>
-     * 
-     * <p>Usage example:</p>
-     * <pre>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
      * Pair&lt;Character, OptionalChar&gt; median = Median.of('z', 'a', 'm');
      * char medianValue = median.left; // 'm'
-     * </pre>
-     * 
-     * <pre>
-     * <code>
-     * Median.of('a'); // -> ['a', OptionalChar.empty()]
-     * Median.of('a', 'c'); // -> ['a', OptionalChar.of('c')]
-     * Median.of('a', 'c', 'b'); // -> ['b', OptionalChar.empty()]
-     * Median.of('a', 'c', 'b', 'd'); // -> ['b', OptionalChar.of('c')]
-     * </code>
-     * </pre>
+     * }</pre>
      *
      * @param a the array of characters to find the median from. Must not be null or empty.
      * @return a {@code Pair} containing the median value(s). For odd-length arrays, the {@code left}
@@ -132,6 +123,8 @@ public final class Median {
      *         contains the smaller median and {@code right} contains the larger median.
      * @throws IllegalArgumentException if the specified array is null or empty
      * @see #of(char[], int, int)
+     * @see Pair
+     * @see OptionalChar
      * @see N#median(char[])
      */
     public static Pair<Character, OptionalChar> of(final char... a) throws IllegalArgumentException {
@@ -153,21 +146,12 @@ public final class Median {
      * <p>For subarrays with an even number of elements, returns the two median values, with the smaller
      * value in the {@code left} component and the larger value in the {@code right} component.</p>
      * 
-     * <p>Usage example:</p>
-     * <pre>
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
      * char[] chars = {'z', 'a', 'm', 'x'};
      * Pair&lt;Character, OptionalChar&gt; median = Median.of(chars, 1, 3);
      * // Considers only 'a' and 'm', returns ['a', OptionalChar.of('m')]
-     * </pre>
-     * 
-     * <pre>
-     * <code>
-     * Median.of(new char[]{'a', 'b', 'c'}, 0, 1); // -> ['a', OptionalChar.empty()]
-     * Median.of(new char[]{'a', 'b', 'c'}, 0, 2); // -> ['a', OptionalChar.of('b')]
-     * Median.of(new char[]{'a', 'b', 'c'}, 0, 3); // -> ['b', OptionalChar.empty()]
-     * Median.of(new char[]{'a', 'b', 'c', 'd'}, 0, 4); // -> ['b', OptionalChar.of('c')]
-     * </code>
-     * </pre>
+     * }</pre>
      *
      * @param a the array of characters to find the median from. Must not be null.
      * @param fromIndex the starting index (inclusive) of the range within the array to consider.
@@ -222,22 +206,22 @@ public final class Median {
 
     /**
      * Finds the median value(s) from an array of bytes using natural ordering.
-     * 
+     *
      * <p>The median represents the middle value(s) when the array elements are arranged in sorted order.
      * The input array does not need to be pre-sorted. This method uses an efficient priority queue-based
-     * algorithm that processes the array in O(n) time complexity.</p>
-     * 
+     * algorithm that processes the array in O(n) time complexity by maintaining a bounded heap of size (length/2 + 1).</p>
+     *
      * <p>For arrays with an odd number of elements, returns the single median value in the {@code left}
      * component of the pair, with the {@code right} component empty.</p>
-     * 
+     *
      * <p>For arrays with an even number of elements, returns the two median values, with the smaller
      * value in the {@code left} component and the larger value in the {@code right} component.</p>
-     * 
-     * <p>Usage example:</p>
-     * <pre>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
      * Pair&lt;Byte, OptionalByte&gt; median = Median.of((byte)10, (byte)5, (byte)15);
      * byte medianValue = median.left; // 10
-     * </pre>
+     * }</pre>
      *
      * @param a the array of bytes to find the median from. Must not be null or empty.
      * @return a {@code Pair} containing the median value(s). For odd-length arrays, the {@code left}
@@ -245,6 +229,8 @@ public final class Median {
      *         contains the smaller median and {@code right} contains the larger median.
      * @throws IllegalArgumentException if the specified array is null or empty
      * @see #of(byte[], int, int)
+     * @see Pair
+     * @see OptionalByte
      */
     public static Pair<Byte, OptionalByte> of(final byte... a) throws IllegalArgumentException {
         N.checkArgNotEmpty(a, "The specified array 'a' can't be null or empty");
@@ -266,12 +252,12 @@ public final class Median {
      * <p>For subarrays with an even number of elements, returns the two median values, with the smaller
      * value in the {@code left} component and the larger value in the {@code right} component.</p>
      * 
-     * <p>Usage example:</p>
-     * <pre>
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
      * byte[] bytes = {30, 10, 20, 40};
      * Pair&lt;Byte, OptionalByte&gt; median = Median.of(bytes, 1, 3);
      * // Considers only bytes[1] and bytes[2]: 10, 20. Returns [10, OptionalByte.of(20)]
-     * </pre>
+     * }</pre>
      *
      * @param a the array of bytes to find the median from. Must not be null.
      * @param fromIndex the starting index (inclusive) of the range within the array to consider.
@@ -325,23 +311,22 @@ public final class Median {
 
     /**
      * Finds the median value(s) from an array of short integers using natural ordering.
-     * 
+     *
      * <p>The median represents the middle value(s) when the array elements are arranged in sorted order.
      * The input array does not need to be pre-sorted. This method uses an efficient priority queue-based
-     * algorithm that processes the array in linear time while maintaining only the necessary elements
-     * for median calculation.</p>
-     * 
+     * algorithm that processes the array in O(n) time complexity by maintaining a bounded heap of size (length/2 + 1).</p>
+     *
      * <p>For arrays with an odd number of elements, returns the single median value in the {@code left}
      * component of the pair, with the {@code right} component empty.</p>
-     * 
+     *
      * <p>For arrays with an even number of elements, returns the two median values, with the smaller
      * value in the {@code left} component and the larger value in the {@code right} component.</p>
-     * 
-     * <p>Usage example:</p>
-     * <pre>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
      * Pair&lt;Short, OptionalShort&gt; median = Median.of((short)100, (short)50, (short)200);
      * short medianValue = median.left; // 100
-     * </pre>
+     * }</pre>
      *
      * @param a the array of short integers to find the median from. Must not be null or empty.
      * @return a {@code Pair} containing the median value(s). For odd-length arrays, the {@code left}
@@ -349,6 +334,8 @@ public final class Median {
      *         contains the smaller median and {@code right} contains the larger median.
      * @throws IllegalArgumentException if the specified array is null or empty
      * @see #of(short[], int, int)
+     * @see Pair
+     * @see OptionalShort
      */
     public static Pair<Short, OptionalShort> of(final short... a) throws IllegalArgumentException {
         N.checkArgNotEmpty(a, "The specified array 'a' can't be null or empty");
@@ -370,12 +357,12 @@ public final class Median {
      * <p>For subarrays with an even number of elements, returns the two median values, with the smaller
      * value in the {@code left} component and the larger value in the {@code right} component.</p>
      * 
-     * <p>Usage example:</p>
-     * <pre>
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
      * short[] values = {300, 100, 200, 400};
      * Pair&lt;Short, OptionalShort&gt; median = Median.of(values, 1, 3);
      * // Considers only values[1] and values[2]: 100, 200. Returns [100, OptionalShort.of(200)]
-     * </pre>
+     * }</pre>
      *
      * @param a the array of short integers to find the median from. Must not be null.
      * @param fromIndex the starting index (inclusive) of the range within the array to consider.
@@ -429,24 +416,23 @@ public final class Median {
 
     /**
      * Finds the median value(s) from an array of integers using natural ordering.
-     * 
+     *
      * <p>The median represents the middle value(s) when the array elements are arranged in sorted order.
      * The input array does not need to be pre-sorted. This method uses an efficient priority queue-based
-     * algorithm that achieves O(n) time complexity by maintaining a bounded heap of size (length/2 + 1)
-     * instead of performing a full O(n log n) sort operation.</p>
-     * 
+     * algorithm that processes the array in O(n) time complexity by maintaining a bounded heap of size (length/2 + 1).</p>
+     *
      * <p>For arrays with an odd number of elements, returns the single median value in the {@code left}
      * component of the pair, with the {@code right} component empty.</p>
-     * 
+     *
      * <p>For arrays with an even number of elements, returns the two median values, with the smaller
      * value in the {@code left} component and the larger value in the {@code right} component.</p>
-     * 
-     * <p>Usage example:</p>
-     * <pre>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
      * Pair&lt;Integer, OptionalInt&gt; median = Median.of(10, 5, 20, 15);
      * int lowerMedian = median.left; // 10
      * int upperMedian = median.right.get(); // 15
-     * </pre>
+     * }</pre>
      *
      * @param a the array of integers to find the median from. Must not be null or empty.
      * @return a {@code Pair} containing the median value(s). For odd-length arrays, the {@code left}
@@ -454,6 +440,8 @@ public final class Median {
      *         contains the smaller median and {@code right} contains the larger median.
      * @throws IllegalArgumentException if the specified array is null or empty
      * @see #of(int[], int, int)
+     * @see Pair
+     * @see OptionalInt
      */
     public static Pair<Integer, OptionalInt> of(final int... a) throws IllegalArgumentException {
         N.checkArgNotEmpty(a, "The specified array 'a' can't be null or empty");
@@ -475,12 +463,12 @@ public final class Median {
      * <p>For subarrays with an even number of elements, returns the two median values, with the smaller
      * value in the {@code left} component and the larger value in the {@code right} component.</p>
      * 
-     * <p>Usage example:</p>
-     * <pre>
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
      * int[] numbers = {100, 50, 75, 25, 90};
      * Pair&lt;Integer, OptionalInt&gt; median = Median.of(numbers, 1, 4);
      * // Considers only numbers[1], numbers[2], numbers[3]: 50, 75, 25. Returns [50, OptionalInt.empty()]
-     * </pre>
+     * }</pre>
      *
      * @param a the array of integers to find the median from. Must not be null.
      * @param fromIndex the starting index (inclusive) of the range within the array to consider.
@@ -534,23 +522,23 @@ public final class Median {
 
     /**
      * Finds the median value(s) from an array of long integers using natural ordering.
-     * 
+     *
      * <p>The median represents the middle value(s) when the array elements are arranged in sorted order.
      * The input array does not need to be pre-sorted. This method uses an efficient priority queue-based
-     * algorithm that processes large integer values while maintaining optimal performance characteristics.</p>
-     * 
+     * algorithm that processes the array in O(n) time complexity by maintaining a bounded heap of size (length/2 + 1).</p>
+     *
      * <p>For arrays with an odd number of elements, returns the single median value in the {@code left}
      * component of the pair, with the {@code right} component empty.</p>
-     * 
+     *
      * <p>For arrays with an even number of elements, returns the two median values, with the smaller
      * value in the {@code left} component and the larger value in the {@code right} component.</p>
-     * 
-     * <p>Usage example:</p>
-     * <pre>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
      * Pair&lt;Long, OptionalLong&gt; median = Median.of(1000L, 500L, 1500L, 750L);
      * long lowerMedian = median.left; // 750
      * long upperMedian = median.right.get(); // 1000
-     * </pre>
+     * }</pre>
      *
      * @param a the array of long integers to find the median from. Must not be null or empty.
      * @return a {@code Pair} containing the median value(s). For odd-length arrays, the {@code left}
@@ -558,6 +546,8 @@ public final class Median {
      *         contains the smaller median and {@code right} contains the larger median.
      * @throws IllegalArgumentException if the specified array is null or empty
      * @see #of(long[], int, int)
+     * @see Pair
+     * @see OptionalLong
      */
     public static Pair<Long, OptionalLong> of(final long... a) throws IllegalArgumentException {
         N.checkArgNotEmpty(a, "The specified array 'a' can't be null or empty");
@@ -579,12 +569,12 @@ public final class Median {
      * <p>For subarrays with an even number of elements, returns the two median values, with the smaller
      * value in the {@code left} component and the larger value in the {@code right} component.</p>
      * 
-     * <p>Usage example:</p>
-     * <pre>
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
      * long[] values = {3000L, 1000L, 2000L, 4000L, 1500L};
      * Pair&lt;Long, OptionalLong&gt; median = Median.of(values, 1, 4);
      * // Considers values[1], values[2], values[3]: 1000, 2000, 4000. Returns [2000, OptionalLong.empty()]
-     * </pre>
+     * }</pre>
      *
      * @param a the array of long integers to find the median from. Must not be null.
      * @param fromIndex the starting index (inclusive) of the range within the array to consider.
@@ -638,23 +628,24 @@ public final class Median {
 
     /**
      * Finds the median value(s) from an array of float values using natural ordering.
-     * 
+     *
      * <p>The median represents the middle value(s) when the array elements are arranged in sorted order.
      * The input array does not need to be pre-sorted. This method uses an efficient priority queue-based
-     * algorithm that handles floating-point values correctly, including proper handling of NaN values
+     * algorithm that processes the array in O(n) time complexity by maintaining a bounded heap of size (length/2 + 1).
+     * This implementation handles floating-point values correctly, including proper handling of NaN values
      * according to IEEE 754 floating-point standards.</p>
-     * 
+     *
      * <p>For arrays with an odd number of elements, returns the single median value in the {@code left}
      * component of the pair, with the {@code right} component empty.</p>
-     * 
+     *
      * <p>For arrays with an even number of elements, returns the two median values, with the smaller
      * value in the {@code left} component and the larger value in the {@code right} component.</p>
-     * 
-     * <p>Usage example:</p>
-     * <pre>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
      * Pair&lt;Float, OptionalFloat&gt; median = Median.of(10.5f, 5.2f, 20.8f);
      * float medianValue = median.left; // 10.5f
-     * </pre>
+     * }</pre>
      *
      * @param a the array of float values to find the median from. Must not be null or empty.
      * @return a {@code Pair} containing the median value(s). For odd-length arrays, the {@code left}
@@ -662,6 +653,8 @@ public final class Median {
      *         contains the smaller median and {@code right} contains the larger median.
      * @throws IllegalArgumentException if the specified array is null or empty
      * @see #of(float[], int, int)
+     * @see Pair
+     * @see OptionalFloat
      */
     public static Pair<Float, OptionalFloat> of(final float... a) throws IllegalArgumentException {
         N.checkArgNotEmpty(a, "The specified array 'a' can't be null or empty");
@@ -674,8 +667,9 @@ public final class Median {
      * 
      * <p>The median represents the middle value(s) when the subarray elements are arranged in sorted order.
      * The input array does not need to be pre-sorted. This method operates on a contiguous subarray defined
-     * by the range [fromIndex, toIndex) and efficiently computes the median using a bounded priority queue
-     * while properly handling floating-point comparison semantics.</p>
+     * by the range [fromIndex, toIndex) and efficiently computes the median using a bounded priority queue.
+     * This implementation handles floating-point values correctly, including proper handling of NaN values
+     * according to IEEE 754 floating-point standards.</p>
      * 
      * <p>For subarrays with an odd number of elements, returns the single median value in the {@code left}
      * component of the pair, with the {@code right} component empty.</p>
@@ -683,12 +677,12 @@ public final class Median {
      * <p>For subarrays with an even number of elements, returns the two median values, with the smaller
      * value in the {@code left} component and the larger value in the {@code right} component.</p>
      * 
-     * <p>Usage example:</p>
-     * <pre>
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
      * float[] values = {30.5f, 10.2f, 20.8f, 40.1f};
      * Pair&lt;Float, OptionalFloat&gt; median = Median.of(values, 1, 3);
      * // Considers values[1] and values[2]: 10.2f, 20.8f. Returns [10.2f, OptionalFloat.of(20.8f)]
-     * </pre>
+     * }</pre>
      *
      * @param a the array of float values to find the median from. Must not be null.
      * @param fromIndex the starting index (inclusive) of the range within the array to consider.
@@ -742,24 +736,25 @@ public final class Median {
 
     /**
      * Finds the median value(s) from an array of double values using natural ordering.
-     * 
+     *
      * <p>The median represents the middle value(s) when the array elements are arranged in sorted order.
      * The input array does not need to be pre-sorted. This method uses an efficient priority queue-based
-     * algorithm that handles double-precision floating-point values with full IEEE 754 compliance,
+     * algorithm that processes the array in O(n) time complexity by maintaining a bounded heap of size (length/2 + 1).
+     * This implementation handles double-precision floating-point values with full IEEE 754 compliance,
      * including proper treatment of special values like NaN and infinity.</p>
-     * 
+     *
      * <p>For arrays with an odd number of elements, returns the single median value in the {@code left}
      * component of the pair, with the {@code right} component empty.</p>
-     * 
+     *
      * <p>For arrays with an even number of elements, returns the two median values, with the smaller
      * value in the {@code left} component and the larger value in the {@code right} component.</p>
-     * 
-     * <p>Usage example:</p>
-     * <pre>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
      * Pair&lt;Double, OptionalDouble&gt; median = Median.of(10.5, 5.2, 20.8, 15.1);
      * double lowerMedian = median.left; // 10.5
      * double upperMedian = median.right.get(); // 15.1
-     * </pre>
+     * }</pre>
      *
      * @param a the array of double values to find the median from. Must not be null or empty.
      * @return a {@code Pair} containing the median value(s). For odd-length arrays, the {@code left}
@@ -767,6 +762,8 @@ public final class Median {
      *         contains the smaller median and {@code right} contains the larger median.
      * @throws IllegalArgumentException if the specified array is null or empty
      * @see #of(double[], int, int)
+     * @see Pair
+     * @see OptionalDouble
      */
     public static Pair<Double, OptionalDouble> of(final double... a) throws IllegalArgumentException {
         N.checkArgNotEmpty(a, "The specified array 'a' can't be null or empty");
@@ -779,8 +776,9 @@ public final class Median {
      * 
      * <p>The median represents the middle value(s) when the subarray elements are arranged in sorted order.
      * The input array does not need to be pre-sorted. This method operates on a contiguous subarray defined
-     * by the range [fromIndex, toIndex) and uses an efficient selection algorithm that maintains optimal
-     * precision for double-precision floating-point arithmetic operations.</p>
+     * by the range [fromIndex, toIndex) and efficiently computes the median using a bounded priority queue.
+     * This implementation handles double-precision floating-point values with full IEEE 754 compliance,
+     * including proper treatment of special values like NaN and infinity.</p>
      * 
      * <p>For subarrays with an odd number of elements, returns the single median value in the {@code left}
      * component of the pair, with the {@code right} component empty.</p>
@@ -788,12 +786,12 @@ public final class Median {
      * <p>For subarrays with an even number of elements, returns the two median values, with the smaller
      * value in the {@code left} component and the larger value in the {@code right} component.</p>
      * 
-     * <p>Usage example:</p>
-     * <pre>
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
      * double[] values = {30.5, 10.2, 20.8, 40.1, 15.3};
      * Pair&lt;Double, OptionalDouble&gt; median = Median.of(values, 1, 4);
      * // Considers values[1], values[2], values[3]: 10.2, 20.8, 40.1. Returns [20.8, OptionalDouble.empty()]
-     * </pre>
+     * }</pre>
      *
      * @param a the array of double values to find the median from. Must not be null.
      * @param fromIndex the starting index (inclusive) of the range within the array to consider.
@@ -852,19 +850,19 @@ public final class Median {
      * according to their natural comparison method (compareTo). The input array does not need to be pre-sorted.
      * This method uses an efficient priority queue-based algorithm that works with any type implementing
      * the Comparable interface.</p>
-     * 
+     *
      * <p>For arrays with an odd number of elements, returns the single median value in the {@code left}
      * component of the pair, with the {@code right} component empty.</p>
      * 
      * <p>For arrays with an even number of elements, returns the two median values, with the smaller
      * value in the {@code left} component and the larger value in the {@code right} component.</p>
      * 
-     * <p>Usage example:</p>
-     * <pre>
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
      * String[] words = {"apple", "banana", "cherry"};
      * Pair&lt;String, Optional&lt;String&gt;&gt; median = Median.of(words);
      * String medianWord = median.left; // "banana"
-     * </pre>
+     * }</pre>
      *
      * @param <T> the type of elements in the array, which must implement Comparable
      * @param a the array of Comparable objects to find the median from. Must not be null or empty.
@@ -888,19 +886,19 @@ public final class Median {
      * according to their natural comparison method (compareTo). The input array does not need to be pre-sorted.
      * This method operates on a contiguous subarray defined by the range [fromIndex, toIndex) and delegates
      * to the comparator-based version using the natural order comparator.</p>
-     * 
+     *
      * <p>For subarrays with an odd number of elements, returns the single median value in the {@code left}
      * component of the pair, with the {@code right} component empty.</p>
      * 
      * <p>For subarrays with an even number of elements, returns the two median values, with the smaller
      * value in the {@code left} component and the larger value in the {@code right} component.</p>
      * 
-     * <p>Usage example:</p>
-     * <pre>
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
      * String[] words = {"zebra", "apple", "banana", "cherry"};
      * Pair&lt;String, Optional&lt;String&gt;&gt; median = Median.of(words, 1, 4);
      * // Considers words[1], words[2], words[3]: "apple", "banana", "cherry". Returns ["banana", Optional.empty()]
-     * </pre>
+     * }</pre>
      *
      * @param <T> the type of elements in the array, which must implement Comparable
      * @param a the array of Comparable objects to find the median from. Must not be null.
@@ -929,23 +927,28 @@ public final class Median {
      * uses an efficient priority queue-based algorithm that works with any custom comparison logic,
      * allowing for flexible median calculation on objects that may not implement Comparable or when
      * a different ordering than natural order is desired.</p>
-     * 
+     *
+     * <p><strong>Note:</strong> This method does not explicitly handle null elements. Behavior with null
+     * elements depends on the comparator used. If using natural ordering (null comparator) or a comparator
+     * that does not handle nulls, a {@code NullPointerException} may be thrown during comparison.</p>
+     *
      * <p>For arrays with an odd number of elements, returns the single median value in the {@code left}
      * component of the pair, with the {@code right} component empty.</p>
      * 
      * <p>For arrays with an even number of elements, returns the two median values, with the smaller
      * value in the {@code left} component and the larger value in the {@code right} component.</p>
      * 
-     * <p>Usage example:</p>
-     * <pre>
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
      * String[] words = {"apple", "pie", "banana"};
      * Pair&lt;String, Optional&lt;String&gt;&gt; median = Median.of(words, Comparator.comparing(String::length));
      * String medianWord = median.left; // "apple" (middle length)
-     * </pre>
+     * }</pre>
      *
      * @param <T> the type of elements in the array
      * @param a the array of objects to find the median from. Must not be null or empty.
      * @param cmp the comparator to use for ordering the elements. If null, natural ordering is used.
+     *            The comparator must be consistent with equals for predictable results.
      * @return a {@code Pair} containing the median value(s). For odd-length arrays, the {@code left}
      *         contains the median and {@code right} is empty. For even-length arrays, the {@code left}
      *         contains the smaller median and {@code right} contains the larger median.
@@ -966,22 +969,26 @@ public final class Median {
      * according to the provided comparator. The input array does not need to be pre-sorted. This method
      * operates on a contiguous subarray defined by the range [fromIndex, toIndex) and uses an efficient
      * selection algorithm based on a bounded priority queue that maintains only the necessary elements.</p>
-     * 
+     *
      * <p>The algorithm optimizes performance by using a min-heap of size k = (length/2 + 1) to track
      * only the smaller half of the elements plus one, avoiding the need to sort the entire subarray.</p>
-     * 
+     *
+     * <p><strong>Note:</strong> This method does not explicitly handle null elements. Behavior with null
+     * elements depends on the comparator used. If using natural ordering (null comparator) or a comparator
+     * that does not handle nulls, a {@code NullPointerException} may be thrown during comparison.</p>
+     *
      * <p>For subarrays with an odd number of elements, returns the single median value in the {@code left}
      * component of the pair, with the {@code right} component empty.</p>
      * 
      * <p>For subarrays with an even number of elements, returns the two median values, with the smaller
      * value in the {@code left} component and the larger value in the {@code right} component.</p>
      * 
-     * <p>Usage example:</p>
-     * <pre>
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
      * String[] words = {"elephant", "ant", "bee", "tiger"};
      * Pair&lt;String, Optional&lt;String&gt;&gt; median = Median.of(words, 1, 4, Comparator.comparing(String::length));
      * // Considers words[1], words[2], words[3]: "ant", "bee", "tiger". Returns ["bee", Optional.empty()]
-     * </pre>
+     * }</pre>
      *
      * @param <T> the type of elements in the array
      * @param a the array of objects to find the median from. Must not be null.
@@ -1052,12 +1059,12 @@ public final class Median {
      * <p>For collections with an even number of elements, returns the two median values, with the smaller
      * value in the {@code left} component and the larger value in the {@code right} component.</p>
      *
-     * <p>Usage example:</p>
-     * <pre>
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
      * List&lt;Integer&gt; numbers = Arrays.asList(10, 5, 20, 15, 25);
      * Pair&lt;Integer, Optional&lt;Integer&gt;&gt; median = Median.of(numbers);
      * int medianValue = median.left; // 15
-     * </pre>
+     * }</pre>
      *
      * @param <T> the type of elements in the collection, which must implement Comparable
      * @param c the collection of Comparable objects to find the median from. Must not be null or empty.
@@ -1080,22 +1087,26 @@ public final class Median {
      * uses an efficient priority queue-based algorithm that works with any custom comparison logic,
      * providing flexibility for objects that may not implement Comparable or when a different ordering
      * than natural order is desired.</p>
-     * 
+     *
      * <p>The algorithm maintains optimal performance by using a min-heap of size k = (size/2 + 1) to track
      * only the smaller half of the elements plus one, iterating through the collection exactly once.</p>
-     * 
+     *
+     * <p><strong>Note:</strong> This method does not explicitly handle null elements. Behavior with null
+     * elements depends on the comparator used. If using natural ordering (null comparator) or a comparator
+     * that does not handle nulls, a {@code NullPointerException} may be thrown during comparison.</p>
+     *
      * <p>For collections with an odd number of elements, returns the single median value in the {@code left}
      * component of the pair, with the {@code right} component empty.</p>
      * 
      * <p>For collections with an even number of elements, returns the two median values, with the smaller
      * value in the {@code left} component and the larger value in the {@code right} component.</p>
      * 
-     * <p>Usage example:</p>
-     * <pre>
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
      * Set&lt;String&gt; words = new HashSet&lt;&gt;(Arrays.asList("apple", "pie", "banana"));
      * Pair&lt;String, Optional&lt;String&gt;&gt; median = Median.of(words, Comparator.comparing(String::length));
      * String medianWord = median.left; // Word with median length
-     * </pre>
+     * }</pre>
      *
      * @param <T> the type of elements in the collection
      * @param c the collection of objects to find the median from. Must not be null or empty.
@@ -1153,22 +1164,22 @@ public final class Median {
      * according to their natural comparison method (compareTo). The input collection does not need to be sorted.
      * This method extracts a slice of the collection defined by the range [fromIndex, toIndex) and delegates
      * to the comparator-based version using the natural order comparator.</p>
-     * 
+     *
      * <p>The method efficiently handles the range extraction by using a slice operation that creates a view
      * of the specified portion of the collection without copying all elements unnecessarily.</p>
-     * 
+     *
      * <p>For subcollections with an odd number of elements, returns the single median value in the {@code left}
      * component of the pair, with the {@code right} component empty.</p>
      * 
      * <p>For subcollections with an even number of elements, returns the two median values, with the smaller
      * value in the {@code left} component and the larger value in the {@code right} component.</p>
      * 
-     * <p>Usage example:</p>
-     * <pre>
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
      * List&lt;Integer&gt; numbers = Arrays.asList(100, 50, 75, 25, 90);
      * Pair&lt;Integer, Optional&lt;Integer&gt;&gt; median = Median.of(numbers, 1, 4);
      * // Considers elements at indices 1, 2, 3: 50, 75, 25. Returns [50, Optional.empty()]
-     * </pre>
+     * }</pre>
      *
      * @param <T> the type of elements in the collection, which must implement Comparable
      * @param c the collection of Comparable objects to find the median from. Must not be null.
@@ -1196,23 +1207,27 @@ public final class Median {
      * according to the provided comparator. The input collection does not need to be sorted. This method
      * extracts a slice of the collection defined by the range [fromIndex, toIndex) and then applies the
      * median-finding algorithm to the resulting subcollection.</p>
-     * 
+     *
      * <p>The method first validates the input parameters and range bounds, then creates a slice view of the
      * collection using the specified indices. This approach is memory-efficient as it avoids copying
      * elements that are not part of the target range.</p>
-     * 
+     *
+     * <p><strong>Note:</strong> This method does not explicitly handle null elements. Behavior with null
+     * elements depends on the comparator used. If using natural ordering (null comparator) or a comparator
+     * that does not handle nulls, a {@code NullPointerException} may be thrown during comparison.</p>
+     *
      * <p>For subcollections with an odd number of elements, returns the single median value in the {@code left}
      * component of the pair, with the {@code right} component empty.</p>
      * 
      * <p>For subcollections with an even number of elements, returns the two median values, with the smaller
      * value in the {@code left} component and the larger value in the {@code right} component.</p>
      * 
-     * <p>Usage example:</p>
-     * <pre>
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
      * List&lt;String&gt; words = Arrays.asList("elephant", "ant", "bee", "tiger", "cat");
      * Pair&lt;String, Optional&lt;String&gt;&gt; median = Median.of(words, 1, 4, Comparator.comparing(String::length));
      * // Considers words at indices 1, 2, 3: "ant", "bee", "tiger". Returns ["bee", Optional.empty()]
-     * </pre>
+     * }</pre>
      *
      * @param <T> the type of elements in the collection
      * @param c the collection of objects to find the median from. Must not be null.
@@ -1233,7 +1248,7 @@ public final class Median {
      */
     public static <T> Pair<T, Optional<T>> of(final Collection<? extends T> c, final int fromIndex, final int toIndex, final Comparator<? super T> cmp) {
         if (N.isEmpty(c) || toIndex - fromIndex < 1) {
-            throw new IllegalArgumentException("The length of collection cannot be null or empty"); //NOSONAR
+            throw new IllegalArgumentException("The length of collection can't be null or empty"); //NOSONAR
         }
 
         N.checkFromToIndex(fromIndex, toIndex, c.size());

@@ -132,7 +132,8 @@ public class LongTriConsumer2025Test extends TestBase {
     @Test
     public void testFunctionalInterfaceContract() {
         assertDoesNotThrow(() -> {
-            final LongTriConsumer consumer = (a, b, c) -> { };
+            final LongTriConsumer consumer = (a, b, c) -> {
+            };
             consumer.accept(1L, 2L, 3L);
         });
     }

@@ -40,6 +40,20 @@ public interface ToBooleanFunction<T> extends Throwables.ToBooleanFunction<T, Ru
     /**
      * Applies this function to the given argument.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * ToBooleanFunction<Boolean> unbox = ToBooleanFunction.UNBOX;
+     * boolean result1 = unbox.applyAsBoolean(Boolean.TRUE); // returns true
+     * boolean result2 = unbox.applyAsBoolean(null); // returns false
+     *
+     * ToBooleanFunction<String> isEmpty = String::isEmpty;
+     * boolean result3 = isEmpty.applyAsBoolean(""); // returns true
+     * boolean result4 = isEmpty.applyAsBoolean("hello"); // returns false
+     *
+     * ToBooleanFunction<Integer> isEven = n -> n % 2 == 0;
+     * boolean result5 = isEven.applyAsBoolean(4); // returns true
+     * }</pre>
+     *
      * @param value the function argument
      * @return the function result as a boolean value
      */

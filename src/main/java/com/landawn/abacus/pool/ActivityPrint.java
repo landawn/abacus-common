@@ -39,7 +39,7 @@ import com.landawn.abacus.annotation.SuppressFBWarnings;
  *   <li>Current time - last access time > max idle time</li>
  * </ul>
  * 
- * <p>Usage example:
+ * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * // Create activity print with 1 hour lifetime, 10 minute max idle
  * ActivityPrint activity = new ActivityPrint(3600000, 600000);
@@ -196,7 +196,7 @@ public final class ActivityPrint implements Cloneable, Serializable {
      * Updates the last access time to the current system time.
      * This method should be called whenever the associated object is accessed from the pool.
      * 
-     * <p>Usage example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * E pooledObject = pool.get();
      * if (pooledObject != null) {

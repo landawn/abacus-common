@@ -541,7 +541,8 @@ public class Files100Test extends TestBase {
         com.landawn.abacus.guava.Files.deleteRecursively(rootDir, RecursiveDeleteOption.ALLOW_INSECURE);
         assertFalse(Files.exists(rootDir));
 
-        assertThrows(NoSuchFileException.class, () -> com.landawn.abacus.guava.Files.deleteRecursively(tempDir.resolve("nonexistent"), RecursiveDeleteOption.ALLOW_INSECURE));
+        assertThrows(NoSuchFileException.class,
+                () -> com.landawn.abacus.guava.Files.deleteRecursively(tempDir.resolve("nonexistent"), RecursiveDeleteOption.ALLOW_INSECURE));
 
         Path singleFile = tempDir.resolve("single.txt");
         Files.write(singleFile, "content".getBytes(UTF_8));

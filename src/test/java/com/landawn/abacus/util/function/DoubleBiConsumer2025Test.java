@@ -132,7 +132,8 @@ public class DoubleBiConsumer2025Test extends TestBase {
 
     @Test
     public void testFunctionalInterfaceContract() {
-        DoubleBiConsumer lambda = (t, u) -> {};
+        DoubleBiConsumer lambda = (t, u) -> {
+        };
         assertNotNull(lambda);
         assertDoesNotThrow(() -> lambda.accept(1.0, 2.0));
     }

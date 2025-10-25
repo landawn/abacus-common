@@ -45,8 +45,8 @@ import java.lang.annotation.Target;
  *   <li>Custom enum mappings</li>
  * </ul>
  * 
- * <p><b>Example usage:</b></p>
- * <pre>
+ * <p><b>Usage Examples:</b></p>
+ * <pre>{@code
  * public class User {
  *     {@literal @}Type(name = "EncryptedString", scope = Scope.PERSISTENCE)
  *     private String password;  // Encrypted when saved to DB
@@ -57,7 +57,7 @@ import java.lang.annotation.Target;
  *     {@literal @}Type(clazz = CustomDateType.class)
  *     private Date createdDate; // Uses custom date formatting
  * }
- * </pre>
+ * }</pre>
  * 
  * @since 2016
  */

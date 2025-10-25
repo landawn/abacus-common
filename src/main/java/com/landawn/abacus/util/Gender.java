@@ -21,7 +21,7 @@ package com.landawn.abacus.util;
  * <p>Each gender value has an associated integer representation that can be used 
  * for database storage or legacy system integration.</p>
  * 
- * <p>Example usage:</p>
+ * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * // Get gender from integer value
  * Gender gender = Gender.valueOf(1); // Returns FEMALE
@@ -87,7 +87,7 @@ public enum Gender {
     /**
      * Returns the Gender enum constant associated with the specified integer value.
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Gender female = Gender.valueOf(1); // Returns FEMALE
      * Gender male = Gender.valueOf(2);   // Returns MALE

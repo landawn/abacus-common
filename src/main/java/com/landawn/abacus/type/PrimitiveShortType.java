@@ -34,7 +34,7 @@ public final class PrimitiveShortType extends AbstractShortType {
     /**
      * Returns the Class object representing the primitive short type.
      *
-     * <p>Usage example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * PrimitiveShortType type = new PrimitiveShortType();
      * Class clazz = type.clazz();
@@ -54,7 +54,7 @@ public final class PrimitiveShortType extends AbstractShortType {
      * Indicates whether this type represents a primitive type.
      * For PrimitiveShortType, this always returns {@code true} since it represents the primitive short type.
      *
-     * <p>Usage example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * PrimitiveShortType type = new PrimitiveShortType();
      * boolean isPrimitive = type.isPrimitiveType();
@@ -72,7 +72,7 @@ public final class PrimitiveShortType extends AbstractShortType {
      * Returns the default value for the primitive short type.
      * The default value for primitive short is 0.
      *
-     * <p>Usage example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * PrimitiveShortType type = new PrimitiveShortType();
      * Short defaultVal = type.defaultValue();
@@ -91,7 +91,7 @@ public final class PrimitiveShortType extends AbstractShortType {
      * This method handles various data types that can be converted to short,
      * including direct short values, other numeric types, and string representations.
      *
-     * <p>Usage example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * PrimitiveShortType type = new PrimitiveShortType();
      * // Assuming rs is a ResultSet with a short value in column 1
@@ -130,7 +130,7 @@ public final class PrimitiveShortType extends AbstractShortType {
      * This method handles various data types that can be converted to short,
      * including direct short values, other numeric types, and string representations.
      *
-     * <p>Usage example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * PrimitiveShortType type = new PrimitiveShortType();
      * // Assuming rs is a ResultSet with a short value in column "age"

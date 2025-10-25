@@ -60,7 +60,7 @@ public interface LongObjConsumer<T> extends Throwables.LongObjConsumer<T, Runtim
      *   <li>Implementing indexed operations where the long is an index</li>
      * </ul>
      *
-     * <p>Example usage:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * LongObjConsumer<String> logger = (timestamp, message) -> 
      *     System.out.println("[" + timestamp + "] " + message);
@@ -84,7 +84,7 @@ public interface LongObjConsumer<T> extends Throwables.LongObjConsumer<T, Runtim
      * of operations that will be executed sequentially on the same pair of
      * input values.
      *
-     * <p>Example usage:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * LongObjConsumer<User> updateTimestamp = (timestamp, user) -> 
      *     user.setLastModified(timestamp);

@@ -83,7 +83,7 @@ import com.landawn.abacus.util.function.IntFunction;
  *   <li>Registration mechanism for custom collection and map creators</li>
  * </ul>
  *
- * <p>Example usage:</p>
+ * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * // Create a function for ArrayList with initial capacity
  * IntFunction<List<String>> listCreator = IntFunctions.ofList();
@@ -272,7 +272,7 @@ public final class IntFunctions {
      * <p>This method serves as a shorthand convenience method that can help with type inference
      * in certain contexts. It's part of a family of factory methods that handle various function types.</p>
      * 
-     * <p>Example usage:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Instead of explicitly typing:
      * IntFunction<String[]> arrayCreator = size -> new String[size];

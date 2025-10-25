@@ -29,7 +29,7 @@ import java.io.Serial;
  *   <li>API responses that return more results than the maximum allowed</li>
  * </ul>
  * 
- * <p>Example usage:</p>
+ * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * // In a stream operation expecting at most one element
  * List<String> results = stream.collect(Collectors.toList());
@@ -59,7 +59,7 @@ public class TooManyElementsException extends IllegalStateException {
      * Constructs a new {@code TooManyElementsException} with no detail message.
      * The cause is not initialized and may subsequently be initialized by a call to {@link #initCause}.
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * throw new TooManyElementsException();
      * }</pre>
@@ -71,7 +71,7 @@ public class TooManyElementsException extends IllegalStateException {
      * Constructs a new {@code TooManyElementsException} with the specified detail message.
      * The cause is not initialized and may subsequently be initialized by a call to {@link #initCause}.
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * throw new TooManyElementsException("Result set contains " + count + " elements, maximum allowed is " + max);
      * }</pre>
@@ -89,7 +89,7 @@ public class TooManyElementsException extends IllegalStateException {
      * <p>Note that the detail message associated with {@code cause} is <i>not</i> automatically
      * incorporated in this exception's detail message.</p>
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * try {
      *     validateCollectionSize(collection);
@@ -115,7 +115,7 @@ public class TooManyElementsException extends IllegalStateException {
      * <p>This constructor is useful for exceptions that are little more than wrappers for other
      * throwables.</p>
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * catch (SQLException e) {
      *     throw new TooManyElementsException(e);

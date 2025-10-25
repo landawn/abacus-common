@@ -92,8 +92,8 @@ public interface Logger {
 
     /**
      * Checks if the logger instance is enabled for the TRACE level.
-     * 
-     * <p>This method should be used to guard expensive trace message construction:</p>
+     *
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * if (logger.isTraceEnabled()) {
      *     logger.trace("Entry count: " + expensiveCalculation());
@@ -115,8 +115,8 @@ public interface Logger {
 
     /**
      * Logs a message at the TRACE level with one parameter.
-     * 
-     * <p>The message should contain a placeholder {} or %s for the argument:</p>
+     *
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * logger.trace("Entry number: {}", i);
      * }</pre>
@@ -260,9 +260,8 @@ public interface Logger {
 
     /**
      * Logs a message at the TRACE level using a supplier for lazy evaluation.
-     * 
-     * <p>The supplier is only invoked if TRACE level is enabled, making this
-     * efficient for expensive message construction:</p>
+     *
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * logger.trace(() -> "Result: " + computeExpensiveResult());
      * }</pre>
@@ -448,8 +447,8 @@ public interface Logger {
 
     /**
      * Logs a message at the DEBUG level using a supplier for lazy evaluation.
-     * 
-     * <p>The supplier is only invoked if DEBUG level is enabled:</p>
+     *
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * logger.debug(() -> "Complex object state: " + complexObject.debugString());
      * }</pre>
@@ -498,7 +497,7 @@ public interface Logger {
     /**
      * Logs a message at the INFO level with one parameter.
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * logger.info("Server started on port {}", port);
      * }</pre>
@@ -641,8 +640,8 @@ public interface Logger {
 
     /**
      * Logs a message at the INFO level using a supplier for lazy evaluation.
-     * 
-     * <p>The supplier is only invoked if INFO level is enabled:</p>
+     *
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * logger.info(() -> "Processed " + getProcessedCount() + " records");
      * }</pre>
@@ -691,7 +690,7 @@ public interface Logger {
     /**
      * Logs a message at the WARN level with one parameter.
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * logger.warn("Cache size {} exceeds recommended maximum", cacheSize);
      * }</pre>
@@ -834,8 +833,8 @@ public interface Logger {
 
     /**
      * Logs a message at the WARN level using a supplier for lazy evaluation.
-     * 
-     * <p>The supplier is only invoked if WARN level is enabled:</p>
+     *
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * logger.warn(() -> "Memory usage " + getMemoryUsage() + " exceeds threshold");
      * }</pre>
@@ -884,7 +883,7 @@ public interface Logger {
     /**
      * Logs a message at the ERROR level with one parameter.
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * logger.error("Failed to process file: {}", filename);
      * }</pre>
@@ -978,8 +977,8 @@ public interface Logger {
 
     /**
      * Logs an exception at the ERROR level with an accompanying message.
-     * 
-     * <p>This is commonly used for logging exceptions:</p>
+     *
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * try {
      *     // some operation
@@ -1036,8 +1035,8 @@ public interface Logger {
 
     /**
      * Logs a message at the ERROR level using a supplier for lazy evaluation.
-     * 
-     * <p>The supplier is only invoked if ERROR level is enabled:</p>
+     *
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * logger.error(() -> "Critical error in module: " + module.getDetailedStatus());
      * }</pre>

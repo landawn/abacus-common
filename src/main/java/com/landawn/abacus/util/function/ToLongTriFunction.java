@@ -36,7 +36,7 @@ public interface ToLongTriFunction<A, B, C> extends Throwables.ToLongTriFunction
     /**
      * Applies this function to the given arguments and returns a long result.
      * 
-     * <p>Example usage:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ToLongTriFunction<Integer, Integer, Integer> multiplier = 
      *     (a, b, c) -> (long) a * b * c;
@@ -54,8 +54,7 @@ public interface ToLongTriFunction<A, B, C> extends Throwables.ToLongTriFunction
      * @param a the first function argument
      * @param b the second function argument
      * @param c the third function argument
-     * @return the function result as a primitive long
-     * @throws RuntimeException if any error occurs during function execution
+     * @return the function result as a primitive long if any error occurs during function execution
      */
     @Override
     long applyAsLong(A a, B b, C c);

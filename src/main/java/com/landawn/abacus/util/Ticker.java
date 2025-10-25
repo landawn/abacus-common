@@ -26,7 +26,7 @@ package com.landawn.abacus.util;
  * The values returned by {@link #read()} have no absolute meaning and can only be
  * interpreted relative to other values returned by the same ticker.</p>
  * 
- * <p><b>Usage example:</b></p>
+ * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * // Using the system ticker
  * Ticker ticker = Ticker.systemTicker();
@@ -79,7 +79,7 @@ public abstract class Ticker {
      * where actual elapsed time measurement is needed. The returned ticker is a singleton
      * instance that can be safely shared across multiple threads.</p>
      * 
-     * <p><b>Usage example:</b></p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Ticker ticker = Ticker.systemTicker();
      * long startTime = ticker.read();

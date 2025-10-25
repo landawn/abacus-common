@@ -46,7 +46,7 @@ public interface QuadFunction<A, B, C, D, R> extends Throwables.QuadFunction<A, 
      * produces a result of type R. The function should be deterministic, meaning
      * that for the same inputs, it should always produce the same output.
      *
-     * <p>Example usage:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * QuadFunction<Integer, Integer, Integer, Integer, Integer> sum4 = 
      *     (a, b, c, d) -> a + b + c + d;
@@ -66,7 +66,6 @@ public interface QuadFunction<A, B, C, D, R> extends Throwables.QuadFunction<A, 
      * @param c the third function argument
      * @param d the fourth function argument
      * @return the function result
-     * @throws RuntimeException if the function cannot compute a result
      */
     @Override
     R apply(A a, B b, C c, D d);
@@ -81,7 +80,7 @@ public interface QuadFunction<A, B, C, D, R> extends Throwables.QuadFunction<A, 
      * transformations together. The output of this function becomes the input to
      * the {@code after} function.
      *
-     * <p>Example usage:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * QuadFunction<Integer, Integer, Integer, Integer, Integer> sum4 = 
      *     (a, b, c, d) -> a + b + c + d;

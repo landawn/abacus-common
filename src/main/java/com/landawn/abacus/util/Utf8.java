@@ -34,7 +34,7 @@ import static java.lang.Character.MIN_SURROGATE;
  *   <li>More efficient than standard Java UTF-8 operations for validation and length calculation</li>
  * </ul>
  * 
- * <p>Example usage:</p>
+ * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * String text = "Hello 世界";
  * int utf8Length = Utf8.encodedLength(text); // More efficient than text.getBytes("UTF-8").length
@@ -65,7 +65,7 @@ public class Utf8 {
      *   <li>General Unicode including surrogate pairs</li>
      * </ul>
      * 
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String ascii = "Hello World";
      * int length1 = Utf8.encodedLength(ascii); // Returns 11 (1 byte per char)
@@ -149,7 +149,7 @@ public class Utf8 {
      * {@code Arrays.equals(bytes, new String(bytes, UTF_8).getBytes(UTF_8))} would return true,
      * but is more efficient in both time and space.</p>
      * 
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * byte[] validUtf8 = "Hello 世界".getBytes(StandardCharsets.UTF_8);
      * boolean valid1 = Utf8.isWellFormed(validUtf8); // Returns true
@@ -173,7 +173,7 @@ public class Utf8 {
      * Note that this can return {@code false} even when {@code isWellFormed(bytes)} 
      * would return {@code true} if the slice boundaries split a multi-byte character.</p>
      * 
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * byte[] buffer = new byte[1024];
      * int bytesRead = inputStream.read(buffer);

@@ -46,7 +46,7 @@ public class XMLGregorianCalendarType extends AbstractType<XMLGregorianCalendar>
      * {@link javax.xml.datatype.XMLGregorianCalendar} class that this type handles.
      * </p>
      *
-     * <pre>{@code
+     * <p><b>Usage Examples:</b></p>
      * XMLGregorianCalendarType type = new XMLGregorianCalendarType();
      * Class<XMLGregorianCalendar> clazz = type.clazz(); // Returns XMLGregorianCalendar.class
      * }</pre>
@@ -69,7 +69,7 @@ public class XMLGregorianCalendarType extends AbstractType<XMLGregorianCalendar>
      * </ul>
      * </p>
      *
-     * <pre>{@code
+     * <p><b>Usage Examples:</b></p>
      * XMLGregorianCalendar cal1 = type.valueOf("2023-10-15T10:30:00");
      * XMLGregorianCalendar cal2 = type.valueOf("SYS_TIME"); // Current time
      * }</pre>
@@ -91,7 +91,7 @@ public class XMLGregorianCalendarType extends AbstractType<XMLGregorianCalendar>
      * character array to a string and delegates to {@link #valueOf(String)}.
      * </p>
      *
-     * <pre>{@code
+     * <p><b>Usage Examples:</b></p>
      * char[] chars = "1697364600000".toCharArray();
      * XMLGregorianCalendar cal = type.valueOf(chars, 0, chars.length); // From epoch millis
      * }</pre>
@@ -126,7 +126,7 @@ public class XMLGregorianCalendarType extends AbstractType<XMLGregorianCalendar>
      * If the input is null, this method returns null.
      * </p>
      *
-     * <pre>{@code
+     * <p><b>Usage Examples:</b></p>
      * XMLGregorianCalendar cal = Dates.currentXMLGregorianCalendar();
      * String str = type.stringOf(cal); // Returns formatted date/time string
      * }</pre>
@@ -146,7 +146,7 @@ public class XMLGregorianCalendarType extends AbstractType<XMLGregorianCalendar>
      * XMLGregorianCalendar using the Dates utility.
      * </p>
      *
-     * <pre>{@code
+     * <p><b>Usage Examples:</b></p>
      * XMLGregorianCalendar cal = type.get(resultSet, 1);
      * // Retrieves timestamp from first column as XMLGregorianCalendar
      * }</pre>
@@ -169,7 +169,7 @@ public class XMLGregorianCalendarType extends AbstractType<XMLGregorianCalendar>
      * XMLGregorianCalendar using the Dates utility.
      * </p>
      *
-     * <pre>{@code
+     * <p><b>Usage Examples:</b></p>
      * XMLGregorianCalendar cal = type.get(resultSet, "created_date");
      * // Retrieves timestamp from 'created_date' column
      * }</pre>
@@ -192,7 +192,7 @@ public class XMLGregorianCalendarType extends AbstractType<XMLGregorianCalendar>
      * PreparedStatement. If the XMLGregorianCalendar is null, a NULL value is set.
      * </p>
      *
-     * <pre>{@code
+     * <p><b>Usage Examples:</b></p>
      * XMLGregorianCalendar cal = Dates.currentXMLGregorianCalendar();
      * type.set(preparedStatement, 1, cal); // Sets timestamp at first parameter
      * }</pre>
@@ -214,7 +214,7 @@ public class XMLGregorianCalendarType extends AbstractType<XMLGregorianCalendar>
      * CallableStatement. If the XMLGregorianCalendar is null, a NULL value is set.
      * </p>
      *
-     * <pre>{@code
+     * <p><b>Usage Examples:</b></p>
      * XMLGregorianCalendar cal = Dates.currentXMLGregorianCalendar();
      * type.set(callableStatement, "created_date", cal); // Sets timestamp parameter
      * }</pre>
@@ -236,7 +236,7 @@ public class XMLGregorianCalendarType extends AbstractType<XMLGregorianCalendar>
      * If the XMLGregorianCalendar is null, it appends the string "null".
      * </p>
      *
-     * <pre>{@code
+     * <p><b>Usage Examples:</b></p>
      * StringBuilder sb = new StringBuilder();
      * type.appendTo(sb, xmlGregorianCalendar); // Appends formatted date/time
      * }</pre>
@@ -267,6 +267,7 @@ public class XMLGregorianCalendarType extends AbstractType<XMLGregorianCalendar>
      * The output may be quoted based on the configuration settings.
      * </p>
      *
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * CharacterWriter writer = new CharacterWriter();
      * JSONXMLSerializationConfig<?> config = JSONXMLSerializationConfig.of();

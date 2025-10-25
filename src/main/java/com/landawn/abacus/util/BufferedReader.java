@@ -32,7 +32,7 @@ import com.landawn.abacus.annotation.SuppressFBWarnings;
  * <p><b>Important:</b> This class is not thread-safe. If multiple threads access
  * an instance concurrently, external synchronization is required.</p>
  * 
- * <p>Example usage:</p>
+ * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * // Reading from a string
  * BufferedReader reader = new BufferedReader("Hello\nWorld");
@@ -77,7 +77,7 @@ final class BufferedReader extends java.io.BufferedReader { // NOSONAR
      * <p>This constructor initializes the reader to read characters directly
      * from the provided string without any underlying stream.</p>
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * BufferedReader reader = new BufferedReader("Line 1\nLine 2\nLine 3");
      * while (true) {
@@ -100,7 +100,7 @@ final class BufferedReader extends java.io.BufferedReader { // NOSONAR
      * <p>The stream is wrapped with an InputStreamReader using the default
      * character encoding.</p>
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * BufferedReader reader = new BufferedReader(System.in);
      * System.out.print("Enter text: ");
@@ -116,7 +116,7 @@ final class BufferedReader extends java.io.BufferedReader { // NOSONAR
     /**
      * Creates a BufferedReader that reads from the specified Reader.
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * FileReader fileReader = new FileReader("data.txt");
      * BufferedReader reader = new BufferedReader(fileReader);
@@ -138,7 +138,7 @@ final class BufferedReader extends java.io.BufferedReader { // NOSONAR
      * the end of the stream has been reached. Line terminators are processed
      * according to the reader's configuration.</p>
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * BufferedReader reader = new BufferedReader("ABC");
      * int ch1 = reader.read(); // 65 ('A')
@@ -241,7 +241,7 @@ final class BufferedReader extends java.io.BufferedReader { // NOSONAR
      * <p>This method attempts to read up to {@code len} characters from the input,
      * storing them into the array {@code cbuf} starting at offset {@code off}.</p>
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * BufferedReader reader = new BufferedReader("Hello World");
      * char[] buffer = new char[5];
@@ -389,7 +389,7 @@ final class BufferedReader extends java.io.BufferedReader { // NOSONAR
      * a carriage return ('\r'), or a carriage return followed immediately by a
      * line feed. The line terminator is not included in the returned string.</p>
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * BufferedReader reader = new BufferedReader("Line 1\r\nLine 2\nLine 3");
      * System.out.println(reader.readLine()); // "Line 1"
@@ -425,7 +425,7 @@ final class BufferedReader extends java.io.BufferedReader { // NOSONAR
      * <p>This method will skip as many characters as possible up to the
      * specified number, and returns the actual number of characters skipped.</p>
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * BufferedReader reader = new BufferedReader("1234567890");
      * long skipped = reader.skip(5);
@@ -496,7 +496,7 @@ final class BufferedReader extends java.io.BufferedReader { // NOSONAR
      * <p>A stream is ready if the buffer contains data or if the underlying
      * stream is ready.</p>
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * BufferedReader reader = new BufferedReader("Hello");
      * if (reader.ready()) {
@@ -545,7 +545,7 @@ final class BufferedReader extends java.io.BufferedReader { // NOSONAR
      * invocations will throw an IOException. Closing a previously closed
      * stream has no effect.</p>
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * BufferedReader reader = new BufferedReader(new FileInputStream("file.txt"));
      * try {
@@ -581,7 +581,7 @@ final class BufferedReader extends java.io.BufferedReader { // NOSONAR
      * reading different strings, which can be more efficient than creating
      * new instances.</p>
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * BufferedReader reader = new BufferedReader("First");
      * System.out.println(reader.readLine()); // "First"

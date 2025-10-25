@@ -41,14 +41,14 @@ import java.security.NoSuchAlgorithmException;
  * 
  * <p>Note: This implementation is based on Apache Commons Codec.</p>
  * 
- * <p>Example usage:</p>
- * <pre>
+ * <p><b>Usage Examples:</b></p>
+ * <pre>{@code
  * // Generate MD5 hash of a string
  * String hash = DigestUtil.md5Hex("Hello World");
  * 
  * // Generate SHA-256 hash of a file
  * byte[] digest = DigestUtil.sha256(new File("document.pdf"));
- * </pre>
+ * }</pre>
  * 
  * @see MessageDigestAlgorithms
  */
@@ -65,12 +65,12 @@ public class DigestUtil {
      * This is a convenience method that directly computes and returns the final digest hash.
      * The MessageDigest is reset after this operation.
      *
-     * <p>Example:</p>
-     * <pre>
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
      * MessageDigest md = DigestUtil.getMd5Digest();
      * byte[] hash = DigestUtil.digest(md, "test".getBytes());
      * // hash contains the 16-byte MD5 digest
-     * </pre>
+     * }</pre>
      *
      * @param messageDigest The MessageDigest algorithm to use (must not be {@code null})
      * @param data The byte array to digest (must not be {@code null})
@@ -88,12 +88,12 @@ public class DigestUtil {
      * The ByteBuffer's position will be advanced to its limit after this operation.
      * All bytes from the current position to the limit are included in the digest calculation.
      *
-     * <p>Example:</p>
-     * <pre>
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
      * ByteBuffer buffer = ByteBuffer.wrap("Hello".getBytes());
      * byte[] hash = DigestUtil.digest(DigestUtil.getSha1Digest(), buffer);
      * // buffer.position() is now equal to buffer.limit()
-     * </pre>
+     * }</pre>
      *
      * @param messageDigest The MessageDigest algorithm to use (must not be {@code null})
      * @param data The ByteBuffer containing data to digest (must not be {@code null})
@@ -112,12 +112,12 @@ public class DigestUtil {
      * The file is read using a buffered input stream for efficiency (1024-byte buffer).
      * The entire file content is processed regardless of size.
      *
-     * <p>Example:</p>
-     * <pre>
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
      * File file = new File("document.txt");
      * byte[] hash = DigestUtil.digest(DigestUtil.getSha256Digest(), file);
      * // Produces a 32-byte SHA-256 hash of the file contents
-     * </pre>
+     * }</pre>
      *
      * @param messageDigest The MessageDigest algorithm to use (must not be {@code null})
      * @param data The File to read and digest (must exist and be readable)
@@ -137,13 +137,13 @@ public class DigestUtil {
      * The stream is read completely until EOF but is NOT closed by this method.
      * It is the caller's responsibility to close the stream.
      *
-     * <p>Example:</p>
-     * <pre>
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
      * try (InputStream is = new FileInputStream("data.bin")) {
      *     byte[] hash = DigestUtil.digest(DigestUtil.getMd5Digest(), is);
      *     // Stream is still open here, closed by try-with-resources
      * }
-     * </pre>
+     * }</pre>
      *
      * @param messageDigest The MessageDigest algorithm to use (must not be {@code null})
      * @param data The InputStream to read and digest (must not be {@code null})
@@ -163,12 +163,12 @@ public class DigestUtil {
      * the file is opened with default read options). The file stream is automatically closed
      * after reading.
      *
-     * <p>Example:</p>
-     * <pre>
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
      * Path path = Paths.get("data.txt");
      * byte[] hash = DigestUtil.digest(DigestUtil.getSha512Digest(), path, StandardOpenOption.READ);
      * // Or simply: DigestUtil.digest(DigestUtil.getSha512Digest(), path)
-     * </pre>
+     * }</pre>
      *
      * @param messageDigest The MessageDigest algorithm to use (must not be {@code null})
      * @param data The Path to the file to digest (must not be {@code null})
@@ -190,12 +190,12 @@ public class DigestUtil {
      * The RandomAccessFile is read from its current position to the end.
      * The file position is modified during reading.
      *
-     * <p>Example:</p>
-     * <pre>
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
      * try (RandomAccessFile raf = new RandomAccessFile("large.dat", "r")) {
      *     byte[] hash = DigestUtil.digest(DigestUtil.getSha256Digest(), raf);
      * }
-     * </pre>
+     * }</pre>
      *
      * @param messageDigest The MessageDigest algorithm to use (must not be {@code null})
      * @param data The RandomAccessFile to read and digest (must not be {@code null})
@@ -214,11 +214,11 @@ public class DigestUtil {
      * This method wraps the checked NoSuchAlgorithmException in an unchecked IllegalArgumentException,
      * making it more convenient to use when you know the algorithm is available.
      *
-     * <p>Example:</p>
-     * <pre>
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
      * MessageDigest md = DigestUtil.getDigest("SHA-512");
      * byte[] hash = md.digest("data".getBytes());
-     * </pre>
+     * }</pre>
      *
      * @param algorithm The name of the algorithm (e.g., "MD5", "SHA-256", "SHA-512").
      *                  See Java Cryptography Architecture documentation for standard algorithm names.
@@ -243,12 +243,12 @@ public class DigestUtil {
      * the algorithm is not available. This method provides a safe fallback mechanism and
      * never throws an exception.
      *
-     * <p>Example:</p>
-     * <pre>
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
      * MessageDigest fallback = DigestUtil.getSha256Digest();
      * MessageDigest md = DigestUtil.getDigest("SHA3-256", fallback);
      * // Returns SHA3-256 if available (Java 9+), otherwise SHA-256
-     * </pre>
+     * }</pre>
      *
      * @param algorithm The name of the algorithm to attempt (e.g., "SHA3-512", "BLAKE2b").
      *                  Can be {@code null}, in which case the default is returned.
@@ -286,11 +286,11 @@ public class DigestUtil {
      * It should NOT be used for any security purposes or new applications.
      * This method is provided only for compatibility with legacy systems.</p>
      *
-     * <p>Example:</p>
-     * <pre>
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
      * MessageDigest md2 = DigestUtil.getMd2Digest();
      * byte[] hash = md2.digest("legacy data".getBytes());
-     * </pre>
+     * }</pre>
      *
      * @return A new MD2 MessageDigest instance
      * @throws IllegalArgumentException If MD2 is not available (may occur in modern JVMs
@@ -313,11 +313,11 @@ public class DigestUtil {
      * file integrity verification, or hash-based data structures where collision resistance
      * is not critical.</p>
      *
-     * <p>Example:</p>
-     * <pre>
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
      * MessageDigest md5 = DigestUtil.getMd5Digest();
      * byte[] checksum = md5.digest(fileData);
-     * </pre>
+     * }</pre>
      *
      * @return A new MD5 MessageDigest instance
      * @throws IllegalArgumentException If MD5 is not available (should not happen with standard JRE)
@@ -337,11 +337,11 @@ public class DigestUtil {
      * or other security-critical applications. Consider using SHA-256 or SHA-512 instead.
      * SHA-1 may still be acceptable for HMAC and non-security purposes.</p>
      *
-     * <p>Example:</p>
-     * <pre>
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
      * MessageDigest sha1 = DigestUtil.getSha1Digest();
      * byte[] hash = sha1.digest(data);
-     * </pre>
+     * }</pre>
      *
      * @return A new SHA-1 MessageDigest instance (produces 20-byte/160-bit hashes)
      * @throws IllegalArgumentException If SHA-1 is not available (should not happen with standard JRE)
@@ -361,11 +361,11 @@ public class DigestUtil {
      * recommended for most cryptographic purposes including digital signatures, certificates,
      * and data integrity verification. It provides a good balance between security and performance.</p>
      *
-     * <p>Example:</p>
-     * <pre>
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
      * MessageDigest sha256 = DigestUtil.getSha256Digest();
      * byte[] secureHash = sha256.digest(sensitiveData);
-     * </pre>
+     * }</pre>
      *
      * @return A new SHA-256 MessageDigest instance (produces 32-byte/256-bit hashes)
      * @throws IllegalArgumentException If SHA-256 is not available (should not happen with standard JRE)
@@ -384,11 +384,11 @@ public class DigestUtil {
      * It uses a different internal structure (sponge construction) compared to SHA-2, providing
      * an alternative security approach. SHA3-224 produces a 224-bit hash output.</p>
      *
-     * <p>Example:</p>
-     * <pre>
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
      * MessageDigest sha3 = DigestUtil.getSha3_224Digest();
      * byte[] hash = sha3.digest(data);
-     * </pre>
+     * }</pre>
      *
      * @return A new SHA3-224 MessageDigest instance (produces 28-byte/224-bit hashes)
      * @throws IllegalArgumentException If SHA3-224 is not available (requires Java 9 or later)
@@ -409,11 +409,11 @@ public class DigestUtil {
      * level to SHA-256 but with different mathematical foundations, providing diversity in
      * cryptographic primitives.</p>
      *
-     * <p>Example:</p>
-     * <pre>
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
      * MessageDigest sha3 = DigestUtil.getSha3_256Digest();
      * byte[] hash = sha3.digest(message.getBytes());
-     * </pre>
+     * }</pre>
      *
      * @return A new SHA3-256 MessageDigest instance (produces 32-byte/256-bit hashes)
      * @throws IllegalArgumentException If SHA3-256 is not available (requires Java 9 or later)
@@ -432,11 +432,11 @@ public class DigestUtil {
      * <p>SHA3-384 is part of the SHA-3 family and provides higher security strength than
      * SHA3-256. It is suitable for applications requiring enhanced security margins.</p>
      *
-     * <p>Example:</p>
-     * <pre>
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
      * MessageDigest sha3 = DigestUtil.getSha3_384Digest();
      * byte[] hash = sha3.digest(data);
-     * </pre>
+     * }</pre>
      *
      * @return A new SHA3-384 MessageDigest instance (produces 48-byte/384-bit hashes)
      * @throws IllegalArgumentException If SHA3-384 is not available (requires Java 9 or later)
@@ -456,11 +456,11 @@ public class DigestUtil {
      * It offers maximum collision resistance and is suitable for applications requiring the
      * highest level of security assurance.</p>
      *
-     * <p>Example:</p>
-     * <pre>
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
      * MessageDigest sha3 = DigestUtil.getSha3_512Digest();
      * byte[] hash = sha3.digest(criticalData);
-     * </pre>
+     * }</pre>
      *
      * @return A new SHA3-512 MessageDigest instance (produces 64-byte/512-bit hashes)
      * @throws IllegalArgumentException If SHA3-512 is not available (requires Java 9 or later)
@@ -481,11 +481,11 @@ public class DigestUtil {
      * while producing smaller output than SHA-512. Suitable for applications requiring enhanced
      * security margins.</p>
      *
-     * <p>Example:</p>
-     * <pre>
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
      * MessageDigest sha384 = DigestUtil.getSha384Digest();
      * byte[] hash = sha384.digest(data);
-     * </pre>
+     * }</pre>
      *
      * @return A new SHA-384 MessageDigest instance (produces 48-byte/384-bit hashes)
      * @throws IllegalArgumentException If SHA-384 is not available (should not happen with standard JRE)
@@ -505,11 +505,11 @@ public class DigestUtil {
      * a smaller hash output. This can be more efficient on 64-bit platforms compared to
      * SHA-224.</p>
      *
-     * <p>Example:</p>
-     * <pre>
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
      * MessageDigest digest = DigestUtil.getSha512_224Digest();
      * byte[] hash = digest.digest(data);
-     * </pre>
+     * }</pre>
      *
      * @return A new SHA-512/224 MessageDigest instance (produces 28-byte/224-bit hashes)
      * @throws IllegalArgumentException If SHA-512/224 is not available (requires Java 9 or later)
@@ -529,11 +529,11 @@ public class DigestUtil {
      * output size as SHA-256. It can offer better performance on 64-bit systems compared
      * to SHA-256 due to its use of 64-bit operations.</p>
      *
-     * <p>Example:</p>
-     * <pre>
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
      * MessageDigest digest = DigestUtil.getSha512_256Digest();
      * byte[] hash = digest.digest(data);
-     * </pre>
+     * }</pre>
      *
      * @return A new SHA-512/256 MessageDigest instance (produces 32-byte/256-bit hashes)
      * @throws IllegalArgumentException If SHA-512/256 is not available (requires Java 9 or later)
@@ -553,11 +553,11 @@ public class DigestUtil {
      * assurance and is more efficient on 64-bit platforms due to its use of 64-bit
      * operations. Widely used in security-critical applications.</p>
      *
-     * <p>Example:</p>
-     * <pre>
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
      * MessageDigest sha512 = DigestUtil.getSha512Digest();
      * byte[] hash = sha512.digest(criticalData);
-     * </pre>
+     * }</pre>
      *
      * @return A new SHA-512 MessageDigest instance (produces 64-byte/512-bit hashes)
      * @throws IllegalArgumentException If SHA-512 is not available (should not happen with standard JRE)
@@ -586,8 +586,8 @@ public class DigestUtil {
      * This method is useful for checking algorithm availability before attempting to use it,
      * allowing for graceful fallback to alternative algorithms.
      *
-     * <p>Example:</p>
-     * <pre>
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
      * if (DigestUtil.isAvailable("SHA3-256")) {
      *     // Use SHA3-256 (available in Java 9+)
      *     return DigestUtil.getSha3_256Digest();
@@ -595,7 +595,7 @@ public class DigestUtil {
      *     // Fall back to SHA-256
      *     return DigestUtil.getSha256Digest();
      * }
-     * </pre>
+     * }</pre>
      *
      * @param messageDigestAlgorithm The algorithm name to test (e.g., "SHA-256", "SHA3-512", "BLAKE2b").
      *                               Can be {@code null}, which will return {@code false}.
@@ -613,10 +613,10 @@ public class DigestUtil {
      *
      * <p><strong>WARNING:</strong> MD2 is cryptographically broken. Use only for legacy compatibility.</p>
      *
-     * <p>Example:</p>
-     * <pre>
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
      * byte[] hash = DigestUtil.md2("Hello".getBytes());
-     * </pre>
+     * }</pre>
      *
      * @param data The data to digest (must not be {@code null})
      * @return MD2 digest as a 16-byte array
@@ -663,11 +663,11 @@ public class DigestUtil {
      *
      * <p><strong>WARNING:</strong> MD2 is cryptographically broken. Use only for legacy compatibility.</p>
      *
-     * <p>Example:</p>
-     * <pre>
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
      * String hash = DigestUtil.md2Hex("password".getBytes());
      * // Returns something like "f03881a88c6e39135f0ecc60efd609b9"
-     * </pre>
+     * }</pre>
      *
      * @param data The data to digest (must not be {@code null})
      * @return MD2 digest as a 32-character lowercase hexadecimal string
@@ -715,10 +715,10 @@ public class DigestUtil {
      * <p><strong>WARNING:</strong> MD5 is cryptographically broken. Do NOT use for security purposes.
      * Acceptable only for checksums and non-cryptographic uses.</p>
      *
-     * <p>Example:</p>
-     * <pre>
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
      * byte[] checksum = DigestUtil.md5(fileBytes);
-     * </pre>
+     * }</pre>
      *
      * @param data The data to digest (must not be {@code null})
      * @return MD5 digest as a 16-byte array
@@ -762,11 +762,11 @@ public class DigestUtil {
      *
      * <p><strong>WARNING:</strong> MD5 is cryptographically broken. Do NOT use for security purposes.</p>
      *
-     * <p>Example:</p>
-     * <pre>
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
      * String checksum = DigestUtil.md5Hex("Hello World".getBytes());
      * // Returns "b10a8db164e0754105b7a99be72e3fe5"
-     * </pre>
+     * }</pre>
      *
      * @param data The data to digest (must not be {@code null})
      * @return MD5 digest as a 32-character lowercase hexadecimal string
@@ -797,10 +797,10 @@ public class DigestUtil {
      *
      * <p><strong>WARNING:</strong> MD5 is cryptographically broken. Do NOT use for security purposes.</p>
      *
-     * <p>Example:</p>
-     * <pre>
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
      * String hash = DigestUtil.md5Hex("test@example.com");
-     * </pre>
+     * }</pre>
      *
      * @param data The string to digest (must not be {@code null})
      * @return MD5 digest as a 32-character lowercase hexadecimal string
@@ -925,10 +925,10 @@ public class DigestUtil {
      * Calculates the SHA-256 digest of the input data and returns it as a 32-byte array.
      * SHA-256 is recommended for general cryptographic use.
      *
-     * <p>Example:</p>
-     * <pre>
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
      * byte[] secureHash = DigestUtil.sha256(sensitiveData);
-     * </pre>
+     * }</pre>
      *
      * @param data The data to digest
      * @return SHA-256 digest as a 32-byte array
@@ -969,10 +969,10 @@ public class DigestUtil {
      * Calculates the SHA-256 digest and returns it as a 64-character hexadecimal string.
      * This is commonly used for password hashing (with salt) and data integrity verification.
      *
-     * <p>Example:</p>
-     * <pre>
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
      * String hash = DigestUtil.sha256Hex("password" + salt);
-     * </pre>
+     * }</pre>
      *
      * @param data The data to digest
      * @return SHA-256 digest as a hex string
@@ -1572,10 +1572,10 @@ public class DigestUtil {
     /**
      * Calculates the SHA-512 digest and returns it as a 128-character hexadecimal string.
      *
-     * <p>Example:</p>
-     * <pre>
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
      * String hash = DigestUtil.sha512Hex("critical data".getBytes());
-     * </pre>
+     * }</pre>
      *
      * @param data The data to digest
      * @return SHA-512 digest as a hex string
@@ -1654,13 +1654,13 @@ public class DigestUtil {
      * Updates the given MessageDigest with the specified byte array data.
      * This method is useful when computing digests incrementally.
      *
-     * <p>Example:</p>
-     * <pre>
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
      * MessageDigest md = DigestUtil.getSha256Digest();
      * DigestUtil.updateDigest(md, part1);
      * DigestUtil.updateDigest(md, part2);
      * byte[] finalHash = md.digest();
-     * </pre>
+     * }</pre>
      *
      * @param messageDigest The MessageDigest to update
      * @param valueToDigest The byte array to add to the digest
@@ -1730,14 +1730,14 @@ public class DigestUtil {
      * The stream is read completely but not closed. This method uses a buffer
      * for efficient reading of large streams.
      *
-     * <p>Example:</p>
-     * <pre>
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
      * MessageDigest md = DigestUtil.getMd5Digest();
      * try (InputStream is = new FileInputStream("large.dat")) {
      *     DigestUtil.updateDigest(md, is);
      * }
      * byte[] hash = md.digest();
-     * </pre>
+     * }</pre>
      *
      * @param digest The MessageDigest to update
      * @param inputStream The InputStream to read
@@ -1795,13 +1795,13 @@ public class DigestUtil {
      * Updates the given MessageDigest with a string value (converted to UTF-8 bytes).
      * This is a convenience method for updating a digest with text data.
      *
-     * <p>Example:</p>
-     * <pre>
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
      * MessageDigest md = DigestUtil.getSha256Digest();
      * DigestUtil.updateDigest(md, "Hello ");
      * DigestUtil.updateDigest(md, "World");
      * String hash = Hex.encodeToString(md.digest());
-     * </pre>
+     * }</pre>
      *
      * @param messageDigest The MessageDigest to update
      * @param valueToDigest The string value to add to the digest
@@ -1923,14 +1923,14 @@ public class DigestUtil {
          * Returns an array containing all MessageDigest algorithm constants defined in this class.
          * This can be useful for testing algorithm availability or iterating through algorithms.
          *
-         * <p>Example:</p>
-         * <pre>
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
          * for (String algorithm : MessageDigestAlgorithms.values()) {
          *     if (DigestUtil.isAvailable(algorithm)) {
          *         System.out.println(algorithm + " is available");
          *     }
          * }
-         * </pre>
+         * }</pre>
          *
          * @return An array of all algorithm name constants
          * 

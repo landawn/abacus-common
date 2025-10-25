@@ -378,10 +378,7 @@ public class Stream200Test extends TestBase {
     public void testFlatmapToEntryFromMap() {
         Map<String, Integer> map1 = N.asMap("a", 1, "b", 2);
         Map<String, Integer> map2 = N.asMap("c", 3);
-        List<Map.Entry<String, Integer>> result = Stream.of(map1, map2)
-                .flatmapToEntry(Fn.identity())
-                .sortedByKey(Comparator.naturalOrder())
-                .toList();
+        List<Map.Entry<String, Integer>> result = Stream.of(map1, map2).flatmapToEntry(Fn.identity()).sortedByKey(Comparator.naturalOrder()).toList();
         assertEquals(Arrays.asList(N.newEntry("a", 1), N.newEntry("b", 2), N.newEntry("c", 3)), result);
     }
 
@@ -402,9 +399,7 @@ public class Stream200Test extends TestBase {
 
     @Test
     public void testFlatmapIfNotNullSingleMapper() {
-        List<Integer> result = Stream.of(Arrays.asList(1, 2), null, Arrays.asList(3, 4))
-                .flatmapIfNotNull(c -> c)
-                .toList();
+        List<Integer> result = Stream.of(Arrays.asList(1, 2), null, Arrays.asList(3, 4)).flatmapIfNotNull(c -> c).toList();
         assertEquals(Arrays.asList(1, 2, 3, 4), result);
     }
 
@@ -412,9 +407,7 @@ public class Stream200Test extends TestBase {
     public void testFlatmapIfNotNullTwoMappers() {
         List<String> data = Arrays.asList("1,2", null, "3,4");
         List<Integer> result = Stream.of(data, null, Arrays.asList("5,6"))
-                .flatmapIfNotNull(list -> list,
-                        (String str) -> str == null ? null : Stream.of(str.split(",")).map(Integer::parseInt).toList()
-                )
+                .flatmapIfNotNull(list -> list, (String str) -> str == null ? null : Stream.of(str.split(",")).map(Integer::parseInt).toList())
                 .toList();
         assertEquals(Arrays.asList(1, 2, 3, 4, 5, 6), result);
     }
@@ -502,9 +495,7 @@ public class Stream200Test extends TestBase {
     @Test
     public void testGroupByWithKeyMapperValueMapperAndMergeFunction() {
         Map<Character, String> result = Stream.of("apple", "apricot", "banana", "blueberry", "avocado")
-                .groupBy(s -> s.charAt(0),
-                        s -> s.substring(0, Math.min(s.length(), 3)),
-                        (v1, v2) -> v1 + ";" + v2)
+                .groupBy(s -> s.charAt(0), s -> s.substring(0, Math.min(s.length(), 3)), (v1, v2) -> v1 + ";" + v2)
                 .toMap(Map.Entry::getKey, Map.Entry::getValue);
 
         assertEquals("app;apr;avo", result.get('a'));
@@ -523,11 +514,7 @@ public class Stream200Test extends TestBase {
     @Test
     public void testGroupByToEntryWithKeyMapperValueMapperCollectorAndMapFactory() {
         Map<Character, String> result = Stream.of("apple", "apricot", "banana", "blueberry", "avocado")
-                .groupByToEntry(s -> s.charAt(0),
-                        s -> String.valueOf(s.length()),
-                        Collectors.joining(",", "[", "]"),
-                        TreeMap::new
-                )
+                .groupByToEntry(s -> s.charAt(0), s -> String.valueOf(s.length()), Collectors.joining(",", "[", "]"), TreeMap::new)
                 .toMap();
 
         assertEquals("[5,7,7]", result.get('a'));
@@ -591,17 +578,13 @@ public class Stream200Test extends TestBase {
 
     @Test
     public void testCollapseBiPredicateAndMerger() {
-        List<Integer> result = Stream.of(1, 1, 2, 3, 3, 1, 2)
-                .collapse((p, c) -> p.equals(c), (r, c) -> r + c)
-                .toList();
+        List<Integer> result = Stream.of(1, 1, 2, 3, 3, 1, 2).collapse((p, c) -> p.equals(c), (r, c) -> r + c).toList();
         assertEquals(Arrays.asList(2, 2, 6, 1, 2), result);
     }
 
     @Test
     public void testCollapseWithCollector() {
-        List<Long> result = Stream.of(1, 2, 2, 3, 3, 3, 4)
-                .collapse((prev, curr) -> prev.equals(curr), Collectors.counting())
-                .toList();
+        List<Long> result = Stream.of(1, 2, 2, 3, 3, 3, 4).collapse((prev, curr) -> prev.equals(curr), Collectors.counting()).toList();
         assertEquals(Arrays.asList(1L, 2L, 3L, 1L), result);
     }
 
@@ -661,20 +644,15 @@ public class Stream200Test extends TestBase {
 
     @Test
     public void testSplitByChunkSizeAndCollector() {
-        List<Long> result = Stream.of(1, 2, 3, 4, 5)
-                .split(2, Collectors.summingInt(x -> x))
-                .map(Integer::longValue)
-                .toList();
+        List<Long> result = Stream.of(1, 2, 3, 4, 5).split(2, Collectors.summingInt(x -> x)).map(Integer::longValue).toList();
         assertEquals(Arrays.asList(3L, 7L, 5L), result);
     }
 
     @Test
     public void testSplitByPredicate() {
-        List<List<Integer>> result = Stream.of(1, 2, 0, 3, 4, 0, 5)
-                .split(x -> x == 0)
-                .toList();
-        assertEquals(Arrays.asList(Arrays.asList(1, 2), Collections.singletonList(0),
-                Arrays.asList(3, 4), Collections.singletonList(0), Collections.singletonList(5)), result);
+        List<List<Integer>> result = Stream.of(1, 2, 0, 3, 4, 0, 5).split(x -> x == 0).toList();
+        assertEquals(Arrays.asList(Arrays.asList(1, 2), Collections.singletonList(0), Arrays.asList(3, 4), Collections.singletonList(0),
+                Collections.singletonList(5)), result);
 
         result = Stream.of(0, 1, 2, 0, 3, 4, 0).split(x -> x == 0).toList();
         assertEquals(Arrays.asList(Collections.singletonList(0), Arrays.asList(1, 2), Collections.singletonList(0), Arrays.asList(3, 4),
@@ -701,10 +679,7 @@ public class Stream200Test extends TestBase {
 
     @Test
     public void testSplitAtPositionWithCollector() {
-        List<Long> result = Stream.of(1, 2, 3, 4, 5)
-                .splitAt(2, Collectors.summingInt(ToIntFunction.UNBOX))
-                .map(Integer::longValue)
-                .toList();
+        List<Long> result = Stream.of(1, 2, 3, 4, 5).splitAt(2, Collectors.summingInt(ToIntFunction.UNBOX)).map(Integer::longValue).toList();
         assertEquals(N.asList(3L, 12L), result);
     }
 
@@ -870,9 +845,7 @@ public class Stream200Test extends TestBase {
 
     @Test
     public void testDistinctByFunction() {
-        List<String> result = Stream.of("apple", "apricot", "banana", "blueberry", "Apple")
-                .distinctBy(s -> s.toLowerCase().charAt(0))
-                .toList();
+        List<String> result = Stream.of("apple", "apricot", "banana", "blueberry", "Apple").distinctBy(s -> s.toLowerCase().charAt(0)).toList();
         assertEquals(2, result.size());
         assertTrue(result.stream().anyMatch(s -> s.toLowerCase().startsWith("a")));
         assertTrue(result.stream().anyMatch(s -> s.toLowerCase().startsWith("b")));
@@ -1161,8 +1134,7 @@ public class Stream200Test extends TestBase {
     @Test
     public void testFlatGroupToWithDownstreamCollector() {
         Map<Character, Long> map = Stream.of("apple", "apricot", "banana")
-                .flatGroupTo(s -> Stream.of(s.toCharArray()).map(c -> (Character) c).toList(),
-                        Collectors.counting());
+                .flatGroupTo(s -> Stream.of(s.toCharArray()).map(c -> (Character) c).toList(), Collectors.counting());
 
         assertEquals(Long.valueOf(5), map.get('a'));
         assertEquals(Long.valueOf(3), map.get('p'));
@@ -1449,9 +1421,7 @@ public class Stream200Test extends TestBase {
 
     @Test
     public void testDifference() {
-        List<String> result = Stream.of("a", "b", "a", "c", "d")
-                .difference(Fn.identity(), Arrays.asList("a", "c", "e"))
-                .toList();
+        List<String> result = Stream.of("a", "b", "a", "c", "d").difference(Fn.identity(), Arrays.asList("a", "c", "e")).toList();
         assertEquals(Arrays.asList("b", "a", "d"), result);
     }
 
@@ -1833,15 +1803,18 @@ public class Stream200Test extends TestBase {
         Iterator<Integer> iterA = Arrays.asList(1, 2, 3, 4).iterator();
         Iterator<String> iterB = Arrays.asList("a", "b", "c").iterator();
 
-        List<Pair<Integer, String>> result = Stream.parallelZipIterators(Arrays.asList(iterA, iterB),
-                (List<Object> list) -> Pair.of((Integer) list.get(0), (String) list.get(1)), 2).toList();
+        List<Pair<Integer, String>> result = Stream
+                .parallelZipIterators(Arrays.asList(iterA, iterB), (List<Object> list) -> Pair.of((Integer) list.get(0), (String) list.get(1)), 2)
+                .toList();
 
         assertTrue(N.isEqualCollection(Arrays.asList(Pair.of(1, "a"), Pair.of(2, "b"), Pair.of(3, "c")), result));
 
         Iterator<Integer> iterA2 = Arrays.asList(1, 2, 3, 4).iterator();
         Iterator<String> iterB2 = Arrays.asList("a", "b", "c").iterator();
-        List<Pair<Integer, String>> resultWithDefaults = Stream.parallelZipIterators(Arrays.asList(iterA2, iterB2), Arrays.asList(0, "defaultVal"),
-                (List<Object> list) -> Pair.of((Integer) list.get(0), (String) list.get(1)), 2).toList();
+        List<Pair<Integer, String>> resultWithDefaults = Stream
+                .parallelZipIterators(Arrays.asList(iterA2, iterB2), Arrays.asList(0, "defaultVal"),
+                        (List<Object> list) -> Pair.of((Integer) list.get(0), (String) list.get(1)), 2)
+                .toList();
         assertTrue(N.isEqualCollection(Arrays.asList(Pair.of(1, "a"), Pair.of(2, "b"), Pair.of(3, "c"), Pair.of(4, "defaultVal")), resultWithDefaults));
     }
 
@@ -1887,8 +1860,7 @@ public class Stream200Test extends TestBase {
 
         List<Stream<Integer>> streams = Arrays.asList(s1, s2, s3, s4);
 
-        List<Integer> result = Stream.parallelMerge(streams, (e1, e2) -> e1 <= e2 ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND, 2)
-                .toList();
+        List<Integer> result = Stream.parallelMerge(streams, (e1, e2) -> e1 <= e2 ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND, 2).toList();
 
         List<Integer> expected = IntStream.rangeClosed(1, 12).boxed().toList();
         assertEquals(expected, result);

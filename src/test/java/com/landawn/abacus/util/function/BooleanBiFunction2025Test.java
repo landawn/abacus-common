@@ -20,7 +20,7 @@ public class BooleanBiFunction2025Test extends TestBase {
         BooleanBiFunction<String> chainedFunction = function.andThen(doubleIt).andThen(toString);
         String result = chainedFunction.apply(true, false);
 
-        assertEquals("2", result);  // (1 + 0) * 2 = 2
+        assertEquals("2", result); // (1 + 0) * 2 = 2
     }
 
     @Test
@@ -69,8 +69,7 @@ public class BooleanBiFunction2025Test extends TestBase {
 
     @Test
     public void testLogicalOperations() {
-        BooleanBiFunction<String> function = (t, u) ->
-            String.format("AND=%b, OR=%b, XOR=%b", t && u, t || u, t != u);
+        BooleanBiFunction<String> function = (t, u) -> String.format("AND=%b, OR=%b, XOR=%b", t && u, t || u, t != u);
 
         assertEquals("AND=false, OR=true, XOR=true", function.apply(true, false));
         assertEquals("AND=true, OR=true, XOR=false", function.apply(true, true));
@@ -90,9 +89,12 @@ public class BooleanBiFunction2025Test extends TestBase {
     @Test
     public void testComplexLogic() {
         BooleanBiFunction<String> function = (t, u) -> {
-            if (t && u) return "BOTH";
-            if (t) return "FIRST";
-            if (u) return "SECOND";
+            if (t && u)
+                return "BOTH";
+            if (t)
+                return "FIRST";
+            if (u)
+                return "SECOND";
             return "NEITHER";
         };
 

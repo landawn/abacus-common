@@ -34,6 +34,14 @@ public interface DoubleConsumer extends Throwables.DoubleConsumer<RuntimeExcepti
     /**
      * Performs this operation on the given argument.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * DoubleConsumer printer = d -> System.out.println("Value: " + d);
+     * printer.accept(3.14); // Prints: Value: 3.14
+     *
+     * DoubleStream.of(1.1, 2.2, 3.3).forEach(printer);
+     * }</pre>
+     *
      * @param t the double input argument
      */
     @Override
@@ -44,7 +52,15 @@ public interface DoubleConsumer extends Throwables.DoubleConsumer<RuntimeExcepti
      * If performing either operation throws an exception, it is relayed to the caller of the composed operation.
      * If performing this operation throws an exception, the {@code after} operation will not be performed.
      *
-     * @param after the operation to perform after this operation
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * DoubleConsumer logger = d -> System.out.println("Processing: " + d);
+     * DoubleConsumer validator = d -> { if (d < 0) throw new IllegalArgumentException(); };
+     * DoubleConsumer combined = logger.andThen(validator);
+     * combined.accept(5.5); // Logs then validates
+     * }</pre>
+     *
+     * @param after the operation to perform after this operation. Must not be {@code null}.
      * @return a composed {@code DoubleConsumer} that performs in sequence this operation followed by the {@code after} operation
      */
     @Override

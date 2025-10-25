@@ -43,7 +43,7 @@ import java.util.function.Predicate;
  * handling and thread-safe operations. It provides a fluent API for composing complex data
  * processing pipelines.</p>
  * 
- * <p>Example usage:</p>
+ * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * Observer.of(Arrays.asList(1, 2, 3, 4, 5))
  *     .filter(n -> n % 2 == 0)
@@ -119,7 +119,7 @@ public abstract class Observer<T> implements Immutable {
      * Signals completion to a BlockingQueue by adding a special completion flag.
      * This method is used to indicate that no more elements will be added to the queue.
      * 
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * BlockingQueue<String> queue = new LinkedBlockingQueue<>();
      * // Add elements to queue...
@@ -137,7 +137,7 @@ public abstract class Observer<T> implements Immutable {
      * Creates an Observer from a BlockingQueue. The Observer will emit elements from the queue
      * until it encounters the completion flag or the queue is empty.
      * 
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * BlockingQueue<Integer> queue = new LinkedBlockingQueue<>();
      * queue.offer(1);
@@ -163,7 +163,7 @@ public abstract class Observer<T> implements Immutable {
      * Creates an Observer from a Collection. The Observer will emit all elements
      * from the collection in iteration order.
      * 
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * List<String> list = Arrays.asList("a", "b", "c");
      * Observer.of(list)
@@ -182,7 +182,7 @@ public abstract class Observer<T> implements Immutable {
      * Creates an Observer from an Iterator. The Observer will emit all elements
      * from the iterator until hasNext() returns false.
      * 
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Iterator<Integer> iter = Arrays.asList(1, 2, 3).iterator();
      * Observer.of(iter)
@@ -205,7 +205,7 @@ public abstract class Observer<T> implements Immutable {
      * Creates an Observer that emits a single value (0L) after the specified delay in milliseconds.
      * This is useful for creating delayed actions or timeouts.
      * 
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Observer.timer(1000) // Wait 1 second
      *     .observe(value -> System.out.println("Timer fired!"));
@@ -223,7 +223,7 @@ public abstract class Observer<T> implements Immutable {
      * Creates an Observer that emits a single value (0L) after the specified delay.
      * This is useful for creating delayed actions or timeouts with custom time units.
      * 
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Observer.timer(5, TimeUnit.SECONDS)
      *     .observe(value -> System.out.println("5 seconds elapsed!"));
@@ -246,7 +246,7 @@ public abstract class Observer<T> implements Immutable {
      * Creates an Observer that emits sequential numbers (0, 1, 2, ...) periodically
      * with the specified interval in milliseconds.
      * 
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Observer.interval(1000) // Emit every second
      *     .limit(5)
@@ -265,7 +265,7 @@ public abstract class Observer<T> implements Immutable {
      * Creates an Observer that emits sequential numbers periodically with an initial delay
      * and specified interval in milliseconds.
      * 
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Observer.interval(2000, 1000) // Wait 2s, then emit every 1s
      *     .limit(3)
@@ -285,7 +285,7 @@ public abstract class Observer<T> implements Immutable {
      * Creates an Observer that emits sequential numbers periodically with the specified
      * period and time unit.
      * 
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Observer.interval(2, TimeUnit.SECONDS)
      *     .observe(n -> System.out.println("Tick: " + n));
@@ -304,7 +304,7 @@ public abstract class Observer<T> implements Immutable {
      * Creates an Observer that emits sequential numbers periodically with an initial delay,
      * period, and time unit.
      * 
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Observer.interval(5, 2, TimeUnit.SECONDS) // Wait 5s, then emit every 2s
      *     .map(n -> "Event " + n)
@@ -330,7 +330,7 @@ public abstract class Observer<T> implements Immutable {
      * Applies debounce operator that only emits an item if a particular timespan has passed
      * without emitting another item. This is useful for handling rapid events like user input.
      * 
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * userInputObserver
      *     .debounce(300) // Wait 300ms after last input
@@ -349,7 +349,7 @@ public abstract class Observer<T> implements Immutable {
      * Applies debounce operator that only emits an item if a particular timespan has passed
      * without emitting another item. The time interval can be specified with custom units.
      * 
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * sensorDataObserver
      *     .debounce(1, TimeUnit.SECONDS)
@@ -432,7 +432,7 @@ public abstract class Observer<T> implements Immutable {
      * Applies throttleFirst operator that only emits the first item emitted during sequential
      * time windows of a specified duration. Subsequent items are ignored until the window expires.
      * 
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * buttonClickObserver
      *     .throttleFirst(1000) // Prevent rapid clicks
@@ -451,7 +451,7 @@ public abstract class Observer<T> implements Immutable {
      * Applies throttleFirst operator that only emits the first item emitted during sequential
      * time windows of a specified duration with custom time units.
      * 
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * apiCallObserver
      *     .throttleFirst(5, TimeUnit.SECONDS) // Rate limit API calls
@@ -519,7 +519,7 @@ public abstract class Observer<T> implements Immutable {
      * Applies throttleLast operator that only emits the last item emitted during sequential
      * time windows of a specified duration. Also known as "sample" in some reactive libraries.
      * 
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * mousePositionObserver
      *     .throttleLast(100) // Sample mouse position every 100ms
@@ -538,7 +538,7 @@ public abstract class Observer<T> implements Immutable {
      * Applies throttleLast operator that only emits the last item emitted during sequential
      * time windows of a specified duration with custom time units.
      * 
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * temperatureSensor
      *     .throttleLast(1, TimeUnit.MINUTES) // Sample every minute
@@ -608,7 +608,7 @@ public abstract class Observer<T> implements Immutable {
      * Delays the emission of items by the specified duration in milliseconds.
      * Each item will be emitted after the delay has passed.
      * 
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Observer.of(Arrays.asList("A", "B", "C"))
      *     .delay(1000) // Delay each emission by 1 second
@@ -627,7 +627,7 @@ public abstract class Observer<T> implements Immutable {
      * Delays the emission of items by the specified duration with custom time units.
      * The delay is applied from the subscription time, not from each individual emission.
      * 
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Observer.timer(0)
      *     .delay(3, TimeUnit.SECONDS)
@@ -672,7 +672,7 @@ public abstract class Observer<T> implements Immutable {
      * Transforms items into Timed objects that contain the time interval between
      * consecutive emissions in milliseconds.
      * 
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Observer.interval(1000)
      *     .timeInterval()
@@ -706,7 +706,7 @@ public abstract class Observer<T> implements Immutable {
      * Transforms items into Timed objects that contain the timestamp of emission
      * in milliseconds since epoch.
      * 
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * eventObserver
      *     .timestamp()
@@ -733,7 +733,7 @@ public abstract class Observer<T> implements Immutable {
     /**
      * Skips the first n items emitted by this Observer and emits the remaining items.
      * 
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Observer.of(Arrays.asList(1, 2, 3, 4, 5))
      *     .skip(2)
@@ -767,7 +767,7 @@ public abstract class Observer<T> implements Immutable {
      * Limits the number of items emitted by this Observer to at most maxSize items.
      * After emitting maxSize items, the Observer completes.
      * 
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Observer.interval(100)
      *     .limit(5)
@@ -801,7 +801,7 @@ public abstract class Observer<T> implements Immutable {
      * Filters out duplicate items, ensuring each unique item is emitted only once.
      * Uses the item's equals() method for comparison.
      * 
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Observer.of(Arrays.asList(1, 2, 2, 3, 1, 3))
      *     .distinct()
@@ -829,7 +829,7 @@ public abstract class Observer<T> implements Immutable {
      * Filters out items with duplicate keys as determined by the keyExtractor function.
      * Only the first item with each unique key is emitted.
      * 
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Observer.of(Arrays.asList("apple", "banana", "apricot", "blueberry"))
      *     .distinctBy(s -> s.charAt(0)) // Distinct by first letter
@@ -857,7 +857,7 @@ public abstract class Observer<T> implements Immutable {
     /**
      * Filters items emitted by this Observer, only emitting those that satisfy the predicate.
      * 
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Observer.of(Arrays.asList(1, 2, 3, 4, 5))
      *     .filter(n -> n % 2 == 0)
@@ -883,7 +883,7 @@ public abstract class Observer<T> implements Immutable {
     /**
      * Transforms each item emitted by this Observer by applying a mapper function.
      * 
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Observer.of(Arrays.asList(1, 2, 3))
      *     .map(n -> n * n)
@@ -911,7 +911,7 @@ public abstract class Observer<T> implements Immutable {
      * Transforms each item into a collection and flattens the results into a single sequence.
      * This is useful for one-to-many transformations.
      * 
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Observer.of(Arrays.asList("Hello World", "Foo Bar"))
      *     .flatMap(s -> Arrays.asList(s.split(" ")))
@@ -945,7 +945,7 @@ public abstract class Observer<T> implements Immutable {
      * Buffers items into lists based on a time window. Emits a list of items
      * every timespan period.
      * 
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * eventObserver
      *     .buffer(1000, TimeUnit.MILLISECONDS)
@@ -965,7 +965,7 @@ public abstract class Observer<T> implements Immutable {
      * Buffers items into lists based on time windows or item count, whichever occurs first.
      * Emits when either the time window expires or the buffer reaches the specified count.
      * 
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * dataObserver
      *     .buffer(5000, TimeUnit.MILLISECONDS, 10)
@@ -1027,7 +1027,7 @@ public abstract class Observer<T> implements Immutable {
      * Buffers items into lists based on sliding time windows. Creates overlapping or
      * gapped windows based on the timespan and timeskip parameters.
      * 
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Overlapping windows: every 3 seconds, emit items from last 5 seconds
      * observer.buffer(5, 3, TimeUnit.SECONDS)
@@ -1049,7 +1049,7 @@ public abstract class Observer<T> implements Immutable {
      * Creates overlapping or gapped windows that emit when either the window duration
      * expires or the count is reached.
      * 
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * sensorData
      *     .buffer(10, 5, TimeUnit.SECONDS, 100) // 10s windows every 5s, max 100 items
@@ -1117,7 +1117,7 @@ public abstract class Observer<T> implements Immutable {
      * Subscribes to this Observer with an action to be performed on each emitted item.
      * If an error occurs, it will be thrown as a RuntimeException.
      * 
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Observer.of(Arrays.asList(1, 2, 3))
      *     .observe(System.out::println);
@@ -1133,7 +1133,7 @@ public abstract class Observer<T> implements Immutable {
      * Subscribes to this Observer with actions for items and errors.
      * The onComplete action will be an empty action.
      * 
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * dataObserver.observe(
      *     data -> processData(data),
@@ -1152,7 +1152,7 @@ public abstract class Observer<T> implements Immutable {
      * Subscribes to this Observer with actions for items, errors, and completion.
      * This is the most complete form of subscription.
      * 
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * fileProcessor.observe(
      *     line -> processLine(line),

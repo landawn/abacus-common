@@ -33,7 +33,7 @@ import java.io.Serial;
  * This class predates the Java 8 version and may be retained for backward compatibility
  * or to maintain consistency with other unchecked exceptions in this framework.</p>
  * 
- * <p>Example usage:</p>
+ * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * // In a stream operation
  * files.stream()
@@ -72,7 +72,7 @@ public class UncheckedIOException extends UncheckedException {
      * <p>This constructor preserves all information from the original IOException including
      * its message, stack trace, and any suppressed exceptions.</p>
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * try {
      *     fileInputStream.read();
@@ -94,7 +94,7 @@ public class UncheckedIOException extends UncheckedException {
      * <p>This constructor allows you to provide additional context about the I/O operation
      * that failed, while preserving all information from the original exception.</p>
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * try {
      *     Files.copy(source, target);

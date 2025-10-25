@@ -1907,17 +1907,14 @@ public class Collectors101Test extends TestBase {
 
     @Test
     public void testToBiMapWithMergeFunction() {
-        BiMap<Integer, String> biMap = Stream.of("a", "bb", "ccc", "dd").collect(Collectors.toBiMap(String::length, e -> e, (s1, s2) -> s1
-        ));
+        BiMap<Integer, String> biMap = Stream.of("a", "bb", "ccc", "dd").collect(Collectors.toBiMap(String::length, e -> e, (s1, s2) -> s1));
 
         Assertions.assertEquals("bb", biMap.get(2));
     }
 
     @Test
     public void testToBiMapWithAllParameters() {
-        BiMap<Integer, String> biMap = Stream.of("a", "bb", "ccc", "dd")
-                .collect(Collectors.toBiMap(String::length, e -> e, (s1, s2) -> s1,
-                        BiMap::new));
+        BiMap<Integer, String> biMap = Stream.of("a", "bb", "ccc", "dd").collect(Collectors.toBiMap(String::length, e -> e, (s1, s2) -> s1, BiMap::new));
 
         Assertions.assertEquals("bb", biMap.get(2));
     }

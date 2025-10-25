@@ -693,7 +693,8 @@ public class Seq104Test extends TestBase {
     @Test
     public void testGroupToWithValueMapperDownstreamCollectorAndMapFactory() {
         Seq<String, RuntimeException> seq = Seq.of("apple", "apricot", "banana");
-        Map<Character, Optional<Integer>> map = seq.groupTo(s -> s.charAt(0), String::length, com.landawn.abacus.util.stream.Collectors.max(), Suppliers.ofLinkedHashMap());
+        Map<Character, Optional<Integer>> map = seq.groupTo(s -> s.charAt(0), String::length, com.landawn.abacus.util.stream.Collectors.max(),
+                Suppliers.ofLinkedHashMap());
         assertEquals(2, map.size());
         assertEquals(7, map.get('a').get());
         assertEquals(6, map.get('b').get());

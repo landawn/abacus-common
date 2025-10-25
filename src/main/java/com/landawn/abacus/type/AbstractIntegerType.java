@@ -114,13 +114,24 @@ public abstract class AbstractIntegerType extends NumberType<Number> {
 
     /**
      * Retrieves an integer value from a ResultSet at the specified column index.
-     * Note: This method uses rs.getInt() which returns 0 for SQL NULL values.
-     * Therefore, SQL NULL values are converted to Integer.valueOf(0), not null.
+     * This method uses rs.getInt() which returns 0 for SQL NULL values.
+     * Subclasses may override this to return null for SQL NULL values.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * // For primitive int types
+     * PrimitiveIntType type = TypeFactory.getType(int.class);
+     * int value = type.get(rs, 1); // Returns 0 for SQL NULL
+     *
+     * // For wrapper Integer types
+     * IntegerType type = TypeFactory.getType(Integer.class);
+     * Integer value = type.get(rs, 1); // Returns null for SQL NULL (overridden in subclass)
+     * }</pre>
      *
      * @param rs the ResultSet to read from
      * @param columnIndex the column index (1-based)
-     * @return the integer value at the specified column, or Integer.valueOf(0) if the value is SQL NULL
-     * @throws SQLException if a database access error occurs
+     * @return the integer value at the specified column; returns 0 if SQL NULL (may be overridden by subclasses to return null)
+     * @throws SQLException if a database access error occurs or the columnIndex is invalid
      */
     @Override
     public Integer get(final ResultSet rs, final int columnIndex) throws SQLException {
@@ -129,13 +140,24 @@ public abstract class AbstractIntegerType extends NumberType<Number> {
 
     /**
      * Retrieves an integer value from a ResultSet using the specified column label.
-     * Note: This method uses rs.getInt() which returns 0 for SQL NULL values.
-     * Therefore, SQL NULL values are converted to Integer.valueOf(0), not null.
+     * This method uses rs.getInt() which returns 0 for SQL NULL values.
+     * Subclasses may override this to return null for SQL NULL values.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * // For primitive int types
+     * PrimitiveIntType type = TypeFactory.getType(int.class);
+     * int value = type.get(rs, "count"); // Returns 0 for SQL NULL
+     *
+     * // For wrapper Integer types
+     * IntegerType type = TypeFactory.getType(Integer.class);
+     * Integer value = type.get(rs, "count"); // Returns null for SQL NULL (overridden in subclass)
+     * }</pre>
      *
      * @param rs the ResultSet to read from
      * @param columnLabel the column label
-     * @return the integer value at the specified column, or Integer.valueOf(0) if the value is SQL NULL
-     * @throws SQLException if a database access error occurs
+     * @return the integer value at the specified column; returns 0 if SQL NULL (may be overridden by subclasses to return null)
+     * @throws SQLException if a database access error occurs or the columnLabel is not found
      */
     @Override
     public Integer get(final ResultSet rs, final String columnLabel) throws SQLException {

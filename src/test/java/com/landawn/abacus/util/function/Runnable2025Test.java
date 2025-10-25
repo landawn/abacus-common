@@ -15,7 +15,7 @@ public class Runnable2025Test extends TestBase {
 
     @Test
     public void testRun() {
-        final int[] counter = {0};
+        final int[] counter = { 0 };
         Runnable runnable = () -> counter[0]++;
 
         runnable.run();
@@ -40,7 +40,7 @@ public class Runnable2025Test extends TestBase {
 
     @Test
     public void testRun_MultipleInvocations() {
-        final int[] counter = {0};
+        final int[] counter = { 0 };
         Runnable runnable = () -> counter[0]++;
 
         runnable.run();
@@ -52,7 +52,7 @@ public class Runnable2025Test extends TestBase {
 
     @Test
     public void testToCallable() {
-        final int[] counter = {0};
+        final int[] counter = { 0 };
         Runnable runnable = () -> counter[0]++;
 
         Callable<Void> callable = runnable.toCallable();
@@ -64,14 +64,15 @@ public class Runnable2025Test extends TestBase {
 
     @Test
     public void testToThrowable() {
-        Runnable runnable = () -> {};
+        Runnable runnable = () -> {
+        };
         com.landawn.abacus.util.Throwables.Runnable<?> throwableRunnable = runnable.toThrowable();
         assertNotNull(throwableRunnable);
     }
 
     @Test
     public void testJavaLangCompatibility() {
-        final int[] counter = {0};
+        final int[] counter = { 0 };
         Runnable runnable = () -> counter[0]++;
         java.lang.Runnable javaRunnable = runnable;
 
@@ -82,7 +83,8 @@ public class Runnable2025Test extends TestBase {
 
     @Test
     public void testFunctionalInterfaceContract() {
-        Runnable lambda = () -> {};
+        Runnable lambda = () -> {
+        };
         assertNotNull(lambda);
         assertDoesNotThrow(() -> lambda.run());
     }

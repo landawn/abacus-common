@@ -40,7 +40,7 @@ public interface ToFloatFunction<T> extends Throwables.ToFloatFunction<T, Runtim
      * A predefined ToFloatFunction instance that unboxes a Float object to a primitive float.
      * Returns 0.0f if the input is null, otherwise returns the float value of the Float object.
      * 
-     * <p>Example usage:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Float boxed = 3.14f;
      * float primitive = ToFloatFunction.UNBOX.applyAsFloat(boxed); // returns 3.14f
@@ -55,7 +55,7 @@ public interface ToFloatFunction<T> extends Throwables.ToFloatFunction<T, Runtim
      * perform the conversion. This function can handle various Number subclasses including
      * Integer, Long, Double, BigDecimal, etc.
      * 
-     * <p>Example usage:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Integer intValue = 42;
      * float result1 = ToFloatFunction.FROM_NUM.applyAsFloat(intValue); // returns 42.0f
@@ -75,8 +75,7 @@ public interface ToFloatFunction<T> extends Throwables.ToFloatFunction<T, Runtim
      * Applies this function to the given argument and returns a float result.
      *
      * @param value the function argument
-     * @return the function result as a primitive float
-     * @throws RuntimeException if any error occurs during function execution
+     * @return the function result as a primitive float if any error occurs during function execution
      */
     @Override
     float applyAsFloat(T value);

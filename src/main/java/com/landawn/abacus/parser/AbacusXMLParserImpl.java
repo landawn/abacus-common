@@ -66,6 +66,61 @@ import com.landawn.abacus.util.Objectory;
 import com.landawn.abacus.util.Strings;
 import com.landawn.abacus.util.XmlUtil;
 
+/**
+ * Abacus-specific implementation of XML parser supporting SAX, DOM, and StAX parsing modes.
+ *
+ * <p>This implementation extends {@link AbstractXMLParser} and provides optimized XML serialization
+ * and deserialization capabilities tailored for the Abacus framework. It supports multiple XML
+ * parsing strategies including SAX (Simple API for XML), DOM (Document Object Model), and StAX
+ * (Streaming API for XML).</p>
+ *
+ * <p>Key features:</p>
+ * <ul>
+ *   <li>Multiple parser types (SAX, DOM, StAX) with automatic selection based on use case</li>
+ *   <li>Efficient handling of large XML documents through streaming</li>
+ *   <li>Support for complex object graphs and collections</li>
+ *   <li>Circular reference detection and handling</li>
+ *   <li>Dynamic type resolution through node class mappings</li>
+ *   <li>Configurable property naming policies and exclusions</li>
+ *   <li>Pretty-printing and indentation support</li>
+ *   <li>Type information preservation in XML attributes</li>
+ * </ul>
+ *
+ * <p>Parser type characteristics:</p>
+ * <ul>
+ *   <li><b>SAX</b>: Event-driven, memory efficient, suitable for large documents, read-only</li>
+ *   <li><b>DOM</b>: Tree-based, allows random access and modification, memory intensive</li>
+ *   <li><b>StAX</b>: Pull-based streaming, balanced performance, recommended for most use cases</li>
+ * </ul>
+ *
+ * <p><b>Usage Examples:</b></p>
+ * <pre>{@code
+ * // Create parser with StAX for balanced performance
+ * XMLParser parser = new AbacusXMLParserImpl(XMLParserType.StAX);
+ *
+ * // Serialize object to XML
+ * MyBean bean = new MyBean();
+ * String xml = parser.serialize(bean);
+ *
+ * // Deserialize with configuration
+ * XMLDeserializationConfig config = new XMLDeserializationConfig()
+ *     .ignoreUnmatchedProperty(true);
+ * MyBean restored = parser.deserialize(xml, config, MyBean.class);
+ *
+ * // Use SAX for memory-efficient parsing of large documents
+ * XMLParser saxParser = new AbacusXMLParserImpl(XMLParserType.SAX);
+ * LargeBean large = saxParser.deserialize(largeXmlFile, LargeBean.class);
+ * }</pre>
+ *
+ * <p>This class is package-private and should be accessed through {@link ParserFactory} or
+ * {@link XMLParser} interface.</p>
+ *
+ * @see AbstractXMLParser
+ * @see XMLParser
+ * @see XMLParserType
+ * @see XMLSerializationConfig
+ * @see XMLDeserializationConfig
+ */
 final class AbacusXMLParserImpl extends AbstractXMLParser {
 
     // ...
@@ -90,10 +145,22 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
 
     private final XMLParserType parserType;
 
+    /**
+     * Constructs a new AbacusXMLParserImpl with the specified parser type and default configurations.
+     *
+     * @param parserType the XML parser type to use (SAX, DOM, or StAX)
+     */
     AbacusXMLParserImpl(final XMLParserType parserType) {
         this.parserType = parserType;
     }
 
+    /**
+     * Constructs a new AbacusXMLParserImpl with the specified parser type and custom configurations.
+     *
+     * @param parserType the XML parser type to use (SAX, DOM, or StAX)
+     * @param xsc the XML serialization configuration; may be {@code null} for defaults
+     * @param xdc the XML deserialization configuration; may be {@code null} for defaults
+     */
     AbacusXMLParserImpl(final XMLParserType parserType, final XMLSerializationConfig xsc, final XMLDeserializationConfig xdc) {
         super(xsc, xdc);
         this.parserType = parserType;

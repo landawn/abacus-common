@@ -37,8 +37,8 @@ import java.lang.annotation.Target;
  *   <li>Supporting backward compatibility testing for record migration</li>
  * </ul>
  * 
- * <p><b>Example usage:</b></p>
- * <pre>
+ * <p><b>Usage Examples:</b></p>
+ * <pre>{@code
  * {@literal @}Record
  * {@literal @}Data
  * {@literal @}AllArgsConstructor
@@ -51,7 +51,7 @@ import java.lang.annotation.Target;
  * 
  * // This class behaves similarly to a Java 16+ record:
  * // public record PersonRecord(String name, int age, String email) {}
- * </pre>
+ * }</pre>
  * 
  * <p><b>Testing implications:</b></p>
  * <ul>

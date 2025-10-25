@@ -40,13 +40,13 @@ import com.landawn.abacus.util.cs;
  *   <li>Fluent API for easy configuration</li>
  * </ul>
  * 
- * <p>Usage example:</p>
+ * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * JSONDeserializationConfig config = new JSONDeserializationConfig()
  *     .ignoreUnmatchedProperty(true)
  *     .readNullToEmpty(true)
  *     .setMapInstanceType(LinkedHashMap.class);
- * 
+ *
  * Person person = parser.deserialize(jsonString, config, Person.class);
  * }</pre>
  * 
@@ -92,7 +92,7 @@ public class JSONDeserializationConfig extends DeserializationConfig<JSONDeseria
      * values in the target object rather than overwriting them with null or empty values
      * from the JSON.</p>
      * 
-     * <p>Usage example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * config.ignoreNullOrEmpty(true);
      * // JSON: {"name": "", "items": [], "data": null}
@@ -136,7 +136,7 @@ public class JSONDeserializationConfig extends DeserializationConfig<JSONDeseria
      *   <li>null Map → empty map of the appropriate type</li>
      * </ul>
      * 
-     * <p>Usage example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * config.readNullToEmpty(true);
      * // JSON: {"name": null, "items": null}
@@ -178,11 +178,11 @@ public class JSONDeserializationConfig extends DeserializationConfig<JSONDeseria
      *   <li>Using {@link java.util.concurrent.ConcurrentHashMap} for thread-safe operations</li>
      * </ul>
      * 
-     * <p>Usage example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * config.setMapInstanceType(LinkedHashMap.class);
      * // Maps will be created as LinkedHashMap to preserve insertion order
-     * 
+     *
      * config.setMapInstanceType(TreeMap.class);
      * // Maps will be created as TreeMap for sorted keys
      * }</pre>
@@ -221,7 +221,7 @@ public class JSONDeserializationConfig extends DeserializationConfig<JSONDeseria
      * 
      * <p>Property names support dot notation for nested properties.</p>
      * 
-     * <p>Usage example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * config.setPropHandler("items", (collection, element) -> {
      *     // Custom processing for each element
@@ -229,7 +229,7 @@ public class JSONDeserializationConfig extends DeserializationConfig<JSONDeseria
      *         collection.add(processElement(element));
      *     }
      * });
-     * 
+     *
      * // For nested properties
      * config.setPropHandler("account.devices.model", (collection, model) -> {
      *     collection.add(model.toString().toUpperCase());
@@ -368,7 +368,7 @@ public class JSONDeserializationConfig extends DeserializationConfig<JSONDeseria
      * with common settings. It follows the builder pattern and supports method chaining
      * for easy configuration.</p>
      * 
-     * <p>Usage example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * JSONDeserializationConfig config = JDC.create()
      *     .ignoreUnmatchedProperty(true)
@@ -406,7 +406,7 @@ public class JSONDeserializationConfig extends DeserializationConfig<JSONDeseria
          * Use {@link #create()} followed by {@link JSONDeserializationConfig#setElementType(Class)}
          * instead for better clarity and consistency.</p>
          * 
-         * <p>Example of recommended approach:</p>
+         * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * JSONDeserializationConfig config = JDC.create()
          *     .setElementType(Person.class);
@@ -427,7 +427,7 @@ public class JSONDeserializationConfig extends DeserializationConfig<JSONDeseria
          * <p>This method is deprecated and will be removed in a future version.
          * Use {@link #create()} with method chaining for better flexibility.</p>
          * 
-         * <p>Example of recommended approach:</p>
+         * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * JSONDeserializationConfig config = JDC.create()
          *     .setMapKeyType(String.class)

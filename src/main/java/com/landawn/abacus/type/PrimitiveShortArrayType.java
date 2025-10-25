@@ -42,7 +42,7 @@ public final class PrimitiveShortArrayType extends AbstractPrimitiveArrayType<sh
     /**
      * Returns the Class object representing the primitive short array type (short[].class).
      *
-     * <p>Usage example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * PrimitiveShortArrayType type = new PrimitiveShortArrayType();
      * Class clazz = type.clazz();
@@ -62,7 +62,7 @@ public final class PrimitiveShortArrayType extends AbstractPrimitiveArrayType<sh
      * Returns the Type instance for the element type of this array, which is Short.
      * This method provides access to the Type representation of individual array elements.
      *
-     * <p>Usage example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * PrimitiveShortArrayType type = new PrimitiveShortArrayType();
      * Type<Short> elementType = type.getElementType();
@@ -79,7 +79,7 @@ public final class PrimitiveShortArrayType extends AbstractPrimitiveArrayType<sh
     /**
      * Returns the parameter types associated with this array type.
      *
-     * <p>Usage example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * PrimitiveShortArrayType type = new PrimitiveShortArrayType();
      * Type<Short>[] paramTypes = type.getParameterTypes();
@@ -99,7 +99,7 @@ public final class PrimitiveShortArrayType extends AbstractPrimitiveArrayType<sh
      * Converts a primitive short array to its string representation.
      * The array is formatted as comma-separated values enclosed in square brackets.
      *
-     * <p>Usage example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * PrimitiveShortArrayType type = new PrimitiveShortArrayType();
      * short[] array = {1, 2, 3};
@@ -132,7 +132,7 @@ public final class PrimitiveShortArrayType extends AbstractPrimitiveArrayType<sh
      * Parses a string representation of a short array and returns the corresponding short array.
      * The string should contain comma-separated short values enclosed in square brackets.
      *
-     * <p>Usage example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * PrimitiveShortArrayType type = new PrimitiveShortArrayType();
      * short[] array = type.valueOf("[1, 2, 3]");
@@ -178,7 +178,7 @@ public final class PrimitiveShortArrayType extends AbstractPrimitiveArrayType<sh
      * The array is formatted as comma-separated values enclosed in square brackets.
      * If the array is null, appends "null".
      *
-     * <p>Usage example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * PrimitiveShortArrayType type = new PrimitiveShortArrayType();
      * short[] array = {10, 20, 30};
@@ -219,7 +219,7 @@ public final class PrimitiveShortArrayType extends AbstractPrimitiveArrayType<sh
      * This method is optimized for performance when writing to character-based outputs.
      * The array is formatted as comma-separated values enclosed in square brackets.
      *
-     * <p>Usage example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * PrimitiveShortArrayType type = new PrimitiveShortArrayType();
      * short[] array = {100, 200, 300};
@@ -261,7 +261,7 @@ public final class PrimitiveShortArrayType extends AbstractPrimitiveArrayType<sh
      * Converts a Collection of Short objects to a primitive short array.
      * Each element in the collection is unboxed to its primitive short value.
      *
-     * <p>Usage example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * PrimitiveShortArrayType type = new PrimitiveShortArrayType();
      * List<Short> list = Arrays.asList((short) 5, (short) 10, (short) 15);
@@ -299,7 +299,7 @@ public final class PrimitiveShortArrayType extends AbstractPrimitiveArrayType<sh
      * Converts a primitive short array to a Collection by adding all array elements to the provided collection.
      * Each primitive short value is autoboxed to a Short object before being added.
      *
-     * <p>Usage example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * PrimitiveShortArrayType type = new PrimitiveShortArrayType();
      * short[] array = {1, 2, 3};
@@ -333,7 +333,7 @@ public final class PrimitiveShortArrayType extends AbstractPrimitiveArrayType<sh
      * The hash code is calculated based on the contents of the array using the standard
      * array hash code algorithm, which considers all elements in the array.
      *
-     * <p>Usage example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * PrimitiveShortArrayType type = new PrimitiveShortArrayType();
      * short[] array1 = {1, 2, 3};
@@ -359,7 +359,7 @@ public final class PrimitiveShortArrayType extends AbstractPrimitiveArrayType<sh
      * Two arrays are considered equal if they have the same length and contain the same
      * elements in the same order. Two null references are considered equal.
      *
-     * <p>Usage example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * PrimitiveShortArrayType type = new PrimitiveShortArrayType();
      * short[] array1 = {1, 2, 3};

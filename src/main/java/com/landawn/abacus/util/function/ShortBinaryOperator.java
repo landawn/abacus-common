@@ -48,7 +48,7 @@ public interface ShortBinaryOperator extends Throwables.ShortBinaryOperator<Runt
      * <p>Note that due to Java's type promotion rules, arithmetic operations on shorts
      * are promoted to int, so explicit casting back to short is often required.
      *
-     * <p>Example usage:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ShortBinaryOperator add = (a, b) -> (short) (a + b);
      * ShortBinaryOperator max = (a, b) -> (short) Math.max(a, b);
@@ -66,8 +66,7 @@ public interface ShortBinaryOperator extends Throwables.ShortBinaryOperator<Runt
      *
      * @param left the first operand
      * @param right the second operand
-     * @return the operator result
-     * @throws RuntimeException if the operation cannot be completed
+     * @return the operator result if the operation cannot be completed
      */
     @Override
     short applyAsShort(short left, short right);

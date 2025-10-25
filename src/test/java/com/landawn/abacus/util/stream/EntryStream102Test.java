@@ -175,12 +175,7 @@ public class EntryStream102Test extends TestBase {
 
     @Test
     public void testGroupByWithKeyMapperValueMapperMergeFunction() {
-        Map<Boolean, String> grouped = EntryStream.of(testMap)
-                .groupBy(e -> e.getValue() % 2 == 0,
-                        Entry::getKey,
-                        (s1, s2) -> s1 + "," + s2
-                )
-                .toMap();
+        Map<Boolean, String> grouped = EntryStream.of(testMap).groupBy(e -> e.getValue() % 2 == 0, Entry::getKey, (s1, s2) -> s1 + "," + s2).toMap();
 
         assertEquals(2, grouped.size());
         assertTrue(grouped.get(true).contains("two"));

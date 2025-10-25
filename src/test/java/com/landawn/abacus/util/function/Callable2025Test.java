@@ -48,7 +48,7 @@ public class Callable2025Test extends TestBase {
 
     @Test
     public void testToRunnable() {
-        final int[] counter = {0};
+        final int[] counter = { 0 };
         Callable<String> callable = () -> {
             counter[0]++;
             return "executed";

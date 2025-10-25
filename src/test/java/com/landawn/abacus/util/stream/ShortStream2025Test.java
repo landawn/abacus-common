@@ -1332,8 +1332,8 @@ public class ShortStream2025Test extends TestBase {
 
     @Test
     public void testCollapseWithNoCollapsibleElements() {
-        ShortStream stream = ShortStream.of((short) 1, (short) 10, (short) 20, (short) 30).collapse((prev, curr) -> curr - prev <= 2,
-                (a, b) -> (short) (a + b));
+        ShortStream stream = ShortStream.of((short) 1, (short) 10, (short) 20, (short) 30)
+                .collapse((prev, curr) -> curr - prev <= 2, (a, b) -> (short) (a + b));
         assertArrayEquals(new short[] { 1, 10, 20, 30 }, stream.toArray());
     }
 

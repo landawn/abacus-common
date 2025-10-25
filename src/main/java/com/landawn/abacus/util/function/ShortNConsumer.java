@@ -30,7 +30,28 @@ public interface ShortNConsumer {
      * Performs this operation on the given arguments.
      * The behavior of this operation is generally expected to be non-interfering and stateless.
      *
-     * @param args the input arguments as a variable-length array of short values
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * ShortNConsumer sumPrinter = args -> {
+     *     int sum = 0;
+     *     for (short value : args) sum += value;
+     *     System.out.println("Sum: " + sum);
+     * };
+     * sumPrinter.accept((short) 1, (short) 2, (short) 3); // Prints "Sum: 6"
+     *
+     * ShortNConsumer minMaxPrinter = args -> {
+     *     if (args.length == 0) return;
+     *     short min = args[0], max = args[0];
+     *     for (short v : args) {
+     *         if (v < min) min = v;
+     *         if (v > max) max = v;
+     *     }
+     *     System.out.println("Min: " + min + ", Max: " + max);
+     * };
+     * minMaxPrinter.accept((short) 5, (short) 2, (short) 8, (short) 1);
+     * }</pre>
+     *
+     * @param args the input arguments as a variable-length array of short values if the operation cannot be completed
      */
     void accept(short... args);
 

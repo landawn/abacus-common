@@ -49,8 +49,7 @@ public interface FloatBiConsumer extends Throwables.FloatBiConsumer<RuntimeExcep
      * </ul>
      *
      * @param t the first float argument
-     * @param u the second float argument
-     * @throws RuntimeException if the operation encounters an error during execution
+     * @param u the second float argument if the operation encounters an error during execution
      */
     @Override
     void accept(float t, float u);
@@ -67,7 +66,7 @@ public interface FloatBiConsumer extends Throwables.FloatBiConsumer<RuntimeExcep
      *   <li>Then execute the {@code after} consumer's {@code accept} method with the same arguments</li>
      * </ol>
      * 
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * FloatBiConsumer logValues = (x, y) -> System.out.printf("Point: (%.2f, %.2f)%n", x, y);
      * FloatBiConsumer calculateDistance = (x, y) -> {

@@ -43,7 +43,7 @@ public interface ShortBiFunction<R> extends Throwables.ShortBiFunction<R, Runtim
      * The function should be deterministic, meaning that for the same inputs, it
      * should always produce the same output.
      *
-     * <p>Example usage:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ShortBiFunction<Integer> sum = (a, b) -> (int) (a + b);
      * ShortBiFunction<String> formatter = (x, y) -> 
@@ -59,7 +59,6 @@ public interface ShortBiFunction<R> extends Throwables.ShortBiFunction<R, Runtim
      * @param t the first function argument
      * @param u the second function argument
      * @return the function result
-     * @throws RuntimeException if the function cannot compute a result
      */
     @Override
     R apply(short t, short u);
@@ -74,7 +73,7 @@ public interface ShortBiFunction<R> extends Throwables.ShortBiFunction<R, Runtim
      * transformations together. The output of this function becomes the input to
      * the {@code after} function.
      *
-     * <p>Example usage:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ShortBiFunction<Integer> multiply = (a, b) -> (int) (a * b);
      * Function<Integer, String> addPrefix = result -> 

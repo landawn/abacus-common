@@ -45,7 +45,7 @@ import com.landawn.abacus.annotation.Beta;
  * <p>The implementation preserves the iteration order of entries when created from a LinkedHashMap
  * or SortedMap, otherwise no specific iteration order is guaranteed.</p>
  * 
- * <p>Example usage:
+ * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * // Create an immutable map with specific entries
  * ImmutableMap<String, Integer> map = ImmutableMap.of(
@@ -102,12 +102,11 @@ public class ImmutableMap<K, V> extends AbstractMap<K, V> implements Immutable {
      * Returns an empty ImmutableMap. This method always returns the same cached instance,
      * making it memory efficient for representing empty maps.
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ImmutableMap<String, Integer> emptyMap = ImmutableMap.empty();
      * System.out.println(emptyMap.size()); // 0
      * }</pre>
-     * </p>
      *
      * @param <K> the type of keys
      * @param <V> the type of values
@@ -122,12 +121,11 @@ public class ImmutableMap<K, V> extends AbstractMap<K, V> implements Immutable {
      * The returned map is immutable and will have a size of 1.
      * The iteration order is guaranteed to match the order of insertion.
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ImmutableMap<String, Integer> singleEntry = ImmutableMap.of("count", 42);
      * System.out.println(singleEntry.get("count")); // 42
      * }</pre>
-     * </p>
      *
      * @param <K> the type of the key
      * @param <V> the type of the value
@@ -145,14 +143,13 @@ public class ImmutableMap<K, V> extends AbstractMap<K, V> implements Immutable {
      * The iteration order is guaranteed to match the order of insertion.
      * If the same key is provided twice, an IllegalArgumentException may be thrown.
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ImmutableMap<String, String> map = ImmutableMap.of(
      *     "first", "John",
      *     "last", "Doe"
      * );
      * }</pre>
-     * </p>
      *
      * @param <K> the type of the keys
      * @param <V> the type of the values
@@ -172,7 +169,7 @@ public class ImmutableMap<K, V> extends AbstractMap<K, V> implements Immutable {
      * The iteration order is guaranteed to match the order of insertion.
      * If duplicate keys are provided, an IllegalArgumentException may be thrown.
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ImmutableMap<String, Integer> scores = ImmutableMap.of(
      *     "Alice", 95,
@@ -180,7 +177,6 @@ public class ImmutableMap<K, V> extends AbstractMap<K, V> implements Immutable {
      *     "Charlie", 92
      * );
      * }</pre>
-     * </p>
      *
      * @param <K> the type of the keys
      * @param <V> the type of the values
@@ -306,14 +302,13 @@ public class ImmutableMap<K, V> extends AbstractMap<K, V> implements Immutable {
      * If duplicate keys are provided, an IllegalArgumentException may be thrown.
      * Unlike some map implementations, this method supports null keys and values.
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ImmutableMap<String, Integer> map = ImmutableMap.of(
      *     "zero", 0, "one", 1, "two", 2, "three", 3, "four", 4,
      *     "five", 5, "six", 6, "seven", 7, "eight", 8, "nine", 9
      * );
      * }</pre>
-     * </p>
      *
      * @param <K> the type of the keys
      * @param <V> the type of the values
@@ -335,7 +330,7 @@ public class ImmutableMap<K, V> extends AbstractMap<K, V> implements Immutable {
      * Otherwise, a new ImmutableMap is created with a defensive copy of the map's entries.
      * The iteration order is preserved if the source map is a LinkedHashMap or SortedMap.
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Map<String, Integer> mutable = new HashMap<>();
      * mutable.put("a", 1);
@@ -344,7 +339,6 @@ public class ImmutableMap<K, V> extends AbstractMap<K, V> implements Immutable {
      * mutable.put("c", 3); // Does not affect immutable
      * System.out.println(immutable.size()); // Still 2
      * }</pre>
-     * </p>
      *
      * @param <K> the type of keys in the map
      * @param <V> the type of values in the map
@@ -371,7 +365,7 @@ public class ImmutableMap<K, V> extends AbstractMap<K, V> implements Immutable {
      * <p><b>Warning:</b> Use this method with caution as the immutability guarantee depends on not modifying
      * the original map after wrapping. For a true immutable copy, use {@link #copyOf(Map)} instead.</p>
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Map<String, Integer> mutable = new HashMap<>();
      * mutable.put("a", 1);
@@ -379,7 +373,6 @@ public class ImmutableMap<K, V> extends AbstractMap<K, V> implements Immutable {
      * mutable.put("b", 2); // This change IS visible in wrapped!
      * System.out.println(wrapped.size()); // 2
      * }</pre>
-     * </p>
      *
      * @param <K> the type of keys in the map
      * @param <V> the type of values in the map
@@ -402,14 +395,13 @@ public class ImmutableMap<K, V> extends AbstractMap<K, V> implements Immutable {
      * contains no mapping for the key. This method distinguishes between a key that is mapped
      * to null and a key that is not present in the map.
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ImmutableMap<String, Integer> map = ImmutableMap.of("a", 1, "b", 2);
      * System.out.println(map.getOrDefault("a", 0));  // 1
      * System.out.println(map.getOrDefault("c", 0));  // 0
      * System.out.println(map.getOrDefault("c", 99)); // 99
      * }</pre>
-     * </p>
      *
      * @param key the key whose associated value is to be returned
      * @param defaultValue the value to return if the map contains no mapping for the key
@@ -615,14 +607,13 @@ public class ImmutableMap<K, V> extends AbstractMap<K, V> implements Immutable {
      * Returns true if this map contains no key-value mappings.
      * This method has the same behavior as checking if size() == 0.
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ImmutableMap<String, Integer> empty = ImmutableMap.empty();
      * ImmutableMap<String, Integer> nonEmpty = ImmutableMap.of("a", 1);
      * System.out.println(empty.isEmpty());    // true
      * System.out.println(nonEmpty.isEmpty()); // false
      * }</pre>
-     * </p>
      *
      * @return {@code true} if this map contains no key-value mappings, {@code false} otherwise
      * @see java.util.Map#isEmpty()
@@ -637,14 +628,13 @@ public class ImmutableMap<K, V> extends AbstractMap<K, V> implements Immutable {
      * More formally, returns {@code true} if and only if this map contains a mapping for a key k
      * such that (key==null ? k==null : key.equals(k)).
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ImmutableMap<String, Integer> map = ImmutableMap.of("a", 1, "b", 2);
      * System.out.println(map.containsKey("a"));   // true
      * System.out.println(map.containsKey("c"));   // false
      * System.out.println(map.containsKey(null));  // false (unless null key was added)
      * }</pre>
-     * </p>
      *
      * @param key the key whose presence in this map is to be tested
      * @return {@code true} if this map contains a mapping for the specified key
@@ -661,13 +651,12 @@ public class ImmutableMap<K, V> extends AbstractMap<K, V> implements Immutable {
      * to a value v such that (value==null ? v==null : value.equals(v)).
      * This operation requires linear time in the size of the map.
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ImmutableMap<String, Integer> map = ImmutableMap.of("a", 1, "b", 2, "c", 1);
      * System.out.println(map.containsValue(1));   // true
      * System.out.println(map.containsValue(3));   // false
      * }</pre>
-     * </p>
      *
      * @param value the value whose presence in this map is to be tested
      * @return {@code true} if this map maps one or more keys to the specified value
@@ -684,13 +673,12 @@ public class ImmutableMap<K, V> extends AbstractMap<K, V> implements Immutable {
      * map contains no mapping for the key; it's also possible that the map explicitly maps
      * the key to null. The containsKey operation may be used to distinguish these two cases.
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ImmutableMap<String, Integer> map = ImmutableMap.of("a", 1, "b", 2);
      * System.out.println(map.get("a"));  // 1
      * System.out.println(map.get("c"));  // null
      * }</pre>
-     * </p>
      *
      * @param key the key whose associated value is to be returned
      * @return the value to which the specified key is mapped, or null if no mapping exists
@@ -707,14 +695,13 @@ public class ImmutableMap<K, V> extends AbstractMap<K, V> implements Immutable {
      * Attempts to modify the returned set will result in an UnsupportedOperationException.
      * The iteration order of the set matches the iteration order of the underlying map.
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ImmutableMap<String, Integer> map = ImmutableMap.of("a", 1, "b", 2);
      * Set<String> keys = map.keySet();
      * System.out.println(keys); // [a, b]
      * // keys.add("c"); // throws UnsupportedOperationException
      * }</pre>
-     * </p>
      *
      * @return an unmodifiable set view of the keys contained in this map
      * @see java.util.Map#keySet()
@@ -730,14 +717,13 @@ public class ImmutableMap<K, V> extends AbstractMap<K, V> implements Immutable {
      * Attempts to modify the returned collection will result in an UnsupportedOperationException.
      * The iteration order of the collection matches the iteration order of the underlying map.
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ImmutableMap<String, Integer> map = ImmutableMap.of("a", 1, "b", 2);
      * Collection<Integer> values = map.values();
      * System.out.println(values); // [1, 2]
      * // values.remove(1); // throws UnsupportedOperationException
      * }</pre>
-     * </p>
      *
      * @return an unmodifiable collection view of the values contained in this map
      * @see java.util.Map#values()
@@ -754,7 +740,7 @@ public class ImmutableMap<K, V> extends AbstractMap<K, V> implements Immutable {
      * Attempts to modify the returned set or its entries will result in an UnsupportedOperationException.
      * The iteration order of the set matches the iteration order of the underlying map.
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ImmutableMap<String, Integer> map = ImmutableMap.of("a", 1, "b", 2);
      * Set<Map.Entry<String, Integer>> entries = map.entrySet();
@@ -762,7 +748,6 @@ public class ImmutableMap<K, V> extends AbstractMap<K, V> implements Immutable {
      *     System.out.println(entry.getKey() + "=" + entry.getValue());
      * }
      * }</pre>
-     * </p>
      *
      * @return an unmodifiable set view of the mappings contained in this map
      * @see java.util.Map#entrySet()
@@ -776,12 +761,11 @@ public class ImmutableMap<K, V> extends AbstractMap<K, V> implements Immutable {
      * Returns the number of key-value mappings in this map.
      * If the map contains more than Integer.MAX_VALUE elements, returns Integer.MAX_VALUE.
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ImmutableMap<String, Integer> map = ImmutableMap.of("a", 1, "b", 2, "c", 3);
      * System.out.println(map.size()); // 3
      * }</pre>
-     * </p>
      *
      * @return the number of key-value mappings in this map
      * @see java.util.Map#size()
@@ -797,7 +781,7 @@ public class ImmutableMap<K, V> extends AbstractMap<K, V> implements Immutable {
      * More formally, two maps m1 and m2 are equal if m1.entrySet().equals(m2.entrySet()).
      * This ensures that the equals method works properly across different implementations of the Map interface.
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ImmutableMap<String, Integer> map1 = ImmutableMap.of("a", 1, "b", 2);
      * ImmutableMap<String, Integer> map2 = ImmutableMap.of("a", 1, "b", 2);
@@ -805,7 +789,6 @@ public class ImmutableMap<K, V> extends AbstractMap<K, V> implements Immutable {
      * System.out.println(map1.equals(map2)); // true
      * System.out.println(map1.equals(map3)); // false
      * }</pre>
-     * </p>
      *
      * @param obj the object to be compared for equality with this map
      * @return {@code true} if the specified object is equal to this map
@@ -825,13 +808,12 @@ public class ImmutableMap<K, V> extends AbstractMap<K, V> implements Immutable {
      * The hash code is computed as the sum of the hash codes of each entry in the map's entry set.
      * This ensures that two maps that are equal (according to the equals method) will have the same hash code.
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ImmutableMap<String, Integer> map1 = ImmutableMap.of("a", 1, "b", 2);
      * ImmutableMap<String, Integer> map2 = ImmutableMap.of("a", 1, "b", 2);
      * System.out.println(map1.hashCode() == map2.hashCode()); // true
      * }</pre>
-     * </p>
      *
      * @return the hash code value for this map
      * @see java.util.Map#hashCode()
@@ -847,12 +829,11 @@ public class ImmutableMap<K, V> extends AbstractMap<K, V> implements Immutable {
      * enclosed in braces ("{}"). Each key-value mapping is represented as the key followed by an equals sign ("=")
      * followed by the value. Adjacent mappings are separated by the characters ", " (comma and space).
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ImmutableMap<String, Integer> map = ImmutableMap.of("a", 1, "b", 2);
      * System.out.println(map); // {a=1, b=2}
      * }</pre>
-     * </p>
      *
      * @return a string representation of this map
      * @see java.util.Map#toString()
@@ -868,7 +849,7 @@ public class ImmutableMap<K, V> extends AbstractMap<K, V> implements Immutable {
      * This is useful when the number of entries is not known at compile time.
      * The builder uses a HashMap internally for efficient entry addition.
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ImmutableMap<String, Integer> map = ImmutableMap.<String, Integer>builder()
      *     .put("one", 1)
@@ -876,7 +857,6 @@ public class ImmutableMap<K, V> extends AbstractMap<K, V> implements Immutable {
      *     .put("three", 3)
      *     .build();
      * }</pre>
-     * </p>
      *
      * @param <K> the type of keys to be maintained by the map
      * @param <V> the type of mapped values
@@ -891,8 +871,8 @@ public class ImmutableMap<K, V> extends AbstractMap<K, V> implements Immutable {
      * The builder will add entries to the provided map and then create an immutable view of it.
      * This allows reusing an existing map instance as the backing storage.
      * Note that the provided map should not be modified outside the builder after this call.
-     * 
-     * <p>Example:
+     *
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Map<String, Integer> backing = new LinkedHashMap<>();
      * ImmutableMap<String, Integer> map = ImmutableMap.builder(backing)
@@ -900,11 +880,10 @@ public class ImmutableMap<K, V> extends AbstractMap<K, V> implements Immutable {
      *     .put("two", 2)
      *     .build();
      * }</pre>
-     * </p>
      *
      * @param <K> the type of keys to be maintained by the map
      * @param <V> the type of mapped values
-     * @param backedMap the map to be used as the backing storage for the Builder, must not be null
+     * @param backedMap the map to be used as the backing storage for the Builder
      * @return a new Builder instance that will use the provided map
      * @throws IllegalArgumentException if backedMap is null
      */
@@ -922,7 +901,7 @@ public class ImmutableMap<K, V> extends AbstractMap<K, V> implements Immutable {
      * <p>The builder is not thread-safe and should not be used concurrently
      * from multiple threads without external synchronization.</p>
      * 
-     * <p>Example usage:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ImmutableMap<String, Integer> map = ImmutableMap.<String, Integer>builder()
      *     .put("one", 1)
@@ -930,7 +909,6 @@ public class ImmutableMap<K, V> extends AbstractMap<K, V> implements Immutable {
      *     .putAll(otherMap)
      *     .build();
      * }</pre>
-     * </p>
      *
      * @param <K> the type of keys in the map being built
      * @param <V> the type of values in the map being built
@@ -951,7 +929,7 @@ public class ImmutableMap<K, V> extends AbstractMap<K, V> implements Immutable {
          * If the map previously contained a mapping for the key, the old value is replaced.
          * Null keys and values are permitted.
          * 
-         * <p>Example:
+         * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * builder.put("key", "value")
          *        .put("another", "data");
@@ -975,7 +953,7 @@ public class ImmutableMap<K, V> extends AbstractMap<K, V> implements Immutable {
          * The behavior is undefined if the specified map is modified while this operation is in progress.
          * If the map is null or empty, no entries are added.
          * 
-         * <p>Example:
+         * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * Map<String, Integer> existing = Map.of("a", 1, "b", 2);
          * builder.putAll(existing)
@@ -1003,7 +981,7 @@ public class ImmutableMap<K, V> extends AbstractMap<K, V> implements Immutable {
          * for any modification attempts. The iteration order depends on the type of map
          * used internally by the builder.</p>
          * 
-         * <p>Example:
+         * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * ImmutableMap<String, Integer> map = builder.build();
          * // builder should not be used after this point

@@ -46,7 +46,7 @@ public class ZonedDateTimeType extends AbstractTemporalType<ZonedDateTime> {
      * {@link java.time.ZonedDateTime} class that this type handles.
      * </p>
      *
-     * <pre>{@code
+     * <p><b>Usage Examples:</b></p>
      * ZonedDateTimeType type = new ZonedDateTimeType();
      * Class<ZonedDateTime> clazz = type.clazz(); // Returns ZonedDateTime.class
      * }</pre>
@@ -65,7 +65,7 @@ public class ZonedDateTimeType extends AbstractTemporalType<ZonedDateTime> {
      * If the input is null, this method returns null.
      * </p>
      *
-     * <pre>{@code
+     * <p><b>Usage Examples:</b></p>
      * ZonedDateTime zdt = ZonedDateTime.now();
      * String str = type.stringOf(zdt); // Returns "2023-10-15T10:30:00.123Z"
      * }</pre>
@@ -89,7 +89,7 @@ public class ZonedDateTimeType extends AbstractTemporalType<ZonedDateTime> {
      * </ul>
      * </p>
      *
-     * <pre>{@code
+     * <p><b>Usage Examples:</b></p>
      * ZonedDateTime zdt1 = type.valueOf(1697364600000L); // From epoch milliseconds
      * ZonedDateTime zdt2 = type.valueOf("2023-10-15T10:30:00Z"); // From string
      * }</pre>
@@ -120,7 +120,7 @@ public class ZonedDateTimeType extends AbstractTemporalType<ZonedDateTime> {
      * </ul>
      * </p>
      *
-     * <pre>{@code
+     * <p><b>Usage Examples:</b></p>
      * ZonedDateTime zdt1 = type.valueOf("2023-10-15T10:30:00Z"); // ISO 8601 format
      * ZonedDateTime zdt2 = type.valueOf("SYS_TIME"); // Current time
      * }</pre>
@@ -162,7 +162,7 @@ public class ZonedDateTimeType extends AbstractTemporalType<ZonedDateTime> {
      * character array to a string and delegates to {@link #valueOf(String)}.
      * </p>
      *
-     * <pre>{@code
+     * <p><b>Usage Examples:</b></p>
      * char[] chars = "1697364600000".toCharArray();
      * ZonedDateTime zdt = type.valueOf(chars, 0, chars.length); // From epoch millis
      * }</pre>
@@ -197,7 +197,7 @@ public class ZonedDateTimeType extends AbstractTemporalType<ZonedDateTime> {
      * ZonedDateTime in the default timezone.
      * </p>
      *
-     * <pre>{@code
+     * <p><b>Usage Examples:</b></p>
      * ZonedDateTime zdt = type.get(resultSet, 1);
      * // Retrieves timestamp from first column as ZonedDateTime
      * }</pre>
@@ -221,7 +221,7 @@ public class ZonedDateTimeType extends AbstractTemporalType<ZonedDateTime> {
      * ZonedDateTime in the default timezone.
      * </p>
      *
-     * <pre>{@code
+     * <p><b>Usage Examples:</b></p>
      * ZonedDateTime zdt = type.get(resultSet, "created_date");
      * // Retrieves timestamp from 'created_date' column
      * }</pre>
@@ -245,7 +245,7 @@ public class ZonedDateTimeType extends AbstractTemporalType<ZonedDateTime> {
      * PreparedStatement. If the ZonedDateTime is null, a NULL value is set.
      * </p>
      *
-     * <pre>{@code
+     * <p><b>Usage Examples:</b></p>
      * ZonedDateTime zdt = ZonedDateTime.now();
      * type.set(preparedStatement, 1, zdt); // Sets timestamp at first parameter
      * }</pre>
@@ -267,7 +267,7 @@ public class ZonedDateTimeType extends AbstractTemporalType<ZonedDateTime> {
      * CallableStatement. If the ZonedDateTime is null, a NULL value is set.
      * </p>
      *
-     * <pre>{@code
+     * <p><b>Usage Examples:</b></p>
      * ZonedDateTime zdt = ZonedDateTime.now();
      * type.set(callableStatement, "created_date", zdt); // Sets timestamp parameter
      * }</pre>
@@ -289,7 +289,7 @@ public class ZonedDateTimeType extends AbstractTemporalType<ZonedDateTime> {
      * to the provided Appendable. If the ZonedDateTime is null, it appends the string "null".
      * </p>
      *
-     * <pre>{@code
+     * <p><b>Usage Examples:</b></p>
      * StringBuilder sb = new StringBuilder();
      * type.appendTo(sb, ZonedDateTime.now()); // Appends formatted date/time
      * }</pre>
@@ -320,6 +320,7 @@ public class ZonedDateTimeType extends AbstractTemporalType<ZonedDateTime> {
      * The output may be quoted based on the configuration settings, except for LONG format.
      * </p>
      *
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * CharacterWriter writer = new CharacterWriter();
      * JSONXMLSerializationConfig<?> config = JSONXMLSerializationConfig.of();

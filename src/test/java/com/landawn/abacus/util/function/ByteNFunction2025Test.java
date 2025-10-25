@@ -16,7 +16,8 @@ public class ByteNFunction2025Test extends TestBase {
         ByteNFunction<String> toString = args -> {
             StringBuilder sb = new StringBuilder();
             for (int i = 0; i < args.length; i++) {
-                if (i > 0) sb.append(",");
+                if (i > 0)
+                    sb.append(",");
                 sb.append(args[i]);
             }
             return sb.toString();
@@ -45,7 +46,8 @@ public class ByteNFunction2025Test extends TestBase {
         ByteNFunction<Double> average = new ByteNFunction<Double>() {
             @Override
             public Double apply(byte... args) {
-                if (args.length == 0) return 0.0;
+                if (args.length == 0)
+                    return 0.0;
                 double sum = 0;
                 for (byte b : args) {
                     sum += b;
@@ -140,7 +142,8 @@ public class ByteNFunction2025Test extends TestBase {
         ByteNFunction<String> toString = args -> {
             StringBuilder sb = new StringBuilder();
             for (int i = 0; i < args.length; i++) {
-                if (i > 0) sb.append(",");
+                if (i > 0)
+                    sb.append(",");
                 sb.append(args[i]);
             }
             return sb.toString();

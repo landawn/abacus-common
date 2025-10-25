@@ -30,8 +30,8 @@ public class SQLXMLType extends AbstractType<SQLXML> {
 
     /**
      * Returns the Class object representing the SQL XML type.
-     * <p>
-     * Usage example:
+     *
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * SQLXMLType type = new SQLXMLType();
      * Class<SQLXML> clazz = type.clazz(); // Returns SQLXML.class
@@ -47,8 +47,8 @@ public class SQLXMLType extends AbstractType<SQLXML> {
     /**
      * Indicates whether this type is serializable.
      * SQL XML types are not serializable as they represent database-specific XML data.
-     * <p>
-     * Usage example:
+     *
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * SQLXMLType type = new SQLXMLType();
      * boolean serializable = type.isSerializable(); // Returns false
@@ -65,8 +65,8 @@ public class SQLXMLType extends AbstractType<SQLXML> {
      * Converts a SQLXML object to its string representation.
      * This operation is not supported for SQL XML types as they are database-specific
      * and require special handling for XML data extraction.
-     * <p>
-     * Usage example:
+     *
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * SQLXMLType type = new SQLXMLType();
      * // This will throw UnsupportedOperationException
@@ -86,8 +86,8 @@ public class SQLXMLType extends AbstractType<SQLXML> {
      * Creates a SQLXML object from a string representation.
      * This operation is not supported for SQL XML types as they must be created
      * by the database connection and cannot be instantiated from a string.
-     * <p>
-     * Usage example:
+     *
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * SQLXMLType type = new SQLXMLType();
      * // This will throw UnsupportedOperationException
@@ -106,8 +106,8 @@ public class SQLXMLType extends AbstractType<SQLXML> {
     /**
      * Retrieves a SQL XML value from the specified column in the ResultSet.
      * A SQL XML represents XML data stored in the database.
-     * <p>
-     * Usage example:
+     *
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * SQLXMLType type = new SQLXMLType();
      * ResultSet rs = statement.executeQuery("SELECT config_xml FROM settings");
@@ -127,8 +127,8 @@ public class SQLXMLType extends AbstractType<SQLXML> {
     /**
      * Retrieves a SQL XML value from the specified column in the ResultSet.
      * A SQL XML represents XML data stored in the database.
-     * <p>
-     * Usage example:
+     *
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * SQLXMLType type = new SQLXMLType();
      * ResultSet rs = statement.executeQuery("SELECT config_xml FROM settings");
@@ -148,8 +148,8 @@ public class SQLXMLType extends AbstractType<SQLXML> {
     /**
      * Sets a SQLXML parameter in a PreparedStatement.
      * The SQLXML represents XML data to be stored in the database.
-     * <p>
-     * Usage example:
+     *
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * SQLXMLType type = new SQLXMLType();
      * PreparedStatement stmt = conn.prepareStatement("INSERT INTO settings (config_xml) VALUES (?)");
@@ -169,8 +169,8 @@ public class SQLXMLType extends AbstractType<SQLXML> {
     /**
      * Sets a SQLXML parameter in a CallableStatement.
      * The SQLXML represents XML data to be stored in the database.
-     * <p>
-     * Usage example:
+     *
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * SQLXMLType type = new SQLXMLType();
      * CallableStatement stmt = conn.prepareCall("{call update_config(?)}");

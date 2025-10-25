@@ -141,14 +141,15 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
     }
 
     /**
-     * Creates a new IntList containing the specified number of elements from the given array.
-     * The list will contain the first 'size' elements from the array. If the array is null,
-     * it is treated as an empty array.
+     * Creates a new IntList containing the first {@code size} elements of the specified array.
+     * The array is used directly as the backing array without copying for efficiency.
+     * If the input array is {@code null}, it is treated as an empty array.
      *
-     * @param a the array of integers to be placed into the new list. May be null.
-     * @param size the number of elements to include in the list. Must be non-negative.
-     * @return a new IntList containing the specified number of elements from the array
-     * @throws IndexOutOfBoundsException if size is negative or greater than the array length
+     * @param a the array of int values to be used as the backing array. Can be {@code null}.
+     * @param size the number of elements from the array to include in the list.
+     *             Must be between 0 and the array length (inclusive).
+     * @return a new IntList containing the first {@code size} elements of the specified array
+     * @throws IndexOutOfBoundsException if {@code size} is negative or greater than the array length
      */
     public static IntList of(final int[] a, final int size) throws IndexOutOfBoundsException {
         N.checkFromIndexSize(0, size, N.len(a));
@@ -158,25 +159,32 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
 
     /**
      * Creates a new IntList that is a copy of the specified array.
-     * This method creates a defensive copy of the array, so subsequent modifications
-     * to the original array will not affect the returned list.
      *
-     * @param a the array to be copied. May be null, in which case an empty list is returned.
-     * @return a new IntList containing a copy of the elements from the specified array
+     * <p>Unlike {@link #of(int...)}, this method always creates a defensive copy of the input array,
+     * ensuring that modifications to the returned list do not affect the original array.</p>
+     *
+     * <p>If the input array is {@code null}, an empty list is returned.</p>
+     *
+     * @param a the array to be copied. Can be {@code null}.
+     * @return a new IntList containing a copy of the elements from the specified array,
+     *         or an empty list if the array is {@code null}
      */
     public static IntList copyOf(final int[] a) {
         return of(N.clone(a));
     }
 
     /**
-     * Creates a new IntList that is a copy of the specified range of the array.
-     * This method creates a defensive copy of the specified portion of the array.
+     * Creates a new IntList that is a copy of the specified range within the given array.
      *
-     * @param a the array from which a range is to be copied
-     * @param fromIndex the initial index of the range to be copied, inclusive
-     * @param toIndex the final index of the range to be copied, exclusive
-     * @return a new IntList containing the elements from the specified range
-     * @throws IndexOutOfBoundsException if fromIndex < 0 or toIndex > a.length or fromIndex > toIndex
+     * <p>This method creates a defensive copy of the elements in the range [fromIndex, toIndex),
+     * ensuring that modifications to the returned list do not affect the original array.</p>
+     *
+     * @param a the array from which a range is to be copied. Must not be {@code null}.
+     * @param fromIndex the initial index of the range to be copied, inclusive.
+     * @param toIndex the final index of the range to be copied, exclusive.
+     * @return a new IntList containing a copy of the elements in the specified range
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0} or {@code toIndex > a.length}
+     *                                   or {@code fromIndex > toIndex}
      */
     public static IntList copyOf(final int[] a, final int fromIndex, final int toIndex) {
         return of(N.copyOfRange(a, fromIndex, toIndex));
@@ -323,16 +331,20 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
     }
 
     /**
-     * Returns the internal array backing this list without creating a copy.
-     * This method provides direct access to the internal array for performance reasons.
-     * 
-     * <p><b>Warning:</b> The returned array should not be modified unless you understand
-     * the implications. Modifications to the returned array will directly affect this list.
-     * The array may be larger than the list size; only elements from index 0 to size()-1
-     * are valid list elements.
+     * Returns the underlying int array backing this list without creating a copy.
+     * This method provides direct access to the internal array for performance-critical operations.
      *
-     * @return the internal array backing this list
-     * @deprecated should call {@code toArray()}
+     * <p><b>Warning:</b> The returned array is the actual internal storage of this list.
+     * Modifications to the returned array will directly affect this list's contents.
+     * The array may be larger than the list size; only indices from 0 to size()-1 contain valid elements.</p>
+     *
+     * <p>This method is marked as {@code @Beta} and should be used with caution.</p>
+     *
+     * @return the internal int array backing this list
+     * @deprecated This method is deprecated because it exposes internal state and can lead to bugs.
+     *             Use {@link #toArray()} instead to get a safe copy of the list elements.
+     *             If you need the internal array for performance reasons and understand the risks,
+     *             consider using a custom implementation or wrapping this list appropriately.
      */
     @Beta
     @Deprecated
@@ -376,6 +388,10 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
      * Appends the specified element to the end of this list.
      * The list will automatically grow if necessary to accommodate the new element.
      *
+     * <p>This method runs in amortized constant time. If the internal array needs to be
+     * resized to accommodate the new element, all existing elements will be copied to
+     * a new, larger array.</p>
+     *
      * @param e the element to be appended to this list
      */
     public void add(final int e) {
@@ -389,9 +405,13 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
      * Shifts the element currently at that position (if any) and any subsequent
      * elements to the right (adds one to their indices).
      *
+     * <p>This method runs in linear time in the worst case (when inserting at the beginning
+     * of the list), as it may need to shift all existing elements.</p>
+     *
      * @param index the index at which the specified element is to be inserted
      * @param e the element to be inserted
-     * @throws IndexOutOfBoundsException if the index is out of range (index < 0 || index > size())
+     * @throws IndexOutOfBoundsException if the index is out of range
+     *         ({@code index < 0 || index > size()})
      */
     public void add(final int index, final int e) {
         rangeCheckForAdd(index);
@@ -534,8 +554,12 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
      * If the list does not contain the element, it is unchanged. More formally, removes the
      * element with the lowest index i such that get(i) == e.
      *
+     * <p>This method runs in linear time, as it may need to search through the entire list
+     * to find the element.</p>
+     *
      * @param e the element to be removed from this list, if present
-     * @return {@code true} if this list contained the specified element and it was removed
+     * @return {@code true} if this list contained the specified element (and it was removed);
+     *         {@code false} otherwise
      */
     public boolean remove(final int e) {
         for (int i = 0; i < size; i++) {
@@ -627,11 +651,21 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
 
     /**
      * Removes all elements from this list that satisfy the given predicate.
-     * The elements are tested in order, and those for which the predicate returns true
-     * are removed. The relative order of retained elements is preserved.
+     * Elements are tested in order from first to last, and those for which the predicate
+     * returns {@code true} are removed. The order of the remaining elements is preserved.
      *
-     * @param p the predicate which returns {@code true} for elements to be removed
-     * @return {@code true} if any elements were removed from this list
+     * <p>This is a functional programming approach to element removal, allowing complex
+     * removal logic to be expressed concisely using lambda expressions or method references.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * IntList list = IntList.of(1, -2, 3, -4, 5);
+     * list.removeIf(i -> i < 0);  // Removes negative values
+     * // list now contains: [1, 3, 5]
+     * }</pre>
+     *
+     * @param p the predicate which returns {@code true} for elements to be removed. Must not be {@code null}.
+     * @return {@code true} if any elements were removed; {@code false} if the list was unchanged
      */
     public boolean removeIf(final IntPredicate p) {
         N.requireNonNull(p, cs.predicate);
@@ -853,12 +887,12 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
      * so that the element originally at fromIndex will be at newPositionAfterMove.
      * Other elements are shifted as necessary to accommodate the move.
      * 
-     * <p>Example: 
-     * <pre>
+     * <p><b>Usage Examples:</b></p> 
+     * <pre>{@code
      * IntList list = IntList.of(0, 1, 2, 3, 4, 5);
      * list.moveRange(1, 3, 3);  // Moves elements [1, 2] to position starting at index 3
      * // Result: [0, 3, 4, 1, 2, 5]
-     * </pre>
+     * }</pre>
      *
      * @param fromIndex the starting index (inclusive) of the range to be moved
      * @param toIndex the ending index (exclusive) of the range to be moved
@@ -1199,13 +1233,13 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
      * For elements that appear multiple times, the intersection contains the minimum number of occurrences
      * present in both lists.
      *
-     * <p>Example:
-     * <pre>
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
      * IntList list1 = IntList.of(0, 1, 2, 2, 3);
      * IntList list2 = IntList.of(1, 2, 2, 4);
      * IntList result = list1.intersection(list2); // result will be [1, 2, 2]
      * // One occurrence of '1' (minimum count in both lists) and two occurrences of '2'
-     * </pre>
+     * }</pre>
      *
      * @param b the list to find common elements with this list
      * @return a new IntList containing elements present in both lists, considering the minimum
@@ -1238,12 +1272,12 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
      * For elements that appear multiple times, the intersection contains the minimum number of occurrences
      * present in both sources.
      *
-     * <p>Example:
-     * <pre>
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
      * IntList list1 = IntList.of(0, 1, 2, 2, 3);
-     * int[] array = new int[]{1, 2, 2, 4};
+     * int[] array = new int[] {1, 2, 2, 4};
      * IntList result = list1.intersection(array); // result will be [1, 2, 2]
-     * </pre>
+     * }</pre>
      *
      * @param b the array to find common elements with this list
      * @return a new IntList containing elements present in both this list and the array,
@@ -1266,13 +1300,13 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
      * considering the number of occurrences of each element. If an element appears multiple times
      * in both lists, the difference will contain the extra occurrences from this list.
      *
-     * <p>Example:
-     * <pre>
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
      * IntList list1 = IntList.of(0, 1, 2, 2, 3);
      * IntList list2 = IntList.of(2, 5, 1);
      * IntList result = list1.difference(list2); // result will be [0, 2, 3]
      * // One '2' remains because list1 has two occurrences and list2 has one
-     * </pre>
+     * }</pre>
      *
      * @param b the list whose elements are to be removed from this list
      * @return a new IntList containing elements present in this list but not in the specified list,
@@ -1305,12 +1339,12 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
      * considering the number of occurrences of each element. If an element appears multiple times
      * in both sources, the difference will contain the extra occurrences from this list.
      *
-     * <p>Example:
-     * <pre>
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
      * IntList list1 = IntList.of(0, 1, 2, 2, 3);
-     * int[] array = new int[]{2, 5, 1};
+     * int[] array = new int[] {2, 5, 1};
      * IntList result = list1.difference(array); // result will be [0, 2, 3]
-     * </pre>
+     * }</pre>
      *
      * @param b the array whose elements are to be removed from this list
      * @return a new IntList containing elements present in this list but not in the array,
@@ -1337,8 +1371,8 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
      * <p>The order of elements is preserved, with elements from this list appearing first,
      * followed by elements from the specified list.
      *
-     * <p>Example:
-     * <pre>
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
      * IntList list1 = IntList.of(0, 1, 2, 2, 3);
      * IntList list2 = IntList.of(2, 5, 1);
      * IntList result = list1.symmetricDifference(list2);
@@ -1347,7 +1381,7 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
      * // - 0, 3: only in list1
      * // - 5: only in list2
      * // - 2: appears twice in list1 and once in list2, so one occurrence remains
-     * </pre>
+     * }</pre>
      *
      * @param b the list to compare with this list for symmetric difference
      * @return a new IntList containing elements that are in either list but not in both,
@@ -1392,13 +1426,13 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
      * For elements that appear multiple times, the result contains the absolute difference
      * in the number of occurrences.
      *
-     * <p>Example:
-     * <pre>
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
      * IntList list1 = IntList.of(0, 1, 2, 2, 3);
-     * int[] array = new int[]{2, 5, 1};
+     * int[] array = new int[] {2, 5, 1};
      * IntList result = list1.symmetricDifference(array);
      * // result will contain: [0, 2, 3, 5]
-     * </pre>
+     * }</pre>
      *
      * @param b the array to compare with this list for symmetric difference
      * @return a new IntList containing elements that are in either this list or the array but not in both,
@@ -1606,18 +1640,28 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
     }
 
     /**
-     * Performs the given action for each element in the specified range of this list.
-     * The action is executed once for each element in the range, passing the element value as the argument.
-     * 
-     * <p>If fromIndex is less than toIndex, elements are processed in forward order from fromIndex
-     * (inclusive) to toIndex (exclusive). If fromIndex is greater than toIndex, elements are
-     * processed in reverse order from fromIndex (inclusive) down to toIndex (exclusive).
-     * If toIndex is -1, it is treated as 0 for reverse iteration.</p>
+     * Performs the given action for each element within the specified range of this list.
      *
-     * @param fromIndex the starting index (inclusive) of the range to iterate
-     * @param toIndex the ending index (exclusive) of the range to iterate, or -1 for reverse iteration from fromIndex to start
+     * <p>This method supports both forward and backward iteration based on the relative values of
+     * fromIndex and toIndex:</p>
+     * <ul>
+     *   <li>If {@code fromIndex <= toIndex}: iterates forward from fromIndex (inclusive) to toIndex (exclusive)</li>
+     *   <li>If {@code fromIndex > toIndex}: iterates backward from fromIndex (inclusive) to toIndex (exclusive)</li>
+     *   <li>If {@code toIndex == -1}: treated as backward iteration from fromIndex to the beginning of the list</li>
+     * </ul>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * IntList list = IntList.of(10, 20, 30, 40, 50);
+     * list.forEach(0, 3, action);    // Forward: processes indices 0,1,2
+     * list.forEach(3, 0, action);    // Backward: processes indices 3,2,1
+     * list.forEach(4, -1, action);   // Backward: processes indices 4,3,2,1,0
+     * }</pre>
+     *
+     * @param fromIndex the starting index (inclusive)
+     * @param toIndex the ending index (exclusive), or -1 for backward iteration to the start
      * @param action the action to be performed for each element
-     * @throws IndexOutOfBoundsException if the range is invalid
+     * @throws IndexOutOfBoundsException if the indices are out of range
      */
     public void forEach(final int fromIndex, final int toIndex, final IntConsumer action) throws IndexOutOfBoundsException {
         N.checkFromToIndex(fromIndex < toIndex ? fromIndex : (toIndex == -1 ? 0 : toIndex), Math.max(fromIndex, toIndex), size);
@@ -2296,11 +2340,13 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
      * The hash code is computed based on the elements in the list and their order.
      * 
      * <p>The hash code is defined to be the result of the following calculation:
+     * 
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * int hashCode = 1;
      * for (int e : list)
      *     hashCode = 31 * hashCode + e;
-     * }</pre></p>
+     * }</pre>
      *
      * @return the hash code value for this list
      */
@@ -2340,7 +2386,7 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
      * enclosed in square brackets ("[]"). Adjacent elements are separated
      * by the characters ", " (comma and space).
      * 
-     * <p>Example: A list containing the integers 1, 2, and 3 would return "[1, 2, 3]".</p>
+     * <p><b>Usage Examples:</b></p> A list containing the integers 1, 2, and 3 would return "[1, 2, 3]".</p>
      *
      * @return a string representation of this list
      */

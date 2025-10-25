@@ -43,7 +43,7 @@ public interface ObjIntFunction<T, R> extends Throwables.ObjIntFunction<T, R, Ru
      * produces a result of type R. The function should be deterministic, meaning
      * that for the same inputs, it should always produce the same output.
      *
-     * <p>Example usage:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ObjIntFunction<List<String>, String> getAtIndex = (list, index) -> 
      *     list.get(index);
@@ -57,7 +57,6 @@ public interface ObjIntFunction<T, R> extends Throwables.ObjIntFunction<T, R, Ru
      * @param t the first function argument of type T
      * @param u the second function argument, a primitive int value
      * @return the function result of type R
-     * @throws RuntimeException if the function cannot compute a result
      */
     @Override
     R apply(T t, int u);
@@ -72,7 +71,7 @@ public interface ObjIntFunction<T, R> extends Throwables.ObjIntFunction<T, R, Ru
      * transformations together. The output of this function becomes the input to
      * the {@code after} function.
      *
-     * <p>Example usage:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ObjIntFunction<String[], String> getElement = (array, index) -> 
      *     array[index];

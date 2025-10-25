@@ -49,7 +49,7 @@ import com.landawn.abacus.util.URLEncodedUtil;
  * <p>This implementation uses the modern Java HttpClient introduced in Java 11, providing better performance
  * and support for HTTP/2 compared to older HTTP clients.</p>
  * 
- * <p>Example usage:</p>
+ * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * // Simple GET request
  * HttpResponse<String> response = HttpRequest.url("https://api.example.com/users")
@@ -140,7 +140,7 @@ public final class HttpRequest {
     /**
      * Creates a new HttpRequest instance with the specified URL using the default HTTP client.
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * HttpRequest request = HttpRequest.url("https://api.example.com/users");
      * }</pre>
@@ -156,7 +156,7 @@ public final class HttpRequest {
      * Creates a new HttpRequest instance with the specified URL and timeout settings.
      * A new HTTP client is created with the specified timeouts and will be closed after execution.
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * HttpRequest request = HttpRequest.url("https://api.example.com/data", 5000, 30000);
      * }</pre>
@@ -233,7 +233,7 @@ public final class HttpRequest {
      * The connection timeout is the maximum time to wait when establishing a connection to the server.
      * If the connection cannot be established within this timeout, the request will fail.
      *
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * HttpRequest.url("https://api.example.com/data")
      *     .connectTimeout(Duration.ofSeconds(10))
@@ -287,7 +287,7 @@ public final class HttpRequest {
      * Sets the read timeout for this request.
      * The read timeout is the maximum time to wait for data to be read from the server.
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * HttpRequest.url("https://api.example.com/slow-endpoint")
      *     .readTimeout(Duration.ofSeconds(60))
@@ -309,7 +309,7 @@ public final class HttpRequest {
      * (e.g., HTTP Basic or Digest authentication). This is useful for scenarios requiring dynamic
      * credential retrieval or advanced authentication mechanisms.
      *
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Authenticator auth = new Authenticator() {
      *     @Override
@@ -338,7 +338,7 @@ public final class HttpRequest {
     /**
      * Sets the Basic Authentication header for this request.
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * HttpRequest.url("https://api.example.com/secure")
      *     .basicAuth("username", "password")
@@ -360,7 +360,7 @@ public final class HttpRequest {
      * Sets the HTTP header specified by {@code name/value}.
      * If this HttpRequest already has any headers with that name, they are all replaced.
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * HttpRequest.url("https://api.example.com/data")
      *     .header("Accept", "application/json")
@@ -384,7 +384,7 @@ public final class HttpRequest {
      * If this HttpRequest already has any headers with those names, they are all replaced.
      * This is a convenience method for setting multiple headers in one call.
      *
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * HttpRequest.url("https://api.example.com/data")
      *     .headers("Accept", "application/json", "User-Agent", "MyApp/1.0")
@@ -408,7 +408,7 @@ public final class HttpRequest {
      * If this HttpRequest already has any headers with those names, they are all replaced.
      * This is a convenience method for setting multiple headers in one call.
      *
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * HttpRequest.url("https://api.example.com/data")
      *     .headers("Accept", "application/json",
@@ -435,7 +435,7 @@ public final class HttpRequest {
      * Sets HTTP headers specified by the key/value entries from the provided Map.
      * If this HttpRequest already has any headers with those names, they are all replaced.
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Map<String, String> headers = new HashMap<>();
      * headers.put("Accept", "application/json");
@@ -465,7 +465,7 @@ public final class HttpRequest {
      * If this HttpRequest already has any headers with those names, they are all replaced.
      * This is useful when you have a collection of headers to apply from another source.
      *
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * HttpHeaders headers = new HttpHeaders();
      * headers.set("Accept", "application/json");
@@ -493,7 +493,7 @@ public final class HttpRequest {
      * Sets query parameters for {@code GET} or {@code DELETE} request.
      * The query string will be appended to the URL.
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * HttpRequest.url("https://api.example.com/search")
      *     .query("q=java&limit=10")
@@ -513,7 +513,7 @@ public final class HttpRequest {
      * Sets query parameters for {@code GET} or {@code DELETE} request.
      * The parameters will be URL-encoded and appended to the URL.
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Map<String, Object> params = new HashMap<>();
      * params.put("q", "java programming");
@@ -536,7 +536,7 @@ public final class HttpRequest {
     /**
      * Sets the request body as JSON with Content-Type: application/json.
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String json = "{\"name\":\"John\",\"age\":30}";
      * HttpRequest.url("https://api.example.com/users")
@@ -559,7 +559,7 @@ public final class HttpRequest {
      * Sets the request body as JSON with Content-Type: application/json.
      * The object will be serialized to JSON using the default JSON serializer.
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * User user = new User("John", 30);
      * HttpRequest.url("https://api.example.com/users")
@@ -582,7 +582,7 @@ public final class HttpRequest {
      * Sets the request body as XML with Content-Type: application/xml.
      * The provided XML string will be sent as-is in the request body.
      *
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String xml = "<user><name>John</name><age>30</age></user>";
      * HttpRequest.url("https://api.example.com/users")
@@ -607,7 +607,7 @@ public final class HttpRequest {
      * The object will be serialized to XML using the default XML serializer.
      * This is useful when you have a POJO that you want to send as XML.
      *
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * User user = new User("John", 30);
      * HttpRequest.url("https://api.example.com/users")
@@ -631,7 +631,7 @@ public final class HttpRequest {
      * Sets the request body as form data with Content-Type: application/x-www-form-urlencoded.
      * The map entries will be encoded as form fields.
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Map<String, String> formData = new HashMap<>();
      * formData.put("username", "john_doe");
@@ -657,7 +657,7 @@ public final class HttpRequest {
      * Sets the request body as form data with Content-Type: application/x-www-form-urlencoded.
      * The bean properties will be encoded as form fields using getter methods.
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * LoginRequest login = new LoginRequest();
      * login.setUsername("john_doe");
@@ -688,7 +688,7 @@ public final class HttpRequest {
      * This allows full control over the request body content and is useful for advanced scenarios
      * such as streaming data, multipart form data, or custom content types.
      *
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * BodyPublisher publisher = BodyPublishers.ofFile(Paths.get("data.bin"));
      * HttpRequest.url("https://api.example.com/upload")
@@ -710,7 +710,7 @@ public final class HttpRequest {
     /**
      * Executes a GET request and returns the response with a String body.
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * HttpResponse<String> response = HttpRequest.url("https://api.example.com/users")
      *     .header("Accept", "application/json")
@@ -733,7 +733,7 @@ public final class HttpRequest {
      * This allows you to control how the response body is processed, such as saving to a file,
      * reading as bytes, or handling as an input stream.
      *
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * HttpResponse<byte[]> response = HttpRequest.url("https://api.example.com/image.png")
      *     .get(BodyHandlers.ofByteArray());
@@ -753,7 +753,7 @@ public final class HttpRequest {
     /**
      * Executes a GET request and returns the response body deserialized to the specified type.
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * List<User> users = HttpRequest.url("https://api.example.com/users")
      *     .get(new TypeToken<List<User>>(){}.getType());
@@ -773,7 +773,7 @@ public final class HttpRequest {
     /**
      * Executes a POST request and returns the response with a String body.
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * User newUser = new User("John", "Doe");
      * HttpResponse<String> response = HttpRequest.url("https://api.example.com/users")
@@ -793,7 +793,7 @@ public final class HttpRequest {
      * This allows you to control how the response body is processed, such as saving to a file,
      * reading as bytes, or handling as an input stream.
      *
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * HttpResponse<InputStream> response = HttpRequest.url("https://api.example.com/data")
      *     .jsonBody(requestData)
@@ -813,7 +813,7 @@ public final class HttpRequest {
     /**
      * Executes a POST request and returns the response body deserialized to the specified type.
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * User newUser = new User("John", "Doe");
      * User createdUser = HttpRequest.url("https://api.example.com/users")
@@ -836,7 +836,7 @@ public final class HttpRequest {
      * Executes a PUT request and returns the response with a String body.
      * PUT requests are typically used to update or replace a resource on the server.
      *
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * User updatedUser = new User("John", "Smith");
      * HttpResponse<String> response = HttpRequest.url("https://api.example.com/users/123")
@@ -856,7 +856,7 @@ public final class HttpRequest {
      * This allows you to control how the response body is processed, such as saving to a file,
      * reading as bytes, or handling as an input stream.
      *
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Path outputPath = Paths.get("response.json");
      * HttpResponse<Path> response = HttpRequest.url("https://api.example.com/users/123")
@@ -879,7 +879,7 @@ public final class HttpRequest {
      * This method automatically handles JSON/XML deserialization based on the response content type.
      * An exception is thrown if the response status code indicates an error (not 2xx).
      *
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * User updatedUser = new User("John", "Smith");
      * User result = HttpRequest.url("https://api.example.com/users/123")
@@ -902,7 +902,7 @@ public final class HttpRequest {
      * Executes a PATCH request and returns the response with a String body.
      * PATCH requests are typically used to apply partial updates to a resource on the server.
      *
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Map<String, Object> updates = new HashMap<>();
      * updates.put("email", "newemail@example.com");
@@ -924,7 +924,7 @@ public final class HttpRequest {
      * This allows you to control how the response body is processed, such as saving to a file,
      * reading as bytes, or handling as an input stream.
      *
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Map<String, Object> updates = new HashMap<>();
      * updates.put("status", "active");
@@ -949,7 +949,7 @@ public final class HttpRequest {
      * This method automatically handles JSON/XML deserialization based on the response content type.
      * An exception is thrown if the response status code indicates an error (not 2xx).
      *
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Map<String, Object> updates = new HashMap<>();
      * updates.put("email", "newemail@example.com");
@@ -973,7 +973,7 @@ public final class HttpRequest {
     /**
      * Executes a DELETE request and returns the response with a String body.
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * HttpResponse<String> response = HttpRequest.url("https://api.example.com/users/123")
      *     .delete();
@@ -991,7 +991,7 @@ public final class HttpRequest {
      * This allows you to control how the response body is processed, such as saving to a file,
      * reading as bytes, or handling as an input stream.
      *
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * HttpResponse<Void> response = HttpRequest.url("https://api.example.com/users/123")
      *     .delete(BodyHandlers.discarding());
@@ -1013,7 +1013,7 @@ public final class HttpRequest {
      * This method automatically handles JSON/XML deserialization based on the response content type.
      * An exception is thrown if the response status code indicates an error (not 2xx).
      *
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * DeleteResponse result = HttpRequest.url("https://api.example.com/users/123")
      *     .delete(DeleteResponse.class);
@@ -1035,7 +1035,7 @@ public final class HttpRequest {
      * HEAD requests are used to retrieve headers without the response body, which is useful
      * for checking if a resource exists, getting metadata, or checking content length.
      *
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * HttpResponse<Void> response = HttpRequest.url("https://api.example.com/large-file.zip")
      *     .head();
@@ -1066,7 +1066,7 @@ public final class HttpRequest {
      * Executes an HTTP request with the specified method and returns the response with a String body.
      * This is a generic execution method that allows you to specify any HTTP method dynamically.
      *
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * HttpResponse<String> response = HttpRequest.url("https://api.example.com/data")
      *     .execute(HttpMethod.GET);
@@ -1087,7 +1087,7 @@ public final class HttpRequest {
      * This is a generic execution method that provides full control over both the HTTP method
      * and how the response is processed.
      *
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * HttpResponse<byte[]> response = HttpRequest.url("https://api.example.com/image")
      *     .execute(HttpMethod.GET, BodyHandlers.ofByteArray());
@@ -1122,7 +1122,7 @@ public final class HttpRequest {
      * This is a generic execution method that automatically handles JSON/XML deserialization.
      * An exception is thrown if the response status code indicates an error (not 2xx).
      *
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * User user = HttpRequest.url("https://api.example.com/users/123")
      *     .execute(HttpMethod.GET, User.class);
@@ -1180,7 +1180,7 @@ public final class HttpRequest {
     /**
      * Executes a GET request asynchronously and returns a CompletableFuture with a String body response.
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * CompletableFuture<HttpResponse<String>> future = HttpRequest.url("https://api.example.com/users")
      *     .asyncGet();
@@ -1202,7 +1202,7 @@ public final class HttpRequest {
      * Executes a GET request asynchronously with a custom response body handler.
      * The request executes in the background, allowing the calling thread to continue processing.
      *
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * CompletableFuture<HttpResponse<byte[]>> future =
      *     HttpRequest.url("https://api.example.com/large-file")
@@ -1225,7 +1225,7 @@ public final class HttpRequest {
     /**
      * Executes a GET request asynchronously and returns the response body deserialized to the specified type.
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * CompletableFuture<List<User>> future = HttpRequest.url("https://api.example.com/users")
      *     .asyncGet(new TypeToken<List<User>>(){}.getType());
@@ -1248,7 +1248,7 @@ public final class HttpRequest {
      * The push promise handler is used for HTTP/2 server push, which allows the server to send
      * additional resources before the client requests them.
      *
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * PushPromiseHandler<String> pushHandler = (initiatingRequest, pushPromiseRequest, acceptor) -> {
      *     acceptor.apply(BodyHandlers.ofString());
@@ -1274,7 +1274,7 @@ public final class HttpRequest {
      * Executes a POST request asynchronously and returns a CompletableFuture with a String body response.
      * The request executes in the background, allowing the calling thread to continue processing.
      *
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * User newUser = new User("John", "Doe");
      * CompletableFuture<HttpResponse<String>> future =
@@ -1298,7 +1298,7 @@ public final class HttpRequest {
      * This allows you to control how the response body is processed while the request executes
      * in the background.
      *
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * CompletableFuture<HttpResponse<Path>> future =
      *     HttpRequest.url("https://api.example.com/report")
@@ -1320,7 +1320,7 @@ public final class HttpRequest {
      * This method automatically handles JSON/XML deserialization in the background.
      * An exception is thrown if the response status code indicates an error (not 2xx).
      *
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * User newUser = new User("John", "Doe");
      * CompletableFuture<User> future =
@@ -1346,7 +1346,7 @@ public final class HttpRequest {
      * The push promise handler is used for HTTP/2 server push, which allows the server to send
      * additional resources before the client requests them.
      *
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * PushPromiseHandler<String> pushHandler = (initiatingRequest, pushPromiseRequest, acceptor) -> {
      *     acceptor.apply(BodyHandlers.ofString());
@@ -1373,7 +1373,7 @@ public final class HttpRequest {
      * Executes a PUT request asynchronously and returns a CompletableFuture with a String body response.
      * The request executes in the background, allowing the calling thread to continue processing.
      *
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * User updatedUser = new User("John", "Smith");
      * CompletableFuture<HttpResponse<String>> future =
@@ -1543,7 +1543,7 @@ public final class HttpRequest {
      * HEAD requests are useful for checking if a resource exists or getting metadata without
      * downloading the full response body.
      *
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * CompletableFuture<HttpResponse<Void>> future =
      *     HttpRequest.url("https://api.example.com/large-file.zip")
@@ -1577,7 +1577,7 @@ public final class HttpRequest {
      * This is a generic async execution method that allows you to specify any HTTP method dynamically.
      * The request executes in the background, allowing the calling thread to continue processing.
      *
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * CompletableFuture<HttpResponse<String>> future =
      *     HttpRequest.url("https://api.example.com/data")
@@ -1601,7 +1601,7 @@ public final class HttpRequest {
      * This is a generic async execution method that provides full control over both the HTTP method
      * and how the response is processed. The request executes in the background.
      *
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * CompletableFuture<HttpResponse<byte[]>> future =
      *     HttpRequest.url("https://api.example.com/image")
@@ -1624,7 +1624,6 @@ public final class HttpRequest {
             throws IllegalArgumentException {
         N.checkArgNotNull(httpMethod, HTTP_METHOD_STR);
 
-        @SuppressWarnings("resource")
         final HttpClient httpClientToUse = checkUrlAndHttpClient();
 
         //    try {
@@ -1642,7 +1641,7 @@ public final class HttpRequest {
      * This is a generic async execution method that automatically handles JSON/XML deserialization in the background.
      * An exception is thrown if the response status code indicates an error (not 2xx).
      *
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * CompletableFuture<User> future =
      *     HttpRequest.url("https://api.example.com/users/123")
@@ -1663,7 +1662,6 @@ public final class HttpRequest {
     public <T> CompletableFuture<T> asyncExecute(final HttpMethod httpMethod, final Class<T> resultClass) throws IllegalArgumentException {
         N.checkArgNotNull(httpMethod, HTTP_METHOD_STR);
 
-        @SuppressWarnings("resource")
         final HttpClient httpClientToUse = checkUrlAndHttpClient();
         final BodyHandler<?> responseBodyHandler = createResponseBodyHandler(resultClass);
 
@@ -1677,7 +1675,7 @@ public final class HttpRequest {
      * additional resources before the client requests them. This is a generic async execution method
      * that provides full control over all aspects of the request and response processing.
      *
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * PushPromiseHandler<String> pushHandler = (initiatingRequest, pushPromiseRequest, acceptor) -> {
      *     System.out.println("Server push for: " + pushPromiseRequest.uri());
@@ -1702,7 +1700,6 @@ public final class HttpRequest {
             final PushPromiseHandler<T> pushPromiseHandler) throws IllegalArgumentException {
         N.checkArgNotNull(httpMethod, HTTP_METHOD_STR);
 
-        @SuppressWarnings("resource")
         final HttpClient httpClientToUse = checkUrlAndHttpClient();
 
         //    try {

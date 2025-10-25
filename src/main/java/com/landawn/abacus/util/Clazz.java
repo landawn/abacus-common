@@ -53,14 +53,14 @@ import java.util.concurrent.LinkedBlockingQueue;
  * </ul>
  * </p>
  * 
- * <p>Example usage:
+ * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * // Get a typed Class reference (without actual type parameters)
  * Class<List<String>> listClass = Clazz.ofList(String.class);
  * 
  * // Use predefined constants
  * Class<Map<String, Object>> propsMap = Clazz.PROPS_MAP;
- * }</pre></p>
+ * }</pre>
  *
  * @see com.landawn.abacus.type.Type
  * @see TypeReference
@@ -181,7 +181,7 @@ public final class Clazz {
      * {@code ArrayList<Integer>.class} are the same object. This method only provides compile-time
      * type checking.</p>
      *
-     * <p>Example usage:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Instead of: Class<ArrayList<String>> cls = (Class<ArrayList<String>>) ArrayList.class;
      * Class<ArrayList<String>> arrayListClass = Clazz.of(ArrayList.class);
@@ -189,7 +189,7 @@ public final class Clazz {
      * // Useful for method parameters
      * public <T> T deserialize(String json, Class<T> type) { ... }
      * MyObject obj = deserialize(json, Clazz.of(MyObject.class));
-     * }</pre></p>
+     * }</pre>
      *
      * @param <T> the target type parameter
      * @param cls the class to cast (must not be null)
@@ -209,10 +209,10 @@ public final class Clazz {
      * 
      * <p><b>Warning:</b> The returned Class object does not contain actual type parameter information.</p>
      * 
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Class<List<String>> listClass = Clazz.ofList();
-     * }</pre></p>
+     * }</pre>
      *
      * @param <T> the element type of the list
      * @return the Class object representing {@code List<T>}
@@ -238,7 +238,7 @@ public final class Clazz {
      * due to Java's type erasure. The {@code eleCls} parameter is only used for compile-time type
      * inference and is not stored or used at runtime.</p>
      *
-     * <p>Example usage:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // For type-safe API calls
      * Class<List<String>> stringListClass = Clazz.ofList(String.class);
@@ -246,7 +246,7 @@ public final class Clazz {
      *
      * // Common use case with serialization frameworks
      * List<String> result = deserializer.readValue(json, Clazz.ofList(String.class));
-     * }</pre></p>
+     * }</pre>
      *
      * @param <T> the element type of the list
      * @param eleCls the class of elements (used only for type inference, not retained at runtime)
@@ -267,10 +267,10 @@ public final class Clazz {
      * 
      * <p><b>Warning:</b> The returned Class object does not contain actual type parameter information.</p>
      * 
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Class<List<String>> linkedListClass = Clazz.ofLinkedList();
-     * }</pre></p>
+     * }</pre>
      *
      * @param <T> the element type of the list
      * @return the Class object representing {@code LinkedList<T>}
@@ -289,10 +289,10 @@ public final class Clazz {
      * 
      * <p><b>Warning:</b> The returned Class object does not contain actual type parameter information.</p>
      * 
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Class<List<String>> linkedListClass = Clazz.ofLinkedList(String.class);
-     * }</pre></p>
+     * }</pre>
      *
      * @param <T> the element type of the list
      * @param eleCls the class of elements (used only for type inference)
@@ -312,10 +312,10 @@ public final class Clazz {
      * 
      * <p><b>Warning:</b> The returned Class object does not contain actual type parameter information.</p>
      * 
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Class<List<Map<String, Object>>> listOfMapsClass = Clazz.ofListOfMap(String.class, Object.class);
-     * }</pre></p>
+     * }</pre>
      *
      * @param <K> the key type of the maps in the list
      * @param <V> the value type of the maps in the list
@@ -338,10 +338,10 @@ public final class Clazz {
      * 
      * <p><b>Warning:</b> The returned Class object does not contain actual type parameter information.</p>
      * 
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Class<Set<Map<String, Integer>>> setOfMapsClass = Clazz.ofSetOfMap(String.class, Integer.class);
-     * }</pre></p>
+     * }</pre>
      *
      * @param <K> the key type of the maps in the set
      * @param <V> the value type of the maps in the set
@@ -364,10 +364,10 @@ public final class Clazz {
      * 
      * <p><b>Warning:</b> The returned Class object does not contain actual type parameter information.</p>
      * 
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Class<Set<String>> setClass = Clazz.ofSet();
-     * }</pre></p>
+     * }</pre>
      *
      * @param <T> the element type of the set
      * @return the Class object representing {@code Set<T>}
@@ -386,11 +386,11 @@ public final class Clazz {
      * 
      * <p><b>Warning:</b> The returned Class object does not contain actual type parameter information.</p>
      * 
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Class<Set<String>> stringSetClass = Clazz.ofSet(String.class);
      * Class<Set<Integer>> intSetClass = Clazz.ofSet(Integer.class);
-     * }</pre></p>
+     * }</pre>
      *
      * @param <T> the element type of the set
      * @param eleCls the class of elements (used only for type inference)
@@ -410,10 +410,10 @@ public final class Clazz {
      * 
      * <p><b>Warning:</b> The returned Class object does not contain actual type parameter information.</p>
      * 
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Class<Set<String>> linkedHashSetClass = Clazz.ofLinkedHashSet();
-     * }</pre></p>
+     * }</pre>
      *
      * @param <T> the element type of the set
      * @return the Class object representing {@code LinkedHashSet<T>}
@@ -432,10 +432,10 @@ public final class Clazz {
      * 
      * <p><b>Warning:</b> The returned Class object does not contain actual type parameter information.</p>
      * 
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Class<Set<String>> linkedHashSetClass = Clazz.ofLinkedHashSet(String.class);
-     * }</pre></p>
+     * }</pre>
      *
      * @param <T> the element type of the set
      * @param eleCls the class of elements (used only for type inference)
@@ -455,10 +455,10 @@ public final class Clazz {
      * 
      * <p><b>Warning:</b> The returned Class object does not contain actual type parameter information.</p>
      * 
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Class<SortedSet<String>> sortedSetClass = Clazz.ofSortedSet();
-     * }</pre></p>
+     * }</pre>
      *
      * @param <T> the element type of the sorted set
      * @return the Class object representing {@code SortedSet<T>}
@@ -477,10 +477,10 @@ public final class Clazz {
      * 
      * <p><b>Warning:</b> The returned Class object does not contain actual type parameter information.</p>
      * 
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Class<SortedSet<Integer>> sortedIntSetClass = Clazz.ofSortedSet(Integer.class);
-     * }</pre></p>
+     * }</pre>
      *
      * @param <T> the element type of the sorted set
      * @param eleCls the class of elements (used only for type inference)
@@ -500,10 +500,10 @@ public final class Clazz {
      * 
      * <p><b>Warning:</b> The returned Class object does not contain actual type parameter information.</p>
      * 
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Class<NavigableSet<String>> navigableSetClass = Clazz.ofNavigableSet();
-     * }</pre></p>
+     * }</pre>
      *
      * @param <T> the element type of the navigable set
      * @return the Class object representing {@code NavigableSet<T>}
@@ -522,10 +522,10 @@ public final class Clazz {
      * 
      * <p><b>Warning:</b> The returned Class object does not contain actual type parameter information.</p>
      * 
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Class<NavigableSet<Double>> navigableDoubleSetClass = Clazz.ofNavigableSet(Double.class);
-     * }</pre></p>
+     * }</pre>
      *
      * @param <T> the element type of the navigable set
      * @param eleCls the class of elements (used only for type inference)
@@ -545,10 +545,10 @@ public final class Clazz {
      * 
      * <p><b>Warning:</b> The returned Class object does not contain actual type parameter information.</p>
      * 
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Class<NavigableSet<String>> treeSetClass = Clazz.ofTreeSet();
-     * }</pre></p>
+     * }</pre>
      *
      * @param <T> the element type of the tree set
      * @return the Class object representing {@code TreeSet<T>}
@@ -580,7 +580,7 @@ public final class Clazz {
      * due to Java's type erasure. The {@code eleCls} parameter is only used for compile-time type
      * inference.</p>
      *
-     * <p>Example usage:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Class<NavigableSet<String>> treeSetClass = Clazz.ofTreeSet(String.class);
      *
@@ -588,7 +588,7 @@ public final class Clazz {
      * NavigableSet<Integer> numbers = new TreeSet<>();
      * numbers.addAll(Arrays.asList(5, 2, 8, 1));
      * // numbers now contains: [1, 2, 5, 8]
-     * }</pre></p>
+     * }</pre>
      *
      * @param <T> the element type of the tree set
      * @param eleCls the class of elements (used only for type inference, not retained at runtime)
@@ -610,10 +610,10 @@ public final class Clazz {
      * 
      * <p><b>Warning:</b> The returned Class object does not contain actual type parameter information.</p>
      * 
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Class<Queue<String>> queueClass = Clazz.ofQueue();
-     * }</pre></p>
+     * }</pre>
      *
      * @param <T> the element type of the queue
      * @return the Class object representing {@code Queue<T>}
@@ -632,10 +632,10 @@ public final class Clazz {
      * 
      * <p><b>Warning:</b> The returned Class object does not contain actual type parameter information.</p>
      * 
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Class<Queue<Task>> taskQueueClass = Clazz.ofQueue(Task.class);
-     * }</pre></p>
+     * }</pre>
      *
      * @param <T> the element type of the queue
      * @param eleCls the class of elements (used only for type inference)
@@ -655,10 +655,10 @@ public final class Clazz {
      * 
      * <p><b>Warning:</b> The returned Class object does not contain actual type parameter information.</p>
      * 
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Class<Deque<String>> dequeClass = Clazz.ofDeque();
-     * }</pre></p>
+     * }</pre>
      *
      * @param <T> the element type of the deque
      * @return the Class object representing {@code Deque<T>}
@@ -677,10 +677,10 @@ public final class Clazz {
      * 
      * <p><b>Warning:</b> The returned Class object does not contain actual type parameter information.</p>
      * 
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Class<Deque<Integer>> intDequeClass = Clazz.ofDeque(Integer.class);
-     * }</pre></p>
+     * }</pre>
      *
      * @param <T> the element type of the deque
      * @param eleCls the class of elements (used only for type inference)
@@ -700,10 +700,10 @@ public final class Clazz {
      * 
      * <p><b>Warning:</b> The returned Class object does not contain actual type parameter information.</p>
      * 
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Class<Deque<String>> arrayDequeClass = Clazz.ofArrayDeque();
-     * }</pre></p>
+     * }</pre>
      *
      * @param <T> the element type of the array deque
      * @return the Class object representing {@code ArrayDeque<T>}
@@ -722,10 +722,10 @@ public final class Clazz {
      * 
      * <p><b>Warning:</b> The returned Class object does not contain actual type parameter information.</p>
      * 
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Class<Deque<String>> arrayDequeClass = Clazz.ofArrayDeque(String.class);
-     * }</pre></p>
+     * }</pre>
      *
      * @param <T> the element type of the array deque
      * @param eleCls the class of elements (used only for type inference)
@@ -745,10 +745,10 @@ public final class Clazz {
      * 
      * <p><b>Warning:</b> The returned Class object does not contain actual type parameter information.</p>
      * 
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Class<Queue<String>> concurrentQueueClass = Clazz.ofConcurrentLinkedQueue();
-     * }</pre></p>
+     * }</pre>
      *
      * @param <T> the element type of the concurrent queue
      * @return the Class object representing {@code ConcurrentLinkedQueue<T>}
@@ -767,10 +767,10 @@ public final class Clazz {
      * 
      * <p><b>Warning:</b> The returned Class object does not contain actual type parameter information.</p>
      * 
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Class<Queue<Message>> messageQueueClass = Clazz.ofConcurrentLinkedQueue(Message.class);
-     * }</pre></p>
+     * }</pre>
      *
      * @param <T> the element type of the concurrent queue
      * @param eleCls the class of elements (used only for type inference)
@@ -790,10 +790,10 @@ public final class Clazz {
      * 
      * <p><b>Warning:</b> The returned Class object does not contain actual type parameter information.</p>
      * 
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Class<Queue<Task>> priorityQueueClass = Clazz.ofPriorityQueue();
-     * }</pre></p>
+     * }</pre>
      *
      * @param <T> the element type of the priority queue
      * @return the Class object representing {@code PriorityQueue<T>}
@@ -812,10 +812,10 @@ public final class Clazz {
      * 
      * <p><b>Warning:</b> The returned Class object does not contain actual type parameter information.</p>
      * 
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Class<Queue<Integer>> intPriorityQueueClass = Clazz.ofPriorityQueue(Integer.class);
-     * }</pre></p>
+     * }</pre>
      *
      * @param <T> the element type of the priority queue
      * @param eleCls the class of elements (used only for type inference)
@@ -835,10 +835,10 @@ public final class Clazz {
      * 
      * <p><b>Warning:</b> The returned Class object does not contain actual type parameter information.</p>
      * 
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Class<BlockingQueue<String>> blockingQueueClass = Clazz.ofLinkedBlockingQueue();
-     * }</pre></p>
+     * }</pre>
      *
      * @param <T> the element type of the blocking queue
      * @return the Class object representing {@code LinkedBlockingQueue<T>}
@@ -872,7 +872,7 @@ public final class Clazz {
      * due to Java's type erasure. The {@code eleCls} parameter is only used for compile-time type
      * inference.</p>
      *
-     * <p>Example usage:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Class<BlockingQueue<Task>> taskQueueClass = Clazz.ofLinkedBlockingQueue(Task.class);
      *
@@ -880,7 +880,7 @@ public final class Clazz {
      * BlockingQueue<Task> queue = new LinkedBlockingQueue<>(100); // capacity of 100
      * queue.put(new Task()); // blocks if queue is full
      * Task task = queue.take(); // blocks if queue is empty
-     * }</pre></p>
+     * }</pre>
      *
      * @param <T> the element type of the blocking queue
      * @param eleCls the class of elements (used only for type inference, not retained at runtime)
@@ -901,10 +901,10 @@ public final class Clazz {
      * 
      * <p><b>Warning:</b> The returned Class object does not contain actual type parameter information.</p>
      * 
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Class<Collection<String>> collectionClass = Clazz.ofCollection();
-     * }</pre></p>
+     * }</pre>
      *
      * @param <T> the element type of the collection
      * @return the Class object representing {@code Collection<T>}
@@ -923,10 +923,10 @@ public final class Clazz {
      * 
      * <p><b>Warning:</b> The returned Class object does not contain actual type parameter information.</p>
      * 
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Class<Collection<User>> userCollectionClass = Clazz.ofCollection(User.class);
-     * }</pre></p>
+     * }</pre>
      *
      * @param <T> the element type of the collection
      * @param eleCls the class of elements (used only for type inference)
@@ -946,10 +946,10 @@ public final class Clazz {
      * 
      * <p><b>Warning:</b> The returned Class object does not contain actual type parameter information.</p>
      * 
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Class<Map<String, Object>> mapClass = Clazz.ofMap();
-     * }</pre></p>
+     * }</pre>
      *
      * @param <K> the key type of the map
      * @param <V> the value type of the map
@@ -969,11 +969,11 @@ public final class Clazz {
      * 
      * <p><b>Warning:</b> The returned Class object does not contain actual type parameter information.</p>
      * 
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Class<Map<String, Integer>> stringIntMapClass = Clazz.ofMap(String.class, Integer.class);
      * Class<Map<Long, User>> userMapClass = Clazz.ofMap(Long.class, User.class);
-     * }</pre></p>
+     * }</pre>
      *
      * @param <K> the key type of the map
      * @param <V> the value type of the map
@@ -995,10 +995,10 @@ public final class Clazz {
      * 
      * <p><b>Warning:</b> The returned Class object does not contain actual type parameter information.</p>
      * 
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Class<Map<String, Object>> linkedMapClass = Clazz.ofLinkedHashMap();
-     * }</pre></p>
+     * }</pre>
      *
      * @param <K> the key type of the map
      * @param <V> the value type of the map
@@ -1018,10 +1018,10 @@ public final class Clazz {
      * 
      * <p><b>Warning:</b> The returned Class object does not contain actual type parameter information.</p>
      * 
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Class<Map<String, Object>> propsMapClass = Clazz.ofLinkedHashMap(String.class, Object.class);
-     * }</pre></p>
+     * }</pre>
      *
      * @param <K> the key type of the map
      * @param <V> the value type of the map
@@ -1044,10 +1044,10 @@ public final class Clazz {
      * 
      * <p><b>Warning:</b> The returned Class object does not contain actual type parameter information.</p>
      * 
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Class<SortedMap<String, Integer>> sortedMapClass = Clazz.ofSortedMap();
-     * }</pre></p>
+     * }</pre>
      *
      * @param <K> the key type of the sorted map
      * @param <V> the value type of the sorted map
@@ -1067,10 +1067,10 @@ public final class Clazz {
      * 
      * <p><b>Warning:</b> The returned Class object does not contain actual type parameter information.</p>
      * 
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Class<SortedMap<Integer, String>> sortedMapClass = Clazz.ofSortedMap(Integer.class, String.class);
-     * }</pre></p>
+     * }</pre>
      *
      * @param <K> the key type of the sorted map
      * @param <V> the value type of the sorted map
@@ -1093,10 +1093,10 @@ public final class Clazz {
      * 
      * <p><b>Warning:</b> The returned Class object does not contain actual type parameter information.</p>
      * 
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Class<NavigableMap<String, Object>> navigableMapClass = Clazz.ofNavigableMap();
-     * }</pre></p>
+     * }</pre>
      *
      * @param <K> the key type of the navigable map
      * @param <V> the value type of the navigable map
@@ -1116,10 +1116,10 @@ public final class Clazz {
      * 
      * <p><b>Warning:</b> The returned Class object does not contain actual type parameter information.</p>
      * 
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Class<NavigableMap<Date, Event>> eventMapClass = Clazz.ofNavigableMap(Date.class, Event.class);
-     * }</pre></p>
+     * }</pre>
      *
      * @param <K> the key type of the navigable map
      * @param <V> the value type of the navigable map
@@ -1142,10 +1142,10 @@ public final class Clazz {
      * 
      * <p><b>Warning:</b> The returned Class object does not contain actual type parameter information.</p>
      * 
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Class<NavigableMap<String, Integer>> treeMapClass = Clazz.ofTreeMap();
-     * }</pre></p>
+     * }</pre>
      *
      * @param <K> the key type of the tree map
      * @param <V> the value type of the tree map
@@ -1165,10 +1165,10 @@ public final class Clazz {
      * 
      * <p><b>Warning:</b> The returned Class object does not contain actual type parameter information.</p>
      * 
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Class<NavigableMap<String, List<String>>> treeMapClass = Clazz.ofTreeMap(String.class, List.class);
-     * }</pre></p>
+     * }</pre>
      *
      * @param <K> the key type of the tree map
      * @param <V> the value type of the tree map
@@ -1191,10 +1191,10 @@ public final class Clazz {
      * 
      * <p><b>Warning:</b> The returned Class object does not contain actual type parameter information.</p>
      * 
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Class<ConcurrentMap<String, Object>> concurrentMapClass = Clazz.ofConcurrentMap();
-     * }</pre></p>
+     * }</pre>
      *
      * @param <K> the key type of the concurrent map
      * @param <V> the value type of the concurrent map
@@ -1214,10 +1214,10 @@ public final class Clazz {
      * 
      * <p><b>Warning:</b> The returned Class object does not contain actual type parameter information.</p>
      * 
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Class<ConcurrentMap<Long, Session>> sessionMapClass = Clazz.ofConcurrentMap(Long.class, Session.class);
-     * }</pre></p>
+     * }</pre>
      *
      * @param <K> the key type of the concurrent map
      * @param <V> the value type of the concurrent map
@@ -1240,10 +1240,10 @@ public final class Clazz {
      * 
      * <p><b>Warning:</b> The returned Class object does not contain actual type parameter information.</p>
      * 
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Class<ConcurrentMap<String, Object>> concurrentHashMapClass = Clazz.ofConcurrentHashMap();
-     * }</pre></p>
+     * }</pre>
      *
      * @param <K> the key type of the concurrent hash map
      * @param <V> the value type of the concurrent hash map
@@ -1273,7 +1273,7 @@ public final class Clazz {
      * due to Java's type erasure. The {@code keyCls} and {@code valueCls} parameters are only used
      * for compile-time type inference.</p>
      *
-     * <p>Example usage:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // For thread-safe caching or shared state
      * Class<ConcurrentMap<String, AtomicInteger>> counterMapClass =
@@ -1282,7 +1282,7 @@ public final class Clazz {
      * // Common use case
      * ConcurrentMap<String, User> userCache = new ConcurrentHashMap<>();
      * Class<ConcurrentMap<String, User>> cacheType = Clazz.ofConcurrentHashMap(String.class, User.class);
-     * }</pre></p>
+     * }</pre>
      *
      * @param <K> the key type of the concurrent hash map
      * @param <V> the value type of the concurrent hash map
@@ -1306,10 +1306,10 @@ public final class Clazz {
      * 
      * <p><b>Warning:</b> The returned Class object does not contain actual type parameter information.</p>
      * 
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Class<BiMap<String, Integer>> biMapClass = Clazz.ofBiMap();
-     * }</pre></p>
+     * }</pre>
      *
      * @param <K> the key type of the bimap
      * @param <V> the value type of the bimap
@@ -1347,7 +1347,7 @@ public final class Clazz {
      * due to Java's type erasure. The {@code keyCls} and {@code valueCls} parameters are only used
      * for compile-time type inference.</p>
      *
-     * <p>Example usage:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Class<BiMap<String, Integer>> idMapClass = Clazz.ofBiMap(String.class, Integer.class);
      *
@@ -1356,7 +1356,7 @@ public final class Clazz {
      * userIds.put("alice", 101);
      * userIds.put("bob", 102);
      * String name = userIds.inverse().get(101); // returns "alice"
-     * }</pre></p>
+     * }</pre>
      *
      * @param <K> the key type of the bimap
      * @param <V> the value type of the bimap
@@ -1378,10 +1378,10 @@ public final class Clazz {
      * 
      * <p><b>Warning:</b> The returned Class object does not contain actual type parameter information.</p>
      * 
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Class<Multiset<String>> multisetClass = Clazz.ofMultiset();
-     * }</pre></p>
+     * }</pre>
      *
      * @param <T> the element type of the multiset
      * @return the Class object representing {@code Multiset<T>}
@@ -1423,7 +1423,7 @@ public final class Clazz {
      * due to Java's type erasure. The {@code eleCls} parameter is only used for compile-time type
      * inference.</p>
      *
-     * <p>Example usage:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Class<Multiset<String>> wordCountClass = Clazz.ofMultiset(String.class);
      *
@@ -1433,7 +1433,7 @@ public final class Clazz {
      * words.add("banana");
      * words.add("apple");
      * int count = words.count("apple"); // returns 2
-     * }</pre></p>
+     * }</pre>
      *
      * @param <T> the element type of the multiset
      * @param eleCls the class of elements (used only for type inference, not retained at runtime)
@@ -1453,10 +1453,10 @@ public final class Clazz {
      * 
      * <p><b>Warning:</b> The returned Class object does not contain actual type parameter information.</p>
      * 
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Class<ListMultimap<String, Integer>> multiMapClass = Clazz.ofListMultimap();
-     * }</pre></p>
+     * }</pre>
      *
      * @param <K> the key type of the list multimap
      * @param <E> the element type of the value collections
@@ -1476,11 +1476,11 @@ public final class Clazz {
      * 
      * <p><b>Warning:</b> The returned Class object does not contain actual type parameter information.</p>
      * 
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Class<ListMultimap<String, Integer>> groupedDataClass = 
      *     Clazz.ofListMultimap(String.class, Integer.class);
-     * }</pre></p>
+     * }</pre>
      *
      * @param <K> the key type of the list multimap
      * @param <E> the element type of the value collections
@@ -1503,10 +1503,10 @@ public final class Clazz {
      * 
      * <p><b>Warning:</b> The returned Class object does not contain actual type parameter information.</p>
      * 
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Class<SetMultimap<String, Integer>> multiMapClass = Clazz.ofSetMultimap();
-     * }</pre></p>
+     * }</pre>
      *
      * @param <K> the key type of the set multimap
      * @param <E> the element type of the value collections
@@ -1526,11 +1526,11 @@ public final class Clazz {
      * 
      * <p><b>Warning:</b> The returned Class object does not contain actual type parameter information.</p>
      * 
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Class<SetMultimap<String, String>> tagMapClass = 
      *     Clazz.ofSetMultimap(String.class, String.class);
-     * }</pre></p>
+     * }</pre>
      *
      * @param <K> the key type of the set multimap
      * @param <E> the element type of the value collections

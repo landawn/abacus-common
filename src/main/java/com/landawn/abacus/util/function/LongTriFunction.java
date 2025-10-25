@@ -25,7 +25,7 @@ import com.landawn.abacus.util.Throwables;
  * <p>The interface extends {@code Throwables.LongTriFunction} with {@code RuntimeException} as the exception type,
  * making it suitable for use in contexts where checked exceptions are not required.
  * 
- * <p>Example usage:
+ * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * LongTriFunction<String> formatter = (a, b, c) -> 
  *     String.format("(%d, %d, %d)", a, b, c);
@@ -64,8 +64,7 @@ public interface LongTriFunction<R> extends Throwables.LongTriFunction<R, Runtim
      * @param a the first argument
      * @param b the second argument
      * @param c the third argument
-     * @return the function result of type R
-     * @throws RuntimeException if any error occurs during function execution
+     * @return the function result of type R if any error occurs during function execution
      */
     @Override
     R apply(long a, long b, long c);
@@ -80,7 +79,7 @@ public interface LongTriFunction<R> extends Throwables.LongTriFunction<R, Runtim
      * <p>This method allows for function composition, enabling the chaining of
      * operations where the output of this function becomes the input of the next.
      * 
-     * <p>Example usage:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * LongTriFunction<Long> sum = (a, b, c) -> a + b + c;
      * Function<Long, String> format = n -> "Result: " + n;

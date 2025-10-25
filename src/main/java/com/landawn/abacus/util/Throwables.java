@@ -131,7 +131,7 @@ public final class Throwables {
      * If the command throws an exception, the result from the specified supplier will be returned instead.
      * This method provides a safe way to handle exceptions by providing a fallback value supplier.
      *
-     * <p>Example usage:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String result = Throwables.call(
      *     () -> riskyOperation(),
@@ -262,8 +262,8 @@ public final class Throwables {
 
     /**
      *
-     * @param <T>
-     * @param <E>
+     * @param <T> the type of elements in the iterator
+     * @param <E> the type of exception that may be thrown
      * @see ObjIterator
      */
     @SuppressWarnings({ "java:S6548" })
@@ -445,7 +445,7 @@ public final class Throwables {
          * <p>The iterator is initialized on the first call to {@code hasNext()}, {@code next()}, {@code advance()}, or {@code count()}.
          * The underlying iterator is only closed if it has been initialized when {@code close()} is called.
          *
-         * <p>Example usage:
+         * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * Iterator<String, IOException> iter = Iterator.defer(() ->
          *     Iterator.ofLines(new FileReader("large-file.txt"))
@@ -584,7 +584,7 @@ public final class Throwables {
          * it will close the underlying BufferedReader (and thus the original Reader). It is recommended to use
          * this iterator in a try-with-resources statement to ensure proper resource cleanup.
          *
-         * <p>Example usage:
+         * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * try (Iterator<String, IOException> lines = Iterator.ofLines(new FileReader("file.txt"))) {
          *     while (lines.hasNext()) {
@@ -949,7 +949,7 @@ public final class Throwables {
     /**
      * The Interface Runnable.
      *
-     * @param <E>
+     * @param <E> the type of exception that may be thrown
      */
     @FunctionalInterface
     public interface Runnable<E extends Throwable> {
@@ -982,8 +982,8 @@ public final class Throwables {
     /**
      * The Interface Callable.
      *
-     * @param <R>
-     * @param <E>
+     * @param <R> the type of the result
+     * @param <E> the type of exception that may be thrown
      */
     @FunctionalInterface
     public interface Callable<R, E extends Throwable> {
@@ -1017,8 +1017,8 @@ public final class Throwables {
     /**
      * The Interface Supplier.
      *
-     * @param <T>
-     * @param <E>
+     * @param <T> the type of the value supplied
+     * @param <E> the type of exception that may be thrown
      */
     @FunctionalInterface
     public interface Supplier<T, E extends Throwable> {
@@ -1052,7 +1052,7 @@ public final class Throwables {
     /**
      * The Interface BooleanSupplier.
      *
-     * @param <E>
+     * @param <E> the type of exception that may be thrown
      */
     @FunctionalInterface
     public interface BooleanSupplier<E extends Throwable> {
@@ -1069,7 +1069,7 @@ public final class Throwables {
     /**
      * The Interface CharSupplier.
      *
-     * @param <E>
+     * @param <E> the type of exception that may be thrown
      */
     @FunctionalInterface
     public interface CharSupplier<E extends Throwable> {
@@ -1086,7 +1086,7 @@ public final class Throwables {
     /**
      * The Interface ByteSupplier.
      *
-     * @param <E>
+     * @param <E> the type of exception that may be thrown
      */
     @FunctionalInterface
     public interface ByteSupplier<E extends Throwable> {
@@ -1103,7 +1103,7 @@ public final class Throwables {
     /**
      * The Interface ShortSupplier.
      *
-     * @param <E>
+     * @param <E> the type of exception that may be thrown
      */
     @FunctionalInterface
     public interface ShortSupplier<E extends Throwable> {
@@ -1120,7 +1120,7 @@ public final class Throwables {
     /**
      * The Interface IntSupplier.
      *
-     * @param <E>
+     * @param <E> the type of exception that may be thrown
      */
     @FunctionalInterface
     public interface IntSupplier<E extends Throwable> {
@@ -1137,7 +1137,7 @@ public final class Throwables {
     /**
      * The Interface LongSupplier.
      *
-     * @param <E>
+     * @param <E> the type of exception that may be thrown
      */
     @FunctionalInterface
     public interface LongSupplier<E extends Throwable> {
@@ -1154,7 +1154,7 @@ public final class Throwables {
     /**
      * The Interface FloatSupplier.
      *
-     * @param <E>
+     * @param <E> the type of exception that may be thrown
      */
     @FunctionalInterface
     public interface FloatSupplier<E extends Throwable> {
@@ -1171,7 +1171,7 @@ public final class Throwables {
     /**
      * The Interface DoubleSupplier.
      *
-     * @param <E>
+     * @param <E> the type of exception that may be thrown
      */
     @FunctionalInterface
     public interface DoubleSupplier<E extends Throwable> {
@@ -1188,8 +1188,8 @@ public final class Throwables {
     /**
      * The Interface Predicate.
      *
-     * @param <T>
-     * @param <E>
+     * @param <T> the type of the input to the predicate
+     * @param <E> the type of exception that may be thrown
      */
     @FunctionalInterface
     public interface Predicate<T, E extends Throwable> {
@@ -1233,9 +1233,9 @@ public final class Throwables {
     /**
      * The Interface BiPredicate.
      *
-     * @param <T>
-     * @param <U>
-     * @param <E>
+     * @param <T> the type of the input
+     * @param <U> the type of the second input
+     * @param <E> the type of exception that may be thrown
      */
     @FunctionalInterface
     public interface BiPredicate<T, U, E extends Throwable> {
@@ -1271,10 +1271,10 @@ public final class Throwables {
     /**
      * The Interface TriPredicate.
      *
-     * @param <A>
-     * @param <B>
-     * @param <C>
-     * @param <E>
+     * @param <A> the type of the first input
+     * @param <B> the type of the second input
+     * @param <C> the type of the third input
+     * @param <E> the type of exception that may be thrown
      */
     @FunctionalInterface
     public interface TriPredicate<A, B, C, E extends Throwable> {
@@ -1294,11 +1294,11 @@ public final class Throwables {
     /**
      * The Interface QuadPredicate.
      *
-     * @param <A>
-     * @param <B>
-     * @param <C>
-     * @param <D>
-     * @param <E>
+     * @param <A> the type of the first input
+     * @param <B> the type of the second input
+     * @param <C> the type of the third input
+     * @param <D> the type of the fourth input
+     * @param <E> the type of exception that may be thrown
      */
     @FunctionalInterface
     public interface QuadPredicate<A, B, C, D, E extends Throwable> {
@@ -1319,9 +1319,9 @@ public final class Throwables {
     /**
      * The Interface Function.
      *
-     * @param <T>
-     * @param <R>
-     * @param <E>
+     * @param <T> the type of the input to the function
+     * @param <R> the type of the result
+     * @param <E> the type of exception that may be thrown
      */
     @FunctionalInterface
     public interface Function<T, R, E extends Throwable> {
@@ -1356,10 +1356,10 @@ public final class Throwables {
     /**
      * The Interface BiFunction.
      *
-     * @param <T>
-     * @param <U>
-     * @param <R>
-     * @param <E>
+     * @param <T> the type of the input
+     * @param <U> the type of the second input
+     * @param <R> the type of the result
+     * @param <E> the type of exception that may be thrown
      */
     @FunctionalInterface
     public interface BiFunction<T, U, R, E extends Throwable> {
@@ -1395,11 +1395,11 @@ public final class Throwables {
     /**
      * The Interface TriFunction.
      *
-     * @param <A>
-     * @param <B>
-     * @param <C>
-     * @param <R>
-     * @param <E>
+     * @param <A> the type of the first input
+     * @param <B> the type of the second input
+     * @param <C> the type of the third input
+     * @param <R> the type of the result
+     * @param <E> the type of exception that may be thrown
      */
     @FunctionalInterface
     public interface TriFunction<A, B, C, R, E extends Throwable> {
@@ -1419,12 +1419,12 @@ public final class Throwables {
     /**
      * The Interface QuadFunction.
      *
-     * @param <A>
-     * @param <B>
-     * @param <C>
-     * @param <D>
-     * @param <R>
-     * @param <E>
+     * @param <A> the type of the first input
+     * @param <B> the type of the second input
+     * @param <C> the type of the third input
+     * @param <D> the type of the fourth input
+     * @param <R> the type of the result
+     * @param <E> the type of exception that may be thrown
      */
     @FunctionalInterface
     public interface QuadFunction<A, B, C, D, R, E extends Throwable> {
@@ -1445,8 +1445,8 @@ public final class Throwables {
     /**
      * The Interface Consumer.
      *
-     * @param <T>
-     * @param <E>
+     * @param <T> the type of the input to the consumer
+     * @param <E> the type of exception that may be thrown
      */
     @FunctionalInterface
     public interface Consumer<T, E extends Throwable> {
@@ -1480,9 +1480,9 @@ public final class Throwables {
     /**
      * The Interface BiConsumer.
      *
-     * @param <T>
-     * @param <U>
-     * @param <E>
+     * @param <T> the type of the input
+     * @param <U> the type of the second input
+     * @param <E> the type of exception that may be thrown
      */
     @FunctionalInterface
     public interface BiConsumer<T, U, E extends Throwable> {
@@ -1517,10 +1517,10 @@ public final class Throwables {
     /**
      * The Interface TriConsumer.
      *
-     * @param <A>
-     * @param <B>
-     * @param <C>
-     * @param <E>
+     * @param <A> the type of the first input
+     * @param <B> the type of the second input
+     * @param <C> the type of the third input
+     * @param <E> the type of exception that may be thrown
      */
     @FunctionalInterface
     public interface TriConsumer<A, B, C, E extends Throwable> {
@@ -1539,11 +1539,11 @@ public final class Throwables {
     /**
      * The Interface QuadConsumer.
      *
-     * @param <A>
-     * @param <B>
-     * @param <C>
-     * @param <D>
-     * @param <E>
+     * @param <A> the type of the first input
+     * @param <B> the type of the second input
+     * @param <C> the type of the third input
+     * @param <D> the type of the fourth input
+     * @param <E> the type of exception that may be thrown
      */
     @FunctionalInterface
     public interface QuadConsumer<A, B, C, D, E extends Throwable> {
@@ -1563,7 +1563,7 @@ public final class Throwables {
     /**
      * The Interface BooleanConsumer.
      *
-     * @param <E>
+     * @param <E> the type of exception that may be thrown
      */
     @FunctionalInterface
     public interface BooleanConsumer<E extends Throwable> {
@@ -1580,7 +1580,7 @@ public final class Throwables {
     /**
      * The Interface BooleanPredicate.
      *
-     * @param <E>
+     * @param <E> the type of exception that may be thrown
      */
     @FunctionalInterface
     public interface BooleanPredicate<E extends Throwable> {
@@ -1598,8 +1598,8 @@ public final class Throwables {
     /**
      * The Interface BooleanFunction.
      *
-     * @param <R>
-     * @param <E>
+     * @param <R> the type of the result
+     * @param <E> the type of exception that may be thrown
      */
     @FunctionalInterface
     public interface BooleanFunction<R, E extends Throwable> {
@@ -1617,7 +1617,7 @@ public final class Throwables {
     /**
      * The Interface CharConsumer.
      *
-     * @param <E>
+     * @param <E> the type of exception that may be thrown
      */
     @FunctionalInterface
     public interface CharConsumer<E extends Throwable> {
@@ -1634,7 +1634,7 @@ public final class Throwables {
     /**
      * The Interface CharPredicate.
      *
-     * @param <E>
+     * @param <E> the type of exception that may be thrown
      */
     @FunctionalInterface
     public interface CharPredicate<E extends Throwable> {
@@ -1652,8 +1652,8 @@ public final class Throwables {
     /**
      * The Interface CharFunction.
      *
-     * @param <R>
-     * @param <E>
+     * @param <R> the type of the result
+     * @param <E> the type of exception that may be thrown
      */
     @FunctionalInterface
     public interface CharFunction<R, E extends Throwable> {
@@ -1671,7 +1671,7 @@ public final class Throwables {
     /**
      * The Interface ByteConsumer.
      *
-     * @param <E>
+     * @param <E> the type of exception that may be thrown
      */
     @FunctionalInterface
     public interface ByteConsumer<E extends Throwable> {
@@ -1688,7 +1688,7 @@ public final class Throwables {
     /**
      * The Interface BytePredicate.
      *
-     * @param <E>
+     * @param <E> the type of exception that may be thrown
      */
     @FunctionalInterface
     public interface BytePredicate<E extends Throwable> {
@@ -1706,8 +1706,8 @@ public final class Throwables {
     /**
      * The Interface ByteFunction.
      *
-     * @param <R>
-     * @param <E>
+     * @param <R> the type of the result
+     * @param <E> the type of exception that may be thrown
      */
     @FunctionalInterface
     public interface ByteFunction<R, E extends Throwable> {
@@ -1725,7 +1725,7 @@ public final class Throwables {
     /**
      * The Interface ShortConsumer.
      *
-     * @param <E>
+     * @param <E> the type of exception that may be thrown
      */
     @FunctionalInterface
     public interface ShortConsumer<E extends Throwable> {
@@ -1742,7 +1742,7 @@ public final class Throwables {
     /**
      * The Interface ShortPredicate.
      *
-     * @param <E>
+     * @param <E> the type of exception that may be thrown
      */
     @FunctionalInterface
     public interface ShortPredicate<E extends Throwable> {
@@ -1760,8 +1760,8 @@ public final class Throwables {
     /**
      * The Interface ShortFunction.
      *
-     * @param <R>
-     * @param <E>
+     * @param <R> the type of the result
+     * @param <E> the type of exception that may be thrown
      */
     @FunctionalInterface
     public interface ShortFunction<R, E extends Throwable> {
@@ -1779,7 +1779,7 @@ public final class Throwables {
     /**
      * The Interface IntConsumer.
      *
-     * @param <E>
+     * @param <E> the type of exception that may be thrown
      */
     @FunctionalInterface
     public interface IntConsumer<E extends Throwable> {
@@ -1796,7 +1796,7 @@ public final class Throwables {
     /**
      * The Interface IntPredicate.
      *
-     * @param <E>
+     * @param <E> the type of exception that may be thrown
      */
     @FunctionalInterface
     public interface IntPredicate<E extends Throwable> {
@@ -1814,8 +1814,8 @@ public final class Throwables {
     /**
      * The Interface IntFunction.
      *
-     * @param <R>
-     * @param <E>
+     * @param <R> the type of the result
+     * @param <E> the type of exception that may be thrown
      */
     @FunctionalInterface
     public interface IntFunction<R, E extends Throwable> {
@@ -1833,7 +1833,7 @@ public final class Throwables {
     /**
      * The Interface IntToLongFunction.
      *
-     * @param <E>
+     * @param <E> the type of exception that may be thrown
      */
     @FunctionalInterface
     public interface IntToLongFunction<E extends Throwable> {
@@ -1851,7 +1851,7 @@ public final class Throwables {
     /**
      * The Interface IntToDoubleFunction.
      *
-     * @param <E>
+     * @param <E> the type of exception that may be thrown
      */
     @FunctionalInterface
     public interface IntToDoubleFunction<E extends Throwable> {
@@ -1869,7 +1869,7 @@ public final class Throwables {
     /**
      * The Interface LongConsumer.
      *
-     * @param <E>
+     * @param <E> the type of exception that may be thrown
      */
     @FunctionalInterface
     public interface LongConsumer<E extends Throwable> {
@@ -1886,7 +1886,7 @@ public final class Throwables {
     /**
      * The Interface LongPredicate.
      *
-     * @param <E>
+     * @param <E> the type of exception that may be thrown
      */
     @FunctionalInterface
     public interface LongPredicate<E extends Throwable> {
@@ -1904,8 +1904,8 @@ public final class Throwables {
     /**
      * The Interface LongFunction.
      *
-     * @param <R>
-     * @param <E>
+     * @param <R> the type of the result
+     * @param <E> the type of exception that may be thrown
      */
     @FunctionalInterface
     public interface LongFunction<R, E extends Throwable> {
@@ -1923,7 +1923,7 @@ public final class Throwables {
     /**
      * The Interface LongToIntFunction.
      *
-     * @param <E>
+     * @param <E> the type of exception that may be thrown
      */
     @FunctionalInterface
     public interface LongToIntFunction<E extends Throwable> {
@@ -1941,7 +1941,7 @@ public final class Throwables {
     /**
      * The Interface LongToDoubleFunction.
      *
-     * @param <E>
+     * @param <E> the type of exception that may be thrown
      */
     @FunctionalInterface
     public interface LongToDoubleFunction<E extends Throwable> {
@@ -1959,7 +1959,7 @@ public final class Throwables {
     /**
      * The Interface FloatConsumer.
      *
-     * @param <E>
+     * @param <E> the type of exception that may be thrown
      */
     @FunctionalInterface
     public interface FloatConsumer<E extends Throwable> {
@@ -1976,7 +1976,7 @@ public final class Throwables {
     /**
      * The Interface FloatPredicate.
      *
-     * @param <E>
+     * @param <E> the type of exception that may be thrown
      */
     @FunctionalInterface
     public interface FloatPredicate<E extends Throwable> {
@@ -1994,8 +1994,8 @@ public final class Throwables {
     /**
      * The Interface FloatFunction.
      *
-     * @param <R>
-     * @param <E>
+     * @param <R> the type of the result
+     * @param <E> the type of exception that may be thrown
      */
     @FunctionalInterface
     public interface FloatFunction<R, E extends Throwable> {
@@ -2013,7 +2013,7 @@ public final class Throwables {
     /**
      * The Interface DoubleConsumer.
      *
-     * @param <E>
+     * @param <E> the type of exception that may be thrown
      */
     @FunctionalInterface
     public interface DoubleConsumer<E extends Throwable> {
@@ -2030,7 +2030,7 @@ public final class Throwables {
     /**
      * The Interface DoublePredicate.
      *
-     * @param <E>
+     * @param <E> the type of exception that may be thrown
      */
     @FunctionalInterface
     public interface DoublePredicate<E extends Throwable> {
@@ -5635,7 +5635,7 @@ public final class Throwables {
          * <p>The returned LazyInitializer will call the supplier exactly once on the first invocation of {@code get()},
          * and cache the result for all subsequent calls. The initialization is thread-safe using double-checked locking.
          *
-         * <p>Example usage:
+         * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * LazyInitializer<Database, SQLException> dbInit = LazyInitializer.of(() ->
          *     createExpensiveDatabase()
@@ -5673,8 +5673,7 @@ public final class Throwables {
             if (!initialized) {
                 synchronized (this) {
                     if (!initialized) {
-                        final T temp = supplier.get();
-                        value = temp;
+                        value = supplier.get();
                         initialized = true;
                     }
                 }

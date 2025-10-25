@@ -45,8 +45,7 @@ public interface ObjDoubleConsumer<T> extends Throwables.ObjDoubleConsumer<T, Ru
      * or performing calculations where the result is stored within the object.
      *
      * @param t the first input argument of type T
-     * @param value the second input argument, a primitive double value
-     * @throws RuntimeException if the operation cannot be completed
+     * @param value the second input argument, a primitive double value if the operation cannot be completed
      */
     @Override
     void accept(T t, double value);
@@ -62,7 +61,7 @@ public interface ObjDoubleConsumer<T> extends Throwables.ObjDoubleConsumer<T, Ru
      * consumer receives the same input arguments. This is useful for performing
      * multiple independent operations on the same data.
      *
-     * <p>Example usage:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ObjDoubleConsumer<List<Double>> addToList = (list, value) -> list.add(value);
      * ObjDoubleConsumer<List<Double>> printValue = (list, value) -> System.out.println(value);

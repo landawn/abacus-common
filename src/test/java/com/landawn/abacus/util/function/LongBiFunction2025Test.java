@@ -98,8 +98,7 @@ public class LongBiFunction2025Test extends TestBase {
 
     @Test
     public void testApply_complexObject() {
-        final LongBiFunction<String> function = (start, end) ->
-            String.format("Range [%d, %d]", start, end);
+        final LongBiFunction<String> function = (start, end) -> String.format("Range [%d, %d]", start, end);
         final String result = function.apply(1L, 100L);
         assertEquals("Range [1, 100]", result);
     }

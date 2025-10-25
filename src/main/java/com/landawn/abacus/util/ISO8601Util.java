@@ -35,7 +35,7 @@ import com.landawn.abacus.annotation.SuppressFBWarnings;
  * 
  * <p>Note: This class is adapted from Jackson's date utilities.</p>
  * 
- * <p>Example usage:</p>
+ * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * // Formatting
  * Date date = new Date();
@@ -75,7 +75,7 @@ final class ISO8601Util {
      * 
      * <p>The output format is {@code yyyy-MM-ddThh:mm:ssZ} (no millisecond precision, UTC timezone).</p>
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Date date = new Date();
      * String formatted = ISO8601Util.format(date); // "2023-12-25T10:30:45Z"
@@ -93,7 +93,7 @@ final class ISO8601Util {
      * 
      * <p>The output format is {@code yyyy-MM-ddThh:mm:ss[.sss]Z} (UTC timezone).</p>
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Date date = new Date();
      * String withMillis = ISO8601Util.format(date, true); // "2023-12-25T10:30:45.123Z"
@@ -127,7 +127,7 @@ final class ISO8601Util {
      * 
      * <p>The output format is {@code yyyy-MM-ddThh:mm:ss[.sss][Z|[+-]hh:mm]}</p>
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Date date = new Date();
      * TimeZone tz = TimeZone.getTimeZone("America/New_York");
@@ -182,7 +182,7 @@ final class ISO8601Util {
      * <li>{@code yyyy-MM-ddThh:mm:ss-hh:mm}</li>
      * </ul>
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Date date1 = ISO8601Util.parse("2023-12-25");
      * Date date2 = ISO8601Util.parse("2023-12-25T10:30:45Z");
@@ -211,7 +211,7 @@ final class ISO8601Util {
      * <li>{@code [yyyy-MM-dd|yyyyMMdd]T[hh:mm[:ss[.sss]]|hhmm[ss[.sss]]][Z|[+-]hh:mm]}</li>
      * </ul>
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ParsePosition pos = new ParsePosition(0);
      * Date date = ISO8601Util.parse("2023-12-25T10:30:45Z extra text", pos);

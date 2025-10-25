@@ -26,7 +26,7 @@ import com.landawn.abacus.util.Throwables;
  * and {@code java.util.function.LongUnaryOperator}, providing compatibility with the Java standard library
  * while adding function composition capabilities.
  * 
- * <p>Example usage:
+ * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * LongUnaryOperator increment = x -> x + 1;
  * LongUnaryOperator doubleValue = x -> x * 2;
@@ -56,8 +56,7 @@ public interface LongUnaryOperator extends Throwables.LongUnaryOperator<RuntimeE
      * </ul>
      *
      * @param operand the operand
-     * @return the operator result
-     * @throws RuntimeException if any error occurs during the operation
+     * @return the operator result if any error occurs during the operation
      */
     @Override
     long applyAsLong(long operand);
@@ -69,7 +68,7 @@ public interface LongUnaryOperator extends Throwables.LongUnaryOperator<RuntimeE
      * <p>If evaluation of either operator throws an exception, it is relayed to
      * the caller of the composed operator.
      * 
-     * <p>Example usage:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * LongUnaryOperator multiplyBy3 = x -> x * 3;
      * LongUnaryOperator add10 = x -> x + 10;
@@ -96,7 +95,7 @@ public interface LongUnaryOperator extends Throwables.LongUnaryOperator<RuntimeE
      * <p>If evaluation of either operator throws an exception, it is relayed to
      * the caller of the composed operator.
      * 
-     * <p>Example usage:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * LongUnaryOperator multiplyBy2 = x -> x * 2;
      * LongUnaryOperator subtract5 = x -> x - 5;
@@ -122,7 +121,7 @@ public interface LongUnaryOperator extends Throwables.LongUnaryOperator<RuntimeE
      * <p>This is useful as a default operator or in functional pipelines where
      * no transformation is needed for certain conditions.
      * 
-     * <p>Example usage:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * LongUnaryOperator op = condition ? x -> x * 2 : LongUnaryOperator.identity();
      * long result = op.applyAsLong(5L); // returns 10L if condition is true, 5L otherwise

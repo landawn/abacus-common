@@ -59,7 +59,7 @@ import com.landawn.abacus.type.Type;
  * <p>The reason for not encoding content with Base64 for File/OutputStream is to provide
  * a higher performance solution for binary data handling.</p>
  * 
- * <p>Usage examples:</p>
+ * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * // With SpecificRecord
  * User user = new User("John", 30);
@@ -87,7 +87,7 @@ public final class AvroParser extends AbstractParser<AvroSerializationConfig, Av
      * Serializes an object to Avro format encoded as a Base64 string.
      * The content is Base64 encoded to make it suitable for text-based transmission.
      * 
-     * <p>Usage example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * User user = new User("John", 30);
      * AvroSerializationConfig config = new AvroSerializationConfig()
@@ -117,7 +117,7 @@ public final class AvroParser extends AbstractParser<AvroSerializationConfig, Av
      * Serializes an object to an Avro file.
      * The content is written in binary format without Base64 encoding.
      * 
-     * <p>Usage example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * List<User> users = Arrays.asList(
      *     new User("John", 30),
@@ -162,7 +162,7 @@ public final class AvroParser extends AbstractParser<AvroSerializationConfig, Av
      *   <li>Regular Java beans and Maps (requires schema in config)</li>
      * </ul>
      * 
-     * <p>Usage example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // With SpecificRecord
      * User user = new User("John", 30);
@@ -312,7 +312,7 @@ public final class AvroParser extends AbstractParser<AvroSerializationConfig, Av
      * Deserializes a Base64 encoded Avro string to an object.
      * The input string must be Base64 encoded Avro binary data.
      * 
-     * <p>Usage example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String base64Data = "..."; // Base64 encoded Avro data
      * AvroDeserializationConfig config = new AvroDeserializationConfig()
@@ -335,7 +335,7 @@ public final class AvroParser extends AbstractParser<AvroSerializationConfig, Av
      * Deserializes an Avro file to an object.
      * The file should contain binary Avro data (not Base64 encoded).
      * 
-     * <p>Usage example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * File avroFile = new File("users.avro");
      * List<User> users = parser.deserialize(avroFile, null, List.class);
@@ -372,7 +372,7 @@ public final class AvroParser extends AbstractParser<AvroSerializationConfig, Av
      *   <li>Regular Java beans and Maps (requires schema in config)</li>
      * </ul>
      * 
-     * <p>Usage example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Deserialize to SpecificRecord
      * try (InputStream is = new FileInputStream("user.avro")) {

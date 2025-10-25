@@ -43,8 +43,8 @@ import java.lang.annotation.Target;
  *   <li>The field will still occupy memory in the object instance</li>
  * </ul>
  * 
- * <p><b>Example usage:</b></p>
- * <pre>
+ * <p><b>Usage Examples:</b></p>
+ * <pre>{@code
  * {@literal @}Entity
  * public class Product {
  *     {@literal @}Id
@@ -65,7 +65,7 @@ import java.lang.annotation.Target;
  *     {@literal @}Transient
  *     private List<Review> reviews;      // Loaded separately
  * }
- * </pre>
+ * }</pre>
  * 
  * @since 2018
  * @see Column

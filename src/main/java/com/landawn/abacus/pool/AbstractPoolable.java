@@ -22,7 +22,7 @@ package com.landawn.abacus.pool;
  * <p>Subclasses need only implement the {@link #destroy(Poolable.Caller)} method to define
  * their cleanup behavior when removed from a pool.
  * 
- * <p>Usage example:
+ * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * public class PooledConnection extends AbstractPoolable {
  *     private final Connection connection;

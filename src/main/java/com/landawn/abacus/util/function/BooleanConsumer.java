@@ -29,6 +29,17 @@ public interface BooleanConsumer extends Throwables.BooleanConsumer<RuntimeExcep
 
     /**
      * Performs this operation on the given argument.
+     * This method is expected to operate via side-effects.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * BooleanConsumer logger = value -> System.out.println("Boolean value: " + value);
+     * logger.accept(true); // Prints: Boolean value: true
+     *
+     * List<Boolean> results = new ArrayList<>();
+     * BooleanConsumer collector = results::add;
+     * collector.accept(false);
+     * }</pre>
      *
      * @param t the input argument
      */
@@ -39,6 +50,14 @@ public interface BooleanConsumer extends Throwables.BooleanConsumer<RuntimeExcep
      * Returns a composed {@code BooleanConsumer} that performs, in sequence, this operation followed by the {@code after} operation.
      * If performing either operation throws an exception, it is relayed to the caller of the composed operation.
      * If performing this operation throws an exception, the {@code after} operation will not be performed.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * BooleanConsumer logger = value -> System.out.println("Value: " + value);
+     * BooleanConsumer validator = value -> { if (!value) throw new IllegalArgumentException(); };
+     * BooleanConsumer combined = logger.andThen(validator);
+     * combined.accept(true); // Logs then validates
+     * }</pre>
      *
      * @param after the operation to perform after this operation. Must not be {@code null}.
      * @return a composed {@code BooleanConsumer} that performs in sequence this operation followed by the {@code after} operation

@@ -31,7 +31,7 @@ public interface ToCharFunction<T> extends Throwables.ToCharFunction<T, RuntimeE
      * A predefined ToCharFunction instance that unboxes a Character object to a primitive char.
      * Returns 0 if the input is null, otherwise returns the char value of the Character object.
      * 
-     * <p>Example usage:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Character boxed = 'A';
      * char primitive = ToCharFunction.UNBOX.applyAsChar(boxed); // returns 'A'
@@ -44,8 +44,7 @@ public interface ToCharFunction<T> extends Throwables.ToCharFunction<T, RuntimeE
      * Applies this function to the given argument and returns a char result.
      *
      * @param value the function argument
-     * @return the function result as a primitive char
-     * @throws RuntimeException if any error occurs during function execution
+     * @return the function result as a primitive char if any error occurs during function execution
      */
     @Override
     char applyAsChar(T value);

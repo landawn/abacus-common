@@ -76,8 +76,17 @@ public interface IntPredicate extends Throwables.IntPredicate<RuntimeException>,
     /**
      * Evaluates this predicate on the given argument.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * IntPredicate isEven = value -> value % 2 == 0;
+     * boolean result1 = isEven.test(4); // Returns true
+     * boolean result2 = isEven.test(3); // Returns false
+     *
+     * IntStream.of(1, 2, 3, 4, 5).filter(isEven).forEach(System.out::println); // Prints: 2 4
+     * }</pre>
+     *
      * @param value the input argument
-     * @return {@code true} if the input argument matches the predicate, otherwise {@code false}
+     * @return {@code true} if the input argument matches the predicate, otherwise {@code false} if the predicate evaluation fails
      */
     @Override
     boolean test(int value);

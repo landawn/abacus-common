@@ -121,7 +121,7 @@ public class CharConsumer2025Test extends TestBase {
 
     @Test
     public void testSideEffects() {
-        final int[] counter = {0};
+        final int[] counter = { 0 };
         CharConsumer consumer = c -> counter[0]++;
 
         consumer.accept('a');

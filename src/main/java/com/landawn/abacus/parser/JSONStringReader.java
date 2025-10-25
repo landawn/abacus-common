@@ -132,7 +132,7 @@ class JSONStringReader extends AbstractJSONReader {
      * Creates a JSONReader for parsing the given JSON string.
      * This factory method creates an optimized reader for string sources.
      * 
-     * <p>Usage example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String json = "{\"name\":\"John\"}";
      * JSONReader reader = JSONStringReader.parse(json, new char[256]);
@@ -152,7 +152,7 @@ class JSONStringReader extends AbstractJSONReader {
      * Creates a JSONReader for parsing a substring of the given JSON string.
      * This allows parsing a portion of a larger string without creating a substring.
      * 
-     * <p>Usage example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String json = "prefix{\"name\":\"John\"}suffix";
      * JSONReader reader = JSONStringReader.parse(json, 6, json.length() - 6, new char[256]);

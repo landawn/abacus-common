@@ -26,7 +26,7 @@ import java.io.OutputStream;
  * and reasonable compression ratios. It is particularly effective for data that
  * contains repeated byte sequences.
  * 
- * <p>Example usage:
+ * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * try (FileOutputStream fos = new FileOutputStream("data.snappy");
  *      SnappyOutputStream sos = new SnappyOutputStream(fos)) {
@@ -47,7 +47,7 @@ public final class SnappyOutputStream extends OutputStream {
      * Creates a new SnappyOutputStream that compresses data written to the specified output stream.
      * Uses the default buffer size for compression.
      * 
-     * <p>Example usage:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * OutputStream compressed = new SnappyOutputStream(new FileOutputStream("data.snappy"));
      * }</pre>
@@ -63,7 +63,7 @@ public final class SnappyOutputStream extends OutputStream {
      * A larger buffer size may improve compression performance for large data sets
      * at the cost of increased memory usage.
      * 
-     * <p>Example usage:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Use a 64KB buffer for better performance with large files
      * OutputStream compressed = new SnappyOutputStream(new FileOutputStream("large.snappy"), 65536);
@@ -95,7 +95,7 @@ public final class SnappyOutputStream extends OutputStream {
      * Writes an array of bytes to the output stream after compression.
      * This is equivalent to calling {@code write(b, 0, b.length)}.
      * 
-     * <p>Example usage:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * byte[] data = "Hello, World!".getBytes();
      * snappyOut.write(data);
@@ -113,7 +113,7 @@ public final class SnappyOutputStream extends OutputStream {
      * Writes a portion of a byte array to the output stream after compression.
      * Writes {@code len} bytes from the array {@code b}, starting at offset {@code off}.
      * 
-     * <p>Example usage:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * byte[] buffer = new byte[1024];
      * int bytesRead = inputStream.read(buffer);

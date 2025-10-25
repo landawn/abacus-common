@@ -39,7 +39,7 @@ import javax.mail.internet.MimeMultipart;
  * 
  * <p>This class supports SMTP authentication and can be configured with various mail server properties.</p>
  * 
- * <p>Example usage:</p>
+ * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * // Configure mail server properties
  * Properties props = new Properties();
@@ -50,7 +50,7 @@ import javax.mail.internet.MimeMultipart;
  * 
  * // Send plain text email
  * EmailUtil.sendEmail(
- *     new String[]{"recipient@example.com"},
+ *     new String[] {"recipient@example.com"},
  *     "sender@example.com",
  *     "Test Subject",
  *     "Hello, this is a test email!",
@@ -61,11 +61,11 @@ import javax.mail.internet.MimeMultipart;
  * 
  * // Send HTML email with attachment
  * EmailUtil.sendHTMLEmailWithAttachment(
- *     new String[]{"recipient@example.com"},
+ *     new String[] {"recipient@example.com"},
  *     "sender@example.com",
  *     "HTML Email",
  *     "<h1>Hello</h1><p>This is an HTML email!</p>",
- *     new String[]{"attachment.pdf"},
+ *     new String[] {"attachment.pdf"},
  *     "username",
  *     "password",
  *     props
@@ -81,14 +81,14 @@ public final class EmailUtil {
     /**
      * Sends a plain text email to the specified recipients.
      *
-     * <p>Example usage:</p></p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Properties props = new Properties();
      * props.put("mail.smtp.host", "smtp.example.com");
      * props.put("mail.smtp.auth", "true");
-     * 
+     *
      * EmailUtil.sendEmail(
-     *     new String[]{"user1@example.com", "user2@example.com"},
+     *     new String[] {"user1@example.com", "user2@example.com"},
      *     "sender@example.com",
      *     "Meeting Reminder",
      *     "Don't forget about tomorrow's meeting at 10 AM",
@@ -106,6 +106,8 @@ public final class EmailUtil {
      * @param password the password for SMTP authentication
      * @param props mail server properties (e.g., mail.smtp.host, mail.smtp.port)
      * @throws RuntimeException if sending the email fails
+     * @see #sendEmailWithAttachment(String[], String, String, String, String[], String, String, Properties)
+     * @see #sendHTMLEmail(String[], String, String, String, String, String, Properties)
      */
     public static void sendEmail(final String[] recipients, final String from, final String subject, final String content, final String userName,
             final String password, final Properties props) {
@@ -115,14 +117,14 @@ public final class EmailUtil {
     /**
      * Sends a plain text email with file attachments to the specified recipients.
      *
-     * <p>Example usage:</p></p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * EmailUtil.sendEmailWithAttachment(
-     *     new String[]{"recipient@example.com"},
+     *     new String[] {"recipient@example.com"},
      *     "sender@example.com",
      *     "Monthly Report",
      *     "Please find the monthly report attached.",
-     *     new String[]{"/path/to/report.pdf", "/path/to/data.xlsx"},
+     *     new String[] {"/path/to/report.pdf", "/path/to/data.xlsx"},
      *     "username",
      *     "password",
      *     mailProperties
@@ -138,6 +140,8 @@ public final class EmailUtil {
      * @param password the password for SMTP authentication
      * @param props mail server properties (e.g., mail.smtp.host, mail.smtp.port)
      * @throws RuntimeException if sending the email fails
+     * @see #sendEmail(String[], String, String, String, String, String, Properties)
+     * @see #sendHTMLEmailWithAttachment(String[], String, String, String, String[], String, String, Properties)
      */
     public static void sendEmailWithAttachment(final String[] recipients, final String from, final String subject, final String content,
             final String[] attachedFiles, final String userName, final String password, final Properties props) {
@@ -147,16 +151,16 @@ public final class EmailUtil {
     /**
      * Sends an HTML email to the specified recipients.
      *
-     * <p>Example usage:</p></p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String htmlContent = "<html><body>" +
      *     "<h2>Welcome!</h2>" +
      *     "<p>Thank you for <b>registering</b>.</p>" +
      *     "<a href='https://example.com'>Visit our website</a>" +
      *     "</body></html>";
-     * 
+     *
      * EmailUtil.sendHTMLEmail(
-     *     new String[]{"newuser@example.com"},
+     *     new String[] {"newuser@example.com"},
      *     "noreply@example.com",
      *     "Welcome to Our Service",
      *     htmlContent,
@@ -174,6 +178,8 @@ public final class EmailUtil {
      * @param password the password for SMTP authentication
      * @param props mail server properties (e.g., mail.smtp.host, mail.smtp.port)
      * @throws RuntimeException if sending the email fails
+     * @see #sendHTMLEmailWithAttachment(String[], String, String, String, String[], String, String, Properties)
+     * @see #sendEmail(String[], String, String, String, String, String, Properties)
      */
     public static void sendHTMLEmail(final String[] recipients, final String from, final String subject, final String content, final String userName,
             final String password, final Properties props) {
@@ -183,7 +189,7 @@ public final class EmailUtil {
     /**
      * Sends an HTML email with file attachments to the specified recipients.
      *
-     * <p>Example usage:</p></p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String htmlContent = "<html><body>" +
      *     "<h1>Invoice</h1>" +
@@ -193,13 +199,13 @@ public final class EmailUtil {
      *     "<tr><td>Product A</td><td>$100</td></tr>" +
      *     "</table>" +
      *     "</body></html>";
-     * 
+     *
      * EmailUtil.sendHTMLEmailWithAttachment(
-     *     new String[]{"customer@example.com"},
+     *     new String[] {"customer@example.com"},
      *     "billing@example.com",
      *     "Invoice #12345",
      *     htmlContent,
-     *     new String[]{"/path/to/invoice.pdf"},
+     *     new String[] {"/path/to/invoice.pdf"},
      *     "smtp_user",
      *     "smtp_pass",
      *     props
@@ -215,6 +221,8 @@ public final class EmailUtil {
      * @param password the password for SMTP authentication
      * @param props mail server properties (e.g., mail.smtp.host, mail.smtp.port)
      * @throws RuntimeException if sending the email fails
+     * @see #sendHTMLEmail(String[], String, String, String, String, String, Properties)
+     * @see #sendEmailWithAttachment(String[], String, String, String, String[], String, String, Properties)
      */
     public static void sendHTMLEmailWithAttachment(final String[] recipients, final String from, final String subject, final String content,
             final String[] attachedFiles, final String userName, final String password, final Properties props) {

@@ -31,7 +31,7 @@ import com.landawn.abacus.util.function.Consumer;
  * a BigDecimalSummaryStatistics instance concurrently from multiple threads
  * if it is not being modified.</p>
  * 
- * <p>Example usage with streams:</p>
+ * <p><b>Usage Examples with streams:</b></p>
  * <pre>{@code
  * List<BigDecimal> amounts = Arrays.asList(
  *     new BigDecimal("10.50"),
@@ -67,7 +67,7 @@ public class BigDecimalSummaryStatistics implements Consumer<BigDecimal> {
      * Constructs an empty instance with zero count, zero sum,
      * and undefined min/max values.
      * 
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * BigDecimalSummaryStatistics stats = new BigDecimalSummaryStatistics();
      * stats.accept(new BigDecimal("100.00"));
@@ -83,7 +83,7 @@ public class BigDecimalSummaryStatistics implements Consumer<BigDecimal> {
      * from pre-calculated values, such as when deserializing or combining
      * results from multiple sources.</p>
      * 
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * BigDecimalSummaryStatistics stats = new BigDecimalSummaryStatistics(
      *     3L,
@@ -111,7 +111,7 @@ public class BigDecimalSummaryStatistics implements Consumer<BigDecimal> {
      * <p>This method updates the count, sum, min, and max values based on
      * the provided value. Null values should not be passed to this method.</p>
      * 
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * BigDecimalSummaryStatistics stats = new BigDecimalSummaryStatistics();
      * stats.accept(new BigDecimal("25.50"));
@@ -135,7 +135,7 @@ public class BigDecimalSummaryStatistics implements Consumer<BigDecimal> {
      * summary statistics objects are created for different partitions
      * and need to be combined into a single result.</p>
      * 
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * BigDecimalSummaryStatistics stats1 = new BigDecimalSummaryStatistics();
      * stats1.accept(new BigDecimal("10"));
@@ -161,7 +161,7 @@ public class BigDecimalSummaryStatistics implements Consumer<BigDecimal> {
     /**
      * Returns the minimum value recorded, or null if no values have been recorded.
      * 
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * BigDecimalSummaryStatistics stats = new BigDecimalSummaryStatistics();
      * stats.accept(new BigDecimal("10.50"));
@@ -178,7 +178,7 @@ public class BigDecimalSummaryStatistics implements Consumer<BigDecimal> {
     /**
      * Returns the maximum value recorded, or null if no values have been recorded.
      * 
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * BigDecimalSummaryStatistics stats = new BigDecimalSummaryStatistics();
      * stats.accept(new BigDecimal("10.50"));
@@ -195,7 +195,7 @@ public class BigDecimalSummaryStatistics implements Consumer<BigDecimal> {
     /**
      * Returns the count of values recorded.
      * 
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * BigDecimalSummaryStatistics stats = new BigDecimalSummaryStatistics();
      * stats.accept(new BigDecimal("10"));
@@ -212,7 +212,7 @@ public class BigDecimalSummaryStatistics implements Consumer<BigDecimal> {
     /**
      * Returns the sum of values recorded, or zero if no values have been recorded.
      * 
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * BigDecimalSummaryStatistics stats = new BigDecimalSummaryStatistics();
      * stats.accept(new BigDecimal("10.50"));
@@ -232,7 +232,7 @@ public class BigDecimalSummaryStatistics implements Consumer<BigDecimal> {
      * <p>The average is calculated using MathContext.DECIMAL128 for precision.
      * If no values have been recorded, this method returns BigDecimal.ZERO.</p>
      * 
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * BigDecimalSummaryStatistics stats = new BigDecimalSummaryStatistics();
      * stats.accept(new BigDecimal("10.00"));
@@ -256,7 +256,7 @@ public class BigDecimalSummaryStatistics implements Consumer<BigDecimal> {
      * values formatted with appropriate decimal places. Values are formatted
      * using a DecimalFormat with pattern "#,###.000000".</p>
      * 
-     * <p>Example output:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * {min=5.250000, max=25.750000, count=3, sum=46.500000, average=15.500000}
      * }</pre>

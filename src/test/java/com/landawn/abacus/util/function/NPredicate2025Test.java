@@ -16,7 +16,8 @@ public class NPredicate2025Test extends TestBase {
     public void testTest() {
         NPredicate<Integer> predicate = args -> {
             for (Integer n : args) {
-                if (n <= 0) return false;
+                if (n <= 0)
+                    return false;
             }
             return true;
         };
@@ -45,7 +46,8 @@ public class NPredicate2025Test extends TestBase {
     public void testTestWithLambda() {
         NPredicate<String> predicate = args -> {
             for (String s : args) {
-                if (s.isEmpty()) return true;
+                if (s.isEmpty())
+                    return true;
             }
             return false;
         };
@@ -75,7 +77,8 @@ public class NPredicate2025Test extends TestBase {
     public void testNegate() {
         NPredicate<Integer> predicate = args -> {
             for (Integer n : args) {
-                if (n % 2 != 0) return false;
+                if (n % 2 != 0)
+                    return false;
             }
             return true;
         };
@@ -89,7 +92,8 @@ public class NPredicate2025Test extends TestBase {
     public void testAnd() {
         NPredicate<Integer> predicate1 = args -> {
             for (Integer n : args) {
-                if (n <= 0) return false;
+                if (n <= 0)
+                    return false;
             }
             return true;
         };
@@ -110,7 +114,7 @@ public class NPredicate2025Test extends TestBase {
 
     @Test
     public void testAndShortCircuit() {
-        final boolean[] secondCalled = {false};
+        final boolean[] secondCalled = { false };
         NPredicate<String> predicate1 = args -> false;
         NPredicate<String> predicate2 = args -> {
             secondCalled[0] = true;
@@ -126,7 +130,8 @@ public class NPredicate2025Test extends TestBase {
     public void testOr() {
         NPredicate<String> predicate1 = args -> {
             for (String s : args) {
-                if (s.isEmpty()) return true;
+                if (s.isEmpty())
+                    return true;
             }
             return false;
         };
@@ -141,7 +146,7 @@ public class NPredicate2025Test extends TestBase {
 
     @Test
     public void testOrShortCircuit() {
-        final boolean[] secondCalled = {false};
+        final boolean[] secondCalled = { false };
         NPredicate<String> predicate1 = args -> true;
         NPredicate<String> predicate2 = args -> {
             secondCalled[0] = true;
@@ -170,7 +175,8 @@ public class NPredicate2025Test extends TestBase {
     public void testWithNullValues() {
         NPredicate<String> predicate = args -> {
             for (String s : args) {
-                if (s == null) return true;
+                if (s == null)
+                    return true;
             }
             return false;
         };
@@ -183,7 +189,8 @@ public class NPredicate2025Test extends TestBase {
     public void testAllMatch() {
         NPredicate<String> predicate = args -> {
             for (String s : args) {
-                if (s.length() <= 3) return false;
+                if (s.length() <= 3)
+                    return false;
             }
             return true;
         };
@@ -196,7 +203,8 @@ public class NPredicate2025Test extends TestBase {
     public void testAnyMatch() {
         NPredicate<Integer> predicate = args -> {
             for (Integer n : args) {
-                if (n > 100) return true;
+                if (n > 100)
+                    return true;
             }
             return false;
         };

@@ -59,7 +59,7 @@ import com.landawn.abacus.logging.LoggerFactory;
  *   <li>./resources, ../resources</li>
  * </ul>
  * 
- * <p>Example usage:
+ * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * public class MyConfig extends Configuration {
  *     public MyConfig(Element element) {
@@ -213,7 +213,7 @@ public abstract class Configuration {
      * This method returns the file system path where the class was loaded from.
      * URLs with %20 encoding for spaces are automatically decoded.
      * 
-     * <p>Example usage:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String location = Configuration.getSourceCodeLocation(MyClass.class);
      * // Returns: "/path/to/myapp/classes" or "/path/to/myapp.jar"
@@ -232,7 +232,7 @@ public abstract class Configuration {
      * common configuration locations. The search includes Maven/Gradle build directories,
      * resources directories, and standard config/conf directories at both current and parent levels.
      * 
-     * <p>Example usage:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * List<String> paths = Configuration.getCommonConfigPath();
      * for (String path : paths) {
@@ -280,8 +280,8 @@ public abstract class Configuration {
      * The search is performed recursively in all common configuration locations.
      * Directories named .cvs, .svn, and .git are ignored during the search.
      * Results are cached for improved performance on subsequent lookups.
-     * 
-     * <p>Example usage:
+     *
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * File configDir = Configuration.findDir("config/database");
      * if (configDir != null && configDir.exists()) {
@@ -291,6 +291,7 @@ public abstract class Configuration {
      *
      * @param configDir the name of the configuration directory to find
      * @return the found directory as a File object, or null if not found
+     * @see #findFile(String)
      */
     public static File findDir(final String configDir) {
         return findFile(configDir, true, null);
@@ -301,8 +302,8 @@ public abstract class Configuration {
      * The search is performed recursively in all common configuration locations.
      * Directories named .cvs, .svn, and .git are ignored during the search.
      * Results are cached for improved performance on subsequent lookups.
-     * 
-     * <p>Example usage:
+     *
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * File configFile = Configuration.findFile("database.xml");
      * if (configFile != null) {
@@ -312,6 +313,8 @@ public abstract class Configuration {
      *
      * @param configFileName the name of the configuration file to find
      * @return the found file as a File object, or null if not found
+     * @see #findDir(String)
+     * @see #findFileByFile(File, String)
      */
     public static File findFile(final String configFileName) {
         return findFile(configFileName, false, null);
@@ -409,7 +412,7 @@ public abstract class Configuration {
      * to common configuration paths if not found. This method is useful for finding
      * related configuration files that are referenced from within another configuration file.
      * 
-     * <p>Example usage:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * File mainConfig = new File("/app/config/main.xml");
      * File dbConfig = Configuration.findFileByFile(mainConfig, "database.xml");
@@ -442,7 +445,7 @@ public abstract class Configuration {
      * Directories named .cvs, .svn, and .git are ignored during the search.
      * The file name can include a relative path which will be preserved during the search.
      * 
-     * <p>Example usage:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * File rootDir = new File("/app");
      * File configFile = Configuration.findFileInDir("config/database.xml", rootDir, false);
@@ -548,7 +551,7 @@ public abstract class Configuration {
     /**
      * Gets the current source code location.
      *
-     * @return
+     * @return the File representing the current source code location directory
      */
     private static File getCurrentSourceCodeLocation() {
         File dir = new File(getSourceCodeLocation(Configuration.class));
@@ -574,7 +577,7 @@ public abstract class Configuration {
      * This method handles SAXException and IOException, wrapping them in appropriate
      * unchecked exceptions for easier handling.
      * 
-     * <p>Example usage:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * File configFile = new File("config.xml");
      * Document doc = Configuration.parse(configFile);
@@ -602,7 +605,7 @@ public abstract class Configuration {
      * This method handles SAXException and IOException, wrapping them in appropriate
      * unchecked exceptions for easier handling.
      * 
-     * <p>Example usage:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * try (InputStream is = new FileInputStream("config.xml")) {
      *     Document doc = Configuration.parse(is);
@@ -631,7 +634,7 @@ public abstract class Configuration {
      * returns the decoded file. This method helps handle file paths that may have
      * been URL-encoded.
      * 
-     * <p>Example usage:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * File file = new File("/path/with%20spaces/file.xml");
      * File formatted = Configuration.formatPath(file);
@@ -678,7 +681,7 @@ public abstract class Configuration {
      *   <li>"60 * 60 * 1000" - 3600000 milliseconds (1 hour)</li>
      * </ul>
      * 
-     * <p>Example usage:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * long timeout = Configuration.readTimeInMillis("30s"); // 30000
      * long delay = Configuration.readTimeInMillis("5m");    // 300000
@@ -745,8 +748,8 @@ public abstract class Configuration {
      * The returned collection is backed by the configuration, so changes to
      * the configuration are reflected in the collection. However, the collection
      * itself should not be modified.
-     * 
-     * <p>Example usage:
+     *
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Collection<String> names = config.getAttrNames();
      * for (String name : names) {
@@ -755,6 +758,8 @@ public abstract class Configuration {
      * }</pre>
      *
      * @return a collection of all attribute names
+     * @see #getAttribute(String)
+     * @see #getAttributes()
      */
     public Collection<String> getAttrNames() {
         return attrs.keySet();
@@ -764,8 +769,8 @@ public abstract class Configuration {
      * Gets the value of the specified attribute.
      * Returns null if the attribute doesn't exist. Attribute values are always
      * returned as strings, even if they were originally numeric in the XML.
-     * 
-     * <p>Example usage:
+     *
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String dbUrl = config.getAttribute("database.url");
      * String timeout = config.getAttribute("connection.timeout");
@@ -776,6 +781,8 @@ public abstract class Configuration {
      *
      * @param attrName the name of the attribute
      * @return the attribute value, or null if the attribute doesn't exist
+     * @see #hasAttribute(String)
+     * @see #getAttributes()
      */
     public String getAttribute(final String attrName) {
         return attrs.get(attrName);
@@ -785,8 +792,8 @@ public abstract class Configuration {
      * Checks if an attribute with the specified name exists.
      * This method can be used to distinguish between an attribute with a null/empty
      * value and an attribute that doesn't exist at all.
-     * 
-     * <p>Example usage:
+     *
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * if (config.hasAttribute("optional.setting")) {
      *     String value = config.getAttribute("optional.setting");
@@ -796,6 +803,7 @@ public abstract class Configuration {
      *
      * @param attrName the name of the attribute to check
      * @return {@code true} if the attribute exists, {@code false} otherwise
+     * @see #getAttribute(String)
      */
     public boolean hasAttribute(final String attrName) {
         return attrs.containsKey(attrName);
@@ -805,8 +813,8 @@ public abstract class Configuration {
      * Gets all attributes as a map.
      * The returned map is the internal attribute map, so modifications to it
      * will affect the configuration. Use with caution.
-     * 
-     * <p>Example usage:
+     *
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Map<String, String> allAttrs = config.getAttributes();
      * // Create a defensive copy if needed
@@ -814,6 +822,8 @@ public abstract class Configuration {
      * }</pre>
      *
      * @return a map containing all attribute names and their values
+     * @see #getAttribute(String)
+     * @see #getAttrNames()
      */
     public Map<String, String> getAttributes() {
         return attrs;
@@ -825,7 +835,7 @@ public abstract class Configuration {
      * it will be replaced with the corresponding property value if available.
      * The attribute value is trimmed of leading and trailing whitespace.
      * 
-     * <p>Example usage:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Direct value
      * config.setAttribute("timeout", "30s");
@@ -855,7 +865,7 @@ public abstract class Configuration {
      * Removes an attribute from the configuration.
      * This method is typically used by subclasses to manage configuration state.
      * 
-     * <p>Example usage:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String oldValue = config.removeAttribute("deprecated.setting");
      * if (oldValue != null) {
@@ -875,7 +885,7 @@ public abstract class Configuration {
      * Each element in the resulting array is trimmed of leading and trailing whitespace.
      * Empty elements after trimming are preserved.
      * 
-     * <p>Example usage:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String[] hosts = config.string2Array("host1, host2, host3");
      * // Result: ["host1", "host2", "host3"]
@@ -896,7 +906,7 @@ public abstract class Configuration {
      * Each element in the resulting list is trimmed of leading and trailing whitespace.
      * Empty elements after trimming are preserved. The returned list is mutable.
      * 
-     * <p>Example usage:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * List<String> features = config.string2List("feature1, feature2, feature3");
      * features.add("feature4"); // Can modify the list
@@ -915,7 +925,7 @@ public abstract class Configuration {
      * Duplicate values are automatically removed (set behavior).
      * The returned set is mutable and uses hash-based implementation.
      * 
-     * <p>Example usage:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Set<String> tags = config.string2Set("java, java, xml, config");
      * // Result: Set containing ["java", "xml", "config"]
@@ -948,7 +958,7 @@ public abstract class Configuration {
      * Two configurations are equal if they have the same attributes.
      * The properties map is not considered in equality comparison.
      * 
-     * <p>Example usage:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Configuration config1 = new MyConfig(element1);
      * Configuration config2 = new MyConfig(element2);
@@ -969,7 +979,7 @@ public abstract class Configuration {
      * Returns a string representation of this configuration showing its attributes.
      * The format is the same as Map.toString(), showing all attribute key-value pairs.
      * 
-     * <p>Example output:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * {database.url=jdbc:mysql://localhost:3306/mydb, timeout=30s, pool.size=10}
      * }</pre>

@@ -25,7 +25,7 @@ import com.landawn.abacus.util.Throwables;
  * <p>The interface extends {@code Throwables.ObjBiIntFunction} with {@code RuntimeException} as the exception type,
  * making it suitable for use in contexts where checked exceptions are not required.
  * 
- * <p>Example usage:
+ * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * ObjBiIntFunction<String, String> substring = (str, start, end) -> 
  *     str.substring(start, end);
@@ -66,8 +66,7 @@ public interface ObjBiIntFunction<T, R> extends Throwables.ObjBiIntFunction<T, R
      * @param t the object first argument
      * @param i the first int argument (often used as start index, row, or x-coordinate)
      * @param j the second int argument (often used as end index, column, or y-coordinate)
-     * @return the function result of type R
-     * @throws RuntimeException if any error occurs during function execution
+     * @return the function result of type R if any error occurs during function execution
      */
     @Override
     R apply(T t, int i, int j);
@@ -82,7 +81,7 @@ public interface ObjBiIntFunction<T, R> extends Throwables.ObjBiIntFunction<T, R
      * <p>This method allows for function composition, enabling the chaining of
      * operations where the output of this function becomes the input of the next.
      * 
-     * <p>Example usage:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ObjBiIntFunction<String, String> substring = (str, start, end) -> 
      *     str.substring(start, end);

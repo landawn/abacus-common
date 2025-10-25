@@ -35,7 +35,7 @@ import java.lang.annotation.Target;
  *   <li>Custom types that need simplified JSON/XML representation</li>
  * </ul>
  * 
- * <p>Example usage:</p>
+ * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * public class Amount {
  *     @JsonXmlValue

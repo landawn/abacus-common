@@ -25,7 +25,7 @@ import com.landawn.abacus.util.Throwables;
  * <p>The interface extends {@code Throwables.LongTriPredicate} with {@code RuntimeException} as the exception type,
  * making it suitable for use in contexts where checked exceptions are not required.
  * 
- * <p>Example usage:
+ * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * LongTriPredicate isTriangle = (a, b, c) -> 
  *     a + b > c && a + c > b && b + c > a;
@@ -47,7 +47,7 @@ public interface LongTriPredicate extends Throwables.LongTriPredicate<RuntimeExc
      * 
      * <p>This constant is useful as a default predicate or for testing purposes.
      * 
-     * <p>Example usage:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * LongTriPredicate alwaysTrue = LongTriPredicate.ALWAYS_TRUE;
      * alwaysTrue.test(1L, 2L, 3L); // returns true
@@ -61,7 +61,7 @@ public interface LongTriPredicate extends Throwables.LongTriPredicate<RuntimeExc
      * 
      * <p>This constant is useful as a default predicate or for testing purposes.
      * 
-     * <p>Example usage:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * LongTriPredicate alwaysFalse = LongTriPredicate.ALWAYS_FALSE;
      * alwaysFalse.test(1L, 2L, 3L); // returns false
@@ -87,8 +87,7 @@ public interface LongTriPredicate extends Throwables.LongTriPredicate<RuntimeExc
      * @param a the first input argument
      * @param b the second input argument
      * @param c the third input argument
-     * @return {@code true} if the input arguments match the predicate, otherwise {@code false}
-     * @throws RuntimeException if any error occurs during predicate evaluation
+     * @return {@code true} if the input arguments match the predicate, otherwise {@code false} if any error occurs during predicate evaluation
      */
     @Override
     boolean test(long a, long b, long c);
@@ -99,7 +98,7 @@ public interface LongTriPredicate extends Throwables.LongTriPredicate<RuntimeExc
      * <p>The returned predicate will return {@code true} when this predicate returns {@code false},
      * and {@code false} when this predicate returns {@code true}.
      * 
-     * <p>Example usage:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * LongTriPredicate allPositive = (a, b, c) -> a > 0 && b > 0 && c > 0;
      * LongTriPredicate notAllPositive = allPositive.negate();
@@ -123,7 +122,7 @@ public interface LongTriPredicate extends Throwables.LongTriPredicate<RuntimeExc
      * to the caller; if evaluation of this predicate throws an exception, the
      * {@code other} predicate will not be evaluated.
      * 
-     * <p>Example usage:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * LongTriPredicate allPositive = (a, b, c) -> a > 0 && b > 0 && c > 0;
      * LongTriPredicate sumLessThan100 = (a, b, c) -> a + b + c < 100;
@@ -150,7 +149,7 @@ public interface LongTriPredicate extends Throwables.LongTriPredicate<RuntimeExc
      * to the caller; if evaluation of this predicate throws an exception, the
      * {@code other} predicate will not be evaluated.
      * 
-     * <p>Example usage:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * LongTriPredicate anyZero = (a, b, c) -> a == 0 || b == 0 || c == 0;
      * LongTriPredicate sumGreaterThan1000 = (a, b, c) -> a + b + c > 1000;

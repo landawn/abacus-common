@@ -14,6 +14,17 @@
 
 package com.landawn.abacus.type;
 
+/**
+ * Type handler for primitive int values.
+ * This class handles the primitive int type specifically, as opposed to the Integer wrapper class.
+ * It provides type information and default value handling for int primitives.
+ *
+ * <p><b>Usage Examples:</b></p>
+ * <pre>{@code
+ * Type<Integer> type = TypeFactory.getType(int.class);
+ * Integer defaultVal = type.defaultValue(); // Returns 0
+ * }</pre>
+ */
 @SuppressWarnings("java:S2160")
 public final class PrimitiveIntType extends AbstractIntegerType {
 
@@ -28,13 +39,12 @@ public final class PrimitiveIntType extends AbstractIntegerType {
     /**
      * Returns the Class object representing the primitive int type.
      *
-     * <pre>
-     * <code>
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
      * PrimitiveIntType type = new PrimitiveIntType();
      * Class&lt;?&gt; clazz = type.clazz();
      * // clazz equals int.class
-     * </code>
-     * </pre>
+     * }</pre>
      *
      * @return the Class object for int.class
      */
@@ -48,13 +58,12 @@ public final class PrimitiveIntType extends AbstractIntegerType {
      * Indicates whether this type represents a primitive type.
      * For PrimitiveIntType, this always returns {@code true} since it represents the primitive int type.
      *
-     * <pre>
-     * <code>
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
      * PrimitiveIntType type = new PrimitiveIntType();
      * boolean isPrimitive = type.isPrimitiveType();
      * // isPrimitive is true
-     * </code>
-     * </pre>
+     * }</pre>
      *
      * @return true, indicating this is a primitive type
      */
@@ -67,13 +76,11 @@ public final class PrimitiveIntType extends AbstractIntegerType {
      * Returns the default value for the primitive int type.
      * The default value for primitive int is 0.
      *
-     * <pre>
-     * <code>
+     * <p><b>Usage Examples:</b></p>
      * PrimitiveIntType type = new PrimitiveIntType();
      * Integer defaultVal = type.defaultValue();
      * // defaultVal equals 0
-     * </code>
-     * </pre>
+     * }</pre>
      *
      * @return Integer object containing the value 0
      */

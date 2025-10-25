@@ -36,7 +36,7 @@ public interface ToDoubleTriFunction<A, B, C> extends Throwables.ToDoubleTriFunc
     /**
      * Applies this function to the given arguments and returns a double result.
      * 
-     * <p>Example usage:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ToDoubleTriFunction<Integer, Integer, Integer> volumeCalculator = 
      *     (length, width, height) -> (double) length * width * height;
@@ -50,8 +50,7 @@ public interface ToDoubleTriFunction<A, B, C> extends Throwables.ToDoubleTriFunc
      * @param a the first function argument
      * @param b the second function argument
      * @param c the third function argument
-     * @return the function result as a primitive double
-     * @throws RuntimeException if any error occurs during function execution
+     * @return the function result as a primitive double if any error occurs during function execution
      */
     @Override
     double applyAsDouble(A a, B b, C c);

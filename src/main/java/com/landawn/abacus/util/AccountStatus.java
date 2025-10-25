@@ -29,7 +29,7 @@ package com.landawn.abacus.util;
  *   <li>DELETED (5) - Account has been deleted from the system</li>
  * </ul>
  * 
- * <p>Example usage:</p>
+ * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * AccountStatus status = AccountStatus.ACTIVE;
  * int statusCode = status.intValue(); // Returns 1
@@ -83,7 +83,7 @@ public enum AccountStatus {
      * This can be useful for database persistence or API communication
      * where numeric codes are preferred.
      * 
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * AccountStatus status = AccountStatus.SUSPENDED;
      * int code = status.intValue(); // Returns 2
@@ -99,7 +99,7 @@ public enum AccountStatus {
      * Returns the AccountStatus corresponding to the specified integer value.
      * This method performs a reverse lookup from integer code to enum constant.
      * 
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * AccountStatus status = AccountStatus.valueOf(1); // Returns ACTIVE
      * AccountStatus suspended = AccountStatus.valueOf(2); // Returns SUSPENDED

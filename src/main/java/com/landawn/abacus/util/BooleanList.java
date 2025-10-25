@@ -91,12 +91,13 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
 
     /**
      * Constructs a BooleanList using the specified array as the element array for this list without copying.
-     * The list will have the same size as the array length.
-     * 
+     * The list will use the provided array as its internal storage without copying,
+     * making this operation O(1) in time complexity.
+     *
      * <p><b>Note:</b> The array is used directly without copying. Any modifications to the list
      * will affect the original array and vice versa.</p>
      *
-     * @param a the array to be used as the element array for this list. Must not be {@code null}.}
+     * @param a the array to be used as the element array for this list. Must not be {@code null}.
      */
     public BooleanList(final boolean[] a) {
         this(N.requireNonNull(a), a.length);
@@ -105,12 +106,12 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
     /**
      * Constructs a BooleanList using the specified array as the element array for this list without copying.
      * Only the first {@code size} elements of the array will be considered as part of the list.
-     * 
+     *
      * <p><b>Note:</b> The array is used directly without copying. Any modifications to the list
      * will affect the original array and vice versa.</p>
      *
      * @param a the array to be used as the element array for this list. Must not be {@code null}.
-     * @param size the number of elements in the list. Must be between 0 and the array length (inclusive).}
+     * @param size the number of elements in the list. Must be between 0 and the array length (inclusive).
      * @throws IndexOutOfBoundsException if {@code size} is negative or greater than the array length
      */
     public BooleanList(final boolean[] a, final int size) throws IndexOutOfBoundsException {
@@ -134,11 +135,10 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
 
     /**
      * Creates a new BooleanList containing the first {@code size} elements of the specified array.
-     * 
-     * <p>If the input array is {@code null}, it is treated as an empty array. The {@code size}
-     * parameter must be valid for the resulting array length.</p>
+     * The array is used directly as the backing array without copying for efficiency.
+     * If the input array is {@code null}, it is treated as an empty array.
      *
-     * @param a the array of boolean values to be included in the new list. Can be {@code null}.
+     * @param a the array of boolean values to be used as the backing array. Can be {@code null}.
      * @param size the number of elements from the array to include in the list.
      *             Must be between 0 and the array length (inclusive).
      * @return a new BooleanList containing the first {@code size} elements of the specified array
@@ -152,10 +152,10 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
 
     /**
      * Creates a new BooleanList that is a copy of the specified array.
-     * 
+     *
      * <p>Unlike {@link #of(boolean...)}, this method always creates a defensive copy of the input array,
      * ensuring that modifications to the returned list do not affect the original array.</p>
-     * 
+     *
      * <p>If the input array is {@code null}, an empty list is returned.</p>
      *
      * @param a the array to be copied. Can be {@code null}.
@@ -168,8 +168,8 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
 
     /**
      * Creates a new BooleanList that is a copy of the specified range within the given array.
-     * 
-     * <p>This method creates a defensive copy of the elements in the specified range,
+     *
+     * <p>This method creates a defensive copy of the elements in the range [fromIndex, toIndex),
      * ensuring that modifications to the returned list do not affect the original array.</p>
      *
      * @param a the array from which a range is to be copied. Must not be {@code null}.
@@ -177,7 +177,7 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
      * @param toIndex the final index of the range to be copied, exclusive.
      * @return a new BooleanList containing a copy of the elements in the specified range
      * @throws IndexOutOfBoundsException if {@code fromIndex < 0} or {@code toIndex > a.length}
-     *                                   or {@code fromIndex > toIndex}}
+     *                                   or {@code fromIndex > toIndex}
      */
     public static BooleanList copyOf(final boolean[] a, final int fromIndex, final int toIndex) {
         return of(N.copyOfRange(a, fromIndex, toIndex));
@@ -186,10 +186,10 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
     /**
      * Creates a new BooleanList with the specified element repeated a given number of times.
      * 
-     * <p>Example usage:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * BooleanList list = BooleanList.repeat(true, 5); // [true, true, true, true, true]
-     * }</pre></p>
+     * }</pre>
      *
      * @param element the boolean value to be repeated
      * @param len the number of times to repeat the element. Must be non-negative.
@@ -206,10 +206,10 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
      * <p>Each element in the list has an equal probability of being {@code true} or {@code false}.
      * The random values are generated using a secure random number generator.</p>
      * 
-     * <p>Example usage:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * BooleanList randomList = BooleanList.random(10); // list with 10 random boolean values
-     * }</pre></p>
+     * }</pre>
      *
      * @param len the number of random boolean values to generate. Must be non-negative.
      * @return a new BooleanList containing random boolean values
@@ -474,11 +474,11 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
      * 
      * <p>This method runs in linear time and performs at most one pass through the list.</p>
      * 
-     * <p>Example usage:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * BooleanList list = BooleanList.of(true, false, true, false, true);
      * list.removeAllOccurrences(true); // list is now [false, false]
-     * }</pre></p>
+     * }</pre>
      *
      * @param e the element to be removed from this list
      * @return {@code true} if this list was modified (i.e., at least one element was removed);
@@ -505,8 +505,9 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
     }
 
     /**
+     * Removes the element at the specified index without bounds checking.
      *
-     * @param index
+     * @param index the index of the element to remove
      */
     private void fastRemove(final int index) {
         final int numMoved = size - index - 1;
@@ -557,18 +558,18 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
 
     /**
      * Removes all elements from this list that satisfy the given predicate.
-     * 
+     *
      * <p>Elements are tested in order, and those for which the predicate returns {@code true}
      * are removed. The relative order of retained elements is preserved.</p>
-     * 
-     * <p>Example usage:
+     *
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * BooleanList list = BooleanList.of(true, false, true, false);
      * list.removeIf(b -> b); // removes all true values, list is now [false, false]
-     * }</pre></p>
+     * }</pre>
      *
-     * @param p the predicate which returns {@code true} for elements to be removed
-     * @return {@code true} if any elements were removed; {@code false} otherwise}
+     * @param p the predicate which returns {@code true} for elements to be removed. Must not be {@code null}.
+     * @return {@code true} if any elements were removed; {@code false} otherwise
      */
     public boolean removeIf(final BooleanPredicate p) {
         final BooleanList tmp = new BooleanList(size());
@@ -596,11 +597,11 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
      * <p>For boolean lists, this method will result in a list containing at most two elements:
      * one {@code true} and one {@code false}, preserving their first occurrence order.</p>
      * 
-     * <p>Example usage:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * BooleanList list = BooleanList.of(true, false, true, false, true);
      * list.removeDuplicates(); // list is now [true, false]
-     * }</pre></p>
+     * }</pre>
      *
      * @return {@code true} if the list was modified (i.e., duplicates were removed);
      *         {@code false} if the list already contained only distinct values
@@ -680,10 +681,11 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
     }
 
     /**
+     * Performs a batch removal operation based on the specified collection and complement flag.
      *
-     * @param c
-     * @param complement
-     * @return
+     * @param c the collection of elements to check against
+     * @param complement if true, retain elements in c; if false, remove elements in c
+     * @return the number of elements removed
      */
     private int batchRemove(final BooleanList c, final boolean complement) {
         final boolean[] elementData = this.elementData;//NOSONAR
@@ -747,12 +749,12 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
      * <p>This method is more efficient than removing elements one by one when multiple
      * elements need to be removed.</p>
      * 
-     * <p>Example usage:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * BooleanList list = BooleanList.of(true, false, true, false, true);
      * list.deleteAllByIndices(1, 3); // removes elements at indices 1 and 3
      * // list is now [true, true, true]
-     * }</pre></p>
+     * }</pre>
      *
      * @param indices the indices of elements to be removed. Duplicate indices are allowed
      *                and will be handled appropriately.
@@ -783,12 +785,12 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
      * <p>Shifts any subsequent elements to the left (reduces their indices by
      * {@code toIndex - fromIndex}).</p>
      * 
-     * <p>Example usage:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * BooleanList list = BooleanList.of(true, false, true, false, true);
      * list.deleteRange(1, 4); // removes elements at indices 1, 2, and 3
      * // list is now [true, true]
-     * }</pre></p>
+     * }</pre>
      *
      * @param fromIndex the index of the first element to be removed (inclusive)
      * @param toIndex the index after the last element to be removed (exclusive)
@@ -821,12 +823,12 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
      * so that the element originally at fromIndex will be at newPositionAfterMove.
      * Other elements are shifted as necessary to accommodate the move.
      * 
-     * <p>Example usage:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * BooleanList list = BooleanList.of(true, false, true, false, true);
      * list.moveRange(1, 3, 2); // moves elements at indices 1-2 to start at index 2
      * // list is now [true, false, false, true, true]
-     * }</pre></p>
+     * }</pre>
      *
      * @param fromIndex the starting index (inclusive) of the range to be moved
      * @param toIndex the ending index (exclusive) of the range to be moved
@@ -847,13 +849,13 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
      * <p>If the replacement list has a different size than the range being replaced,
      * the list will be resized accordingly, and subsequent elements will be shifted.</p>
      * 
-     * <p>Example usage:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * BooleanList list = BooleanList.of(true, false, true, false, true);
      * BooleanList replacement = BooleanList.of(false, false);
      * list.replaceRange(1, 4, replacement);
      * // list is now [true, false, false, true]
-     * }</pre></p>
+     * }</pre>
      *
      * @param fromIndex the index of the first element to be replaced (inclusive)
      * @param toIndex the index after the last element to be replaced (exclusive)
@@ -936,12 +938,12 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
      * 
      * <p>This method runs in linear time, making a single pass through the list.</p>
      * 
-     * <p>Example usage:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * BooleanList list = BooleanList.of(true, false, true, false);
      * int count = list.replaceAll(true, false); // returns 2
      * // list is now [false, false, false, false]
-     * }</pre></p>
+     * }</pre>
      *
      * @param oldVal the value to be replaced
      * @param newVal the value to replace {@code oldVal}
@@ -967,17 +969,17 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
 
     /**
      * Replaces each element of this list with the result of applying the operator to that element.
-     * 
+     *
      * <p>This method runs in linear time, applying the operator to each element exactly once.</p>
-     * 
-     * <p>Example usage:
+     *
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * BooleanList list = BooleanList.of(true, false, true, false);
      * list.replaceAll(b -> !b); // negates all values
      * // list is now [false, true, false, true]
-     * }</pre></p>
+     * }</pre>
      *
-     * @param operator the operator to apply to each element}
+     * @param operator the operator to apply to each element. Must not be {@code null}.
      */
     public void replaceAll(final BooleanUnaryOperator operator) {
         for (int i = 0, len = size(); i < len; i++) {
@@ -987,20 +989,20 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
 
     /**
      * Replaces all elements that satisfy the given predicate with the specified new value.
-     * 
+     *
      * <p>This method runs in linear time, testing each element against the predicate
      * and replacing those that match.</p>
-     * 
-     * <p>Example usage:
+     *
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * BooleanList list = BooleanList.of(true, false, true, false);
      * boolean modified = list.replaceIf(b -> b, false); // replace all true with false
      * // list is now [false, false, false, false], modified is true
-     * }</pre></p>
+     * }</pre>
      *
-     * @param predicate the predicate to test each element
+     * @param predicate the predicate to test each element. Must not be {@code null}.
      * @param newValue the value to replace matching elements with
-     * @return {@code true} if at least one element was replaced; {@code false} otherwise}
+     * @return {@code true} if at least one element was replaced; {@code false} otherwise
      */
     public boolean replaceIf(final BooleanPredicate predicate, final boolean newValue) {
         boolean result = false;
@@ -1032,12 +1034,12 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
      * The range to be filled extends from {@code fromIndex} (inclusive) to
      * {@code toIndex} (exclusive).
      * 
-     * <p>Example usage:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * BooleanList list = BooleanList.of(true, true, true, true, true);
      * list.fill(1, 4, false);
      * // list is now [true, false, false, false, true]
-     * }</pre></p>
+     * }</pre>
      *
      * @param fromIndex the index of the first element (inclusive) to be filled with the specified value
      * @param toIndex the index after the last element (exclusive) to be filled with the specified value
@@ -1222,13 +1224,13 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
      * appears multiple times in both lists, it will appear in the result the minimum
      * number of times it appears in either list.</p>
      * 
-     * <p>Example usage:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * BooleanList list1 = BooleanList.of(true, false, true, false);
      * BooleanList list2 = BooleanList.of(true, true, false);
      * BooleanList result = list1.intersection(list2);
      * // result is [true, false, true]
-     * }</pre></p>
+     * }</pre>
      *
      * @param b the BooleanList to intersect with this list
      * @return a new BooleanList containing the intersection of this list and the specified list
@@ -1280,12 +1282,12 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
      * it will appear max(0, n-m) times in the result. The order of elements from this
      * list is preserved.</p>
      * 
-     * <p>Example usage:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * BooleanList list1 = BooleanList.of(true, true, false, true);
      * BooleanList list2 = BooleanList.of(true, false);
      * BooleanList result = list1.difference(list2); // result is [true, true]
-     * }</pre></p>
+     * }</pre>
      *
      * @param b the BooleanList whose elements will be subtracted from this list
      * @return a new BooleanList containing the elements in this list but not in the specified list
@@ -1339,13 +1341,13 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
      * <p>The result contains all elements that appear in exactly one of the two lists,
      * or elements that appear a different number of times in each list.</p>
      * 
-     * <p>Example usage:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * BooleanList list1 = BooleanList.of(true, true, false);
      * BooleanList list2 = BooleanList.of(true, false, false);
      * BooleanList result = list1.symmetricDifference(list2);
      * // result is [true, false] (one extra true from list1, one extra false from list2)
-     * }</pre></p>
+     * }</pre>
      *
      * @param b the BooleanList to compute symmetric difference with
      * @return a new BooleanList containing the symmetric difference of the two lists
@@ -1408,11 +1410,11 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
      * 
      * <p>This method runs in linear time, examining each element once.</p>
      * 
-     * <p>Example usage:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * BooleanList list = BooleanList.of(true, false, true, false, true);
      * int count = list.occurrencesOf(true); // returns 3
-     * }</pre></p>
+     * }</pre>
      *
      * @param valueToFind the value whose frequency is to be determined
      * @return the number of times the specified value appears in this list
@@ -2135,11 +2137,13 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
      * the elements in the list and their order.
      * 
      * <p>The hash code is defined to be the result of the following calculation:
+     * 
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * int hashCode = 1;
      * for (boolean e : list)
      *     hashCode = 31 * hashCode + (e ? 1231 : 1237);
-     * }</pre></p>
+     * }</pre>
      *
      * @return the hash code value for this list
      */
@@ -2176,7 +2180,7 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
      * of the list's elements in order, enclosed in square brackets ("[]"). Adjacent
      * elements are separated by the characters ", " (comma and space).
      * 
-     * <p>Example: A list containing true, false, true would return "[true, false, true]"</p>
+     * <p><b>Usage Examples:</b></p> A list containing true, false, true would return "[true, false, true]"</p>
      *
      * @return a string representation of this list
      */

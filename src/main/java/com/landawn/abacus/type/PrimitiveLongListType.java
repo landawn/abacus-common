@@ -39,7 +39,7 @@ public final class PrimitiveLongListType extends AbstractPrimitiveListType<LongL
     /**
      * Returns the Class object representing the LongList type.
      *
-     * <p>Usage example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * PrimitiveLongListType type = new PrimitiveLongListType();
      * Class<LongList> clazz = type.clazz();
@@ -57,7 +57,7 @@ public final class PrimitiveLongListType extends AbstractPrimitiveListType<LongL
      * Returns the Type instance for the element type of this list, which is primitive long.
      * This method provides access to the Type representation of individual list elements.
      *
-     * <p>Usage example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * PrimitiveLongListType type = new PrimitiveLongListType();
      * Type<?> elementType = type.getElementType();
@@ -74,7 +74,7 @@ public final class PrimitiveLongListType extends AbstractPrimitiveListType<LongL
     /**
      * Returns the parameter types associated with this list type.
      *
-     * <p>Usage example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * PrimitiveLongListType type = new PrimitiveLongListType();
      * Type<Long>[] paramTypes = type.getParameterTypes();
@@ -95,7 +95,7 @@ public final class PrimitiveLongListType extends AbstractPrimitiveListType<LongL
      * The list is converted to an array first, then formatted as comma-separated values
      * enclosed in square brackets.
      *
-     * <p>Usage example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * PrimitiveLongListType type = new PrimitiveLongListType();
      * LongList list = LongList.of(1L, 2L, 3L);
@@ -118,7 +118,7 @@ public final class PrimitiveLongListType extends AbstractPrimitiveListType<LongL
      * Parses a string representation of a long list and returns the corresponding LongList.
      * The string should contain comma-separated long values enclosed in square brackets.
      *
-     * <p>Usage example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * PrimitiveLongListType type = new PrimitiveLongListType();
      * LongList list = type.valueOf("[1, 2, 3]");
@@ -146,7 +146,7 @@ public final class PrimitiveLongListType extends AbstractPrimitiveListType<LongL
      * The list is formatted as comma-separated values enclosed in square brackets.
      * If the list is null, appends "null".
      *
-     * <p>Usage example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * PrimitiveLongListType type = new PrimitiveLongListType();
      * LongList list = LongList.of(10L, 20L, 30L);
@@ -178,7 +178,7 @@ public final class PrimitiveLongListType extends AbstractPrimitiveListType<LongL
      * The list is converted to an array and then written as comma-separated values
      * enclosed in square brackets.
      *
-     * <p>Usage example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * PrimitiveLongListType type = new PrimitiveLongListType();
      * LongList list = LongList.of(100L, 200L, 300L);

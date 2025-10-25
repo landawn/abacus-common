@@ -51,7 +51,7 @@ public interface LongNConsumer {
      *   <li>Implementing operations that work with any number of long inputs</li>
      * </ul>
      *
-     * <p>Example usage:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * LongNConsumer sumPrinter = args -> {
      *     long sum = 0;
@@ -80,7 +80,7 @@ public interface LongNConsumer {
      * of operations that will be executed sequentially on the same array of
      * input values.
      *
-     * <p>Example usage:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * LongNConsumer logger = args -> System.out.println("Processing " + args.length + " values");
      * LongNConsumer processor = args -> processValues(args);

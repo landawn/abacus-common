@@ -64,7 +64,7 @@ public class CharTriPredicate2025Test extends TestBase {
 
     @Test
     public void testAndShortCircuit() {
-        final boolean[] secondCalled = {false};
+        final boolean[] secondCalled = { false };
         CharTriPredicate alwaysFalse = (a, b, c) -> false;
         CharTriPredicate checkCalled = (a, b, c) -> {
             secondCalled[0] = true;
@@ -89,7 +89,7 @@ public class CharTriPredicate2025Test extends TestBase {
 
     @Test
     public void testOrShortCircuit() {
-        final boolean[] secondCalled = {false};
+        final boolean[] secondCalled = { false };
         CharTriPredicate alwaysTrue = (a, b, c) -> true;
         CharTriPredicate checkCalled = (a, b, c) -> {
             secondCalled[0] = true;

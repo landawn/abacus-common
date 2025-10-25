@@ -43,7 +43,7 @@ import com.landawn.abacus.logging.LoggerFactory;
  * for efficient bitwise operations. When the size exceeds capacity, a warning
  * is logged (once) but the map continues to function.</p>
  * 
- * <p>Example usage:</p>
+ * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * // Create a pool for caching database connections by connection string
  * ObjectPool<String, Connection> connectionPool = new ObjectPool<>(16);
@@ -108,7 +108,7 @@ public final class ObjectPool<K, V> extends AbstractMap<K, V> {
      * Returns the value to which the specified key is mapped, or null if this map contains no mapping for the key.
      * This operation is thread-safe and optimized for performance.
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ObjectPool<String, Integer> pool = new ObjectPool<>(10);
      * pool.put("one", 1);
@@ -231,7 +231,7 @@ public final class ObjectPool<K, V> extends AbstractMap<K, V> {
      * Removes the mapping for a key from this map if it is present.
      * This operation is thread-safe.
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ObjectPool<String, Integer> pool = new ObjectPool<>(10);
      * pool.put("key", 100);
@@ -407,7 +407,7 @@ public final class ObjectPool<K, V> extends AbstractMap<K, V> {
      * 
      * <p>The returned set does not support modification operations.</p>
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ObjectPool<String, Integer> pool = new ObjectPool<>(10);
      * pool.put("one", 1);

@@ -34,7 +34,7 @@ package com.landawn.abacus.http;
  *   <li>{@link #CONNECT} - Establish a tunnel (typically for HTTPS through proxy)</li>
  * </ul>
  * 
- * <p>Example usage:</p>
+ * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * HttpMethod method = HttpMethod.GET;
  * String methodName = method.name(); // "GET"

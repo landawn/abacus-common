@@ -35,9 +35,9 @@ public class CharIteratorEx100Test extends TestBase {
 
     @Test
     public void testOfArray() {
-        char[] array = {'a', 'b', 'c'};
+        char[] array = { 'a', 'b', 'c' };
         CharIteratorEx iter = CharIteratorEx.of(array);
-        
+
         Assertions.assertTrue(iter.hasNext());
         Assertions.assertEquals('a', iter.nextChar());
         Assertions.assertEquals('b', iter.nextChar());
@@ -56,9 +56,9 @@ public class CharIteratorEx100Test extends TestBase {
 
     @Test
     public void testOfArrayWithIndices() {
-        char[] array = {'a', 'b', 'c', 'd', 'e'};
+        char[] array = { 'a', 'b', 'c', 'd', 'e' };
         CharIteratorEx iter = CharIteratorEx.of(array, 1, 4);
-        
+
         Assertions.assertTrue(iter.hasNext());
         Assertions.assertEquals('b', iter.nextChar());
         Assertions.assertEquals('c', iter.nextChar());
@@ -68,7 +68,7 @@ public class CharIteratorEx100Test extends TestBase {
 
     @Test
     public void testOfArrayWithIndicesEmpty() {
-        char[] array = {'a', 'b', 'c'};
+        char[] array = { 'a', 'b', 'c' };
         CharIteratorEx iter = CharIteratorEx.of(array, 1, 1);
         Assertions.assertFalse(iter.hasNext());
         Assertions.assertSame(CharIteratorEx.EMPTY, iter);
@@ -76,7 +76,7 @@ public class CharIteratorEx100Test extends TestBase {
 
     @Test
     public void testOfArrayWithIndicesInvalid() {
-        char[] array = {'a', 'b', 'c'};
+        char[] array = { 'a', 'b', 'c' };
         Assertions.assertThrows(IndexOutOfBoundsException.class, () -> CharIteratorEx.of(array, 2, 1));
         Assertions.assertThrows(IndexOutOfBoundsException.class, () -> CharIteratorEx.of(array, -1, 2));
         Assertions.assertThrows(IndexOutOfBoundsException.class, () -> CharIteratorEx.of(array, 0, 4));
@@ -86,19 +86,19 @@ public class CharIteratorEx100Test extends TestBase {
     public void testOfCharIterator() {
         CharIterator baseIter = new CharIterator() {
             private int index = 0;
-            private char[] data = {'x', 'y', 'z'};
-            
+            private char[] data = { 'x', 'y', 'z' };
+
             @Override
             public boolean hasNext() {
                 return index < data.length;
             }
-            
+
             @Override
             public char nextChar() {
                 return data[index++];
             }
         };
-        
+
         CharIteratorEx iter = CharIteratorEx.of(baseIter);
         Assertions.assertTrue(iter.hasNext());
         Assertions.assertEquals('x', iter.nextChar());
@@ -125,7 +125,7 @@ public class CharIteratorEx100Test extends TestBase {
     public void testFromIterator() {
         List<Character> list = Arrays.asList('a', 'b', 'c');
         CharIteratorEx iter = CharIteratorEx.from(list.iterator());
-        
+
         Assertions.assertTrue(iter.hasNext());
         Assertions.assertEquals('a', iter.nextChar());
         Assertions.assertEquals('b', iter.nextChar());
@@ -144,35 +144,35 @@ public class CharIteratorEx100Test extends TestBase {
     public void testFromObjIteratorEx() {
         ObjIteratorEx<Character> objIter = ObjIteratorEx.of('a', 'b', 'c');
         CharIteratorEx iter = CharIteratorEx.from(objIter);
-        
+
         iter.advance(1);
         Assertions.assertEquals('b', iter.nextChar());
-        
+
         Assertions.assertEquals(1, iter.count());
-        
+
         iter.close();
     }
 
     @Test
     public void testAdvance() {
-        char[] array = {'a', 'b', 'c', 'd', 'e'};
+        char[] array = { 'a', 'b', 'c', 'd', 'e' };
         CharIteratorEx iter = CharIteratorEx.of(array);
-        
+
         iter.advance(2);
         Assertions.assertEquals('c', iter.nextChar());
-        
+
         iter.advance(1);
         Assertions.assertEquals('e', iter.nextChar());
-        
+
         iter.advance(10);
         Assertions.assertFalse(iter.hasNext());
     }
 
     @Test
     public void testAdvanceZero() {
-        char[] array = {'a', 'b', 'c'};
+        char[] array = { 'a', 'b', 'c' };
         CharIteratorEx iter = CharIteratorEx.of(array);
-        
+
         iter.advance(0);
         Assertions.assertEquals('a', iter.nextChar());
     }
@@ -185,18 +185,18 @@ public class CharIteratorEx100Test extends TestBase {
 
     @Test
     public void testCount() {
-        char[] array = {'a', 'b', 'c', 'd', 'e'};
+        char[] array = { 'a', 'b', 'c', 'd', 'e' };
         CharIteratorEx iter = CharIteratorEx.of(array, 1, 4);
-        
+
         Assertions.assertEquals(3, iter.count());
         Assertions.assertFalse(iter.hasNext());
     }
 
     @Test
     public void testToArray() {
-        char[] array = {'a', 'b', 'c'};
+        char[] array = { 'a', 'b', 'c' };
         CharIteratorEx iter = CharIteratorEx.of(array);
-        
+
         char[] result = iter.toArray();
         Assertions.assertArrayEquals(array, result);
         Assertions.assertFalse(iter.hasNext());
@@ -204,19 +204,19 @@ public class CharIteratorEx100Test extends TestBase {
 
     @Test
     public void testToArrayPartial() {
-        char[] array = {'a', 'b', 'c', 'd', 'e'};
+        char[] array = { 'a', 'b', 'c', 'd', 'e' };
         CharIteratorEx iter = CharIteratorEx.of(array, 1, 4);
-        
+
         char[] result = iter.toArray();
-        Assertions.assertArrayEquals(new char[]{'b', 'c', 'd'}, result);
+        Assertions.assertArrayEquals(new char[] { 'b', 'c', 'd' }, result);
         Assertions.assertFalse(iter.hasNext());
     }
 
     @Test
     public void testToList() {
-        char[] array = {'a', 'b', 'c'};
+        char[] array = { 'a', 'b', 'c' };
         CharIteratorEx iter = CharIteratorEx.of(array);
-        
+
         CharList result = iter.toList();
         Assertions.assertEquals(3, result.size());
         Assertions.assertEquals('a', result.get(0));
@@ -227,9 +227,9 @@ public class CharIteratorEx100Test extends TestBase {
 
     @Test
     public void testToListPartial() {
-        char[] array = {'a', 'b', 'c', 'd', 'e'};
+        char[] array = { 'a', 'b', 'c', 'd', 'e' };
         CharIteratorEx iter = CharIteratorEx.of(array, 1, 4);
-        
+
         CharList result = iter.toList();
         Assertions.assertEquals(3, result.size());
         Assertions.assertEquals('b', result.get(0));

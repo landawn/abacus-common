@@ -22,7 +22,7 @@ package com.landawn.abacus.util;
  * <p>This enum can be useful for calendar operations, scheduling systems, or any
  * application that needs to work with days of the week using numeric codes.</p>
  * 
- * <p>Example usage:</p>
+ * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * // Get day from integer value
  * DayOfWeek monday = DayOfWeek.valueOf(1); // Returns MONDAY
@@ -100,7 +100,7 @@ public enum DayOfWeek {
      * <li>SATURDAY = 6</li>
      * </ul>
      *
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * int fridayValue = DayOfWeek.FRIDAY.intValue(); // Returns 5
      * int sundayValue = DayOfWeek.SUNDAY.intValue(); // Returns 0
@@ -117,7 +117,7 @@ public enum DayOfWeek {
      * This method provides a way to convert numeric day representations back to
      * DayOfWeek enum constants.
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * DayOfWeek monday = DayOfWeek.valueOf(1);    // Returns MONDAY
      * DayOfWeek sunday = DayOfWeek.valueOf(0);    // Returns SUNDAY

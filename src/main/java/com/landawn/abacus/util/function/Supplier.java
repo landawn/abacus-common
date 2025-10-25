@@ -37,7 +37,23 @@ public interface Supplier<T> extends Throwables.Supplier<T, RuntimeException>, j
     /**
      * Gets a result.
      *
-     * @return a result
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Supplier<String> helloSupplier = () -> "Hello, World!";
+     * String greeting = helloSupplier.get(); // returns "Hello, World!"
+     *
+     * Supplier<LocalDateTime> timestampSupplier = LocalDateTime::now;
+     * LocalDateTime now = timestampSupplier.get(); // returns current date-time
+     *
+     * Supplier<UUID> uuidSupplier = UUID::randomUUID;
+     * UUID id = uuidSupplier.get(); // returns a random UUID
+     *
+     * // Lazy initialization pattern
+     * Supplier<ExpensiveObject> lazyInit = () -> new ExpensiveObject();
+     * ExpensiveObject obj = lazyInit.get(); // creates object only when needed
+     * }</pre>
+     *
+     * @return a result if a result cannot be supplied
      */
     @Override
     T get();
@@ -45,9 +61,22 @@ public interface Supplier<T> extends Throwables.Supplier<T, RuntimeException>, j
     /**
      * Converts this supplier to a throwable supplier that can throw checked exceptions.
      * This method provides a way to use this supplier in contexts that require explicit exception handling.
-     * 
+     *
      * <p>The returned supplier will have the same behavior as this supplier but with the ability
      * to throw checked exceptions of the specified type.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Supplier<String> supplier = () -> "data";
+     * Throwables.Supplier<String, IOException> throwableSupplier = supplier.toThrowable();
+     *
+     * // Can now be used in contexts requiring IOException
+     * try {
+     *     String result = throwableSupplier.get();
+     * } catch (IOException e) {
+     *     // Handle IOException
+     * }
+     * }</pre>
      *
      * @param <E> the type of exception that the returned supplier may throw
      * @return a throwable supplier that wraps this supplier

@@ -99,7 +99,7 @@ public abstract class TriIterator<A, B, C> extends ImmutableIterator<Triple<A, B
      * <p><strong>Warning:</strong> This method creates an infinite iterator. Always use with
      * {@link #limit(long)} or other terminating operations to avoid infinite loops.</p>
      *
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * AtomicInteger counter = new AtomicInteger(0);
      * TriIterator<Integer, Integer, Integer> iter = TriIterator.generate(triple -> {
@@ -111,7 +111,6 @@ public abstract class TriIterator<A, B, C> extends ImmutableIterator<Triple<A, B
      * // Use with limit to avoid infinite iteration
      * iter.limit(10).forEachRemaining((a, b, c) -> System.out.println(a + ", " + b + ", " + c));
      * }</pre>
-     * </p>
      *
      * @param <A> the first type of elements returned by this iterator
      * @param <B> the second type of elements returned by this iterator
@@ -132,7 +131,7 @@ public abstract class TriIterator<A, B, C> extends ImmutableIterator<Triple<A, B
      * <p>This method allows creating custom iterators with controlled termination logic.
      * The output consumer should populate the provided Triple object with new values on each call.</p>
      *
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * AtomicInteger counter = new AtomicInteger(0);
      * TriIterator<Integer, String, Boolean> iter = TriIterator.generate(
@@ -147,7 +146,6 @@ public abstract class TriIterator<A, B, C> extends ImmutableIterator<Triple<A, B
      * iter.forEachRemaining((num, str, bool) ->
      *     System.out.println(num + ": " + str + " (even: " + bool + ")"));
      * }</pre>
-     * </p>
      *
      * @param <A> the first type of elements returned by this iterator
      * @param <B> the second type of elements returned by this iterator
@@ -262,7 +260,7 @@ public abstract class TriIterator<A, B, C> extends ImmutableIterator<Triple<A, B
      *
      * <p>This is useful for generating indexed sequences where each triple depends on its position.</p>
      *
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * TriIterator<Integer, String, Double> iter = TriIterator.generate(0, 5, (index, triple) -> {
      *     triple.setLeft(index);
@@ -272,7 +270,6 @@ public abstract class TriIterator<A, B, C> extends ImmutableIterator<Triple<A, B
      * iter.forEachRemaining((idx, str, sqrt) ->
      *     System.out.println(str + " -> sqrt = " + sqrt));
      * }</pre>
-     * </p>
      *
      * @param <A> the first type of elements returned by this iterator
      * @param <B> the second type of elements returned by this iterator
@@ -370,7 +367,7 @@ public abstract class TriIterator<A, B, C> extends ImmutableIterator<Triple<A, B
      * If the arrays have different lengths, the resulting TriIterator will have the length of the shortest array.
      * If any of arrays is {@code null}, returns an empty TriIterator.
      *
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String[] names = {"Alice", "Bob", "Charlie"};
      * Integer[] ages = {25, 30, 35};
@@ -379,7 +376,6 @@ public abstract class TriIterator<A, B, C> extends ImmutableIterator<Triple<A, B
      * iter.forEachRemaining((name, age, isActive) ->
      *     System.out.println(name + " is " + age + " years old, active: " + isActive));
      * }</pre>
-     * </p>
      *
      * @param <A> the type of elements in the first array
      * @param <B> the type of elements in the second array
@@ -399,7 +395,7 @@ public abstract class TriIterator<A, B, C> extends ImmutableIterator<Triple<A, B
      * If the arrays have different lengths, the resulting TriIterator will continue with the default values
      * for the shorter array until the longest array is exhausted.
      *
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String[] names = {"Alice", "Bob"};
      * Integer[] ages = {25, 30, 35};
@@ -413,7 +409,6 @@ public abstract class TriIterator<A, B, C> extends ImmutableIterator<Triple<A, B
      * // Bob, 30, false     (default for active)
      * // Unknown, 35, false (defaults for name and active)
      * }</pre>
-     * </p>
      *
      * @param <A> the type of elements in the first array
      * @param <B> the type of elements in the second array
@@ -738,6 +733,8 @@ public abstract class TriIterator<A, B, C> extends ImmutableIterator<Triple<A, B
      * are passed directly to the action consumer.</p>
      *
      * <p>Example implementation:
+     * 
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * protected <E extends Exception> void next(Throwables.TriConsumer<A, B, C, E> action) {
      *     if (!hasNext()) {
@@ -749,7 +746,6 @@ public abstract class TriIterator<A, B, C> extends ImmutableIterator<Triple<A, B
      *     action.accept(first, second, third);
      * }
      * }</pre>
-     * </p>
      *
      * @param <E> the type of exception that the action may throw
      * @param action a TriConsumer that accepts the next three elements from this iterator
@@ -798,7 +794,7 @@ public abstract class TriIterator<A, B, C> extends ImmutableIterator<Triple<A, B
     /**
      * Returns a new TriIterator with <i>n</i> elements skipped from the beginning of this TriIterator.
      *
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Integer[] nums = {1, 2, 3, 4, 5};
      * String[] strs = {"a", "b", "c", "d", "e"};
@@ -808,7 +804,6 @@ public abstract class TriIterator<A, B, C> extends ImmutableIterator<Triple<A, B
      *     System.out.println(num + ", " + str + ", " + flag));
      * // Output: (3, c, true), (4, d, false), (5, e, true)
      * }</pre>
-     * </p>
      *
      * @param n the number of elements to skip
      * @return A new TriIterator that skips the first <i>n</i> elements.
@@ -897,7 +892,7 @@ public abstract class TriIterator<A, B, C> extends ImmutableIterator<Triple<A, B
      * Returns a new TriIterator with a limited number of elements.
      * The resulting TriIterator will contain at most the specified number of elements.
      *
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Create an infinite iterator and limit it
      * AtomicInteger counter = new AtomicInteger(0);
@@ -909,7 +904,6 @@ public abstract class TriIterator<A, B, C> extends ImmutableIterator<Triple<A, B
      *     System.out.println(a + ", " + b + ", " + c));
      * // Output: (0,0,0), (1,2,3), (2,4,6), (3,6,9), (4,8,12)
      * }</pre>
-     * </p>
      *
      * @param count the maximum number of elements to include in the resulting TriIterator
      * @return a new TriIterator that contains at most the specified number of elements
@@ -983,7 +977,7 @@ public abstract class TriIterator<A, B, C> extends ImmutableIterator<Triple<A, B
     /**
      * Returns a new TriIterator that includes only the elements that satisfy the provided predicate.
      *
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Integer[] nums = {1, 2, 3, 4, 5};
      * String[] strs = {"a", "bb", "ccc", "dddd", "eeeee"};
@@ -994,7 +988,6 @@ public abstract class TriIterator<A, B, C> extends ImmutableIterator<Triple<A, B
      *     System.out.println(num + ", " + str + ", " + flag));
      * // Output: (3, ccc, true), (5, eeeee, true)
      * }</pre>
-     * </p>
      *
      * @param predicate the predicate to apply to each triple of elements
      * @return a new TriIterator containing only the elements that match the predicate
@@ -1104,7 +1097,7 @@ public abstract class TriIterator<A, B, C> extends ImmutableIterator<Triple<A, B
     /**
      * Transforms the elements of this TriIterator using the given mapper function.
      *
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String[] names = {"Alice", "Bob", "Charlie"};
      * Integer[] ages = {25, 30, 35};
@@ -1117,7 +1110,6 @@ public abstract class TriIterator<A, B, C> extends ImmutableIterator<Triple<A, B
      * // Bob (30) from LA
      * // Charlie (35) from Chicago
      * }</pre>
-     * </p>
      *
      * @param <R> the type of elements in the resulting ObjIterator
      * @param mapper the function to apply to each triple of elements
@@ -1205,7 +1197,7 @@ public abstract class TriIterator<A, B, C> extends ImmutableIterator<Triple<A, B
      * Converts the elements in this TriIterator to three separate lists of type A, B, and C.
      * The resulting Triple contains three lists, each containing the elements of the corresponding type.
      *
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String[] names = {"Alice", "Bob", "Charlie"};
      * Integer[] ages = {25, 30, 35};
@@ -1216,7 +1208,6 @@ public abstract class TriIterator<A, B, C> extends ImmutableIterator<Triple<A, B
      * List<Integer> ageList = result.middle();  // [25, 30, 35]
      * List<Boolean> activeList = result.right(); // [true, false, true]
      * }</pre>
-     * </p>
      *
      * @param supplier a Supplier that provides new instances of List for storing the elements
      * @return a Triple containing three lists of elements of type A, B, and C
@@ -1239,7 +1230,7 @@ public abstract class TriIterator<A, B, C> extends ImmutableIterator<Triple<A, B
      * Converts the elements in this TriIterator to three separate sets of type A, B, and C.
      * The resulting Triple contains three sets, each containing the unique elements of the corresponding type.
      *
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String[] names = {"Alice", "Bob", "Alice"};
      * Integer[] ages = {25, 30, 25};
@@ -1250,7 +1241,6 @@ public abstract class TriIterator<A, B, C> extends ImmutableIterator<Triple<A, B
      * Set<Integer> ageSet = result.middle();  // [25, 30]
      * Set<Boolean> activeSet = result.right(); // [true, false]
      * }</pre>
-     * </p>
      *
      * @param supplier a Supplier that provides new instances of Set for storing the elements
      * @return a Triple containing three sets of elements of type A, B, and C

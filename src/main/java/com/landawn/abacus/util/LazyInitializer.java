@@ -25,7 +25,7 @@ import java.util.function.Supplier;
  * <p>The initialization is performed only once, even in multi-threaded environments. Once initialized,
  * subsequent calls to {@link #get()} return the cached value without synchronization.</p>
  * 
- * <p>Example usage:</p>
+ * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * LazyInitializer<ExpensiveObject> lazy = LazyInitializer.of(() -> new ExpensiveObject());
  * // Object is not created yet
@@ -57,7 +57,7 @@ final class LazyInitializer<T> implements com.landawn.abacus.util.function.Suppl
      * Creates a new LazyInitializer instance with the specified supplier.
      * If the supplier is already a LazyInitializer, it is returned as-is to avoid double wrapping.
      * 
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * LazyInitializer<String> lazy = LazyInitializer.of(() -> "Hello World");
      * String value = lazy.get(); // "Hello World"
@@ -85,7 +85,7 @@ final class LazyInitializer<T> implements com.landawn.abacus.util.function.Suppl
      * <p>This method is thread-safe and uses double-checked locking to ensure the supplier is called
      * only once even in concurrent scenarios.</p>
      * 
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * LazyInitializer<Connection> dbConnection = LazyInitializer.of(() -> createConnection());
      * Connection conn = dbConnection.get(); // Creates connection on first call
@@ -100,8 +100,7 @@ final class LazyInitializer<T> implements com.landawn.abacus.util.function.Suppl
         if (!initialized) {
             synchronized (this) {
                 if (!initialized) {
-                    final T temp = supplier.get();
-                    value = temp;
+                    value = supplier.get();
                     initialized = true;
                 }
             }

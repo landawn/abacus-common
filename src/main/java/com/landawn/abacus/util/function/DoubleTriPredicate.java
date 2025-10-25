@@ -67,8 +67,7 @@ public interface DoubleTriPredicate extends Throwables.DoubleTriPredicate<Runtim
      * @param a the first double argument to test
      * @param b the second double argument to test
      * @param c the third double argument to test
-     * @return {@code true} if the input arguments match the predicate, otherwise {@code false}
-     * @throws RuntimeException if the predicate evaluation encounters an error
+     * @return {@code true} if the input arguments match the predicate, otherwise {@code false} if the predicate evaluation encounters an error
      */
     @Override
     boolean test(double a, double b, double c);
@@ -79,7 +78,7 @@ public interface DoubleTriPredicate extends Throwables.DoubleTriPredicate<Runtim
      * <p>The returned predicate will return {@code true} when this predicate returns {@code false},
      * and {@code false} when this predicate returns {@code true}.</p>
      * 
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * DoubleTriPredicate isValidTriangle = (a, b, c) -> a + b > c && b + c > a && a + c > b;
      * DoubleTriPredicate isInvalidTriangle = isValidTriangle.negate();
@@ -99,7 +98,7 @@ public interface DoubleTriPredicate extends Throwables.DoubleTriPredicate<Runtim
      * <p>Any exceptions thrown during evaluation of either predicate are relayed to the caller;
      * if evaluation of this predicate throws an exception, the {@code other} predicate will not be evaluated.</p>
      * 
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * DoubleTriPredicate isPositive = (a, b, c) -> a > 0 && b > 0 && c > 0;
      * DoubleTriPredicate sumLessThan100 = (a, b, c) -> a + b + c < 100;
@@ -123,7 +122,7 @@ public interface DoubleTriPredicate extends Throwables.DoubleTriPredicate<Runtim
      * <p>Any exceptions thrown during evaluation of either predicate are relayed to the caller;
      * if evaluation of this predicate throws an exception, the {@code other} predicate will not be evaluated.</p>
      * 
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * DoubleTriPredicate allZero = (a, b, c) -> a == 0 && b == 0 && c == 0;
      * DoubleTriPredicate allOne = (a, b, c) -> a == 1 && b == 1 && c == 1;

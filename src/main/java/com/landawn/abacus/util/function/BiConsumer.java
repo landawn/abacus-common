@@ -35,9 +35,38 @@ import com.landawn.abacus.util.Throwables;
 public interface BiConsumer<T, U> extends Throwables.BiConsumer<T, U, RuntimeException>, java.util.function.BiConsumer<T, U> { //NOSONAR
 
     /**
+     * Performs this operation on the given arguments.
+     * This method is expected to operate via side-effects, modifying the state of the arguments
+     * or external state.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * BiConsumer<String, Integer> printer = (str, num) -> System.out.println(str + ": " + num);
+     * printer.accept("Count", 42); // Prints: Count: 42
+     *
+     * Map<String, Integer> map = new HashMap<>();
+     * BiConsumer<String, Integer> mapPutter = (key, value) -> map.put(key, value);
+     * mapPutter.accept("age", 30);
+     * }</pre>
+     *
+     * @param t the first input argument
+     * @param u the second input argument
+     */
+    @Override
+    void accept(T t, U u);
+
+    /**
      * Returns a composed {@code BiConsumer} that performs, in sequence, this operation followed by the {@code after} operation.
      * If performing either operation throws an exception, it is relayed to the caller of the composed operation.
      * If performing this operation throws an exception, the {@code after} operation will not be performed.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * BiConsumer<String, Integer> logger = (name, value) -> System.out.println("Logging: " + name + " = " + value);
+     * BiConsumer<String, Integer> validator = (name, value) -> { if (value < 0) throw new IllegalArgumentException(); };
+     * BiConsumer<String, Integer> combined = logger.andThen(validator);
+     * combined.accept("score", 85); // Logs then validates
+     * }</pre>
      *
      * @param after the operation to perform after this operation. Must not be {@code null}.
      * @return a composed {@code BiConsumer} that performs in sequence this operation followed by the {@code after} operation
@@ -53,6 +82,13 @@ public interface BiConsumer<T, U> extends Throwables.BiConsumer<T, U, RuntimeExc
     /**
      * Converts this {@code BiConsumer} to a {@code Throwables.BiConsumer} that can throw a checked exception.
      * This method provides a way to use this consumer in contexts that require explicit exception handling.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * BiConsumer<String, String> concatenator = (s1, s2) -> System.out.println(s1 + s2);
+     * Throwables.BiConsumer<String, String, RuntimeException> throwableConsumer = concatenator.toThrowable();
+     * // Can now be used in contexts that handle exceptions
+     * }</pre>
      *
      * @param <E> the type of exception that the returned consumer can throw
      * @return a {@code Throwables.BiConsumer} view of this consumer that can throw exceptions of type {@code E}

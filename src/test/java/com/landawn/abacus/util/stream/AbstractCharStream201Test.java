@@ -65,9 +65,8 @@ public class AbstractCharStream201Test extends TestBase {
     @Test
     public void testDelay() {
         long startTime = System.nanoTime();
-        createCharStream(new char[] { 'a', 'b', 'c' }).delay(Duration.ofMillis(10))
-                .forEach(c -> {
-                });
+        createCharStream(new char[] { 'a', 'b', 'c' }).delay(Duration.ofMillis(10)).forEach(c -> {
+        });
         long endTime = System.nanoTime();
         assertTrue(TimeUnit.NANOSECONDS.toMillis(endTime - startTime) >= 30);
     }
@@ -179,7 +178,8 @@ public class AbstractCharStream201Test extends TestBase {
 
     @Test
     public void testCollapseBinaryOperator() {
-        List<Character> result = createCharStream(new char[] { 'a', 'b', 'd', 'e', 'f', 'h' }).collapse((c1, c2) -> (c2 - c1) <= 1, (c1, c2) -> (char) (c1 + c2))
+        List<Character> result = createCharStream(new char[] { 'a', 'b', 'd', 'e', 'f', 'h' })
+                .collapse((c1, c2) -> (c2 - c1) <= 1, (c1, c2) -> (char) (c1 + c2))
                 .boxed()
                 .toList();
         assertEquals(Arrays.asList((char) ('a' + 'b'), (char) ('d' + 'e' + 'f'), 'h'), result);
@@ -282,9 +282,7 @@ public class AbstractCharStream201Test extends TestBase {
 
     @Test
     public void testScanAccumulator() {
-        List<Character> result = createCharStream(new char[] { '1', '2', '3' }).scan((c1, c2) -> (char) (c1 + c2 - '0'))
-                .boxed()
-                .toList();
+        List<Character> result = createCharStream(new char[] { '1', '2', '3' }).scan((c1, c2) -> (char) (c1 + c2 - '0')).boxed().toList();
         assertEquals(Arrays.asList('1', (char) ('1' + '2' - '0'), (char) ('1' + '2' + '3' - '0' - '0')), result);
 
         result = createCharStream(new char[] {}).scan((c1, c2) -> c1).boxed().toList();
@@ -296,9 +294,7 @@ public class AbstractCharStream201Test extends TestBase {
 
     @Test
     public void testScanInitAccumulator() {
-        List<Character> result = createCharStream(new char[] { '1', '2', '3' }).scan('0', (c1, c2) -> (char) (c1 + c2 - '0'))
-                .boxed()
-                .toList();
+        List<Character> result = createCharStream(new char[] { '1', '2', '3' }).scan('0', (c1, c2) -> (char) (c1 + c2 - '0')).boxed().toList();
         assertEquals(Arrays.asList((char) ('0' + '1' - '0'), (char) ('0' + '1' + '2' - '0' - '0'), (char) ('0' + '1' + '2' + '3' - '0' - '0' - '0')), result);
 
         result = createCharStream(new char[] {}).scan('x', (c1, c2) -> c1).boxed().toList();
@@ -639,7 +635,8 @@ public class AbstractCharStream201Test extends TestBase {
 
     @Test
     public void testGroupTo() {
-        Map<Boolean, List<Character>> result = createCharStream(new char[] { 'a', 'b', 'c', 'd' }).groupTo(c -> c % 2 == 0, java.util.stream.Collectors.toList());
+        Map<Boolean, List<Character>> result = createCharStream(new char[] { 'a', 'b', 'c', 'd' }).groupTo(c -> c % 2 == 0,
+                java.util.stream.Collectors.toList());
         assertEquals(2, result.size());
         assertEquals(Arrays.asList('b', 'd'), result.get(true));
         assertEquals(Arrays.asList('a', 'c'), result.get(false));
@@ -650,8 +647,8 @@ public class AbstractCharStream201Test extends TestBase {
 
     @Test
     public void testGroupToWithMapFactory() {
-        Map<Boolean, List<Character>> result = createCharStream(new char[] { 'a', 'b', 'c', 'd' }).groupTo(c -> c % 2 == 0, java.util.stream.Collectors.toList(),
-                Suppliers.ofTreeMap());
+        Map<Boolean, List<Character>> result = createCharStream(new char[] { 'a', 'b', 'c', 'd' }).groupTo(c -> c % 2 == 0,
+                java.util.stream.Collectors.toList(), Suppliers.ofTreeMap());
         assertEquals(2, result.size());
     }
 

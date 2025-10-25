@@ -1301,14 +1301,12 @@ public class ByteStream2025Test extends TestBase {
 
     @Test
     public void testZipWithCollectionOfStreams() {
-        Collection<ByteStream> streams = Arrays.asList(
-                ByteStream.of((byte) 1, (byte) 2),
-                ByteStream.of((byte) 10, (byte) 20),
-                ByteStream.of((byte) 100, (byte) 127)
-        );
+        Collection<ByteStream> streams = Arrays.asList(ByteStream.of((byte) 1, (byte) 2), ByteStream.of((byte) 10, (byte) 20),
+                ByteStream.of((byte) 100, (byte) 127));
         ByteStream result = ByteStream.zip(streams, bytes -> {
             byte sum = 0;
-            for (Byte b : bytes) sum += b;
+            for (Byte b : bytes)
+                sum += b;
             return sum;
         });
         assertArrayEquals(new byte[] { 111, -107 }, result.toArray());
@@ -1316,14 +1314,12 @@ public class ByteStream2025Test extends TestBase {
 
     @Test
     public void testZipWithCollectionAndValuesForNone() {
-        Collection<ByteStream> streams = Arrays.asList(
-                ByteStream.of((byte) 1, (byte) 2, (byte) 3),
-                ByteStream.of((byte) 10, (byte) 20)
-        );
+        Collection<ByteStream> streams = Arrays.asList(ByteStream.of((byte) 1, (byte) 2, (byte) 3), ByteStream.of((byte) 10, (byte) 20));
         byte[] defaults = { 0, 100 };
         ByteStream result = ByteStream.zip(streams, defaults, bytes -> {
             byte sum = 0;
-            for (Byte b : bytes) sum += b;
+            for (Byte b : bytes)
+                sum += b;
             return sum;
         });
         assertEquals(3, result.count());
@@ -1331,11 +1327,7 @@ public class ByteStream2025Test extends TestBase {
 
     @Test
     public void testMergeWithCollectionOfStreams() {
-        Collection<ByteStream> streams = Arrays.asList(
-                ByteStream.of((byte) 1, (byte) 5),
-                ByteStream.of((byte) 2, (byte) 6),
-                ByteStream.of((byte) 3, (byte) 7)
-        );
+        Collection<ByteStream> streams = Arrays.asList(ByteStream.of((byte) 1, (byte) 5), ByteStream.of((byte) 2, (byte) 6), ByteStream.of((byte) 3, (byte) 7));
         ByteStream result = ByteStream.merge(streams, (a, b) -> a <= b ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND);
         assertEquals(6, result.count());
     }

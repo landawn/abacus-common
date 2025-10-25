@@ -36,6 +36,15 @@ public interface BiFunction<T, U, R> extends Throwables.BiFunction<T, U, R, Runt
     /**
      * Applies this function to the given arguments.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * BiFunction<String, String, String> concatenator = (s1, s2) -> s1 + s2;
+     * String result = concatenator.apply("Hello, ", "World!"); // Returns "Hello, World!"
+     *
+     * BiFunction<Integer, Integer, Integer> adder = (a, b) -> a + b;
+     * Integer sum = adder.apply(10, 20); // Returns 30
+     * }</pre>
+     *
      * @param t the first function argument
      * @param u the second function argument
      * @return the function result
@@ -46,6 +55,14 @@ public interface BiFunction<T, U, R> extends Throwables.BiFunction<T, U, R, Runt
     /**
      * Returns a composed function that first applies this function to its input, and then applies the {@code after} function to the result.
      * If evaluation of either function throws an exception, it is relayed to the caller of the composed function.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * BiFunction<Integer, Integer, Integer> multiplier = (a, b) -> a * b;
+     * Function<Integer, String> toString = Object::toString;
+     * BiFunction<Integer, Integer, String> combined = multiplier.andThen(toString);
+     * String result = combined.apply(3, 4); // Returns "12"
+     * }</pre>
      *
      * @param <V> the type of output of the {@code after} function, and of the composed function
      * @param after the function to apply after this function is applied. Must not be {@code null}.
@@ -59,6 +76,13 @@ public interface BiFunction<T, U, R> extends Throwables.BiFunction<T, U, R, Runt
     /**
      * Converts this {@code BiFunction} to a {@code Throwables.BiFunction} that can throw a checked exception.
      * This method provides a way to use this function in contexts that require explicit exception handling.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * BiFunction<String, String, String> joiner = (s1, s2) -> s1 + " " + s2;
+     * Throwables.BiFunction<String, String, String, RuntimeException> throwableFunction = joiner.toThrowable();
+     * // Can now be used in contexts that handle exceptions
+     * }</pre>
      *
      * @param <E> the type of exception that the returned function can throw
      * @return a {@code Throwables.BiFunction} view of this function that can throw exceptions of type {@code E}

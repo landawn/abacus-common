@@ -27,7 +27,7 @@ package com.landawn.abacus.util;
  *   <li>Needing a more explicit representation than boolean for yes/no choices</li>
  * </ul>
  * 
- * <p>Example usage:</p>
+ * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * YesNo answer = YesNo.YES;
  * int dbValue = answer.intValue(); // Returns 1
@@ -61,7 +61,7 @@ public enum YesNo {
      * Returns the integer value associated with this YesNo constant.
      * NO returns 0, YES returns 1.
      * 
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * YesNo consent = YesNo.YES;
      * int value = consent.intValue(); // Returns 1
@@ -80,7 +80,7 @@ public enum YesNo {
      * Returns the YesNo enum constant corresponding to the specified integer value.
      * This method provides a way to convert from numeric representation back to the enum.
      * 
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Reading from database
      * int dbValue = resultSet.getInt("is_active");

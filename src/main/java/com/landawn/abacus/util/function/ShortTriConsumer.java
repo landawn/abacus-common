@@ -32,9 +32,24 @@ public interface ShortTriConsumer extends Throwables.ShortTriConsumer<RuntimeExc
     /**
      * Performs this operation on the given arguments.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * ShortTriConsumer sumPrinter = (a, b, c) ->
+     *     System.out.println("Sum: " + (a + b + c));
+     * sumPrinter.accept((short) 10, (short) 20, (short) 30); // Prints "Sum: 60"
+     *
+     * ShortTriConsumer rangeSetter = (min, max, value) -> {
+     *     if (value < min || value > max) {
+     *         throw new IllegalArgumentException("Value out of range");
+     *     }
+     *     config.setValue(value);
+     * };
+     * rangeSetter.accept((short) 0, (short) 100, (short) 50); // Sets value to 50
+     * }</pre>
+     *
      * @param a the first input argument
      * @param b the second input argument
-     * @param c the third input argument
+     * @param c the third input argument if the operation cannot be completed
      */
     @Override
     void accept(short a, short b, short c);

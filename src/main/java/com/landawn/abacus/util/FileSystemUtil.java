@@ -49,7 +49,7 @@ import java.util.StringTokenizer;
  * on all platforms or configurations. For modern applications, consider using
  * {@link java.nio.file.FileStore} instead.</p>
  * 
- * <p>Example usage:</p>
+ * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * // Get free space in kilobytes for a specific path
  * long freeSpaceKb = FileSystemUtil.freeSpaceKb("/home");
@@ -138,7 +138,7 @@ final class FileSystemUtil {
      * <li>AIX/HP-UX: uses 'df -kP' on the specified path</li>
      * </ul>
      * 
-     * <p>Example usage:</p></p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Windows
      * long freeKb = FileSystemUtil.freeSpaceKb("C:");
@@ -169,7 +169,7 @@ final class FileSystemUtil {
      * specifying a timeout for the command execution. This is useful to prevent
      * hanging on unresponsive file systems.</p>
      * 
-     * <p>Example usage:</p></p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * try {
      *     // Get free space with 5 second timeout
@@ -200,7 +200,7 @@ final class FileSystemUtil {
      * freeSpaceKb(new File(".").getAbsolutePath())
      * }</pre>
      * 
-     * <p>Example usage:</p></p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * long freeKb = FileSystemUtil.freeSpaceKb();
      * System.out.println("Current directory free space: " + freeKb + " KB");
@@ -222,7 +222,7 @@ final class FileSystemUtil {
      * freeSpaceKb(new File(".").getAbsolutePath(), timeout)
      * }</pre>
      * 
-     * <p>Example usage:</p></p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Get free space in current directory with 3 second timeout
      * long freeKb = FileSystemUtil.freeSpaceKb(3000);
@@ -242,10 +242,12 @@ final class FileSystemUtil {
     /**
      * Returns the free space on a drive or volume in a cross-platform manner.
      * Note that some OS's are NOT currently supported, including OS/390.
-     * <pre>
+     * 
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
      * FileSystemUtils.freeSpace("C:");  // Windows
      * FileSystemUtils.freeSpace("/volume");  // *nix
-     * </pre>
+     * }</pre>
      * The free space is calculated via the command line.
      * It uses 'dir /-c' on Windows and <i>df</i> on *nix.
      *
@@ -254,7 +256,7 @@ final class FileSystemUtil {
      * @param kb whether to normalize to kilobytes
      * @param timeout the timeout amount in milliseconds or no timeout if the value
      *  is zero or less
-     * @return
+     * @return the amount of free disk space in bytes or kilobytes depending on the kb parameter
      * @throws IOException if an error occurs when finding the free space
      * @throws IllegalArgumentException if the path is invalid
      * @throws IllegalStateException if an error occurred in initialisation
@@ -285,7 +287,7 @@ final class FileSystemUtil {
      * @param path the path to get free space for, including the colon
      * @param timeout the timeout amount in milliseconds or no timeout if the value
      *  is zero or less
-     * @return
+     * @return the amount of free disk space in bytes
      * @throws IOException if an error occurs
      */
     long freeSpaceWindows(String path, final long timeout) throws IOException {
@@ -319,7 +321,7 @@ final class FileSystemUtil {
      *
      * @param line the line to parse
      * @param path the path that was sent
-     * @return
+     * @return the amount of free disk space in bytes extracted from the dir command output
      * @throws IOException if an error occurs
      */
     long parseDir(final String line, final String path) throws IOException {
@@ -376,7 +378,7 @@ final class FileSystemUtil {
      * @param posix whether to use the POSIX standard format flag
      * @param timeout the timeout amount in milliseconds or no timeout if the value
      *  is zero or less
-     * @return
+     * @return the amount of free disk space in kilobytes
      * @throws IOException if an error occurs
      */
     long freeSpaceUnix(final String path, final boolean kb, final boolean posix, final long timeout) throws IOException {
@@ -427,8 +429,8 @@ final class FileSystemUtil {
      * Parses the bytes from a string.
      *
      * @param freeSpace the free space string
-     * @param path
-     * @return
+     * @param path the path being queried
+     * @return the number of bytes parsed from the string
      * @throws IOException if an error occurs
      */
     long parseBytes(final String freeSpace, final String path) throws IOException {
@@ -453,7 +455,7 @@ final class FileSystemUtil {
      * @param max the maximum limit for the lines returned
      * @param timeout the timeout amount in milliseconds or no timeout if the value
      *  is zero or less
-     * @return
+     * @return a list of output lines from the executed command
      * @throws IOException if an error occurs
      */
     List<String> performCommand(final String[] cmdAttrs, final int max, final long timeout) throws IOException {
@@ -512,7 +514,7 @@ final class FileSystemUtil {
      * Opens the process to the operating system.
      *
      * @param cmdAttrs the command line parameters
-     * @return
+     * @return the newly created Process
      * @throws IOException if an error occurs
      */
     Process openProcess(final String[] cmdAttrs) throws IOException {

@@ -179,7 +179,7 @@ public class BooleanBiPredicate2025Test extends TestBase {
         BooleanBiPredicate predicate = new BooleanBiPredicate() {
             @Override
             public boolean test(boolean t, boolean u) {
-                return t != u;  // XOR
+                return t != u; // XOR
             }
         };
 

@@ -45,7 +45,7 @@ import com.landawn.abacus.annotation.Beta;
  * 
  * <p>Null elements are supported if the underlying set implementation supports them.
  * 
- * <p>Example usage:
+ * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * // Create using factory methods
  * ImmutableSet<String> colors = ImmutableSet.of("red", "green", "blue");
@@ -96,7 +96,7 @@ public class ImmutableSet<E> extends ImmutableCollection<E> implements Set<E> {
      * Returns an empty ImmutableSet. This method always returns the same cached instance,
      * making it memory efficient for representing empty sets.
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ImmutableSet<String> empty = ImmutableSet.empty();
      * System.out.println(empty.size()); // prints: 0
@@ -115,7 +115,7 @@ public class ImmutableSet<E> extends ImmutableCollection<E> implements Set<E> {
      * This is a convenience method equivalent to {@link #of(Object)}.
      * The returned set is immutable and will have a size of 1.
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ImmutableSet<String> single = ImmutableSet.just("hello");
      * System.out.println(single.contains("hello")); // prints: true
@@ -135,7 +135,7 @@ public class ImmutableSet<E> extends ImmutableCollection<E> implements Set<E> {
      * The returned set is immutable and will have a size of 1.
      * The iteration order is guaranteed for this single element.
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ImmutableSet<Integer> single = ImmutableSet.of(42);
      * // single.add(43); // Would throw UnsupportedOperationException
@@ -155,7 +155,7 @@ public class ImmutableSet<E> extends ImmutableCollection<E> implements Set<E> {
      * will contain only one element. The iteration order is guaranteed to match the order
      * of the first occurrence of each distinct element.
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ImmutableSet<String> pair = ImmutableSet.of("first", "second");
      * System.out.println(pair.size()); // prints: 2
@@ -331,7 +331,7 @@ public class ImmutableSet<E> extends ImmutableCollection<E> implements Set<E> {
      * Unlike some collection frameworks, this method supports null elements in the array.
      * The iteration order is guaranteed to match the order of first occurrence in the array.
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String[] colors = {"red", "green", "blue", "red"};
      * ImmutableSet<String> colorSet = ImmutableSet.of(colors);
@@ -360,7 +360,7 @@ public class ImmutableSet<E> extends ImmutableCollection<E> implements Set<E> {
      * Otherwise, a new ImmutableSet is created with a defensive copy of the collection's distinct elements.
      * The iteration order is preserved if the source collection is a List, LinkedHashSet, or SortedSet.
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * List<Integer> numbers = Arrays.asList(1, 2, 3, 2, 1);
      * ImmutableSet<Integer> uniqueNumbers = ImmutableSet.copyOf(numbers);
@@ -397,7 +397,7 @@ public class ImmutableSet<E> extends ImmutableCollection<E> implements Set<E> {
      * <p><b>Warning:</b> Use this method with caution as the immutability guarantee depends on not modifying
      * the original set after wrapping. This method is marked as @Beta.
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Set<String> mutableSet = new HashSet<>();
      * mutableSet.add("initial");
@@ -443,7 +443,7 @@ public class ImmutableSet<E> extends ImmutableCollection<E> implements Set<E> {
      * This is useful when the number of elements is not known at compile time.
      * The builder uses a HashSet internally, so duplicate elements are automatically removed.
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ImmutableSet<String> names = ImmutableSet.<String>builder()
      *     .add("Alice")
@@ -466,7 +466,7 @@ public class ImmutableSet<E> extends ImmutableCollection<E> implements Set<E> {
      * This allows reusing an existing set instance as the backing storage.
      * Note that the provided set should not be modified outside the builder after this call.
      * 
-     * <p>Example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Set<Integer> backingSet = new LinkedHashSet<>(); // Preserves insertion order
      * ImmutableSet<Integer> numbers = ImmutableSet.builder(backingSet)
@@ -489,7 +489,7 @@ public class ImmutableSet<E> extends ImmutableCollection<E> implements Set<E> {
      * especially useful when elements are added conditionally or in loops.
      * The builder automatically handles duplicates - each distinct element is included only once.
      * 
-     * <p>Example usage:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ImmutableSet<String> set = ImmutableSet.<String>builder()
      *     .add("one")
@@ -512,7 +512,7 @@ public class ImmutableSet<E> extends ImmutableCollection<E> implements Set<E> {
          * If the element is already present in the set (as determined by equals()),
          * it is not added again. Null elements are permitted.
          * 
-         * <p>Example:
+         * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * Builder<String> builder = ImmutableSet.<String>builder();
          * builder.add("hello")
@@ -536,7 +536,7 @@ public class ImmutableSet<E> extends ImmutableCollection<E> implements Set<E> {
          * iteration order depending on the underlying set implementation.
          * If the array is null or empty, no elements are added.
          * 
-         * <p>Example:
+         * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * builder.add("one", "two", "three");
          * }</pre>
@@ -560,7 +560,7 @@ public class ImmutableSet<E> extends ImmutableCollection<E> implements Set<E> {
          * iteration order depending on the underlying set implementation.
          * If the collection is null or empty, no elements are added.
          * 
-         * <p>Example:
+         * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * List<String> moreElements = Arrays.asList("four", "five");
          * builder.addAll(moreElements);
@@ -583,7 +583,7 @@ public class ImmutableSet<E> extends ImmutableCollection<E> implements Set<E> {
          * already in the set) are included only once. The iterator is consumed by this operation.
          * If the iterator is null or has no elements, no elements are added.
          * 
-         * <p>Example:
+         * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * Iterator<String> iter = someCollection.iterator();
          * builder.addAll(iter);
@@ -611,7 +611,7 @@ public class ImmutableSet<E> extends ImmutableCollection<E> implements Set<E> {
          * for any modification attempts. The iteration order depends on the type of set
          * used internally by the builder.
          * 
-         * <p>Example:
+         * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * ImmutableSet<String> finalSet = builder.build();
          * System.out.println(finalSet.size()); // Number of distinct elements

@@ -92,7 +92,7 @@ public abstract class BiIterator<A, B> extends ImmutableIterator<Pair<A, B>> {
      * <p>This is a singleton instance that is reused for all empty BiIterator requests,
      * making it efficient for representing empty iterations.</p>
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * BiIterator<String, Integer> empty = BiIterator.empty();
      * assertFalse(empty.hasNext()); // true - no elements
@@ -115,7 +115,7 @@ public abstract class BiIterator<A, B> extends ImmutableIterator<Pair<A, B>> {
      * a {@code HashMap} provides no iteration order guarantees, while a {@code LinkedHashMap}
      * maintains insertion order.</p>
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Map<String, Integer> map = Map.of("a", 1, "b", 2);
      * BiIterator<String, Integer> iter = BiIterator.of(map);
@@ -143,7 +143,7 @@ public abstract class BiIterator<A, B> extends ImmutableIterator<Pair<A, B>> {
      * <p>This method is useful when you already have an iterator over map entries
      * and want to process keys and values separately without creating intermediate {@code Pair} objects.</p>
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Map<String, Integer> map = Map.of("a", 1, "b", 2);
      * Iterator<Map.Entry<String, Integer>> entryIter = map.entrySet().iterator();
@@ -230,7 +230,7 @@ public abstract class BiIterator<A, B> extends ImmutableIterator<Pair<A, B>> {
      * <p>The output consumer receives a mutable {@code Pair} object that should be populated
      * with the next pair of values using {@code pair.set(a, b)} or {@code pair.setLeft(a)} and {@code pair.setRight(b)}.</p>
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * AtomicInteger counter = new AtomicInteger(0);
      * BiIterator<Integer, String> iter = BiIterator.generate(pair -> {
@@ -260,7 +260,7 @@ public abstract class BiIterator<A, B> extends ImmutableIterator<Pair<A, B>> {
      * <p>The output consumer receives a mutable {@code Pair} object that should be populated
      * with the next pair of values using {@code pair.set(a, b)} or {@code pair.setLeft(a)} and {@code pair.setRight(b)}.</p>
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * AtomicInteger counter = new AtomicInteger(0);
      * BiIterator<Integer, String> iter = BiIterator.generate(
@@ -385,7 +385,7 @@ public abstract class BiIterator<A, B> extends ImmutableIterator<Pair<A, B>> {
      * <p>The output consumer receives the current index and a mutable {@code Pair} object that should be
      * populated with the values corresponding to that index.</p>
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Generate pairs of (index, square of index)
      * BiIterator<Integer, Integer> iter = BiIterator.generate(0, 5, (i, pair) -> {
@@ -486,7 +486,7 @@ public abstract class BiIterator<A, B> extends ImmutableIterator<Pair<A, B>> {
      * If the arrays have different lengths, iteration stops when the shorter array is exhausted.
      * If either array is {@code null}, returns an empty {@code BiIterator}.
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String[] names = {"Alice", "Bob", "Charlie"};
      * Integer[] ages = {25, 30, 35};
@@ -513,7 +513,7 @@ public abstract class BiIterator<A, B> extends ImmutableIterator<Pair<A, B>> {
      * The resulting iterator continues until both arrays are exhausted, using default values
      * when one array is shorter than the other.
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String[] names = {"Alice", "Bob"};
      * Integer[] ages = {25, 30, 35, 40};
@@ -568,7 +568,7 @@ public abstract class BiIterator<A, B> extends ImmutableIterator<Pair<A, B>> {
      * Iteration stops when the shorter iterator is exhausted. Elements from the longer iterator
      * beyond that point are ignored.
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Iterator<String> names = List.of("Alice", "Bob").iterator();
      * Iterator<Integer> ages = List.of(25, 30, 35).iterator();
@@ -672,7 +672,7 @@ public abstract class BiIterator<A, B> extends ImmutableIterator<Pair<A, B>> {
      * Iteration continues until both iterators are exhausted, using the specified default values
      * when one iterator is shorter than the other.
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Iterator<String> names = List.of("Alice", "Bob").iterator();
      * Iterator<Integer> ages = List.of(25, 30, 35).iterator();
@@ -775,7 +775,7 @@ public abstract class BiIterator<A, B> extends ImmutableIterator<Pair<A, B>> {
      * Unzips an iterable into a {@code BiIterator} by splitting each element into a pair using the unzip function.
      * This is the inverse operation of zipping - it transforms single elements into pairs of values.
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * List<String> data = List.of("Alice:25", "Bob:30");
      * BiIterator<String, Integer> iter = BiIterator.unzip(data, (s, pair) -> {
@@ -854,7 +854,7 @@ public abstract class BiIterator<A, B> extends ImmutableIterator<Pair<A, B>> {
      * Performs the given action for each remaining pair of elements in this iterator.
      * The action is executed for each pair until all elements are consumed or the action throws an exception.
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * BiIterator<String, Integer> iter = BiIterator.of(Map.of("a", 1, "b", 2));
      * iter.forEachRemaining((key, value) -> System.out.println(key + "=" + value));
@@ -878,7 +878,7 @@ public abstract class BiIterator<A, B> extends ImmutableIterator<Pair<A, B>> {
      * Returns a new {@code BiIterator} that skips the first {@code n} pairs of elements.
      * The resulting iterator will begin iteration after discarding the specified number of elements.
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * BiIterator<String, Integer> iter = BiIterator.of(Map.of("a", 1, "b", 2, "c", 3));
      * BiIterator<String, Integer> skipped = iter.skip(1);
@@ -976,7 +976,7 @@ public abstract class BiIterator<A, B> extends ImmutableIterator<Pair<A, B>> {
      * Returns a new {@code BiIterator} that is limited to at most {@code count} pairs of elements.
      * The resulting iterator will produce at most the specified number of pairs, even if more are available.
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * BiIterator<Integer, Integer> infinite = BiIterator.generate(pair -> pair.set(1, 2));
      * BiIterator<Integer, Integer> limited = infinite.limit(5);
@@ -1057,7 +1057,7 @@ public abstract class BiIterator<A, B> extends ImmutableIterator<Pair<A, B>> {
      * Returns a new {@code BiIterator} that includes only pairs satisfying the given predicate.
      * Pairs for which the predicate returns {@code false} are skipped during iteration.
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * BiIterator<String, Integer> iter = BiIterator.of(Map.of("a", 1, "b", 2, "c", 3));
      * BiIterator<String, Integer> filtered = iter.filter((k, v) -> v > 1);
@@ -1172,7 +1172,7 @@ public abstract class BiIterator<A, B> extends ImmutableIterator<Pair<A, B>> {
      * Transforms each pair of elements in this {@code BiIterator} using the given mapper function,
      * producing an {@code ObjIterator} of the mapped results.
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * BiIterator<String, Integer> iter = BiIterator.of(Map.of("a", 1, "b", 2));
      * ObjIterator<String> mapped = iter.map((k, v) -> k + "=" + v);
@@ -1224,7 +1224,7 @@ public abstract class BiIterator<A, B> extends ImmutableIterator<Pair<A, B>> {
      * Converts this {@code BiIterator} into an {@code EntryStream} for further stream processing.
      * The resulting stream will contain all remaining pairs from this iterator.
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * BiIterator<String, Integer> iter = BiIterator.of(Map.of("a", 1, "b", 2));
      * EntryStream<String, Integer> stream = iter.stream();
@@ -1241,7 +1241,7 @@ public abstract class BiIterator<A, B> extends ImmutableIterator<Pair<A, B>> {
      * Converts this {@code BiIterator} into a {@code Stream} by applying the mapper function to each pair.
      * The resulting stream will contain the mapped values.
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * BiIterator<String, Integer> iter = BiIterator.of(Map.of("a", 1, "b", 2));
      * Stream<String> stream = iter.stream((k, v) -> k + "=" + v);
@@ -1294,7 +1294,7 @@ public abstract class BiIterator<A, B> extends ImmutableIterator<Pair<A, B>> {
      * The first list contains all first elements from the pairs, and the second list contains all second elements.
      * This method consumes the entire iterator and "unzips" the pairs into separate lists.
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * BiIterator<String, Integer> iter = BiIterator.of(Map.of("a", 1, "b", 2));
      * Pair<List<String>, List<Integer>> lists = iter.toMultiList(ArrayList::new);
@@ -1321,7 +1321,7 @@ public abstract class BiIterator<A, B> extends ImmutableIterator<Pair<A, B>> {
      * The first set contains all unique first elements from the pairs, and the second set contains all unique second elements.
      * This method consumes the entire iterator and "unzips" the pairs into separate sets, removing duplicates.
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * BiIterator<String, Integer> iter = BiIterator.of(Map.of("a", 1, "b", 2));
      * Pair<Set<String>, Set<Integer>> sets = iter.toMultiSet(HashSet::new);

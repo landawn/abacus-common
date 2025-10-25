@@ -65,7 +65,7 @@ import com.landawn.abacus.util.ImmutableList;
  * 
  * <p>All methods in this class are static. The class cannot be instantiated.
  * 
- * <p>Example usage:
+ * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * // Read all lines from a file
  * List<String> lines = Files.readAllLines(new File("data.txt"), StandardCharsets.UTF_8);
@@ -96,7 +96,7 @@ public abstract class Files { //NOSONAR
      * <p><b>{@link java.nio.file.Path} equivalent:</b> {@link
      * java.nio.file.Files#newBufferedReader(java.nio.file.Path, Charset)}.
      *
-     * <p>Example usage:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * try (BufferedReader reader = Files.newReader(new File("data.txt"), StandardCharsets.UTF_8)) {
      *     String line;
@@ -129,7 +129,7 @@ public abstract class Files { //NOSONAR
      * java.nio.file.Files#newBufferedWriter(java.nio.file.Path, Charset,
      * java.nio.file.OpenOption...)}.
      *
-     * <p>Example usage:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * try (BufferedWriter writer = Files.newWriter(new File("output.txt"), StandardCharsets.UTF_8)) {
      *     writer.write("Hello, World!");
@@ -155,7 +155,7 @@ public abstract class Files { //NOSONAR
      * <p>This method does not open the file immediately. The file is opened when methods
      * on the returned ByteSource are called.
      *
-     * <p>Example usage:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ByteSource source = Files.asByteSource(new File("data.bin"));
      * byte[] bytes = source.read();
@@ -177,7 +177,7 @@ public abstract class Files { //NOSONAR
      * StandardOpenOption} for the standard options that may be provided. Providing no options is
      * equivalent to providing the {@link StandardOpenOption#READ READ} option.
      *
-     * <p>Example usage:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Path path = Paths.get("data.bin");
      * ByteSource source = Files.asByteSource(path, StandardOpenOption.READ);
@@ -201,7 +201,7 @@ public abstract class Files { //NOSONAR
      * <p>This method does not open the file immediately. The file is opened when methods
      * on the returned ByteSink are called.
      *
-     * <p>Example usage:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Overwrite file
      * ByteSink sink = Files.asByteSink(new File("output.bin"));
@@ -231,7 +231,7 @@ public abstract class Files { //NOSONAR
      * StandardOpenOption#TRUNCATE_EXISTING TRUNCATE_EXISTING} and {@link StandardOpenOption#WRITE
      * WRITE} options.
      *
-     * <p>Example usage:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Path path = Paths.get("output.bin");
      * ByteSink sink = Files.asByteSink(path, StandardOpenOption.CREATE, StandardOpenOption.APPEND);
@@ -254,7 +254,7 @@ public abstract class Files { //NOSONAR
      * <p>This method does not open the file immediately. The file is opened when methods
      * on the returned CharSource are called.
      *
-     * <p>Example usage:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * CharSource source = Files.asCharSource(new File("text.txt"), StandardCharsets.UTF_8);
      * String content = source.read();
@@ -278,7 +278,7 @@ public abstract class Files { //NOSONAR
      * StandardOpenOption} for the standard options that may be provided. Providing no options is
      * equivalent to providing the {@link StandardOpenOption#READ READ} option.
      *
-     * <p>Example usage:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Path path = Paths.get("text.txt");
      * CharSource source = Files.asCharSource(path, StandardCharsets.UTF_8, StandardOpenOption.READ);
@@ -305,7 +305,7 @@ public abstract class Files { //NOSONAR
      * <p>This method does not open the file immediately. The file is opened when methods
      * on the returned CharSink are called.
      *
-     * <p>Example usage:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Overwrite file
      * CharSink sink = Files.asCharSink(new File("output.txt"), StandardCharsets.UTF_8);
@@ -336,7 +336,7 @@ public abstract class Files { //NOSONAR
      * StandardOpenOption#TRUNCATE_EXISTING TRUNCATE_EXISTING} and {@link StandardOpenOption#WRITE
      * WRITE} options.
      *
-     * <p>Example usage:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Path path = Paths.get("output.txt");
      * CharSink sink = Files.asCharSink(path, StandardCharsets.UTF_8, 
@@ -361,7 +361,7 @@ public abstract class Files { //NOSONAR
      * <p>This method is intended for simple cases where it is convenient to read all bytes
      * into a byte array. It is not intended for reading large files.
      *
-     * <p>Example usage:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * byte[] fileData = Files.toByteArray(new File("image.png"));
      * }</pre>
@@ -385,7 +385,7 @@ public abstract class Files { //NOSONAR
      * <p><b>{@link java.nio.file.Path} equivalent:</b> {@link
      * java.nio.file.Files#write(java.nio.file.Path, byte[], java.nio.file.OpenOption...)}.
      *
-     * <p>Examples:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * byte[] data = "Hello, World!".getBytes(StandardCharsets.UTF_8);
      * File target = new File("backup/output.txt");
@@ -414,7 +414,7 @@ public abstract class Files { //NOSONAR
      * <p>This method may be faster than reading both files into memory for comparison,
      * as it can stop reading as soon as a difference is found.
      *
-     * <p>Example usage:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * boolean identical = Files.equal(new File("file1.txt"), new File("file2.txt"));
      * if (identical) {
@@ -438,7 +438,7 @@ public abstract class Files { //NOSONAR
      * <p>This method may be faster than reading both files into memory for comparison,
      * as it can stop reading as soon as a difference is found.
      *
-     * <p>Example usage:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Path path1 = Paths.get("file1.txt");
      * Path path2 = Paths.get("file2.txt");
@@ -461,7 +461,7 @@ public abstract class Files { //NOSONAR
      *
      * <p>This method creates parent directories if necessary.
      *
-     * <p>Example usage:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * File file = new File("timestamp.txt");
      * Files.touch(file);
@@ -483,7 +483,7 @@ public abstract class Files { //NOSONAR
      *
      * <p>This method creates parent directories if necessary.
      *
-     * <p>Example usage:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Path path = Paths.get("timestamp.txt");
      * Files.touch(path);
@@ -520,7 +520,7 @@ public abstract class Files { //NOSONAR
      * <p><b>{@link java.nio.file.Path} equivalent:</b> {@link
      * java.nio.file.Files#createTempDirectory}.
      *
-     * <p>Example usage:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * File tempDir = Files.createTempDir();
      * // Use tempDir for temporary operations
@@ -557,7 +557,7 @@ public abstract class Files { //NOSONAR
      * {@link File#mkdirs()}, this method throws an exception if the parent directory cannot
      * be created.
      *
-     * <p>Example usage:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * File file = new File("/path/to/deep/directory/file.txt");
      * Files.createParentDirs(file);
@@ -580,7 +580,7 @@ public abstract class Files { //NOSONAR
      * <p>This method does nothing if the parent directory already exists. File attributes
      * can be used to set permissions or other properties on the created directories.
      *
-     * <p>Example usage:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Path path = Paths.get("/path/to/deep/directory/file.txt");
      * Files.createParentDirectories(path);
@@ -604,7 +604,7 @@ public abstract class Files { //NOSONAR
      * <p><b>{@link java.nio.file.Path} equivalent:</b> {@link
      * java.nio.file.Files#copy(java.nio.file.Path, OutputStream)}.
      *
-     * <p>Example usage:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * try (FileOutputStream out = new FileOutputStream("backup.bin")) {
      *     Files.copy(new File("original.bin"), out);
@@ -634,7 +634,7 @@ public abstract class Files { //NOSONAR
      * <p><b>{@link java.nio.file.Path} equivalent:</b> {@link
      * java.nio.file.Files#copy(java.nio.file.Path, java.nio.file.Path, java.nio.file.CopyOption...)}.
      *
-     * <p>Example usage:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * File source = new File("document.pdf");
      * File backup = new File("document_backup.pdf");
@@ -660,7 +660,7 @@ public abstract class Files { //NOSONAR
      *
      * <p><b>{@link java.nio.file.Path} equivalent:</b> {@link java.nio.file.Files#move}.
      *
-     * <p>Example usage:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Rename a file
      * Files.move(new File("old_name.txt"), new File("new_name.txt"));
@@ -691,7 +691,7 @@ public abstract class Files { //NOSONAR
      * <p><b>{@link java.nio.file.Path} equivalent:</b> {@link
      * java.nio.file.Files#readAllLines(java.nio.file.Path, Charset)}.
      *
-     * <p>Example usage:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * List<String> lines = Files.readLines(new File("data.txt"), StandardCharsets.UTF_8);
      * for (String line : lines) {
@@ -721,7 +721,7 @@ public abstract class Files { //NOSONAR
      * <p>Memory-mapped files can offer significant performance benefits for certain operations,
      * but they also consume virtual memory space and may not be suitable for all use cases.
      *
-     * <p>Example usage:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * MappedByteBuffer buffer = Files.map(new File("data.bin"));
      * int firstInt = buffer.getInt();
@@ -746,7 +746,7 @@ public abstract class Files { //NOSONAR
      *
      * <p>This only works for files ≤ {@link Integer#MAX_VALUE} bytes.
      *
-     * <p>Example usage:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Create a read-write mapping
      * MappedByteBuffer buffer = Files.map(new File("data.bin"), MapMode.READ_WRITE);
@@ -777,7 +777,7 @@ public abstract class Files { //NOSONAR
      *
      * <p>This only works for files ≤ {@link Integer#MAX_VALUE} bytes.
      *
-     * <p>Example usage:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Create a new 1MB memory-mapped file
      * MappedByteBuffer buffer = Files.map(new File("new.bin"), MapMode.READ_WRITE, 1024 * 1024);
@@ -812,7 +812,7 @@ public abstract class Files { //NOSONAR
      * symlink to {@code x}, {@code a/../b} may refer to a sibling of {@code x}, rather than the
      * sibling of {@code a} referred to by {@code b}.
      *
-     * <p>Example usage:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String cleaned = Files.simplifyPath("/foo//bar/../baz/./");
      * // Returns: "/foo/baz"
@@ -830,7 +830,7 @@ public abstract class Files { //NOSONAR
      * href="http://en.wikipedia.org/wiki/Filename_extension">file extension</a> or path. This is
      * similar to the {@code basename} unix command. The result does not include the '{@code .}'.
      *
-     * <p>Example usage:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String name = Files.getNameWithoutExtension("/home/user/document.pdf");
      * // Returns: "document"
@@ -852,7 +852,7 @@ public abstract class Files { //NOSONAR
      * href="http://en.wikipedia.org/wiki/Filename_extension">file extension</a> or path. This is
      * similar to the {@code basename} unix command. The result does not include the '{@code .}'.
      *
-     * <p>Example usage:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Path path = Paths.get("/home/user/document.pdf");
      * String name = Files.getNameWithoutExtension(path);
@@ -880,7 +880,7 @@ public abstract class Files { //NOSONAR
      * href="https://learn.microsoft.com/en-us/archive/blogs/askcore/alternate-data-streams-in-ntfs">Alternate
      * Data Streams</a>.
      *
-     * <p>Example usage:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String ext1 = Files.getFileExtension("document.pdf");
      * // Returns: "pdf"
@@ -913,7 +913,7 @@ public abstract class Files { //NOSONAR
      * href="https://learn.microsoft.com/en-us/archive/blogs/askcore/alternate-data-streams-in-ntfs">Alternate
      * Data Streams</a>.
      *
-     * <p>Example usage:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Path path = Paths.get("/home/user/document.pdf");
      * String ext = Files.getFileExtension(path);
@@ -943,11 +943,11 @@ public abstract class Files { //NOSONAR
      * a directory, no exception will be thrown and the returned {@link Iterable} will contain a
      * single element: that file.
      *
-     * <p>Example: {@code Files.fileTraverser().depthFirstPreOrder(new File("/"))} may return files
+     * <p><b>Usage Examples:</b></p> {@code Files.fileTraverser().depthFirstPreOrder(new File("/"))} may return files
      * with the following paths: {@code ["/", "/etc", "/etc/config.txt", "/etc/fonts", "/home",
      * "/home/alice", ...]}
      *
-     * <p>Example usage:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Traverser<File> traverser = Files.fileTraverser();
      * for (File file : traverser.breadthFirst(new File("/home/user"))) {
@@ -978,11 +978,11 @@ public abstract class Files { //NOSONAR
      * created by this traverser if an {@link IOException} is thrown by a call to {@link
      * #listFiles(Path)}.
      *
-     * <p>Example: {@code MoreFiles.fileTraverser().depthFirstPreOrder(Paths.get("/"))} may return the
+     * <p><b>Usage Examples:</b></p> {@code MoreFiles.fileTraverser().depthFirstPreOrder(Paths.get("/"))} may return the
      * following paths: {@code ["/", "/etc", "/etc/config.txt", "/etc/fonts", "/home", "/home/alice",
      * ...]}
      *
-     * <p>Example usage:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Traverser<Path> traverser = Files.pathTraverser();
      * for (Path path : traverser.breadthFirst(Paths.get("/home/user"))) {
@@ -1004,7 +1004,7 @@ public abstract class Files { //NOSONAR
      * <p>The order of the returned files is not specified and may vary between invocations
      * or platforms.
      *
-     * <p>Example usage:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ImmutableList<Path> files = Files.listFiles(Paths.get("/home/user"));
      * for (Path file : files) {
@@ -1045,7 +1045,7 @@ public abstract class Files { //NOSONAR
      * guarantee the security of recursive deletes. If you wish to allow the recursive deletes anyway,
      * pass {@link RecursiveDeleteOption#ALLOW_INSECURE} to this method to override that behavior.
      *
-     * <p>Example usage:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Safe recursive delete
      * Files.deleteRecursively(Paths.get("/tmp/old_data"));
@@ -1090,7 +1090,7 @@ public abstract class Files { //NOSONAR
      * guarantee the security of recursive deletes. If you wish to allow the recursive deletes anyway,
      * pass {@link RecursiveDeleteOption#ALLOW_INSECURE} to this method to override that behavior.
      *
-     * <p>Example usage:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Empty a directory but keep the directory itself
      * Path tempDir = Paths.get("/tmp/working");
@@ -1117,7 +1117,7 @@ public abstract class Files { //NOSONAR
      * LinkOption...)} on input paths with the given link options. This is useful for filtering
      * collections of paths.
      *
-     * <p>Example usage:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * List<Path> directories = paths.stream()
      *     .filter(Files.isDirectory())
@@ -1139,7 +1139,7 @@ public abstract class Files { //NOSONAR
      * LinkOption...)} on input paths with the given link options. This is useful for filtering
      * collections of paths.
      *
-     * <p>Example usage:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * List<Path> regularFiles = paths.stream()
      *     .filter(Files.isRegularFile())
@@ -1165,7 +1165,7 @@ public abstract class Files { //NOSONAR
      *
      * <p>This method is equivalent to: {@link java.nio.file.Files#readAllBytes(Path)}.
      *
-     * <p>Example usage:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * byte[] data = Files.readAllBytes(new File("image.jpg"));
      * }</pre>
@@ -1198,7 +1198,7 @@ public abstract class Files { //NOSONAR
      *
      * <p>This method is equivalent to: {@code readString(file, StandardCharsets.UTF_8)}.
      *
-     * <p>Example usage:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String content = Files.readString(new File("config.json"));
      * }</pre>
@@ -1227,7 +1227,7 @@ public abstract class Files { //NOSONAR
      *
      * <p>This method is equivalent to: {@link java.nio.file.Files#readString(Path, Charset)}.
      *
-     * <p>Example usage:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String content = Files.readString(new File("document.txt"), StandardCharsets.ISO_8859_1);
      * }</pre>
@@ -1262,7 +1262,7 @@ public abstract class Files { //NOSONAR
      * <p><b>{@link java.nio.file.Path} equivalent:</b> {@link
      * java.nio.file.Files#readAllLines(java.nio.file.Path, Charset)}.
      *
-     * <p>Example usage:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * List<String> lines = Files.readAllLines(new File("data.txt"));
      * for (String line : lines) {
@@ -1292,7 +1292,7 @@ public abstract class Files { //NOSONAR
      * <p><b>{@link java.nio.file.Path} equivalent:</b> {@link
      * java.nio.file.Files#readAllLines(java.nio.file.Path, Charset)}.
      *
-     * <p>Example usage:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Read all lines using a specific charset
      * List<String> lines = Files.readAllLines(new File("data.csv"), StandardCharsets.ISO_8859_1);

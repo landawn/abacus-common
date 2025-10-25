@@ -43,7 +43,7 @@ public interface ObjIntConsumer<T> extends Throwables.ObjIntConsumer<T, RuntimeE
      * array or list indexing operations, counter updates, or any operation where
      * an integer parameter modifies the state of an object.
      *
-     * <p>Example usage:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ObjIntConsumer<List<String>> setAtIndex = (list, index) -> 
      *     list.set(index, "Updated");
@@ -52,8 +52,7 @@ public interface ObjIntConsumer<T> extends Throwables.ObjIntConsumer<T, RuntimeE
      * }</pre>
      *
      * @param t the first input argument of type T
-     * @param value the second input argument, a primitive int value
-     * @throws RuntimeException if the operation cannot be completed
+     * @param value the second input argument, a primitive int value if the operation cannot be completed
      */
     @Override
     void accept(T t, int value);
@@ -69,7 +68,7 @@ public interface ObjIntConsumer<T> extends Throwables.ObjIntConsumer<T, RuntimeE
      * consumer receives the same input arguments. This is useful for performing
      * multiple independent operations on the same data.
      *
-     * <p>Example usage:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ObjIntConsumer<StringBuilder> appendIndex = (sb, index) -> 
      *     sb.append("[").append(index).append("]");

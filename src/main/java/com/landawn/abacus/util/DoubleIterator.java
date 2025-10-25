@@ -32,7 +32,7 @@ import com.landawn.abacus.util.stream.DoubleStream;
  * double values where performance is critical. It provides various utility methods for
  * transforming, filtering, and processing double values.</p>
  * 
- * <p>Example usage:</p>
+ * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * // Create iterator from array
  * double[] values = {1.5, 2.5, 3.5, 4.5};
@@ -87,7 +87,7 @@ public abstract class DoubleIterator extends ImmutableIterator<Double> {
     /**
      * Creates a DoubleIterator from a double array.
      *
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * double[] values = {1.1, 2.2, 3.3};
      * DoubleIterator iter = DoubleIterator.of(values);
@@ -103,7 +103,7 @@ public abstract class DoubleIterator extends ImmutableIterator<Double> {
     /**
      * Creates a DoubleIterator from a portion of a double array.
      *
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * double[] values = {1.0, 2.0, 3.0, 4.0, 5.0};
      * DoubleIterator iter = DoubleIterator.of(values, 1, 4); // iterates over 2.0, 3.0, 4.0
@@ -159,7 +159,7 @@ public abstract class DoubleIterator extends ImmutableIterator<Double> {
      * Creates a DoubleIterator that is initialized lazily using the provided Supplier.
      * The Supplier is invoked only when the first method on the returned iterator is called.
      *
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * DoubleIterator iter = DoubleIterator.defer(() -> {
      *     // Expensive initialization
@@ -213,7 +213,7 @@ public abstract class DoubleIterator extends ImmutableIterator<Double> {
     /**
      * Creates an infinite DoubleIterator that generates values using the provided supplier.
      *
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Generate random doubles infinitely
      * DoubleIterator randomIter = DoubleIterator.generate(Math::random);
@@ -245,7 +245,7 @@ public abstract class DoubleIterator extends ImmutableIterator<Double> {
     /**
      * Creates a DoubleIterator that generates values while the hasNext condition is true.
      *
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * int count = 0;
      * DoubleIterator iter = DoubleIterator.generate(
@@ -304,6 +304,13 @@ public abstract class DoubleIterator extends ImmutableIterator<Double> {
     /**
      * Returns the next double value in the iteration.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * DoubleIterator iter = DoubleIterator.of(1.0, 2.0, 3.0);
+     * double first = iter.nextDouble(); // 1.0
+     * double second = iter.nextDouble(); // 2.0
+     * }</pre>
+     *
      * @return the next double value
      * @throws NoSuchElementException if the iteration has no more elements
      */
@@ -312,7 +319,7 @@ public abstract class DoubleIterator extends ImmutableIterator<Double> {
     /**
      * Skips the specified number of elements in this iterator.
      *
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * double[] values = {1.0, 2.0, 3.0, 4.0, 5.0};
      * DoubleIterator iter = DoubleIterator.of(values).skip(2);
@@ -368,7 +375,7 @@ public abstract class DoubleIterator extends ImmutableIterator<Double> {
     /**
      * Limits this iterator to return at most the specified number of elements.
      *
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * double[] values = {1.0, 2.0, 3.0, 4.0, 5.0};
      * DoubleIterator iter = DoubleIterator.of(values).limit(3);
@@ -411,7 +418,7 @@ public abstract class DoubleIterator extends ImmutableIterator<Double> {
     /**
      * Returns a filtered DoubleIterator that only includes elements matching the predicate.
      *
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * double[] values = {1.5, 2.5, 3.5, 4.5};
      * DoubleIterator iter = DoubleIterator.of(values)
@@ -464,7 +471,7 @@ public abstract class DoubleIterator extends ImmutableIterator<Double> {
     /**
      * Returns the first element in this iterator wrapped in an OptionalDouble.
      *
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * OptionalDouble first = DoubleIterator.of(1.5, 2.5, 3.5).first();
      * // first.get() returns 1.5
@@ -484,7 +491,7 @@ public abstract class DoubleIterator extends ImmutableIterator<Double> {
      * Returns the last element in this iterator wrapped in an OptionalDouble.
      * This method consumes the entire iterator.
      *
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * OptionalDouble last = DoubleIterator.of(1.5, 2.5, 3.5).last();
      * // last.get() returns 3.5
@@ -507,12 +514,19 @@ public abstract class DoubleIterator extends ImmutableIterator<Double> {
     }
 
     /**
-     * Converts the remaining elements in this iterator to a double array.
+     * Converts the remaining elements to a double array.
      *
-     * <p>Example:</p>
+     * <p>This method consumes the iterator. After calling this method, the iterator
+     * will be empty (hasNext() returns false). If the iterator is already empty,
+     * returns an empty array.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * double[] array = DoubleIterator.of(1.5, 2.5, 3.5).toArray();
-     * // array contains {1.5, 2.5, 3.5}
+     * double[] array = DoubleIterator.of(1.0, 2.0, 3.0, 4.0, 5.0).toArray();
+     * // array = [1.0, 2.0, 3.0, 4.0, 5.0]
+     *
+     * // Empty iterator returns empty array
+     * double[] empty = DoubleIterator.empty().toArray(); // empty.length == 0
      * }</pre>
      *
      * @return a double array containing all remaining elements
@@ -523,12 +537,19 @@ public abstract class DoubleIterator extends ImmutableIterator<Double> {
     }
 
     /**
-     * Converts the remaining elements in this iterator to a DoubleList.
+     * Converts the remaining elements to a DoubleList.
      *
-     * <p>Example:</p>
+     * <p>This method consumes the iterator. After calling this method, the iterator
+     * will be empty (hasNext() returns false). If the iterator is already empty,
+     * returns an empty DoubleList.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * DoubleList list = DoubleIterator.of(1.5, 2.5, 3.5).toList();
-     * // list contains [1.5, 2.5, 3.5]
+     * DoubleList list = DoubleIterator.of(1.0, 2.0, 3.0, 4.0, 5.0).toList();
+     * // list contains [1.0, 2.0, 3.0, 4.0, 5.0]
+     *
+     * // Empty iterator returns empty list
+     * DoubleList empty = DoubleIterator.empty().toList(); // empty.size() == 0
      * }</pre>
      *
      * @return a DoubleList containing all remaining elements
@@ -546,7 +567,7 @@ public abstract class DoubleIterator extends ImmutableIterator<Double> {
     /**
      * Converts this iterator to a DoubleStream.
      *
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * double sum = DoubleIterator.of(1.5, 2.5, 3.5)
      *     .stream()
@@ -564,7 +585,7 @@ public abstract class DoubleIterator extends ImmutableIterator<Double> {
      * Returns an iterator of IndexedDouble objects that pairs each element with its index.
      * The indexing starts from 0.
      *
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * DoubleIterator.of(10.5, 20.5, 30.5)
      *     .indexed()
@@ -584,7 +605,7 @@ public abstract class DoubleIterator extends ImmutableIterator<Double> {
      * Returns an iterator of IndexedDouble objects that pairs each element with its index,
      * starting from the specified start index.
      *
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * DoubleIterator.of(10.5, 20.5, 30.5)
      *     .indexed(100)
@@ -637,7 +658,7 @@ public abstract class DoubleIterator extends ImmutableIterator<Double> {
     /**
      * Performs the given action for each remaining double element.
      *
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * DoubleIterator.of(1.5, 2.5, 3.5)
      *     .foreachRemaining(d -> System.out.println(d * 2));
@@ -645,9 +666,12 @@ public abstract class DoubleIterator extends ImmutableIterator<Double> {
      *
      * @param <E> the type of exception the action may throw
      * @param action the action to perform on each element
+     * @throws IllegalArgumentException if action is {@code null}
      * @throws E if the action throws an exception
      */
-    public <E extends Exception> void foreachRemaining(final Throwables.DoubleConsumer<E> action) throws E {//NOSONAR 
+    public <E extends Exception> void foreachRemaining(final Throwables.DoubleConsumer<E> action) throws E {//NOSONAR
+        N.checkArgNotNull(action);
+
         while (hasNext()) {
             action.accept(nextDouble());
         }
@@ -656,7 +680,7 @@ public abstract class DoubleIterator extends ImmutableIterator<Double> {
     /**
      * Performs the given action for each remaining element along with its index.
      *
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * DoubleIterator.of(10.5, 20.5, 30.5)
      *     .foreachIndexed((index, value) ->
@@ -671,6 +695,8 @@ public abstract class DoubleIterator extends ImmutableIterator<Double> {
      * @throws E if the action throws an exception
      */
     public <E extends Exception> void foreachIndexed(final Throwables.IntDoubleConsumer<E> action) throws IllegalArgumentException, E {
+        N.checkArgNotNull(action);
+
         int idx = 0;
 
         while (hasNext()) {

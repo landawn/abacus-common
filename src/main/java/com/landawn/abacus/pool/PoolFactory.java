@@ -27,7 +27,7 @@ package com.landawn.abacus.pool;
  *   <li>Memory-based constraints</li>
  * </ul>
  * 
- * <p>Usage examples:
+ * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * // Simple object pool with capacity 100
  * ObjectPool<MyResource> pool1 = PoolFactory.createObjectPool(100);
@@ -233,7 +233,7 @@ public abstract class PoolFactory { //NOSONAR
      * Creates a new KeyedObjectPool with full configuration options including memory constraints and auto-balancing.
      * This is the most flexible factory method for creating keyed object pools.
      * 
-     * <p>Usage example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * MemoryMeasure<String, Connection> measure = (key, conn) -> 
      *     key.length() * 2 + conn.getMemoryUsage();

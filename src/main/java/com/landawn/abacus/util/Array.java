@@ -67,18 +67,16 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * <p>This method uses {@link java.lang.reflect.Array#newInstance(Class, int...)} to create a new instance of the specified array.
      * The dimensions should be a valid int array representing the dimensions of the new array.
      *
-     * <p>Example usage:
-     * <pre>
-     * <code>
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
      * Array.newInstance(Integer.class, 5, 5); // returns a 5x5 Integer array
      * Array.newInstance(String.class, 3, 3, 3); // returns a 3x3x3 String array
-     * </code>
-     * </pre>
+     * }</pre>
      *
      * @param <T> the type of the array.
      * @param componentType the Class object representing the component type of the new array.
      * @param dimensions the dimensions of the new array.
-     * @return the new array.}.
+     * @return the new array
      * @throws NegativeArraySizeException if any of the specified dimensions is negative.
      * @see java.lang.reflect.Array#newInstance(Class, int...)
      */
@@ -108,13 +106,11 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * <p>This method uses {@link java.lang.reflect.Array#get(Object, int)} to retrieve the element.
      * The array can be an object array or a primitive array.
      *
-     * <p>Example usage:
-     * <pre>
-     * <code>
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
      * Integer[] array = {1, 2, 3};
      * Integer element = Array.get(array, 1); // returns 2
-     * </code>
-     * </pre>
+     * }</pre>
      *
      * @param <T> the type of the array.
      * @param array the array from which to retrieve the element.
@@ -134,13 +130,11 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * <p>This method uses {@link java.lang.reflect.Array#getBoolean(Object, int)} to retrieve the boolean value.
      * The array can be an object array or a primitive array.
      *
-     * <p>Example usage:
-     * <pre>
-     * <code>
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
      * boolean[] array = {true, false, true};
      * boolean element = Array.getBoolean(array, 1); // returns false
-     * </code>
-     * </pre>
+     * }</pre>
      *
      * @param array the array from which to retrieve the boolean value.
      * @param index the index of the boolean value to be retrieved.
@@ -159,13 +153,11 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * <p>This method uses {@link java.lang.reflect.Array#getByte(Object, int)} to retrieve the byte value.
      * The array can be an object array or a primitive array.
      *
-     * <p>Example usage:
-     * <pre>
-     * <code>
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
      * byte[] array = {1, 2, 3};
      * byte element = Array.getByte(array, 1); // returns 2
-     * </code>
-     * </pre>
+     * }</pre>
      *
      * @param array the array from which to retrieve the byte value.
      * @param index the index of the byte value to be retrieved.
@@ -184,13 +176,11 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * <p>This method uses {@link java.lang.reflect.Array#getChar(Object, int)} to retrieve the char value.
      * The array can be an object array or a primitive array.
      *
-     * <p>Example usage:
-     * <pre>
-     * <code>
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
      * char[] array = {'a', 'b', 'c'};
      * char element = Array.getChar(array, 1); // returns 'b'
-     * </code>
-     * </pre>
+     * }</pre>
      *
      * @param array the array from which to retrieve the char value.
      * @param index the index of the char value to be retrieved.
@@ -209,13 +199,11 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * <p>This method uses {@link java.lang.reflect.Array#getShort(Object, int)} to retrieve the short value.
      * The array can be an object array or a primitive array.
      *
-     * <p>Example usage:
-     * <pre>
-     * <code>
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
      * short[] array = {1, 2, 3};
      * short element = Array.getShort(array, 1); // returns 2
-     * </code>
-     * </pre>
+     * }</pre>
      *
      * @param array the array from which to retrieve the short value.
      * @param index the index of the short value to be retrieved.
@@ -234,13 +222,11 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * <p>This method uses {@link java.lang.reflect.Array#getInt(Object, int)} to retrieve the integer value.
      * The array can be an object array or a primitive array.
      *
-     * <p>Example usage:
-     * <pre>
-     * <code>
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
      * int[] array = {1, 2, 3};
      * int element = Array.getInt(array, 1); // returns 2
-     * </code>
-     * </pre>
+     * }</pre>
      *
      * @param array the array from which to retrieve the integer value.
      * @param index the index of the integer value to be retrieved.
@@ -259,13 +245,11 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * <p>This method uses {@link java.lang.reflect.Array#getLong(Object, int)} to retrieve the long value.
      * The array can be an object array or a primitive array.
      *
-     * <p>Example usage:
-     * <pre>
-     * <code>
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
      * long[] array = {1L, 2L, 3L};
      * long element = Array.getLong(array, 1); // returns 2L
-     * </code>
-     * </pre>
+     * }</pre>
      *
      * @param array the array from which to retrieve the long value.
      * @param index the index of the long value to be retrieved.
@@ -284,13 +268,11 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * <p>This method uses {@link java.lang.reflect.Array#getFloat(Object, int)} to retrieve the float value.
      * The array can be an object array or a primitive array.
      *
-     * <p>Example usage:
-     * <pre>
-     * <code>
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
      * float[] array = {1.1f, 2.2f, 3.3f};
      * float element = Array.getFloat(array, 1); // returns 2.2f
-     * </code>
-     * </pre>
+     * }</pre>
      *
      * @param array the array from which to retrieve the float value.
      * @param index the index of the float value to be retrieved.
@@ -309,13 +291,11 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * <p>This method uses {@link java.lang.reflect.Array#getDouble(Object, int)} to retrieve the double value.
      * The array can be an object array or a primitive array.
      *
-     * <p>Example usage:
-     * <pre>
-     * <code>
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
      * double[] array = {1.1, 2.2, 3.3};
      * double element = Array.getDouble(array, 1); // returns 2.2
-     * </code>
-     * </pre>
+     * }</pre>
      *
      * @param array the array from which to retrieve the double value.
      * @param index the index of the double value to be retrieved.
@@ -334,13 +314,11 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * <p>This method uses {@link java.lang.reflect.Array#set(Object, int, Object)} to set the value.
      * The array can be an object array or a primitive array.
      *
-     * <p>Example usage:
-     * <pre>
-     * <code>
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
      * Integer[] array = {1, 2, 3};
      * Array.set(array, 1, 4); // array now is {1, 4, 3}
-     * </code>
-     * </pre>
+     * }</pre>
      *
      * @param array the array in which to set the value.
      * @param index the index at which the value is to be set.
@@ -359,13 +337,11 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * <p>This method uses {@link java.lang.reflect.Array#setBoolean(Object, int, boolean)} to set the boolean value.
      * The array can be an object array or a primitive array.
      *
-     * <p>Example usage:
-     * <pre>
-     * <code>
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
      * boolean[] array = {true, false, true};
      * Array.setBoolean(array, 1, true); // array now is {true, true, true}
-     * </code>
-     * </pre>
+     * }</pre>
      *
      * @param array the array in which to set the boolean value.
      * @param index the index at which the boolean value is to be set.
@@ -384,13 +360,11 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * <p>This method uses {@link java.lang.reflect.Array#setByte(Object, int, byte)} to set the byte value.
      * The array can be an object array or a primitive array.
      *
-     * <p>Example usage:
-     * <pre>
-     * <code>
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
      * byte[] array = {1, 2, 3};
      * Array.setByte(array, 1, (byte)4); // array now is {1, 4, 3}
-     * </code>
-     * </pre>
+     * }</pre>
      *
      * @param array the array in which to set the byte value.
      * @param index the index at which the byte value is to be set.
@@ -409,13 +383,11 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * <p>This method uses {@link java.lang.reflect.Array#setChar(Object, int, char)} to set the char value.
      * The array can be an object array or a primitive array.
      *
-     * <p>Example usage:
-     * <pre>
-     * <code>
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
      * char[] array = {'a', 'b', 'c'};
      * Array.setChar(array, 1, 'd'); // array now is {'a', 'd', 'c'}
-     * </code>
-     * </pre>
+     * }</pre>
      *
      * @param array the array in which to set the char value.
      * @param index the index at which the char value is to be set.
@@ -434,13 +406,11 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * <p>This method uses {@link java.lang.reflect.Array#setShort(Object, int, short)} to set the short value.
      * The array can be an object array or a primitive array.
      *
-     * <p>Example usage:
-     * <pre>
-     * <code>
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
      * short[] array = {1, 2, 3};
      * Array.setShort(array, 1, (short)4); // array now is {1, 4, 3}
-     * </code>
-     * </pre>
+     * }</pre>
      *
      * @param array the array in which to set the short value.
      * @param index the index at which the short value is to be set.
@@ -459,13 +429,11 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * <p>This method uses {@link java.lang.reflect.Array#setInt(Object, int, int)} to set the integer value.
      * The array can be an object array or a primitive array.
      *
-     * <p>Example usage:
-     * <pre>
-     * <code>
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
      * int[] array = {1, 2, 3};
      * Array.setInt(array, 1, 4); // array now is {1, 4, 3}
-     * </code>
-     * </pre>
+     * }</pre>
      *
      * @param array the array in which to set the integer value.
      * @param index the index at which the integer value is to be set.
@@ -484,13 +452,11 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * <p>This method uses {@link java.lang.reflect.Array#setLong(Object, int, long)} to set the long value.
      * The array can be an object array or a primitive array.
      *
-     * <p>Example usage:
-     * <pre>
-     * <code>
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
      * long[] array = {1L, 2L, 3L};
      * Array.setLong(array, 1, 4L); // array now is {1L, 4L, 3L}
-     * </code>
-     * </pre>
+     * }</pre>
      *
      * @param array the array in which to set the long value.
      * @param index the index at which the long value is to be set.
@@ -509,13 +475,11 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * <p>This method uses {@link java.lang.reflect.Array#setFloat(Object, int, float)} to set the float value.
      * The array can be an object array or a primitive array.
      *
-     * <p>Example usage:
-     * <pre>
-     * <code>
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
      * float[] array = {1.1f, 2.2f, 3.3f};
      * Array.setFloat(array, 1, 4.4f); // array now is {1.1f, 4.4f, 3.3f}
-     * </code>
-     * </pre>
+     * }</pre>
      *
      * @param array the array in which to set the float value.
      * @param index the index at which the float value is to be set.
@@ -534,13 +498,11 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * <p>This method uses {@link java.lang.reflect.Array#setDouble(Object, int, double)} to set the double value.
      * The array can be an object array or a primitive array.
      *
-     * <p>Example usage:
-     * <pre>
-     * <code>
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
      * double[] array = {1.1, 2.2, 3.3};
      * Array.setDouble(array, 1, 4.4); // array now is {1.1, 4.4, 3.3}
-     * </code>
-     * </pre>
+     * }</pre>
      *
      * @param array the array in which to set the double value.
      * @param index the index at which the double value is to be set.
@@ -569,7 +531,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
      *   <li>Immutable empty list if the input array is null or empty</li>
      * </ul>
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String[] array = {"a", "b", "c"};
      * List<String> list = Array.asList(array);
@@ -1491,7 +1453,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * for the specified number of times. The resulting array will have a length equal to the
      * original array length multiplied by the repetition count.</p>
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * boolean[] original = {true, false, true};
      * boolean[] repeated = Array.repeat(original, 3);
@@ -1559,7 +1521,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * for the specified number of times. The resulting array will have a length equal to the
      * original array length multiplied by the repetition count.</p>
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * char[] original = {'a', 'b', 'c'};
      * char[] repeated = Array.repeat(original, 3);
@@ -1626,7 +1588,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * for the specified number of times. The resulting array will have a length equal to the
      * original array length multiplied by the repetition count.</p>
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * byte[] original = {1, 2, 3};
      * byte[] repeated = Array.repeat(original, 3);
@@ -1693,7 +1655,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * for the specified number of times. The resulting array will have a length equal to the
      * original array length multiplied by the repetition count.</p>
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * short[] original = {1, 2, 3};
      * short[] repeated = Array.repeat(original, 3);
@@ -1760,7 +1722,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * for the specified number of times. The resulting array will have a length equal to the
      * original array length multiplied by the repetition count.</p>
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * int[] original = {1, 2, 3};
      * int[] repeated = Array.repeat(original, 3);
@@ -1827,7 +1789,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * for the specified number of times. The resulting array will have a length equal to the
      * original array length multiplied by the repetition count.</p>
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * long[] original = {1L, 2L, 3L};
      * long[] repeated = Array.repeat(original, 3);
@@ -1894,7 +1856,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * for the specified number of times. The resulting array will have a length equal to the
      * original array length multiplied by the repetition count.</p>
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * float[] original = {1.1f, 2.2f, 3.3f};
      * float[] repeated = Array.repeat(original, 3);
@@ -1961,7 +1923,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * for the specified number of times. The resulting array will have a length equal to the
      * original array length multiplied by the repetition count.</p>
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * double[] original = {1.1, 2.2, 3.3};
      * double[] repeated = Array.repeat(original, 3);
@@ -2028,7 +1990,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * for the specified number of times. The resulting array will have a length equal to the
      * original array length multiplied by the repetition count.</p>
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String[] original = {"a", "b", "c"};
      * String[] repeated = Array.repeat(original, 3);
@@ -2124,7 +2086,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * for the specified number of times. The resulting array will have a length equal to the
      * original array length multiplied by the repetition count.</p>
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Integer[] original = {1, 2, 3};
      * Integer[] repeated = Array.repeat(original, 3, Integer.class);
@@ -2201,7 +2163,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * <p>Each element in the returned array is a random integer that can be any value
      * in the full range of int values (from Integer.MIN_VALUE to Integer.MAX_VALUE).</p>
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * int[] randomInts = Array.random(5);
      * // Result: an array of 5 random integers, e.g., [-1234567, 987654321, -42, 2147483647, 0]
@@ -2230,7 +2192,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
      *
      * <p>Each element in the returned array is a random integer in the range [startInclusive, endExclusive).</p>
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * int[] randomInts = Array.random(1, 100, 5);
      * // Result: an array of 5 random integers between 1 (inclusive) and 100 (exclusive)
@@ -2285,7 +2247,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * <p>The operation creates a new array and does not modify the input arrays. Both input arrays can be null or empty,
      * which will be handled gracefully.
      *
-     * <p><b>Examples:</b>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Example 1: Basic concatenation of two 2D arrays
      * boolean[][] a = {{true, false}, {true}};
@@ -2346,7 +2308,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * <p>The operation creates a new array and does not modify the input arrays. Both input arrays can be null or empty,
      * which will be handled gracefully.
      *
-     * <p><b>Examples:</b>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Example 1: Basic concatenation of two 3D arrays
      * boolean[][][] a = {{{true, false}}, {{true}}};
@@ -2407,7 +2369,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * <p>The operation creates a new array and does not modify the input arrays. Both input arrays can be null or empty,
      * which will be handled gracefully.
      *
-     * <p><b>Examples:</b>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Example 1: Basic concatenation of two 2D arrays
      * char[][] a = {{'a', 'b'}, {'c'}};
@@ -2468,7 +2430,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * <p>The operation creates a new array and does not modify the input arrays. Both input arrays can be null or empty,
      * which will be handled gracefully.
      *
-     * <p><b>Examples:</b>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Example 1: Basic concatenation of two 3D arrays
      * char[][][] a = {{{'a', 'b'}}, {{'c'}}};
@@ -2529,7 +2491,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * <p>The operation creates a new array and does not modify the input arrays. Both input arrays can be null or empty,
      * which will be handled gracefully.
      *
-     * <p><b>Examples:</b>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Example 1: Basic concatenation of two 2D arrays
      * byte[][] a = {{1, 2}, {3}};
@@ -2590,7 +2552,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * <p>The operation creates a new array and does not modify the input arrays. Both input arrays can be null or empty,
      * which will be handled gracefully.
      *
-     * <p><b>Examples:</b>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Example 1: Basic concatenation of two 3D arrays
      * byte[][][] a = {{{1, 2}}, {{3}}};
@@ -2651,7 +2613,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * <p>The operation creates a new array and does not modify the input arrays. Both input arrays can be null or empty,
      * which will be handled gracefully.
      *
-     * <p><b>Examples:</b>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Example 1: Basic concatenation of two 2D arrays
      * short[][] a = {{1, 2}, {3}};
@@ -2712,7 +2674,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * <p>The operation creates a new array and does not modify the input arrays. Both input arrays can be null or empty,
      * which will be handled gracefully.
      *
-     * <p><b>Examples:</b>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Example 1: Basic concatenation of two 3D arrays
      * short[][][] a = {{{1, 2}}, {{3}}};
@@ -2773,7 +2735,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * <p>The operation creates a new array and does not modify the input arrays. Both input arrays can be null or empty,
      * which will be handled gracefully.
      *
-     * <p><b>Examples:</b>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Example 1: Basic concatenation of two 2D arrays
      * int[][] a = {{1, 2}, {3}};
@@ -2834,7 +2796,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * <p>The operation creates a new array and does not modify the input arrays. Both input arrays can be null or empty,
      * which will be handled gracefully.
      *
-     * <p><b>Examples:</b>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Example 1: Basic concatenation of two 3D arrays
      * int[][][] a = {{{1, 2}}, {{3}}};
@@ -2895,7 +2857,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * <p>The operation creates a new array and does not modify the input arrays. Both input arrays can be null or empty,
      * which will be handled gracefully.
      *
-     * <p><b>Examples:</b>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Example 1: Basic concatenation of two 2D arrays
      * long[][] a = {{1L, 2L}, {3L}};
@@ -2956,7 +2918,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * <p>The operation creates a new array and does not modify the input arrays. Both input arrays can be null or empty,
      * which will be handled gracefully.
      *
-     * <p><b>Examples:</b>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Example 1: Basic concatenation of two 3D arrays
      * long[][][] a = {{{1L, 2L}}, {{3L}}};
@@ -3017,7 +2979,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * <p>The operation creates a new array and does not modify the input arrays. Both input arrays can be null or empty,
      * which will be handled gracefully.
      *
-     * <p><b>Examples:</b>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Example 1: Basic concatenation of two 2D arrays
      * float[][] a = {{1.0f, 2.0f}, {3.0f}};
@@ -3078,7 +3040,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * <p>The operation creates a new array and does not modify the input arrays. Both input arrays can be null or empty,
      * which will be handled gracefully.
      *
-     * <p><b>Examples:</b>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Example 1: Basic concatenation of two 3D arrays
      * float[][][] a = {{{1.0f, 2.0f}}, {{3.0f}}};
@@ -3139,7 +3101,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * <p>The operation creates a new array and does not modify the input arrays. Both input arrays can be null or empty,
      * which will be handled gracefully.
      *
-     * <p><b>Examples:</b>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Example 1: Basic concatenation of two 2D arrays
      * double[][] a = {{1.0, 2.0}, {3.0}};
@@ -3200,7 +3162,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * <p>The operation creates a new array and does not modify the input arrays. Both input arrays can be null or empty,
      * which will be handled gracefully.
      *
-     * <p><b>Examples:</b>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Example 1: Basic concatenation of two 3D arrays
      * double[][][] a = {{{1.0, 2.0}}, {{3.0}}};
@@ -3261,7 +3223,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * <p>The operation creates a new array and does not modify the input arrays. Both input arrays can be null or empty,
      * which will be handled gracefully. The method preserves the component type of the input arrays in the result.
      *
-     * <p><b>Examples:</b>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Example 1: Basic concatenation of two 2D String arrays
      * String[][] a = {{"a", "b"}, {"c"}};
@@ -3324,7 +3286,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * <p>The operation creates a new array and does not modify the input arrays. Both input arrays can be null or empty,
      * which will be handled gracefully. The method preserves the component type of the input arrays in the result.
      *
-     * <p><b>Examples:</b>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Example 1: Basic concatenation of two 3D String arrays
      * String[][][] a = {{{"a", "b"}}, {{"c"}}};
@@ -5177,7 +5139,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * If the input is a matrix of size m x n, then the output will be another matrix of size n x m.
      * This method will return {@code null} if the input array is {@code null}.</p>
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * boolean[][] matrix = {
      *     {true, false, true},
@@ -5530,7 +5492,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * The original 2D array is unchanged; a new 2D array representing the transposed matrix is returned.
      * This method can be used to interchange the rows and columns of the 2D array.
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String[][] matrix = {
      *     {"A", "B", "C"},

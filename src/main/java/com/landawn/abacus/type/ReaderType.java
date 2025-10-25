@@ -78,7 +78,7 @@ public class ReaderType extends AbstractType<Reader> {
     /**
      * Returns the Class object representing the Reader type or its subclass.
      *
-     * <p>Usage example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ReaderType type = new ReaderType();
      * Class<Reader> clazz = type.clazz();
@@ -96,7 +96,7 @@ public class ReaderType extends AbstractType<Reader> {
      * Indicates whether this type represents a Reader.
      * For ReaderType, this always returns true.
      *
-     * <p>Usage example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ReaderType type = new ReaderType();
      * boolean isReader = type.isReader();
@@ -114,7 +114,7 @@ public class ReaderType extends AbstractType<Reader> {
      * Converts a Reader to its string representation by reading all content from the Reader.
      * The Reader is fully consumed and closed after this operation.
      *
-     * <p>Usage example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ReaderType type = new ReaderType();
      * Reader reader = new StringReader("Hello World");
@@ -139,7 +139,7 @@ public class ReaderType extends AbstractType<Reader> {
      * If the concrete Reader class has a constructor accepting String or Reader,
      * it will be used. Otherwise, a StringReader is returned.
      *
-     * <p>Usage example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ReaderType type = new ReaderType();
      * Reader reader = type.valueOf("Sample text");
@@ -175,7 +175,7 @@ public class ReaderType extends AbstractType<Reader> {
      * If the object is a Clob, its character stream is returned.
      * Otherwise, the object is converted to string and then to a Reader.
      *
-     * <p>Usage example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ReaderType type = new ReaderType();
      *
@@ -215,7 +215,7 @@ public class ReaderType extends AbstractType<Reader> {
     /**
      * Retrieves a character stream (Reader) from the specified column in the ResultSet.
      *
-     * <p>Usage example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ReaderType type = new ReaderType();
      * // Assuming rs is a ResultSet with a character stream in column 1
@@ -237,7 +237,7 @@ public class ReaderType extends AbstractType<Reader> {
     /**
      * Retrieves a character stream (Reader) from the specified column in the ResultSet.
      *
-     * <p>Usage example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ReaderType type = new ReaderType();
      * // Assuming rs is a ResultSet with a character stream in column "content"
@@ -260,7 +260,7 @@ public class ReaderType extends AbstractType<Reader> {
      * Sets a Reader parameter in a PreparedStatement.
      * The Reader will be used to provide character stream data to the database.
      *
-     * <p>Usage example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ReaderType type = new ReaderType();
      * PreparedStatement stmt = connection.prepareStatement("INSERT INTO docs (content) VALUES (?)");
@@ -283,7 +283,7 @@ public class ReaderType extends AbstractType<Reader> {
      * Sets a Reader parameter in a CallableStatement.
      * The Reader will be used to provide character stream data to the database.
      *
-     * <p>Usage example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ReaderType type = new ReaderType();
      * CallableStatement stmt = connection.prepareCall("{call update_content(?)}");
@@ -306,7 +306,7 @@ public class ReaderType extends AbstractType<Reader> {
      * Sets a Reader parameter in a PreparedStatement with a specified length.
      * The Reader will be used to provide character stream data to the database.
      *
-     * <p>Usage example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ReaderType type = new ReaderType();
      * PreparedStatement stmt = connection.prepareStatement("INSERT INTO docs (content) VALUES (?)");
@@ -331,7 +331,7 @@ public class ReaderType extends AbstractType<Reader> {
      * Sets a Reader parameter in a CallableStatement with a specified length.
      * The Reader will be used to provide character stream data to the database.
      *
-     * <p>Usage example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ReaderType type = new ReaderType();
      * CallableStatement stmt = connection.prepareCall("{call update_content(?)}");
@@ -358,7 +358,7 @@ public class ReaderType extends AbstractType<Reader> {
      * Otherwise, the Reader content is read as a string and appended.
      * The Reader is fully consumed after this operation.
      *
-     * <p>Usage example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ReaderType type = new ReaderType();
      * Reader reader = new StringReader("Hello World");
@@ -395,7 +395,7 @@ public class ReaderType extends AbstractType<Reader> {
      * The content is optionally quoted based on the serialization configuration.
      * The Reader is fully consumed after this operation.
      *
-     * <p>Usage example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ReaderType type = new ReaderType();
      * Reader reader = new StringReader("Sample text");

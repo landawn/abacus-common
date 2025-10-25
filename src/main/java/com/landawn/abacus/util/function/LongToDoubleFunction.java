@@ -40,7 +40,7 @@ public interface LongToDoubleFunction extends Throwables.LongToDoubleFunction<Ru
      * very large long values, there may be some loss of precision due to the
      * limitations of double representation.
      * 
-     * <p>Example usage:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * LongToDoubleFunction converter = LongToDoubleFunction.DEFAULT;
      * double result = converter.applyAsDouble(42L); // returns 42.0
@@ -61,8 +61,7 @@ public interface LongToDoubleFunction extends Throwables.LongToDoubleFunction<Ru
      * </ul>
      *
      * @param value the function argument as a long
-     * @return the function result as a double
-     * @throws RuntimeException if any error occurs during the function execution
+     * @return the function result as a double if any error occurs during the function execution
      */
     @Override
     double applyAsDouble(long value);

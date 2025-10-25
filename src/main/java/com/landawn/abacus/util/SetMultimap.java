@@ -29,9 +29,28 @@ import com.landawn.abacus.annotation.Beta;
 import com.landawn.abacus.annotation.Internal;
 
 /**
+ * A {@link Multimap} implementation that uses {@link Set} to store values for each key.
+ * This means that duplicate values are not allowed for each key, and each value
+ * appears at most once per key.
+ *
+ * <p>Key characteristics of SetMultimap:</p>
+ * <ul>
+ * <li>Does not allow duplicate values for each key</li>
+ * <li>No guaranteed order of values (depends on the Set implementation)</li>
+ * <li>Values for a key are stored in a {@link Set}</li>
+ * </ul>
+ *
+ * <p><b>Usage Examples:</b></p>
+ * <pre>{@code
+ * SetMultimap<String, Integer> multimap = N.newSetMultimap();
+ * multimap.put("a", 1);
+ * multimap.put("a", 2);
+ * multimap.put("a", 1); // duplicate ignored
+ * // Result: "a" -> [1, 2]
+ * }</pre>
  *
  * @param <K> the key type
- * @param <E>
+ * @param <E> the element type stored in the value collections
  * @see N#newSetMultimap()
  * @see N#newSetMultimap(Class, Class)
  * @see N#newSetMultimap(Supplier, Supplier)
@@ -103,11 +122,16 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
     /**
      * Creates a new instance of SetMultimap with one key-value pair.
      *
+     * <p>This is a convenient factory method for creating a SetMultimap with a single entry.
+     * The returned SetMultimap is mutable and backed by a HashMap and HashSet.
+     *
      * @param <K> the type of the key
      * @param <E> the type of the value
      * @param k1 the key of the key-value pair
      * @param v1 the value of the key-value pair
      * @return a new instance of SetMultimap with the specified key-value pair
+     * @see #of(Object, Object, Object, Object)
+     * @see #create(Map)
      */
     public static <K, E> SetMultimap<K, E> of(final K k1, final E v1) {
         final SetMultimap<K, E> map = new SetMultimap<>(1);
@@ -120,6 +144,11 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
     /**
      * Creates a new instance of SetMultimap with two key-value pairs.
      *
+     * <p>This is a convenient factory method for creating a SetMultimap with two entries.
+     * If both keys are the same, only unique values will be added to the set associated with that key.
+     * Duplicate values will be ignored due to Set semantics.
+     * The returned SetMultimap is mutable and backed by a HashMap and HashSet.
+     *
      * @param <K> the type of the keys
      * @param <E> the type of the values
      * @param k1 the first key of the key-value pairs
@@ -127,6 +156,8 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
      * @param k2 the second key of the key-value pairs
      * @param v2 the second value of the key-value pairs
      * @return a new instance of SetMultimap with the specified key-value pairs
+     * @see #of(Object, Object)
+     * @see #create(Map)
      */
     public static <K, E> SetMultimap<K, E> of(final K k1, final E v1, final K k2, final E v2) {
         final SetMultimap<K, E> map = new SetMultimap<>(2);
@@ -140,6 +171,11 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
     /**
      * Creates a new instance of SetMultimap with three key-value pairs.
      *
+     * <p>This is a convenient factory method for creating a SetMultimap with three entries.
+     * If multiple keys are the same, only unique values will be added to the set associated with that key.
+     * Duplicate values will be ignored due to Set semantics.
+     * The returned SetMultimap is mutable and backed by a HashMap and HashSet.
+     *
      * @param <K> the type of the keys
      * @param <E> the type of the values
      * @param k1 the first key of the key-value pairs
@@ -149,6 +185,8 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
      * @param k3 the third key of the key-value pairs
      * @param v3 the third value of the key-value pairs
      * @return a new instance of SetMultimap with the specified key-value pairs
+     * @see #of(Object, Object)
+     * @see #create(Map)
      */
     public static <K, E> SetMultimap<K, E> of(final K k1, final E v1, final K k2, final E v2, final K k3, final E v3) {
         final SetMultimap<K, E> map = new SetMultimap<>(3);
@@ -163,6 +201,11 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
     /**
      * Creates a new instance of SetMultimap with four key-value pairs.
      *
+     * <p>This is a convenient factory method for creating a SetMultimap with four entries.
+     * If multiple keys are the same, only unique values will be added to the set associated with that key.
+     * Duplicate values will be ignored due to Set semantics.
+     * The returned SetMultimap is mutable and backed by a HashMap and HashSet.
+     *
      * @param <K> the type of the keys
      * @param <E> the type of the values
      * @param k1 the first key of the key-value pairs
@@ -174,6 +217,8 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
      * @param k4 the fourth key of the key-value pairs
      * @param v4 the fourth value of the key-value pairs
      * @return a new instance of SetMultimap with the specified key-value pairs
+     * @see #of(Object, Object)
+     * @see #create(Map)
      */
     public static <K, E> SetMultimap<K, E> of(final K k1, final E v1, final K k2, final E v2, final K k3, final E v3, final K k4, final E v4) {
         final SetMultimap<K, E> map = new SetMultimap<>(4);
@@ -189,6 +234,11 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
     /**
      * Creates a new instance of SetMultimap with five key-value pairs.
      *
+     * <p>This is a convenient factory method for creating a SetMultimap with five entries.
+     * If multiple keys are the same, only unique values will be added to the set associated with that key.
+     * Duplicate values will be ignored due to Set semantics.
+     * The returned SetMultimap is mutable and backed by a HashMap and HashSet.
+     *
      * @param <K> the type of the keys
      * @param <E> the type of the values
      * @param k1 the first key of the key-value pairs
@@ -202,6 +252,8 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
      * @param k5 the fifth key of the key-value pairs
      * @param v5 the fifth value of the key-value pairs
      * @return a new instance of SetMultimap with the specified key-value pairs
+     * @see #of(Object, Object)
+     * @see #create(Map)
      */
     public static <K, E> SetMultimap<K, E> of(final K k1, final E v1, final K k2, final E v2, final K k3, final E v3, final K k4, final E v4, final K k5,
             final E v5) {
@@ -219,6 +271,11 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
     /**
      * Creates a new instance of SetMultimap with six key-value pairs.
      *
+     * <p>This is a convenient factory method for creating a SetMultimap with six entries.
+     * If multiple keys are the same, only unique values will be added to the set associated with that key.
+     * Duplicate values will be ignored due to Set semantics.
+     * The returned SetMultimap is mutable and backed by a HashMap and HashSet.
+     *
      * @param <K> the type of the keys
      * @param <E> the type of the values
      * @param k1 the first key of the key-value pairs
@@ -234,6 +291,8 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
      * @param k6 the sixth key of the key-value pairs
      * @param v6 the sixth value of the key-value pairs
      * @return a new instance of SetMultimap with the specified key-value pairs
+     * @see #of(Object, Object)
+     * @see #create(Map)
      */
     public static <K, E> SetMultimap<K, E> of(final K k1, final E v1, final K k2, final E v2, final K k3, final E v3, final K k4, final E v4, final K k5,
             final E v5, final K k6, final E v6) {
@@ -252,6 +311,11 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
     /**
      * Creates a new instance of SetMultimap with seven key-value pairs.
      *
+     * <p>This is a convenient factory method for creating a SetMultimap with seven entries.
+     * If multiple keys are the same, only unique values will be added to the set associated with that key.
+     * Duplicate values will be ignored due to Set semantics.
+     * The returned SetMultimap is mutable and backed by a HashMap and HashSet.
+     *
      * @param <K> the type of the keys
      * @param <E> the type of the values
      * @param k1 the first key of the key-value pairs
@@ -269,6 +333,8 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
      * @param k7 the seventh key of the key-value pairs
      * @param v7 the seventh value of the key-value pairs
      * @return a new instance of SetMultimap with the specified key-value pairs
+     * @see #of(Object, Object)
+     * @see #create(Map)
      */
     public static <K, E> SetMultimap<K, E> of(final K k1, final E v1, final K k2, final E v2, final K k3, final E v3, final K k4, final E v4, final K k5,
             final E v5, final K k6, final E v6, final K k7, final E v7) {
@@ -292,6 +358,7 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
      * <p>The returned SetMultimap uses the same map type as the input map for its backing storage,
      * and uses {@link HashSet} for value collections.
      *
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Map<String, Integer> map = Map.of("a", 1, "b", 2);
      * SetMultimap<String, Integer> multimap = SetMultimap.create(map);
@@ -300,7 +367,7 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
      *
      * @param <K> the type of the keys
      * @param <E> the type of the values
-     * @param map the map containing the key-value pairs to be added to the new SetMultimap, may be null or empty
+     * @param map The map containing the key-value pairs to be added to the new SetMultimap, may be null or empty
      * @return a new instance of SetMultimap with the key-value pairs from the specified map
      *
      */
@@ -321,6 +388,7 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
      *
      * <p>This method is useful for grouping objects by a specific property or attribute.
      *
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * List<String> words = List.of("apple", "ant", "banana", "bear");
      * SetMultimap<Character, String> grouped = SetMultimap.create(words, s -> s.charAt(0));
@@ -357,6 +425,7 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
      * <p>This method is useful for creating a multimap from a collection of objects by transforming them into
      * different key-value pairs.
      *
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * List<String> words = List.of("apple", "ant", "banana");
      * SetMultimap<Character, Integer> multimap =
@@ -371,11 +440,10 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
      * @param keyExtractor the function to extract keys from elements; must not be null
      * @param valueExtractor the function to extract values from elements; must not be null
      * @return a new instance of SetMultimap with extracted keys and values from the specified collection
-     * @throws IllegalArgumentException if either keyExtractor or valueExtractor is null
      *
      */
     public static <T, K, E> SetMultimap<K, E> create(final Collection<? extends T> c, final Function<? super T, ? extends K> keyExtractor,
-            final Function<? super T, ? extends E> valueExtractor) throws IllegalArgumentException {
+            final Function<? super T, ? extends E> valueExtractor) {
         final SetMultimap<K, E> multimap = N.newSetMultimap(N.size(c));
 
         if (N.notEmpty(c)) {
@@ -467,6 +535,7 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
      * <p>This method is useful when you want to treat an existing Map&lt;K, Set&lt;E&gt;&gt; as a SetMultimap
      * without creating a copy.
      *
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Map<String, Set<Integer>> map = new HashMap<>();
      * map.put("a", new HashSet<>(List.of(1, 2)));
@@ -477,7 +546,7 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
      * @param <K> the type of the keys in the map
      * @param <E> the type of the elements in the set
      * @param <V> the type of the set extending Set&lt;E&gt;
-     * @param map the map to be wrapped into a SetMultimap; must not be null and must not contain null values
+     * @param map The map to be wrapped into a SetMultimap; must not be null and must not contain null values
      * @return a SetMultimap instance backed by the provided map
      * @throws IllegalArgumentException if the provided map is null or contains null values
      *
@@ -499,6 +568,7 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
      *
      * <p>The provided value supplier will be used to create new sets when new keys are added to the multimap.
      *
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Map<String, TreeSet<Integer>> map = new HashMap<>();
      * SetMultimap<String, Integer> multimap =
@@ -510,8 +580,8 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
      * @param <K> the type of the keys in the map
      * @param <E> the type of the elements in the set
      * @param <V> the type of the set extending Set&lt;E&gt;
-     * @param map the map to be wrapped into a SetMultimap; must not be null
-     * @param valueSupplier the supplier that provides new set instances for new keys; must not be null
+     * @param map The map to be wrapped into a SetMultimap
+     * @param valueSupplier The supplier that provides the set to be used as the value collection
      * @return a SetMultimap instance backed by the provided map
      * @throws IllegalArgumentException if the provided map or valueSupplier is null
      *
@@ -532,6 +602,7 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
      * <p>This operation creates a new multimap and does not modify the original. The new multimap will
      * preserve the ordering characteristics of the original map.
      *
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * SetMultimap<String, Integer> original = SetMultimap.of("a", 1, "a", 2, "b", 1);
      * // original: {"a" -> [1, 2], "b" -> [1]}
@@ -571,6 +642,7 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
      *
      * <p>Modifications to the returned multimap will not affect the original and vice versa.
      *
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * SetMultimap<String, Integer> original = SetMultimap.of("a", 1, "b", 2);
      * SetMultimap<String, Integer> copy = original.copy();
@@ -597,6 +669,7 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
      * <p>The new SetMultimap shares the same set instances as the original for matching entries
      * (shallow copy of matching entries), and uses the same map and set suppliers.
      *
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * SetMultimap<String, Integer> map = SetMultimap.of("a", 1, "a", 2, "b", 3);
      * SetMultimap<String, Integer> filtered = map.filter((k, v) -> v.size() > 1);
@@ -628,6 +701,7 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
      * <p>The new SetMultimap shares the same set instances as the original for matching entries
      * (shallow copy of matching entries), and uses the same map and set suppliers.
      *
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * SetMultimap<String, Integer> map = SetMultimap.of("a", 1, "b", 2, "c", 3);
      * SetMultimap<String, Integer> filtered = map.filterByKey(k -> k.equals("a") || k.equals("b"));
@@ -659,6 +733,7 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
      * <p>The new SetMultimap shares the same set instances as the original for matching entries
      * (shallow copy of matching entries), and uses the same map and set suppliers.
      *
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * SetMultimap<String, Integer> map = SetMultimap.of("a", 1, "a", 2, "b", 3);
      * SetMultimap<String, Integer> filtered = map.filterByValue(v -> !v.isEmpty() && v.size() > 1);
@@ -692,6 +767,7 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
      *
      * <p>The returned map and its value sets are completely immutable and cannot be modified.
      *
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * SetMultimap<String, Integer> map = SetMultimap.of("a", 1, "a", 2, "b", 3);
      * ImmutableMap<String, ImmutableSet<Integer>> immutable = map.toImmutableMap();
@@ -721,6 +797,7 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
      *
      * <p>The returned map and its value sets are completely immutable and cannot be modified.
      *
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * SetMultimap<String, Integer> map = SetMultimap.of("b", 2, "a", 1);
      * ImmutableMap<String, ImmutableSet<Integer>> sorted =

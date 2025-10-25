@@ -597,8 +597,7 @@ public class ShortStream104Test extends TestBase {
     public void testRateLimitedWithPermitsPerSecond() throws InterruptedException {
         long startTime = System.currentTimeMillis();
 
-        createShortStream((short) 1, (short) 2, (short) 3).rateLimited(10.0)
-                .toArray();
+        createShortStream((short) 1, (short) 2, (short) 3).rateLimited(10.0).toArray();
 
         long elapsedTime = System.currentTimeMillis() - startTime;
         assertTrue(elapsedTime >= 200);

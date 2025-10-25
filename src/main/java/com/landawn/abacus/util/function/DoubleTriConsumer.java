@@ -49,8 +49,7 @@ public interface DoubleTriConsumer extends Throwables.DoubleTriConsumer<RuntimeE
      *
      * @param a the first double argument
      * @param b the second double argument
-     * @param c the third double argument
-     * @throws RuntimeException if the operation encounters an error during execution
+     * @param c the third double argument if the operation encounters an error during execution
      */
     @Override
     void accept(double a, double b, double c);
@@ -67,7 +66,7 @@ public interface DoubleTriConsumer extends Throwables.DoubleTriConsumer<RuntimeE
      *   <li>Then execute the {@code after} consumer's {@code accept} method with the same arguments</li>
      * </ol>
      * 
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * DoubleTriConsumer printValues = (a, b, c) -> System.out.printf("Values: %.2f, %.2f, %.2f%n", a, b, c);
      * DoubleTriConsumer sumValues = (a, b, c) -> System.out.println("Sum: " + (a + b + c));

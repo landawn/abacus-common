@@ -94,7 +94,7 @@ public class BiObjIntConsumer2025Test extends TestBase {
         BiObjIntConsumer<String, String> chainedConsumer = consumer1.andThen(consumer2);
 
         assertThrows(RuntimeException.class, () -> chainedConsumer.accept("test", "value", 5));
-        assertEquals(1, results.size());  // First consumer should have executed
+        assertEquals(1, results.size()); // First consumer should have executed
         assertEquals("test", results.get(0));
     }
 
@@ -126,8 +126,7 @@ public class BiObjIntConsumer2025Test extends TestBase {
     @Test
     public void testWithNullObjects() {
         List<String> results = new ArrayList<>();
-        BiObjIntConsumer<String, String> consumer = (t, u, i) ->
-            results.add(String.valueOf(t) + "," + String.valueOf(u) + "," + i);
+        BiObjIntConsumer<String, String> consumer = (t, u, i) -> results.add(String.valueOf(t) + "," + String.valueOf(u) + "," + i);
 
         consumer.accept(null, null, 42);
 
@@ -153,7 +152,8 @@ public class BiObjIntConsumer2025Test extends TestBase {
             sb.append("[").append(t).append(", ").append(u).append("] repeated ").append(i).append(" times: ");
             for (int j = 0; j < i; j++) {
                 sb.append(t).append(u);
-                if (j < i - 1) sb.append(", ");
+                if (j < i - 1)
+                    sb.append(", ");
             }
         };
 

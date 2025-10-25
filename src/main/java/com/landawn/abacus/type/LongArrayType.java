@@ -34,7 +34,7 @@ public final class LongArrayType extends ObjectArrayType<Long> {
      * The array is formatted as a comma-separated list of values enclosed in square brackets.
      * Null values in the array are represented as "null".
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * LongArrayType type = new LongArrayType();
      *
@@ -79,15 +79,15 @@ public final class LongArrayType extends ObjectArrayType<Long> {
      * - Values of "null" (case-sensitive, exactly 4 characters) are converted to null elements
      * - Other values are parsed as Long objects
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * LongArrayType type = new LongArrayType();
      *
      * Long[] result = type.valueOf("[1, 2, 3]");
-     * // Returns: Long[]{1L, 2L, 3L}
+     * // Returns: Long[] {1L, 2L, 3L}
      *
      * result = type.valueOf("[1, null, 3]");
-     * // Returns: Long[]{1L, null, 3L}
+     * // Returns: Long[] {1L, null, 3L}
      *
      * result = type.valueOf("[]");
      * // Returns: empty Long array
@@ -134,7 +134,7 @@ public final class LongArrayType extends ObjectArrayType<Long> {
      * The array is formatted as a comma-separated list of values enclosed in square brackets.
      * Null array is represented as "null", null elements are represented as "null".
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * LongArrayType type = new LongArrayType();
      * StringBuilder sb = new StringBuilder();
@@ -186,7 +186,7 @@ public final class LongArrayType extends ObjectArrayType<Long> {
      * This method is optimized for character-based writing and may be more efficient than appendTo
      * for certain output scenarios.
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * LongArrayType type = new LongArrayType();
      * CharacterWriter writer = new CharacterWriter();

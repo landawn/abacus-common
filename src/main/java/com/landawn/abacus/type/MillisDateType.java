@@ -35,7 +35,7 @@ public class MillisDateType extends DateType {
      * The value is read as a long representing milliseconds since epoch.
      * A value of 0 is treated as NULL and returns null.
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * MillisDateType type = new MillisDateType();
      * ResultSet rs = ...; // obtained from database query
@@ -66,7 +66,7 @@ public class MillisDateType extends DateType {
      * The value is read as a long representing milliseconds since epoch.
      * A value of 0 is treated as NULL and returns null.
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * MillisDateType type = new MillisDateType();
      * ResultSet rs = ...; // obtained from database query
@@ -97,7 +97,7 @@ public class MillisDateType extends DateType {
      * The Date is stored as a long value representing milliseconds since epoch.
      * If the Date is null, 0 is stored.
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * MillisDateType type = new MillisDateType();
      * PreparedStatement stmt = connection.prepareStatement(
@@ -126,7 +126,7 @@ public class MillisDateType extends DateType {
      * The Date is stored as a long value representing milliseconds since epoch.
      * If the Date is null, 0 is stored.
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * MillisDateType type = new MillisDateType();
      * CallableStatement stmt = connection.prepareCall("{call update_date(?, ?)}");

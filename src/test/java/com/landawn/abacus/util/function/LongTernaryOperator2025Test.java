@@ -65,8 +65,10 @@ public class LongTernaryOperator2025Test extends TestBase {
     @Test
     public void testApplyAsLong_median() {
         final LongTernaryOperator median = (a, b, c) -> {
-            if ((a >= b && a <= c) || (a <= b && a >= c)) return a;
-            if ((b >= a && b <= c) || (b <= a && b >= c)) return b;
+            if ((a >= b && a <= c) || (a <= b && a >= c))
+                return a;
+            if ((b >= a && b <= c) || (b <= a && b >= c))
+                return b;
             return c;
         };
         assertEquals(50L, median.applyAsLong(5L, 100L, 50L));

@@ -33,7 +33,7 @@ import com.landawn.abacus.util.N;
  *   <li>Temporary pooling of objects that don't need cleanup</li>
  * </ul>
  * 
- * <p>Usage examples:
+ * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * // Wrap with infinite lifetime
  * String data = "cached data";
@@ -99,7 +99,7 @@ public final class PoolableWrapper<T> extends AbstractPoolable implements Immuta
      * Creates a new PoolableWrapper with infinite lifetime and idle time.
      * This is a convenience factory method equivalent to calling the constructor.
      * 
-     * <p>Usage example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * List<String> data = Arrays.asList("a", "b", "c");
      * PoolableWrapper<List<String>> wrapped = PoolableWrapper.of(data);
@@ -117,7 +117,7 @@ public final class PoolableWrapper<T> extends AbstractPoolable implements Immuta
      * Creates a new PoolableWrapper with specified lifetime and idle time limits.
      * This is a convenience factory method for creating wrappers with expiration settings.
      * 
-     * <p>Usage example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Cache a computed result for 5 minutes, expire after 1 minute idle
      * ComplexResult result = computeExpensiveOperation();

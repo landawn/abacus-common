@@ -39,7 +39,7 @@ public final class PrimitiveShortListType extends AbstractPrimitiveListType<Shor
     /**
      * Returns the Class object representing the ShortList type.
      *
-     * <p>Usage example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * PrimitiveShortListType type = new PrimitiveShortListType();
      * Class<ShortList> clazz = type.clazz();
@@ -57,7 +57,7 @@ public final class PrimitiveShortListType extends AbstractPrimitiveListType<Shor
      * Returns the Type instance for the element type of this list, which is primitive short.
      * This method provides access to the Type representation of individual list elements.
      *
-     * <p>Usage example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * PrimitiveShortListType type = new PrimitiveShortListType();
      * Type<Short> elementType = type.getElementType();
@@ -74,7 +74,7 @@ public final class PrimitiveShortListType extends AbstractPrimitiveListType<Shor
     /**
      * Returns the parameter types associated with this list type.
      *
-     * <p>Usage example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * PrimitiveShortListType type = new PrimitiveShortListType();
      * Type<Short>[] paramTypes = type.getParameterTypes();
@@ -95,7 +95,7 @@ public final class PrimitiveShortListType extends AbstractPrimitiveListType<Shor
      * The list is converted to an array first, then formatted as comma-separated values
      * enclosed in square brackets.
      *
-     * <p>Usage example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * PrimitiveShortListType type = new PrimitiveShortListType();
      * ShortList list = ShortList.of((short) 1, (short) 2, (short) 3);
@@ -118,7 +118,7 @@ public final class PrimitiveShortListType extends AbstractPrimitiveListType<Shor
      * Parses a string representation of a short list and returns the corresponding ShortList.
      * The string should contain comma-separated short values enclosed in square brackets.
      *
-     * <p>Usage example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * PrimitiveShortListType type = new PrimitiveShortListType();
      * ShortList list = type.valueOf("[1, 2, 3]");
@@ -146,7 +146,7 @@ public final class PrimitiveShortListType extends AbstractPrimitiveListType<Shor
      * The list is formatted as comma-separated values enclosed in square brackets.
      * If the list is null, appends "null".
      *
-     * <p>Usage example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * PrimitiveShortListType type = new PrimitiveShortListType();
      * ShortList list = ShortList.of((short) 10, (short) 20, (short) 30);
@@ -178,7 +178,7 @@ public final class PrimitiveShortListType extends AbstractPrimitiveListType<Shor
      * The list is converted to an array and then written as comma-separated values
      * enclosed in square brackets.
      *
-     * <p>Usage example:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * PrimitiveShortListType type = new PrimitiveShortListType();
      * ShortList list = ShortList.of((short) 100, (short) 200, (short) 300);

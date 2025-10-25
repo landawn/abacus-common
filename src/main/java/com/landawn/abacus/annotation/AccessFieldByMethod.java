@@ -39,8 +39,8 @@ import java.lang.annotation.Target;
  *   <li>Compatibility with frameworks that require method-based access</li>
  * </ul>
  * 
- * <p><b>Example usage:</b></p>
- * <pre>
+ * <p><b>Usage Examples:</b></p>
+ * <pre>{@code
  * {@literal @}AccessFieldByMethod
  * public class User {
  *     private String name;
@@ -49,7 +49,7 @@ import java.lang.annotation.Target;
  *         return name != null ? name : "Anonymous";
  *     }
  * }
- * </pre>
+ * }</pre>
  * 
  * @since 2019
  * @see java.lang.reflect.Field

@@ -14,8 +14,7 @@ public class ObjBiIntPredicate2025Test extends TestBase {
 
     @Test
     public void testTest() {
-        ObjBiIntPredicate<String> predicate = (t, i, j) ->
-            i >= 0 && j <= t.length() && i < j;
+        ObjBiIntPredicate<String> predicate = (t, i, j) -> i >= 0 && j <= t.length() && i < j;
 
         assertTrue(predicate.test("Hello", 0, 5));
         assertFalse(predicate.test("Hello", -1, 5));
@@ -25,8 +24,7 @@ public class ObjBiIntPredicate2025Test extends TestBase {
 
     @Test
     public void testTestWithLambda() {
-        ObjBiIntPredicate<String> predicate = (t, i, j) ->
-            t.length() > i && t.length() >= j;
+        ObjBiIntPredicate<String> predicate = (t, i, j) -> t.length() > i && t.length() >= j;
 
         assertTrue(predicate.test("Hello World", 5, 10));
         assertFalse(predicate.test("Hi", 5, 10));
@@ -69,7 +67,7 @@ public class ObjBiIntPredicate2025Test extends TestBase {
 
     @Test
     public void testAndShortCircuit() {
-        final boolean[] secondCalled = {false};
+        final boolean[] secondCalled = { false };
         ObjBiIntPredicate<String> predicate1 = (t, i, j) -> false;
         ObjBiIntPredicate<String> predicate2 = (t, i, j) -> {
             secondCalled[0] = true;
@@ -95,7 +93,7 @@ public class ObjBiIntPredicate2025Test extends TestBase {
 
     @Test
     public void testOrShortCircuit() {
-        final boolean[] secondCalled = {false};
+        final boolean[] secondCalled = { false };
         ObjBiIntPredicate<String> predicate1 = (t, i, j) -> true;
         ObjBiIntPredicate<String> predicate2 = (t, i, j) -> {
             secondCalled[0] = true;

@@ -49,8 +49,8 @@ import java.lang.annotation.RetentionPolicy;
  *   <li>STYLE - Code style issues</li>
  * </ul>
  * 
- * <p><b>Example usage:</b></p>
- * <pre>
+ * <p><b>Usage Examples:</b></p>
+ * <pre>{@code
  * // Suppress a specific bug pattern
  * {@literal @}SuppressFBWarnings(value = "NP_NULL_ON_SOME_PATH", 
  *                         justification = "Null check performed by validation framework")
@@ -71,7 +71,7 @@ import java.lang.annotation.RetentionPolicy;
  * public class LegacyAuthenticator {
  *     // Class implementation
  * }
- * </pre>
+ * }</pre>
  * 
  * @since 2020
  * @see <a href="https://spotbugs.readthedocs.io/en/stable/">SpotBugs Documentation</a>
@@ -91,7 +91,7 @@ public @interface SuppressFBWarnings {
      *   <li><b>Bug kinds:</b> "SECURITY", "STYLE", "MT_CORRECTNESS", etc.</li>
      * </ul>
      * 
-     * <p><b>Examples:</b></p>
+     * <p><b>Usage Examples:</b></p>
      * <ul>
      *   <li>{"NP_NULL_ON_SOME_PATH"} - Suppress specific null pointer warnings</li>
      *   <li>{"SECURITY"} - Suppress all security-related warnings</li>
@@ -114,7 +114,7 @@ public @interface SuppressFBWarnings {
      *   <li>Note if the issue is addressed elsewhere in the codebase</li>
      * </ul>
      * 
-     * <p><b>Example justifications:</b></p>
+     * <p><b>Usage Examples:</b></p>
      * <ul>
      *   <li>"Null check performed by validation framework"</li>
      *   <li>"Intentional exposure for API compatibility"</li>

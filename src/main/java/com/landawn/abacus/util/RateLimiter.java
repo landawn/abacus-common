@@ -45,7 +45,10 @@ import com.landawn.abacus.util.SmoothRateLimiter.SmoothWarmingUp;
  * the permits issued each second steadily increase until it hits the stable rate.
  *
  * <p>As an example, imagine that we have a list of tasks to execute, but we don't want to submit
- * more than 2 per second: <pre>   {@code
+ * more than 2 per second: 
+ * 
+ * <p><b>Usage Examples:</b></p>
+ * <pre>{@code
  *  final RateLimiter rateLimiter = RateLimiter.create(2.0); // rate is "2 permits per second"
  *  void submitTasks(List<Runnable> tasks, Executor executor) {
  *    for (Runnable task : tasks) {
@@ -61,7 +64,8 @@ import com.landawn.abacus.util.SmoothRateLimiter.SmoothWarmingUp;
  *  void submitPacket(byte[] packet) {
  *    rateLimiter.acquire(packet.length);
  *    networkService.send(packet);
- *  }}</pre>
+ *  }
+ * }</pre>
  *
  * <p>It is important to note that the number of permits requested <i>never</i> affects the
  * throttling of the request itself (an invocation to {@code acquire(1)} and an invocation to
@@ -92,7 +96,7 @@ public abstract class RateLimiter {
      * {@code permitsPerSecond} permits will be allowed, with subsequent requests being smoothly
      * limited at the stable rate of {@code permitsPerSecond}.
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * RateLimiter limiter = RateLimiter.create(5.0); // 5 permits per second
      * limiter.acquire(); // Acquires one permit, may wait if necessary
@@ -124,10 +128,11 @@ public abstract class RateLimiter {
     }
 
     /**
+     * Creates a {@code RateLimiter} with the specified stable throughput and custom stopwatch.
      *
-     * @param permitsPerSecond
-     * @param stopwatch
-     * @return
+     * @param permitsPerSecond the rate of permits per second
+     * @param stopwatch the stopwatch to use for timing
+     * @return a newly created {@code RateLimiter} with the specified rate
      */
     static RateLimiter create(final double permitsPerSecond, final SleepingStopwatch stopwatch) {
         final RateLimiter rateLimiter = new SmoothBursty(stopwatch, 1.0 /* maxBurstSeconds */);
@@ -151,7 +156,7 @@ public abstract class RateLimiter {
      * <p>The returned {@code RateLimiter} starts in a "cold" state (i.e., the warmup period will
      * follow), and if it is left unused for long enough, it will return to that state.
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Create a rate limiter with 10 permits/sec and 3 second warmup
      * RateLimiter limiter = RateLimiter.create(10.0, 3, TimeUnit.SECONDS);
@@ -173,13 +178,14 @@ public abstract class RateLimiter {
     }
 
     /**
+     * Creates a {@code RateLimiter} with warmup period, cold factor, and custom stopwatch.
      *
-     * @param permitsPerSecond
-     * @param warmupPeriod
-     * @param unit
-     * @param coldFactor
-     * @param stopwatch
-     * @return
+     * @param permitsPerSecond the rate of permits per second
+     * @param warmupPeriod the duration of the warmup period
+     * @param unit the time unit for the warmup period
+     * @param coldFactor the cold factor for warmup behavior
+     * @param stopwatch the stopwatch to use for timing
+     * @return a newly created {@code RateLimiter} with the specified rate and warmup behavior
      */
     static RateLimiter create(final double permitsPerSecond, final long warmupPeriod, final TimeUnit unit, final double coldFactor,
             final SleepingStopwatch stopwatch) {
@@ -232,7 +238,7 @@ public abstract class RateLimiter {
      * {@code RateLimiter} was configured with a warmup period of 20 seconds, it still has a warmup
      * period of 20 seconds after this method invocation.
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * RateLimiter limiter = RateLimiter.create(5.0);
      * limiter.setRate(10.0); // Increase rate to 10 permits/second
@@ -240,6 +246,8 @@ public abstract class RateLimiter {
      *
      * @param permitsPerSecond the new stable rate of this {@code RateLimiter}, must be positive and not NaN
      * @throws IllegalArgumentException if {@code permitsPerSecond} is negative, zero, or NaN
+     * @see #getRate()
+     * @see #create(double)
      */
     public final void setRate(final double permitsPerSecond) throws IllegalArgumentException {
         //noinspection ConstantValue
@@ -250,10 +258,10 @@ public abstract class RateLimiter {
     }
 
     /**
-     * Do set rate.
+     * Internal method to set the rate. Subclasses implement this to update internal state.
      *
-     * @param permitsPerSecond
-     * @param nowMicros
+     * @param permitsPerSecond the rate of permits per second
+     * @param nowMicros the current time in microseconds
      */
     abstract void doSetRate(double permitsPerSecond, long nowMicros);
 
@@ -265,13 +273,14 @@ public abstract class RateLimiter {
      *
      * <p>This method is thread-safe and can be called concurrently with other rate limiter operations.
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * RateLimiter limiter = RateLimiter.create(5.0);
      * double currentRate = limiter.getRate(); // Returns 5.0
      * }</pre>
      *
      * @return the current stable rate in permits per second
+     * @see #setRate(double)
      */
     public final double getRate() {
         synchronized (mutex()) {
@@ -280,9 +289,9 @@ public abstract class RateLimiter {
     }
 
     /**
-     * Do get rate.
+     * Internal method to get the rate. Subclasses implement this to return the current rate.
      *
-     * @return
+     * @return the current stable rate in permits per second
      */
     abstract double doGetRate();
 
@@ -296,7 +305,7 @@ public abstract class RateLimiter {
      * <p>If the rate limiter has unused permits available, this method will return immediately
      * with a return value of 0.0. Otherwise, it will sleep until a permit becomes available.
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * RateLimiter limiter = RateLimiter.create(2.0); // 2 permits per second
      * double waitTime = limiter.acquire(); // Acquires 1 permit
@@ -304,6 +313,8 @@ public abstract class RateLimiter {
      * }</pre>
      *
      * @return time spent sleeping to enforce rate, in seconds; 0.0 if not rate-limited
+     * @see #acquire(int)
+     * @see #tryAcquire()
      */
     public double acquire() {
         return acquire(1);
@@ -318,7 +329,7 @@ public abstract class RateLimiter {
      * not the current one. If this method is called on an idle rate limiter, it will return immediately
      * (even for a large number of permits), but subsequent requests will be throttled to compensate.
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * RateLimiter limiter = RateLimiter.create(5.0); // 5 permits per second
      * double waitTime = limiter.acquire(3); // Acquires 3 permits
@@ -328,6 +339,8 @@ public abstract class RateLimiter {
      * @param permits the number of permits to acquire, must be positive
      * @return time spent sleeping to enforce rate, in seconds; 0.0 if not rate-limited
      * @throws IllegalArgumentException if the requested number of permits is negative or zero
+     * @see #acquire()
+     * @see #tryAcquire(int)
      */
     public double acquire(final int permits) {
         final long microsToWait = reserve(permits);
@@ -339,7 +352,7 @@ public abstract class RateLimiter {
      * Reserves the given number of permits from this {@code RateLimiter} for future use, returning
      * the number of microseconds until the reservation can be consumed.
      *
-     * @param permits
+     * @param permits the number of permits to acquire
      * @return time in microseconds to wait until the resource can be acquired, never negative
      */
     final long reserve(final int permits) {
@@ -356,7 +369,7 @@ public abstract class RateLimiter {
      *
      * <p>This method is equivalent to {@code tryAcquire(1, timeout, unit)}.
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * RateLimiter limiter = RateLimiter.create(2.0);
      * if (limiter.tryAcquire(100, TimeUnit.MILLISECONDS)) {
@@ -381,7 +394,7 @@ public abstract class RateLimiter {
      *
      * <p>This method is equivalent to {@code tryAcquire(permits, 0, anyUnit)}.
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * RateLimiter limiter = RateLimiter.create(5.0);
      * if (limiter.tryAcquire(3)) {
@@ -408,7 +421,7 @@ public abstract class RateLimiter {
      * <p>This is useful for operations that should only proceed if resources are immediately available,
      * without waiting or queueing.
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * RateLimiter limiter = RateLimiter.create(10.0);
      * if (limiter.tryAcquire()) {
@@ -420,6 +433,8 @@ public abstract class RateLimiter {
      * }</pre>
      *
      * @return {@code true} if the permit was acquired, {@code false} otherwise
+     * @see #tryAcquire(int)
+     * @see #acquire()
      */
     public boolean tryAcquire() {
         return tryAcquire(1, 0, MICROSECONDS);
@@ -434,7 +449,7 @@ public abstract class RateLimiter {
      * available. If permits are available within the timeout, they are acquired and the method returns
      * {@code true}. Otherwise, it returns {@code false} without acquiring any permits.
      *
-     * <p>Example usage:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * RateLimiter limiter = RateLimiter.create(2.0);
      * if (limiter.tryAcquire(5, 2, TimeUnit.SECONDS)) {
@@ -469,10 +484,11 @@ public abstract class RateLimiter {
     }
 
     /**
+     * Checks if permits can be acquired within the given timeout.
      *
-     * @param nowMicros
-     * @param timeoutMicros
-     * @return
+     * @param nowMicros the current time in microseconds
+     * @param timeoutMicros the maximum time to wait in microseconds
+     * @return {@code true} if permits can be acquired within the timeout, {@code false} otherwise
      */
     private boolean canAcquire(final long nowMicros, final long timeoutMicros) {
         return queryEarliestAvailable(nowMicros) - timeoutMicros <= nowMicros;
@@ -481,9 +497,9 @@ public abstract class RateLimiter {
     /**
      * Reserves the next ticket and returns the wait time that the caller must wait for.
      *
-     * @param permits
-     * @param nowMicros
-     * @return
+     * @param permits the number of permits to acquire
+     * @param nowMicros the current time in microseconds
+     * @return the time in microseconds that the caller must wait
      */
     final long reserveAndGetWaitLength(final int permits, final long nowMicros) {
         final long momentAvailable = reserveEarliestAvailable(permits, nowMicros);
@@ -493,9 +509,8 @@ public abstract class RateLimiter {
     /**
      * Returns the earliest time that permits are available (with one caveat).
      *
-     * @param nowMicros
-     * @return
-     *     arbitrary past or present time
+     * @param nowMicros the current time in microseconds
+     * @return the earliest time when permits are available, which may be an arbitrary past or present time
      */
     abstract long queryEarliestAvailable(long nowMicros);
 
@@ -503,10 +518,9 @@ public abstract class RateLimiter {
      * Reserves the requested number of permits and returns the time that those permits can be used
      * (with one caveat).
      *
-     * @param permits
-     * @param nowMicros
-     * @return
-     *     arbitrary past or present time
+     * @param permits the number of permits to acquire
+     * @param nowMicros the current time in microseconds
+     * @return the time when the reserved permits can be used, which may be an arbitrary past or present time
      */
     abstract long reserveEarliestAvailable(int permits, long nowMicros);
 
@@ -539,9 +553,9 @@ public abstract class RateLimiter {
         protected abstract long readMicros();
 
         /**
-         * Sleep micros uninterruptibly.
+         * Sleeps for the specified duration in microseconds without being interrupted.
          *
-         * @param micros
+         * @param micros the duration to sleep in microseconds
          */
         protected abstract void sleepMicrosUninterruptibly(long micros);
 
@@ -575,8 +589,9 @@ public abstract class RateLimiter {
     }
 
     /**
+     * Validates that the requested number of permits is positive.
      *
-     * @param permits
+     * @param permits the number of permits to acquire
      */
     private static void checkPermits(final int permits) {
         N.checkArgument(permits > 0, "Requested permits (%s) must be positive", permits);

@@ -29,7 +29,7 @@ import com.landawn.abacus.util.u.Optional;
  * <p>Triple is commonly used to return multiple values from a method or to group
  * three related values together without creating a dedicated class.</p>
  * 
- * <p>Example usage:</p>
+ * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * Triple<String, Integer, Boolean> triple = Triple.of("Hello", 42, true);
  * String left = triple.left();     // "Hello"
@@ -81,7 +81,7 @@ public final class Triple<L, M, R> implements Mutable {
      * Creates a new Triple instance with the specified left, middle, and right values.
      * This is the preferred way to create a Triple instance.
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Triple<String, Integer, Boolean> triple = Triple.of("text", 100, false);
      * }</pre>
@@ -105,7 +105,7 @@ public final class Triple<L, M, R> implements Mutable {
      * return an empty array of Triple instances without creating a new array each time.
      * The returned array is immutable and shared across all calls.
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Triple<String, Integer, Boolean>[] emptyTriples = Triple.emptyArray();
      * // emptyTriples.length == 0
@@ -168,7 +168,7 @@ public final class Triple<L, M, R> implements Mutable {
      * Sets the left element of this Triple to the specified value.
      * This method allows modification of the left element after the Triple has been created.
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Triple<String, Integer, Boolean> triple = Triple.of("old", 42, true);
      * triple.setLeft("new");
@@ -198,7 +198,7 @@ public final class Triple<L, M, R> implements Mutable {
      * Sets the middle element of this Triple to the specified value.
      * This method allows modification of the middle element after the Triple has been created.
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Triple<String, Integer, Boolean> triple = Triple.of("text", 42, true);
      * triple.setMiddle(100);
@@ -228,7 +228,7 @@ public final class Triple<L, M, R> implements Mutable {
      * Sets the right element of this Triple to the specified value.
      * This method allows modification of the right element after the Triple has been created.
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Triple<String, Integer, Boolean> triple = Triple.of("text", 42, true);
      * triple.setRight(false);
@@ -245,7 +245,7 @@ public final class Triple<L, M, R> implements Mutable {
      * Sets all three elements of this Triple to the specified values in a single operation.
      * This is more efficient than calling setLeft, setMiddle, and setRight separately.
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Triple<String, Integer, Boolean> triple = Triple.of("old", 1, true);
      * triple.set("new", 2, false);
@@ -267,7 +267,7 @@ public final class Triple<L, M, R> implements Mutable {
      * This method is useful when you need to retrieve the old value while setting a new one
      * in an atomic-like operation.
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Triple<String, Integer, Boolean> triple = Triple.of("old", 42, true);
      * String oldValue = triple.getAndSetLeft("new");
@@ -288,7 +288,7 @@ public final class Triple<L, M, R> implements Mutable {
      * This method is useful when you want to set a value and immediately use it
      * in a fluent style or chain of operations.
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Triple<String, Integer, Boolean> triple = Triple.of("old", 42, true);
      * String newValue = triple.setAndGetLeft("new");
@@ -308,7 +308,7 @@ public final class Triple<L, M, R> implements Mutable {
      * This method is useful when you need to retrieve the old value while setting a new one
      * in an atomic-like operation.
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Triple<String, Integer, Boolean> triple = Triple.of("text", 42, true);
      * Integer oldValue = triple.getAndSetMiddle(100);
@@ -329,7 +329,7 @@ public final class Triple<L, M, R> implements Mutable {
      * This method is useful when you want to set a value and immediately use it
      * in a fluent style or chain of operations.
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Triple<String, Integer, Boolean> triple = Triple.of("text", 42, true);
      * Integer newValue = triple.setAndGetMiddle(100);
@@ -349,7 +349,7 @@ public final class Triple<L, M, R> implements Mutable {
      * This method is useful when you need to retrieve the old value while setting a new one
      * in an atomic-like operation.
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Triple<String, Integer, Boolean> triple = Triple.of("text", 42, true);
      * Boolean oldValue = triple.getAndSetRight(false);
@@ -370,7 +370,7 @@ public final class Triple<L, M, R> implements Mutable {
      * This method is useful when you want to set a value and immediately use it
      * in a fluent style or chain of operations.
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Triple<String, Integer, Boolean> triple = Triple.of("text", 42, true);
      * Boolean newValue = triple.setAndGetRight(false);
@@ -389,7 +389,7 @@ public final class Triple<L, M, R> implements Mutable {
      * Conditionally sets the left element to the specified new value if the provided predicate returns true.
      * The predicate receives both the current Triple instance and the proposed new left value.
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Triple<String, Integer, Boolean> triple = Triple.of("old", 42, true);
      * boolean wasSet = triple.setLeftIf("new", (t, newVal) -> t.left().length() < newVal.length());
@@ -416,7 +416,7 @@ public final class Triple<L, M, R> implements Mutable {
      * Conditionally sets the middle element to the specified new value if the provided predicate returns true.
      * The predicate receives both the current Triple instance and the proposed new middle value.
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Triple<String, Integer, Boolean> triple = Triple.of("text", 42, true);
      * boolean wasSet = triple.setMiddleIf(100, (t, newVal) -> newVal > t.middle());
@@ -444,7 +444,7 @@ public final class Triple<L, M, R> implements Mutable {
      * Conditionally sets the right element to the specified new value if the provided predicate returns true.
      * The predicate receives both the current Triple instance and the proposed new right value.
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Triple<String, Integer, Boolean> triple = Triple.of("text", 42, true);
      * boolean wasSet = triple.setRightIf(false, (t, newVal) -> t.right() != newVal);
@@ -472,7 +472,7 @@ public final class Triple<L, M, R> implements Mutable {
      * The predicate receives the current Triple instance and all three proposed new values.
      * If the predicate returns true, all three elements are updated; otherwise, no changes are made.
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Triple<String, Integer, Boolean> triple = Triple.of("old", 42, true);
      * boolean wasSet = triple.setIf("new", 100, false, 
@@ -506,7 +506,7 @@ public final class Triple<L, M, R> implements Mutable {
      * while keeping the middle element in the same position.
      * The original Triple remains unchanged.
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Triple<String, Integer, Boolean> original = Triple.of("left", 42, true);
      * Triple<Boolean, Integer, String> reversed = original.reverse();
@@ -527,7 +527,7 @@ public final class Triple<L, M, R> implements Mutable {
      * The new Triple contains the same element references as the original
      * (the elements themselves are not cloned).
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Triple<String, Integer, Boolean> original = Triple.of("text", 42, true);
      * Triple<String, Integer, Boolean> copy = original.copy();
@@ -547,7 +547,7 @@ public final class Triple<L, M, R> implements Mutable {
      * Converts this Triple into an array containing the three elements in order: left, middle, right.
      * The returned array is of type Object[] and has a length of 3.
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Triple<String, Integer, Boolean> triple = Triple.of("text", 42, true);
      * Object[] array = triple.toArray();
@@ -566,7 +566,7 @@ public final class Triple<L, M, R> implements Mutable {
      * the elements are stored in it; otherwise, a new array of the same type with length 3
      * is created and returned.
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Triple<String, String, String> triple = Triple.of("one", "two", "three");
      * String[] array = triple.toArray(new String[3]);
@@ -597,7 +597,7 @@ public final class Triple<L, M, R> implements Mutable {
      * left, middle, then right. This method is useful for performing the same operation
      * on all three elements.
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Triple<String, String, String> triple = Triple.of("one", "two", "three");
      * triple.forEach(System.out::println);
@@ -624,7 +624,7 @@ public final class Triple<L, M, R> implements Mutable {
      * Applies the given tri-consumer action to the three elements of this Triple.
      * The action receives the left, middle, and right elements as separate parameters.
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Triple<String, Integer, Boolean> triple = Triple.of("text", 42, true);
      * triple.accept((l, m, r) -> {
@@ -646,7 +646,7 @@ public final class Triple<L, M, R> implements Mutable {
      * Applies the given consumer action to this Triple instance as a whole.
      * The action receives the entire Triple object rather than individual elements.
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Triple<String, Integer, Boolean> triple = Triple.of("text", 42, true);
      * triple.accept(t -> {
@@ -667,7 +667,7 @@ public final class Triple<L, M, R> implements Mutable {
      * Applies the given tri-function to the three elements of this Triple and returns the result.
      * The function receives the left, middle, and right elements as separate parameters.
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Triple<String, Integer, Boolean> triple = Triple.of("Hello", 5, true);
      * String result = triple.map((l, m, r) -> l + " has " + m + " letters: " + r);
@@ -688,7 +688,7 @@ public final class Triple<L, M, R> implements Mutable {
      * Applies the given function to this Triple instance as a whole and returns the result.
      * The function receives the entire Triple object rather than individual elements.
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Triple<String, Integer, Boolean> triple = Triple.of("text", 42, true);
      * String result = triple.map(t -> 
@@ -712,7 +712,7 @@ public final class Triple<L, M, R> implements Mutable {
      * when applied to the three elements, otherwise returns an empty Optional.
      * The predicate receives the left, middle, and right elements as separate parameters.
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Triple<String, Integer, Boolean> triple = Triple.of("text", 42, true);
      * Optional<Triple<String, Integer, Boolean>> filtered = 
@@ -735,7 +735,7 @@ public final class Triple<L, M, R> implements Mutable {
      * when applied to this Triple instance, otherwise returns an empty Optional.
      * The predicate receives the entire Triple object rather than individual elements.
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Triple<String, Integer, Boolean> triple = Triple.of("text", 42, true);
      * Optional<Triple<String, Integer, Boolean>> filtered = 
@@ -758,7 +758,7 @@ public final class Triple<L, M, R> implements Mutable {
      * Tuple3 is another three-element container type that may have different
      * characteristics or API compared to Triple.
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Triple<String, Integer, Boolean> triple = Triple.of("text", 42, true);
      * Tuple3<String, Integer, Boolean> tuple = triple.toTuple();
@@ -795,7 +795,7 @@ public final class Triple<L, M, R> implements Mutable {
      * Element equality is determined using the N.equals utility method,
      * which handles null values correctly.
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Triple<String, Integer, Boolean> t1 = Triple.of("text", 42, true);
      * Triple<String, Integer, Boolean> t2 = Triple.of("text", 42, true);
@@ -829,7 +829,7 @@ public final class Triple<L, M, R> implements Mutable {
      * the N.toString utility method, which handles null values by converting them
      * to the string "null".
      * 
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Triple<String, Integer, Boolean> triple = Triple.of("text", 42, true);
      * System.out.println(triple);  // prints: (text, 42, true)

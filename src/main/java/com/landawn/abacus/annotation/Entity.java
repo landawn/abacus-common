@@ -41,8 +41,8 @@ import java.lang.annotation.Target;
  *   <li>Be serializable if they need to be passed across network boundaries</li>
  * </ul>
  * 
- * <p><b>Example usage:</b></p>
- * <pre>
+ * <p><b>Usage Examples:</b></p>
+ * <pre>{@code
  * {@literal @}Entity(name = "users")
  * public class User {
  *     {@literal @}Id
@@ -56,7 +56,7 @@ import java.lang.annotation.Target;
  *     
  *     // Constructors, getters, setters, etc.
  * }
- * </pre>
+ * }</pre>
  * 
  * <p><strong>Note:</strong> This annotation is marked as {@link Beta}, indicating it may
  * undergo changes in future versions.</p>
@@ -92,14 +92,14 @@ public @interface Entity {
      *   <li>Cache keys and other framework internals</li>
      * </ul>
      * 
-     * <p><b>Example:</b></p>
-     * <pre>
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
      * {@literal @}Entity(name = "app_users")  // Maps to 'app_users' table
      * public class User { }
      * 
      * {@literal @}Entity  // Maps to 'Customer' table (class name)
      * public class Customer { }
-     * </pre>
+     * }</pre>
      * 
      * @return the entity name, or empty string to use the simple class name as default
      */

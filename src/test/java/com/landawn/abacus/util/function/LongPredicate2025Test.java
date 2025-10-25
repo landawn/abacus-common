@@ -236,9 +236,7 @@ public class LongPredicate2025Test extends TestBase {
 
     @Test
     public void testComplexChaining() {
-        final LongPredicate predicate = LongPredicate.IS_POSITIVE
-            .and(val -> val < 100)
-            .or(LongPredicate.IS_ZERO);
+        final LongPredicate predicate = LongPredicate.IS_POSITIVE.and(val -> val < 100).or(LongPredicate.IS_ZERO);
 
         assertTrue(predicate.test(50L)); // positive and < 100
         assertTrue(predicate.test(0L)); // is zero

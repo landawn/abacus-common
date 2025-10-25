@@ -33,7 +33,7 @@ import com.landawn.abacus.util.cs;
  * <p>The response body is stored as a byte array and can be deserialized to various types
  * using the {@code body(Class)} or {@code body(Type)} methods.</p>
  * 
- * <p>Example usage:</p>
+ * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * HttpResponse response = httpClient.get(HttpResponse.class);
  * 
@@ -90,7 +90,7 @@ public class HttpResponse {
      * Returns {@code true} if the code is in [200..300), which means the request was successfully received,
      * understood, and accepted.
      *
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * HttpResponse response = client.get(HttpResponse.class);
      * if (response.isSuccessful()) {
@@ -144,7 +144,7 @@ public class HttpResponse {
      *   <li>500 - Internal Server Error</li>
      * </ul>
      *
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * int status = response.statusCode();
      * if (status == 404) {
@@ -172,7 +172,7 @@ public class HttpResponse {
      * Gets all response headers as a map.
      * Each header name maps to a list of values, as headers can have multiple values.
      *
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Map<String, List<String>> headers = response.headers();
      * List<String> contentType = headers.get("Content-Type");
@@ -188,7 +188,7 @@ public class HttpResponse {
      * Gets the raw response body as a byte array.
      * This method returns the original bytes received from the server.
      *
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * byte[] rawData = response.body();
      * // Process raw bytes
@@ -210,7 +210,7 @@ public class HttpResponse {
      *   <li>Any other class - Deserializes based on content type (JSON, XML, etc.)</li>
      * </ul>
      *
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Get as string
      * String text = response.body(String.class);
@@ -230,7 +230,7 @@ public class HttpResponse {
     public <T> T body(final Class<T> resultClass) throws IllegalArgumentException {
         N.checkArgNotNull(resultClass, cs.resultClass);
 
-        if (resultClass == null || resultClass.equals(String.class)) {
+        if (resultClass.equals(String.class)) {
             return (T) new String(body, respCharset);
         } else if (byte[].class.equals(resultClass)) {
             return (T) body;
@@ -249,7 +249,7 @@ public class HttpResponse {
      * Deserializes the response body to the specified parameterized type.
      * This method is useful for deserializing to generic types like List&lt;User&gt; or Map&lt;String, Object&gt;.
      *
-     * <p>Example:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Deserialize to a list of users
      * Type<List<User>> listType = new TypeReference<List<User>>() {};
@@ -268,7 +268,7 @@ public class HttpResponse {
     public <T> T body(final Type<T> resultType) throws IllegalArgumentException {
         N.checkArgNotNull(resultType, cs.resultType);
 
-        if (resultType == null || resultType.clazz().equals(String.class)) {
+        if (resultType.clazz().equals(String.class)) {
             return (T) new String(body, respCharset);
         } else if (resultType.clazz().equals(byte[].class)) {
             return (T) body;
@@ -332,6 +332,7 @@ public class HttpResponse {
      * Returns a string representation of this HttpResponse.
      * The string includes the status code, message, request URL, and elapsed time.
      *
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * HttpResponse{statusCode=200, message=OK, url=https://api.example.com/users, elapsedTime=123}
      * }</pre>

@@ -27,7 +27,7 @@ package com.landawn.abacus.pool;
  *   <li>Memory usage (when applicable)</li>
  * </ul>
  * 
- * <p>Usage example:
+ * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * PoolStats stats = pool.stats();
  * 

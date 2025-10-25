@@ -50,7 +50,7 @@ import com.landawn.abacus.parser.ParserUtil.BeanInfo;
  *   <li>Consistent string representation for debugging and logging</li>
  * </ul>
  * 
- * <p>Example usage:
+ * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * // Single property ID
  * Seid userId = Seid.of("User.id", 123);
@@ -105,7 +105,7 @@ public class Seid implements EntityId {
      * Creates a new Seid with a single property-value pair.
      * The entity name is automatically extracted from the property name.
      * 
-     * <p>Example usage:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Seid userId = new Seid("User.id", 123);
      * // Entity name will be "User", property name will be "id"
@@ -124,7 +124,7 @@ public class Seid implements EntityId {
      * Creates a new Seid from a map of property names to values.
      * The entity name is extracted from the first property name in the map.
      * 
-     * <p>Example usage:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Map<String, Object> props = new HashMap<>();
      * props.put("User.id", 123);
@@ -158,7 +158,7 @@ public class Seid implements EntityId {
      * Creates a new Seid with a single property-value pair.
      * This is a convenient factory method alternative to the constructor.
      * 
-     * <p>Example usage:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Seid userId = Seid.of("User.id", 123);
      * }</pre>
@@ -175,7 +175,7 @@ public class Seid implements EntityId {
      * Creates a new Seid with two property-value pairs.
      * This is useful for composite keys with exactly two components.
      * 
-     * <p>Example usage:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Seid compositeId = Seid.of("Order.customerId", 123, "Order.orderId", 456);
      * }</pre>
@@ -196,7 +196,7 @@ public class Seid implements EntityId {
      * Creates a new Seid with three property-value pairs.
      * This is useful for composite keys with exactly three components.
      * 
-     * <p>Example usage:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Seid compositeId = Seid.of("Entity.prop1", val1, "Entity.prop2", val2, "Entity.prop3", val3);
      * }</pre>
@@ -221,7 +221,7 @@ public class Seid implements EntityId {
      * Creates a new Seid from a map of property names to values.
      * This is an alternative factory method to the constructor.
      * 
-     * <p>Example usage:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Map<String, Object> props = Map.of("User.id", 123, "User.version", 1);
      * Seid seid = Seid.create(props);
@@ -241,7 +241,7 @@ public class Seid implements EntityId {
      * Creates a new Seid from an entity object by extracting its ID properties.
      * The entity class must have properties annotated as ID fields.
      * 
-     * <p>Example usage:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * @Entity
      * public class User {
@@ -273,7 +273,7 @@ public class Seid implements EntityId {
      * Creates a new Seid from an entity object using specified property names as IDs.
      * This allows custom selection of which properties to use as identifiers.
      * 
-     * <p>Example usage:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * User user = new User(123L, "john@example.com", "John");
      * Seid emailId = Seid.create(user, Arrays.asList("email"));
@@ -303,7 +303,7 @@ public class Seid implements EntityId {
     /**
      * Returns the entity name associated with this Seid.
      * 
-     * <p>Example usage:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Seid userId = Seid.of("User.id", 123);
      * String entityName = userId.entityName(); // Returns "User"
@@ -320,7 +320,7 @@ public class Seid implements EntityId {
      * Gets the value of the specified property.
      * Supports both simple property names and canonical names.
      * 
-     * <p>Example usage:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Seid seid = Seid.of("User.id", 123);
      * Integer id = seid.get("id"); // Returns 123
@@ -344,7 +344,7 @@ public class Seid implements EntityId {
      * Gets the value of the specified property as an int.
      * Performs automatic conversion if the stored value is not an int.
      * 
-     * <p>Example usage:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Seid seid = Seid.of("User.age", "25");
      * int age = seid.getInt("age"); // Returns 25 (converted from String)
@@ -363,7 +363,7 @@ public class Seid implements EntityId {
      * Gets the value of the specified property as a long.
      * Performs automatic conversion if the stored value is not a long.
      * 
-     * <p>Example usage:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Seid seid = Seid.of("User.id", 123);
      * long id = seid.getLong("id"); // Returns 123L
@@ -382,7 +382,7 @@ public class Seid implements EntityId {
      * Gets the value of the specified property, converting it to the target type if necessary.
      * Returns the default value for the target type if the property value is null.
      * 
-     * <p>Example usage:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Seid seid = Seid.of("User.active", "true");
      * Boolean active = seid.get("active", Boolean.class); // Returns Boolean.TRUE
@@ -473,7 +473,7 @@ public class Seid implements EntityId {
      * Checks if this Seid contains the specified property.
      * Supports both simple and canonical property names.
      * 
-     * <p>Example usage:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Seid seid = Seid.of("User.id", 123);
      * boolean hasId = seid.containsKey("id"); // Returns true
@@ -501,7 +501,7 @@ public class Seid implements EntityId {
      * The returned set is backed by the Seid, so changes to the Seid
      * are reflected in the set.
      * 
-     * <p>Example usage:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Seid seid = Seid.of("User.id", 123, "User.name", "John");
      * Set<String> keys = seid.keySet(); // Contains ["id", "name"]
@@ -518,7 +518,7 @@ public class Seid implements EntityId {
      * Returns a set view of the property entries in this Seid.
      * Each entry contains a property name and its corresponding value.
      * 
-     * <p>Example usage:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Seid seid = Seid.of("User.id", 123);
      * for (Map.Entry<String, Object> entry : seid.entrySet()) {
@@ -536,7 +536,7 @@ public class Seid implements EntityId {
     /**
      * Returns the number of properties in this Seid.
      * 
-     * <p>Example usage:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Seid seid = Seid.of("User.id", 123, "User.version", 1);
      * int count = seid.size(); // Returns 2
@@ -552,7 +552,7 @@ public class Seid implements EntityId {
     /**
      * Checks if this Seid contains no properties.
      * 
-     * <p>Example usage:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Seid seid = Seid.of("User");
      * boolean empty = seid.isEmpty(); // Returns true
@@ -602,7 +602,7 @@ public class Seid implements EntityId {
      * Checks if this Seid is equal to another object.
      * Two Seids are equal if they have the same string representation.
      * 
-     * <p>Example usage:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Seid seid1 = Seid.of("User.id", 123);
      * Seid seid2 = Seid.of("User.id", 123);
@@ -637,7 +637,7 @@ public class Seid implements EntityId {
      * The format is: "EntityName: {prop1=value1, prop2=value2, ...}"
      * Properties are sorted by name for consistent representation.
      * 
-     * <p>Example usage:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Seid seid = Seid.of("User.id", 123, "User.name", "John");
      * String str = seid.toString(); // Returns "User: {id=123, name=John}"

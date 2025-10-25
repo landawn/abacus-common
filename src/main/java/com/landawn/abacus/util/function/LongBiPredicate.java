@@ -126,7 +126,7 @@ public interface LongBiPredicate extends Throwables.LongBiPredicate<RuntimeExcep
      * to the caller; if evaluation of this predicate throws an exception, the
      * {@code other} predicate will not be evaluated.
      *
-     * <p>Example usage:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * LongBiPredicate isPositive = (a, b) -> a > 0 && b > 0;
      * LongBiPredicate sumLessThan100 = (a, b) -> a + b < 100;
@@ -153,7 +153,7 @@ public interface LongBiPredicate extends Throwables.LongBiPredicate<RuntimeExcep
      * to the caller; if evaluation of this predicate throws an exception, the
      * {@code other} predicate will not be evaluated.
      *
-     * <p>Example usage:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * LongBiPredicate isZero = (a, b) -> a == 0 || b == 0;
      * LongBiPredicate isNegative = (a, b) -> a < 0 || b < 0;

@@ -70,7 +70,7 @@ public class DoubleObjPredicate2025Test extends TestBase {
 
     @Test
     public void testAndShortCircuit() {
-        final boolean[] secondCalled = {false};
+        final boolean[] secondCalled = { false };
         DoubleObjPredicate<String> predicate1 = (d, s) -> false;
         DoubleObjPredicate<String> predicate2 = (d, s) -> {
             secondCalled[0] = true;
@@ -97,7 +97,7 @@ public class DoubleObjPredicate2025Test extends TestBase {
 
     @Test
     public void testOrShortCircuit() {
-        final boolean[] secondCalled = {false};
+        final boolean[] secondCalled = { false };
         DoubleObjPredicate<String> predicate1 = (d, s) -> true;
         DoubleObjPredicate<String> predicate2 = (d, s) -> {
             secondCalled[0] = true;

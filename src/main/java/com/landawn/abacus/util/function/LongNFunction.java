@@ -58,7 +58,7 @@ public interface LongNFunction<R> extends Throwables.LongNFunction<R, RuntimeExc
      *   <li>Implementing variadic mathematical functions</li>
      * </ul>
      *
-     * <p>Example usage:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * LongNFunction<Double> average = args -> {
      *     if (args.length == 0) return 0.0;
@@ -89,7 +89,7 @@ public interface LongNFunction<R> extends Throwables.LongNFunction<R, RuntimeExc
      * where the output of this function becomes the input of the next function.
      * This is useful for building complex transformations from simpler ones.
      *
-     * <p>Example usage:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * LongNFunction<Long> sum = args -> {
      *     long total = 0;
