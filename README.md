@@ -2,7 +2,33 @@
 [![Maven Central](https://img.shields.io/maven-central/v/com.landawn/abacus-common.svg)](https://maven-badges.herokuapp.com/maven-central/com.landawn/abacus-common/)
 [![Javadocs](https://img.shields.io/badge/javadoc-6.25.1-brightgreen.svg)](https://www.javadoc.io/doc/com.landawn/abacus-common/6.25.1/index.html)
 
-A general programming library in Java. It's easy to learn and simple to use with concise and powerful APIs.
+
+**Abacus-common** is a general-purpose Java programming library that provides a rich set of utilities, data structures, and functional APIs.
+
+##### Key Features
+
+1. *Frequently used utilities* — e.g., `Strings`, `Numbers`, `Maps`, `Joiner`, `Splitter`.
+2. *Additional data structures* — `Dataset`, `Sheet`, `Multiset`, `Multimap`, `Pair`, `Tuple`, `Range`, `Fraction`.
+3. *Comprehensive functional programming APIs* — including `Stream`, `EntryStream`, `Collectors`.
+
+##### How it differs from other libraries
+
+1. *Comprehensive and consistent*:
+   abacus-common offers unified APIs across data types — for example, `N.isEmpty(String/byte[]/Collection/Map/...)` — instead of relying on separate utilities like `StringUtils/ArrayUtils/Collections/MapUtils.isEmpty(...)` from different classes/libraries.
+
+2. *Simple and concise*:
+   All APIs are well organized and follow consistent design principles:
+	* Always return an empty string or collection instead of `null`.
+	* Use concise, consistent method names and parameter orders.
+	* Ensure predictable and uniform behavior across components.
+	* More...
+
+3. *Powerful and extensive*:
+   The library provides thousands of utility methods — covering everything from daily-use helpers to advanced support for I/O, concurrency, JSON/XML serialization, and functional programming.
+
+##### Why Abacus-common?
+
+Abacus-common is a *mega-library* unlike most others. It contains thousands of public methods across tens of classes, covering nearly all common programming use cases. You no longer need to search multiple libraries or maintain your own `StringUtils` or `CollectionUtils` — everything is conveniently available in one place with clean, consistent, and easy-to-use APIs.
 
 ## Features:
 
@@ -86,6 +112,18 @@ more [Collectors](https://htmlpreview.github.io/?https://github.com/landawn/abac
 [MutableFloat](https://htmlpreview.github.io/?https://github.com/landawn/abacus-common/master/docs/MutableFloat_view.html) and 
 [MutableDouble](https://htmlpreview.github.io/?https://github.com/landawn/abacus-common/master/docs/MutableDouble_view.html).
 
+* Optional: 
+[OptionalBoolean](https://htmlpreview.github.io/?https://github.com/landawn/abacus-common/master/docs/OptionalBoolean_view.html), 
+[OptionalChar](https://htmlpreview.github.io/?https://github.com/landawn/abacus-common/master/docs/OptionalChar_view.html), 
+[OptionalByte](https://htmlpreview.github.io/?https://github.com/landawn/abacus-common/master/docs/OptionalByte_view.html), 
+[OptionalShort](https://htmlpreview.github.io/?https://github.com/landawn/abacus-common/master/docs/OptionalShort_view.html), 
+[OptionalInt](https://htmlpreview.github.io/?https://github.com/landawn/abacus-common/master/docs/OptionalInt_view.html), 
+[OptionalLong](https://htmlpreview.github.io/?https://github.com/landawn/abacus-common/master/docs/OptionalLong_view.html), 
+[OptionalFloat](https://htmlpreview.github.io/?https://github.com/landawn/abacus-common/master/docs/OptionalFloat_view.html), 
+[OptionalDouble](https://htmlpreview.github.io/?https://github.com/landawn/abacus-common/master/docs/OptionalDouble_view.html), 
+[Optional](https://htmlpreview.github.io/?https://github.com/landawn/abacus-common/master/docs/Optional_view.html) and 
+[Nullable](https://htmlpreview.github.io/?https://github.com/landawn/abacus-common/master/docs/Nullable_view.html)
+
 * Primitive List: 
 [PrimitiveList](https://htmlpreview.github.io/?https://github.com/landawn/abacus-common/master/docs/PrimitiveList_view.html), 
 [BooleanList](https://htmlpreview.github.io/?https://github.com/landawn/abacus-common/master/docs/BooleanList_view.html), 
@@ -110,18 +148,6 @@ more [Collectors](https://htmlpreview.github.io/?https://github.com/landawn/abac
 [BiIterator](https://htmlpreview.github.io/?https://github.com/landawn/abacus-common/master/docs/BiIterator_view.html),
 [TriIterator](https://htmlpreview.github.io/?https://github.com/landawn/abacus-common/master/docs/TriIterator_view.html) and 
 [LineIterator](https://htmlpreview.github.io/?https://github.com/landawn/abacus-common/master/docs/LineIterator_view.html). 
-
-* Optional: 
-[OptionalBoolean](https://htmlpreview.github.io/?https://github.com/landawn/abacus-common/master/docs/OptionalBoolean_view.html), 
-[OptionalChar](https://htmlpreview.github.io/?https://github.com/landawn/abacus-common/master/docs/OptionalChar_view.html), 
-[OptionalByte](https://htmlpreview.github.io/?https://github.com/landawn/abacus-common/master/docs/OptionalByte_view.html), 
-[OptionalShort](https://htmlpreview.github.io/?https://github.com/landawn/abacus-common/master/docs/OptionalShort_view.html), 
-[OptionalInt](https://htmlpreview.github.io/?https://github.com/landawn/abacus-common/master/docs/OptionalInt_view.html), 
-[OptionalLong](https://htmlpreview.github.io/?https://github.com/landawn/abacus-common/master/docs/OptionalLong_view.html), 
-[OptionalFloat](https://htmlpreview.github.io/?https://github.com/landawn/abacus-common/master/docs/OptionalFloat_view.html), 
-[OptionalDouble](https://htmlpreview.github.io/?https://github.com/landawn/abacus-common/master/docs/OptionalDouble_view.html), 
-[Optional](https://htmlpreview.github.io/?https://github.com/landawn/abacus-common/master/docs/Optional_view.html) and 
-[Nullable](https://htmlpreview.github.io/?https://github.com/landawn/abacus-common/master/docs/Nullable_view.html)
 
 * JSON/XML Data Binding: 
 [Parser](https://htmlpreview.github.io/?https://github.com/landawn/abacus-common/master/docs/Parser_view.html), 
