@@ -4,19 +4,20 @@
 ##### Key Features
 
 1. *Frequently used utilities* — e.g., `Strings`, `Numbers`, `Maps`, `Joiner`, `Splitter`.
-2. *Additional data structures* — `Dataset`, `Sheet`, `Multiset`, `Multimap`, `Pair`, `Triple`, `Tuple`, `Range`, `Fraction`.
-3. *Comprehensive functional programming APIs* — including `Stream` and `EntryStream`.
+2. *Additional data structures* — `Dataset`, `Sheet`, `Multiset`, `Multimap`, `Pair`, `Tuple`, `Range`, `Fraction`.
+3. *Comprehensive functional programming APIs* — including `Stream`, `EntryStream`, `Collectors`.
 
 ##### How it differs from other libraries
 
 1. *Comprehensive and consistent*:
-   abacus-common offers unified APIs across data types — for example, `N.isEmpty(String/byte[]/Object[]/Collection/Map/...)` — instead of relying on separate utilities like `StringUtils`, `Collections`, or `MapUtils` from different libraries.
+   abacus-common offers unified APIs across data types — for example, `N.isEmpty(String/byte[]/Collection/...)` — instead of relying on separate utilities like `StringUtils/Collections/MapUtils.isEmpty(...)` from different classes/libraries.
 
 2. *Simple and concise*:
    All APIs are well organized and follow consistent design principles:
 	* Always return an empty string or collection instead of `null`.
 	* Use concise, consistent method names and parameter orders.
 	* Ensure predictable and uniform behavior across components.
+	* More...
 
 3. *Powerful and extensive*:
    The library provides thousands of utility methods — covering everything from daily-use helpers to advanced support for I/O, concurrency, JSON/XML serialization, and functional programming.
