@@ -60,16 +60,6 @@ A general programming library in Java. It's easy to learn and simple to use with
 [JSONUtil](https://htmlpreview.github.io/?https://github.com/landawn/abacus-common/master/docs/JSONUtil_view.html), 
 [Profiler](https://htmlpreview.github.io/?https://github.com/landawn/abacus-common/master/docs/Profiler_view.html)...
 
-* Primitive Mutable: 
-[MutableBoolean](https://htmlpreview.github.io/?https://github.com/landawn/abacus-common/master/docs/MutableBoolean_view.html), 
-[MutableChar](https://htmlpreview.github.io/?https://github.com/landawn/abacus-common/master/docs/MutableChar_view.html), 
-[MutableByte](https://htmlpreview.github.io/?https://github.com/landawn/abacus-common/master/docs/MutableByte_view.html), 
-[MutableShort](https://htmlpreview.github.io/?https://github.com/landawn/abacus-common/master/docs/MutableShort_view.html), 
-[MutableInt](https://htmlpreview.github.io/?https://github.com/landawn/abacus-common/master/docs/MutableInt_view.html), 
-[MutableLong](https://htmlpreview.github.io/?https://github.com/landawn/abacus-common/master/docs/MutableLong_view.html), 
-[MutableFloat](https://htmlpreview.github.io/?https://github.com/landawn/abacus-common/master/docs/MutableFloat_view.html) and 
-[MutableDouble](https://htmlpreview.github.io/?https://github.com/landawn/abacus-common/master/docs/MutableDouble_view.html).
-
 * Streams, both sequential and parallel, are supported with more functions: 
 [Seq](https://htmlpreview.github.io/?https://github.com/landawn/abacus-common/master/docs/Seq_view.html), 
 [BaseStream](https://htmlpreview.github.io/?https://github.com/landawn/abacus-common/master/docs/BaseStream_view.html), 
@@ -85,6 +75,16 @@ A general programming library in Java. It's easy to learn and simple to use with
 [Fn](https://htmlpreview.github.io/?https://github.com/landawn/abacus-common/master/docs/Fn_view.html), 
 more [Collectors](https://htmlpreview.github.io/?https://github.com/landawn/abacus-common/master/docs/Collectors_view.html) and 
 [Throwables](https://htmlpreview.github.io/?https://github.com/landawn/abacus-common/master/docs/Throwables_view.html).
+
+* Primitive Mutable: 
+[MutableBoolean](https://htmlpreview.github.io/?https://github.com/landawn/abacus-common/master/docs/MutableBoolean_view.html), 
+[MutableChar](https://htmlpreview.github.io/?https://github.com/landawn/abacus-common/master/docs/MutableChar_view.html), 
+[MutableByte](https://htmlpreview.github.io/?https://github.com/landawn/abacus-common/master/docs/MutableByte_view.html), 
+[MutableShort](https://htmlpreview.github.io/?https://github.com/landawn/abacus-common/master/docs/MutableShort_view.html), 
+[MutableInt](https://htmlpreview.github.io/?https://github.com/landawn/abacus-common/master/docs/MutableInt_view.html), 
+[MutableLong](https://htmlpreview.github.io/?https://github.com/landawn/abacus-common/master/docs/MutableLong_view.html), 
+[MutableFloat](https://htmlpreview.github.io/?https://github.com/landawn/abacus-common/master/docs/MutableFloat_view.html) and 
+[MutableDouble](https://htmlpreview.github.io/?https://github.com/landawn/abacus-common/master/docs/MutableDouble_view.html).
 
 * Primitive List: 
 [PrimitiveList](https://htmlpreview.github.io/?https://github.com/landawn/abacus-common/master/docs/PrimitiveList_view.html), 
