@@ -70,6 +70,22 @@ A general programming library in Java. It's easy to learn and simple to use with
 [MutableFloat](https://htmlpreview.github.io/?https://github.com/landawn/abacus-common/master/docs/MutableFloat_view.html) and 
 [MutableDouble](https://htmlpreview.github.io/?https://github.com/landawn/abacus-common/master/docs/MutableDouble_view.html).
 
+* Streams, both sequential and parallel, are supported with more functions: 
+[Seq](https://htmlpreview.github.io/?https://github.com/landawn/abacus-common/master/docs/Seq_view.html), 
+[BaseStream](https://htmlpreview.github.io/?https://github.com/landawn/abacus-common/master/docs/BaseStream_view.html), 
+[Stream](https://htmlpreview.github.io/?https://github.com/landawn/abacus-common/master/docs/Stream_view.html), 
+[CharStream](https://htmlpreview.github.io/?https://github.com/landawn/abacus-common/master/docs/CharStream_view.html), 
+[ByteStream](https://htmlpreview.github.io/?https://github.com/landawn/abacus-common/master/docs/ByteStream_view.html), 
+[ShortStream](https://htmlpreview.github.io/?https://github.com/landawn/abacus-common/master/docs/ShortStream_view.html), 
+[IntStream](https://htmlpreview.github.io/?https://github.com/landawn/abacus-common/master/docs/IntStream_view.html), 
+[LongStream](https://htmlpreview.github.io/?https://github.com/landawn/abacus-common/master/docs/LongStream_view.html), 
+[FloatStream](https://htmlpreview.github.io/?https://github.com/landawn/abacus-common/master/docs/FloatStream_view.html), 
+[DoubleStream](https://htmlpreview.github.io/?https://github.com/landawn/abacus-common/master/docs/DoubleStream_view.html), 
+[EntryStream](https://htmlpreview.github.io/?https://github.com/landawn/abacus-common/master/docs/EntryStream_view.html), 
+[Fn](https://htmlpreview.github.io/?https://github.com/landawn/abacus-common/master/docs/Fn_view.html), 
+more [Collectors](https://htmlpreview.github.io/?https://github.com/landawn/abacus-common/master/docs/Collectors_view.html) and 
+[Throwables](https://htmlpreview.github.io/?https://github.com/landawn/abacus-common/master/docs/Throwables_view.html).
+
 * Primitive List: 
 [PrimitiveList](https://htmlpreview.github.io/?https://github.com/landawn/abacus-common/master/docs/PrimitiveList_view.html), 
 [BooleanList](https://htmlpreview.github.io/?https://github.com/landawn/abacus-common/master/docs/BooleanList_view.html), 
@@ -106,22 +122,6 @@ A general programming library in Java. It's easy to learn and simple to use with
 [OptionalDouble](https://htmlpreview.github.io/?https://github.com/landawn/abacus-common/master/docs/OptionalDouble_view.html), 
 [Optional](https://htmlpreview.github.io/?https://github.com/landawn/abacus-common/master/docs/Optional_view.html) and 
 [Nullable](https://htmlpreview.github.io/?https://github.com/landawn/abacus-common/master/docs/Nullable_view.html)
-
-* Streams, both sequential and parallel, are supported with more functions: 
-[Seq](https://htmlpreview.github.io/?https://github.com/landawn/abacus-common/master/docs/Seq_view.html), 
-[BaseStream](https://htmlpreview.github.io/?https://github.com/landawn/abacus-common/master/docs/BaseStream_view.html), 
-[Stream](https://htmlpreview.github.io/?https://github.com/landawn/abacus-common/master/docs/Stream_view.html), 
-[CharStream](https://htmlpreview.github.io/?https://github.com/landawn/abacus-common/master/docs/CharStream_view.html), 
-[ByteStream](https://htmlpreview.github.io/?https://github.com/landawn/abacus-common/master/docs/ByteStream_view.html), 
-[ShortStream](https://htmlpreview.github.io/?https://github.com/landawn/abacus-common/master/docs/ShortStream_view.html), 
-[IntStream](https://htmlpreview.github.io/?https://github.com/landawn/abacus-common/master/docs/IntStream_view.html), 
-[LongStream](https://htmlpreview.github.io/?https://github.com/landawn/abacus-common/master/docs/LongStream_view.html), 
-[FloatStream](https://htmlpreview.github.io/?https://github.com/landawn/abacus-common/master/docs/FloatStream_view.html), 
-[DoubleStream](https://htmlpreview.github.io/?https://github.com/landawn/abacus-common/master/docs/DoubleStream_view.html), 
-[EntryStream](https://htmlpreview.github.io/?https://github.com/landawn/abacus-common/master/docs/EntryStream_view.html), 
-[Fn](https://htmlpreview.github.io/?https://github.com/landawn/abacus-common/master/docs/Fn_view.html), 
-more [Collectors](https://htmlpreview.github.io/?https://github.com/landawn/abacus-common/master/docs/Collectors_view.html) and 
-[Throwables](https://htmlpreview.github.io/?https://github.com/landawn/abacus-common/master/docs/Throwables_view.html).
 
 * JSON/XML Data Binding: 
 [Parser](https://htmlpreview.github.io/?https://github.com/landawn/abacus-common/master/docs/Parser_view.html), 
