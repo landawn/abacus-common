@@ -10,7 +10,7 @@
 ##### How it differs from other libraries
 
 1. *Comprehensive and consistent*:
-   abacus-common offers unified APIs across data types — for example, `N.isEmpty(String/byte[]/Collection/...)` — instead of relying on separate utilities like `StringUtils/Collections/MapUtils.isEmpty(...)` from different classes/libraries.
+   abacus-common offers unified APIs across data types — for example, `N.isEmpty(String/byte[]/Collection/Map/...)` — instead of relying on separate utilities like `StringUtils/ArrayUtils/Collections/MapUtils.isEmpty(...)` from different classes/libraries.
 
 2. *Simple and concise*:
    All APIs are well organized and follow consistent design principles:
