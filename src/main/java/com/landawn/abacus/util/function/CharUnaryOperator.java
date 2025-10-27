@@ -42,7 +42,7 @@ public interface CharUnaryOperator extends Throwables.CharUnaryOperator<RuntimeE
      * and then applies this operator to the result. If evaluation of either operator throws
      * an exception, it is relayed to the caller of the composed operator.
      *
-     * @param before the operator to apply before this operator is applied. Must not be null.
+     * @param before the operator to apply before this operator is applied. Must not be {@code null}.
      * @return a composed operator that first applies the {@code before} operator and then
      *         applies this operator
      * 
@@ -57,7 +57,7 @@ public interface CharUnaryOperator extends Throwables.CharUnaryOperator<RuntimeE
      * applies the {@code after} operator to the result. If evaluation of either operator
      * throws an exception, it is relayed to the caller of the composed operator.
      *
-     * @param after the operator to apply after this operator is applied. Must not be null.
+     * @param after the operator to apply after this operator is applied. Must not be {@code null}.
      * @return a composed operator that first applies this operator and then applies the
      *         {@code after} operator
      * 

@@ -56,7 +56,6 @@ import com.landawn.abacus.util.stream.Stream;
  * }</pre>
  * 
  * @param <T> the type of nodes in the graph
- *
  * @see <a href="http://google.github.io/guava/releases/23.3-android/api/docs/">Guava Documentation</a>
  */
 public final class Traverser<T> {
@@ -156,7 +155,7 @@ public final class Traverser<T> {
      * }</pre>
      *
      * <p>because there are two paths from {@code b} to {@code f} ({@code b->d->f} and {@code
-     * b->e->f}).
+     * b-&gt;e-&gt;f}).
      *
      * <p><b>Note on binary trees</b>
      *

@@ -55,7 +55,7 @@ import com.landawn.abacus.logging.LoggerFactory;
  * Connection conn = connectionPool.get("jdbc:mysql://localhost/test");
  * }</pre>
  * 
- * <p><b>Note:</b> This implementation does not support null keys or values.
+ * <p><b>Note:</b> This implementation does not support {@code null} keys or values.
  * The keySet(), values(), and entrySet() methods return unmodifiable views
  * that are computed on each call.</p>
  *
@@ -105,9 +105,9 @@ public final class ObjectPool<K, V> extends AbstractMap<K, V> {
     }
 
     /**
-     * Returns the value to which the specified key is mapped, or null if this map contains no mapping for the key.
+     * Returns the value to which the specified key is mapped, or {@code null} if this map contains no mapping for the key.
      * This operation is thread-safe and optimized for performance.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ObjectPool<String, Integer> pool = new ObjectPool<>(10);
@@ -117,8 +117,9 @@ public final class ObjectPool<K, V> extends AbstractMap<K, V> {
      * }</pre>
      *
      * @param key the key whose associated value is to be returned
-     * @return the value to which the specified key is mapped, or null if this map contains no mapping for the key
+     * @return the value to which the specified key is mapped, or {@code null} if this map contains no mapping for the key
      */
+    @MayReturnNull
     @Override
     public V get(final Object key) {
         final int hash = hash(key);
@@ -137,15 +138,16 @@ public final class ObjectPool<K, V> extends AbstractMap<K, V> {
      * Associates the specified value with the specified key in this map.
      * If the map previously contained a mapping for the key, the old value is replaced.
      * This operation is thread-safe.
-     * 
+     *
      * <p>If the pool size exceeds its capacity, a warning is logged once,
      * but the operation completes successfully.</p>
      *
      * @param key key with which the specified value is to be associated
      * @param value value to be associated with the specified key
-     * @return the previous value associated with key, or null if there was no mapping for key
+     * @return the previous value associated with key, or {@code null} if there was no mapping for key
      * @throws IllegalArgumentException if the key or value is null
      */
+    @MayReturnNull
     @Override
     public V put(final K key, final V value) {
         synchronized (table) {
@@ -240,7 +242,7 @@ public final class ObjectPool<K, V> extends AbstractMap<K, V> {
      * }</pre>
      *
      * @param key key whose mapping is to be removed from the map
-     * @return the previous value associated with key, or null if there was no mapping for key
+     * @return the previous value associated with key, or {@code null} if there was no mapping for key
      */
     @MayReturnNull
     @Override
@@ -284,11 +286,11 @@ public final class ObjectPool<K, V> extends AbstractMap<K, V> {
     }
 
     /**
-     * Returns true if this map contains a mapping for the specified key.
-     * This method also verifies that the associated value is not null.
+     * Returns {@code true} if this map contains a mapping for the specified key.
+     * This method also verifies that the associated value is not {@code null}.
      *
      * @param key key whose presence in this map is to be tested
-     * @return {@code true} if this map contains a non-null mapping for the specified key
+     * @return {@code true} if this map contains a {@code non-null} mapping for the specified key
      */
     @Override
     public boolean containsKey(final Object key) {
@@ -305,7 +307,7 @@ public final class ObjectPool<K, V> extends AbstractMap<K, V> {
     }
 
     /**
-     * Returns true if this map maps one or more keys to the specified value.
+     * Returns {@code true} if this map maps one or more keys to the specified value.
      * This operation requires a full scan of the map and is not optimized for performance.
      *
      * @param value value whose presence in this map is to be tested
@@ -449,18 +451,13 @@ public final class ObjectPool<K, V> extends AbstractMap<K, V> {
         _size += delta;
     }
 
-    /**
-     * Returns the number of key-value mappings in this map.
-     *
-     * @return the number of key-value mappings in this map
-     */
     @Override
     public int size() {
         return _size;
     }
 
     /**
-     * Returns true if this map contains no key-value mappings.
+     * Returns {@code true} if this map contains no key-value mappings.
      *
      * @return {@code true} if this map contains no key-value mappings
      */
@@ -523,14 +520,6 @@ public final class ObjectPool<K, V> extends AbstractMap<K, V> {
         /** Cached hash code of the key */
         final int hash;
 
-        /**
-         * Creates a new entry with the specified values.
-         *
-         * @param h the hash code of the key
-         * @param k the key
-         * @param v the value
-         * @param n the next entry in the chain
-         */
         Entry(final int h, final K k, final V v, final Entry<K, V> n) {
             value = v;
             next = n;
@@ -538,21 +527,11 @@ public final class ObjectPool<K, V> extends AbstractMap<K, V> {
             hash = h;
         }
 
-        /**
-         * Returns the key corresponding to this entry.
-         *
-         * @return the key corresponding to this entry
-         */
         @Override
         public final K getKey() {
             return key;
         }
 
-        /**
-         * Returns the value corresponding to this entry.
-         *
-         * @return the value corresponding to this entry
-         */
         @Override
         public final V getValue() {
             return value;
@@ -574,7 +553,7 @@ public final class ObjectPool<K, V> extends AbstractMap<K, V> {
 
         /**
          * Compares the specified object with this entry for equality.
-         * Returns true if the given object is also a map entry and
+         * Returns {@code true} if the given object is also a map entry and
          * the two entries represent the same mapping.
          *
          * @param obj object to be compared for equality with this map entry

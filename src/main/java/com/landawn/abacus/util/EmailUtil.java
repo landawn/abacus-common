@@ -135,7 +135,7 @@ public final class EmailUtil {
      * @param from the sender's email address
      * @param subject the email subject
      * @param content the plain text content of the email
-     * @param attachedFiles array of file paths to attach, or null if no attachments
+     * @param attachedFiles array of file paths to attach, or {@code null} if no attachments
      * @param userName the username for SMTP authentication
      * @param password the password for SMTP authentication
      * @param props mail server properties (e.g., mail.smtp.host, mail.smtp.port)
@@ -216,7 +216,7 @@ public final class EmailUtil {
      * @param from the sender's email address
      * @param subject the email subject
      * @param content the HTML content of the email
-     * @param attachedFiles array of file paths to attach, or null if no attachments
+     * @param attachedFiles array of file paths to attach, or {@code null} if no attachments
      * @param userName the username for SMTP authentication
      * @param password the password for SMTP authentication
      * @param props mail server properties (e.g., mail.smtp.host, mail.smtp.port)

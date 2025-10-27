@@ -90,11 +90,6 @@ public class InputStreamType extends AbstractType<InputStream> {
         return typeClass;
     }
 
-    /**
-     * Indicates whether this type represents an InputStream.
-     *
-     * @return true, as this type handler specifically handles InputStreams
-     */
     @Override
     public boolean isInputStream() {
         return true;
@@ -106,9 +101,10 @@ public class InputStreamType extends AbstractType<InputStream> {
      * Note that this operation consumes the stream.
      *
      * @param x the InputStream to convert to string
-     * @return the base64-encoded string representation of the stream contents, or null if the input is null
+     * @return the base64-encoded string representation of the stream contents, or {@code null} if the input is null
      */
     @Override
+    @MayReturnNull
     public String stringOf(final InputStream x) {
         // return x == null ? null : Strings.base64Encode(IOUtil.readAllBytes(x));
 
@@ -121,10 +117,11 @@ public class InputStreamType extends AbstractType<InputStream> {
      * If no specific constructors are available, returns a ByteArrayInputStream.
      *
      * @param str the base64-encoded string to decode
-     * @return a new InputStream containing the decoded bytes, or null if the input is null
+     * @return a new InputStream containing the decoded bytes, or {@code null} if the input is null
      */
     @MayReturnNull
     @Override
+
     public InputStream valueOf(final String str) {
         if (str == null) {
             return null; // NOSONAR
@@ -146,7 +143,7 @@ public class InputStreamType extends AbstractType<InputStream> {
      * Other objects are converted to string first, then to InputStream.
      *
      * @param obj the object to convert to InputStream
-     * @return an InputStream representation of the object, or null if the input is null
+     * @return an InputStream representation of the object, or {@code null} if the input is null
      * @throws UncheckedSQLException if a SQLException occurs while reading from a Blob
      */
     @MayReturnNull
@@ -172,7 +169,7 @@ public class InputStreamType extends AbstractType<InputStream> {
      *
      * @param rs the ResultSet to read from
      * @param columnIndex the index of the column to read (1-based)
-     * @return the InputStream from the column, or null if the column value is SQL NULL
+     * @return the InputStream from the column, or {@code null} if the column value is SQL NULL
      * @throws SQLException if a database access error occurs or the columnIndex is invalid
      */
     @Override
@@ -186,7 +183,7 @@ public class InputStreamType extends AbstractType<InputStream> {
      *
      * @param rs the ResultSet to read from
      * @param columnLabel the label of the column to read
-     * @return the InputStream from the column, or null if the column value is SQL NULL
+     * @return the InputStream from the column, or {@code null} if the column value is SQL NULL
      * @throws SQLException if a database access error occurs or the columnLabel is not found
      */
     @Override

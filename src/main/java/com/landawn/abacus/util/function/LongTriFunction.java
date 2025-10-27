@@ -14,6 +14,7 @@
 
 package com.landawn.abacus.util.function;
 
+import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.util.Throwables;
 
 /**
@@ -67,6 +68,7 @@ public interface LongTriFunction<R> extends Throwables.LongTriFunction<R, Runtim
      * @return the function result of type R if any error occurs during function execution
      */
     @Override
+    @MayReturnNull
     R apply(long a, long b, long c);
 
     /**

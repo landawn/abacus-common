@@ -42,7 +42,7 @@ public final class PrimitiveIntType extends AbstractIntegerType {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * PrimitiveIntType type = new PrimitiveIntType();
-     * Class&lt;?&gt; clazz = type.clazz();
+     * Class<?> clazz = type.clazz();
      * // clazz equals int.class
      * }</pre>
      *
@@ -65,7 +65,7 @@ public final class PrimitiveIntType extends AbstractIntegerType {
      * // isPrimitive is true
      * }</pre>
      *
-     * @return true, indicating this is a primitive type
+     * @return {@code true}, indicating this is a primitive type
      */
     @Override
     public boolean isPrimitiveType() {

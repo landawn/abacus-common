@@ -20,12 +20,12 @@ package com.landawn.abacus.util;
  * Static methods pertaining to ASCII characters (those in the range of values {@code 0x00} through
  * {@code 0x7F}), and to strings containing such characters.
  *
- * <p>ASCII utilities also exist in other classes of this package:
+ * <p>ASCII utilities also exist in other classes of this package:</p>
  * <ul>
  * <!-- TODO(kevinb): how can we make this not produce a warning when building gwt javadoc? -->
- * <li>{@link Charsets#US_ASCII} specifies the {@code Charset} of ASCII characters.
+ * <li>{@link Charsets#US_ASCII} specifies the {@code Charset} of ASCII characters.</li>
  * <li>{@link com.google.common.base.CharMatcher#ascii} matches ASCII characters and provides text processing methods which
- * operate only on the ASCII characters of a string.
+ * operate only on the ASCII characters of a string.</li>
  * </ul>
  * 
  * <p>This class provides constants for all ASCII control characters as defined in RFC 20,

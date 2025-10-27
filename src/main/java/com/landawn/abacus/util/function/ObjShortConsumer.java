@@ -16,6 +16,15 @@ package com.landawn.abacus.util.function;
 
 import com.landawn.abacus.util.Throwables;
 
+/**
+ * A functional interface that represents an operation that accepts an object-valued and a
+ * short-valued argument, and returns no result. This is a specialization of BiConsumer.
+ *
+ * <p>This is a functional interface whose functional method is {@link #accept(Object, short)}.
+ *
+ * @param <T> the type of the object argument to the operation
+ * @see java.util.function.BiConsumer
+ */
 @FunctionalInterface
 public interface ObjShortConsumer<T> extends Throwables.ObjShortConsumer<T, RuntimeException> { //NOSONAR
 

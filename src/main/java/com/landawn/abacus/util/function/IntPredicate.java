@@ -26,7 +26,7 @@ import com.landawn.abacus.util.Throwables;
  *
  * <p>This is a functional interface whose functional method is {@link #test(int)}.
  *
- * <p>Refer to JDK API documentation at: <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html">https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a>
+ * <p>Refer to JDK API documentation at: <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html">https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a></p>
  *
  * @see java.util.function.Predicate
  */
@@ -139,6 +139,12 @@ public interface IntPredicate extends Throwables.IntPredicate<RuntimeException>,
      * Returns the specified {@code IntPredicate} instance. This method exists for symmetry with
      * other functional interface types.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * IntPredicate pred = IntPredicate.of(v -> v > 0);
+     * boolean result = pred.test(5); // Returns true
+     * }</pre>
+     *
      * @param predicate the predicate to return
      * @return the specified predicate
      */
@@ -148,6 +154,12 @@ public interface IntPredicate extends Throwables.IntPredicate<RuntimeException>,
 
     /**
      * Returns a predicate that tests if an {@code int} value is equal to the target value.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * IntPredicate isFive = IntPredicate.equal(5);
+     * boolean result = isFive.test(5); // Returns true
+     * }</pre>
      *
      * @param targetInt the value to compare against
      * @return a predicate that tests if an {@code int} value is equal to {@code targetInt}
@@ -159,6 +171,12 @@ public interface IntPredicate extends Throwables.IntPredicate<RuntimeException>,
     /**
      * Returns a predicate that tests if an {@code int} value is not equal to the target value.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * IntPredicate notZero = IntPredicate.notEqual(0);
+     * boolean result = notZero.test(5); // Returns true
+     * }</pre>
+     *
      * @param targetInt the value to compare against
      * @return a predicate that tests if an {@code int} value is not equal to {@code targetInt}
      */
@@ -168,6 +186,12 @@ public interface IntPredicate extends Throwables.IntPredicate<RuntimeException>,
 
     /**
      * Returns a predicate that tests if an {@code int} value is greater than the target value.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * IntPredicate greaterThanTen = IntPredicate.greaterThan(10);
+     * boolean result = greaterThanTen.test(15); // Returns true
+     * }</pre>
      *
      * @param targetInt the value to compare against
      * @return a predicate that tests if an {@code int} value is greater than {@code targetInt}
@@ -179,6 +203,12 @@ public interface IntPredicate extends Throwables.IntPredicate<RuntimeException>,
     /**
      * Returns a predicate that tests if an {@code int} value is greater than or equal to the target value.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * IntPredicate atLeastZero = IntPredicate.greaterEqual(0);
+     * boolean result = atLeastZero.test(0); // Returns true
+     * }</pre>
+     *
      * @param targetInt the value to compare against
      * @return a predicate that tests if an {@code int} value is greater than or equal to {@code targetInt}
      */
@@ -188,6 +218,12 @@ public interface IntPredicate extends Throwables.IntPredicate<RuntimeException>,
 
     /**
      * Returns a predicate that tests if an {@code int} value is less than the target value.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * IntPredicate lessThanHundred = IntPredicate.lessThan(100);
+     * boolean result = lessThanHundred.test(50); // Returns true
+     * }</pre>
      *
      * @param targetInt the value to compare against
      * @return a predicate that tests if an {@code int} value is less than {@code targetInt}
@@ -199,6 +235,12 @@ public interface IntPredicate extends Throwables.IntPredicate<RuntimeException>,
     /**
      * Returns a predicate that tests if an {@code int} value is less than or equal to the target value.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * IntPredicate maxTen = IntPredicate.lessEqual(10);
+     * boolean result = maxTen.test(10); // Returns true
+     * }</pre>
+     *
      * @param targetInt the value to compare against
      * @return a predicate that tests if an {@code int} value is less than or equal to {@code targetInt}
      */
@@ -209,6 +251,12 @@ public interface IntPredicate extends Throwables.IntPredicate<RuntimeException>,
     /**
      * Returns a predicate that tests if an {@code int} value is between two values (exclusive).
      * The value must be strictly greater than {@code minValue} and strictly less than {@code maxValue}.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * IntPredicate inRange = IntPredicate.between(0, 100);
+     * boolean result = inRange.test(50); // Returns true
+     * }</pre>
      *
      * @param minValue the lower bound (exclusive)
      * @param maxValue the upper bound (exclusive)

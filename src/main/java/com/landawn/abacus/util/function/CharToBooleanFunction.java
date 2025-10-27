@@ -30,7 +30,7 @@ public interface CharToBooleanFunction {
      * A default implementation that converts a char value to a boolean.
      * Returns {@code true} if the char value is 'Y', 'y', or '1', otherwise {@code false}.
      * This follows common conventions for representing boolean values as characters,
-     * where 'Y' represents "yes", 'y' is the lowercase variant, and '1' is the numeric representation of true.
+     * where 'Y' represents "yes", 'y' is the lowercase variant, and '1' is the numeric representation of {@code true}.
      */
     CharToBooleanFunction DEFAULT = value -> (value == 'Y' || value == 'y' || value == '1');
 

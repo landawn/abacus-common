@@ -59,8 +59,14 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
 
     static final Random RAND = new SecureRandom();
 
+    /**
+     * The array buffer into which the elements of the LongList are stored.
+     */
     private long[] elementData = N.EMPTY_LONG_ARRAY;
 
+    /**
+     * The size of the LongList (the number of elements it contains).
+     */
     private int size = 0;
 
     /**
@@ -95,7 +101,7 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
      * <p>Changes to the provided array after construction will be reflected in this list
      * and vice versa, as they share the same underlying array.
      *
-     * @param a the array whose elements are to be placed into this list. Must not be null.
+     * @param a the array whose elements are to be placed into this list. Must not be {@code null}.
      */
     public LongList(final long[] a) {
         this(N.requireNonNull(a), a.length);
@@ -111,7 +117,7 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
      * <p>Changes to the provided array after construction will be reflected in this list
      * and vice versa, as they share the same underlying array.
      *
-     * @param a the array to be used as the internal storage for this list. Must not be null.
+     * @param a the array to be used as the internal storage for this list. Must not be {@code null}.
      * @param size the number of elements in the list, must be between 0 and a.length (inclusive)
      * @throws IndexOutOfBoundsException if size is negative or greater than a.length
      */
@@ -489,7 +495,7 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
      *
      * @param a the array containing elements to be added to this list
      * @return {@code true} if this list changed as a result of the call
-     *         (returns {@code false} if the specified array is null or empty)
+     *         (returns {@code false} if the specified array is {@code null} or empty)
      */
     @Override
     public boolean addAll(final long[] a) {
@@ -506,7 +512,7 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
      * @param index the index at which to insert the first element from the specified array
      * @param a the array containing elements to be inserted into this list
      * @return {@code true} if this list changed as a result of the call
-     *         (returns {@code false} if the specified array is null or empty)
+     *         (returns {@code false} if the specified array is {@code null} or empty)
      * @throws IndexOutOfBoundsException if the index is out of range
      *         ({@code index < 0 || index > size()})
      */
@@ -769,7 +775,7 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
      * Performs a batch removal operation based on the specified collection and complement flag.
      *
      * @param c the collection of elements to check against
-     * @param complement if true, retain elements in c; if false, remove elements in c
+     * @param complement if {@code true}, retain elements in c; if {@code false}, remove elements in c
      * @return the number of elements removed
      */
     private int batchRemove(final LongList c, final boolean complement) {
@@ -2187,11 +2193,6 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
         return size == 0;
     }
 
-    /**
-     * Returns the number of elements in this list.
-     *
-     * @return the number of elements in this list
-     */
     @Override
     public int size() {
         return size;

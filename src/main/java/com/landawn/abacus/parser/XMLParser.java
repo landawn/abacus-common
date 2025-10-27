@@ -91,7 +91,7 @@ public interface XMLParser extends Parser<XMLSerializationConfig, XMLDeserializa
      * Deserializes an XML DOM node to an object of the specified type with custom deserialization configuration.
      *
      * <p>This method provides fine-grained control over the deserialization process through the configuration
-     * parameter. The configuration can specify options such as ignoring unknown properties, handling null values,
+     * parameter. The configuration can specify options such as ignoring unknown properties, handling {@code null} values,
      * date/time formats, and other deserialization behaviors.
      *
      * <p><b>Usage Examples:</b></p>
@@ -177,12 +177,12 @@ public interface XMLParser extends Parser<XMLSerializationConfig, XMLDeserializa
      * Deserializes an XML DOM node using node class mappings for dynamic type resolution.
      *
      * <p>This method enables polymorphic deserialization from DOM nodes by mapping XML element names
-     * to Java classes. The target class is determined by matching the node name or its 'name' attribute
+     * to Java classes. The target class is determined by matching the node name or its <i>name</i> attribute
      * to the provided class mappings. This is particularly useful when working with pre-parsed DOM trees
      * containing heterogeneous elements.
      *
      * <p>The parser first attempts to match the node's tag name against the nodeClasses map. If no match
-     * is found and the node has a 'name' attribute, it will attempt to match using that attribute value.
+     * is found and the node has a <i>name</i> attribute, it will attempt to match using that attribute value.
      * This provides flexibility in XML structure design.
      *
      * <p><b>Usage Examples:</b></p>

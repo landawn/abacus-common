@@ -60,6 +60,7 @@ public class ClobType extends AbstractType<Clob> {
      * @param x the CLOB object (parameter is ignored)
      * @return Never returns normally
      * @throws UnsupportedOperationException always thrown as this operation is not supported
+     @MayReturnNull
      */
     @Override
     public String stringOf(final Clob x) throws UnsupportedOperationException {
@@ -98,7 +99,7 @@ public class ClobType extends AbstractType<Clob> {
      *
      * @param rs the ResultSet containing the data
      * @param columnIndex the column index (1-based) of the CLOB value
-     * @return The CLOB object at the specified column, or null if the column value is SQL NULL
+     * @return The CLOB object at the specified column, or {@code null} if the column value is SQL NULL
      * @throws SQLException if a database access error occurs or the column index is invalid
      */
     @Override
@@ -111,7 +112,7 @@ public class ClobType extends AbstractType<Clob> {
      *
      * @param rs the ResultSet containing the data
      * @param columnLabel the label of the column containing the CLOB value
-     * @return The CLOB object in the specified column, or null if the column value is SQL NULL
+     * @return The CLOB object in the specified column, or {@code null} if the column value is SQL NULL
      * @throws SQLException if a database access error occurs or the column label is not found
      */
     @Override
@@ -124,7 +125,7 @@ public class ClobType extends AbstractType<Clob> {
      *
      * @param stmt the PreparedStatement in which to set the parameter
      * @param columnIndex the parameter index (1-based) to set
-     * @param x the CLOB object to set. Can be null.
+     * @param x the CLOB object to set. Can be {@code null}.
      * @throws SQLException if a database access error occurs or the parameter index is invalid
      */
     @Override
@@ -137,7 +138,7 @@ public class ClobType extends AbstractType<Clob> {
      *
      * @param stmt the CallableStatement in which to set the parameter
      * @param parameterName the name of the parameter to set
-     * @param x the CLOB object to set. Can be null.
+     * @param x the CLOB object to set. Can be {@code null}.
      * @throws SQLException if a database access error occurs or the parameter name is not found
      */
     @Override

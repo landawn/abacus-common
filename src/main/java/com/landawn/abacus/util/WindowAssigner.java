@@ -36,9 +36,17 @@ package com.landawn.abacus.util;
 public abstract class WindowAssigner {
 
     /**
+     * Constructor for subclasses to extend.
+     * This constructor is used by concrete implementations of WindowAssigner
+     * to create specific windowing strategies.
+     */
+    protected WindowAssigner() {
+    }
+
+    /**
      * Processes the input iterator and returns a new iterator that groups elements into windows.
      * This method is called internally by the Stream API to apply windowing logic.
-     * 
+     *
      * <p>Implementations should define how elements from the input iterator are grouped
      * into windows and returned as batches through the output iterator.</p>
      *

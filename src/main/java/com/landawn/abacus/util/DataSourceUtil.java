@@ -34,7 +34,7 @@ import com.landawn.abacus.logging.LoggerFactory;
  * participation and connection pooling in Spring environments.</p>
  * 
  * <p>All close methods in this class follow the pattern of closing resources in reverse order
- * of their creation (ResultSet -> Statement -> Connection) to ensure proper cleanup.</p>
+ * of their creation (ResultSet -&gt; Statement -&gt; Connection) to ensure proper cleanup.</p>
  * 
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
@@ -145,7 +145,7 @@ public final class DataSourceUtil {
 
     /**
      * Closes a ResultSet and optionally its associated Statement.
-     * If closeStatement is true, attempts to retrieve and close the Statement that created the ResultSet.
+     * If closeStatement is {@code true}, attempts to retrieve and close the Statement that created the ResultSet.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -158,7 +158,7 @@ public final class DataSourceUtil {
      * }</pre>
      *
      * @param rs the ResultSet to close, may be null
-     * @param closeStatement if true, also closes the Statement that created the ResultSet
+     * @param closeStatement if {@code true}, also closes the Statement that created the ResultSet
      * @throws UncheckedSQLException if a database access error occurs
      */
     public static void close(final ResultSet rs, final boolean closeStatement) throws UncheckedSQLException {
@@ -167,7 +167,7 @@ public final class DataSourceUtil {
 
     /**
      * Closes a ResultSet and optionally its associated Statement and Connection.
-     * Resources are closed in reverse order: ResultSet -> Statement -> Connection.
+     * Resources are closed in reverse order: ResultSet -&gt; Statement -&gt; Connection.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -181,9 +181,9 @@ public final class DataSourceUtil {
      * }</pre>
      *
      * @param rs the ResultSet to close, may be null
-     * @param closeStatement if true, also closes the Statement that created the ResultSet
-     * @param closeConnection if true, also closes the Connection (requires closeStatement to be true)
-     * @throws IllegalArgumentException if closeStatement is false while closeConnection is true
+     * @param closeStatement if {@code true}, also closes the Statement that created the ResultSet
+     * @param closeConnection if {@code true}, also closes the Connection (requires closeStatement to be true)
+     * @throws IllegalArgumentException if closeStatement is {@code false} while closeConnection is true
      * @throws UncheckedSQLException if a database access error occurs
      */
     public static void close(final ResultSet rs, final boolean closeStatement, final boolean closeConnection)
@@ -346,7 +346,7 @@ public final class DataSourceUtil {
 
     /**
      * Closes a ResultSet, Statement, and Connection in the proper order.
-     * Resources are closed in reverse order of creation: ResultSet -> Statement -> Connection.
+     * Resources are closed in reverse order of creation: ResultSet -&gt; Statement -&gt; Connection.
      * If any close operation fails, the exception is thrown after attempting to close remaining resources.
      *
      * <p><b>Usage Examples:</b></p>
@@ -429,7 +429,7 @@ public final class DataSourceUtil {
      * }</pre>
      *
      * @param rs the ResultSet to close, may be null
-     * @param closeStatement if true, also closes the Statement that created the ResultSet
+     * @param closeStatement if {@code true}, also closes the Statement that created the ResultSet
      * @throws UncheckedSQLException if unable to retrieve the Statement from ResultSet
      */
     public static void closeQuietly(final ResultSet rs, final boolean closeStatement) throws UncheckedSQLException {
@@ -452,9 +452,9 @@ public final class DataSourceUtil {
      * }</pre>
      *
      * @param rs the ResultSet to close, may be null
-     * @param closeStatement if true, also closes the Statement that created the ResultSet
-     * @param closeConnection if true, also closes the Connection (requires closeStatement to be true)
-     * @throws IllegalArgumentException if closeStatement is false while closeConnection is true
+     * @param closeStatement if {@code true}, also closes the Statement that created the ResultSet
+     * @param closeConnection if {@code true}, also closes the Connection (requires closeStatement to be true)
+     * @throws IllegalArgumentException if closeStatement is {@code false} while closeConnection is true
      */
     public static void closeQuietly(final ResultSet rs, final boolean closeStatement, final boolean closeConnection) throws IllegalArgumentException {
         if (closeConnection && !closeStatement) {
@@ -583,7 +583,7 @@ public final class DataSourceUtil {
     /**
      * Unconditionally closes a ResultSet, Statement, and Connection.
      * Any exceptions during closing are ignored and logged.
-     * Resources are closed in the proper order: ResultSet -> Statement -> Connection.
+     * Resources are closed in the proper order: ResultSet -&gt; Statement -&gt; Connection.
      * This method is typically used in finally blocks where exception handling is not desired.
      *
      * <p><b>Usage Examples:</b></p>

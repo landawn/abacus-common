@@ -35,10 +35,10 @@ import com.landawn.abacus.util.WD;
  * Type handler for Google Guava Multiset implementations.
  * This class provides serialization and deserialization capabilities for various Guava Multiset types
  * including HashMultiset, LinkedHashMultiset, and TreeMultiset.
- * Multisets are serialized as Map<E, Integer> structures where the value represents the count of each element.
+ * Multisets are serialized as Map&lt;E, Integer&gt; structures where the value represents the count of each element.
  *
  * @param <E> the element type of the multiset
- * @param <T> the multiset type (must extend Multiset<E>)
+ * @param <T> the multiset type (must extend Multiset&lt;E&gt;)
  */
 @SuppressWarnings("java:S2160")
 public class GuavaMultisetType<E, T extends Multiset<E>> extends AbstractType<T> {
@@ -73,9 +73,10 @@ public class GuavaMultisetType<E, T extends Multiset<E>> extends AbstractType<T>
      * The declaring name represents the type in a format suitable for type declarations,
      * using canonical class names with type parameters.
      *
-     * @return the declaring name of this type (e.g., "com.google.common.collect.Multiset<String>")
+     * @return the declaring name of this type (e.g., "com.google.common.collect.Multiset&lt;String&gt;")
      */
     @Override
+    @MayReturnNull
     public String declaringName() {
         return declaringName;
     }
@@ -111,11 +112,6 @@ public class GuavaMultisetType<E, T extends Multiset<E>> extends AbstractType<T>
         return parameterTypes;
     }
 
-    /**
-     * Indicates that this is a generic type with type parameters.
-     *
-     * @return {@code true} as multiset types are generic types
-     */
     @Override
     public boolean isGenericType() {
         return true;
@@ -125,7 +121,7 @@ public class GuavaMultisetType<E, T extends Multiset<E>> extends AbstractType<T>
      * Indicates whether instances of this type can be serialized.
      * Guava multisets are serializable through their Map representation.
      *
-     * @return true, as multisets can be serialized
+     * @return {@code true}, as multisets can be serialized
      */
     @Override
     public boolean isSerializable() {
@@ -138,9 +134,10 @@ public class GuavaMultisetType<E, T extends Multiset<E>> extends AbstractType<T>
      * For ordered multisets (LinkedHashMultiset, TreeMultiset), the order is preserved using LinkedHashMap.
      *
      * @param x the multiset to convert to string
-     * @return the JSON string representation of the multiset as a map of elements to counts, or null if the input is null
+     * @return the JSON string representation of the multiset as a map of elements to counts, or {@code null} if the input is null
      */
     @Override
+    @MayReturnNull
     public String stringOf(final T x) {
         if (x == null) {
             return null;
@@ -157,14 +154,15 @@ public class GuavaMultisetType<E, T extends Multiset<E>> extends AbstractType<T>
 
     /**
      * Converts a string representation back to a multiset instance.
-     * The string should be in JSON format representing a Map<E, Integer> where values are element counts.
+     * The string should be in JSON format representing a Map&lt;E, Integer&gt; where values are element counts.
      * Creates the appropriate multiset implementation based on the type class.
      *
      * @param str the JSON string to parse
-     * @return a new multiset instance containing the parsed elements with their counts, or null if the input is null or empty
+     * @return a new multiset instance containing the parsed elements with their counts, or {@code null} if the input is {@code null} or empty
      */
     @MayReturnNull
     @Override
+
     public T valueOf(final String str) {
         if (Strings.isEmpty(str)) {
             return null; // NOSONAR
@@ -187,8 +185,8 @@ public class GuavaMultisetType<E, T extends Multiset<E>> extends AbstractType<T>
      *
      * @param typeClass the multiset class
      * @param parameterTypeName the name of the element type
-     * @param isDeclaringName true to generate a declaring name, {@code false} for the full name
-     * @return the formatted type name (e.g., "Multiset<String>")
+     * @param isDeclaringName {@code true} to generate a declaring name, {@code false} for the full name
+     * @return the formatted type name (e.g., "Multiset&lt;String&gt;")
      */
     protected static String getTypeName(final Class<?> typeClass, final String parameterTypeName, final boolean isDeclaringName) {
         if (isDeclaringName) {

@@ -33,8 +33,7 @@ import java.lang.annotation.Target;
  *   <li>Performance or stability issues</li>
  *   <li>Missing features that will be added later</li>
  * </ul>
- * </p>
- * 
+ *
  * <p>This annotation can be applied to:</p>
  * <ul>
  *   <li>Types (classes, interfaces, enums, annotations)</li>
@@ -53,7 +52,7 @@ import java.lang.annotation.Target;
  * 
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
- * {@literal @}Beta
+ * @Beta
  * public class ExperimentalFeature {
  *     // This class may change significantly
  * }

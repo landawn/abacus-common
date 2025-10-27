@@ -14,11 +14,6 @@
 
 package com.landawn.abacus.type;
 
-/**
- * Type handler for {@link StringBuilder} objects. This class provides serialization
- * and deserialization support for StringBuilder instances, which are mutable
- * sequences of characters.
- */
 public class StringBuilderType extends AbstractCharSequenceType<StringBuilder> {
 
     /**
@@ -45,7 +40,7 @@ public class StringBuilderType extends AbstractCharSequenceType<StringBuilder> {
      * This method returns the string content of the StringBuilder.
      *
      * @param x the StringBuilder object to convert
-     * @return the string representation of the StringBuilder's content, or null if x is null
+          * @return the string representation of the StringBuilder's content, or {@code null} if x is null
      */
     @Override
     public String stringOf(final StringBuilder x) {
@@ -57,7 +52,7 @@ public class StringBuilderType extends AbstractCharSequenceType<StringBuilder> {
      * This method creates a new StringBuilder containing the provided string.
      *
      * @param str the string to convert to a StringBuilder
-     * @return a new StringBuilder containing the string content, or null if str is null
+          * @return a new StringBuilder containing the string content, or {@code null} if str is null
      */
     @Override
     public StringBuilder valueOf(final String str) {
@@ -66,9 +61,9 @@ public class StringBuilderType extends AbstractCharSequenceType<StringBuilder> {
 
     /**
      * Indicates whether instances of this type are immutable.
-     * StringBuilder instances are mutable, so this returns false.
+     * StringBuilder instances are mutable, so this returns {@code false}.
      *
-     * @return false, as StringBuilder objects are mutable
+     * @return {@code false}, as StringBuilder objects are mutable
      */
     @Override
     public boolean isImmutable() {

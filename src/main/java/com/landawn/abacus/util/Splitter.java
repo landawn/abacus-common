@@ -61,6 +61,10 @@ import com.landawn.abacus.util.stream.Stream;
 @SuppressWarnings("java:S1192")
 public final class Splitter {
 
+    /**
+     * A compiled regular expression pattern that matches one or more whitespace characters.
+     * Uses Unicode character class to properly handle all Unicode whitespace characters.
+     */
     public static final Pattern WHITE_SPACE_PATTERN = Pattern.compile("\\s+", Pattern.UNICODE_CHARACTER_CLASS);
 
     private static final SubStringFunc defaultSubStringFunc = (source, start, end) -> source.subSequence(start, end).toString();
@@ -464,10 +468,10 @@ public final class Splitter {
 
     /**
      * Configures this Splitter to omit empty strings from the results when the specified
-     * parameter is true. Empty strings can occur when there are consecutive delimiters
+     * parameter is {@code true}. Empty strings can occur when there are consecutive delimiters
      * or when delimiters appear at the beginning or end of the input.
      *
-     * @param omitEmptyStrings true to omit empty strings from results, {@code false} to include them
+     * @param omitEmptyStrings {@code true} to omit empty strings from results, {@code false} to include them
      * @return this Splitter instance for method chaining
      * @deprecated replaced by {@link #omitEmptyStrings()}
      */
@@ -503,10 +507,10 @@ public final class Splitter {
 
     /**
      * Configures this Splitter to trim leading and trailing spaces from each
-     * resulting substring when the specified parameter is true. Only space
+     * resulting substring when the specified parameter is {@code true}. Only space
      * characters (not all whitespace) are trimmed.
      *
-     * @param trim true to trim spaces from results, {@code false} to leave them as-is
+     * @param trim {@code true} to trim spaces from results, {@code false} to leave them as-is
      * @return this Splitter instance for method chaining
      * @deprecated replaced by {@link #trimResults()}
      */
@@ -542,11 +546,11 @@ public final class Splitter {
 
     /**
      * Configures this Splitter to remove leading and trailing whitespace characters
-     * from each resulting substring when the specified parameter is true. This method
+     * from each resulting substring when the specified parameter is {@code true}. This method
      * removes all whitespace as defined by {@link Character#isWhitespace(char)},
      * including spaces, tabs, newlines, etc.
      *
-     * @param strip true to strip whitespace from results, {@code false} to leave them as-is
+     * @param strip {@code true} to strip whitespace from results, {@code false} to leave them as-is
      * @return this Splitter instance for method chaining
      * @see Character#isWhitespace(char)
      * @deprecated replaced by {@link #stripResults()}
@@ -1006,7 +1010,7 @@ public final class Splitter {
      * @param source the CharSequence to split; may be {@code null}
      * @param arrayType the Class object representing the desired array type
      * @return an array of the specified type containing the split and converted results
-     * @throws IllegalArgumentException if arrayType is null or not an array type
+     * @throws IllegalArgumentException if arrayType is {@code null} or not an array type
      */
     public <T> T splitToArray(final CharSequence source, final Class<T> arrayType) throws IllegalArgumentException {
         N.checkArgNotNull(arrayType, cs.arrayType);
@@ -1054,7 +1058,7 @@ public final class Splitter {
      *
      * @param source the CharSequence to split; may be {@code null}
      * @param output the String array to populate with split results
-     * @throws IllegalArgumentException if output is null or empty
+     * @throws IllegalArgumentException if output is {@code null} or empty
      */
     public void splitToArray(final CharSequence source, final String[] output) throws IllegalArgumentException {
         N.checkArgNotEmpty(output, cs.output);
@@ -1220,12 +1224,6 @@ public final class Splitter {
         /** The key value splitter. */
         private final Splitter keyValueSplitter;
 
-        /**
-         * Instantiates a new map splitter.
-         *
-         * @param entrySplitter the Splitter to use for splitting entries
-         * @param keyValueSplitter the Splitter to use for splitting key-value pairs
-         */
         MapSplitter(final Splitter entrySplitter, final Splitter keyValueSplitter) {
             this.entrySplitter = entrySplitter;
             this.keyValueSplitter = keyValueSplitter;
@@ -1332,9 +1330,9 @@ public final class Splitter {
 
         /**
          * Configures this MapSplitter to omit entries with empty values when the
-         * specified parameter is true. This applies to the entries splitting phase.
+         * specified parameter is {@code true}. This applies to the entries splitting phase.
          *
-         * @param omitEmptyStrings true to omit entries with empty keys and values, {@code false} to include them
+         * @param omitEmptyStrings {@code true} to omit entries with empty keys and values, {@code false} to include them
          * @return this MapSplitter instance for method chaining
          * @deprecated replaced by {@link #omitEmptyStrings()}
          */
@@ -1370,9 +1368,9 @@ public final class Splitter {
 
         /**
          * Configures this MapSplitter to trim spaces from both entries and
-         * key-value pairs when the specified parameter is true.
+         * key-value pairs when the specified parameter is {@code true}.
          *
-         * @param trim true to trim spaces, {@code false} to leave them as-is
+         * @param trim {@code true} to trim spaces, {@code false} to leave them as-is
          * @return this MapSplitter instance for method chaining
          * @deprecated replaced by {@link #trimResults()}
          */
@@ -1412,9 +1410,9 @@ public final class Splitter {
         /**
          * Configures this MapSplitter to strip all leading and trailing whitespace
          * characters from both entries and key-value pairs when the specified
-         * parameter is true.
+         * parameter is {@code true}.
          *
-         * @param strip true to strip whitespace, {@code false} to leave it as-is
+         * @param strip {@code true} to strip whitespace, {@code false} to leave it as-is
          * @return this MapSplitter instance for method chaining
          * @see Character#isWhitespace(char)
          * @deprecated replaced by {@link #stripResults()}
@@ -1456,7 +1454,7 @@ public final class Splitter {
         /**
          * Sets the maximum number of map entries to produce when splitting.
          *
-         * <p><b>Limit Semantics - "Up To N":</b></p>
+         * <p><b>Limit Semantics - "Up To N":</b>
          * <ul>
          *   <li>{@code limit(N)} means: produce <b>AT MOST N</b> map entries</li>
          *   <li>If input has fewer than N pairs: returns all pairs</li>
@@ -1464,7 +1462,7 @@ public final class Splitter {
          *   <li>If input has more than N pairs: returns first N pairs, remainder is discarded</li>
          * </ul>
          *
-         * <p><b>Common Confusion:</b></p>
+         * <p><b>Common Confusion:</b>
          * <ul>
          *   <li>{@code limit(2)} does NOT mean "return 1 entry"</li>
          *   <li>{@code limit(2)} means "return up to 2 entries"</li>
@@ -1511,9 +1509,9 @@ public final class Splitter {
          * // But here limit(2) means 2 map entries, not 1
          * }</pre>
          *
-         * @param limit the maximum number of entries to return; must be > 0
+         * @param limit the maximum number of entries to return; must be &gt; 0
          * @return this MapSplitter for method chaining
-         * @throws IllegalArgumentException if {@code limit} <= 0
+         * @throws IllegalArgumentException if {@code limit} &lt;= 0
          * @see Splitter#limit(int)
          */
         public MapSplitter limit(final int limit) throws IllegalArgumentException {
@@ -1714,7 +1712,7 @@ public final class Splitter {
          * @param <M> the type of Map to populate
          * @param source the CharSequence to split into a map; may be {@code null}
          * @param output the Map to add the parsed key-value pairs to
-         * @throws IllegalArgumentException if output is null, or if any entry string
+         * @throws IllegalArgumentException if output is {@code null}, or if any entry string
          *         cannot be properly parsed into a key-value pair
          */
         public <M extends Map<String, String>> void split(final CharSequence source, final M output) throws IllegalArgumentException {
@@ -1770,7 +1768,7 @@ public final class Splitter {
          * @param keyType the Class representing the type to convert keys to
          * @param valueType the Class representing the type to convert values to
          * @param output the Map to add the converted key-value pairs to
-         * @throws IllegalArgumentException if keyType, valueType, or output is null,
+         * @throws IllegalArgumentException if keyType, valueType, or output is {@code null},
          *         or if any entry string cannot be properly parsed into a key-value pair
          */
         public <K, V, M extends Map<K, V>> void split(final CharSequence source, final Class<K> keyType, final Class<V> valueType, final M output)
@@ -1797,7 +1795,7 @@ public final class Splitter {
          * @param keyType the Type instance used for converting strings to keys
          * @param valueType the Type instance used for converting strings to values
          * @param output the Map to add the converted key-value pairs to
-         * @throws IllegalArgumentException if keyType, valueType, or output is null,
+         * @throws IllegalArgumentException if keyType, valueType, or output is {@code null},
          *         or if any entry string cannot be properly parsed into a key-value pair
          */
         public <K, V, M extends Map<K, V>> void split(final CharSequence source, final Type<K> keyType, final Type<V> valueType, final M output)
@@ -2045,9 +2043,9 @@ public final class Splitter {
          * produces split substrings lazily on-demand.
          *
          * @param toSplit the CharSequence to be split; may be {@code null}
-         * @param omitEmptyStrings true to omit empty strings from results
-         * @param trim true to trim leading and trailing spaces from each substring
-         * @param strip true to strip all whitespace from each substring
+         * @param omitEmptyStrings {@code true} to omit empty strings from results
+         * @param trim {@code true} to trim leading and trailing spaces from each substring
+         * @param strip {@code true} to strip all whitespace from each substring
          * @param limit the maximum number of substrings to produce
          * @return an ObjIterator that produces split substrings; returns an empty iterator if toSplit is null
          */

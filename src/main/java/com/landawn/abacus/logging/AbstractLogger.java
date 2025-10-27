@@ -54,20 +54,10 @@ public abstract class AbstractLogger implements Logger {
 
     protected final String name;
 
-    /**
-     * Constructs an AbstractLogger with the specified name.
-     * 
-     * @param name the name of the logger
-     */
     protected AbstractLogger(final String name) {
         this.name = name;
     }
 
-    /**
-     * Gets the name of this logger.
-     *
-     * @return the logger name
-     */
     @Override
     public String getName() {
         return name;
@@ -453,12 +443,6 @@ public abstract class AbstractLogger implements Logger {
         }
     }
 
-    /**
-     * Logs a message at DEBUG level with an exception.
-     *
-     * @param t the exception to log
-     * @param msg the message to log
-     */
     @Override
     public void debug(final Throwable t, final String msg) {
         debug(msg, t);
@@ -680,12 +664,6 @@ public abstract class AbstractLogger implements Logger {
         }
     }
 
-    /**
-     * Logs a message at INFO level with an exception.
-     *
-     * @param t the exception to log
-     * @param msg the message to log
-     */
     @Override
     public void info(final Throwable t, final String msg) {
         info(msg, t);
@@ -907,12 +885,6 @@ public abstract class AbstractLogger implements Logger {
         }
     }
 
-    /**
-     * Logs a message at WARN level with an exception.
-     *
-     * @param t the exception to log
-     * @param msg the message to log
-     */
     @Override
     public void warn(final Throwable t, final String msg) {
         warn(msg, t);
@@ -1134,12 +1106,6 @@ public abstract class AbstractLogger implements Logger {
         }
     }
 
-    /**
-     * Logs a message at ERROR level with an exception.
-     *
-     * @param t the exception to log
-     * @param msg the message to log
-     */
     @Override
     public void error(final Throwable t, final String msg) {
         error(msg, t);
@@ -1232,9 +1198,17 @@ public abstract class AbstractLogger implements Logger {
 
     /**
      * Formats a message template with one argument.
-     * 
+     *
      * <p>Supports both {} and %s placeholders. If no placeholder is found,
      * the argument is appended in square brackets.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * String msg = format("User {} logged in", "john");
+     * // Output: "User john logged in"
+     * String msg2 = format("Count: %s", 42);
+     * // Output: "Count: 42"
+     * }</pre>
      *
      * @param template the message template
      * @param arg the argument to substitute
@@ -1274,9 +1248,17 @@ public abstract class AbstractLogger implements Logger {
 
     /**
      * Formats a message template with two arguments.
-     * 
+     *
      * <p>Supports both {} and %s placeholders. Extra arguments are appended
      * in square brackets if there are fewer placeholders than arguments.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * String msg = format("User {} logged in from {}", "john", "192.168.1.1");
+     * // Output: "User john logged in from 192.168.1.1"
+     * String msg2 = format("Only one placeholder: {}", "arg1", "arg2");
+     * // Output: "Only one placeholder: arg1 [arg2]"
+     * }</pre>
      *
      * @param template the message template
      * @param arg1 the first argument
@@ -1338,9 +1320,18 @@ public abstract class AbstractLogger implements Logger {
 
     /**
      * Formats a message template with three arguments.
-     * 
+     *
      * <p>Supports both {} and %s placeholders. Extra arguments are appended
      * in square brackets if there are fewer placeholders than arguments.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * String msg = format("User {} performed {} operations in {}ms",
+     *                     "alice", 10, 250);
+     * // Output: "User alice performed 10 operations in 250ms"
+     * String msg2 = format("Result: {}", "success", "extra", "args");
+     * // Output: "Result: success [extra, args]"
+     * }</pre>
      *
      * @param template the message template
      * @param arg1 the first argument
@@ -1431,9 +1422,9 @@ public abstract class AbstractLogger implements Logger {
      *                     username, opCount, duration);
      * }</pre>
      *
-     * @param template a non-null string containing 0 or more {} or %s placeholders
+     * @param template a {@code non-null} string containing 0 or more {} or %s placeholders
      * @param args the arguments to be substituted into the message template. Arguments
-     *     are converted to strings using {@link String#valueOf(Object)}. Arguments can be null.
+     *     are converted to strings using {@link String#valueOf(Object)}. Arguments can be {@code null}.
      * @return the formatted message
      */
     // Note that this is somewhat-improperly used from Verify.java as well.

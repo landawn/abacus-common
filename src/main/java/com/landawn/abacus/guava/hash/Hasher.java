@@ -26,8 +26,8 @@ import com.google.common.hash.HashCode;
  * A stateful object for computing hash codes incrementally. Hasher instances are created
  * by {@link HashFunction#newHasher()} and accumulate data through their various put methods
  * before generating a final {@link HashCode}.
- * 
- * <h3>Usage Pattern</h3>
+ *
+ * <p><b>Usage Pattern</b></p>
  * <ol>
  *   <li>Obtain a new Hasher from a HashFunction</li>
  *   <li>Add data using put methods (can be chained)</li>
@@ -43,8 +43,8 @@ import com.google.common.hash.HashCode;
  *     .putBytes(sessionToken)
  *     .hash();
  * }</pre>
- * 
- * <h3>Important Notes</h3>
+ *
+ * <p><b>Important Notes</b></p>
  * <ul>
  *   <li><b>Single use:</b> Each Hasher instance should be used for exactly one hash computation</li>
  *   <li><b>Order matters:</b> Data must be added in a consistent order for reproducible results</li>
@@ -54,8 +54,8 @@ import com.google.common.hash.HashCode;
  *   <li><b>Multibyte values:</b> All multibyte values (int, long, etc.) are interpreted in 
  *       little-endian order</li>
  * </ul>
- * 
- * <h3>Avoiding Collisions</h3>
+ *
+ * <p><b>Avoiding Collisions</b></p>
  * <p>Since data chunks are not delimited, be careful to avoid unintended collisions:
  * 
  * <p><b>Usage Examples:</b></p>
@@ -223,7 +223,7 @@ public interface Hasher {
 
     /**
      * Adds a boolean value to this hasher's internal state. This is equivalent to
-     * {@code put((byte) 1)} for true and {@code put((byte) 0)} for false.
+     * {@code put((byte) 1)} for {@code true} and {@code put((byte) 0)} for {@code false}.
      * 
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -339,11 +339,11 @@ public interface Hasher {
      * Adds an arbitrary object to this hasher's internal state using a {@link Funnel}
      * to decompose the object into primitive values. This is a convenience method
      * equivalent to {@code funnel.funnel(instance, this)}.
-     * 
+     *
      * <p>The funnel is responsible for breaking down the object into a sequence of
      * primitive values that can be hashed. This ensures consistent hashing of complex
      * objects.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Funnel<Person> personFunnel = (person, into) -> {
@@ -351,7 +351,7 @@ public interface Hasher {
      *         .putInt(person.age)
      *         .putLong(person.id);
      * };
-     * 
+     *
      * Person person = new Person("Alice", 30, 12345L);
      * hasher.put(person, personFunnel);
      * }</pre>

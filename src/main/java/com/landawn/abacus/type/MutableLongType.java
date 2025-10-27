@@ -41,9 +41,10 @@ public class MutableLongType extends NumberType<MutableLong> {
 
     /**
      * Converts a {@link MutableLong} object to its string representation.
-     * 
+     *
      * @param x the MutableLong object to convert
-     * @return the string representation of the long value, or null if the input is null
+     * @return the string representation of the long value, or {@code null} if the input is null
+     @MayReturnNull
      */
     @Override
     public String stringOf(final MutableLong x) {
@@ -52,10 +53,11 @@ public class MutableLongType extends NumberType<MutableLong> {
 
     /**
      * Converts a string representation to a {@link MutableLong} object.
-     * 
+     *
      * @param str the string to convert
-     * @return a MutableLong containing the parsed long value, or null if the input string is empty or null
+     * @return a MutableLong containing the parsed long value, or {@code null} if the input string is empty or null
      * @throws NumberFormatException if the string cannot be parsed as a long
+     @MayReturnNull
      */
     @Override
     public MutableLong valueOf(final String str) {
@@ -64,7 +66,7 @@ public class MutableLongType extends NumberType<MutableLong> {
 
     /**
      * Retrieves a {@link MutableLong} value from a ResultSet at the specified column index.
-     * 
+     *
      * @param rs the ResultSet to read from
      * @param columnIndex the column index (1-based) to retrieve the value from
      * @return a MutableLong containing the long value from the ResultSet
@@ -77,7 +79,7 @@ public class MutableLongType extends NumberType<MutableLong> {
 
     /**
      * Retrieves a {@link MutableLong} value from a ResultSet using the specified column label.
-     * 
+     *
      * @param rs the ResultSet to read from
      * @param columnLabel the label for the column specified with the SQL AS clause
      * @return a MutableLong containing the long value from the ResultSet
@@ -90,7 +92,7 @@ public class MutableLongType extends NumberType<MutableLong> {
 
     /**
      * Sets a parameter in a PreparedStatement to the value of a {@link MutableLong}.
-     * 
+     *
      * @param stmt the PreparedStatement to set the parameter on
      * @param columnIndex the parameter index (1-based) to set
      * @param x the MutableLong value to set, or null
@@ -103,7 +105,7 @@ public class MutableLongType extends NumberType<MutableLong> {
 
     /**
      * Sets a named parameter in a CallableStatement to the value of a {@link MutableLong}.
-     * 
+     *
      * @param stmt the CallableStatement to set the parameter on
      * @param parameterName the name of the parameter to set
      * @param x the MutableLong value to set, or null
@@ -116,7 +118,7 @@ public class MutableLongType extends NumberType<MutableLong> {
 
     /**
      * Appends the string representation of a {@link MutableLong} to an Appendable.
-     * 
+     *
      * @param appendable the Appendable to write to
      * @param x the MutableLong value to append
      * @throws IOException if an I/O error occurs during the append operation
@@ -133,7 +135,7 @@ public class MutableLongType extends NumberType<MutableLong> {
     /**
      * Writes the character representation of a {@link MutableLong} to a CharacterWriter.
      * This method is typically used for JSON/XML serialization.
-     * 
+     *
      * @param writer the CharacterWriter to write to
      * @param x the MutableLong value to write
      * @param config the serialization configuration

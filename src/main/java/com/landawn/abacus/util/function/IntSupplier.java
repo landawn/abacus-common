@@ -28,7 +28,7 @@ import com.landawn.abacus.util.Throwables;
  *
  * <p>This is a functional interface whose functional method is {@link #getAsInt()}.
  *
- * <p>Refer to JDK API documentation at: <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html">https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a>
+ * <p>Refer to JDK API documentation at: <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html">https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a></p>
  *
  * @see java.util.function.Supplier
  */
@@ -48,6 +48,12 @@ public interface IntSupplier extends Throwables.IntSupplier<RuntimeException>, j
 
     /**
      * Gets a result.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * IntSupplier counter = new AtomicInteger()::incrementAndGet;
+     * int value = counter.getAsInt(); // Returns 1, then 2, then 3, etc.
+     * }</pre>
      *
      * @return an {@code int} value
      */

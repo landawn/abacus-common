@@ -51,6 +51,7 @@ public abstract class AbstractDoubleType extends NumberType<Number> {
      */
     @MayReturnNull
     @Override
+
     public String stringOf(final Number x) {
         if (x == null) {
             return null; // NOSONAR
@@ -72,7 +73,9 @@ public abstract class AbstractDoubleType extends NumberType<Number> {
      * @return the Double value
      * @throws NumberFormatException if the string cannot be parsed as a double
      */
+    @MayReturnNull
     @Override
+
     public Double valueOf(final String str) {
         try {
             return Strings.isEmpty(str) ? ((Double) defaultValue()) : Double.valueOf(str);
@@ -97,7 +100,7 @@ public abstract class AbstractDoubleType extends NumberType<Number> {
     /**
      * Retrieves a double value from a ResultSet at the specified column index.
      * This method uses rs.getDouble() which returns 0.0 for SQL NULL values.
-     * Subclasses may override this to return null for SQL NULL values.
+     * Subclasses may override this to return {@code null} for SQL NULL values.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -116,6 +119,7 @@ public abstract class AbstractDoubleType extends NumberType<Number> {
      * @throws SQLException if a database access error occurs or the columnIndex is invalid
      */
     @Override
+    @MayReturnNull
     public Double get(final ResultSet rs, final int columnIndex) throws SQLException {
         return rs.getDouble(columnIndex);
     }
@@ -123,7 +127,7 @@ public abstract class AbstractDoubleType extends NumberType<Number> {
     /**
      * Retrieves a double value from a ResultSet using the specified column label.
      * This method uses rs.getDouble() which returns 0.0 for SQL NULL values.
-     * Subclasses may override this to return null for SQL NULL values.
+     * Subclasses may override this to return {@code null} for SQL NULL values.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -142,6 +146,7 @@ public abstract class AbstractDoubleType extends NumberType<Number> {
      * @throws SQLException if a database access error occurs or the columnLabel is not found
      */
     @Override
+    @MayReturnNull
     public Double get(final ResultSet rs, final String columnLabel) throws SQLException {
         return rs.getDouble(columnLabel);
     }

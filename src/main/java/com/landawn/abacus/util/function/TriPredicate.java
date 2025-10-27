@@ -79,7 +79,7 @@ public interface TriPredicate<A, B, C> extends Throwables.TriPredicate<A, B, C, 
     /**
      * Returns a composed predicate that represents a short-circuiting logical AND of this
      * predicate and another. When evaluating the composed predicate, if this predicate is
-     * false, then the other predicate is not evaluated.
+     * {@code false}, then the other predicate is not evaluated.
      * 
      * <p>Any exceptions thrown during evaluation of either predicate are relayed to the caller;
      * if evaluation of this predicate throws an exception, the other predicate will not be evaluated.
@@ -106,7 +106,7 @@ public interface TriPredicate<A, B, C> extends Throwables.TriPredicate<A, B, C, 
     /**
      * Returns a composed predicate that represents a short-circuiting logical OR of this
      * predicate and another. When evaluating the composed predicate, if this predicate is
-     * true, then the other predicate is not evaluated.
+     * {@code true}, then the other predicate is not evaluated.
      * 
      * <p>Any exceptions thrown during evaluation of either predicate are relayed to the caller;
      * if evaluation of this predicate throws an exception, the other predicate will not be evaluated.
@@ -140,7 +140,7 @@ public interface TriPredicate<A, B, C> extends Throwables.TriPredicate<A, B, C, 
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * TriPredicate<String, Integer, Boolean> predicate = (s, i, b) -> { ... };
-     * Throwables.TriPredicate<String, Integer, Boolean, IOException> throwablePredicate = 
+     * var throwablePredicate = 
      *     predicate.toThrowable();
      * }</pre>
      *

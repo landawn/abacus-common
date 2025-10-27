@@ -26,6 +26,7 @@ import java.util.Map;
 import java.util.Objects;
 
 import com.landawn.abacus.annotation.JsonXmlField;
+import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.annotation.SuppressFBWarnings;
 import com.landawn.abacus.annotation.Type.EnumBy;
 import com.landawn.abacus.parser.JSONXMLSerializationConfig;
@@ -41,7 +42,7 @@ import com.landawn.abacus.util.Strings;
  * It supports both ordinal (numeric) and name (string) representations of enums,
  * and handles custom JSON/XML field names through annotations.
  *
- * @param <T> the enum type, must extend Enum<T>
+ * @param <T> the enum type, must extend Enum&lt;T&gt;
  */
 @SuppressWarnings("java:S2160")
 public final class EnumType<T extends Enum<T>> extends SingleValueType<T> {
@@ -99,7 +100,7 @@ public final class EnumType<T extends Enum<T>> extends SingleValueType<T> {
      * Indicates whether this enum type is serializable.
      * Enums are always serializable.
      *
-     * @return true, as enums are always serializable
+     * @return {@code true}, as enums are always serializable
      */
     @Override
     public boolean isSerializable() {
@@ -110,7 +111,7 @@ public final class EnumType<T extends Enum<T>> extends SingleValueType<T> {
      * Indicates whether instances of this enum type are immutable.
      * Enums are always immutable in Java.
      *
-     * @return true, as enums are immutable
+     * @return {@code true}, as enums are immutable
      */
     @Override
     public boolean isImmutable() {
@@ -122,10 +123,12 @@ public final class EnumType<T extends Enum<T>> extends SingleValueType<T> {
      * If a custom JSON value type is defined, uses the parent class implementation.
      * Otherwise, returns the enum's name.
      *
-     * @param x the enum value to convert. Can be null.
-     * @return The string representation of the enum, or null if input is null
+     * @param x the enum value to convert. Can be {@code null}.
+     * @return The string representation of the enum, or {@code null} if input is null
      */
+    @MayReturnNull
     @Override
+
     public String stringOf(final T x) {
         return (jsonValueType == null) ? (x == null ? null : x.name()) : super.stringOf(x);
     }
@@ -139,11 +142,13 @@ public final class EnumType<T extends Enum<T>> extends SingleValueType<T> {
      * - Empty/null strings return null
      * - Special handling for "null" string if no enum constant named "null" exists
      *
-     * @param str the string to convert. Can be null or empty.
-     * @return The enum value corresponding to the string, or null if input is null/empty
+     * @param str the string to convert. Can be {@code null} or empty.
+     * @return The enum value corresponding to the string, or {@code null} if input is null/empty
      * @throws IllegalArgumentException if the string doesn't match any enum value
      */
+    @MayReturnNull
     @Override
+
     public T valueOf(final String str) {
         if (jsonValueType == null) {
             if (Strings.isEmpty(str) || (!hasNull && NULL.equals(str))) {
@@ -164,12 +169,13 @@ public final class EnumType<T extends Enum<T>> extends SingleValueType<T> {
 
     /**
      * Converts an integer ordinal value to its corresponding enum constant.
-     * Zero is treated as null unless there's an enum with ordinal 0.
+     * Zero is treated as {@code null} unless there's an enum with ordinal 0.
      *
      * @param value the ordinal value of the enum
-     * @return The enum constant with the specified ordinal, or null if value is 0 and no enum has ordinal 0
+     * @return The enum constant with the specified ordinal, or {@code null} if value is 0 and no enum has ordinal 0
      * @throws IllegalArgumentException if no enum constant exists with the given ordinal (except for 0)
      */
+    @MayReturnNull
     public T valueOf(final int value) {
         final T result = numberEnum.get(value);
 
@@ -188,10 +194,12 @@ public final class EnumType<T extends Enum<T>> extends SingleValueType<T> {
      *
      * @param rs the ResultSet containing the data
      * @param columnIndex the column index (1-based) of the enum value
-     * @return The enum value at the specified column, or null if the column value is SQL NULL
+     * @return The enum value at the specified column, or {@code null} if the column value is SQL NULL
      * @throws SQLException if a database access error occurs or the column index is invalid
      */
+    @MayReturnNull
     @Override
+
     public T get(final ResultSet rs, final int columnIndex) throws SQLException {
         if (jsonValueType == null) {
             if (enumBy == EnumBy.ORDINAL) {
@@ -212,10 +220,12 @@ public final class EnumType<T extends Enum<T>> extends SingleValueType<T> {
      *
      * @param rs the ResultSet containing the data
      * @param columnLabel the label of the column containing the enum value
-     * @return The enum value in the specified column, or null if the column value is SQL NULL
+     * @return The enum value in the specified column, or {@code null} if the column value is SQL NULL
      * @throws SQLException if a database access error occurs or the column label is not found
      */
+    @MayReturnNull
     @Override
+
     public T get(final ResultSet rs, final String columnLabel) throws SQLException {
         if (jsonValueType == null) {
             if (enumBy == EnumBy.ORDINAL) {
@@ -236,7 +246,7 @@ public final class EnumType<T extends Enum<T>> extends SingleValueType<T> {
      *
      * @param stmt the PreparedStatement in which to set the parameter
      * @param columnIndex the parameter index (1-based) to set
-     * @param x the enum value to set. Can be null.
+     * @param x the enum value to set. Can be {@code null}.
      * @throws SQLException if a database access error occurs or the parameter index is invalid
      */
     @Override
@@ -260,7 +270,7 @@ public final class EnumType<T extends Enum<T>> extends SingleValueType<T> {
      *
      * @param stmt the CallableStatement in which to set the parameter
      * @param parameterName the name of the parameter to set
-     * @param x the enum value to set. Can be null.
+     * @param x the enum value to set. Can be {@code null}.
      * @throws SQLException if a database access error occurs or the parameter name is not found
      */
     @Override
@@ -283,7 +293,7 @@ public final class EnumType<T extends Enum<T>> extends SingleValueType<T> {
      * - NAME: writes the JSON/XML field name (possibly quoted based on config)
      *
      * @param writer the CharacterWriter to write to
-     * @param x the enum value to write. Can be null.
+     * @param x the enum value to write. Can be {@code null}.
      * @param config the serialization configuration for quotation settings
      * @throws IOException if an I/O error occurs during writing
      */

@@ -367,7 +367,7 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
      *
      * @param <K> the type of the keys
      * @param <E> the type of the values
-     * @param map The map containing the key-value pairs to be added to the new SetMultimap, may be null or empty
+     * @param map The map containing the key-value pairs to be added to the new SetMultimap, may be {@code null} or empty
      * @return a new instance of SetMultimap with the key-value pairs from the specified map
      *
      */
@@ -397,7 +397,7 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
      *
      * @param <T> the type of the elements in the collection
      * @param <K> the type of the keys in the SetMultimap
-     * @param c the collection of elements to be added to the SetMultimap, may be null or empty
+     * @param c the collection of elements to be added to the SetMultimap, may be {@code null} or empty
      * @param keyExtractor the function to extract keys from elements; must not be null
      * @return a new instance of SetMultimap with keys extracted from elements and values being the elements themselves
      * @throws IllegalArgumentException if the keyExtractor is null
@@ -436,7 +436,7 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
      * @param <T> the type of the elements in the collection
      * @param <K> the type of the keys in the SetMultimap
      * @param <E> the type of the values in the SetMultimap
-     * @param c the collection of elements to be transformed, may be null or empty
+     * @param c the collection of elements to be transformed, may be {@code null} or empty
      * @param keyExtractor the function to extract keys from elements; must not be null
      * @param valueExtractor the function to extract values from elements; must not be null
      * @return a new instance of SetMultimap with extracted keys and values from the specified collection
@@ -529,8 +529,8 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
      * Wraps an existing map into a SetMultimap without copying its contents. Changes to the wrapped map
      * will be reflected in the SetMultimap and vice versa, as they share the same underlying storage.
      *
-     * <p><strong>Important:</strong> The provided map must not contain null values.
-     * All values must be non-null Set instances. This constraint is validated at wrap time.
+     * <p><strong>Important:</strong> The provided map must not contain {@code null} values.
+     * All values must be {@code non-null} Set instances. This constraint is validated at wrap time.
      *
      * <p>This method is useful when you want to treat an existing Map&lt;K, Set&lt;E&gt;&gt; as a SetMultimap
      * without creating a copy.
@@ -546,9 +546,9 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
      * @param <K> the type of the keys in the map
      * @param <E> the type of the elements in the set
      * @param <V> the type of the set extending Set&lt;E&gt;
-     * @param map The map to be wrapped into a SetMultimap; must not be null and must not contain null values
+     * @param map The map to be wrapped into a SetMultimap; must not be {@code null} and must not contain {@code null} values
      * @return a SetMultimap instance backed by the provided map
-     * @throws IllegalArgumentException if the provided map is null or contains null values
+     * @throws IllegalArgumentException if the provided map is {@code null} or contains {@code null} values
      *
      */
     @SuppressWarnings("rawtypes")
@@ -676,7 +676,7 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
      * // filtered contains: {"a" -> [1, 2]}
      * }</pre>
      *
-     * @param filter the predicate to test each key-value pair; must not be null.
+     * @param filter the predicate to test each key-value pair; must not be {@code null}.
      *               The predicate receives the key and the complete set of values associated with that key.
      *               If it returns {@code true}, the entire entry is included in the result.
      * @return a new SetMultimap containing only the entries that match the filter
@@ -708,7 +708,7 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
      * // filtered contains: {"a" -> [1], "b" -> [2]}
      * }</pre>
      *
-     * @param filter the predicate to test each key; must not be null.
+     * @param filter the predicate to test each key; must not be {@code null}.
      *               If it returns {@code true} for a key, all values associated with that key are included in the result.
      * @return a new SetMultimap containing only the entries whose keys match the filter
      *
@@ -740,7 +740,7 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
      * // filtered contains: {"a" -> [1, 2]}
      * }</pre>
      *
-     * @param filter the predicate to test each value set; must not be null.
+     * @param filter the predicate to test each value set; must not be {@code null}.
      *               The predicate receives the complete set of values for each key.
      *               If it returns {@code true}, the entire entry is included in the result.
      * @return a new SetMultimap containing only the entries whose value sets match the filter

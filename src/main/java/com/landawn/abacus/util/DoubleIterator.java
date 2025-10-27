@@ -61,7 +61,18 @@ import com.landawn.abacus.util.stream.DoubleStream;
 @SuppressWarnings({ "java:S6548" })
 public abstract class DoubleIterator extends ImmutableIterator<Double> {
 
-    /** An empty DoubleIterator instance that contains no elements */
+    /**
+     * Constructs a new DoubleIterator.
+     */
+    protected DoubleIterator() {
+    }
+
+    /**
+     * A singleton empty DoubleIterator instance that contains no elements.
+     * This iterator's hasNext() always returns false, and nextDouble() always throws NoSuchElementException.
+     *
+     * @see #empty()
+     */
     public static final DoubleIterator EMPTY = new DoubleIterator() {
         @Override
         public boolean hasNext() {
@@ -171,7 +182,7 @@ public abstract class DoubleIterator extends ImmutableIterator<Double> {
      * @param iteratorSupplier a Supplier that provides the DoubleIterator when needed
      * @return a lazily initialized DoubleIterator
      * @throws IllegalArgumentException if iteratorSupplier is null
-     * @throws IllegalStateException if the supplier returns null when invoked
+     * @throws IllegalStateException if the supplier returns {@code null} when invoked
      */
     public static DoubleIterator defer(final Supplier<? extends DoubleIterator> iteratorSupplier) throws IllegalArgumentException {
         N.checkArgNotNull(iteratorSupplier, cs.iteratorSupplier);
@@ -243,7 +254,7 @@ public abstract class DoubleIterator extends ImmutableIterator<Double> {
     }
 
     /**
-     * Creates a DoubleIterator that generates values while the hasNext condition is true.
+     * Creates a DoubleIterator that generates values while the hasNext condition is {@code true}.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code

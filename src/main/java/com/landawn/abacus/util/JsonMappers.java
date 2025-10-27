@@ -153,7 +153,7 @@ public final class JsonMappers {
      * // Result: {"name":"John","age":30}
      * }</pre>
      *
-     * @param obj the object to serialize; can be null (produces "null")
+     * @param obj the object to serialize; can be {@code null} (produces "null")
      * @return a JSON string representation of the object
      * @throws RuntimeException if serialization fails due to invalid object structure or configuration
      * @see #toJson(Object, boolean)
@@ -185,9 +185,9 @@ public final class JsonMappers {
      * // }
      * }</pre>
      *
-     * @param obj the object to serialize; can be null (produces "null")
-     * @param prettyFormat if true, the output will be formatted with indentation and line breaks;
-     *                     if false, output will be compact (single line)
+     * @param obj the object to serialize; can be {@code null} (produces "null")
+     * @param prettyFormat if {@code true}, the output will be formatted with indentation and line breaks;
+     *                     if {@code false}, output will be compact (single line)
      * @return a JSON string representation of the object
      * @throws RuntimeException if serialization fails due to invalid object structure or configuration
      * @see #toJson(Object)
@@ -214,7 +214,7 @@ public final class JsonMappers {
      *   <li>WRITE_DATES_AS_TIMESTAMPS - Write dates as numeric timestamps</li>
      *   <li>WRITE_ENUMS_USING_INDEX - Write enums using their ordinal values</li>
      *   <li>INDENT_OUTPUT - Pretty print the output</li>
-     *   <li>WRITE_NULL_MAP_VALUES - Include null values in maps</li>
+     *   <li>WRITE_NULL_MAP_VALUES - Include {@code null} values in maps</li>
      * </ul>
      *
      * <p><b>Usage Examples:</b></p>
@@ -229,7 +229,7 @@ public final class JsonMappers {
      *     SerializationFeature.INDENT_OUTPUT);
      * }</pre>
      *
-     * @param obj the object to serialize; can be null (produces "null")
+     * @param obj the object to serialize; can be {@code null} (produces "null")
      * @param first the first serialization feature to apply (required to ensure at least one feature)
      * @param features additional serialization features to apply (optional)
      * @return a JSON string representation of the object
@@ -259,8 +259,8 @@ public final class JsonMappers {
      * String json = JsonMappers.toJson(myObject, config);
      * }</pre>
      *
-     * @param obj the object to serialize; can be null (produces "null")
-     * @param config the custom serialization configuration to use; if null, uses default configuration
+     * @param obj the object to serialize; can be {@code null} (produces "null")
+     * @param config the custom serialization configuration to use; if {@code null}, uses default configuration
      * @return a JSON string representation of the object
      * @throws RuntimeException if serialization fails due to invalid object structure or configuration
      * @see #createSerializationConfig()
@@ -293,7 +293,7 @@ public final class JsonMappers {
      * // File now contains: {"name":"John","age":30}
      * }</pre>
      *
-     * @param obj the object to serialize; can be null (produces "null")
+     * @param obj the object to serialize; can be {@code null} (produces "null")
      * @param output the file to write the JSON to; parent directories will be created if needed
      * @throws RuntimeException if serialization fails or file cannot be written
      * @see #toJson(Object, File, SerializationConfig)
@@ -321,9 +321,9 @@ public final class JsonMappers {
      * JsonMappers.toJson(myData, new File("formatted-data.json"), config);
      * }</pre>
      *
-     * @param obj the object to serialize; can be null (produces "null")
+     * @param obj the object to serialize; can be {@code null} (produces "null")
      * @param output the file to write the JSON to; parent directories will be created if needed
-     * @param config the custom serialization configuration to use; if null, uses default configuration
+     * @param config the custom serialization configuration to use; if {@code null}, uses default configuration
      * @throws RuntimeException if serialization fails or file cannot be written
      * @see #toJson(Object, File)
      * @see SerializationConfig
@@ -357,7 +357,7 @@ public final class JsonMappers {
      * JsonMappers.toJson(responseData, httpServletResponse.getOutputStream());
      * }</pre>
      *
-     * @param obj the object to serialize; can be null (produces "null")
+     * @param obj the object to serialize; can be {@code null} (produces "null")
      * @param output the output stream to write the JSON to; not closed by this method
      * @throws RuntimeException if serialization fails or writing to stream fails
      * @see #toJson(Object, OutputStream, SerializationConfig)
@@ -387,9 +387,9 @@ public final class JsonMappers {
      * JsonMappers.toJson(apiResponse, response.getOutputStream(), config);
      * }</pre>
      *
-     * @param obj the object to serialize; can be null (produces "null")
+     * @param obj the object to serialize; can be {@code null} (produces "null")
      * @param output the output stream to write the JSON to; not closed by this method
-     * @param config the custom serialization configuration to use; if null, uses default configuration
+     * @param config the custom serialization configuration to use; if {@code null}, uses default configuration
      * @throws RuntimeException if serialization fails or writing to stream fails
      * @see #toJson(Object, OutputStream)
      * @see SerializationConfig
@@ -428,7 +428,7 @@ public final class JsonMappers {
      * String json = sw.toString();
      * }</pre>
      *
-     * @param obj the object to serialize; can be null (produces "null")
+     * @param obj the object to serialize; can be {@code null} (produces "null")
      * @param output the writer to write the JSON to; not closed by this method
      * @throws RuntimeException if serialization fails or writing fails
      * @see #toJson(Object, Writer, SerializationConfig)
@@ -458,9 +458,9 @@ public final class JsonMappers {
      * }
      * }</pre>
      *
-     * @param obj the object to serialize; can be null (produces "null")
+     * @param obj the object to serialize; can be {@code null} (produces "null")
      * @param output the writer to write the JSON to; not closed by this method
-     * @param config the custom serialization configuration to use; if null, uses default configuration
+     * @param config the custom serialization configuration to use; if {@code null}, uses default configuration
      * @throws RuntimeException if serialization fails or writing fails
      * @see #toJson(Object, Writer)
      * @see SerializationConfig
@@ -495,7 +495,7 @@ public final class JsonMappers {
      * }
      * }</pre>
      *
-     * @param obj the object to serialize; can be null (produces "null")
+     * @param obj the object to serialize; can be {@code null} (produces "null")
      * @param output the DataOutput to write the JSON to
      * @throws RuntimeException if serialization fails or writing fails
      * @see #toJson(Object, DataOutput, SerializationConfig)
@@ -526,9 +526,9 @@ public final class JsonMappers {
      * }
      * }</pre>
      *
-     * @param obj the object to serialize; can be null (produces "null")
+     * @param obj the object to serialize; can be {@code null} (produces "null")
      * @param output the DataOutput to write the JSON to
-     * @param config the custom serialization configuration to use; if null, uses default configuration
+     * @param config the custom serialization configuration to use; if {@code null}, uses default configuration
      * @throws RuntimeException if serialization fails or writing fails
      * @see #toJson(Object, DataOutput)
      * @see SerializationConfig
@@ -566,7 +566,7 @@ public final class JsonMappers {
      * @param <T> the type of the object to deserialize to
      * @param json the JSON content as a UTF-8 encoded byte array
      * @param targetType the class of the object to deserialize to
-     * @return the deserialized object; never null unless JSON contains "null"
+     * @return the deserialized object; never {@code null} unless JSON contains "null"
      * @throws RuntimeException if deserialization fails due to invalid JSON or type mismatch
      * @see #fromJson(byte[], int, int, Class)
      * @see #fromJson(byte[], TypeReference)
@@ -601,7 +601,7 @@ public final class JsonMappers {
      * @param offset the offset in the array where JSON data starts
      * @param len the number of bytes to read from the offset
      * @param targetType the class of the object to deserialize to
-     * @return the deserialized object; never null unless JSON contains "null"
+     * @return the deserialized object; never {@code null} unless JSON contains "null"
      * @throws RuntimeException if deserialization fails or array bounds are invalid
      * @throws IndexOutOfBoundsException if offset or length are invalid
      * @see #fromJson(byte[], Class)
@@ -619,7 +619,7 @@ public final class JsonMappers {
      * This is the most commonly used deserialization method.
      * 
      * <p>The method handles all standard JSON types including objects, arrays,
-     * primitives, and null values. For complex generic types, use the TypeReference
+     * primitives, and {@code null} values. For complex generic types, use the TypeReference
      * overload instead.</p>
      *
      * <p><b>Usage Examples:</b></p>
@@ -640,7 +640,7 @@ public final class JsonMappers {
      * @param <T> the type of the object to deserialize to
      * @param json the JSON content as a string
      * @param targetType the class of the object to deserialize to
-     * @return the deserialized object; null if JSON string is "null"
+     * @return the deserialized object; {@code null} if JSON string is "null"
      * @throws RuntimeException if deserialization fails due to invalid JSON or type mismatch
      * @see #fromJson(String, TypeReference)
      * @see #fromJson(String, Class, DeserializationFeature, DeserializationFeature...)
@@ -683,7 +683,7 @@ public final class JsonMappers {
      * @param targetType the class of the object to deserialize to
      * @param first the first deserialization feature to apply (required)
      * @param features additional deserialization features to apply (optional)
-     * @return the deserialized object; null if JSON string is "null"
+     * @return the deserialized object; {@code null} if JSON string is "null"
      * @throws RuntimeException if deserialization fails
      * @see DeserializationFeature
      * @see #fromJson(String, Class, DeserializationConfig)
@@ -715,8 +715,8 @@ public final class JsonMappers {
      * @param <T> the type of the object to deserialize to
      * @param json the JSON content as a string
      * @param targetType the class of the object to deserialize to
-     * @param config the custom deserialization configuration; if null, uses default
-     * @return the deserialized object; null if JSON string is "null"
+     * @param config the custom deserialization configuration; if {@code null}, uses default
+     * @return the deserialized object; {@code null} if JSON string is "null"
      * @throws RuntimeException if deserialization fails
      * @see #createDeserializationConfig()
      * @see DeserializationConfig
@@ -755,7 +755,7 @@ public final class JsonMappers {
      * @param <T> the type of the object to deserialize to
      * @param json the file containing JSON content
      * @param targetType the class of the object to deserialize to
-     * @return the deserialized object; null if JSON contains "null"
+     * @return the deserialized object; {@code null} if JSON contains "null"
      * @throws RuntimeException if file cannot be read or JSON is invalid
      * @see #fromJson(File, Class, DeserializationConfig)
      * @see #fromJson(File, TypeReference)
@@ -788,8 +788,8 @@ public final class JsonMappers {
      * @param <T> the type of the object to deserialize to
      * @param json the file containing JSON content
      * @param targetType the class of the object to deserialize to
-     * @param config the custom deserialization configuration; if null, uses default
-     * @return the deserialized object; null if JSON contains "null"
+     * @param config the custom deserialization configuration; if {@code null}, uses default
+     * @return the deserialized object; {@code null} if JSON contains "null"
      * @throws RuntimeException if file cannot be read or JSON is invalid
      * @see #fromJson(File, Class)
      * @see DeserializationConfig
@@ -834,7 +834,7 @@ public final class JsonMappers {
      * @param <T> the type of the object to deserialize to
      * @param json the input stream containing JSON content
      * @param targetType the class of the object to deserialize to
-     * @return the deserialized object; null if JSON contains "null"
+     * @return the deserialized object; {@code null} if JSON contains "null"
      * @throws RuntimeException if reading fails or JSON is invalid
      * @see #fromJson(InputStream, Class, DeserializationConfig)
      * @see #fromJson(InputStream, TypeReference)
@@ -868,8 +868,8 @@ public final class JsonMappers {
      * @param <T> the type of the object to deserialize to
      * @param json the input stream containing JSON content
      * @param targetType the class of the object to deserialize to
-     * @param config the custom deserialization configuration; if null, uses default
-     * @return the deserialized object; null if JSON contains "null"
+     * @param config the custom deserialization configuration; if {@code null}, uses default
+     * @return the deserialized object; {@code null} if JSON contains "null"
      * @throws RuntimeException if reading fails or JSON is invalid
      * @see #fromJson(InputStream, Class)
      * @see DeserializationConfig
@@ -912,7 +912,7 @@ public final class JsonMappers {
      * @param <T> the type of the object to deserialize to
      * @param json the reader containing JSON content
      * @param targetType the class of the object to deserialize to
-     * @return the deserialized object; null if JSON contains "null"
+     * @return the deserialized object; {@code null} if JSON contains "null"
      * @throws RuntimeException if reading fails or JSON is invalid
      * @see #fromJson(Reader, Class, DeserializationConfig)
      * @see #fromJson(Reader, TypeReference)
@@ -946,8 +946,8 @@ public final class JsonMappers {
      * @param <T> the type of the object to deserialize to
      * @param json the reader containing JSON content
      * @param targetType the class of the object to deserialize to
-     * @param config the custom deserialization configuration; if null, uses default
-     * @return the deserialized object; null if JSON contains "null"
+     * @param config the custom deserialization configuration; if {@code null}, uses default
+     * @return the deserialized object; {@code null} if JSON contains "null"
      * @throws RuntimeException if reading fails or JSON is invalid
      * @see #fromJson(Reader, Class)
      * @see DeserializationConfig
@@ -986,7 +986,7 @@ public final class JsonMappers {
      * @param <T> the type of the object to deserialize to
      * @param json the URL pointing to JSON content
      * @param targetType the class of the object to deserialize to
-     * @return the deserialized object; null if JSON contains "null"
+     * @return the deserialized object; {@code null} if JSON contains "null"
      * @throws RuntimeException if network access fails or JSON is invalid
      * @see #fromJson(URL, Class, DeserializationConfig)
      * @see #fromJson(URL, TypeReference)
@@ -1018,8 +1018,8 @@ public final class JsonMappers {
      * @param <T> the type of the object to deserialize to
      * @param json the URL pointing to JSON content
      * @param targetType the class of the object to deserialize to
-     * @param config the custom deserialization configuration; if null, uses default
-     * @return the deserialized object; null if JSON contains "null"
+     * @param config the custom deserialization configuration; if {@code null}, uses default
+     * @return the deserialized object; {@code null} if JSON contains "null"
      * @throws RuntimeException if network access fails or JSON is invalid
      * @see #fromJson(URL, Class)
      * @see DeserializationConfig
@@ -1057,7 +1057,7 @@ public final class JsonMappers {
      * @param <T> the type of the object to deserialize to
      * @param json the DataInput containing JSON content
      * @param targetType the class of the object to deserialize to
-     * @return the deserialized object; null if JSON contains "null"
+     * @return the deserialized object; {@code null} if JSON contains "null"
      * @throws RuntimeException if reading fails or JSON is invalid
      * @see #fromJson(DataInput, Class, DeserializationConfig)
      * @see #fromJson(DataInput, TypeReference)
@@ -1092,8 +1092,8 @@ public final class JsonMappers {
      * @param <T> the type of the object to deserialize to
      * @param json the DataInput containing JSON content
      * @param targetType the class of the object to deserialize to
-     * @param config the custom deserialization configuration; if null, uses default
-     * @return the deserialized object; null if JSON contains "null"
+     * @param config the custom deserialization configuration; if {@code null}, uses default
+     * @return the deserialized object; {@code null} if JSON contains "null"
      * @throws RuntimeException if reading fails or JSON is invalid
      * @see #fromJson(DataInput, Class)
      * @see DeserializationConfig
@@ -1139,7 +1139,7 @@ public final class JsonMappers {
      * @param <T> the type of the object to deserialize to
      * @param json the JSON content as a UTF-8 encoded byte array
      * @param targetType TypeReference capturing the generic type information
-     * @return the deserialized object; null if JSON contains "null"
+     * @return the deserialized object; {@code null} if JSON contains "null"
      * @throws RuntimeException if deserialization fails or type doesn't match
      * @see TypeReference
      * @see #fromJson(byte[], Class)
@@ -1175,7 +1175,7 @@ public final class JsonMappers {
      * @param offset the offset in the array where JSON data starts
      * @param len the number of bytes to read from the offset
      * @param targetType TypeReference capturing the generic type information
-     * @return the deserialized object; null if JSON contains "null"
+     * @return the deserialized object; {@code null} if JSON contains "null"
      * @throws RuntimeException if deserialization fails or bounds are invalid
      * @throws IndexOutOfBoundsException if offset or length are invalid
      * @see TypeReference
@@ -1216,7 +1216,7 @@ public final class JsonMappers {
      * @param <T> the type of the object to deserialize to
      * @param json the JSON content as a string
      * @param targetType TypeReference capturing the generic type information
-     * @return the deserialized object; null if JSON contains "null"
+     * @return the deserialized object; {@code null} if JSON contains "null"
      * @throws RuntimeException if deserialization fails or JSON is invalid
      * @see TypeReference
      * @see #fromJson(String, Class)
@@ -1256,7 +1256,7 @@ public final class JsonMappers {
      * @param targetType TypeReference capturing the generic type information
      * @param first the first deserialization feature to apply (required)
      * @param features additional deserialization features to apply (optional)
-     * @return the deserialized object; null if JSON contains "null"
+     * @return the deserialized object; {@code null} if JSON contains "null"
      * @throws RuntimeException if deserialization fails
      * @see TypeReference
      * @see DeserializationFeature
@@ -1290,8 +1290,8 @@ public final class JsonMappers {
      * @param <T> the type of the object to deserialize to
      * @param json the JSON content as a string
      * @param targetType TypeReference capturing the generic type information
-     * @param config the custom deserialization configuration; if null, uses default
-     * @return the deserialized object; null if JSON contains "null"
+     * @param config the custom deserialization configuration; if {@code null}, uses default
+     * @return the deserialized object; {@code null} if JSON contains "null"
      * @throws RuntimeException if deserialization fails
      * @see TypeReference
      * @see DeserializationConfig
@@ -1333,7 +1333,7 @@ public final class JsonMappers {
      * @param <T> the type of the object to deserialize to
      * @param json the file containing JSON content
      * @param targetType TypeReference capturing the generic type information
-     * @return the deserialized object; null if JSON contains "null"
+     * @return the deserialized object; {@code null} if JSON contains "null"
      * @throws RuntimeException if file cannot be read or JSON is invalid
      * @see TypeReference
      * @see #fromJson(File, Class)
@@ -1369,8 +1369,8 @@ public final class JsonMappers {
      * @param <T> the type of the object to deserialize to
      * @param json the file containing JSON content
      * @param targetType TypeReference capturing the generic type information
-     * @param config the custom deserialization configuration; if null, uses default
-     * @return the deserialized object; null if JSON contains "null"
+     * @param config the custom deserialization configuration; if {@code null}, uses default
+     * @return the deserialized object; {@code null} if JSON contains "null"
      * @throws RuntimeException if file cannot be read or JSON is invalid
      * @see TypeReference
      * @see DeserializationConfig
@@ -1414,7 +1414,7 @@ public final class JsonMappers {
      * @param <T> the type of the object to deserialize to
      * @param json the input stream containing JSON content
      * @param targetType TypeReference capturing the generic type information
-     * @return the deserialized object; null if JSON contains "null"
+     * @return the deserialized object; {@code null} if JSON contains "null"
      * @throws RuntimeException if reading fails or JSON is invalid
      * @see TypeReference
      * @see #fromJson(InputStream, Class)
@@ -1449,7 +1449,7 @@ public final class JsonMappers {
      * @param <T> the type of the object to deserialize to
      * @param json the InputStream containing JSON data to deserialize
      * @param targetType TypeReference describing the target type, can be Bean/Array/Collection/Map types
-     * @param config custom deserialization configuration, if null uses default configuration
+     * @param config custom deserialization configuration, if {@code null} uses default configuration
      * @return the deserialized object of type T
      * @throws RuntimeException wrapping any IOException that occurs during deserialization
      * @see TypeReference
@@ -1519,7 +1519,7 @@ public final class JsonMappers {
      * @param <T> the type of the object to deserialize to
      * @param json the Reader containing JSON data to deserialize
      * @param targetType TypeReference describing the target type, can be Bean/Array/Collection/Map types
-     * @param config custom deserialization configuration, if null uses default configuration
+     * @param config custom deserialization configuration, if {@code null} uses default configuration
      * @return the deserialized object of type T
      * @throws RuntimeException wrapping any IOException that occurs during deserialization
      * @see TypeReference
@@ -1589,7 +1589,7 @@ public final class JsonMappers {
      * @param <T> the type of the object to deserialize to
      * @param json the URL pointing to JSON data to deserialize
      * @param targetType TypeReference describing the target type
-     * @param config custom deserialization configuration, if null uses default configuration
+     * @param config custom deserialization configuration, if {@code null} uses default configuration
      * @return the deserialized object of type T
      * @throws RuntimeException wrapping any IOException that occurs during network access or deserialization
      * @see TypeReference
@@ -1660,7 +1660,7 @@ public final class JsonMappers {
      * @param <T> the type of the object to deserialize to
      * @param json the DataInput containing JSON data to deserialize
      * @param targetType TypeReference describing the target type
-     * @param config custom deserialization configuration, if null uses default configuration
+     * @param config custom deserialization configuration, if {@code null} uses default configuration
      * @return the deserialized object of type T
      * @throws RuntimeException wrapping any IOException that occurs during deserialization
      * @see TypeReference
@@ -1886,7 +1886,7 @@ public final class JsonMappers {
          * }</pre>
          *
          * @param obj the object to serialize to JSON
-         * @param prettyFormat if true, formats the JSON with indentation and line breaks
+         * @param prettyFormat if {@code true}, formats the JSON with indentation and line breaks
          * @return JSON string representation of the object, optionally formatted
          * @throws RuntimeException wrapping any JsonProcessingException that occurs during serialization
          */

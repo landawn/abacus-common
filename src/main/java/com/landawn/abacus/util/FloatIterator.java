@@ -54,8 +54,16 @@ import com.landawn.abacus.util.stream.FloatStream;
 public abstract class FloatIterator extends ImmutableIterator<Float> {
 
     /**
+     * Constructs a new FloatIterator.
+     */
+    protected FloatIterator() {
+    }
+
+    /**
      * A singleton empty FloatIterator that has no elements.
      * This instance is immutable and can be safely shared.
+     *
+     * @see #empty()
      */
     public static final FloatIterator EMPTY = new FloatIterator() {
         @Override
@@ -98,7 +106,7 @@ public abstract class FloatIterator extends ImmutableIterator<Float> {
      * }
      * }</pre>
      *
-     * @param a the array to create an iterator from, may be null or empty
+     * @param a the array to create an iterator from, may be {@code null} or empty
      * @return a new FloatIterator over the array elements, or empty iterator if array is null/empty
      */
     public static FloatIterator of(final float... a) {
@@ -252,7 +260,7 @@ public abstract class FloatIterator extends ImmutableIterator<Float> {
     }
 
     /**
-     * Returns a FloatIterator that generates values while the hasNext condition is true.
+     * Returns a FloatIterator that generates values while the hasNext condition is {@code true}.
      * This allows for creating finite iterators with dynamic termination conditions.
      *
      * <p><b>Usage Examples:</b></p>

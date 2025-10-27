@@ -26,7 +26,7 @@ import com.landawn.abacus.util.WD;
 /**
  * Type handler for Double array (Double[]) values.
  * This class provides serialization, deserialization, and output operations for Double arrays.
- * It handles proper formatting with brackets, separators, and null value representation.
+ * It handles proper formatting with brackets, separators, and {@code null} value representation.
  */
 public final class DoubleArrayType extends ObjectArrayType<Double> {
 
@@ -41,11 +41,12 @@ public final class DoubleArrayType extends ObjectArrayType<Double> {
      * - Empty arrays return "[]"
      * - Uses efficient string joining for performance
      *
-     * @param x the Double array to convert. Can be null.
-     * @return A string representation of the array, or null if input is null
+     * @param x the Double array to convert. Can be {@code null}.
+     * @return A string representation of the array, or {@code null} if input is null
      */
     @MayReturnNull
     @Override
+
     public String stringOf(final Double[] x) {
         if (x == null) {
             return null; // NOSONAR
@@ -59,15 +60,16 @@ public final class DoubleArrayType extends ObjectArrayType<Double> {
     /**
      * Converts a string representation back to a Double array.
      * Expects format: [element1, element2, ...]
-     * - "null" strings (4 characters) are converted to null elements
+     * - "null" strings (4 characters) are converted to {@code null} elements
      * - Empty string or "[]" returns empty array
      * - Individual elements are parsed as Double values
      *
-     * @param str the string to parse. Can be null.
-     * @return A Double array parsed from the string, or null if input is null
+     * @param str the string to parse. Can be {@code null}.
+     * @return A Double array parsed from the string, or {@code null} if input is null
      */
     @MayReturnNull
     @Override
+
     public Double[] valueOf(final String str) {
         if (Strings.isEmpty(str) || Strings.isBlank(str)) {
             return null; // NOSONAR
@@ -99,7 +101,7 @@ public final class DoubleArrayType extends ObjectArrayType<Double> {
      * Uses toString() for Double values to ensure proper formatting.
      *
      * @param appendable the Appendable to write to
-     * @param x the Double array to append. Can be null.
+     * @param x the Double array to append. Can be {@code null}.
      * @throws IOException if an I/O error occurs during writing
      */
     @Override
@@ -132,7 +134,7 @@ public final class DoubleArrayType extends ObjectArrayType<Double> {
      * Uses optimized numeric writing for Double values.
      *
      * @param writer the CharacterWriter to write to
-     * @param x the Double array to write. Can be null.
+     * @param x the Double array to write. Can be {@code null}.
      * @param config the serialization configuration (currently unused for Double arrays)
      * @throws IOException if an I/O error occurs during writing
      */

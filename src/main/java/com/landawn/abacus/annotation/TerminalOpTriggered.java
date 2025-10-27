@@ -48,14 +48,14 @@ import java.lang.annotation.Target;
  * 
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
- * public class StreamProcessor&lt;T&gt; {
- *     {@literal @}TerminalOpTriggered
- *     public StreamProcessor&lt;T&gt; sorted(Comparator&lt;T&gt; comparator) {
+ * public class StreamProcessor<T> {
+ *     @TerminalOpTriggered
+ *     public StreamProcessor<T> sorted(Comparator<T> comparator) {
  *         // This internally triggers terminal operation (collect)
- *         List&lt;T&gt; sortedList = this.collect(Collectors.toList());
+ *         List<T> sortedList = this.collect(Collectors.toList());
  *         sortedList.sort(comparator);
  *         // Returns new stream from sorted data
- *         return new StreamProcessor&lt;&gt;(sortedList.stream());
+ *         return new StreamProcessor<>(sortedList.stream());
  *     }
  * }
  * }</pre>

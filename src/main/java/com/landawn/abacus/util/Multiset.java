@@ -2086,13 +2086,6 @@ public final class Multiset<E> implements Collection<E> {
         return backingMap.toString();
     }
 
-    /**
-     * Validates that the specified number of occurrences is non-negative.
-     *
-     * @param occurrences the number of occurrences to check
-     * @return the validated occurrences value
-     * @throws IllegalArgumentException if occurrences is negative
-     */
     private static int checkOccurrences(final int occurrences) {
         if (occurrences < 0) {
             throw new IllegalArgumentException("The specified 'occurrences' cannot be negative");
@@ -2106,7 +2099,7 @@ public final class Multiset<E> implements Collection<E> {
      * a view of the multiset whose elements are of this class. A multiset implementation may return
      * Entry instances that are either live "read-through" views to the Multiset, or immutable
      * snapshots. Note that this type is unrelated to the similarly-named type {@code Map.Entry}.
-     * 
+     *
      * <p><b>Usage Example:</b></p>
      * <pre>{@code
      * Multiset<String> multiset = Multiset.of("a", "a", "b");
@@ -2114,6 +2107,8 @@ public final class Multiset<E> implements Collection<E> {
      *     System.out.println(entry.element() + " appears " + entry.count() + " times");
      * }
      * }</pre>
+     *
+     * @param <E> the type of element contained in the multiset
      */
     public interface Entry<E> {
 
@@ -2216,21 +2211,11 @@ public final class Multiset<E> implements Collection<E> {
             this.count = count;
         }
 
-        /**
-         * Returns the element associated with this entry.
-         *
-         * @return the element for this entry
-         */
         @Override
         public E element() {
             return element;
         }
 
-        /**
-         * Returns the count of occurrences for the element in this entry.
-         *
-         * @return the count of occurrences
-         */
         @Override
         public int count() {
             return count;

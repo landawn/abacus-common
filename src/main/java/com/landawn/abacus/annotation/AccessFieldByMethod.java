@@ -41,7 +41,7 @@ import java.lang.annotation.Target;
  * 
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
- * {@literal @}AccessFieldByMethod
+ * @AccessFieldByMethod
  * public class User {
  *     private String name;
  *     

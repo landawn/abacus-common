@@ -60,10 +60,11 @@ public class CalendarType extends AbstractCalendarType<Calendar> {
      * - String: parsed as a date/time string
      * - Other objects: converted to string first, then parsed
      *
-     * @param obj the object to convert to Calendar. Can be null.
-     * @return A Calendar instance representing the input value, or null if input is null
+     * @param obj the object to convert to Calendar. Can be {@code null}.
+     * @return A Calendar instance representing the input value, or {@code null} if input is null
      */
     @Override
+    @MayReturnNull
     public Calendar valueOf(final Object obj) {
         if (obj instanceof Number) {
             return Dates.createCalendar(((Number) obj).longValue());
@@ -79,14 +80,15 @@ public class CalendarType extends AbstractCalendarType<Calendar> {
     /**
      * Converts a string representation to a Calendar instance.
      * Special handling for:
-     * - null or empty string: returns null
+     * - {@code null} or empty string: returns null
      * - "sysTime": returns the current system time as Calendar
      * - Other strings: parsed using date parsing utilities
      *
-     * @param str the string to parse. Can be null or empty.
-     * @return A Calendar instance parsed from the string, or null if input is null/empty
+     * @param str the string to parse. Can be {@code null} or empty.
+     * @return A Calendar instance parsed from the string, or {@code null} if input is null/empty
      */
     @Override
+    @MayReturnNull
     public Calendar valueOf(final String str) {
         return Strings.isEmpty(str) ? null : (N.equals(str, SYS_TIME) ? Dates.currentCalendar() : Dates.parseCalendar(str));
     }
@@ -100,10 +102,11 @@ public class CalendarType extends AbstractCalendarType<Calendar> {
      * @param cbuf the character array containing the value to parse
      * @param offset the starting position in the character array
      * @param len the number of characters to use
-     * @return A Calendar instance parsed from the character array, or null if input is null or empty
+     * @return A Calendar instance parsed from the character array, or {@code null} if input is {@code null} or empty
      */
     @MayReturnNull
     @Override
+
     public Calendar valueOf(final char[] cbuf, final int offset, final int len) {
         if ((cbuf == null) || (len == 0)) {
             return null; // NOSONAR
@@ -126,10 +129,11 @@ public class CalendarType extends AbstractCalendarType<Calendar> {
      *
      * @param rs the ResultSet containing the data
      * @param columnIndex the column index (1-based) of the timestamp value
-     * @return A Calendar instance created from the timestamp, or null if the column value is SQL NULL
+     * @return A Calendar instance created from the timestamp, or {@code null} if the column value is SQL NULL
      * @throws SQLException if a database access error occurs or the column index is invalid
      */
     @Override
+    @MayReturnNull
     public Calendar get(final ResultSet rs, final int columnIndex) throws SQLException {
         final Timestamp ts = rs.getTimestamp(columnIndex);
 
@@ -142,10 +146,11 @@ public class CalendarType extends AbstractCalendarType<Calendar> {
      *
      * @param rs the ResultSet containing the data
      * @param columnLabel the label of the column containing the timestamp value
-     * @return A Calendar instance created from the timestamp, or null if the column value is SQL NULL
+     * @return A Calendar instance created from the timestamp, or {@code null} if the column value is SQL NULL
      * @throws SQLException if a database access error occurs or the column label is not found
      */
     @Override
+    @MayReturnNull
     public Calendar get(final ResultSet rs, final String columnLabel) throws SQLException {
         final Timestamp ts = rs.getTimestamp(columnLabel);
 

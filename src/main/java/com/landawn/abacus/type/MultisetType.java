@@ -60,7 +60,7 @@ public class MultisetType<E> extends AbstractType<Multiset<E>> {
      * Returns the declaring name of this Multiset type.
      * The declaring name includes the fully qualified class name of the element type.
      *
-     * @return The declaring name in format "Multiset<ElementDeclaringName>"
+     * @return The declaring name in format "Multiset&lt;ElementDeclaringName&gt;"
      */
     @Override
     public String declaringName() {
@@ -77,11 +77,6 @@ public class MultisetType<E> extends AbstractType<Multiset<E>> {
         return (Class<Multiset<E>>) typeClass;
     }
 
-    /**
-     * Gets the element type of this Multiset.
-     *
-     * @return The Type representing the element type E
-     */
     @Override
     public Type<E> getElementType() {
         return elementType;
@@ -102,7 +97,7 @@ public class MultisetType<E> extends AbstractType<Multiset<E>> {
      * Indicates whether this is a generic type.
      * For MultisetType, this always returns {@code true} since Multiset is parameterized with an element type.
      *
-     * @return true, indicating that Multiset is a generic type
+     * @return {@code true}, indicating that Multiset is a generic type
      */
     @Override
     public boolean isGenericType() {
@@ -113,7 +108,7 @@ public class MultisetType<E> extends AbstractType<Multiset<E>> {
      * Indicates whether instances of this type can be serialized.
      * Multiset objects can be serialized through this type handler.
      *
-     * @return true, indicating that Multiset is serializable through this type
+     * @return {@code true}, indicating that Multiset is serializable through this type
      */
     @Override
     public boolean isSerializable() {
@@ -126,9 +121,10 @@ public class MultisetType<E> extends AbstractType<Multiset<E>> {
      * then serialized as JSON.
      *
      * @param x The Multiset object to convert
-     * @return The JSON string representation of the Multiset as a map of element to count, or null if the input is null
+     * @return The JSON string representation of the Multiset as a map of element to count, or {@code null} if the input is null
      */
     @Override
+    @MayReturnNull
     public String stringOf(final Multiset<E> x) {
         return (x == null) ? null : Utils.jsonParser.serialize(x.toMap(), Utils.jsc);
     }
@@ -138,7 +134,7 @@ public class MultisetType<E> extends AbstractType<Multiset<E>> {
      * The string should represent a JSON object where each key is an element and the value is its count.
      *
      * @param str The JSON string to parse
-     * @return The parsed Multiset object, or null if the input is null or empty
+     * @return The parsed Multiset object, or {@code null} if the input is {@code null} or empty
      */
     @MayReturnNull
     @Override

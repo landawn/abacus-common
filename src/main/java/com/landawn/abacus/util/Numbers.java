@@ -47,7 +47,7 @@ import com.landawn.abacus.type.Type;
 
 /**
  * <p>Note: A lot of codes in this classed are copied from Google Guava, Apache Commons Math and Apache Commons Lang under the Apache License, Version 2.0 and may be modified</p>
- * <br>The purpose of copying the code is to re-organize the APIs.</br>
+ * <p>The purpose of copying the code is to re-organize the APIs.</p>
  *
  * When to throw exception? It's designed to avoid throwing any unnecessary
  * exception if the contract defined by method is not broken. For example, if
@@ -219,7 +219,7 @@ public final class Numbers {
     private static final int SIEVE_30 = ~((1 << 1) | (1 << 7) | (1 << 11) | (1 << 13) | (1 << 17) | (1 << 19) | (1 << 23) | (1 << 29));
 
     /*
-     * If n <= millerRabinBases[i][0], then testing n against bases millerRabinBases[i][1..] suffices
+     * If n &lt;= millerRabinBases[i][0], then testing n against bases millerRabinBases[i][1..] suffices
      * to prove its primality. Values from miller-rabin.appspot.com.
      *
      * NOTE: We could get slightly better bases that would be treated as unsigned, but benchmarks
@@ -752,7 +752,7 @@ public final class Numbers {
 
     /**
      * Converts the given number to the specified target type with overflow checking.
-     * If the input value is null, returns the provided default value.
+     * If the input value is {@code null}, returns the provided default value.
      *
      * <p>This method supports conversion between all primitive number types (byte, short, int, long, float, double)
      * and their corresponding wrapper classes. It also supports conversion to and from BigInteger and BigDecimal.
@@ -838,7 +838,7 @@ public final class Numbers {
     }
 
     /**
-     * Converts the given number to the specified target type using the provided Type instance, with a custom default value for null.
+     * Converts the given number to the specified target type using the provided Type instance, with a custom default value for {@code null}.
      *
      * <p>This method supports conversion between all primitive number types (byte, short, int, long, float, double),
      * as well as their corresponding wrapper classes. It also supports conversion to and from BigInteger and BigDecimal.
@@ -1199,7 +1199,7 @@ public final class Numbers {
      * Numbers.extractFirstInt(null);            // returns OptionalInt.empty()
      * }</pre>
      *
-     * @param str the string to search for integer values (may be null or empty)
+     * @param str the string to search for integer values (may be {@code null} or empty)
      * @return an OptionalInt containing the first integer found in the string,
      *         or OptionalInt.empty() if no integer is found or if the input string is null/empty
      * @see #extractFirstInt(String, int)
@@ -1240,7 +1240,7 @@ public final class Numbers {
      * Numbers.extractFirstInt(null, 0);            // returns 0
      * }</pre>
      *
-     * @param str the string to search for integer values (may be null or empty)
+     * @param str the string to search for integer values (may be {@code null} or empty)
      * @param defaultValue the value to return if no integer is found in the string
      * @return the first integer found in the string, or the specified default value if no integer is found or if the input string is null/empty
      * @see #extractFirstInt(String)
@@ -3374,8 +3374,8 @@ public final class Numbers {
      * boolean b5 = Numbers.isPrime(0);      // returns false
      * }</pre>
      *
-     * @param n the number to test for primality; must be >= 0
-     * @return {@code true} if n is prime, {@code false} otherwise (including for n < 2)
+     * @param n the number to test for primality; must be &gt;= 0
+     * @return {@code true} if n is prime, {@code false} otherwise (including for n &lt; 2)
      * @throws IllegalArgumentException if {@code n} is negative
      * @see BigInteger#isProbablePrime(int)
      */
@@ -3850,11 +3850,11 @@ public final class Numbers {
          *
          * The key idea is that based on the number of leading zeros (equivalently, floor(log2(x))),
          * we can narrow the possible floor(log10(x)) values to two.  For example, if floor(log2(x))
-         * is 6, then 64 <= x < 128, so floor(log10(x)) is either 1 or 2.
+         * is 6, then 64 &lt;= x &lt; 128, so floor(log10(x)) is either 1 or 2.
          */
         final int y = int_maxLog10ForLeadingZeros[Integer.numberOfLeadingZeros(x)];
         /*
-         * y is the higher of the two possible values of floor(log10(x)). If x < 10^y, then we want the
+         * y is the higher of the two possible values of floor(log10(x)). If x &lt; 10^y, then we want the
          * lower of the two possible values, or y - 1, otherwise, we want y.
          */
         return y - lessThanBranchFree(x, int_powersOf10[y]);
@@ -4026,12 +4026,6 @@ public final class Numbers {
         }
     }
 
-    /**
-     * Fits in long.
-     *
-     * @param x the value to check
-     * @return {@code true} if the value fits in a long, otherwise {@code false}
-     */
     static boolean fitsInLong(final BigInteger x) {
         return x.bitLength() <= Long.SIZE - 1;
     }
@@ -4045,7 +4039,7 @@ public final class Numbers {
      *
      * <p>This method computes integer exponentiation using an efficient O(log k) algorithm.
      * If the result overflows, the returned value will be equal to the low-order bits of the
-     * true result, following standard Java overflow semantics (similar to multiplication overflow).
+     * {@code true} result, following standard Java overflow semantics (similar to multiplication overflow).
      *
      * <p>Special cases are optimized for common bases (0, 1, -1, 2, -2).
      *
@@ -4109,7 +4103,7 @@ public final class Numbers {
      *
      * <p>This method computes long integer exponentiation using an efficient O(log k) algorithm.
      * If the result overflows, the returned value will be equal to the low-order bits of the
-     * true result, specifically {@code BigInteger.valueOf(b).pow(k).longValue()}, following
+     * {@code true} result, specifically {@code BigInteger.valueOf(b).pow(k).longValue()}, following
      * standard Java overflow semantics.
      *
      * <p>Special cases are optimized for common bases (0, 1, -1, 2, -2).
@@ -4299,14 +4293,14 @@ public final class Numbers {
             case HALF_EVEN:
                 final int halfSquare = sqrtFloor * sqrtFloor + sqrtFloor;
                 /*
-                 * We wish to test whether x <= (sqrtFloor + 0.5)^2 = halfSquare + 0.25. Since both
-                 * x and halfSquare are integers, this is equivalent to testing whether x <=
+                 * We wish to test whether x &lt;= (sqrtFloor + 0.5)^2 = halfSquare + 0.25. Since both
+                 * x and halfSquare are integers, this is equivalent to testing whether x &lt;=
                  * halfSquare. (We have to deal with overflow, though.)
                  *
                  * If we treat halfSquare as an unsigned int, we know that
-                 *            sqrtFloor^2 <= x < (sqrtFloor + 1)^2
-                 * halfSquare - sqrtFloor <= x < halfSquare + sqrtFloor + 1
-                 * so |x - halfSquare| <= sqrtFloor.  Therefore, it's safe to treat x - halfSquare as a
+                 *            sqrtFloor^2 &lt;= x &lt; (sqrtFloor + 1)^2
+                 * halfSquare - sqrtFloor &lt;= x &lt; halfSquare + sqrtFloor + 1
+                 * so |x - halfSquare| &lt;= sqrtFloor.  Therefore, it's safe to treat x - halfSquare as a
                  * signed int, so lessThanBranchFree is safe for use.
                  */
                 return sqrtFloor + lessThanBranchFree(halfSquare, x);
@@ -4315,11 +4309,6 @@ public final class Numbers {
         }
     }
 
-    /**
-     *
-     * @param x the value to compute the floor square root of
-     * @return the floor of the square root of x
-     */
     private static int sqrtFloor(final int x) {
         // There is no loss of precision in converting an int to a double, according to
         // http://java.sun.com/docs/books/jls/third_edition/html/conversions.html#5.1.2
@@ -4364,15 +4353,15 @@ public final class Numbers {
         /*
          * Let k be the {@code true} value of floor(sqrt(x)), so that
          *
-         *            k * k <= x          <  (k + 1) * (k + 1)
-         * (double) (k * k) <= (double) x <= (double) ((k + 1) * (k + 1))
+         *            k * k &lt;= x          &lt;  (k + 1) * (k + 1)
+         * (double) (k * k) &lt;= (double) x &lt;= (double) ((k + 1) * (k + 1))
          *          since casting to double is nondecreasing.
          *          Note that the right-hand inequality is no longer strict.
-         * Math.sqrt(k * k) <= Math.sqrt(x) <= Math.sqrt((k + 1) * (k + 1))
+         * Math.sqrt(k * k) &lt;= Math.sqrt(x) &lt;= Math.sqrt((k + 1) * (k + 1))
          *          since Math.sqrt is monotonic.
-         * (long) Math.sqrt(k * k) <= (long) Math.sqrt(x) <= (long) Math.sqrt((k + 1) * (k + 1))
+         * (long) Math.sqrt(k * k) &lt;= (long) Math.sqrt(x) &lt;= (long) Math.sqrt((k + 1) * (k + 1))
          *          since casting to long is monotonic
-         * k <= (long) Math.sqrt(x) <= k + 1
+         * k &lt;= (long) Math.sqrt(x) &lt;= k + 1
          *          since (long) Math.sqrt(k * k) == k, as checked exhaustively in
          *          {@link LongMathTest#testSqrtOfPerfectSquareAsDoubleIsPerfect}
          */
@@ -4402,14 +4391,14 @@ public final class Numbers {
                 final long sqrtFloor = guess - ((x < guessSquared) ? 1 : 0);
                 final long halfSquare = sqrtFloor * sqrtFloor + sqrtFloor;
                 /*
-                 * We wish to test whether x <= (sqrtFloor + 0.5)^2 = halfSquare + 0.25. Since both x
-                 * and halfSquare are integers, this is equivalent to testing whether x <=
+                 * We wish to test whether x &lt;= (sqrtFloor + 0.5)^2 = halfSquare + 0.25. Since both x
+                 * and halfSquare are integers, this is equivalent to testing whether x &lt;=
                  * halfSquare. (We have to deal with overflow, though.)
                  *
                  * If we treat halfSquare as an unsigned long, we know that
-                 *            sqrtFloor^2 <= x < (sqrtFloor + 1)^2
-                 * halfSquare - sqrtFloor <= x < halfSquare + sqrtFloor + 1
-                 * so |x - halfSquare| <= sqrtFloor.  Therefore, it's safe to treat x - halfSquare as a
+                 *            sqrtFloor^2 &lt;= x &lt; (sqrtFloor + 1)^2
+                 * halfSquare - sqrtFloor &lt;= x &lt; halfSquare + sqrtFloor + 1
+                 * so |x - halfSquare| &lt;= sqrtFloor.  Therefore, it's safe to treat x - halfSquare as a
                  * signed long, so lessThanBranchFree is safe for use.
                  */
                 return sqrtFloor + lessThanBranchFree(halfSquare, x);
@@ -4476,8 +4465,8 @@ public final class Numbers {
             case HALF_EVEN:
                 final BigInteger halfSquare = sqrtFloor.pow(2).add(sqrtFloor);
                 /*
-                 * We wish to test whether x <= (sqrtFloor + 0.5)^2 = halfSquare + 0.25. Since both x
-                 * and halfSquare are integers, this is equivalent to testing whether x <=
+                 * We wish to test whether x &lt;= (sqrtFloor + 0.5)^2 = halfSquare + 0.25. Since both x
+                 * and halfSquare are integers, this is equivalent to testing whether x &lt;=
                  * halfSquare.
                  */
                 return (halfSquare.compareTo(x) >= 0) ? sqrtFloor : sqrtFloor.add(BigInteger.ONE);
@@ -4486,11 +4475,6 @@ public final class Numbers {
         }
     }
 
-    /**
-     *
-     * @param x the value to compute the floor square root of
-     * @return the floor of the square root of x
-     */
     private static BigInteger sqrtFloor(final BigInteger x) {
         /*
          * Adapted from Hacker's Delight, Figure 11-1.
@@ -4500,7 +4484,7 @@ public final class Numbers {
          * guess with an application of Newton's method, which sets guess := (guess + (x / guess)) / 2.
          * This iteration has the following two properties:
          *
-         * a) every iteration (except potentially the first) has guess >= floor(sqrt(x)). This is
+         * a) every iteration (except potentially the first) has guess &gt;= floor(sqrt(x)). This is
          * because guess' is the arithmetic mean of guess and x / guess, sqrt(x) is the geometric mean,
          * and the arithmetic mean is always higher than the geometric mean.
          *
@@ -4509,7 +4493,7 @@ public final class Numbers {
          *
          * We start out with a double-precision approximation, which may be higher or lower than the
          * {@code true} value. Therefore, we perform at least one Newton iteration to get a guess that's
-         * definitely >= floor(sqrt(x)), and then continue the iteration until we reach a fixed point.
+         * definitely &gt;= floor(sqrt(x)), and then continue the iteration until we reach a fixed point.
          */
         BigInteger sqrt0;
         final int log2 = log2(x, FLOOR);
@@ -4518,7 +4502,7 @@ public final class Numbers {
         } else {
             final int shift = (log2 - SIGNIFICAND_BITS) & ~1; // even!
             /*
-             * We have that x / 2^shift < 2^54. Our initial approximation to sqrtFloor(x) will be
+             * We have that x / 2^shift &lt; 2^54. Our initial approximation to sqrtFloor(x) will be
              * 2^(shift/2) * sqrtApproxWithDoubles(x / 2^shift).
              */
             sqrt0 = sqrtApproxWithDoubles(x.shiftRight(shift)).shiftLeft(shift >> 1);
@@ -4534,12 +4518,6 @@ public final class Numbers {
         return sqrt0;
     }
 
-    /**
-     * Sqrt approx with doubles.
-     *
-     * @param x the value to compute the approximate square root of
-     * @return the approximate square root as a BigInteger
-     */
     private static BigInteger sqrtApproxWithDoubles(final BigInteger x) {
         return roundToBigInteger(Math.sqrt(bigToDouble(x)), HALF_EVEN);
     }
@@ -4764,8 +4742,7 @@ public final class Numbers {
      * @param m the modulus, must be positive
      * @return x mod m, a non-negative value less than m
      * @throws ArithmeticException if {@code m <= 0}
-     * @see <a href="http://docs.oracle.com/javase/specs/jls/se7/html/jls-15.html#jls-15.17.3">
-     *      Remainder Operator</a>
+     * @see <a href="http://docs.oracle.com/javase/specs/jls/se7/html/jls-15.html#jls-15.17.3">Remainder Operator</a>
      */
     public static int mod(final int x, final int m) {
         if (m <= 0) {
@@ -4792,8 +4769,7 @@ public final class Numbers {
      * @param m the modulus, must be positive
      * @return x mod m, a non-negative value less than m
      * @throws ArithmeticException if {@code m <= 0}
-     * @see <a href="http://docs.oracle.com/javase/specs/jls/se7/html/jls-15.html#jls-15.17.3">
-     *     Remainder Operator</a>
+     * @see <a href="http://docs.oracle.com/javase/specs/jls/se7/html/jls-15.html#jls-15.17.3">Remainder Operator</a>
      */
     public static int mod(final long x, final int m) {
         // Cast is safe because the result is guaranteed in the range [0, m)
@@ -4817,8 +4793,7 @@ public final class Numbers {
      * @param m the modulus, must be positive
      * @return x mod m, a non-negative value less than m
      * @throws ArithmeticException if {@code m <= 0}
-     * @see <a href="http://docs.oracle.com/javase/specs/jls/se7/html/jls-15.html#jls-15.17.3">
-     *     Remainder Operator</a>
+     * @see <a href="http://docs.oracle.com/javase/specs/jls/se7/html/jls-15.html#jls-15.17.3">Remainder Operator</a>
      */
     public static long mod(final long x, final long m) {
         if (m <= 0) {
@@ -4879,7 +4854,7 @@ public final class Numbers {
         }
         /*
          * Uses the binary GCD algorithm; see http://en.wikipedia.org/wiki/Binary_GCD_algorithm.
-         * This is >40% faster than the Euclidean algorithm in benchmarks.
+         * This is &gt;40% faster than the Euclidean algorithm in benchmarks.
          */
         final int aTwos = Integer.numberOfTrailingZeros(a);
         a >>= aTwos; // divide out all 2s
@@ -4959,7 +4934,7 @@ public final class Numbers {
         }
         /*
          * Uses the binary GCD algorithm; see http://en.wikipedia.org/wiki/Binary_GCD_algorithm. This is
-         * >60% faster than the Euclidean algorithm in benchmarks.
+         * &gt;60% faster than the Euclidean algorithm in benchmarks.
          */
         final int aTwos = Long.numberOfTrailingZeros(a);
         a >>= aTwos; // divide out all 2s
@@ -5238,11 +5213,11 @@ public final class Numbers {
         // Hacker's Delight, Section 2-12
         final int leadingZeros = Long.numberOfLeadingZeros(a) + Long.numberOfLeadingZeros(~a) + Long.numberOfLeadingZeros(b) + Long.numberOfLeadingZeros(~b);
         /*
-         * If leadingZeros > Long.SIZE + 1 it's definitely fine, if it's < Long.SIZE it's definitely
+         * If leadingZeros &gt; Long.SIZE + 1 it's definitely fine, if it's &lt; Long.SIZE it's definitely
          * bad. We do the leadingZeros check to avoid the division below if at all possible.
          *
          * Otherwise, if b == Long.MIN_VALUE, then the only allowed values are 0 and 1. We take
-         * care of all a < 0 with their own check, because in particular, the case a == -1 will
+         * care of all a &lt; 0 with their own check, because in particular, the case a == -1 will
          * incorrectly pass the division check below.
          *
          * In all other cases, we check that either a is 0 or the result is consistent with division.
@@ -5395,8 +5370,8 @@ public final class Numbers {
     /**
      * Returns the sum of {@code a} and {@code b}, saturating at the integer bounds instead of overflowing.
      *
-     * <p>This method performs addition with saturation arithmetic. If the true sum would exceed
-     * {@code Integer.MAX_VALUE}, the method returns {@code Integer.MAX_VALUE}. If the true sum
+     * <p>This method performs addition with saturation arithmetic. If the {@code true} sum would exceed
+     * {@code Integer.MAX_VALUE}, the method returns {@code Integer.MAX_VALUE}. If the {@code true} sum
      * would be less than {@code Integer.MIN_VALUE}, the method returns {@code Integer.MIN_VALUE}.
      *
      * <p><b>Examples demonstrating saturation:</b></p>
@@ -5423,8 +5398,8 @@ public final class Numbers {
     /**
      * Returns the sum of {@code a} and {@code b}, saturating at the long bounds instead of overflowing.
      *
-     * <p>This method performs addition with saturation arithmetic. If the true sum would exceed
-     * {@code Long.MAX_VALUE}, the method returns {@code Long.MAX_VALUE}. If the true sum
+     * <p>This method performs addition with saturation arithmetic. If the {@code true} sum would exceed
+     * {@code Long.MAX_VALUE}, the method returns {@code Long.MAX_VALUE}. If the {@code true} sum
      * would be less than {@code Long.MIN_VALUE}, the method returns {@code Long.MIN_VALUE}.
      * 
      * <p><b>Examples demonstrating saturation:</b></p>
@@ -5456,8 +5431,8 @@ public final class Numbers {
     /**
      * Returns the difference of {@code a} and {@code b}, saturating at the integer bounds instead of overflowing.
      *
-     * <p>This method performs subtraction with saturation arithmetic. If the true difference would exceed
-     * {@code Integer.MAX_VALUE}, the method returns {@code Integer.MAX_VALUE}. If the true difference
+     * <p>This method performs subtraction with saturation arithmetic. If the {@code true} difference would exceed
+     * {@code Integer.MAX_VALUE}, the method returns {@code Integer.MAX_VALUE}. If the {@code true} difference
      * would be less than {@code Integer.MIN_VALUE}, the method returns {@code Integer.MIN_VALUE}.
      *
      * <p><b>Examples demonstrating saturation:</b></p>
@@ -5483,8 +5458,8 @@ public final class Numbers {
     /**
      * Returns the difference of {@code a} and {@code b}, saturating at the long bounds instead of overflowing.
      *
-     * <p>This method performs subtraction with saturation arithmetic. If the true difference would exceed
-     * {@code Long.MAX_VALUE}, the method returns {@code Long.MAX_VALUE}. If the true difference
+     * <p>This method performs subtraction with saturation arithmetic. If the {@code true} difference would exceed
+     * {@code Long.MAX_VALUE}, the method returns {@code Long.MAX_VALUE}. If the {@code true} difference
      * would be less than {@code Long.MIN_VALUE}, the method returns {@code Long.MIN_VALUE}.
      *
      * <p><b>Examples demonstrating saturation:</b></p>
@@ -5516,8 +5491,8 @@ public final class Numbers {
     /**
      * Returns the product of {@code a} and {@code b}, saturating at the integer bounds instead of overflowing.
      *
-     * <p>This method performs multiplication with saturation arithmetic. If the true product would exceed
-     * {@code Integer.MAX_VALUE}, the method returns {@code Integer.MAX_VALUE}. If the true product
+     * <p>This method performs multiplication with saturation arithmetic. If the {@code true} product would exceed
+     * {@code Integer.MAX_VALUE}, the method returns {@code Integer.MAX_VALUE}. If the {@code true} product
      * would be less than {@code Integer.MIN_VALUE}, the method returns {@code Integer.MIN_VALUE}.
      *
      * <p><b>Examples demonstrating saturation:</b></p>
@@ -5543,8 +5518,8 @@ public final class Numbers {
     /**
      * Returns the product of {@code a} and {@code b}, saturating at the long bounds instead of overflowing.
      *
-     * <p>This method performs multiplication with saturation arithmetic. If the true product would exceed
-     * {@code Long.MAX_VALUE}, the method returns {@code Long.MAX_VALUE}. If the true product
+     * <p>This method performs multiplication with saturation arithmetic. If the {@code true} product would exceed
+     * {@code Long.MAX_VALUE}, the method returns {@code Long.MAX_VALUE}. If the {@code true} product
      * would be less than {@code Long.MIN_VALUE}, the method returns {@code Long.MIN_VALUE}.
      *
      * <p><b>Examples demonstrating saturation:</b></p>
@@ -5584,9 +5559,9 @@ public final class Numbers {
     /**
      * Returns {@code b} to the {@code k}th power, saturating at the integer bounds instead of overflowing.
      *
-     * <p>This method computes integer exponentiation with saturation arithmetic. If the true result
+     * <p>This method computes integer exponentiation with saturation arithmetic. If the {@code true} result
      * would exceed {@code Integer.MAX_VALUE}, the method returns {@code Integer.MAX_VALUE}. If the
-     * true result would be less than {@code Integer.MIN_VALUE}, the method returns {@code Integer.MIN_VALUE}.
+     * {@code true} result would be less than {@code Integer.MIN_VALUE}, the method returns {@code Integer.MIN_VALUE}.
      *
      * <p>This is useful when you want to avoid overflow but don't want to throw exceptions or use
      * larger data types.
@@ -5659,9 +5634,9 @@ public final class Numbers {
     /**
      * Returns {@code b} to the {@code k}th power, saturating at the long bounds instead of overflowing.
      *
-     * <p>This method computes long integer exponentiation with saturation arithmetic. If the true result
+     * <p>This method computes long integer exponentiation with saturation arithmetic. If the {@code true} result
      * would exceed {@code Long.MAX_VALUE}, the method returns {@code Long.MAX_VALUE}. If the
-     * true result would be less than {@code Long.MIN_VALUE}, the method returns {@code Long.MIN_VALUE}.
+     * {@code true} result would be less than {@code Long.MIN_VALUE}, the method returns {@code Long.MIN_VALUE}.
      *
      * <p>This is useful when you want to avoid overflow but don't want to throw exceptions or use
      * larger data types like BigInteger.
@@ -5770,7 +5745,7 @@ public final class Numbers {
      * Returns {@code n!} (n factorial), the product of the first {@code n} positive integers.
      *
      * <p>The factorial function computes {@code n! = 1 * 2 * 3 * ... * n}. By convention,
-     * {@code 0! = 1}. If the true result would exceed {@code Integer.MAX_VALUE}, this method
+     * {@code 0! = 1}. If the {@code true} result would exceed {@code Integer.MAX_VALUE}, this method
      * returns {@code Integer.MAX_VALUE} instead.
      *
      * <p>The largest value of {@code n} for which {@code n!} fits in an {@code int} is 12.
@@ -5801,7 +5776,7 @@ public final class Numbers {
      * Returns {@code n!} (n factorial) as a {@code long}, the product of the first {@code n} positive integers.
      *
      * <p>The factorial function computes {@code n! = 1 * 2 * 3 * ... * n}. By convention,
-     * {@code 0! = 1}. If the true result would exceed {@code Long.MAX_VALUE}, this method
+     * {@code 0! = 1}. If the {@code true} result would exceed {@code Long.MAX_VALUE}, this method
      * returns {@code Long.MAX_VALUE} instead.
      *
      * <p>The largest value of {@code n} for which {@code n!} fits in a {@code long} is 20.
@@ -5937,22 +5912,10 @@ public final class Numbers {
         return listProduct(bignums).shiftLeft(shift);
     }
 
-    /**
-     *
-     * @param nums the list of BigIntegers to multiply
-     * @return the product of all numbers in the list
-     */
     static BigInteger listProduct(final List<BigInteger> nums) {
         return listProduct(nums, 0, nums.size());
     }
 
-    /**
-     *
-     * @param nums the list of BigIntegers to multiply
-     * @param start the starting index (inclusive)
-     * @param end the ending index (exclusive)
-     * @return the product of numbers in the specified range
-     */
     static BigInteger listProduct(final List<BigInteger> nums, final int start, final int end) {
         switch (end - start) {
             case 0:
@@ -6357,22 +6320,11 @@ public final class Numbers {
         return mean;
     }
 
-    /**
-     *
-     * @param argument the value to check
-     * @return the argument if it is finite
-     */
     private static double checkFinite(final double argument) {
         N.checkArgument(isFinite(argument));
         return argument;
     }
 
-    /**
-     *
-     * @param x the value to round
-     * @param mode the rounding mode to apply
-     * @return the rounded value
-     */
     static double roundIntermediate(final double x, final RoundingMode mode) {
         if (!isFinite(x)) {
             throw new ArithmeticException("input is infinite or NaN");
@@ -6765,6 +6717,7 @@ public final class Numbers {
      * <li>With {@link Double#POSITIVE_INFINITY} tolerance, all non-NaN values are fuzzily equal.
      * <li>With finite tolerance, {@code Double.POSITIVE_INFINITY} and {@code
      *     Double.NEGATIVE_INFINITY} are fuzzily equal only to themselves.
+     * </ul>
      *
      * <p>This is reflexive and symmetric, but <em>not</em> transitive, so it is <em>not</em> an
      * equivalence relation and <em>not</em> suitable for use in {@link Object#equals}
@@ -6880,11 +6833,11 @@ public final class Numbers {
          *
          * The key idea is that based on the number of leading zeros (equivalently, floor(log2(x))), we
          * can narrow the possible floor(log10(x)) values to two. For example, if floor(log2(x)) is 6,
-         * then 64 <= x < 128, so floor(log10(x)) is either 1 or 2.
+         * then 64 &lt;= x &lt; 128, so floor(log10(x)) is either 1 or 2.
          */
         final int y = maxLog10ForLeadingZeros[Long.numberOfLeadingZeros(x)];
         /*
-         * y is the higher of the two possible values of floor(log10(x)). If x < 10^y, then we want the
+         * y is the higher of the two possible values of floor(log10(x)). If x &lt; 10^y, then we want the
          * lower of the two possible values, or y - 1, otherwise, we want y.
          */
         return y - lessThanBranchFree(x, powersOf10[y]);
@@ -6925,22 +6878,10 @@ public final class Numbers {
     // These values were generated by using checkedMultiply to see when the simple multiply/divide
     // algorithm would lead to an overflow.
 
-    /**
-     * Checks if is finite.
-     *
-     * @param d the value to check
-     * @return {@code true}, if is finite
-     */
     static boolean isFinite(final double d) {
         return getExponent(d) <= MAX_EXPONENT;
     }
 
-    /**
-     * Checks if is normal.
-     *
-     * @param d the value to check
-     * @return {@code true}, if is normal
-     */
     static boolean isNormal(final double d) {
         return getExponent(d) >= MIN_EXPONENT;
     }
@@ -6954,12 +6895,6 @@ public final class Numbers {
         return longBitsToDouble(significand | ONE_BITS);
     }
 
-    /**
-     * Big to double.
-     *
-     * @param x the BigInteger to convert
-     * @return the double representation of the BigInteger
-     */
     static double bigToDouble(final BigInteger x) {
         // This is an extremely fast implementation of BigInteger.doubleValue(). JDK patch pending.
         final BigInteger absX = x.abs();
@@ -7177,7 +7112,7 @@ public final class Numbers {
      * Numbers.acosh(0.5)  // NaN (outside domain)
      * }</pre>
      *
-     * @param a the number on which to compute the inverse hyperbolic cosine; must be >= 1
+     * @param a the number on which to compute the inverse hyperbolic cosine; must be &gt;= 1
      * @return the inverse hyperbolic cosine of {@code a}, or NaN if {@code a < 1}
      * @see #asinh(double)
      * @see #atanh(double)
@@ -7251,9 +7186,6 @@ public final class Numbers {
      */
     static final class UnsignedLongs {
 
-        /**
-         * Instantiates a new unsigned longs.
-         */
         private UnsignedLongs() {
         }
 
@@ -7322,9 +7254,6 @@ public final class Numbers {
     }
 
     private enum MillerRabinTester {
-        /**
-         * Works for inputs <= FLOOR_SQRT_MAX_LONG.
-         */
         SMALL {
             @Override
             long mulMod(final long a, final long b, final long m) {
@@ -7342,12 +7271,9 @@ public final class Numbers {
                 return (a * a) % m;
             }
         },
-        /**
-         * Works for all nonnegative signed longs.
-         */
         LARGE {
             /**
-             * Returns (a + b) mod m. Precondition: 0 <= a, b < m < 2^63.
+             * Returns (a + b) mod m. Precondition: 0 &lt;= a, b &lt; m &lt; 2^63.
              */
             private long plusMod(final long a, final long b, final long m) {
                 return (a >= m - b) ? (a + b - m) : (a + b);
@@ -7418,12 +7344,6 @@ public final class Numbers {
             }
         };
 
-        /**
-         *
-         * @param base the base value
-         * @param n the value to test
-         * @return {@code true} if the test passes, otherwise {@code false}
-         */
         static boolean test(final long base, final long n) {
             // Since base will be considered % n, it's okay if base > FLOOR_SQRT_MAX_LONG,
             // so long as n <= FLOOR_SQRT_MAX_LONG.
@@ -7449,14 +7369,6 @@ public final class Numbers {
          */
         abstract long squareMod(long a, long m);
 
-        /**
-         * Returns a^p mod m.
-         *
-         * @param a the base value
-         * @param p the exponent
-         * @param m the modulus
-         * @return the result of a^p mod m
-         */
         private long powMod(long a, long p, final long m) {
             long res = 1;
             for (; p != 0; p >>= 1) {

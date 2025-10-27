@@ -53,6 +53,13 @@ import java.util.NoSuchElementException;
 @SuppressWarnings({ "java:S6548" })
 public abstract class ImmutableListIterator<T> extends ObjIterator<T> implements ListIterator<T> {
 
+    /**
+     * Constructs a new ImmutableListIterator.
+     * This constructor is protected to allow subclassing.
+     */
+    protected ImmutableListIterator() {
+    }
+
     @SuppressWarnings("rawtypes")
     private static final ImmutableListIterator EMPTY = new ImmutableListIterator() {
         @Override
@@ -88,7 +95,7 @@ public abstract class ImmutableListIterator<T> extends ObjIterator<T> implements
 
     /**
      * Returns an empty ImmutableListIterator. This iterator has no elements,
-     * so {@link #hasNext()} and {@link #hasPrevious()} always return false.
+     * so {@link #hasNext()} and {@link #hasPrevious()} always return {@code false}.
      * 
      * <p>The returned iterator is a singleton instance and can be safely shared.
      * 
@@ -111,7 +118,7 @@ public abstract class ImmutableListIterator<T> extends ObjIterator<T> implements
      * Creates an ImmutableListIterator that wraps the provided ListIterator.
      * The returned iterator provides read-only access to the elements.
      * 
-     * <p>If the provided iterator is null, an empty ImmutableListIterator is returned.
+     * <p>If the provided iterator is {@code null}, an empty ImmutableListIterator is returned.
      * If the provided iterator is already an ImmutableListIterator, it is returned as-is.
      * 
      * <p>The returned iterator reflects the current state of the provided iterator,

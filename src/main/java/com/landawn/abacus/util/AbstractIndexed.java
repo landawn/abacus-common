@@ -31,11 +31,6 @@ abstract class AbstractIndexed implements Immutable {
     /** The index value associated with this object */
     protected final long index;
 
-    /**
-     * Constructs an AbstractIndexed object with the specified index.
-     * 
-     * @param index the index value to associate with this object
-     */
     protected AbstractIndexed(final long index) {
         this.index = index;
     }

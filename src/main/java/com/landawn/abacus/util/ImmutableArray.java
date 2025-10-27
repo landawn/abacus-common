@@ -29,7 +29,7 @@ import com.landawn.abacus.util.stream.Stream;
  * supports conversion to {@link ImmutableList} and {@link Stream} for functional operations.</p>
  * 
  * <p>Note: While the ImmutableArray itself cannot be modified, if it contains mutable objects,
- * those objects themselves can still be modified. For true immutability, ensure that the
+ * those objects themselves can still be modified. For {@code true} immutability, ensure that the
  * array contains only immutable objects.</p>
  * 
  * <p><b>Usage Examples:</b></p>
@@ -321,7 +321,7 @@ public final class ImmutableArray<T> implements Iterable<T>, Immutable {
      * @param index the index of the element to return (zero-based)
      * @return the element at the specified position
      * @throws ArrayIndexOutOfBoundsException if the index is out of range
-     *         (index < 0 || index >= length())
+     *         (index &lt; 0 || index &gt;= length())
      */
     public T get(final int index) {
         return elements[index];
@@ -395,8 +395,8 @@ public final class ImmutableArray<T> implements Iterable<T>, Immutable {
      * @param fromIndex the starting index (inclusive)
      * @param toIndex the ending index (exclusive)
      * @return a new ImmutableArray containing the specified range of elements
-     * @throws IndexOutOfBoundsException if fromIndex < 0, toIndex > length(),
-     *         or fromIndex > toIndex
+     * @throws IndexOutOfBoundsException if fromIndex &lt; 0, toIndex &gt; length(),
+     *         or fromIndex &gt; toIndex
      */
     public ImmutableArray<T> copy(final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         N.checkFromToIndex(fromIndex, toIndex, length);

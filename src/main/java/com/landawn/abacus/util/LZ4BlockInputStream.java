@@ -196,7 +196,7 @@ public final class LZ4BlockInputStream extends InputStream {
      * Tests if this input stream supports the mark and reset methods.
      * The markSupported method returns the value from the underlying LZ4 implementation.
      * 
-     * @return {@code true} if this stream instance supports the mark and reset methods; false otherwise
+     * @return {@code true} if this stream instance supports the mark and reset methods; {@code false} otherwise
      */
     @Override
     public boolean markSupported() {

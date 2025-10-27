@@ -47,8 +47,23 @@ import com.landawn.abacus.util.stream.Stream;
 @SuppressWarnings({ "java:S6548" })
 public abstract class BiIterator<A, B> extends ImmutableIterator<Pair<A, B>> {
 
+    /**
+     * Constructs a new BiIterator.
+     */
+    protected BiIterator() {
+    }
+
+    /**
+     * A singleton empty BiIterator instance that contains no elements.
+     * This iterator's hasNext() always returns false, and any attempt to retrieve elements throws NoSuchElementException.
+     *
+     * @see #empty()
+     */
     @SuppressWarnings("rawtypes")
     private static final BiIterator EMPTY = new BiIterator() {
+        /**
+         * Constructs an empty BiIterator.
+         */
         @Override
         public boolean hasNext() {
             return false;

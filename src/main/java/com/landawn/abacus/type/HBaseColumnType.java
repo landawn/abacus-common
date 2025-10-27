@@ -59,9 +59,10 @@ public class HBaseColumnType<T> extends AbstractType<HBaseColumn<T>> {
      * The declaring name represents the type in a simplified format suitable for type declarations,
      * using simple class names rather than fully qualified names.
      *
-     * @return the declaring name of this type (e.g., "HBaseColumn<String>")
+     * @return the declaring name of this type (e.g., "HBaseColumn&lt;String&gt;")
      */
     @Override
+    @MayReturnNull
     public String declaringName() {
         return declaringName;
     }
@@ -98,11 +99,6 @@ public class HBaseColumnType<T> extends AbstractType<HBaseColumn<T>> {
         return parameterTypes;
     }
 
-    /**
-     * Indicates that this is a generic type with type parameters.
-     *
-     * @return {@code true} as HBaseColumn is a generic type
-     */
     @Override
     public boolean isGenericType() {
         return true;
@@ -114,9 +110,10 @@ public class HBaseColumnType<T> extends AbstractType<HBaseColumn<T>> {
      * and value is the string representation of the stored value.
      *
      * @param x the HBaseColumn to convert to string
-     * @return the string representation in format "version:value", or null if the input is null
+     * @return the string representation in format "version:value", or {@code null} if the input is null
      */
     @Override
+    @MayReturnNull
     public String stringOf(final HBaseColumn<T> x) {
         return x == null ? null : x.version() + SEPARATOR + elementType.stringOf(x.value());
     }
@@ -127,7 +124,7 @@ public class HBaseColumnType<T> extends AbstractType<HBaseColumn<T>> {
      * representing the timestamp/version, and value is parsed according to the element type.
      *
      * @param str the string to parse in format "version:value"
-     * @return a new HBaseColumn instance with the parsed version and value, or null if the input is null or empty
+     * @return a new HBaseColumn instance with the parsed version and value, or {@code null} if the input is {@code null} or empty
      */
     @MayReturnNull
     @Override
@@ -150,8 +147,8 @@ public class HBaseColumnType<T> extends AbstractType<HBaseColumn<T>> {
      *
      * @param typeClass the HBaseColumn class (not used in current implementation but kept for consistency)
      * @param parameterTypeName the name of the value type
-     * @param isDeclaringName true to generate a declaring name with simple class names, {@code false} for fully qualified names
-     * @return the formatted type name (e.g., "HBaseColumn<String>" or "com.landawn.abacus.util.HBaseColumn<java.lang.String>")
+     * @param isDeclaringName {@code true} to generate a declaring name with simple class names, {@code false} for fully qualified names
+     * @return the formatted type name (e.g., "HBaseColumn&lt;String&gt;" or "com.landawn.abacus.util.HBaseColumn&lt;java.lang.String&gt;")
      */
     @SuppressWarnings("unused")
     protected static String getTypeName(final Class<?> typeClass, final String parameterTypeName, final boolean isDeclaringName) {

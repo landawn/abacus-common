@@ -46,12 +46,11 @@ import java.util.concurrent.LinkedBlockingQueue;
  * actual type parameter information due to Java's type erasure. These methods are primarily useful for
  * providing type hints to APIs that accept Class parameters.</p>
  * 
- * <p>For retaining actual type parameter information, consider using:
+ * <p>For retaining actual type parameter information, consider using:</p>
  * <ul>
  *   <li>{@code Type.of("List<String>")} or {@code Type.ofList(String.class)}</li>
  *   <li>{@code new TypeReference<List<String>>() {}.type()}</li>
  * </ul>
- * </p>
  * 
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
@@ -1341,7 +1340,7 @@ public final class Clazz {
      *   <li>ID to name mappings (and vice versa)</li>
      *   <li>Code to description dictionaries</li>
      *   <li>Two-way translation tables</li>
-     * </ul></p>
+     * </ul>
      *
      * <p><b>Warning:</b> The returned Class object does NOT contain actual type parameter information
      * due to Java's type erasure. The {@code keyCls} and {@code valueCls} parameters are only used
@@ -1409,7 +1408,7 @@ public final class Clazz {
      *   <li>Efficient count queries: {@code count(element)}</li>
      *   <li>Add/remove operations update occurrence counts</li>
      *   <li>Order-independent equality</li>
-     * </ul></p>
+     * </ul>
      *
      * <p><b>Use Cases:</b> Ideal for scenarios requiring frequency counting, such as:
      * <ul>
@@ -1417,7 +1416,7 @@ public final class Clazz {
      *   <li>Histogram data structures</li>
      *   <li>Statistical aggregation</li>
      *   <li>Voting/polling systems</li>
-     * </ul></p>
+     * </ul>
      *
      * <p><b>Warning:</b> The returned Class object does NOT contain actual type parameter information
      * due to Java's type erasure. The {@code eleCls} parameter is only used for compile-time type

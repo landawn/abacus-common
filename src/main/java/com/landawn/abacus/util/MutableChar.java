@@ -52,6 +52,9 @@ public final class MutableChar implements Mutable, Serializable, Comparable<Muta
     @Serial
     private static final long serialVersionUID = 6807507696378901820L;
 
+    /**
+     * The mutable char value.
+     */
     private char value;
 
     /**
@@ -184,8 +187,8 @@ public final class MutableChar implements Mutable, Serializable, Comparable<Muta
     }
 
     /**
-     * Conditionally sets the value to newValue if the predicate evaluates to true for the current value.
-     * If the predicate returns false, the value remains unchanged.
+     * Conditionally sets the value to newValue if the predicate evaluates to {@code true} for the current value.
+     * If the predicate returns {@code false}, the value remains unchanged.
      *
      * <p>This method is useful for conditional updates based on the current state.</p>
      *

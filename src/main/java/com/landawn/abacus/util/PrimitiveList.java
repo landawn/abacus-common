@@ -41,6 +41,12 @@ import com.landawn.abacus.annotation.Beta;
  */
 public abstract class PrimitiveList<B, A, L extends PrimitiveList<B, A, L>> implements RandomAccess, java.io.Serializable { // Iterable<B>, // reference to notEmpty is ambiguous both methods notEmpty(java.lang.Iterable<?>)
 
+    /**
+     * Protected constructor for subclasses.
+     */
+    protected PrimitiveList() {
+    }
+
     @Serial
     private static final long serialVersionUID = 1504784980113045443L;
 
@@ -75,7 +81,7 @@ public abstract class PrimitiveList<B, A, L extends PrimitiveList<B, A, L>> impl
      * current capacity is insufficient to accommodate all new elements.</p>
      *
      * @param c the PrimitiveList containing elements to be added to this list. 
-     *          If null or empty, this list remains unchanged.
+     *          If {@code null} or empty, this list remains unchanged.
      * @return {@code true} if this list changed as a result of the call (i.e., if c was not empty),
      *         {@code false} otherwise
      */
@@ -93,7 +99,7 @@ public abstract class PrimitiveList<B, A, L extends PrimitiveList<B, A, L>> impl
      * @param index the index at which to insert the first element from the specified list.
      *              Must be between 0 and size() (inclusive).
      * @param c the PrimitiveList containing elements to be inserted into this list.
-     *          If null or empty, this list remains unchanged.
+     *          If {@code null} or empty, this list remains unchanged.
      * @return {@code true} if this list changed as a result of the call (i.e., if c was not empty),
      *         {@code false} otherwise
      * @throws IndexOutOfBoundsException if the index is out of range
@@ -109,7 +115,7 @@ public abstract class PrimitiveList<B, A, L extends PrimitiveList<B, A, L>> impl
      * current capacity is insufficient to accommodate all new elements.</p>
      *
      * @param a the array containing elements to be added to this list.
-     *          If null or empty, this list remains unchanged.
+     *          If {@code null} or empty, this list remains unchanged.
      * @return {@code true} if this list changed as a result of the call (i.e., if the array was not empty),
      *         {@code false} otherwise
      */
@@ -127,7 +133,7 @@ public abstract class PrimitiveList<B, A, L extends PrimitiveList<B, A, L>> impl
      * @param index the index at which to insert the first element from the specified array.
      *              Must be between 0 and size() (inclusive).
      * @param a the array containing elements to be inserted into this list.
-     *          If null or empty, this list remains unchanged.
+     *          If {@code null} or empty, this list remains unchanged.
      * @return {@code true} if this list changed as a result of the call (i.e., if the array was not empty),
      *         {@code false} otherwise
      * @throws IndexOutOfBoundsException if the index is out of range
@@ -143,7 +149,7 @@ public abstract class PrimitiveList<B, A, L extends PrimitiveList<B, A, L>> impl
      * if the element appears at least once in the specified list. The comparison is done by value.</p>
      *
      * @param c the PrimitiveList containing elements to be removed from this list.
-     *          If null or empty, this list remains unchanged.
+     *          If {@code null} or empty, this list remains unchanged.
      * @return {@code true} if this list was modified as a result of the call,
      *         {@code false} otherwise
      */
@@ -157,7 +163,7 @@ public abstract class PrimitiveList<B, A, L extends PrimitiveList<B, A, L>> impl
      * if the element appears at least once in the specified array. The comparison is done by value.</p>
      *
      * @param a the array containing elements to be removed from this list.
-     *          If null or empty, this list remains unchanged.
+     *          If {@code null} or empty, this list remains unchanged.
      * @return {@code true} if this list was modified as a result of the call,
      *         {@code false} otherwise
      */
@@ -191,7 +197,7 @@ public abstract class PrimitiveList<B, A, L extends PrimitiveList<B, A, L>> impl
      * <p>Elements are compared by value. The relative order of retained elements is preserved.</p>
      *
      * @param c the PrimitiveList containing elements to be retained in this list.
-     *          If null or empty, this list will be cleared.
+     *          If {@code null} or empty, this list will be cleared.
      * @return {@code true} if this list was modified as a result of the call,
      *         {@code false} otherwise
      */
@@ -206,7 +212,7 @@ public abstract class PrimitiveList<B, A, L extends PrimitiveList<B, A, L>> impl
      * <p>Elements are compared by value. The relative order of retained elements is preserved.</p>
      *
      * @param a the array containing elements to be retained in this list.
-     *          If null or empty, this list will be cleared.
+     *          If {@code null} or empty, this list will be cleared.
      * @return {@code true} if this list was modified as a result of the call,
      *         {@code false} otherwise
      */
@@ -229,7 +235,7 @@ public abstract class PrimitiveList<B, A, L extends PrimitiveList<B, A, L>> impl
      * }</pre>
      *
      * @param indices the indices of elements to be removed. Null or empty array results in no change.
-     *                Invalid indices (negative or >= size()) are ignored.
+     *                Invalid indices (negative or &gt;= size()) are ignored.
      */
     public abstract void deleteAllByIndices(int... indices);
 
@@ -250,7 +256,7 @@ public abstract class PrimitiveList<B, A, L extends PrimitiveList<B, A, L>> impl
      * @param fromIndex the index of the first element to be removed (inclusive).
      *                  Must be non-negative.
      * @param toIndex the index after the last element to be removed (exclusive).
-     *                Must be >= fromIndex and <= size().
+     *                Must be &gt;= fromIndex and &lt;= size().
      * @throws IndexOutOfBoundsException if fromIndex or toIndex is out of range
      *         ({@code fromIndex < 0 || toIndex > size() || fromIndex > toIndex})
      */
@@ -298,9 +304,9 @@ public abstract class PrimitiveList<B, A, L extends PrimitiveList<B, A, L>> impl
      * @param fromIndex the starting index (inclusive) of the range to replace.
      *                  Must be non-negative.
      * @param toIndex the ending index (exclusive) of the range to replace.
-     *                Must be >= fromIndex and <= size().
+     *                Must be &gt;= fromIndex and &lt;= size().
      * @param replacement the PrimitiveList whose elements will replace the specified range.
-     *                    If null or empty, the range is simply deleted.
+     *                    If {@code null} or empty, the range is simply deleted.
      * @throws IndexOutOfBoundsException if fromIndex or toIndex is out of range
      *         ({@code fromIndex < 0 || toIndex > size() || fromIndex > toIndex})
      */
@@ -326,9 +332,9 @@ public abstract class PrimitiveList<B, A, L extends PrimitiveList<B, A, L>> impl
      * @param fromIndex the starting index (inclusive) of the range to replace.
      *                  Must be non-negative.
      * @param toIndex the ending index (exclusive) of the range to replace.
-     *                Must be >= fromIndex and <= size().
+     *                Must be &gt;= fromIndex and &lt;= size().
      * @param replacement the array whose elements will replace the specified range.
-     *                    If null or empty, the range is simply deleted.
+     *                    If {@code null} or empty, the range is simply deleted.
      * @throws IndexOutOfBoundsException if fromIndex or toIndex is out of range
      *         ({@code fromIndex < 0 || toIndex > size() || fromIndex > toIndex})
      */
@@ -350,7 +356,7 @@ public abstract class PrimitiveList<B, A, L extends PrimitiveList<B, A, L>> impl
      * }</pre>
      *
      * @param l the PrimitiveList to be checked for common elements with this list.
-     *          If null or empty, returns {@code false}.
+     *          If {@code null} or empty, returns {@code false}.
      * @return {@code true} if this list contains any element from the specified list,
      *         {@code false} otherwise
      */
@@ -372,7 +378,7 @@ public abstract class PrimitiveList<B, A, L extends PrimitiveList<B, A, L>> impl
      * }</pre>
      *
      * @param a the array to be checked for common elements with this list.
-     *          If null or empty, returns {@code false}.
+     *          If {@code null} or empty, returns {@code false}.
      * @return {@code true} if this list contains any element from the specified array,
      *         {@code false} otherwise
      */
@@ -397,7 +403,7 @@ public abstract class PrimitiveList<B, A, L extends PrimitiveList<B, A, L>> impl
      * }</pre>
      *
      * @param l the PrimitiveList to be checked for containment in this list.
-     *          If null or empty, returns {@code true}.
+     *          If {@code null} or empty, returns {@code true}.
      * @return {@code true} if this list contains all elements in the specified list,
      *         {@code false} otherwise
      */
@@ -422,7 +428,7 @@ public abstract class PrimitiveList<B, A, L extends PrimitiveList<B, A, L>> impl
      * }</pre>
      *
      * @param a the array to be checked for containment in this list.
-     *          If null or empty, returns {@code true}.
+     *          If {@code null} or empty, returns {@code true}.
      * @return {@code true} if this list contains all elements in the specified array,
      *         {@code false} otherwise
      */
@@ -447,7 +453,7 @@ public abstract class PrimitiveList<B, A, L extends PrimitiveList<B, A, L>> impl
      * }</pre>
      *
      * @param l the PrimitiveList to check for disjointness with this list.
-     *          If null or empty, returns {@code true}.
+     *          If {@code null} or empty, returns {@code true}.
      * @return {@code true} if the two lists have no elements in common,
      *         {@code false} otherwise
      */
@@ -471,7 +477,7 @@ public abstract class PrimitiveList<B, A, L extends PrimitiveList<B, A, L>> impl
      * }</pre>
      *
      * @param a the array to check for disjointness with this list.
-     *          If null or empty, returns {@code true}.
+     *          If {@code null} or empty, returns {@code true}.
      * @return {@code true} if this list and the array have no elements in common,
      *         {@code false} otherwise
      */
@@ -499,7 +505,7 @@ public abstract class PrimitiveList<B, A, L extends PrimitiveList<B, A, L>> impl
      * }</pre>
      *
      * @param b the list to find common elements with this list.
-     *          If null or empty, returns an empty list.
+     *          If {@code null} or empty, returns an empty list.
      * @return a new PrimitiveList containing elements present in both this list and the specified list,
      *         considering the minimum number of occurrences in either list.
      * @see IntList#intersection(IntList)
@@ -529,7 +535,7 @@ public abstract class PrimitiveList<B, A, L extends PrimitiveList<B, A, L>> impl
      * }</pre>
      *
      * @param b the array to find common elements with this list.
-     *          If null or empty, returns an empty list.
+     *          If {@code null} or empty, returns an empty list.
      * @return a new PrimitiveList containing elements present in both this list and the specified array,
      *         considering the minimum number of occurrences in either source.
      * @see IntList#intersection(int[])
@@ -559,7 +565,7 @@ public abstract class PrimitiveList<B, A, L extends PrimitiveList<B, A, L>> impl
      * }</pre>
      *
      * @param b the list to compare against this list.
-     *          If null or empty, returns a copy of this list.
+     *          If {@code null} or empty, returns a copy of this list.
      * @return a new PrimitiveList containing the elements that are present in this list but not in the specified list,
      *         considering the number of occurrences.
      * @see IntList#difference(IntList)
@@ -589,7 +595,7 @@ public abstract class PrimitiveList<B, A, L extends PrimitiveList<B, A, L>> impl
      * }</pre>
      *
      * @param a the array to compare against this list.
-     *          If null or empty, returns a copy of this list.
+     *          If {@code null} or empty, returns a copy of this list.
      * @return a new PrimitiveList containing the elements that are present in this list but not in the specified array,
      *         considering the number of occurrences.
      * @see IntList#difference(int[])
@@ -620,7 +626,7 @@ public abstract class PrimitiveList<B, A, L extends PrimitiveList<B, A, L>> impl
      * }</pre>
      *
      * @param b the list to compare with this list for symmetric difference.
-     *          If null or empty, returns a copy of this list.
+     *          If {@code null} or empty, returns a copy of this list.
      * @return a new list containing elements that are present in either this list or the specified list,
      *         but not in both, considering the number of occurrences
      * @see IntList#symmetricDifference(IntList)
@@ -651,7 +657,7 @@ public abstract class PrimitiveList<B, A, L extends PrimitiveList<B, A, L>> impl
      * }</pre>
      *
      * @param b the array to compare with this list for symmetric difference.
-     *          If null or empty, returns a copy of this list.
+     *          If {@code null} or empty, returns a copy of this list.
      * @return a new list containing elements that are present in either this list or the specified array,
      *         but not in both, considering the number of occurrences
      * @see IntList#symmetricDifference(int[])
@@ -716,9 +722,9 @@ public abstract class PrimitiveList<B, A, L extends PrimitiveList<B, A, L>> impl
      * @param fromIndex the starting index (inclusive) of the range to process.
      *                  Must be non-negative.
      * @param toIndex the ending index (exclusive) of the range to process.
-     *                Must be >= fromIndex and <= size().
+     *                Must be &gt;= fromIndex and &lt;= size().
      * @return a new PrimitiveList with distinct elements from the specified range
-     * @throws IndexOutOfBoundsException if fromIndex < 0, toIndex > size(), or fromIndex > toIndex
+     * @throws IndexOutOfBoundsException if fromIndex &lt; 0, toIndex &gt; size(), or fromIndex &gt; toIndex
      */
     public abstract L distinct(final int fromIndex, final int toIndex);
 
@@ -810,8 +816,8 @@ public abstract class PrimitiveList<B, A, L extends PrimitiveList<B, A, L>> impl
      * @param fromIndex the starting index (inclusive) of the range to reverse.
      *                  Must be non-negative.
      * @param toIndex the ending index (exclusive) of the range to reverse.
-     *                Must be >= fromIndex and <= size().
-     * @throws IndexOutOfBoundsException if fromIndex < 0, toIndex > size(), or fromIndex > toIndex
+     *                Must be &gt;= fromIndex and &lt;= size().
+     * @throws IndexOutOfBoundsException if fromIndex &lt; 0, toIndex &gt; size(), or fromIndex &gt; toIndex
      */
     public abstract void reverse(final int fromIndex, final int toIndex);
 
@@ -877,7 +883,7 @@ public abstract class PrimitiveList<B, A, L extends PrimitiveList<B, A, L>> impl
      * }</pre>
      *
      * @param rnd the source of randomness to use for shuffling.
-     *            Must not be null.
+     *            Must not be {@code null}.
      */
     public abstract void shuffle(final Random rnd);
 
@@ -894,9 +900,9 @@ public abstract class PrimitiveList<B, A, L extends PrimitiveList<B, A, L>> impl
      * }</pre>
      *
      * @param i the index of the first element to swap.
-     *          Must be >= 0 and < size().
+     *          Must be &gt;= 0 and &lt; size().
      * @param j the index of the second element to swap.
-     *          Must be >= 0 and < size().
+     *          Must be &gt;= 0 and &lt; size().
      * @throws IndexOutOfBoundsException if either i or j is out of range
      *         ({@code i < 0 || i >= size() || j < 0 || j >= size()})
      */
@@ -937,9 +943,9 @@ public abstract class PrimitiveList<B, A, L extends PrimitiveList<B, A, L>> impl
      * @param fromIndex the starting index (inclusive) of the range to copy.
      *                  Must be non-negative.
      * @param toIndex the ending index (exclusive) of the range to copy.
-     *                Must be >= fromIndex and <= size().
+     *                Must be &gt;= fromIndex and &lt;= size().
      * @return a new PrimitiveList containing the elements in the specified range
-     * @throws IndexOutOfBoundsException if fromIndex < 0, toIndex > size(), or fromIndex > toIndex
+     * @throws IndexOutOfBoundsException if fromIndex &lt; 0, toIndex &gt; size(), or fromIndex &gt; toIndex
      */
     public abstract L copy(final int fromIndex, final int toIndex);
 
@@ -948,7 +954,7 @@ public abstract class PrimitiveList<B, A, L extends PrimitiveList<B, A, L>> impl
      * selecting only elements at intervals defined by the step parameter.
      * 
      * <p>For positive step values, elements are selected in forward direction starting from fromIndex.
-     * For negative step values when fromIndex > toIndex, elements are selected in reverse direction.
+     * For negative step values when fromIndex &gt; toIndex, elements are selected in reverse direction.
      * The absolute value of step determines the interval between selected elements.</p>
      * 
      * <p><b>Usage Examples:</b></p>
@@ -965,8 +971,8 @@ public abstract class PrimitiveList<B, A, L extends PrimitiveList<B, A, L>> impl
      * }</pre>
      *
      * @param fromIndex the starting index (inclusive) of the range to copy.
-     *                  For forward stepping, must be < toIndex.
-     *                  For reverse stepping, must be > toIndex (or toIndex can be -1 for start).
+     *                  For forward stepping, must be &lt; toIndex.
+     *                  For reverse stepping, must be &gt; toIndex (or toIndex can be -1 for start).
      * @param toIndex the ending index (exclusive) of the range to copy.
      *                Can be -1 when using negative step to indicate copying to the start.
      * @param step the interval between selected elements. Must not be zero.
@@ -997,7 +1003,7 @@ public abstract class PrimitiveList<B, A, L extends PrimitiveList<B, A, L>> impl
      *
      * @param chunkSize the desired size of each chunk. Must be greater than 0.
      * @return a List containing the PrimitiveList chunks
-     * @throws IllegalArgumentException if chunkSize <= 0
+     * @throws IllegalArgumentException if chunkSize &lt;= 0
      */
     public List<L> split(final int chunkSize) {
         return split(0, size(), chunkSize);
@@ -1022,11 +1028,11 @@ public abstract class PrimitiveList<B, A, L extends PrimitiveList<B, A, L>> impl
      * @param fromIndex the starting index (inclusive) of the range to split.
      *                  Must be non-negative.
      * @param toIndex the ending index (exclusive) of the range to split.
-     *                Must be >= fromIndex and <= size().
+     *                Must be &gt;= fromIndex and &lt;= size().
      * @param chunkSize the desired size of each chunk. Must be greater than 0.
      * @return a List containing the PrimitiveList chunks
-     * @throws IndexOutOfBoundsException if fromIndex < 0, toIndex > size(), or fromIndex > toIndex
-     * @throws IllegalArgumentException if chunkSize <= 0
+     * @throws IndexOutOfBoundsException if fromIndex &lt; 0, toIndex &gt; size(), or fromIndex &gt; toIndex
+     * @throws IllegalArgumentException if chunkSize &lt;= 0
      */
     public abstract List<L> split(final int fromIndex, final int toIndex, int chunkSize);
 
@@ -1137,7 +1143,7 @@ public abstract class PrimitiveList<B, A, L extends PrimitiveList<B, A, L>> impl
      * <p>This method is equivalent to calling {@code boxed(0, size())}.</p>
      * 
      * <p>This method is useful when you need to work with APIs that require
-     * List<Integer> rather than primitive arrays.</p>
+     * List&lt;Integer&gt; rather than primitive arrays.</p>
      * 
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1170,9 +1176,9 @@ public abstract class PrimitiveList<B, A, L extends PrimitiveList<B, A, L>> impl
      * @param fromIndex the starting index (inclusive) of the range to box.
      *                  Must be non-negative.
      * @param toIndex the ending index (exclusive) of the range to box.
-     *                Must be >= fromIndex and <= size().
+     *                Must be &gt;= fromIndex and &lt;= size().
      * @return a new List containing elements from the specified range as boxed objects
-     * @throws IndexOutOfBoundsException if fromIndex < 0, toIndex > size(), or fromIndex > toIndex
+     * @throws IndexOutOfBoundsException if fromIndex &lt; 0, toIndex &gt; size(), or fromIndex &gt; toIndex
      */
     public abstract List<B> boxed(final int fromIndex, final int toIndex);
 
@@ -1200,7 +1206,7 @@ public abstract class PrimitiveList<B, A, L extends PrimitiveList<B, A, L>> impl
      * @param fromIndex the starting index (inclusive) of the range to convert
      * @param toIndex the ending index (exclusive) of the range to convert
      * @return a new List containing elements from the specified range as boxed objects
-     * @throws IndexOutOfBoundsException if fromIndex < 0, toIndex > size(), or fromIndex > toIndex
+     * @throws IndexOutOfBoundsException if fromIndex &lt; 0, toIndex &gt; size(), or fromIndex &gt; toIndex
      * @deprecated use {@link #boxed(int, int)} instead.
      */
     @Deprecated
@@ -1243,9 +1249,9 @@ public abstract class PrimitiveList<B, A, L extends PrimitiveList<B, A, L>> impl
      * @param fromIndex the starting index (inclusive) of the range to convert.
      *                  Must be non-negative.
      * @param toIndex the ending index (exclusive) of the range to convert.
-     *                Must be >= fromIndex and <= size().
+     *                Must be &gt;= fromIndex and &lt;= size().
      * @return a new Set containing unique elements from the specified range as boxed objects
-     * @throws IndexOutOfBoundsException if fromIndex < 0, toIndex > size(), or fromIndex > toIndex
+     * @throws IndexOutOfBoundsException if fromIndex &lt; 0, toIndex &gt; size(), or fromIndex &gt; toIndex
      */
     public Set<B> toSet(final int fromIndex, final int toIndex) {
         return toCollection(fromIndex, toIndex, IntFunctions.ofSet());
@@ -1279,12 +1285,12 @@ public abstract class PrimitiveList<B, A, L extends PrimitiveList<B, A, L>> impl
      * The type of Collection returned is determined by the provided supplier function.
      * The returned collection is independent of this list.
      * 
-     * @param <C> the type of Collection to create, must extend Collection<B>
+     * @param <C> the type of Collection to create, must extend Collection&lt;B&gt;
      * @param fromIndex the starting index (inclusive) of the range to convert
      * @param toIndex the ending index (exclusive) of the range to convert
      * @param supplier a function that creates a new Collection instance of the desired type with the given initial capacity
      * @return a Collection containing elements from the specified range in the same order
-     * @throws IndexOutOfBoundsException if fromIndex < 0, toIndex > size(), or fromIndex > toIndex
+     * @throws IndexOutOfBoundsException if fromIndex &lt; 0, toIndex &gt; size(), or fromIndex &gt; toIndex
      * @throws RuntimeException if the supplier throws an exception during Collection creation
      */
     public abstract <C extends Collection<B>> C toCollection(final int fromIndex, final int toIndex, final IntFunction<? extends C> supplier);
@@ -1306,7 +1312,7 @@ public abstract class PrimitiveList<B, A, L extends PrimitiveList<B, A, L>> impl
      * @param fromIndex the starting index (inclusive) of the range to convert
      * @param toIndex the ending index (exclusive) of the range to convert
      * @return a Multiset containing elements from the specified range with their occurrence counts
-     * @throws IndexOutOfBoundsException if fromIndex < 0, toIndex > size(), or fromIndex > toIndex
+     * @throws IndexOutOfBoundsException if fromIndex &lt; 0, toIndex &gt; size(), or fromIndex &gt; toIndex
      */
     public Multiset<B> toMultiset(final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex);
@@ -1338,7 +1344,7 @@ public abstract class PrimitiveList<B, A, L extends PrimitiveList<B, A, L>> impl
      * @param toIndex the ending index (exclusive) of the range to convert
      * @param supplier a function that creates a new Multiset instance with the given initial capacity
      * @return a Multiset containing elements from the specified range with their occurrence counts
-     * @throws IndexOutOfBoundsException if fromIndex < 0, toIndex > size(), or fromIndex > toIndex
+     * @throws IndexOutOfBoundsException if fromIndex &lt; 0, toIndex &gt; size(), or fromIndex &gt; toIndex
      * @throws RuntimeException if the supplier throws an exception during Multiset creation
      */
     public abstract Multiset<B> toMultiset(final int fromIndex, final int toIndex, final IntFunction<Multiset<B>> supplier);
@@ -1371,7 +1377,7 @@ public abstract class PrimitiveList<B, A, L extends PrimitiveList<B, A, L>> impl
      * 
      * @param fromIndex the starting index (inclusive) to validate
      * @param toIndex the ending index (exclusive) to validate
-     * @throws IndexOutOfBoundsException if fromIndex < 0, toIndex > size(), or fromIndex > toIndex
+     * @throws IndexOutOfBoundsException if fromIndex &lt; 0, toIndex &gt; size(), or fromIndex &gt; toIndex
      */
     protected void checkFromToIndex(final int fromIndex, final int toIndex) {
         N.checkFromToIndex(fromIndex, toIndex, size());
@@ -1382,7 +1388,7 @@ public abstract class PrimitiveList<B, A, L extends PrimitiveList<B, A, L>> impl
      * This method checks that index is non-negative and less than size().
      * 
      * @param index the index to validate
-     * @throws IndexOutOfBoundsException if index < 0 or index >= size()
+     * @throws IndexOutOfBoundsException if index &lt; 0 or index &gt;= size()
      */
     protected void rangeCheck(final int index) {
         if (index < 0 || index >= size()) {
@@ -1466,7 +1472,7 @@ public abstract class PrimitiveList<B, A, L extends PrimitiveList<B, A, L>> impl
      * Determines whether a set-based algorithm should be used for operations involving two collections.
      * This method uses heuristics based on the sizes of the collections to decide if using a Set
      * for lookups would be more efficient than linear searching.
-     * Returns true if the minimum size is greater than 3 and the maximum size is greater than 9.
+     * Returns {@code true} if the minimum size is greater than 3 and the maximum size is greater than 9.
      * 
      * @param lenA the size of the first collection
      * @param lenB the size of the second collection

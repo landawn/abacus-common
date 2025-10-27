@@ -46,7 +46,7 @@ public final class PrimitiveCharType extends AbstractCharacterType {
      * Indicates whether this type represents a primitive type.
      * Always returns {@code true} for PrimitiveCharType.
      *
-     * @return true, as this type handler is for primitive char
+     * @return {@code true}, as this type handler is for primitive char
      */
     @Override
     public boolean isPrimitiveType() {
@@ -55,7 +55,7 @@ public final class PrimitiveCharType extends AbstractCharacterType {
 
     /**
      * Returns the default value for the primitive char type.
-     * The default value for char primitives is the null character (Unicode 0).
+     * The default value for char primitives is the {@code null} character (Unicode 0).
      *
      * @return Character value of 0 ('\0') as the default value for primitive char
      */

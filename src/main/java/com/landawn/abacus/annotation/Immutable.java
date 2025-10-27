@@ -50,7 +50,7 @@ import java.lang.annotation.Target;
  * 
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
- * {@literal @}Immutable
+ * @Immutable
  * public final class Point {
  *     private final int x;
  *     private final int y;
@@ -60,7 +60,7 @@ import java.lang.annotation.Target;
  *         this.y = y;
  *     }
  *     
- *     {@literal @}Immutable
+ *     @Immutable
  *     public Point translate(int dx, int dy) {
  *         return new Point(x + dx, y + dy);
  *     }

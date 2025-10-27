@@ -58,6 +58,9 @@ public final class MutableBoolean implements Mutable, Serializable, Comparable<M
     @Serial
     private static final long serialVersionUID = -4830728138360036487L;
 
+    /**
+     * The mutable boolean value.
+     */
     private boolean value;
 
     /**
@@ -182,7 +185,7 @@ public final class MutableBoolean implements Mutable, Serializable, Comparable<M
     }
 
     /**
-     * Returns the current value and then inverts it (true becomes false, {@code false} becomes true).
+     * Returns the current value and then inverts it (true becomes {@code false}, {@code false} becomes true).
      * 
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -199,7 +202,7 @@ public final class MutableBoolean implements Mutable, Serializable, Comparable<M
     }
 
     /**
-     * Inverts the current value and then returns it (true becomes false, {@code false} becomes true).
+     * Inverts the current value and then returns it (true becomes {@code false}, {@code false} becomes true).
      * 
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -215,8 +218,8 @@ public final class MutableBoolean implements Mutable, Serializable, Comparable<M
     }
 
     /**
-     * Sets the value to newValue if the predicate evaluates to true for the current value.
-     * If the predicate returns false, the value remains unchanged.
+     * Sets the value to newValue if the predicate evaluates to {@code true} for the current value.
+     * If the predicate returns {@code false}, the value remains unchanged.
      * 
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -303,7 +306,7 @@ public final class MutableBoolean implements Mutable, Serializable, Comparable<M
     }
 
     /**
-     * Inverts the current value (true becomes false, {@code false} becomes true).
+     * Inverts the current value (true becomes {@code false}, {@code false} becomes true).
      * 
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -330,7 +333,7 @@ public final class MutableBoolean implements Mutable, Serializable, Comparable<M
      * }</pre>
      * 
      * @param other the other MutableBoolean to compare to, not null
-     * @return negative if this is less (false < true), zero if equal, positive if greater
+     * @return negative if this is less (false &lt; true), zero if equal, positive if greater
      */
     @Override
     public int compareTo(final MutableBoolean other) {
@@ -364,8 +367,8 @@ public final class MutableBoolean implements Mutable, Serializable, Comparable<M
 
     /**
      * Returns a hash code for this MutableBoolean.
-     * The hash code is the same as Boolean.TRUE.hashCode() for true values
-     * and Boolean.FALSE.hashCode() for false values.
+     * The hash code is the same as Boolean.TRUE.hashCode() for {@code true} values
+     * and Boolean.FALSE.hashCode() for {@code false} values.
      * 
      * @return a suitable hash code
      */

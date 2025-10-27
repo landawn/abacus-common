@@ -172,8 +172,8 @@ public final class BufferedCSVWriter extends CharacterWriter {
     /**
      * Checks if the writer is using backslash escaping for double quotes.
      * 
-     * <p>When true, double quotes are escaped as \" (backslash-quote).
-     * When false, double quotes are escaped as "" (double-double-quote),
+     * <p>When {@code true}, double quotes are escaped as \" (backslash-quote).
+     * When {@code false}, double quotes are escaped as "" (double-double-quote),
      * which is the standard CSV escaping method.</p>
      * 
      * <p><b>Usage Examples:</b></p>

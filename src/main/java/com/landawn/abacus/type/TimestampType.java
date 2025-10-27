@@ -62,14 +62,16 @@ public class TimestampType extends AbstractDateType<Timestamp> {
      * <ul>
      *   <li>If obj is a Number, creates a Timestamp using the long value as milliseconds since epoch</li>
      *   <li>If obj is a java.util.Date, creates a Timestamp from the date's time value</li>
-     *   <li>If obj is null, returns null</li>
+     *   <li>If obj is {@code null}, returns null</li>
      *   <li>Otherwise, converts obj to string and parses it as a Timestamp</li>
      * </ul>
      *
      * @param obj the object to convert to Timestamp
-     * @return a Timestamp representation of the object, or null if obj is null
+     * @return a Timestamp representation of the object, or {@code null} if obj is null
      */
+    @MayReturnNull
     @Override
+
     public Timestamp valueOf(final Object obj) {
         if (obj instanceof Number) {
             return new Timestamp(((Number) obj).longValue());
@@ -85,15 +87,17 @@ public class TimestampType extends AbstractDateType<Timestamp> {
      * <p>
      * Special handling:
      * <ul>
-     *   <li>If str is null or empty, returns null</li>
+     *   <li>If str is {@code null} or empty, returns null</li>
      *   <li>If str equals "SYS_TIME", returns the current timestamp</li>
      *   <li>Otherwise, parses the string using the configured date format</li>
      * </ul>
      *
      * @param str the string to parse
-     * @return a Timestamp parsed from the string, or null if str is empty
+     * @return a Timestamp parsed from the string, or {@code null} if str is empty
      */
+    @MayReturnNull
     @Override
+
     public Timestamp valueOf(final String str) {
         return Strings.isEmpty(str) ? null : (N.equals(str, SYS_TIME) ? Dates.currentTimestamp() : Dates.parseTimestamp(str));
     }
@@ -108,10 +112,11 @@ public class TimestampType extends AbstractDateType<Timestamp> {
      * @param cbuf the character array containing the timestamp representation
      * @param offset the starting position in the character array
      * @param len the number of characters to parse
-     * @return a Timestamp parsed from the character array, or null if the array is null or length is 0
+     * @return a Timestamp parsed from the character array, or {@code null} if the array is {@code null} or length is 0
      */
     @MayReturnNull
     @Override
+
     public Timestamp valueOf(final char[] cbuf, final int offset, final int len) {
         if ((cbuf == null) || (len == 0)) {
             return null; // NOSONAR
@@ -133,9 +138,10 @@ public class TimestampType extends AbstractDateType<Timestamp> {
      *
      * @param rs the ResultSet to read from
      * @param columnIndex the column index (1-based)
-     * @return the Timestamp value at the specified column, or null if the column value is SQL NULL
+     * @return the Timestamp value at the specified column, or {@code null} if the column value is SQL NULL
      * @throws SQLException if a database access error occurs or the column index is invalid
      */
+    @MayReturnNull
     @Override
     public Timestamp get(final ResultSet rs, final int columnIndex) throws SQLException {
         return rs.getTimestamp(columnIndex);
@@ -146,9 +152,10 @@ public class TimestampType extends AbstractDateType<Timestamp> {
      *
      * @param rs the ResultSet to read from
      * @param columnLabel the column label/name
-     * @return the Timestamp value at the specified column, or null if the column value is SQL NULL
+     * @return the Timestamp value at the specified column, or {@code null} if the column value is SQL NULL
      * @throws SQLException if a database access error occurs or the column label is invalid
      */
+    @MayReturnNull
     @Override
     public Timestamp get(final ResultSet rs, final String columnLabel) throws SQLException {
         return rs.getTimestamp(columnLabel);

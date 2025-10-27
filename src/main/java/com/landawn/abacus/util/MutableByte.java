@@ -49,6 +49,9 @@ public final class MutableByte extends Number implements Comparable<MutableByte>
     @Serial
     private static final long serialVersionUID = -1585823265L;
 
+    /**
+     * The mutable byte value.
+     */
     private byte value;
 
     /**
@@ -176,8 +179,8 @@ public final class MutableByte extends Number implements Comparable<MutableByte>
     }
 
     /**
-     * Sets the value to newValue if the predicate evaluates to true for the current value.
-     * If the predicate returns false, the value remains unchanged.
+     * Sets the value to newValue if the predicate evaluates to {@code true} for the current value.
+     * If the predicate returns {@code false}, the value remains unchanged.
      * 
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code

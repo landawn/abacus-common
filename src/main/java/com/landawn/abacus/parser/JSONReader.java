@@ -33,8 +33,8 @@ import com.landawn.abacus.type.Type;
  *   <li>{@link #END_BRACKET} - Closing bracket ']' for arrays</li>
  *   <li>{@link #START_QUOTATION_D} - Double quote '"' start</li>
  *   <li>{@link #END_QUOTATION_D} - Double quote '"' end</li>
- *   <li>{@link #START_QUOTATION_S} - Single quote '\'' start</li>
- *   <li>{@link #END_QUOTATION_S} - Single quote '\'' end</li>
+ *   <li>{@link #START_QUOTATION_S} - Single quote <i>\'</i> start</li>
+ *   <li>{@link #END_QUOTATION_S} - Single quote <i>\'</i> end</li>
  *   <li>{@link #COLON} - Colon ':' separator</li>
  *   <li>{@link #COMMA} - Comma ',' separator</li>
  * </ul>
@@ -86,13 +86,13 @@ interface JSONReader {
     int END_QUOTATION_D = 6;
 
     /**
-     * Start single quotation token '\''. Indicates the beginning of a single-quoted string.
+     * Start single quotation token <i>\'</i>. Indicates the beginning of a single-quoted string.
      * Note: Single quotes are not standard JSON but may be supported for flexibility.
      */
     int START_QUOTATION_S = 7;
 
     /**
-     * End single quotation token '\''. Indicates the end of a single-quoted string.
+     * End single quotation token <i>\'</i>. Indicates the end of a single-quoted string.
      * Note: Single quotes are not standard JSON but may be supported for flexibility.
      */
     int END_QUOTATION_S = 8;
@@ -171,7 +171,7 @@ interface JSONReader {
 
     /**
      * Checks if the reader has text content available.
-     * This is typically true after reading a string token or value token
+     * This is typically {@code true} after reading a string token or value token
      * (like numbers, booleans, or null).
      * 
      * <p><b>Usage Examples:</b></p>
@@ -187,9 +187,9 @@ interface JSONReader {
 
     /**
      * Gets the text content from the last read token.
-     * This method should only be called when {@link #hasText()} returns true.
+     * This method should only be called when {@link #hasText()} returns {@code true}.
      * The returned text represents the value of the last parsed token, such as
-     * a string value, number, boolean, or null.
+     * a string value, number, boolean, or {@code null}.
      * 
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -233,7 +233,7 @@ interface JSONReader {
      * character buffers or strings.</p>
      *
      * @param symbolReader the symbol reader for property resolution
-     * @return the property information, or null if not found
+     * @return the property information, or {@code null} if not found
      */
     PropInfo readPropInfo(SymbolReader symbolReader);
 
@@ -285,7 +285,7 @@ interface JSONReader {
          * }</pre>
          *
          * @param propName the property name to look up
-         * @return the property information, or null if not found
+         * @return the property information, or {@code null} if not found
          */
         PropInfo getPropInfo(String propName);
 
@@ -306,7 +306,7 @@ interface JSONReader {
          * @param cbuf the character buffer containing the property name
          * @param fromIndex the starting index (inclusive)
          * @param toIndex the ending index (exclusive)
-         * @return the property information, or null if not found
+         * @return the property information, or {@code null} if not found
          */
         PropInfo readPropInfo(char[] cbuf, int fromIndex, int toIndex);
 

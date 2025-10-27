@@ -50,6 +50,12 @@ import com.landawn.abacus.util.stream.LongStream;
 public abstract class LongIterator extends ImmutableIterator<Long> {
 
     /**
+     * Protected constructor for subclasses.
+     */
+    protected LongIterator() {
+    }
+
+    /**
      * An empty LongIterator that always returns {@code false} for hasNext() and throws
      * NoSuchElementException for nextLong(). This constant is useful for representing
      * an iterator over an empty collection of longs.
@@ -88,7 +94,7 @@ public abstract class LongIterator extends ImmutableIterator<Long> {
      * }</pre>
      *
      * @param a the array of long values to iterate over
-     * @return a new LongIterator over the specified array, or an empty iterator if the array is null or empty
+     * @return a new LongIterator over the specified array, or an empty iterator if the array is {@code null} or empty
      */
     public static LongIterator of(final long... a) {
         return N.isEmpty(a) ? EMPTY : of(a, 0, a.length);
@@ -203,7 +209,7 @@ public abstract class LongIterator extends ImmutableIterator<Long> {
 
     /**
      * Creates an infinite LongIterator that generates values using the provided LongSupplier.
-     * The iterator will always return true for hasNext() and will generate values on demand.
+     * The iterator will always return {@code true} for hasNext() and will generate values on demand.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -233,7 +239,7 @@ public abstract class LongIterator extends ImmutableIterator<Long> {
 
     /**
      * Creates a LongIterator that generates values using the provided LongSupplier while the
-     * BooleanSupplier returns true. This allows for creating finite iterators with dynamic termination conditions.
+     * BooleanSupplier returns {@code true}. This allows for creating finite iterators with dynamic termination conditions.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code

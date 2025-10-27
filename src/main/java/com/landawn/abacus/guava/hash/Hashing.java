@@ -348,7 +348,7 @@ public final class Hashing {
      * @param key the secret key for HMAC computation
      * @return a hash function implementing HMAC-MD5 with the given key
      * @throws IllegalArgumentException if the given key is inappropriate for initializing
-     *                                  this MAC (e.g., wrong algorithm or null key)
+     *                                  this MAC (e.g., wrong algorithm or {@code null} key)
      */
     public static HashFunction hmacMd5(final Key key) {
         return GuavaHashFunction.wrap(com.google.common.hash.Hashing.hmacMd5(key));

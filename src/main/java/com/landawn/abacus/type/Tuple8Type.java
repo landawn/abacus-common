@@ -90,7 +90,7 @@ public class Tuple8Type<T1, T2, T3, T4, T5, T6, T7, T8> extends AbstractType<Tup
 
     /**
      * Returns the declaring name of this type, which includes simple class names.
-     * For example: "Tuple8<String, Integer, Double, Boolean, Long, Float, Byte, Short>" 
+     * For example: "Tuple8&lt;String, Integer, Double, Boolean, Long, Float, Byte, Short&gt;"
      * instead of the fully qualified name.
      *
      * @return the declaring name of this Tuple8 type
@@ -137,9 +137,10 @@ public class Tuple8Type<T1, T2, T3, T4, T5, T6, T7, T8> extends AbstractType<Tup
      * The tuple is serialized as a JSON array containing its eight elements.
      *
      * @param x the Tuple8 object to convert
-     * @return a JSON string representation of the tuple, or null if x is null
+     * @return a JSON string representation of the tuple, or {@code null} if x is null
      */
     @Override
+    @MayReturnNull
     public String stringOf(final Tuple8<T1, T2, T3, T4, T5, T6, T7, T8> x) {
         return (x == null) ? null : Utils.jsonParser.serialize(N.asArray(x._1, x._2, x._3, x._4, x._5, x._6, x._7, x._8), Utils.jsc);
     }
@@ -150,7 +151,7 @@ public class Tuple8Type<T1, T2, T3, T4, T5, T6, T7, T8> extends AbstractType<Tup
      * Each element will be converted to the appropriate type based on the tuple's type parameters.
      *
      * @param str the JSON string to parse
-     * @return a Tuple8 object parsed from the string, or null if str is empty
+     * @return a Tuple8 object parsed from the string, or {@code null} if str is empty
      */
     @MayReturnNull
     @SuppressWarnings({ "unchecked", "deprecation" })
@@ -292,7 +293,7 @@ public class Tuple8Type<T1, T2, T3, T4, T5, T6, T7, T8> extends AbstractType<Tup
 
     /**
      * Generates the type name for a Tuple8 with the specified element type names.
-     * 
+     *
      * @param t1TypeName the type name of the first element
      * @param t2TypeName the type name of the second element
      * @param t3TypeName the type name of the third element
@@ -301,8 +302,8 @@ public class Tuple8Type<T1, T2, T3, T4, T5, T6, T7, T8> extends AbstractType<Tup
      * @param t6TypeName the type name of the sixth element
      * @param t7TypeName the type name of the seventh element
      * @param t8TypeName the type name of the eighth element
-     * @param isDeclaringName if true, returns the declaring name (simple class names); 
-     *                        if false, returns the full canonical name
+     * @param isDeclaringName if {@code true}, returns the declaring name (simple class names);
+     *                        if {@code false}, returns the full canonical name
      * @return the formatted type name string
      */
     protected static String getTypeName(final String t1TypeName, final String t2TypeName, final String t3TypeName, final String t4TypeName,

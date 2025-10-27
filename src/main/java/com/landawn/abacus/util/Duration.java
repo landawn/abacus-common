@@ -20,6 +20,7 @@ package com.landawn.abacus.util;
 @com.landawn.abacus.annotation.Immutable
 public final class Duration implements Comparable<Duration>, Immutable {
 
+    /** A Duration constant representing zero duration (0 milliseconds). */
     public static final Duration ZERO = new Duration(0);
 
     private static final long MILLIS_PER_SECOND = 1000L;
@@ -36,12 +37,6 @@ public final class Duration implements Comparable<Duration>, Immutable {
         this.milliseconds = milliseconds;
     }
 
-    /**
-     * Creates a Duration instance from the specified milliseconds.
-     *
-     * @param milliseconds the duration in milliseconds
-     * @return a Duration instance representing the specified duration
-     */
     private static Duration create(final long milliseconds) {
         if (milliseconds == 0) {
             return ZERO;
@@ -360,8 +355,7 @@ public final class Duration implements Comparable<Duration>, Immutable {
      *   <li>If the multiplicand is 1, returns this instance</li>
      *   <li>Otherwise, returns a new Duration with the multiplied value</li>
      * </ul>
-     * This instance is immutable and unaffected by this method call.
-     * </p>
+     * <p>This instance is immutable and unaffected by this method call.</p>
      *
      * @param multiplicand the value to multiply the duration by, positive or negative
      * @return a Duration based on this duration multiplied by the specified scalar
@@ -387,8 +381,7 @@ public final class Duration implements Comparable<Duration>, Immutable {
      *   <li>If the divisor is 1, returns this instance</li>
      *   <li>Otherwise, returns a new Duration with the divided value (truncated)</li>
      * </ul>
-     * This instance is immutable and unaffected by this method call.
-     * </p>
+     * <p>This instance is immutable and unaffected by this method call.</p>
      *
      * @param divisor the value to divide the duration by, positive or negative but not zero
      * @return a Duration based on this duration divided by the specified divisor
@@ -413,9 +406,8 @@ public final class Duration implements Comparable<Duration>, Immutable {
      *   <li>A negative duration becomes positive</li>
      *   <li>Zero remains zero</li>
      * </ul>
-     * This method is equivalent to {@code multipliedBy(-1)}.
-     * This instance is immutable and unaffected by this method call.
-     * </p>
+     * <p>This method is equivalent to {@code multipliedBy(-1)}.
+     * This instance is immutable and unaffected by this method call.</p>
      *
      * @return a Duration based on this duration with the amount negated
      * @throws ArithmeticException if numeric overflow occurs (only when the duration equals Long.MIN_VALUE milliseconds)
@@ -551,7 +543,7 @@ public final class Duration implements Comparable<Duration>, Immutable {
      * Two durations are considered equal if they represent the exact same amount of time.
      * </p>
      *
-     * @param obj the object to check, null returns false
+     * @param obj the object to check, {@code null} returns false
      * @return {@code true} if this is equal to the other duration
      */
     @Override
@@ -597,7 +589,6 @@ public final class Duration implements Comparable<Duration>, Immutable {
      *   <li>"PT25.5S" - 25.5 seconds (25 seconds and 500 milliseconds)</li>
      *   <li>"PT-0.5S" - negative 500 milliseconds</li>
      * </ul>
-     * </p>
      *
      * @return an ISO-8601 representation of this duration, not null
      */

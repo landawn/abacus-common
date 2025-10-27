@@ -160,17 +160,6 @@ public abstract class AbstractPool implements Pool {
      */
     boolean isClosed = false;
 
-    /**
-     * Constructs a new AbstractPool with the specified configuration.
-     * 
-     * @param capacity the maximum number of objects the pool can hold
-     * @param evictDelay the delay in milliseconds between eviction runs, or 0 to disable automatic eviction
-     * @param evictionPolicy the policy to use for evicting objects, or null for LAST_ACCESS_TIME
-     * @param autoBalance whether to automatically balance the pool when full
-     * @param balanceFactor the proportion of objects to remove during balancing (0 uses default of 0.2)
-     * @param maxMemorySize the maximum memory size in bytes, or 0 for no memory limit
-     * @throws IllegalArgumentException if capacity, evictDelay, balanceFactor, or maxMemorySize is negative
-     */
     protected AbstractPool(final int capacity, final long evictDelay, final EvictionPolicy evictionPolicy, final boolean autoBalance, final float balanceFactor,
             final long maxMemorySize) {
         if (capacity < 0 || evictDelay < 0 || balanceFactor < 0 || maxMemorySize < 0) {
@@ -228,11 +217,6 @@ public abstract class AbstractPool implements Pool {
         lock.unlock();
     }
 
-    /**
-     * Returns the maximum capacity of this pool.
-     * 
-     * @return the maximum number of objects this pool can hold
-     */
     @Override
     public int capacity() {
         return capacity;
@@ -260,11 +244,6 @@ public abstract class AbstractPool implements Pool {
                 maxMemorySize <= 0 ? -1 : maxMemorySize, maxMemorySize <= 0 ? -1 : totalDataSize.get());
     }
 
-    /**
-     * Checks whether this pool is empty.
-     * 
-     * @return {@code true} if the pool contains no objects, {@code false} otherwise
-     */
     @Override
     public boolean isEmpty() {
         return size() == 0;

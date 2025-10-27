@@ -26,7 +26,7 @@ import com.landawn.abacus.util.WD;
 /**
  * Type handler for Float array (Float[]) values.
  * This class provides serialization, deserialization, and output operations for Float arrays.
- * It handles proper formatting with brackets, separators, and null value representation.
+ * It handles proper formatting with brackets, separators, and {@code null} value representation.
  */
 public final class FloatArrayType extends ObjectArrayType<Float> {
 
@@ -41,11 +41,12 @@ public final class FloatArrayType extends ObjectArrayType<Float> {
      * - Empty arrays return "[]"
      * - Uses efficient string joining for performance
      *
-     * @param x the Float array to convert. Can be null.
-     * @return A string representation of the array, or null if input is null
+     * @param x the Float array to convert. Can be {@code null}.
+     * @return A string representation of the array, or {@code null} if input is null
      */
     @MayReturnNull
     @Override
+
     public String stringOf(final Float[] x) {
         if (x == null) {
             return null; // NOSONAR
@@ -59,15 +60,16 @@ public final class FloatArrayType extends ObjectArrayType<Float> {
     /**
      * Converts a string representation back to a Float array.
      * Expects format: [element1, element2, ...]
-     * - "null" strings (4 characters) are converted to null elements
+     * - "null" strings (4 characters) are converted to {@code null} elements
      * - Empty string or "[]" returns empty array
      * - Individual elements are parsed as Float values
      *
-     * @param str the string to parse. Can be null.
-     * @return A Float array parsed from the string, or null if input is null
+     * @param str the string to parse. Can be {@code null}.
+     * @return A Float array parsed from the string, or {@code null} if input is null
      */
     @MayReturnNull
     @Override
+
     public Float[] valueOf(final String str) {
         if (Strings.isEmpty(str) || Strings.isBlank(str)) {
             return null; // NOSONAR
@@ -99,7 +101,7 @@ public final class FloatArrayType extends ObjectArrayType<Float> {
      * Uses toString() for Float values to ensure proper formatting.
      *
      * @param appendable the Appendable to write to
-     * @param x the Float array to append. Can be null.
+     * @param x the Float array to append. Can be {@code null}.
      * @throws IOException if an I/O error occurs during writing
      */
     @Override
@@ -132,7 +134,7 @@ public final class FloatArrayType extends ObjectArrayType<Float> {
      * Uses optimized numeric writing for Float values.
      *
      * @param writer the CharacterWriter to write to
-     * @param x the Float array to write. Can be null.
+     * @param x the Float array to write. Can be {@code null}.
      * @param config the serialization configuration (currently unused for Float arrays)
      * @throws IOException if an I/O error occurs during writing
      */

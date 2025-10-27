@@ -49,6 +49,9 @@ public final class MutableInt extends Number implements Comparable<MutableInt>, 
     @Serial
     private static final long serialVersionUID = 512176391864L;
 
+    /**
+     * The mutable int value.
+     */
     private int value;
 
     /**
@@ -173,8 +176,8 @@ public final class MutableInt extends Number implements Comparable<MutableInt>, 
     }
 
     /**
-     * Sets the value to newValue if the predicate evaluates to true for the current value.
-     * If the predicate returns false, the value remains unchanged.
+     * Sets the value to newValue if the predicate evaluates to {@code true} for the current value.
+     * If the predicate returns {@code false}, the value remains unchanged.
      * 
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code

@@ -56,7 +56,8 @@ public class MutableDoubleType extends NumberType<MutableDouble> {
      * }</pre>
      *
      * @param x The MutableDouble object to convert
-     * @return The string representation of the double value, or null if the input is null
+     * @return The string representation of the double value, or {@code null} if the input is null
+     @MayReturnNull
      */
     @Override
     public String stringOf(final MutableDouble x) {
@@ -80,8 +81,9 @@ public class MutableDoubleType extends NumberType<MutableDouble> {
      * }</pre>
      *
      * @param str The string to parse
-     * @return A MutableDouble containing the parsed value, or null if the input is null or empty
+     * @return A MutableDouble containing the parsed value, or {@code null} if the input is {@code null} or empty
      * @throws NumberFormatException if the string cannot be parsed as a double
+     @MayReturnNull
      */
     @Override
     public MutableDouble valueOf(final String str) {
@@ -136,7 +138,7 @@ public class MutableDoubleType extends NumberType<MutableDouble> {
 
     /**
      * Sets a MutableDouble parameter in a PreparedStatement at the specified position.
-     * If the MutableDouble is null, 0.0 is stored. Otherwise, the wrapped double value is stored.
+     * If the MutableDouble is {@code null}, 0.0 is stored. Otherwise, the wrapped double value is stored.
      *
      * <p><b>Usage Examples:</b></p>
      * MutableDoubleType type = new MutableDoubleType();
@@ -145,7 +147,7 @@ public class MutableDoubleType extends NumberType<MutableDouble> {
      * type.set(stmt, 1, price);
      * stmt.executeUpdate();
      *
-     * // For null value
+     * // For {@code null} value
      * type.set(stmt, 1, null);
      * // This sets the parameter to 0.0
      * }</pre>
@@ -162,7 +164,7 @@ public class MutableDoubleType extends NumberType<MutableDouble> {
 
     /**
      * Sets a MutableDouble parameter in a CallableStatement using the specified parameter name.
-     * If the MutableDouble is null, 0.0 is stored. Otherwise, the wrapped double value is stored.
+     * If the MutableDouble is {@code null}, 0.0 is stored. Otherwise, the wrapped double value is stored.
      *
      * <p><b>Usage Examples:</b></p>
      * MutableDoubleType type = new MutableDoubleType();
@@ -171,7 +173,7 @@ public class MutableDoubleType extends NumberType<MutableDouble> {
      * type.set(stmt, "amount", amount);
      * stmt.execute();
      *
-     * // For null value
+     * // For {@code null} value
      * type.set(stmt, "amount", null);
      * // This sets the parameter to 0.0
      * }</pre>
@@ -217,7 +219,7 @@ public class MutableDoubleType extends NumberType<MutableDouble> {
 
     /**
      * Writes the character representation of a MutableDouble to a CharacterWriter.
-     * The value is written as numeric characters or the null character array.
+     * The value is written as numeric characters or the {@code null} character array.
      * This method is optimized for character-based writing.
      *
      * <p><b>Usage Examples:</b></p>
@@ -227,7 +229,7 @@ public class MutableDoubleType extends NumberType<MutableDouble> {
      * type.writeCharacter(writer, md, null);
      * // Writes: 3.14159
      *
-     * type.writeCharacter(writer, null, null);
+     * type.writeCharacter(writer, {@code null}, null);
      * // Writes: null
      * }</pre>
      *

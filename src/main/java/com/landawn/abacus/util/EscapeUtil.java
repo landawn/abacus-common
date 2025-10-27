@@ -27,6 +27,8 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
+import com.landawn.abacus.annotation.MayReturnNull;
+
 /**
  * Note: it's copied from StringEscaperUtils in Apache Commons Lang under Apache License 2.0
  *
@@ -298,7 +300,7 @@ public final class EscapeUtil {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * EscapeUtil.escapeEcmaScript("Don't stop")     = "Don\\'t stop"
-     * EscapeUtil.escapeEcmaScript("&lt;/script&gt;")     = "&lt;\\/script&gt;"
+     * EscapeUtil.escapeEcmaScript("</script>")     = "<\\/script>"
      * EscapeUtil.escapeEcmaScript("He said \"Hi\"") = "He said \\\"Hi\\\""
      * EscapeUtil.escapeEcmaScript(null)             = null
      * }</pre>
@@ -376,7 +378,7 @@ public final class EscapeUtil {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * EscapeUtil.unescapeEcmaScript("Don\\'t stop")  = "Don't stop"
-     * EscapeUtil.unescapeEcmaScript("&lt;\\/script&gt;")  = "&lt;/script&gt;"
+     * EscapeUtil.unescapeEcmaScript("<\\/script>")  = "</script>"
      * EscapeUtil.unescapeEcmaScript(null)            = null
      * }</pre>
      *
@@ -432,7 +434,7 @@ public final class EscapeUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * EscapeUtil.escapeHtml4("&lt;p&gt;Hello&lt;/p&gt;")  = "&amp;lt;p&amp;gt;Hello&amp;lt;/p&amp;gt;"
+     * EscapeUtil.escapeHtml4("<p>Hello</p>")  = "&amp;lt;p&amp;gt;Hello&amp;lt;/p&amp;gt;"
      * EscapeUtil.escapeHtml4("bread &amp; butter")    = "bread &amp;amp; butter"
      * EscapeUtil.escapeHtml4("\"quoted\"")        = "&amp;quot;quoted&amp;quot;"
      * EscapeUtil.escapeHtml4(null)                = null
@@ -457,7 +459,7 @@ public final class EscapeUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * EscapeUtil.escapeHtml3("&lt;div&gt;")  = "&amp;lt;div&amp;gt;"
+     * EscapeUtil.escapeHtml3("<div>")  = "&amp;lt;div&amp;gt;"
      * EscapeUtil.escapeHtml3("A &amp; B")    = "A &amp;amp; B"
      * EscapeUtil.escapeHtml3(null)       = null
      * }</pre>
@@ -486,7 +488,7 @@ public final class EscapeUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * EscapeUtil.unescapeHtml4("&amp;lt;p&amp;gt;Hello&amp;lt;/p&amp;gt;")  = "&lt;p&gt;Hello&lt;/p&gt;"
+     * EscapeUtil.unescapeHtml4("&amp;lt;p&amp;gt;Hello&amp;lt;/p&amp;gt;")  = "<p>Hello</p>"
      * EscapeUtil.unescapeHtml4("bread &amp;amp; butter")            = "bread &amp; butter"
      * EscapeUtil.unescapeHtml4("&amp;copy; 2024")                   = "© 2024"
      * EscapeUtil.unescapeHtml4("&amp;#65;")                         = "A"
@@ -511,7 +513,7 @@ public final class EscapeUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * EscapeUtil.unescapeHtml3("&amp;lt;div&amp;gt;")  = "&lt;div&gt;"
+     * EscapeUtil.unescapeHtml3("&amp;lt;div&amp;gt;")  = "<div>"
      * EscapeUtil.unescapeHtml3("A &amp;amp; B")    = "A &amp; B"
      * EscapeUtil.unescapeHtml3(null)           = null
      * }</pre>
@@ -543,7 +545,7 @@ public final class EscapeUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * EscapeUtil.escapeXml10("&lt;root&gt;data&lt;/root&gt;")  = "&amp;lt;root&amp;gt;data&amp;lt;/root&amp;gt;"
+     * EscapeUtil.escapeXml10("<root>data</root>")  = "&amp;lt;root&amp;gt;data&amp;lt;/root&amp;gt;"
      * EscapeUtil.escapeXml10("A &amp; B")                 = "A &amp;amp; B"
      * EscapeUtil.escapeXml10("It's \"cool\"")        = "It&amp;apos;s &amp;quot;cool&amp;quot;"
      * EscapeUtil.escapeXml10(null)                   = null
@@ -567,7 +569,7 @@ public final class EscapeUtil {
      * {@code "} to {@code &quot;}, and {@code '} to {@code &apos;}.</p>
      *
      * <p>XML 1.1 allows more control characters than XML 1.0 but still cannot represent
-     * the null byte ({@code #x0}) or unpaired Unicode surrogate codepoints. This method:</p>
+     * the {@code null} byte ({@code #x0}) or unpaired Unicode surrogate codepoints. This method:</p>
      * <ul>
      * <li>Removes invalid characters: {@code #x0}, unpaired surrogates</li>
      * <li>Valid range: {@code [#x1-#xD7FF] | [#xE000-#xFFFD] | [#x10000-#x10FFFF]}</li>
@@ -578,7 +580,7 @@ public final class EscapeUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * EscapeUtil.escapeXml11("&lt;tag&gt;value&lt;/tag&gt;")  = "&amp;lt;tag&amp;gt;value&amp;lt;/tag&amp;gt;"
+     * EscapeUtil.escapeXml11("<tag>value</tag>")  = "&amp;lt;tag&amp;gt;value&amp;lt;/tag&amp;gt;"
      * EscapeUtil.escapeXml11("A &amp; B")                 = "A &amp;amp; B"
      * EscapeUtil.escapeXml11(null)                   = null
      * }</pre>
@@ -607,7 +609,7 @@ public final class EscapeUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * EscapeUtil.unescapeXml("&amp;lt;root&amp;gt;")     = "&lt;root&gt;"
+     * EscapeUtil.unescapeXml("&amp;lt;root&amp;gt;")     = "<root>"
      * EscapeUtil.unescapeXml("A &amp;amp; B")        = "A &amp; B"
      * EscapeUtil.unescapeXml("&amp;apos;quoted&amp;apos;") = "'quoted'"
      * EscapeUtil.unescapeXml("&amp;#65;")           = "A"
@@ -690,6 +692,13 @@ public final class EscapeUtil {
      */
     public abstract static class CharSequenceTranslator {
 
+        /**
+         * Constructor for CharSequenceTranslator.
+         */
+        protected CharSequenceTranslator() {
+            // Protected constructor for subclasses
+        }
+
         /** The Constant HEX_DIGITS. */
         static final char[] HEX_DIGITS = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F' };
 
@@ -712,6 +721,7 @@ public final class EscapeUtil {
          * @param input CharSequence to be translated
          * @return String output of translation
          */
+        @MayReturnNull
         public final String translate(final CharSequence input) {
             if (input == null) {
                 return null;

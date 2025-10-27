@@ -56,8 +56,25 @@ public class AtomicIntegerType extends AbstractAtomicType<AtomicInteger> {
      * Converts an AtomicInteger value to its string representation.
      * The integer value is extracted from the AtomicInteger and converted to string.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * AtomicIntegerType type = (AtomicIntegerType) TypeFactory.getType(AtomicInteger.class);
+     *
+     * AtomicInteger value = new AtomicInteger(42);
+     * String str = type.stringOf(value);
+     * // str: "42"
+     *
+     * AtomicInteger zero = new AtomicInteger(0);
+     * String zeroStr = type.stringOf(zero);
+     * // zeroStr: "0"
+     *
+     * String nullStr = type.stringOf(null);
+     * // nullStr: null
+     * }</pre>
+     *
      * @param x the AtomicInteger value to convert
-     * @return the string representation of the integer value, or null if input is null
+     * @return the string representation of the integer value, or {@code null} if input is null
+     @MayReturnNull
      */
     @Override
     public String stringOf(final AtomicInteger x) {
@@ -68,9 +85,27 @@ public class AtomicIntegerType extends AbstractAtomicType<AtomicInteger> {
      * Converts a string representation to an AtomicInteger value.
      * Parses the string as an integer and wraps it in a new AtomicInteger instance.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * AtomicIntegerType type = (AtomicIntegerType) TypeFactory.getType(AtomicInteger.class);
+     *
+     * AtomicInteger value = type.valueOf("42");
+     * // value.get(): 42
+     *
+     * AtomicInteger negative = type.valueOf("-100");
+     * // negative.get(): -100
+     *
+     * AtomicInteger nullValue = type.valueOf(null);
+     * // nullValue: null
+     *
+     * // Throws NumberFormatException:
+     * // type.valueOf("not a number");
+     * }</pre>
+     *
      * @param str the string to parse as an integer
-     * @return a new AtomicInteger containing the parsed value, or null if str is null or empty
+     * @return a new AtomicInteger containing the parsed value, or {@code null} if str is {@code null} or empty
      * @throws NumberFormatException if the string cannot be parsed as an integer
+     @MayReturnNull
      */
     @Override
     public AtomicInteger valueOf(final String str) {
@@ -85,6 +120,7 @@ public class AtomicIntegerType extends AbstractAtomicType<AtomicInteger> {
      * @param columnIndex the column index (1-based) of the integer value
      * @return a new AtomicInteger containing the retrieved value (0 if SQL NULL)
      * @throws SQLException if a database access error occurs or the columnIndex is invalid
+     @MayReturnNull
      */
     @Override
     public AtomicInteger get(final ResultSet rs, final int columnIndex) throws SQLException {
@@ -100,6 +136,7 @@ public class AtomicIntegerType extends AbstractAtomicType<AtomicInteger> {
      *                    or the column name if no AS clause was specified
      * @return a new AtomicInteger containing the retrieved value (0 if SQL NULL)
      * @throws SQLException if a database access error occurs or the columnLabel is invalid
+     @MayReturnNull
      */
     @Override
     public AtomicInteger get(final ResultSet rs, final String columnLabel) throws SQLException {
@@ -109,11 +146,11 @@ public class AtomicIntegerType extends AbstractAtomicType<AtomicInteger> {
     /**
      * Sets an AtomicInteger parameter in a PreparedStatement at the specified position.
      * The integer value is extracted from the AtomicInteger before setting.
-     * If the AtomicInteger is null, sets 0 as the parameter value.
+     * If the AtomicInteger is {@code null}, sets 0 as the parameter value.
      *
      * @param stmt the PreparedStatement to set the parameter on
      * @param columnIndex the parameter index (1-based) to set
-     * @param x the AtomicInteger value to set, may be null (treated as 0)
+     * @param x the AtomicInteger value to set, may be {@code null} (treated as 0)
      * @throws SQLException if a database access error occurs or the columnIndex is invalid
      */
     @Override
@@ -124,11 +161,11 @@ public class AtomicIntegerType extends AbstractAtomicType<AtomicInteger> {
     /**
      * Sets a named AtomicInteger parameter in a CallableStatement.
      * The integer value is extracted from the AtomicInteger before setting.
-     * If the AtomicInteger is null, sets 0 as the parameter value.
+     * If the AtomicInteger is {@code null}, sets 0 as the parameter value.
      *
      * @param stmt the CallableStatement to set the parameter on
      * @param parameterName the name of the parameter to set
-     * @param x the AtomicInteger value to set, may be null (treated as 0)
+     * @param x the AtomicInteger value to set, may be {@code null} (treated as 0)
      * @throws SQLException if a database access error occurs or the parameter name is invalid
      */
     @Override

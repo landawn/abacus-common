@@ -48,7 +48,7 @@ public final class LongType extends AbstractLongType {
      * Indicates whether this type represents a primitive wrapper class.
      * For LongType, this always returns {@code true} since Long is the wrapper class for the primitive long type.
      *
-     * @return true, indicating that Long is a primitive wrapper
+     * @return {@code true}, indicating that Long is a primitive wrapper
      */
     @Override
     public boolean isPrimitiveWrapper() {
@@ -61,16 +61,17 @@ public final class LongType extends AbstractLongType {
      * - If the value is already a Long, it is returned directly
      * - If the value is any other Number type, it is converted to Long
      * - If the value is a String, it is parsed as a Long
-     * - If the value is NULL in the database, null is returned
+     * - If the value is NULL in the database, {@code null} is returned
      *
      * @param rs The ResultSet containing the data
      * @param columnIndex The column index (1-based) to retrieve the value from
-     * @return The Long value from the ResultSet, or null if the database value is NULL
+     * @return The Long value from the ResultSet, or {@code null} if the database value is NULL
      * @throws SQLException if a database access error occurs or the column index is invalid
      * @throws NumberFormatException if the value is a String that cannot be parsed as a Long
      */
     @MayReturnNull
     @Override
+
     public Long get(final ResultSet rs, final int columnIndex) throws SQLException {
         final Object ret = rs.getObject(columnIndex);
 
@@ -91,16 +92,17 @@ public final class LongType extends AbstractLongType {
      * - If the value is already a Long, it is returned directly
      * - If the value is any other Number type, it is converted to Long
      * - If the value is a String, it is parsed as a Long
-     * - If the value is NULL in the database, null is returned
+     * - If the value is NULL in the database, {@code null} is returned
      *
      * @param rs The ResultSet containing the data
      * @param columnLabel The label of the column to retrieve the value from
-     * @return The Long value from the ResultSet, or null if the database value is NULL
+     * @return The Long value from the ResultSet, or {@code null} if the database value is NULL
      * @throws SQLException if a database access error occurs or the column label is not found
      * @throws NumberFormatException if the value is a String that cannot be parsed as a Long
      */
     @MayReturnNull
     @Override
+
     public Long get(final ResultSet rs, final String columnLabel) throws SQLException {
         final Object ret = rs.getObject(columnLabel);
 

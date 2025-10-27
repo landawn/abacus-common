@@ -25,7 +25,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Map;
 
-import com.landawn.abacus.util.*;
 import org.apache.avro.Schema;
 import org.apache.avro.Schema.Field;
 import org.apache.avro.file.DataFileStream;
@@ -44,6 +43,12 @@ import com.landawn.abacus.annotation.SuppressFBWarnings;
 import com.landawn.abacus.exception.UncheckedIOException;
 import com.landawn.abacus.parser.ParserUtil.BeanInfo;
 import com.landawn.abacus.type.Type;
+import com.landawn.abacus.util.Beans;
+import com.landawn.abacus.util.ByteArrayOutputStream;
+import com.landawn.abacus.util.IOUtil;
+import com.landawn.abacus.util.N;
+import com.landawn.abacus.util.Objectory;
+import com.landawn.abacus.util.Strings;
 
 /**
  * Parser implementation for Apache Avro format serialization and deserialization.
@@ -82,6 +87,14 @@ import com.landawn.abacus.type.Type;
  * @since 0.8
  */
 public final class AvroParser extends AbstractParser<AvroSerializationConfig, AvroDeserializationConfig> {
+
+    /**
+     * Constructs a new AvroParser instance.
+     * This parser can be used to serialize and deserialize objects to/from Apache Avro format.
+     */
+    public AvroParser() {
+        // Default constructor
+    }
 
     /**
      * Serializes an object to Avro format encoded as a Base64 string.

@@ -59,9 +59,9 @@ import okhttp3.internal.Util;
  * A fluent HTTP request builder and executor based on OkHttp.
  * This class provides a convenient API for building and executing HTTP requests with various features
  * such as headers, query parameters, request bodies, and authentication.
- * 
- * <p>Note: This class contains the codes and docs copied from: <a href="https://square.github.io/okhttp/">OkHttp</a> under Apache License v2 and may be modified.</p>
- * 
+ *
+ * <p>Note: This class contains the codes and docs copied from: <a href="https://square.github.io/okhttp/">OkHttp</a> under Apache License v2 and may be modified.
+ *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * // Simple GET request
@@ -272,7 +272,7 @@ public final class OkHttpRequest {
      *
      * @param <T> the type of the tag
      * @param type the class type used as a key for the tag
-     * @param tag the tag to attach, or null to remove existing tag
+     * @param tag the tag to attach, or {@code null} to remove existing tag
      * @return this OkHttpRequest instance for method chaining
      */
     public <T> OkHttpRequest tag(final Class<? super T> type, @Nullable final T tag) {
@@ -584,7 +584,7 @@ public final class OkHttpRequest {
      *
      * @param formBodyByMap a map containing form field names and values
      * @return this OkHttpRequest instance for method chaining
-     * @see {@code FormBody.Builder}
+     * @see FormBody.Builder
      */
     public OkHttpRequest formBody(final Map<?, ?> formBodyByMap) {
         if (N.isEmpty(formBodyByMap)) {
@@ -620,7 +620,7 @@ public final class OkHttpRequest {
      * @param formBodyByBean a bean object whose properties will be used as form fields
      * @return this OkHttpRequest instance for method chaining
      * @throws IllegalArgumentException if the provided object is not a bean class with getter/setter methods
-     * @see {@code FormBody.Builder}
+     * @see FormBody.Builder
      */
     public OkHttpRequest formBody(final Object formBodyByBean) throws IllegalArgumentException {
         if (formBodyByBean == null) {
@@ -652,7 +652,7 @@ public final class OkHttpRequest {
      *
      * @param formBodyByMap a map containing form field names and values
      * @return this OkHttpRequest instance for method chaining
-     * @see {@code FormBody.Builder}
+     * @see FormBody.Builder
      * @deprecated This method has been replaced by {@link #formBody(Map)} for better API clarity.
      *             The new method name explicitly indicates that it creates form-urlencoded body data,
      *             making the code more readable and self-documenting. Please update your code to use
@@ -668,7 +668,7 @@ public final class OkHttpRequest {
      *
      * @param formBodyByBean a bean object whose properties will be used as form fields
      * @return this OkHttpRequest instance for method chaining
-     * @see {@code FormBody.Builder}
+     * @see FormBody.Builder
      * @deprecated This method has been replaced by {@link #formBody(Object)} for better API clarity.
      *             The new method name explicitly indicates that it creates form-urlencoded body data,
      *             making the code more readable and self-documenting. Please update your code to use
@@ -685,7 +685,7 @@ public final class OkHttpRequest {
      *
      * @param body the RequestBody to use
      * @return this OkHttpRequest instance for method chaining
-     * @see {@code RequestBody}
+     * @see RequestBody
      */
     public OkHttpRequest body(final RequestBody body) {
         this.body = body;
@@ -696,7 +696,7 @@ public final class OkHttpRequest {
      * Sets the request body with the specified content and media type.
      *
      * @param content the string content of the request body
-     * @param contentType the media type of the content, or null to use default
+     * @param contentType the media type of the content, or {@code null} to use default
      * @return this OkHttpRequest instance for method chaining
      * @see RequestBody#create(MediaType, String)
      */
@@ -710,7 +710,7 @@ public final class OkHttpRequest {
      * Sets the request body with the specified byte array content and media type.
      *
      * @param content the byte array content of the request body
-     * @param contentType the media type of the content, or null to use default
+     * @param contentType the media type of the content, or {@code null} to use default
      * @return this OkHttpRequest instance for method chaining
      * @see RequestBody#create(MediaType, byte[])
      */
@@ -726,7 +726,7 @@ public final class OkHttpRequest {
      * @param content the byte array content of the request body
      * @param offset the offset in the byte array to start reading from
      * @param byteCount the number of bytes to read from the array
-     * @param contentType the media type of the content, or null to use default
+     * @param contentType the media type of the content, or {@code null} to use default
      * @return this OkHttpRequest instance for method chaining
      * @see RequestBody#create(MediaType, byte[], int, int)
      */
@@ -740,7 +740,7 @@ public final class OkHttpRequest {
      * Sets the request body with the content from the specified file and media type.
      *
      * @param content the file containing the request body content
-     * @param contentType the media type of the content, or null to use default
+     * @param contentType the media type of the content, or {@code null} to use default
      * @return this OkHttpRequest instance for method chaining
      */
     public OkHttpRequest body(final File content, @Nullable final MediaType contentType) {

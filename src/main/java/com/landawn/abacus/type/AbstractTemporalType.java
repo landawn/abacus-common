@@ -38,16 +38,16 @@ public abstract class AbstractTemporalType<T extends Temporal> extends AbstractT
     /**
      * DateTimeFormatter for ISO 8601 date-time format with offset.
      * <p>
-     * This formatter adheres to the ISO-8601 standard for representing date and time with 
+     * This formatter adheres to the ISO-8601 standard for representing date and time with
      * an offset from UTC (e.g., "2023-04-15T14:30:45+01:00"). It's used for consistent
      * formatting and parsing of temporal values throughout the type system.
      * <p>
      * The formatter uses the standard {@link DateTimeFormatter#ISO_OFFSET_DATE_TIME} which
-     * formats or parses a date-time with an offset, such as '2011-12-03T10:15:30+01:00'.
+     * formats or parses a date-time with an offset, such as <i>2011-12-03T10:15:30+01:00</i>.
      * <p>
      * This field is protected and shared across subclasses to ensure consistent handling
      * of temporal data in ISO format.
-     * 
+     *
      * @see DateTimeFormatter#ISO_OFFSET_DATE_TIME
      * @see #iso8601TimestampDTF
      * @see java.time.format.DateTimeFormatter
@@ -57,16 +57,16 @@ public abstract class AbstractTemporalType<T extends Temporal> extends AbstractT
     /**
      * DateTimeFormatter for ISO 8601 date-time format with offset.
      * <p>
-     * This formatter adheres to the ISO-8601 standard for representing date and time with 
+     * This formatter adheres to the ISO-8601 standard for representing date and time with
      * an offset from UTC (e.g., "2023-04-15T14:30:45+01:00"). It's used for consistent
      * formatting and parsing of temporal values throughout the type system.
      * <p>
      * The formatter uses the standard {@link DateTimeFormatter#ISO_OFFSET_DATE_TIME} which
-     * formats or parses a date-time with an offset, such as '2011-12-03T10:15:30+01:00'.
+     * formats or parses a date-time with an offset, such as <i>2011-12-03T10:15:30+01:00</i>.
      * <p>
      * This field is protected and shared across subclasses to ensure consistent handling
      * of temporal data in ISO format.
-     * 
+     *
      * @see DateTimeFormatter#ISO_OFFSET_DATE_TIME
      * @see #iso8601TimestampDTF
      * @see java.time.format.DateTimeFormatter

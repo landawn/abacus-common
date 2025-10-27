@@ -48,6 +48,7 @@ class JSONStreamReader extends JSONStringReader {
      * @param rbuf the read buffer for streaming input (recommended size: 8192 or larger)
      * @param cbuf the character buffer for token processing (recommended size: 8192 or larger)
      * @return a JSONReader instance configured for streaming JSON parsing
+     @MayReturnNull
      * @throws UncheckedIOException if an I/O error occurs during initial setup
      */
     public static JSONReader parse(final Reader reader, final char[] rbuf, final char[] cbuf) {

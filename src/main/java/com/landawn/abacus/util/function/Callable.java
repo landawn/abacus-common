@@ -14,6 +14,7 @@
 
 package com.landawn.abacus.util.function;
 
+import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.util.Fn;
 import com.landawn.abacus.util.Throwables;
 
@@ -37,15 +38,29 @@ public interface Callable<R> extends java.util.concurrent.Callable<R>, Throwable
      * Unlike {@link java.util.concurrent.Callable#call()}, this method only throws RuntimeException,
      * not checked exceptions.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Callable<String> task = () -> "Hello, World!";
+     * String result = task.call(); // Returns "Hello, World!"
+     * }</pre>
+     *
      * @return the computed result
      */
     @Override
+    @MayReturnNull
     R call();
 
     /**
      * Converts this Callable to a Runnable that executes the call() method but discards the result.
      * The returned Runnable will execute this Callable when run, ignoring any return value.
      * Any RuntimeException thrown by the call() method will be propagated.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Callable<Integer> calculator = () -> 2 + 2;
+     * Runnable runnable = calculator.toRunnable();
+     * runnable.run(); // Computes 4 but result is discarded
+     * }</pre>
      *
      * @return a Runnable that executes this Callable and discards the result
      */
@@ -57,9 +72,16 @@ public interface Callable<R> extends java.util.concurrent.Callable<R>, Throwable
      * Converts this Callable to a Throwables.Callable with a specified exception type.
      * This method performs an unchecked cast and is useful when you need to adapt this Callable
      * to a context that expects a different exception type.
-     * 
+     *
      * <p>Note: Since this is an unchecked cast, ensure that the actual implementation
      * only throws RuntimeException or its subclasses.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Callable<String> task = () -> "result";
+     * var throwableTask = task.toThrowable();
+     * // Can now be used in contexts that handle IOException
+     * }</pre>
      *
      * @param <E> the type of exception that the returned Callable is declared to throw
      * @return a Throwables.Callable that is functionally equivalent to this Callable

@@ -19,6 +19,7 @@ import java.util.Map;
 
 import javax.net.ssl.SSLSocketFactory;
 
+import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.util.Charsets;
 import com.landawn.abacus.util.Strings;
 
@@ -162,8 +163,9 @@ public final class HttpSettings {
     /**
      * Gets the SSL socket factory used for HTTPS connections.
      *
-     * @return The SSL socket factory, or null if not set
+     * @return The SSL socket factory, or {@code null} if not set
      */
+    @MayReturnNull
     public SSLSocketFactory getSSLSocketFactory() {
         return sslSocketFactory;
     }
@@ -191,8 +193,9 @@ public final class HttpSettings {
     /**
      * Gets the proxy configuration.
      *
-     * @return The proxy, or null if not set
+     * @return The proxy, or {@code null} if not set
      */
+    @MayReturnNull
     public Proxy getProxy() {
         return proxy;
     }
@@ -232,7 +235,7 @@ public final class HttpSettings {
      * 
      * Note: Only for {@code HttpClient}, not for {@code OKHttpClient}.
      *
-     * @param useCaches true to use caches, {@code false} otherwise
+     * @param useCaches {@code true} to use caches, {@code false} otherwise
      * @return This HttpSettings instance for method chaining
      */
     public HttpSettings setUseCaches(final boolean useCaches) {
@@ -254,11 +257,11 @@ public final class HttpSettings {
 
     /**
      * Sets whether the connection will be used for input.
-     * This should almost always be true (the default).
+     * This should almost always be {@code true} (the default).
      * 
      * Note: Only for {@code HttpClient}, not for {@code OKHttpClient}.
      *
-     * @param doInput true if the connection will be used for input
+     * @param doInput {@code true} if the connection will be used for input
      * @return This HttpSettings instance for method chaining
      * @see java.net.HttpURLConnection#setDoInput(boolean)
      */
@@ -281,11 +284,11 @@ public final class HttpSettings {
 
     /**
      * Sets whether the connection will be used for output.
-     * This is automatically set to true for POST and PUT requests.
+     * This is automatically set to {@code true} for POST and PUT requests.
      * 
      * Note: Only for {@code HttpClient}, not for {@code OKHttpClient}.
      *
-     * @param doOutput true if the connection will be used for output
+     * @param doOutput {@code true} if the connection will be used for output
      * @return This HttpSettings instance for method chaining
      * @see java.net.HttpURLConnection#setDoOutput(boolean)
      */
@@ -307,10 +310,10 @@ public final class HttpSettings {
 
     /**
      * Sets whether this is a one-way request (fire-and-forget).
-     * When true, the request will be sent but the response will not be read.
+     * When {@code true}, the request will be sent but the response will not be read.
      * This can improve performance for requests where the response is not needed.
      *
-     * @param isOneWayRequest true for one-way requests
+     * @param isOneWayRequest {@code true} for one-way requests
      * @return This HttpSettings instance for method chaining
      */
     public HttpSettings isOneWayRequest(final boolean isOneWayRequest) {
@@ -323,8 +326,9 @@ public final class HttpSettings {
      * Gets the content format for request/response serialization.
      * If not explicitly set, it will be determined from the Content-Type header.
      *
-     * @return The content format, or null if not set
+     * @return The content format, or {@code null} if not set
      */
+    @MayReturnNull
     public ContentFormat getContentFormat() {
         if ((contentFormat == null || contentFormat == ContentFormat.NONE) && headers != null) {
             contentFormat = HttpUtil.getContentFormat(HttpUtil.getContentType(headers), HttpUtil.getContentEncoding(headers));
@@ -355,11 +359,12 @@ public final class HttpSettings {
 
     /**
      * Gets the Content-Type header value.
-     * If not explicitly set but a content format is configured, 
+     * If not explicitly set but a content format is configured,
      * the content type will be derived from the content format.
      *
-     * @return The Content-Type header value, or null if not set
+     * @return The Content-Type header value, or {@code null} if not set
      */
+    @MayReturnNull
     public String getContentType() {
         String contentType = HttpUtil.getContentType(headers);
 
@@ -404,8 +409,9 @@ public final class HttpSettings {
      * If not explicitly set but a content format is configured,
      * the content encoding will be derived from the content format.
      *
-     * @return The Content-Encoding header value, or null if not set
+     * @return The Content-Encoding header value, or {@code null} if not set
      */
+    @MayReturnNull
     public String getContentEncoding() {
         String contentEncoding = HttpUtil.getContentEncoding(headers);
 

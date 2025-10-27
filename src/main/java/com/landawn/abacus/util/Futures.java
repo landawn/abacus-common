@@ -273,10 +273,10 @@ public final class Futures {
      * @param <T> the result type of the input futures
      * @param <FC> the specific collection type containing the futures
      * @param <R> the result type of the composed future
-     * @param cfs the collection of input futures, must not be null or empty
+     * @param cfs the collection of input futures, must not be {@code null} or empty
      * @param zipFunctionForGet the function that processes the collection of futures
      * @return a ContinuableFuture that completes when all input futures complete
-     * @throws IllegalArgumentException if the collection is null or empty
+     * @throws IllegalArgumentException if the collection is {@code null} or empty
      */
     public static <T, FC extends Collection<? extends Future<? extends T>>, R> ContinuableFuture<R> compose(final FC cfs,
             final Throwables.Function<? super FC, ? extends R, Exception> zipFunctionForGet) {
@@ -324,12 +324,12 @@ public final class Futures {
      * @param <T> the result type of the input futures
      * @param <FC> the specific collection type containing the futures
      * @param <R> the result type of the composed future
-     * @param cfs the collection of input futures, must not be null or empty
+     * @param cfs the collection of input futures, must not be {@code null} or empty
      * @param zipFunctionForGet the function for regular get() operations
      * @param zipFunctionTimeoutGet the function for get(timeout, unit) operations. Receives a Tuple3 with
      *                              (futures collection, timeout, timeUnit)
      * @return a ContinuableFuture with custom logic for both regular and timeout operations
-     * @throws IllegalArgumentException if the collection is null or empty, or if either function is null
+     * @throws IllegalArgumentException if the collection is {@code null} or empty, or if either function is null
      */
     public static <T, FC extends Collection<? extends Future<? extends T>>, R> ContinuableFuture<R> compose(final FC cfs,
             final Throwables.Function<? super FC, ? extends R, Exception> zipFunctionForGet,
@@ -775,7 +775,7 @@ public final class Futures {
      * @param cfs the array of futures to wait for
      * @return a ContinuableFuture that completes with a list of all results when all input
      *         futures complete successfully
-     * @throws IllegalArgumentException if the array is null or empty
+     * @throws IllegalArgumentException if the array is {@code null} or empty
      */
     @SafeVarargs
     public static <T> ContinuableFuture<List<T>> allOf(final Future<? extends T>... cfs) {
@@ -813,7 +813,7 @@ public final class Futures {
      * @param <T> the result type of the futures
      * @param cfs the collection of futures to wait for
      * @return a ContinuableFuture that completes with a list of all results
-     * @throws IllegalArgumentException if the collection is null or empty
+     * @throws IllegalArgumentException if the collection is {@code null} or empty
      */
     public static <T> ContinuableFuture<List<T>> allOf(final Collection<? extends Future<? extends T>> cfs) {
         return allOf2(cfs);
@@ -922,7 +922,7 @@ public final class Futures {
      * @param <T> the result type of the futures
      * @param cfs the array of futures to race
      * @return a ContinuableFuture that completes with the first successful result
-     * @throws IllegalArgumentException if the array is null or empty
+     * @throws IllegalArgumentException if the array is {@code null} or empty
      */
     @SafeVarargs
     public static <T> ContinuableFuture<T> anyOf(final Future<? extends T>... cfs) {
@@ -954,20 +954,12 @@ public final class Futures {
      * @param <T> the result type of the futures
      * @param cfs the collection of futures to race
      * @return a ContinuableFuture that completes with the first successful result
-     * @throws IllegalArgumentException if the collection is null or empty
+     * @throws IllegalArgumentException if the collection is {@code null} or empty
      */
     public static <T> ContinuableFuture<T> anyOf(final Collection<? extends Future<? extends T>> cfs) {
         return anyOf2(cfs);
     }
 
-    /**
-     * Internal implementation for anyOf methods.
-     *
-     * @param <T> the result type
-     * @param cfs the collection of futures to race
-     * @return a ContinuableFuture that completes with the first successful result
-     * @throws IllegalArgumentException if the collection is null or empty
-     */
     private static <T> ContinuableFuture<T> anyOf2(final Collection<? extends Future<? extends T>> cfs) {
         N.checkArgument(N.notEmpty(cfs), "The specified collection cannot be null or empty");
 

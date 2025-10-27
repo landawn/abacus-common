@@ -537,17 +537,13 @@ public abstract class RateLimiter {
         return String.format(Locale.ROOT, "RateLimiter[stableRate=%3.1fqps]", getRate());
     }
 
-    /**
-     * The Class SleepingStopwatch.
-     */
     abstract static class SleepingStopwatch {
-        /** Constructor for use by subclasses. */
         protected SleepingStopwatch() {
         }
 
         /*
          * We always hold the mutex when calling this. TODO(cpovirk): Is that important? Perhaps we need
-         * to guarantee that each call to reserveEarliestAvailable, etc. sees a value >= the previous?
+         * to guarantee that each call to reserveEarliestAvailable, etc. sees a value &gt;= the previous?
          * Also, is it OK that we don't hold the mutex when sleeping?
          */
         protected abstract long readMicros();
@@ -588,11 +584,6 @@ public abstract class RateLimiter {
         }
     }
 
-    /**
-     * Validates that the requested number of permits is positive.
-     *
-     * @param permits the number of permits to acquire
-     */
     private static void checkPermits(final int permits) {
         N.checkArgument(permits > 0, "Requested permits (%s) must be positive", permits);
     }

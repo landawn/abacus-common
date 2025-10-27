@@ -80,7 +80,7 @@ public final class LoggerFactory {
      * }</pre>
      *
      * @param clazz the class for which to get the logger
-     * @return a Logger instance for the specified class
+          * @return a Logger instance for the specified class
      */
     public static synchronized Logger getLogger(final Class<?> clazz) {
         return getLogger(clazz.getName());

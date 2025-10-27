@@ -29,7 +29,7 @@ import com.landawn.abacus.util.u.Optional;
  * and {@link Mutable} to indicate that its state can be modified after creation.
  * 
  * <p>The pair consists of two elements referred to as "left" and "right". Both elements
- * can be of any type, including null. This class is particularly useful when you need
+ * can be of any type, including {@code null}. This class is particularly useful when you need
  * to return two values from a method or store two related objects together.</p>
  * 
  * <p><b>Usage Examples:</b></p>
@@ -60,7 +60,7 @@ public final class Pair<L, R> implements Map.Entry<L, R>, Mutable {
     private R right; //NOSONAR
 
     /**
-     * Constructs an empty Pair with both left and right elements initialized to null.
+     * Constructs an empty Pair with both left and right elements initialized to {@code null}.
      * This constructor is useful when you need to create a pair and set its values later.
      * 
      * <p><b>Usage Examples:</b></p>
@@ -83,7 +83,7 @@ public final class Pair<L, R> implements Map.Entry<L, R>, Mutable {
      * This is the preferred way to create a Pair instance as it provides
      * a more concise syntax than using the constructor.
      * 
-     * <p>Both elements can be null. The returned pair is mutable, allowing
+     * <p>Both elements can be {@code null}. The returned pair is mutable, allowing
      * modification of its elements after creation.</p>
      * 
      * <p><b>Usage Examples:</b></p>
@@ -210,7 +210,7 @@ public final class Pair<L, R> implements Map.Entry<L, R>, Mutable {
 
     /**
      * Sets the left element of this pair to the specified value.
-     * The value can be null. This method modifies the pair in place.
+     * The value can be {@code null}. This method modifies the pair in place.
      * 
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -239,7 +239,7 @@ public final class Pair<L, R> implements Map.Entry<L, R>, Mutable {
 
     /**
      * Sets the right element of this pair to the specified value.
-     * The value can be null. This method modifies the pair in place.
+     * The value can be {@code null}. This method modifies the pair in place.
      * 
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -356,7 +356,7 @@ public final class Pair<L, R> implements Map.Entry<L, R>, Mutable {
 
     /**
      * Sets the left element to the specified value if and only if the given predicate
-     * evaluates to true. The predicate receives both the current pair and the new value
+     * evaluates to {@code true}. The predicate receives both the current pair and the new value
      * as parameters for evaluation.
      * 
      * <p>This method is useful for conditional updates where you want to change
@@ -390,7 +390,7 @@ public final class Pair<L, R> implements Map.Entry<L, R>, Mutable {
 
     /**
      * Sets the right element to the specified value if and only if the given predicate
-     * evaluates to true. The predicate receives both the current pair and the new value
+     * evaluates to {@code true}. The predicate receives both the current pair and the new value
      * as parameters for evaluation.
      * 
      * <p>This method is useful for conditional updates where you want to change
@@ -424,12 +424,12 @@ public final class Pair<L, R> implements Map.Entry<L, R>, Mutable {
 
     /**
      * Sets both the left and right elements to the specified values if and only if
-     * the given predicate evaluates to true. The predicate receives the current pair,
+     * the given predicate evaluates to {@code true}. The predicate receives the current pair,
      * the new left value, and the new right value as parameters for evaluation.
      * 
      * <p>This method is useful for conditional updates where you want to change
      * both values atomically only when certain conditions are met. If the predicate
-     * returns false, neither value is changed.</p>
+     * returns {@code false}, neither value is changed.</p>
      * 
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -511,7 +511,7 @@ public final class Pair<L, R> implements Map.Entry<L, R>, Mutable {
     /**
      * Converts this pair to an Object array containing two elements.
      * The first element of the array is the left element of the pair,
-     * and the second element is the right element. Either or both can be null.
+     * and the second element is the right element. Either or both can be {@code null}.
      * 
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -727,7 +727,7 @@ public final class Pair<L, R> implements Map.Entry<L, R>, Mutable {
      *
      * @param <E> the type of exception that the predicate may throw
      * @param predicate the condition to test with the left and right elements
-     * @return an Optional containing this pair if the predicate returns true,
+     * @return an Optional containing this pair if the predicate returns {@code true},
      *         otherwise an empty Optional
      * @throws E if the predicate throws an exception
      */
@@ -759,7 +759,7 @@ public final class Pair<L, R> implements Map.Entry<L, R>, Mutable {
      *
      * @param <E> the type of exception that the predicate may throw
      * @param predicate the condition to test with this pair
-     * @return an Optional containing this pair if the predicate returns true,
+     * @return an Optional containing this pair if the predicate returns {@code true},
      *         otherwise an empty Optional
      * @throws E if the predicate throws an exception
      */
@@ -903,10 +903,10 @@ public final class Pair<L, R> implements Map.Entry<L, R>, Mutable {
 
     /**
      * Compares this pair to the specified object for equality.
-     * Returns true if and only if the specified object is also a Pair,
+     * Returns {@code true} if and only if the specified object is also a Pair,
      * and both pairs have equal left and right elements.
      * 
-     * <p>Two elements are considered equal if they are both null,
+     * <p>Two elements are considered equal if they are both {@code null},
      * or if they are equal according to their equals() method.</p>
      * 
      * <p><b>Usage Examples:</b></p>

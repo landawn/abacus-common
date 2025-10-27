@@ -59,7 +59,7 @@ public interface DoubleTriPredicate extends Throwables.DoubleTriPredicate<Runtim
      * <p>Common use cases include:</p>
      * <ul>
      *   <li>Validating 3D coordinates (e.g., checking if a point is within bounds)</li>
-     *   <li>Testing mathematical relationships (e.g., triangle inequality: a + b > c)</li>
+     *   <li>Testing mathematical relationships (e.g., triangle inequality: a + b &gt; c)</li>
      *   <li>Checking color values (e.g., RGB values within valid range)</li>
      *   <li>Validating measurement constraints</li>
      * </ul>

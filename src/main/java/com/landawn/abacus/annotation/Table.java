@@ -44,7 +44,7 @@ import java.lang.annotation.Target;
  * 
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
- * {@literal @}Table(name = "user_accounts", alias = "ua")
+ * @Table(name = "user_accounts", alias = "ua")
  * public class User {
  *     private Long id;
  *     private String username;
@@ -52,7 +52,7 @@ import java.lang.annotation.Target;
  *     private Date lastLogin;
  * }
  * 
- * {@literal @}Table(name = "products", nonColumnFields = {"tempData", "cache"})
+ * @Table(name = "products", nonColumnFields = {"tempData", "cache"})
  * public class Product {
  *     private Long id;
  *     private String name;
@@ -94,7 +94,7 @@ public @interface Table {
      * 
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * {@literal @}Table(name = "user_accounts")  // Maps to 'user_accounts' table
+     * @Table(name = "user_accounts")  // Maps to 'user_accounts' table
      * public class User { }
      * }</pre>
      * 
@@ -116,7 +116,7 @@ public @interface Table {
      * 
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * {@literal @}Table(name = "customer_order_details", alias = "cod")
+     * @Table(name = "customer_order_details", alias = "cod")
      * public class CustomerOrderDetail { }
      * // Enables queries like: SELECT cod.* FROM customer_order_details cod WHERE ...
      * }</pre>
@@ -139,7 +139,7 @@ public @interface Table {
      * 
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * {@literal @}Table(name = "users", columnFields = {"id", "username", "email"})
+     * @Table(name = "users", columnFields = {"id", "username", "email"})
      * public class User {
      *     private Long id;
      *     private String username;
@@ -168,7 +168,7 @@ public @interface Table {
      * 
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * {@literal @}Table(name = "products", nonColumnFields = {"displayPrice", "cache", "dirty"})
+     * @Table(name = "products", nonColumnFields = {"displayPrice", "cache", "dirty"})
      * public class Product {
      *     private Long id;                  // Mapped
      *     private String name;              // Mapped

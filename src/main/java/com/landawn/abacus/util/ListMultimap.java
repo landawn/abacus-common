@@ -432,7 +432,7 @@ public final class ListMultimap<K, E> extends Multimap<K, E, List<E>> {
      * @param keyExtractor the function to generate keys for the ListMultimap
      * @param valueExtractor the function to extract values for the ListMultimap
      * @return a new instance of ListMultimap with keys and values from the specified collection
-     * @throws IllegalArgumentException if the keyExtractor is null or if the valueExtractor is null
+     * @throws IllegalArgumentException if the keyExtractor is {@code null} or if the valueExtractor is null
      */
     public static <T, K, E> ListMultimap<K, E> create(final Collection<? extends T> c, final Function<? super T, ? extends K> keyExtractor,
             final Function<? super T, ? extends E> valueExtractor) throws IllegalArgumentException {
@@ -521,7 +521,7 @@ public final class ListMultimap<K, E> extends Multimap<K, E, List<E>> {
      * @param <K> the type of the keys
      * @param <E> the type of the values
      * @param c the collection of maps containing the key-value pairs to be added to the new ListMultimap
-     * @return a new instance of ListMultimap with the key-value pairs from the specified collection of maps, or an empty ListMultimap if the collection is null or empty
+     * @return a new instance of ListMultimap with the key-value pairs from the specified collection of maps, or an empty ListMultimap if the collection is {@code null} or empty
      */
     public static <K, E> ListMultimap<K, E> concat(final Collection<? extends Map<? extends K, ? extends E>> c) {
         if (N.isEmpty(c)) {
@@ -541,7 +541,7 @@ public final class ListMultimap<K, E> extends Multimap<K, E, List<E>> {
     /**
      * Wraps the provided map into a ListMultimap. Changes to the specified map will be reflected in the ListMultimap and vice versa.
      *
-     * <p>This method creates a view of the provided map as a ListMultimap. The map must contain non-null, non-empty list values.
+     * <p>This method creates a view of the provided map as a ListMultimap. The map must contain {@code non-null}, non-empty list values.
      * Any modifications made to the returned ListMultimap will be reflected in the underlying map and vice versa.
      *
      * <p><b>Usage Examples:</b></p>
@@ -558,7 +558,7 @@ public final class ListMultimap<K, E> extends Multimap<K, E, List<E>> {
      * @param <V> the type of the list
      * @param map The map to be wrapped into a ListMultimap
      * @return a new instance of ListMultimap backed by the provided map
-     * @throws IllegalArgumentException if the provided map is null or contains null or empty list values
+     * @throws IllegalArgumentException if the provided map is {@code null} or contains {@code null} or empty list values
      */
     @SuppressWarnings("rawtypes")
     @Beta

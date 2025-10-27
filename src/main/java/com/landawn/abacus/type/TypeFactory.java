@@ -39,6 +39,7 @@ import java.util.function.Function;
 
 import javax.xml.datatype.XMLGregorianCalendar;
 
+import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.logging.Logger;
 import com.landawn.abacus.logging.LoggerFactory;
 import com.landawn.abacus.parser.JSONParser;
@@ -427,12 +428,6 @@ public final class TypeFactory {
 
     private static final Map<java.lang.reflect.Type, Type<?>> type2TypeCache = new ConcurrentHashMap<>();
 
-    /**
-     * Gets the class name.
-     *
-     * @param cls
-     * @return
-     */
     static String getClassName(final Class<?> cls) {
         String clsName = ClassUtil.getCanonicalClassName(cls);
 
@@ -443,14 +438,6 @@ public final class TypeFactory {
         return clsName;
     }
 
-    /**
-     * Gets the type.
-     *
-     * @param <T>
-     * @param cls
-     * @param typeName
-     * @return
-     */
     @SuppressWarnings({ "rawtypes", "unchecked" })
     private static <T> Type<T> getType(Class cls, String typeName) {
         if (Strings.isEmpty(typeName)) {
@@ -1074,14 +1061,6 @@ public final class TypeFactory {
         return type;
     }
 
-    /**
-     * Gets the type.
-     *
-     * @param <T>
-     * @param classes
-     * @return
-     * @deprecated please using {@code Type#ofAll(Class...)}
-     */
     @Deprecated
     @SafeVarargs
     static <T> List<Type<T>> getType(final Class<? extends T>... classes) {
@@ -1114,6 +1093,13 @@ public final class TypeFactory {
      * that includes type parameters.
      * </p>
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Type<String> stringType = TypeFactory.getType(String.class);
+     * Type<Integer> intType = TypeFactory.getType(Integer.class);
+     * Type<List> listType = TypeFactory.getType(List.class);
+     * }</pre>
+     *
      * @param <T> the type parameter
      * @param cls the Class object for which to retrieve the Type
      * @return the Type object corresponding to the specified class
@@ -1138,14 +1124,6 @@ public final class TypeFactory {
         return type;
     }
 
-    /**
-     * Gets the type.
-     *
-     * @param <T>
-     * @param classes
-     * @return
-     * @deprecated please using {@code Type#ofAll(Collection)}
-     */
     @Deprecated
     static <T> List<Type<T>> getType(final Collection<Class<? extends T>> classes) {
         final List<Type<T>> result = new ArrayList<>(classes.size());
@@ -1227,7 +1205,7 @@ public final class TypeFactory {
      * @param <T> the type parameter
      * @param typeName the name of the type to retrieve, with optional type parameters
      * @return the Type object corresponding to the type name
-     * @throws IllegalArgumentException if typeName is null or if the type name format is invalid
+     * @throws IllegalArgumentException if typeName is {@code null} or if the type name format is invalid
      * @see #getType(Class)
      * @see #registerType(String, Type)
      */
@@ -1274,10 +1252,14 @@ public final class TypeFactory {
                 return targetClass;
             }
 
+            @MayReturnNull
+
             @Override
             public String stringOf(final T x) {
                 return toStringFunc.apply(x, Utils.jsonParser);
             }
+
+            @MayReturnNull
 
             @Override
             public T valueOf(final String str) {
@@ -1322,10 +1304,14 @@ public final class TypeFactory {
                 return cls;
             }
 
+            @MayReturnNull
+
             @Override
             public String stringOf(final T x) {
                 return toStringFunc.apply(x);
             }
+
+            @MayReturnNull
 
             @Override
             public T valueOf(final String str) {
@@ -1346,10 +1332,17 @@ public final class TypeFactory {
      * Attempting to do so will throw an IllegalArgumentException.
      * </p>
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Type<MyClass> customType = new MyCustomType();
+     * TypeFactory.registerType(MyClass.class, customType);
+     * Type<MyClass> retrieved = TypeFactory.getType(MyClass.class);
+     * }</pre>
+     *
      * @param <T> the type parameter
      * @param cls the class for which to register the type
      * @param type the Type implementation to register for the class
-     * @throws IllegalArgumentException if cls or type is null, or if a type is already registered for the class
+     * @throws IllegalArgumentException if cls or type is {@code null}, or if a type is already registered for the class
      * @see #registerType(String, Type)
      * @see #getType(Class)
      */
@@ -1389,7 +1382,7 @@ public final class TypeFactory {
      * @param targetClass the class that this type handles
      * @param toStringFunc the function to convert an object of type T to a String, receives the object and a JSONParser
      * @param fromStringFunc the function to convert a String to an object of type T, receives the string and a JSONParser
-     * @throws IllegalArgumentException if typeName, targetClass, toStringFunc, or fromStringFunc is null,
+     * @throws IllegalArgumentException if typeName, targetClass, toStringFunc, or fromStringFunc is {@code null},
      *                                  or if a type with the given name already exists
      * @see #registerType(String, Class, Function, Function)
      * @see #registerType(String, Type)
@@ -1407,10 +1400,14 @@ public final class TypeFactory {
                 return targetClass;
             }
 
+            @MayReturnNull
+
             @Override
             public String stringOf(final T x) {
                 return toStringFunc.apply(x, Utils.jsonParser);
             }
+
+            @MayReturnNull
 
             @Override
             public T valueOf(final String str) {
@@ -1448,7 +1445,7 @@ public final class TypeFactory {
      * @param targetClass the class that this type handles
      * @param toStringFunc the function to convert an object of type T to a String
      * @param fromStringFunc the function to convert a String to an object of type T
-     * @throws IllegalArgumentException if typeName, targetClass, toStringFunc, or fromStringFunc is null,
+     * @throws IllegalArgumentException if typeName, targetClass, toStringFunc, or fromStringFunc is {@code null},
      *                                  or if a type with the given name already exists
      * @see #registerType(String, Class, BiFunction, BiFunction)
      * @see #registerType(String, Type)
@@ -1466,10 +1463,14 @@ public final class TypeFactory {
                 return targetClass;
             }
 
+            @MayReturnNull
+
             @Override
             public String stringOf(final T x) {
                 return toStringFunc.apply(x);
             }
+
+            @MayReturnNull
 
             @Override
             public T valueOf(final String str) {
@@ -1495,9 +1496,16 @@ public final class TypeFactory {
      * already exists will throw an IllegalArgumentException.
      * </p>
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Type<MyClass> customType = new MyCustomType();
+     * TypeFactory.registerType("CustomTypeName", customType);
+     * Type<MyClass> retrieved = TypeFactory.getType("CustomTypeName");
+     * }</pre>
+     *
      * @param typeName the name to register the type under
      * @param type the Type implementation to register
-     * @throws IllegalArgumentException if typeName or type is null, or if a type with the given name already exists
+     * @throws IllegalArgumentException if typeName or type is {@code null}, or if a type with the given name already exists
      * @see #registerType(Type)
      * @see #getType(String)
      */
@@ -1526,8 +1534,17 @@ public final class TypeFactory {
      * already exists in the type pool will throw an IllegalArgumentException.
      * </p>
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Type<MyClass> customType = new AbstractType<MyClass>("MyClass") {
+     *     // implementation
+     * };
+     * TypeFactory.registerType(customType);
+     * Type<MyClass> retrieved = TypeFactory.getType("MyClass");
+     * }</pre>
+     *
      * @param type the Type implementation to register
-     * @throws IllegalArgumentException if type is null or if a type with the same name already exists
+     * @throws IllegalArgumentException if type is {@code null} or if a type with the same name already exists
      * @see #registerType(String, Type)
      * @see Type#name()
      */

@@ -20,6 +20,7 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.Calendar;
 
+import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.parser.JSONXMLSerializationConfig;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.DateTimeFormat;
@@ -78,7 +79,9 @@ public abstract class AbstractCalendarType<T extends Calendar> extends AbstractT
      * @param calendar the Calendar value to convert
      * @return the formatted string representation of the calendar, or {@code null} if input is {@code null}
      */
+    @MayReturnNull
     @Override
+
     public String stringOf(final Calendar calendar) {
         return (calendar == null) ? null : Dates.format(calendar);
     }

@@ -34,7 +34,7 @@ import com.landawn.abacus.util.NamingPolicy;
  *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
- * {@literal @}JsonXmlConfig(namingPolicy = NamingPolicy.UPPER_CAMEL_CASE,
+ * @JsonXmlConfig(namingPolicy = NamingPolicy.UPPER_CAMEL_CASE,
  *                exclusion = Exclusion.DEFAULT)
  * public class User { }
  * }</pre>
@@ -72,7 +72,7 @@ public @interface JsonXmlConfig {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * {@literal @}JsonXmlConfig(ignoredFields = {"password", "internal.*"})
+     * @JsonXmlConfig(ignoredFields = {"password", "internal.*"})
      * public class User {
      *     private String password;      // Will be ignored
      *     private String internalToken; // Will be ignored (matches "internal.*")
@@ -165,8 +165,8 @@ public @interface JsonXmlConfig {
      *
      * <p><b>Common exclusion policies:</b></p>
      * <ul>
-     *   <li>Exclusion.NULL (default): Excludes fields with null values</li>
-     *   <li>Exclusion.DEFAULT: Excludes null values and primitive type default values (0, false, etc.)</li>
+     *   <li>Exclusion.NULL (default): Excludes fields with {@code null} values</li>
+     *   <li>Exclusion.DEFAULT: Excludes {@code null} values and primitive type default values (0, false, etc.)</li>
      *   <li>Exclusion.NONE: Includes all fields</li>
      * </ul>
      *

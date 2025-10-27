@@ -48,8 +48,9 @@ public class BytesType extends AbstractType<byte[]> {
      * Converts a byte array to its string representation using Base64 encoding.
      * This method is used for serialization purposes.
      *
-     * @param x the byte array to convert. Can be null.
-     * @return A Base64 encoded string representation of the byte array, or null if the input is null
+     * @param x the byte array to convert. Can be {@code null}.
+     * @return A Base64 encoded string representation of the byte array, or {@code null} if the input is null
+     @MayReturnNull
      */
     @Override
     public String stringOf(final byte[] x) {
@@ -60,8 +61,8 @@ public class BytesType extends AbstractType<byte[]> {
      * Converts a Base64 encoded string back to a byte array.
      * This method is used for deserialization purposes.
      *
-     * @param str the Base64 encoded string to convert. Can be null.
-     * @return The decoded byte array, or null if the input string is null
+     * @param str the Base64 encoded string to convert. Can be {@code null}.
+     * @return The decoded byte array, or {@code null} if the input string is null
      */
     @Override
     public byte[] valueOf(final String str) {
@@ -73,7 +74,7 @@ public class BytesType extends AbstractType<byte[]> {
      *
      * @param rs the ResultSet containing the data
      * @param columnIndex the column index (1-based) of the byte array value
-     * @return The byte array value at the specified column, or null if the column value is SQL NULL
+     * @return The byte array value at the specified column, or {@code null} if the column value is SQL NULL
      * @throws SQLException if a database access error occurs or the column index is invalid
      */
     @Override
@@ -86,7 +87,7 @@ public class BytesType extends AbstractType<byte[]> {
      *
      * @param rs the ResultSet containing the data
      * @param columnLabel the label of the column containing the byte array value
-     * @return The byte array value in the specified column, or null if the column value is SQL NULL
+     * @return The byte array value in the specified column, or {@code null} if the column value is SQL NULL
      * @throws SQLException if a database access error occurs or the column label is not found
      */
     @Override
@@ -99,7 +100,7 @@ public class BytesType extends AbstractType<byte[]> {
      *
      * @param stmt the PreparedStatement in which to set the parameter
      * @param columnIndex the parameter index (1-based) to set
-     * @param x the byte array value to set. Can be null.
+     * @param x the byte array value to set. Can be {@code null}.
      * @throws SQLException if a database access error occurs or the parameter index is invalid
      */
     @Override
@@ -112,7 +113,7 @@ public class BytesType extends AbstractType<byte[]> {
      *
      * @param stmt the CallableStatement in which to set the parameter
      * @param parameterName the name of the parameter to set
-     * @param x the byte array value to set. Can be null.
+     * @param x the byte array value to set. Can be {@code null}.
      * @throws SQLException if a database access error occurs or the parameter name is not found
      */
     @Override

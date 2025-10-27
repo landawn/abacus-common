@@ -35,8 +35,8 @@ import com.landawn.abacus.annotation.SuppressFBWarnings;
  * 
  * <p>Objects expire when either:
  * <ul>
- *   <li>Current time - creation time > live time, or</li>
- *   <li>Current time - last access time > max idle time</li>
+ *   <li>Current time - creation time &gt; live time, or</li>
+ *   <li>Current time - last access time &gt; max idle time</li>
  * </ul>
  * 
  * <p><b>Usage Examples:</b></p>
@@ -61,14 +61,29 @@ public final class ActivityPrint implements Cloneable, Serializable {
     @Serial
     private static final long serialVersionUID = -45207875951748322L;
 
+    /**
+     * The timestamp when this ActivityPrint was created (in milliseconds).
+     */
     private long createdTime;
 
+    /**
+     * The maximum lifetime allowed for the pooled object (in milliseconds).
+     */
     private long liveTime;
 
+    /**
+     * The maximum idle time allowed before the pooled object is considered inactive (in milliseconds).
+     */
     private long maxIdleTime;
 
+    /**
+     * The timestamp of the last access to the pooled object (in milliseconds).
+     */
     private long lastAccessTime;
 
+    /**
+     * The total number of times this pooled object has been accessed.
+     */
     private int accessCount;
 
     /**
@@ -240,8 +255,8 @@ public final class ActivityPrint implements Cloneable, Serializable {
      * 
      * <p>An object is considered expired if either:
      * <ul>
-     *   <li>It has exceeded its maximum lifetime (current time - creation time > live time)</li>
-     *   <li>It has been idle too long (current time - last access time > max idle time)</li>
+     *   <li>It has exceeded its maximum lifetime (current time - creation time &gt; live time)</li>
+     *   <li>It has been idle too long (current time - last access time &gt; max idle time)</li>
      * </ul>
      * 
      * @return {@code true} if the object has expired, {@code false} otherwise

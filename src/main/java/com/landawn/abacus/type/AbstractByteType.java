@@ -51,6 +51,7 @@ public abstract class AbstractByteType extends NumberType<Number> {
      */
     @MayReturnNull
     @Override
+
     public String stringOf(final Number x) {
         if (x == null) {
             return null; // NOSONAR
@@ -72,7 +73,9 @@ public abstract class AbstractByteType extends NumberType<Number> {
      * @return the Byte value
      * @throws NumberFormatException if the string cannot be parsed as a byte
      */
+    @MayReturnNull
     @Override
+
     public Byte valueOf(final String str) {
         if (Strings.isEmpty(str)) {
             return (Byte) defaultValue();
@@ -104,7 +107,9 @@ public abstract class AbstractByteType extends NumberType<Number> {
      * @return the Byte value, or default value if input is {@code null} or empty
      * @throws NumberFormatException if the value is out of byte range or not a valid number
      */
+    @MayReturnNull
     @Override
+
     public Byte valueOf(final char[] cbuf, final int offset, final int len) {
         if ((cbuf == null) || (len == 0)) {
             return (Byte) defaultValue();
@@ -122,7 +127,7 @@ public abstract class AbstractByteType extends NumberType<Number> {
     /**
      * Retrieves a byte value from a ResultSet at the specified column index.
      * This method uses rs.getByte() which returns 0 for SQL NULL values.
-     * Subclasses may override this to return null for SQL NULL values.
+     * Subclasses may override this to return {@code null} for SQL NULL values.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -141,6 +146,7 @@ public abstract class AbstractByteType extends NumberType<Number> {
      * @throws SQLException if a database access error occurs or the columnIndex is invalid
      */
     @Override
+    @MayReturnNull
     public Byte get(final ResultSet rs, final int columnIndex) throws SQLException {
         return rs.getByte(columnIndex);
     }
@@ -153,7 +159,7 @@ public abstract class AbstractByteType extends NumberType<Number> {
     /**
      * Retrieves a byte value from a ResultSet using the specified column label.
      * This method uses rs.getByte() which returns 0 for SQL NULL values.
-     * Subclasses may override this to return null for SQL NULL values.
+     * Subclasses may override this to return {@code null} for SQL NULL values.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -172,6 +178,7 @@ public abstract class AbstractByteType extends NumberType<Number> {
      * @throws SQLException if a database access error occurs or the columnLabel is not found
      */
     @Override
+    @MayReturnNull
     public Byte get(final ResultSet rs, final String columnLabel) throws SQLException {
         return rs.getByte(columnLabel);
     }

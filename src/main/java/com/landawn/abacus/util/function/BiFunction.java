@@ -14,6 +14,7 @@
 
 package com.landawn.abacus.util.function;
 
+import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.annotation.SuppressFBWarnings;
 import com.landawn.abacus.util.Throwables;
 
@@ -23,7 +24,7 @@ import com.landawn.abacus.util.Throwables;
  * 
  * <p>This is a functional interface whose functional method is {@link #apply(Object, Object)}.
  * 
- * <p>Refer to JDK API documentation at: <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html">https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a>
+ * <p>Refer to JDK API documentation at: <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html">https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a></p>
  *
  * @param <T> the type of the first argument to the function
  * @param <U> the type of the second argument to the function
@@ -50,6 +51,7 @@ public interface BiFunction<T, U, R> extends Throwables.BiFunction<T, U, R, Runt
      * @return the function result
      */
     @Override
+    @MayReturnNull
     R apply(T t, U u);
 
     /**
@@ -80,7 +82,7 @@ public interface BiFunction<T, U, R> extends Throwables.BiFunction<T, U, R, Runt
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * BiFunction<String, String, String> joiner = (s1, s2) -> s1 + " " + s2;
-     * Throwables.BiFunction<String, String, String, RuntimeException> throwableFunction = joiner.toThrowable();
+     * var throwableFunction = joiner.toThrowable();
      * // Can now be used in contexts that handle exceptions
      * }</pre>
      *

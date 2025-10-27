@@ -194,7 +194,7 @@ public class HttpResponse {
      * // Process raw bytes
      * }</pre>
      *
-     * @return The response body as a byte array, never null (may be empty)
+     * @return The response body as a byte array, never {@code null} (may be empty)
      */
     public byte[] body() {
         return body;

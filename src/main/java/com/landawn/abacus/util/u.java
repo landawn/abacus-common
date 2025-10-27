@@ -43,8 +43,8 @@ import com.landawn.abacus.util.stream.ShortStream;
 import com.landawn.abacus.util.stream.Stream;
 
 /**
- * A utility class containing various Optional and Nullable implementations for primitive types and objects.
- * This class provides container objects which may or may not contain a non-null value.
+ * A utility class containing various Optional and {@code Nullable} implementations for primitive types and objects.
+ * This class provides container objects which may or may not contain a {@code non-null} value.
  */
 public class u { // NOSONAR
 
@@ -75,19 +75,11 @@ public class u { // NOSONAR
 
         private final boolean isPresent;
 
-        /**
-         * Instantiates a new optional boolean.
-         */
         private OptionalBoolean() {
             value = false;
             isPresent = false;
         }
 
-        /**
-         * Instantiates a new optional boolean.
-         *
-         * @param value the boolean value to be present
-         */
         private OptionalBoolean(final boolean value) {
             this.value = value;
             isPresent = true;
@@ -127,7 +119,7 @@ public class u { // NOSONAR
 
         /**
          * Returns an {@code OptionalBoolean} describing the given value, if
-         * non-null, otherwise returns an empty {@code OptionalBoolean}.
+         * {@code non-null}, otherwise returns an empty {@code OptionalBoolean}.
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
@@ -139,7 +131,7 @@ public class u { // NOSONAR
          *
          * @param val the possibly-null value to describe
          * @return an {@code OptionalBoolean} with a present value if the specified value
-         *         is non-null, otherwise an empty {@code OptionalBoolean}
+         *         is {@code non-null}, otherwise an empty {@code OptionalBoolean}
          */
         public static OptionalBoolean ofNullable(final Boolean val) {
             if (val == null) {
@@ -828,19 +820,11 @@ public class u { // NOSONAR
 
         private final boolean isPresent;
 
-        /**
-         * Instantiates a new optional char.
-         */
         private OptionalChar() {
             value = 0;
             isPresent = false;
         }
 
-        /**
-         * Instantiates a new optional char.
-         *
-         * @param value the char value to be present
-         */
         private OptionalChar(final char value) {
             this.value = value;
             isPresent = true;
@@ -880,7 +864,7 @@ public class u { // NOSONAR
 
         /**
          * Returns an {@code OptionalChar} describing the given value, if
-         * non-null, otherwise returns an empty {@code OptionalChar}.
+         * {@code non-null}, otherwise returns an empty {@code OptionalChar}.
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
@@ -891,7 +875,7 @@ public class u { // NOSONAR
          *
          * @param val the possibly-null value to describe
          * @return an {@code OptionalChar} with a present value if the specified value
-         *         is non-null, otherwise an empty {@code OptionalChar}
+         *         is {@code non-null}, otherwise an empty {@code OptionalChar}
          */
         public static OptionalChar ofNullable(final Character val) {
             if (val == null) {
@@ -1518,19 +1502,11 @@ public class u { // NOSONAR
 
         private final boolean isPresent;
 
-        /**
-         * Instantiates a new optional byte.
-         */
         private OptionalByte() {
             value = 0;
             isPresent = false;
         }
 
-        /**
-         * Instantiates a new optional byte.
-         *
-         * @param value the byte value to be present
-         */
         private OptionalByte(final byte value) {
             this.value = value;
             isPresent = true;
@@ -1557,12 +1533,12 @@ public class u { // NOSONAR
         }
 
         /**
-         * Returns an {@code OptionalByte} describing the specified value, if non-null,
+         * Returns an {@code OptionalByte} describing the specified value, if {@code non-null},
          * otherwise returns an empty {@code OptionalByte}.
          *
          * @param val the possibly-null value to describe
          * @return an {@code OptionalByte} with a present value if the specified value
-         *         is non-null, otherwise an empty {@code OptionalByte}
+         *         is {@code non-null}, otherwise an empty {@code OptionalByte}
          */
         public static OptionalByte ofNullable(final Byte val) {
             if (val == null) {
@@ -2148,19 +2124,11 @@ public class u { // NOSONAR
 
         private final boolean isPresent;
 
-        /**
-         * Instantiates a new optional short.
-         */
         private OptionalShort() {
             value = 0;
             isPresent = false;
         }
 
-        /**
-         * Instantiates a new optional short.
-         *
-         * @param value the short value to be present
-         */
         private OptionalShort(final short value) {
             this.value = value;
             isPresent = true;
@@ -2187,12 +2155,12 @@ public class u { // NOSONAR
         }
 
         /**
-         * Returns an {@code OptionalShort} describing the specified value, if non-null,
+         * Returns an {@code OptionalShort} describing the specified value, if {@code non-null},
          * otherwise returns an empty {@code OptionalShort}.
          *
          * @param val the possibly-null value to describe
          * @return an {@code OptionalShort} with a present value if the specified value
-         *         is non-null, otherwise an empty {@code OptionalShort}
+         *         is {@code non-null}, otherwise an empty {@code OptionalShort}
          */
         public static OptionalShort ofNullable(final Short val) {
             if (val == null) {
@@ -2778,19 +2746,11 @@ public class u { // NOSONAR
 
         private final boolean isPresent;
 
-        /**
-         * Instantiates a new optional int.
-         */
         private OptionalInt() {
             value = 0;
             isPresent = false;
         }
 
-        /**
-         * Instantiates a new optional int.
-         *
-         * @param value the int value to be present
-         */
         private OptionalInt(final int value) {
             this.value = value;
             isPresent = true;
@@ -2829,7 +2789,7 @@ public class u { // NOSONAR
         }
 
         /**
-         * Returns an {@code OptionalInt} describing the specified value, if non-null,
+         * Returns an {@code OptionalInt} describing the specified value, if {@code non-null},
          * otherwise returns an empty {@code OptionalInt}.
          *
          * <p><b>Usage Examples:</b></p>
@@ -2841,7 +2801,7 @@ public class u { // NOSONAR
          *
          * @param val the possibly-null value to describe
          * @return an {@code OptionalInt} with a present value if the specified value
-         *         is non-null, otherwise an empty {@code OptionalInt}
+         *         is {@code non-null}, otherwise an empty {@code OptionalInt}
          */
         public static OptionalInt ofNullable(final Integer val) {
             if (val == null) {
@@ -3526,19 +3486,11 @@ public class u { // NOSONAR
 
         private final boolean isPresent;
 
-        /**
-         * Instantiates a new optional long.
-         */
         private OptionalLong() {
             value = 0;
             isPresent = false;
         }
 
-        /**
-         * Instantiates a new optional long.
-         *
-         * @param value the long value to be present
-         */
         private OptionalLong(final long value) {
             this.value = value;
             isPresent = true;
@@ -3565,10 +3517,10 @@ public class u { // NOSONAR
         }
 
         /**
-         * Returns an OptionalLong describing the given value, if non-null, otherwise returns an empty OptionalLong.
+         * Returns an OptionalLong describing the given value, if {@code non-null}, otherwise returns an empty OptionalLong.
          *
          * @param val the possibly-null value
-         * @return an OptionalLong with a present value if the specified value is non-null, otherwise an empty OptionalLong
+         * @return an OptionalLong with a present value if the specified value is {@code non-null}, otherwise an empty OptionalLong
          */
         public static OptionalLong ofNullable(final Long val) {
             if (val == null) {
@@ -4173,19 +4125,11 @@ public class u { // NOSONAR
 
         private final boolean isPresent;
 
-        /**
-         * Instantiates a new optional float.
-         */
         private OptionalFloat() {
             value = 0;
             isPresent = false;
         }
 
-        /**
-         * Instantiates a new optional float.
-         *
-         * @param value the float value to be present
-         */
         private OptionalFloat(final float value) {
             this.value = value;
             isPresent = true;
@@ -4212,10 +4156,10 @@ public class u { // NOSONAR
         }
 
         /**
-         * Returns an OptionalFloat describing the given value, if non-null, otherwise returns an empty OptionalFloat.
+         * Returns an OptionalFloat describing the given value, if {@code non-null}, otherwise returns an empty OptionalFloat.
          *
          * @param val the possibly-null value
-         * @return an OptionalFloat with a present value if the specified value is non-null, otherwise an empty OptionalFloat
+         * @return an OptionalFloat with a present value if the specified value is {@code non-null}, otherwise an empty OptionalFloat
          */
         public static OptionalFloat ofNullable(final Float val) {
             if (val == null) {
@@ -4780,19 +4724,11 @@ public class u { // NOSONAR
 
         private final boolean isPresent;
 
-        /**
-         * Instantiates a new optional double.
-         */
         private OptionalDouble() {
             value = 0;
             isPresent = false;
         }
 
-        /**
-         * Instantiates a new optional double.
-         *
-         * @param value the double value to be present
-         */
         private OptionalDouble(final double value) {
             this.value = value;
             isPresent = true;
@@ -4821,7 +4757,7 @@ public class u { // NOSONAR
          * Returns an {@code OptionalDouble} containing the specified {@code Double} value, or an empty {@code OptionalDouble} if the value is {@code null}.
          *
          * @param val the {@code Double} value to store, possibly {@code null}
-         * @return an {@code OptionalDouble} containing the specified value if non-null, otherwise an empty {@code OptionalDouble}
+         * @return an {@code OptionalDouble} containing the specified value if {@code non-null}, otherwise an empty {@code OptionalDouble}
          */
         public static OptionalDouble ofNullable(final Double val) {
             if (val == null) {
@@ -5393,7 +5329,7 @@ public class u { // NOSONAR
     }
 
     /**
-     * A container object which may or may not contain a non-null value.
+     * A container object which may or may not contain a {@code non-null} value.
      * If a value is present, {@code isPresent()} returns {@code true}.
      * If no value is present, the object is considered empty and {@code isPresent()} returns {@code false}.
      *
@@ -5421,9 +5357,6 @@ public class u { // NOSONAR
 
         private final T value;
 
-        /**
-         * Instantiates a new optional.
-         */
         private Optional() {
             value = null;
         }
@@ -5454,7 +5387,7 @@ public class u { // NOSONAR
         }
 
         /**
-         * Returns an {@code Optional} containing the specified non-null value.
+         * Returns an {@code Optional} containing the specified {@code non-null} value.
          * Special handling for empty strings: returns a cached instance for empty strings.
          *
          * <p><b>Usage Examples:</b></p>
@@ -5463,7 +5396,7 @@ public class u { // NOSONAR
          * opt.get(); // returns "Hello"
          * }</pre>
          *
-         * @param value the non-null value to store
+         * @param value the {@code non-null} value to store
          * @return an {@code Optional} containing the specified value
          * @throws NullPointerException if value is null
          */
@@ -5478,7 +5411,7 @@ public class u { // NOSONAR
         }
 
         /**
-         * Returns an {@code Optional} containing the specified non-null value.
+         * Returns an {@code Optional} containing the specified {@code non-null} value.
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
@@ -5487,7 +5420,7 @@ public class u { // NOSONAR
          * }</pre>
          *
          * @param <T> the type of the value
-         * @param value the non-null value to store
+         * @param value the {@code non-null} value to store
          * @return an {@code Optional} containing the specified value
          * @throws NullPointerException if value is null
          */
@@ -5496,11 +5429,11 @@ public class u { // NOSONAR
         }
 
         /**
-         * Returns an {@code Optional} containing the specified {@code String} value if non-null, otherwise returns an empty {@code Optional}.
+         * Returns an {@code Optional} containing the specified {@code String} value if {@code non-null}, otherwise returns an empty {@code Optional}.
          * Special handling for empty strings: returns a cached instance for empty strings.
          *
          * @param value the possibly-null value to store
-         * @return an {@code Optional} containing the specified value if non-null, otherwise an empty {@code Optional}
+         * @return an {@code Optional} containing the specified value if {@code non-null}, otherwise an empty {@code Optional}
          */
         public static Optional<String> ofNullable(final String value) {
             if (value == null) {
@@ -5513,11 +5446,11 @@ public class u { // NOSONAR
         }
 
         /**
-         * Returns an {@code Optional} containing the specified value if non-null, otherwise returns an empty {@code Optional}.
+         * Returns an {@code Optional} containing the specified value if {@code non-null}, otherwise returns an empty {@code Optional}.
          *
          * @param <T> the type of the value
          * @param value the possibly-null value to store
-         * @return an {@code Optional} containing the specified value if non-null, otherwise an empty {@code Optional}
+         * @return an {@code Optional} containing the specified value if {@code non-null}, otherwise an empty {@code Optional}
          */
         public static <T> Optional<T> ofNullable(final T value) {
             if (value == null) {
@@ -6158,11 +6091,34 @@ public class u { // NOSONAR
     }
 
     /**
-     * A container object which may contain a {@code null} or non-null value.
-     * Unlike {@code Optional}, this class allows {@code null} values to be present.
-     * If a value has been set (even if {@code null}), {@code isPresent()} returns {@code true}.
-     * If no value has been set, the object is considered empty and {@code isPresent()} returns {@code false}.
+     * A container object that may hold either a {@code null} or {@code non-null} value.
+     * Unlike {@link Optional}, this class allows {@code null} values to be present.
+     * <p>
+     * If a value has been explicitly set (even if it is {@code null}), {@link #isPresent()} returns {@code true}.
+     * If no value has been set, the object is considered empty, {@link #isPresent()} returns {@code false} and {@link #isEmpty()} returns {@code true}.
+     * </p>
      *
+     * <p><b>Why {@code Nullable}?</b></p>
+     *
+     * <p><b>Logical Meaning of {@code null}</b></p>
+     * {@code null} does not always represent “nonexistent.”  
+     * For example, a collection may contain {@code null} elements, which does not mean the collection itself is empty.
+     * Similarly, when retrieving a column value from a database record, the value may be {@code null}
+     * even though the record itself exists.  
+     * In such cases, allowing {@code null} as a valid value is both useful and necessary.
+     *
+     * <p><b>Limited and Optional Usage</b></p>
+     * <p>The {@code Nullable} is used as a return type in fewer than one hundred public methods —
+     * less than 0.5% of all public methods in this library. And most of these methods also have non-null-returning alternatives.
+     * <p>For example:</p>
+     * <ul>
+     *   <li>{@code N.findFirstNonNull/N.findLastNonNull} as alternatives to {@code N.findFirst/N.findLast}</li>
+     *   <li>{@code AbstractQuery.queryForSingleNonNull/queryForUniqueNonNull} as alternatives to {@code AbstractQuery.queryForSingleResult/queryForUniqueResult}</li>
+     * </ul>
+     * <p>
+     * Outside of this library, whether to use {@code @Nullable} is entirely up to you — the API is flexible enough to support both preferences.
+     * </p>
+     * 
      * @param <T> the type of value
      * @see com.landawn.abacus.util.u.Optional
      * @see com.landawn.abacus.util.Holder
@@ -6191,19 +6147,11 @@ public class u { // NOSONAR
 
         private final boolean isPresent;
 
-        /**
-         * Instantiates a new {@code Nullable}.
-         */
         private Nullable() {
             value = null;
             isPresent = false;
         }
 
-        /**
-         * Instantiates a new {@code Nullable}.
-         *
-         * @param value the value to be present, may be {@code null}
-         */
         private Nullable(final T value) {
             this.value = value;
             isPresent = true;
@@ -6351,7 +6299,7 @@ public class u { // NOSONAR
         /**
          * Returns {@code true} if a value is present and it is not {@code null}, otherwise returns {@code false}.
          *
-         * @return {@code true} if a non-null value is present, otherwise {@code false}
+         * @return {@code true} if a {@code non-null} value is present, otherwise {@code false}
          */
         public boolean isNotNull() {
             return value != null;
@@ -6406,7 +6354,7 @@ public class u { // NOSONAR
          * If a value is present and is not {@code null}, performs the given action with the value, otherwise does nothing.
          *
          * @param <E> the type of exception that the action may throw
-         * @param action the action to be performed if a non-null value is present
+         * @param action the action to be performed if a {@code non-null} value is present
          * @return this {@code Nullable} instance
          * @throws IllegalArgumentException if {@code action} is {@code null}
          * @throws E if the action throws an exception
@@ -6427,7 +6375,7 @@ public class u { // NOSONAR
          *
          * @param <E> the type of exception that the action may throw
          * @param <E2> the type of exception that the empty action may throw
-         * @param action the action to be performed if a non-null value is present
+         * @param action the action to be performed if a {@code non-null} value is present
          * @param emptyAction the empty-based action to be performed if the value is {@code null} or not present
          * @return this {@code Nullable} instance
          * @throws IllegalArgumentException if {@code action} or {@code emptyAction} is {@code null}
@@ -7329,7 +7277,7 @@ public class u { // NOSONAR
          * <p>
          * This method differs from {@link #stream()} in that it returns an empty stream both when the {@code Nullable}
          * is empty and when it contains a {@code null} value. A stream with the value is only returned when
-         * the {@code Nullable} contains a non-null value.
+         * the {@code Nullable} contains a {@code non-null} value.
          *
          * @return a {@code Stream} containing the value if not {@code null}, otherwise an empty {@code Stream}
          */
@@ -7364,7 +7312,7 @@ public class u { // NOSONAR
          * <p>
          * This method differs from {@link #toList()} in that it returns an empty list both when the {@code Nullable}
          * is empty and when it contains a {@code null} value. A list with the value is only returned when
-         * the {@code Nullable} contains a non-null value.
+         * the {@code Nullable} contains a {@code non-null} value.
          *
          * @return a {@code List} containing the value if not {@code null}, otherwise an empty {@code List}
          */
@@ -7399,7 +7347,7 @@ public class u { // NOSONAR
          * <p>
          * This method differs from {@link #toSet()} in that it returns an empty set both when the {@code Nullable}
          * is empty and when it contains a {@code null} value. A set with the value is only returned when
-         * the {@code Nullable} contains a non-null value.
+         * the {@code Nullable} contains a {@code non-null} value.
          *
          * @return a {@code Set} containing the value if not {@code null}, otherwise an empty {@code Set}
          */
@@ -7434,7 +7382,7 @@ public class u { // NOSONAR
          * <p>
          * This method differs from {@link #toImmutableList()} in that it returns an empty immutable list both when 
          * the {@code Nullable} is empty and when it contains a {@code null} value. An immutable list with the value 
-         * is only returned when the {@code Nullable} contains a non-null value.
+         * is only returned when the {@code Nullable} contains a {@code non-null} value.
          *
          * @return an {@code ImmutableList} containing the value if not {@code null}, otherwise an empty {@code ImmutableList}
          */
@@ -7469,7 +7417,7 @@ public class u { // NOSONAR
          * <p>
          * This method differs from {@link #toImmutableSet()} in that it returns an empty immutable set both when 
          * the {@code Nullable} is empty and when it contains a {@code null} value. An immutable set with the value 
-         * is only returned when the {@code Nullable} contains a non-null value.
+         * is only returned when the {@code Nullable} contains a {@code non-null} value.
          *
          * @return an {@code ImmutableSet} containing the value if not {@code null}, otherwise an empty {@code ImmutableSet}
          */
@@ -7484,7 +7432,7 @@ public class u { // NOSONAR
         /**
          * Converts this {@code Nullable} to an {@code Optional}.
          * <p>
-         * If this {@code Nullable} contains a non-null value, returns an {@code Optional} containing that value.
+         * If this {@code Nullable} contains a {@code non-null} value, returns an {@code Optional} containing that value.
          * If this {@code Nullable} is empty or contains a {@code null} value, returns an empty {@code Optional}.
          * <p>
          * Note that this conversion loses the distinction between an empty {@code Nullable} and a {@code Nullable}
@@ -7503,7 +7451,7 @@ public class u { // NOSONAR
         /**
          * Converts this {@code Nullable} to a {@code java.util.Optional}.
          * <p>
-         * If this {@code Nullable} contains a non-null value, returns a {@code java.util.Optional} containing that value.
+         * If this {@code Nullable} contains a {@code non-null} value, returns a {@code java.util.Optional} containing that value.
          * If this {@code Nullable} is empty or contains a {@code null} value, returns an empty {@code java.util.Optional}.
          * <p>
          * Note that this conversion loses the distinction between an empty {@code Nullable} and a {@code Nullable}
@@ -7570,7 +7518,7 @@ public class u { // NOSONAR
          * <ul>
          * <li>If empty (not present): returns "Nullable.empty"</li>
          * <li>If present with {@code null} value: returns "Nullable[null]"</li>
-         * <li>If present with non-null value: returns "Nullable[value]" where value is the string representation of the contained value</li>
+         * <li>If present with {@code non-null} value: returns "Nullable[value]" where value is the string representation of the contained value</li>
          * </ul>
          *
          * @return a string representation of this {@code Nullable}

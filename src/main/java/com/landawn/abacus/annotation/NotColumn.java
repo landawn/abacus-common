@@ -44,24 +44,24 @@ import java.lang.annotation.Target;
  * 
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
- * {@literal @}Entity
+ * @Entity
  * public class Product {
- *     {@literal @}Id
+ *     @Id
  *     private Long id;
  *     
- *     {@literal @}Column
+ *     @Column
  *     private String name;
  *     
- *     {@literal @}Column
+ *     @Column
  *     private BigDecimal basePrice;
  *     
- *     {@literal @}NotColumn
+ *     @NotColumn
  *     private BigDecimal discountedPrice;  // Calculated at runtime
  *     
- *     {@literal @}NotColumn
+ *     @NotColumn
  *     private List<Review> reviews;         // Loaded separately via JOIN
  *     
- *     {@literal @}NotColumn
+ *     @NotColumn
  *     private boolean inCart;               // UI state, not persisted
  *     
  *     public BigDecimal getDiscountedPrice() {

@@ -21,7 +21,7 @@ import com.landawn.abacus.util.Strings;
  * Type handler for java.util.OptionalDouble.
  * This class provides serialization, deserialization, and database access capabilities for OptionalDouble instances.
  * OptionalDouble is a container that may or may not contain a double value.
- * Empty optionals are represented as null in serialized form.
+ * Empty optionals are represented as {@code null} in serialized form.
  */
 public class JdkOptionalDoubleType extends AbstractOptionalType<OptionalDouble> {
 
@@ -45,7 +45,7 @@ public class JdkOptionalDoubleType extends AbstractOptionalType<OptionalDouble> 
      * Indicates whether instances of this type implement the Comparable interface.
      * OptionalDouble values can be compared when both are present.
      *
-     * @return true, as OptionalDouble values are comparable
+     * @return {@code true}, as OptionalDouble values are comparable
      */
     @Override
     public boolean isComparable() {
@@ -56,7 +56,7 @@ public class JdkOptionalDoubleType extends AbstractOptionalType<OptionalDouble> 
      * Indicates whether this type should be written without quotes in CSV format.
      * Double values are numeric and should not be quoted.
      *
-     * @return true, indicating that OptionalDouble values should not be quoted in CSV output
+     * @return {@code true}, indicating that OptionalDouble values should not be quoted in CSV output
      */
     @Override
     public boolean isNonQuotableCsvType() {
@@ -75,11 +75,12 @@ public class JdkOptionalDoubleType extends AbstractOptionalType<OptionalDouble> 
 
     /**
      * Converts an OptionalDouble to its string representation.
-     * If the optional is empty or null, returns null.
+     * If the optional is empty or {@code null}, returns {@code null}.
      * Otherwise, returns the string representation of the contained double value.
      *
      * @param x the OptionalDouble to convert to string
-     * @return the string representation of the double value, or null if empty or null
+     * @return the string representation of the double value, or {@code null} if empty or null
+     @MayReturnNull
      */
     @Override
     public String stringOf(final OptionalDouble x) {
@@ -88,11 +89,12 @@ public class JdkOptionalDoubleType extends AbstractOptionalType<OptionalDouble> 
 
     /**
      * Parses a string representation into an OptionalDouble.
-     * Empty or null strings result in an empty OptionalDouble.
+     * Empty or {@code null} strings result in an empty OptionalDouble.
      * Non-empty strings are parsed as double values and wrapped in OptionalDouble.
      *
      * @param str the string to parse
-     * @return OptionalDouble.empty() if the string is null or empty, otherwise OptionalDouble containing the parsed value
+     * @return OptionalDouble.empty() if the string is {@code null} or empty, otherwise OptionalDouble containing the parsed value
+     @MayReturnNull
      */
     @Override
     public OptionalDouble valueOf(final String str) {
@@ -101,13 +103,14 @@ public class JdkOptionalDoubleType extends AbstractOptionalType<OptionalDouble> 
 
     /**
      * Retrieves an OptionalDouble value from the specified column in a ResultSet.
-     * If the column value is null, returns an empty OptionalDouble.
+     * If the column value is {@code null}, returns an empty OptionalDouble.
      * Otherwise, converts the value to double and wraps it in OptionalDouble.
      *
      * @param rs the ResultSet to read from
      * @param columnIndex the index of the column to read (1-based)
-     * @return OptionalDouble.empty() if the column is null, otherwise OptionalDouble containing the value
+     * @return OptionalDouble.empty() if the column is {@code null}, otherwise OptionalDouble containing the value
      * @throws SQLException if a database access error occurs or the columnIndex is invalid
+     @MayReturnNull
      */
     @Override
     public OptionalDouble get(final ResultSet rs, final int columnIndex) throws SQLException {
@@ -118,13 +121,14 @@ public class JdkOptionalDoubleType extends AbstractOptionalType<OptionalDouble> 
 
     /**
      * Retrieves an OptionalDouble value from the specified column in a ResultSet using the column label.
-     * If the column value is null, returns an empty OptionalDouble.
+     * If the column value is {@code null}, returns an empty OptionalDouble.
      * Otherwise, converts the value to double and wraps it in OptionalDouble.
      *
      * @param rs the ResultSet to read from
      * @param columnLabel the label of the column to read
-     * @return OptionalDouble.empty() if the column is null, otherwise OptionalDouble containing the value
+     * @return OptionalDouble.empty() if the column is {@code null}, otherwise OptionalDouble containing the value
      * @throws SQLException if a database access error occurs or the columnLabel is not found
+     @MayReturnNull
      */
     @Override
     public OptionalDouble get(final ResultSet rs, final String columnLabel) throws SQLException {
@@ -135,7 +139,7 @@ public class JdkOptionalDoubleType extends AbstractOptionalType<OptionalDouble> 
 
     /**
      * Sets an OptionalDouble parameter in a PreparedStatement.
-     * If the OptionalDouble is null or empty, sets the parameter to SQL NULL.
+     * If the OptionalDouble is {@code null} or empty, sets the parameter to SQL NULL.
      * Otherwise, sets the double value.
      *
      * @param stmt the PreparedStatement to set the parameter on
@@ -154,7 +158,7 @@ public class JdkOptionalDoubleType extends AbstractOptionalType<OptionalDouble> 
 
     /**
      * Sets an OptionalDouble parameter in a CallableStatement using a parameter name.
-     * If the OptionalDouble is null or empty, sets the parameter to SQL NULL.
+     * If the OptionalDouble is {@code null} or empty, sets the parameter to SQL NULL.
      * Otherwise, sets the double value.
      *
      * @param stmt the CallableStatement to set the parameter on
@@ -190,7 +194,7 @@ public class JdkOptionalDoubleType extends AbstractOptionalType<OptionalDouble> 
 
     /**
      * Writes the character representation of an OptionalDouble to a CharacterWriter.
-     * Empty optionals are written as null.
+     * Empty optionals are written as {@code null}.
      * Present values are written as numeric values without quotes.
      *
      * @param writer the CharacterWriter to write to

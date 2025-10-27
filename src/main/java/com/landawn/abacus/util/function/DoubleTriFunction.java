@@ -14,6 +14,7 @@
 
 package com.landawn.abacus.util.function;
 
+import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.util.Throwables;
 
 /**
@@ -55,6 +56,7 @@ public interface DoubleTriFunction<R> extends Throwables.DoubleTriFunction<R, Ru
      * @return the function result of type {@code R} if the function encounters an error during computation
      */
     @Override
+    @MayReturnNull
     R apply(double a, double b, double c);
 
     /**

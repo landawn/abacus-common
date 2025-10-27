@@ -23,11 +23,11 @@ import java.lang.annotation.Target;
  * Indicates that the annotated method or type uses lazy evaluation strategy.
  * Lazy evaluation defers computation until the result is actually needed,
  * which can improve performance by avoiding unnecessary calculations.
- * 
+ *
  * <p>When applied to a method, it indicates that the method's computation
  * is deferred until the result is accessed. When applied to a type, it indicates
  * that the entire type or its operations follow lazy evaluation patterns.</p>
- * 
+ *
  * <p>Lazy evaluation is commonly used in:</p>
  * <ul>
  *   <li>Stream operations that don't execute until a terminal operation</li>
@@ -35,8 +35,45 @@ import java.lang.annotation.Target;
  *   <li>Collections that generate elements as needed</li>
  *   <li>Properties that are calculated when first accessed</li>
  * </ul>
- * 
+ *
+ * <p><b>Benefits of lazy evaluation:</b></p>
+ * <ul>
+ *   <li>Improved performance by avoiding unnecessary computations</li>
+ *   <li>Better memory efficiency by processing elements one at a time</li>
+ *   <li>Support for infinite data structures</li>
+ *   <li>Composition of operations without intermediate results</li>
+ * </ul>
+ *
+ * <p><b>Usage Examples:</b></p>
+ * <pre>{@code
+ * public class DataProcessor {
+ *     @LazyEvaluation
+ *     public Stream<String> processLargeFile(Path filePath) {
+ *         // Returns stream without reading file yet
+ *         // File is read only when terminal operation is called
+ *         return Files.lines(filePath).map(String::trim);
+ *     }
+ *
+ *     @LazyEvaluation
+ *     public Supplier<ExpensiveResult> computeResult() {
+ *         // Computation deferred until get() is called
+ *         return () -> performExpensiveCalculation();
+ *     }
+ * }
+ *
+ * @LazyEvaluation
+ * public class LazyList<T> implements List<T> {
+ *     // Elements generated on-demand when accessed
+ *     private final Function<Integer, T> generator;
+ *
+ *     public T get(int index) {
+ *         return generator.apply(index);  // Computed only when requested
+ *     }
+ * }
+ * }</pre>
+ *
  * @since 2020
+ * @see IntermediateOp
  */
 @Target({ ElementType.METHOD, ElementType.TYPE })
 @Retention(RetentionPolicy.RUNTIME)

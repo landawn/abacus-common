@@ -86,11 +86,6 @@ public enum ServiceStatus {
 
     private final int intValue;
 
-    /**
-     * Constructs a ServiceStatus with the specified integer value.
-     * 
-     * @param intValue the integer representation of this status
-     */
     ServiceStatus(final int intValue) {
         this.intValue = intValue;
     }

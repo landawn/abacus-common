@@ -42,12 +42,12 @@ package com.landawn.abacus.util;
 public enum YesNo {
 
     /**
-     * Represents "No" or false, with integer value 0.
+     * Represents "No" or {@code false}, with integer value 0.
      */
     NO(0),
 
     /**
-     * Represents "Yes" or true, with integer value 1.
+     * Represents "Yes" or {@code true}, with integer value 1.
      */
     YES(1);
 

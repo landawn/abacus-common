@@ -91,7 +91,7 @@ public enum Gender {
      * <pre>{@code
      * Gender female = Gender.valueOf(1); // Returns FEMALE
      * Gender male = Gender.valueOf(2);   // Returns MALE
-     * Gender x = Gender.valueOf(3);   // Returns MALE
+     * Gender x = Gender.valueOf(3);      // Returns X
      * Gender blank = Gender.valueOf(0);  // Returns BLANK
      * }</pre>
      *

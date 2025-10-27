@@ -32,7 +32,7 @@ public interface ToBooleanFunction<T> extends Throwables.ToBooleanFunction<T, Ru
 
     /**
      * A function that safely unboxes a Boolean object to a primitive boolean value.
-     * Returns {@code false} for null inputs and the boolean value for non-null inputs.
+     * Returns {@code false} for {@code null} inputs and the boolean value for {@code non-null} inputs.
      * This provides null-safe unboxing behavior.
      */
     ToBooleanFunction<Boolean> UNBOX = value -> value != null && value;

@@ -63,7 +63,7 @@ public class PairType<L, R> extends AbstractType<Pair<L, R>> {
 
     /**
      * Returns the declaring name of this type, which includes the simple class name and parameter types.
-     * For example: "Pair<String, Integer>" for a Pair with String left type and Integer right type.
+     * For example: "Pair&lt;String, Integer&gt;" for a Pair with String left type and Integer right type.
      *
      * @return the declaring name of this type
      */
@@ -96,7 +96,7 @@ public class PairType<L, R> extends AbstractType<Pair<L, R>> {
     /**
      * Indicates whether this is a generic type. Always returns {@code true} for PairType.
      *
-     * @return true, as PairType is always a generic type
+     * @return {@code true}, as PairType is always a generic type
      */
     @Override
     public boolean isGenericType() {
@@ -106,12 +106,13 @@ public class PairType<L, R> extends AbstractType<Pair<L, R>> {
     /**
      * Converts a Pair object to its string representation using JSON format.
      * The pair is serialized as a JSON array with two elements: [leftValue, rightValue].
-     * Returns null if the input pair is null.
+     * Returns {@code null} if the input pair is {@code null}.
      *
      * @param x the Pair object to convert to string
-     * @return a JSON string representation of the pair, or null if the input is null
+     * @return a JSON string representation of the pair, or {@code null} if the input is null
      */
     @Override
+    @MayReturnNull
     public String stringOf(final Pair<L, R> x) {
         return (x == null) ? null : Utils.jsonParser.serialize(N.asArray(x.left(), x.right()), Utils.jsc);
     }
@@ -119,10 +120,10 @@ public class PairType<L, R> extends AbstractType<Pair<L, R>> {
     /**
      * Parses a string representation and creates a Pair object.
      * The string should be in JSON array format: [leftValue, rightValue].
-     * Returns null if the input string is null or empty.
+     * Returns {@code null} if the input string is {@code null} or empty.
      *
      * @param str the string to parse, expected to be a JSON array with two elements
-     * @return a Pair object created from the parsed values, or null if the input is null or empty
+     * @return a Pair object created from the parsed values, or {@code null} if the input is {@code null} or empty
      */
     @MayReturnNull
     @SuppressWarnings("unchecked")
@@ -143,7 +144,7 @@ public class PairType<L, R> extends AbstractType<Pair<L, R>> {
     /**
      * Appends the string representation of a Pair object to an Appendable.
      * The pair is formatted as [leftValue, rightValue] with appropriate element separation.
-     * If the pair is null, appends "null". Handles Writer instances with buffering optimization.
+     * If the pair is {@code null}, appends "null". Handles Writer instances with buffering optimization.
      *
      * @param appendable the Appendable to write to
      * @param x the Pair object to append
@@ -192,7 +193,7 @@ public class PairType<L, R> extends AbstractType<Pair<L, R>> {
     /**
      * Writes the character representation of a Pair object to a CharacterWriter.
      * The pair is formatted as [leftValue, rightValue] using the provided serialization configuration.
-     * If the pair is null, writes "null".
+     * If the pair is {@code null}, writes "null".
      *
      * @param writer the CharacterWriter to write to
      * @param x the Pair object to write
@@ -221,10 +222,10 @@ public class PairType<L, R> extends AbstractType<Pair<L, R>> {
 
     /**
      * Generates a type name for a Pair type with the specified left and right type names.
-     * 
+     *
      * @param leftTypeName the name of the left type
      * @param rightTypeName the name of the right type
-     * @param isDeclaringName if true, uses simple class names; if false, uses canonical class names
+     * @param isDeclaringName if {@code true}, uses simple class names; if {@code false}, uses canonical class names
      * @return the generated type name string
      */
     protected static String getTypeName(final String leftTypeName, final String rightTypeName, final boolean isDeclaringName) {

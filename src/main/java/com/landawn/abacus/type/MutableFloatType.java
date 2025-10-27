@@ -48,7 +48,8 @@ public class MutableFloatType extends NumberType<MutableFloat> {
      * Returns the string representation of the wrapped float value.
      *
      * @param x the MutableFloat object to convert
-     * @return the string representation of the float value, or null if x is null
+     * @return the string representation of the float value, or {@code null} if x is null
+     @MayReturnNull
      */
     @Override
     public String stringOf(final MutableFloat x) {
@@ -60,7 +61,8 @@ public class MutableFloatType extends NumberType<MutableFloat> {
      * Parses the string as a float value and wraps it in a MutableFloat.
      *
      * @param str the string to parse
-     * @return a MutableFloat containing the parsed value, or null if str is empty
+     * @return a MutableFloat containing the parsed value, or {@code null} if str is empty
+     @MayReturnNull
      */
     @Override
     public MutableFloat valueOf(final String str) {
@@ -98,7 +100,7 @@ public class MutableFloatType extends NumberType<MutableFloat> {
     /**
      * Sets a MutableFloat value at the specified parameter index in the PreparedStatement.
      * Extracts the float value from the MutableFloat and sets it in the statement.
-     * If the MutableFloat is null, sets 0.0f as the value.
+     * If the MutableFloat is {@code null}, sets 0.0f as the value.
      *
      * @param stmt the PreparedStatement to set the parameter on
      * @param columnIndex the index of the parameter to set (1-based)
@@ -113,7 +115,7 @@ public class MutableFloatType extends NumberType<MutableFloat> {
     /**
      * Sets a MutableFloat value for the specified parameter name in the CallableStatement.
      * Extracts the float value from the MutableFloat and sets it in the statement.
-     * If the MutableFloat is null, sets 0.0f as the value.
+     * If the MutableFloat is {@code null}, sets 0.0f as the value.
      *
      * @param stmt the CallableStatement to set the parameter on
      * @param parameterName the name of the parameter to set
@@ -127,7 +129,7 @@ public class MutableFloatType extends NumberType<MutableFloat> {
 
     /**
      * Appends the string representation of a MutableFloat to the given Appendable.
-     * Writes "null" if the MutableFloat is null, otherwise writes the string
+     * Writes "null" if the MutableFloat is {@code null}, otherwise writes the string
      * representation of the float value.
      *
      * @param appendable the Appendable to write to
@@ -145,8 +147,8 @@ public class MutableFloatType extends NumberType<MutableFloat> {
 
     /**
      * Writes the character representation of a MutableFloat to the given CharacterWriter.
-     * This method is used for JSON/XML serialization. Writes null characters if the
-     * MutableFloat is null, otherwise writes the float value directly.
+     * This method is used for JSON/XML serialization. Writes {@code null} characters if the
+     * MutableFloat is {@code null}, otherwise writes the float value directly.
      *
      * @param writer the CharacterWriter to write to
      * @param x the MutableFloat value to write

@@ -39,19 +39,19 @@ import com.landawn.abacus.annotation.Type.EnumBy;
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * public class User {
- *     {@literal @}JsonXmlField(name = "user_id")
+ *     @JsonXmlField(name = "user_id")
  *     private Long id;
  *     
- *     {@literal @}JsonXmlField(name = "full_name", alias = {"name", "userName"})
+ *     @JsonXmlField(name = "full_name", alias = {"name", "userName"})
  *     private String fullName;
  *     
- *     {@literal @}JsonXmlField(dateFormat = "yyyy-MM-dd", timeZone = "UTC")
+ *     @JsonXmlField(dateFormat = "yyyy-MM-dd", timeZone = "UTC")
  *     private Date birthDate;
  *     
- *     {@literal @}JsonXmlField(numberFormat = "#.##")
+ *     @JsonXmlField(numberFormat = "#.##")
  *     private Double salary;
  *     
- *     {@literal @}JsonXmlField(ignore = true)
+ *     @JsonXmlField(ignore = true)
  *     private String password;
  * }
  * }</pre>
@@ -71,7 +71,7 @@ public @interface JsonXmlField {
      * 
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * {@literal @}JsonXmlField(name = "user_id")
+     * @JsonXmlField(name = "user_id")
      * private Long id;  // Serialized as "user_id" instead of "id"
      * }</pre>
      * 
@@ -85,7 +85,7 @@ public @interface JsonXmlField {
      * 
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * {@literal @}JsonXmlField(name = "full_name", alias = {"name", "userName", "user_name"})
+     * @JsonXmlField(name = "full_name", alias = {"name", "userName", "user_name"})
      * private String fullName;
      * // Can be deserialized from any of: "full_name", "name", "userName", "user_name"
      * }</pre>
@@ -100,7 +100,7 @@ public @interface JsonXmlField {
      * 
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * {@literal @}JsonXmlField(type = "java.util.Date")
+     * @JsonXmlField(type = "java.util.Date")
      * private Object dateValue;  // Forces treatment as Date type
      * }</pre>
      * 
@@ -120,7 +120,7 @@ public @interface JsonXmlField {
      * 
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * {@literal @}JsonXmlField(enumerated = EnumBy.ORDINAL)
+     * @JsonXmlField(enumerated = EnumBy.ORDINAL)
      * private Status status;  // Serialized as 0, 1, 2... instead of "ACTIVE", "INACTIVE"...
      * }</pre>
      * 
@@ -134,10 +134,10 @@ public @interface JsonXmlField {
      * 
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * {@literal @}JsonXmlField(dateFormat = "yyyy-MM-dd HH:mm:ss")
+     * @JsonXmlField(dateFormat = "yyyy-MM-dd HH:mm:ss")
      * private Date created;  // Serialized as "2023-12-25 10:30:45"
      * 
-     * {@literal @}JsonXmlField(dateFormat = "ISO_INSTANT")
+     * @JsonXmlField(dateFormat = "ISO_INSTANT")
      * private Instant timestamp;  // Serialized as "2023-12-25T10:30:45.123Z"
      * }</pre>
      * 
@@ -152,10 +152,10 @@ public @interface JsonXmlField {
      * 
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * {@literal @}JsonXmlField(dateFormat = "yyyy-MM-dd HH:mm:ss", timeZone = "UTC")
+     * @JsonXmlField(dateFormat = "yyyy-MM-dd HH:mm:ss", timeZone = "UTC")
      * private Date eventTime;  // Always serialized in UTC timezone
      * 
-     * {@literal @}JsonXmlField(timeZone = "America/New_York")
+     * @JsonXmlField(timeZone = "America/New_York")
      * private LocalDateTime meetingTime;
      * }</pre>
      * 
@@ -169,10 +169,10 @@ public @interface JsonXmlField {
      * 
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * {@literal @}JsonXmlField(numberFormat = "#.##")
+     * @JsonXmlField(numberFormat = "#.##")
      * private Double price;  // Serialized with 2 decimal places: "19.99"
      * 
-     * {@literal @}JsonXmlField(numberFormat = "###,###.00")
+     * @JsonXmlField(numberFormat = "###,###.00")
      * private BigDecimal amount;  // Serialized with comma separators: "1,234.56"
      * }</pre>
      * 
@@ -190,10 +190,10 @@ public @interface JsonXmlField {
      * public class User {
      *     private String username;
      *     
-     *     {@literal @}JsonXmlField(ignore = true)
+     *     @JsonXmlField(ignore = true)
      *     private String password;  // Never included in JSON/XML
      *     
-     *     {@literal @}JsonXmlField(ignore = true)
+     *     @JsonXmlField(ignore = true)
      *     private String internalId;  // Hidden from serialization
      * }
      * }</pre>
@@ -215,7 +215,7 @@ public @interface JsonXmlField {
      * public class Document {
      *     private String title;
      *     
-     *     {@literal @}JsonXmlField(isJsonRawValue = true)
+     *     @JsonXmlField(isJsonRawValue = true)
      *     private String metadata;  // Contains: "{"key":"value"}"
      *     // Result: {"title":"My Doc","metadata":{"key":"value"}}
      *     // Instead of: {"title":"My Doc","metadata":"{\"key\":\"value\"}"}
@@ -239,10 +239,10 @@ public @interface JsonXmlField {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * public class User {
-     *     {@literal @}JsonXmlField(expose = Expose.SERIALIZE_ONLY)
+     *     @JsonXmlField(expose = Expose.SERIALIZE_ONLY)
      *     private String displayName;  // Written to JSON but not read from it
      *     
-     *     {@literal @}JsonXmlField(expose = Expose.DESERIALIZE_ONLY)
+     *     @JsonXmlField(expose = Expose.DESERIALIZE_ONLY)
      *     private String tempPassword;  // Read from JSON but not written to it
      * }
      * }</pre>

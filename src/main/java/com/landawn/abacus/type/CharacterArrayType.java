@@ -27,7 +27,7 @@ import com.landawn.abacus.util.WD;
 /**
  * Type handler for Character array (Character[]) values.
  * This class provides serialization, deserialization, and output operations for Character arrays.
- * It handles proper formatting with brackets, separators, and null value representation.
+ * It handles proper formatting with brackets, separators, and {@code null} value representation.
  */
 public final class CharacterArrayType extends ObjectArrayType<Character> {
 
@@ -42,11 +42,12 @@ public final class CharacterArrayType extends ObjectArrayType<Character> {
      * - Non-null characters are wrapped in single quotes
      * - Empty arrays return "[]"
      *
-     * @param x the Character array to convert. Can be null.
-     * @return A string representation of the array with quoted characters, or null if input is null
+     * @param x the Character array to convert. Can be {@code null}.
+     * @return A string representation of the array with quoted characters, or {@code null} if input is null
      */
     @MayReturnNull
     @Override
+
     public String stringOf(final Character[] x) {
         if (x == null) {
             return null; // NOSONAR
@@ -84,14 +85,15 @@ public final class CharacterArrayType extends ObjectArrayType<Character> {
      * Converts a string representation back to a Character array.
      * Expects format: [element1, element2, ...]
      * - Handles both quoted and unquoted characters
-     * - "null" strings (4 characters) are converted to null elements
+     * - "null" strings (4 characters) are converted to {@code null} elements
      * - Empty string or "[]" returns empty array
      *
-     * @param str the string to parse. Can be null.
-     * @return A Character array parsed from the string, or null if input is null
+     * @param str the string to parse. Can be {@code null}.
+     * @return A Character array parsed from the string, or {@code null} if input is null
      */
     @MayReturnNull
     @Override
+
     public Character[] valueOf(final String str) {
         if (Strings.isEmpty(str) || Strings.isBlank(str)) {
             return null; // NOSONAR
@@ -134,7 +136,7 @@ public final class CharacterArrayType extends ObjectArrayType<Character> {
      * Null elements are represented as "null" (without quotes).
      *
      * @param appendable the Appendable to write to
-     * @param x the Character array to append. Can be null.
+     * @param x the Character array to append. Can be {@code null}.
      * @throws IOException if an I/O error occurs during writing
      */
     @Override
@@ -168,8 +170,8 @@ public final class CharacterArrayType extends ObjectArrayType<Character> {
      * - Null elements are always represented as "null" without quotes
      *
      * @param writer the CharacterWriter to write to
-     * @param x the Character array to write. Can be null.
-     * @param config the serialization configuration that specifies quotation settings. Can be null.
+     * @param x the Character array to write. Can be {@code null}.
+     * @param config the serialization configuration that specifies quotation settings. Can be {@code null}.
      * @throws IOException if an I/O error occurs during writing
      */
     @Override
@@ -223,10 +225,11 @@ public final class CharacterArrayType extends ObjectArrayType<Character> {
      * This is an alternative string representation that uses join utility for formatting.
      * The output format is: [element1, element2, ...]
      *
-     * @param x the Character array to convert. Can be null.
-     * @return A string representation of the array, or null if input is null
+     * @param x the Character array to convert. Can be {@code null}.
+     * @return A string representation of the array, or {@code null} if input is null
      */
     @Override
+    @MayReturnNull
     public String toString(final Character[] x) {
         if (x == null) {
             return null; // NOSONAR

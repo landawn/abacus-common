@@ -61,7 +61,7 @@ public final class PrimitiveShortType extends AbstractShortType {
      * System.out.println(isPrimitive); // Output: true
      * }</pre>
      *
-     * @return true, indicating this is a primitive type
+     * @return {@code true}, indicating this is a primitive type
      */
     @Override
     public boolean isPrimitiveType() {
@@ -105,12 +105,13 @@ public final class PrimitiveShortType extends AbstractShortType {
      *
      * @param rs the ResultSet to read from
      * @param columnIndex the 1-based index of the column to retrieve
-     * @return the short value from the specified column, or null if the column value is SQL NULL
+     * @return the short value from the specified column, or {@code null} if the column value is SQL NULL
      * @throws SQLException if a database access error occurs or the column index is invalid
      * @throws NumberFormatException if the column value is a string that cannot be parsed as a short
      */
     @MayReturnNull
     @Override
+
     public Short get(final ResultSet rs, final int columnIndex) throws SQLException {
         final Object ret = rs.getObject(columnIndex);
 
@@ -144,12 +145,13 @@ public final class PrimitiveShortType extends AbstractShortType {
      *
      * @param rs the ResultSet to read from
      * @param columnLabel the label of the column to retrieve (column name or alias)
-     * @return the short value from the specified column, or null if the column value is SQL NULL
+     * @return the short value from the specified column, or {@code null} if the column value is SQL NULL
      * @throws SQLException if a database access error occurs or the column label is not found
      * @throws NumberFormatException if the column value is a string that cannot be parsed as a short
      */
     @MayReturnNull
     @Override
+
     public Short get(final ResultSet rs, final String columnLabel) throws SQLException {
         final Object ret = rs.getObject(columnLabel);
 

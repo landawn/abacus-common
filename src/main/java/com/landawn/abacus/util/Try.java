@@ -394,8 +394,8 @@ public final class Try<T extends AutoCloseable> {
     /**
      * Executes the callable with conditional exception handling based on a predicate.
      * 
-     * <p>If an exception occurs and the predicate returns true, the supplier provides the return value.
-     * If the predicate returns false, the exception is rethrown as a RuntimeException.</p>
+     * <p>If an exception occurs and the predicate returns {@code true}, the supplier provides the return value.
+     * If the predicate returns {@code false}, the exception is rethrown as a RuntimeException.</p>
      * 
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -681,8 +681,8 @@ public final class Try<T extends AutoCloseable> {
     /**
      * Executes the function with conditional exception handling based on a predicate.
      * 
-     * <p>If an exception occurs and the predicate returns true, the supplier provides the return value.
-     * If the predicate returns false, the exception is rethrown as a RuntimeException.</p>
+     * <p>If an exception occurs and the predicate returns {@code true}, the supplier provides the return value.
+     * If the predicate returns {@code false}, the exception is rethrown as a RuntimeException.</p>
      * 
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code

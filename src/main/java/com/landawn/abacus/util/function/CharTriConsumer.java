@@ -48,7 +48,7 @@ public interface CharTriConsumer extends Throwables.CharTriConsumer<RuntimeExcep
      * 
      * <p>The three char arguments are passed to both consumers in the same order.
      *
-     * @param after the operation to perform after this operation. Must not be null.
+     * @param after the operation to perform after this operation. Must not be {@code null}.
      * @return a composed {@code CharTriConsumer} that performs in sequence this operation
      *         followed by the {@code after} operation
      */

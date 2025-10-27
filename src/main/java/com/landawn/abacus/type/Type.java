@@ -57,7 +57,7 @@ import com.landawn.abacus.util.TypeReference;
  * It provides comprehensive type information and operations for converting between
  * different representations (String, Object, database types, etc.) and performing
  * type-specific operations like serialization, comparison, and equality checking.
- * 
+ *
  * <p>This interface is the core abstraction for type handling in Abacus, supporting:</p>
  * <ul>
  *   <li>Type identification and metadata (name, class, generic parameters)</li>
@@ -113,7 +113,7 @@ public interface Type<T> {
 
     /**
      * Returns the Type instance by parsing the given type name string.
-     * Supports both simple and generic type names (e.g., "String", "List<String>").
+     * Supports both simple and generic type names (e.g., "String", "List&lt;String&gt;").
      *
      * @param <T> the type parameter
      * @param typeName the type name string
@@ -351,10 +351,10 @@ public interface Type<T> {
     }
 
     /**
-     * Returns a Map type for properties (LinkedHashMap<String, Object>).
+     * Returns a Map type for properties (LinkedHashMap&lt;String, Object&gt;).
      * Commonly used for property maps in configuration and data transfer.
      *
-     * @return Type instance for LinkedHashMap<String, Object>
+     * @return Type instance for LinkedHashMap&lt;String, Object&gt;
      */
     static Type<Map<String, Object>> ofPropsMap() {
         return TypeFactory.getType("LinkedHashMap<String, Object>");
@@ -477,7 +477,7 @@ public interface Type<T> {
 
     /**
      * Returns a SetMultimap type with the specified key and element types.
-     * 
+     *
      * @param <K> the key type
      * @param <E> the element type
      * @param keyClass the key class
@@ -490,7 +490,7 @@ public interface Type<T> {
 
     /**
      * Returns the name of this type.
-     * For generic types, includes type parameters (e.g., "List<String>").
+     * For generic types, includes type parameters (e.g., "List&lt;String&gt;").
      *
      * @return the type name
      */
@@ -547,20 +547,10 @@ public interface Type<T> {
         return false; // Default implementation, can be overridden by specific types
     }
 
-    /**
-     * Checks if this is a boolean type (boolean or Boolean).
-     *
-     * @return {@code true} if this is a boolean type
-     */
     default boolean isBoolean() {
         return false; // Default implementation, can be overridden by specific types
     }
 
-    /**
-     * Checks if this is a char type (char or Character).
-     *
-     * @return {@code true} if this is a char type
-     */
     default boolean isCharacter() {
         return false; // Default implementation, can be overridden by specific types
     }
@@ -574,110 +564,50 @@ public interface Type<T> {
         return false; // Default implementation, can be overridden by specific types
     }
 
-    /**
-     * Checks if this is a byte type (byte or Byte).
-     *
-     * @return {@code true} if this is a byte type
-     */
     default boolean isByte() {
         return false; // Default implementation, can be overridden by specific types
     }
 
-    /**
-     * Checks if this is a short type (short or Short).
-     *
-     * @return {@code true} if this is a short type
-     */
     default boolean isShort() {
         return false; // Default implementation, can be overridden by specific types
     }
 
-    /**
-     * Checks if this is an int type (int or Integer).
-     *
-     * @return {@code true} if this is an int type
-     */
     default boolean isInteger() {
         return false; // Default implementation, can be overridden by specific types
     }
 
-    /**
-     * Checks if this is a long type (long or Long).
-     *
-     * @return {@code true} if this is a long type
-     */
     default boolean isLong() {
         return false; // Default implementation, can be overridden by specific types
     }
 
-    /**
-     * Checks if this is a float type (float or Float).
-     *
-     * @return {@code true} if this is a float type
-     */
     default boolean isFloat() {
         return false; // Default implementation, can be overridden by specific types
     }
 
-    /**
-     * Checks if this is a double type (double or Double).
-     *
-     * @return {@code true} if this is a double type
-     */
     default boolean isDouble() {
         return false; // Default implementation, can be overridden by specific types
     }
 
-    /**
-     * Checks if this is a String type.
-     *
-     * @return {@code true} if this is a String type
-     */
     default boolean isString() {
         return false; // Default implementation, can be overridden by specific types
     }
 
-    /**
-     * Checks if this is a CharSequence type.
-     *
-     * @return {@code true} if this is a CharSequence type
-     */
     default boolean isCharSequence() {
         return false; // Default implementation, can be overridden by specific types
     }
 
-    /**
-     * Checks if this type represents a Date.
-     *
-     * @return {@code true} if this is a Date type
-     */
     default boolean isDate() {
         return false; // Default implementation, can be overridden by specific types
     }
 
-    /**
-     * Checks if this type represents a Calendar.
-     *
-     * @return {@code true} if this is a Calendar type
-     */
     default boolean isCalendar() {
         return false; // Default implementation, can be overridden by specific types
     }
 
-    /**
-     * Checks if this type represents a Joda DateTime.
-     *
-     * @return {@code true} if this is a Joda DateTime type
-     */
     default boolean isJodaDateTime() {
         return false; // Default implementation, can be overridden by specific types
     }
 
-    /**
-     * Checks if this type represents a primitive array.
-     *
-     * @return {@code true} if this is a primitive array type
-     */
     default boolean isPrimitiveArray() {
         return false; // Default implementation, can be overridden by specific types
     }
@@ -691,56 +621,26 @@ public interface Type<T> {
         return false; // Default implementation, can be overridden by specific types
     }
 
-    /**
-     * Checks if this type represents an object array.
-     *
-     * @return {@code true} if this is an object array type
-     */
     default boolean isObjectArray() {
         return false; // Default implementation, can be overridden by specific types
     }
 
-    /**
-     * Checks if this type represents any kind of array.
-     *
-     * @return {@code true} if this is an array type
-     */
     default boolean isArray() {
         return isPrimitiveArray() || isObjectArray(); // Default implementation, can be overridden by specific types
     }
 
-    /**
-     * Checks if this type represents a List.
-     *
-     * @return {@code true} if this is a List type
-     */
     default boolean isList() {
         return isPrimitiveArray() || isObjectArray(); // Default implementation, can be overridden by specific types
     }
 
-    /**
-     * Checks if this type represents a Set.
-     *
-     * @return {@code true} if this is a Set type
-     */
     default boolean isSet() {
         return isPrimitiveArray() || isObjectArray(); // Default implementation, can be overridden by specific types
     }
 
-    /**
-     * Checks if this type represents a Collection.
-     *
-     * @return {@code true} if this is a Collection type
-     */
     default boolean isCollection() {
         return isPrimitiveArray() || isObjectArray(); // Default implementation, can be overridden by specific types
     }
 
-    /**
-     * Checks if this type represents a Map.
-     *
-     * @return {@code true} if this is a Map type
-     */
     default boolean isMap() {
         return isPrimitiveArray() || isObjectArray(); // Default implementation, can be overridden by specific types
     }
@@ -754,83 +654,38 @@ public interface Type<T> {
         return isPrimitiveArray() || isObjectArray(); // Default implementation, can be overridden by specific types
     }
 
-    /**
-     * Checks if this type represents a MapEntity.
-     *
-     * @return {@code true} if this is a MapEntity type
-     */
     default boolean isMapEntity() {
         return isPrimitiveArray() || isObjectArray(); // Default implementation, can be overridden by specific types
     }
 
-    /**
-     * Checks if this type represents an EntityId.
-     *
-     * @return {@code true} if this is an EntityId type
-     */
     default boolean isEntityId() {
         return isPrimitiveArray() || isObjectArray(); // Default implementation, can be overridden by specific types
     }
 
-    /**
-     * Checks if this type represents a Dataset.
-     *
-     * @return {@code true} if this is a Dataset type
-     */
     default boolean isDataset() {
         return isPrimitiveArray() || isObjectArray(); // Default implementation, can be overridden by specific types
     }
 
-    /**
-     * Checks if this type represents an InputStream.
-     *
-     * @return {@code true} if this is an InputStream type
-     */
     default boolean isInputStream() {
         return false; // Default implementation, can be overridden by specific types
     }
 
-    /**
-     * Checks if this type represents a Reader.
-     *
-     * @return {@code true} if this is a Reader type
-     */
     default boolean isReader() {
         return false; // Default implementation, can be overridden by specific types
     }
 
-    /**
-     * Checks if this type represents a ByteBuffer.
-     *
-     * @return {@code true} if this is a ByteBuffer type
-     */
     default boolean isByteBuffer() {
         return false; // Default implementation, can be overridden by specific types
     }
 
-    /**
-     * Checks if this is a generic type with type parameters.
-     *
-     * @return {@code true} if this is a generic type
-     */
     default boolean isGenericType() {
         return false; // Default implementation, can be overridden by specific types
     }
 
-    /**
-     * Checks if values of this type are immutable.
-     *
-     * @return {@code true} if this type is immutable
-     */
     default boolean isImmutable() {
         return false; // Default implementation, can be overridden by specific types
     }
 
-    /**
-     * Checks if values of this type can be compared.
-     *
-     * @return {@code true} if this type is comparable
-     */
     default boolean isComparable() {
         return false; // Default implementation, can be overridden by specific types
     }
@@ -847,9 +702,9 @@ public interface Type<T> {
     }
 
     /**
-     * Checks if this type represents optional or nullable values.
+     * Checks if this type represents optional or {@code nullable} values.
      *
-     * @return {@code true} if this is an optional or nullable type
+     * @return {@code true} if this is an optional or {@code nullable} type
      */
     default boolean isOptionalOrNullable() {
         return false; // Default implementation, can be overridden by specific types
@@ -865,11 +720,6 @@ public interface Type<T> {
         return false; // Default implementation, can be overridden by specific types
     }
 
-    /**
-     * Checks if this is the Object type.
-     *
-     * @return {@code true} if this is the Object type
-     */
     default boolean isObjectType() {
         return false; // Default implementation, can be overridden by specific types
     }
@@ -890,7 +740,7 @@ public interface Type<T> {
 
     /**
      * Gets the parameter types for generic types.
-     * For example, Map<K,V> returns types for K and V.
+     * For example, Map&lt;K,V&gt; returns types for K and V.
      *
      * @return array of parameter types, empty if none
      */
@@ -918,7 +768,7 @@ public interface Type<T> {
      *
      * @param x the first value
      * @param y the second value
-     * @return negative if x < y, zero if x equals y, positive if x > y
+     * @return negative if x &lt; y, zero if x equals y, positive if x &gt; y
      * @throws UnsupportedOperationException if this type is not comparable
      */
     int compare(T x, T y);

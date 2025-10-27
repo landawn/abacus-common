@@ -38,12 +38,12 @@ public interface CharPredicate extends Throwables.CharPredicate<RuntimeException
     CharPredicate ALWAYS_FALSE = value -> false;
 
     /**
-     * A predicate that tests if the char value is equal to the null character ('\0').
+     * A predicate that tests if the char value is equal to the {@code null} character ('\0').
      */
     CharPredicate IS_ZERO = value -> value == 0;
 
     /**
-     * A predicate that tests if the char value is not equal to the null character ('\0').
+     * A predicate that tests if the char value is not equal to the {@code null} character ('\0').
      */
     CharPredicate NOT_ZERO = value -> value != 0;
 

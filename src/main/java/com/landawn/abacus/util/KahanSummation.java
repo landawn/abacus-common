@@ -42,6 +42,12 @@ import com.landawn.abacus.util.u.OptionalDouble;
  */
 public final class KahanSummation { // NOSONAR
 
+    /**
+     * Constructs a new KahanSummation with initial values of zero.
+     */
+    public KahanSummation() {
+    }
+
     private long count;
 
     private double correction;

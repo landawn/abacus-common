@@ -123,7 +123,7 @@ public final class Timed<T> implements Immutable {
 
     /**
      * Returns the value contained in this timed instance.
-     * The returned value may be null if null was provided when creating the instance.
+     * The returned value may be {@code null} if {@code null} was provided when creating the instance.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -146,7 +146,7 @@ public final class Timed<T> implements Immutable {
      *
      * <p>The hash code is calculated by combining the timestamp's hash code
      * (computed using XOR of its upper and lower 32 bits) with the value's hash code
-     * using the standard multiplier of 31. If the value is null, its hash code is 0.
+     * using the standard multiplier of 31. If the value is {@code null}, its hash code is 0.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -180,7 +180,7 @@ public final class Timed<T> implements Immutable {
      * }</pre>
      *
      * @param obj the reference object with which to compare
-     * @return {@code true} if this object is equal to the obj argument; false otherwise
+     * @return {@code true} if this object is equal to the obj argument; {@code false} otherwise
      */
     @Override
     public boolean equals(final Object obj) {

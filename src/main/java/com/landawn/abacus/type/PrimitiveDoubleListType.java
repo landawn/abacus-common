@@ -75,10 +75,11 @@ public final class PrimitiveDoubleListType extends AbstractPrimitiveListType<Dou
     /**
      * Converts a DoubleList to its string representation.
      * The list is first converted to a double array, then serialized using the array type handler.
-     * Returns null if the input list is null.
+     * Returns {@code null} if the input list is {@code null}.
      *
      * @param x the DoubleList to convert
-     * @return the string representation of the list, or null if input is null
+     * @return the string representation of the list, or {@code null} if input is null
+     @MayReturnNull
      */
     @Override
     public String stringOf(final DoubleList x) {
@@ -88,10 +89,11 @@ public final class PrimitiveDoubleListType extends AbstractPrimitiveListType<Dou
     /**
      * Parses a string representation and creates a DoubleList.
      * The string is first parsed as a double array, then wrapped in a DoubleList.
-     * Returns null if the input string is null or empty.
+     * Returns {@code null} if the input string is {@code null} or empty.
      *
      * @param str the string to parse
-     * @return a DoubleList created from the parsed values, or null if input is null or empty
+     * @return a DoubleList created from the parsed values, or {@code null} if input is {@code null} or empty
+     @MayReturnNull
      */
     @Override
     public DoubleList valueOf(final String str) {
@@ -101,7 +103,7 @@ public final class PrimitiveDoubleListType extends AbstractPrimitiveListType<Dou
     /**
      * Appends the string representation of a DoubleList to an Appendable.
      * Delegates to the array type handler after converting the list to an array.
-     * Appends "null" if the list is null.
+     * Appends "null" if the list is {@code null}.
      *
      * @param appendable the Appendable to write to
      * @param x the DoubleList to append
@@ -119,7 +121,7 @@ public final class PrimitiveDoubleListType extends AbstractPrimitiveListType<Dou
     /**
      * Writes the character representation of a DoubleList to a CharacterWriter.
      * Delegates to the array type handler after converting the list to an array.
-     * Writes "null" if the list is null.
+     * Writes "null" if the list is {@code null}.
      *
      * @param writer the CharacterWriter to write to
      * @param x the DoubleList to write

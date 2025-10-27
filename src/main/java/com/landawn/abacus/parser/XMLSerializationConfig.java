@@ -60,7 +60,7 @@ public class XMLSerializationConfig extends JSONXMLSerializationConfig<XMLSerial
      * <ul>
      *   <li>tagByPropertyName: true</li>
      *   <li>writeTypeInfo: false</li>
-     *   <li>No quotation marks (set to null character)</li>
+     *   <li>No quotation marks (set to {@code null} character)</li>
      *   <li>Inherits other defaults from JSONXMLSerializationConfig</li>
      * </ul>
      */
@@ -69,13 +69,6 @@ public class XMLSerializationConfig extends JSONXMLSerializationConfig<XMLSerial
         setStringQuotation(WD.CHAR_ZERO); // NOSONAR
     }
 
-    /**
-     * Sets the string quotation character.
-     * 
-     * @param stringQuotation the quotation character
-     * @return this configuration instance
-     * @deprecated this method should not be called for XML serialization
-     */
     @Deprecated
     @Override
     public XMLSerializationConfig setStringQuotation(final char stringQuotation) {
@@ -84,13 +77,6 @@ public class XMLSerializationConfig extends JSONXMLSerializationConfig<XMLSerial
         return this;
     }
 
-    /**
-     * Sets the character quotation.
-     * 
-     * @param charQuotation the quotation character
-     * @return this configuration instance
-     * @deprecated this method should not be called for XML serialization
-     */
     @Deprecated
     @Override
     public XMLSerializationConfig setCharQuotation(final char charQuotation) {
@@ -99,12 +85,6 @@ public class XMLSerializationConfig extends JSONXMLSerializationConfig<XMLSerial
         return this;
     }
 
-    /**
-     * Removes character quotation.
-     * 
-     * @return this configuration instance
-     * @deprecated this method should not be called for XML serialization
-     */
     @Deprecated
     @Override
     public XMLSerializationConfig noCharQuotation() {
@@ -113,12 +93,6 @@ public class XMLSerializationConfig extends JSONXMLSerializationConfig<XMLSerial
         return this;
     }
 
-    /**
-     * Removes string quotation.
-     * 
-     * @return this configuration instance
-     * @deprecated this method should not be called for XML serialization
-     */
     @Deprecated
     @Override
     public XMLSerializationConfig noStringQuotation() {
@@ -127,12 +101,6 @@ public class XMLSerializationConfig extends JSONXMLSerializationConfig<XMLSerial
         return this;
     }
 
-    /**
-     * Removes all quotation marks.
-     * 
-     * @return this configuration instance
-     * @deprecated this method should not be called for XML serialization
-     */
     @Deprecated
     @Override
     public XMLSerializationConfig noQuotation() {
@@ -143,11 +111,12 @@ public class XMLSerializationConfig extends JSONXMLSerializationConfig<XMLSerial
 
     /**
      * Checks if XML tags should be named after property names.
-     * 
-     * <p>When true, XML elements will use the property name as the tag name.
-     * When false, a generic tag structure is used with name attributes.</p>
+     *
+     * <p>When {@code true}, XML elements will use the property name as the tag name.
+     * When {@code false}, a generic tag structure is used with name attributes.</p>
      *
      * <p><b>Usage Examples:</b></p>
+     * <p>With tagByPropertyName = true:</p>
      * <pre>{@code
      * <person>
      *   <name>John</name>
@@ -155,7 +124,7 @@ public class XMLSerializationConfig extends JSONXMLSerializationConfig<XMLSerial
      * </person>
      * }</pre>
      *
-     * <p><b>Usage Examples:</b></p>
+     * <p>With tagByPropertyName = false:</p>
      * <pre>{@code
      * <bean name="person">
      *   <property name="name">John</property>
@@ -328,6 +297,17 @@ public class XMLSerializationConfig extends JSONXMLSerializationConfig<XMLSerial
      * }</pre>
      */
     public static final class XSC extends XMLSerializationConfig {
+
+        /**
+         * Constructs a new XSC factory instance.
+         *
+         * <p>This constructor is provided to satisfy javadoc requirements.
+         * The XSC class is intended to be used through its static factory methods
+         * rather than instantiation.</p>
+         */
+        public XSC() {
+            super();
+        }
 
         /**
          * Creates a new XMLSerializationConfig instance with default settings.

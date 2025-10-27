@@ -105,9 +105,9 @@ public final class Iterators {
      * If the index is out of bounds (greater than the number of elements in the iterator), a {@code Nullable}.empty() is returned.
      *
      * @param <T> the type of elements in the iterator.
-     * @param iter the iterator from which to retrieve the element, or {@code null} to return {@code Nullable.empty()}.
+     * @param iter the iterator from which to retrieve the element, or {@code null} to return {@code {@code Nullable}.empty()}.
      * @param index the position in the iterator of the element to be returned. Indexing starts from 0.
-     * @return a {@code Nullable} containing the element at the specified position in the iterator, or {@code Nullable.empty()} if the index is out of bounds.
+     * @return a {@code Nullable} containing the element at the specified position in the iterator, or {@code {@code Nullable}.empty()} if the index is out of bounds.
      * @throws IllegalArgumentException if {@code index} is negative.
      */
     public static <T> Nullable<T> get(final Iterator<? extends T> iter, long index) throws IllegalArgumentException {
@@ -269,6 +269,10 @@ public final class Iterators {
      *
      * <p>Note that this will modify the supplied iterators, since they will have been advanced some
      * number of elements forward.
+     *
+     * @param iterator1 the first iterator to compare
+     * @param iterator2 the second iterator to compare
+     * @return {@code true} if the iterators contain equal elements in the same order, {@code false} otherwise
      */
     public static boolean elementsEqual(final Iterator<?> iterator1, final Iterator<?> iterator2) {
         final boolean isIterator1Empty = N.isEmpty(iterator1);
@@ -2079,6 +2083,7 @@ public final class Iterators {
      * @param c the third Iterator to be zipped.
      * @param valueForNoneA the default value to be used when the first Iterator is exhausted.
      * @param valueForNoneB the default value to be used when the second Iterator is exhausted.
+     * @param valueForNoneC the default value to be used when the third Iterator is exhausted.
      * @param zipFunction a TriFunction that takes an element from each Iterator and returns a new element for the resulting ObjIterator.
      * @return an ObjIterator that will iterate over the elements created by <i>zipFunction</i>.
      */
@@ -2414,13 +2419,13 @@ public final class Iterators {
 
     /**
      * Returns a new {@code ObjIterator} with {@code null} elements removed from the specified Iterable.
-     * All {@code null} elements will be filtered out, returning only non-null elements.
+     * All {@code null} elements will be filtered out, returning only {@code non-null} elements.
      *
-     * <p><b>Usage Examples:</b></p> {@code Iterators.skipNulls(Arrays.asList("A", null, "B", null, "C"))} yields an iterator with elements: "A", "B", "C"
+     * <p><b>Usage Examples:</b></p> {@code Iterators.skipNulls(Arrays.asList("A", {@code null}, "B", {@code null}, "C"))} yields an iterator with elements: "A", "B", "C"
      *
      * @param <T> the type of elements in the iterable.
      * @param c the iterable whose {@code null} elements should be skipped.
-     * @return an {@code ObjIterator} that iterates over only the non-null elements.
+     * @return an {@code ObjIterator} that iterates over only the {@code non-null} elements.
      */
     @Beta
     public static <T> ObjIterator<T> skipNulls(final Iterable<? extends T> c) {
@@ -2429,13 +2434,13 @@ public final class Iterators {
 
     /**
      * Returns a new {@code ObjIterator} with {@code null} elements removed from the specified Iterator.
-     * All {@code null} elements will be filtered out, returning only non-null elements.
+     * All {@code null} elements will be filtered out, returning only {@code non-null} elements.
      *
-     * <p><b>Usage Examples:</b></p> {@code Iterators.skipNulls(Arrays.asList("A", null, "B", null, "C").iterator())} yields an iterator with elements: "A", "B", "C"
+     * <p><b>Usage Examples:</b></p> {@code Iterators.skipNulls(Arrays.asList("A", {@code null}, "B", {@code null}, "C").iterator())} yields an iterator with elements: "A", "B", "C"
      *
      * @param <T> the type of elements in the iterator.
      * @param iter the iterator whose {@code null} elements should be skipped.
-     * @return an {@code ObjIterator} that iterates over only the non-null elements.
+     * @return an {@code ObjIterator} that iterates over only the {@code non-null} elements.
      */
     public static <T> ObjIterator<T> skipNulls(final Iterator<? extends T> iter) {
         return filter(iter, Fn.notNull());

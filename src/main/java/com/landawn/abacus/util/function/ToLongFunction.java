@@ -26,7 +26,7 @@ import com.landawn.abacus.util.Throwables;
  *
  * <p>This is a functional interface whose functional method is {@link #applyAsLong(Object)}.
  *
- * <p>Refer to JDK API documentation at: <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html">https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a>
+ * <p>Refer to JDK API documentation at: <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html">https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a></p>
  *
  * @param <T> the type of the input to the function
  */
@@ -35,7 +35,7 @@ public interface ToLongFunction<T> extends Throwables.ToLongFunction<T, RuntimeE
 
     /**
      * A predefined ToLongFunction instance that unboxes a Long object to a primitive long.
-     * Returns 0L if the input is null, otherwise returns the long value of the Long object.
+     * Returns 0L if the input is {@code null}, otherwise returns the long value of the Long object.
      * 
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -48,7 +48,7 @@ public interface ToLongFunction<T> extends Throwables.ToLongFunction<T, RuntimeE
 
     /**
      * A predefined ToLongFunction instance that converts any Number object to a primitive long.
-     * Returns 0L if the input is null, otherwise calls the longValue() method on the Number object.
+     * Returns 0L if the input is {@code null}, otherwise calls the longValue() method on the Number object.
      * This function can handle various Number subclasses including Integer, Double, Float, BigDecimal, etc.
      * 
      * <p>Note: This conversion may result in loss of precision for floating-point numbers or

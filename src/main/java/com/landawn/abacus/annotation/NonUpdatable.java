@@ -51,27 +51,27 @@ import java.lang.annotation.Target;
  * 
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
- * {@literal @}Entity
+ * @Entity
  * public class Order {
- *     {@literal @}Id
+ *     @Id
  *     private Long id;
  *     
- *     {@literal @}NonUpdatable
- *     {@literal @}Column(name = "order_number")
+ *     @NonUpdatable
+ *     @Column(name = "order_number")
  *     private String orderNumber;      // Set once at creation
  *     
- *     {@literal @}NonUpdatable
- *     {@literal @}Column(name = "customer_id")
+ *     @NonUpdatable
+ *     @Column(name = "customer_id")
  *     private Long customerId;         // Cannot change customer after creation
  *     
- *     {@literal @}NonUpdatable
- *     {@literal @}Column(name = "created_date")
+ *     @NonUpdatable
+ *     @Column(name = "created_date")
  *     private Date createdDate;        // Immutable creation timestamp
  *     
- *     {@literal @}Column(name = "status")
+ *     @Column(name = "status")
  *     private String status;           // Can be updated
  *     
- *     {@literal @}Column(name = "total_amount")
+ *     @Column(name = "total_amount")
  *     private BigDecimal totalAmount;  // Can be updated
  * }
  * }</pre>

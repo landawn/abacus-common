@@ -64,6 +64,7 @@ public class TimedType<T> extends AbstractType<Timed<T>> { //NOSONAR
      * @return the declaring name of this Timed type
      */
     @Override
+    @MayReturnNull
     public String declaringName() {
         return declaringName;
     }
@@ -89,11 +90,6 @@ public class TimedType<T> extends AbstractType<Timed<T>> { //NOSONAR
         return parameterTypes;
     }
 
-    /**
-     * Indicates that this is a generic type with type parameters.
-     *
-     * @return true, as Timed is a generic type
-     */
     @Override
     public boolean isGenericType() {
         return true;
@@ -104,9 +100,10 @@ public class TimedType<T> extends AbstractType<Timed<T>> { //NOSONAR
      * The format is a JSON array: [timestamp, value].
      *
      * @param x the Timed object to convert
-     * @return the JSON string representation, or null if x is null
+     * @return the JSON string representation, or {@code null} if x is null
      */
     @Override
+    @MayReturnNull
     public String stringOf(final Timed<T> x) {
         return (x == null) ? null : Utils.jsonParser.serialize(N.asArray(x.timestamp(), x.value()), Utils.jsc);
     }
@@ -116,7 +113,7 @@ public class TimedType<T> extends AbstractType<Timed<T>> { //NOSONAR
      * Expects a JSON array format: [timestamp, value].
      *
      * @param str the string to parse
-     * @return a Timed object containing the parsed timestamp and value, or null if str is empty
+     * @return a Timed object containing the parsed timestamp and value, or {@code null} if str is empty
      */
     @MayReturnNull
     @SuppressWarnings("unchecked")
@@ -213,9 +210,9 @@ public class TimedType<T> extends AbstractType<Timed<T>> { //NOSONAR
 
     /**
      * Generates the type name for a Timed type with the specified value type.
-     * 
+     *
      * @param valueTypeName the name of the value type
-     * @param isDeclaringName if true, uses simple class names; if false, uses canonical class names
+     * @param isDeclaringName if {@code true}, uses simple class names; if {@code false}, uses canonical class names
      * @return the generated type name for Timed with the specified value type
      */
     protected static String getTypeName(final String valueTypeName, final boolean isDeclaringName) {

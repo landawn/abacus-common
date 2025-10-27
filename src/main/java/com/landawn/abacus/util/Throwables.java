@@ -184,7 +184,7 @@ public final class Throwables {
     /**
      * Executes the specified callable command that may throw a checked exception and returns its result.
      * If the command throws an exception and the predicate returns {@code true} for that exception,
-     * the result from the supplier will be returned. If the predicate returns false,
+     * the result from the supplier will be returned. If the predicate returns {@code false},
      * the exception will be wrapped in a RuntimeException and rethrown.
      *
      * @param <R> the type of the result returned by the callable or the supplier
@@ -217,7 +217,7 @@ public final class Throwables {
     /**
      * Executes the specified callable command that may throw a checked exception and returns its result.
      * If the command throws an exception and the predicate returns {@code true} for that exception,
-     * the specified default value will be returned. If the predicate returns false,
+     * the specified default value will be returned. If the predicate returns {@code false},
      * the exception will be wrapped in a RuntimeException and rethrown.
      *
      * @param <R> the type of the result returned by the callable or the default value
@@ -261,6 +261,9 @@ public final class Throwables {
     };
 
     /**
+     * An iterator that can throw checked exceptions during iteration.
+     * This iterator provides hasNext(), next(), and other iteration methods that can throw exceptions of type E.
+     * It extends AutoCloseable to support try-with-resources and implements Immutable to prevent modification.
      *
      * @param <T> the type of elements in the iterator
      * @param <E> the type of exception that may be thrown
@@ -268,8 +271,15 @@ public final class Throwables {
      */
     @SuppressWarnings({ "java:S6548" })
     public abstract static class Iterator<T, E extends Throwable> implements AutoCloseable, Immutable {
+
         /**
-         * Returns an empty iterator that has no elements and whose hasNext() always returns false.
+         * Constructor for subclasses.
+         */
+        protected Iterator() {
+        }
+
+        /**
+         * Returns an empty iterator that has no elements and whose hasNext() always returns {@code false}.
          *
          * @param <T> the type of elements that would be returned by this iterator
          * @param <E> the type of exception that may be thrown
@@ -315,7 +325,7 @@ public final class Throwables {
          * @param <T> the type of elements in the array
          * @param <E> the type of exception that may be thrown
          * @param a the array of elements to iterate over
-         * @return an iterator over the elements in the array, or an empty iterator if the array is null or empty
+         * @return an iterator over the elements in the array, or an empty iterator if the array is {@code null} or empty
          */
         @SafeVarargs
         public static <T, E extends Exception> Throwables.Iterator<T, E> of(final T... a) {
@@ -545,7 +555,7 @@ public final class Throwables {
          * @param <E> the type of exception that may be thrown
          * @param c the collection of iterators to concatenate
          * @return a single iterator that iterates over all elements from all iterators in order,
-         *         or an empty iterator if the collection is null or empty
+         *         or an empty iterator if the collection is {@code null} or empty
          */
         public static <T, E extends Exception> Throwables.Iterator<T, E> concat(final Collection<? extends Throwables.Iterator<? extends T, ? extends E>> c) {
             if (N.isEmpty(c)) {
@@ -595,7 +605,6 @@ public final class Throwables {
          *
          * @param reader the Reader to read lines from
          * @return an iterator over the lines in the reader, or an empty iterator if the reader is null
-         * @throws IOException if an I/O error occurs while reading from the reader
          */
         public static Throwables.Iterator<String, IOException> ofLines(final Reader reader) {
             if (reader == null) {
@@ -649,7 +658,7 @@ public final class Throwables {
         }
 
         /**
-         * Returns true if the iterator has more elements to iterate over.
+         * Returns {@code true} if the iterator has more elements to iterate over.
          *
          * @return {@code true} if there are more elements, {@code false} otherwise
          * @throws E if an exception occurs while checking for more elements
@@ -793,10 +802,10 @@ public final class Throwables {
         }
 
         /**
-         * Returns the first element from this iterator wrapped in a Nullable.
-         * If the iterator is empty, returns an empty Nullable.
+         * Returns the first element from this iterator wrapped in a {@code Nullable}.
+         * If the iterator is empty, returns an empty {@code Nullable}.
          *
-         * @return a Nullable containing the first element if present, otherwise an empty Nullable
+         * @return a {@code Nullable} containing the first element if present, otherwise an empty Nullable
          * @throws E if an exception occurs while retrieving the first element
          */
         public Nullable<T> first() throws E {
@@ -808,11 +817,11 @@ public final class Throwables {
         }
 
         /**
-         * Returns the first non-null element from this iterator wrapped in an Optional.
-         * If no non-null element is found or the iterator is empty, returns an empty Optional.
+         * Returns the first {@code non-null} element from this iterator wrapped in an Optional.
+         * If no {@code non-null} element is found or the iterator is empty, returns an empty Optional.
          *
-         * @return an Optional containing the first non-null element if present, otherwise an empty Optional
-         * @throws E if an exception occurs while searching for a non-null element
+         * @return an Optional containing the first {@code non-null} element if present, otherwise an empty Optional
+         * @throws E if an exception occurs while searching for a {@code non-null} element
          */
         public u.Optional<T> firstNonNull() throws E {
             T next = null;
@@ -829,11 +838,11 @@ public final class Throwables {
         }
 
         /**
-         * Returns the last element from this iterator wrapped in a Nullable.
+         * Returns the last element from this iterator wrapped in a {@code Nullable}.
          * This method will consume all elements in the iterator.
-         * If the iterator is empty, returns an empty Nullable.
+         * If the iterator is empty, returns an empty {@code Nullable}.
          *
-         * @return a Nullable containing the last element if present, otherwise an empty Nullable
+         * @return a {@code Nullable} containing the last element if present, otherwise an empty Nullable
          * @throws E if an exception occurs while iterating through the elements
          */
         public Nullable<T> last() throws E {
@@ -4276,12 +4285,12 @@ public final class Throwables {
     public interface IntObjConsumer<T, E extends Throwable> {
 
         /**
-         * Returns an IntObjConsumer that performs the given operation.
+         * Returns the given consumer instance. This is a convenience method for type inference.
          *
          * @param <T> the type of the object argument to the consumer
-         * @param <E> the type of exception that the consumer may throw
-         * @param consumer the operation to be performed
-         * @return the input consumer
+         * @param <E> the type of exception that may be thrown
+         * @param consumer the consumer to return
+         * @return the same consumer instance
          */
         static <T, E extends Throwable> IntObjConsumer<T, E> of(final IntObjConsumer<T, E> consumer) {
             return consumer;
@@ -4308,13 +4317,13 @@ public final class Throwables {
     public interface IntObjFunction<T, R, E extends Throwable> {
 
         /**
-         * Returns an IntObjFunction that performs the given function.
+         * Returns the given function as is.
          *
          * @param <T> the type of the object argument to the function
          * @param <R> the type of the result of the function
-         * @param <E> the type of exception that the function may throw
-         * @param func the function to be performed
-         * @return the input function
+         * @param <E> the type of exception that may be thrown
+         * @param func the function to return
+         * @return the same function instance
          */
         static <T, R, E extends Throwable> IntObjFunction<T, R, E> of(final IntObjFunction<T, R, E> func) {
             return func;
@@ -4341,12 +4350,12 @@ public final class Throwables {
     public interface IntObjPredicate<T, E extends Throwable> {
 
         /**
-         * Returns an IntObjPredicate that performs the given test.
+         * Returns the given predicate as is.
          *
          * @param <T> the type of the object argument to the predicate
-         * @param <E> the type of exception that the predicate may throw
-         * @param predicate the predicate to be performed
-         * @return the input predicate
+         * @param <E> the type of exception that may be thrown
+         * @param predicate the predicate to return
+         * @return the same predicate instance
          */
         static <T, E extends Throwable> IntObjPredicate<T, E> of(final IntObjPredicate<T, E> predicate) {
             return predicate;

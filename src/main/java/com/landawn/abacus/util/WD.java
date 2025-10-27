@@ -43,7 +43,7 @@ public final class WD {
     }
 
     /**
-     * Represents the null character: {@code (char) 0}.
+     * Represents the {@code null} character: {@code (char) 0}.
      * This is the character with ASCII value 0, often used as a string terminator in C.
      */
     public static final char CHAR_ZERO = (char) 0;
@@ -417,13 +417,13 @@ public final class WD {
     public static final String BRACKET_R = "]";
 
     /**
-     * Represents the left curly brace character: {@code '{'}.
+     * Represents the left curly brace character: '{'.
      * Used for block delimiters and object literals.
      */
     public static final char _BRACE_L = '{';
 
     /**
-     * Represents the left curly brace string: {@code "{"}.
+     * Represents the left curly brace string: "{".
      */
     public static final String BRACE_L = "{";
 

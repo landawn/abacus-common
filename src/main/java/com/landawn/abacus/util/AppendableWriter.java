@@ -89,14 +89,14 @@ public sealed class AppendableWriter extends Writer permits StringWriter {
     /**
      * Appends the specified character sequence to this writer.
      * 
-     * <p>If csq is null, then the four characters "null" are appended to this writer.</p>
+     * <p>If csq is {@code null}, then the four characters "null" are appended to this writer.</p>
      * 
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * writer.append("Hello").append(" ").append("World");
      * }</pre>
      *
-     * @param csq the character sequence to append. If csq is null, then the four characters "null" are appended
+     * @param csq the character sequence to append. If csq is {@code null}, then the four characters "null" are appended
      * @return this writer
      * @throws IOException if an I/O error occurs or if the writer has been closed
      */
@@ -118,7 +118,7 @@ public sealed class AppendableWriter extends Writer permits StringWriter {
      * }</pre>
      *
      * @param csq the character sequence from which a subsequence will be appended. 
-     *            If csq is null, then characters will be appended as if csq contained the four characters "null"
+     *            If csq is {@code null}, then characters will be appended as if csq contained the four characters "null"
      * @param start the index of the first character in the subsequence
      * @param end the index of the character following the last character in the subsequence
      * @return this writer

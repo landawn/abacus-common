@@ -344,7 +344,7 @@ sealed class BufferedWriter extends java.io.BufferedWriter permits CharacterWrit
     }
 
     /**
-     * Writes a string. If the string is null, "null" is written.
+     * Writes a string. If the string is {@code null}, "null" is written.
      * 
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -388,7 +388,7 @@ sealed class BufferedWriter extends java.io.BufferedWriter permits CharacterWrit
     }
 
     /**
-     * Internal method to write a non-null string.
+     * Internal method to write a {@code non-null} string.
      *
      * @param str the string to write (must not be null)
      * @throws IOException if an I/O error occurs
@@ -399,7 +399,7 @@ sealed class BufferedWriter extends java.io.BufferedWriter permits CharacterWrit
     }
 
     /**
-     * Internal method to write a portion of a non-null string.
+     * Internal method to write a portion of a {@code non-null} string.
      *
      * @param str the string to write (must not be null)
      * @param off the offset from which to start writing
@@ -705,29 +705,16 @@ sealed class BufferedWriter extends java.io.BufferedWriter permits CharacterWrit
         lock = value;
     }
 
-    /**
-     * Reinitializes this writer to write to the specified OutputStream.
-     *
-     * @param os the output stream to write to
-     */
     void reinit(final OutputStream os) {
         reinit(IOUtil.newOutputStreamWriter(os)); // NOSONAR
     }
 
-    /**
-     * Reinitializes this writer to write to the specified Writer.
-     *
-     * @param writer the writer to write to
-     */
     void reinit(final Writer writer) {
         isClosed = false;
         out = writer;
         lock = writer;
     }
 
-    /**
-     * Resets the internal state of this writer.
-     */
     void _reset() { //NOSONAR
         Objectory.recycle(_cbuf);
         _cbuf = null;

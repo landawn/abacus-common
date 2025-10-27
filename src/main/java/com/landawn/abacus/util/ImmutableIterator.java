@@ -25,7 +25,7 @@ import com.landawn.abacus.annotation.Beta;
 /**
  * An abstract base class for immutable iterators that do not support element removal.
  * This class implements the Iterator interface but throws UnsupportedOperationException
- * for the remove() operation, ensuring true immutability.
+ * for the remove() operation, ensuring {@code true} immutability.
  * 
  * <p>ImmutableIterator provides additional utility methods for converting the remaining
  * elements to various collection types, including immutable collections. It serves as
@@ -79,7 +79,7 @@ abstract class ImmutableIterator<T> implements java.util.Iterator<T>, Immutable 
      * to the end of the iteration, with duplicates removed.
      * 
      * <p>This method consumes the iterator. After calling this method,
-     * the iterator will be exhausted and hasNext() will return false.</p>
+     * the iterator will be exhausted and hasNext() will return {@code false}.</p>
      * 
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -99,7 +99,7 @@ abstract class ImmutableIterator<T> implements java.util.Iterator<T>, Immutable 
      * created by the provided supplier.
      * 
      * <p>This method consumes the iterator. After calling this method,
-     * the iterator will be exhausted and hasNext() will return false.</p>
+     * the iterator will be exhausted and hasNext() will return {@code false}.</p>
      * 
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -126,7 +126,7 @@ abstract class ImmutableIterator<T> implements java.util.Iterator<T>, Immutable 
      * Collects all remaining elements from this iterator into an ImmutableList.
      * 
      * <p>This method consumes the iterator. After calling this method,
-     * the iterator will be exhausted and hasNext() will return false.</p>
+     * the iterator will be exhausted and hasNext() will return {@code false}.</p>
      * 
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -146,7 +146,7 @@ abstract class ImmutableIterator<T> implements java.util.Iterator<T>, Immutable 
      * Duplicate elements will be removed according to their equals() method.
      * 
      * <p>This method consumes the iterator. After calling this method,
-     * the iterator will be exhausted and hasNext() will return false.</p>
+     * the iterator will be exhausted and hasNext() will return {@code false}.</p>
      * 
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -166,7 +166,7 @@ abstract class ImmutableIterator<T> implements java.util.Iterator<T>, Immutable 
      * This method consumes all remaining elements to count them.
      * 
      * <p><b>Warning:</b> This method consumes the iterator. After calling this method,
-     * the iterator will be exhausted and hasNext() will return false. If you need
+     * the iterator will be exhausted and hasNext() will return {@code false}. If you need
      * both the count and the elements, consider collecting to a list first.</p>
      * 
      * <p><b>Usage Examples:</b></p>

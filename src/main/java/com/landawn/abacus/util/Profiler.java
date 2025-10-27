@@ -320,23 +320,6 @@ public final class Profiler {
         }
     }
 
-    /**
-     * Run performance test for the specified method.
-     *
-     * @param instance the instance on which to invoke the method, may be {@code null} for static methods
-     * @param methodName the name of the method being profiled
-     * @param method the method to be profiled
-     * @param args the arguments to pass to the method, may be {@code null} or empty
-     * @param setUpForMethod the setup method to be executed before the profiled method, may be {@code null}
-     * @param tearDownForMethod the teardown method to be executed after the profiled method, may be {@code null}
-     * @param setUpForLoop the setup method to be executed before each loop iteration, may be {@code null}
-     * @param tearDownForLoop the teardown method to be executed after each loop iteration, may be {@code null}
-     * @param threadNum the number of threads to use for the performance test
-     * @param threadDelay the delay in milliseconds between starting each thread
-     * @param loopNum the number of loop iterations to execute in each thread
-     * @param loopDelay the delay in milliseconds between each loop iteration
-     * @return the performance statistics from multiple loop executions
-     */
     @SuppressWarnings("deprecation")
     private static MultiLoopsStatistics run(final Object instance, final String methodName, final Method method, final List<?> args,
             final Method setUpForMethod, final Method tearDownForMethod, final Method setUpForLoop, final Method tearDownForLoop, final int threadNum,
@@ -380,22 +363,6 @@ public final class Profiler {
         return new MultiLoopsStatistics(startTimeInMillis, endTimeInMillis, startTimeInNano, endTimeInNano, threadNum, loopStatisticsList);
     }
 
-    /**
-     * Execute the loop iterations for performance testing.
-     *
-     * @param instance the instance on which to invoke the method, may be {@code null} for static methods
-     * @param methodName the name of the method being profiled
-     * @param method the method to be profiled
-     * @param arg the argument to pass to the method, may be {@code null}
-     * @param setUpForMethod the setup method to be executed before the profiled method, may be {@code null}
-     * @param tearDownForMethod the teardown method to be executed after the profiled method, may be {@code null}
-     * @param setUpForLoop the setup method to be executed before each loop iteration, may be {@code null}
-     * @param tearDownForLoop the teardown method to be executed after each loop iteration, may be {@code null}
-     * @param loopNum the number of loop iterations to execute
-     * @param loopDelay the delay in milliseconds between each loop iteration
-     * @param loopStatisticsList the list to collect loop statistics, may not be {@code null}
-     * @param ps the PrintStream for output
-     */
     private static void runLoops(final Object instance, final String methodName, final Method method, final Object arg, final Method setUpForMethod,
             final Method tearDownForMethod, final Method setUpForLoop, final Method tearDownForLoop, final int loopNum, final long loopDelay,
             final List<LoopStatistics> loopStatisticsList, final PrintStream ps) {
@@ -498,13 +465,6 @@ public final class Profiler {
         return methodStatisticsList;
     }
 
-    /**
-     * Gets the method by name from the instance's class.
-     *
-     * @param instance the instance whose class will be searched for the method
-     * @param methodName the name of the method to find
-     * @return the Method object matching the given name
-     */
     @SuppressWarnings("deprecation")
     private static Method getMethod(final Object instance, final String methodName) {
         final Method method = ClassUtil.getDeclaredMethod(instance.getClass(), methodName);
@@ -578,7 +538,7 @@ public final class Profiler {
     interface Statistics {
 
         /**
-         * Gets the result of the execution, typically null for successful runs
+         * Gets the result of the execution, typically {@code null} for successful runs
          * or an Exception object if the execution failed.
          *
          * @return the execution result
@@ -779,21 +739,10 @@ public final class Profiler {
         /** The result. */
         private Object result;
 
-        /**
-         * Instantiates a new abstract statistics.
-         */
         protected AbstractStatistics() {
             this(0, 0, 0, 0);
         }
 
-        /**
-         * Instantiates a new abstract statistics.
-         *
-         * @param startTimeInMillis the start time in milliseconds since epoch
-         * @param endTimeInMillis the end time in milliseconds since epoch
-         * @param startTimeInNano the start time in nanoseconds
-         * @param endTimeInNano the end time in nanoseconds
-         */
         protected AbstractStatistics(final long startTimeInMillis, final long endTimeInMillis, final long startTimeInNano, final long endTimeInNano) {
             this.startTimeInMillis = startTimeInMillis;
             this.endTimeInMillis = endTimeInMillis;
@@ -801,111 +750,56 @@ public final class Profiler {
             this.endTimeInNano = endTimeInNano;
         }
 
-        /**
-         * Gets the start time in millis.
-         *
-         * @return the start time in milliseconds since epoch
-         */
         @Override
         public long getStartTimeInMillis() {
             return startTimeInMillis;
         }
 
-        /**
-         * Sets the start time in millis.
-         *
-         * @param startTimeInMillis the new start time in millis
-         */
         @Override
         public void setStartTimeInMillis(final long startTimeInMillis) {
             this.startTimeInMillis = startTimeInMillis;
         }
 
-        /**
-         * Gets the end time in millis.
-         *
-         * @return the end time in milliseconds since epoch
-         */
         @Override
         public long getEndTimeInMillis() {
             return endTimeInMillis;
         }
 
-        /**
-         * Sets the end time in millis.
-         *
-         * @param endTimeInMillis the new end time in millis
-         */
         @Override
         public void setEndTimeInMillis(final long endTimeInMillis) {
             this.endTimeInMillis = endTimeInMillis;
         }
 
-        /**
-         * Gets the start time in nano.
-         *
-         * @return the start time in nanoseconds
-         */
         @Override
         public long getStartTimeInNano() {
             return startTimeInNano;
         }
 
-        /**
-         * Sets the start time in nano.
-         *
-         * @param startTimeInNano the new start time in nano
-         */
         @Override
         public void setStartTimeInNano(final long startTimeInNano) {
             this.startTimeInNano = startTimeInNano;
         }
 
-        /**
-         * Gets the end time in nano.
-         *
-         * @return the end time in nanoseconds
-         */
         @Override
         public long getEndTimeInNano() {
             return endTimeInNano;
         }
 
-        /**
-         * Sets the end time in nano.
-         *
-         * @param endTimeInNano the new end time in nano
-         */
         @Override
         public void setEndTimeInNano(final long endTimeInNano) {
             this.endTimeInNano = endTimeInNano;
         }
 
-        /**
-         * Gets the elapsed time in millis.
-         *
-         * @return the elapsed time in milliseconds
-         */
         @Override
         public double getElapsedTimeInMillis() {
             return (endTimeInNano - startTimeInNano) / 1000000.0d; // convert to milliseconds.
         }
 
-        /**
-         * Gets the result.
-         *
-         * @return the result object
-         */
         @Override
         public Object getResult() {
             return result;
         }
 
-        /**
-         * Sets the result.
-         *
-         * @param result the new result
-         */
         @Override
         public void setResult(final Object result) {
             this.result = result;
@@ -986,21 +880,11 @@ public final class Profiler {
             return methodName;
         }
 
-        /**
-         * Gets the execution result.
-         *
-         * @return the result (null for success, Exception for failure)
-         */
         @Override
         public Object getResult() {
             return result;
         }
 
-        /**
-         * Sets the execution result.
-         *
-         * @param result the new result
-         */
         @Override
         public void setResult(final Object result) {
             this.result = result;
@@ -1076,11 +960,6 @@ public final class Profiler {
             this.methodStatisticsList = methodStatisticsList;
         }
 
-        /**
-         * Gets the method name list.
-         *
-         * @return the list of unique method names
-         */
         @Override
         public List<String> getMethodNameList() {
             final List<String> result = new ArrayList<>();
@@ -1124,11 +1003,6 @@ public final class Profiler {
             getMethodStatisticsList().add(methodStatistics);
         }
 
-        /**
-         * Gets the max elapsed time method.
-         *
-         * @return the method statistics with the maximum elapsed time
-         */
         @Override
         public MethodStatistics getMaxElapsedTimeMethod() {
             MethodStatistics result = null;
@@ -1142,11 +1016,6 @@ public final class Profiler {
             return result;
         }
 
-        /**
-         * Gets the min elapsed time method.
-         *
-         * @return the method statistics with the minimum elapsed time
-         */
         @Override
         public MethodStatistics getMinElapsedTimeMethod() {
             MethodStatistics result = null;
@@ -1238,11 +1107,6 @@ public final class Profiler {
             return (methodNum > 0) ? (totalTime / methodNum) : totalTime;
         }
 
-        /**
-         * Gets the total elapsed time in millis.
-         *
-         * @return the total elapsed time in milliseconds
-         */
         @Override
         public double getTotalElapsedTimeInMillis() {
             double result = 0;
@@ -1254,12 +1118,6 @@ public final class Profiler {
             return result;
         }
 
-        /**
-         * Gets the method size.
-         *
-         * @param methodName the name of the method
-         * @return the number of executions for the specified method
-         */
         @Override
         public int getMethodSize(final String methodName) {
             int methodSize = 0;
@@ -1273,12 +1131,6 @@ public final class Profiler {
             return methodSize;
         }
 
-        /**
-         * Gets the method statistics list.
-         *
-         * @param methodName the name of the method
-         * @return the list of method statistics for the specified method
-         */
         @Override
         public List<MethodStatistics> getMethodStatisticsList(final String methodName) {
             final List<MethodStatistics> result = new ArrayList<>(getMethodSize(methodName));
@@ -1292,12 +1144,6 @@ public final class Profiler {
             return result;
         }
 
-        /**
-         * Gets the failed method statistics list.
-         *
-         * @param methodName the name of the method
-         * @return the list of failed method statistics for the specified method
-         */
         @Override
         public List<MethodStatistics> getFailedMethodStatisticsList(final String methodName) {
             final List<MethodStatistics> result = new ArrayList<>();
@@ -1311,11 +1157,6 @@ public final class Profiler {
             return result;
         }
 
-        /**
-         * Gets the all failed method statistics list.
-         *
-         * @return the list of all failed method statistics
-         */
         @Override
         public List<MethodStatistics> getAllFailedMethodStatisticsList() {
             final List<MethodStatistics> result = new ArrayList<>();
@@ -1387,11 +1228,6 @@ public final class Profiler {
             return threadNum;
         }
 
-        /**
-         * Gets the method name list.
-         *
-         * @return the list of unique method names
-         */
         @Override
         public List<String> getMethodNameList() {
             List<String> result = null;
@@ -1433,11 +1269,6 @@ public final class Profiler {
             getLoopStatisticsList().add(loopStatistics);
         }
 
-        /**
-         * Gets the max elapsed time method.
-         *
-         * @return the method statistics with the maximum elapsed time
-         */
         @Override
         public MethodStatistics getMaxElapsedTimeMethod() {
             MethodStatistics result = null;
@@ -1454,11 +1285,6 @@ public final class Profiler {
             return result;
         }
 
-        /**
-         * Gets the min elapsed time method.
-         *
-         * @return the method statistics with the minimum elapsed time
-         */
         @Override
         public MethodStatistics getMinElapsedTimeMethod() {
             MethodStatistics result = null;
@@ -1551,11 +1377,6 @@ public final class Profiler {
             return (methodNum > 0) ? (totalTime / methodNum) : totalTime;
         }
 
-        /**
-         * Gets the total elapsed time in millis.
-         *
-         * @return the total elapsed time in milliseconds
-         */
         @Override
         public double getTotalElapsedTimeInMillis() {
             double result = 0;
@@ -1567,12 +1388,6 @@ public final class Profiler {
             return result;
         }
 
-        /**
-         * Gets the method size.
-         *
-         * @param methodName the name of the method
-         * @return the number of executions for the specified method
-         */
         @Override
         public int getMethodSize(final String methodName) {
             int result = 0;
@@ -1584,12 +1399,6 @@ public final class Profiler {
             return result;
         }
 
-        /**
-         * Gets the method statistics list.
-         *
-         * @param methodName the name of the method
-         * @return the list of method statistics for the specified method
-         */
         @Override
         public List<MethodStatistics> getMethodStatisticsList(final String methodName) {
             final List<MethodStatistics> methodStatisticsList = new ArrayList<>(getMethodSize(methodName));
@@ -1601,12 +1410,6 @@ public final class Profiler {
             return methodStatisticsList;
         }
 
-        /**
-         * Gets the failed method statistics list.
-         *
-         * @param methodName the name of the method
-         * @return the list of failed method statistics for the specified method
-         */
         @Override
         public List<MethodStatistics> getFailedMethodStatisticsList(final String methodName) {
             final List<MethodStatistics> result = new ArrayList<>();
@@ -1618,11 +1421,6 @@ public final class Profiler {
             return result;
         }
 
-        /**
-         * Gets the all failed method statistics list.
-         *
-         * @return the list of all failed method statistics
-         */
         @Override
         public List<MethodStatistics> getAllFailedMethodStatisticsList() {
             final List<MethodStatistics> result = new ArrayList<>();
@@ -1663,7 +1461,7 @@ public final class Profiler {
          * endTime:   2023-01-01 10:00:05
          * totalElapsedTime: 5000.000
          * 
-         * &lt;method name&gt;,  |avg time|, |min time|, |max time|, |0.01% &gt;=|, ...
+         * <method name>,  |avg time|, |min time|, |max time|, |0.01% >=|, ...
          * testMethod,     1.234,      0.123,      12.345,      10.234,     ...
          * }</pre>
          */

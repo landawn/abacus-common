@@ -51,6 +51,7 @@ import com.landawn.abacus.type.Type;
  * 
  * <h2>Supported Conversions:</h2>
  * <table border="1">
+ *   <caption>Supported type conversions between Java and JSON</caption>
  *   <tr><th>Java Type</th><th>JSON Type</th><th>Method</th></tr>
  *   <tr><td>Map&lt;String, ?&gt;</td><td>JSONObject</td><td>wrap(Map) / unwrap(JSONObject)</td></tr>
  *   <tr><td>JavaBean</td><td>JSONObject</td><td>wrap(Object) / unwrap(JSONObject, Class)</td></tr>
@@ -623,7 +624,7 @@ public final class JSONUtil {
      *   <li>JSON numbers → Integer, Long, or Double based on value</li>
      *   <li>JSON strings → String</li>
      *   <li>JSON booleans → Boolean</li>
-     *   <li>JSON null → null</li>
+     *   <li>JSON {@code null} → null</li>
      *   <li>JSON objects → Map&lt;String, Object&gt;</li>
      *   <li>JSON arrays → List&lt;Object&gt;</li>
      * </ul>
@@ -706,7 +707,7 @@ public final class JSONUtil {
      * </p>
      * <ul>
      *   <li>Object type defaults to List&lt;Object&gt;</li>
-     *   <li>Primitive arrays use default values for null elements</li>
+     *   <li>Primitive arrays use default values for {@code null} elements</li>
      *   <li>JSONObject.NULL is converted to Java null</li>
      * </ul>
      * 

@@ -14,6 +14,7 @@
 
 package com.landawn.abacus.util.function;
 
+import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.util.Throwables;
 
 /**
@@ -22,7 +23,7 @@ import com.landawn.abacus.util.Throwables;
  * 
  * <p>This is a functional interface whose functional method is {@link #apply(Object[])}.
  * 
- * <p>The 'N' in NFunction stands for 'N-ary', indicating that this function can accept
+ * <p>The 'N' in NFunction stands for <i>N-ary</i>, indicating that this function can accept
  * any number of arguments of the same type.
  * 
  * <p>The interface extends {@code Throwables.NFunction} with {@code RuntimeException} as the exception type,
@@ -74,6 +75,7 @@ public interface NFunction<T, R> extends Throwables.NFunction<T, R, RuntimeExcep
      */
     @SuppressWarnings("unchecked")
     @Override
+    @MayReturnNull
     R apply(T... args);
 
     /**

@@ -40,8 +40,9 @@ public class ClobReaderType extends ReaderType {
      *
      * @param rs the ResultSet containing the data
      * @param columnIndex the column index (1-based) of the CLOB value
-     * @return A Reader containing the character stream of the CLOB, or null if the column value is SQL NULL
+     * @return A Reader containing the character stream of the CLOB, or {@code null} if the column value is SQL NULL
      * @throws SQLException if a database access error occurs or the column index is invalid
+     @MayReturnNull
      */
     @Override
     public Reader get(final ResultSet rs, final int columnIndex) throws SQLException {
@@ -54,8 +55,9 @@ public class ClobReaderType extends ReaderType {
      *
      * @param rs the ResultSet containing the data
      * @param columnLabel the label of the column containing the CLOB value
-     * @return A Reader containing the character stream of the CLOB, or null if the column value is SQL NULL
+     * @return A Reader containing the character stream of the CLOB, or {@code null} if the column value is SQL NULL
      * @throws SQLException if a database access error occurs or the column label is not found
+     @MayReturnNull
      */
     @Override
     public Reader get(final ResultSet rs, final String columnLabel) throws SQLException {
@@ -68,7 +70,7 @@ public class ClobReaderType extends ReaderType {
      *
      * @param stmt the PreparedStatement in which to set the parameter
      * @param columnIndex the parameter index (1-based) to set
-     * @param x the Reader containing the character data. Can be null.
+     * @param x the Reader containing the character data. Can be {@code null}.
      * @throws SQLException if a database access error occurs or the parameter index is invalid
      */
     @Override
@@ -82,7 +84,7 @@ public class ClobReaderType extends ReaderType {
      *
      * @param stmt the CallableStatement in which to set the parameter
      * @param parameterName the name of the parameter to set
-     * @param x the Reader containing the character data. Can be null.
+     * @param x the Reader containing the character data. Can be {@code null}.
      * @throws SQLException if a database access error occurs or the parameter name is not found
      */
     @Override
@@ -96,7 +98,7 @@ public class ClobReaderType extends ReaderType {
      *
      * @param stmt the PreparedStatement in which to set the parameter
      * @param columnIndex the parameter index (1-based) to set
-     * @param x the Reader containing the character data. Can be null.
+     * @param x the Reader containing the character data. Can be {@code null}.
      * @param sqlTypeOrLength the number of characters to read from the Reader
      * @throws SQLException if a database access error occurs or the parameter index is invalid
      */
@@ -111,7 +113,7 @@ public class ClobReaderType extends ReaderType {
      *
      * @param stmt the CallableStatement in which to set the parameter
      * @param parameterName the name of the parameter to set
-     * @param x the Reader containing the character data. Can be null.
+     * @param x the Reader containing the character data. Can be {@code null}.
      * @param sqlTypeOrLength the number of characters to read from the Reader
      * @throws SQLException if a database access error occurs or the parameter name is not found
      */
@@ -124,8 +126,8 @@ public class ClobReaderType extends ReaderType {
      * Converts a CLOB to a character Reader.
      * This is a utility method used internally to extract character streams from CLOB objects.
      *
-     * @param clob the CLOB to convert. Can be null.
-     * @return A Reader for the CLOB's character stream, or null if the CLOB is null
+     * @param clob the CLOB to convert. Can be {@code null}.
+     * @return A Reader for the CLOB's character stream, or {@code null} if the CLOB is null
      * @throws SQLException if a database access error occurs while accessing the CLOB
      */
     static Reader clob2Reader(final Clob clob) throws SQLException {

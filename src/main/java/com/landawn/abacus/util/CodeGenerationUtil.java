@@ -33,7 +33,6 @@ import com.landawn.abacus.util.stream.Stream.StreamEx;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
 
 /**
@@ -127,7 +126,10 @@ public final class CodeGenerationUtil {
 
     private static final String LINE_SEPARATOR = IOUtil.LINE_SEPARATOR;
 
+    /** Identity property name converter that returns property names unchanged. */
     private static final BiFunction<Class<?>, String, String> identityPropNameConverter = (cls, propName) -> propName;
+
+    /** Comment string used to suppress SonarQube warnings. */
     public static final String NOSONAR_COMMENTS = " // NOSONAR";
 
     private CodeGenerationUtil() {
@@ -908,9 +910,12 @@ public final class CodeGenerationUtil {
      *     .build();
      * }</pre>
      */
+    /**
+     * Configuration class for property name table code generation.
+     * Contains settings for customizing the generated property name table class.
+     */
     @Builder
     @Data
-    @NoArgsConstructor
     @AllArgsConstructor
     @Accessors(chain = true)
     public static final class PropNameTableCodeConfig {
@@ -962,5 +967,12 @@ public final class CodeGenerationUtil {
         /** Map of function name to function implementation. The function receives entity class, property class, and property name,
          * and returns the function property name string. Return null to skip a property for that function. */
         private Map<String, TriFunction<Class<?>, Class<?>, String, String>> propFunctions;
+
+        /**
+         * Default constructor.
+         * Creates a new instance with default values for all fields.
+         */
+        public PropNameTableCodeConfig() {
+        }
     }
 }

@@ -50,7 +50,7 @@ public class EntityIdType extends AbstractType<EntityId> {
      * Indicates whether this type represents an EntityId.
      * Always returns {@code true} for EntityIdType.
      *
-     * @return true, as this type handler specifically handles EntityId objects
+     * @return {@code true}, as this type handler specifically handles EntityId objects
      */
     @Override
     public boolean isEntityId() {
@@ -61,7 +61,7 @@ public class EntityIdType extends AbstractType<EntityId> {
      * Indicates whether this EntityId type is serializable in the type system.
      * EntityIds require special JSON serialization handling.
      *
-     * @return false, indicating EntityIds are not simply serializable
+     * @return {@code false}, indicating EntityIds are not simply serializable
      */
     @Override
     public boolean isSerializable() {
@@ -82,8 +82,9 @@ public class EntityIdType extends AbstractType<EntityId> {
      * Converts an EntityId to its JSON string representation.
      * The EntityId is serialized with all its component fields.
      *
-     * @param x the EntityId to convert. Can be null.
-     * @return A JSON string representation of the EntityId, or null if input is null
+     * @param x the EntityId to convert. Can be {@code null}.
+     * @return A JSON string representation of the EntityId, or {@code null} if input is null
+     @MayReturnNull
      */
     @Override
     public String stringOf(final EntityId x) {
@@ -95,8 +96,9 @@ public class EntityIdType extends AbstractType<EntityId> {
      * The string should contain a valid JSON representation of an EntityId
      * with all required fields.
      *
-     * @param str the JSON string to parse. Can be null or empty.
-     * @return An EntityId parsed from the JSON string, or null if input is null/empty
+     * @param str the JSON string to parse. Can be {@code null} or empty.
+     * @return An EntityId parsed from the JSON string, or {@code null} if input is null/empty
+     @MayReturnNull
      */
     @Override
     public EntityId valueOf(final String str) {

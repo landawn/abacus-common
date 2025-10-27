@@ -14,6 +14,7 @@
 
 package com.landawn.abacus.util.function;
 
+import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.util.Throwables;
 
 /**
@@ -40,6 +41,7 @@ public interface ByteTriFunction<R> extends Throwables.ByteTriFunction<R, Runtim
      * @return the function result of type R
      */
     @Override
+    @MayReturnNull
     R apply(byte a, byte b, byte c);
 
     /**
@@ -49,7 +51,7 @@ public interface ByteTriFunction<R> extends Throwables.ByteTriFunction<R, Runtim
      * the caller of the composed function.
      *
      * @param <V> the type of output of the {@code after} function, and of the composed function
-     * @param after the function to apply after this function is applied. Must not be null.
+     * @param after the function to apply after this function is applied. Must not be {@code null}.
      * @return a composed function that first applies this function and then applies the
      *         {@code after} function
      */

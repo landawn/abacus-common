@@ -66,8 +66,14 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
 
     static final Random RAND = new SecureRandom();
 
+    /**
+     * The array buffer into which the elements of the DoubleList are stored.
+     */
     private double[] elementData = N.EMPTY_DOUBLE_ARRAY;
 
+    /**
+     * The size of the DoubleList (the number of elements it contains).
+     */
     private int size = 0;
 
     /**
@@ -100,7 +106,7 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      * Modifications to the list will directly affect the provided array.
      * The size of the list will be equal to the length of the array.
      *
-     * @param a the array to be used as the backing array for this list. Must not be null.
+     * @param a the array to be used as the backing array for this list. Must not be {@code null}.
      */
     public DoubleList(final double[] a) {
         this(N.requireNonNull(a), a.length);
@@ -108,11 +114,11 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
 
     /**
      * Constructs a DoubleList using the specified array as the backing array with a specific size.
-     * The array is used directly without copying. Only the first 'size' elements of the array
+     * The array is used directly without copying. Only the first <i>size</i> elements of the array
      * are considered part of the list. This constructor is useful when working with arrays
      * that are larger than the actual data they contain.
      *
-     * @param a the array to be used as the backing array for this list. Must not be null.
+     * @param a the array to be used as the backing array for this list. Must not be {@code null}.
      * @param size the number of elements in the list. Must be between 0 and a.length (inclusive).
      * @throws IndexOutOfBoundsException if size is negative or greater than a.length
      */
@@ -191,7 +197,7 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      *
      * @param element the double value to be repeated
      * @param len the number of times to repeat the element. Must be non-negative.
-     * @return a new DoubleList containing 'len' copies of the specified element
+     * @return a new DoubleList containing <i>len</i> copies of the specified element
      * @throws IllegalArgumentException if len is negative
      */
     public static DoubleList repeat(final double element, final int len) {
@@ -204,7 +210,7 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      * generated using a secure random number generator.
      *
      * @param len the number of random double values to generate. Must be non-negative.
-     * @return a new DoubleList containing 'len' random double values
+     * @return a new DoubleList containing <i>len</i> random double values
      * @throws IllegalArgumentException if len is negative
      */
     public static DoubleList random(final int len) {
@@ -349,7 +355,7 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      * @param index the index at which to insert the first element from the specified list
      * @param c the DoubleList containing elements to be inserted into this list
      * @return {@code true} if this list changed as a result of the call (i.e., if c was not empty)
-     * @throws IndexOutOfBoundsException if the index is out of range (index < 0 || index > size())
+     * @throws IndexOutOfBoundsException if the index is out of range (index &lt; 0 || index &gt; size())
      */
     @Override
     public boolean addAll(final int index, final DoubleList c) {
@@ -397,7 +403,7 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      * @param index the index at which to insert the first element from the specified array
      * @param a the array containing elements to be inserted into this list
      * @return {@code true} if this list changed as a result of the call (i.e., if the array was not empty)
-     * @throws IndexOutOfBoundsException if the index is out of range (index < 0 || index > size())
+     * @throws IndexOutOfBoundsException if the index is out of range (index &lt; 0 || index &gt; size())
      */
     @Override
     public boolean addAll(final int index, final double[] a) {
@@ -646,7 +652,7 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      * Performs a batch removal operation based on the specified collection and complement flag.
      *
      * @param c the collection of elements to check against
-     * @param complement if true, retain elements in c; if false, remove elements in c
+     * @param complement if {@code true}, retain elements in c; if {@code false}, remove elements in c
      * @return the number of elements removed
      */
     private int batchRemove(final DoubleList c, final boolean complement) {
@@ -687,7 +693,7 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      *
      * @param index the index of the element to be removed
      * @return the element that was removed from the list
-     * @throws IndexOutOfBoundsException if the index is out of range (index < 0 || index >= size())
+     * @throws IndexOutOfBoundsException if the index is out of range (index &lt; 0 || index &gt;= size())
      */
     public double delete(final int index) {
         rangeCheck(index);
@@ -730,7 +736,7 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      *
      * @param fromIndex the starting index of the range to be removed (inclusive)
      * @param toIndex the ending index of the range to be removed (exclusive)
-     * @throws IndexOutOfBoundsException if fromIndex < 0, toIndex > size(), or fromIndex > toIndex
+     * @throws IndexOutOfBoundsException if fromIndex &lt; 0, toIndex &gt; size(), or fromIndex &gt; toIndex
      */
     @Override
     public void deleteRange(final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
@@ -786,7 +792,7 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      * @param fromIndex the starting index of the range to be replaced (inclusive)
      * @param toIndex the ending index of the range to be replaced (exclusive)
      * @param replacement the DoubleList whose elements will replace the specified range
-     * @throws IndexOutOfBoundsException if fromIndex < 0, toIndex > size(), or fromIndex > toIndex
+     * @throws IndexOutOfBoundsException if fromIndex &lt; 0, toIndex &gt; size(), or fromIndex &gt; toIndex
      */
     @Override
     public void replaceRange(final int fromIndex, final int toIndex, final DoubleList replacement) throws IndexOutOfBoundsException {
@@ -826,7 +832,7 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      * @param fromIndex the starting index of the range to be replaced (inclusive)
      * @param toIndex the ending index of the range to be replaced (exclusive)
      * @param replacement the array whose elements will replace the specified range
-     * @throws IndexOutOfBoundsException if fromIndex < 0, toIndex > size(), or fromIndex > toIndex
+     * @throws IndexOutOfBoundsException if fromIndex &lt; 0, toIndex &gt; size(), or fromIndex &gt; toIndex
      */
     @Override
     public void replaceRange(final int fromIndex, final int toIndex, final double[] replacement) throws IndexOutOfBoundsException {
@@ -935,7 +941,7 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      * @param fromIndex the starting index of the range to fill (inclusive)
      * @param toIndex the ending index of the range to fill (exclusive)
      * @param val the value to fill the range with
-     * @throws IndexOutOfBoundsException if fromIndex < 0, toIndex > size(), or fromIndex > toIndex
+     * @throws IndexOutOfBoundsException if fromIndex &lt; 0, toIndex &gt; size(), or fromIndex &gt; toIndex
      */
     public void fill(final int fromIndex, final int toIndex, final double val) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex);
@@ -960,7 +966,7 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
 
     /**
      * Checks if this list contains any element from the specified DoubleList.
-     * Returns true if there is at least one element that appears in both lists.
+     * Returns {@code true} if there is at least one element that appears in both lists.
      *
      * @param c the DoubleList to check for common elements
      * @return {@code true} if this list contains any element from the specified list
@@ -976,7 +982,7 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
 
     /**
      * Checks if this list contains any element from the specified array.
-     * Returns true if there is at least one element that appears in both this list and the array.
+     * Returns {@code true} if there is at least one element that appears in both this list and the array.
      *
      * @param a the array to check for common elements
      * @return {@code true} if this list contains any element from the specified array
@@ -992,7 +998,7 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
 
     /**
      * Checks if this list contains all elements from the specified DoubleList.
-     * Returns true only if every element in the specified list is also present in this list.
+     * Returns {@code true} only if every element in the specified list is also present in this list.
      * The frequency of elements is not considered; only presence is checked.
      *
      * @param c the DoubleList to check for containment
@@ -1027,7 +1033,7 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
 
     /**
      * Checks if this list contains all elements from the specified array.
-     * Returns true only if every element in the specified array is also present in this list.
+     * Returns {@code true} only if every element in the specified array is also present in this list.
      * The frequency of elements is not considered; only presence is checked.
      *
      * @param a the array to check for containment
@@ -1046,7 +1052,7 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
 
     /**
      * Checks if this list and the specified DoubleList have no elements in common.
-     * Returns true if the two lists are disjoint (i.e., have no common elements).
+     * Returns {@code true} if the two lists are disjoint (i.e., have no common elements).
      *
      * @param c the DoubleList to check for disjointness
      * @return {@code true} if this list and the specified list have no elements in common
@@ -1078,7 +1084,7 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
 
     /**
      * Checks if this list and the specified array have no elements in common.
-     * Returns true if the list and array are disjoint (i.e., have no common elements).
+     * Returns {@code true} if the list and array are disjoint (i.e., have no common elements).
      *
      * @param b the array to check for disjointness
      * @return {@code true} if this list and the specified array have no elements in common
@@ -1180,7 +1186,7 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      * Returns a new list with the elements in this list but not in the specified list {@code b},
      * considering the number of occurrences of each element. If an element appears n times in this list
      * and m times in the specified list, the result will contain (n - m) occurrences of that element
-     * (or zero if m >= n). The order of elements from this list is preserved.
+     * (or zero if m &gt;= n). The order of elements from this list is preserved.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1227,7 +1233,7 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      * Returns a new list with the elements in this list but not in the specified array {@code b},
      * considering the number of occurrences of each element. If an element appears n times in this list
      * and m times in the specified array, the result will contain (n - m) occurrences of that element
-     * (or zero if m >= n). The order of elements from this list is preserved.
+     * (or zero if m &gt;= n). The order of elements from this list is preserved.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1479,7 +1485,7 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      * @param fromIndex the starting index of the range (inclusive)
      * @param toIndex the ending index of the range (exclusive)
      * @return an OptionalDouble containing the minimum element in the range, or empty if the range is empty
-     * @throws IndexOutOfBoundsException if fromIndex < 0, toIndex > size(), or fromIndex > toIndex
+     * @throws IndexOutOfBoundsException if fromIndex &lt; 0, toIndex &gt; size(), or fromIndex &gt; toIndex
      */
     public OptionalDouble min(final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex);
@@ -1506,7 +1512,7 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      * @param fromIndex the starting index of the range (inclusive)
      * @param toIndex the ending index of the range (exclusive)
      * @return an OptionalDouble containing the maximum element in the range, or empty if the range is empty
-     * @throws IndexOutOfBoundsException if fromIndex < 0, toIndex > size(), or fromIndex > toIndex
+     * @throws IndexOutOfBoundsException if fromIndex &lt; 0, toIndex &gt; size(), or fromIndex &gt; toIndex
      */
     public OptionalDouble max(final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex);
@@ -1552,7 +1558,7 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      * 
      * <p>This method iterates through all elements from index 0 to size-1.</p>
      *
-     * @param action the action to be performed for each element. Must not be null.
+     * @param action the action to be performed for each element. Must not be {@code null}.
      */
     public void forEach(final DoubleConsumer action) {
         forEach(0, size, action);
@@ -1560,7 +1566,7 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
 
     /**
      * Performs the given action for each element in the specified range of this list,
-     * in the order elements occur in the list (or reverse order if fromIndex > toIndex),
+     * in the order elements occur in the list (or reverse order if fromIndex &gt; toIndex),
      * until all elements have been processed or the action throws an exception.
      * 
      * <p>If {@code fromIndex <= toIndex}, iteration proceeds from fromIndex (inclusive)
@@ -1573,7 +1579,7 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      * @param fromIndex the index of the first element (inclusive) to be processed
      * @param toIndex the index of the last element (exclusive) to be processed,
      *                or -1 for reverse iteration to the beginning
-     * @param action the action to be performed for each element. Must not be null.
+     * @param action the action to be performed for each element. Must not be {@code null}.
      * @throws IndexOutOfBoundsException if fromIndex or toIndex is out of range
      *         ({@code fromIndex < 0 || toIndex > size() || (fromIndex > toIndex && toIndex != -1)})
      */
@@ -1875,7 +1881,7 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      * 
      * <p>If the list contains fewer than 2 elements, no shuffling is performed.</p>
      *
-     * @param rnd the source of randomness to use to shuffle the list. Must not be null.
+     * @param rnd the source of randomness to use to shuffle the list. Must not be {@code null}.
      */
     @Override
     public void shuffle(final Random rnd) {
@@ -2044,11 +2050,6 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
         return size == 0;
     }
 
-    /**
-     * Returns the number of elements in this list.
-     *
-     * @return the number of elements in this list
-     */
     @Override
     public int size() {
         return size;

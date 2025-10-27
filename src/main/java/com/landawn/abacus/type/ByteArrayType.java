@@ -45,11 +45,12 @@ public final class ByteArrayType extends ObjectArrayType<Byte> {
      * Null elements are represented as "null" in the output.
      *
      * @param x the Byte array to convert
-     * @return a string representation like "[1, 2, null]", or null if input is null,
+     * @return a string representation like "[1, 2, null]", or {@code null} if input is {@code null},
      *         or "[]" if the array is empty
      */
     @MayReturnNull
     @Override
+
     public String stringOf(final Byte[] x) {
         if (x == null) {
             return null; // NOSONAR
@@ -63,15 +64,16 @@ public final class ByteArrayType extends ObjectArrayType<Byte> {
     /**
      * Converts a string representation back to a Byte array.
      * Parses a string in the format "[1, 2, null]" into a Byte array.
-     * The string "null" (case-sensitive) is parsed as a null element.
+     * The string "null" (case-sensitive) is parsed as a {@code null} element.
      *
      * @param str the string to parse, expecting format like "[1, 2, null]"
-     * @return a Byte array parsed from the string, or null if str is null,
+     * @return a Byte array parsed from the string, or {@code null} if str is {@code null},
      *         or an empty array if str is empty or equals "[]"
-     * @throws NumberFormatException if any non-null element cannot be parsed as a byte
+     * @throws NumberFormatException if any {@code non-null} element cannot be parsed as a byte
      */
     @MayReturnNull
     @Override
+
     public Byte[] valueOf(final String str) {
         if (Strings.isEmpty(str) || Strings.isBlank(str)) {
             return null; // NOSONAR
@@ -102,7 +104,7 @@ public final class ByteArrayType extends ObjectArrayType<Byte> {
      *
      * @param rs the ResultSet to retrieve the value from
      * @param columnIndex the column index (1-based) of the byte array
-     * @return a Byte array boxed from the database byte[], or null if the value is SQL NULL
+     * @return a Byte array boxed from the database byte[], or {@code null} if the value is SQL NULL
      * @throws SQLException if a database access error occurs or the columnIndex is invalid
      */
     @Override
@@ -117,7 +119,7 @@ public final class ByteArrayType extends ObjectArrayType<Byte> {
      * @param rs the ResultSet to retrieve the value from
      * @param columnLabel the label for the column specified with the SQL AS clause,
      *                    or the column name if no AS clause was specified
-     * @return a Byte array boxed from the database byte[], or null if the value is SQL NULL
+     * @return a Byte array boxed from the database byte[], or {@code null} if the value is SQL NULL
      * @throws SQLException if a database access error occurs or the columnLabel is invalid
      */
     @Override

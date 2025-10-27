@@ -91,7 +91,7 @@ public final class Retry<T> {
      *   <li>An exception is thrown and the {@code retryCondition} bi-predicate evaluates to {@code true} for {@code null} result and the exception.</li>
      *   <li>A result is returned but the {@code retryCondition} bi-predicate evaluates to {@code true} for the result and {@code null} exception.</li>
      * </ul>
-     * This allows retrying based on both exceptional outcomes and unsatisfactory results.</p>
+     * This allows retrying based on both exceptional outcomes and unsatisfactory results.
      *
      * <p>Between retry attempts, the thread will sleep for the specified interval. If {@code retryIntervalInMillis} is 0,
      * retries will be executed immediately without delay.</p>
@@ -133,7 +133,6 @@ public final class Retry<T> {
      *   <li>If {@code retryCondition} is set, the operation is retried when the predicate returns {@code true} for the thrown exception.</li>
      *   <li>If {@code retryCondition2} is set, the operation is retried when the bi-predicate returns {@code true} for {@code null} result and the thrown exception.</li>
      * </ul>
-     * </p>
      *
      * <p><b>Usage Example:</b></p>
      * <pre>{@code
@@ -191,14 +190,13 @@ public final class Retry<T> {
      *   <li>An exception is thrown and the retry condition (based on the exception) is satisfied.</li>
      *   <li>The result is returned but {@code retryCondition2} evaluates to {@code true} for the result.</li>
      * </ul>
-     * Between retries, the thread will sleep for {@code retryIntervalInMillis} milliseconds if configured.</p>
+     * Between retries, the thread will sleep for {@code retryIntervalInMillis} milliseconds if configured.
      *
      * <p>The retry logic is controlled by the retry conditions specified during construction:
      * <ul>
      *   <li>If {@code retryCondition} is set, the operation is retried when the predicate returns {@code true} for the thrown exception.</li>
      *   <li>If {@code retryCondition2} is set, the operation is retried when the bi-predicate returns {@code true} for the result and/or exception.</li>
      * </ul>
-     * </p>
      *
      * <p><b>Usage Example:</b></p>
      * <pre>{@code

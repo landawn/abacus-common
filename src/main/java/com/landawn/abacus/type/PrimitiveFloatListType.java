@@ -75,10 +75,11 @@ public final class PrimitiveFloatListType extends AbstractPrimitiveListType<Floa
     /**
      * Converts a FloatList to its string representation.
      * The list is first converted to a float array, then serialized using the array type handler.
-     * Returns null if the input list is null.
+     * Returns {@code null} if the input list is {@code null}.
      *
      * @param x the FloatList to convert
-     * @return the string representation of the list, or null if input is null
+     * @return the string representation of the list, or {@code null} if input is null
+     @MayReturnNull
      */
     @Override
     public String stringOf(final FloatList x) {
@@ -88,10 +89,11 @@ public final class PrimitiveFloatListType extends AbstractPrimitiveListType<Floa
     /**
      * Parses a string representation and creates a FloatList.
      * The string is first parsed as a float array, then wrapped in a FloatList.
-     * Returns null if the input string is null or empty.
+     * Returns {@code null} if the input string is {@code null} or empty.
      *
      * @param str the string to parse
-     * @return a FloatList created from the parsed values, or null if input is null or empty
+     * @return a FloatList created from the parsed values, or {@code null} if input is {@code null} or empty
+     @MayReturnNull
      */
     @Override
     public FloatList valueOf(final String str) {
@@ -101,7 +103,7 @@ public final class PrimitiveFloatListType extends AbstractPrimitiveListType<Floa
     /**
      * Appends the string representation of a FloatList to an Appendable.
      * Delegates to the array type handler after converting the list to an array.
-     * Appends "null" if the list is null.
+     * Appends "null" if the list is {@code null}.
      *
      * @param appendable the Appendable to write to
      * @param x the FloatList to append
@@ -119,7 +121,7 @@ public final class PrimitiveFloatListType extends AbstractPrimitiveListType<Floa
     /**
      * Writes the character representation of a FloatList to a CharacterWriter.
      * Delegates to the array type handler after converting the list to an array.
-     * Writes "null" if the list is null.
+     * Writes "null" if the list is {@code null}.
      *
      * @param writer the CharacterWriter to write to
      * @param x the FloatList to write

@@ -21,6 +21,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Stack;
 
+import com.landawn.abacus.annotation.MayReturnNull;
+
 /**
  * General filename and filepath manipulation utilities.
  * 
@@ -101,21 +103,12 @@ public final class FilenameUtil {
         }
     }
 
-    /**
-     * Instances should NOT be constructed in standard programming.
-     */
     private FilenameUtil() {
         // singleton for utility class.
     }
 
     //-----------------------------------------------------------------------
 
-    /**
-     * Checks if the character is a separator.
-     *
-     * @param ch the character to check
-     * @return {@code true} if it is a separator character
-     */
     private static boolean isSeparator(final char ch) {
         return ch == UNIX_SEPARATOR || ch == WINDOWS_SEPARATOR;
     }
@@ -149,13 +142,14 @@ public final class FilenameUtil {
      * @param filename the filename to normalize, {@code null} returns null
      * @return the normalized filename, or {@code null} if invalid. Null bytes inside string will be removed
      */
+    @MayReturnNull
     public static String normalize(final String filename) {
         return doNormalize(filename, SYSTEM_SEPARATOR, true);
     }
 
     /**
      * Normalizes a path with control over the separator character.
-     * 
+     *
      * <p>This method normalizes a path to a standard format.
      * The input may contain separators in either Unix or Windows format.
      * The output will contain separators in the format specified.</p>
@@ -164,7 +158,7 @@ public final class FilenameUtil {
      * <pre>{@code
      * // Force Unix separators
      * FilenameUtil.normalize("C:\\foo\\bar", true);   // Returns "C:/foo/bar"
-     * 
+     *
      * // Force Windows separators
      * FilenameUtil.normalize("/foo/bar", false);      // Returns "\\foo\\bar"
      * }</pre>
@@ -174,6 +168,7 @@ public final class FilenameUtil {
      *                      {@code false} if a windows separator should be used
      * @return the normalized filename, or {@code null} if invalid. Null bytes inside string will be removed
      */
+    @MayReturnNull
     public static String normalize(final String filename, final boolean unixSeparator) {
         final char separator = unixSeparator ? UNIX_SEPARATOR : WINDOWS_SEPARATOR;
         return doNormalize(filename, separator, true);
@@ -199,6 +194,7 @@ public final class FilenameUtil {
      * @param filename the filename to normalize, {@code null} returns null
      * @return the normalized filename without trailing separator, or {@code null} if invalid
      */
+    @MayReturnNull
     public static String normalizeNoEndSeparator(final String filename) {
         return doNormalize(filename, SYSTEM_SEPARATOR, false);
     }
@@ -217,19 +213,12 @@ public final class FilenameUtil {
      *                      {@code false} if a windows separator should be used
      * @return the normalized filename without trailing separator, or {@code null} if invalid
      */
+    @MayReturnNull
     public static String normalizeNoEndSeparator(final String filename, final boolean unixSeparator) {
         final char separator = unixSeparator ? UNIX_SEPARATOR : WINDOWS_SEPARATOR;
         return doNormalize(filename, separator, false);
     }
 
-    /**
-     * Internal method to perform the normalization.
-     *
-     * @param filename the filename to normalize, may be {@code null}
-     * @param separator The separator character to use
-     * @param keepSeparator {@code true} to keep the final separator
-     * @return the normalized filename. Null bytes inside string will be removed.
-     */
     private static String doNormalize(final String filename, final char separator, final boolean keepSeparator) {
         if (filename == null) {
             return null;
@@ -345,6 +334,7 @@ public final class FilenameUtil {
      * @param fullFilenameToAdd the filename (or path) to attach to the base
      * @return the concatenated path, or {@code null} if invalid. Null bytes inside string will be removed
      */
+    @MayReturnNull
     public static String concat(final String basePath, final String fullFilenameToAdd) {
         final int prefix = getPrefixLength(fullFilenameToAdd);
         if (prefix < 0) {
@@ -375,9 +365,9 @@ public final class FilenameUtil {
      * 
      * <p>Edge cases:</p>
      * <ul>
-     * <li>A directory must not be null: if null, throws IllegalArgumentException</li>
+     * <li>A directory must not be null: if {@code null}, throws IllegalArgumentException</li>
      * <li>A directory does not contain itself: returns false</li>
-     * <li>A null child file is not contained in any parent: returns false</li>
+     * <li>A {@code null} child file is not contained in any parent: returns false</li>
      * </ul>
      *
      * <p><b>Usage Examples:</b></p>
@@ -463,6 +453,7 @@ public final class FilenameUtil {
      * @param path the path to be changed, {@code null} ignored
      * @return the updated path with system separators
      */
+    @MayReturnNull
     public static String separatorsToSystem(final String path) {
         if (path == null) {
             return null;
@@ -625,6 +616,7 @@ public final class FilenameUtil {
      * @param filename the filename to query, {@code null} returns null
      * @return the prefix of the file, {@code null} if invalid. Null bytes inside string will be removed
      */
+    @MayReturnNull
     public static String getPrefix(final String filename) {
         if (filename == null) {
             return null;
@@ -680,17 +672,11 @@ public final class FilenameUtil {
      *         {@code null} if invalid. Null bytes inside string will be removed
      * @see #getFullPathNoEndSeparator(String)
      */
+    @MayReturnNull
     public static String getPathNoEndSeparator(final String filename) {
         return doGetPath(filename, 0);
     }
 
-    /**
-     * Does the work of getting the path.
-     *
-     * @param filename the filename to query, may be {@code null}
-     * @param separatorAdd 0 to omit the end separator, 1 to return it
-     * @return the path. Null bytes inside string will be removed
-     */
     private static String doGetPath(final String filename, final int separatorAdd) {
         if (filename == null) {
             return null;
@@ -745,17 +731,11 @@ public final class FilenameUtil {
      * @return the path of the file without trailing separator, an empty string if none exists,
      *         {@code null} if invalid
      */
+    @MayReturnNull
     public static String getFullPathNoEndSeparator(final String filename) {
         return doGetFullPath(filename, false);
     }
 
-    /**
-     * Does the work of getting the path.
-     *
-     * @param filename the filename to query, may be {@code null}
-     * @param includeSeparator {@code true} to include the end separator
-     * @return the path
-     */
     private static String doGetFullPath(final String filename, final boolean includeSeparator) {
         if (filename == null) {
             return null;
@@ -799,6 +779,7 @@ public final class FilenameUtil {
      * @return the name of the file without the path, or an empty string if none exists.
      *         Null bytes inside string will be removed
      */
+    @MayReturnNull
     public static String getName(final String filename) {
         if (filename == null) {
             return null;

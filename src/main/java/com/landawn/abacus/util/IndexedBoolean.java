@@ -112,7 +112,7 @@ public final class IndexedBoolean extends AbstractIndexed {
      * Returns the hash code of this IndexedBoolean instance.
      * 
      * <p>The hash code is computed based on both the index and the value.
-     * The formula ensures that true and false values at the same index have different hash codes.</p>
+     * The formula ensures that {@code true} and {@code false} values at the same index have different hash codes.</p>
      *
      * @return the hash code
      */

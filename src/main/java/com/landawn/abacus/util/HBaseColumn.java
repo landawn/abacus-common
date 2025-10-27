@@ -229,7 +229,7 @@ public final class HBaseColumn<T> implements Comparable<HBaseColumn<T>> {
      *
      * @param <T> the type of the column value
      * @param value the column value
-     * @param cmp the comparator to use for sorting, or null to use DESC_HBASE_COLUMN_COMPARATOR
+     * @param cmp the comparator to use for sorting, or {@code null} to use DESC_HBASE_COLUMN_COMPARATOR
      * @return a SortedSet containing the HBaseColumn
      */
     public static <T> SortedSet<HBaseColumn<T>> asSortedSet(final T value, final Comparator<HBaseColumn<?>> cmp) {
@@ -260,7 +260,7 @@ public final class HBaseColumn<T> implements Comparable<HBaseColumn<T>> {
      * @param <T> the type of the column value
      * @param value the column value
      * @param version the version timestamp
-     * @param cmp the comparator to use for sorting, or null to use DESC_HBASE_COLUMN_COMPARATOR
+     * @param cmp the comparator to use for sorting, or {@code null} to use DESC_HBASE_COLUMN_COMPARATOR
      * @return a SortedSet containing the HBaseColumn
      */
     public static <T> SortedSet<HBaseColumn<T>> asSortedSet(final T value, final long version, final Comparator<HBaseColumn<?>> cmp) {
@@ -318,7 +318,7 @@ public final class HBaseColumn<T> implements Comparable<HBaseColumn<T>> {
      *
      * @param <T> the type of the column value
      * @param value the column value
-     * @param cmp the comparator for sorting versions, or null to use DESC_HBASE_VERSION_COMPARATOR
+     * @param cmp the comparator for sorting versions, or {@code null} to use DESC_HBASE_VERSION_COMPARATOR
      * @return a SortedMap with version as key and HBaseColumn as value
      */
     public static <T> SortedMap<Long, HBaseColumn<T>> asSortedMap(final T value, final Comparator<Long> cmp) {
@@ -350,7 +350,7 @@ public final class HBaseColumn<T> implements Comparable<HBaseColumn<T>> {
      * @param <T> the type of the column value
      * @param value the column value
      * @param version the version timestamp
-     * @param cmp the comparator for sorting versions, or null to use DESC_HBASE_VERSION_COMPARATOR
+     * @param cmp the comparator for sorting versions, or {@code null} to use DESC_HBASE_VERSION_COMPARATOR
      * @return a SortedMap with version as key and HBaseColumn as value
      */
     public static <T> SortedMap<Long, HBaseColumn<T>> asSortedMap(final T value, final long version, final Comparator<Long> cmp) {
@@ -390,10 +390,10 @@ public final class HBaseColumn<T> implements Comparable<HBaseColumn<T>> {
     }
 
     /**
-     * Checks if this HBaseColumn is null (empty).
-     * An HBaseColumn is considered null if:
+     * Checks if this HBaseColumn is {@code null} (empty).
+     * An HBaseColumn is considered {@code null} if:
      * <ul>
-     * <li>Both value is null and version is 0, or</li>
+     * <li>Both value is {@code null} and version is 0, or</li>
      * <li>It is one of the predefined empty column constants</li>
      * </ul>
      *

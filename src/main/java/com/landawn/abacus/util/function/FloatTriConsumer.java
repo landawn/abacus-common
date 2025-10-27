@@ -51,7 +51,7 @@ public interface FloatTriConsumer extends Throwables.FloatTriConsumer<RuntimeExc
      * composed operation. If performing this operation throws an exception,
      * the {@code after} operation will not be performed.
      *
-     * @param after the operation to perform after this operation. Must not be null.
+     * @param after the operation to perform after this operation. Must not be {@code null}.
      * @return a composed {@code FloatTriConsumer} that performs in sequence this
      *         operation followed by the {@code after} operation
      */

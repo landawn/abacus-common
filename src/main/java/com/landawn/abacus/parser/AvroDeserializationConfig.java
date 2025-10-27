@@ -16,6 +16,7 @@ package com.landawn.abacus.parser;
 
 import org.apache.avro.Schema;
 
+import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.annotation.SuppressFBWarnings;
 import com.landawn.abacus.util.N;
 
@@ -52,8 +53,9 @@ public class AvroDeserializationConfig extends DeserializationConfig<AvroDeseria
      * Gets the Avro schema used for deserialization.
      * The schema defines the expected structure of the data to be deserialized.
      *
-     * @return the Avro schema, or null if not set
+     * @return the Avro schema, or {@code null} if not set
      */
+    @MayReturnNull
     public Schema getSchema() {
         return schema;
     }
@@ -128,6 +130,14 @@ public class AvroDeserializationConfig extends DeserializationConfig<AvroDeseria
      * }</pre>
      */
     public static final class ADC extends AvroDeserializationConfig {
+
+        /**
+         * Private constructor to prevent instantiation.
+         * Use the static factory method {@link #create()} instead.
+         */
+        private ADC() {
+            // Private constructor
+        }
 
         /**
          * Creates a new instance of AvroDeserializationConfig with default settings.

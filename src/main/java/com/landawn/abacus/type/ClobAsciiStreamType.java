@@ -49,7 +49,7 @@ public class ClobAsciiStreamType extends InputStreamType {
      *
      * @param rs the ResultSet containing the data
      * @param columnIndex the column index (1-based) of the CLOB value
-     * @return An InputStream containing the ASCII representation of the CLOB, or null if the column value is SQL NULL
+     * @return An InputStream containing the ASCII representation of the CLOB, or {@code null} if the column value is SQL NULL
      * @throws SQLException if a database access error occurs or the column index is invalid
      */
     @Override
@@ -63,7 +63,7 @@ public class ClobAsciiStreamType extends InputStreamType {
      *
      * @param rs the ResultSet containing the data
      * @param columnLabel the label of the column containing the CLOB value
-     * @return An InputStream containing the ASCII representation of the CLOB, or null if the column value is SQL NULL
+     * @return An InputStream containing the ASCII representation of the CLOB, or {@code null} if the column value is SQL NULL
      * @throws SQLException if a database access error occurs or the column label is not found
      */
     @Override
@@ -77,7 +77,7 @@ public class ClobAsciiStreamType extends InputStreamType {
      *
      * @param stmt the PreparedStatement in which to set the parameter
      * @param columnIndex the parameter index (1-based) to set
-     * @param x the ASCII InputStream to set. Can be null.
+     * @param x the ASCII InputStream to set. Can be {@code null}.
      * @throws SQLException if a database access error occurs or the parameter index is invalid
      */
     @Override
@@ -91,7 +91,7 @@ public class ClobAsciiStreamType extends InputStreamType {
      *
      * @param stmt the CallableStatement in which to set the parameter
      * @param parameterName the name of the parameter to set
-     * @param x the ASCII InputStream to set. Can be null.
+     * @param x the ASCII InputStream to set. Can be {@code null}.
      * @throws SQLException if a database access error occurs or the parameter name is not found
      */
     @Override
@@ -105,7 +105,7 @@ public class ClobAsciiStreamType extends InputStreamType {
      *
      * @param stmt the PreparedStatement in which to set the parameter
      * @param columnIndex the parameter index (1-based) to set
-     * @param x the ASCII InputStream to set. Can be null.
+     * @param x the ASCII InputStream to set. Can be {@code null}.
      * @param sqlTypeOrLength the length of the stream in bytes
      * @throws SQLException if a database access error occurs or the parameter index is invalid
      */
@@ -120,7 +120,7 @@ public class ClobAsciiStreamType extends InputStreamType {
      *
      * @param stmt the CallableStatement in which to set the parameter
      * @param parameterName the name of the parameter to set
-     * @param x the ASCII InputStream to set. Can be null.
+     * @param x the ASCII InputStream to set. Can be {@code null}.
      * @param sqlTypeOrLength the length of the stream in bytes
      * @throws SQLException if a database access error occurs or the parameter name is not found
      */
@@ -135,7 +135,7 @@ public class ClobAsciiStreamType extends InputStreamType {
      * Otherwise, the entire stream is read into a string first.
      *
      * @param appendable the Appendable to write to
-     * @param x the ASCII InputStream to append. Can be null.
+     * @param x the ASCII InputStream to append. Can be {@code null}.
      * @throws IOException if an I/O error occurs during reading or writing
      */
     @Override
@@ -157,8 +157,8 @@ public class ClobAsciiStreamType extends InputStreamType {
      * If serialization config specifies string quotation, the content is wrapped in quotes.
      *
      * @param writer the CharacterWriter to write to
-     * @param t the ASCII InputStream to write. Can be null.
-     * @param config the serialization configuration for quotation settings. Can be null.
+     * @param t the ASCII InputStream to write. Can be {@code null}.
+     * @param config the serialization configuration for quotation settings. Can be {@code null}.
      * @throws IOException if an I/O error occurs during reading or writing
      */
     @Override
@@ -195,8 +195,8 @@ public class ClobAsciiStreamType extends InputStreamType {
      * Converts a CLOB to an ASCII InputStream.
      * This is a utility method used internally to extract ASCII streams from CLOB objects.
      *
-     * @param clob the CLOB to convert. Can be null.
-     * @return An ASCII InputStream from the CLOB, or null if the CLOB is null
+     * @param clob the CLOB to convert. Can be {@code null}.
+     * @return An ASCII InputStream from the CLOB, or {@code null} if the CLOB is null
      * @throws SQLException if a database access error occurs while accessing the CLOB
      */
     static InputStream clob2AsciiStream(final Clob clob) throws SQLException {

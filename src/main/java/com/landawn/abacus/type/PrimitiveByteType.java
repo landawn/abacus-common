@@ -46,7 +46,7 @@ public final class PrimitiveByteType extends AbstractByteType {
      * Indicates whether this type represents a primitive type.
      * Always returns {@code true} for PrimitiveByteType.
      *
-     * @return true, as this type handler is for primitive byte
+     * @return {@code true}, as this type handler is for primitive byte
      */
     @Override
     public boolean isPrimitiveType() {

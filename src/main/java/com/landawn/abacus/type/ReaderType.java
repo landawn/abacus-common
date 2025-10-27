@@ -94,7 +94,7 @@ public class ReaderType extends AbstractType<Reader> {
 
     /**
      * Indicates whether this type represents a Reader.
-     * For ReaderType, this always returns true.
+     * For ReaderType, this always returns {@code true}.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -103,7 +103,7 @@ public class ReaderType extends AbstractType<Reader> {
      * System.out.println(isReader); // Output: true
      * }</pre>
      *
-     * @return true, indicating this is a Reader type
+     * @return {@code true}, indicating this is a Reader type
      */
     @Override
     public boolean isReader() {
@@ -126,10 +126,12 @@ public class ReaderType extends AbstractType<Reader> {
      * }</pre>
      *
      * @param x the Reader to convert to string
-     * @return the string containing all content read from the Reader, or null if the input is null
+     * @return the string containing all content read from the Reader, or {@code null} if the input is null
      * @throws UncheckedIOException if an I/O error occurs while reading from the Reader
      */
+    @MayReturnNull
     @Override
+
     public String stringOf(final Reader x) {
         return x == null ? null : IOUtil.readAllToString(x);
     }
@@ -151,11 +153,12 @@ public class ReaderType extends AbstractType<Reader> {
      * }</pre>
      *
      * @param str the string to create a Reader from
-     * @return a Reader containing the string content, or null if the input string is null
+     * @return a Reader containing the string content, or {@code null} if the input string is null
      * @throws RuntimeException if the constructor invocation fails
      */
     @MayReturnNull
     @Override
+
     public Reader valueOf(final String str) {
         if (str == null) {
             return null; // NOSONAR
@@ -192,7 +195,7 @@ public class ReaderType extends AbstractType<Reader> {
      * }</pre>
      *
      * @param obj the object to convert to a Reader
-     * @return a Reader representation of the object, or null if the input is null
+     * @return a Reader representation of the object, or {@code null} if the input is null
      * @throws UncheckedSQLException if accessing the Clob's character stream fails
      */
     @MayReturnNull
@@ -226,10 +229,12 @@ public class ReaderType extends AbstractType<Reader> {
      *
      * @param rs the ResultSet to read from
      * @param columnIndex the 1-based index of the column to retrieve
-     * @return the Reader for the specified column, or null if the column value is SQL NULL
+     * @return the Reader for the specified column, or {@code null} if the column value is SQL NULL
      * @throws SQLException if a database access error occurs or the column index is invalid
      */
+    @MayReturnNull
     @Override
+
     public Reader get(final ResultSet rs, final int columnIndex) throws SQLException {
         return rs.getCharacterStream(columnIndex);
     }
@@ -248,9 +253,10 @@ public class ReaderType extends AbstractType<Reader> {
      *
      * @param rs the ResultSet to read from
      * @param columnLabel the label of the column to retrieve (column name or alias)
-     * @return the Reader for the specified column, or null if the column value is SQL NULL
+     * @return the Reader for the specified column, or {@code null} if the column value is SQL NULL
      * @throws SQLException if a database access error occurs or the column label is not found
      */
+    @MayReturnNull
     @Override
     public Reader get(final ResultSet rs, final String columnLabel) throws SQLException {
         return rs.getCharacterStream(columnLabel);

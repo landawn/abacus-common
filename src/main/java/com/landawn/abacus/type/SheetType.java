@@ -14,6 +14,7 @@
 
 package com.landawn.abacus.type;
 
+import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.util.ClassUtil;
 import com.landawn.abacus.util.Sheet;
 import com.landawn.abacus.util.Strings;
@@ -56,7 +57,8 @@ public class SheetType<R, C, E> extends AbstractType<Sheet<R, C, E>> {
      * Returns the declaring name of this type, which includes the Sheet class name
      * and its parameterized types in angle brackets using declaring names.
      *
-     * @return the declaring name in the format "Sheet<RowType, ColumnType, ElementType>"
+     * @return the declaring name in the format "Sheet&lt;RowType, ColumnType, ElementType&gt;"
+     @MayReturnNull
      */
     @Override
     public String declaringName() {
@@ -88,7 +90,7 @@ public class SheetType<R, C, E> extends AbstractType<Sheet<R, C, E>> {
      * Indicates whether this type is a generic type.
      * SheetType is always generic as it is parameterized with three type parameters.
      *
-     * @return true, indicating this is a generic type
+     * @return {@code true}, indicating this is a generic type
      */
     @Override
     public boolean isGenericType() {
@@ -99,18 +101,15 @@ public class SheetType<R, C, E> extends AbstractType<Sheet<R, C, E>> {
      * Indicates whether this type is serializable.
      * SheetType does not support standard serialization.
      *
-     * @return false, indicating this type is not serializable
+     * @return {@code false}, indicating this type is not serializable
      */
     @Override
     public boolean isSerializable() {
         return false;
     }
 
-    /**
-     * Returns the serialization type for Sheet objects.
-     *
-     * @return SerializationType.SHEET
-     */
+    @MayReturnNull
+
     @Override
     public SerializationType getSerializationType() {
         return SerializationType.SHEET;
@@ -121,8 +120,9 @@ public class SheetType<R, C, E> extends AbstractType<Sheet<R, C, E>> {
      * The sheet structure is serialized maintaining the row-column-value relationships.
      *
      * @param x the Sheet to convert to string
-     * @return the JSON string representation of the sheet, or null if the input is null
+     * @return the JSON string representation of the sheet, or {@code null} if the input is null
      */
+    @MayReturnNull
     @SuppressWarnings("rawtypes")
     @Override
     public String stringOf(final Sheet x) {
@@ -134,9 +134,10 @@ public class SheetType<R, C, E> extends AbstractType<Sheet<R, C, E>> {
      * The string should represent a valid sheet structure with row keys, column keys, and values.
      *
      * @param str the JSON string to parse
-     * @return the parsed Sheet object, or null if the input string is null or empty
+     * @return the parsed Sheet object, or {@code null} if the input string is {@code null} or empty
      * @throws IllegalArgumentException if the string cannot be parsed as a valid Sheet structure
      */
+    @MayReturnNull
     @SuppressWarnings("rawtypes")
     @Override
     public Sheet valueOf(final String str) {

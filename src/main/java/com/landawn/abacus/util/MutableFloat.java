@@ -49,6 +49,9 @@ public final class MutableFloat extends Number implements Comparable<MutableFloa
     @Serial
     private static final long serialVersionUID = 5787169186L;
 
+    /**
+     * The mutable float value.
+     */
     private float value;
 
     /**
@@ -201,8 +204,8 @@ public final class MutableFloat extends Number implements Comparable<MutableFloa
     }
 
     /**
-     * Sets the value to newValue if the predicate evaluates to true for the current value.
-     * If the predicate returns false, the value remains unchanged.
+     * Sets the value to newValue if the predicate evaluates to {@code true} for the current value.
+     * If the predicate returns {@code false}, the value remains unchanged.
      *
      * <p>This method provides conditional update functionality, useful for implementing
      * business rules, validation, or state machine transitions.</p>
@@ -503,21 +506,11 @@ public final class MutableFloat extends Number implements Comparable<MutableFloa
         return (long) value;
     }
 
-    /**
-     * Returns the value of this MutableFloat as a float.
-     * 
-     * @return the float value
-     */
     @Override
     public float floatValue() {
         return value;
     }
 
-    /**
-     * Returns the value of this MutableFloat as a double.
-     * 
-     * @return the value as a double
-     */
     @Override
     public double doubleValue() {
         return value;

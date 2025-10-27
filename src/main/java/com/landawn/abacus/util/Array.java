@@ -89,10 +89,10 @@ public abstract sealed class Array permits Array.ArrayUtil {
      *
      * <p>This method uses {@link java.lang.reflect.Array#getLength(Object)} to determine the length of the array.
      * The array can be an object array or a primitive array.
-     * If the array is null, this method returns 0.
+     * If the array is {@code null}, this method returns 0.
      *
      * @param array the array whose length is to be determined.
-     * @return the length of the array, or 0 if the array is null.
+     * @return the length of the array, or 0 if the array is {@code null}.
      * @throws IllegalArgumentException if the provided object is not an array.
      * @see java.lang.reflect.Array#getLength(Object)
      */
@@ -520,7 +520,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * otherwise an immutable/unmodifiable empty list is returned.
      *
      * <p>This method provides a null-safe wrapper around {@link Arrays#asList(Object...)} that
-     * handles empty and null arrays gracefully by returning an empty list instead of a list
+     * handles empty and {@code null} arrays gracefully by returning an empty list instead of a list
      * backed by an empty array. This can help avoid potential issues with list operations
      * on empty arrays.</p>
      *
@@ -528,7 +528,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * <ul>
      *   <li>Fixed-size - cannot be resized (no add/remove operations)</li>
      *   <li>Backed by the original array - changes to the list affect the array and vice versa</li>
-     *   <li>Immutable empty list if the input array is null or empty</li>
+     *   <li>Immutable empty list if the input array is {@code null} or empty</li>
      * </ul>
      *
      * <p><b>Usage Examples:</b></p>
@@ -545,8 +545,8 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * }</pre>
      *
      * @param <T> the type of elements in the array and returned list
-     * @param a the array to be converted to a list. Can be null or empty.
-     * @return a fixed-size list backed by the specified array, or an empty list if the array is null or empty
+     * @param a the array to be converted to a list. Can be {@code null} or empty.
+     * @return a fixed-size list backed by the specified array, or an empty list if the array is {@code null} or empty
      * @see Arrays#asList(Object...)
      * @see N#asList(Object...)
      * @see List#of(Object...)
@@ -797,7 +797,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
      *
      * @param startInclusive the first integer (inclusive) in the integer array.
      * @param endExclusive the upper bound (exclusive) of the integer array.
-     * @return an integer array containing integers from <i>startInclusive</i> to <i>endExclusive</i>, or an empty array if startInclusive >= endExclusive.
+     * @return an integer array containing integers from <i>startInclusive</i> to <i>endExclusive</i>, or an empty array if startInclusive &gt;= endExclusive.
      * @throws IllegalArgumentException if the range size exceeds Integer.MAX_VALUE (overflow detected).
      */
     public static int[] range(int startInclusive, final int endExclusive) {
@@ -826,7 +826,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
      *
      * @param startInclusive the first long integer (inclusive) in the long array.
      * @param endExclusive the upper bound (exclusive) of the long array.
-     * @return a long array containing long integers from <i>startInclusive</i> to <i>endExclusive</i>, or an empty array if startInclusive >= endExclusive.
+     * @return a long array containing long integers from <i>startInclusive</i> to <i>endExclusive</i>, or an empty array if startInclusive &gt;= endExclusive.
      * @throws IllegalArgumentException if the range size is negative or exceeds Integer.MAX_VALUE (overflow detected).
      */
     public static long[] range(long startInclusive, final long endExclusive) {
@@ -2137,8 +2137,8 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * The type of the array is determined by the type of <i>element</i>.
      *
      * <p>This method provides a clearer alternative to the deprecated {@link Array#repeat(Object, int)} method
-     * by explicitly indicating in its name that null elements are not allowed. Unlike the deprecated method which
-     * may throw NullPointerException, this method consistently throws IllegalArgumentException for null elements.</p>
+     * by explicitly indicating in its name that {@code null} elements are not allowed. Unlike the deprecated method which
+     * may throw NullPointerException, this method consistently throws IllegalArgumentException for {@code null} elements.</p>
      *
      * @param <T> the type of the elements in the array.
      * @param element the value to be repeated in the array. Must not be {@code null}.
@@ -2244,7 +2244,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
      *   <li>If neither array has a row at that index (both are null), the result row is an empty array</li>
      * </ul>
      *
-     * <p>The operation creates a new array and does not modify the input arrays. Both input arrays can be null or empty,
+     * <p>The operation creates a new array and does not modify the input arrays. Both input arrays can be {@code null} or empty,
      * which will be handled gracefully.
      *
      * <p><b>Usage Examples:</b></p>
@@ -2272,8 +2272,8 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * // result = new boolean[0][]
      * }</pre>
      *
-     * @param a the first 2D boolean array to concatenate. Can be null or empty, in which case a clone of {@code b} is returned (or an empty array if both are null/empty).
-     * @param b the second 2D boolean array to concatenate. Can be null or empty, in which case a clone of {@code a} is returned (or an empty array if both are null/empty).
+     * @param a the first 2D boolean array to concatenate. Can be {@code null} or empty, in which case a clone of {@code b} is returned (or an empty array if both are null/empty).
+     * @param b the second 2D boolean array to concatenate. Can be {@code null} or empty, in which case a clone of {@code a} is returned (or an empty array if both are null/empty).
      * @return a new 2D boolean array containing the element-wise concatenation of the input arrays. The length equals max(a.length, b.length).
      *         Each row in the result is the concatenation of the corresponding rows from {@code a} and {@code b}.
      */
@@ -2305,7 +2305,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
      *   <li>If neither array has a layer at that index (both are null), the result layer is an empty 2D array</li>
      * </ul>
      *
-     * <p>The operation creates a new array and does not modify the input arrays. Both input arrays can be null or empty,
+     * <p>The operation creates a new array and does not modify the input arrays. Both input arrays can be {@code null} or empty,
      * which will be handled gracefully.
      *
      * <p><b>Usage Examples:</b></p>
@@ -2333,8 +2333,8 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * // result = new boolean[0][][]
      * }</pre>
      *
-     * @param a the first 3D boolean array to concatenate. Can be null or empty, in which case a clone of {@code b} is returned (or an empty array if both are null/empty).
-     * @param b the second 3D boolean array to concatenate. Can be null or empty, in which case a clone of {@code a} is returned (or an empty array if both are null/empty).
+     * @param a the first 3D boolean array to concatenate. Can be {@code null} or empty, in which case a clone of {@code b} is returned (or an empty array if both are null/empty).
+     * @param b the second 3D boolean array to concatenate. Can be {@code null} or empty, in which case a clone of {@code a} is returned (or an empty array if both are null/empty).
      * @return a new 3D boolean array containing the element-wise concatenation of the input arrays. The length equals max(a.length, b.length).
      *         Each 2D layer in the result is the concatenation of the corresponding layers from {@code a} and {@code b}.
      */
@@ -2366,7 +2366,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
      *   <li>If neither array has a row at that index (both are null), the result row is an empty array</li>
      * </ul>
      *
-     * <p>The operation creates a new array and does not modify the input arrays. Both input arrays can be null or empty,
+     * <p>The operation creates a new array and does not modify the input arrays. Both input arrays can be {@code null} or empty,
      * which will be handled gracefully.
      *
      * <p><b>Usage Examples:</b></p>
@@ -2394,8 +2394,8 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * // result = new char[0][]
      * }</pre>
      *
-     * @param a the first 2D char array to concatenate. Can be null or empty, in which case a clone of {@code b} is returned (or an empty array if both are null/empty).
-     * @param b the second 2D char array to concatenate. Can be null or empty, in which case a clone of {@code a} is returned (or an empty array if both are null/empty).
+     * @param a the first 2D char array to concatenate. Can be {@code null} or empty, in which case a clone of {@code b} is returned (or an empty array if both are null/empty).
+     * @param b the second 2D char array to concatenate. Can be {@code null} or empty, in which case a clone of {@code a} is returned (or an empty array if both are null/empty).
      * @return a new 2D char array containing the element-wise concatenation of the input arrays. The length equals max(a.length, b.length).
      *         Each row in the result is the concatenation of the corresponding rows from {@code a} and {@code b}.
      */
@@ -2427,7 +2427,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
      *   <li>If neither array has a layer at that index (both are null), the result layer is an empty 2D array</li>
      * </ul>
      *
-     * <p>The operation creates a new array and does not modify the input arrays. Both input arrays can be null or empty,
+     * <p>The operation creates a new array and does not modify the input arrays. Both input arrays can be {@code null} or empty,
      * which will be handled gracefully.
      *
      * <p><b>Usage Examples:</b></p>
@@ -2455,8 +2455,8 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * // result = new char[0][][]
      * }</pre>
      *
-     * @param a the first 3D char array to concatenate. Can be null or empty, in which case a clone of {@code b} is returned (or an empty array if both are null/empty).
-     * @param b the second 3D char array to concatenate. Can be null or empty, in which case a clone of {@code a} is returned (or an empty array if both are null/empty).
+     * @param a the first 3D char array to concatenate. Can be {@code null} or empty, in which case a clone of {@code b} is returned (or an empty array if both are null/empty).
+     * @param b the second 3D char array to concatenate. Can be {@code null} or empty, in which case a clone of {@code a} is returned (or an empty array if both are null/empty).
      * @return a new 3D char array containing the element-wise concatenation of the input arrays. The length equals max(a.length, b.length).
      *         Each 2D layer in the result is the concatenation of the corresponding layers from {@code a} and {@code b}.
      */
@@ -2488,7 +2488,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
      *   <li>If neither array has a row at that index (both are null), the result row is an empty array</li>
      * </ul>
      *
-     * <p>The operation creates a new array and does not modify the input arrays. Both input arrays can be null or empty,
+     * <p>The operation creates a new array and does not modify the input arrays. Both input arrays can be {@code null} or empty,
      * which will be handled gracefully.
      *
      * <p><b>Usage Examples:</b></p>
@@ -2516,8 +2516,8 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * // result = new byte[0][]
      * }</pre>
      *
-     * @param a the first 2D byte array to concatenate. Can be null or empty, in which case a clone of {@code b} is returned (or an empty array if both are null/empty).
-     * @param b the second 2D byte array to concatenate. Can be null or empty, in which case a clone of {@code a} is returned (or an empty array if both are null/empty).
+     * @param a the first 2D byte array to concatenate. Can be {@code null} or empty, in which case a clone of {@code b} is returned (or an empty array if both are null/empty).
+     * @param b the second 2D byte array to concatenate. Can be {@code null} or empty, in which case a clone of {@code a} is returned (or an empty array if both are null/empty).
      * @return a new 2D byte array containing the element-wise concatenation of the input arrays. The length equals max(a.length, b.length).
      *         Each row in the result is the concatenation of the corresponding rows from {@code a} and {@code b}.
      */
@@ -2549,7 +2549,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
      *   <li>If neither array has a layer at that index (both are null), the result layer is an empty 2D array</li>
      * </ul>
      *
-     * <p>The operation creates a new array and does not modify the input arrays. Both input arrays can be null or empty,
+     * <p>The operation creates a new array and does not modify the input arrays. Both input arrays can be {@code null} or empty,
      * which will be handled gracefully.
      *
      * <p><b>Usage Examples:</b></p>
@@ -2577,8 +2577,8 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * // result = new byte[0][][]
      * }</pre>
      *
-     * @param a the first 3D byte array to concatenate. Can be null or empty, in which case a clone of {@code b} is returned (or an empty array if both are null/empty).
-     * @param b the second 3D byte array to concatenate. Can be null or empty, in which case a clone of {@code a} is returned (or an empty array if both are null/empty).
+     * @param a the first 3D byte array to concatenate. Can be {@code null} or empty, in which case a clone of {@code b} is returned (or an empty array if both are null/empty).
+     * @param b the second 3D byte array to concatenate. Can be {@code null} or empty, in which case a clone of {@code a} is returned (or an empty array if both are null/empty).
      * @return a new 3D byte array containing the element-wise concatenation of the input arrays. The length equals max(a.length, b.length).
      *         Each 2D layer in the result is the concatenation of the corresponding layers from {@code a} and {@code b}.
      */
@@ -2610,7 +2610,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
      *   <li>If neither array has a row at that index (both are null), the result row is an empty array</li>
      * </ul>
      *
-     * <p>The operation creates a new array and does not modify the input arrays. Both input arrays can be null or empty,
+     * <p>The operation creates a new array and does not modify the input arrays. Both input arrays can be {@code null} or empty,
      * which will be handled gracefully.
      *
      * <p><b>Usage Examples:</b></p>
@@ -2638,8 +2638,8 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * // result = new short[0][]
      * }</pre>
      *
-     * @param a the first 2D short array to concatenate. Can be null or empty, in which case a clone of {@code b} is returned (or an empty array if both are null/empty).
-     * @param b the second 2D short array to concatenate. Can be null or empty, in which case a clone of {@code a} is returned (or an empty array if both are null/empty).
+     * @param a the first 2D short array to concatenate. Can be {@code null} or empty, in which case a clone of {@code b} is returned (or an empty array if both are null/empty).
+     * @param b the second 2D short array to concatenate. Can be {@code null} or empty, in which case a clone of {@code a} is returned (or an empty array if both are null/empty).
      * @return a new 2D short array containing the element-wise concatenation of the input arrays. The length equals max(a.length, b.length).
      *         Each row in the result is the concatenation of the corresponding rows from {@code a} and {@code b}.
      */
@@ -2671,7 +2671,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
      *   <li>If neither array has a layer at that index (both are null), the result layer is an empty 2D array</li>
      * </ul>
      *
-     * <p>The operation creates a new array and does not modify the input arrays. Both input arrays can be null or empty,
+     * <p>The operation creates a new array and does not modify the input arrays. Both input arrays can be {@code null} or empty,
      * which will be handled gracefully.
      *
      * <p><b>Usage Examples:</b></p>
@@ -2699,8 +2699,8 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * // result = new short[0][][]
      * }</pre>
      *
-     * @param a the first 3D short array to concatenate. Can be null or empty, in which case a clone of {@code b} is returned (or an empty array if both are null/empty).
-     * @param b the second 3D short array to concatenate. Can be null or empty, in which case a clone of {@code a} is returned (or an empty array if both are null/empty).
+     * @param a the first 3D short array to concatenate. Can be {@code null} or empty, in which case a clone of {@code b} is returned (or an empty array if both are null/empty).
+     * @param b the second 3D short array to concatenate. Can be {@code null} or empty, in which case a clone of {@code a} is returned (or an empty array if both are null/empty).
      * @return a new 3D short array containing the element-wise concatenation of the input arrays. The length equals max(a.length, b.length).
      *         Each 2D layer in the result is the concatenation of the corresponding layers from {@code a} and {@code b}.
      */
@@ -2732,7 +2732,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
      *   <li>If neither array has a row at that index (both are null), the result row is an empty array</li>
      * </ul>
      *
-     * <p>The operation creates a new array and does not modify the input arrays. Both input arrays can be null or empty,
+     * <p>The operation creates a new array and does not modify the input arrays. Both input arrays can be {@code null} or empty,
      * which will be handled gracefully.
      *
      * <p><b>Usage Examples:</b></p>
@@ -2760,8 +2760,8 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * // result = new int[0][]
      * }</pre>
      *
-     * @param a the first 2D int array to concatenate. Can be null or empty, in which case a clone of {@code b} is returned (or an empty array if both are null/empty).
-     * @param b the second 2D int array to concatenate. Can be null or empty, in which case a clone of {@code a} is returned (or an empty array if both are null/empty).
+     * @param a the first 2D int array to concatenate. Can be {@code null} or empty, in which case a clone of {@code b} is returned (or an empty array if both are null/empty).
+     * @param b the second 2D int array to concatenate. Can be {@code null} or empty, in which case a clone of {@code a} is returned (or an empty array if both are null/empty).
      * @return a new 2D int array containing the element-wise concatenation of the input arrays. The length equals max(a.length, b.length).
      *         Each row in the result is the concatenation of the corresponding rows from {@code a} and {@code b}.
      */
@@ -2793,7 +2793,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
      *   <li>If neither array has a layer at that index (both are null), the result layer is an empty 2D array</li>
      * </ul>
      *
-     * <p>The operation creates a new array and does not modify the input arrays. Both input arrays can be null or empty,
+     * <p>The operation creates a new array and does not modify the input arrays. Both input arrays can be {@code null} or empty,
      * which will be handled gracefully.
      *
      * <p><b>Usage Examples:</b></p>
@@ -2821,8 +2821,8 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * // result = new int[0][][]
      * }</pre>
      *
-     * @param a the first 3D int array to concatenate. Can be null or empty, in which case a clone of {@code b} is returned (or an empty array if both are null/empty).
-     * @param b the second 3D int array to concatenate. Can be null or empty, in which case a clone of {@code a} is returned (or an empty array if both are null/empty).
+     * @param a the first 3D int array to concatenate. Can be {@code null} or empty, in which case a clone of {@code b} is returned (or an empty array if both are null/empty).
+     * @param b the second 3D int array to concatenate. Can be {@code null} or empty, in which case a clone of {@code a} is returned (or an empty array if both are null/empty).
      * @return a new 3D int array containing the element-wise concatenation of the input arrays. The length equals max(a.length, b.length).
      *         Each 2D layer in the result is the concatenation of the corresponding layers from {@code a} and {@code b}.
      */
@@ -2854,7 +2854,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
      *   <li>If neither array has a row at that index (both are null), the result row is an empty array</li>
      * </ul>
      *
-     * <p>The operation creates a new array and does not modify the input arrays. Both input arrays can be null or empty,
+     * <p>The operation creates a new array and does not modify the input arrays. Both input arrays can be {@code null} or empty,
      * which will be handled gracefully.
      *
      * <p><b>Usage Examples:</b></p>
@@ -2882,8 +2882,8 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * // result = new long[0][]
      * }</pre>
      *
-     * @param a the first 2D long array to concatenate. Can be null or empty, in which case a clone of {@code b} is returned (or an empty array if both are null/empty).
-     * @param b the second 2D long array to concatenate. Can be null or empty, in which case a clone of {@code a} is returned (or an empty array if both are null/empty).
+     * @param a the first 2D long array to concatenate. Can be {@code null} or empty, in which case a clone of {@code b} is returned (or an empty array if both are null/empty).
+     * @param b the second 2D long array to concatenate. Can be {@code null} or empty, in which case a clone of {@code a} is returned (or an empty array if both are null/empty).
      * @return a new 2D long array containing the element-wise concatenation of the input arrays. The length equals max(a.length, b.length).
      *         Each row in the result is the concatenation of the corresponding rows from {@code a} and {@code b}.
      */
@@ -2915,7 +2915,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
      *   <li>If neither array has a layer at that index (both are null), the result layer is an empty 2D array</li>
      * </ul>
      *
-     * <p>The operation creates a new array and does not modify the input arrays. Both input arrays can be null or empty,
+     * <p>The operation creates a new array and does not modify the input arrays. Both input arrays can be {@code null} or empty,
      * which will be handled gracefully.
      *
      * <p><b>Usage Examples:</b></p>
@@ -2943,8 +2943,8 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * // result = new long[0][][]
      * }</pre>
      *
-     * @param a the first 3D long array to concatenate. Can be null or empty, in which case a clone of {@code b} is returned (or an empty array if both are null/empty).
-     * @param b the second 3D long array to concatenate. Can be null or empty, in which case a clone of {@code a} is returned (or an empty array if both are null/empty).
+     * @param a the first 3D long array to concatenate. Can be {@code null} or empty, in which case a clone of {@code b} is returned (or an empty array if both are null/empty).
+     * @param b the second 3D long array to concatenate. Can be {@code null} or empty, in which case a clone of {@code a} is returned (or an empty array if both are null/empty).
      * @return a new 3D long array containing the element-wise concatenation of the input arrays. The length equals max(a.length, b.length).
      *         Each 2D layer in the result is the concatenation of the corresponding layers from {@code a} and {@code b}.
      */
@@ -2976,7 +2976,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
      *   <li>If neither array has a row at that index (both are null), the result row is an empty array</li>
      * </ul>
      *
-     * <p>The operation creates a new array and does not modify the input arrays. Both input arrays can be null or empty,
+     * <p>The operation creates a new array and does not modify the input arrays. Both input arrays can be {@code null} or empty,
      * which will be handled gracefully.
      *
      * <p><b>Usage Examples:</b></p>
@@ -3004,8 +3004,8 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * // result = new float[0][]
      * }</pre>
      *
-     * @param a the first 2D float array to concatenate. Can be null or empty, in which case a clone of {@code b} is returned (or an empty array if both are null/empty).
-     * @param b the second 2D float array to concatenate. Can be null or empty, in which case a clone of {@code a} is returned (or an empty array if both are null/empty).
+     * @param a the first 2D float array to concatenate. Can be {@code null} or empty, in which case a clone of {@code b} is returned (or an empty array if both are null/empty).
+     * @param b the second 2D float array to concatenate. Can be {@code null} or empty, in which case a clone of {@code a} is returned (or an empty array if both are null/empty).
      * @return a new 2D float array containing the element-wise concatenation of the input arrays. The length equals max(a.length, b.length).
      *         Each row in the result is the concatenation of the corresponding rows from {@code a} and {@code b}.
      */
@@ -3037,7 +3037,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
      *   <li>If neither array has a layer at that index (both are null), the result layer is an empty 2D array</li>
      * </ul>
      *
-     * <p>The operation creates a new array and does not modify the input arrays. Both input arrays can be null or empty,
+     * <p>The operation creates a new array and does not modify the input arrays. Both input arrays can be {@code null} or empty,
      * which will be handled gracefully.
      *
      * <p><b>Usage Examples:</b></p>
@@ -3065,8 +3065,8 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * // result = new float[0][][]
      * }</pre>
      *
-     * @param a the first 3D float array to concatenate. Can be null or empty, in which case a clone of {@code b} is returned (or an empty array if both are null/empty).
-     * @param b the second 3D float array to concatenate. Can be null or empty, in which case a clone of {@code a} is returned (or an empty array if both are null/empty).
+     * @param a the first 3D float array to concatenate. Can be {@code null} or empty, in which case a clone of {@code b} is returned (or an empty array if both are null/empty).
+     * @param b the second 3D float array to concatenate. Can be {@code null} or empty, in which case a clone of {@code a} is returned (or an empty array if both are null/empty).
      * @return a new 3D float array containing the element-wise concatenation of the input arrays. The length equals max(a.length, b.length).
      *         Each 2D layer in the result is the concatenation of the corresponding layers from {@code a} and {@code b}.
      */
@@ -3098,7 +3098,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
      *   <li>If neither array has a row at that index (both are null), the result row is an empty array</li>
      * </ul>
      *
-     * <p>The operation creates a new array and does not modify the input arrays. Both input arrays can be null or empty,
+     * <p>The operation creates a new array and does not modify the input arrays. Both input arrays can be {@code null} or empty,
      * which will be handled gracefully.
      *
      * <p><b>Usage Examples:</b></p>
@@ -3126,8 +3126,8 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * // result = new double[0][]
      * }</pre>
      *
-     * @param a the first 2D double array to concatenate. Can be null or empty, in which case a clone of {@code b} is returned (or an empty array if both are null/empty).
-     * @param b the second 2D double array to concatenate. Can be null or empty, in which case a clone of {@code a} is returned (or an empty array if both are null/empty).
+     * @param a the first 2D double array to concatenate. Can be {@code null} or empty, in which case a clone of {@code b} is returned (or an empty array if both are null/empty).
+     * @param b the second 2D double array to concatenate. Can be {@code null} or empty, in which case a clone of {@code a} is returned (or an empty array if both are null/empty).
      * @return a new 2D double array containing the element-wise concatenation of the input arrays. The length equals max(a.length, b.length).
      *         Each row in the result is the concatenation of the corresponding rows from {@code a} and {@code b}.
      */
@@ -3159,7 +3159,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
      *   <li>If neither array has a layer at that index (both are null), the result layer is an empty 2D array</li>
      * </ul>
      *
-     * <p>The operation creates a new array and does not modify the input arrays. Both input arrays can be null or empty,
+     * <p>The operation creates a new array and does not modify the input arrays. Both input arrays can be {@code null} or empty,
      * which will be handled gracefully.
      *
      * <p><b>Usage Examples:</b></p>
@@ -3187,8 +3187,8 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * // result = new double[0][][]
      * }</pre>
      *
-     * @param a the first 3D double array to concatenate. Can be null or empty, in which case a clone of {@code b} is returned (or an empty array if both are null/empty).
-     * @param b the second 3D double array to concatenate. Can be null or empty, in which case a clone of {@code a} is returned (or an empty array if both are null/empty).
+     * @param a the first 3D double array to concatenate. Can be {@code null} or empty, in which case a clone of {@code b} is returned (or an empty array if both are null/empty).
+     * @param b the second 3D double array to concatenate. Can be {@code null} or empty, in which case a clone of {@code a} is returned (or an empty array if both are null/empty).
      * @return a new 3D double array containing the element-wise concatenation of the input arrays. The length equals max(a.length, b.length).
      *         Each 2D layer in the result is the concatenation of the corresponding layers from {@code a} and {@code b}.
      */
@@ -3220,7 +3220,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
      *   <li>If neither array has a row at that index (both are null), the result row is an empty array</li>
      * </ul>
      *
-     * <p>The operation creates a new array and does not modify the input arrays. Both input arrays can be null or empty,
+     * <p>The operation creates a new array and does not modify the input arrays. Both input arrays can be {@code null} or empty,
      * which will be handled gracefully. The method preserves the component type of the input arrays in the result.
      *
      * <p><b>Usage Examples:</b></p>
@@ -3249,11 +3249,11 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * }</pre>
      *
      * @param <T> the component type of the elements in the arrays.
-     * @param a the first 2D array to concatenate. Can be null or empty, in which case a clone of {@code b} is returned.
-     * @param b the second 2D array to concatenate. Can be null or empty, in which case a clone of {@code a} is returned.
+     * @param a the first 2D array to concatenate. Can be {@code null} or empty, in which case a clone of {@code b} is returned.
+     * @param b the second 2D array to concatenate. Can be {@code null} or empty, in which case a clone of {@code a} is returned.
      * @return a new 2D array containing the element-wise concatenation of the input arrays. The length equals max(a.length, b.length).
      *         Each row in the result is the concatenation of the corresponding rows from {@code a} and {@code b}.
-     *         Returns null if both input arrays are null.
+     *         Returns {@code null} if both input arrays are {@code null}.
      */
     public static <T> T[][] concatt(final T[][] a, final T[][] b) {
         if (N.isEmpty(a)) {
@@ -3283,7 +3283,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
      *   <li>If neither array has a layer at that index (both are null), the result layer is an empty 2D array</li>
      * </ul>
      *
-     * <p>The operation creates a new array and does not modify the input arrays. Both input arrays can be null or empty,
+     * <p>The operation creates a new array and does not modify the input arrays. Both input arrays can be {@code null} or empty,
      * which will be handled gracefully. The method preserves the component type of the input arrays in the result.
      *
      * <p><b>Usage Examples:</b></p>
@@ -3312,11 +3312,11 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * }</pre>
      *
      * @param <T> the component type of the elements in the arrays.
-     * @param a the first 3D array to concatenate. Can be null or empty, in which case a clone of {@code b} is returned.
-     * @param b the second 3D array to concatenate. Can be null or empty, in which case a clone of {@code a} is returned.
+     * @param a the first 3D array to concatenate. Can be {@code null} or empty, in which case a clone of {@code b} is returned.
+     * @param b the second 3D array to concatenate. Can be {@code null} or empty, in which case a clone of {@code a} is returned.
      * @return a new 3D array containing the element-wise concatenation of the input arrays. The length equals max(a.length, b.length).
      *         Each 2D layer in the result is the concatenation of the corresponding layers from {@code a} and {@code b}.
-     *         Returns null if both input arrays are null.
+     *         Returns {@code null} if both input arrays are {@code null}.
      */
     public static <T> T[][][] concatt(final T[][][] a, final T[][][] b) {
         if (N.isEmpty(a)) {

@@ -151,7 +151,7 @@ public class JSONHttpMessageConverter extends AbstractJsonHttpMessageConverter {
      *                     This is the actual runtime type resolved from the method signature or type parameter.
      * @param reader the Reader containing the JSON content to be deserialized. The Reader is managed by
      *               Spring's framework and will be closed automatically after this method returns.
-     * @return the deserialized object of the specified type, never null unless the JSON content is "null"
+     * @return the deserialized object of the specified type, never {@code null} unless the JSON content is "null"
      * @throws com.landawn.abacus.exception.UncheckedIOException if an I/O error occurs while reading from the Reader
      * @throws IllegalArgumentException if the JSON content cannot be mapped to the target type due to type mismatch
      * @throws RuntimeException if JSON parsing fails due to malformed JSON or other parsing errors
@@ -173,7 +173,7 @@ public class JSONHttpMessageConverter extends AbstractJsonHttpMessageConverter {
      * <p><b>Serialization Features:</b></p>
      * <ul>
      *   <li>Automatic conversion of JavaBean properties to JSON fields</li>
-     *   <li>Null value handling (by default, null fields are included as "null")</li>
+     *   <li>Null value handling (by default, {@code null} fields are included as "null")</li>
      *   <li>Support for collections, maps, and arrays</li>
      *   <li>Automatic date/time formatting to ISO-8601 or custom formats</li>
      *   <li>Handling of enums (serialized as their name by default)</li>
@@ -211,10 +211,10 @@ public class JSONHttpMessageConverter extends AbstractJsonHttpMessageConverter {
      * }
      * }</pre>
      *
-     * @param obj the object to serialize to JSON. Can be null, in which case the JSON output will be "null".
+     * @param obj the object to serialize to JSON. Can be {@code null}, in which case the JSON output will be "null".
      *            Can be any Java object including primitives, collections, maps, POJOs, or complex nested structures.
      * @param type the type information for the object. This parameter is currently unused but provided for
-     *             future compatibility with Spring's type system. May be null.
+     *             future compatibility with Spring's type system. May be {@code null}.
      * @param writer the Writer to write the JSON output to. The Writer is managed by Spring's framework
      *               and will be flushed and closed automatically after this method returns.
      * @throws com.landawn.abacus.exception.UncheckedIOException if an I/O error occurs while writing to the Writer

@@ -1119,14 +1119,6 @@ public sealed class Difference<L, R> permits KeyValueDifference {
         /** The different values. */
         private final D diffValues;
 
-        /**
-         * Instantiates a new KeyValueDifference.
-         *
-         * @param common the common elements/properties present in both structures with equal values
-         * @param leftOnly the elements/properties present only in the left structure
-         * @param rightOnly the elements/properties present only in the right structure
-         * @param withDifferentValues the elements/properties present in both structures but with different values
-         */
         KeyValueDifference(final L common, final L leftOnly, final R rightOnly, final D withDifferentValues) {
             super(common, leftOnly, rightOnly);
             diffValues = withDifferentValues;
@@ -1300,14 +1292,6 @@ public sealed class Difference<L, R> permits KeyValueDifference {
      */
     public static final class MapDifference<L, R, D> extends KeyValueDifference<L, R, D> {
 
-        /**
-         * Instantiates a new {@code MapDifference}.
-         *
-         * @param common the common entries present in both maps with equal values
-         * @param leftOnly the entries present only in the left map
-         * @param rightOnly the entries present only in the right map
-         * @param withDifferentValues the entries present in both maps but with different values
-         */
         MapDifference(final L common, final L leftOnly, final R rightOnly, final D withDifferentValues) {
             super(common, leftOnly, rightOnly, withDifferentValues);
         }
@@ -1324,7 +1308,7 @@ public sealed class Difference<L, R> permits KeyValueDifference {
          * </ul>
          * 
          * <p>The comparison uses the standard {@code equals} method to compare values. Null values are
-         * handled correctly - if both maps have a null value for the same key, it's considered a common entry.
+         * handled correctly - if both maps have a {@code null} value for the same key, it's considered a common entry.
          * 
          * <p>The order of entries in the result maps depends on the input map types:
          * <ul>
@@ -1575,7 +1559,7 @@ public sealed class Difference<L, R> permits KeyValueDifference {
          * 
          * <p>The comparison process:
          * <ol>
-         *   <li>Only keys in {@code keysToCompare} are considered (if null, all keys are compared)</li>
+         *   <li>Only keys in {@code keysToCompare} are considered (if {@code null}, all keys are compared)</li>
          *   <li>For each key, values are compared using the {@code valueEquivalence} predicate</li>
          *   <li>The predicate receives the key and both values, allowing key-dependent comparison</li>
          * </ol>
@@ -2074,8 +2058,8 @@ public sealed class Difference<L, R> permits KeyValueDifference {
      * <p>Special handling:
      * <ul>
      *   <li>Properties annotated with {@code @DiffIgnore} are excluded from comparison</li>
-     *   <li>When comparing all properties, null values in both beans are ignored</li>
-     *   <li>When comparing specific properties, null values are included in the comparison</li>
+     *   <li>When comparing all properties, {@code null} values in both beans are ignored</li>
+     *   <li>When comparing specific properties, {@code null} values are included in the comparison</li>
      * </ul>
      * 
      * <p><b>Usage Examples:</b></p>
@@ -2107,14 +2091,6 @@ public sealed class Difference<L, R> permits KeyValueDifference {
      * @see N#difference(Collection, Collection)
      */
     public static final class BeanDifference<L, R, D> extends KeyValueDifference<L, R, D> {
-        /**
-         * Instantiates a new {@code BeanDifference}.
-         *
-         * @param common the common properties present in both beans with equal values
-         * @param leftOnly the properties present only in the left bean
-         * @param rightOnly the properties present only in the right bean
-         * @param withDifferentValues the properties present in both beans but with different values
-         */
         BeanDifference(final L common, final L leftOnly, final R rightOnly, final D withDifferentValues) {
             super(common, leftOnly, rightOnly, withDifferentValues);
         }
@@ -2640,7 +2616,7 @@ public sealed class Difference<L, R> permits KeyValueDifference {
          * }</pre>
          *
          * @param <T> the type of beans in both collections
-         * @param <C> the type of the list containing beans (typically List<T>)
+         * @param <C> the type of the list containing beans (typically List&lt;T&gt;)
          * @param <K> the type of the identifier used to match beans between collections
          * @param a the first collection of beans to compare. Can be {@code null} or empty.
          * @param b the second collection of beans to compare. Can be {@code null} or empty.
@@ -2697,7 +2673,7 @@ public sealed class Difference<L, R> permits KeyValueDifference {
          * }</pre>
          *
          * @param <T> the type of beans in both collections
-         * @param <C> the type of the list containing beans (typically List<T>)
+         * @param <C> the type of the list containing beans (typically List&lt;T&gt;)
          * @param <K> the type of the identifier used to match beans between collections
          * @param a the first collection of beans to compare. Can be {@code null} or empty.
          * @param b the second collection of beans to compare. Can be {@code null} or empty.

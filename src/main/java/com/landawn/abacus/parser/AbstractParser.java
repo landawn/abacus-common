@@ -14,6 +14,8 @@
 
 package com.landawn.abacus.parser;
 
+import com.landawn.abacus.annotation.MayReturnNull;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -107,89 +109,43 @@ abstract class AbstractParser<SC extends SerializationConfig<?>, DC extends Dese
 
     static final Type<Map<String, Object>> propsMapType = TypeFactory.getType("Map<String, Object>");
 
-    /**
-     *
-     * @param obj
-     * @return
-     */
+    @MayReturnNull
+
     @Override
     public String serialize(final Object obj) {
         return serialize(obj, (SC) null);
     }
 
-    /**
-     *
-     * @param obj
-     * @param output
-     */
     @Override
     public void serialize(final Object obj, final File output) {
         serialize(obj, null, output);
     }
 
-    /**
-     *
-     * @param obj
-     * @param output
-     */
     @Override
     public void serialize(final Object obj, final OutputStream output) {
         serialize(obj, null, output);
     }
 
-    /**
-     *
-     * @param obj
-     * @param output
-     */
     @Override
     public void serialize(final Object obj, final Writer output) {
         serialize(obj, null, output);
     }
 
-    /**
-     *
-     * @param <T>
-     * @param source
-     * @param targetClass
-     * @return
-     */
     @Override
     public <T> T deserialize(final String source, final Class<? extends T> targetClass) {
         return deserialize(source, null, targetClass);
     }
 
-    /**
-     *
-     * @param <T>
-     * @param source
-     * @param targetClass
-     * @return
-     */
     @Override
     public <T> T deserialize(final File source, final Class<? extends T> targetClass) {
         return deserialize(source, null, targetClass);
     }
 
-    /**
-     *
-     * @param <T>
-     * @param source
-     * @param targetClass
-     * @return
-     */
     @Override
     public <T> T deserialize(final InputStream source, final Class<? extends T> targetClass) {
         return deserialize(source, null, targetClass);
     }
 
-    /**
-     *
-     * @param <T>
-     * @param source
-     * @param targetClass
-     * @return
-     */
     @Override
     public <T> T deserialize(final Reader source, final Class<? extends T> targetClass) {
         return deserialize(source, null, targetClass);
@@ -242,14 +198,6 @@ abstract class AbstractParser<SC extends SerializationConfig<?>, DC extends Dese
         return result;
     }
 
-    /**
-     * New prop instance.
-     *
-     * @param <T>
-     * @param propClass
-     * @param attrTypeClass
-     * @return
-     */
     @SuppressFBWarnings("NP_LOAD_OF_KNOWN_NULL_VALUE")
     @SuppressWarnings("unchecked")
     protected static <T> T newPropInstance(final Class<?> propClass, final Class<?> attrTypeClass) {
@@ -270,13 +218,6 @@ abstract class AbstractParser<SC extends SerializationConfig<?>, DC extends Dese
         throw new ParseException("Failed to create property instance with property class by attribute " + attrTypeClass);
     }
 
-    /**
-     * Gets the concrete class.
-     *
-     * @param targetClass
-     * @param typeClass
-     * @return
-     */
     protected static Class<?> getConcreteClass(final Class<?> targetClass, final Class<?> typeClass) {
         if (typeClass == null) {
             return targetClass;
@@ -287,14 +228,6 @@ abstract class AbstractParser<SC extends SerializationConfig<?>, DC extends Dese
         }
     }
 
-    /**
-     * Collection 2 array.
-     * @param c
-     * @param targetClass
-     *
-     * @param <T>
-     * @return
-     */
     protected static <T> T collection2Array(final Collection<?> c, final Class<?> targetClass) {
         if (c == null) {
             return null;
@@ -341,7 +274,7 @@ abstract class AbstractParser<SC extends SerializationConfig<?>, DC extends Dese
      * @return {@code true} if circular reference was found and handled, {@code false} otherwise
      */
     protected static boolean hasCircularReference(final Object obj, final IdentityHashSet<Object> serializedObjects, final JSONXMLSerializationConfig<?> config,
-            @SuppressWarnings("unused") final CharacterWriter bw)   {
+            @SuppressWarnings("unused") final CharacterWriter bw) {
         final Type<?> type = obj == null ? null : Type.of(obj.getClass());
         if (obj != null && serializedObjects != null //
                 && (type.isBean() || type.isMap() || type.isCollection() || type.isObjectArray() || type.isMapEntity())) {

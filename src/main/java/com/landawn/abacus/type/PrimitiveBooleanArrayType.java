@@ -79,13 +79,14 @@ public final class PrimitiveBooleanArrayType extends AbstractPrimitiveArrayType<
     /**
      * Converts a boolean array to its string representation.
      * The format is: [true, false, true] with elements separated by commas.
-     * Returns null if the input array is null, or "[]" if the array is empty.
+     * Returns {@code null} if the input array is {@code null}, or "[]" if the array is empty.
      *
      * @param x the boolean array to convert
-     * @return the string representation of the array, or null if input is null
+     * @return the string representation of the array, or {@code null} if input is null
      */
     @MayReturnNull
     @Override
+
     public String stringOf(final boolean[] x) {
         if (x == null) {
             return null; // NOSONAR
@@ -99,10 +100,10 @@ public final class PrimitiveBooleanArrayType extends AbstractPrimitiveArrayType<
     /**
      * Parses a string representation and creates a boolean array.
      * Expected format: [true, false, true] or similar boolean value representations.
-     * Returns null if input is null, empty array if input is empty or "[]".
+     * Returns {@code null} if input is {@code null}, empty array if input is empty or "[]".
      *
      * @param str the string to parse
-     * @return the parsed boolean array, or null if input is null
+     * @return the parsed boolean array, or {@code null} if input is null
      */
     @MayReturnNull
     @Override
@@ -129,7 +130,7 @@ public final class PrimitiveBooleanArrayType extends AbstractPrimitiveArrayType<
     /**
      * Appends the string representation of a boolean array to an Appendable.
      * The format is: [true, false, true] with proper element separation.
-     * Appends "null" if the array is null.
+     * Appends "null" if the array is {@code null}.
      *
      * @param appendable the Appendable to write to
      * @param x the boolean array to append
@@ -157,7 +158,7 @@ public final class PrimitiveBooleanArrayType extends AbstractPrimitiveArrayType<
     /**
      * Writes the character representation of a boolean array to a CharacterWriter.
      * Uses optimized character arrays for true/false values for better performance.
-     * Writes "null" if the array is null.
+     * Writes "null" if the array is {@code null}.
      *
      * @param writer the CharacterWriter to write to
      * @param x the boolean array to write
@@ -186,10 +187,10 @@ public final class PrimitiveBooleanArrayType extends AbstractPrimitiveArrayType<
     /**
      * Converts a Collection of Boolean objects to a primitive boolean array.
      * Each element in the collection is unboxed to its primitive boolean value.
-     * Returns null if the input collection is null.
+     * Returns {@code null} if the input collection is {@code null}.
      *
      * @param c the Collection of Boolean objects to convert
-     * @return a boolean array containing the unboxed values, or null if input is null
+     * @return a boolean array containing the unboxed values, or {@code null} if input is null
      */
     @MayReturnNull
     @Override
@@ -212,7 +213,7 @@ public final class PrimitiveBooleanArrayType extends AbstractPrimitiveArrayType<
     /**
      * Converts a boolean array to a Collection.
      * Each primitive boolean value is boxed to a Boolean object and added to the output collection.
-     * Does nothing if the input array is null or empty.
+     * Does nothing if the input array is {@code null} or empty.
      *
      * @param <E> the type of elements in the output collection
      * @param x the boolean array to convert
@@ -244,7 +245,7 @@ public final class PrimitiveBooleanArrayType extends AbstractPrimitiveArrayType<
     /**
      * Compares two boolean arrays for equality.
      * Arrays are considered equal if they have the same length and all corresponding elements are equal.
-     * Two null arrays are considered equal.
+     * Two {@code null} arrays are considered equal.
      *
      * @param x the first boolean array
      * @param y the second boolean array

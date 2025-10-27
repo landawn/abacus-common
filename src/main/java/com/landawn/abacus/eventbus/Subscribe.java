@@ -113,8 +113,8 @@ public @interface Subscribe {
     /**
      * Controls whether the subscriber accepts only exact event type matches or includes subtypes.
      * 
-     * <p>When set to true, only events of the exact parameter type will be delivered.
-     * When false (default), events of the parameter type and all its subtypes will be delivered.</p>
+     * <p>When set to {@code true}, only events of the exact parameter type will be delivered.
+     * When {@code false} (default), events of the parameter type and all its subtypes will be delivered.</p>
      * 
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -140,7 +140,7 @@ public @interface Subscribe {
     /**
      * Indicates whether this subscriber should receive the most recent sticky event upon registration.
      * 
-     * <p>When true, if a sticky event matching this subscriber's type and event ID was previously posted,
+     * <p>When {@code true}, if a sticky event matching this subscriber's type and event ID was previously posted,
      * it will be immediately delivered to this subscriber upon registration.</p>
      * 
      * <p><b>Usage Examples:</b></p>
@@ -218,7 +218,7 @@ public @interface Subscribe {
     /**
      * Controls whether duplicate consecutive events should be ignored.
      * 
-     * <p>When true, if an event equal to the previous event is posted, it will be ignored.
+     * <p>When {@code true}, if an event equal to the previous event is posted, it will be ignored.
      * Events are compared using their equals() method.</p>
      * 
      * <p>This is useful for preventing redundant processing of unchanged data.</p>

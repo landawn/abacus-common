@@ -44,7 +44,7 @@ import java.io.Writer;
  *     writer.write("<item>Value with & special < > characters</item>");
  *     writer.write("</root>");
  *     String xml = writer.toString();
- *     // Result: <root><item>Value with &amp; special &lt; &gt; characters</item></root>
+ *     // Result: <root><item>Value with &amp; special < > characters</item></root>
  * }
  * }</pre>
  * 
@@ -180,7 +180,7 @@ public final class BufferedXMLWriter extends CharacterWriter {
      * <p>This method is used internally by the writer infrastructure and
      * typically should not be called directly by client code.</p>
      * 
-     * @return WD.CHAR_ZERO (the null character)
+     * @return WD.CHAR_ZERO (the {@code null} character)
      */
     @SuppressWarnings("SameReturnValue")
     char getCharQuotation() {

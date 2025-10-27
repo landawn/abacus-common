@@ -80,9 +80,9 @@ public final class AddrUtil {
      * // Returns: ["server1:8080", "server2:8080"]
      * }</pre>
      *
-     * @param servers the string containing server addresses separated by whitespace or commas; must not be null or result in empty list after splitting
+     * @param servers the string containing server addresses separated by whitespace or commas; must not be {@code null} or result in empty list after splitting
      * @return a non-empty list of trimmed server address strings
-     * @throws IllegalArgumentException if the servers string is null, or results in an empty list after splitting and trimming
+     * @throws IllegalArgumentException if the servers string is {@code null}, or results in an empty list after splitting and trimming
      */
     public static List<String> getServerList(final String servers) {
         final List<String> serverList = URL_SPLITTER.split(servers);
@@ -121,9 +121,9 @@ public final class AddrUtil {
      * // MemcachedClient client = new MemcachedClient(addrs);
      * }</pre>
      *
-     * @param servers the string containing server addresses to parse; must not be null or empty
+     * @param servers the string containing server addresses to parse; must not be {@code null} or empty
      * @return a non-empty list of {@link InetSocketAddress} instances corresponding to the parsed addresses
-     * @throws IllegalArgumentException if the servers string is null, empty, or contains invalid addresses (missing colon, invalid port number, empty host or port)
+     * @throws IllegalArgumentException if the servers string is {@code null}, empty, or contains invalid addresses (missing colon, invalid port number, empty host or port)
      * @see #getAddressList(Collection)
      * @see #getServerList(String)
      */
@@ -198,7 +198,7 @@ public final class AddrUtil {
      * List<InetSocketAddress> addresses = AddrUtil.getAddressList(serverStrings);
      * }</pre>
      *
-     * @param servers a collection of server addresses where each string is in the format {@code "host:port"}; must not be null or empty
+     * @param servers a collection of server addresses where each string is in the format {@code "host:port"}; must not be {@code null} or empty
      * @return a non-empty list of {@link InetSocketAddress} instances corresponding to the server addresses
      * @throws IllegalArgumentException if any server address is invalid (missing colon, invalid port number, empty host or port) or if the collection results in an empty address list
      * @see #getAddressList(String)

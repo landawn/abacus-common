@@ -15,6 +15,7 @@
  */
 package com.landawn.abacus.util.function;
 
+import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.util.Throwables;
 
 /**
@@ -68,6 +69,7 @@ public interface QuadFunction<A, B, C, D, R> extends Throwables.QuadFunction<A, 
      * @return the function result
      */
     @Override
+    @MayReturnNull
     R apply(A a, B b, C c, D d);
 
     /**

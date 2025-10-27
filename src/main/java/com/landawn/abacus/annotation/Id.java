@@ -52,15 +52,15 @@ import java.lang.annotation.Target;
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * // Single primary key
- * {@literal @}Entity
+ * @Entity
  * public class User {
- *     {@literal @}Id
+ *     @Id
  *     private Long id;
  * }
  * 
  * // Composite primary key
- * {@literal @}Entity
- * {@literal @}Id({"company_id", "employee_id"})
+ * @Entity
+ * @Id({"company_id", "employee_id"})
  * public class Employee {
  *     private Long companyId;
  *     private Long employeeId;
@@ -89,13 +89,13 @@ public @interface Id {
      * 
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * {@literal @}Id  // Uses field name as column name
+     * @Id  // Uses field name as column name
      * private Long id;
      * 
-     * {@literal @}Id({"user_id"})  // Maps to 'user_id' column
+     * @Id({"user_id"})  // Maps to 'user_id' column
      * private Long id;
      * 
-     * {@literal @}Id({"dept_id", "emp_id"})  // Composite key
+     * @Id({"dept_id", "emp_id"})  // Composite key
      * public class Employee { }
      * }</pre>
      * 

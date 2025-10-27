@@ -39,27 +39,28 @@ public class ListMultimapType<K, E> extends MultimapType<K, E, List<E>, ListMult
 
     /**
      * Converts a ListMultimap to its JSON string representation.
-     * 
-     * The multimap is first converted to a Map<K, List<E>> structure,
+     *
+     * The multimap is first converted to a Map&lt;K, List&lt;E&gt;&gt; structure,
      * then serialized to JSON using the default JSON parser.
      *
      * @param x the ListMultimap to convert to JSON string
-     * @return the JSON string representation of the multimap, or null if the input is null
+     * @return the JSON string representation of the multimap, or {@code null} if the input is null
      */
     @Override
+    @MayReturnNull
     public String stringOf(final ListMultimap<K, E> x) {
         return (x == null) ? null : Utils.jsonParser.serialize(x.toMap(), Utils.jsc);
     }
 
     /**
      * Parses a JSON string into a ListMultimap instance.
-     * 
-     * This method deserializes the JSON string as a Map<K, Collection<E>>,
+     *
+     * This method deserializes the JSON string as a Map&lt;K, Collection&lt;E&gt;&gt;,
      * then populates a new LinkedListMultimap with the entries.
      * The resulting multimap preserves insertion order for both keys and values.
      *
      * @param str the JSON string to parse
-     * @return a ListMultimap instance populated with the parsed data, or null if the string is empty or null
+     * @return a ListMultimap instance populated with the parsed data, or {@code null} if the string is empty or null
      * @throws IllegalArgumentException if the JSON string is malformed
      */
     @MayReturnNull

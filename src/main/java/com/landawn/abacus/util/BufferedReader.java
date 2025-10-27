@@ -18,6 +18,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.Reader;
 
+import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.annotation.SuppressFBWarnings;
 
 /**
@@ -299,9 +300,9 @@ final class BufferedReader extends java.io.BufferedReader { // NOSONAR
     /**
      * Reads a line of text with control over line terminator handling.
      * 
-     * @param ignoreLF if true, skip a leading line feed character
+     * @param ignoreLF if {@code true}, skip a leading line feed character
      * @return a String containing the contents of the line, not including
-     *         any line-termination characters, or null if the end of the
+     *         any line-termination characters, or {@code null} if the end of the
      *         stream has been reached
      * @throws IOException if an I/O error occurs
      */
@@ -388,7 +389,7 @@ final class BufferedReader extends java.io.BufferedReader { // NOSONAR
      * <p>A line is considered to be terminated by any one of a line feed ('\n'),
      * a carriage return ('\r'), or a carriage return followed immediately by a
      * line feed. The line terminator is not included in the returned string.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * BufferedReader reader = new BufferedReader("Line 1\r\nLine 2\nLine 3");
@@ -399,10 +400,11 @@ final class BufferedReader extends java.io.BufferedReader { // NOSONAR
      * }</pre>
      *
      * @return a String containing the contents of the line, not including
-     *         any line-termination characters, or null if the end of the
+     *         any line-termination characters, or {@code null} if the end of the
      *         stream has been reached
      * @throws IOException if an I/O error occurs
      */
+    @MayReturnNull
     @Override
     public String readLine() throws IOException {
         if (str == null) {
@@ -505,7 +507,7 @@ final class BufferedReader extends java.io.BufferedReader { // NOSONAR
      * }</pre>
      *
      * @return {@code true} if the next read() is guaranteed not to block for input,
-     *         false otherwise
+     *         {@code false} otherwise
      * @throws IOException if an I/O error occurs
      */
     @Override
@@ -627,9 +629,6 @@ final class BufferedReader extends java.io.BufferedReader { // NOSONAR
         lock = reader;
     }
 
-    /**
-     * Resets the internal state of this reader.
-     */
     void _reset() { //NOSONAR
         //noinspection SynchronizeOnNonFinalField
         synchronized (lock) {

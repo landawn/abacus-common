@@ -23,6 +23,7 @@ import java.util.List;
 
 import com.landawn.abacus.annotation.Beta;
 import com.landawn.abacus.annotation.Internal;
+import com.landawn.abacus.annotation.MayReturnNull;
 
 /**
  * Internal utility class for the Abacus library.
@@ -44,7 +45,7 @@ public final class InternalUtil {
     public static final String ERROR_MSG_FOR_NO_SUCH_EX = "Target object/value does not exist or is not found";
 
     /**
-     * Standard error message for NoSuchElementException when a target object/value does not exist or is null.
+     * Standard error message for NoSuchElementException when a target object/value does not exist or is {@code null}.
      */
     public static final String ERROR_MSG_FOR_NULL_ELEMENT_EX = "Target object/value does not exist or is not found, or its value is null";
 
@@ -96,17 +97,18 @@ public final class InternalUtil {
 
     /**
      * Attempts to get the internal array backing an ArrayList without copying.
-     * 
+     *
      * <p>This method uses reflection to access the internal elementData field of ArrayList
      * for performance optimization. If reflection fails or the collection is not an ArrayList,
-     * returns null.</p>
+     * returns {@code null}.</p>
      *
      * @param c the collection to get the internal array from
-     * @return the internal array if accessible, null otherwise
+     * @return the internal array if accessible, {@code null} otherwise
      * @deprecated DO NOT call the methods defined in this class. it's for internal use only.
      */
     @Deprecated
     @Beta
+    @MayReturnNull
     static Object[] getInternalArray(final Collection<?> c) {
         if (c == null) {
             return null; // NOSONAR

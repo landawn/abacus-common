@@ -60,9 +60,10 @@ public class IndexedType<T> extends AbstractType<Indexed<T>> {
      * The declaring name represents the type in a simplified format suitable for type declarations,
      * using simple class names rather than fully qualified names.
      *
-     * @return the declaring name of this type (e.g., "Indexed<String>")
+     * @return the declaring name of this type (e.g., "Indexed&lt;String&gt;")
      */
     @Override
+    @MayReturnNull
     public String declaringName() {
         return declaringName;
     }
@@ -88,11 +89,6 @@ public class IndexedType<T> extends AbstractType<Indexed<T>> {
         return parameterTypes;
     }
 
-    /**
-     * Indicates that this is a generic type with type parameters.
-     *
-     * @return {@code true} as Indexed is a generic type
-     */
     @Override
     public boolean isGenericType() {
         return true;
@@ -103,9 +99,10 @@ public class IndexedType<T> extends AbstractType<Indexed<T>> {
      * The indexed value is serialized as a JSON array with two elements: [index, value].
      *
      * @param x the Indexed object to convert to string
-     * @return the JSON array representation "[index,value]", or null if the input is null
+     * @return the JSON array representation "[index,value]", or {@code null} if the input is null
      */
     @Override
+    @MayReturnNull
     public String stringOf(final Indexed<T> x) {
         return (x == null) ? null : Utils.jsonParser.serialize(N.asArray(x.index(), x.value()), Utils.jsc);
     }
@@ -117,7 +114,7 @@ public class IndexedType<T> extends AbstractType<Indexed<T>> {
      * according to the value type.
      *
      * @param str the JSON array string to parse (e.g., "[0,\"hello\"]")
-     * @return a new Indexed instance with the parsed index and value, or null if the input is null or empty
+     * @return a new Indexed instance with the parsed index and value, or {@code null} if the input is {@code null} or empty
      */
     @MayReturnNull
     @SuppressWarnings("unchecked")
@@ -193,8 +190,8 @@ public class IndexedType<T> extends AbstractType<Indexed<T>> {
      * The format depends on whether a declaring name (simplified) or full name is requested.
      *
      * @param valueTypeName the name of the value type
-     * @param isDeclaringName true to generate a declaring name with simple class names, {@code false} for fully qualified names
-     * @return the formatted type name (e.g., "Indexed<String>" or "com.landawn.abacus.util.Indexed<java.lang.String>")
+     * @param isDeclaringName {@code true} to generate a declaring name with simple class names, {@code false} for fully qualified names
+     * @return the formatted type name (e.g., "Indexed&lt;String&gt;" or "com.landawn.abacus.util.Indexed&lt;java.lang.String&gt;")
      */
     protected static String getTypeName(final String valueTypeName, final boolean isDeclaringName) {
         if (isDeclaringName) {

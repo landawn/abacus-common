@@ -59,7 +59,8 @@ public class ImmutableSetType<E> extends AbstractType<ImmutableSet<E>> {
      * The declaring name represents the type in a simplified format suitable for type declarations,
      * using simple class names rather than fully qualified names.
      *
-     * @return the declaring name of this type (e.g., "ImmutableSet<String>")
+     * @return the declaring name of this type (e.g., "ImmutableSet&lt;String&gt;")
+     @MayReturnNull
      */
     @Override
     public String declaringName() {
@@ -101,7 +102,7 @@ public class ImmutableSetType<E> extends AbstractType<ImmutableSet<E>> {
      * Indicates whether this type represents a Set or its subtype.
      * ImmutableSet is considered a set type.
      *
-     * @return true, as ImmutableSet is a set type
+     * @return {@code true}, as ImmutableSet is a set type
      */
     @Override
     public boolean isSet() {
@@ -112,18 +113,13 @@ public class ImmutableSetType<E> extends AbstractType<ImmutableSet<E>> {
      * Indicates whether this type represents a Collection or its subtype.
      * ImmutableSet is a collection type.
      *
-     * @return true, as ImmutableSet is a collection type
+     * @return {@code true}, as ImmutableSet is a collection type
      */
     @Override
     public boolean isCollection() {
         return true;
     }
 
-    /**
-     * Indicates that this is a generic type with type parameters.
-     *
-     * @return {@code true} as ImmutableSet is a generic type
-     */
     @Override
     public boolean isGenericType() {
         return true;
@@ -145,6 +141,7 @@ public class ImmutableSetType<E> extends AbstractType<ImmutableSet<E>> {
      * Delegates to the underlying set type for serialization categorization.
      *
      * @return SerializationType.SERIALIZABLE if elements are serializable, SerializationType.COLLECTION otherwise
+     @MayReturnNull
      */
     @Override
     public SerializationType getSerializationType() {
@@ -156,7 +153,7 @@ public class ImmutableSetType<E> extends AbstractType<ImmutableSet<E>> {
      * Delegates the serialization to the underlying set type handler.
      *
      * @param x the immutable set to convert to string
-     * @return the string representation of the immutable set, or null if the input is null
+     * @return the string representation of the immutable set, or {@code null} if the input is null
      */
     @Override
     public String stringOf(final ImmutableSet<E> x) {
@@ -209,8 +206,8 @@ public class ImmutableSetType<E> extends AbstractType<ImmutableSet<E>> {
      *
      * @param typeClass the ImmutableSet class
      * @param parameterTypeName the name of the element type
-     * @param isDeclaringName true to generate a declaring name with simple class names, {@code false} for fully qualified names
-     * @return the formatted type name (e.g., "ImmutableSet<String>" or "com.landawn.abacus.util.ImmutableSet<java.lang.String>")
+     * @param isDeclaringName {@code true} to generate a declaring name with simple class names, {@code false} for fully qualified names
+     * @return the formatted type name (e.g., "ImmutableSet&lt;String&gt;" or "com.landawn.abacus.util.ImmutableSet&lt;java.lang.String&gt;")
      */
     protected static String getTypeName(final Class<?> typeClass, final String parameterTypeName, final boolean isDeclaringName) {
         if (isDeclaringName) {

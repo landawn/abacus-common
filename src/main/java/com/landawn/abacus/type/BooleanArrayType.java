@@ -26,7 +26,7 @@ import com.landawn.abacus.util.WD;
 /**
  * Type handler for Boolean array operations.
  * This class provides serialization/deserialization and I/O operations
- * for Boolean[] arrays, handling null elements and array formatting.
+ * for Boolean[] arrays, handling {@code null} elements and array formatting.
  */
 public final class BooleanArrayType extends ObjectArrayType<Boolean> {
 
@@ -40,11 +40,12 @@ public final class BooleanArrayType extends ObjectArrayType<Boolean> {
      * Null elements are represented as "null" in the output.
      *
      * @param x the Boolean array to convert
-     * @return a string representation like "[true, false, null]", or null if input is null,
+     * @return a string representation like "[true, false, null]", or {@code null} if input is {@code null},
      *         or "[]" if the array is empty
      */
     @MayReturnNull
     @Override
+
     public String stringOf(final Boolean[] x) {
         if (x == null) {
             return null; // NOSONAR
@@ -58,14 +59,15 @@ public final class BooleanArrayType extends ObjectArrayType<Boolean> {
     /**
      * Converts a string representation back to a Boolean array.
      * Parses a string in the format "[true, false, null]" into a Boolean array.
-     * The string "null" (case-sensitive) is parsed as a null element.
+     * The string "null" (case-sensitive) is parsed as a {@code null} element.
      *
      * @param str the string to parse, expecting format like "[true, false, null]"
-     * @return a Boolean array parsed from the string, or null if str is null,
+     * @return a Boolean array parsed from the string, or {@code null} if str is {@code null},
      *         or an empty array if str is empty or equals "[]"
      */
     @MayReturnNull
     @Override
+
     public Boolean[] valueOf(final String str) {
         if (Strings.isEmpty(str) || Strings.isBlank(str)) {
             return null; // NOSONAR

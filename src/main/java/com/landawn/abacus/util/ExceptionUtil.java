@@ -154,7 +154,7 @@ public final class ExceptionUtil {
      * @param <E> the type of exception to map
      * @param exceptionClass the class of the exception to map
      * @param runtimeExceptionMapper the function that converts the exception to RuntimeException
-     * @param force if true, overwrites existing mapper; if false, throws exception if mapper exists
+     * @param force if {@code true}, overwrites existing mapper; if {@code false}, throws exception if mapper exists
      * @throws IllegalArgumentException if trying to register built-in classes or if mapper already exists and force is false
      */
     @SuppressWarnings("rawtypes")
@@ -240,7 +240,7 @@ public final class ExceptionUtil {
 
     /**
      * Converts the specified Throwable to a RuntimeException with option to call Thread.interrupt().
-     * If it's an Error and throwIfItIsError is false, wraps it in RuntimeException.
+     * If it's an Error and throwIfItIsError is {@code false}, wraps it in RuntimeException.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -732,7 +732,7 @@ public final class ExceptionUtil {
      * }</pre>
      *
      * @param e the exception
-     * @param withExceptionClassName if true, prefixes the message with the exception class name
+     * @param withExceptionClassName if {@code true}, prefixes the message with the exception class name
      * @return the formatted error message
      */
     public static String getErrorMessage(final Throwable e, final boolean withExceptionClassName) {

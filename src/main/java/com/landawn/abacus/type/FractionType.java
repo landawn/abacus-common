@@ -42,9 +42,9 @@ public class FractionType extends AbstractType<Fraction> {
 
     /**
      * Indicates whether this type represents a numeric value.
-     * Fractions are mathematical representations of rational numbers, so this returns true.
+     * Fractions are mathematical representations of rational numbers, so this returns {@code true}.
      *
-     * @return true, as Fraction represents numeric values
+     * @return {@code true}, as Fraction represents numeric values
      */
     @Override
     public boolean isNumber() {
@@ -53,9 +53,9 @@ public class FractionType extends AbstractType<Fraction> {
 
     /**
      * Indicates whether instances of this type are immutable.
-     * Fraction objects are immutable once created, so this returns true.
+     * Fraction objects are immutable once created, so this returns {@code true}.
      *
-     * @return true, as Fraction instances are immutable
+     * @return {@code true}, as Fraction instances are immutable
      */
     @Override
     public boolean isImmutable() {
@@ -64,9 +64,9 @@ public class FractionType extends AbstractType<Fraction> {
 
     /**
      * Indicates whether instances of this type implement the Comparable interface.
-     * Fraction implements Comparable<Fraction>, allowing fractions to be compared and sorted.
+     * Fraction implements Comparable&lt;Fraction&gt;, allowing fractions to be compared and sorted.
      *
-     * @return true, as Fraction implements Comparable
+     * @return {@code true}, as Fraction implements Comparable
      */
     @Override
     public boolean isComparable() {
@@ -77,7 +77,7 @@ public class FractionType extends AbstractType<Fraction> {
      * Indicates whether this type should be written without quotes in CSV format.
      * Numeric types like Fraction are typically not quoted in CSV files.
      *
-     * @return true, indicating that Fraction values should not be quoted in CSV output
+     * @return {@code true}, indicating that Fraction values should not be quoted in CSV output
      */
     @Override
     public boolean isNonQuotableCsvType() {
@@ -90,7 +90,8 @@ public class FractionType extends AbstractType<Fraction> {
      * typically in the form "numerator/denominator".
      *
      * @param x the Fraction to convert to string
-     * @return the string representation of the fraction, or null if the input is null
+     * @return the string representation of the fraction, or {@code null} if the input is null
+     @MayReturnNull
      */
     @Override
     public String stringOf(final Fraction x) {
@@ -103,7 +104,8 @@ public class FractionType extends AbstractType<Fraction> {
      * typically "numerator/denominator" or a decimal number.
      *
      * @param str the string to parse into a Fraction
-     * @return the parsed Fraction object, or null if the input string is null or empty
+     * @return the parsed Fraction object, or {@code null} if the input string is {@code null} or empty
+     @MayReturnNull
      */
     @Override
     public Fraction valueOf(final String str) {

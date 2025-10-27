@@ -61,10 +61,11 @@ public class DateType extends AbstractDateType<Date> {
      * - String: parsed as a date string
      * - Other objects: converted to string first, then parsed
      *
-     * @param obj the object to convert to SQL Date. Can be null.
-     * @return A SQL Date instance representing the input value, or null if input is null
+     * @param obj the object to convert to SQL Date. Can be {@code null}.
+     * @return A SQL Date instance representing the input value, or {@code null} if input is null
      */
     @Override
+    @MayReturnNull
     public Date valueOf(final Object obj) {
         if (obj instanceof Number) {
             return new Date(((Number) obj).longValue());
@@ -78,14 +79,15 @@ public class DateType extends AbstractDateType<Date> {
     /**
      * Converts a string representation to a SQL Date instance.
      * Special handling for:
-     * - null or empty string: returns null
+     * - {@code null} or empty string: returns null
      * - "sysTime": returns the current system date
      * - Other strings: parsed using date parsing utilities
      *
-     * @param str the string to parse. Can be null or empty.
-     * @return A SQL Date instance parsed from the string, or null if input is null/empty
+     * @param str the string to parse. Can be {@code null} or empty.
+     * @return A SQL Date instance parsed from the string, or {@code null} if input is null/empty
      */
     @Override
+    @MayReturnNull
     public Date valueOf(final String str) {
         return Strings.isEmpty(str) ? null : (N.equals(str, SYS_TIME) ? Dates.currentDate() : Dates.parseDate(str));
     }
@@ -99,10 +101,11 @@ public class DateType extends AbstractDateType<Date> {
      * @param cbuf the character array containing the value to parse
      * @param offset the starting position in the character array
      * @param len the number of characters to use
-     * @return A SQL Date instance parsed from the character array, or null if input is null or empty
+     * @return A SQL Date instance parsed from the character array, or {@code null} if input is {@code null} or empty
      */
     @MayReturnNull
     @Override
+
     public Date valueOf(final char[] cbuf, final int offset, final int len) {
         if ((cbuf == null) || (len == 0)) {
             return null; // NOSONAR
@@ -124,7 +127,7 @@ public class DateType extends AbstractDateType<Date> {
      *
      * @param rs the ResultSet containing the data
      * @param columnIndex the column index (1-based) of the date value
-     * @return A SQL Date instance from the result set, or null if the column value is SQL NULL
+     * @return A SQL Date instance from the result set, or {@code null} if the column value is SQL NULL
      * @throws SQLException if a database access error occurs or the column index is invalid
      */
     @Override
@@ -137,7 +140,7 @@ public class DateType extends AbstractDateType<Date> {
      *
      * @param rs the ResultSet containing the data
      * @param columnLabel the label of the column containing the date value
-     * @return A SQL Date instance from the result set, or null if the column value is SQL NULL
+     * @return A SQL Date instance from the result set, or {@code null} if the column value is SQL NULL
      * @throws SQLException if a database access error occurs or the column label is not found
      */
     @Override
@@ -150,7 +153,7 @@ public class DateType extends AbstractDateType<Date> {
      *
      * @param stmt the PreparedStatement in which to set the parameter
      * @param columnIndex the parameter index (1-based) to set
-     * @param x the SQL Date value to set. Can be null.
+     * @param x the SQL Date value to set. Can be {@code null}.
      * @throws SQLException if a database access error occurs or the parameter index is invalid
      */
     @Override
@@ -163,7 +166,7 @@ public class DateType extends AbstractDateType<Date> {
      *
      * @param stmt the CallableStatement in which to set the parameter
      * @param parameterName the name of the parameter to set
-     * @param x the SQL Date value to set. Can be null.
+     * @param x the SQL Date value to set. Can be {@code null}.
      * @throws SQLException if a database access error occurs or the parameter name is not found
      */
     @Override

@@ -76,7 +76,7 @@ public final class Synchronized<T> {
      * }</pre>
      *
      * @param <T> the type of the mutex object
-     * @param mutex the object on which synchronized operations will be performed. Must not be null.
+     * @param mutex the object on which synchronized operations will be performed. Must not be {@code null}.
      * @return a new Synchronized instance for the provided mutex
      * @throws IllegalArgumentException if the provided mutex is null
      */
@@ -106,8 +106,8 @@ public final class Synchronized<T> {
      *
      * @param <T> the type of the mutex
      * @param <E> the type of exception that the command might throw
-     * @param mutex the object to synchronize on. Must not be null.
-     * @param cmd the runnable command to execute. Must not be null.
+     * @param mutex the object to synchronize on. Must not be {@code null}.
+     * @param cmd the runnable command to execute. Must not be {@code null}.
      * @throws IllegalArgumentException if either mutex or cmd is null
      * @throws E if the command throws an exception of type E
      */
@@ -143,8 +143,8 @@ public final class Synchronized<T> {
      * @param <T> the type of the mutex
      * @param <R> the type of the result returned by the callable
      * @param <E> the type of exception that the callable might throw
-     * @param mutex the object to synchronize on. Must not be null.
-     * @param cmd the callable command to execute. Must not be null.
+     * @param mutex the object to synchronize on. Must not be {@code null}.
+     * @param cmd the callable command to execute. Must not be {@code null}.
      * @return the result of the callable command
      * @throws IllegalArgumentException if either mutex or cmd is null
      * @throws E if the callable throws an exception of type E
@@ -175,8 +175,8 @@ public final class Synchronized<T> {
      *
      * @param <T> the type of the mutex
      * @param <E> the type of exception that the predicate might throw
-     * @param mutex the object to synchronize on and pass to the predicate. Must not be null.
-     * @param predicate the predicate to test. Must not be null.
+     * @param mutex the object to synchronize on and pass to the predicate. Must not be {@code null}.
+     * @param predicate the predicate to test. Must not be {@code null}.
      * @return the boolean result of the predicate
      * @throws IllegalArgumentException if either mutex or predicate is null
      * @throws E if the predicate throws an exception of type E
@@ -209,9 +209,9 @@ public final class Synchronized<T> {
      * @param <T> the type of the mutex
      * @param <U> the type of the additional argument
      * @param <E> the type of exception that the predicate might throw
-     * @param mutex the object to synchronize on and pass as first argument to the predicate. Must not be null.
+     * @param mutex the object to synchronize on and pass as first argument to the predicate. Must not be {@code null}.
      * @param u the additional argument to pass as second argument to the predicate
-     * @param predicate the bi-predicate to test. Must not be null.
+     * @param predicate the bi-predicate to test. Must not be {@code null}.
      * @return the boolean result of the bi-predicate
      * @throws IllegalArgumentException if either mutex or predicate is null
      * @throws E if the predicate throws an exception of type E
@@ -242,8 +242,8 @@ public final class Synchronized<T> {
      *
      * @param <T> the type of the mutex
      * @param <E> the type of exception that the consumer might throw
-     * @param mutex the object to synchronize on and pass to the consumer. Must not be null.
-     * @param consumer the consumer to execute. Must not be null.
+     * @param mutex the object to synchronize on and pass to the consumer. Must not be {@code null}.
+     * @param consumer the consumer to execute. Must not be {@code null}.
      * @throws IllegalArgumentException if either mutex or consumer is null
      * @throws E if the consumer throws an exception of type E
      */
@@ -273,9 +273,9 @@ public final class Synchronized<T> {
      * @param <T> the type of the mutex
      * @param <U> the type of the additional argument
      * @param <E> the type of exception that the consumer might throw
-     * @param mutex the object to synchronize on and pass as first argument to the consumer. Must not be null.
+     * @param mutex the object to synchronize on and pass as first argument to the consumer. Must not be {@code null}.
      * @param u the additional argument to pass as second argument to the consumer
-     * @param consumer the bi-consumer to execute. Must not be null.
+     * @param consumer the bi-consumer to execute. Must not be {@code null}.
      * @throws IllegalArgumentException if either mutex or consumer is null
      * @throws E if the consumer throws an exception of type E
      */
@@ -306,8 +306,8 @@ public final class Synchronized<T> {
      * @param <T> the type of the mutex
      * @param <R> the type of the result
      * @param <E> the type of exception that the function might throw
-     * @param mutex the object to synchronize on and pass to the function. Must not be null.
-     * @param function the function to apply. Must not be null.
+     * @param mutex the object to synchronize on and pass to the function. Must not be {@code null}.
+     * @param function the function to apply. Must not be {@code null}.
      * @return the result of applying the function
      * @throws IllegalArgumentException if either mutex or function is null
      * @throws E if the function throws an exception of type E
@@ -342,9 +342,9 @@ public final class Synchronized<T> {
      * @param <U> the type of the additional argument
      * @param <R> the type of the result
      * @param <E> the type of exception that the function might throw
-     * @param mutex the object to synchronize on and pass as first argument to the function. Must not be null.
+     * @param mutex the object to synchronize on and pass as first argument to the function. Must not be {@code null}.
      * @param u the additional argument to pass as second argument to the function
-     * @param function the bi-function to apply. Must not be null.
+     * @param function the bi-function to apply. Must not be {@code null}.
      * @return the result of applying the bi-function
      * @throws IllegalArgumentException if either mutex or function is null
      * @throws E if the function throws an exception of type E
@@ -378,7 +378,7 @@ public final class Synchronized<T> {
      * }</pre>
      *
      * @param <E> the type of exception that the command might throw
-     * @param cmd the runnable command to execute. Must not be null.
+     * @param cmd the runnable command to execute. Must not be {@code null}.
      * @throws IllegalArgumentException if cmd is null
      * @throws E if the command throws an exception of type E
      */
@@ -406,7 +406,7 @@ public final class Synchronized<T> {
      *
      * @param <R> the type of the result
      * @param <E> the type of exception that the callable might throw
-     * @param cmd the callable command to execute. Must not be null.
+     * @param cmd the callable command to execute. Must not be {@code null}.
      * @return the result of the callable command
      * @throws IllegalArgumentException if cmd is null
      * @throws E if the callable throws an exception of type E
@@ -434,7 +434,7 @@ public final class Synchronized<T> {
      * }</pre>
      *
      * @param <E> the type of exception that the predicate might throw
-     * @param predicate the predicate to test with the mutex as argument. Must not be null.
+     * @param predicate the predicate to test with the mutex as argument. Must not be {@code null}.
      * @return the boolean result of the predicate
      * @throws IllegalArgumentException if predicate is null
      * @throws E if the predicate throws an exception of type E
@@ -462,7 +462,7 @@ public final class Synchronized<T> {
      * }</pre>
      *
      * @param <E> the type of exception that the consumer might throw
-     * @param consumer the consumer to execute with the mutex as argument. Must not be null.
+     * @param consumer the consumer to execute with the mutex as argument. Must not be {@code null}.
      * @throws IllegalArgumentException if consumer is null
      * @throws E if the consumer throws an exception of type E
      */
@@ -490,7 +490,7 @@ public final class Synchronized<T> {
      *
      * @param <R> the type of the result
      * @param <E> the type of exception that the function might throw
-     * @param function the function to apply with the mutex as argument. Must not be null.
+     * @param function the function to apply with the mutex as argument. Must not be {@code null}.
      * @return the result of applying the function
      * @throws IllegalArgumentException if function is null
      * @throws E if the function throws an exception of type E

@@ -29,9 +29,9 @@ import com.landawn.abacus.util.Throwables;
  * <p>This is a functional interface whose functional method is
  * {@link #accept(long, Object)}.
  *
- * <p>Refer to JDK API documentation at: 
+ * <p>Refer to JDK API documentation at:
  * <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html">
- * https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a>
+ * https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a></p>
  *
  * @param <T> the type of the object argument to the operation
  *
@@ -96,7 +96,7 @@ public interface LongObjConsumer<T> extends Throwables.LongObjConsumer<T, Runtim
      * // First updates the user's timestamp, then logs the update
      * }</pre>
      *
-     * @param after the operation to perform after this operation. Must not be null.
+     * @param after the operation to perform after this operation. Must not be {@code null}.
      *              Note that the type parameter must be {@code ? super T} to ensure
      *              type safety when composing consumers
      * @return a composed {@code LongObjConsumer} that performs in sequence this

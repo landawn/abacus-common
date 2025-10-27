@@ -14,6 +14,8 @@
 
 package com.landawn.abacus.parser;
 
+import com.landawn.abacus.annotation.MayReturnNull;
+
 import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
@@ -443,7 +445,7 @@ public final class ParserFactory {
      *
      * @param xsc the XML serialization configuration, configures how objects are converted to XML
      * @param xdc the XML deserialization configuration, configures how XML is converted to objects
-     * @return a new JAXB {@link XMLParser} instance with the specified configurations
+          * @return a new JAXB {@link XMLParser} instance with the specified configurations
      */
     public static XMLParser createJAXBParser(final XMLSerializationConfig xsc, final XMLDeserializationConfig xdc) {
         return new JAXBParser(xsc, xdc);

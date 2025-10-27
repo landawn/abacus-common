@@ -86,13 +86,14 @@ public final class PrimitiveCharArrayType extends AbstractPrimitiveArrayType<cha
     /**
      * Converts a char array to its string representation.
      * The format is: ['a', 'b', 'c'] with each character quoted and separated by commas.
-     * Returns null if the input array is null, or "[]" if the array is empty.
+     * Returns {@code null} if the input array is {@code null}, or "[]" if the array is empty.
      *
      * @param x the char array to convert
-     * @return the string representation of the array, or null if input is null
+     * @return the string representation of the array, or {@code null} if input is null
      */
     @MayReturnNull
     @Override
+
     public String stringOf(final char[] x) {
         if (x == null) {
             return null; // NOSONAR
@@ -127,10 +128,10 @@ public final class PrimitiveCharArrayType extends AbstractPrimitiveArrayType<cha
      * Parses a string representation and creates a char array.
      * Expected format: ['a', 'b', 'c'] with quoted characters or [a, b, c] without quotes.
      * Automatically detects whether characters are quoted and handles both formats.
-     * Returns null if input is null, empty array if input is empty or "[]".
+     * Returns {@code null} if input is {@code null}, empty array if input is empty or "[]".
      *
      * @param str the string to parse
-     * @return the parsed char array, or null if input is null
+     * @return the parsed char array, or {@code null} if input is null
      */
     @MayReturnNull
     @Override
@@ -166,10 +167,10 @@ public final class PrimitiveCharArrayType extends AbstractPrimitiveArrayType<cha
      * Converts an object to a char array.
      * Handles special case of Clob objects by extracting their character content.
      * For other object types, converts to string first then parses as char array.
-     * Returns null if input is null.
+     * Returns {@code null} if input is {@code null}.
      *
      * @param obj the object to convert (can be a Clob or other type)
-     * @return the char array representation of the object, or null if input is null
+     * @return the char array representation of the object, or {@code null} if input is null
      */
     @MayReturnNull
     @SuppressFBWarnings
@@ -199,7 +200,7 @@ public final class PrimitiveCharArrayType extends AbstractPrimitiveArrayType<cha
     /**
      * Appends the string representation of a char array to an Appendable.
      * The format is: [a, b, c] without quotes around the characters.
-     * Appends "null" if the array is null.
+     * Appends "null" if the array is {@code null}.
      *
      * @param appendable the Appendable to write to
      * @param x the char array to append
@@ -228,7 +229,7 @@ public final class PrimitiveCharArrayType extends AbstractPrimitiveArrayType<cha
      * Writes the character representation of a char array to a CharacterWriter.
      * If a character quotation is specified in the config, characters are quoted.
      * Single quotes within characters are escaped when using single quote quotation.
-     * Writes "null" if the array is null.
+     * Writes "null" if the array is {@code null}.
      *
      * @param writer the CharacterWriter to write to
      * @param x the char array to write
@@ -276,10 +277,10 @@ public final class PrimitiveCharArrayType extends AbstractPrimitiveArrayType<cha
     /**
      * Converts a Collection of Character objects to a primitive char array.
      * Each element in the collection is unboxed to its primitive char value.
-     * Returns null if the input collection is null.
+     * Returns {@code null} if the input collection is {@code null}.
      *
      * @param c the Collection of Character objects to convert
-     * @return a char array containing the unboxed values, or null if input is null
+     * @return a char array containing the unboxed values, or {@code null} if input is null
      */
     @MayReturnNull
     @Override
@@ -302,7 +303,7 @@ public final class PrimitiveCharArrayType extends AbstractPrimitiveArrayType<cha
     /**
      * Converts a char array to a Collection.
      * Each primitive char value is boxed to a Character object and added to the output collection.
-     * Does nothing if the input array is null or empty.
+     * Does nothing if the input array is {@code null} or empty.
      *
      * @param <E> the type of elements in the output collection
      * @param x the char array to convert
@@ -334,7 +335,7 @@ public final class PrimitiveCharArrayType extends AbstractPrimitiveArrayType<cha
     /**
      * Compares two char arrays for equality.
      * Arrays are considered equal if they have the same length and all corresponding elements are equal.
-     * Two null arrays are considered equal.
+     * Two {@code null} arrays are considered equal.
      *
      * @param x the first char array
      * @param y the second char array
@@ -348,7 +349,7 @@ public final class PrimitiveCharArrayType extends AbstractPrimitiveArrayType<cha
     /**
      * Converts a char array to a readable string representation.
      * The format is: [a, b, c] with elements separated by commas but without quotes.
-     * Returns "null" if the array is null.
+     * Returns "null" if the array is {@code null}.
      *
      * @param x the char array to convert
      * @return a string representation suitable for display

@@ -58,8 +58,14 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
 
     static final Random RAND = new SecureRandom();
 
+    /**
+     * The array buffer into which the elements of the ShortList are stored.
+     */
     private short[] elementData = N.EMPTY_SHORT_ARRAY;
 
+    /**
+     * The size of the ShortList (the number of elements it contains).
+     */
     private int size = 0;
 
     /**
@@ -90,7 +96,7 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      * Constructs a ShortList using the specified array as the backing array for this list without copying.
      * The list will have the same length as the array. Modifications to the list will affect the original array.
      *
-     * @param a the array to be used as the backing array for this list. Must not be null.
+     * @param a the array to be used as the backing array for this list. Must not be {@code null}.
      */
     public ShortList(final short[] a) {
         this(N.requireNonNull(a), a.length);
@@ -101,7 +107,7 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      * Only the first {@code size} elements of the array will be considered part of the list.
      * Modifications to the list will affect the original array.
      *
-     * @param a the array to be used as the backing array for this list. Must not be null.
+     * @param a the array to be used as the backing array for this list. Must not be {@code null}.
      * @param size the number of elements in the list. Must be between 0 and a.length (inclusive).
      * @throws IndexOutOfBoundsException if size is negative or greater than a.length
      */
@@ -176,7 +182,7 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
 
     /**
      * Creates a ShortList containing a sequence of short values from startInclusive (inclusive) to
-     * endExclusive (exclusive), incrementing by 1. If startInclusive >= endExclusive, an empty list is returned.
+     * endExclusive (exclusive), incrementing by 1. If startInclusive &gt;= endExclusive, an empty list is returned.
      *
      * @param startInclusive the starting value (inclusive)
      * @param endExclusive the ending value (exclusive)
@@ -203,7 +209,7 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
 
     /**
      * Creates a ShortList containing a sequence of short values from startInclusive to endInclusive
-     * (both inclusive), incrementing by 1. If startInclusive > endInclusive, an empty list is returned.
+     * (both inclusive), incrementing by 1. If startInclusive &gt; endInclusive, an empty list is returned.
      *
      * @param startInclusive the starting value (inclusive)
      * @param endInclusive the ending value (inclusive)
@@ -390,7 +396,7 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      * @param index the index at which to insert the first element from the specified list
      * @param c the ShortList containing elements to be added to this list
      * @return {@code true} if this list changed as a result of the call
-     * @throws IndexOutOfBoundsException if the index is out of range (index < 0 || index > size())
+     * @throws IndexOutOfBoundsException if the index is out of range (index &lt; 0 || index &gt; size())
      */
     @Override
     public boolean addAll(final int index, final ShortList c) {
@@ -438,7 +444,7 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      * @param index the index at which to insert the first element from the specified array
      * @param a the array containing elements to be added to this list
      * @return {@code true} if this list changed as a result of the call (returns {@code false} only if the array is empty)
-     * @throws IndexOutOfBoundsException if the index is out of range (index < 0 || index > size())
+     * @throws IndexOutOfBoundsException if the index is out of range (index &lt; 0 || index &gt; size())
      */
     @Override
     public boolean addAll(final int index, final short[] a) {
@@ -694,7 +700,7 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      * Performs a batch removal operation based on the specified collection and complement flag.
      *
      * @param c the collection of elements to check against
-     * @param complement if true, retain elements in c; if false, remove elements in c
+     * @param complement if {@code true}, retain elements in c; if {@code false}, remove elements in c
      * @return the number of elements removed
      */
     private int batchRemove(final ShortList c, final boolean complement) {
@@ -735,7 +741,7 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      *
      * @param index the index of the element to be removed
      * @return the element that was removed from the list
-     * @throws IndexOutOfBoundsException if the index is out of range (index < 0 || index >= size())
+     * @throws IndexOutOfBoundsException if the index is out of range (index &lt; 0 || index &gt;= size())
      */
     public short delete(final int index) {
         rangeCheck(index);
@@ -751,7 +757,7 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      * Removes all elements at the specified indices from this list. The indices array may contain
      * duplicates and does not need to be sorted. Elements are removed efficiently in a single pass.
      *
-     * @param indices the indices of elements to be removed. Can be empty, null, or contain duplicates.
+     * @param indices the indices of elements to be removed. Can be empty, {@code null}, or contain duplicates.
      */
     @Override
     public void deleteAllByIndices(final int... indices) {
@@ -778,7 +784,7 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      * @param fromIndex the index of the first element to be removed (inclusive)
      * @param toIndex the index after the last element to be removed (exclusive)
      * @throws IndexOutOfBoundsException if fromIndex or toIndex is out of range
-     *         (fromIndex < 0 || toIndex > size() || fromIndex > toIndex)
+     *         (fromIndex &lt; 0 || toIndex &gt; size() || fromIndex &gt; toIndex)
      */
     @Override
     public void deleteRange(final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
@@ -816,7 +822,7 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      * @param fromIndex the starting index (inclusive) of the range to be moved
      * @param toIndex the ending index (exclusive) of the range to be moved
      * @param newPositionAfterMove the index where the first element of the range
-     *        should be positioned after the move; must be >= 0 and <= {@code size() - lengthOfRange}
+     *        should be positioned after the move; must be &gt;= 0 and &lt;= {@code size() - lengthOfRange}
      * @throws IndexOutOfBoundsException if any index is out of bounds or if newPositionAfterMove
      *         would cause elements to be moved outside the list bounds
      */
@@ -834,7 +840,7 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      * @param toIndex the ending index (exclusive) of the range to be replaced
      * @param replacement the ShortList whose elements will replace the specified range. Can be empty.
      * @throws IndexOutOfBoundsException if fromIndex or toIndex is out of range
-     *         (fromIndex < 0 || toIndex > size() || fromIndex > toIndex)
+     *         (fromIndex &lt; 0 || toIndex &gt; size() || fromIndex &gt; toIndex)
      */
     @Override
     public void replaceRange(final int fromIndex, final int toIndex, final ShortList replacement) throws IndexOutOfBoundsException {
@@ -872,9 +878,9 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      *
      * @param fromIndex the starting index (inclusive) of the range to be replaced
      * @param toIndex the ending index (exclusive) of the range to be replaced
-     * @param replacement the array whose elements will replace the specified range. Can be empty or null.
+     * @param replacement the array whose elements will replace the specified range. Can be empty or {@code null}.
      * @throws IndexOutOfBoundsException if fromIndex or toIndex is out of range
-     *         (fromIndex < 0 || toIndex > size() || fromIndex > toIndex)
+     *         (fromIndex &lt; 0 || toIndex &gt; size() || fromIndex &gt; toIndex)
      */
     @Override
     public void replaceRange(final int fromIndex, final int toIndex, final short[] replacement) throws IndexOutOfBoundsException {
@@ -982,7 +988,7 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      * @param toIndex the index after the last element (exclusive) to be filled with the specified value
      * @param val the value to be stored in all elements of the specified range
      * @throws IndexOutOfBoundsException if fromIndex or toIndex is out of range
-     *         (fromIndex < 0 || toIndex > size() || fromIndex > toIndex)
+     *         (fromIndex &lt; 0 || toIndex &gt; size() || fromIndex &gt; toIndex)
      */
     public void fill(final int fromIndex, final int toIndex, final short val) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex);
@@ -1005,7 +1011,7 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
     }
 
     /**
-     * Returns true if this list contains any of the elements in the specified ShortList.
+     * Returns {@code true} if this list contains any of the elements in the specified ShortList.
      * The operation returns as soon as any match is found.
      *
      * @param c the ShortList to be checked for containment in this list
@@ -1021,7 +1027,7 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
     }
 
     /**
-     * Returns true if this list contains any of the elements in the specified array.
+     * Returns {@code true} if this list contains any of the elements in the specified array.
      * The operation returns as soon as any match is found.
      *
      * @param a the array to be checked for containment in this list
@@ -1037,7 +1043,7 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
     }
 
     /**
-     * Returns true if this list contains all of the elements in the specified ShortList.
+     * Returns {@code true} if this list contains all of the elements in the specified ShortList.
      * Each element's occurrences are counted independently - if an element appears twice
      * in the specified list, this list must contain at least two occurrences of that element.
      *
@@ -1072,7 +1078,7 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
     }
 
     /**
-     * Returns true if this list contains all of the elements in the specified array.
+     * Returns {@code true} if this list contains all of the elements in the specified array.
      * Each element's occurrences are counted independently - if an element appears twice
      * in the specified array, this list must contain at least two occurrences of that element.
      *
@@ -1091,7 +1097,7 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
     }
 
     /**
-     * Returns true if this list has no elements in common with the specified ShortList.
+     * Returns {@code true} if this list has no elements in common with the specified ShortList.
      * Two lists are disjoint if they share no common elements.
      *
      * @param c the ShortList to be checked for disjointness with this list
@@ -1123,7 +1129,7 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
     }
 
     /**
-     * Returns true if this list has no elements in common with the specified array.
+     * Returns {@code true} if this list has no elements in common with the specified array.
      * This list and the array are disjoint if they share no common elements.
      *
      * @param b the array to be checked for disjointness with this list
@@ -1446,12 +1452,12 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
     /**
      * Returns the index of the first occurrence of the specified element in this list,
      * searching forwards from the specified index, or -1 if the element is not found.
-     * More formally, returns the lowest index i >= fromIndex such that elementData[i] == valueToFind,
+     * More formally, returns the lowest index i &gt;= fromIndex such that elementData[i] == valueToFind,
      * or -1 if there is no such index.
      *
      * @param valueToFind the element to search for
      * @param fromIndex the index to start searching from (inclusive)
-     * @return the index of the first occurrence of the element at position >= fromIndex,
+     * @return the index of the first occurrence of the element at position &gt;= fromIndex,
      *         or -1 if the element is not found
      */
     public int indexOf(final short valueToFind, final int fromIndex) {
@@ -1484,13 +1490,13 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
     /**
      * Returns the index of the last occurrence of the specified element in this list,
      * searching backwards from the specified index, or -1 if the element is not found.
-     * More formally, returns the highest index i <= startIndexFromBack such that
+     * More formally, returns the highest index i &lt;= startIndexFromBack such that
      * elementData[i] == valueToFind, or -1 if there is no such index.
      *
      * @param valueToFind the element to search for
      * @param startIndexFromBack the index to start searching backwards from (inclusive).
      *        Can be size() to search the entire list.
-     * @return the index of the last occurrence of the element at position <= startIndexFromBack,
+     * @return the index of the last occurrence of the element at position &lt;= startIndexFromBack,
      *         or -1 if the element is not found
      */
     public int lastIndexOf(final short valueToFind, final int startIndexFromBack) {
@@ -1525,7 +1531,7 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      * @return an OptionalShort containing the minimum element in the specified range,
      *         or an empty OptionalShort if the range is empty
      * @throws IndexOutOfBoundsException if fromIndex or toIndex is out of range
-     *         (fromIndex < 0 || toIndex > size() || fromIndex > toIndex)
+     *         (fromIndex &lt; 0 || toIndex &gt; size() || fromIndex &gt; toIndex)
      */
     public OptionalShort min(final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex);
@@ -1551,7 +1557,7 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      * @return an OptionalShort containing the maximum element in the specified range,
      *         or an empty OptionalShort if the range is empty
      * @throws IndexOutOfBoundsException if fromIndex or toIndex is out of range
-     *         (fromIndex < 0 || toIndex > size() || fromIndex > toIndex)
+     *         (fromIndex &lt; 0 || toIndex &gt; size() || fromIndex &gt; toIndex)
      */
     public OptionalShort max(final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex);
@@ -1669,7 +1675,7 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      * @param fromIndex the starting index (inclusive) of the range
      * @param toIndex the ending index (exclusive) of the range
      * @return a new ShortList containing the distinct elements
-     * @throws IndexOutOfBoundsException if fromIndex < 0, toIndex > size(), or fromIndex > toIndex
+     * @throws IndexOutOfBoundsException if fromIndex &lt; 0, toIndex &gt; size(), or fromIndex &gt; toIndex
      */
     @Override
     public ShortList distinct(final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
@@ -1766,7 +1772,7 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      * @param valueToFind the value to search for
      * @return the index of the search key if found within the range; otherwise, (-(insertion point) - 1).
      *         The insertion point is the point at which the key would be inserted into the list.
-     * @throws IndexOutOfBoundsException if fromIndex < 0, toIndex > size(), or fromIndex > toIndex
+     * @throws IndexOutOfBoundsException if fromIndex &lt; 0, toIndex &gt; size(), or fromIndex &gt; toIndex
      */
     public int binarySearch(final int fromIndex, final int toIndex, final short valueToFind) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex);
@@ -1795,7 +1801,7 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      *
      * @param fromIndex the starting index (inclusive) of the range to reverse
      * @param toIndex the ending index (exclusive) of the range to reverse
-     * @throws IndexOutOfBoundsException if fromIndex < 0, toIndex > size(), or fromIndex > toIndex
+     * @throws IndexOutOfBoundsException if fromIndex &lt; 0, toIndex &gt; size(), or fromIndex &gt; toIndex
      */
     @Override
     public void reverse(final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
@@ -1861,7 +1867,7 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      *
      * @param i the index of the first element to swap
      * @param j the index of the second element to swap
-     * @throws IndexOutOfBoundsException if either index is out of range (i < 0 || i >= size() || j < 0 || j >= size())
+     * @throws IndexOutOfBoundsException if either index is out of range (i &lt; 0 || i &gt;= size() || j &lt; 0 || j &gt;= size())
      */
     @Override
     public void swap(final int i, final int j) {
@@ -1893,7 +1899,7 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      * @param fromIndex the starting index (inclusive) of the range to copy
      * @param toIndex the ending index (exclusive) of the range to copy
      * @return a new ShortList containing the specified range of elements
-     * @throws IndexOutOfBoundsException if fromIndex < 0, toIndex > size(), or fromIndex > toIndex
+     * @throws IndexOutOfBoundsException if fromIndex &lt; 0, toIndex &gt; size(), or fromIndex &gt; toIndex
      */
     @Override
     public ShortList copy(final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
@@ -1935,8 +1941,8 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      * @param toIndex the ending index (exclusive) of the range to split
      * @param size the desired size of each subsequence. Must be positive.
      * @return a List of ShortList instances containing the split subsequences
-     * @throws IndexOutOfBoundsException if fromIndex < 0, toIndex > size(), or fromIndex > toIndex
-     * @throws IllegalArgumentException if size <= 0
+     * @throws IndexOutOfBoundsException if fromIndex &lt; 0, toIndex &gt; size(), or fromIndex &gt; toIndex
+     * @throws IllegalArgumentException if size &lt;= 0
      */
     @Override
     public List<ShortList> split(final int fromIndex, final int toIndex, final int size) throws IndexOutOfBoundsException {
@@ -1994,11 +2000,6 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
         return size == 0;
     }
 
-    /**
-     * Returns the number of elements in this list.
-     *
-     * @return the number of elements in this list
-     */
     @Override
     public int size() {
         return size;
@@ -2010,7 +2011,7 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      * <p>This method converts each primitive short value to its corresponding
      * Short wrapper object.</p>
      * 
-     * @return a new List<Short> containing all elements as boxed values
+     * @return a new List&lt;Short&gt; containing all elements as boxed values
      */
     @Override
     public List<Short> boxed() {
@@ -2025,8 +2026,8 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      *
      * @param fromIndex the starting index (inclusive) of the range to box
      * @param toIndex the ending index (exclusive) of the range to box
-     * @return a new List<Short> containing the specified range of elements as boxed values
-     * @throws IndexOutOfBoundsException if fromIndex < 0, toIndex > size(), or fromIndex > toIndex
+     * @return a new List&lt;Short&gt; containing the specified range of elements as boxed values
+     * @throws IndexOutOfBoundsException if fromIndex &lt; 0, toIndex &gt; size(), or fromIndex &gt; toIndex
      */
     @Override
     public List<Short> boxed(final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
@@ -2079,7 +2080,7 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      * @param toIndex the ending index (exclusive) of the range to add
      * @param supplier a function that creates the collection with the specified initial capacity
      * @return the collection with the added elements
-     * @throws IndexOutOfBoundsException if fromIndex < 0, toIndex > size(), or fromIndex > toIndex
+     * @throws IndexOutOfBoundsException if fromIndex &lt; 0, toIndex &gt; size(), or fromIndex &gt; toIndex
      */
     @Override
     public <C extends Collection<Short>> C toCollection(final int fromIndex, final int toIndex, final IntFunction<? extends C> supplier)
@@ -2104,7 +2105,7 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      * @param toIndex the ending index (exclusive) of the range
      * @param supplier a function that creates the Multiset with the specified initial capacity
      * @return a Multiset containing the elements from the specified range
-     * @throws IndexOutOfBoundsException if fromIndex < 0, toIndex > size(), or fromIndex > toIndex
+     * @throws IndexOutOfBoundsException if fromIndex &lt; 0, toIndex &gt; size(), or fromIndex &gt; toIndex
      */
     @Override
     public Multiset<Short> toMultiset(final int fromIndex, final int toIndex, final IntFunction<Multiset<Short>> supplier) throws IndexOutOfBoundsException {
@@ -2156,7 +2157,7 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      * @param fromIndex the starting index (inclusive) of the range
      * @param toIndex the ending index (exclusive) of the range
      * @return a sequential ShortStream over the specified range of elements
-     * @throws IndexOutOfBoundsException if fromIndex < 0, toIndex > size(), or fromIndex > toIndex
+     * @throws IndexOutOfBoundsException if fromIndex &lt; 0, toIndex &gt; size(), or fromIndex &gt; toIndex
      */
     public ShortStream stream(final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex);
@@ -2259,7 +2260,7 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
     /**
      * Compares this list with the specified object for equality.
      * 
-     * <p>Returns true if and only if the specified object is also a ShortList,
+     * <p>Returns {@code true} if and only if the specified object is also a ShortList,
      * both lists have the same size, and all corresponding pairs of elements
      * are equal.</p>
      *

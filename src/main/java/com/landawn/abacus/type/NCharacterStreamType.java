@@ -36,10 +36,10 @@ public class NCharacterStreamType extends ReaderType {
     /**
      * Retrieves a national character stream (Reader) from a ResultSet at the specified column index.
      * The returned Reader can be used to read Unicode character data from the database.
-     * 
+     *
      * @param rs the ResultSet to read from
      * @param columnIndex the column index (1-based) to retrieve the character stream from
-     * @return a Reader for the national character stream, or null if the column value is SQL NULL
+     * @return a Reader for the national character stream, or {@code null} if the column value is SQL NULL
      * @throws SQLException if a database access error occurs or the columnIndex is invalid
      */
     @Override
@@ -50,10 +50,10 @@ public class NCharacterStreamType extends ReaderType {
     /**
      * Retrieves a national character stream (Reader) from a ResultSet using the specified column label.
      * The returned Reader can be used to read Unicode character data from the database.
-     * 
+     *
      * @param rs the ResultSet to read from
      * @param columnLabel the label for the column specified with the SQL AS clause
-     * @return a Reader for the national character stream, or null if the column value is SQL NULL
+     * @return a Reader for the national character stream, or {@code null} if the column value is SQL NULL
      * @throws SQLException if a database access error occurs or the columnLabel is invalid
      */
     @Override
@@ -64,7 +64,7 @@ public class NCharacterStreamType extends ReaderType {
     /**
      * Sets a parameter in a PreparedStatement to a national character stream value.
      * The Reader will be read until end-of-file is reached for the stream.
-     * 
+     *
      * @param stmt the PreparedStatement to set the parameter on
      * @param columnIndex the parameter index (1-based) to set
      * @param x the Reader containing the Unicode character stream to set
@@ -78,7 +78,7 @@ public class NCharacterStreamType extends ReaderType {
     /**
      * Sets a named parameter in a CallableStatement to a national character stream value.
      * The Reader will be read until end-of-file is reached for the stream.
-     * 
+     *
      * @param stmt the CallableStatement to set the parameter on
      * @param parameterName the name of the parameter to set
      * @param x the Reader containing the Unicode character stream to set
@@ -92,7 +92,7 @@ public class NCharacterStreamType extends ReaderType {
     /**
      * Sets a parameter in a PreparedStatement to a national character stream value with a specified length.
      * Only the specified number of characters will be read from the Reader.
-     * 
+     *
      * @param stmt the PreparedStatement to set the parameter on
      * @param columnIndex the parameter index (1-based) to set
      * @param x the Reader containing the Unicode character stream to set
@@ -107,7 +107,7 @@ public class NCharacterStreamType extends ReaderType {
     /**
      * Sets a named parameter in a CallableStatement to a national character stream value with a specified length.
      * Only the specified number of characters will be read from the Reader.
-     * 
+     *
      * @param stmt the CallableStatement to set the parameter on
      * @param parameterName the name of the parameter to set
      * @param x the Reader containing the Unicode character stream to set

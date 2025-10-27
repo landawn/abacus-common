@@ -32,14 +32,14 @@ public interface ToByteFunction<T> extends Throwables.ToByteFunction<T, RuntimeE
 
     /**
      * A function that safely unboxes a Byte object to a primitive byte value.
-     * Returns 0 for null inputs and the byte value for non-null inputs.
+     * Returns 0 for {@code null} inputs and the byte value for {@code non-null} inputs.
      * This provides null-safe unboxing behavior.
      */
     ToByteFunction<Byte> UNBOX = value -> value == null ? 0 : value;
 
     /**
      * A function that converts any Number to a byte value.
-     * Returns 0 for null inputs and calls {@link Number#byteValue()} for non-null inputs.
+     * Returns 0 for {@code null} inputs and calls {@link Number#byteValue()} for {@code non-null} inputs.
      * This provides a convenient way to convert various numeric types to byte.
      */
     ToByteFunction<Number> FROM_NUM = value -> value == null ? 0 : value.byteValue();

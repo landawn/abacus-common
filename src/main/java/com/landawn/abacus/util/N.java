@@ -180,7 +180,8 @@ import com.landawn.abacus.util.stream.Stream;
  *   <li>{@link Strings} - String-specific utilities</li>
  *   <li>{@link Numbers} - Number-specific operations and conversions</li>
  *   <li>{@link Maps} - Map-specific utilities</li>
- *   <li>{@link Iterables} - Iterable/Iterator utilities</li>
+ *   <li>{@link Iterables} - Iterable utilities</li>
+ *   <li>{@link Iterators} - Iterator utilities</li>
  *   <li>{@link Stream} - Stream processing utilities</li>
  * </ul>
  *
@@ -1471,7 +1472,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param fromIndex the start index (inclusive)
      * @param toIndex the end index (exclusive)
      * @return an iterator containing the slice, or an empty iterator if iter is {@code null} or fromIndex equals toIndex
-     * @throws IllegalArgumentException if fromIndex is negative or fromIndex > toIndex
+     * @throws IllegalArgumentException if fromIndex is negative or fromIndex &gt; toIndex
      * @see Iterators#skipAndLimit(Iterator, long, long)
      */
     public static <T> ObjIterator<T> slice(final Iterator<? extends T> iter, final int fromIndex, final int toIndex) {
@@ -2425,6 +2426,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param <T> the type of the elements in the resulting stream
      * @param totalSize the total size to be split. It could be the size of an array, list, etc.
      * @param maxChunkCount the maximum number of chunks to split into
+     * @param func the function to apply to each chunk's start and end indices to produce a result
      * @return a Stream of the mapped chunk values
      * @throws IllegalArgumentException if {@code totalSize} is negative or {@code maxChunkCount} is not positive.
      * @see #splitByChunkCount(int, int, boolean, IntBiFunction)
@@ -3529,7 +3531,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * }</pre>
      *
      * @param a the two-dimensional array to flatten
-     * @return a one-dimensional array containing all elements from all non-null rows
+     * @return a one-dimensional array containing all elements from all {@code non-null} rows
      * @see #flatten(char[][])
      */
     public static boolean[] flatten(final boolean[][] a) {
@@ -3580,8 +3582,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * }</pre>
      *
      * @param a the two-dimensional char array to be flattened, may be {@code null} or empty
-     * @return a one-dimensional char array containing all elements from all non-null rows in the input array.
-     *         Returns an empty array if the input array is {@code null} or empty, or if all rows are null.
+     * @return a one-dimensional char array containing all elements from all {@code non-null} rows in the input array.
+     *         Returns an empty array if the input array is {@code null} or empty, or if all rows are {@code null}.
      * @see #flatten(Object[][])
      */
     public static char[] flatten(final char[][] a) {
@@ -3629,8 +3631,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * }</pre>
      *
      * @param a the two-dimensional byte array to be flattened, may be {@code null} or empty
-     * @return a one-dimensional byte array containing all elements from all non-null rows in the input array.
-     *         Returns an empty array if the input array is {@code null} or empty, or if all rows are null.
+     * @return a one-dimensional byte array containing all elements from all {@code non-null} rows in the input array.
+     *         Returns an empty array if the input array is {@code null} or empty, or if all rows are {@code null}.
      * @see #flatten(Object[][])
      */
     public static byte[] flatten(final byte[][] a) {
@@ -3670,8 +3672,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * }</pre>
      *
      * @param a the two-dimensional short array to be flattened, may be {@code null} or empty
-     * @return a one-dimensional short array containing all elements from all non-null rows in the input array.
-     *         Returns an empty array if the input array is {@code null} or empty, or if all rows are null.
+     * @return a one-dimensional short array containing all elements from all {@code non-null} rows in the input array.
+     *         Returns an empty array if the input array is {@code null} or empty, or if all rows are {@code null}.
      * @see #flatten(Object[][])
      */
     public static short[] flatten(final short[][] a) {
@@ -3711,8 +3713,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * }</pre>
      *
      * @param a the two-dimensional int array to be flattened, may be {@code null} or empty
-     * @return a one-dimensional int array containing all elements from all non-null rows in the input array.
-     *         Returns an empty array if the input array is {@code null} or empty, or if all rows are null.
+     * @return a one-dimensional int array containing all elements from all {@code non-null} rows in the input array.
+     *         Returns an empty array if the input array is {@code null} or empty, or if all rows are {@code null}.
      * @see #flatten(Object[][])
      */
     public static int[] flatten(final int[][] a) {
@@ -3752,8 +3754,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * }</pre>
      *
      * @param a the two-dimensional long array to be flattened, may be {@code null} or empty
-     * @return a one-dimensional long array containing all elements from all non-null rows in the input array.
-     *         Returns an empty array if the input array is {@code null} or empty, or if all rows are null.
+     * @return a one-dimensional long array containing all elements from all {@code non-null} rows in the input array.
+     *         Returns an empty array if the input array is {@code null} or empty, or if all rows are {@code null}.
      * @see #flatten(Object[][])
      */
     public static long[] flatten(final long[][] a) {
@@ -3793,8 +3795,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * }</pre>
      *
      * @param a the two-dimensional float array to be flattened, may be {@code null} or empty
-     * @return a one-dimensional float array containing all elements from all non-null rows in the input array.
-     *         Returns an empty array if the input array is {@code null} or empty, or if all rows are null.
+     * @return a one-dimensional float array containing all elements from all {@code non-null} rows in the input array.
+     *         Returns an empty array if the input array is {@code null} or empty, or if all rows are {@code null}.
      * @see #flatten(Object[][])
      */
     public static float[] flatten(final float[][] a) {
@@ -3834,8 +3836,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * }</pre>
      *
      * @param a the two-dimensional double array to be flattened, may be {@code null} or empty
-     * @return a one-dimensional double array containing all elements from all non-null rows in the input array.
-     *         Returns an empty array if the input array is {@code null} or empty, or if all rows are null.
+     * @return a one-dimensional double array containing all elements from all {@code non-null} rows in the input array.
+     *         Returns an empty array if the input array is {@code null} or empty, or if all rows are {@code null}.
      * @see #flatten(Object[][])
      */
     public static double[] flatten(final double[][] a) {
@@ -6675,7 +6677,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     /**
      * A fake/unsupported method defined to remind user to use {@code replaceAll} when {@code update/updateAll/updateIf} is searched.
      *
-     * @throws UnsupportedOperationException
+     * @throws UnsupportedOperationException always thrown to indicate this method is not supported
      * @see #replaceAll(Object[], UnaryOperator)
      * @see #replaceAll(Object[], Object, Object)
      * @deprecated use {@code replaceAll}
@@ -6688,7 +6690,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     /**
      * A fake/unsupported method defined to remind user to use {@code replaceIf} when {@code update/updateAll/updateIf} is searched.
      *
-     * @throws UnsupportedOperationException
+     * @throws UnsupportedOperationException always thrown to indicate this method is not supported
      * @see #replaceIf(Object[], Predicate, Object)
      * @deprecated use {@code replaceIf}
      */
@@ -6705,7 +6707,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param generator the function used to generate new values for the array elements
      * @see #replaceAll(boolean[], BooleanUnaryOperator)
      * @see Arrays#setAll(int[], IntUnaryOperator)
-     * @see Arrays#parallelSetAll(int[], IntUnaryOperator);
+     * @see Arrays#parallelSetAll(int[], IntUnaryOperator)
      */
     public static void setAll(final boolean[] array, final IntToBooleanFunction generator) {
         if (isEmpty(array)) {
@@ -6725,7 +6727,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param generator the function used to generate new values for the array elements
      * @see #replaceAll(char[], CharUnaryOperator)
      * @see Arrays#setAll(int[], IntUnaryOperator)
-     * @see Arrays#parallelSetAll(int[], IntUnaryOperator);
+     * @see Arrays#parallelSetAll(int[], IntUnaryOperator)
      */
     public static void setAll(final char[] array, final IntToCharFunction generator) {
         if (isEmpty(array)) {
@@ -6745,7 +6747,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param generator the function used to generate new values for the array elements
      * @see #replaceAll(byte[], ByteUnaryOperator)
      * @see Arrays#setAll(int[], IntUnaryOperator)
-     * @see Arrays#parallelSetAll(int[], IntUnaryOperator);
+     * @see Arrays#parallelSetAll(int[], IntUnaryOperator)
      */
     public static void setAll(final byte[] array, final IntToByteFunction generator) {
         if (isEmpty(array)) {
@@ -6765,7 +6767,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param generator the function used to generate new values for the array elements
      * @see #replaceAll(short[], ShortUnaryOperator)
      * @see Arrays#setAll(int[], IntUnaryOperator)
-     * @see Arrays#parallelSetAll(int[], IntUnaryOperator);
+     * @see Arrays#parallelSetAll(int[], IntUnaryOperator)
      */
     public static void setAll(final short[] array, final IntToShortFunction generator) {
         if (isEmpty(array)) {
@@ -6785,7 +6787,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param generator the function used to generate new values for the array elements
      * @see #replaceAll(int[], IntUnaryOperator)
      * @see Arrays#setAll(int[], IntUnaryOperator)
-     * @see Arrays#parallelSetAll(int[], IntUnaryOperator);
+     * @see Arrays#parallelSetAll(int[], IntUnaryOperator)
      */
     public static void setAll(final int[] array, final IntUnaryOperator generator) {
         if (isEmpty(array)) {
@@ -8071,7 +8073,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param index the position in the string where the new string should be inserted
      * @param strToInsert the string to be inserted into the original string
      * @return a new string with the original characters and the inserted string
-     * @throws IndexOutOfBoundsException if the index is out of range (index < 0 || index > str.length())
+     * @throws IndexOutOfBoundsException if the index is out of range (index &lt; 0 || index &gt; str.length())
      */
     public static String insert(final String str, final int index, final String strToInsert) throws IndexOutOfBoundsException {
         checkPositionIndex(index, len(str));
@@ -8461,7 +8463,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param elementsToInsert the elements to be inserted into the list
      * @return {@code true} if the list changed as a result of the call
      * @throws IllegalArgumentException if the list is {@code null}
-     * @throws IndexOutOfBoundsException if the index is out of range (index < 0 || index > list.size())
+     * @throws IndexOutOfBoundsException if the index is out of range (index &lt; 0 || index &gt; list.size())
      */
     @SafeVarargs
     public static <T> boolean insertAll(@NotNull final List<T> list, final int index, final T... elementsToInsert)
@@ -8486,7 +8488,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param elementsToInsert the elements to be inserted into the list
      * @return {@code true} if the list changed as a result of the call
      * @throws IllegalArgumentException if the list is {@code null}
-     * @throws IndexOutOfBoundsException if the index is out of range (index < 0 || index > list.size())
+     * @throws IndexOutOfBoundsException if the index is out of range (index &lt; 0 || index &gt; list.size())
      */
     public static <T> boolean insertAll(@NotNull final List<T> list, final int index, final Collection<? extends T> elementsToInsert)
             throws IllegalArgumentException, IndexOutOfBoundsException {
@@ -8753,6 +8755,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * <br />
      * The original array remains unchanged.
      *
+     * @param <T> the type of elements in the array
      * @param a the original array
      * @param index the position of the element to be removed
      * @return a new array containing the existing elements except the element at the specified index
@@ -9936,6 +9939,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * <br />
      * The original array remains unchanged.
      *
+     * @param <T> the type of elements in the array
      * @param a the array from which the values should be removed.
      * @param valuesToRemove the values to be removed from the array.
      * @return a new array with the first occurrence of the specified value removed. The input array itself is returned if the specified array is {@code null} or empty.
@@ -10301,6 +10305,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * <br />
      * The original array remains unchanged.
      *
+     * @param <T> the type of elements in the array
      * @param a the array from which the value should be removed.
      * @param valueToRemove the value to be removed from the array.
      * @return a new array with all occurrences of the specified value removed. The input array itself is returned if the specified array is {@code null} or empty.
@@ -10455,13 +10460,13 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * // Result: {'d', 'a', 'b', 'c'} - preserves first occurrence order
      * }</pre>
      *
-     * @param a the array from which duplicates should be removed, may be null or empty
+     * @param a the array from which duplicates should be removed, may be {@code null} or empty
      * @param fromIndex the initial index of the range to be considered for duplicate removal, inclusive
      * @param toIndex the final index of the range to be considered for duplicate removal, exclusive
      * @param isSorted {@code true} if the input array within the specified range is sorted (enables faster algorithm),
      *                 {@code false} otherwise
      * @return a new array with distinct elements within the specified range, preserving order of first occurrence.
-     *         Returns an empty array if the input is null or empty.
+     *         Returns an empty array if the input is {@code null} or empty.
      * @throws IndexOutOfBoundsException if {@code fromIndex < 0} or {@code toIndex > a.length} or {@code fromIndex > toIndex}
      * @see #distinct(char[])
      * @see #removeDuplicates(char[], boolean)
@@ -11153,6 +11158,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * <br />
      * The original array remains unchanged.
      *
+     * @param <T> the type of elements in the array
      * @param a the array from which duplicates should be removed.
      * @return a new array with all duplicates removed. The input array itself is returned if the specified array is {@code null} or empty.
      * @see #distinct(Object[])
@@ -11170,6 +11176,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * <br />
      * The original array remains unchanged.
      *
+     * @param <T> the type of elements in the array
      * @param a the array from which duplicates should be removed.
      * @param isSorted a boolean flag indicating whether the input array is sorted. If {@code true}, the algorithm will be faster
      * @return a new array with all duplicates removed. The input array itself is returned if the specified array is {@code null} or empty.
@@ -11187,6 +11194,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * <br />
      * The original array remains unchanged.
      *
+     * @param <T> the type of elements in the array
      * @param a the array from which duplicates should be removed.
      * @param fromIndex the initial index of the range to be considered for duplicate removal.
      * @param toIndex the final index of the range to be considered for duplicate removal.
@@ -12007,6 +12015,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * <br />
      * The original array remains unchanged.
      *
+     * @param <T> the type of elements in the array
      * @param a the original array
      * @param fromIndex the initial index of the range to be replaced, inclusive
      * @param toIndex the final index of the range to be replaced, exclusive
@@ -12427,8 +12436,9 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param c the original list to be modified
      * @param fromIndex the starting index (inclusive) of the range to be moved
      * @param toIndex the ending index (exclusive) of the range to be moved
-     * @param newPositionAfterMove — the zero-based index where the first element of the range will be placed after the move; 
+     * @param newPositionAfterMove — the zero-based index where the first element of the range will be placed after the move;
      *      must be between 0 and sizeOfList - lengthOfRange, inclusive.
+     * @return {@code true} if the list was modified (elements were moved), {@code false} otherwise
      * @throws IndexOutOfBoundsException if any index is out of bounds or if
      *         newPositionAfterMove would cause elements to be moved outside the list
      */
@@ -12458,7 +12468,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * should be positioned in the resulting string. The original string remains unchanged, and a new string
      * with the rearranged characters is returned.</p>
      *
-     * <p>The method returns an empty string for null or empty input.</p>
+     * <p>The method returns an empty string for {@code null} or empty input.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -12524,6 +12534,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @throws IndexOutOfBoundsException if the range is out of the array bounds
      * @see #deleteRange(Object[], int, int)
      */
+    @MayReturnNull
     public static <T> T[] skipRange(final T[] a, final int startInclusive, final int endExclusive) throws IndexOutOfBoundsException {
         final int len = len(a);
 
@@ -13143,7 +13154,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     /**
      * Checks if the given array has duplicate elements.
      *
-     * @param <T>
+     * @param <T> the type of elements in the array
      * @param a the array to be checked for duplicates
      * @return {@code true} if the array has duplicates, {@code false} otherwise
      */
@@ -13287,11 +13298,6 @@ public final class N extends CommonUtil { // public final class N extends π imp
         }
     }
 
-    /**
-     *
-     * @param obj the object to wrap as a hash key
-     * @return the object itself if non-null and not an array, a Wrapper for arrays, or NULL_MASK for null
-     */
     static Object hashKey(final Object obj) {
         return obj == null ? NULL_MASK : (obj.getClass().isArray() ? Wrapper.of(obj) : obj);
     }
@@ -15067,6 +15073,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * @param <T> the type of the elements in the collection, which must extend Number.
      * @param c the collection of numbers to calculate the average.
+     * @param fromIndex the starting index (inclusive) of the range.
+     * @param toIndex the ending index (exclusive) of the range.
      * @return the average of the elements in the collection as a double.
      * @see Iterables#averageLong(Collection, int, int)
      */
@@ -15213,6 +15221,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * @param <T> the type of the elements in the collection, which must extend Number.
      * @param c the collection of numbers to calculate the average.
+     * @param fromIndex the starting index (inclusive) of the range.
+     * @param toIndex the ending index (exclusive) of the range.
      * @return the average of the elements in the collection as a double.
      * @see Iterables#averageDouble(Collection, int, int)
      */
@@ -15535,7 +15545,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
     /**
      * Returns the smaller of two values based on the specified comparator.
-     * If the comparator is {@code null}, null values are considered maximum.
+     * If the comparator is {@code null}, {@code null} values are considered maximum.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -15762,7 +15772,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
     /**
      * Returns the smallest of three values based on the specified comparator.
-     * If the comparator is {@code null}, null values are considered maximum.
+     * If the comparator is {@code null}, {@code null} values are considered maximum.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -16184,7 +16194,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
     /**
      * Returns the smallest value in the specified array according to the provided comparator.
-     * If the comparator is {@code null}, null values are considered maximum.
+     * If the comparator is {@code null}, {@code null} values are considered maximum.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -16215,7 +16225,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
     /**
      * Returns the smallest value within the specified range of the array according to the provided comparator.
-     * If the comparator is {@code null}, null values are considered maximum.
+     * If the comparator is {@code null}, {@code null} values are considered maximum.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -16238,6 +16248,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see #max(Object[], int, int, Comparator)
      * @see Iterables#min(Object[], Comparator)
      */
+    @MayReturnNull
     public static <T> T min(final T[] a, final int fromIndex, final int toIndex, Comparator<? super T> cmp)
             throws IndexOutOfBoundsException, IllegalArgumentException {
         if (isEmpty(a) || toIndex - fromIndex < 1) {
@@ -16293,7 +16304,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
     /**
      * Returns the smallest value within the specified range of the collection according to the provided comparator.
-     * If the comparator is {@code null}, null values are considered maximum.
+     * If the comparator is {@code null}, {@code null} values are considered maximum.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -16315,6 +16326,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see #max(Collection, int, int, Comparator)
      * @see Iterables#min(Iterable, Comparator)
      */
+    @MayReturnNull
     public static <T> T min(final Collection<? extends T> c, final int fromIndex, final int toIndex, Comparator<? super T> cmp)
             throws IllegalArgumentException {
         checkFromToIndex(fromIndex, toIndex, size(c));
@@ -16396,7 +16408,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
     /**
      * Returns the smallest value in the iterable according to the provided comparator.
-     * If the comparator is {@code null}, null values are considered maximum.
+     * If the comparator is {@code null}, {@code null} values are considered maximum.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -16454,7 +16466,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
     /**
      * Returns the smallest value from the iterator according to the provided comparator.
-     * If the comparator is {@code null}, null values are considered maximum.
+     * If the comparator is {@code null}, {@code null} values are considered maximum.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -16475,6 +16487,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see #max(Iterator, Comparator)
      * @see Iterables#min(Iterator, Comparator)
      */
+    @MayReturnNull
     public static <T> T min(final Iterator<? extends T> iter, Comparator<? super T> cmp) throws IllegalArgumentException {
         checkArgument(!isEmpty(iter), "The specified Collection/Iterable/Iterator cannot be null or empty");
         cmp = cmp == null ? (Comparator<T>) NULL_MAX_COMPARATOR : cmp;
@@ -17322,7 +17335,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
     /**
      * Returns the larger of two values according to the provided comparator.
-     * If the comparator is {@code null}, null values are considered minimum.
+     * If the comparator is {@code null}, {@code null} values are considered minimum.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -17540,7 +17553,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
     /**
      * Returns the largest of three values according to the provided comparator.
-     * If the comparator is {@code null}, null values are considered minimum.
+     * If the comparator is {@code null}, {@code null} values are considered minimum.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -18049,7 +18062,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
     /**
      * Returns the largest element in the array according to the provided comparator.
-     * If the comparator is {@code null}, null values are considered minimum.
+     * If the comparator is {@code null}, {@code null} values are considered minimum.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -18080,7 +18093,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
     /**
      * Returns the largest element within the specified range of the array according to the provided comparator.
-     * If the comparator is {@code null}, null values are considered minimum.
+     * If the comparator is {@code null}, {@code null} values are considered minimum.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -18103,6 +18116,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see #min(Object[], int, int, Comparator)
      * @see Iterables#max(Object[], Comparator)
      */
+    @MayReturnNull
     public static <T> T max(final T[] a, final int fromIndex, final int toIndex, Comparator<? super T> cmp)
             throws IndexOutOfBoundsException, IllegalArgumentException {
         if (isEmpty(a) || toIndex - fromIndex < 1) {
@@ -18158,7 +18172,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
     /**
      * Returns the largest element within the specified range of the collection according to the provided comparator.
-     * If the comparator is {@code null}, null values are considered minimum.
+     * If the comparator is {@code null}, {@code null} values are considered minimum.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -18180,6 +18194,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see #min(Collection, int, int, Comparator)
      * @see Iterables#max(Iterable, Comparator)
      */
+    @MayReturnNull
     public static <T> T max(final Collection<? extends T> c, final int fromIndex, final int toIndex, Comparator<? super T> cmp)
             throws IllegalArgumentException {
         checkFromToIndex(fromIndex, toIndex, size(c));
@@ -18261,7 +18276,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
     /**
      * Returns the largest element in the iterable according to the provided comparator.
-     * If the comparator is {@code null}, null values are considered minimum.
+     * If the comparator is {@code null}, {@code null} values are considered minimum.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -18319,7 +18334,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
     /**
      * Returns the largest element from the iterator according to the provided comparator.
-     * If the comparator is {@code null}, null values are considered minimum.
+     * If the comparator is {@code null}, {@code null} values are considered minimum.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -18340,6 +18355,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see #min(Iterator, Comparator)
      * @see Iterables#max(Iterator, Comparator)
      */
+    @MayReturnNull
     public static <T> T max(final Iterator<? extends T> iter, Comparator<? super T> cmp) throws IllegalArgumentException {
         checkArgument(!isEmpty(iter), "The specified Collection/Iterable/Iterator cannot be null or empty");
         cmp = cmp == null ? (Comparator<T>) NULL_MIN_COMPARATOR : cmp;
@@ -19639,12 +19655,13 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
     /**
      * Returns the median value of elements within the specified range of the specified array.
-     * 
+     *
      * <p>The median is computed for elements from {@code fromIndex} (inclusive) to {@code toIndex} (exclusive).
      * For ranges with an odd number of elements, this returns the exact middle element when sorted.
      * For ranges with an even number of elements, this returns the lower of the two middle elements.</p>
      *
      * @param <T> the type of elements in the input array
+     * @param a the array of values to find the median of
      * @param fromIndex the starting index (inclusive) of the range to calculate median for
      * @param toIndex the ending index (exclusive) of the range to calculate median for
      * @return the median within the specified range in the input array
@@ -19689,12 +19706,13 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
     /**
      * Returns the median value of elements within the specified range of the specified array.
-     * 
+     *
      * <p>The median is computed for elements from {@code fromIndex} (inclusive) to {@code toIndex} (exclusive).
      * For ranges with an odd number of elements, this returns the exact middle element when sorted.
      * For ranges with an even number of elements, this returns the lower of the two middle elements.</p>
      *
      * @param <T> the type of elements in the input array
+     * @param a the array of values to find the median of
      * @param fromIndex the starting index (inclusive) of the range to calculate median for
      * @param toIndex the ending index (exclusive) of the range to calculate median for
      * @param cmp the comparator to determine the order of the values
@@ -19755,12 +19773,13 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
     /**
      * Returns the median value of elements within the specified range of the specified collection.
-     * 
+     *
      * <p>The median is computed for elements from {@code fromIndex} (inclusive) to {@code toIndex} (exclusive).
      * For ranges with an odd number of elements, this returns the exact middle element when sorted.
      * For ranges with an even number of elements, this returns the lower of the two middle elements.</p>
      *
      * @param <T> the type of elements in the input collection
+     * @param c the collection of values to find the median of
      * @param fromIndex the starting index (inclusive) of the range to calculate median for
      * @param toIndex the ending index (exclusive) of the range to calculate median for
      * @return the median within the specified range in the input array
@@ -19805,12 +19824,13 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
     /**
      * Returns the median value of elements within the specified range of the specified collection.
-     * 
+     *
      * <p>The median is computed for elements from {@code fromIndex} (inclusive) to {@code toIndex} (exclusive).
      * For ranges with an odd number of elements, this returns the exact middle element when sorted.
      * For ranges with an even number of elements, this returns the lower of the two middle elements.</p>
      *
      * @param <T> the type of elements in the input collection
+     * @param c the collection of values to find the median of
      * @param fromIndex the starting index (inclusive) of the range to calculate median for
      * @param toIndex the ending index (exclusive) of the range to calculate median for
      * @param cmp the comparator to determine the order of the values
@@ -21403,7 +21423,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
-     * Returns the top n largest elements from the array (order not guaranteed, null values treated as smallest).
+     * Returns the top n largest elements from the array (order not guaranteed, {@code null} values treated as smallest).
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -21446,7 +21466,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
-     * Returns the top n largest elements from the specified range (order not guaranteed, null values treated as smallest).
+     * Returns the top n largest elements from the specified range (order not guaranteed, {@code null} values treated as smallest).
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -21506,7 +21526,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
-     * Returns the top n largest elements from the collection (order not guaranteed, null values treated as smallest).
+     * Returns the top n largest elements from the collection (order not guaranteed, {@code null} values treated as smallest).
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -21549,7 +21569,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
-     * Returns the top n largest elements from the specified range (order not guaranteed, null values treated as smallest).
+     * Returns the top n largest elements from the specified range (order not guaranteed, {@code null} values treated as smallest).
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -21681,7 +21701,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
-     * Returns the top n largest elements from the array (encounter order optionally preserved, null values treated as smallest).
+     * Returns the top n largest elements from the array (encounter order optionally preserved, {@code null} values treated as smallest).
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -21726,7 +21746,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
-     * Returns the top n largest elements from the specified range (encounter order optionally preserved, null values treated as smallest).
+     * Returns the top n largest elements from the specified range (encounter order optionally preserved, {@code null} values treated as smallest).
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -21834,7 +21854,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
-     * Returns the top n largest elements from the collection (encounter order optionally preserved, null values treated as smallest).
+     * Returns the top n largest elements from the collection (encounter order optionally preserved, {@code null} values treated as smallest).
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -21879,7 +21899,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
-     * Returns the top n largest elements from the specified range (encounter order optionally preserved, null values treated as smallest).
+     * Returns the top n largest elements from the specified range (encounter order optionally preserved, {@code null} values treated as smallest).
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -27401,7 +27421,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param atMost the maximum number of matches allowed (inclusive)
      * @param filter the predicate to test each element
      * @return {@code true} if match count is within the range ({@code true} if array is empty and {@code atLeast} is 0)
-     * @throws IllegalArgumentException if {@code atLeast < 0 || atMost < 0 || atLeast > atMost}
+     * @throws IllegalArgumentException if {@code atLeast} &lt; 0 || {@code atMost} &lt; 0 || {@code atLeast} &gt; {@code atMost}
      * @see #allMatch(Object[], Predicate)
      * @see #count(Object[], Predicate)
      */
@@ -27447,7 +27467,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param atMost the maximum number of matches allowed (inclusive)
      * @param filter the predicate to test each element
      * @return {@code true} if match count is within the range ({@code true} if iterable is empty and {@code atLeast} is 0)
-     * @throws IllegalArgumentException if {@code atLeast < 0 || atMost < 0 || atLeast > atMost}
+     * @throws IllegalArgumentException if {@code atLeast} &lt; 0 || {@code atMost} &lt; 0 || {@code atLeast} &gt; {@code atMost}
      * @see #allMatch(Iterable, Predicate)
      * @see #count(Iterable, Predicate)
      */
@@ -27489,7 +27509,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param atMost the maximum number of matches allowed (inclusive)
      * @param filter the predicate to test each element
      * @return {@code true} if match count is within the range ({@code true} if iterator is empty and {@code atLeast} is 0)
-     * @throws IllegalArgumentException if {@code atLeast < 0 || atMost < 0 || atLeast > atMost}
+     * @throws IllegalArgumentException if {@code atLeast} &lt; 0 || {@code atMost} &lt; 0 || {@code atLeast} &gt; {@code atMost}
      * @see #allMatch(Iterator, Predicate)
      * @see #count(Iterator, Predicate)
      */
@@ -32984,6 +33004,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * @param <A> the type of the elements in the first array
      * @param <B> the type of the elements in the second array
+     * @param <C> the type of the elements in the third array
      * @param <E> the type of the exception that the action may throw
      * @param a the first array whose elements are to be processed
      * @param b the second array whose elements are to be processed
@@ -33213,7 +33234,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
-     * Executes the action for each non-null element in the array.
+     * Executes the action for each {@code non-null} element in the array.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -33225,7 +33246,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param <T> the type of elements in the array
      * @param <E> the type of exception that the action may throw
      * @param a the array to iterate
-     * @param action the action to execute for each non-null element
+     * @param action the action to execute for each {@code non-null} element
      * @throws E if the action throws an exception
      * @see #forEach(Object[], Throwables.Consumer)
      * @see #forEachNonNull(Iterable, Throwables.Consumer)
@@ -33243,7 +33264,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
-     * Executes the action for each non-null element in the iterable.
+     * Executes the action for each {@code non-null} element in the iterable.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -33255,7 +33276,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param <T> the type of elements in the iterable
      * @param <E> the type of exception that the action may throw
      * @param c the iterable to iterate
-     * @param action the action to execute for each non-null element
+     * @param action the action to execute for each {@code non-null} element
      * @throws E if the action throws an exception
      * @see #forEach(Iterable, Throwables.Consumer)
      * @see #forEachNonNull(Object[], Throwables.Consumer)
@@ -33273,7 +33294,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
-     * Executes the action for each non-null element in the iterator.
+     * Executes the action for each {@code non-null} element in the iterator.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -33285,7 +33306,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param <T> the type of elements in the iterator
      * @param <E> the type of exception that the action may throw
      * @param iter the iterator to iterate
-     * @param action the action to execute for each non-null element
+     * @param action the action to execute for each {@code non-null} element
      * @throws E if the action throws an exception
      * @see #forEach(Iterator, Throwables.Consumer)
      * @see #forEachNonNull(Iterable, Throwables.Consumer)
@@ -33305,7 +33326,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
-     * Executes the action for each non-null element in the array paired with non-null mapped elements.
+     * Executes the action for each {@code non-null} element in the array paired with {@code non-null} mapped elements.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -33321,8 +33342,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param <E> the type of exception that flatMapper may throw
      * @param <E2> the type of exception that action may throw
      * @param a the array to iterate
-     * @param flatMapper the function producing an iterable for each non-null element (skips {@code null} results and {@code null} elements)
-     * @param action the action to execute for each non-null (element, mapped) pair
+     * @param flatMapper the function producing an iterable for each {@code non-null} element (skips {@code null} results and {@code null} elements)
+     * @param action the action to execute for each {@code non-null} (element, mapped) pair
      * @throws E if flatMapper throws an exception
      * @throws E2 if action throws an exception
      * @see #forEach(Object[], Throwables.Function, Throwables.BiConsumer)
@@ -33350,7 +33371,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
-     * Executes the action for each non-null element in the iterable paired with non-null mapped elements.
+     * Executes the action for each {@code non-null} element in the iterable paired with {@code non-null} mapped elements.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -33366,8 +33387,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param <E> the type of exception that flatMapper may throw
      * @param <E2> the type of exception that action may throw
      * @param c the iterable to iterate
-     * @param flatMapper the function producing an iterable for each non-null element (skips {@code null} results and {@code null} elements)
-     * @param action the action to execute for each non-null (element, mapped) pair
+     * @param flatMapper the function producing an iterable for each {@code non-null} element (skips {@code null} results and {@code null} elements)
+     * @param action the action to execute for each {@code non-null} (element, mapped) pair
      * @throws E if flatMapper throws an exception
      * @throws E2 if action throws an exception
      * @see #forEach(Iterable, Throwables.Function, Throwables.BiConsumer)
@@ -33395,7 +33416,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
-     * Executes the action for each non-null element in the iterator paired with non-null mapped elements.
+     * Executes the action for each {@code non-null} element in the iterator paired with {@code non-null} mapped elements.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -33411,8 +33432,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param <E> the type of exception that flatMapper may throw
      * @param <E2> the type of exception that action may throw
      * @param iter the iterator to iterate
-     * @param flatMapper the function producing an iterable for each non-null element (skips {@code null} results and {@code null} elements)
-     * @param action the action to execute for each non-null (element, mapped) pair
+     * @param flatMapper the function producing an iterable for each {@code non-null} element (skips {@code null} results and {@code null} elements)
+     * @param action the action to execute for each {@code non-null} (element, mapped) pair
      * @throws E if flatMapper throws an exception
      * @throws E2 if action throws an exception
      * @see #forEach(Iterator, Throwables.Function, Throwables.BiConsumer)
@@ -33444,7 +33465,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
-     * Executes the action for each non-null element in the array with two levels of non-null mapped elements.
+     * Executes the action for each {@code non-null} element in the array with two levels of {@code non-null} mapped elements.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -33463,9 +33484,9 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param <E2> the type of exception that flatMapper2 may throw
      * @param <E3> the type of exception that action may throw
      * @param a the array to iterate
-     * @param flatMapper the first mapping function (T -> Iterable<T2>, skips {@code null} at all levels)
-     * @param flatMapper2 the second mapping function (T2 -> Iterable<T3>, skips {@code null} at all levels)
-     * @param action the action to execute for each non-null triple
+     * @param flatMapper the first mapping function (T -&gt; Iterable&lt;T2&gt;, skips {@code null} at all levels)
+     * @param flatMapper2 the second mapping function (T2 -&gt; Iterable&lt;T3&gt;, skips {@code null} at all levels)
+     * @param action the action to execute for each {@code non-null} triple
      * @throws E if flatMapper throws an exception
      * @throws E2 if flatMapper2 throws an exception
      * @throws E3 if action throws an exception
@@ -33502,7 +33523,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
-     * Executes the action for each non-null element in the iterable with two levels of non-null mapped elements.
+     * Executes the action for each {@code non-null} element in the iterable with two levels of {@code non-null} mapped elements.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -33521,9 +33542,9 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param <E2> the type of exception that flatMapper2 may throw
      * @param <E3> the type of exception that action may throw
      * @param c the iterable to iterate
-     * @param flatMapper the first mapping function (T -> Iterable<T2>, skips {@code null} at all levels)
-     * @param flatMapper2 the second mapping function (T2 -> Iterable<T3>, skips {@code null} at all levels)
-     * @param action the action to execute for each non-null triple
+     * @param flatMapper the first mapping function (T -&gt; Iterable&lt;T2&gt;, skips {@code null} at all levels)
+     * @param flatMapper2 the second mapping function (T2 -&gt; Iterable&lt;T3&gt;, skips {@code null} at all levels)
+     * @param action the action to execute for each {@code non-null} triple
      * @throws E if flatMapper throws an exception
      * @throws E2 if flatMapper2 throws an exception
      * @throws E3 if action throws an exception
@@ -33560,7 +33581,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
-     * Executes the action for each non-null element in the iterator with two levels of non-null mapped elements.
+     * Executes the action for each {@code non-null} element in the iterator with two levels of {@code non-null} mapped elements.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -33579,9 +33600,9 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param <E2> the type of exception that flatMapper2 may throw
      * @param <E3> the type of exception that action may throw
      * @param iter the iterator to iterate
-     * @param flatMapper the first mapping function (T -> Iterable<T2>, skips {@code null} at all levels)
-     * @param flatMapper2 the second mapping function (T2 -> Iterable<T3>, skips {@code null} at all levels)
-     * @param action the action to execute for each non-null triple
+     * @param flatMapper the first mapping function (T -&gt; Iterable&lt;T2&gt;, skips {@code null} at all levels)
+     * @param flatMapper2 the second mapping function (T2 -&gt; Iterable&lt;T3&gt;, skips {@code null} at all levels)
+     * @param action the action to execute for each {@code non-null} triple
      * @throws E if flatMapper throws an exception
      * @throws E2 if flatMapper2 throws an exception
      * @throws E3 if action throws an exception
@@ -33669,7 +33690,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param <E> the type of exception that the action may throw
      * @param a the array to iterate
      * @param fromIndex the starting index (inclusive) of the range
-     * @param toIndex the ending index (exclusive) of the range (if fromIndex > toIndex, iterates in reverse)
+     * @param toIndex the ending index (exclusive) of the range (if fromIndex &gt; toIndex, iterates in reverse)
      * @param action the action to execute, receiving index and element
      * @throws IndexOutOfBoundsException if the range is out of bounds
      * @throws E if the action throws an exception
@@ -33717,7 +33738,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param <E> the type of exception that the action may throw
      * @param c the collection to iterate
      * @param fromIndex the starting index (inclusive) of the range
-     * @param toIndex the ending index (exclusive) of the range (if fromIndex > toIndex, iterates in reverse)
+     * @param toIndex the ending index (exclusive) of the range (if fromIndex &gt; toIndex, iterates in reverse)
      * @param action the action to execute, receiving index and element
      * @throws IndexOutOfBoundsException if the range is out of bounds
      * @throws E if the action throws an exception
@@ -36653,8 +36674,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
-     * Executes the callable and returns the result wrapped in a Nullable.
-     * Returns an empty Nullable if an exception occurs during execution.
+     * Executes the callable and returns the result wrapped in a {@code Nullable}.
+     * Returns an empty {@code Nullable} if an exception occurs during execution.
      * This provides a safe way to execute operations that may throw exceptions without explicit try-catch blocks.
      *
      * <p><b>Usage Examples:</b></p>
@@ -36667,7 +36688,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * @param <R> the type of result returned by the callable
      * @param cmd the callable to execute
-     * @return a Nullable containing the result, or empty if an exception occurs
+     * @return a {@code Nullable} containing the result, or empty if an exception occurs
      * @see #tryOrEmptyIfExceptionOccurred(Object, Throwables.Function)
      * @see #tryOrDefaultIfExceptionOccurred(Callable, Supplier)
      * @see Try#call(Throwables.Function)
@@ -36682,8 +36703,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
-     * Applies the function to the initial value and returns the result wrapped in a Nullable.
-     * Returns an empty Nullable if an exception occurs during execution.
+     * Applies the function to the initial value and returns the result wrapped in a {@code Nullable}.
+     * Returns an empty {@code Nullable} if an exception occurs during execution.
      * This provides a safe way to execute operations that may throw exceptions without explicit try-catch blocks.
      *
      * <p><b>Usage Examples:</b></p>
@@ -36699,7 +36720,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param <R> the type of result returned by the function
      * @param init the initial value to pass to the function
      * @param func the function to apply
-     * @return a Nullable containing the result, or empty if an exception occurs
+     * @return a {@code Nullable} containing the result, or empty if an exception occurs
      * @see #tryOrEmptyIfExceptionOccurred(Callable)
      * @see #tryOrDefaultIfExceptionOccurred(Object, Throwables.Function, Supplier)
      * @see Try#call(Throwables.Function)
@@ -36850,8 +36871,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
-     * Returns a Nullable containing the result of the supplier if the condition is true.
-     * Returns an empty Nullable if the condition is false.
+     * Returns a {@code Nullable} containing the result of the supplier if the condition is {@code true}.
+     * Returns an empty {@code Nullable} if the condition is {@code false}.
      * This provides a concise way to conditionally compute values without explicit if-else blocks.
      *
      * <p><b>Usage Examples:</b></p>
@@ -36865,7 +36886,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param <E> the type of exception that the supplier may throw
      * @param b the condition to evaluate
      * @param supplier the supplier to execute if the condition is true
-     * @return a Nullable containing the result if condition is true, empty otherwise
+     * @return a {@code Nullable} containing the result if condition is {@code true}, empty otherwise
      * @throws E if the supplier throws an exception
      * @see #ifNotNull(Object, Throwables.Consumer)
      */
@@ -36882,7 +36903,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
     /**
      * Executes one of two actions based on the boolean condition.
-     * Executes actionForTrue if the condition is true, otherwise executes actionForFalse.
+     * Executes actionForTrue if the condition is {@code true}, otherwise executes actionForFalse.
      * Skips execution if the corresponding action is {@code null}.
      *
      * <p><b>Usage Examples:</b></p>
@@ -36897,10 +36918,10 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param <E1> the type of exception that actionForTrue may throw
      * @param <E2> the type of exception that actionForFalse may throw
      * @param b the boolean condition to test
-     * @param actionForTrue the action to execute if condition is true (may be {@code null})
-     * @param actionForFalse the action to execute if condition is false (may be {@code null})
-     * @throws E1 if condition is true and actionForTrue throws an exception
-     * @throws E2 if condition is false and actionForFalse throws an exception
+     * @param actionForTrue the action to execute if condition is {@code true} (may be {@code null})
+     * @param actionForFalse the action to execute if condition is {@code false} (may be {@code null})
+     * @throws E1 if condition is {@code true} and actionForTrue throws an exception
+     * @throws E2 if condition is {@code false} and actionForFalse throws an exception
      * @deprecated it's not a good idea? if-else is better?
      */
     @Deprecated
@@ -36920,7 +36941,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     /**
      * Executes the consumer with the object if the object is not {@code null}.
      * Does nothing if the object is {@code null}.
-     * This provides a concise way to perform null-safe operations without explicit null checks.
+     * This provides a concise way to perform null-safe operations without explicit {@code null} checks.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -37449,7 +37470,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * N.fprintln("Processing item %d of %d: %s", current, total, item.getName());
      * }</pre>
      *
-     * <p><strong>Performance note:</strong> This method uses {@link System#out#printf(String, Object...)}
+     * <p><strong>Performance note:</strong> This method uses {@link System#out System.out.printf(String, Object...)}
      * internally, which is efficient for formatted output but may be slower than simple string concatenation
      * for very frequent debugging calls.</p>
      *
@@ -37459,7 +37480,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *             The number of arguments is variable and may be zero
      * @throws IllegalFormatException if the format string is invalid or contains illegal format specifiers
      * @see String#format(String, Object...)
-     * @see System#out#printf(String, Object...)
+     * @see System#out System.out.printf(String, Object...)
      * @see #println(Object)
      * @see java.util.Formatter
      */

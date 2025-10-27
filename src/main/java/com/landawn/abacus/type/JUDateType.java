@@ -107,9 +107,10 @@ public class JUDateType extends AbstractDateType<Date> {
      * }</pre>
      *
      * @param obj the object to convert to Date
-     * @return a Date instance, or null if the input is null
+     * @return a Date instance, or {@code null} if the input is null
      */
     @Override
+    @MayReturnNull
     public Date valueOf(final Object obj) {
         if (obj instanceof Number) {
             return new Date(((Number) obj).longValue());
@@ -146,10 +147,11 @@ public class JUDateType extends AbstractDateType<Date> {
      * }</pre>
      *
      * @param str the string to parse
-     * @return a Date instance, or null if the string is empty or null
+     * @return a Date instance, or {@code null} if the string is empty or null
      * @throws IllegalArgumentException if the string format is invalid
      */
     @Override
+    @MayReturnNull
     public Date valueOf(final String str) {
         return Strings.isEmpty(str) ? null : (N.equals(str, SYS_TIME) ? Dates.currentJUDate() : Dates.parseJUDate(str));
     }
@@ -178,10 +180,11 @@ public class JUDateType extends AbstractDateType<Date> {
      * @param cbuf the character buffer containing the value to parse
      * @param offset the start offset in the character buffer
      * @param len the number of characters to parse
-     * @return a Date instance, or null if the character buffer is null or length is 0
+     * @return a Date instance, or {@code null} if the character buffer is {@code null} or length is 0
      */
     @MayReturnNull
     @Override
+
     public Date valueOf(final char[] cbuf, final int offset, final int len) {
         if ((cbuf == null) || (len == 0)) {
             return null; // NOSONAR
@@ -214,10 +217,11 @@ public class JUDateType extends AbstractDateType<Date> {
      *
      * @param rs the ResultSet to read from
      * @param columnIndex the column index (1-based) to retrieve the value from
-     * @return a Date instance created from the timestamp, or null if the column value is SQL NULL
+     * @return a Date instance created from the timestamp, or {@code null} if the column value is SQL NULL
      * @throws SQLException if a database access error occurs or the column index is invalid
      */
     @Override
+    @MayReturnNull
     public Date get(final ResultSet rs, final int columnIndex) throws SQLException {
         final Timestamp ts = rs.getTimestamp(columnIndex);
 
@@ -240,10 +244,11 @@ public class JUDateType extends AbstractDateType<Date> {
      *
      * @param rs the ResultSet to read from
      * @param columnLabel the column label to retrieve the value from
-     * @return a Date instance created from the timestamp, or null if the column value is SQL NULL
+     * @return a Date instance created from the timestamp, or {@code null} if the column value is SQL NULL
      * @throws SQLException if a database access error occurs or the column label is invalid
      */
     @Override
+    @MayReturnNull
     public Date get(final ResultSet rs, final String columnLabel) throws SQLException {
         final Timestamp ts = rs.getTimestamp(columnLabel);
 
@@ -257,7 +262,7 @@ public class JUDateType extends AbstractDateType<Date> {
      *
      * This method converts the java.util.Date to a SQL Timestamp before setting it in the statement.
      * If the Date is already a Timestamp instance, it is used directly.
-     * If the Date is null, a SQL NULL is set for the parameter.
+     * If the Date is {@code null}, a SQL NULL is set for the parameter.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -271,7 +276,7 @@ public class JUDateType extends AbstractDateType<Date> {
      *
      * @param stmt the PreparedStatement to set the parameter on
      * @param columnIndex the parameter index (1-based) to set
-     * @param x the Date value to set, or null for SQL NULL
+     * @param x the Date value to set, or {@code null} for SQL NULL
      * @throws SQLException if a database access error occurs or the parameter index is invalid
      */
     @Override
@@ -286,7 +291,7 @@ public class JUDateType extends AbstractDateType<Date> {
      *
      * This method converts the java.util.Date to a SQL Timestamp before setting it in the statement.
      * If the Date is already a Timestamp instance, it is used directly.
-     * If the Date is null, a SQL NULL is set for the parameter.
+     * If the Date is {@code null}, a SQL NULL is set for the parameter.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -300,7 +305,7 @@ public class JUDateType extends AbstractDateType<Date> {
      *
      * @param stmt the CallableStatement to set the parameter on
      * @param parameterName the name of the parameter to set
-     * @param x the Date value to set, or null for SQL NULL
+     * @param x the Date value to set, or {@code null} for SQL NULL
      * @throws SQLException if a database access error occurs or the parameter name is invalid
      */
     @Override

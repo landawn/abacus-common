@@ -1107,7 +1107,7 @@ public final class Fraction extends Number implements Comparable<Fraction>, Immu
      * Fraction quot = f1.dividedBy(f2);  // Returns 3/2 (3/4 ÷ 1/2 = 3/4 × 2/1)
      * }</pre>
      *
-     * @param fraction the fraction to divide by (must not be null or zero)
+     * @param fraction the fraction to divide by (must not be {@code null} or zero)
      * @return a new {@code Fraction} instance with the quotient
      * @throws IllegalArgumentException if the fraction parameter is null
      * @throws ArithmeticException if the divisor fraction is zero or if the
@@ -1170,7 +1170,7 @@ public final class Fraction extends Number implements Comparable<Fraction>, Immu
      * <li>If the numerator is zero, returns "0"</li>
      * <li>If the fraction equals 1, returns "1"</li>
      * <li>If the fraction equals -1, returns "-1"</li>
-     * <li>If the fraction is proper (numerator < denominator), returns "numerator/denominator"</li>
+     * <li>If the fraction is proper (numerator &lt; denominator), returns "numerator/denominator"</li>
      * <li>If the fraction is improper, returns "whole numerator/denominator" format</li>
      * <li>If the fraction has no fractional part, returns just the whole number</li>
      * </ul>

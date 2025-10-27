@@ -14,6 +14,7 @@
 
 package com.landawn.abacus.util.function;
 
+import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.util.Throwables;
 
 /**
@@ -60,6 +61,7 @@ public interface FloatBiFunction<R> extends Throwables.FloatBiFunction<R, Runtim
      * @return the function result of type {@code R} if the function encounters an error during computation
      */
     @Override
+    @MayReturnNull
     R apply(float t, float u);
 
     /**

@@ -19,8 +19,8 @@ import com.landawn.abacus.util.WD;
 /**
  * Type handler for java.util.Optional with generic type parameter.
  * This class provides serialization, deserialization, and database access capabilities for Optional instances.
- * Optional is a container that may or may not contain a non-null value.
- * Empty optionals are represented as null in serialized form.
+ * Optional is a container that may or may not contain a {@code non-null} value.
+ * Empty optionals are represented as {@code null} in serialized form.
  *
  * @param <T> the type of value that may be present in the Optional
  */
@@ -47,7 +47,8 @@ public class JdkOptionalType<T> extends AbstractOptionalType<Optional<T>> {
      * Returns the declaring name of this optional type.
      * The declaring name represents the type in a simplified format suitable for type declarations.
      *
-     * @return the declaring name of this type (e.g., "JdkOptional<String>")
+     * @return the declaring name of this type (e.g., "JdkOptional&lt;String&gt;")
+     @MayReturnNull
      */
     @Override
     public String declaringName() {
@@ -86,11 +87,6 @@ public class JdkOptionalType<T> extends AbstractOptionalType<Optional<T>> {
         return parameterTypes;
     }
 
-    /**
-     * Indicates that this is a generic type with type parameters.
-     *
-     * @return {@code true} as Optional is a generic type
-     */
     @Override
     public boolean isGenericType() {
         return true;
@@ -108,12 +104,13 @@ public class JdkOptionalType<T> extends AbstractOptionalType<Optional<T>> {
 
     /**
      * Converts an Optional to its string representation.
-     * If the optional is empty or null, returns null.
+     * If the optional is empty or {@code null}, returns {@code null}.
      * Otherwise, returns the string representation of the contained value.
      * Uses the runtime type of the value for accurate serialization.
      *
      * @param x the Optional to convert to string
-     * @return the string representation of the contained value, or null if empty or null
+     * @return the string representation of the contained value, or {@code null} if empty or null
+     @MayReturnNull
      */
     @Override
     public String stringOf(final Optional<T> x) {
@@ -126,7 +123,7 @@ public class JdkOptionalType<T> extends AbstractOptionalType<Optional<T>> {
      * Non-null strings are parsed according to the element type and wrapped in Optional.
      *
      * @param str the string to parse
-     * @return Optional.empty() if the string is null, otherwise Optional.ofNullable() of the parsed value
+     * @return Optional.empty() if the string is {@code null}, otherwise Optional.ofNullable() of the parsed value
      */
     @Override
     public Optional<T> valueOf(final String str) {
@@ -135,12 +132,12 @@ public class JdkOptionalType<T> extends AbstractOptionalType<Optional<T>> {
 
     /**
      * Retrieves an Optional value from the specified column in a ResultSet.
-     * If the column value is null, returns an empty Optional.
+     * If the column value is {@code null}, returns an empty Optional.
      * Otherwise, converts the value to the appropriate type and wraps it in Optional.
      *
      * @param rs the ResultSet to read from
      * @param columnIndex the index of the column to read (1-based)
-     * @return Optional.empty() if the column is null, otherwise Optional containing the converted value
+     * @return Optional.empty() if the column is {@code null}, otherwise Optional containing the converted value
      * @throws SQLException if a database access error occurs or the columnIndex is invalid
      */
     @Override
@@ -153,12 +150,12 @@ public class JdkOptionalType<T> extends AbstractOptionalType<Optional<T>> {
 
     /**
      * Retrieves an Optional value from the specified column in a ResultSet using the column label.
-     * If the column value is null, returns an empty Optional.
+     * If the column value is {@code null}, returns an empty Optional.
      * Otherwise, converts the value to the appropriate type and wraps it in Optional.
      *
      * @param rs the ResultSet to read from
      * @param columnLabel the label of the column to read
-     * @return Optional.empty() if the column is null, otherwise Optional containing the converted value
+     * @return Optional.empty() if the column is {@code null}, otherwise Optional containing the converted value
      * @throws SQLException if a database access error occurs or the columnLabel is not found
      */
     @Override
@@ -171,7 +168,7 @@ public class JdkOptionalType<T> extends AbstractOptionalType<Optional<T>> {
 
     /**
      * Sets an Optional parameter in a PreparedStatement.
-     * If the Optional is null or empty, sets the parameter to SQL NULL.
+     * If the Optional is {@code null} or empty, sets the parameter to SQL NULL.
      * Otherwise, sets the contained value as an object parameter.
      *
      * @param stmt the PreparedStatement to set the parameter on
@@ -186,7 +183,7 @@ public class JdkOptionalType<T> extends AbstractOptionalType<Optional<T>> {
 
     /**
      * Sets an Optional parameter in a CallableStatement using a parameter name.
-     * If the Optional is null or empty, sets the parameter to SQL NULL.
+     * If the Optional is {@code null} or empty, sets the parameter to SQL NULL.
      * Otherwise, sets the contained value as an object parameter.
      *
      * @param stmt the CallableStatement to set the parameter on
@@ -220,7 +217,7 @@ public class JdkOptionalType<T> extends AbstractOptionalType<Optional<T>> {
 
     /**
      * Writes the character representation of an Optional to a CharacterWriter.
-     * Empty optionals are written as null.
+     * Empty optionals are written as {@code null}.
      * Present values are serialized using their runtime type for accuracy.
      *
      * @param writer the CharacterWriter to write to

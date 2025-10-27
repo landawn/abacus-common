@@ -74,7 +74,7 @@ public interface NoCachingNoUpdating {
 
         /**
          * Constructs a DisposableArray with the specified array.
-         * The array must not be null.
+         * The array must not be {@code null}.
          *
          * @param a the array to wrap
          * @throws IllegalArgumentException if the array is null
@@ -202,11 +202,11 @@ public interface NoCachingNoUpdating {
 
         /**
          * Converts the array to a Collection of the specified type.
-         * 
+         *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * DisposableArray<String> disposable = DisposableArray.wrap(new String[] {"a", "b", "c"});
-         * LinkedList<String> list = disposable.toCollection(LinkedList::new);
+         * List<String> list = disposable.toCollection(ArrayList::new);
          * }</pre>
          *
          * @param <C> the type of the collection to create
@@ -305,21 +305,11 @@ public interface NoCachingNoUpdating {
             return Strings.join(a, delimiter, prefix, suffix);
         }
 
-        /**
-         * Returns an iterator over the elements in the array.
-         *
-         * @return an iterator over the array elements
-         */
         @Override
         public Iterator<T> iterator() {
             return ObjIterator.of(a);
         }
 
-        /**
-         * Returns a string representation of the array.
-         *
-         * @return a string representation of the array
-         */
         @Override
         public String toString() {
             return N.toString(a);
@@ -355,11 +345,6 @@ public interface NoCachingNoUpdating {
     @Stateful
     class DisposableObjArray extends DisposableArray<Object> {
 
-        /**
-         * Constructs a DisposableObjArray with the specified Object array.
-         *
-         * @param a the Object array to wrap
-         */
         protected DisposableObjArray(final Object[] a) {
             super(a);
         }
@@ -427,12 +412,6 @@ public interface NoCachingNoUpdating {
         /** The element array */
         private final boolean[] a;
 
-        /**
-         * Constructs a DisposableBooleanArray with the specified boolean array.
-         *
-         * @param a the boolean array to wrap
-         * @throws IllegalArgumentException if the array is null
-         */
         protected DisposableBooleanArray(final boolean[] a) {
             N.checkArgNotNull(a, cs.a);
             this.a = a;
@@ -594,21 +573,11 @@ public interface NoCachingNoUpdating {
             return Strings.join(a, 0, length(), delimiter, prefix, suffix);
         }
 
-        /**
-         * Returns a string representation of the array.
-         *
-         * @return a string representation of the array
-         */
         @Override
         public String toString() {
             return N.toString(a);
         }
 
-        /**
-         * Returns the wrapped boolean array.
-         *
-         * @return the wrapped array
-         */
         protected boolean[] values() {
             return a;
         }
@@ -637,12 +606,6 @@ public interface NoCachingNoUpdating {
         /** The element array */
         private final char[] a;
 
-        /**
-         * Constructs a DisposableCharArray with the specified char array.
-         *
-         * @param a the char array to wrap
-         * @throws IllegalArgumentException if the array is null
-         */
         protected DisposableCharArray(final char[] a) {
             N.checkArgNotNull(a, cs.a);
             this.a = a;
@@ -836,21 +799,11 @@ public interface NoCachingNoUpdating {
             return Strings.join(a, 0, length(), delimiter, prefix, suffix);
         }
 
-        /**
-         * Returns a string representation of the array.
-         *
-         * @return a string representation of the array
-         */
         @Override
         public String toString() {
             return N.toString(a);
         }
 
-        /**
-         * Returns the wrapped char array.
-         *
-         * @return the wrapped array
-         */
         protected char[] values() {
             return a;
         }
@@ -879,12 +832,6 @@ public interface NoCachingNoUpdating {
         /** The element array */
         private final byte[] a;
 
-        /**
-         * Constructs a DisposableByteArray with the specified byte array.
-         *
-         * @param a the byte array to wrap
-         * @throws IllegalArgumentException if the array is null
-         */
         protected DisposableByteArray(final byte[] a) {
             N.checkArgNotNull(a, cs.a);
             this.a = a;
@@ -1076,21 +1023,11 @@ public interface NoCachingNoUpdating {
             return Strings.join(a, 0, length(), delimiter, prefix, suffix);
         }
 
-        /**
-         * Returns a string representation of the array.
-         *
-         * @return a string representation of the array
-         */
         @Override
         public String toString() {
             return N.toString(a);
         }
 
-        /**
-         * Returns the wrapped byte array.
-         *
-         * @return the wrapped array
-         */
         protected byte[] values() {
             return a;
         }
@@ -1119,12 +1056,6 @@ public interface NoCachingNoUpdating {
         /** The element array */
         private final short[] a;
 
-        /**
-         * Constructs a DisposableShortArray with the specified short array.
-         *
-         * @param a the short array to wrap
-         * @throws IllegalArgumentException if the array is null
-         */
         protected DisposableShortArray(final short[] a) {
             N.checkArgNotNull(a, cs.a);
             this.a = a;
@@ -1316,21 +1247,11 @@ public interface NoCachingNoUpdating {
             return Strings.join(a, 0, length(), delimiter, prefix, suffix);
         }
 
-        /**
-         * Returns a string representation of the array.
-         *
-         * @return a string representation of the array
-         */
         @Override
         public String toString() {
             return N.toString(a);
         }
 
-        /**
-         * Returns the wrapped short array.
-         *
-         * @return the wrapped array
-         */
         protected short[] values() {
             return a;
         }
@@ -1360,12 +1281,6 @@ public interface NoCachingNoUpdating {
         /** The element array */
         private final int[] a;
 
-        /**
-         * Constructs a DisposableIntArray with the specified int array.
-         *
-         * @param a the int array to wrap
-         * @throws IllegalArgumentException if the array is null
-         */
         protected DisposableIntArray(final int[] a) {
             N.checkArgNotNull(a, cs.a);
             this.a = a;
@@ -1557,21 +1472,11 @@ public interface NoCachingNoUpdating {
             return Strings.join(a, 0, length(), delimiter, prefix, suffix);
         }
 
-        /**
-         * Returns a string representation of the array.
-         *
-         * @return a string representation of the array
-         */
         @Override
         public String toString() {
             return N.toString(a);
         }
 
-        /**
-         * Returns the wrapped int array.
-         *
-         * @return the wrapped array
-         */
         protected int[] values() {
             return a;
         }
@@ -1600,12 +1505,6 @@ public interface NoCachingNoUpdating {
         /** The element array */
         private final long[] a;
 
-        /**
-         * Constructs a DisposableLongArray with the specified long array.
-         *
-         * @param a the long array to wrap
-         * @throws IllegalArgumentException if the array is null
-         */
         protected DisposableLongArray(final long[] a) {
             N.checkArgNotNull(a, cs.a);
             this.a = a;
@@ -1797,21 +1696,11 @@ public interface NoCachingNoUpdating {
             return Strings.join(a, 0, length(), delimiter, prefix, suffix);
         }
 
-        /**
-         * Returns a string representation of the array.
-         *
-         * @return a string representation of the array
-         */
         @Override
         public String toString() {
             return N.toString(a);
         }
 
-        /**
-         * Returns the wrapped long array.
-         *
-         * @return the wrapped array
-         */
         protected long[] values() {
             return a;
         }
@@ -1840,12 +1729,6 @@ public interface NoCachingNoUpdating {
         /** The element array */
         private final float[] a;
 
-        /**
-         * Constructs a DisposableFloatArray with the specified float array.
-         *
-         * @param a the float array to wrap
-         * @throws IllegalArgumentException if the array is null
-         */
         protected DisposableFloatArray(final float[] a) {
             N.checkArgNotNull(a, cs.a);
             this.a = a;
@@ -2037,21 +1920,11 @@ public interface NoCachingNoUpdating {
             return Strings.join(a, 0, length(), delimiter, prefix, suffix);
         }
 
-        /**
-         * Returns a string representation of the array.
-         *
-         * @return a string representation of the array
-         */
         @Override
         public String toString() {
             return N.toString(a);
         }
 
-        /**
-         * Returns the wrapped float array.
-         *
-         * @return the wrapped array
-         */
         protected float[] values() {
             return a;
         }
@@ -2081,12 +1954,6 @@ public interface NoCachingNoUpdating {
         /** The element array */
         private final double[] a;
 
-        /**
-         * Constructs a DisposableDoubleArray with the specified double array.
-         *
-         * @param a the double array to wrap
-         * @throws IllegalArgumentException if the array is null
-         */
         protected DisposableDoubleArray(final double[] a) {
             N.checkArgNotNull(a, cs.a);
             this.a = a;
@@ -2278,21 +2145,11 @@ public interface NoCachingNoUpdating {
             return Strings.join(a, 0, length(), delimiter, prefix, suffix);
         }
 
-        /**
-         * Returns a string representation of the array.
-         *
-         * @return a string representation of the array
-         */
         @Override
         public String toString() {
             return N.toString(a);
         }
 
-        /**
-         * Returns the wrapped double array.
-         *
-         * @return the wrapped array
-         */
         protected double[] values() {
             return a;
         }
@@ -2324,12 +2181,6 @@ public interface NoCachingNoUpdating {
         /** The deque. */
         private final Deque<T> deque;
 
-        /**
-         * Constructs a DisposableDeque with the specified deque.
-         *
-         * @param deque the deque to wrap
-         * @throws IllegalArgumentException if the deque is null
-         */
         protected DisposableDeque(final Deque<T> deque) {
             N.checkArgNotNull(deque, cs.deque);
             this.deque = deque;
@@ -2495,11 +2346,6 @@ public interface NoCachingNoUpdating {
             return Strings.join(deque, delimiter, prefix, suffix);
         }
 
-        /**
-         * Returns a string representation of the deque.
-         *
-         * @return a string representation of the deque
-         */
         @Override
         public String toString() {
             return N.toString(deque);
@@ -2528,6 +2374,12 @@ public interface NoCachingNoUpdating {
     @SequentialOnly
     @Stateful
     abstract class DisposableEntry<K, V> implements Map.Entry<K, V>, NoCachingNoUpdating {
+
+        /**
+         * Protected constructor for subclasses.
+         */
+        protected DisposableEntry() {
+        }
 
         /**
          * Wraps an existing Map.Entry in a DisposableEntry.
@@ -2668,6 +2520,12 @@ public interface NoCachingNoUpdating {
     abstract class DisposablePair<L, R> implements NoCachingNoUpdating {
 
         /**
+         * Protected constructor for subclasses.
+         */
+        protected DisposablePair() {
+        }
+
+        /**
          * Wraps an existing Pair in a DisposablePair.
          *
          * @param <L> the type of the left element
@@ -2783,6 +2641,12 @@ public interface NoCachingNoUpdating {
     @SequentialOnly
     @Stateful
     abstract class DisposableTriple<L, M, R> implements NoCachingNoUpdating {
+
+        /**
+         * Protected constructor for subclasses.
+         */
+        protected DisposableTriple() {
+        }
 
         /**
          * Wraps an existing Triple in a DisposableTriple.

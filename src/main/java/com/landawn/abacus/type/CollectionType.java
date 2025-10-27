@@ -41,7 +41,7 @@ import com.landawn.abacus.util.WD;
  * This class provides serialization and deserialization capabilities for collection types with generic element types.
  *
  * @param <E> the element type of the collection
- * @param <T> the collection type (must extend Collection<E>)
+ * @param <T> the collection type (must extend Collection&lt;E&gt;)
  */
 @SuppressWarnings("java:S2160")
 public class CollectionType<E, T extends Collection<E>> extends AbstractType<T> {
@@ -106,7 +106,7 @@ public class CollectionType<E, T extends Collection<E>> extends AbstractType<T> 
      * The declaring name represents the type in a simplified format suitable for type declarations,
      * using simple class names rather than fully qualified names.
      *
-     * @return the declaring name of this type (e.g., "List<String>" instead of "java.util.List<java.lang.String>")
+     * @return the declaring name of this type (e.g., "List&lt;String&gt;" instead of "java.util.List&lt;java.lang.String&gt;")
      */
     @Override
     public String declaringName() {
@@ -174,11 +174,6 @@ public class CollectionType<E, T extends Collection<E>> extends AbstractType<T> 
         return true;
     }
 
-    /**
-     * Indicates that this is a generic type with type parameters.
-     *
-     * @return {@code true} as collection types are generic types
-     */
     @Override
     public boolean isGenericType() {
         return true;
@@ -208,15 +203,16 @@ public class CollectionType<E, T extends Collection<E>> extends AbstractType<T> 
 
     /**
      * Converts a collection to its string representation.
-     * If the collection is null, returns null.
+     * If the collection is {@code null}, returns {@code null}.
      * If the collection is empty, returns "[]".
      * Otherwise, serializes the collection to a JSON array string where each element is serialized according to its type.
      *
      * @param x the collection to convert to string
-     * @return the string representation of the collection, or null if the input is null
+     * @return the string representation of the collection, or {@code null} if the input is null
      */
     @MayReturnNull
     @Override
+
     public String stringOf(final T x) {
         if (x == null) {
             return null; // NOSONAR
@@ -258,14 +254,15 @@ public class CollectionType<E, T extends Collection<E>> extends AbstractType<T> 
 
     /**
      * Converts a string representation back to a collection instance.
-     * Handles null and empty strings by returning null or an empty collection respectively.
+     * Handles {@code null} and empty strings by returning {@code null} or an empty collection respectively.
      * The string should be in JSON array format.
      *
      * @param str the string to parse
-     * @return a new collection instance containing the parsed elements, or null if the input is null
+     * @return a new collection instance containing the parsed elements, or {@code null} if the input is null
      */
     @MayReturnNull
     @Override
+
     public T valueOf(final String str) {
         if (Strings.isEmpty(str) || Strings.isBlank(str)) {
             return null; // NOSONAR
@@ -388,8 +385,8 @@ public class CollectionType<E, T extends Collection<E>> extends AbstractType<T> 
      *
      * @param typeClass the collection class
      * @param parameterTypeName the name of the element type
-     * @param isDeclaringName true to generate a declaring name with simple class names, {@code false} for fully qualified names
-     * @return the formatted type name (e.g., "List<String>" or "java.util.List<java.lang.String>")
+     * @param isDeclaringName {@code true} to generate a declaring name with simple class names, {@code false} for fully qualified names
+     * @return the formatted type name (e.g., "List&lt;String&gt;" or "java.util.List&lt;java.lang.String&gt;")
      */
     protected static String getTypeName(final Class<?> typeClass, final String parameterTypeName, final boolean isDeclaringName) {
         if (isDeclaringName) {

@@ -20,11 +20,11 @@ import java.lang.annotation.RetentionPolicy;
  * Annotation used to suppress FindBugs warnings on annotated program elements.
  * FindBugs is a static analysis tool that detects potential bugs and security vulnerabilities
  * in Java code. This annotation allows developers to suppress specific warnings when they
- * are false positives or when the code is intentionally designed a certain way.
+ * are {@code false} positives or when the code is intentionally designed a certain way.
  * 
  * <p>This annotation should be used judiciously and only when:</p>
  * <ul>
- *   <li>You have thoroughly analyzed the warning and determined it's a false positive</li>
+ *   <li>You have thoroughly analyzed the warning and determined it's a {@code false} positive</li>
  *   <li>The code design intentionally violates a FindBugs rule for valid reasons</li>
  *   <li>The warning cannot be fixed without significant architectural changes</li>
  *   <li>You have provided proper justification for suppressing the warning</li>
@@ -52,21 +52,21 @@ import java.lang.annotation.RetentionPolicy;
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * // Suppress a specific bug pattern
- * {@literal @}SuppressFBWarnings(value = "NP_NULL_ON_SOME_PATH", 
+ * @SuppressFBWarnings(value = "NP_NULL_ON_SOME_PATH", 
  *                         justification = "Null check performed by validation framework")
  * public void processData(String data) {
  *     // Method implementation
  * }
  * 
  * // Suppress multiple warnings
- * {@literal @}SuppressFBWarnings(value = {"EI_EXPOSE_REP", "EI_EXPOSE_REP2"},
+ * @SuppressFBWarnings(value = {"EI_EXPOSE_REP", "EI_EXPOSE_REP2"},
  *                         justification = "Intentional exposure for performance reasons")
  * public Date[] getDates() {
  *     return this.dates;
  * }
  * 
  * // Suppress by category
- * {@literal @}SuppressFBWarnings(value = "SECURITY", 
+ * @SuppressFBWarnings(value = "SECURITY", 
  *                         justification = "Security handled by external framework")
  * public class LegacyAuthenticator {
  *     // Class implementation
@@ -93,7 +93,7 @@ public @interface SuppressFBWarnings {
      * 
      * <p><b>Usage Examples:</b></p>
      * <ul>
-     *   <li>{"NP_NULL_ON_SOME_PATH"} - Suppress specific null pointer warnings</li>
+     *   <li>{"NP_NULL_ON_SOME_PATH"} - Suppress specific {@code null} pointer warnings</li>
      *   <li>{"SECURITY"} - Suppress all security-related warnings</li>
      *   <li>{"EI_EXPOSE_REP", "EI_EXPOSE_REP2"} - Suppress representation exposure warnings</li>
      * </ul>
@@ -108,7 +108,7 @@ public @interface SuppressFBWarnings {
      * 
      * <p><b>Best practices for justifications:</b></p>
      * <ul>
-     *   <li>Explain why the warning is a false positive</li>
+     *   <li>Explain why the warning is a {@code false} positive</li>
      *   <li>Describe the intentional design decision</li>
      *   <li>Reference external validation or security measures</li>
      *   <li>Note if the issue is addressed elsewhere in the codebase</li>

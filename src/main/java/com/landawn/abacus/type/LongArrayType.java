@@ -56,10 +56,11 @@ public final class LongArrayType extends ObjectArrayType<Long> {
      *
      * @param x The Long array to convert
      * @return The string representation of the array in format "[value1, value2, ...]",
-     *         or null if the input array is null, or "[]" if the array is empty
+     *         or {@code null} if the input array is {@code null}, or "[]" if the array is empty
      */
     @MayReturnNull
     @Override
+
     public String stringOf(final Long[] x) {
         if (x == null) {
             return null; // NOSONAR
@@ -74,9 +75,9 @@ public final class LongArrayType extends ObjectArrayType<Long> {
      * Parses a string to create a Long array.
      * The string should be in the format "[value1, value2, ...]" where each value is either a long number or "null".
      * The method handles:
-     * - null input returns null
+     * - {@code null} input returns null
      * - Empty string or "[]" returns an empty Long array
-     * - Values of "null" (case-sensitive, exactly 4 characters) are converted to null elements
+     * - Values of "null" (case-sensitive, exactly 4 characters) are converted to {@code null} elements
      * - Other values are parsed as Long objects
      *
      * <p><b>Usage Examples:</b></p>
@@ -100,11 +101,12 @@ public final class LongArrayType extends ObjectArrayType<Long> {
      * }</pre>
      *
      * @param str The string to parse
-     * @return The parsed Long array, or null if the input is null
-     * @throws NumberFormatException if any non-null value cannot be parsed as a Long
+     * @return The parsed Long array, or {@code null} if the input is null
+     * @throws NumberFormatException if any {@code non-null} value cannot be parsed as a Long
      */
     @MayReturnNull
     @Override
+
     public Long[] valueOf(final String str) {
         if (Strings.isEmpty(str) || Strings.isBlank(str)) {
             return null; // NOSONAR
@@ -132,7 +134,7 @@ public final class LongArrayType extends ObjectArrayType<Long> {
     /**
      * Appends the string representation of a Long array to an Appendable.
      * The array is formatted as a comma-separated list of values enclosed in square brackets.
-     * Null array is represented as "null", null elements are represented as "null".
+     * Null array is represented as "null", {@code null} elements are represented as "null".
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code

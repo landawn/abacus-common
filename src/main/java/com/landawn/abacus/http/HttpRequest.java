@@ -174,7 +174,7 @@ public final class HttpRequest {
      *     .get();
      * }</pre>
      *
-     * @param httpSettings The HTTP settings to merge. If null, this method has no effect.
+     * @param httpSettings The HTTP settings to merge. If {@code null}, this method has no effect.
      * @return This HttpRequest instance for method chaining
      * @see HttpSettings
      */
@@ -477,7 +477,7 @@ public final class HttpRequest {
      *     .get();
      * }</pre>
      *
-     * @param sslSocketFactory The SSL socket factory to use. Must not be null.
+     * @param sslSocketFactory The SSL socket factory to use. Must not be {@code null}.
      * @return This HttpRequest instance for method chaining
      */
     public HttpRequest sslSocketFactory(final SSLSocketFactory sslSocketFactory) {
@@ -500,7 +500,7 @@ public final class HttpRequest {
      *     .get();
      * }</pre>
      *
-     * @param proxy The proxy to use. Must not be null.
+     * @param proxy The proxy to use. Must not be {@code null}.
      * @return This HttpRequest instance for method chaining
      */
     public HttpRequest proxy(final Proxy proxy) {
@@ -627,7 +627,7 @@ public final class HttpRequest {
      *     .post();
      * }</pre>
      *
-     * @param obj The object to serialize as XML. Must not be null.
+     * @param obj The object to serialize as XML. Must not be {@code null}.
      * @return This HttpRequest instance for method chaining
      */
     public HttpRequest xmlBody(final Object obj) {
@@ -672,7 +672,7 @@ public final class HttpRequest {
      *     .post();
      * }</pre>
      *
-     * @param formBodyByBean A bean object whose properties will be used as form fields. Must not be null.
+     * @param formBodyByBean A bean object whose properties will be used as form fields. Must not be {@code null}.
      * @return This HttpRequest instance for method chaining
      */
     public HttpRequest formBody(final Object formBodyByBean) {
@@ -817,7 +817,7 @@ public final class HttpRequest {
      * }</pre>
      *
      * @param <T> The type of the response object
-     * @param resultClass The class of the expected response object. Must not be null.
+     * @param resultClass The class of the expected response object. Must not be {@code null}.
      * @return The deserialized response object
      * @throws UncheckedIOException if an I/O error occurs during the request
      */
@@ -853,7 +853,7 @@ public final class HttpRequest {
      * }</pre>
      *
      * @param <T> The type of the response object
-     * @param resultClass The class of the expected response object. Must not be null.
+     * @param resultClass The class of the expected response object. Must not be {@code null}.
      * @return The deserialized response object
      * @throws UncheckedIOException if an I/O error occurs during the request
      */
@@ -885,7 +885,7 @@ public final class HttpRequest {
      *
      * @param <T> The type of the response object
      * @param resultClass The class of the expected response object
-     * @return The deserialized response object (typically null for HEAD requests)
+     * @return The deserialized response object (typically {@code null} for HEAD requests)
      * @throws UncheckedIOException if an I/O error occurs
      */
     <T> T head(final Class<T> resultClass) throws UncheckedIOException {
@@ -902,7 +902,7 @@ public final class HttpRequest {
      *     .execute(HttpMethod.GET);
      * }</pre>
      *
-     * @param httpMethod The HTTP method to use (GET, POST, PUT, DELETE, HEAD, etc.). Must not be null.
+     * @param httpMethod The HTTP method to use (GET, POST, PUT, DELETE, HEAD, etc.). Must not be {@code null}.
      * @return The HttpResponse object containing status code, headers, and response body
      * @throws UncheckedIOException if an I/O error occurs during the request
      */
@@ -943,8 +943,8 @@ public final class HttpRequest {
      *     .execute(HttpMethod.GET, file);
      * }</pre>
      *
-     * @param httpMethod The HTTP method to use (GET, POST, PUT, DELETE, HEAD, etc.). Must not be null.
-     * @param output The file to write the response body to. Must not be null.
+     * @param httpMethod The HTTP method to use (GET, POST, PUT, DELETE, HEAD, etc.). Must not be {@code null}.
+     * @param output The file to write the response body to. Must not be {@code null}.
      * @throws IllegalArgumentException if httpMethod is null
      * @throws UncheckedIOException if an I/O error occurs during the request or file writing
      */
@@ -971,8 +971,8 @@ public final class HttpRequest {
      * byte[] data = baos.toByteArray();
      * }</pre>
      *
-     * @param httpMethod The HTTP method to use (GET, POST, PUT, DELETE, HEAD, etc.). Must not be null.
-     * @param output The output stream to write the response body to. Must not be null.
+     * @param httpMethod The HTTP method to use (GET, POST, PUT, DELETE, HEAD, etc.). Must not be {@code null}.
+     * @param output The output stream to write the response body to. Must not be {@code null}.
      * @throws IllegalArgumentException if httpMethod is null
      * @throws UncheckedIOException if an I/O error occurs during the request or stream writing
      */
@@ -999,8 +999,8 @@ public final class HttpRequest {
      * String text = writer.toString();
      * }</pre>
      *
-     * @param httpMethod The HTTP method to use (GET, POST, PUT, DELETE, HEAD, etc.). Must not be null.
-     * @param output The writer to write the response body to. Must not be null.
+     * @param httpMethod The HTTP method to use (GET, POST, PUT, DELETE, HEAD, etc.). Must not be {@code null}.
+     * @param output The writer to write the response body to. Must not be {@code null}.
      * @throws IllegalArgumentException if httpMethod is null
      * @throws UncheckedIOException if an I/O error occurs during the request or writing
      */
@@ -1049,7 +1049,7 @@ public final class HttpRequest {
      *     .getThenAccept(response -> System.out.println("Got: " + response.statusCode()));
      * }</pre>
      *
-     * @param executor The executor to use for the asynchronous operation. Must not be null.
+     * @param executor The executor to use for the asynchronous operation. Must not be {@code null}.
      * @return A ContinuableFuture that will complete with the HttpResponse
      */
     public ContinuableFuture<HttpResponse> asyncGet(final Executor executor) {
@@ -1087,8 +1087,8 @@ public final class HttpRequest {
      * }</pre>
      *
      * @param <T> The type of the response object
-     * @param resultClass The class of the expected response object. Must not be null.
-     * @param executor The executor to use for the asynchronous operation. Must not be null.
+     * @param resultClass The class of the expected response object. Must not be {@code null}.
+     * @param executor The executor to use for the asynchronous operation. Must not be {@code null}.
      * @return A ContinuableFuture that will complete with the deserialized response
      */
     public <T> ContinuableFuture<T> asyncGet(final Class<T> resultClass, final Executor executor) {
@@ -1126,7 +1126,7 @@ public final class HttpRequest {
      *     .getThenAccept(response -> System.out.println("Status: " + response.statusCode()));
      * }</pre>
      *
-     * @param executor The executor to use for the asynchronous operation. Must not be null.
+     * @param executor The executor to use for the asynchronous operation. Must not be {@code null}.
      * @return A ContinuableFuture that will complete with the HttpResponse
      */
     public ContinuableFuture<HttpResponse> asyncPost(final Executor executor) {
@@ -1146,7 +1146,7 @@ public final class HttpRequest {
      * }</pre>
      *
      * @param <T> The type of the response object
-     * @param resultClass The class of the expected response object. Must not be null.
+     * @param resultClass The class of the expected response object. Must not be {@code null}.
      * @return A ContinuableFuture that will complete with the deserialized response
      */
     public <T> ContinuableFuture<T> asyncPost(final Class<T> resultClass) {
@@ -1167,8 +1167,8 @@ public final class HttpRequest {
      * }</pre>
      *
      * @param <T> The type of the response object
-     * @param resultClass The class of the expected response object. Must not be null.
-     * @param executor The executor to use for the asynchronous operation. Must not be null.
+     * @param resultClass The class of the expected response object. Must not be {@code null}.
+     * @param executor The executor to use for the asynchronous operation. Must not be {@code null}.
      * @return A ContinuableFuture that will complete with the deserialized response
      */
     public <T> ContinuableFuture<T> asyncPost(final Class<T> resultClass, final Executor executor) {
@@ -1206,7 +1206,7 @@ public final class HttpRequest {
      *     .getThenAccept(response -> System.out.println("Status: " + response.statusCode()));
      * }</pre>
      *
-     * @param executor The executor to use for the asynchronous operation. Must not be null.
+     * @param executor The executor to use for the asynchronous operation. Must not be {@code null}.
      * @return A ContinuableFuture that will complete with the HttpResponse
      */
     public ContinuableFuture<HttpResponse> asyncPut(final Executor executor) {
@@ -1226,7 +1226,7 @@ public final class HttpRequest {
      * }</pre>
      *
      * @param <T> The type of the response object
-     * @param resultClass The class of the expected response object. Must not be null.
+     * @param resultClass The class of the expected response object. Must not be {@code null}.
      * @return A ContinuableFuture that will complete with the deserialized response
      */
     public <T> ContinuableFuture<T> asyncPut(final Class<T> resultClass) {
@@ -1247,8 +1247,8 @@ public final class HttpRequest {
      * }</pre>
      *
      * @param <T> The type of the response object
-     * @param resultClass The class of the expected response object. Must not be null.
-     * @param executor The executor to use for the asynchronous operation. Must not be null.
+     * @param resultClass The class of the expected response object. Must not be {@code null}.
+     * @param executor The executor to use for the asynchronous operation. Must not be {@code null}.
      * @return A ContinuableFuture that will complete with the deserialized response
      */
     public <T> ContinuableFuture<T> asyncPut(final Class<T> resultClass, final Executor executor) {
@@ -1284,7 +1284,7 @@ public final class HttpRequest {
      *     .getThenAccept(response -> System.out.println("Status: " + response.statusCode()));
      * }</pre>
      *
-     * @param executor The executor to use for the asynchronous operation. Must not be null.
+     * @param executor The executor to use for the asynchronous operation. Must not be {@code null}.
      * @return A ContinuableFuture that will complete with the HttpResponse
      */
     public ContinuableFuture<HttpResponse> asyncDelete(final Executor executor) {
@@ -1303,7 +1303,7 @@ public final class HttpRequest {
      * }</pre>
      *
      * @param <T> The type of the response object
-     * @param resultClass The class of the expected response object. Must not be null.
+     * @param resultClass The class of the expected response object. Must not be {@code null}.
      * @return A ContinuableFuture that will complete with the deserialized response
      */
     public <T> ContinuableFuture<T> asyncDelete(final Class<T> resultClass) {
@@ -1323,8 +1323,8 @@ public final class HttpRequest {
      * }</pre>
      *
      * @param <T> The type of the response object
-     * @param resultClass The class of the expected response object. Must not be null.
-     * @param executor The executor to use for the asynchronous operation. Must not be null.
+     * @param resultClass The class of the expected response object. Must not be {@code null}.
+     * @param executor The executor to use for the asynchronous operation. Must not be {@code null}.
      * @return A ContinuableFuture that will complete with the deserialized response
      */
     public <T> ContinuableFuture<T> asyncDelete(final Class<T> resultClass, final Executor executor) {
@@ -1360,7 +1360,7 @@ public final class HttpRequest {
      *     .getThenAccept(response -> System.out.println("Size: " + response.getContentLength()));
      * }</pre>
      *
-     * @param executor The executor to use for the asynchronous operation. Must not be null.
+     * @param executor The executor to use for the asynchronous operation. Must not be {@code null}.
      * @return A ContinuableFuture that will complete with the HttpResponse
      */
     public ContinuableFuture<HttpResponse> asyncHead(final Executor executor) {
@@ -1401,7 +1401,7 @@ public final class HttpRequest {
      *     .getThenAccept(response -> System.out.println("Status: " + response.statusCode()));
      * }</pre>
      *
-     * @param httpMethod The HTTP method to use (GET, POST, PUT, DELETE, HEAD, etc.). Must not be null.
+     * @param httpMethod The HTTP method to use (GET, POST, PUT, DELETE, HEAD, etc.). Must not be {@code null}.
      * @return A ContinuableFuture that will complete with the HttpResponse
      */
     @Beta
@@ -1421,8 +1421,8 @@ public final class HttpRequest {
      *     .getThenAccept(response -> System.out.println("Status: " + response.statusCode()));
      * }</pre>
      *
-     * @param httpMethod The HTTP method to use (GET, POST, PUT, DELETE, HEAD, etc.). Must not be null.
-     * @param executor The executor to use for the asynchronous operation. Must not be null.
+     * @param httpMethod The HTTP method to use (GET, POST, PUT, DELETE, HEAD, etc.). Must not be {@code null}.
+     * @param executor The executor to use for the asynchronous operation. Must not be {@code null}.
      * @return A ContinuableFuture that will complete with the HttpResponse
      */
     @Beta
@@ -1442,8 +1442,8 @@ public final class HttpRequest {
      * }</pre>
      *
      * @param <T> The type of the response object
-     * @param httpMethod The HTTP method to use (GET, POST, PUT, DELETE, HEAD, etc.). Must not be null.
-     * @param resultClass The class of the expected response object. Must not be null.
+     * @param httpMethod The HTTP method to use (GET, POST, PUT, DELETE, HEAD, etc.). Must not be {@code null}.
+     * @param resultClass The class of the expected response object. Must not be {@code null}.
      * @return A ContinuableFuture that will complete with the deserialized response
      * @throws IllegalArgumentException if httpMethod is null
      */
@@ -1469,9 +1469,9 @@ public final class HttpRequest {
      * }</pre>
      *
      * @param <T> The type of the response object
-     * @param httpMethod The HTTP method to use (GET, POST, PUT, DELETE, HEAD, etc.). Must not be null.
-     * @param resultClass The class of the expected response object. Must not be null.
-     * @param executor The executor to use for the asynchronous operation. Must not be null.
+     * @param httpMethod The HTTP method to use (GET, POST, PUT, DELETE, HEAD, etc.). Must not be {@code null}.
+     * @param resultClass The class of the expected response object. Must not be {@code null}.
+     * @param executor The executor to use for the asynchronous operation. Must not be {@code null}.
      * @return A ContinuableFuture that will complete with the deserialized response
      * @throws IllegalArgumentException if httpMethod is null
      */
@@ -1496,8 +1496,8 @@ public final class HttpRequest {
      *     .thenRun(() -> System.out.println("Download complete"));
      * }</pre>
      *
-     * @param httpMethod The HTTP method to use (GET, POST, PUT, DELETE, HEAD, etc.). Must not be null.
-     * @param output The file to write the response body to. Must not be null.
+     * @param httpMethod The HTTP method to use (GET, POST, PUT, DELETE, HEAD, etc.). Must not be {@code null}.
+     * @param output The file to write the response body to. Must not be {@code null}.
      * @return A ContinuableFuture that will complete when the file is written successfully
      */
     @Beta
@@ -1524,9 +1524,9 @@ public final class HttpRequest {
      *     .thenRun(() -> System.out.println("Download complete"));
      * }</pre>
      *
-     * @param httpMethod The HTTP method to use (GET, POST, PUT, DELETE, HEAD, etc.). Must not be null.
-     * @param output The file to write the response body to. Must not be null.
-     * @param executor The executor to use for the asynchronous operation. Must not be null.
+     * @param httpMethod The HTTP method to use (GET, POST, PUT, DELETE, HEAD, etc.). Must not be {@code null}.
+     * @param output The file to write the response body to. Must not be {@code null}.
+     * @param executor The executor to use for the asynchronous operation. Must not be {@code null}.
      * @return A ContinuableFuture that will complete when the file is written successfully
      */
     @Beta
@@ -1552,8 +1552,8 @@ public final class HttpRequest {
      *     .thenRun(() -> System.out.println("Downloaded " + baos.size() + " bytes"));
      * }</pre>
      *
-     * @param httpMethod The HTTP method to use (GET, POST, PUT, DELETE, HEAD, etc.). Must not be null.
-     * @param output The output stream to write the response body to. Must not be null.
+     * @param httpMethod The HTTP method to use (GET, POST, PUT, DELETE, HEAD, etc.). Must not be {@code null}.
+     * @param output The output stream to write the response body to. Must not be {@code null}.
      * @return A ContinuableFuture that will complete when the stream is written successfully
      */
     @Beta
@@ -1580,9 +1580,9 @@ public final class HttpRequest {
      *     .thenRun(() -> System.out.println("Downloaded " + baos.size() + " bytes"));
      * }</pre>
      *
-     * @param httpMethod The HTTP method to use (GET, POST, PUT, DELETE, HEAD, etc.). Must not be null.
-     * @param output The output stream to write the response body to. Must not be null.
-     * @param executor The executor to use for the asynchronous operation. Must not be null.
+     * @param httpMethod The HTTP method to use (GET, POST, PUT, DELETE, HEAD, etc.). Must not be {@code null}.
+     * @param output The output stream to write the response body to. Must not be {@code null}.
+     * @param executor The executor to use for the asynchronous operation. Must not be {@code null}.
      * @return A ContinuableFuture that will complete when the stream is written successfully
      */
     @Beta
@@ -1608,8 +1608,8 @@ public final class HttpRequest {
      *     .thenRun(() -> System.out.println("Content: " + writer.toString()));
      * }</pre>
      *
-     * @param httpMethod The HTTP method to use (GET, POST, PUT, DELETE, HEAD, etc.). Must not be null.
-     * @param output The writer to write the response body to. Must not be null.
+     * @param httpMethod The HTTP method to use (GET, POST, PUT, DELETE, HEAD, etc.). Must not be {@code null}.
+     * @param output The writer to write the response body to. Must not be {@code null}.
      * @return A ContinuableFuture that will complete when the writer is written successfully
      */
     @Beta
@@ -1636,9 +1636,9 @@ public final class HttpRequest {
      *     .thenRun(() -> System.out.println("Content: " + writer.toString()));
      * }</pre>
      *
-     * @param httpMethod The HTTP method to use (GET, POST, PUT, DELETE, HEAD, etc.). Must not be null.
-     * @param output The writer to write the response body to. Must not be null.
-     * @param executor The executor to use for the asynchronous operation. Must not be null.
+     * @param httpMethod The HTTP method to use (GET, POST, PUT, DELETE, HEAD, etc.). Must not be {@code null}.
+     * @param output The writer to write the response body to. Must not be {@code null}.
+     * @param executor The executor to use for the asynchronous operation. Must not be {@code null}.
      * @return A ContinuableFuture that will complete when the writer is written successfully
      */
     @Beta

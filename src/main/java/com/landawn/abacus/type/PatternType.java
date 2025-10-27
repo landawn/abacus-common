@@ -16,6 +16,7 @@ package com.landawn.abacus.type;
 
 import java.util.regex.Pattern;
 
+import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.util.Strings;
 
 /**
@@ -44,12 +45,14 @@ public class PatternType extends AbstractType<Pattern> {
     /**
      * Converts a Pattern object to its string representation.
      * Returns the pattern string by calling toString() on the Pattern object.
-     * Returns null if the input Pattern is null.
+     * Returns {@code null} if the input Pattern is {@code null}.
      *
      * @param t the Pattern object to convert
-     * @return the pattern string, or null if the input is null
+     * @return the pattern string, or {@code null} if the input is null
      */
+    @MayReturnNull
     @Override
+
     public String stringOf(final Pattern t) {
         return (t == null) ? null : t.toString();
     }
@@ -57,12 +60,14 @@ public class PatternType extends AbstractType<Pattern> {
     /**
      * Creates a Pattern object from a string representation.
      * Compiles the string into a Pattern using Pattern.compile().
-     * Returns null if the input string is null or empty.
+     * Returns {@code null} if the input string is {@code null} or empty.
      *
      * @param str the regular expression string to compile
-     * @return a compiled Pattern object, or null if the input is null or empty
+     * @return a compiled Pattern object, or {@code null} if the input is {@code null} or empty
      */
+    @MayReturnNull
     @Override
+
     public Pattern valueOf(final String str) {
         return (Strings.isEmpty(str)) ? null : Pattern.compile(str);
     }

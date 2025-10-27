@@ -38,15 +38,68 @@ package com.landawn.abacus.http;
  * <pre>{@code
  * HttpMethod method = HttpMethod.GET;
  * String methodName = method.name(); // "GET"
- * 
+ *
  * // Using with HTTP clients
- * HttpRequest.url("https://api.example.com/users")
- *     .execute(HttpMethod.POST, requestBody);
+ * String response = HttpRequest.url("https://api.example.com/users")
+ *     .body("{\"name\":\"John\"}")
+ *     .execute(HttpMethod.POST, String.class);
  * }</pre>
  * 
  * <p>Note: The PATCH method is not supported by {@link java.net.HttpURLConnection}
  * in the standard Java HTTP client implementation.</p>
  */
 public enum HttpMethod {
-    GET, POST, PUT, DELETE, HEAD, OPTIONS, TRACE, CONNECT, PATCH
+    /**
+     * The GET method requests a representation of the specified resource.
+     * Requests using GET should only retrieve data and should have no other effect.
+     */
+    GET,
+
+    /**
+     * The POST method submits data to be processed to a specified resource.
+     * Often used to create new resources or submit form data.
+     */
+    POST,
+
+    /**
+     * The PUT method replaces all current representations of the target resource with the request payload.
+     * Typically used to update or create a resource at a specific URI.
+     */
+    PUT,
+
+    /**
+     * The DELETE method deletes the specified resource.
+     */
+    DELETE,
+
+    /**
+     * The HEAD method asks for a response identical to a GET request, but without the response body.
+     * Useful for retrieving metadata without transferring the entire resource.
+     */
+    HEAD,
+
+    /**
+     * The OPTIONS method describes the communication options for the target resource.
+     * Often used to determine which HTTP methods are supported by the server.
+     */
+    OPTIONS,
+
+    /**
+     * The TRACE method performs a message loop-back test along the path to the target resource.
+     * Used for diagnostic purposes to echo back the received request.
+     */
+    TRACE,
+
+    /**
+     * The CONNECT method establishes a tunnel to the server identified by the target resource.
+     * Typically used to create an SSL tunnel through an HTTP proxy.
+     */
+    CONNECT,
+
+    /**
+     * The PATCH method applies partial modifications to a resource.
+     * Unlike PUT, PATCH is used for partial updates rather than complete replacement.
+     * Note: Not supported by {@link java.net.HttpURLConnection} in standard Java HTTP client.
+     */
+    PATCH
 }

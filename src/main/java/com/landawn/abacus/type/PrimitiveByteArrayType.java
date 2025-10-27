@@ -88,7 +88,7 @@ public final class PrimitiveByteArrayType extends AbstractPrimitiveArrayType<byt
      * Indicates whether this type represents a primitive byte array.
      * Always returns {@code true} for PrimitiveByteArrayType.
      *
-     * @return true, as this type handler is specifically for byte arrays
+     * @return {@code true}, as this type handler is specifically for byte arrays
      */
     @Override
     public boolean isPrimitiveByteArray() {
@@ -98,13 +98,14 @@ public final class PrimitiveByteArrayType extends AbstractPrimitiveArrayType<byt
     /**
      * Converts a byte array to its string representation.
      * The format is: [1, 2, 3] with elements separated by commas.
-     * Returns null if the input array is null, or "[]" if the array is empty.
+     * Returns {@code null} if the input array is {@code null}, or "[]" if the array is empty.
      *
      * @param x the byte array to convert
-     * @return the string representation of the array, or null if input is null
+     * @return the string representation of the array, or {@code null} if input is null
      */
     @MayReturnNull
     @Override
+
     public String stringOf(final byte[] x) {
         if (x == null) {
             return null; // NOSONAR
@@ -118,10 +119,10 @@ public final class PrimitiveByteArrayType extends AbstractPrimitiveArrayType<byt
     /**
      * Parses a string representation and creates a byte array.
      * Expected format: [1, 2, 3] or similar numeric value representations.
-     * Returns null if input is null, empty array if input is empty or "[]".
+     * Returns {@code null} if input is {@code null}, empty array if input is empty or "[]".
      *
      * @param str the string to parse
-     * @return the parsed byte array, or null if input is null
+     * @return the parsed byte array, or {@code null} if input is null
      */
     @MayReturnNull
     @Override
@@ -149,10 +150,10 @@ public final class PrimitiveByteArrayType extends AbstractPrimitiveArrayType<byt
      * Converts an object to a byte array.
      * Handles special case of Blob objects by extracting their byte content.
      * For other object types, converts to string first then parses as byte array.
-     * Returns null if input is null.
+     * Returns {@code null} if input is {@code null}.
      *
      * @param obj the object to convert (can be a Blob or other type)
-     * @return the byte array representation of the object, or null if input is null
+     * @return the byte array representation of the object, or {@code null} if input is null
      */
     @MayReturnNull
     @SuppressFBWarnings
@@ -264,7 +265,7 @@ public final class PrimitiveByteArrayType extends AbstractPrimitiveArrayType<byt
     /**
      * Appends the string representation of a byte array to an Appendable.
      * The format is: [1, 2, 3] with proper element separation.
-     * Appends "null" if the array is null.
+     * Appends "null" if the array is {@code null}.
      *
      * @param appendable the Appendable to write to
      * @param x the byte array to append
@@ -292,7 +293,7 @@ public final class PrimitiveByteArrayType extends AbstractPrimitiveArrayType<byt
     /**
      * Writes the character representation of a byte array to a CharacterWriter.
      * Uses optimized write methods for better performance.
-     * Writes "null" if the array is null.
+     * Writes "null" if the array is {@code null}.
      *
      * @param writer the CharacterWriter to write to
      * @param x the byte array to write
@@ -321,10 +322,10 @@ public final class PrimitiveByteArrayType extends AbstractPrimitiveArrayType<byt
     /**
      * Converts a Collection of Byte objects to a primitive byte array.
      * Each element in the collection is unboxed to its primitive byte value.
-     * Returns null if the input collection is null.
+     * Returns {@code null} if the input collection is {@code null}.
      *
      * @param c the Collection of Byte objects to convert
-     * @return a byte array containing the unboxed values, or null if input is null
+     * @return a byte array containing the unboxed values, or {@code null} if input is null
      */
     @MayReturnNull
     @Override
@@ -347,7 +348,7 @@ public final class PrimitiveByteArrayType extends AbstractPrimitiveArrayType<byt
     /**
      * Converts a byte array to a Collection.
      * Each primitive byte value is boxed to a Byte object and added to the output collection.
-     * Does nothing if the input array is null or empty.
+     * Does nothing if the input array is {@code null} or empty.
      *
      * @param <E> the type of elements in the output collection
      * @param x the byte array to convert
@@ -379,7 +380,7 @@ public final class PrimitiveByteArrayType extends AbstractPrimitiveArrayType<byt
     /**
      * Compares two byte arrays for equality.
      * Arrays are considered equal if they have the same length and all corresponding elements are equal.
-     * Two null arrays are considered equal.
+     * Two {@code null} arrays are considered equal.
      *
      * @param x the first byte array
      * @param y the second byte array

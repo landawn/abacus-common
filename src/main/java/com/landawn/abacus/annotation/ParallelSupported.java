@@ -24,11 +24,11 @@ import java.lang.annotation.Target;
  * Indicates that the annotated method or type supports parallel execution.
  * This annotation documents that the implementation is thread-safe and can be
  * executed concurrently without synchronization issues.
- * 
+ *
  * <p>When applied to a method, it indicates that the method can be safely called
  * from multiple threads simultaneously. When applied to a type, it indicates that
  * the entire type and its operations support parallel execution.</p>
- * 
+ *
  * <p>This annotation is particularly useful for:</p>
  * <ul>
  *   <li>Stream operations that can be parallelized</li>
@@ -36,8 +36,46 @@ import java.lang.annotation.Target;
  *   <li>Algorithms that can be executed in parallel</li>
  *   <li>Thread-safe utility methods</li>
  * </ul>
- * 
+ *
+ * <p><b>Requirements for parallel-supported operations:</b></p>
+ * <ul>
+ *   <li>No shared mutable state or proper synchronization</li>
+ *   <li>Stateless operations or thread-local state</li>
+ *   <li>Associative and non-interfering operations</li>
+ *   <li>Thread-safe access to shared resources</li>
+ * </ul>
+ *
+ * <p><b>Usage Examples:</b></p>
+ * <pre>{@code
+ * public class MathUtils {
+ *     @ParallelSupported
+ *     public static int square(int n) {
+ *         // Stateless operation, safe for parallel execution
+ *         return n * n;
+ *     }
+ *
+ *     @ParallelSupported
+ *     public static double sum(List<Double> numbers) {
+ *         // Can be safely executed in parallel
+ *         return numbers.parallelStream()
+ *                       .mapToDouble(Double::doubleValue)
+ *                       .sum();
+ *     }
+ * }
+ *
+ * @ParallelSupported
+ * public class ThreadSafeProcessor<T> {
+ *     // All methods can be safely called from multiple threads
+ *     private final ConcurrentMap<String, T> cache = new ConcurrentHashMap<>();
+ *
+ *     public T process(String key, Function<String, T> processor) {
+ *         return cache.computeIfAbsent(key, processor);
+ *     }
+ * }
+ * }</pre>
+ *
  * @see SequentialOnly
+ * @see Stateful
  * @since 2018
  */
 @Documented

@@ -62,6 +62,23 @@ public abstract class AbstractArrayType<T> extends AbstractType<T> {
      * Creates a new collection instance of the specified class and populates it
      * with the elements from the array using the {@link #array2Collection(Object, Collection)} method.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * String[] array = {"apple", "banana", "cherry"};
+     * ArrayType<String[]> type = TypeFactory.getType(String[].class);
+     * List<String> list = type.array2Collection(array, ArrayList.class);
+     * // list contains: ["apple", "banana", "cherry"]
+     *
+     * Integer[] numbers = {1, 2, 3, 4, 5};
+     * ArrayType<Integer[]> intType = TypeFactory.getType(Integer[].class);
+     * Set<Integer> set = intType.array2Collection(numbers, HashSet.class);
+     * // set contains: [1, 2, 3, 4, 5]
+     *
+     * // Handling null arrays
+     * List<String> result = type.array2Collection(null, ArrayList.class);
+     * // result is null
+     * }</pre>
+     *
      * @param <E> the element type of the collection
      * @param array the array to convert, may be {@code null}
      * @param collClass the class of the collection to create (must have a no-arg constructor)

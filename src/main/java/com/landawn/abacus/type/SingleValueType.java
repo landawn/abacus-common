@@ -233,11 +233,6 @@ abstract class SingleValueType<T> extends AbstractType<T> { //NOSONAR
         return isObjectType;
     }
 
-    /**
-     * Indicates whether instances of this type can be serialized.
-     *
-     * @return {@code true} if the type is serializable, {@code false} otherwise
-     */
     @Override
     public boolean isSerializable() {
         return isSerializable;
@@ -249,10 +244,11 @@ abstract class SingleValueType<T> extends AbstractType<T> { //NOSONAR
      * otherwise falls back to toString().
      *
      * @param x the object to convert
-     * @return the string representation, or null if x is null
+     * @return the string representation, or {@code null} if x is null
      */
     @MayReturnNull
     @Override
+
     public String stringOf(final T x) {
         if (x == null) {
             return null; // NOSONAR
@@ -285,6 +281,7 @@ abstract class SingleValueType<T> extends AbstractType<T> { //NOSONAR
      * @return an instance of type T, or the string itself if no converter is available
      */
     @Override
+    @MayReturnNull
     public T valueOf(final String str) {
         // throw new UnsupportedOperationException();
 
@@ -307,10 +304,11 @@ abstract class SingleValueType<T> extends AbstractType<T> { //NOSONAR
      *
      * @param rs the ResultSet containing the query results
      * @param columnIndex the index of the column to retrieve (1-based)
-     * @return an instance of type T, or null if the database value is null
+     * @return an instance of type T, or {@code null} if the database value is null
      * @throws SQLException if a database access error occurs
      */
     @Override
+    @MayReturnNull
     public T get(final ResultSet rs, final int columnIndex) throws SQLException {
         if (jsonValueType != null) {
             try {
@@ -333,10 +331,11 @@ abstract class SingleValueType<T> extends AbstractType<T> { //NOSONAR
      *
      * @param rs the ResultSet containing the query results
      * @param columnLabel the label of the column to retrieve
-     * @return an instance of type T, or null if the database value is null
+     * @return an instance of type T, or {@code null} if the database value is null
      * @throws SQLException if a database access error occurs
      */
     @Override
+    @MayReturnNull
     public T get(final ResultSet rs, final String columnLabel) throws SQLException {
         if (jsonValueType != null) {
             try {
@@ -514,7 +513,7 @@ abstract class SingleValueType<T> extends AbstractType<T> { //NOSONAR
      * @param <T> the type to analyze
      * @param typeClass the class to analyze for value extraction patterns
      * @return a tuple containing the value type, creator function, and value extractor function,
-     *         or null if no suitable pattern is found
+     *         or {@code null} if no suitable pattern is found
      */
     @SuppressFBWarnings("REC_CATCH_EXCEPTION")
     static <T> Tuple3<Type<Object>, Function<String, T>, Function<T, Object>> getCreatorAndValueExtractor(final Class<T> typeClass) {

@@ -356,7 +356,7 @@ public class Builder<T> {
 
     /**
      * Tests the wrapped value with the given predicate and returns an Optional containing the value
-     * if the predicate returns true, otherwise returns an empty Optional.
+     * if the predicate returns {@code true}, otherwise returns an empty Optional.
      *
      * @param predicate the predicate to test the wrapped value
      * @return {@code Optional} with the value if {@code predicate} returns {@code true},
@@ -421,11 +421,6 @@ public class Builder<T> {
      */
     public static final class BooleanListBuilder extends Builder<BooleanList> {
 
-        /**
-         * Instantiates a new boolean list builder.
-         *
-         * @param val the BooleanList to wrap in this builder
-         */
         BooleanListBuilder(final BooleanList val) {
             super(val);
         }
@@ -528,11 +523,6 @@ public class Builder<T> {
      */
     public static final class CharListBuilder extends Builder<CharList> {
 
-        /**
-         * Instantiates a new char list builder.
-         *
-         * @param val the CharList to wrap in this builder
-         */
         CharListBuilder(final CharList val) {
             super(val);
         }
@@ -635,11 +625,6 @@ public class Builder<T> {
      */
     public static final class ByteListBuilder extends Builder<ByteList> {
 
-        /**
-         * Instantiates a new byte list builder.
-         *
-         * @param val the ByteList to wrap in this builder
-         */
         ByteListBuilder(final ByteList val) {
             super(val);
         }
@@ -742,11 +727,6 @@ public class Builder<T> {
      */
     public static final class ShortListBuilder extends Builder<ShortList> {
 
-        /**
-         * Instantiates a new short list builder.
-         *
-         * @param val the ShortList to wrap in this builder
-         */
         ShortListBuilder(final ShortList val) {
             super(val);
         }
@@ -849,11 +829,6 @@ public class Builder<T> {
      */
     public static final class IntListBuilder extends Builder<IntList> {
 
-        /**
-         * Instantiates a new int list builder.
-         *
-         * @param val the IntList to wrap in this builder
-         */
         IntListBuilder(final IntList val) {
             super(val);
         }
@@ -956,11 +931,6 @@ public class Builder<T> {
      */
     public static final class LongListBuilder extends Builder<LongList> {
 
-        /**
-         * Instantiates a new long list builder.
-         *
-         * @param val the LongList to wrap in this builder
-         */
         LongListBuilder(final LongList val) {
             super(val);
         }
@@ -1063,11 +1033,6 @@ public class Builder<T> {
      */
     public static final class FloatListBuilder extends Builder<FloatList> {
 
-        /**
-         * Instantiates a new float list builder.
-         *
-         * @param val the FloatList to wrap in this builder
-         */
         FloatListBuilder(final FloatList val) {
             super(val);
         }
@@ -1170,11 +1135,6 @@ public class Builder<T> {
      */
     public static final class DoubleListBuilder extends Builder<DoubleList> {
 
-        /**
-         * Instantiates a new double list builder.
-         *
-         * @param val the DoubleList to wrap in this builder
-         */
         DoubleListBuilder(final DoubleList val) {
             super(val);
         }
@@ -1281,21 +1241,10 @@ public class Builder<T> {
      */
     public static final class ListBuilder<T, L extends List<T>> extends CollectionBuilder<T, L> {
 
-        /**
-         * Instantiates a new list builder.
-         *
-         * @param c the List to wrap in this builder
-         */
         ListBuilder(final L c) {
             super(c);
         }
 
-        /**
-         * Appends the specified element to the end of the list.
-         *
-         * @param e the element to be appended to the list
-         * @return this builder instance for method chaining
-         */
         @Override
         public ListBuilder<T, L> add(final T e) {
             val.add(e);
@@ -1443,11 +1392,6 @@ public class Builder<T> {
      */
     public static sealed class CollectionBuilder<T, C extends Collection<T>> extends Builder<C> permits ListBuilder {
 
-        /**
-         * Instantiates a new collection builder.
-         *
-         * @param c the Collection to wrap in this builder
-         */
         CollectionBuilder(final C c) {
             super(c);
         }
@@ -1550,11 +1494,6 @@ public class Builder<T> {
      */
     public static final class MultisetBuilder<T> extends Builder<Multiset<T>> {
 
-        /**
-         * Instantiates a new multiset builder.
-         *
-         * @param c the Multiset to wrap in this builder
-         */
         MultisetBuilder(final Multiset<T> c) {
             super(c);
         }
@@ -1674,11 +1613,6 @@ public class Builder<T> {
      */
     public static final class MapBuilder<K, V, M extends Map<K, V>> extends Builder<M> {
 
-        /**
-         * Instantiates a new map builder.
-         *
-         * @param m the Map to wrap in this builder
-         */
         MapBuilder(final M m) {
             super(m);
         }
@@ -1715,7 +1649,7 @@ public class Builder<T> {
 
         /**
          * Associates the specified value with the specified key in this map if the key
-         * is not already associated with a value or is associated with null.
+         * is not already associated with a value or is associated with {@code null}.
          *
          * <br />
          * Absent -> key is not found in the specified map or found with {@code null} value.
@@ -1735,7 +1669,7 @@ public class Builder<T> {
 
         /**
          * Associates the value produced by the supplier with the specified key in this map
-         * if the key is not already associated with a value or is associated with null.
+         * if the key is not already associated with a value or is associated with {@code null}.
          * The supplier is only invoked if the value needs to be added.
          *
          * <br />
@@ -1775,7 +1709,7 @@ public class Builder<T> {
          * <p>
          * This is equivalent to calling {@link Map#remove(Object)} for each key in the
          * provided collection, but with the added convenience of method chaining.
-         * If the collection is empty or null, no changes are made to the map.
+         * If the collection is empty or {@code null}, no changes are made to the map.
          *
          * @param keysToRemove the collection containing keys to be removed from the map
          * @return this builder instance for method chaining
@@ -1808,11 +1742,6 @@ public class Builder<T> {
      */
     public static final class MultimapBuilder<K, E, V extends Collection<E>, M extends Multimap<K, E, V>> extends Builder<M> {
 
-        /**
-         * Instantiates a new multimap builder.
-         *
-         * @param m the multimap instance to wrap
-         */
         MultimapBuilder(final M m) {
             super(m);
         }
@@ -2041,11 +1970,6 @@ public class Builder<T> {
      */
     public static final class DatasetBuilder extends Builder<Dataset> {
 
-        /**
-         * Instantiates a new data set builder.
-         *
-         * @param ds the Dataset instance to wrap
-         */
         DatasetBuilder(final Dataset ds) {
             super(ds);
         }
@@ -2377,7 +2301,7 @@ public class Builder<T> {
          * datasetBuilder.removeColumns(name -> name.startsWith("temp_"));
          * }</pre>
          *
-         * @param filter the predicate to test column names; columns returning true are removed
+         * @param filter the predicate to test column names; columns returning {@code true} are removed
          * @return this builder instance for method chaining
          */
         public DatasetBuilder removeColumns(final Predicate<? super String> filter) {
@@ -2811,8 +2735,8 @@ public class Builder<T> {
     }
 
     /**
-     * Creates a new ComparisonBuilder and compares two comparable objects, treating null as smaller.
-     * Null values are considered less than non-null values in the comparison.
+     * Creates a new ComparisonBuilder and compares two comparable objects, treating {@code null} as smaller.
+     * Null values are considered less than {@code non-null} values in the comparison.
      * 
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -2831,8 +2755,8 @@ public class Builder<T> {
     }
 
     /**
-     * Creates a new ComparisonBuilder and compares two comparable objects, treating null as bigger.
-     * Null values are considered greater than non-null values in the comparison.
+     * Creates a new ComparisonBuilder and compares two comparable objects, treating {@code null} as bigger.
+     * Null values are considered greater than {@code non-null} values in the comparison.
      * 
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -2851,8 +2775,8 @@ public class Builder<T> {
     }
 
     /**
-     * Creates a new ComparisonBuilder and compares two boolean values, treating false as less than true.
-     * This is useful for sorting where false values should come before true values.
+     * Creates a new ComparisonBuilder and compares two boolean values, treating {@code false} as less than {@code true}.
+     * This is useful for sorting where {@code false} values should come before {@code true} values.
      * 
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -2870,8 +2794,8 @@ public class Builder<T> {
     }
 
     /**
-     * Creates a new ComparisonBuilder and compares two boolean values, treating true as less than false.
-     * This is useful for sorting where true values should come before false values.
+     * Creates a new ComparisonBuilder and compares two boolean values, treating {@code true} as less than {@code false}.
+     * This is useful for sorting where {@code true} values should come before {@code false} values.
      * 
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -3488,9 +3412,6 @@ public class Builder<T> {
         /** The result. */
         private int result = 0;
 
-        /**
-         * Instantiates a new comparison chain.
-         */
         private ComparisonBuilder() {
             // singleton.
         }
@@ -3501,8 +3422,8 @@ public class Builder<T> {
          * (i.e., all previous comparisons returned 0), this method compares the
          * two objects using {@link Comparable#compareTo}.
          * 
-         * <p>This method handles null values gracefully, considering them equal
-         * to each other but less than any non-null value.</p>
+         * <p>This method handles {@code null} values gracefully, considering them equal
+         * to each other but less than any {@code non-null} value.</p>
          * 
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
@@ -3529,7 +3450,7 @@ public class Builder<T> {
          * If the result of this comparison chain has not already been determined,
          * this method uses the provided comparator to compare the objects.
          * 
-         * <p>If the comparator is null, the natural ordering is used (objects must
+         * <p>If the comparator is {@code null}, the natural ordering is used (objects must
          * implement Comparable). This allows for flexible comparison strategies.</p>
          * 
          * <p><strong>Example:</strong></p>
@@ -3545,9 +3466,9 @@ public class Builder<T> {
          * @param <T> the type of objects being compared
          * @param left the first object to compare
          * @param right the second object to compare
-         * @param comparator the comparator to use, or null for natural ordering
+         * @param comparator the comparator to use, or {@code null} for natural ordering
          * @return this ComparisonBuilder instance for method chaining
-         * @throws IllegalArgumentException if comparator is null and objects don't implement Comparable
+         * @throws IllegalArgumentException if comparator is {@code null} and objects don't implement Comparable
          */
         public <T> ComparisonBuilder compare(final T left, final T right, final Comparator<T> comparator) throws IllegalArgumentException {
             if (result == 0) {
@@ -3562,15 +3483,15 @@ public class Builder<T> {
         }
 
         /**
-         * Compares two comparable objects with null values considered less than non-null values.
-         * This method provides explicit null-handling behavior where null is treated as the
+         * Compares two comparable objects with {@code null} values considered less than {@code non-null} values.
+         * This method provides explicit null-handling behavior where {@code null} is treated as the
          * smallest possible value.
          * 
          * <p>Comparison behavior:</p>
          * <ul>
-         *   <li>null == null returns 0</li>
-         *   <li>null &lt; non-null returns -1</li>
-         *   <li>non-null &gt; null returns 1</li>
+         *   <li>null == {@code null} returns 0</li>
+         *   <li>null &lt; {@code non-null} returns -1</li>
+         *   <li>non-null &gt; {@code null} returns 1</li>
          *   <li>non-null values are compared using compareTo</li>
          * </ul>
          * 
@@ -3598,15 +3519,15 @@ public class Builder<T> {
         }
 
         /**
-         * Compares two comparable objects with null values considered greater than non-null values.
-         * This method provides explicit null-handling behavior where null is treated as the
+         * Compares two comparable objects with {@code null} values considered greater than {@code non-null} values.
+         * This method provides explicit null-handling behavior where {@code null} is treated as the
          * largest possible value.
          * 
          * <p>Comparison behavior:</p>
          * <ul>
-         *   <li>null == null returns 0</li>
-         *   <li>null &gt; non-null returns 1</li>
-         *   <li>non-null &lt; null returns -1</li>
+         *   <li>null == {@code null} returns 0</li>
+         *   <li>null &gt; {@code non-null} returns 1</li>
+         *   <li>non-null &lt; {@code null} returns -1</li>
          *   <li>non-null values are compared using compareTo</li>
          * </ul>
          * 
@@ -3634,14 +3555,14 @@ public class Builder<T> {
         }
 
         /**
-         * Compares two boolean values with false considered less than true.
+         * Compares two boolean values with {@code false} considered less than {@code true}.
          * If the result of this comparison chain has not already been determined,
          * this method compares the boolean values.
          * 
          * <p>Comparison behavior:</p>
          * <ul>
-         *   <li>false &lt; true returns -1</li>
-         *   <li>true &gt; false returns 1</li>
+         *   <li>false &lt; {@code true} returns -1</li>
+         *   <li>true &gt; {@code false} returns 1</li>
          *   <li>equal values return 0</li>
          * </ul>
          * 
@@ -3668,14 +3589,14 @@ public class Builder<T> {
         }
 
         /**
-         * Compares two boolean values with true considered less than false.
+         * Compares two boolean values with {@code true} considered less than {@code false}.
          * If the result of this comparison chain has not already been determined,
          * this method compares the boolean values.
          * 
          * <p>Comparison behavior:</p>
          * <ul>
-         *   <li>true &lt; false returns -1</li>
-         *   <li>false &gt; true returns 1</li>
+         *   <li>true &lt; {@code false} returns -1</li>
+         *   <li>false &gt; {@code true} returns 1</li>
          *   <li>equal values return 0</li>
          * </ul>
          * 
@@ -4002,11 +3923,11 @@ public class Builder<T> {
     /**
      * A builder class for performing chained equality comparisons between objects.
      * This class follows the builder pattern to allow multiple equality checks to be
-     * chained together, with the result being true only if all comparisons are equal.
+     * chained together, with the result being {@code true} only if all comparisons are equal.
      * 
      * <p>The equivalence chain short-circuits on the first non-equal comparison,
      * making it efficient for comparing objects with multiple fields. Once a 
-     * false result is found, subsequent comparisons are skipped.</p>
+     * {@code false} result is found, subsequent comparisons are skipped.</p>
      * 
      * <p><strong>Thread Safety:</strong> This class is not thread-safe and should
      * not be shared between threads.</p>
@@ -4030,9 +3951,6 @@ public class Builder<T> {
         /** The result. */
         private boolean result = true;
 
-        /**
-         * Instantiates a new equivalence chain.
-         */
         private EquivalenceBuilder() {
             // singleton.
         }
@@ -4040,9 +3958,9 @@ public class Builder<T> {
         /**
          * Compares two objects for equality using {@link N#equals(Object, Object)}.
          * If the result of this equivalence chain has not already been determined
-         * to be false, this method checks if the two objects are equal.
+         * to be {@code false}, this method checks if the two objects are equal.
          * 
-         * <p>This method handles null values gracefully, considering two null
+         * <p>This method handles {@code null} values gracefully, considering two null
          * values as equal.</p>
          * 
          * <p><strong>Example:</strong></p>
@@ -4071,7 +3989,7 @@ public class Builder<T> {
         /**
          * Compares two objects for equality using a custom function.
          * If the result of this equivalence chain has not already been determined
-         * to be false, this method uses the provided function to check equality.
+         * to be {@code false}, this method uses the provided function to check equality.
          * 
          * <p>This allows for custom equality logic beyond standard equals() method.</p>
          * 
@@ -4105,7 +4023,7 @@ public class Builder<T> {
         /**
          * Compares two boolean values for equality.
          * If the result of this equivalence chain has not already been determined
-         * to be false, this method checks if the two boolean values are equal.
+         * to be {@code false}, this method checks if the two boolean values are equal.
          * 
          * <p><strong>Example:</strong></p>
          * 
@@ -4133,7 +4051,7 @@ public class Builder<T> {
         /**
          * Compares two char values for equality.
          * If the result of this equivalence chain has not already been determined
-         * to be false, this method checks if the two char values are equal.
+         * to be {@code false}, this method checks if the two char values are equal.
          * 
          * <p><strong>Example:</strong></p>
          * 
@@ -4161,7 +4079,7 @@ public class Builder<T> {
         /**
          * Compares two byte values for equality.
          * If the result of this equivalence chain has not already been determined
-         * to be false, this method checks if the two byte values are equal.
+         * to be {@code false}, this method checks if the two byte values are equal.
          * 
          * <p><strong>Example:</strong></p>
          * 
@@ -4188,7 +4106,7 @@ public class Builder<T> {
         /**
          * Compares two short values for equality.
          * If the result of this equivalence chain has not already been determined
-         * to be false, this method checks if the two short values are equal.
+         * to be {@code false}, this method checks if the two short values are equal.
          * 
          * <p><strong>Example:</strong></p>
          * 
@@ -4215,7 +4133,7 @@ public class Builder<T> {
         /**
          * Compares two int values for equality.
          * If the result of this equivalence chain has not already been determined
-         * to be false, this method checks if the two int values are equal.
+         * to be {@code false}, this method checks if the two int values are equal.
          * 
          * <p><strong>Example:</strong></p>
          * 
@@ -4243,7 +4161,7 @@ public class Builder<T> {
         /**
          * Compares two long values for equality.
          * If the result of this equivalence chain has not already been determined
-         * to be false, this method checks if the two long values are equal.
+         * to be {@code false}, this method checks if the two long values are equal.
          * 
          * <p><strong>Example:</strong></p>
          * 
@@ -4270,7 +4188,7 @@ public class Builder<T> {
         /**
          * Compares two float values for equality using {@link Float#compare}.
          * If the result of this equivalence chain has not already been determined
-         * to be false, this method checks if the two float values are equal.
+         * to be {@code false}, this method checks if the two float values are equal.
          * 
          * <p>This method correctly handles special float values including NaN,
          * positive and negative infinity, and distinguishes between 0.0f and -0.0f.</p>
@@ -4332,7 +4250,7 @@ public class Builder<T> {
         /**
          * Compares two double values for equality using {@link Double#compare}.
          * If the result of this equivalence chain has not already been determined
-         * to be false, this method checks if the two double values are equal.
+         * to be {@code false}, this method checks if the two double values are equal.
          * 
          * <p>This method correctly handles special double values including NaN,
          * positive and negative infinity, and distinguishes between 0.0d and -0.0d.</p>
@@ -4394,8 +4312,8 @@ public class Builder<T> {
         /**
          * Returns the result of the equivalence chain.
          * 
-         * <p>Returns true if and only if all comparisons in the chain returned true.
-         * If any comparison returned false, this method returns false.</p>
+         * <p>Returns {@code true} if and only if all comparisons in the chain returned {@code true}.
+         * If any comparison returned {@code false}, this method returns {@code false}.</p>
          * 
          * <p><strong>Example:</strong></p>
          * 
@@ -4423,8 +4341,8 @@ public class Builder<T> {
          * This method is an alias for {@link #result()} and provides a more descriptive
          * name for checking equality results.
          *
-         * <p>Returns true if and only if all comparisons in the chain returned true.
-         * If any comparison returned false, this method returns false.</p>
+         * <p>Returns {@code true} if and only if all comparisons in the chain returned {@code true}.
+         * If any comparison returned {@code false}, this method returns {@code false}.</p>
          *
          * <p><strong>Example:</strong></p>
          * 
@@ -4479,9 +4397,6 @@ public class Builder<T> {
         /** The result. */
         private int result = 0;
 
-        /**
-         * Instantiates a new hash code chain.
-         */
         private HashCodeBuilder() {
             // singleton.
         }
@@ -4489,7 +4404,7 @@ public class Builder<T> {
         /**
          * Adds the hash code of the specified object to the running hash code.
          * The object's hash code is computed using {@link N#hashCode(Object)},
-         * which handles null values gracefully (returning 0 for null).
+         * which handles {@code null} values gracefully (returning 0 for null).
          * 
          * <p>The hash code is updated using the formula: 
          * {@code result = result * 31 + hashCode(value)}</p>
@@ -4550,7 +4465,7 @@ public class Builder<T> {
 
         /**
          * Adds the hash code of a boolean value to the running hash code.
-         * True is mapped to 1231 and false to 1237, following Java conventions.
+         * True is mapped to 1231 and {@code false} to 1237, following Java conventions.
          * 
          * <p><strong>Example:</strong></p>
          * 

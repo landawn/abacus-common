@@ -16,6 +16,7 @@ package com.landawn.abacus.type;
 
 import java.util.UUID;
 
+import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.util.Strings;
 
 /**
@@ -48,7 +49,7 @@ public class UUIDType extends AbstractType<UUID> {
      *
      * <p><b>Usage Examples:</b></p>
      * UUIDType uuidType = new UUIDType();
-     * Class<UUID> clazz = uuidType.clazz(); // Returns UUID.class
+     * Class&lt;UUID&gt; clazz = uuidType.clazz(); // Returns UUID.class
      * }</pre>
      *
      * @return the Class object for UUID.class
@@ -63,7 +64,7 @@ public class UUIDType extends AbstractType<UUID> {
      * <p>
      * This method returns the standard string representation of the UUID in the format
      * "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx" where 'x' is a hexadecimal digit.
-     * If the input UUID is null, this method returns null.
+     * If the input UUID is {@code null}, this method returns {@code null}.
      * </p>
      *
      * <p><b>Usage Examples:</b></p>
@@ -72,9 +73,11 @@ public class UUIDType extends AbstractType<UUID> {
      * }</pre>
      *
      * @param x the UUID instance to convert to string
-     * @return the string representation of the UUID, or null if the input is null
+     * @return the string representation of the UUID, or {@code null} if the input is null
      */
+    @MayReturnNull
     @Override
+
     public String stringOf(final UUID x) {
         return x == null ? null : x.toString();
     }
@@ -84,7 +87,7 @@ public class UUIDType extends AbstractType<UUID> {
      * <p>
      * This method creates a UUID instance from the provided string using {@link UUID#fromString(String)}.
      * The string must be in the standard UUID format "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
-     * where 'x' is a hexadecimal digit. If the string is null or empty, this method returns null.
+     * where 'x' is a hexadecimal digit. If the string is {@code null} or empty, this method returns {@code null}.
      * </p>
      *
      * <p><b>Usage Examples:</b></p>
@@ -93,10 +96,12 @@ public class UUIDType extends AbstractType<UUID> {
      * }</pre>
      *
      * @param str the string to convert to a UUID
-     * @return a UUID instance created from the string, or null if the string is empty
+     * @return a UUID instance created from the string, or {@code null} if the string is empty
      * @throws IllegalArgumentException if the string is not in the correct UUID format
      */
+    @MayReturnNull
     @Override
+
     public UUID valueOf(final String str) {
         return Strings.isEmpty(str) ? null : java.util.UUID.fromString(str); // NOSONAR
     }

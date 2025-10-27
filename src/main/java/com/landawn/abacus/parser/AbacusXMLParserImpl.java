@@ -14,6 +14,8 @@
 
 package com.landawn.abacus.parser;
 
+import com.landawn.abacus.annotation.MayReturnNull;
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
@@ -166,12 +168,8 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
         this.parserType = parserType;
     }
 
-    /**
-     *
-     * @param obj
-     * @param config
-     * @return
-     */
+    @MayReturnNull
+
     @Override
     public String serialize(final Object obj, final XMLSerializationConfig config) {
         if (obj == null) {
@@ -192,12 +190,6 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
         }
     }
 
-    /**
-     *
-     * @param obj
-     * @param config
-     * @param output
-     */
     @Override
     public void serialize(final Object obj, final XMLSerializationConfig config, final File output) {
         Writer writer = null;
@@ -217,12 +209,6 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
         }
     }
 
-    /**
-     *
-     * @param obj
-     * @param config
-     * @param output
-     */
     @Override
     public void serialize(final Object obj, final XMLSerializationConfig config, final OutputStream output) {
         final BufferedXMLWriter bw = Objectory.createBufferedXMLWriter(output);
@@ -237,12 +223,6 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
         }
     }
 
-    /**
-     *
-     * @param obj
-     * @param config
-     * @param output
-     */
     @Override
     public void serialize(final Object obj, final XMLSerializationConfig config, final Writer output) {
         final boolean isBufferedWriter = output instanceof BufferedXMLWriter;
@@ -338,16 +318,6 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
         }
     }
 
-    /**
-     *
-     * @param obj the bean object to serialize to XML
-     * @param config the XML serialization configuration settings
-     * @param indentation the indentation string for formatting the XML output
-     * @param serializedObjects set of already serialized objects to detect circular references
-     * @param type the Type information for the object being serialized
-     * @param bw the buffered XML writer to write the serialized output to
-     * @throws IOException if an I/O error occurs during writing
-     */
     void writeBean(final Object obj, final XMLSerializationConfig config, final String indentation, final IdentityHashSet<Object> serializedObjects,
             final Type<Object> type, final BufferedXMLWriter bw) throws IOException {
         //    if (hasCircularReference(obj, serializedObjects, bw)) {
@@ -405,16 +375,6 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
         }
     }
 
-    /**
-     *
-     * @param obj the object whose properties will be serialized
-     * @param config the XML serialization configuration settings
-     * @param propIndentation the indentation string for property formatting
-     * @param serializedObjects set of already serialized objects to detect circular references
-     * @param type the Type information for the object being serialized
-     * @param bw the buffered XML writer to write the serialized properties to
-     * @throws IOException if an I/O error occurs during writing
-     */
     void writeProperties(final Object obj, final XMLSerializationConfig config, final String propIndentation, final IdentityHashSet<Object> serializedObjects,
             final Type<Object> type, final BufferedXMLWriter bw) throws IOException {
         //    if (hasCircularReference(obj, serializedObjects, bw)) {
@@ -524,16 +484,6 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
         }
     }
 
-    /**
-     *
-     * @param m the map to serialize to XML
-     * @param config the XML serialization configuration settings
-     * @param indentation the indentation string for formatting the XML output
-     * @param serializedObjects set of already serialized objects to detect circular references
-     * @param type the Type information for the map being serialized
-     * @param bw the buffered XML writer to write the serialized map to
-     * @throws IOException if an I/O error occurs during writing
-     */
     void writeMap(final Map<?, ?> m, final XMLSerializationConfig config, final String indentation, final IdentityHashSet<Object> serializedObjects,
             final Type<Object> type, final BufferedXMLWriter bw) throws IOException {
         //    if (hasCircularReference(m, serializedObjects, bw)) {
@@ -695,16 +645,6 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
         bw.write(XMLConstants.MAP_ELE_END);
     }
 
-    /**
-     *
-     * @param obj the array object to serialize to XML
-     * @param config the XML serialization configuration settings
-     * @param indentation the indentation string for formatting the XML output
-     * @param serializedObjects set of already serialized objects to detect circular references
-     * @param type the Type information for the array being serialized
-     * @param bw the buffered XML writer to write the serialized array to
-     * @throws IOException if an I/O error occurs during writing
-     */
     void writeArray(final Object obj, final XMLSerializationConfig config, final String indentation, final IdentityHashSet<Object> serializedObjects,
             final Type<Object> type, final BufferedXMLWriter bw) throws IOException {
         //    if (hasCircularReference(obj, serializedObjects, bw)) {
@@ -784,16 +724,6 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
         bw.write(XMLConstants.ARRAY_ELE_END);
     }
 
-    /**
-     *
-     * @param c the collection to serialize to XML
-     * @param config the XML serialization configuration settings
-     * @param indentation the indentation string for formatting the XML output
-     * @param serializedObjects set of already serialized objects to detect circular references
-     * @param type the Type information for the collection being serialized
-     * @param bw the buffered XML writer to write the serialized collection to
-     * @throws IOException if an I/O error occurs during writing
-     */
     void writeCollection(final Collection<?> c, final XMLSerializationConfig config, final String indentation, final IdentityHashSet<Object> serializedObjects,
             final Type<Object> type, final BufferedXMLWriter bw) throws IOException {
         //    if (hasCircularReference(c, serializedObjects, bw)) {
@@ -896,14 +826,6 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
         }
     }
 
-    /**
-     *
-     * @param <T>
-     * @param source
-     * @param config
-     * @param targetClass
-     * @return
-     */
     @Override
     public <T> T deserialize(final String source, final XMLDeserializationConfig config, final Class<? extends T> targetClass) {
         if (Strings.isEmpty(source)) {
@@ -919,14 +841,6 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
         }
     }
 
-    /**
-     *
-     * @param <T>
-     * @param source
-     * @param config
-     * @param targetClass
-     * @return
-     */
     @Override
     public <T> T deserialize(final File source, final XMLDeserializationConfig config, final Class<? extends T> targetClass) {
         Reader reader = null;
@@ -940,14 +854,6 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
         }
     }
 
-    /**
-     *
-     * @param <T>
-     * @param source
-     * @param config
-     * @param targetClass
-     * @return
-     */
     @Override
     public <T> T deserialize(final InputStream source, final XMLDeserializationConfig config, final Class<? extends T> targetClass) {
         final BufferedReader br = Objectory.createBufferedReader(source);
@@ -959,41 +865,17 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
         }
     }
 
-    /**
-     *
-     * @param <T>
-     * @param source
-     * @param config
-     * @param targetClass
-     * @return
-     */
     @Override
     public <T> T deserialize(final Reader source, final XMLDeserializationConfig config, final Class<? extends T> targetClass) {
         // BufferedReader? will the target parser create the BufferedReader internally?
         return read(source, config, null, targetClass);
     }
 
-    /**
-     *
-     * @param <T>
-     * @param source
-     * @param config
-     * @param targetClass
-     * @return
-     */
     @Override
     public <T> T deserialize(final Node source, final XMLDeserializationConfig config, final Class<? extends T> targetClass) {
         return readByDOMParser(source, config, targetClass);
     }
 
-    /**
-     *
-     * @param <T>
-     * @param source
-     * @param config
-     * @param nodeClasses
-     * @return
-     */
     @Override
     public <T> T deserialize(final InputStream source, final XMLDeserializationConfig config, final Map<String, Class<?>> nodeClasses) {
         final BufferedReader br = Objectory.createBufferedReader(source);
@@ -1005,42 +887,17 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
         }
     }
 
-    /**
-     *
-     * @param <T>
-     * @param source
-     * @param config
-     * @param nodeClasses
-     * @return
-     */
     @Override
     public <T> T deserialize(final Reader source, final XMLDeserializationConfig config, final Map<String, Class<?>> nodeClasses) {
         return read(source, config, nodeClasses, null);
     }
 
-    /**
-     *
-     * @param <T>
-     * @param source
-     * @param config
-     * @param nodeClasses
-     * @return
-     */
     @SuppressWarnings("unchecked")
     @Override
     public <T> T deserialize(final Node source, final XMLDeserializationConfig config, final Map<String, Class<?>> nodeClasses) {
         return (T) readByDOMParser(source, config, nodeClasses.get(source.getNodeName()));
     }
 
-    /**
-     *
-     * @param source
-     * @param config
-     * @param nodeClasses
-     * @param targetClass
-     * @param <T>
-     * @return
-     */
     @SuppressWarnings("unchecked")
     <T> T read(final Reader source, final XMLDeserializationConfig config, final Map<String, Class<?>> nodeClasses, Class<? extends T> targetClass) {
         final XMLDeserializationConfig configToUse = check(config);
@@ -1903,34 +1760,12 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
         }
     }
 
-    /**
-     * Read by DOM parser.
-     * @param node
-     * @param config
-     * @param targetClass
-     *
-     * @param <T>
-     * @return
-     */
     <T> T readByDOMParser(final Node node, final XMLDeserializationConfig config, final Class<? extends T> targetClass) {
         final XMLDeserializationConfig configToUse = check(config);
 
         return readByDOMParser(node, configToUse, configToUse.getElementType(), false, false, false, true, targetClass);
     }
 
-    /**
-     * Read by DOM parser.
-     * @param node
-     * @param config
-     * @param propType
-     * @param checkedAttr
-     * @param isTagByPropertyName
-     * @param ignoreTypeInfo
-     * @param isFirstCall
-     * @param inputClass
-     * @param <T>
-     * @return
-     */
     @SuppressWarnings({ "deprecation" })
     <T> T readByDOMParser(final Node node, final XMLDeserializationConfig config, Type<?> propType, boolean checkedAttr, boolean isTagByPropertyName,
             boolean ignoreTypeInfo, final boolean isFirstCall, final Class<T> inputClass) {
@@ -2325,13 +2160,6 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
         }
     }
 
-    /**
-     * Gets the node type.
-     *
-     * @param nodeName
-     * @param previousNodeType
-     * @return
-     */
     private static NodeType getNodeType(final String nodeName, final NodeType previousNodeType) {
         if (previousNodeType == NodeType.ENTITY) {
             return NodeType.PROPERTY;
@@ -2346,14 +2174,6 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
         return nodeType;
     }
 
-    /**
-     * Gets the class by node name.
-     * @param nodeName
-     * @param cls
-     *
-     * @param <T>
-     * @return
-     */
     @SuppressWarnings({ "unchecked", "deprecation", "null" })
     private static <T> Class<T> getClassByNodeName(final String nodeName, final Class<?> cls) {
         if (cls == null) {
@@ -2443,10 +2263,6 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
         return xmlSAXHandler;
     }
 
-    /**
-     *
-     * @param xmlSAXHandler
-     */
     private static void recycle(final XmlSAXHandler<?> xmlSAXHandler) {
         if (xmlSAXHandler == null) {
             return;

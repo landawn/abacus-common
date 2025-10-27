@@ -66,9 +66,10 @@ public class LocalDateTimeType extends AbstractTemporalType<LocalDateTime> {
      * }</pre>
      *
      * @param x The LocalDateTime object to convert
-     * @return The string representation of the LocalDateTime, or null if the input is null
+     * @return The string representation of the LocalDateTime, or {@code null} if the input is null
      */
     @Override
+    @MayReturnNull
     public String stringOf(final LocalDateTime x) {
         return (x == null) ? null : x.toString();
     }
@@ -93,9 +94,10 @@ public class LocalDateTimeType extends AbstractTemporalType<LocalDateTime> {
      * }</pre>
      *
      * @param obj The object to convert to LocalDateTime
-     * @return The LocalDateTime representation of the object, or null if the input is null
+     * @return The LocalDateTime representation of the object, or {@code null} if the input is null
      */
     @Override
+    @MayReturnNull
     public LocalDateTime valueOf(final Object obj) {
         if (obj instanceof Number) {
             return LocalDateTime.ofInstant(Instant.ofEpochMilli(((Number) obj).longValue()), DEFAULT_ZONE_ID);
@@ -129,11 +131,12 @@ public class LocalDateTimeType extends AbstractTemporalType<LocalDateTime> {
      * }</pre>
      *
      * @param str The string to parse
-     * @return The parsed LocalDateTime object, or null if the input is null or empty
+     * @return The parsed LocalDateTime object, or {@code null} if the input is {@code null} or empty
      * @throws java.time.format.DateTimeParseException if the string cannot be parsed as a LocalDateTime
      */
     @MayReturnNull
     @Override
+
     public LocalDateTime valueOf(final String str) {
         if (Strings.isEmpty(str)) {
             return null; // NOSONAR
@@ -171,10 +174,11 @@ public class LocalDateTimeType extends AbstractTemporalType<LocalDateTime> {
      * @param cbuf The character array containing the LocalDateTime representation
      * @param offset The starting position in the character array
      * @param len The number of characters to use
-     * @return The parsed LocalDateTime object, or null if the input is null or empty
+     * @return The parsed LocalDateTime object, or {@code null} if the input is {@code null} or empty
      */
     @MayReturnNull
     @Override
+
     public LocalDateTime valueOf(final char[] cbuf, final int offset, final int len) {
         if ((cbuf == null) || (len == 0)) {
             return null; // NOSONAR
@@ -203,10 +207,11 @@ public class LocalDateTimeType extends AbstractTemporalType<LocalDateTime> {
      *
      * @param rs The ResultSet containing the data
      * @param columnIndex The column index (1-based) to retrieve the value from
-     * @return The LocalDateTime value from the ResultSet, or null if the database value is NULL
+     * @return The LocalDateTime value from the ResultSet, or {@code null} if the database value is NULL
      * @throws SQLException if a database access error occurs or the column index is invalid
      */
     @Override
+    @MayReturnNull
     public LocalDateTime get(final ResultSet rs, final int columnIndex) throws SQLException {
         try {
             return rs.getObject(columnIndex, LocalDateTime.class);
@@ -236,10 +241,11 @@ public class LocalDateTimeType extends AbstractTemporalType<LocalDateTime> {
      *
      * @param rs The ResultSet containing the data
      * @param columnName The name of the column to retrieve the value from
-     * @return The LocalDateTime value from the ResultSet, or null if the database value is NULL
+     * @return The LocalDateTime value from the ResultSet, or {@code null} if the database value is NULL
      * @throws SQLException if a database access error occurs or the column name is not found
      */
     @Override
+    @MayReturnNull
     public LocalDateTime get(final ResultSet rs, final String columnName) throws SQLException {
         try {
             return rs.getObject(columnName, LocalDateTime.class);
@@ -270,7 +276,7 @@ public class LocalDateTimeType extends AbstractTemporalType<LocalDateTime> {
      *
      * @param stmt The PreparedStatement to set the parameter on
      * @param columnIndex The parameter index (1-based) to set
-     * @param x The LocalDateTime value to set, or null to set SQL NULL
+     * @param x The LocalDateTime value to set, or {@code null} to set SQL NULL
      * @throws SQLException if a database access error occurs or the parameter index is invalid
      */
     @Override
@@ -302,7 +308,7 @@ public class LocalDateTimeType extends AbstractTemporalType<LocalDateTime> {
      *
      * @param stmt The CallableStatement to set the parameter on
      * @param columnName The name of the parameter to set
-     * @param x The LocalDateTime value to set, or null to set SQL NULL
+     * @param x The LocalDateTime value to set, or {@code null} to set SQL NULL
      * @throws SQLException if a database access error occurs or the parameter name is not found
      */
     @Override

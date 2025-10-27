@@ -40,7 +40,7 @@ public class JSONType<T> extends AbstractType<T> {
 
     /**
      * Constructs a JSONType for the specified class name.
-     * 
+     *
      * This constructor creates a JSONType that handles JSON serialization/deserialization
      * for the specified type. Special handling is provided for "Map" and "List" class names.
      *
@@ -60,9 +60,9 @@ public class JSONType<T> extends AbstractType<T> {
 
     /**
      * Gets the declaring name of this JSONType.
-     * 
+     *
      * The declaring name includes the JSON wrapper notation and the declaring name
-     * of the wrapped type (e.g., "JSON<Map>", "JSON<List>").
+     * of the wrapped type (e.g., "JSON&lt;Map&gt;", "JSON&lt;List&gt;").
      *
      * @return the declaring name of this type
      */
@@ -83,12 +83,13 @@ public class JSONType<T> extends AbstractType<T> {
 
     /**
      * Converts the specified object to its JSON string representation.
-     * 
+     *
      * This method serializes the object using the JSON parser with default
      * serialization configuration.
      *
      * @param x the object to convert to JSON string
-     * @return the JSON string representation of the object, or null if the input is null
+     * @return the JSON string representation of the object, or {@code null} if the input is null
+     @MayReturnNull
      */
     @Override
     public String stringOf(final T x) {
@@ -97,12 +98,13 @@ public class JSONType<T> extends AbstractType<T> {
 
     /**
      * Parses a JSON string into an object of type T.
-     * 
+     *
      * This method deserializes the JSON string using the JSON parser into
      * an instance of the type class handled by this JSONType.
      *
      * @param str the JSON string to parse
-     * @return the deserialized object of type T, or null if the string is empty or null
+     * @return the deserialized object of type T, or {@code null} if the string is empty or null
+     @MayReturnNull
      */
     @Override
     public T valueOf(final String str) {

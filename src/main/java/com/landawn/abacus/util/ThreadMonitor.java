@@ -88,12 +88,6 @@ final class ThreadMonitor implements Runnable {
         }
     }
 
-    /**
-     * Construct and new monitor.
-     *
-     * @param thread The thread to monitor
-     * @param timeout The timeout amount in milliseconds
-     */
     private ThreadMonitor(final Thread thread, final long timeout) {
         this.thread = thread;
         this.timeout = timeout;

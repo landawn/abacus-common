@@ -45,8 +45,8 @@ import com.landawn.abacus.util.stream.Stream;
  * Similar to {@link Map}, but in which each key may be associated with <i>multiple</i> values.
  *
  * <ul>
- * <li>a ->1, 2
- * <li>b -> 3
+ * <li>a -&gt;1, 2
+ * <li>b -&gt; 3
  * </ul>
  *
  * @param <K> the key type
@@ -78,11 +78,6 @@ public sealed class Multimap<K, E, V extends Collection<E>> implements Iterable<
         this(HashMap.class, ArrayList.class);
     }
 
-    /**
-     * Constructs a Multimap with the specified initial capacity.
-     *
-     * @param initialCapacity the initial capacity of the Multimap.
-     */
     Multimap(final int initialCapacity) {
         this(N.newHashMap(initialCapacity), (Supplier<V>) Suppliers.ofList());
     }
@@ -177,7 +172,7 @@ public sealed class Multimap<K, E, V extends Collection<E>> implements Iterable<
     /**
      * Returns the first value associated with the specified key, or a default value if not found.
      * This method provides a null-safe way to retrieve the first value for a key, returning
-     * the specified default value instead of null when the key is absent or has no values.
+     * the specified default value instead of {@code null} when the key is absent or has no values.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -650,7 +645,7 @@ public sealed class Multimap<K, E, V extends Collection<E>> implements Iterable<
      * This is equivalent to removing the entire mapping for the key.
      *
      * <p>After this operation, the key will no longer exist in the Multimap,
-     * and any subsequent {@link #get(Object)} calls with this key will return null.</p>
+     * and any subsequent {@link #get(Object)} calls with this key will return {@code null}.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1555,8 +1550,8 @@ public sealed class Multimap<K, E, V extends Collection<E>> implements Iterable<
      * <p>If the key already has an associated value collection, that existing collection is returned
      * without calling the mapping function. This makes the method safe to call repeatedly.</p>
      *
-     * <p>If the mapping function returns null or an empty collection, no entry is created,
-     * and the method returns null.</p>
+     * <p>If the mapping function returns {@code null} or an empty collection, no entry is created,
+     * and the method returns {@code null}.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1586,7 +1581,7 @@ public sealed class Multimap<K, E, V extends Collection<E>> implements Iterable<
      * @param key the key for which to compute an initial value collection
      * @param mappingFunction the function to compute the initial collection, called only if key is absent
      * @return the existing collection if key was present, or the newly computed and stored collection,
-     *         or null if the mapping function returned null/empty
+     *         or {@code null} if the mapping function returned null/empty
      * @throws IllegalArgumentException if the mappingFunction is null
      * @see #computeIfPresent(Object, BiFunction)
      * @see #compute(Object, BiFunction)
@@ -1613,9 +1608,9 @@ public sealed class Multimap<K, E, V extends Collection<E>> implements Iterable<
      * Updates the value collection for the specified key using a remapping function, but only if the key is present.
      * This method allows conditional transformation of existing collections without affecting absent keys.
      *
-     * <p>If the key is not present, this method does nothing and returns null.</p>
+     * <p>If the key is not present, this method does nothing and returns {@code null}.</p>
      *
-     * <p>If the remapping function returns null or an empty collection, the entire mapping
+     * <p>If the remapping function returns {@code null} or an empty collection, the entire mapping
      * (key and its collection) is removed from the Multimap.</p>
      *
      * <p>The remapping function receives both the key and its current collection, allowing
@@ -1648,7 +1643,7 @@ public sealed class Multimap<K, E, V extends Collection<E>> implements Iterable<
      *
      * @param key the key whose value collection should be remapped
      * @param remappingFunction the function that computes a new collection based on key and current collection
-     * @return the updated collection, or null if the key was not present or the function returned null/empty
+     * @return the updated collection, or {@code null} if the key was not present or the function returned null/empty
      * @throws IllegalArgumentException if the remappingFunction is null
      * @see #computeIfAbsent(Object, Function)
      * @see #compute(Object, BiFunction)
@@ -1760,7 +1755,7 @@ public sealed class Multimap<K, E, V extends Collection<E>> implements Iterable<
      *   <li>If the key doesn't exist, the elements are added directly and the resulting collection is returned</li>
      *   <li>If the key exists, the remapping function receives the current collection and the new elements,
      *       allowing you to define custom merge logic (e.g., union, intersection, custom filtering)</li>
-     *   <li>If the function returns null or an empty collection, the key is removed from the Multimap</li>
+     *   <li>If the function returns {@code null} or an empty collection, the key is removed from the Multimap</li>
      *   <li>If the function returns the same collection instance (oldValue == newValue), no update occurs</li>
      * </ul>
      *
@@ -1793,7 +1788,7 @@ public sealed class Multimap<K, E, V extends Collection<E>> implements Iterable<
      * @param key the key whose value should be merged with the elements
      * @param elements the collection of elements to merge with existing values
      * @param remappingFunction the function that defines how to merge old and new collections
-     * @return the updated collection associated with the key, or null if the key was removed
+     * @return the updated collection associated with the key, or {@code null} if the key was removed
      * @throws IllegalArgumentException if remappingFunction or elements is null
      * @see #merge(Object, Object, BiFunction)
      * @see #compute(Object, BiFunction)
@@ -1838,7 +1833,7 @@ public sealed class Multimap<K, E, V extends Collection<E>> implements Iterable<
      *   <li>If the key doesn't exist, the element is added directly and the resulting collection is returned</li>
      *   <li>If the key exists, the remapping function receives the current collection and the new element,
      *       allowing custom logic to determine the final collection state</li>
-     *   <li>If the function returns null or an empty collection, the key is removed</li>
+     *   <li>If the function returns {@code null} or an empty collection, the key is removed</li>
      *   <li>If the function returns the same collection instance, no update occurs (optimization)</li>
      * </ul>
      *
@@ -1870,7 +1865,7 @@ public sealed class Multimap<K, E, V extends Collection<E>> implements Iterable<
      * @param key the key whose value should be merged with the element
      * @param e the element to merge with existing values
      * @param remappingFunction the function that defines how to merge the collection with the new element
-     * @return the updated collection associated with the key, or null if the key was removed
+     * @return the updated collection associated with the key, or {@code null} if the key was removed
      * @throws IllegalArgumentException if remappingFunction or e is null
      * @see #merge(Object, Collection, BiFunction)
      * @see #compute(Object, BiFunction)
@@ -2034,7 +2029,7 @@ public sealed class Multimap<K, E, V extends Collection<E>> implements Iterable<
 
     /**
      * Tests whether this Multimap contains the specified key.
-     * Returns true even if the key is associated with an empty collection.
+     * Returns {@code true} even if the key is associated with an empty collection.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -2928,7 +2923,7 @@ public sealed class Multimap<K, E, V extends Collection<E>> implements Iterable<
 
     /**
      * Removes all key-value pairs from this Multimap, leaving it empty.
-     * After this call, {@link #isEmpty()} will return true and {@link #size()} will return 0.
+     * After this call, {@link #isEmpty()} will return {@code true} and {@link #size()} will return 0.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -3165,11 +3160,6 @@ public sealed class Multimap<K, E, V extends Collection<E>> implements Iterable<
         return If.is(size() > 0).then(this, action);
     }
 
-    /**
-     * Returns the hash code value for this Multimap.
-     *
-     * @return the hash code value for this Multimap.
-     */
     @Override
     public int hashCode() {
         return backingMap.hashCode();

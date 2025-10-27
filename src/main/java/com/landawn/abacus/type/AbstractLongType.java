@@ -57,6 +57,7 @@ public abstract class AbstractLongType extends NumberType<Number> {
      */
     @MayReturnNull
     @Override
+
     public String stringOf(final Number x) {
         if (x == null) {
             return null; // NOSONAR
@@ -81,7 +82,9 @@ public abstract class AbstractLongType extends NumberType<Number> {
      * @param obj the object to convert
      * @return the Long value representing milliseconds for date/time types, or parsed value for others
      */
+    @MayReturnNull
     @Override
+
     public Long valueOf(final Object obj) {
         if (obj == null) {
             return (Long) defaultValue();
@@ -115,7 +118,9 @@ public abstract class AbstractLongType extends NumberType<Number> {
      * @return the Long value
      * @throws NumberFormatException if the string cannot be parsed as a long
      */
+    @MayReturnNull
     @Override
+
     public Long valueOf(final String str) {
         if (Strings.isEmpty(str)) {
             return (Long) defaultValue();
@@ -145,7 +150,9 @@ public abstract class AbstractLongType extends NumberType<Number> {
      * @param len the number of characters to read
      * @return the Long value, or default value if input is {@code null} or empty
      */
+    @MayReturnNull
     @Override
+
     public Long valueOf(final char[] cbuf, final int offset, final int len) {
         return ((cbuf == null) || (len == 0)) ? ((Long) defaultValue()) : (Long) parseLong(cbuf, offset, len);
     }
@@ -158,7 +165,7 @@ public abstract class AbstractLongType extends NumberType<Number> {
     /**
      * Retrieves a long value from a ResultSet at the specified column index.
      * This method uses rs.getLong() which returns 0 for SQL NULL values.
-     * Subclasses may override this to return null for SQL NULL values.
+     * Subclasses may override this to return {@code null} for SQL NULL values.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -177,6 +184,7 @@ public abstract class AbstractLongType extends NumberType<Number> {
      * @throws SQLException if a database access error occurs or the columnIndex is invalid
      */
     @Override
+    @MayReturnNull
     public Long get(final ResultSet rs, final int columnIndex) throws SQLException {
         return rs.getLong(columnIndex);
     }
@@ -184,7 +192,7 @@ public abstract class AbstractLongType extends NumberType<Number> {
     /**
      * Retrieves a long value from a ResultSet using the specified column label.
      * This method uses rs.getLong() which returns 0 for SQL NULL values.
-     * Subclasses may override this to return null for SQL NULL values.
+     * Subclasses may override this to return {@code null} for SQL NULL values.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -203,6 +211,7 @@ public abstract class AbstractLongType extends NumberType<Number> {
      * @throws SQLException if a database access error occurs or the columnLabel is not found
      */
     @Override
+    @MayReturnNull
     public Long get(final ResultSet rs, final String columnLabel) throws SQLException {
         return rs.getLong(columnLabel);
     }

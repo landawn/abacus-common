@@ -45,6 +45,15 @@ public interface ByteSupplier extends Throwables.ByteSupplier<RuntimeException> 
     /**
      * Gets a byte result.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * ByteSupplier counter = new ByteSupplier() {
+     *     private byte count = 0;
+     *     public byte getAsByte() { return count++; }
+     * };
+     * byte value = counter.getAsByte(); // Returns 0, then 1, 2, ...
+     * }</pre>
+     *
      * @return a byte value
      */
     @Override

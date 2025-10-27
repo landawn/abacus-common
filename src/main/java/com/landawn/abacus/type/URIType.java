@@ -55,7 +55,7 @@ public class URIType extends AbstractType<URI> {
      * Converts a URI instance to its string representation.
      * <p>
      * This method returns the string representation of the URI by calling its {@code toString()} method.
-     * If the input URI is null, this method returns null.
+     * If the input URI is {@code null}, this method returns {@code null}.
      * </p>
      *
      * <p><b>Usage Examples:</b></p>
@@ -66,9 +66,10 @@ public class URIType extends AbstractType<URI> {
      * }</pre>
      *
      * @param x the URI instance to convert to string
-     * @return the string representation of the URI, or null if the input is null
+     * @return the string representation of the URI, or {@code null} if the input is null
      */
     @Override
+    @MayReturnNull
     public String stringOf(final URI x) {
         return (x == null) ? null : x.toString();
     }
@@ -77,7 +78,7 @@ public class URIType extends AbstractType<URI> {
      * Converts a string to a URI instance.
      * <p>
      * This method creates a URI instance from the provided string using {@link URI#create(String)}.
-     * If the string is null or empty, this method returns null.
+     * If the string is {@code null} or empty, this method returns {@code null}.
      * </p>
      *
      * <p><b>Usage Examples:</b></p>
@@ -87,11 +88,12 @@ public class URIType extends AbstractType<URI> {
      * }</pre>
      *
      * @param str the string to convert to a URI
-     * @return a URI instance created from the string, or null if the string is empty
+     * @return a URI instance created from the string, or {@code null} if the string is empty
      * @throws IllegalArgumentException if the string violates RFC 2396 URI syntax rules
      */
     @MayReturnNull
     @Override
+
     public URI valueOf(final String str) {
         if (Strings.isEmpty(str)) {
             return null; // NOSONAR
@@ -116,10 +118,11 @@ public class URIType extends AbstractType<URI> {
      *
      * @param rs the ResultSet to read from
      * @param columnIndex the column index (1-based) of the URI value
-     * @return the URI value, or null if the database value is NULL
+     * @return the URI value, or {@code null} if the database value is NULL
      * @throws SQLException if a database access error occurs or the column index is invalid
      */
     @Override
+    @MayReturnNull
     public URI get(final ResultSet rs, final int columnIndex) throws SQLException {
         return valueOf(rs.getString(columnIndex));
     }
@@ -140,10 +143,11 @@ public class URIType extends AbstractType<URI> {
      *
      * @param rs the ResultSet to read from
      * @param columnLabel the label of the column containing the URI value
-     * @return the URI value, or null if the database value is NULL
+     * @return the URI value, or {@code null} if the database value is NULL
      * @throws SQLException if a database access error occurs or the column label is invalid
      */
     @Override
+    @MayReturnNull
     public URI get(final ResultSet rs, final String columnLabel) throws SQLException {
         return valueOf(rs.getString(columnLabel));
     }
@@ -152,7 +156,7 @@ public class URIType extends AbstractType<URI> {
      * Sets a URI value in a PreparedStatement at the specified parameter index.
      * <p>
      * This method converts the URI to its string representation and sets it in the
-     * PreparedStatement. If the URI is null, a NULL value is set.
+     * PreparedStatement. If the URI is {@code null}, a NULL value is set.
      * </p>
      *
      * <p><b>Usage Examples:</b></p>
@@ -164,7 +168,7 @@ public class URIType extends AbstractType<URI> {
      *
      * @param stmt the PreparedStatement to set the value in
      * @param columnIndex the parameter index (1-based) where to set the URI value
-     * @param x the URI value to set, or null for SQL NULL
+     * @param x the URI value to set, or {@code null} for SQL NULL
      * @throws SQLException if a database access error occurs or the parameter index is invalid
      */
     @Override
@@ -176,7 +180,7 @@ public class URIType extends AbstractType<URI> {
      * Sets a URI value in a CallableStatement using the specified parameter name.
      * <p>
      * This method converts the URI to its string representation and sets it in the
-     * CallableStatement. If the URI is null, a NULL value is set.
+     * CallableStatement. If the URI is {@code null}, a NULL value is set.
      * </p>
      *
      * <p><b>Usage Examples:</b></p>
@@ -188,7 +192,7 @@ public class URIType extends AbstractType<URI> {
      *
      * @param stmt the CallableStatement to set the value in
      * @param parameterName the name of the parameter where to set the URI value
-     * @param x the URI value to set, or null for SQL NULL
+     * @param x the URI value to set, or {@code null} for SQL NULL
      * @throws SQLException if a database access error occurs or the parameter name is invalid
      */
     @Override

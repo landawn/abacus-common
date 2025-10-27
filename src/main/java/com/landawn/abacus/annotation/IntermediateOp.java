@@ -55,17 +55,17 @@ import java.lang.annotation.Target;
  * 
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
- * public class StreamProcessor&lt;T&gt; {
- *     {@literal @}IntermediateOp
- *     public StreamProcessor&lt;T&gt; filter(Predicate&lt;T&gt; predicate) {
+ * public class StreamProcessor<T> {
+ *     @IntermediateOp
+ *     public StreamProcessor<T> filter(Predicate<T> predicate) {
  *         // Returns new stream without processing elements
- *         return new FilteredStream&lt;&gt;(this, predicate);
+ *         return new FilteredStream<>(this, predicate);
  *     }
  *     
- *     {@literal @}IntermediateOp
- *     public &lt;R&gt; StreamProcessor&lt;R&gt; map(Function&lt;T, R&gt; mapper) {
+ *     @IntermediateOp
+ *     public <R> StreamProcessor<R> map(Function<T, R> mapper) {
  *         // Lazy transformation operation
- *         return new MappedStream&lt;&gt;(this, mapper);
+ *         return new MappedStream<>(this, mapper);
  *     }
  * }
  * }</pre>

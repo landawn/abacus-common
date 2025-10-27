@@ -43,11 +43,17 @@ import com.landawn.abacus.annotation.MayReturnNull;
  */
 public abstract class ParserConfig<C extends ParserConfig<C>> implements Cloneable {
 
+    /**
+     * Protected constructor for subclasses.
+     */
+    protected ParserConfig() {
+    }
+
     Map<Class<?>, Set<String>> ignoredBeanPropNameMap = null;
 
     /**
      * Gets the complete map of ignored property names organized by class.
-     * 
+     *
      * <p>The returned map contains entries where:</p>
      * <ul>
      *   <li>Keys are class types</li>
@@ -55,8 +61,9 @@ public abstract class ParserConfig<C extends ParserConfig<C>> implements Cloneab
      *   <li>The special key {@code Object.class} contains globally ignored properties</li>
      * </ul>
      *
-     * @return the map of ignored properties by class, or null if none are configured
+     * @return the map of ignored properties by class, or {@code null} if none are configured
      */
+    @MayReturnNull
     public Map<Class<?>, Set<String>> getIgnoredPropNames() {
         return ignoredBeanPropNameMap;
     }
@@ -77,7 +84,7 @@ public abstract class ParserConfig<C extends ParserConfig<C>> implements Cloneab
      * }</pre>
      *
      * @param cls the class to get ignored properties for
-     * @return collection of ignored property names, or null if none are configured
+     * @return collection of ignored property names, or {@code null} if none are configured
      */
     @MayReturnNull
     public Collection<String> getIgnoredPropNames(final Class<?> cls) {

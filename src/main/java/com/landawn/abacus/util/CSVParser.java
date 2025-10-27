@@ -91,24 +91,24 @@ public class CSVParser {
 
     /**
      * The default strict quotes behavior.
-     * When false, characters outside quotes are included in the field value.
+     * When {@code false}, characters outside quotes are included in the field value.
      */
     public static final boolean DEFAULT_STRICT_QUOTES = false;
 
     /**
      * The default leading whitespace behavior.
-     * When true, leading whitespace is trimmed from unquoted fields.
+     * When {@code true}, leading whitespace is trimmed from unquoted fields.
      */
     public static final boolean DEFAULT_IGNORE_LEADING_WHITESPACE = true;
 
     /**
      * The default behavior for quotation handling.
-     * When false, quote characters are processed normally.
+     * When {@code false}, quote characters are processed normally.
      */
     public static final boolean DEFAULT_IGNORE_QUOTATIONS = false;
 
     /**
-     * The null character constant.
+     * The {@code null} character constant.
      * Used to indicate that a character parameter should be ignored.
      */
     public static final char NULL_CHARACTER = '\0';
@@ -346,7 +346,7 @@ public class CSVParser {
 
     /**
      * Returns whether this parser ignores leading whitespace.
-     * When true, whitespace before a quote character is ignored.
+     * When {@code true}, whitespace before a quote character is ignored.
      *
      * @return {@code true} if leading whitespace is ignored
      */
@@ -356,7 +356,7 @@ public class CSVParser {
 
     /**
      * Returns whether this parser ignores quotation marks.
-     * When true, quotes are treated as regular characters.
+     * When {@code true}, quotes are treated as regular characters.
      *
      * @return {@code true} if quotations are ignored
      */

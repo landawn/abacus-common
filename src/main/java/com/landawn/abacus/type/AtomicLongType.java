@@ -60,6 +60,7 @@ public class AtomicLongType extends AbstractAtomicType<AtomicLong> {
      * @param columnIndex the column index (1-based) of the long value
      * @return a new AtomicLong containing the retrieved value (0L if SQL NULL)
      * @throws SQLException if a database access error occurs or the columnIndex is invalid
+     @MayReturnNull
      */
     @Override
     public AtomicLong get(final ResultSet rs, final int columnIndex) throws SQLException {
@@ -75,6 +76,7 @@ public class AtomicLongType extends AbstractAtomicType<AtomicLong> {
      *                    or the column name if no AS clause was specified
      * @return a new AtomicLong containing the retrieved value (0L if SQL NULL)
      * @throws SQLException if a database access error occurs or the columnLabel is invalid
+     @MayReturnNull
      */
     @Override
     public AtomicLong get(final ResultSet rs, final String columnLabel) throws SQLException {
@@ -84,11 +86,11 @@ public class AtomicLongType extends AbstractAtomicType<AtomicLong> {
     /**
      * Sets an AtomicLong parameter in a PreparedStatement at the specified position.
      * The long value is extracted from the AtomicLong before setting.
-     * If the AtomicLong is null, sets 0L as the parameter value.
+     * If the AtomicLong is {@code null}, sets 0L as the parameter value.
      *
      * @param stmt the PreparedStatement to set the parameter on
      * @param columnIndex the parameter index (1-based) to set
-     * @param x the AtomicLong value to set, may be null (treated as 0L)
+     * @param x the AtomicLong value to set, may be {@code null} (treated as 0L)
      * @throws SQLException if a database access error occurs or the columnIndex is invalid
      */
     @Override
@@ -99,11 +101,11 @@ public class AtomicLongType extends AbstractAtomicType<AtomicLong> {
     /**
      * Sets a named AtomicLong parameter in a CallableStatement.
      * The long value is extracted from the AtomicLong before setting.
-     * If the AtomicLong is null, sets 0L as the parameter value.
+     * If the AtomicLong is {@code null}, sets 0L as the parameter value.
      *
      * @param stmt the CallableStatement to set the parameter on
      * @param parameterName the name of the parameter to set
-     * @param x the AtomicLong value to set, may be null (treated as 0L)
+     * @param x the AtomicLong value to set, may be {@code null} (treated as 0L)
      * @throws SQLException if a database access error occurs or the parameter name is invalid
      */
     @Override
@@ -115,8 +117,25 @@ public class AtomicLongType extends AbstractAtomicType<AtomicLong> {
      * Converts an AtomicLong value to its string representation.
      * The long value is extracted from the AtomicLong and converted to string.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * AtomicLongType type = (AtomicLongType) TypeFactory.getType(AtomicLong.class);
+     *
+     * AtomicLong value = new AtomicLong(123456789L);
+     * String str = type.stringOf(value);
+     * // str: "123456789"
+     *
+     * AtomicLong zero = new AtomicLong(0L);
+     * String zeroStr = type.stringOf(zero);
+     * // zeroStr: "0"
+     *
+     * String nullStr = type.stringOf(null);
+     * // nullStr: null
+     * }</pre>
+     *
      * @param x the AtomicLong value to convert
-     * @return the string representation of the long value, or null if input is null
+     * @return the string representation of the long value, or {@code null} if input is null
+     @MayReturnNull
      */
     @Override
     public String stringOf(final AtomicLong x) {
@@ -127,9 +146,27 @@ public class AtomicLongType extends AbstractAtomicType<AtomicLong> {
      * Converts a string representation to an AtomicLong value.
      * Parses the string as a long and wraps it in a new AtomicLong instance.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * AtomicLongType type = (AtomicLongType) TypeFactory.getType(AtomicLong.class);
+     *
+     * AtomicLong value = type.valueOf("123456789");
+     * // value.get(): 123456789L
+     *
+     * AtomicLong negative = type.valueOf("-9876543210");
+     * // negative.get(): -9876543210L
+     *
+     * AtomicLong nullValue = type.valueOf(null);
+     * // nullValue: null
+     *
+     * // Throws NumberFormatException:
+     * // type.valueOf("not a number");
+     * }</pre>
+     *
      * @param str the string to parse as a long
-     * @return a new AtomicLong containing the parsed value, or null if str is null or empty
+     * @return a new AtomicLong containing the parsed value, or {@code null} if str is {@code null} or empty
      * @throws NumberFormatException if the string cannot be parsed as a long
+     @MayReturnNull
      */
     @Override
     public AtomicLong valueOf(final String str) {

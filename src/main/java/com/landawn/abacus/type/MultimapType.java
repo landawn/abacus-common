@@ -36,7 +36,7 @@ import com.landawn.abacus.util.WD;
  *
  * @param <K> the key type
  * @param <E> the element type (individual values in the collection)
- * @param <V> the value collection type (e.g., List<E> or Set<E>)
+ * @param <V> the value collection type (e.g., List&lt;E&gt; or Set&lt;E&gt;)
  * @param <T> the specific Multimap implementation type
  */
 @SuppressWarnings("java:S2160")
@@ -94,7 +94,7 @@ public class MultimapType<K, E, V extends Collection<E>, T extends Multimap<K, E
      * Returns the declaring name of this Multimap type.
      * The declaring name includes the fully qualified class names of the key, element, and value types.
      *
-     * @return The declaring name in format "MultimapClass<KeyDeclaringName[, ElementDeclaringName][, ValueDeclaringName]>"
+     * @return The declaring name in format "MultimapClass&lt;KeyDeclaringName[, ElementDeclaringName][, ValueDeclaringName]&gt;"
      */
     @Override
     public String declaringName() {
@@ -129,7 +129,7 @@ public class MultimapType<K, E, V extends Collection<E>, T extends Multimap<K, E
      * Indicates whether this is a generic type.
      * For MultimapType, this always returns {@code true} since Multimap is parameterized with key and value types.
      *
-     * @return true, indicating that Multimap is a generic type
+     * @return {@code true}, indicating that Multimap is a generic type
      */
     @Override
     public boolean isGenericType() {
@@ -140,7 +140,7 @@ public class MultimapType<K, E, V extends Collection<E>, T extends Multimap<K, E
      * Indicates whether instances of this type can be serialized.
      * Multimap objects can be serialized through this type handler.
      *
-     * @return true, indicating that Multimap is serializable through this type
+     * @return {@code true}, indicating that Multimap is serializable through this type
      */
     @Override
     public boolean isSerializable() {
@@ -153,9 +153,10 @@ public class MultimapType<K, E, V extends Collection<E>, T extends Multimap<K, E
      * then serialized as JSON.
      *
      * @param x The Multimap object to convert
-     * @return The JSON string representation of the Multimap, or null if the input is null
+     * @return The JSON string representation of the Multimap, or {@code null} if the input is null
      */
     @Override
+    @MayReturnNull
     public String stringOf(final T x) {
         return (x == null) ? null : Utils.jsonParser.serialize(x.toMap(), Utils.jsc);
     }
@@ -167,10 +168,11 @@ public class MultimapType<K, E, V extends Collection<E>, T extends Multimap<K, E
      * based on whether the value type is a Set or not.
      *
      * @param str The JSON string to parse
-     * @return The parsed Multimap object, or null if the input is null or empty
+     * @return The parsed Multimap object, or {@code null} if the input is {@code null} or empty
      */
     @MayReturnNull
     @Override
+
     public T valueOf(final String str) {
         if (Strings.isEmpty(str) || Strings.isBlank(str)) {
             return null; // NOSONAR

@@ -14,6 +14,7 @@
 
 package com.landawn.abacus.util.function;
 
+import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.util.Throwables;
 
 /**
@@ -35,6 +36,7 @@ public interface ByteBiFunction<R> extends Throwables.ByteBiFunction<R, RuntimeE
      * @return the function result
      */
     @Override
+    @MayReturnNull
     R apply(byte t, byte u);
 
     /**

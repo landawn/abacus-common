@@ -143,7 +143,7 @@ public abstract class PoolFactory { //NOSONAR
      * @param autoBalance whether to automatically remove objects when the pool is full (default: true)
      * @param balanceFactor the proportion of objects to remove during balancing (default: 0.2)
      * @param maxMemorySize the maximum total memory size in bytes, or 0 for no memory limit
-     * @param memoryMeasure the function to calculate memory size of pool elements, or null if not using memory limits
+     * @param memoryMeasure the function to calculate memory size of pool elements, or {@code null} if not using memory limits
      * @return a new ObjectPool instance with full configuration
      */
     public static <E extends Poolable> ObjectPool<E> createObjectPool(final int capacity, final long evictDelay, final EvictionPolicy evictionPolicy,
@@ -251,7 +251,7 @@ public abstract class PoolFactory { //NOSONAR
      * @param autoBalance whether to automatically remove entries when the pool is full (default: true)
      * @param balanceFactor the proportion of entries to remove during balancing (default: 0.2)
      * @param maxMemorySize the maximum total memory size in bytes, or 0 for no memory limit
-     * @param memoryMeasure the function to calculate memory size of key-value pairs, or null if not using memory limits
+     * @param memoryMeasure the function to calculate memory size of key-value pairs, or {@code null} if not using memory limits
      * @return a new KeyedObjectPool instance with full configuration
      */
     public static <K, E extends Poolable> KeyedObjectPool<K, E> createKeyedObjectPool(final int capacity, final long evictDelay,

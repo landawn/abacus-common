@@ -96,7 +96,7 @@ public interface Subscriber<E> {
      * }
      * }</pre>
      *
-     * @param event the event instance posted to the EventBus. Never null.
+     * @param event the event instance posted to the EventBus. Never {@code null}.
      */
     void on(E event);
 }

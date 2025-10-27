@@ -58,9 +58,10 @@ public class InstantType extends AbstractTemporalType<Instant> {
      * Uses ISO-8601 timestamp format with millisecond precision (e.g., "2023-12-25T10:30:45.123Z").
      *
      * @param x the Instant to convert to string
-     * @return the ISO-8601 timestamp string representation, or null if the input is null
+     * @return the ISO-8601 timestamp string representation, or {@code null} if the input is null
      */
     @Override
+    @MayReturnNull
     public String stringOf(final Instant x) {
         return (x == null) ? null : iso8601TimestampDTF.format(x.atZone(Dates.UTC_ZONE_ID));
     }
@@ -72,9 +73,10 @@ public class InstantType extends AbstractTemporalType<Instant> {
      * - Other types: converted to string and then parsed
      *
      * @param obj the object to convert to Instant
-     * @return an Instant instance, or null if the input is null
+     * @return an Instant instance, or {@code null} if the input is null
      */
     @Override
+    @MayReturnNull
     public Instant valueOf(final Object obj) {
         if (obj instanceof Number) {
             return Instant.ofEpochMilli(((Number) obj).longValue());
@@ -86,17 +88,18 @@ public class InstantType extends AbstractTemporalType<Instant> {
     /**
      * Parses a string representation into an Instant.
      * The method handles:
-     * - null or null-like strings: returns null
+     * - {@code null} or null-like strings: returns null
      * - "sysTime": returns current instant
      * - numeric strings: interpreted as milliseconds since epoch
      * - ISO-8601 formatted strings: parsed according to standard formats
      * - Standard Instant.parse() format for other strings
      *
      * @param str the string to parse into an Instant
-     * @return the parsed Instant instance, or null if the input is null or represents a null datetime
+     * @return the parsed Instant instance, or {@code null} if the input is {@code null} or represents a {@code null} datetime
      */
     @MayReturnNull
     @Override
+
     public Instant valueOf(final String str) {
         if (isNullDateTime(str)) {
             return null; // NOSONAR
@@ -129,10 +132,11 @@ public class InstantType extends AbstractTemporalType<Instant> {
      * @param cbuf the character array containing the instant representation
      * @param offset the start offset in the character array
      * @param len the number of characters to parse
-     * @return the parsed Instant instance, or null if the input is null or empty
+     * @return the parsed Instant instance, or {@code null} if the input is {@code null} or empty
      */
     @MayReturnNull
     @Override
+
     public Instant valueOf(final char[] cbuf, final int offset, final int len) {
         if ((cbuf == null) || (len == 0)) {
             return null; // NOSONAR
@@ -155,10 +159,11 @@ public class InstantType extends AbstractTemporalType<Instant> {
      *
      * @param rs the ResultSet to read from
      * @param columnIndex the index of the column to read (1-based)
-     * @return the Instant value from the column, or null if the column value is SQL NULL
+     * @return the Instant value from the column, or {@code null} if the column value is SQL NULL
      * @throws SQLException if a database access error occurs or the columnIndex is invalid
      */
     @Override
+    @MayReturnNull
     public Instant get(final ResultSet rs, final int columnIndex) throws SQLException {
         final Timestamp ts = rs.getTimestamp(columnIndex);
 
@@ -171,10 +176,11 @@ public class InstantType extends AbstractTemporalType<Instant> {
      *
      * @param rs the ResultSet to read from
      * @param columnName the name of the column to read
-     * @return the Instant value from the column, or null if the column value is SQL NULL
+     * @return the Instant value from the column, or {@code null} if the column value is SQL NULL
      * @throws SQLException if a database access error occurs or the columnName is not found
      */
     @Override
+    @MayReturnNull
     public Instant get(final ResultSet rs, final String columnName) throws SQLException {
         final Timestamp ts = rs.getTimestamp(columnName);
 

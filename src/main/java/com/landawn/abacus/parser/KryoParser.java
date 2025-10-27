@@ -222,9 +222,6 @@ public final class KryoParser extends AbstractParser<KryoSerializationConfig, Kr
 
     private final List<Kryo> kryoPool = new ArrayList<>(POOL_SIZE);
 
-    /**
-     * Constructs a new KryoParser with default settings.
-     */
     KryoParser() {
     }
 
@@ -239,7 +236,7 @@ public final class KryoParser extends AbstractParser<KryoSerializationConfig, Kr
      * }</pre>
      *
      * @param obj the object to serialize
-     * @param config the serialization configuration (may be null for defaults)
+     * @param config the serialization configuration (may be {@code null} for defaults)
      * @return a Base64 encoded string representation of the object
      */
     @Override
@@ -267,7 +264,7 @@ public final class KryoParser extends AbstractParser<KryoSerializationConfig, Kr
      * }</pre>
      *
      * @param obj the object to serialize
-     * @param config the serialization configuration (may be null for defaults)
+     * @param config the serialization configuration (may be {@code null} for defaults)
      * @param output the output file
      * @throws UncheckedIOException if an I/O error occurs
      */
@@ -301,7 +298,7 @@ public final class KryoParser extends AbstractParser<KryoSerializationConfig, Kr
      * }</pre>
      *
      * @param obj the object to serialize
-     * @param config the serialization configuration (may be null for defaults)
+     * @param config the serialization configuration (may be {@code null} for defaults)
      * @param output the output stream
      * @throws UncheckedIOException if an I/O error occurs
      */
@@ -321,7 +318,7 @@ public final class KryoParser extends AbstractParser<KryoSerializationConfig, Kr
      * }</pre>
      *
      * @param obj the object to serialize
-     * @param config the serialization configuration (may be null for defaults)
+     * @param config the serialization configuration (may be {@code null} for defaults)
      * @param output the output writer
      * @throws UncheckedIOException if an I/O error occurs
      */
@@ -355,7 +352,7 @@ public final class KryoParser extends AbstractParser<KryoSerializationConfig, Kr
      * }</pre>
      *
      * @param obj the object to write (may be null)
-     * @param config the serialization configuration (may be null for defaults)
+     * @param config the serialization configuration (may be {@code null} for defaults)
      * @param output the output stream to write to
      *
      */
@@ -384,8 +381,8 @@ public final class KryoParser extends AbstractParser<KryoSerializationConfig, Kr
      * }</pre>
      *
      * @param obj the object to write (may be null)
-     * @param config the serialization configuration (may be null for defaults). If config.writeClass()
-     *               returns true, both class and object are written; otherwise only the object is written
+     * @param config the serialization configuration (may be {@code null} for defaults). If config.writeClass()
+     *               returns {@code true}, both class and object are written; otherwise only the object is written
      * @param output the Kryo output to write to
      *
      */
@@ -418,7 +415,7 @@ public final class KryoParser extends AbstractParser<KryoSerializationConfig, Kr
      *
      * @param <T> the type of the target object
      * @param source a Base64 encoded string
-     * @param config the deserialization configuration (may be null for defaults)
+     * @param config the deserialization configuration (may be {@code null} for defaults)
      * @param targetClass the target class
      * @return the deserialized object
      */
@@ -448,7 +445,7 @@ public final class KryoParser extends AbstractParser<KryoSerializationConfig, Kr
      *
      * @param <T> the type of the target object
      * @param source the source file
-     * @param config the deserialization configuration (may be null for defaults)
+     * @param config the deserialization configuration (may be {@code null} for defaults)
      * @param targetClass the target class
      * @return the deserialized object
      * @throws UncheckedIOException if an I/O error occurs
@@ -478,7 +475,7 @@ public final class KryoParser extends AbstractParser<KryoSerializationConfig, Kr
      *
      * @param <T> the type of the target object
      * @param source the source input stream
-     * @param config the deserialization configuration (may be null for defaults)
+     * @param config the deserialization configuration (may be {@code null} for defaults)
      * @param targetClass the target class
      * @return the deserialized object
      * @throws UncheckedIOException if an I/O error occurs
@@ -499,7 +496,7 @@ public final class KryoParser extends AbstractParser<KryoSerializationConfig, Kr
      *
      * @param <T> the type of the target object
      * @param source the source reader with Base64 encoded content
-     * @param config the deserialization configuration (may be null for defaults)
+     * @param config the deserialization configuration (may be {@code null} for defaults)
      * @param targetClass the target class
      * @return the deserialized object
      * @throws UncheckedIOException if an I/O error occurs
@@ -522,8 +519,8 @@ public final class KryoParser extends AbstractParser<KryoSerializationConfig, Kr
      *
      * @param <T> the type of the target object
      * @param source the input stream to read from
-     * @param config the deserialization configuration (may be null for defaults)
-     * @param targetClass the target class to deserialize to (may be null if class info is in stream)
+     * @param config the deserialization configuration (may be {@code null} for defaults)
+     * @param targetClass the target class to deserialize to (may be {@code null} if class info is in stream)
      * @return the deserialized object
      *
      */
@@ -541,7 +538,7 @@ public final class KryoParser extends AbstractParser<KryoSerializationConfig, Kr
 
     /**
      * Reads an object using Kryo input.
-     * This method performs the actual Kryo deserialization. If targetClass is null,
+     * This method performs the actual Kryo deserialization. If targetClass is {@code null},
      * it reads both class and object information from the stream; otherwise it reads
      * just the object data and instantiates the specified class.
      *
@@ -553,8 +550,8 @@ public final class KryoParser extends AbstractParser<KryoSerializationConfig, Kr
      *
      * @param <T> the type of the target object
      * @param source the Kryo input to read from
-     * @param config the deserialization configuration (may be null for defaults)
-     * @param targetClass the target class to deserialize to (may be null to read class from stream)
+     * @param config the deserialization configuration (may be {@code null} for defaults)
+     * @param targetClass the target class to deserialize to (may be {@code null} to read class from stream)
      * @return the deserialized object
      *
      */
@@ -574,7 +571,7 @@ public final class KryoParser extends AbstractParser<KryoSerializationConfig, Kr
     /**
      * Validates the serialization configuration.
      * This method can be used to enforce constraints on the serialization configuration.
-     * Currently, this implementation accepts any configuration including null.
+     * Currently, this implementation accepts any configuration including {@code null}.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -600,7 +597,7 @@ public final class KryoParser extends AbstractParser<KryoSerializationConfig, Kr
     /**
      * Validates the deserialization configuration.
      * This method can be used to enforce constraints on the deserialization configuration.
-     * Currently, this implementation accepts any configuration including null.
+     * Currently, this implementation accepts any configuration including {@code null}.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code

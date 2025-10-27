@@ -180,7 +180,7 @@ public abstract class Observer<T> implements Immutable {
 
     /**
      * Creates an Observer from an Iterator. The Observer will emit all elements
-     * from the iterator until hasNext() returns false.
+     * from the iterator until hasNext() returns {@code false}.
      * 
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1261,30 +1261,16 @@ public abstract class Observer<T> implements Immutable {
         /** The on complete. */
         private final Runnable onComplete;
 
-        /**
-         * Constructs a DispatcherBase with error and completion handlers.
-         *
-         * @param onError the error handler
-         * @param onComplete the completion handler
-         */
         protected DispatcherBase(final Consumer<? super Exception> onError, final Runnable onComplete) {
             this.onError = onError;
             this.onComplete = onComplete;
         }
 
-        /**
-         * Handles errors by invoking the error consumer.
-         *
-         * @param error the error to handle
-         */
         @Override
         public void onError(final Exception error) {
             onError.accept(error);
         }
 
-        /**
-         * Handles completion by invoking the completion runnable.
-         */
         @Override
         public void onComplete() {
             onComplete.run();
@@ -1299,9 +1285,6 @@ public abstract class Observer<T> implements Immutable {
      */
     protected abstract static class ObserverBase<T> extends Observer<T> {
 
-        /**
-         * Constructs a new ObserverBase instance.
-         */
         protected ObserverBase() {
 
         }
@@ -1319,11 +1302,6 @@ public abstract class Observer<T> implements Immutable {
         /** The queue. */
         private final BlockingQueue<T> queue;
 
-        /**
-         * Constructs a BlockingQueueObserver with the specified queue.
-         *
-         * @param queue the BlockingQueue to observe
-         */
         BlockingQueueObserver(final BlockingQueue<T> queue) {
             this.queue = queue;
         }
@@ -1380,7 +1358,7 @@ public abstract class Observer<T> implements Immutable {
 
     /**
      * Observer implementation that emits items from an Iterator.
-     * Items are pulled from the iterator asynchronously until hasNext() returns false.
+     * Items are pulled from the iterator asynchronously until hasNext() returns {@code false}.
      *
      * @param <T> the type of items in the iterator
      */
@@ -1389,11 +1367,6 @@ public abstract class Observer<T> implements Immutable {
         /** The iter. */
         private final Iterator<? extends T> iter;
 
-        /**
-         * Constructs an IteratorObserver with the specified iterator.
-         *
-         * @param iter the Iterator to observe
-         */
         IteratorObserver(final Iterator<? extends T> iter) {
             this.iter = iter;
         }
@@ -1462,12 +1435,6 @@ public abstract class Observer<T> implements Immutable {
         /** The unit. */
         private final TimeUnit unit;
 
-        /**
-         * Constructs a TimerObserver with the specified delay.
-         *
-         * @param delay the delay before emission
-         * @param unit the time unit of the delay
-         */
         TimerObserver(final long delay, final TimeUnit unit) {
             this.delay = delay;
             this.unit = unit;
@@ -1526,13 +1493,6 @@ public abstract class Observer<T> implements Immutable {
         /** The future. */
         private ScheduledFuture<?> future = null;
 
-        /**
-         * Constructs an IntervalObserver with the specified timing parameters.
-         *
-         * @param initialDelay the initial delay before first emission
-         * @param period the period between subsequent emissions
-         * @param unit the time unit for delays and period
-         */
         IntervalObserver(final long initialDelay, final long period, final TimeUnit unit) {
             this.initialDelay = initialDelay;
             this.period = period;

@@ -17,6 +17,8 @@ package com.landawn.abacus.exception;
 import java.io.Serial;
 import java.sql.SQLException;
 
+import com.landawn.abacus.annotation.MayReturnNull;
+
 /**
  * A runtime exception that wraps {@link SQLException}, allowing SQL exceptions to be thrown
  * without being declared in method signatures. This exception preserves the SQL-specific
@@ -82,6 +84,10 @@ public class UncheckedSQLException extends UncheckedException {
     @Serial
     private static final long serialVersionUID = 9083988895292299710L;
 
+    /**
+     * The wrapped SQLException that caused this unchecked exception.
+     * Contains the original SQL error details including SQL state and error code.
+     */
     private final SQLException sqlException;
 
     /**
@@ -99,7 +105,7 @@ public class UncheckedSQLException extends UncheckedException {
      * }
      * }</pre>
      *
-     * @param cause the {@link SQLException} to wrap. Must not be null.
+     * @param cause the {@link SQLException} to wrap. Must not be {@code null}.
      * @throws IllegalArgumentException if cause is null
      */
     public UncheckedSQLException(final SQLException cause) {
@@ -126,7 +132,7 @@ public class UncheckedSQLException extends UncheckedException {
      *
      * @param errorMsg the detail message providing context about the SQL failure.
      *                 The detail message is saved for later retrieval by the {@link #getMessage()} method.
-     * @param cause the {@link SQLException} to wrap. Must not be null.
+     * @param cause the {@link SQLException} to wrap. Must not be {@code null}.
      * @throws IllegalArgumentException if cause is null
      */
     public UncheckedSQLException(final String errorMsg, final SQLException cause) {
@@ -158,9 +164,10 @@ public class UncheckedSQLException extends UncheckedException {
      * }
      * }</pre>
      *
-     * @return the SQL state string from the wrapped SQLException, or null if not available
+     * @return the SQL state string from the wrapped SQLException, or {@code null} if not available
      * @see SQLException#getSQLState()
      */
+    @MayReturnNull
     public String getSQLState() {
         return sqlException.getSQLState();
     }

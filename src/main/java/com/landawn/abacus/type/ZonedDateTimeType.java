@@ -48,7 +48,7 @@ public class ZonedDateTimeType extends AbstractTemporalType<ZonedDateTime> {
      *
      * <p><b>Usage Examples:</b></p>
      * ZonedDateTimeType type = new ZonedDateTimeType();
-     * Class<ZonedDateTime> clazz = type.clazz(); // Returns ZonedDateTime.class
+     * Class&lt;ZonedDateTime&gt; clazz = type.clazz(); // Returns ZonedDateTime.class
      * }</pre>
      *
      * @return the Class object for ZonedDateTime.class
@@ -62,7 +62,7 @@ public class ZonedDateTimeType extends AbstractTemporalType<ZonedDateTime> {
      * Converts a ZonedDateTime instance to its string representation.
      * <p>
      * This method formats the ZonedDateTime using the ISO 8601 timestamp format with timezone information.
-     * If the input is null, this method returns null.
+     * If the input is {@code null}, this method returns {@code null}.
      * </p>
      *
      * <p><b>Usage Examples:</b></p>
@@ -71,9 +71,10 @@ public class ZonedDateTimeType extends AbstractTemporalType<ZonedDateTime> {
      * }</pre>
      *
      * @param x the ZonedDateTime instance to convert to string
-     * @return the ISO 8601 timestamp string representation, or null if the input is null
+     * @return the ISO 8601 timestamp string representation, or {@code null} if the input is null
      */
     @Override
+    @MayReturnNull
     public String stringOf(final ZonedDateTime x) {
         return (x == null) ? null : iso8601TimestampDTF.format(x);
     }
@@ -95,9 +96,10 @@ public class ZonedDateTimeType extends AbstractTemporalType<ZonedDateTime> {
      * }</pre>
      *
      * @param obj the object to convert to ZonedDateTime
-     * @return a ZonedDateTime instance, or null if the input is null
+     * @return a ZonedDateTime instance, or {@code null} if the input is null
      */
     @Override
+    @MayReturnNull
     public ZonedDateTime valueOf(final Object obj) {
         if (obj instanceof Number) {
             return ZonedDateTime.ofInstant(Instant.ofEpochMilli(((Number) obj).longValue()), DEFAULT_ZONE_ID);
@@ -126,11 +128,12 @@ public class ZonedDateTimeType extends AbstractTemporalType<ZonedDateTime> {
      * }</pre>
      *
      * @param str the string to convert to ZonedDateTime
-     * @return a ZonedDateTime instance, or null if the string is empty
+     * @return a ZonedDateTime instance, or {@code null} if the string is empty
      * @throws DateTimeParseException if the string cannot be parsed as a valid date/time
      */
     @MayReturnNull
     @Override
+
     public ZonedDateTime valueOf(final String str) {
         if (isNullDateTime(str)) {
             return null; // NOSONAR
@@ -170,10 +173,11 @@ public class ZonedDateTimeType extends AbstractTemporalType<ZonedDateTime> {
      * @param cbuf the character array containing the date/time representation
      * @param offset the starting position in the character array
      * @param len the number of characters to process
-     * @return a ZonedDateTime instance, or null if the input is null or empty
+     * @return a ZonedDateTime instance, or {@code null} if the input is {@code null} or empty
      */
     @MayReturnNull
     @Override
+
     public ZonedDateTime valueOf(final char[] cbuf, final int offset, final int len) {
         if ((cbuf == null) || (len == 0)) {
             return null; // NOSONAR
@@ -204,10 +208,11 @@ public class ZonedDateTimeType extends AbstractTemporalType<ZonedDateTime> {
      *
      * @param rs the ResultSet to read from
      * @param columnIndex the column index (1-based) of the timestamp value
-     * @return the ZonedDateTime value, or null if the database value is NULL
+     * @return the ZonedDateTime value, or {@code null} if the database value is NULL
      * @throws SQLException if a database access error occurs or the column index is invalid
      */
     @Override
+    @MayReturnNull
     public ZonedDateTime get(final ResultSet rs, final int columnIndex) throws SQLException {
         final Timestamp ts = rs.getTimestamp(columnIndex);
 
@@ -223,15 +228,16 @@ public class ZonedDateTimeType extends AbstractTemporalType<ZonedDateTime> {
      *
      * <p><b>Usage Examples:</b></p>
      * ZonedDateTime zdt = type.get(resultSet, "created_date");
-     * // Retrieves timestamp from 'created_date' column
+     * // Retrieves timestamp from <i>created_date</i> column
      * }</pre>
      *
      * @param rs the ResultSet to read from
      * @param columnName the name of the column containing the timestamp value
-     * @return the ZonedDateTime value, or null if the database value is NULL
+     * @return the ZonedDateTime value, or {@code null} if the database value is NULL
      * @throws SQLException if a database access error occurs or the column name is invalid
      */
     @Override
+    @MayReturnNull
     public ZonedDateTime get(final ResultSet rs, final String columnName) throws SQLException {
         final Timestamp ts = rs.getTimestamp(columnName);
 
@@ -242,7 +248,7 @@ public class ZonedDateTimeType extends AbstractTemporalType<ZonedDateTime> {
      * Sets a ZonedDateTime value in a PreparedStatement at the specified parameter index.
      * <p>
      * This method converts the ZonedDateTime to a Timestamp and sets it in the
-     * PreparedStatement. If the ZonedDateTime is null, a NULL value is set.
+     * PreparedStatement. If the ZonedDateTime is {@code null}, a NULL value is set.
      * </p>
      *
      * <p><b>Usage Examples:</b></p>
@@ -252,7 +258,7 @@ public class ZonedDateTimeType extends AbstractTemporalType<ZonedDateTime> {
      *
      * @param stmt the PreparedStatement to set the value in
      * @param columnIndex the parameter index (1-based) where to set the value
-     * @param x the ZonedDateTime value to set, or null for SQL NULL
+     * @param x the ZonedDateTime value to set, or {@code null} for SQL NULL
      * @throws SQLException if a database access error occurs or the parameter index is invalid
      */
     @Override
@@ -264,7 +270,7 @@ public class ZonedDateTimeType extends AbstractTemporalType<ZonedDateTime> {
      * Sets a ZonedDateTime value in a CallableStatement using the specified parameter name.
      * <p>
      * This method converts the ZonedDateTime to a Timestamp and sets it in the
-     * CallableStatement. If the ZonedDateTime is null, a NULL value is set.
+     * CallableStatement. If the ZonedDateTime is {@code null}, a NULL value is set.
      * </p>
      *
      * <p><b>Usage Examples:</b></p>
@@ -274,7 +280,7 @@ public class ZonedDateTimeType extends AbstractTemporalType<ZonedDateTime> {
      *
      * @param stmt the CallableStatement to set the value in
      * @param columnName the name of the parameter where to set the value
-     * @param x the ZonedDateTime value to set, or null for SQL NULL
+     * @param x the ZonedDateTime value to set, or {@code null} for SQL NULL
      * @throws SQLException if a database access error occurs or the parameter name is invalid
      */
     @Override
@@ -286,7 +292,7 @@ public class ZonedDateTimeType extends AbstractTemporalType<ZonedDateTime> {
      * Appends the string representation of a ZonedDateTime to an Appendable.
      * <p>
      * This method formats the ZonedDateTime using the ISO 8601 timestamp format and appends it
-     * to the provided Appendable. If the ZonedDateTime is null, it appends the string "null".
+     * to the provided Appendable. If the ZonedDateTime is {@code null}, it appends the string "null".
      * </p>
      *
      * <p><b>Usage Examples:</b></p>

@@ -27,7 +27,7 @@ import com.landawn.abacus.util.Throwables;
  *
  * <p>This is a functional interface whose functional method is {@link #applyAsDouble(Object)}.
  *
- * <p>Refer to JDK API documentation at: <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html">https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a>
+ * <p>Refer to JDK API documentation at: <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html">https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a></p>
  *
  * @param <T> the type of the input to the function
  */
@@ -36,7 +36,7 @@ public interface ToDoubleFunction<T> extends Throwables.ToDoubleFunction<T, Runt
 
     /**
      * A predefined ToDoubleFunction instance that unboxes a Double object to a primitive double.
-     * Returns 0.0 if the input is null, otherwise returns the double value of the Double object.
+     * Returns 0.0 if the input is {@code null}, otherwise returns the double value of the Double object.
      * 
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -49,7 +49,7 @@ public interface ToDoubleFunction<T> extends Throwables.ToDoubleFunction<T, Runt
 
     /**
      * A predefined ToDoubleFunction instance that converts any Number object to a primitive double.
-     * Returns 0.0 if the input is null, otherwise uses the Numbers.toDouble utility method to
+     * Returns 0.0 if the input is {@code null}, otherwise uses the Numbers.toDouble utility method to
      * perform the conversion. This function can handle various Number subclasses including
      * Integer, Long, Float, BigDecimal, etc.
      * 

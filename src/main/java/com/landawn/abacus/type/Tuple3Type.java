@@ -69,7 +69,7 @@ public class Tuple3Type<T1, T2, T3> extends AbstractType<Tuple3<T1, T2, T3>> {
 
     /**
      * Returns the declaring name of this type, which includes simple class names.
-     * For example: "Tuple3<String, Integer, Double>" instead of the fully qualified name.
+     * For example: "Tuple3&lt;String, Integer, Double&gt;" instead of the fully qualified name.
      *
      * @return the declaring name of this Tuple3 type
      */
@@ -115,9 +115,10 @@ public class Tuple3Type<T1, T2, T3> extends AbstractType<Tuple3<T1, T2, T3>> {
      * The tuple is serialized as a JSON array containing its three elements.
      *
      * @param x the Tuple3 object to convert
-     * @return a JSON string representation of the tuple, or null if x is null
+     * @return a JSON string representation of the tuple, or {@code null} if x is null
      */
     @Override
+    @MayReturnNull
     public String stringOf(final Tuple3<T1, T2, T3> x) {
         return (x == null) ? null : Utils.jsonParser.serialize(N.asArray(x._1, x._2, x._3), Utils.jsc);
     }
@@ -128,7 +129,7 @@ public class Tuple3Type<T1, T2, T3> extends AbstractType<Tuple3<T1, T2, T3>> {
      * Each element will be converted to the appropriate type based on the tuple's type parameters.
      *
      * @param str the JSON string to parse
-     * @return a Tuple3 object parsed from the string, or null if str is empty
+     * @return a Tuple3 object parsed from the string, or {@code null} if str is empty
      */
     @MayReturnNull
     @SuppressWarnings("unchecked")
@@ -234,12 +235,12 @@ public class Tuple3Type<T1, T2, T3> extends AbstractType<Tuple3<T1, T2, T3>> {
 
     /**
      * Generates the type name for a Tuple3 with the specified element type names.
-     * 
+     *
      * @param t1TypeName the type name of the first element
      * @param t2TypeName the type name of the second element
      * @param t3TypeName the type name of the third element
-     * @param isDeclaringName if true, returns the declaring name (simple class names); 
-     *                        if false, returns the full canonical name
+     * @param isDeclaringName if {@code true}, returns the declaring name (simple class names);
+     *                        if {@code false}, returns the full canonical name
      * @return the formatted type name string
      */
     protected static String getTypeName(final String t1TypeName, final String t2TypeName, final String t3TypeName, final boolean isDeclaringName) {

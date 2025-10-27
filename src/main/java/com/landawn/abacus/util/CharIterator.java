@@ -52,7 +52,16 @@ import com.landawn.abacus.util.stream.CharStream;
 public abstract class CharIterator extends ImmutableIterator<Character> {
 
     /**
-     * A singleton empty CharIterator instance.
+     * Constructs a new CharIterator.
+     */
+    protected CharIterator() {
+    }
+
+    /**
+     * A singleton empty CharIterator instance that contains no elements.
+     * This iterator's hasNext() always returns false, and nextChar() always throws NoSuchElementException.
+     *
+     * @see #empty()
      */
     public static final CharIterator EMPTY = new CharIterator() {
         @Override

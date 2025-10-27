@@ -25,7 +25,7 @@ import com.landawn.abacus.util.u.OptionalInt;
 import com.landawn.abacus.util.stream.IntStream;
 
 /**
- * A specialized iterator for primitive int values, providing better performance than Iterator<Integer>
+ * A specialized iterator for primitive int values, providing better performance than Iterator&lt;Integer&gt;
  * by avoiding boxing/unboxing overhead. This abstract class provides various utility methods for
  * creating, transforming, and consuming int iterators.
  * 
@@ -52,6 +52,12 @@ import com.landawn.abacus.util.stream.IntStream;
  */
 @SuppressWarnings({ "java:S6548" })
 public abstract class IntIterator extends ImmutableIterator<Integer> {
+
+    /**
+     * Protected constructor for subclasses.
+     */
+    protected IntIterator() {
+    }
 
     /**
      * An empty IntIterator that has no elements.
@@ -240,7 +246,7 @@ public abstract class IntIterator extends ImmutableIterator<Integer> {
     }
 
     /**
-     * Creates an IntIterator that generates values while a condition is true.
+     * Creates an IntIterator that generates values while a condition is {@code true}.
      * 
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -278,12 +284,6 @@ public abstract class IntIterator extends ImmutableIterator<Integer> {
         };
     }
 
-    /**
-     * Returns the next element as an Integer (boxed).
-     * 
-     * @return the next int value as Integer
-     * @deprecated use {@code nextInt()} instead to avoid boxing
-     */
     @Deprecated
     @Override
     public Integer next() {

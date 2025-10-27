@@ -47,6 +47,22 @@ public class Base64EncodedType extends AbstractType<byte[]> {
      * Uses standard Base64 encoding to convert binary data to a text format
      * suitable for storage or transmission in text-based protocols.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Base64EncodedType type = (Base64EncodedType) TypeFactory.getType(Base64EncodedType.BASE64_ENCODED);
+     *
+     * byte[] data = "Hello World".getBytes();
+     * String encoded = type.stringOf(data);
+     * // encoded: "SGVsbG8gV29ybGQ="
+     *
+     * byte[] empty = new byte[0];
+     * String emptyEncoded = type.stringOf(empty);
+     * // emptyEncoded: ""
+     *
+     * String nullEncoded = type.stringOf(null);
+     * // nullEncoded: ""
+     * }</pre>
+     *
      * @param x the byte array to encode
      * @return the Base64-encoded string representation of the byte array,
      *         or an empty string if the input is null
@@ -59,6 +75,22 @@ public class Base64EncodedType extends AbstractType<byte[]> {
     /**
      * Converts a Base64-encoded string back to its original byte array.
      * Decodes the Base64 string to recover the original binary data.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Base64EncodedType type = (Base64EncodedType) TypeFactory.getType(Base64EncodedType.BASE64_ENCODED);
+     *
+     * String encoded = "SGVsbG8gV29ybGQ=";
+     * byte[] decoded = type.valueOf(encoded);
+     * String text = new String(decoded);
+     * // text: "Hello World"
+     *
+     * byte[] emptyDecoded = type.valueOf("");
+     * // emptyDecoded: byte[0]
+     *
+     * byte[] nullDecoded = type.valueOf(null);
+     * // nullDecoded: byte[0]
+     * }</pre>
      *
      * @param base64String the Base64-encoded string to decode
      * @return the decoded byte array, or an empty byte array if the input is null

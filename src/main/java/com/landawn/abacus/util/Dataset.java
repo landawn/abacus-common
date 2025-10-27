@@ -109,7 +109,7 @@ public sealed interface Dataset permits RowDataset {
      * }</pre>
      *
      * @param columnNames a collection of strings representing the names of the columns in the Dataset.
-     * @param rows a 2D array representing the data in the Dataset. Each subarray is a row. If there is no row, it can be null or empty array.
+     * @param rows a 2D array representing the data in the Dataset. Each subarray is a row. If there is no row, it can be {@code null} or empty array.
      * @return a new Dataset with the specified column names and rows.
      * @throws IllegalArgumentException if the provided columnNames and rows do not align properly.
      * @see N#newDataset(Collection, Object[][])
@@ -135,7 +135,7 @@ public sealed interface Dataset permits RowDataset {
      * }</pre>
      *
      * @param columnNames a collection of strings representing the names of the columns in the Dataset.
-     * @param rows a collection of collections representing the data in the Dataset. Each sub-collection is a row. If there is no row, it can be null or empty array.
+     * @param rows a collection of collections representing the data in the Dataset. Each sub-collection is a row. If there is no row, it can be {@code null} or empty array.
      * @return a new Dataset with the specified column names and rows.
      * @throws IllegalArgumentException if the provided columnNames and rows do not align properly.
      * @see N#newDataset(Collection, Collection)
@@ -161,7 +161,7 @@ public sealed interface Dataset permits RowDataset {
      * }</pre>
      *
      * @param columnNames a collection of strings representing the names of the columns in the Dataset.
-     * @param columns a 2D array representing the data in the Dataset. Each subarray is a column. If there is no column, it can be null or empty array.
+     * @param columns a 2D array representing the data in the Dataset. Each subarray is a column. If there is no column, it can be {@code null} or empty array.
      * @return a new Dataset with the specified column names and columns.
      * @throws IllegalArgumentException if the length of <i>columnNames</i> is not equal to the length of <i>columns</i> or the size of the sub-collection in <i>columns</i> is not equal.
      */
@@ -204,7 +204,7 @@ public sealed interface Dataset permits RowDataset {
      * }</pre>
      *
      * @param columnNames a collection of strings representing the names of the columns in the Dataset.
-     * @param columns a collection of collections representing the data in the Dataset. Each sub-collection is a column. If there is no column, it can be null or empty array.
+     * @param columns a collection of collections representing the data in the Dataset. Each sub-collection is a column. If there is no column, it can be {@code null} or empty array.
      * @return a new Dataset with the specified column names and columns.
      * @throws IllegalArgumentException if the length of <i>columnNames</i> is not equal to the length of <i>columns</i> or the size of the sub-collection in <i>columns</i> is not equal.
      */
@@ -272,7 +272,7 @@ public sealed interface Dataset permits RowDataset {
      *
      * @param columnIndex the zero-based index of the column
      * @return the name of the column at the specified index
-     * @throws IndexOutOfBoundsException if columnIndex is negative or >= columnCount()
+     * @throws IndexOutOfBoundsException if columnIndex is negative or &gt;= columnCount()
      */
     String getColumnName(int columnIndex) throws IndexOutOfBoundsException;
 
@@ -2239,8 +2239,8 @@ public sealed interface Dataset permits RowDataset {
     /**
      * Merges all the rows and columns from another Dataset into this Dataset.
      * <br />
-     * If there are columns in the other Dataset that are not present in this Dataset, they will be added to this Dataset with null values for rows from this Dataset.
-     * If there are columns in this Dataset that are not present in the other Dataset, they will also be included with null values for rows from the other Dataset.
+     * If there are columns in the other Dataset that are not present in this Dataset, they will be added to this Dataset with {@code null} values for rows from this Dataset.
+     * If there are columns in this Dataset that are not present in the other Dataset, they will also be included with {@code null} values for rows from the other Dataset.
      * Duplicated rows in the resulting Dataset will NOT be eliminated.
      * The properties from the other Dataset will also be merged into this Dataset, with the properties from the other Dataset taking precedence in case of conflicts.
      * 
@@ -2276,8 +2276,8 @@ public sealed interface Dataset permits RowDataset {
     /**
      * Merges all the rows and columns from another Dataset into this Dataset with an option to require the same columns.
      * <br />
-     * If there are columns in the other Dataset that are not present in this Dataset, they will be added to this Dataset with null values for rows from this Dataset.
-     * If there are columns in this Dataset that are not present in the other Dataset, they will also be included with null values for rows from the other Dataset.
+     * If there are columns in the other Dataset that are not present in this Dataset, they will be added to this Dataset with {@code null} values for rows from this Dataset.
+     * If there are columns in this Dataset that are not present in the other Dataset, they will also be included with {@code null} values for rows from the other Dataset.
      * Duplicated rows in the resulting Dataset will NOT be eliminated.
      * The properties from the other Dataset will also be merged into this Dataset, with the properties from the other Dataset taking precedence in case of conflicts.
      * 
@@ -2315,9 +2315,9 @@ public sealed interface Dataset permits RowDataset {
     /**
      * Merges selected columns from another Dataset into this Dataset.
      * <br />
-     * If there are selected columns in the other Dataset that are not present in this Dataset, they will be added to this Dataset with null values for rows from this Dataset.
-     * If there are columns in this Dataset that are not present in the other Dataset, they will also be included with null values for rows from the other Dataset.
-     * All rows from the other Dataset will be added to this Dataset, but only with values from the specified columns (other columns will have null values).
+     * If there are selected columns in the other Dataset that are not present in this Dataset, they will be added to this Dataset with {@code null} values for rows from this Dataset.
+     * If there are columns in this Dataset that are not present in the other Dataset, they will also be included with {@code null} values for rows from the other Dataset.
+     * All rows from the other Dataset will be added to this Dataset, but only with values from the specified columns (other columns will have {@code null} values).
      * Duplicated rows in the resulting Dataset will NOT be eliminated.
      * The properties from the other Dataset will also be merged into this Dataset, with the properties from the other Dataset taking precedence in case of conflicts.
      * 
@@ -2354,9 +2354,9 @@ public sealed interface Dataset permits RowDataset {
     /**
      * Merges selected columns from a specified row range of another Dataset into this Dataset.
      * <br />
-     * If there are selected columns in the other Dataset that are not present in this Dataset, they will be added to this Dataset with null values for rows from this Dataset.
-     * If there are columns in this Dataset that are not present in the other Dataset, they will also be included with null values for rows from the other Dataset.
-     * Only rows within the specified range from the other Dataset will be added to this Dataset, and only with values from the specified columns (other columns will have null values).
+     * If there are selected columns in the other Dataset that are not present in this Dataset, they will be added to this Dataset with {@code null} values for rows from this Dataset.
+     * If there are columns in this Dataset that are not present in the other Dataset, they will also be included with {@code null} values for rows from the other Dataset.
+     * Only rows within the specified range from the other Dataset will be added to this Dataset, and only with values from the specified columns (other columns will have {@code null} values).
      * The properties from the other Dataset will also be merged into this Dataset, with the properties from the other Dataset taking precedence in case of conflicts.
      * <br />
      *
@@ -3497,7 +3497,7 @@ public sealed interface Dataset permits RowDataset {
      *                               This supports column headers that are prefixed.
      * @param beanClass the class representing the bean type. Must be a valid JavaBean.
      * @return a list of merged entities of the specified type, based on the Dataset content.
-     * @throws IllegalArgumentException if {@code idPropNames} is null or empty, if any specified ID or selected property
+     * @throws IllegalArgumentException if {@code idPropNames} is {@code null} or empty, if any specified ID or selected property
      *                                  name does not exist in the Dataset, if the {@code prefixAndFieldNameMap} is invalid,
      *                                  or if {@code beanClass} is not a supported JavaBean class.
      * @see #toMergedEntities(Class)
@@ -4322,7 +4322,7 @@ public sealed interface Dataset permits RowDataset {
      * @param output the OutputStream where the JSON string will be written
      * @throws IndexOutOfBoundsException if the specified {@code fromRowIndex} or {@code toRowIndex} is out of the range of the Dataset
      * @throws UncheckedIOException if an I/O error occurs while writing to the OutputStream.
-     * @see #toJson(int, int, Collection, OutputStream
+     * @see #toJson(int, int, Collection, OutputStream)
      */
     void toJson(int fromRowIndex, int toRowIndex, OutputStream output) throws IndexOutOfBoundsException, UncheckedIOException;
 
@@ -4353,7 +4353,7 @@ public sealed interface Dataset permits RowDataset {
 
     /**
      * Converts the entire Dataset into a JSON string and writes it to the provided Writer.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Dataset dataset = Dataset.rows(Arrays.asList("id", "name"), new Object[][] {{1, "Alice"}});
@@ -4361,14 +4361,14 @@ public sealed interface Dataset permits RowDataset {
      * }</pre>
      *
      * @param output the Writer where the JSON string will be written
-     * @throws UncheckedIOException
+     * @throws UncheckedIOException if an I/O error occurs while writing to the output
      * @see #toJson(int, int, Collection, Writer)
      */
     void toJson(Writer output) throws UncheckedIOException;
 
     /**
      * Converts a range of rows in the Dataset into a JSON string and writes it to the provided Writer.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Dataset dataset = Dataset.rows(Arrays.asList("id", "name"), new Object[][] {{1, "Alice"}});
@@ -4378,8 +4378,8 @@ public sealed interface Dataset permits RowDataset {
      * @param fromRowIndex the starting index of the row range (inclusive)
      * @param toRowIndex the ending index of the row range (exclusive)
      * @param output the Writer where the JSON string will be written
-     * @throws IndexOutOfBoundsException
-     * @throws UncheckedIOException
+     * @throws IndexOutOfBoundsException if the row indices are out of bounds
+     * @throws UncheckedIOException if an I/O error occurs while writing to the output
      * @see #toJson(int, int, Collection, Writer)
      */
     void toJson(int fromRowIndex, int toRowIndex, Writer output) throws IndexOutOfBoundsException, UncheckedIOException;
@@ -10136,7 +10136,7 @@ public sealed interface Dataset permits RowDataset {
      * @param toRowIndex the ending index of the slice, exclusive.
      * @return a new Dataset containing the rows from <i>fromRowIndex</i> to <i>toRowIndex</i> from the original Dataset.
      * @throws IndexOutOfBoundsException if the fromRowIndex or toRowIndex is out of the Dataset's range.
-     * @see List#subList(int, int).
+     * @see List#subList(int, int)
      */
     Dataset slice(int fromRowIndex, int toRowIndex) throws IndexOutOfBoundsException;
 
@@ -10155,7 +10155,7 @@ public sealed interface Dataset permits RowDataset {
      * @param columnNames the collection of column names to be included in the sliced Dataset.
      * @return a new Dataset containing the same rows as the original Dataset, but only the columns specified in the <i>columnNames</i> collection.
      * @throws IllegalArgumentException if the <i>columnNames</i> collection is {@code null} or if any of the column names in the collection do not exist in the original Dataset.
-     * @see List#subList(int, int).
+     * @see List#subList(int, int)
      */
     Dataset slice(Collection<String> columnNames) throws IllegalArgumentException;
 
@@ -10383,9 +10383,9 @@ public sealed interface Dataset permits RowDataset {
             throws IndexOutOfBoundsException, IllegalArgumentException;
 
     /**
-     * Creates a Paginated<Dataset> Dataset from the current Dataset.
+     * Creates a Paginated&lt;Dataset&gt; Dataset from the current Dataset.
      * <br />
-     * The Paginated<Dataset> object will contain pages of Datasets, where each page has a maximum size specified by the pageSize parameter.
+     * The Paginated&lt;Dataset&gt; object will contain pages of Datasets, where each page has a maximum size specified by the pageSize parameter.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -10394,15 +10394,15 @@ public sealed interface Dataset permits RowDataset {
      * }</pre>
      *
      * @param pageSize the maximum number of rows each page can contain.
-     * @return a Paginated<Dataset> object containing pages of Datasets.
+     * @return a Paginated&lt;Dataset&gt; object containing pages of Datasets.
      * @throws IllegalArgumentException if pageSize is less than or equal to 0.
      */
     Paginated<Dataset> paginate(int pageSize);
 
     /**
-     * Creates a Paginated<Dataset> object from the current Dataset.
+     * Creates a Paginated&lt;Dataset&gt; object from the current Dataset.
      * <br />
-     * The Paginated<Dataset> object will contain pages of Datasets, where each page has a maximum size specified by the pageSize parameter.
+     * The Paginated&lt;Dataset&gt; object will contain pages of Datasets, where each page has a maximum size specified by the pageSize parameter.
      * Only the columns specified by the columnNames collection will be included in the paginated Dataset.
      *
      * <p><b>Usage Examples:</b></p>
@@ -10413,7 +10413,7 @@ public sealed interface Dataset permits RowDataset {
      *
      * @param columnNames the collection of column names to be included in the paginated Dataset.
      * @param pageSize the maximum number of rows each page can contain.
-     * @return a Paginated<Dataset> object containing pages of Datasets.
+     * @return a Paginated&lt;Dataset&gt; object containing pages of Datasets.
      * @throws IllegalArgumentException if the specified column names are not found in the Dataset or {@code columnNames} is empty or pageSize is less than or equal to 0.
      */
     Paginated<Dataset> paginate(Collection<String> columnNames, int pageSize);
@@ -10913,6 +10913,7 @@ public sealed interface Dataset permits RowDataset {
      * Dataset dataset = Dataset.rows(Arrays.asList("id", "name"), data);
      * if (dataset.isEmpty()) {
      *    // handle empty Dataset
+     * }
      * }</pre>
      *
      * @return {@code true} if the Dataset is empty, {@code false} otherwise.

@@ -68,7 +68,7 @@ public interface CharTriPredicate extends Throwables.CharTriPredicate<RuntimeExc
      * 
      * <p>Any exceptions thrown during evaluation of either predicate are relayed to the caller.
      *
-     * @param other a predicate that will be logically-ANDed with this predicate. Must not be null.
+     * @param other a predicate that will be logically-ANDed with this predicate. Must not be {@code null}.
      * @return a composed predicate that represents the short-circuiting logical AND of this predicate
      *         and the {@code other} predicate
      */
@@ -83,7 +83,7 @@ public interface CharTriPredicate extends Throwables.CharTriPredicate<RuntimeExc
      * 
      * <p>Any exceptions thrown during evaluation of either predicate are relayed to the caller.
      *
-     * @param other a predicate that will be logically-ORed with this predicate. Must not be null.
+     * @param other a predicate that will be logically-ORed with this predicate. Must not be {@code null}.
      * @return a composed predicate that represents the short-circuiting logical OR of this predicate
      *         and the {@code other} predicate
      */

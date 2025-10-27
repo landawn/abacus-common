@@ -53,7 +53,18 @@ import com.landawn.abacus.util.stream.Stream;
 @SuppressWarnings({ "java:S6548" })
 public abstract class BooleanIterator extends ImmutableIterator<Boolean> {
 
-    /** An empty BooleanIterator instance that always returns {@code false} for hasNext() */
+    /**
+     * Constructs a new BooleanIterator.
+     */
+    protected BooleanIterator() {
+    }
+
+    /**
+     * A singleton empty BooleanIterator instance that contains no elements.
+     * This iterator's hasNext() always returns false, and nextBoolean() always throws NoSuchElementException.
+     *
+     * @see #empty()
+     */
     public static final BooleanIterator EMPTY = new BooleanIterator() {
         @Override
         public boolean hasNext() {
@@ -233,7 +244,7 @@ public abstract class BooleanIterator extends ImmutableIterator<Boolean> {
     }
 
     /**
-     * Returns a BooleanIterator that generates values while a condition is true.
+     * Returns a BooleanIterator that generates values while a condition is {@code true}.
      * 
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -271,13 +282,6 @@ public abstract class BooleanIterator extends ImmutableIterator<Boolean> {
         };
     }
 
-    /**
-     * Returns the next element as a Boolean object.
-     * 
-     * @return the next boolean value as a Boolean object
-     * @throws NoSuchElementException if the iteration has no more elements
-     * @deprecated use {@code nextBoolean()} instead
-     */
     @Deprecated
     @Override
     public Boolean next() {

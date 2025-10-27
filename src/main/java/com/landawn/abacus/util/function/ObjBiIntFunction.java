@@ -14,6 +14,7 @@
 
 package com.landawn.abacus.util.function;
 
+import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.util.Throwables;
 
 /**
@@ -69,6 +70,7 @@ public interface ObjBiIntFunction<T, R> extends Throwables.ObjBiIntFunction<T, R
      * @return the function result of type R if any error occurs during function execution
      */
     @Override
+    @MayReturnNull
     R apply(T t, int i, int j);
 
     /**

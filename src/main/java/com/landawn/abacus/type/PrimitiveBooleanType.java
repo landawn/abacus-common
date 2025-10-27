@@ -44,7 +44,7 @@ public final class PrimitiveBooleanType extends AbstractBooleanType {
      * Indicates whether this type represents a primitive type.
      * Always returns {@code true} for PrimitiveBooleanType.
      *
-     * @return true, as this type handler is for primitive boolean
+     * @return {@code true}, as this type handler is for primitive boolean
      */
     @Override
     public boolean isPrimitiveType() {
@@ -53,7 +53,7 @@ public final class PrimitiveBooleanType extends AbstractBooleanType {
 
     /**
      * Returns the default value for the primitive boolean type.
-     * The default value for boolean primitives is false.
+     * The default value for boolean primitives is {@code false}.
      *
      * @return Boolean.FALSE as the default value for primitive boolean
      */

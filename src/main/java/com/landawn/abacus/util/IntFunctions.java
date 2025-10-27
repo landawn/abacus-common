@@ -291,7 +291,7 @@ public final class IntFunctions {
     /**
      * Returns an IntFunction that creates boolean arrays of the specified size.
      * 
-     * <p>The returned function creates new boolean arrays with all elements initialized to false.</p>
+     * <p>The returned function creates new boolean arrays with all elements initialized to {@code false}.</p>
      *
      * @return an IntFunction that creates boolean arrays
      */
@@ -379,7 +379,7 @@ public final class IntFunctions {
     /**
      * Returns an IntFunction that creates String arrays of the specified size.
      * 
-     * <p>The returned function creates new String arrays with all elements initialized to null.</p>
+     * <p>The returned function creates new String arrays with all elements initialized to {@code null}.</p>
      *
      * @return an IntFunction that creates String arrays
      */
@@ -390,7 +390,7 @@ public final class IntFunctions {
     /**
      * Returns an IntFunction that creates Object arrays of the specified size.
      * 
-     * <p>The returned function creates new Object arrays with all elements initialized to null.</p>
+     * <p>The returned function creates new Object arrays with all elements initialized to {@code null}.</p>
      *
      * @return an IntFunction that creates Object arrays
      */
@@ -1119,7 +1119,7 @@ public final class IntFunctions {
      * @param targetClass the Class object representing the Collection type to register
      * @param creator the IntFunction that creates instances of the target class with specified capacity
      * @return {@code true} if the registration was successful, {@code false} if a creator was already registered for this class
-     * @throws IllegalArgumentException if targetClass or creator is null, or if targetClass is a built-in class
+     * @throws IllegalArgumentException if targetClass or creator is {@code null}, or if targetClass is a built-in class
      */
     @SuppressWarnings("rawtypes")
     public static <T extends Collection> boolean registerForCollection(final Class<T> targetClass, final java.util.function.IntFunction<T> creator)
@@ -1147,7 +1147,7 @@ public final class IntFunctions {
      * @param targetClass the Class object representing the Map type to register
      * @param creator the IntFunction that creates instances of the target class with specified capacity
      * @return {@code true} if the registration was successful, {@code false} if a creator was already registered for this class
-     * @throws IllegalArgumentException if targetClass or creator is null, or if targetClass is a built-in class
+     * @throws IllegalArgumentException if targetClass or creator is {@code null}, or if targetClass is a built-in class
      */
     @SuppressWarnings("rawtypes")
     public static <T extends Map> boolean registerForMap(final Class<T> targetClass, final java.util.function.IntFunction<T> creator)

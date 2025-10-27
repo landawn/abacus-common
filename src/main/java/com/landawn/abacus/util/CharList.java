@@ -68,8 +68,14 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
 
     static final Random RAND = new SecureRandom();
 
+    /**
+     * The array buffer into which the elements of the CharList are stored.
+     */
     private char[] elementData = N.EMPTY_CHAR_ARRAY;
 
+    /**
+     * The size of the CharList (the number of elements it contains).
+     */
     private int size = 0;
 
     /**
@@ -457,7 +463,7 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      * @param index the index at which to insert the first element from the specified collection
      * @param c the CharList containing elements to be added to this list
      * @return {@code true} if this list changed as a result of the call
-     * @throws IndexOutOfBoundsException if the index is out of range (index < 0 || index > size())
+     * @throws IndexOutOfBoundsException if the index is out of range (index &lt; 0 || index &gt; size())
      */
     @Override
     public boolean addAll(final int index, final CharList c) {
@@ -503,7 +509,7 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      * @param index the index at which to insert the first element from the specified array
      * @param a the array containing elements to be added to this list
      * @return {@code true} if this list changed as a result of the call
-     * @throws IndexOutOfBoundsException if the index is out of range (index < 0 || index > size())
+     * @throws IndexOutOfBoundsException if the index is out of range (index &lt; 0 || index &gt; size())
      */
     @Override
     public boolean addAll(final int index, final char[] a) {
@@ -786,7 +792,7 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      * 
      * @param index the index of the element to be removed
      * @return the element that was removed from the list
-     * @throws IndexOutOfBoundsException if the index is out of range (index < 0 || index >= size())
+     * @throws IndexOutOfBoundsException if the index is out of range (index &lt; 0 || index &gt;= size())
      */
     public char delete(final int index) {
         rangeCheck(index);
@@ -1439,7 +1445,7 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      * 
      * @param valueToFind the element to search for
      * @param fromIndex the index to start the search from (inclusive)
-     * @return the index of the first occurrence of the element in this list at position >= fromIndex,
+     * @return the index of the first occurrence of the element in this list at position &gt;= fromIndex,
      *         or -1 if the element is not found
      */
     public int indexOf(final char valueToFind, final int fromIndex) {
@@ -1474,7 +1480,7 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      * 
      * @param valueToFind the element to search for
      * @param startIndexFromBack the index to start the backward search from (inclusive)
-     * @return the index of the last occurrence of the element at position <= startIndexFromBack,
+     * @return the index of the last occurrence of the element at position &lt;= startIndexFromBack,
      *         or -1 if the element is not found
      */
     public int lastIndexOf(final char valueToFind, final int startIndexFromBack) {
@@ -1981,8 +1987,8 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      * 
      * <p>Each returned sublist is a new independent CharList instance. Modifications to
      * the returned sublists do not affect this list or each other.</p>
-     * 
-     * <p><b>Usage Examples:</b></p> Splitting [1,2,3,4,5,6,7,8,9] with chunkSize 3 returns [[1,2,3], [4,5,6], [7,8,9]]</p>
+     *
+     * <p><b>Usage Examples:</b> Splitting [1,2,3,4,5,6,7,8,9] with chunkSize 3 returns [[1,2,3], [4,5,6], [7,8,9]]</p>
      *
      * @param fromIndex the index of the first element (inclusive) to be included
      * @param toIndex the index after the last element (exclusive) to be included
@@ -2053,11 +2059,6 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
         return size == 0;
     }
 
-    /**
-     * Returns the number of elements in this list.
-     *
-     * @return the number of elements in this list
-     */
     @Override
     public int size() {
         return size;
@@ -2073,7 +2074,7 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      * <p>Performance: O(n) where n is the size of the list. Note that boxing operations
      * add overhead compared to working with primitive values.</p>
      *
-     * @return a new List<Character> containing all elements from this list
+     * @return a new List&lt;Character&gt; containing all elements from this list
      */
     @Override
     public List<Character> boxed() {
@@ -2092,7 +2093,7 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      *
      * @param fromIndex the index of the first element (inclusive) to be boxed
      * @param toIndex the index after the last element (exclusive) to be boxed
-     * @return a new List<Character> containing the specified range of elements
+     * @return a new List&lt;Character&gt; containing the specified range of elements
      * @throws IndexOutOfBoundsException if {@code fromIndex < 0} or {@code toIndex > size()}
      *         or {@code fromIndex > toIndex}
      */

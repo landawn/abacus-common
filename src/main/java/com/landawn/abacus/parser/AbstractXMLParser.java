@@ -25,6 +25,7 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.Attributes;
 
+import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.exception.ParseException;
 import com.landawn.abacus.logging.Logger;
 import com.landawn.abacus.logging.LoggerFactory;
@@ -117,7 +118,7 @@ abstract class AbstractXMLParser extends AbstractParser<XMLSerializationConfig, 
 
     /**
      * Extracts and converts a property value from an XML node to the appropriate Java type.
-     * This method handles null values, type conversions, and formatted property values.
+     * This method handles {@code null} values, type conversions, and formatted property values.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -129,7 +130,7 @@ abstract class AbstractXMLParser extends AbstractParser<XMLSerializationConfig, 
      * @param propType the target type for the property value
      * @param propInfo property metadata including format information, or null
      * @param propNode the XML node containing the property value
-     * @return the converted property value, or null if the node indicates a null value
+     * @return the converted property value, or {@code null} if the node indicates a {@code null} value
      * @throws ParseException if the property cannot be parsed or type is null
      */
     protected Object getPropValue(final String propName, final Type<?> propType, final PropInfo propInfo, final Node propNode) {
@@ -190,9 +191,9 @@ abstract class AbstractXMLParser extends AbstractParser<XMLSerializationConfig, 
      * }</pre>
      *
      * @param <T> the type of the property instance to create
-     * @param propClass the class to instantiate, or null to use type from attributes
+     * @param propClass the class to instantiate, or {@code null} to use type from attributes
      * @param attrs the XML attributes that may contain type information
-     * @return a new instance of the property class, or null if instantiation fails
+     * @return a new instance of the property class, or {@code null} if instantiation fails
      */
     @SuppressWarnings("unchecked")
     protected static <T> T newPropInstance(final Class<?> propClass, final Attributes attrs) {
@@ -223,8 +224,9 @@ abstract class AbstractXMLParser extends AbstractParser<XMLSerializationConfig, 
      *
      * @param xmlReader the XML stream reader positioned at an element
      * @param attrName the name of the attribute to retrieve
-     * @return the attribute value, or null if the attribute is not found
+     * @return the attribute value, or {@code null} if the attribute is not found
      */
+    @MayReturnNull
     protected static String getAttribute(final XMLStreamReader xmlReader, final String attrName) {
         final int attrCount = xmlReader.getAttributeCount();
         //noinspection StatementWithEmptyBody
@@ -259,8 +261,9 @@ abstract class AbstractXMLParser extends AbstractParser<XMLSerializationConfig, 
      * }</pre>
      *
      * @param node the XML node to examine for type attribute
-     * @return the Class corresponding to the type attribute, or null if no type attribute exists
+     * @return the Class corresponding to the type attribute, or {@code null} if no type attribute exists
      */
+    @MayReturnNull
     protected static Class<?> getAttributeTypeClass(final Node node) {
         final String typeAttr = XmlUtil.getAttribute(node, XMLConstants.TYPE);
 
@@ -282,8 +285,9 @@ abstract class AbstractXMLParser extends AbstractParser<XMLSerializationConfig, 
      * }</pre>
      *
      * @param attrs the XML attributes to examine for type information
-     * @return the Class corresponding to the type attribute, or null if no type attribute exists
+     * @return the Class corresponding to the type attribute, or {@code null} if no type attribute exists
      */
+    @MayReturnNull
     protected static Class<?> getAttributeTypeClass(final Attributes attrs) {
         if (attrs == null) {
             return null;
@@ -309,8 +313,9 @@ abstract class AbstractXMLParser extends AbstractParser<XMLSerializationConfig, 
      * }</pre>
      *
      * @param xmlReader the XML stream reader positioned at an element with attributes
-     * @return the Class corresponding to the type attribute, or null if no type attribute exists
+     * @return the Class corresponding to the type attribute, or {@code null} if no type attribute exists
      */
+    @MayReturnNull
     protected static Class<?> getAttributeTypeClass(final XMLStreamReader xmlReader) {
         if (xmlReader.getAttributeCount() == 0) {
             return null;
@@ -447,7 +452,7 @@ abstract class AbstractXMLParser extends AbstractParser<XMLSerializationConfig, 
      * JSONSerializationConfig jsonConfig = getJSC(xmlConfig);
      * }</pre>
      *
-     * @param config the XML serialization configuration to map, or null for default
+     * @param config the XML serialization configuration to map, or {@code null} for default
      * @return a JSON serialization configuration with corresponding settings
      */
     protected JSONSerializationConfig getJSC(final XMLSerializationConfig config) {

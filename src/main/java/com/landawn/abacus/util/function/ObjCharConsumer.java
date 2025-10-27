@@ -17,14 +17,37 @@ package com.landawn.abacus.util.function;
 import com.landawn.abacus.util.Throwables;
 
 /**
- * A functional interface that represents an operation that accepts an object-valued argument
- * and a char-valued argument, and returns no result. This is a specialization of BiConsumer
- * for the case where the second argument is a primitive char.
+ * Represents an operation that accepts an object-valued argument and a char-valued argument,
+ * and returns no result. This is a two-arity specialization of {@code Consumer}.
+ * Unlike most other functional interfaces, {@code ObjCharConsumer} is expected to operate via side-effects.
  *
  * <p>This is a functional interface whose functional method is {@link #accept(Object, char)}.
  *
+ * <p>The interface extends {@code Throwables.ObjCharConsumer} with {@code RuntimeException} as the exception type,
+ * making it suitable for use in contexts where checked exceptions are not required.
+ *
+ * <p>Note: Unlike some other primitive specializations, this interface does not provide default methods
+ * for composition as the JDK does not provide a standard ObjCharConsumer interface.
+ *
+ * <p><b>Usage Examples:</b></p>
+ * <pre>{@code
+ * ObjCharConsumer<StringBuilder> appendChar = (sb, ch) -> sb.append(ch);
+ * StringBuilder builder = new StringBuilder("Hello");
+ * appendChar.accept(builder, '!'); // builder becomes "Hello!"
+ *
+ * ObjCharConsumer<Map<String, Character>> putChar = (map, value) ->
+ *     map.put("lastChar", value);
+ *
+ * ObjCharConsumer<CharBuffer> putCharBuffer = (buffer, ch) -> buffer.put(ch);
+ * CharBuffer buffer = CharBuffer.allocate(10);
+ * putCharBuffer.accept(buffer, 'A');
+ * }</pre>
+ *
  * @param <T> the type of the object argument to the operation
+ *
+ * @see java.util.function.Consumer
  * @see java.util.function.BiConsumer
+ * @see java.util.function.ObjIntConsumer
  */
 @FunctionalInterface
 public interface ObjCharConsumer<T> extends Throwables.ObjCharConsumer<T, RuntimeException> { //NOSONAR
@@ -32,13 +55,21 @@ public interface ObjCharConsumer<T> extends Throwables.ObjCharConsumer<T, Runtim
     /**
      * Performs this operation on the given arguments.
      *
-     * <p>This method consumes an object of type T and a char value, performing some
-     * side-effect operation without returning any result. Common use cases include
-     * updating the object's state based on the char value, logging, or storing
-     * the char value within the object.
+     * <p>This method processes an object of type T and a char value, typically producing
+     * side effects such as appending the char to a buffer, storing it in a collection,
+     * or modifying the object based on the char value.
      *
-     * @param t the first input argument of type T
-     * @param value the second input argument, a primitive char value if the operation cannot be completed
+     * <p>Common use cases include:
+     * <ul>
+     *   <li>Appending characters to StringBuilder or StringBuffer</li>
+     *   <li>Writing characters to output streams or buffers</li>
+     *   <li>Setting character values in maps or collections</li>
+     *   <li>Processing text data character by character</li>
+     *   <li>Updating object state based on character input</li>
+     * </ul>
+     *
+     * @param t the object input argument
+     * @param value the char input argument
      */
     @Override
     void accept(T t, char value);

@@ -43,11 +43,11 @@ import com.landawn.abacus.util.WD;
  * Type handler for Google Guava Multimap implementations.
  * This class provides serialization and deserialization capabilities for various Guava Multimap types
  * including ListMultimap, SetMultimap, and their concrete implementations.
- * Multimaps are serialized as Map<K, Collection<V>> structures.
+ * Multimaps are serialized as Map&lt;K, Collection&lt;V&gt;&gt; structures.
  *
  * @param <K> the key type of the multimap
  * @param <V> the value type of the multimap
- * @param <T> the multimap type (must extend Multimap<K, V>)
+ * @param <T> the multimap type (must extend Multimap&lt;K, V&gt;)
  */
 @SuppressWarnings("java:S2160")
 public class GuavaMultimapType<K, V, T extends Multimap<K, V>> extends AbstractType<T> {
@@ -81,9 +81,10 @@ public class GuavaMultimapType<K, V, T extends Multimap<K, V>> extends AbstractT
      * The declaring name represents the type in a format suitable for type declarations,
      * using canonical class names with type parameters.
      *
-     * @return the declaring name of this type (e.g., "com.google.common.collect.Multimap<String, Integer>")
+     * @return the declaring name of this type (e.g., "com.google.common.collect.Multimap&lt;String, Integer&gt;")
      */
     @Override
+    @MayReturnNull
     public String declaringName() {
         return declaringName;
     }
@@ -101,7 +102,7 @@ public class GuavaMultimapType<K, V, T extends Multimap<K, V>> extends AbstractT
     /**
      * Returns an array containing the parameter types of this generic multimap type.
      * For multimap types, this includes the key type and the collection value type.
-     * SetMultimap types return [KeyType, Set<ValueType>], while other multimaps return [KeyType, List<ValueType>].
+     * SetMultimap types return [KeyType, Set&lt;ValueType&gt;], while other multimaps return [KeyType, List&lt;ValueType&gt;].
      *
      * @return an array containing the key type and collection value type
      */
@@ -110,11 +111,6 @@ public class GuavaMultimapType<K, V, T extends Multimap<K, V>> extends AbstractT
         return parameterTypes;
     }
 
-    /**
-     * Indicates that this is a generic type with type parameters.
-     *
-     * @return {@code true} as multimap types are generic types
-     */
     @Override
     public boolean isGenericType() {
         return true;
@@ -124,7 +120,7 @@ public class GuavaMultimapType<K, V, T extends Multimap<K, V>> extends AbstractT
      * Indicates whether instances of this type can be serialized.
      * Guava multimaps are serializable through their Map representation.
      *
-     * @return true, as multimaps can be serialized
+     * @return {@code true}, as multimaps can be serialized
      */
     @Override
     public boolean isSerializable() {
@@ -137,9 +133,10 @@ public class GuavaMultimapType<K, V, T extends Multimap<K, V>> extends AbstractT
      * Uses the multimap's asMap() view for serialization.
      *
      * @param x the multimap to convert to string
-     * @return the JSON string representation of the multimap, or null if the input is null
+     * @return the JSON string representation of the multimap, or {@code null} if the input is null
      */
     @Override
+    @MayReturnNull
     public String stringOf(final T x) {
         if (x == null) {
             return null;
@@ -152,15 +149,16 @@ public class GuavaMultimapType<K, V, T extends Multimap<K, V>> extends AbstractT
 
     /**
      * Converts a string representation back to a multimap instance.
-     * The string should be in JSON format representing a Map<K, Collection<V>>.
+     * The string should be in JSON format representing a Map&lt;K, Collection&lt;V&gt;&gt;.
      * Creates the appropriate multimap implementation based on the type class.
      * For immutable types, returns an immutable copy of the constructed multimap.
      *
      * @param str the JSON string to parse
-     * @return a new multimap instance containing the parsed data, or null if the input is null or empty
+     * @return a new multimap instance containing the parsed data, or {@code null} if the input is {@code null} or empty
      */
     @MayReturnNull
     @Override
+
     public T valueOf(final String str) {
         if (Strings.isEmpty(str)) {
             return null; // NOSONAR
@@ -193,8 +191,8 @@ public class GuavaMultimapType<K, V, T extends Multimap<K, V>> extends AbstractT
      * @param typeClass the multimap class
      * @param keyTypeName the name of the key type
      * @param valueTypeName the name of the value type
-     * @param isDeclaringName true to generate a declaring name, {@code false} for the full name
-     * @return the formatted type name (e.g., "Multimap<String, Integer>")
+     * @param isDeclaringName {@code true} to generate a declaring name, {@code false} for the full name
+     * @return the formatted type name (e.g., "Multimap&lt;String, Integer&gt;")
      */
     protected static String getTypeName(final Class<?> typeClass, final String keyTypeName, final String valueTypeName, final boolean isDeclaringName) {
         if (isDeclaringName) {

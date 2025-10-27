@@ -75,7 +75,7 @@ public final class ImmutableEntry<K, V> extends AbstractMap.SimpleImmutableEntry
 
     /**
      * Creates an ImmutableEntry with the specified key and value.
-     * Both the key and value may be null.
+     * Both the key and value may be {@code null}.
      * 
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -102,8 +102,8 @@ public final class ImmutableEntry<K, V> extends AbstractMap.SimpleImmutableEntry
      * This method creates a defensive copy, so changes to the original entry after
      * copying will not affect the created ImmutableEntry.
      * 
-     * <p>If the provided entry contains null key or value, the ImmutableEntry will
-     * also contain null for those fields.
+     * <p>If the provided entry contains {@code null} key or value, the ImmutableEntry will
+     * also contain {@code null} for those fields.
      * 
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code

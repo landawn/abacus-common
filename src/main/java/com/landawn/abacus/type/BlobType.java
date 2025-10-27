@@ -20,6 +20,8 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
+import com.landawn.abacus.annotation.MayReturnNull;
+
 /**
  * Type handler for SQL Blob (Binary Large Object) operations.
  * This class provides direct handling of java.sql.Blob objects for database operations.
@@ -85,9 +87,10 @@ public class BlobType extends AbstractType<Blob> {
      *
      * @param rs the ResultSet to retrieve the Blob from
      * @param columnIndex the column index (1-based) of the Blob value
-     * @return the Blob object at the specified column, or null if the value is SQL NULL
+     * @return the Blob object at the specified column, or {@code null} if the value is SQL NULL
      * @throws SQLException if a database access error occurs or the columnIndex is invalid
      */
+    @MayReturnNull
     @Override
     public Blob get(final ResultSet rs, final int columnIndex) throws SQLException {
         return rs.getBlob(columnIndex);
@@ -99,9 +102,10 @@ public class BlobType extends AbstractType<Blob> {
      * @param rs the ResultSet to retrieve the Blob from
      * @param columnLabel the label for the column specified with the SQL AS clause,
      *                    or the column name if no AS clause was specified
-     * @return the Blob object in the specified column, or null if the value is SQL NULL
+     * @return the Blob object in the specified column, or {@code null} if the value is SQL NULL
      * @throws SQLException if a database access error occurs or the columnLabel is invalid
      */
+    @MayReturnNull
     @Override
     public Blob get(final ResultSet rs, final String columnLabel) throws SQLException {
         return rs.getBlob(columnLabel);

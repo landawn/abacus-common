@@ -14,6 +14,7 @@
 
 package com.landawn.abacus.type;
 
+import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.util.Strings;
 
 /**
@@ -81,9 +82,11 @@ public final class BeanType<T> extends AbstractType<T> {
      * Uses the internal JSON parser to serialize the bean with default configuration.
      *
      * @param x the bean instance to serialize
-     * @return the JSON string representation of the bean, or null if the input is null
+     * @return the JSON string representation of the bean, or {@code null} if the input is null
      */
+    @MayReturnNull
     @Override
+
     public String stringOf(final T x) {
         return (x == null) ? null : Utils.jsonParser.serialize(x, Utils.jsc);
     }
@@ -94,10 +97,12 @@ public final class BeanType<T> extends AbstractType<T> {
      *
      * @param str the JSON string to deserialize
      * @return a new instance of the bean type populated from the JSON data,
-     *         or null if the input string is null or empty
+     *         or {@code null} if the input string is {@code null} or empty
      * @throws com.landawn.abacus.exception.ParseException if the JSON is invalid or cannot be mapped to the bean type
      */
+    @MayReturnNull
     @Override
+
     public T valueOf(final String str) {
         return (Strings.isEmpty(str)) ? null : Utils.jsonParser.deserialize(str, typeClass);
     }

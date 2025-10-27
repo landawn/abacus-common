@@ -1120,7 +1120,6 @@ public final class Suppliers {
      *   <li>Queue, Deque - returns ArrayDeque supplier</li>
      *   <li>Various concurrent collections</li>
      * </ul>
-     * </p>
      *
      * @param <T> the element type of the collection
      * @param targetType the Class object representing the desired Collection implementation
@@ -1210,7 +1209,6 @@ public final class Suppliers {
      *   <li>ConcurrentHashMap - returns ConcurrentHashMap supplier</li>
      *   <li>BiMap - returns BiMap supplier</li>
      * </ul>
-     * </p>
      *
      * @param <K> the type of keys maintained by the map
      * @param <V> the type of mapped values
@@ -1283,7 +1281,7 @@ public final class Suppliers {
      * @param targetClass the Class object of the Collection implementation to register
      * @param supplier the Supplier that creates instances of the target class
      * @return {@code true} if the registration was successful, {@code false} if a supplier was already registered for this class
-     * @throws IllegalArgumentException if targetClass or supplier is null, or if targetClass is a built-in class
+     * @throws IllegalArgumentException if targetClass or supplier is {@code null}, or if targetClass is a built-in class
      */
     @SuppressWarnings("rawtypes")
     public static <T extends Collection> boolean registerForCollection(final Class<T> targetClass, final java.util.function.Supplier<T> supplier)
@@ -1315,7 +1313,7 @@ public final class Suppliers {
      * @param targetClass the Class object of the Map implementation to register
      * @param supplier the Supplier that creates instances of the target class
      * @return {@code true} if the registration was successful, {@code false} if a supplier was already registered for this class
-     * @throws IllegalArgumentException if targetClass or supplier is null, or if targetClass is a built-in class
+     * @throws IllegalArgumentException if targetClass or supplier is {@code null}, or if targetClass is a built-in class
      */
     @SuppressWarnings("rawtypes")
     public static <T extends Map> boolean registerForMap(final Class<T> targetClass, final java.util.function.Supplier<T> supplier)

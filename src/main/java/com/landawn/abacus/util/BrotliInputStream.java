@@ -233,7 +233,7 @@ public final class BrotliInputStream extends InputStream {
      * }
      * }</pre>
      *
-     * @return {@code true} if this stream instance supports the mark and reset methods; false otherwise
+     * @return {@code true} if this stream instance supports the mark and reset methods; {@code false} otherwise
      */
     @Override
     public boolean markSupported() {

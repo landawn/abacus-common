@@ -71,7 +71,7 @@ public interface Parser<SC extends SerializationConfig<?>, DC extends Deserializ
      * String json = parser.serialize(myObject);
      * }</pre>
      *
-     * @param obj the object to serialize (may be null depending on implementation)
+     * @param obj the object to serialize (may be {@code null} depending on implementation)
      * @return the serialized string representation
      */
     String serialize(Object obj);
@@ -86,12 +86,12 @@ public interface Parser<SC extends SerializationConfig<?>, DC extends Deserializ
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * MySerConfig config = new MySerConfig()
-     *     .setPrettyFormat(true)
-     *     .setDateFormat("yyyy-MM-dd");
+     *     .prettyFormat(true)
+     *     .setDateTimeFormat(DateTimeFormat.LONG);
      * String json = parser.serialize(myObject, config);
      * }</pre>
      *
-     * @param obj the object to serialize (may be null depending on implementation)
+     * @param obj the object to serialize (may be {@code null} depending on implementation)
      * @param config the serialization configuration to use (must not be null)
      * @return the serialized string representation
      */
@@ -109,7 +109,7 @@ public interface Parser<SC extends SerializationConfig<?>, DC extends Deserializ
      * parser.serialize(myObject, new File("output.json"));
      * }</pre>
      *
-     * @param obj the object to serialize (may be null depending on implementation)
+     * @param obj the object to serialize (may be {@code null} depending on implementation)
      * @param output the output file to write to (must not be null)
      * @throws UncheckedIOException if an I/O error occurs during file writing
      */
@@ -124,11 +124,11 @@ public interface Parser<SC extends SerializationConfig<?>, DC extends Deserializ
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * MySerConfig config = new MySerConfig().setPrettyFormat(true);
+     * MySerConfig config = new MySerConfig().prettyFormat(true);
      * parser.serialize(myObject, config, new File("output.json"));
      * }</pre>
      *
-     * @param obj the object to serialize (may be null depending on implementation)
+     * @param obj the object to serialize (may be {@code null} depending on implementation)
      * @param config the serialization configuration to use (must not be null)
      * @param output the output file to write to (must not be null)
      * @throws UncheckedIOException if an I/O error occurs during file writing
@@ -149,7 +149,7 @@ public interface Parser<SC extends SerializationConfig<?>, DC extends Deserializ
      * }
      * }</pre>
      *
-     * @param obj the object to serialize (may be null depending on implementation)
+     * @param obj the object to serialize (may be {@code null} depending on implementation)
      * @param output the output stream to write to (must not be null)
      * @throws UncheckedIOException if an I/O error occurs during stream writing
      */
@@ -165,13 +165,13 @@ public interface Parser<SC extends SerializationConfig<?>, DC extends Deserializ
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * MySerConfig config = new MySerConfig().setCharset("UTF-8");
+     * MySerConfig config = new MySerConfig().prettyFormat(true);
      * try (FileOutputStream fos = new FileOutputStream("output.json")) {
      *     parser.serialize(myObject, config, fos);
      * }
      * }</pre>
      *
-     * @param obj the object to serialize (may be null depending on implementation)
+     * @param obj the object to serialize (may be {@code null} depending on implementation)
      * @param config the serialization configuration to use (must not be null)
      * @param output the output stream to write to (must not be null)
      * @throws UncheckedIOException if an I/O error occurs during stream writing
@@ -192,7 +192,7 @@ public interface Parser<SC extends SerializationConfig<?>, DC extends Deserializ
      * }
      * }</pre>
      *
-     * @param obj the object to serialize (may be null depending on implementation)
+     * @param obj the object to serialize (may be {@code null} depending on implementation)
      * @param output the writer to write to (must not be null)
      * @throws UncheckedIOException if an I/O error occurs during writing
      */
@@ -208,13 +208,13 @@ public interface Parser<SC extends SerializationConfig<?>, DC extends Deserializ
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * MySerConfig config = new MySerConfig().setIndent("  ");
+     * MySerConfig config = new MySerConfig().setIndentation("  ");
      * try (FileWriter writer = new FileWriter("output.json")) {
      *     parser.serialize(myObject, config, writer);
      * }
      * }</pre>
      *
-     * @param obj the object to serialize (may be null depending on implementation)
+     * @param obj the object to serialize (may be {@code null} depending on implementation)
      * @param config the serialization configuration to use (must not be null)
      * @param output the writer to write to (must not be null)
      * @throws UncheckedIOException if an I/O error occurs during writing
@@ -251,7 +251,7 @@ public interface Parser<SC extends SerializationConfig<?>, DC extends Deserializ
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * MyDeserConfig config = new MyDeserConfig()
-     *     .setIgnoreUnknownProperty(true)
+     *     .ignoreUnmatchedProperty(true)
      *     .setElementType(String.class);
      * List<String> list = parser.deserialize(jsonArray, config, List.class);
      * }</pre>
@@ -277,7 +277,7 @@ public interface Parser<SC extends SerializationConfig<?>, DC extends Deserializ
      * }</pre>
      *
      * @param <T> the target type
-     * @param source the source file to read from (must not be null and must exist)
+     * @param source the source file to read from (must not be {@code null} and must exist)
      * @param targetClass the class of the object to create (must not be null)
      * @return the deserialized object instance
      * @throws UncheckedIOException if an I/O error occurs or the file doesn't exist
@@ -294,12 +294,12 @@ public interface Parser<SC extends SerializationConfig<?>, DC extends Deserializ
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * MyDeserConfig config = new MyDeserConfig()
-     *     .setDateFormat("yyyy-MM-dd");
+     *     .setDateTimeFormat(DateTimeFormat.LONG);
      * MyClass obj = parser.deserialize(new File("input.json"), config, MyClass.class);
      * }</pre>
      *
      * @param <T> the target type
-     * @param source the source file to read from (must not be null and must exist)
+     * @param source the source file to read from (must not be {@code null} and must exist)
      * @param config the deserialization configuration to use (must not be null)
      * @param targetClass the class of the object to create (must not be null)
      * @return the deserialized object instance
@@ -338,7 +338,7 @@ public interface Parser<SC extends SerializationConfig<?>, DC extends Deserializ
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * MyDeserConfig config = new MyDeserConfig().setCharset("UTF-8");
+     * MyDeserConfig config = new MyDeserConfig().ignoreUnmatchedProperty(true);
      * try (FileInputStream fis = new FileInputStream("input.json")) {
      *     MyClass obj = parser.deserialize(fis, config, MyClass.class);
      * }

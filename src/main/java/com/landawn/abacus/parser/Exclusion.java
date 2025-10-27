@@ -36,7 +36,7 @@ package com.landawn.abacus.parser;
 public enum Exclusion {
     /**
      * Excludes bean properties with {@code null} values during serialization.
-     * Properties that are null will not be included in the serialized output.
+     * Properties that are {@code null} will not be included in the serialized output.
      * 
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -51,7 +51,7 @@ public enum Exclusion {
 
     /**
      * Excludes bean properties with default values during serialization.
-     * This includes null values and primitive type default values (0, false, etc.).
+     * This includes {@code null} values and primitive type default values (0, false, etc.).
      * 
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code

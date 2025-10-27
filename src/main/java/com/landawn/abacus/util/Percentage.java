@@ -37,48 +37,91 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public enum Percentage {
 
+    /** Represents 0.0001% (0.000001 as a decimal). */
     _0_0001("0.0001%", 0.000001),
+    /** Represents 0.001% (0.00001 as a decimal). */
     _0_001("0.001%", 0.00001),
+    /** Represents 0.01% (0.0001 as a decimal). */
     _0_01("0.01%", 0.0001),
+    /** Represents 0.1% (0.001 as a decimal). */
     _0_1("0.1%", 0.001),
+    /** Represents 1% (0.01 as a decimal). */
     _1("1%", 0.01),
+    /** Represents 2% (0.02 as a decimal). */
     _2("2%", 0.02),
+    /** Represents 3% (0.03 as a decimal). */
     _3("3%", 0.03),
+    /** Represents 4% (0.04 as a decimal). */
     _4("4%", 0.04),
+    /** Represents 5% (0.05 as a decimal). */
     _5("5%", 0.05),
+    /** Represents 6% (0.06 as a decimal). */
     _6("6%", 0.06),
+    /** Represents 7% (0.07 as a decimal). */
     _7("7%", 0.07),
+    /** Represents 8% (0.08 as a decimal). */
     _8("8%", 0.08),
+    /** Represents 9% (0.09 as a decimal). */
     _9("9%", 0.09),
+    /** Represents 10% (0.10 as a decimal). */
     _10("10%", 0.10),
+    /** Represents 15% (0.15 as a decimal). */
     _15("15%", 0.15),
+    /** Represents 20% (0.20 as a decimal). */
     _20("20%", 0.20),
+    /** Represents 25% (0.25 as a decimal). */
     _25("25%", 0.25),
+    /** Represents 30% (0.30 as a decimal). */
     _30("30%", 0.30),
+    /** Represents 35% (0.35 as a decimal). */
     _35("35%", 0.35),
+    /** Represents 40% (0.40 as a decimal). */
     _40("40%", 0.40),
+    /** Represents 45% (0.45 as a decimal). */
     _45("45%", 0.45),
+    /** Represents 50% (0.50 as a decimal). */
     _50("50%", 0.50),
+    /** Represents 55% (0.55 as a decimal). */
     _55("55%", 0.55),
+    /** Represents 60% (0.60 as a decimal). */
     _60("60%", 0.60),
+    /** Represents 65% (0.65 as a decimal). */
     _65("65%", 0.65),
+    /** Represents 70% (0.70 as a decimal). */
     _70("70%", 0.70),
+    /** Represents 75% (0.75 as a decimal). */
     _75("75%", 0.75),
+    /** Represents 80% (0.80 as a decimal). */
     _80("80%", 0.80),
+    /** Represents 85% (0.85 as a decimal). */
     _85("85%", 0.85),
+    /** Represents 90% (0.90 as a decimal). */
     _90("90%", 0.90),
+    /** Represents 91% (0.91 as a decimal). */
     _91("91%", 0.91),
+    /** Represents 92% (0.92 as a decimal). */
     _92("92%", 0.92),
+    /** Represents 93% (0.93 as a decimal). */
     _93("93%", 0.93),
+    /** Represents 94% (0.94 as a decimal). */
     _94("94%", 0.94),
+    /** Represents 95% (0.95 as a decimal). */
     _95("95%", 0.95),
+    /** Represents 96% (0.96 as a decimal). */
     _96("96%", 0.96),
+    /** Represents 97% (0.97 as a decimal). */
     _97("97%", 0.97),
+    /** Represents 98% (0.98 as a decimal). */
     _98("98%", 0.98),
+    /** Represents 99% (0.99 as a decimal). */
     _99("99%", 0.99),
+    /** Represents 99.9% (0.999 as a decimal). */
     _99_9("99.9%", 0.999),
+    /** Represents 99.99% (0.9999 as a decimal). */
     _99_99("99.99%", 0.9999),
+    /** Represents 99.999% (0.99999 as a decimal). */
     _99_999("99.999%", 0.99999),
+    /** Represents 99.9999% (0.999999 as a decimal). */
     _99_9999("99.9999%", 0.999999);
 
     private static final Map<String, ImmutableSet<Percentage>> rangePool = new ConcurrentHashMap<>();

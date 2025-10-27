@@ -46,7 +46,7 @@ public final class PrimitiveFloatType extends AbstractFloatType {
      * Indicates whether this type represents a primitive type.
      * Always returns {@code true} for PrimitiveFloatType.
      *
-     * @return true, as this type handler is for primitive float
+     * @return {@code true}, as this type handler is for primitive float
      */
     @Override
     public boolean isPrimitiveType() {

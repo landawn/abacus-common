@@ -14,6 +14,8 @@
 
 package com.landawn.abacus.parser;
 
+import com.landawn.abacus.annotation.MayReturnNull;
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
@@ -129,13 +131,8 @@ final class XMLParserImpl extends AbstractXMLParser {
         this.parserType = parserType;
     }
 
-    /**
-     * Serializes an object to an XML string.
-     * 
-     * @param obj the object to serialize
-     * @param config the serialization configuration
-     * @return the XML string representation of the object
-     */
+    @MayReturnNull
+
     @Override
     public String serialize(final Object obj, final XMLSerializationConfig config) {
         if (obj == null) {
@@ -156,14 +153,6 @@ final class XMLParserImpl extends AbstractXMLParser {
         }
     }
 
-    /**
-     * Serializes an object to an XML file.
-     * 
-     * @param obj the object to serialize
-     * @param config the serialization configuration
-     * @param output the output file
-     * @throws UncheckedIOException if an I/O error occurs
-     */
     @Override
     public void serialize(final Object obj, final XMLSerializationConfig config, final File output) {
         Writer writer = null;
@@ -183,14 +172,6 @@ final class XMLParserImpl extends AbstractXMLParser {
         }
     }
 
-    /**
-     * Serializes an object to an output stream.
-     * 
-     * @param obj the object to serialize
-     * @param config the serialization configuration
-     * @param output the output stream
-     * @throws UncheckedIOException if an I/O error occurs
-     */
     @Override
     public void serialize(final Object obj, final XMLSerializationConfig config, final OutputStream output) {
         final BufferedXMLWriter bw = Objectory.createBufferedXMLWriter(output);
@@ -205,14 +186,6 @@ final class XMLParserImpl extends AbstractXMLParser {
         }
     }
 
-    /**
-     * Serializes an object to a writer.
-     * 
-     * @param obj the object to serialize
-     * @param config the serialization configuration
-     * @param output the output writer
-     * @throws UncheckedIOException if an I/O error occurs
-     */
     @Override
     public void serialize(final Object obj, final XMLSerializationConfig config, final Writer output) {
         final boolean isBufferedWriter = output instanceof BufferedXMLWriter;
@@ -309,17 +282,6 @@ final class XMLParserImpl extends AbstractXMLParser {
         }
     }
 
-    /**
-     * Writes a JavaBean object to XML.
-     * 
-     * @param obj the bean object to write
-     * @param config the serialization configuration
-     * @param indentation the current indentation string
-     * @param serializedObjects set of already serialized objects
-     * @param type the type information
-     * @param bw the XML writer
-     * @throws IOException if an I/O error occurs
-     */
     protected void writeBean(final Object obj, final XMLSerializationConfig config, final String indentation, final IdentityHashSet<Object> serializedObjects,
             final Type<Object> type, final BufferedXMLWriter bw) throws IOException {
         //    if (hasCircularReference(obj, serializedObjects, config, bw)) {
@@ -377,17 +339,6 @@ final class XMLParserImpl extends AbstractXMLParser {
         }
     }
 
-    /**
-     * Writes the properties of a bean object to XML.
-     * 
-     * @param obj the bean object
-     * @param config the serialization configuration
-     * @param propIndentation the indentation for properties
-     * @param serializedObjects set of already serialized objects
-     * @param type the type information
-     * @param bw the XML writer
-     * @throws IOException if an I/O error occurs
-     */
     protected void writeProperties(final Object obj, final XMLSerializationConfig config, final String propIndentation,
             final IdentityHashSet<Object> serializedObjects, final Type<Object> type, final BufferedXMLWriter bw) throws IOException {
         //    if (hasCircularReference(obj, serializedObjects, config, bw)) {
@@ -482,17 +433,6 @@ final class XMLParserImpl extends AbstractXMLParser {
         }
     }
 
-    /**
-     * Writes a Map object to XML.
-     * 
-     * @param m the map to write
-     * @param config the serialization configuration
-     * @param indentation the current indentation string
-     * @param serializedObjects set of already serialized objects
-     * @param type the type information
-     * @param bw the XML writer
-     * @throws IOException if an I/O error occurs
-     */
     protected void writeMap(final Map<?, ?> m, final XMLSerializationConfig config, final String indentation, final IdentityHashSet<Object> serializedObjects,
             final Type<Object> type, final BufferedXMLWriter bw) throws IOException {
         //    if (hasCircularReference(m, serializedObjects, config, bw)) {
@@ -585,17 +525,6 @@ final class XMLParserImpl extends AbstractXMLParser {
         bw.write(XMLConstants.MAP_ELE_END);
     }
 
-    /**
-     * Writes a MapEntity object to XML.
-     * 
-     * @param mapEntity the MapEntity to write
-     * @param config the serialization configuration
-     * @param indentation the current indentation string
-     * @param serializedObjects set of already serialized objects
-     * @param type the type information
-     * @param bw the XML writer
-     * @throws IOException if an I/O error occurs
-     */
     protected void writeMapEntity(final MapEntity mapEntity, final XMLSerializationConfig config, final String indentation,
             final IdentityHashSet<Object> serializedObjects, final Type<Object> type, final BufferedXMLWriter bw) throws IOException {
         //    if (hasCircularReference(mapEntity, serializedObjects, config, bw)) {
@@ -691,17 +620,6 @@ final class XMLParserImpl extends AbstractXMLParser {
         bw.write(WD._GREATER_THAN);
     }
 
-    /**
-     * Writes an array object to XML.
-     * 
-     * @param obj the array object to write
-     * @param config the serialization configuration
-     * @param indentation the current indentation string
-     * @param serializedObjects set of already serialized objects
-     * @param type the type information
-     * @param bw the XML writer
-     * @throws IOException if an I/O error occurs
-     */
     protected void writeArray(final Object obj, final XMLSerializationConfig config, final String indentation, final IdentityHashSet<Object> serializedObjects,
             final Type<Object> type, final BufferedXMLWriter bw) throws IOException {
         //    if (hasCircularReference(obj, serializedObjects, config, bw)) {
@@ -754,17 +672,6 @@ final class XMLParserImpl extends AbstractXMLParser {
         bw.write(XMLConstants.ARRAY_ELE_END);
     }
 
-    /**
-     * Writes a Collection object to XML.
-     * 
-     * @param c the collection to write
-     * @param config the serialization configuration
-     * @param indentation the current indentation string
-     * @param serializedObjects set of already serialized objects
-     * @param type the type information
-     * @param bw the XML writer
-     * @throws IOException if an I/O error occurs
-     */
     protected void writeCollection(final Collection<?> c, final XMLSerializationConfig config, final String indentation,
             final IdentityHashSet<Object> serializedObjects, final Type<Object> type, final BufferedXMLWriter bw) throws IOException {
         //    if (hasCircularReference(c, serializedObjects, config, bw)) {
@@ -2409,12 +2316,6 @@ final class XMLParserImpl extends AbstractXMLParser {
         }
     }
 
-    /**
-     * Gets the deserialization type.
-     *
-     * @param targetClass
-     * @return
-     */
     protected SerializationType getDeserializationType(final Class<?> targetClass) {
         final Type<?> type = N.typeOf(targetClass);
 
@@ -2431,22 +2332,6 @@ final class XMLParserImpl extends AbstractXMLParser {
         return serializationType;
     }
 
-    /**
-     * Gets the prop value.
-     * @param propNode
-     * @param config
-     * @param propName
-     * @param propType
-     * @param propInfo
-     * @param checkedAttr
-     * @param isTagByPropertyName
-     * @param ignoreTypeInfo
-     * @param isProp
-     * @param inputClass
-     *
-     * @param <T>
-     * @return
-     */
     private <T> Object getPropValue(Node propNode, final XMLDeserializationConfig config, final String propName, Type<?> propType, final PropInfo propInfo,
             final boolean checkedAttr, final boolean isTagByPropertyName, final boolean ignoreTypeInfo, final boolean isProp, final Class<T> inputClass) {
         Object propValue = null;
@@ -2488,12 +2373,6 @@ final class XMLParserImpl extends AbstractXMLParser {
         return propValue;
     }
 
-    /**
-     * Gets the prop ele type.
-     *
-     * @param propType
-     * @return
-     */
     private Type<?> getPropEleType(final Type<?> propType) {
         Type<?> propEleType = null;
 

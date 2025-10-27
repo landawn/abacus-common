@@ -52,7 +52,8 @@ public class BSONObjectIdType extends AbstractType<ObjectId> {
      *
      * @param x the ObjectId to convert
      * @return the 24-character hexadecimal string representation of the ObjectId,
-     *         or null if the input is null
+     *         or {@code null} if the input is null
+     @MayReturnNull
      */
     @Override
     public String stringOf(final ObjectId x) {
@@ -65,8 +66,9 @@ public class BSONObjectIdType extends AbstractType<ObjectId> {
      *
      * @param str the hexadecimal string to parse (must be 24 characters)
      * @return a new ObjectId created from the hexadecimal string,
-     *         or null if str is null or empty
+     *         or {@code null} if str is {@code null} or empty
      * @throws IllegalArgumentException if the string is not a valid 24-character hex string
+     @MayReturnNull
      */
     @Override
     public ObjectId valueOf(final String str) {

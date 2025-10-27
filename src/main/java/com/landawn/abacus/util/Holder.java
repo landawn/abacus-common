@@ -46,7 +46,7 @@ public final class Holder<T> implements Mutable {
      * <p>This is equivalent to calling {@code Holder(null)}. The created Holder can later
      * be populated with a value using {@link #setValue(Object)} or other setter methods.
      *
-     * <p><b>Usage Example:</b>
+     * <p><b>Usage Example:</b></p>
      * <pre>{@code
      * Holder<String> holder = new Holder<>();
      * holder.setValue("Hello");
@@ -73,7 +73,7 @@ public final class Holder<T> implements Mutable {
      * <p>This is a static factory method that provides a convenient and type-safe way to create
      * a Holder instance. The method allows for type inference, making the code more concise.
      *
-     * <p><b>Usage Example:</b>
+     * <p><b>Usage Example:</b></p>
      * <pre>{@code
      * Holder<Integer> holder = Holder.of(42);
      * Holder<String> nullHolder = Holder.of(null);
@@ -90,10 +90,10 @@ public final class Holder<T> implements Mutable {
     /**
      * Returns the value held by this Holder.
      *
-     * <p>This method provides direct access to the held value without any null checks or
+     * <p>This method provides direct access to the held value without any {@code null} checks or
      * validation. The caller is responsible for handling potential {@code null} values.
      *
-     * <p><b>Usage Example:</b>
+     * <p><b>Usage Example:</b></p>
      * <pre>{@code
      * Holder<String> holder = Holder.of("test");
      * String value = holder.value(); // returns "test"
@@ -124,7 +124,7 @@ public final class Holder<T> implements Mutable {
      * {@code null}, which effectively clears the Holder. No value is returned; use
      * {@link #setAndGet(Object)} if you need the value returned.
      *
-     * <p><b>Usage Example:</b>
+     * <p><b>Usage Example:</b></p>
      * <pre>{@code
      * Holder<Integer> holder = Holder.of(10);
      * holder.setValue(20); // holder now contains 20
@@ -143,7 +143,7 @@ public final class Holder<T> implements Mutable {
      * previously held. This is particularly useful in scenarios where you need to track state
      * changes or implement swap-based algorithms.
      *
-     * <p><b>Usage Example:</b>
+     * <p><b>Usage Example:</b></p>
      * <pre>{@code
      * Holder<String> holder = Holder.of("old");
      * String previous = holder.getAndSet("new"); // previous = "old", holder now contains "new"
@@ -165,7 +165,7 @@ public final class Holder<T> implements Mutable {
      * or immediate usage of the newly set value. While the return value is the same as the
      * parameter, this pattern is useful in functional programming contexts.
      *
-     * <p><b>Usage Example:</b>
+     * <p><b>Usage Example:</b></p>
      * <pre>{@code
      * Holder<Integer> holder = Holder.of(10);
      * Integer newValue = holder.setAndGet(20); // newValue = 20, holder contains 20
@@ -187,7 +187,7 @@ public final class Holder<T> implements Mutable {
      * the current value. This method returns the original value before the update. This is useful
      * when you need to perform transformations while keeping track of the old state.
      *
-     * <p><b>Usage Example:</b>
+     * <p><b>Usage Example:</b></p>
      * <pre>{@code
      * Holder<Integer> holder = Holder.of(5);
      * Integer old = holder.getAndUpdate(n -> n * 2); // old = 5, holder now contains 10
@@ -212,7 +212,7 @@ public final class Holder<T> implements Mutable {
      * the current value. Unlike {@link #getAndUpdate(Throwables.UnaryOperator)}, this method
      * returns the new value after the update rather than the old value.
      *
-     * <p><b>Usage Example:</b>
+     * <p><b>Usage Example:</b></p>
      * <pre>{@code
      * Holder<Integer> holder = Holder.of(5);
      * Integer updated = holder.updateAndGet(n -> n * 2); // updated = 10, holder contains 10
@@ -237,7 +237,7 @@ public final class Holder<T> implements Mutable {
      * This is useful for implementing compare-and-set semantics or conditional updates based
      * on the current state.
      *
-     * <p><b>Usage Example:</b>
+     * <p><b>Usage Example:</b></p>
      * <pre>{@code
      * Holder<Integer> holder = Holder.of(5);
      * boolean updated = holder.setIf(10, n -> n != null && n < 10); // returns true, holder now contains 10
@@ -287,7 +287,7 @@ public final class Holder<T> implements Mutable {
      * <p>This is a convenience method for null-checking the held value without directly
      * accessing it. It's particularly useful in conditional logic and stream operations.
      *
-     * <p><b>Usage Example:</b>
+     * <p><b>Usage Example:</b></p>
      * <pre>{@code
      * Holder<String> holder = Holder.of(null);
      * if (holder.isNull()) {
@@ -305,9 +305,9 @@ public final class Holder<T> implements Mutable {
      * Checks whether the value held by this Holder is not {@code null}.
      *
      * <p>This is the inverse of {@link #isNull()}. It provides a convenient way to check
-     * if the Holder contains a non-null value before performing operations on it.
+     * if the Holder contains a {@code non-null} value before performing operations on it.
      *
-     * <p><b>Usage Example:</b>
+     * <p><b>Usage Example:</b></p>
      * <pre>{@code
      * Holder<String> holder = Holder.of("test");
      * if (holder.isNotNull()) {
@@ -328,14 +328,14 @@ public final class Holder<T> implements Mutable {
      * is only executed if the value is not {@code null}, making it similar to {@code Optional.ifPresent()}.
      * This is particularly useful for side-effect operations in functional-style code.
      *
-     * <p><b>Usage Example:</b>
+     * <p><b>Usage Example:</b></p>
      * <pre>{@code
      * Holder<String> holder = Holder.of("Hello");
      * holder.ifNotNull(value -> System.out.println(value)); // prints "Hello"
      * }</pre>
      *
      * @param <E> the type of exception that the action may throw
-     * @param action the action to be performed with the non-null value, must not be {@code null}
+     * @param action the action to be performed with the {@code non-null} value, must not be {@code null}
      * @throws IllegalArgumentException if the action is {@code null}
      * @throws E if the action throws an exception
      */
@@ -355,7 +355,7 @@ public final class Holder<T> implements Mutable {
      * a value. Exactly one of the two actions will be performed. This is similar to
      * {@code Optional.ifPresentOrElse()} and is useful when you need to handle both cases.
      *
-     * <p><b>Usage Example:</b>
+     * <p><b>Usage Example:</b></p>
      * <pre>{@code
      * Holder<String> holder = Holder.of(null);
      * holder.ifNotNullOrElse(
@@ -366,7 +366,7 @@ public final class Holder<T> implements Mutable {
      *
      * @param <E> the type of exception that the action may throw
      * @param <E2> the type of exception that the empty action may throw
-     * @param action the action to be performed with the non-null value, must not be {@code null}
+     * @param action the action to be performed with the {@code non-null} value, must not be {@code null}
      * @param emptyAction the action to be performed when the value is {@code null}, must not be {@code null}
      * @throws IllegalArgumentException if either action or emptyAction is {@code null}
      * @throws E if the action throws an exception
@@ -403,7 +403,7 @@ public final class Holder<T> implements Mutable {
      * If the value is {@code null}, no action is performed.
      *
      * @param <E> the type of exception that the action may throw
-     * @param action the action to be performed with the non-null value
+     * @param action the action to be performed with the {@code non-null} value
      * @throws IllegalArgumentException if the action is {@code null}
      * @throws E if the action throws an exception
      * @deprecated replaced by {@link #ifNotNull(Throwables.Consumer)}
@@ -422,9 +422,9 @@ public final class Holder<T> implements Mutable {
      *
      * <p>This method unconditionally applies the mapper function to the current value, even if
      * it is {@code null}. The mapper is responsible for handling {@code null} inputs if necessary.
-     * For conditional mapping that only applies to non-null values, use {@link #mapIfNotNull(Throwables.Function)}.
+     * For conditional mapping that only applies to {@code non-null} values, use {@link #mapIfNotNull(Throwables.Function)}.
      *
-     * <p><b>Usage Example:</b>
+     * <p><b>Usage Example:</b></p>
      * <pre>{@code
      * Holder<String> holder = Holder.of("hello");
      * Integer length = holder.map(s -> s == null ? 0 : s.length()); // returns 5
@@ -445,10 +445,10 @@ public final class Holder<T> implements Mutable {
      * and returns a {@code Nullable} containing the mapped value.
      *
      * <p>This method provides safe, null-aware mapping. The mapper is only invoked when the
-     * value is not {@code null}, eliminating the need for null checks within the mapper.
+     * value is not {@code null}, eliminating the need for {@code null} checks within the mapper.
      * The result is wrapped in a {@code Nullable}, which can itself contain {@code null}.
      *
-     * <p><b>Usage Example:</b>
+     * <p><b>Usage Example:</b></p>
      * <pre>{@code
      * Holder<String> holder = Holder.of("hello");
      * Nullable<Integer> length = holder.mapIfNotNull(String::length); // Nullable.of(5)
@@ -456,7 +456,7 @@ public final class Holder<T> implements Mutable {
      *
      * @param <U> the type of the result of the mapping function
      * @param <E> the type of exception that the mapping function may throw
-     * @param mapper the mapping function to apply to the non-null value, must not be {@code null}
+     * @param mapper the mapping function to apply to the {@code non-null} value, must not be {@code null}
      * @return a {@code Nullable} containing the mapped value if the value was not {@code null}, otherwise an empty {@code Nullable}
      * @throws IllegalArgumentException if the mapper is {@code null}
      * @throws E if the mapping function throws an exception
@@ -477,10 +477,10 @@ public final class Holder<T> implements Mutable {
      *
      * <p>This method is similar to {@link #mapIfNotNull(Throwables.Function)} but returns an
      * {@code Optional} instead of {@code Nullable}. The key difference is that the mapper must
-     * return a non-null value, which is then wrapped in an {@code Optional}. If the original
+     * return a {@code non-null} value, which is then wrapped in an {@code Optional}. If the original
      * value is {@code null}, an empty {@code Optional} is returned.
      *
-     * <p><b>Usage Example:</b>
+     * <p><b>Usage Example:</b></p>
      * <pre>{@code
      * Holder<String> holder = Holder.of("test");
      * Optional<Integer> length = holder.mapToNonNullIfNotNull(String::length); // Optional.of(4)
@@ -488,7 +488,7 @@ public final class Holder<T> implements Mutable {
      *
      * @param <U> the type of the result of the mapping function
      * @param <E> the type of exception that the mapping function may throw
-     * @param mapper the mapping function to apply to the non-null value, must not be {@code null} and must not return {@code null}
+     * @param mapper the mapping function to apply to the {@code non-null} value, must not be {@code null} and must not return {@code null}
      * @return an {@code Optional} containing the mapped value if the value was not {@code null}, otherwise an empty {@code Optional}
      * @throws IllegalArgumentException if the mapper is {@code null}
      * @throws E if the mapping function throws an exception
@@ -510,9 +510,9 @@ public final class Holder<T> implements Mutable {
      *
      * <p>This method applies the predicate unconditionally to the current value, even if it is
      * {@code null}. The predicate must handle {@code null} inputs appropriately. For conditional
-     * filtering that only applies to non-null values, use {@link #filterIfNotNull(Throwables.Predicate)}.
+     * filtering that only applies to {@code non-null} values, use {@link #filterIfNotNull(Throwables.Predicate)}.
      *
-     * <p><b>Usage Example:</b>
+     * <p><b>Usage Example:</b></p>
      * <pre>{@code
      * Holder<Integer> holder = Holder.of(10);
      * Nullable<Integer> filtered = holder.filter(n -> n != null && n > 5); // Nullable.of(10)
@@ -536,18 +536,18 @@ public final class Holder<T> implements Mutable {
      * an {@code Optional} containing the value if the predicate returns {@code true}.
      *
      * <p>This method provides safe, null-aware filtering. The predicate is only invoked when the
-     * value is not {@code null}, eliminating the need for null checks within the predicate.
+     * value is not {@code null}, eliminating the need for {@code null} checks within the predicate.
      * If the value is {@code null} or the predicate returns {@code false}, an empty {@code Optional}
      * is returned.
      *
-     * <p><b>Usage Example:</b>
+     * <p><b>Usage Example:</b></p>
      * <pre>{@code
      * Holder<Integer> holder = Holder.of(10);
      * Optional<Integer> filtered = holder.filterIfNotNull(n -> n > 5); // Optional.of(10)
      * }</pre>
      *
      * @param <E> the type of exception that the predicate may throw
-     * @param predicate the predicate to test the non-null value, must not be {@code null}
+     * @param predicate the predicate to test the {@code non-null} value, must not be {@code null}
      * @return an {@code Optional} containing the value if it is not {@code null} and the predicate returns {@code true}, otherwise an empty {@code Optional}
      * @throws IllegalArgumentException if the predicate is {@code null}
      * @throws E if the predicate throws an exception
@@ -569,7 +569,7 @@ public final class Holder<T> implements Mutable {
      * {@code null}. The default value is evaluated eagerly. For lazy evaluation, use
      * {@link #orElseGetIfNull(Supplier)}.
      *
-     * <p><b>Usage Example:</b>
+     * <p><b>Usage Example:</b></p>
      * <pre>{@code
      * Holder<String> holder = Holder.of(null);
      * String value = holder.orElseIfNull("default"); // returns "default"
@@ -589,7 +589,7 @@ public final class Holder<T> implements Mutable {
      * when the value is {@code null}, which is useful when computing the default value is expensive
      * or has side effects. For simple default values, use {@link #orElseIfNull(Object)}.
      *
-     * <p><b>Usage Example:</b>
+     * <p><b>Usage Example:</b></p>
      * <pre>{@code
      * Holder<String> holder = Holder.of(null);
      * String value = holder.orElseGetIfNull(() -> computeExpensiveDefault()); // supplier only called if needed
@@ -613,9 +613,9 @@ public final class Holder<T> implements Mutable {
      * Returns the value if it is not {@code null}, otherwise throws {@code NoSuchElementException}.
      *
      * <p>This method is useful when the absence of a value should be treated as an error condition.
-     * It enforces that a non-null value must be present or an exception will be thrown.
+     * It enforces that a {@code non-null} value must be present or an exception will be thrown.
      *
-     * <p><b>Usage Example:</b>
+     * <p><b>Usage Example:</b></p>
      * <pre>{@code
      * Holder<String> holder = Holder.of("value");
      * String value = holder.orElseThrowIfNull(); // returns "value"
@@ -639,7 +639,7 @@ public final class Holder<T> implements Mutable {
      * <p>This method allows you to provide a custom error message that will be included in the
      * exception if the value is {@code null}. This helps provide more context about what went wrong.
      *
-     * <p><b>Usage Example:</b>
+     * <p><b>Usage Example:</b></p>
      * <pre>{@code
      * Holder<String> holder = Holder.of(null);
      * String value = holder.orElseThrowIfNull("User name is required"); // throws with custom message
@@ -665,7 +665,7 @@ public final class Holder<T> implements Mutable {
      * <p>This method allows you to provide a parameterized error message. The message template
      * can contain placeholders that will be replaced with the provided parameter value.
      *
-     * <p><b>Usage Example:</b>
+     * <p><b>Usage Example:</b></p>
      * <pre>{@code
      * Holder<User> holder = Holder.of(null);
      * User user = holder.orElseThrowIfNull("User with id %s not found", userId);
@@ -692,7 +692,7 @@ public final class Holder<T> implements Mutable {
      * <p>This overload allows formatting an error message with two parameters, useful for more
      * detailed error reporting.
      *
-     * <p><b>Usage Example:</b>
+     * <p><b>Usage Example:</b></p>
      * <pre>{@code
      * Holder<Item> holder = Holder.of(null);
      * Item item = holder.orElseThrowIfNull("Item %s in category %s not found", itemId, categoryId);
@@ -719,7 +719,7 @@ public final class Holder<T> implements Mutable {
      *
      * <p>This overload allows formatting an error message with three parameters.
      *
-     * <p><b>Usage Example:</b>
+     * <p><b>Usage Example:</b></p>
      * <pre>{@code
      * Holder<Record> holder = Holder.of(null);
      * Record rec = holder.orElseThrowIfNull("Record %s-%s in table %s not found", id1, id2, tableName);
@@ -748,7 +748,7 @@ public final class Holder<T> implements Mutable {
      * <p>This is the varargs overload that accepts any number of parameters. Use this when you
      * need to format an error message with four or more parameters.
      *
-     * <p><b>Usage Example:</b>
+     * <p><b>Usage Example:</b></p>
      * <pre>{@code
      * Holder<Data> holder = Holder.of(null);
      * Data data = holder.orElseThrowIfNull("Data not found: %s, %s, %s, %s", p1, p2, p3, p4);
@@ -775,7 +775,7 @@ public final class Holder<T> implements Mutable {
      * of exception (checked or unchecked) with custom logic for creating the exception. The
      * supplier is only invoked when the value is {@code null}.
      *
-     * <p><b>Usage Example:</b>
+     * <p><b>Usage Example:</b></p>
      * <pre>{@code
      * Holder<User> holder = Holder.of(null);
      * User user = holder.orElseThrowIfNull(() -> new UserNotFoundException("User not in cache"));
@@ -804,7 +804,7 @@ public final class Holder<T> implements Mutable {
      * method returns 0. This implementation ensures that equal Holders (as determined by
      * {@link #equals(Object)}) have the same hash code.
      *
-     * <p><b>Usage Example:</b>
+     * <p><b>Usage Example:</b></p>
      * <pre>{@code
      * Holder<String> holder = Holder.of("test");
      * int hash = holder.hashCode(); // returns "test".hashCode()
@@ -828,7 +828,7 @@ public final class Holder<T> implements Mutable {
      *
      * <p>Note that two Holders containing {@code null} are considered equal.
      *
-     * <p><b>Usage Example:</b>
+     * <p><b>Usage Example:</b></p>
      * <pre>{@code
      * Holder<String> h1 = Holder.of("test");
      * Holder<String> h2 = Holder.of("test");
@@ -851,7 +851,7 @@ public final class Holder<T> implements Mutable {
      * of the value and "]". The value's string representation is obtained using {@code N.toString()},
      * which handles the conversion appropriately. If the value is {@code null}, returns "Holder[null]".
      *
-     * <p><b>Usage Example:</b>
+     * <p><b>Usage Example:</b></p>
      * <pre>{@code
      * Holder<String> holder = Holder.of("test");
      * String str = holder.toString(); // returns "Holder[test]"

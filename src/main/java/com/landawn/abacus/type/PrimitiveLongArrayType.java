@@ -52,6 +52,7 @@ public final class PrimitiveLongArrayType extends AbstractPrimitiveArrayType<lon
      */
     @SuppressWarnings({ "rawtypes", "unchecked" })
     @Override
+    @MayReturnNull
     public Class clazz() {
         return long[].class;
     }
@@ -63,7 +64,7 @@ public final class PrimitiveLongArrayType extends AbstractPrimitiveArrayType<lon
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * PrimitiveLongArrayType type = new PrimitiveLongArrayType();
-     * Type&lt;Long&gt; elemType = type.getElementType();
+     * Type<Long> elemType = type.getElementType();
      * // elemType can be used for element-level operations
      * }</pre>
      *
@@ -110,11 +111,12 @@ public final class PrimitiveLongArrayType extends AbstractPrimitiveArrayType<lon
      * }</pre>
      *
      * @param x the long array to convert to string
-     * @return the string representation of the array, or null if the input array is null.
+     * @return the string representation of the array, or {@code null} if the input array is {@code null}.
      *         Returns "[]" for empty arrays.
      */
     @MayReturnNull
     @Override
+
     public String stringOf(final long[] x) {
         if (x == null) {
             return null; // NOSONAR
@@ -143,7 +145,7 @@ public final class PrimitiveLongArrayType extends AbstractPrimitiveArrayType<lon
      * }</pre>
      *
      * @param str the string to parse, expected format is "[value1, value2, ...]"
-     * @return the parsed long array, or null if the input string is null.
+     * @return the parsed long array, or {@code null} if the input string is {@code null}.
      *         Returns an empty array for empty string or "[]".
      * @throws NumberFormatException if any element in the string cannot be parsed as a long
      */
@@ -172,7 +174,7 @@ public final class PrimitiveLongArrayType extends AbstractPrimitiveArrayType<lon
     /**
      * Appends the string representation of a long array to the given Appendable.
      * The array is formatted as comma-separated values enclosed in square brackets.
-     * If the array is null, appends "null".
+     * If the array is {@code null}, appends "null".
      *
      * <p><b>Usage Examples:</b></p>
      * PrimitiveLongArrayType type = new PrimitiveLongArrayType();
@@ -221,7 +223,7 @@ public final class PrimitiveLongArrayType extends AbstractPrimitiveArrayType<lon
      * type.writeCharacter(writer, arr, null);
      * // Writes: [5, 10, 15]
      *
-     * type.writeCharacter(writer, null, null);
+     * type.writeCharacter(writer, {@code null}, null);
      * // Writes: null
      * }</pre>
      *
@@ -265,7 +267,7 @@ public final class PrimitiveLongArrayType extends AbstractPrimitiveArrayType<lon
      *
      * @param c the Collection of Long objects to convert
      * @return a primitive long array containing all elements from the collection,
-     *         or null if the input collection is null
+     *         or {@code null} if the input collection is null
      * @throws ClassCastException if any element in the collection is not a Long
      */
     @MayReturnNull
@@ -345,7 +347,7 @@ public final class PrimitiveLongArrayType extends AbstractPrimitiveArrayType<lon
     /**
      * Compares two long arrays for equality.
      * Two arrays are considered equal if they have the same length and contain the same
-     * elements in the same order. Two null references are considered equal.
+     * elements in the same order. Two {@code null} references are considered equal.
      *
      * <p><b>Usage Examples:</b></p>
      * PrimitiveLongArrayType type = new PrimitiveLongArrayType();

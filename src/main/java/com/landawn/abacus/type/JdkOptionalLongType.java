@@ -21,7 +21,7 @@ import com.landawn.abacus.util.Strings;
  * Type handler for java.util.OptionalLong.
  * This class provides serialization, deserialization, and database access capabilities for OptionalLong instances.
  * OptionalLong is a container that may or may not contain a long value.
- * Empty optionals are represented as null in serialized form.
+ * Empty optionals are represented as {@code null} in serialized form.
  */
 public class JdkOptionalLongType extends AbstractOptionalType<OptionalLong> {
 
@@ -45,7 +45,7 @@ public class JdkOptionalLongType extends AbstractOptionalType<OptionalLong> {
      * Indicates whether instances of this type implement the Comparable interface.
      * OptionalLong values can be compared when both are present.
      *
-     * @return true, as OptionalLong values are comparable
+     * @return {@code true}, as OptionalLong values are comparable
      */
     @Override
     public boolean isComparable() {
@@ -56,7 +56,7 @@ public class JdkOptionalLongType extends AbstractOptionalType<OptionalLong> {
      * Indicates whether this type should be written without quotes in CSV format.
      * Long values are numeric and should not be quoted.
      *
-     * @return true, indicating that OptionalLong values should not be quoted in CSV output
+     * @return {@code true}, indicating that OptionalLong values should not be quoted in CSV output
      */
     @Override
     public boolean isNonQuotableCsvType() {
@@ -75,11 +75,12 @@ public class JdkOptionalLongType extends AbstractOptionalType<OptionalLong> {
 
     /**
      * Converts an OptionalLong to its string representation.
-     * If the optional is empty or null, returns null.
+     * If the optional is empty or {@code null}, returns {@code null}.
      * Otherwise, returns the string representation of the contained long value.
      *
      * @param x the OptionalLong to convert to string
-     * @return the string representation of the long value, or null if empty or null
+     * @return the string representation of the long value, or {@code null} if empty or null
+     @MayReturnNull
      */
     @Override
     public String stringOf(final OptionalLong x) {
@@ -88,11 +89,12 @@ public class JdkOptionalLongType extends AbstractOptionalType<OptionalLong> {
 
     /**
      * Parses a string representation into an OptionalLong.
-     * Empty or null strings result in an empty OptionalLong.
+     * Empty or {@code null} strings result in an empty OptionalLong.
      * Non-empty strings are parsed as long values and wrapped in OptionalLong.
      *
      * @param str the string to parse
-     * @return OptionalLong.empty() if the string is null or empty, otherwise OptionalLong containing the parsed value
+     * @return OptionalLong.empty() if the string is {@code null} or empty, otherwise OptionalLong containing the parsed value
+     @MayReturnNull
      */
     @Override
     public OptionalLong valueOf(final String str) {
@@ -101,13 +103,14 @@ public class JdkOptionalLongType extends AbstractOptionalType<OptionalLong> {
 
     /**
      * Retrieves an OptionalLong value from the specified column in a ResultSet.
-     * If the column value is null, returns an empty OptionalLong.
+     * If the column value is {@code null}, returns an empty OptionalLong.
      * Otherwise, converts the value to long and wraps it in OptionalLong.
      *
      * @param rs the ResultSet to read from
      * @param columnIndex the index of the column to read (1-based)
-     * @return OptionalLong.empty() if the column is null, otherwise OptionalLong containing the value
+     * @return OptionalLong.empty() if the column is {@code null}, otherwise OptionalLong containing the value
      * @throws SQLException if a database access error occurs or the columnIndex is invalid
+     @MayReturnNull
      */
     @Override
     public OptionalLong get(final ResultSet rs, final int columnIndex) throws SQLException {
@@ -118,13 +121,14 @@ public class JdkOptionalLongType extends AbstractOptionalType<OptionalLong> {
 
     /**
      * Retrieves an OptionalLong value from the specified column in a ResultSet using the column label.
-     * If the column value is null, returns an empty OptionalLong.
+     * If the column value is {@code null}, returns an empty OptionalLong.
      * Otherwise, converts the value to long and wraps it in OptionalLong.
      *
      * @param rs the ResultSet to read from
      * @param columnLabel the label of the column to read
-     * @return OptionalLong.empty() if the column is null, otherwise OptionalLong containing the value
+     * @return OptionalLong.empty() if the column is {@code null}, otherwise OptionalLong containing the value
      * @throws SQLException if a database access error occurs or the columnLabel is not found
+     @MayReturnNull
      */
     @Override
     public OptionalLong get(final ResultSet rs, final String columnLabel) throws SQLException {
@@ -135,7 +139,7 @@ public class JdkOptionalLongType extends AbstractOptionalType<OptionalLong> {
 
     /**
      * Sets an OptionalLong parameter in a PreparedStatement.
-     * If the OptionalLong is null or empty, sets the parameter to SQL NULL.
+     * If the OptionalLong is {@code null} or empty, sets the parameter to SQL NULL.
      * Otherwise, sets the long value.
      *
      * @param stmt the PreparedStatement to set the parameter on
@@ -154,7 +158,7 @@ public class JdkOptionalLongType extends AbstractOptionalType<OptionalLong> {
 
     /**
      * Sets an OptionalLong parameter in a CallableStatement using a parameter name.
-     * If the OptionalLong is null or empty, sets the parameter to SQL NULL.
+     * If the OptionalLong is {@code null} or empty, sets the parameter to SQL NULL.
      * Otherwise, sets the long value.
      *
      * @param stmt the CallableStatement to set the parameter on
@@ -190,7 +194,7 @@ public class JdkOptionalLongType extends AbstractOptionalType<OptionalLong> {
 
     /**
      * Writes the character representation of an OptionalLong to a CharacterWriter.
-     * Empty optionals are written as null.
+     * Empty optionals are written as {@code null}.
      * Present values are written as numeric values without quotes.
      *
      * @param writer the CharacterWriter to write to

@@ -50,11 +50,11 @@ import java.lang.annotation.Target;
  * 
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
- * {@literal @}Mutable
+ * @Mutable
  * public class Counter {
  *     private int value = 0;
  *     
- *     {@literal @}Mutable
+ *     @Mutable
  *     public void increment() {
  *         value++;
  *     }

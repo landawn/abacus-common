@@ -14,6 +14,7 @@
 
 package com.landawn.abacus.util.function;
 
+import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.util.Throwables;
 
 /**
@@ -37,6 +38,7 @@ public interface IntBiFunction<R> extends Throwables.IntBiFunction<R, RuntimeExc
      * @return the function result
      */
     @Override
+    @MayReturnNull
     R apply(int t, int u);
 
     /**

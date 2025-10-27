@@ -69,9 +69,10 @@ public abstract class AbstractStringType extends AbstractCharSequenceType<String
      * Since the input is already a String, this method simply returns the input value unchanged.
      *
      * @param str the String value to convert
-     * @return the same String value passed as input, or null if input is null
+     * @return the same String value passed as input, or {@code null} if input is null
      */
     @Override
+    @MayReturnNull
     public String stringOf(final String str) {
         return str;
     }
@@ -81,9 +82,11 @@ public abstract class AbstractStringType extends AbstractCharSequenceType<String
      * Since the input is already a String, this method simply returns the input value unchanged.
      *
      * @param str the string representation to convert
-     * @return the same String value passed as input, or null if input is null
+     * @return the same String value passed as input, or {@code null} if input is null
      */
+    @MayReturnNull
     @Override
+
     public String valueOf(final String str) {
         return str;
     }
@@ -95,10 +98,12 @@ public abstract class AbstractStringType extends AbstractCharSequenceType<String
      * @param cbuf the character array containing the characters to convert
      * @param offset the starting position in the character array
      * @param len the number of characters to include
-     * @return a new String created from the specified characters, or null if cbuf is null,
+     * @return a new String created from the specified characters, or {@code null} if cbuf is {@code null},
      *         or an empty string if cbuf is empty or len is 0
      */
+    @MayReturnNull
     @Override
+
     public String valueOf(final char[] cbuf, final int offset, final int len) {
         return cbuf == null ? null : ((cbuf.length == 0 || len == 0) ? Strings.EMPTY : String.valueOf(cbuf, offset, len));
     }
@@ -109,7 +114,7 @@ public abstract class AbstractStringType extends AbstractCharSequenceType<String
      * string conversion for other object types.
      *
      * @param obj the object to convert to String
-     * @return the String representation of the object, or null if obj is null.
+     * @return the String representation of the object, or {@code null} if obj is {@code null}.
      *         For Clob objects, extracts and returns the character data.
      *         For other objects, uses their type-specific string conversion.
      * @throws UncheckedSQLException if there's an error reading from a Clob or freeing Clob resources
@@ -145,10 +150,12 @@ public abstract class AbstractStringType extends AbstractCharSequenceType<String
      *
      * @param rs the ResultSet to retrieve the value from
      * @param columnIndex the column index (1-based) of the value to retrieve
-     * @return the String value at the specified column, or null if the value is SQL NULL
+     * @return the String value at the specified column, or {@code null} if the value is SQL NULL
      * @throws SQLException if a database access error occurs or the columnIndex is invalid
      */
+    @MayReturnNull
     @Override
+
     public String get(final ResultSet rs, final int columnIndex) throws SQLException {
         return rs.getString(columnIndex);
     }
@@ -159,10 +166,12 @@ public abstract class AbstractStringType extends AbstractCharSequenceType<String
      * @param rs the ResultSet to retrieve the value from
      * @param columnLabel the label for the column specified with the SQL AS clause,
      *                    or the column name if no AS clause was specified
-     * @return the String value in the specified column, or null if the value is SQL NULL
+     * @return the String value in the specified column, or {@code null} if the value is SQL NULL
      * @throws SQLException if a database access error occurs or the columnLabel is invalid
      */
+    @MayReturnNull
     @Override
+
     public String get(final ResultSet rs, final String columnLabel) throws SQLException {
         return rs.getString(columnLabel);
     }
@@ -195,7 +204,7 @@ public abstract class AbstractStringType extends AbstractCharSequenceType<String
 
     /**
      * Appends a String value to an Appendable object.
-     * If the String is null, appends the string "null" instead.
+     * If the String is {@code null}, appends the string "null" instead.
      *
      * @param appendable the Appendable object to append to
      * @param x the String value to append, may be null
@@ -208,12 +217,12 @@ public abstract class AbstractStringType extends AbstractCharSequenceType<String
 
     /**
      * Writes a String value to a CharacterWriter with optional quotation based on configuration.
-     * This method handles null values and applies string quotation marks if specified in the configuration.
+     * This method handles {@code null} values and applies string quotation marks if specified in the configuration.
      *
      * @param writer the CharacterWriter to write to
      * @param x the String value to write, may be null
      * @param config the serialization configuration that may specify string quotation preferences
-     *               and null string handling options
+     *               and {@code null} string handling options
      * @throws IOException if an I/O error occurs during the write operation
      */
     @Override

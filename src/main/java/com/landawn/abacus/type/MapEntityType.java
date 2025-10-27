@@ -49,7 +49,7 @@ public class MapEntityType extends AbstractType<MapEntity> {
 
     /**
      * Indicates whether this type represents a MapEntity.
-     * For MapEntityType, this always returns true.
+     * For MapEntityType, this always returns {@code true}.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -58,7 +58,7 @@ public class MapEntityType extends AbstractType<MapEntity> {
      * // Returns: true
      * }</pre>
      *
-     * @return true, indicating that this type represents a MapEntity
+     * @return {@code true}, indicating that this type represents a MapEntity
      */
     @Override
     public boolean isMapEntity() {
@@ -76,7 +76,7 @@ public class MapEntityType extends AbstractType<MapEntity> {
      * // Returns: false
      * }</pre>
      *
-     * @return false, indicating that MapEntity is not serializable through this type
+     * @return {@code false}, indicating that MapEntity is not serializable through this type
      */
     @Override
     public boolean isSerializable() {
@@ -118,7 +118,8 @@ public class MapEntityType extends AbstractType<MapEntity> {
      * }</pre>
      *
      * @param x The MapEntity object to convert
-     * @return The JSON string representation of the MapEntity, or null if the input is null
+     * @return The JSON string representation of the MapEntity, or {@code null} if the input is null
+     @MayReturnNull
      */
     @Override
     public String stringOf(final MapEntity x) {
@@ -144,7 +145,8 @@ public class MapEntityType extends AbstractType<MapEntity> {
      * }</pre>
      *
      * @param str The JSON string to parse
-     * @return The parsed MapEntity object, or null if the input is null or empty
+     * @return The parsed MapEntity object, or {@code null} if the input is {@code null} or empty
+     @MayReturnNull
      */
     @Override
     public MapEntity valueOf(final String str) {

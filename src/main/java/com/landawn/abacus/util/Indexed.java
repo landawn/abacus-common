@@ -128,7 +128,7 @@ public final class Indexed<T> extends AbstractIndexed {
      * Checks if this Indexed instance is equal to another object.
      * 
      * <p>Two Indexed instances are equal if they have the same index and equal values
-     * (where null values are considered equal to each other).</p>
+     * (where {@code null} values are considered equal to each other).</p>
      * 
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code

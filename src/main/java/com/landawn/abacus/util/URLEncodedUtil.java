@@ -21,7 +21,7 @@
  * This software consists of voluntary contributions made by many
  * individuals on behalf of the Apache Software Foundation.  For more
  * information on the Apache Software Foundation, please see
- * <http://www.apache.org/>.
+ * <a href="http://www.apache.org/">http://www.apache.org/</a>.
  *
  */
 package com.landawn.abacus.util;
@@ -56,7 +56,7 @@ import com.landawn.abacus.util.Splitter.MapSplitter;
  */
 public final class URLEncodedUtil {
     /**
-     * The constant representing the ampersand character ('&') used as a separator in URL query parameters.
+     * The constant representing the ampersand character ('&amp;') used as a separator in URL query parameters.
      */
     public static final char QP_SEP_A = '&';
 
@@ -202,17 +202,17 @@ public final class URLEncodedUtil {
      * Decodes a URL-encoded query string into a {@code Map<String, String>} using the default charset (UTF-8).
      * <p>
      * This method parses a URL query string (e.g., "name=value&amp;foo=bar") and converts it into a map
-     * where keys are parameter names and values are parameter values. Both '+' characters and '%XX' sequences
+     * where keys are parameter names and values are parameter values. Both '+' characters and <i>%XX</i> sequences
      * are decoded. Parameter names and values are trimmed of whitespace. If a parameter appears multiple times,
      * only the last occurrence is retained (use {@link #decodeToMultimap(String)} to preserve all values).
      * </p>
      * <p>
-     * Supports both '&amp;' and ';' as parameter separators according to RFC 2396.
+     * Supports both <i>&amp;</i> and ';' as parameter separators according to RFC 2396.
      * </p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Map&lt;String, String&gt; params = URLEncodedUtil.decode("name=John+Doe&amp;age=30");
+     * Map<String, String> params = URLEncodedUtil.decode("name=John+Doe&amp;age=30");
      * // params: {name=John Doe, age=30}
      * }</pre>
      *
@@ -231,17 +231,17 @@ public final class URLEncodedUtil {
      * Decodes a URL-encoded query string into a {@code Map<String, String>} using the specified charset.
      * <p>
      * This method parses a URL query string and converts it into a map where keys are parameter names
-     * and values are parameter values. Both '+' characters and '%XX' sequences are decoded using the
+     * and values are parameter values. Both '+' characters and <i>%XX</i> sequences are decoded using the
      * specified charset. Parameter names and values are trimmed of whitespace. If a parameter appears
      * multiple times, only the last occurrence is retained.
      * </p>
      * <p>
-     * Supports both '&amp;' and ';' as parameter separators according to RFC 2396.
+     * Supports both <i>&amp;</i> and ';' as parameter separators according to RFC 2396.
      * </p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Map&lt;String, String&gt; params = URLEncodedUtil.decode("name=%E4%B8%AD%E6%96%87", StandardCharsets.UTF_8);
+     * Map<String, String> params = URLEncodedUtil.decode("name=%E4%B8%AD%E6%96%87", StandardCharsets.UTF_8);
      * // params: {name=中文}
      * }</pre>
      *
@@ -261,17 +261,17 @@ public final class URLEncodedUtil {
      * Decodes a URL-encoded query string into a custom {@code Map} implementation using the specified charset and map supplier.
      * <p>
      * This method provides flexibility in choosing the Map implementation (e.g., {@code TreeMap}, {@code HashMap}, etc.)
-     * by accepting a custom supplier. Both '+' characters and '%XX' sequences are decoded using the specified charset.
+     * by accepting a custom supplier. Both '+' characters and <i>%XX</i> sequences are decoded using the specified charset.
      * Parameter names and values are trimmed of whitespace. If a parameter appears multiple times, only the last
      * occurrence is retained.
      * </p>
      * <p>
-     * Supports both '&amp;' and ';' as parameter separators according to RFC 2396.
+     * Supports both <i>&amp;</i> and ';' as parameter separators according to RFC 2396.
      * </p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * TreeMap&lt;String, String&gt; params = URLEncodedUtil.decode("b=2&amp;a=1", StandardCharsets.UTF_8, TreeMap::new);
+     * TreeMap<String, String> params = URLEncodedUtil.decode("b=2&amp;a=1", StandardCharsets.UTF_8, TreeMap::new);
      * // params: {a=1, b=2} (sorted by key)
      * }</pre>
      *
@@ -320,16 +320,16 @@ public final class URLEncodedUtil {
      * <p>
      * This method parses a URL query string and converts it into a multimap where keys are parameter names
      * and values are lists of parameter values. Unlike {@link #decode(String)}, this method preserves all
-     * values when a parameter appears multiple times in the query string. Both '+' characters and '%XX'
+     * values when a parameter appears multiple times in the query string. Both '+' characters and <i>%XX</i>
      * sequences are decoded. Parameter names and values are trimmed of whitespace.
      * </p>
      * <p>
-     * Supports both '&amp;' and ';' as parameter separators according to RFC 2396.
+     * Supports both <i>&amp;</i> and ';' as parameter separators according to RFC 2396.
      * </p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * ListMultimap&lt;String, String&gt; params = URLEncodedUtil.decodeToMultimap("color=red&amp;color=blue&amp;size=L");
+     * ListMultimap<String, String> params = URLEncodedUtil.decodeToMultimap("color=red&amp;color=blue&amp;size=L");
      * // params: {color=[red, blue], size=[L]}
      * }</pre>
      *
@@ -348,16 +348,16 @@ public final class URLEncodedUtil {
      * <p>
      * This method parses a URL query string and converts it into a multimap where keys are parameter names
      * and values are lists of parameter values. Unlike {@link #decode(String, Charset)}, this method preserves
-     * all values when a parameter appears multiple times in the query string. Both '+' characters and '%XX'
+     * all values when a parameter appears multiple times in the query string. Both '+' characters and <i>%XX</i>
      * sequences are decoded using the specified charset. Parameter names and values are trimmed of whitespace.
      * </p>
      * <p>
-     * Supports both '&amp;' and ';' as parameter separators according to RFC 2396.
+     * Supports both <i>&amp;</i> and ';' as parameter separators according to RFC 2396.
      * </p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * ListMultimap&lt;String, String&gt; params = URLEncodedUtil.decodeToMultimap("tag=java&amp;tag=url", StandardCharsets.UTF_8);
+     * ListMultimap<String, String> params = URLEncodedUtil.decodeToMultimap("tag=java&amp;tag=url", StandardCharsets.UTF_8);
      * // params: {tag=[java, url]}
      * }</pre>
      *
@@ -405,11 +405,11 @@ public final class URLEncodedUtil {
      * <p>
      * This method parses a URL query string and populates a JavaBean or Map instance with the decoded parameters.
      * Parameter names are matched to bean property names (case-sensitive). Values are automatically converted
-     * to the appropriate property types using the bean's property information. Both '+' characters and '%XX'
+     * to the appropriate property types using the bean's property information. Both '+' characters and <i>%XX</i>
      * sequences are decoded. Parameter names and values are trimmed of whitespace.
      * </p>
      * <p>
-     * Supports both '&amp;' and ';' as parameter separators according to RFC 2396.
+     * Supports both <i>&amp;</i> and ';' as parameter separators according to RFC 2396.
      * </p>
      *
      * <p><b>Usage Examples:</b></p>
@@ -435,7 +435,7 @@ public final class URLEncodedUtil {
      * <p>
      * This method parses a URL query string and populates a JavaBean or Map instance with the decoded parameters.
      * Parameter names are matched to bean property names (case-sensitive). Values are automatically converted
-     * to the appropriate property types using the bean's property information. Both '+' characters and '%XX'
+     * to the appropriate property types using the bean's property information. Both '+' characters and <i>%XX</i>
      * sequences are decoded using the specified charset. Parameter names and values are trimmed of whitespace.
      * </p>
      * <p>
@@ -443,7 +443,7 @@ public final class URLEncodedUtil {
      * Otherwise, it creates and populates a bean instance.
      * </p>
      * <p>
-     * Supports both '&amp;' and ';' as parameter separators according to RFC 2396.
+     * Supports both <i>&amp;</i> and ';' as parameter separators according to RFC 2396.
      * </p>
      *
      * <p><b>Usage Examples:</b></p>
@@ -527,7 +527,7 @@ public final class URLEncodedUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Map&lt;String, String[]&gt; params = new HashMap&lt;&gt;();
+     * Map<String, String[]> params = new HashMap<>();
      * params.put("name", new String[] {"Alice"});
      * params.put("tags", new String[] {"java", "coding"});
      * User user = URLEncodedUtil.parameters2Bean(params, User.class);
@@ -584,11 +584,10 @@ public final class URLEncodedUtil {
      * <li>{@code String}: If contains "=", treated as encoded parameters; otherwise encoded as-is</li>
      * </ul>
      * Characters are percent-encoded according to application/x-www-form-urlencoded rules, where spaces become '+'.
-     * </p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Map&lt;String, Object&gt; params = Map.of("name", "John Doe", "age", 30);
+     * Map<String, Object> params = Map.of("name", "John Doe", "age", 30);
      * String query = URLEncodedUtil.encode(params);
      * // query: "name=John+Doe&amp;age=30"
      * }</pre>
@@ -614,11 +613,10 @@ public final class URLEncodedUtil {
      * <li>{@code String}: If contains "=", treated as encoded parameters; otherwise encoded as-is</li>
      * </ul>
      * Characters are percent-encoded using the specified charset according to application/x-www-form-urlencoded rules.
-     * </p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Map&lt;String, Object&gt; params = Map.of("name", "中文");
+     * Map<String, Object> params = Map.of("name", "中文");
      * String query = URLEncodedUtil.encode(params, StandardCharsets.UTF_8);
      * // query: "name=%E4%B8%AD%E6%96%87"
      * }</pre>
@@ -645,7 +643,6 @@ public final class URLEncodedUtil {
      * <li>{@code String}: If contains "=", treated as encoded parameters; otherwise encoded as-is</li>
      * </ul>
      * Characters are percent-encoded using the specified charset according to application/x-www-form-urlencoded rules.
-     * </p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -688,7 +685,7 @@ public final class URLEncodedUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Map&lt;String, Object&gt; params = Map.of("q", "java url encoding", "page", 1);
+     * Map<String, Object> params = Map.of("q", "java url encoding", "page", 1);
      * String fullUrl = URLEncodedUtil.encode("http://search.example.com", params);
      * // fullUrl: "http://search.example.com?q=java+url+encoding&amp;page=1"
      * }</pre>
@@ -714,7 +711,7 @@ public final class URLEncodedUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Map&lt;String, Object&gt; params = Map.of("name", "中文");
+     * Map<String, Object> params = Map.of("name", "中文");
      * String fullUrl = URLEncodedUtil.encode("http://example.com", params, StandardCharsets.UTF_8);
      * // fullUrl: "http://example.com?name=%E4%B8%AD%E6%96%87"
      * }</pre>
@@ -841,7 +838,6 @@ public final class URLEncodedUtil {
      * <li>{@code Object[]}: Pairs of name-value elements (must have even length)</li>
      * <li>{@code String}: If contains "=", treated as pre-encoded parameters; otherwise encoded as-is</li>
      * </ul>
-     * </p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -927,13 +923,6 @@ public final class URLEncodedUtil {
         }
     }
 
-    /**
-     * Decode/unescape www-url-form-encoded content.
-     *
-     * @param content the content to decode, will decode '+' as space
-     * @param charset the charset to use
-     * @return encoded string
-     */
     private static String decodeFormFields(final String content, final Charset charset) {
         if (content == null) {
             return null;

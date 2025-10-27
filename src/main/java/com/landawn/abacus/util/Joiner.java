@@ -41,8 +41,14 @@ import com.landawn.abacus.util.u.Optional;
  */
 public final class Joiner implements Closeable {
 
+    /**
+     * The default delimiter used to separate elements when joining.
+     */
     public static final String DEFAULT_DELIMITER = Strings.ELEMENT_SEPARATOR;
 
+    /**
+     * The default delimiter used to separate keys and values in key-value pairs.
+     */
     public static final String DEFAULT_KEY_VALUE_DELIMITER = "=";
 
     private final String prefix;
@@ -240,9 +246,9 @@ public final class Joiner implements Closeable {
     }
 
     /**
-     * Configures the joiner to skip null elements instead of adding them to the result.
-     * When enabled, null values will be ignored during appending operations.
-     * By default, null values are converted to the string specified by {@link #useForNull(String)}.
+     * Configures the joiner to skip {@code null} elements instead of adding them to the result.
+     * When enabled, {@code null} values will be ignored during appending operations.
+     * By default, {@code null} values are converted to the string specified by {@link #useForNull(String)}.
      * 
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -259,7 +265,7 @@ public final class Joiner implements Closeable {
     }
 
     /**
-     * Sets the string representation to use for null values.
+     * Sets the string representation to use for {@code null} values.
      * This setting is ignored if {@link #skipNulls()} has been called.
      * The default value is "null".
      * 
@@ -269,7 +275,7 @@ public final class Joiner implements Closeable {
      * // Returns: "a, N/A, b"
      * }</pre>
      *
-     * @param nullText the string to use for null values, if null is passed, "null" will be used
+     * @param nullText the string to use for {@code null} values, if {@code null} is passed, "null" will be used
      * @return this Joiner instance for method chaining
      */
     public Joiner useForNull(final String nullText) {
@@ -411,7 +417,7 @@ public final class Joiner implements Closeable {
 
     /**
      * Appends a String to the joiner.
-     * If the string is null, it will be handled according to the skipNulls and useForNull settings.
+     * If the string is {@code null}, it will be handled according to the skipNulls and useForNull settings.
      * If trimBeforeAppend is enabled, the string will be trimmed before appending.
      * 
      * <p><b>Usage Examples:</b></p>
@@ -433,7 +439,7 @@ public final class Joiner implements Closeable {
 
     /**
      * Appends a CharSequence to the joiner.
-     * If the CharSequence is null, it will be handled according to the skipNulls and useForNull settings.
+     * If the CharSequence is {@code null}, it will be handled according to the skipNulls and useForNull settings.
      * If trimBeforeAppend is enabled, the CharSequence will be converted to string and trimmed before appending.
      * 
      * <p><b>Usage Examples:</b></p>
@@ -456,7 +462,7 @@ public final class Joiner implements Closeable {
     /**
      * Appends a subsequence of the specified CharSequence to the joiner.
      * Characters from start (inclusive) to end (exclusive) will be appended.
-     * If the CharSequence is null, it will be handled according to the skipNulls and useForNull settings.
+     * If the CharSequence is {@code null}, it will be handled according to the skipNulls and useForNull settings.
      * 
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -486,7 +492,7 @@ public final class Joiner implements Closeable {
 
     /**
      * Appends a StringBuilder to the joiner.
-     * If the StringBuilder is null, it will be handled according to the skipNulls and useForNull settings.
+     * If the StringBuilder is {@code null}, it will be handled according to the skipNulls and useForNull settings.
      * Note: The contents of the StringBuilder are appended directly without trimming even if trimBeforeAppend is enabled.
      * 
      * <p><b>Usage Examples:</b></p>
@@ -513,7 +519,7 @@ public final class Joiner implements Closeable {
     /**
      * Appends an Object to the joiner.
      * The object will be converted to string using its toString() method.
-     * If the object is null, it will be handled according to the skipNulls and useForNull settings.
+     * If the object is {@code null}, it will be handled according to the skipNulls and useForNull settings.
      * If trimBeforeAppend is enabled, the string representation will be trimmed before appending.
      * 
      * <p><b>Usage Examples:</b></p>
@@ -534,7 +540,7 @@ public final class Joiner implements Closeable {
     }
 
     /**
-     * Appends an object to the joiner only if it is not null.
+     * Appends an object to the joiner only if it is not {@code null}.
      * This is a convenience method that ignores the skipNulls setting for this specific append operation.
      * 
      * <p><b>Usage Examples:</b></p>
@@ -555,8 +561,8 @@ public final class Joiner implements Closeable {
     }
 
     /**
-     * Conditionally appends a value provided by a supplier if the specified condition is true.
-     * The supplier is only invoked if the condition is true.
+     * Conditionally appends a value provided by a supplier if the specified condition is {@code true}.
+     * The supplier is only invoked if the condition is {@code true}.
      * 
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -589,7 +595,7 @@ public final class Joiner implements Closeable {
      * Joiner.with(", ").appendAll(arr).toString(); // Returns: "true, false, true"
      * }</pre>
      *
-     * @param a the boolean array to append, may be null or empty
+     * @param a the boolean array to append, may be {@code null} or empty
      * @return this Joiner instance for method chaining
      */
     public Joiner appendAll(final boolean[] a) {
@@ -650,7 +656,7 @@ public final class Joiner implements Closeable {
      * Joiner.with(", ").appendAll(arr).toString(); // Returns: "a, b, c"
      * }</pre>
      *
-     * @param a the char array to append, may be null or empty
+     * @param a the char array to append, may be {@code null} or empty
      * @return this Joiner instance for method chaining
      */
     public Joiner appendAll(final char[] a) {
@@ -711,7 +717,7 @@ public final class Joiner implements Closeable {
      * Joiner.with(", ").appendAll(arr).toString(); // Returns: "1, 2, 3"
      * }</pre>
      *
-     * @param a the byte array to append, may be null or empty
+     * @param a the byte array to append, may be {@code null} or empty
      * @return this Joiner instance for method chaining
      */
     public Joiner appendAll(final byte[] a) {
@@ -772,7 +778,7 @@ public final class Joiner implements Closeable {
      * Joiner.with(", ").appendAll(arr).toString(); // Returns: "10, 20, 30"
      * }</pre>
      *
-     * @param a the short array to append, may be null or empty
+     * @param a the short array to append, may be {@code null} or empty
      * @return this Joiner instance for method chaining
      */
     public Joiner appendAll(final short[] a) {
@@ -833,7 +839,7 @@ public final class Joiner implements Closeable {
      * Joiner.with(", ").appendAll(arr).toString(); // Returns: "1, 2, 3"
      * }</pre>
      *
-     * @param a the int array to append, may be null or empty
+     * @param a the int array to append, may be {@code null} or empty
      * @return this Joiner instance for method chaining
      */
     public Joiner appendAll(final int[] a) {
@@ -894,7 +900,7 @@ public final class Joiner implements Closeable {
      * Joiner.with(", ").appendAll(arr).toString(); // Returns: "100, 200, 300"
      * }</pre>
      *
-     * @param a the long array to append, may be null or empty
+     * @param a the long array to append, may be {@code null} or empty
      * @return this Joiner instance for method chaining
      */
     public Joiner appendAll(final long[] a) {
@@ -955,7 +961,7 @@ public final class Joiner implements Closeable {
      * Joiner.with(", ").appendAll(arr).toString(); // Returns: "1.5, 2.5, 3.5"
      * }</pre>
      *
-     * @param a the float array to append, may be null or empty
+     * @param a the float array to append, may be {@code null} or empty
      * @return this Joiner instance for method chaining
      */
     public Joiner appendAll(final float[] a) {
@@ -1016,7 +1022,7 @@ public final class Joiner implements Closeable {
      * Joiner.with(", ").appendAll(arr).toString(); // Returns: "1.5, 2.5, 3.5"
      * }</pre>
      *
-     * @param a the double array to append, may be null or empty
+     * @param a the double array to append, may be {@code null} or empty
      * @return this Joiner instance for method chaining
      */
     public Joiner appendAll(final double[] a) {
@@ -1078,7 +1084,7 @@ public final class Joiner implements Closeable {
      * Joiner.with(", ").skipNulls().appendAll(arr).toString(); // Returns: "a, 1, b"
      * }</pre>
      *
-     * @param a the Object array to append, may be null or empty
+     * @param a the Object array to append, may be {@code null} or empty
      * @return this Joiner instance for method chaining
      */
     public Joiner appendAll(final Object[] a) {
@@ -1142,7 +1148,7 @@ public final class Joiner implements Closeable {
      * Joiner.with(", ").appendAll(list).toString(); // Returns: "true, false, true"
      * }</pre>
      *
-     * @param c the BooleanList to append, may be null or empty
+     * @param c the BooleanList to append, may be {@code null} or empty
      * @return this Joiner instance for method chaining
      */
     @SuppressWarnings("deprecation")
@@ -1191,7 +1197,7 @@ public final class Joiner implements Closeable {
      * Joiner.with(", ").appendAll(list).toString(); // Returns: "a, b, c"
      * }</pre>
      *
-     * @param c the CharList to append, may be null or empty
+     * @param c the CharList to append, may be {@code null} or empty
      * @return this Joiner instance for method chaining
      */
     @SuppressWarnings("deprecation")
@@ -1240,7 +1246,7 @@ public final class Joiner implements Closeable {
      * Joiner.with(", ").appendAll(list).toString(); // Returns: "1, 2, 3"
      * }</pre>
      *
-     * @param c the ByteList to append, may be null or empty
+     * @param c the ByteList to append, may be {@code null} or empty
      * @return this Joiner instance for method chaining
      */
     @SuppressWarnings("deprecation")
@@ -1289,7 +1295,7 @@ public final class Joiner implements Closeable {
      * Joiner.with(", ").appendAll(list).toString(); // Returns: "10, 20, 30"
      * }</pre>
      *
-     * @param c the ShortList to append, may be null or empty
+     * @param c the ShortList to append, may be {@code null} or empty
      * @return this Joiner instance for method chaining
      */
     @SuppressWarnings("deprecation")
@@ -1338,7 +1344,7 @@ public final class Joiner implements Closeable {
      * Joiner.with(", ").appendAll(list).toString(); // Returns: "1, 2, 3"
      * }</pre>
      *
-     * @param c the IntList to append, may be null or empty
+     * @param c the IntList to append, may be {@code null} or empty
      * @return this Joiner instance for method chaining
      */
     @SuppressWarnings("deprecation")
@@ -1387,7 +1393,7 @@ public final class Joiner implements Closeable {
      * Joiner.with(", ").appendAll(list).toString(); // Returns: "100, 200, 300"
      * }</pre>
      *
-     * @param c the LongList to append, may be null or empty
+     * @param c the LongList to append, may be {@code null} or empty
      * @return this Joiner instance for method chaining
      */
     @SuppressWarnings("deprecation")
@@ -2402,8 +2408,8 @@ public final class Joiner implements Closeable {
     }
 
     /**
-     * Appends properties of a bean object with control over null handling and property exclusion.
-     * Properties can be filtered based on null values and/or explicit exclusion list.
+     * Appends properties of a bean object with control over {@code null} handling and property exclusion.
+     * Properties can be filtered based on {@code null} values and/or explicit exclusion list.
      * Each included property is formatted as a key-value pair.
      * 
      * <p><b>Usage Examples:</b></p>
@@ -2421,7 +2427,7 @@ public final class Joiner implements Closeable {
      * }</pre>
      *
      * @param bean the bean object whose properties to append
-     * @param ignoreNullProperty if true, properties with null values are skipped
+     * @param ignoreNullProperty if {@code true}, properties with {@code null} values are skipped
      * @param ignoredPropNames set of property names to exclude from appending
      * @return this Joiner instance for method chaining
      * @throws IllegalArgumentException if bean is not a valid bean class with getter/setter methods
@@ -2490,7 +2496,7 @@ public final class Joiner implements Closeable {
      * @param bean the bean object whose properties to append
      * @param filter the bi-predicate to test property names and values; only properties that pass are appended
      * @return this Joiner instance for method chaining
-     * @throws IllegalArgumentException if filter is null, or if bean is not null and is not a valid bean class with getter/setter methods
+     * @throws IllegalArgumentException if filter is {@code null}, or if bean is not {@code null} and is not a valid bean class with getter/setter methods
      */
     public Joiner appendBean(final Object bean, final BiPredicate<? super String, ?> filter) throws IllegalArgumentException {
         N.checkArgNotNull(filter, cs.filter);

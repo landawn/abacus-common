@@ -28,10 +28,13 @@ package com.landawn.abacus.util;
  * 
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
+ * // Select compression mode based on requirements
  * CompressionMode mode = CompressionMode.GZIP;
- * // Use with compression utilities
- * byte[] compressed = compress(data, mode);
- * byte[] decompressed = decompress(compressed, mode);
+ *
+ * // Use in conditional logic
+ * if (mode == CompressionMode.GZIP) {
+ *     // Apply GZIP compression
+ * }
  * }</pre>
  * 
  * @since 1.0

@@ -28,7 +28,7 @@ package com.landawn.abacus.util;
  *   <li>Not thread-safe (no synchronization overhead)</li>
  *   <li>Built on StringBuilder for better performance</li>
  *   <li>Provides direct access to the underlying StringBuilder</li>
- *   <li>Returns 'this' from append methods for method chaining</li>
+ *   <li>Returns <i>this</i> from append methods for method chaining</li>
  * </ul>
  * 
  * <p><b>Usage Examples:</b></p>
@@ -140,7 +140,7 @@ public final class StringWriter extends AppendableWriter {
 
     /**
      * Appends a character sequence to this writer.
-     * If the sequence is null, the string "null" is appended.
+     * If the sequence is {@code null}, the string "null" is appended.
      * 
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -159,7 +159,7 @@ public final class StringWriter extends AppendableWriter {
 
     /**
      * Appends a portion of a character sequence to this writer.
-     * If the sequence is null, then characters are appended as if the sequence
+     * If the sequence is {@code null}, then characters are appended as if the sequence
      * contained the four characters "null".
      * 
      * <p><b>Usage Examples:</b></p>
@@ -240,7 +240,7 @@ public final class StringWriter extends AppendableWriter {
 
     /**
      * Writes a string to this writer.
-     * If the string is null, nothing is written.
+     * If the string is {@code null}, nothing is written.
      * 
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code

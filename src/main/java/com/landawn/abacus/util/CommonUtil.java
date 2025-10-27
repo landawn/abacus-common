@@ -3855,6 +3855,7 @@ sealed class CommonUtil permits N {
     /**
      * Compares two maps for equality based on the specified keys.
      *
+     * @param <K> the type of keys in the maps
      * @param map1 the first map to compare, it can be null
      * @param map2 the second map to compare, it can be null
      * @param keysToCompare the collection of keys to compare, it must not be null
@@ -3891,7 +3892,7 @@ sealed class CommonUtil permits N {
      *
      * @param bean1 the first bean to compare, must not be null
      * @param bean2 the second bean to compare, must not be null
-     * @param propNamesToCompare the collection of property names to compare, must not be null or empty
+     * @param propNamesToCompare the collection of property names to compare, must not be {@code null} or empty
      * @return {@code true} if all the specified properties of the beans are equal, {@code false} otherwise
      * @throws IllegalArgumentException if the {@code propNamesToCompare} is empty
      * @deprecated Use {@link Beans#equalsByProps(Object,Object,Collection<String>)} instead
@@ -4734,11 +4735,6 @@ sealed class CommonUtil permits N {
         return Strings.join(a, fromIndex, toIndex, Strings.ELEMENT_SEPARATOR, WD.BRACKET_L, WD.BRACKET_R);
     }
 
-    /**
-     *
-     * @param sb the StringBuilder to append to
-     * @param a the boolean array to be represented as a string
-     */
     static void toString(final StringBuilder sb, final boolean[] a) {
         if (a == null) {
             sb.append(Strings.NULL);
@@ -4749,14 +4745,6 @@ sealed class CommonUtil permits N {
         }
     }
 
-    /**
-     *
-     * @param sb the StringBuilder to append to
-     * @param a the boolean array to be represented as a string
-     * @param fromIndex the starting index (inclusive)
-     * @param toIndex the ending index (exclusive)
-     * @throws IndexOutOfBoundsException
-     */
     static void toString(final StringBuilder sb, final boolean[] a, final int fromIndex, final int toIndex) {
         sb.append(WD._BRACKET_L);
 
@@ -4811,11 +4799,6 @@ sealed class CommonUtil permits N {
         // return String.valueOf(a, fromIndex, toIndex - fromIndex); // NOSONAR)
     }
 
-    /**
-     *
-     * @param sb the StringBuilder to append to
-     * @param a the char array to be represented as a string
-     */
     static void toString(final StringBuilder sb, final char[] a) {
         if (a == null) {
             sb.append(Strings.NULL);
@@ -4826,13 +4809,6 @@ sealed class CommonUtil permits N {
         }
     }
 
-    /**
-     *
-     * @param sb the StringBuilder to append to
-     * @param a the char array to be represented as a string
-     * @param fromIndex the starting index (inclusive)
-     * @param toIndex the ending index (exclusive)
-     */
     static void toString(final StringBuilder sb, final char[] a, final int fromIndex, final int toIndex) {
         sb.append(WD._BRACKET_L);
 
@@ -4885,11 +4861,6 @@ sealed class CommonUtil permits N {
         return Strings.join(a, fromIndex, toIndex, Strings.ELEMENT_SEPARATOR, WD.BRACKET_L, WD.BRACKET_R);
     }
 
-    /**
-     *
-     * @param sb the StringBuilder to append to
-     * @param a the byte array to be represented as a string
-     */
     static void toString(final StringBuilder sb, final byte[] a) {
         if (a == null) {
             sb.append(Strings.NULL);
@@ -4900,13 +4871,6 @@ sealed class CommonUtil permits N {
         }
     }
 
-    /**
-     *
-     * @param sb the StringBuilder to append to
-     * @param a the byte array to be represented as a string
-     * @param fromIndex the starting index (inclusive)
-     * @param toIndex the ending index (exclusive)
-     */
     static void toString(final StringBuilder sb, final byte[] a, final int fromIndex, final int toIndex) {
         sb.append(WD._BRACKET_L);
 
@@ -4959,11 +4923,6 @@ sealed class CommonUtil permits N {
         return Strings.join(a, fromIndex, toIndex, Strings.ELEMENT_SEPARATOR, WD.BRACKET_L, WD.BRACKET_R);
     }
 
-    /**
-     *
-     * @param sb the StringBuilder to append to
-     * @param a the short array to be represented as a string
-     */
     static void toString(final StringBuilder sb, final short[] a) {
         if (a == null) {
             sb.append(Strings.NULL);
@@ -4974,13 +4933,6 @@ sealed class CommonUtil permits N {
         }
     }
 
-    /**
-     *
-     * @param sb the StringBuilder to append to
-     * @param a the short array to be represented as a string
-     * @param fromIndex the starting index (inclusive)
-     * @param toIndex the ending index (exclusive)
-     */
     static void toString(final StringBuilder sb, final short[] a, final int fromIndex, final int toIndex) {
         sb.append(WD._BRACKET_L);
 
@@ -5033,11 +4985,6 @@ sealed class CommonUtil permits N {
         return Strings.join(a, fromIndex, toIndex, Strings.ELEMENT_SEPARATOR, WD.BRACKET_L, WD.BRACKET_R);
     }
 
-    /**
-     *
-     * @param sb the StringBuilder to append to
-     * @param a the int array to be represented as a string
-     */
     static void toString(final StringBuilder sb, final int[] a) {
         if (a == null) {
             sb.append(Strings.NULL);
@@ -5048,13 +4995,6 @@ sealed class CommonUtil permits N {
         }
     }
 
-    /**
-     *
-     * @param sb the StringBuilder to append to
-     * @param a the int array to be represented as a string
-     * @param fromIndex the starting index (inclusive)
-     * @param toIndex the ending index (exclusive)
-     */
     static void toString(final StringBuilder sb, final int[] a, final int fromIndex, final int toIndex) {
         sb.append(WD._BRACKET_L);
 
@@ -5107,11 +5047,6 @@ sealed class CommonUtil permits N {
         return Strings.join(a, fromIndex, toIndex, Strings.ELEMENT_SEPARATOR, WD.BRACKET_L, WD.BRACKET_R);
     }
 
-    /**
-     *
-     * @param sb the StringBuilder to append to
-     * @param a the long array to be represented as a string
-     */
     static void toString(final StringBuilder sb, final long[] a) {
         if (a == null) {
             sb.append(Strings.NULL);
@@ -5122,13 +5057,6 @@ sealed class CommonUtil permits N {
         }
     }
 
-    /**
-     *
-     * @param sb the StringBuilder to append to
-     * @param a the long array to be represented as a string
-     * @param fromIndex the starting index (inclusive)
-     * @param toIndex the ending index (exclusive)
-     */
     static void toString(final StringBuilder sb, final long[] a, final int fromIndex, final int toIndex) {
         sb.append(WD._BRACKET_L);
 
@@ -5181,11 +5109,6 @@ sealed class CommonUtil permits N {
         return Strings.join(a, fromIndex, toIndex, Strings.ELEMENT_SEPARATOR, WD.BRACKET_L, WD.BRACKET_R);
     }
 
-    /**
-     *
-     * @param sb the StringBuilder to append to
-     * @param a the float array to be represented as a string
-     */
     static void toString(final StringBuilder sb, final float[] a) {
         if (a == null) {
             sb.append(Strings.NULL);
@@ -5196,13 +5119,6 @@ sealed class CommonUtil permits N {
         }
     }
 
-    /**
-     *
-     * @param sb the StringBuilder to append to
-     * @param a the float array to be represented as a string
-     * @param fromIndex the starting index (inclusive)
-     * @param toIndex the ending index (exclusive)
-     */
     static void toString(final StringBuilder sb, final float[] a, final int fromIndex, final int toIndex) {
         sb.append(WD._BRACKET_L);
 
@@ -7678,7 +7594,7 @@ sealed class CommonUtil permits N {
      *
      * @param <T> the type to return the default value for
      * @param cls the class type for which the default value is to be returned.
-     * @param nonNullForPrimitiveWrapper if {@code true}, it will return non-null value for primitive wrapper types, otherwise it will return {@code null}.
+     * @param nonNullForPrimitiveWrapper if {@code true}, it will return {@code non-null} value for primitive wrapper types, otherwise it will return {@code null}.
      * @return the default value of the given class type. For example, for an Integer class type, it will return 0.
      * @throws IllegalArgumentException if the specified class type is {@code null}.
      */
@@ -7698,6 +7614,7 @@ sealed class CommonUtil permits N {
     /**
      * Gets a Type by the given type name.
      *
+     * @param <T> the type parameter
      * @param typeName the name of the type to be retrieved.
      * @return the Type corresponding to the given type name.
      * @throws IllegalArgumentException if the specified {@code typeName} is {@code null}.
@@ -7720,6 +7637,7 @@ sealed class CommonUtil permits N {
     /**
      * Gets a Type by the given {@code Class}.
      *
+     * @param <T> the type represented by the class
      * @param cls the name of the type to be retrieved.
      * @return the Type corresponding to the given type name.
      * @throws IllegalArgumentException if the specified {@code Class} is {@code null}.
@@ -7849,6 +7767,7 @@ sealed class CommonUtil permits N {
      * @see #valueOf(String, Class)
      * @see Type#stringOf(Object)
      */
+    @MayReturnNull
     public static String stringOf(final Object obj) {
         return (obj == null) ? null : typeOf(obj.getClass()).stringOf(obj);
     }
@@ -8735,12 +8654,6 @@ sealed class CommonUtil permits N {
         return Array.newInstance(componentType, dimensions);
     }
 
-    /**
-     *
-     * @param size the expected number of entries in the hash map
-     * @return the initial capacity for the hash map to minimize rehashing
-     * @deprecated for internal use only
-     */
     @Deprecated
     @Internal
     @Beta
@@ -10402,6 +10315,7 @@ sealed class CommonUtil permits N {
      * @param <T> the type of the elements in the collection. It must extend or be the same as the type of the array.
      * @param c the collection to be converted into an array.
      * @param arraySupplier the function to generate a new array of the appropriate type and size.
+     * @return an array containing the elements of the collection
      */
     public static <A, T extends A> A[] toArray(final Collection<? extends T> c, final IntFunction<A[]> arraySupplier) {
         if (isEmpty(c)) {
@@ -12591,6 +12505,7 @@ sealed class CommonUtil permits N {
      * @param c the Iterable to be converted
      * @param keyExtractor a function that extracts keys from the elements of the Iterable
      * @param valueExtractor a function that extracts values from the elements of the Iterable
+     * @param mergeFunction a function to merge values when duplicate keys are encountered
      * @param mapSupplier a function that provides a new instance of the desired Map type
      * @return a Map containing the elements of the Iterable, with keys and values extracted by the keyExtractor and valueExtractor functions
      * @see Fn#throwingMerger()
@@ -14581,6 +14496,7 @@ sealed class CommonUtil permits N {
     /**
      * Compares two {@code Comparable} object values. ({@code null} is considered as the smallest value in nature order).
      *
+     * @param <T> the type of the comparable objects
      * @param a the first object value
      * @param b the second object value
      * @return 0 if both values are equal; a value greater than {@code 0} if the first value is greater than the second; a value less than {@code 0} if the first value is less than the second
@@ -15547,6 +15463,7 @@ sealed class CommonUtil permits N {
     /**
      * Compares two arrays lexicographically. ({@code null} is considered as the smallest value in nature order).
      *
+     * @param <T> the type of the comparable array elements
      * @param a the first array to compare
      * @param b the second array to compare
      * @return a negative integer, zero, or a positive integer as the first array is less than, equal to, or greater than the second
@@ -15560,6 +15477,7 @@ sealed class CommonUtil permits N {
     /**
      * Compares two arrays lexicographically over the specified range. ({@code null} is considered as the smallest value in nature order).
      *
+     * @param <T> the type of the comparable array elements
      * @param a the first array to compare
      * @param fromIndexA the starting index in the first array
      * @param b the second array to compare
@@ -15607,6 +15525,7 @@ sealed class CommonUtil permits N {
     /**
      * Compares two arrays lexicographically over the specified range using the specified comparator.
      *
+     * @param <T> the type of the array elements
      * @param a the first array to compare
      * @param fromIndexA the starting index in the first array
      * @param b the second array to compare
@@ -15642,6 +15561,7 @@ sealed class CommonUtil permits N {
     /**
      * Compares two collections lexicographically over the specified range. ({@code null} is considered as the smallest value in nature order).
      *
+     * @param <T> the type of the collection elements
      * @param a the first collection to compare
      * @param fromIndexA the starting index in the first collection
      * @param b the second collection to compare
@@ -16088,7 +16008,7 @@ sealed class CommonUtil permits N {
      * Checks if the given value is between the specified minimum and maximum values, inclusive.
      * It means {@code min <= value <= max}.
      * {@code null} is considered as the smallest value in nature order.
-     * @implNote it is equivalent to {@link #geAndLe(Comparable, Comparable, Comparable)}.
+     * <p><b>Implementation Note:</b> it is equivalent to {@link #geAndLe(Comparable, Comparable, Comparable)}.</p>
      *
      * @param <T> the type of the objects being compared
      * @param value the value to check, must not be null
@@ -16103,9 +16023,9 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Checks if the given value is between the specified minimum and maximum values, inclusive. 
+     * Checks if the given value is between the specified minimum and maximum values, inclusive.
      * It means {@code min <= value <= max}.
-     * @implNote it is equivalent to {@link #geAndLe(Object, Object, Object, Comparator)}.
+     * <p><b>Implementation Note:</b> it is equivalent to {@link #geAndLe(Object, Object, Object, Comparator)}.</p>
      *
      * @param <T> the type of the objects being compared
      * @param value the value to check, must not be null
@@ -16130,7 +16050,7 @@ sealed class CommonUtil permits N {
      * @param c the iterable from which to retrieve the element
      * @param index the position of the element to retrieve
      * @return the element at the specified position in the iterable
-     * @throws IllegalArgumentException if the iterable is null or the index is negative
+     * @throws IllegalArgumentException if the iterable is {@code null} or the index is negative
      * @throws IndexOutOfBoundsException if the index is bigger than the maximum index of the specified Iterable or Iterator
      */
     public static <T> T getElement(@NotNull final Iterable<? extends T> c, final int index) throws IllegalArgumentException, IndexOutOfBoundsException {
@@ -16155,7 +16075,7 @@ sealed class CommonUtil permits N {
      * @param iter the Iterator to retrieve the element from. Must not be {@code null}.
      * @param index the index of the element to retrieve. Must be a non-negative integer.
      * @return the element at the specified index in the Iterator
-     * @throws IllegalArgumentException if the Iterator is null or the index is negative
+     * @throws IllegalArgumentException if the Iterator is {@code null} or the index is negative
      * @throws IndexOutOfBoundsException if the index is bigger than the maximum index of the specified Iterable or Iterator
      */
     public static <T> T getElement(@NotNull final Iterator<? extends T> iter, long index) throws IllegalArgumentException, IndexOutOfBoundsException {
@@ -18434,6 +18354,7 @@ sealed class CommonUtil permits N {
      * Finds and returns the index of the first mismatch between two arrays starting from specified indices.
      * If the arrays are identical in the specified range, returns -1.
      *
+     * @param <T> the type of the comparable array elements
      * @param a the first array
      * @param fromIndexA the starting index in the first array
      * @param b the second array
@@ -18488,6 +18409,7 @@ sealed class CommonUtil permits N {
      * Finds and returns the index of the first mismatch between two arrays starting from specified indices.
      * If the arrays are identical in the specified range, returns -1.
      *
+     * @param <T> the type of the array elements
      * @param a the first array
      * @param fromIndexA the starting index in the first array
      * @param b the second array
@@ -18711,8 +18633,8 @@ sealed class CommonUtil permits N {
      * between {@code fromIndex} (inclusive) and {@code toIndex} (exclusive).
      * Elements outside this range remain unchanged.</p>
      * 
-     * <p>For example, reversing the range [1, 4) in the array {@code [true, false, false, true, true]}
-     * results in {@code [true, true, false, false, true]}.</p>
+     * <p>For example, reversing the range [1, 4) in the array {@code [true, false, {@code false}, true, true]}
+     * results in {@code [true, true, false, {@code false}, true]}.</p>
      *
      * @param a the boolean array containing the range to be reversed
      * @param fromIndex the starting index of the range (inclusive). Must be non-negative.
@@ -20595,7 +20517,7 @@ sealed class CommonUtil permits N {
      * positional access.</p>
      *
      * @param list the list to be shuffled. If {@code null}, empty, or contains only one element, no operation is performed.
-     * @param rnd the random number generator to use for shuffling or has size <= 1)
+     * @param rnd the random number generator to use for shuffling or has size &lt;= 1)
      * @see java.util.Collections#shuffle(List, Random)
      * @see Random
      */
@@ -20656,7 +20578,7 @@ sealed class CommonUtil permits N {
      * @param c the collection to be shuffled. It should be a collection that has a well-defined encounter order
      *          (e.g., {@link List}, {@link java.util.LinkedHashSet}). If {@code null} or contains fewer than 2 elements,
      *          no operation is performed.
-     * @param rnd the random number generator to use for shuffling or has size < 2)
+     * @param rnd the random number generator to use for shuffling or has size &lt; 2)
      * @see #shuffle(List, Random)
      * @see #shuffle(Collection)
      * @see java.util.Collections#shuffle(List, Random)
@@ -20839,6 +20761,7 @@ sealed class CommonUtil permits N {
      * Swaps the left and right elements in the specified triple.
      *
      * @param <T> the type of the elements in the triple
+     * @param <M> the type of the middle element in the triple
      * @param triple the triple whose elements are to be swapped
      */
     public static <T, M> void swap(final Triple<T, M, T> triple) {
@@ -20851,6 +20774,7 @@ sealed class CommonUtil permits N {
      * Swaps the left and right elements in the specified triple if the specified predicate is {@code true}.
      *
      * @param <T> the type of the elements in the triple
+     * @param <M> the type of the middle element in the triple
      * @param triple the triple whose elements are to be swapped
      * @param predicate the predicate to determine if the elements should be swapped
      * @return {@code true} if the left and right elements are swapped, otherwise {@code false}
@@ -21150,11 +21074,12 @@ sealed class CommonUtil permits N {
     /**
      * Fills the specified Object array with the specified value.
      *
+     * @param <T> the type of the array elements
      * @param a the Object array to be filled
      * @param val the Object value to fill the array with
      * @see Arrays#fill(Object[], Object)
      * @see N#setAll(Object[], IntFunction)
-     * @see N#replaceAll(Object[], UnaryOperator) 
+     * @see N#replaceAll(Object[], UnaryOperator)
      * @see Iterables#fill(Object[], Supplier)
      * @see Iterables#fill(Object[], int, int, Supplier)
      */
@@ -21171,6 +21096,7 @@ sealed class CommonUtil permits N {
     /**
      * Fills the specified Object array with the specified value from the specified fromIndex (inclusive) to the specified toIndex (exclusive).
      *
+     * @param <T> the type of the array elements
      * @param a the Object array to be filled
      * @param fromIndex the index to start filling (inclusive)
      * @param toIndex the index to stop filling (exclusive)
@@ -21302,7 +21228,7 @@ sealed class CommonUtil permits N {
      * @param count the number of instances to create and fill
      * @return a list of new instances of the specified bean class with properties filled with random values
      * @throws IllegalArgumentException if the specified beanClass is {@code null} or the bean class is not a valid JavaBean
-     * @deprecated Use {@link Beans#fill(Class<? extends T>,int)} instead
+     * @deprecated Use {@link Beans#fill(Class, int)} instead
      */
     @Deprecated
     public static <T> List<T> fill(final Class<? extends T> beanClass, final int count) throws IllegalArgumentException {
@@ -21478,7 +21404,6 @@ sealed class CommonUtil permits N {
      * @param size the target size of the resulting list
      * @return a list containing the repeated elements
      * @throws IllegalArgumentException if the specified collection is {@code null} or empty, or the specified size is negative
-     * @throws IllegalArgumentException
      * @see Iterators#repeatElementsToSize(Collection, long)
      */
     public static <T> List<T> repeatElementsToSize(final Collection<T> c, final int size) throws IllegalArgumentException {
@@ -23007,6 +22932,7 @@ sealed class CommonUtil permits N {
     /**
      * Returns a new array that is a clone of the specified array, or {@code null} if the original array is {@code null}.
      *
+     * @param <T> the type of the array elements
      * @param original the array to be cloned
      * @return a clone of the original array, or {@code null} if the original array is null
      */
@@ -23198,6 +23124,7 @@ sealed class CommonUtil permits N {
     /**
      * Clone the original array and its sub arrays. {@code null} is returned if the input array is {@code null}.
      *
+     * @param <T> the type of the array elements
      * @param original the 2D array to be cloned
      * @return a clone of the original 2D array, or {@code null} if the original array is null
      * @see #clone(Object[])
@@ -23404,6 +23331,7 @@ sealed class CommonUtil permits N {
     /**
      * Clone the original array and its sub arrays. {@code null} is returned if the input array is {@code null}.
      *
+     * @param <T> the type of the array elements
      * @param original the 3D array to be cloned
      * @return a clone of the original 3D array, or {@code null} if the original array is null
      * @see #clone(Object[])
@@ -24137,8 +24065,8 @@ sealed class CommonUtil permits N {
     /**
      * Sorts the specified array of booleans into ascending order. {@code false} is considered less than {@code true}.
      * <p>This method modifies the original array in-place.
+     * <p><b>Implementation Note:</b> This operation runs in O(n) time where n is the array length.</p>
      *
-     * @implNote This operation runs in O(n) time where n is the array length.
      * @param a the array to be sorted
      */
     public static void sort(final boolean[] a) {
@@ -24210,9 +24138,9 @@ sealed class CommonUtil permits N {
     /**
      * Sorts the specified array into ascending numerical order.
      * <p>This method modifies the original array in-place.
+     * <p><b>Implementation Note:</b> This method uses a dual-pivot Quicksort via {@link Arrays#sort(byte[])},
+     * which offers O(n log n) performance on most data sets.</p>
      *
-     * @implNote This method uses a dual-pivot Quicksort via {@link Arrays#sort(byte[])},
-     *           which offers O(n log n) performance on most data sets.
      * @param a the array to be sorted
      */
     public static void sort(final byte[] a) {
@@ -24275,9 +24203,9 @@ sealed class CommonUtil permits N {
     /**
      * Sorts the specified array into ascending numerical order.
      * <p>This method modifies the original array in-place.
+     * <p><b>Implementation Note:</b> This method uses a dual-pivot Quicksort via {@link Arrays#sort(int[])},
+     * which offers O(n log n) performance on most data sets.</p>
      *
-     * @implNote This method uses a dual-pivot Quicksort via {@link Arrays#sort(int[])},
-     *           which offers O(n log n) performance on most data sets.
      * @param a the array to be sorted
      */
     public static void sort(final int[] a) {
@@ -24371,9 +24299,9 @@ sealed class CommonUtil permits N {
     /**
      * Sorts the specified array into ascending numerical order.
      * <p>This method modifies the original array in-place.
+     * <p><b>Implementation Note:</b> This method uses a dual-pivot Quicksort via {@link Arrays#sort(double[])},
+     * which offers O(n log n) performance on most data sets.</p>
      *
-     * @implNote This method uses a dual-pivot Quicksort via {@link Arrays#sort(double[])},
-     *           which offers O(n log n) performance on most data sets.
      * @param a the array to be sorted
      */
     public static void sort(final double[] a) {
@@ -25065,10 +24993,11 @@ sealed class CommonUtil permits N {
     /**
      * Sorts the specified range of the specified array according to the natural ordering (where {@code null} is minimum) by multiple threads.
      *
+     * @param <T> the type of the comparable array elements
      * @param a the array to be sorted
      * @param fromIndex the index of the first element (inclusive) to be sorted
      * @param toIndex the index of the last element (exclusive) to be sorted
-     * @throws IllegalArgumentException if fromIndex > toIndex
+     * @throws IllegalArgumentException if fromIndex &gt; toIndex
      * @throws ArrayIndexOutOfBoundsException if fromIndex or toIndex is out of range
      * @see Arrays#parallelSort(Comparable[])
      * @see Arrays#parallelSort(Object[], Comparator)
@@ -25791,7 +25720,7 @@ sealed class CommonUtil permits N {
      * @param a the array to be searched. It must be sorted in ascending order
      * @param valueToFind the value to be searched for
      * @return the index of the value to be searched, if it is contained in the array within the specified range;
-     *         otherwise, <tt>(-(insertion point) - 1)</tt>, or <tt>-1</tt> if the array is {@code null} or empty.
+     *         otherwise, <code>(-(insertion point) - 1)</code>, or <code>-1</code> if the array is {@code null} or empty.
      */
     static int binarySearch(final boolean[] a, final boolean valueToFind) {
         if (isEmpty(a)) {
@@ -25827,7 +25756,7 @@ sealed class CommonUtil permits N {
      * @param a the array to be searched. It must be sorted in ascending order
      * @param valueToFind the value to be searched for
      * @return the index of the value to be searched, if it is contained in the array within the specified range;
-     *         otherwise, <tt>(-(insertion point) - 1)</tt>, or <tt>-1</tt> if the array is {@code null} or empty.
+     *         otherwise, <code>(-(insertion point) - 1)</code>, or <code>-1</code> if the array is {@code null} or empty.
      * @see Arrays#binarySearch(char[], char)
      */
     public static int binarySearch(final char[] a, final char valueToFind) {
@@ -25849,7 +25778,7 @@ sealed class CommonUtil permits N {
      * @param toIndex the index of the last element (exclusive) to be searched.
      * @param valueToFind the value to be searched for.
      * @return the index of the value to be searched, if it is contained in the array within the specified range;
-     *         otherwise, <tt>(-(insertion point) - 1)</tt>, or <tt>-1</tt> if the array is {@code null} or empty.
+     *         otherwise, <code>(-(insertion point) - 1)</code>, or <code>-1</code> if the array is {@code null} or empty.
      * @throws IndexOutOfBoundsException if the range is out of bounds.
      * @see Arrays#binarySearch(char[], int, int, char)
      */
@@ -25872,7 +25801,7 @@ sealed class CommonUtil permits N {
      * @param a the array to be searched. It must be sorted in ascending order
      * @param valueToFind the value to be searched for
      * @return the index of the value to be searched, if it is contained in the array within the specified range;
-     *         otherwise, <tt>(-(insertion point) - 1)</tt>, or <tt>-1</tt> if the array is {@code null} or empty.
+     *         otherwise, <code>(-(insertion point) - 1)</code>, or <code>-1</code> if the array is {@code null} or empty.
      * @see Arrays#binarySearch(byte[], byte)
      */
     public static int binarySearch(final byte[] a, final byte valueToFind) {
@@ -25894,7 +25823,7 @@ sealed class CommonUtil permits N {
      * @param toIndex the index of the last element (exclusive) to be searched.
      * @param valueToFind the value to be searched for.
      * @return the index of the value to be searched, if it is contained in the array within the specified range;
-     *         otherwise, <tt>(-(insertion point) - 1)</tt>, or <tt>-1</tt> if the array is {@code null} or empty.
+     *         otherwise, <code>(-(insertion point) - 1)</code>, or <code>-1</code> if the array is {@code null} or empty.
      * @throws IndexOutOfBoundsException if the range is out of bounds.
      * @see Arrays#binarySearch(byte[], int, int, byte)
      */
@@ -25917,7 +25846,7 @@ sealed class CommonUtil permits N {
      * @param a the array to be searched. It must be sorted in ascending order
      * @param valueToFind the value to be searched for
      * @return the index of the value to be searched, if it is contained in the array within the specified range;
-     *         otherwise, <tt>(-(insertion point) - 1)</tt>, or <tt>-1</tt> if the array is {@code null} or empty.
+     *         otherwise, <code>(-(insertion point) - 1)</code>, or <code>-1</code> if the array is {@code null} or empty.
      * @see Arrays#binarySearch(short[], short)
      */
     public static int binarySearch(final short[] a, final short valueToFind) {
@@ -25939,7 +25868,7 @@ sealed class CommonUtil permits N {
      * @param toIndex the index of the last element (exclusive) to be searched.
      * @param valueToFind the value to be searched for.
      * @return the index of the value to be searched, if it is contained in the array within the specified range;
-     *         otherwise, <tt>(-(insertion point) - 1)</tt>, or <tt>-1</tt> if the array is {@code null} or empty.
+     *         otherwise, <code>(-(insertion point) - 1)</code>, or <code>-1</code> if the array is {@code null} or empty.
      * @throws IndexOutOfBoundsException if the range is out of bounds.
      * @see Arrays#binarySearch(short[], int, int, short)
      */
@@ -25962,7 +25891,7 @@ sealed class CommonUtil permits N {
      * @param a the array to be searched. It must be sorted in ascending order
      * @param valueToFind the value to be searched for
      * @return the index of the value to be searched, if it is contained in the array within the specified range;
-     *         otherwise, <tt>(-(insertion point) - 1)</tt>, or <tt>-1</tt> if the array is {@code null} or empty.
+     *         otherwise, <code>(-(insertion point) - 1)</code>, or <code>-1</code> if the array is {@code null} or empty.
      * @see Arrays#binarySearch(int[], int)
      */
     public static int binarySearch(final int[] a, final int valueToFind) {
@@ -25984,7 +25913,7 @@ sealed class CommonUtil permits N {
      * @param toIndex the index of the last element (exclusive) to be searched.
      * @param valueToFind the value to be searched for.
      * @return the index of the value to be searched, if it is contained in the array within the specified range;
-     *         otherwise, <tt>(-(insertion point) - 1)</tt>, or <tt>-1</tt> if the array is {@code null} or empty.
+     *         otherwise, <code>(-(insertion point) - 1)</code>, or <code>-1</code> if the array is {@code null} or empty.
      * @throws IndexOutOfBoundsException if the range is out of bounds.
      * @see Arrays#binarySearch(int[], int, int, int)
      */
@@ -26007,7 +25936,7 @@ sealed class CommonUtil permits N {
      * @param a the array to be searched. It must be sorted in ascending order
      * @param valueToFind the value to be searched for
      * @return the index of the value to be searched, if it is contained in the array within the specified range;
-     *         otherwise, <tt>(-(insertion point) - 1)</tt>, or <tt>-1</tt> if the array is {@code null} or empty.
+     *         otherwise, <code>(-(insertion point) - 1)</code>, or <code>-1</code> if the array is {@code null} or empty.
      * @see Arrays#binarySearch(long[], long)
      */
     public static int binarySearch(final long[] a, final long valueToFind) {
@@ -26029,7 +25958,7 @@ sealed class CommonUtil permits N {
      * @param toIndex the index of the last element (exclusive) to be searched.
      * @param valueToFind the value to be searched for.
      * @return the index of the value to be searched, if it is contained in the array within the specified range;
-     *         otherwise, <tt>(-(insertion point) - 1)</tt>, or <tt>-1</tt> if the array is {@code null} or empty.
+     *         otherwise, <code>(-(insertion point) - 1)</code>, or <code>-1</code> if the array is {@code null} or empty.
      * @throws IndexOutOfBoundsException if the range is out of bounds.
      * @see Arrays#binarySearch(long[], int, int, long)
      */
@@ -26052,7 +25981,7 @@ sealed class CommonUtil permits N {
      * @param a the array to be searched. It must be sorted in ascending order
      * @param valueToFind the value to be searched for
      * @return the index of the value to be searched, if it is contained in the array within the specified range;
-     *         otherwise, <tt>(-(insertion point) - 1)</tt>, or <tt>-1</tt> if the array is {@code null} or empty.
+     *         otherwise, <code>(-(insertion point) - 1)</code>, or <code>-1</code> if the array is {@code null} or empty.
      * @see Arrays#binarySearch(float[], float)
      */
     public static int binarySearch(final float[] a, final float valueToFind) {
@@ -26074,7 +26003,7 @@ sealed class CommonUtil permits N {
      * @param toIndex the index of the last element (exclusive) to be searched.
      * @param valueToFind the value to be searched for.
      * @return the index of the value to be searched, if it is contained in the array within the specified range;
-     *         otherwise, <tt>(-(insertion point) - 1)</tt>, or <tt>-1</tt> if the array is {@code null} or empty.
+     *         otherwise, <code>(-(insertion point) - 1)</code>, or <code>-1</code> if the array is {@code null} or empty.
      * @throws IndexOutOfBoundsException if the range is out of bounds.
      * @see Arrays#binarySearch(float[], int, int, float)
      */
@@ -26097,7 +26026,7 @@ sealed class CommonUtil permits N {
      * @param a the array to be searched. It must be sorted in ascending order
      * @param valueToFind the value to be searched for
      * @return the index of the value to be searched, if it is contained in the array within the specified range;
-     *         otherwise, <tt>(-(insertion point) - 1)</tt>, or <tt>-1</tt> if the array is {@code null} or empty.
+     *         otherwise, <code>(-(insertion point) - 1)</code>, or <code>-1</code> if the array is {@code null} or empty.
      * @see Arrays#binarySearch(double[], double)
      */
     public static int binarySearch(final double[] a, final double valueToFind) {
@@ -26119,7 +26048,7 @@ sealed class CommonUtil permits N {
      * @param toIndex the index of the last element (exclusive) to be searched.
      * @param valueToFind the value to be searched for.
      * @return the index of the value to be searched, if it is contained in the array within the specified range;
-     *         otherwise, <tt>(-(insertion point) - 1)</tt>, or <tt>-1</tt> if the array is {@code null} or empty.
+     *         otherwise, <code>(-(insertion point) - 1)</code>, or <code>-1</code> if the array is {@code null} or empty.
      * @throws IndexOutOfBoundsException if the range is out of bounds.
      * @see Arrays#binarySearch(double[], int, int, double)
      */
@@ -26142,7 +26071,7 @@ sealed class CommonUtil permits N {
      * @param a the array to be searched. It must be sorted in ascending order
      * @param valueToFind the value to be searched for
      * @return the index of the value to be searched, if it is contained in the array within the specified range;
-     *         otherwise, <tt>(-(insertion point) - 1)</tt>, or <tt>-1</tt> if the array is {@code null} or empty.
+     *         otherwise, <code>(-(insertion point) - 1)</code>, or <code>-1</code> if the array is {@code null} or empty.
      * @see Arrays#binarySearch(Object[], Object)
      */
     public static int binarySearch(final Object[] a, final Object valueToFind) {
@@ -26164,7 +26093,7 @@ sealed class CommonUtil permits N {
      * @param toIndex the index of the last element (exclusive) to be searched.
      * @param valueToFind the value to be searched for.
      * @return the index of the value to be searched, if it is contained in the array within the specified range;
-     *         otherwise, <tt>(-(insertion point) - 1)</tt>, or <tt>-1</tt> if the array is {@code null} or empty.
+     *         otherwise, <code>(-(insertion point) - 1)</code>, or <code>-1</code> if the array is {@code null} or empty.
      * @throws IndexOutOfBoundsException if the range is out of bounds.
      * @see Arrays#binarySearch(Object[], int, int, Object)
      */
@@ -26189,7 +26118,7 @@ sealed class CommonUtil permits N {
      * @param valueToFind the value to be searched for
      * @param cmp the comparator by which the array is ordered
      * @return the index of the value to be searched, if it is contained in the array within the specified range;
-     *         otherwise, <tt>(-(insertion point) - 1)</tt>, or <tt>-1</tt> if the array is {@code null} or empty.
+     *         otherwise, <code>(-(insertion point) - 1)</code>, or <code>-1</code> if the array is {@code null} or empty.
      * @see Arrays#binarySearch(Object[], Object, Comparator)
      */
     public static <T> int binarySearch(final T[] a, final T valueToFind, final Comparator<? super T> cmp) {
@@ -26213,7 +26142,7 @@ sealed class CommonUtil permits N {
      * @param valueToFind the value to be searched for.
      * @param cmp the comparator by which the array is ordered
      * @return the index of the value to be searched, if it is contained in the array within the specified range;
-     *         otherwise, <tt>(-(insertion point) - 1)</tt>, or <tt>-1</tt> if the array is {@code null} or empty.
+     *         otherwise, <code>(-(insertion point) - 1)</code>, or <code>-1</code> if the array is {@code null} or empty.
      * @throws IndexOutOfBoundsException if the range is out of bounds.
      * @see Arrays#binarySearch(Object[], int, int, Object, Comparator)
      */
@@ -26237,7 +26166,7 @@ sealed class CommonUtil permits N {
      * @param list the list to be searched. It must be sorted in ascending order
      * @param valueToFind the value to be searched for
      * @return the index of the value to be searched, if it is contained in the list within the specified range;
-     *         otherwise, <tt>(-(insertion point) - 1)</tt>, or <tt>-1</tt> if the list is {@code null} or empty.
+     *         otherwise, <code>(-(insertion point) - 1)</code>, or <code>-1</code> if the list is {@code null} or empty.
      * @see Collections#binarySearch(List, Object)
      */
     public static <T extends Comparable<? super T>> int binarySearch(final List<? extends T> list, final T valueToFind) {
@@ -26260,7 +26189,7 @@ sealed class CommonUtil permits N {
      * @param toIndex the index of the last element (exclusive) to be searched.
      * @param valueToFind the value to be searched for.
      * @return the index of the value to be searched, if it is contained in the list within the specified range;
-     *         otherwise, <tt>(-(insertion point) - 1)</tt>, or <tt>-1</tt> if the list is {@code null} or empty.
+     *         otherwise, <code>(-(insertion point) - 1)</code>, or <code>-1</code> if the list is {@code null} or empty.
      * @throws IndexOutOfBoundsException if the range is out of bounds.
      * @see Collections#binarySearch(List, Object)
      */
@@ -26286,7 +26215,7 @@ sealed class CommonUtil permits N {
      * @param valueToFind the value to be searched for
      * @param cmp the comparator by which the list is ordered
      * @return the index of the value to be searched, if it is contained in the list within the specified range;
-     *         otherwise, <tt>(-(insertion point) - 1)</tt>, or <tt>-1</tt> if the list is {@code null} or empty.
+     *         otherwise, <code>(-(insertion point) - 1)</code>, or <code>-1</code> if the list is {@code null} or empty.
      * @see Collections#binarySearch(List, Object, Comparator)
      */
     public static <T> int binarySearch(final List<? extends T> list, final T valueToFind, final Comparator<? super T> cmp) {
@@ -26310,7 +26239,7 @@ sealed class CommonUtil permits N {
      * @param valueToFind the value to be searched for.
      * @param cmp the comparator by which the list is ordered
      * @return the index of the value to be searched, if it is contained in the list within the specified range;
-     *         otherwise, <tt>(-(insertion point) - 1)</tt>, or <tt>-1</tt> if the list is {@code null} or empty.
+     *         otherwise, <code>(-(insertion point) - 1)</code>, or <code>-1</code> if the list is {@code null} or empty.
      * @throws IndexOutOfBoundsException if the range is out of bounds.
      * @see Collections#binarySearch(List, Object, Comparator)
      */
@@ -28116,13 +28045,6 @@ sealed class CommonUtil permits N {
 
     // ================================ isSorted/sort/sortBy/parallelSort/reverseSort/binarySearch/Index... =============
 
-    /**
-     * Creates the mask.
-     *
-     * @param <T> the type of the interface
-     * @param interfaceClass the interface class to create a proxy for
-     * @return a proxy instance that throws UnsupportedOperationException on all method calls
-     */
     static <T> T createMask(final Class<T> interfaceClass) {
         final InvocationHandler h = (proxy, method, args) -> {
             throw new UnsupportedOperationException("It's a mask");

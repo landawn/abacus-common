@@ -103,7 +103,8 @@ public final class PrimitiveIntListType extends AbstractPrimitiveListType<IntLis
      * }</pre>
      *
      * @param x the IntList to convert to string
-     * @return the string representation of the list, or null if the input list is null
+     * @return the string representation of the list, or {@code null} if the input list is null
+     @MayReturnNull
      */
     @Override
     public String stringOf(final IntList x) {
@@ -128,8 +129,9 @@ public final class PrimitiveIntListType extends AbstractPrimitiveListType<IntLis
      * }</pre>
      *
      * @param str the string to parse, expected format is "[value1, value2, ...]"
-     * @return the parsed IntList, or null if the input string is null or empty
+     * @return the parsed IntList, or {@code null} if the input string is {@code null} or empty
      * @throws NumberFormatException if any element in the string cannot be parsed as an integer
+     @MayReturnNull
      */
     @Override
     public IntList valueOf(final String str) {
@@ -139,7 +141,7 @@ public final class PrimitiveIntListType extends AbstractPrimitiveListType<IntLis
     /**
      * Appends the string representation of an IntList to the given Appendable.
      * The list is formatted as comma-separated values enclosed in square brackets.
-     * If the list is null, appends "null".
+     * If the list is {@code null}, appends "null".
      *
      * <p><b>Usage Examples:</b></p>
      * PrimitiveIntListType type = new PrimitiveIntListType();
@@ -179,7 +181,7 @@ public final class PrimitiveIntListType extends AbstractPrimitiveListType<IntLis
      * type.writeCharacter(writer, list, null);
      * // Writes: [5, 10, 15]
      *
-     * type.writeCharacter(writer, null, null);
+     * type.writeCharacter(writer, {@code null}, null);
      * // Writes: null
      * }</pre>
      *

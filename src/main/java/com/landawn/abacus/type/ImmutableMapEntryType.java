@@ -73,9 +73,10 @@ public class ImmutableMapEntryType<K, V> extends AbstractType<AbstractMap.Simple
      * Returns the declaring name of this immutable map entry type.
      * The declaring name represents the type in a simplified format suitable for type declarations.
      *
-     * @return the declaring name of this type (e.g., "Map.ImmutableEntry<String, Integer>")
+     * @return the declaring name of this type (e.g., "Map.ImmutableEntry&lt;String, Integer&gt;")
      */
     @Override
+    @MayReturnNull
     public String declaringName() {
         return declaringName;
     }
@@ -101,11 +102,6 @@ public class ImmutableMapEntryType<K, V> extends AbstractType<AbstractMap.Simple
         return parameterTypes;
     }
 
-    /**
-     * Indicates that this is a generic type with type parameters.
-     *
-     * @return {@code true} as map entry types are generic types
-     */
     @Override
     public boolean isGenericType() {
         return true;
@@ -116,9 +112,10 @@ public class ImmutableMapEntryType<K, V> extends AbstractType<AbstractMap.Simple
      * The entry is serialized as a JSON object with a single key-value pair.
      *
      * @param x the immutable map entry to convert to string
-     * @return the JSON string representation of the entry (e.g., "{\"key\":\"value\"}"), or null if the input is null
+     * @return the JSON string representation of the entry (e.g., "{\"key\":\"value\"}"), or {@code null} if the input is null
      */
     @Override
+    @MayReturnNull
     public String stringOf(final AbstractMap.SimpleImmutableEntry<K, V> x) {
         return (x == null) ? null : Utils.jsonParser.serialize(N.asMap(x.getKey(), x.getValue()));
     }
@@ -126,10 +123,10 @@ public class ImmutableMapEntryType<K, V> extends AbstractType<AbstractMap.Simple
     /**
      * Parses a string representation into an immutable map entry instance.
      * The string should be in JSON object format with a single key-value pair.
-     * Empty strings or empty JSON objects ("{}") result in null.
+     * Empty strings or empty JSON objects ("{}") result in {@code null}.
      *
      * @param str the JSON string to parse (e.g., "{\"key\":\"value\"}")
-     * @return a new immutable map entry instance, or null if the input is null, empty, or "{}"
+     * @return a new immutable map entry instance, or {@code null} if the input is {@code null}, empty, or "{}"
      */
     @MayReturnNull
     @Override
@@ -227,8 +224,8 @@ public class ImmutableMapEntryType<K, V> extends AbstractType<AbstractMap.Simple
      *
      * @param keyTypeName the name of the key type
      * @param valueTypeName the name of the value type
-     * @param isDeclaringName true to generate a declaring name with simple type names, {@code false} for fully qualified names
-     * @return the formatted type name (e.g., "Map.ImmutableEntry<String, Integer>")
+     * @param isDeclaringName {@code true} to generate a declaring name with simple type names, {@code false} for fully qualified names
+     * @return the formatted type name (e.g., "Map.ImmutableEntry&lt;String, Integer&gt;")
      */
     protected static String getTypeName(final String keyTypeName, final String valueTypeName, final boolean isDeclaringName) {
         if (isDeclaringName) {

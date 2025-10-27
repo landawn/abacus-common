@@ -88,9 +88,10 @@ public class JodaMutableDateTimeType extends AbstractJodaDateTimeType<MutableDat
      * }</pre>
      *
      * @param obj the object to convert to MutableDateTime
-     * @return a MutableDateTime instance, or null if the input is null
+     * @return a MutableDateTime instance, or {@code null} if the input is null
      */
     @Override
+    @MayReturnNull
     public MutableDateTime valueOf(final Object obj) {
         if (obj instanceof Number) {
             return new MutableDateTime(((Number) obj).longValue());
@@ -130,11 +131,12 @@ public class JodaMutableDateTimeType extends AbstractJodaDateTimeType<MutableDat
      * }</pre>
      *
      * @param str the string to parse
-     * @return a MutableDateTime instance, or null if the string is empty or null
+     * @return a MutableDateTime instance, or {@code null} if the string is empty or null
      * @throws IllegalArgumentException if the string format is invalid
      */
     @MayReturnNull
     @Override
+
     public MutableDateTime valueOf(final String str) {
         if (Strings.isEmpty(str)) {
             return null; // NOSONAR
@@ -171,10 +173,11 @@ public class JodaMutableDateTimeType extends AbstractJodaDateTimeType<MutableDat
      * @param cbuf the character buffer containing the value to parse
      * @param offset the start offset in the character buffer
      * @param len the number of characters to parse
-     * @return a MutableDateTime instance, or null if the character buffer is null or length is 0
+     * @return a MutableDateTime instance, or {@code null} if the character buffer is {@code null} or length is 0
      */
     @MayReturnNull
     @Override
+
     public MutableDateTime valueOf(final char[] cbuf, final int offset, final int len) {
         if ((cbuf == null) || (len == 0)) {
             return null; // NOSONAR
@@ -208,10 +211,11 @@ public class JodaMutableDateTimeType extends AbstractJodaDateTimeType<MutableDat
      *
      * @param rs the ResultSet to read from
      * @param columnIndex the column index (1-based) to retrieve the value from
-     * @return a MutableDateTime instance created from the timestamp, or null if the column value is SQL NULL
+     * @return a MutableDateTime instance created from the timestamp, or {@code null} if the column value is SQL NULL
      * @throws SQLException if a database access error occurs or the column index is invalid
      */
     @Override
+    @MayReturnNull
     public MutableDateTime get(final ResultSet rs, final int columnIndex) throws SQLException {
         final Timestamp ts = rs.getTimestamp(columnIndex);
 
@@ -234,10 +238,11 @@ public class JodaMutableDateTimeType extends AbstractJodaDateTimeType<MutableDat
      *
      * @param rs the ResultSet to read from
      * @param columnLabel the column label to retrieve the value from
-     * @return a MutableDateTime instance created from the timestamp, or null if the column value is SQL NULL
+     * @return a MutableDateTime instance created from the timestamp, or {@code null} if the column value is SQL NULL
      * @throws SQLException if a database access error occurs or the column label is invalid
      */
     @Override
+    @MayReturnNull
     public MutableDateTime get(final ResultSet rs, final String columnLabel) throws SQLException {
         final Timestamp ts = rs.getTimestamp(columnLabel);
 
@@ -260,7 +265,7 @@ public class JodaMutableDateTimeType extends AbstractJodaDateTimeType<MutableDat
      *
      * @param stmt the PreparedStatement to set the parameter on
      * @param columnIndex the parameter index (1-based) to set
-     * @param x the MutableDateTime value to set, or null for SQL NULL
+     * @param x the MutableDateTime value to set, or {@code null} for SQL NULL
      * @throws SQLException if a database access error occurs or the parameter index is invalid
      */
     @Override
@@ -285,7 +290,7 @@ public class JodaMutableDateTimeType extends AbstractJodaDateTimeType<MutableDat
      *
      * @param stmt the CallableStatement to set the parameter on
      * @param parameterName the name of the parameter to set
-     * @param x the MutableDateTime value to set, or null for SQL NULL
+     * @param x the MutableDateTime value to set, or {@code null} for SQL NULL
      * @throws SQLException if a database access error occurs or the parameter name is invalid
      */
     @Override

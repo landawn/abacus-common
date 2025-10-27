@@ -22,6 +22,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
+import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.parser.JSONXMLSerializationConfig;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.Strings;
@@ -57,9 +58,11 @@ public final class BigDecimalType extends NumberType<BigDecimal> {
      * Uses the standard toString() method which may use scientific notation.
      *
      * @param x the BigDecimal value to convert
-     * @return the string representation of the BigDecimal, or null if input is null
+     * @return the string representation of the BigDecimal, or {@code null} if input is null
      */
+    @MayReturnNull
     @Override
+
     public String stringOf(final BigDecimal x) {
         return (x == null) ? null : x.toString();
     }
@@ -70,10 +73,12 @@ public final class BigDecimalType extends NumberType<BigDecimal> {
      *
      * @param str the string to parse as a BigDecimal
      * @return a new BigDecimal parsed from the string with unlimited precision,
-     *         or null if str is null or empty
+     *         or {@code null} if str is {@code null} or empty
      * @throws NumberFormatException if the string cannot be parsed as a valid BigDecimal
      */
+    @MayReturnNull
     @Override
+
     public BigDecimal valueOf(final String str) {
         return Strings.isEmpty(str) ? null : new BigDecimal(str, MathContext.UNLIMITED);
     }
@@ -87,10 +92,12 @@ public final class BigDecimalType extends NumberType<BigDecimal> {
      * @param offset the starting position in the character array
      * @param len the number of characters to use
      * @return a new BigDecimal created from the specified characters with unlimited precision,
-     *         or null if len is 0
+     *         or {@code null} if len is 0
      * @throws NumberFormatException if the character sequence cannot be parsed as a valid BigDecimal
      */
+    @MayReturnNull
     @Override
+
     public BigDecimal valueOf(final char[] cbuf, final int offset, final int len) {
         return len == 0 ? null : new BigDecimal(cbuf, offset, len, MathContext.UNLIMITED);
     }
@@ -100,9 +107,10 @@ public final class BigDecimalType extends NumberType<BigDecimal> {
      *
      * @param rs the ResultSet to retrieve the value from
      * @param columnIndex the column index (1-based) of the BigDecimal value
-     * @return the BigDecimal value at the specified column, or null if the value is SQL NULL
+     * @return the BigDecimal value at the specified column, or {@code null} if the value is SQL NULL
      * @throws SQLException if a database access error occurs or the columnIndex is invalid
      */
+    @MayReturnNull
     @Override
     public BigDecimal get(final ResultSet rs, final int columnIndex) throws SQLException {
         return rs.getBigDecimal(columnIndex);
@@ -114,9 +122,10 @@ public final class BigDecimalType extends NumberType<BigDecimal> {
      * @param rs the ResultSet to retrieve the value from
      * @param columnLabel the label for the column specified with the SQL AS clause,
      *                    or the column name if no AS clause was specified
-     * @return the BigDecimal value in the specified column, or null if the value is SQL NULL
+     * @return the BigDecimal value in the specified column, or {@code null} if the value is SQL NULL
      * @throws SQLException if a database access error occurs or the columnLabel is invalid
      */
+    @MayReturnNull
     @Override
     public BigDecimal get(final ResultSet rs, final String columnLabel) throws SQLException {
         return rs.getBigDecimal(columnLabel);

@@ -27,7 +27,7 @@ import com.landawn.abacus.util.Throwables;
  *
  * <p>This is a functional interface whose functional method is {@link #apply(Object)}.
  *
- * <p>Refer to JDK API documentation at: <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html">https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a>
+ * <p>Refer to JDK API documentation at: <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html">https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a></p>
  *
  * @param <T> the type of the operand and result of the operator
  */
@@ -126,7 +126,7 @@ public interface UnaryOperator<T> extends Function<T, T>, Throwables.UnaryOperat
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * UnaryOperator<String> operator = s -> s.toUpperCase();
-     * Throwables.UnaryOperator<String, IOException> throwableOperator = 
+     * var throwableOperator = 
      *     operator.toThrowable();
      * }</pre>
      *

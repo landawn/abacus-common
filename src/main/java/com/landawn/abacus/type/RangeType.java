@@ -67,7 +67,7 @@ public class RangeType<T extends Comparable<? super T>> extends AbstractType<Ran
      * Returns the declaring name of this type, which includes the Range class name
      * and its parameterized type in angle brackets.
      *
-     * @return the declaring name in the format "Range<ElementType>"
+     * @return the declaring name in the format "Range&lt;ElementType&gt;"
      */
     @Override
     public String declaringName() {
@@ -110,7 +110,7 @@ public class RangeType<T extends Comparable<? super T>> extends AbstractType<Ran
      * Indicates whether this type is a generic type.
      * RangeType is always generic as it is parameterized with a type T.
      *
-     * @return true, indicating this is a generic type
+     * @return {@code true}, indicating this is a generic type
      */
     @Override
     public boolean isGenericType() {
@@ -124,12 +124,13 @@ public class RangeType<T extends Comparable<? super T>> extends AbstractType<Ran
      * - Open-Closed: "(lower, upper]"
      * - Closed-Open: "[lower, upper)"
      * - Closed-Closed: "[lower, upper]"
-     * 
+     *
      * @param x the Range to convert to string
-     * @return the string representation of the Range, or null if the input is null
+     * @return the string representation of the Range, or {@code null} if the input is null
      */
     @MayReturnNull
     @Override
+
     public String stringOf(final Range<T> x) {
         if (x == null) {
             return null; // NOSONAR
@@ -156,9 +157,9 @@ public class RangeType<T extends Comparable<? super T>> extends AbstractType<Ran
      * - "(lower, upper]" for open-closed range
      * - "[lower, upper)" for closed-open range
      * - "[lower, upper]" for closed-closed range
-     * 
+     *
      * @param str the string to parse
-     * @return the parsed Range object, or null if the input string is null or empty
+     * @return the parsed Range object, or {@code null} if the input string is {@code null} or empty
      * @throws IllegalArgumentException if the string format is invalid
      */
     @MayReturnNull
@@ -185,8 +186,8 @@ public class RangeType<T extends Comparable<? super T>> extends AbstractType<Ran
     /**
      * Appends the string representation of a Range to the given Appendable.
      * The format depends on the bound type and includes the appropriate brackets/parentheses.
-     * If the Range is null, appends "null".
-     * 
+     * If the Range is {@code null}, appends "null".
+     *
      * @param appendable the Appendable to write to (e.g., StringBuilder, Writer)
      * @param x the Range to append
      * @throws IOException if an I/O error occurs during the append operation
@@ -246,7 +247,7 @@ public class RangeType<T extends Comparable<? super T>> extends AbstractType<Ran
      * Writes the character representation of a Range to the given CharacterWriter.
      * The Range is first converted to a string representation, then written as a quoted string
      * according to the serialization configuration.
-     * 
+     *
      * @param writer the CharacterWriter to write to
      * @param x the Range to write
      * @param config the serialization configuration that determines string quotation

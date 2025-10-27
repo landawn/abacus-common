@@ -23,7 +23,7 @@ import com.landawn.abacus.util.Throwables;
  * 
  * <p>This is a functional interface whose functional method is {@link #test(Object, Object)}.
  * 
- * <p>Refer to JDK API documentation at: <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html">https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a>
+ * <p>Refer to JDK API documentation at: <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html">https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a></p>
  *
  * @param <T> the type of the first argument to the predicate
  * @param <U> the type of the second argument to the predicate
@@ -117,7 +117,7 @@ public interface BiPredicate<T, U> extends Throwables.BiPredicate<T, U, RuntimeE
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * BiPredicate<String, String> fileExists = (dir, name) -> Files.exists(Paths.get(dir, name));
-     * Throwables.BiPredicate<String, String, IOException> throwablePredicate = fileExists.toThrowable();
+     * var throwablePredicate = fileExists.toThrowable();
      * }</pre>
      *
      * @param <E> the type of exception that the returned predicate can throw

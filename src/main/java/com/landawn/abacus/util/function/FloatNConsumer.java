@@ -44,7 +44,7 @@ public interface FloatNConsumer {
      * composed operation. If performing this operation throws an exception,
      * the {@code after} operation will not be performed.
      *
-     * @param after the operation to perform after this operation. Must not be null.
+     * @param after the operation to perform after this operation. Must not be {@code null}.
      * @return a composed {@code FloatNConsumer} that performs in sequence this
      *         operation followed by the {@code after} operation
      */

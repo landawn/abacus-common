@@ -43,8 +43,9 @@ public class BlobInputStreamType extends InputStreamType {
      *
      * @param rs the ResultSet to retrieve the BLOB from
      * @param columnIndex the column index (1-based) of the BLOB value
-     * @return an InputStream for reading the BLOB data, or null if the value is SQL NULL
+     * @return an InputStream for reading the BLOB data, or {@code null} if the value is SQL NULL
      * @throws SQLException if a database access error occurs or the columnIndex is invalid
+     @MayReturnNull
      */
     @Override
     public InputStream get(final ResultSet rs, final int columnIndex) throws SQLException {
@@ -59,8 +60,9 @@ public class BlobInputStreamType extends InputStreamType {
      * @param rs the ResultSet to retrieve the BLOB from
      * @param columnLabel the label for the column specified with the SQL AS clause,
      *                    or the column name if no AS clause was specified
-     * @return an InputStream for reading the BLOB data, or null if the value is SQL NULL
+     * @return an InputStream for reading the BLOB data, or {@code null} if the value is SQL NULL
      * @throws SQLException if a database access error occurs or the columnLabel is invalid
+     @MayReturnNull
      */
     @Override
     public InputStream get(final ResultSet rs, final String columnLabel) throws SQLException {
@@ -130,7 +132,7 @@ public class BlobInputStreamType extends InputStreamType {
      * This static utility method extracts the binary stream from the Blob.
      *
      * @param blob the SQL Blob to convert
-     * @return an InputStream for reading the Blob's content, or null if the blob is null
+     * @return an InputStream for reading the Blob's content, or {@code null} if the blob is null
      * @throws SQLException if there is an error accessing the BLOB value
      */
     static InputStream blob2InputStream(final Blob blob) throws SQLException {

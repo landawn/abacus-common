@@ -30,7 +30,7 @@ import com.landawn.abacus.util.Strings;
  * <ul>
  *   <li><strong>Character Event Mapping:</strong> Fast lookup tables for JSON structural characters</li>
  *   <li><strong>Numeric Constants:</strong> Pre-computed powers of ten for efficient number parsing</li>
- *   <li><strong>Special Value Constants:</strong> Interned string constants for null, true, and false</li>
+ *   <li><strong>Special Value Constants:</strong> Interned string constants for {@code null}, true, and false</li>
  *   <li><strong>Alphanumeric Support:</strong> Extended character mappings for various JSON tokens</li>
  * </ul>
  * 
@@ -137,6 +137,22 @@ abstract class AbstractJSONReader implements JSONReader { //NOSONAR
 
     protected static final Type<String> strType = Type.of(String.class);
 
+    /**
+     * Reads and returns the next token from the JSON input using String as the default expected type.
+     * This is a convenience method that delegates to {@link #nextToken(Type)} with String type.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * JSONReader reader = // obtain reader
+     * int token = reader.nextToken();
+     * if (token == START_BRACE) {
+     *     // Process JSON object
+     * }
+     * }</pre>
+     *
+     * @return the token identifier, or -1 if no next token is found
+     * @throws UncheckedIOException if an I/O error occurs during reading
+     */
     @Override
     public int nextToken() throws UncheckedIOException {
         return nextToken(strType);

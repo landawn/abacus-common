@@ -241,8 +241,8 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * This allows for deferred execution and lazy evaluation of the sequence creation.
      *
      * <br />
-     * @implNote
-     * This is equivalent to: {@code Seq.just(supplier).flatMap(Supplier::get)}.
+     * <p><b>Implementation Note:</b>
+     * This is equivalent to: {@code Seq.just(supplier).flatMap(Supplier::get)}.</p>
      *
      * @param <T> the type of elements in the sequence
      * @param <E> the type of exception that the sequence operations can throw
@@ -286,13 +286,13 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
     }
 
     /**
-     * Returns a {@code Seq} containing the specified element if it is not null,
+     * Returns a {@code Seq} containing the specified element if it is not {@code null},
      * otherwise returns an empty {@code Seq}.
      *
      * @param <T> the type of the element
      * @param <E> the type of exception that the sequence operations can throw
      * @param e the element to be contained in the sequence if not null
-     * @return a {@code Seq} containing the element if not null, otherwise an empty {@code Seq}
+     * @return a {@code Seq} containing the element if not {@code null}, otherwise an empty {@code Seq}
      */
     public static <T, E extends Exception> Seq<T, E> ofNullable(final T e) {
         if (e == null) {
@@ -303,7 +303,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
     }
 
     /**
-     * Returns a {@code Seq} containing the specified element if it is not null,
+     * Returns a {@code Seq} containing the specified element if it is not {@code null},
      * otherwise returns an empty {@code Seq}. This method allows explicit specification
      * of the exception type.
      *
@@ -311,7 +311,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * @param <E> the type of exception that the sequence operations can throw
      * @param e the element to be contained in the sequence if not null
      * @param exceptionType the class of exception type (used for type inference only)
-     * @return a {@code Seq} containing the element if not null, otherwise an empty {@code Seq}
+     * @return a {@code Seq} containing the element if not {@code null}, otherwise an empty {@code Seq}
      */
     public static <T, E extends Exception> Seq<T, E> ofNullable(final T e, @SuppressWarnings("unused") final Class<E> exceptionType) { //NOSONAR
         if (e == null) {
@@ -323,7 +323,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
 
     /**
      * Returns a {@code Seq} containing the specified elements.
-     * If the array is null or empty, an empty sequence is returned.
+     * If the array is {@code null} or empty, an empty sequence is returned.
      *
      * @param <T> the type of elements in the sequence
      * @param <E> the type of exception that the sequence operations can throw
@@ -379,7 +379,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
 
     /**
      * Returns a {@code Seq} containing the elements from the specified boolean array.
-     * If the array is null or empty, an empty sequence is returned.
+     * If the array is {@code null} or empty, an empty sequence is returned.
      * Each boolean value is boxed into a Boolean object.
      *
      * @param <E> the type of exception that the sequence operations can throw
@@ -428,7 +428,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
 
     /**
      * Returns a {@code Seq} containing the elements from the specified char array.
-     * If the array is null or empty, an empty sequence is returned.
+     * If the array is {@code null} or empty, an empty sequence is returned.
      * Each char value is boxed into a Character object.
      *
      * @param <E> the type of exception that the sequence operations can throw
@@ -477,7 +477,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
 
     /**
      * Returns a {@code Seq} containing the elements from the specified byte array.
-     * If the array is null or empty, an empty sequence is returned.
+     * If the array is {@code null} or empty, an empty sequence is returned.
      * Each byte value is boxed into a Byte object.
      *
      * @param <E> the type of exception that the sequence operations can throw
@@ -526,7 +526,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
 
     /**
      * Returns a {@code Seq} containing the elements from the specified short array.
-     * If the array is null or empty, an empty sequence is returned.
+     * If the array is {@code null} or empty, an empty sequence is returned.
      * Each short value is boxed into a Short object.
      *
      * @param <E> the type of exception that the sequence operations can throw
@@ -575,7 +575,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
 
     /**
      * Returns a {@code Seq} containing the elements from the specified int array.
-     * If the array is null or empty, an empty sequence is returned.
+     * If the array is {@code null} or empty, an empty sequence is returned.
      * Each int value is boxed into an Integer object.
      *
      * @param <E> the type of exception that the sequence operations can throw
@@ -624,7 +624,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
 
     /**
      * Returns a {@code Seq} containing the elements from the specified long array.
-     * If the array is null or empty, an empty sequence is returned.
+     * If the array is {@code null} or empty, an empty sequence is returned.
      * Each long value is boxed into a Long object.
      *
      * @param <E> the type of exception that the sequence operations can throw
@@ -673,7 +673,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
 
     /**
      * Returns a {@code Seq} containing the elements from the specified float array.
-     * If the array is null or empty, an empty sequence is returned.
+     * If the array is {@code null} or empty, an empty sequence is returned.
      * Each float value is boxed into a Float object.
      *
      * @param <E> the type of exception that the sequence operations can throw
@@ -722,7 +722,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
 
     /**
      * Returns a {@code Seq} containing the elements from the specified double array.
-     * If the array is null or empty, an empty sequence is returned.
+     * If the array is {@code null} or empty, an empty sequence is returned.
      * Each double value is boxed into a Double object.
      *
      * @param <E> the type of exception that the sequence operations can throw
@@ -797,7 +797,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
 
     /**
      * Returns a {@code Seq} containing all elements from the specified Iterable.
-     * If the Iterable is null, an empty sequence is returned.
+     * If the Iterable is {@code null}, an empty sequence is returned.
      *
      * @param <T> the type of elements in the Iterable
      * @param <E> the type of exception that the sequence operations can throw
@@ -815,7 +815,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
     /**
      * Returns a {@code Seq} containing all elements from the specified Iterable.
      * This method allows explicit specification of the exception type.
-     * If the Iterable is null, an empty sequence is returned.
+     * If the Iterable is {@code null}, an empty sequence is returned.
      *
      * @param <T> the type of elements in the Iterable
      * @param <E> the type of exception that the sequence operations can throw
@@ -829,7 +829,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
 
     /**
      * Returns a {@code Seq} containing all elements from the specified Iterator.
-     * If the Iterator is null, an empty sequence is returned.
+     * If the Iterator is {@code null}, an empty sequence is returned.
      *
      * @param <T> the type of elements in the Iterator
      * @param <E> the type of exception that the sequence operations can throw
@@ -846,7 +846,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
 
     /**
      * Returns a {@code Seq} containing all elements from the specified Throwables.Iterator.
-     * If the Iterator is null, an empty sequence is returned.
+     * If the Iterator is {@code null}, an empty sequence is returned.
      *
      * @param <T> the type of elements in the Iterator
      * @param <E> the type of exception that the sequence operations can throw
@@ -864,7 +864,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
     /**
      * Returns a {@code Seq} containing all elements from the specified Iterator.
      * This method allows explicit specification of the exception type.
-     * If the Iterator is null, an empty sequence is returned.
+     * If the Iterator is {@code null}, an empty sequence is returned.
      *
      * @param <T> the type of elements in the Iterator
      * @param <E> the type of exception that the sequence operations can throw
@@ -878,7 +878,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
 
     /**
      * Returns a {@code Seq} containing all elements from the specified Enumeration.
-     * If the Enumeration is null, an empty sequence is returned.
+     * If the Enumeration is {@code null}, an empty sequence is returned.
      *
      * @param <T> the type of elements in the Enumeration
      * @param <E> the type of exception that the sequence operations can throw
@@ -896,7 +896,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
     /**
      * Returns a {@code Seq} containing all elements from the specified Enumeration.
      * This method allows explicit specification of the exception type.
-     * If the Enumeration is null, an empty sequence is returned.
+     * If the Enumeration is {@code null}, an empty sequence is returned.
      *
      * @param <T> the type of elements in the Enumeration
      * @param <E> the type of exception that the sequence operations can throw
@@ -910,7 +910,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
 
     /**
      * Returns a {@code Seq} containing all entries from the specified Map.
-     * If the Map is null or empty, an empty sequence is returned.
+     * If the Map is {@code null} or empty, an empty sequence is returned.
      *
      * @param <K> the type of keys in the Map
      * @param <V> the type of values in the Map
@@ -929,7 +929,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
     /**
      * Returns a {@code Seq} containing all entries from the specified Map.
      * This method allows explicit specification of the exception type.
-     * If the Map is null or empty, an empty sequence is returned.
+     * If the Map is {@code null} or empty, an empty sequence is returned.
      *
      * @param <K> the type of keys in the Map
      * @param <V> the type of values in the Map
@@ -944,7 +944,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
 
     /**
      * Returns a {@code Seq} containing all keys from the specified Map.
-     * If the Map is null or empty, an empty sequence is returned.
+     * If the Map is {@code null} or empty, an empty sequence is returned.
      *
      * @param <K> the type of keys in the Map
      * @param <E> the type of exception that the sequence operations can throw
@@ -962,7 +962,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
     /**
      * Returns a {@code Seq} containing keys from the specified Map where the corresponding
      * values satisfy the given predicate.
-     * If the Map is null or empty, an empty sequence is returned.
+     * If the Map is {@code null} or empty, an empty sequence is returned.
      *
      * @param <K> the type of keys in the Map
      * @param <V> the type of values in the Map
@@ -983,7 +983,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
     /**
      * Returns a {@code Seq} containing keys from the specified Map where the key-value
      * pairs satisfy the given bi-predicate.
-     * If the Map is null or empty, an empty sequence is returned.
+     * If the Map is {@code null} or empty, an empty sequence is returned.
      *
      * @param <K> the type of keys in the Map
      * @param <V> the type of values in the Map
@@ -1003,7 +1003,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
 
     /**
      * Returns a {@code Seq} containing all values from the specified Map.
-     * If the Map is null or empty, an empty sequence is returned.
+     * If the Map is {@code null} or empty, an empty sequence is returned.
      *
      * @param <V> the type of values in the Map
      * @param <E> the type of exception that the sequence operations can throw
@@ -1021,7 +1021,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
     /**
      * Returns a {@code Seq} containing values from the specified Map where the corresponding
      * keys satisfy the given predicate.
-     * If the Map is null or empty, an empty sequence is returned.
+     * If the Map is {@code null} or empty, an empty sequence is returned.
      *
      * @param <K> the type of keys in the Map
      * @param <V> the type of values in the Map
@@ -1042,7 +1042,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
     /**
      * Returns a {@code Seq} containing values from the specified Map where the key-value
      * pairs satisfy the given bi-predicate.
-     * If the Map is null or empty, an empty sequence is returned.
+     * If the Map is {@code null} or empty, an empty sequence is returned.
      *
      * @param <K> the type of keys in the Map
      * @param <V> the type of values in the Map
@@ -1250,8 +1250,8 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      *
      * @param <E> the type of exception that the sequence operations can throw
      * @param str the string to split into lines
-     * @param trim if true, trims whitespace from the beginning and end of each line
-     * @param omitEmptyLines if true, omits empty lines from the result
+     * @param trim if {@code true}, trims whitespace from the beginning and end of each line
+     * @param omitEmptyLines if {@code true}, omits empty lines from the result
      * @return a {@code Seq<String, E>} containing the processed lines
      */
     public static <E extends Exception> Seq<String, E> splitToLines(final String str, final boolean trim, final boolean omitEmptyLines) {
@@ -1512,9 +1512,9 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
 
     /**
      * Lists all files in the specified parent directory with optional recursive traversal.
-     * If recursively is false, only immediate children files are listed.
-     * If recursively is true, all descendant files are listed in depth-first order.
-     * Directories are included in the results when recursively is true.
+     * If recursively is {@code false}, only immediate children files are listed.
+     * If recursively is {@code true}, all descendant files are listed in depth-first order.
+     * Directories are included in the results when recursively is {@code true}.
      * The method uses a breadth-first traversal when recursive listing is enabled.
      *
      * @param parentPath the parent directory to list files from. Must not be {@code null}.
@@ -1654,7 +1654,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * Concatenates multiple arrays into a single sequence.
      * The arrays are processed in the order they are provided, from left to right.
      * Null arrays in the varargs are skipped without throwing an exception.
-     * The resulting sequence contains all elements from all non-null arrays in order.
+     * The resulting sequence contains all elements from all {@code non-null} arrays in order.
      * This is a lazy operation - arrays are not accessed until the sequence is consumed.
      *
      * @param <T> the type of elements in the arrays
@@ -1679,7 +1679,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * Concatenates multiple Iterables into a single sequence.
      * The Iterables are processed in the order they are provided, from left to right.
      * Null Iterables in the varargs are skipped without throwing an exception.
-     * The resulting sequence contains all elements from all non-null Iterables in order.
+     * The resulting sequence contains all elements from all {@code non-null} Iterables in order.
      * This is a lazy operation - Iterables are not accessed until the sequence is consumed.
      *
      * @param <T> the type of elements in the Iterables
@@ -1687,7 +1687,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * @param a the Iterables to be concatenated. Can be empty, contain {@code null} Iterables, or be {@code null} itself
      * @return a sequence containing all elements from all provided Iterables in order.
      *         Returns an empty sequence if no Iterables are provided or all Iterables are {@code null}
-     * @see #concat(T[]...)
+     * @see #concat(Object[][])
      * @see #concat(Iterator...)
      * @see #concat(Seq...)
      */
@@ -1704,7 +1704,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * Concatenates multiple Iterators into a single sequence.
      * The Iterators are processed in the order they are provided, from left to right.
      * Null Iterators in the varargs are skipped without throwing an exception.
-     * The resulting sequence contains all elements from all non-null Iterators in order.
+     * The resulting sequence contains all elements from all {@code non-null} Iterators in order.
      * This is a lazy operation - Iterators are not accessed until the sequence is consumed.
      * Note: The iterators are consumed as the sequence is iterated, so they cannot be reused.
      *
@@ -1713,7 +1713,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * @param a the Iterators to be concatenated. Can be empty, contain {@code null} Iterators, or be {@code null} itself
      * @return a sequence containing all elements from all provided Iterators in order.
      *         Returns an empty sequence if no Iterators are provided or all Iterators are {@code null}
-     * @see #concat(T[]...)
+     * @see #concat(Object[][])
      * @see #concat(Iterable...)
      * @see #concat(Seq...)
      */
@@ -2529,7 +2529,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * @param nextSelector a function that takes two elements (one from each array) and returns MergeResult.TAKE_FIRST
      *                     to select the first element, or any other value to select the second element
      * @return a sequence containing all elements from both arrays in the order determined by the next selector.
-     *         If either array is null or empty, returns a sequence containing the other array's elements
+     *         If either array is {@code null} or empty, returns a sequence containing the other array's elements
      * @see N#merge(Object[], Object[], java.util.function.BiFunction)
      */
     public static <T, E extends Exception> Seq<T, E> merge(final T[] a, final T[] b,
@@ -2928,7 +2928,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * Stops taking elements as soon as the predicate returns {@code false} for the first time.
      * This is an intermediate operation that does not consume the sequence.
      *
-     * <p>This operation is short-circuiting - it stops evaluating elements once the predicate returns false.</p>
+     * <p>This operation is short-circuiting - it stops evaluating elements once the predicate returns {@code false}.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -3286,7 +3286,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
     }
 
     /**
-     * Transforms the non-null elements of this sequence using the provided mapper function, skipping null elements.
+     * Transforms the {@code non-null} elements of this sequence using the provided mapper function, skipping {@code null} elements.
      * This is an intermediate operation that does not consume the sequence.
      *
      * <p>This method is equivalent to: {@code skipNulls().map(mapper)}.</p>
@@ -3299,8 +3299,8 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * }</pre>
      *
      * @param <R> the type of the elements in the new sequence
-     * @param mapper the function to apply to each non-null element
-     * @return a new sequence containing the transformed non-null elements
+     * @param mapper the function to apply to each {@code non-null} element
+     * @return a new sequence containing the transformed {@code non-null} elements
      * @throws IllegalStateException if the sequence is already closed
      */
     @Beta
@@ -3690,8 +3690,8 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
     }
 
     /**
-     * Transforms the non-null elements of this sequence using the provided mapper function,
-     * which returns a collection of new elements for each non-null element.
+     * Transforms the {@code non-null} elements of this sequence using the provided mapper function,
+     * which returns a collection of new elements for each {@code non-null} element.
      * The resulting collections are then flattened into a single sequence.
      * Null elements are skipped.
      * This is an intermediate operation that does not consume the sequence.
@@ -3708,8 +3708,8 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * }</pre>
      *
      * @param <R> the type of the elements in the new sequence
-     * @param mapper the function to apply to each non-null element, which returns a collection of new elements
-     * @return a new sequence containing the flattened elements from non-null source elements
+     * @param mapper the function to apply to each {@code non-null} element, which returns a collection of new elements
+     * @return a new sequence containing the flattened elements from {@code non-null} source elements
      * @throws IllegalStateException if the sequence is already closed
      */
     @Beta
@@ -3721,8 +3721,8 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
     }
 
     /**
-     * Transforms the non-null elements of this sequence using two successive mapper functions.
-     * First mapper is applied to non-null elements, then the second mapper is applied to non-null results from the first mapper.
+     * Transforms the {@code non-null} elements of this sequence using two successive mapper functions.
+     * First mapper is applied to {@code non-null} elements, then the second mapper is applied to {@code non-null} results from the first mapper.
      * The resulting collections are then flattened into a single sequence.
      * This is an intermediate operation that does not consume the sequence.
      *
@@ -3747,7 +3747,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      *
      * @param <U> the type of the intermediate elements in the new sequence
      * @param <R> the type of the final elements in the new sequence
-     * @param mapper the function to apply to each non-null element, which returns a collection of intermediate elements
+     * @param mapper the function to apply to each {@code non-null} element, which returns a collection of intermediate elements
      * @param mapper2 the function to apply to each intermediate element, which returns a collection of final elements
      * @return a new sequence containing the flattened elements
      * @throws IllegalStateException if the sequence is already closed
@@ -3996,7 +3996,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * @param mapper a non-interfering, stateless function to apply to each pair of elements
      * @return a new sequence consisting of the results of applying the mapper function to each pair of elements
      * @throws IllegalStateException if the sequence is already closed
-     * @throws IllegalArgumentException if the mapper is null or increment is not positive
+     * @throws IllegalArgumentException if the mapper is {@code null} or increment is not positive
      * @see #slidingMap(int, boolean, Throwables.BiFunction)
      */
     @IntermediateOp
@@ -4022,12 +4022,12 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      *
      * @param <R> the element type of the new sequence
      * @param increment the distance between the first elements of each pair (must be positive)
-     * @param ignoreNotPaired if false, unpaired elements will be processed with null as their pair;
-     *                        if true, the last element will be ignored if there is no element to pair with it
+     * @param ignoreNotPaired if {@code false}, unpaired elements will be processed with {@code null} as their pair;
+     *                        if {@code true}, the last element will be ignored if there is no element to pair with it
      * @param mapper a non-interfering, stateless function to apply to each pair of elements
      * @return a new sequence consisting of the results of applying the mapper function to each pair of elements
      * @throws IllegalStateException if the sequence is already closed
-     * @throws IllegalArgumentException if the mapper is null or increment is not positive
+     * @throws IllegalArgumentException if the mapper is {@code null} or increment is not positive
      */
     @IntermediateOp
     public <R> Seq<R, E> slidingMap(final int increment, final boolean ignoreNotPaired,
@@ -4136,7 +4136,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * @param mapper a non-interfering, stateless function to apply to each triple of elements
      * @return a new sequence consisting of the results of applying the mapper function to each triple of elements
      * @throws IllegalStateException if the sequence is already closed
-     * @throws IllegalArgumentException if the mapper is null or increment is not positive
+     * @throws IllegalArgumentException if the mapper is {@code null} or increment is not positive
      * @see #slidingMap(int, boolean, Throwables.TriFunction)
      */
     @IntermediateOp
@@ -4164,12 +4164,12 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      *
      * @param <R> the element type of the new sequence
      * @param increment the distance between the first elements of each triple (must be positive)
-     * @param ignoreNotPaired if false, unpaired elements will be processed with null as their pair;
-     *                        if true, elements that cannot form a complete triple will be ignored
+     * @param ignoreNotPaired if {@code false}, unpaired elements will be processed with {@code null} as their pair;
+     *                        if {@code true}, elements that cannot form a complete triple will be ignored
      * @param mapper a non-interfering, stateless function to apply to each triple of elements
      * @return a new sequence consisting of the results of applying the mapper function to each triple of elements
      * @throws IllegalStateException if the sequence is already closed
-     * @throws IllegalArgumentException if the mapper is null or increment is not positive
+     * @throws IllegalArgumentException if the mapper is {@code null} or increment is not positive
      */
     @IntermediateOp
     public <R> Seq<R, E> slidingMap(final int increment, final boolean ignoreNotPaired,
@@ -4662,7 +4662,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * }</pre>
      *
      * @param predicate the predicate used to classify elements
-     * @return a new sequence containing exactly two entries: true->matching elements, false->non-matching elements
+     * @return a new sequence containing exactly two entries: true-&gt;matching elements, false-&gt;non-matching elements
      * @throws IllegalStateException if the sequence is already closed
      * @see Collectors#partitioningBy(Predicate)
      */
@@ -6947,7 +6947,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
 
     /**
      * Filters out {@code null} elements from this {@code Seq}.
-     * Only non-null elements will be included in the returned sequence.
+     * Only {@code non-null} elements will be included in the returned sequence.
      *
      * <br />
      * This is an intermediate operation and will not close the sequence.
@@ -7068,7 +7068,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
     /**
      * Returns a new {@code Seq} consisting of the last {@code n} elements of this sequence.
      * A queue with size up to {@code n} will be maintained to filter out the last {@code n} elements.
-     * It may cause <code>{@code OutOfMemoryError}</code> if {@code n} is big enough.
+     * It may cause <code>OutOfMemoryError</code> if {@code n} is big enough.
      *
      * <br />
      * All the elements will be loaded to get the last {@code n} elements and the sequence will be closed after that, if a terminal operation is triggered.
@@ -7090,8 +7090,8 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
     /**
      * Returns a new {@code Seq} consisting of the last {@code n} elements of this sequence.
      * A queue with size up to {@code n} will be maintained to filter out the last {@code n} elements.
-     * It may cause <code>{@code OutOfMemoryError}</code> if {@code n} is big enough.
-     * 
+     * It may cause <code>OutOfMemoryError</code> if {@code n} is big enough.
+     *
      * <p>All elements must be consumed to determine which are the last n elements.
      * The sequence will be closed after retrieving the last n elements when a terminal operation is triggered.</p>
      *
@@ -7512,7 +7512,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
 
     /**
      * Returns a new {@code Seq} with the elements sorted in their natural order.
-     * Nulls are considered smaller than non-null values.
+     * Nulls are considered smaller than {@code non-null} values.
      *
      * <p>This is an intermediate operation that triggers terminal evaluation. All elements will be
      * loaded into memory to perform the sort.</p>
@@ -7532,7 +7532,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
 
     /**
      * Returns a new {@code Seq} with the elements sorted using the specified comparator.
-     * A null comparator indicates natural ordering should be used.
+     * A {@code null} comparator indicates natural ordering should be used.
      *
      * <p>This is an intermediate operation that triggers terminal evaluation. All elements will be
      * loaded into memory to perform the sort.</p>
@@ -7653,7 +7653,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
 
     /**
      * Returns a new {@code Seq} with the elements sorted in reverse natural order.
-     * Nulls are considered bigger than non-null values in reverse order.
+     * Nulls are considered bigger than {@code non-null} values in reverse order.
      *
      * <p>This is an intermediate operation that triggers terminal evaluation. All elements will be
      * loaded into memory to perform the sort.</p>
@@ -7752,7 +7752,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
 
     /**
      * Returns a new {@code Seq} with the elements sorted in reverse order according to natural order of the values extracted by the provided key extractor function.
-     * Nulls are considered bigger than non-null values in reverse order.
+     * Nulls are considered bigger than {@code non-null} values in reverse order.
      *
      * <p>This is an intermediate operation that triggers terminal evaluation. All elements will be
      * loaded into memory to perform the sort.</p>
@@ -8302,13 +8302,13 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * determined by the selector function. The selector function is called for each pair of elements and returns
      * a {@link MergeResult} indicating which element(s) to include in the output.</p>
      * 
-     * <p>The merge process continues until both sequences are exhausted. The MergeResult values control the behavior:
+     * <p>The merge process continues until both sequences are exhausted. The MergeResult values control the behavior:</p>
      * <ul>
      * <li>TAKE_FIRST: Take element from the first sequence only</li>
      * <li>TAKE_SECOND: Take element from the second sequence only</li>
      * <li>TAKE_BOTH: Take both elements (first sequence element followed by second)</li>
-     * </ul></p>
-     * 
+     * </ul>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Seq<Integer> seq1 = Seq.of(1, 3, 5);
@@ -8348,8 +8348,8 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      *
      * @param <T2> the type of elements in the given Collection
      * @param <R> the type of elements in the resulting Seq
-     * @param b the Collection to be combined with the current Seq. Must be non-null.
-     * @param zipFunction a BiFunction that determines the combination of elements in the combined Seq. Must be non-null.
+     * @param b the Collection to be combined with the current Seq. Must be {@code non-null}.
+     * @param zipFunction a BiFunction that determines the combination of elements in the combined Seq. Must be {@code non-null}.
      * @return a new Seq that is the result of combining the current Seq with the given Collection
      * @throws IllegalStateException if the sequence is already closed
      * @see #zipWith(Collection, Object, Object, Throwables.BiFunction)
@@ -8381,10 +8381,10 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      *
      * @param <T2> the type of elements in the given Collection
      * @param <R> the type of elements in the resulting Seq
-     * @param b the Collection to be combined with the current Seq. Must be non-null.
+     * @param b the Collection to be combined with the current Seq. Must be {@code non-null}.
      * @param valueForNoneA the default value to use for the current Seq when it runs out of elements
      * @param valueForNoneB the default value to use for the Collection when it runs out of elements
-     * @param zipFunction a BiFunction that determines the combination of elements in the combined Seq. Must be non-null.
+     * @param zipFunction a BiFunction that determines the combination of elements in the combined Seq. Must be {@code non-null}.
      * @return a new Seq that is the result of combining the current Seq with the given Collection
      * @throws IllegalStateException if the sequence is already closed
      * @see N#zip(Iterable, Iterable, Object, Object, BiFunction)
@@ -8415,9 +8415,9 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * @param <T2> the type of elements in the first given Collection
      * @param <T3> the type of elements in the second given Collection
      * @param <R> the type of elements in the resulting Seq
-     * @param b the first Collection to be combined with the current Seq. Must be non-null.
-     * @param c the second Collection to be combined with the current Seq. Must be non-null.
-     * @param zipFunction a TriFunction that determines the combination of elements in the combined Seq. Must be non-null.
+     * @param b the first Collection to be combined with the current Seq. Must be {@code non-null}.
+     * @param c the second Collection to be combined with the current Seq. Must be {@code non-null}.
+     * @param zipFunction a TriFunction that determines the combination of elements in the combined Seq. Must be {@code non-null}.
      * @return a new Seq that is the result of combining the current Seq with the given Collections
      * @throws IllegalStateException if the sequence is already closed
      * @see #zipWith(Collection, Collection, Object, Object, Object, Throwables.TriFunction)
@@ -8451,12 +8451,12 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * @param <T2> the type of elements in the first given Collection
      * @param <T3> the type of elements in the second given Collection
      * @param <R> the type of elements in the resulting Seq
-     * @param b the first Collection to be combined with the current Seq. Must be non-null.
-     * @param c the second Collection to be combined with the current Seq. Must be non-null.
+     * @param b the first Collection to be combined with the current Seq. Must be {@code non-null}.
+     * @param c the second Collection to be combined with the current Seq. Must be {@code non-null}.
      * @param valueForNoneA the default value to use for the current Seq when it runs out of elements
      * @param valueForNoneB the default value to use for the first Collection when it runs out of elements
      * @param valueForNoneC the default value to use for the second Collection when it runs out of elements
-     * @param zipFunction a TriFunction that determines the combination of elements in the combined Seq. Must be non-null.
+     * @param zipFunction a TriFunction that determines the combination of elements in the combined Seq. Must be {@code non-null}.
      * @return a new Seq that is the result of combining the current Seq with the given Collections
      * @throws IllegalStateException if the sequence is already closed
      * @see N#zip(Iterable, Iterable, Iterable, Object, Object, Object, TriFunction)
@@ -8485,8 +8485,8 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      *
      * @param <T2> the type of elements in the given Seq
      * @param <R> the type of elements in the resulting Seq
-     * @param b the Seq to be combined with the current Seq. Must be non-null.
-     * @param zipFunction a BiFunction that determines the combination of elements in the combined Seq. Must be non-null.
+     * @param b the Seq to be combined with the current Seq. Must be {@code non-null}.
+     * @param zipFunction a BiFunction that determines the combination of elements in the combined Seq. Must be {@code non-null}.
      * @return a new Seq that is the result of combining the current Seq with the given Seq
      * @throws IllegalStateException if the sequence is already closed
      * @see #zipWith(Seq, Object, Object, Throwables.BiFunction)
@@ -8519,7 +8519,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * @param b the Seq to be combined with the current Seq. Will be closed along with this Seq.
      * @param valueForNoneA the default value to use for the current Seq when it runs out of elements
      * @param valueForNoneB the default value to use for the given Seq when it runs out of elements
-     * @param zipFunction a BiFunction that determines the combination of elements in the combined Seq. Must be non-null.
+     * @param zipFunction a BiFunction that determines the combination of elements in the combined Seq. Must be {@code non-null}.
      * @return a new Seq that is the result of combining the current Seq with the given Seq
      * @throws IllegalStateException if the sequence is already closed
      * @see N#zip(Iterable, Iterable, Object, Object, BiFunction)
@@ -8552,7 +8552,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * @param <R> the type of elements in the resulting Seq
      * @param b the second Seq to be combined with the current Seq. Will be closed along with this Seq.
      * @param c the third Seq to be combined with the current Seq. Will be closed along with this Seq.
-     * @param zipFunction a TriFunction that determines the combination of elements in the combined Seq. Must be non-null.
+     * @param zipFunction a TriFunction that determines the combination of elements in the combined Seq. Must be {@code non-null}.
      * @return a new Seq that is the result of combining the current Seq with the given Seqs
      * @throws IllegalStateException if the sequence is already closed
      * @see #zipWith(Seq, Seq, Object, Object, Object, Throwables.TriFunction)
@@ -8590,7 +8590,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * @param valueForNoneA the default value to use for the current Seq when it runs out of elements
      * @param valueForNoneB the default value to use for the second Seq when it runs out of elements
      * @param valueForNoneC the default value to use for the third Seq when it runs out of elements
-     * @param zipFunction a TriFunction that determines the combination of elements in the combined Seq. Must be non-null.
+     * @param zipFunction a TriFunction that determines the combination of elements in the combined Seq. Must be {@code non-null}.
      * @return a new Seq that is the result of combining the current Seq with the given Seqs
      * @throws IllegalStateException if the sequence is already closed
      * @see N#zip(Iterable, Iterable, Iterable, Object, Object, Object, TriFunction)
@@ -8999,16 +8999,16 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      *
      * <p>This is a terminal operation. This sequence will be automatically closed after this operation completes, whether normally or exceptionally.</p>
      * 
-     * <p>For example, with sequence [a, b, c, d, e, f] and increment=2:
+     * <p>For example, with sequence [a, b, c, d, e, f] and increment=2:</p>
      * <ul>
      * <li>Pairs processed: (a,b), (c,d), (e,f)</li>
      * </ul>
-     * 
-     * With the same sequence and increment=1:
+     *
+     * <p>With the same sequence and increment=1:</p>
      * <ul>
      * <li>Pairs processed: (a,b), (b,c), (c,d), (d,e), (e,f)</li>
-     * </ul></p>
-     * 
+     * </ul>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Process non-overlapping pairs
@@ -9021,7 +9021,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * @param increment the distance between the first elements of each pair (must be positive)
      * @param action a non-interfering action to perform on each pair of elements
      * @throws IllegalStateException if the sequence is already closed
-     * @throws IllegalArgumentException if the action is null or increment is not positive
+     * @throws IllegalArgumentException if the action is {@code null} or increment is not positive
      * @throws E if an exception occurs during iteration
      * @throws E2 if the action throws an exception
      */
@@ -9098,16 +9098,16 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      *
      * <p>This is a terminal operation. This sequence will be automatically closed after this operation completes, whether normally or exceptionally.</p>
      * 
-     * <p>For example, with sequence [a, b, c, d, e, f, g, h, i] and increment=3:
+     * <p>For example, with sequence [a, b, c, d, e, f, g, h, i] and increment=3:</p>
      * <ul>
      * <li>Triples processed: (a,b,c), (d,e,f), (g,h,i)</li>
      * </ul>
-     * 
-     * With the same sequence and increment=1:
+     *
+     * <p>With the same sequence and increment=1:</p>
      * <ul>
      * <li>Triples processed: (a,b,c), (b,c,d), (c,d,e), (d,e,f), (e,f,g), (f,g,h), (g,h,i)</li>
-     * </ul></p>
-     * 
+     * </ul>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Process non-overlapping triples
@@ -9120,7 +9120,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * @param increment the distance between the first elements of each triple (must be positive)
      * @param action a non-interfering action to perform on each triple of elements
      * @throws IllegalStateException if the sequence is already closed
-     * @throws IllegalArgumentException if the action is null or increment is not positive
+     * @throws IllegalArgumentException if the action is {@code null} or increment is not positive
      * @throws E if an exception occurs during iteration
      * @throws E2 if the action throws an exception
      */
@@ -9309,7 +9309,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
 
     /**
      * Returns an {@code Optional} containing the maximum element of this sequence according to the comparable value
-     * extracted by the provided key mapper function. Null values are considered to be less than non-null values.
+     * extracted by the provided key mapper function. Null values are considered to be less than {@code non-null} values.
      * Returns an empty {@code Optional} if this sequence is empty.
      * 
      * <p>This is a <b>terminal operation</b>.</p>
@@ -9474,7 +9474,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * 
      * <p>This is a <b>short-circuiting terminal operation</b>.</p>
      * 
-     * <p>Implementation note: This is equivalent to {@code atLeast <= stream.filter(predicate).limit(atMost + 1).count() <= atMost}</p>
+     * <p>Implementation note: This is equivalent to {@code {@code atLeast} <= stream.filter(predicate).limit(atMost + 1).count() <= atMost}</p>
      * 
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -11061,7 +11061,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * Groups the elements in this sequence by the keys extracted using the provided key extractor function,
      * transforms the values using the provided value extractor function, and stores the results
      * in a map created by the specified map factory. Each transformed value is placed into a list
-     * associated with its key..</p>
+     * associated with its key.
      *
      * <p>This is a terminal operation. This sequence will be automatically closed after this operation completes, whether normally or exceptionally.</p>
      *
@@ -12341,10 +12341,10 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * Prints all elements of this sequence to the standard output (System.out).
      * The elements are formatted as a comma-separated list enclosed in square brackets: {@code [element1, element2, ...]}.
      * This method should be used with caution when the sequence is large, as it will load all elements into memory.
-     * 
+     *
      * <p>This is a terminal operation. This sequence will be automatically closed after this operation completes, whether normally or exceptionally.</p>
      *
-     * @implNote This method is equivalent to {@code System.out.println(seq.join(", ", "[", "]"))} 
+     * <p><b>Implementation Note:</b> This method is equivalent to {@code System.out.println(seq.join(", ", "[", "]"))}</p> 
      *
      * @throws IllegalStateException if the sequence has already been closed
      * @throws E if an exception occurs during element processing
@@ -12859,7 +12859,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      *             receives the entire sequence as its parameter and can return null
      * @return an Optional containing the result of the function application if this sequence
      *         is not empty, or an empty Optional if the sequence is empty. If the function
-     *         returns null, the Optional will contain null
+     *         returns {@code null}, the Optional will contain null
      * @throws IllegalStateException if the sequence is already closed
      * @throws IllegalArgumentException if the specified function is null
      * @throws E if the underlying sequence operations throw an exception
@@ -12973,11 +12973,11 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * execution. If a close handler throws an exception, subsequent handlers will still be executed,
      * and all exceptions will be aggregated.</p>
      *
-     * @param closeHandler the Runnable to be executed when the sequence is closed. If null or
+     * @param closeHandler the Runnable to be executed when the sequence is closed. If {@code null} or
      *                     empty, the sequence is returned unchanged
      * @return a sequence with the close handler registered. This may be the same sequence instance.
      * @throws IllegalStateException if the sequence is already closed
-     * @throws IllegalArgumentException if the specified closeHandler is null (though null is handled
+     * @throws IllegalArgumentException if the specified closeHandler is {@code null} (though {@code null} is handled
      *                                  gracefully by returning the sequence unchanged)
      */
     @IntermediateOp

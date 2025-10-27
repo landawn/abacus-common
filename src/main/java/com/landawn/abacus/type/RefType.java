@@ -20,6 +20,8 @@ import java.sql.Ref;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
+import com.landawn.abacus.annotation.MayReturnNull;
+
 public class RefType extends AbstractType<Ref> {
 
     public static final String REF = Ref.class.getSimpleName();
@@ -56,7 +58,7 @@ public class RefType extends AbstractType<Ref> {
      * System.out.println(serializable); // Output: false
      * }</pre>
      *
-     * @return false, indicating this type is not serializable
+     * @return {@code false}, indicating this type is not serializable
      */
     @Override
     public boolean isSerializable() {
@@ -84,6 +86,7 @@ public class RefType extends AbstractType<Ref> {
      * @throws UnsupportedOperationException always thrown as Ref cannot be converted to string
      */
     @Override
+    @MayReturnNull
     public String stringOf(final Ref x) throws UnsupportedOperationException {
         throw new UnsupportedOperationException();
     }
@@ -108,6 +111,7 @@ public class RefType extends AbstractType<Ref> {
      * @throws UnsupportedOperationException always thrown as Ref cannot be created from string
      */
     @Override
+    @MayReturnNull
     public Ref valueOf(final String str) throws UnsupportedOperationException {
         throw new UnsupportedOperationException();
     }
@@ -129,10 +133,12 @@ public class RefType extends AbstractType<Ref> {
      *
      * @param rs the ResultSet to read from
      * @param columnIndex the 1-based index of the column to retrieve
-     * @return the Ref value from the specified column, or null if the column value is SQL NULL
+     * @return the Ref value from the specified column, or {@code null} if the column value is SQL NULL
      * @throws SQLException if a database access error occurs or the column index is invalid
      */
+    @MayReturnNull
     @Override
+
     public Ref get(final ResultSet rs, final int columnIndex) throws SQLException {
         return rs.getRef(columnIndex);
     }
@@ -154,9 +160,10 @@ public class RefType extends AbstractType<Ref> {
      *
      * @param rs the ResultSet to read from
      * @param columnLabel the label of the column to retrieve (column name or alias)
-     * @return the Ref value from the specified column, or null if the column value is SQL NULL
+     * @return the Ref value from the specified column, or {@code null} if the column value is SQL NULL
      * @throws SQLException if a database access error occurs or the column label is not found
      */
+    @MayReturnNull
     @Override
     public Ref get(final ResultSet rs, final String columnLabel) throws SQLException {
         return rs.getRef(columnLabel);

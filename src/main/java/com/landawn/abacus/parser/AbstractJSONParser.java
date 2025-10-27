@@ -105,7 +105,7 @@ abstract class AbstractJSONParser extends AbstractParser<JSONSerializationConfig
      *
      * @param <T> the type of the target class
      * @param source the JSON string to deserialize
-     * @param config the deserialization configuration to use, or null to use default configuration
+     * @param config the deserialization configuration to use, or {@code null} to use default configuration
      * @param targetClass the class of the target object to deserialize into
      * @return an instance of the target class populated with data from the JSON string
      * @throws UnsupportedOperationException if this operation is not supported by the implementation
@@ -146,7 +146,7 @@ abstract class AbstractJSONParser extends AbstractParser<JSONSerializationConfig
      * }</pre>
      *
      * @param source the JSON array string to deserialize
-     * @param config the deserialization configuration to use, or null to use default configuration
+     * @param config the deserialization configuration to use, or {@code null} to use default configuration
      * @param output the array to populate with deserialized elements
      * @throws UnsupportedOperationException if this operation is not supported by the implementation
      */
@@ -185,7 +185,7 @@ abstract class AbstractJSONParser extends AbstractParser<JSONSerializationConfig
      * }</pre>
      *
      * @param source the JSON array string to deserialize
-     * @param config the deserialization configuration to use, or null to use default configuration
+     * @param config the deserialization configuration to use, or {@code null} to use default configuration
      * @param output the collection to populate with deserialized elements
      * @throws UnsupportedOperationException if this operation is not supported by the implementation
      */
@@ -224,7 +224,7 @@ abstract class AbstractJSONParser extends AbstractParser<JSONSerializationConfig
      * }</pre>
      *
      * @param source the JSON object string to deserialize
-     * @param config the deserialization configuration to use, or null to use default configuration
+     * @param config the deserialization configuration to use, or {@code null} to use default configuration
      * @param output the map to populate with deserialized key-value pairs
      * @throws UnsupportedOperationException if this operation is not supported by the implementation
      */
@@ -270,7 +270,7 @@ abstract class AbstractJSONParser extends AbstractParser<JSONSerializationConfig
      * @param source the JSON string containing the substring to deserialize
      * @param fromIndex the beginning index of the substring, inclusive
      * @param toIndex the ending index of the substring, exclusive
-     * @param config the deserialization configuration to use, or null to use default configuration
+     * @param config the deserialization configuration to use, or {@code null} to use default configuration
      * @param targetClass the class of the target object to deserialize into
      * @return an instance of the target class populated with data from the JSON substring
      */

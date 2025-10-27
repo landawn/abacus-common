@@ -21,47 +21,47 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Indicates that the annotated element gracefully handles null values without throwing exceptions.
+ * Indicates that the annotated element gracefully handles {@code null} values without throwing exceptions.
  * This annotation documents that the code has been specifically designed to be defensive against
- * null inputs, providing predictable behavior even when null values are encountered.
+ * {@code null} inputs, providing predictable behavior even when {@code null} values are encountered.
  * 
  * <p><b>When applied to methods or constructors:</b></p>
  * <ul>
- *   <li>The method/constructor can accept null arguments without throwing NullPointerException</li>
+ *   <li>The method/constructor can accept {@code null} arguments without throwing NullPointerException</li>
  *   <li>Null inputs are handled with sensible default behavior or early returns</li>
- *   <li>The implementation includes proper null checks and defensive programming</li>
+ *   <li>The implementation includes proper {@code null} checks and defensive programming</li>
  * </ul>
  * 
  * <p><b>When applied to parameters:</b></p>
  * <ul>
  *   <li>Null is an acceptable and expected value for this parameter</li>
- *   <li>The method logic properly handles the null case</li>
+ *   <li>The method logic properly handles the {@code null} case</li>
  *   <li>No NullPointerException will occur from passing null</li>
  * </ul>
  * 
  * <p><b>Common null-safe patterns:</b></p>
  * <ul>
  *   <li>Returning empty collections instead of null</li>
- *   <li>Using default values when null is provided</li>
- *   <li>Gracefully skipping operations on null inputs</li>
+ *   <li>Using default values when {@code null} is provided</li>
+ *   <li>Gracefully skipping operations on {@code null} inputs</li>
  *   <li>Implementing the Null Object pattern</li>
  * </ul>
  * 
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * public class StringUtils {
- *     {@literal @}NullSafe
- *     public static String trim({@literal @}NullSafe String input) {
+ *     @NullSafe
+ *     public static String trim(@NullSafe String input) {
  *         return input == null ? "" : input.trim();
  *     }
  *     
- *     {@literal @}NullSafe
- *     public static boolean isEmpty({@literal @}NullSafe String str) {
+ *     @NullSafe
+ *     public static boolean isEmpty(@NullSafe String str) {
  *         return str == null || str.length() == 0;
  *     }
  *     
- *     {@literal @}NullSafe
- *     public List<String> parseTokens({@literal @}NullSafe String input) {
+ *     @NullSafe
+ *     public List<String> parseTokens(@NullSafe String input) {
  *         if (input == null) {
  *             return Collections.emptyList();
  *         }

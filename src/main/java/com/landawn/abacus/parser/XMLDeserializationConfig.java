@@ -63,6 +63,17 @@ public class XMLDeserializationConfig extends DeserializationConfig<XMLDeseriali
     public static final class XDC extends XMLDeserializationConfig {
 
         /**
+         * Constructs a new XDC factory instance.
+         *
+         * <p>This constructor is provided to satisfy javadoc requirements.
+         * The XDC class is intended to be used through its static factory methods
+         * rather than instantiation.</p>
+         */
+        public XDC() {
+            super();
+        }
+
+        /**
          * Creates a new XMLDeserializationConfig instance with default settings.
          *
          * @return a new XMLDeserializationConfig instance

@@ -308,7 +308,7 @@ public final class LineIterator extends ObjIterator<String> implements AutoClose
      * This method retrieves the next line from the underlying reader. It returns the line
      * that was previously cached by {@link #hasNext()}, or attempts to read a new line if
      * {@code hasNext()} hasn't been called. The returned line does not include any
-     * line-termination characters (such as '\n' or '\r\n').
+     * line-termination characters (such as <i>\n</i> or '\r\n').
      * <p>
      * You must call {@link #hasNext()} before calling this method to check if a line is
      * available, or ensure you handle the {@link NoSuchElementException} that will be thrown
@@ -323,7 +323,7 @@ public final class LineIterator extends ObjIterator<String> implements AutoClose
      * }
      * }</pre>
      *
-     * @return the next line from the input, never null (empty lines are returned as empty strings)
+     * @return the next line from the input, never {@code null} (empty lines are returned as empty strings)
      * @throws NoSuchElementException if there is no line to return (end of stream reached)
      */
     @Override

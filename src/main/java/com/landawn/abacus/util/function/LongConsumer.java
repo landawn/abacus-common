@@ -31,9 +31,9 @@ import com.landawn.abacus.util.Throwables;
  * <p>This is a functional interface whose functional method is
  * {@link #accept(long)}.
  *
- * <p>Refer to JDK API documentation at: 
+ * <p>Refer to JDK API documentation at:
  * <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html">
- * https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a>
+ * https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a></p>
  *
  * @see java.util.function.Consumer
  * @see java.util.function.LongConsumer

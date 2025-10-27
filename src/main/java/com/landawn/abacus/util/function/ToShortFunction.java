@@ -37,7 +37,7 @@ public interface ToShortFunction<T> extends Throwables.ToShortFunction<T, Runtim
 
     /**
      * A predefined ToShortFunction instance that unboxes a Short object to a primitive short.
-     * Returns 0 if the input is null, otherwise returns the short value of the Short object.
+     * Returns 0 if the input is {@code null}, otherwise returns the short value of the Short object.
      * 
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -50,7 +50,7 @@ public interface ToShortFunction<T> extends Throwables.ToShortFunction<T, Runtim
 
     /**
      * A predefined ToShortFunction instance that converts any Number object to a primitive short.
-     * Returns 0 if the input is null, otherwise calls the shortValue() method on the Number object.
+     * Returns 0 if the input is {@code null}, otherwise calls the shortValue() method on the Number object.
      * This function can handle various Number subclasses including Integer, Long, Double, Float, BigDecimal, etc.
      * 
      * <p>Note: This conversion may result in loss of precision for floating-point numbers or

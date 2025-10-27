@@ -129,11 +129,6 @@ public enum MediaType {
 
     private final int intValue;
 
-    /**
-     * Constructs a MediaType with the specified integer value.
-     * 
-     * @param intValue the numeric value associated with this media type
-     */
     MediaType(final int intValue) {
         this.intValue = intValue;
     }

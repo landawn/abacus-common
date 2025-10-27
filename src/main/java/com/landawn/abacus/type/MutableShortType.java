@@ -41,9 +41,10 @@ public class MutableShortType extends NumberType<MutableShort> {
 
     /**
      * Converts a {@link MutableShort} object to its string representation.
-     * 
+     *
      * @param x the MutableShort object to convert
-     * @return the string representation of the short value, or null if the input is null
+     * @return the string representation of the short value, or {@code null} if the input is null
+     @MayReturnNull
      */
     @Override
     public String stringOf(final MutableShort x) {
@@ -52,10 +53,11 @@ public class MutableShortType extends NumberType<MutableShort> {
 
     /**
      * Converts a string representation to a {@link MutableShort} object.
-     * 
+     *
      * @param str the string to convert
-     * @return a MutableShort containing the parsed short value, or null if the input string is empty or null
+     * @return a MutableShort containing the parsed short value, or {@code null} if the input string is empty or null
      * @throws NumberFormatException if the string cannot be parsed as a short
+     @MayReturnNull
      */
     @Override
     public MutableShort valueOf(final String str) {
@@ -64,7 +66,7 @@ public class MutableShortType extends NumberType<MutableShort> {
 
     /**
      * Retrieves a {@link MutableShort} value from a ResultSet at the specified column index.
-     * 
+     *
      * @param rs the ResultSet to read from
      * @param columnIndex the column index (1-based) to retrieve the value from
      * @return a MutableShort containing the short value from the ResultSet
@@ -77,7 +79,7 @@ public class MutableShortType extends NumberType<MutableShort> {
 
     /**
      * Retrieves a {@link MutableShort} value from a ResultSet using the specified column label.
-     * 
+     *
      * @param rs the ResultSet to read from
      * @param columnLabel the label for the column specified with the SQL AS clause
      * @return a MutableShort containing the short value from the ResultSet
@@ -90,10 +92,10 @@ public class MutableShortType extends NumberType<MutableShort> {
 
     /**
      * Sets a parameter in a PreparedStatement to the value of a {@link MutableShort}.
-     * 
+     *
      * @param stmt the PreparedStatement to set the parameter on
      * @param columnIndex the parameter index (1-based) to set
-     * @param x the MutableShort value to set, or null (will be stored as 0)
+     * @param x the MutableShort value to set, or {@code null} (will be stored as 0)
      * @throws SQLException if a database access error occurs or the columnIndex is invalid
      */
     @Override
@@ -103,10 +105,10 @@ public class MutableShortType extends NumberType<MutableShort> {
 
     /**
      * Sets a named parameter in a CallableStatement to the value of a {@link MutableShort}.
-     * 
+     *
      * @param stmt the CallableStatement to set the parameter on
      * @param parameterName the name of the parameter to set
-     * @param x the MutableShort value to set, or null (will be stored as 0)
+     * @param x the MutableShort value to set, or {@code null} (will be stored as 0)
      * @throws SQLException if a database access error occurs or the parameterName is invalid
      */
     @Override
@@ -116,7 +118,7 @@ public class MutableShortType extends NumberType<MutableShort> {
 
     /**
      * Appends the string representation of a {@link MutableShort} to an Appendable.
-     * 
+     *
      * @param appendable the Appendable to write to
      * @param x the MutableShort value to append
      * @throws IOException if an I/O error occurs during the append operation
@@ -133,7 +135,7 @@ public class MutableShortType extends NumberType<MutableShort> {
     /**
      * Writes the character representation of a {@link MutableShort} to a CharacterWriter.
      * This method is typically used for JSON/XML serialization.
-     * 
+     *
      * @param writer the CharacterWriter to write to
      * @param x the MutableShort value to write
      * @param config the serialization configuration

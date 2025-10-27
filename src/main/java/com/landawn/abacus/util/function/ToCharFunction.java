@@ -29,7 +29,7 @@ public interface ToCharFunction<T> extends Throwables.ToCharFunction<T, RuntimeE
 
     /**
      * A predefined ToCharFunction instance that unboxes a Character object to a primitive char.
-     * Returns 0 if the input is null, otherwise returns the char value of the Character object.
+     * Returns 0 if the input is {@code null}, otherwise returns the char value of the Character object.
      * 
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code

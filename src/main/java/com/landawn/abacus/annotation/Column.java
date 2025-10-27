@@ -43,15 +43,15 @@ import java.lang.annotation.Target;
  * 
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
- * {@literal @}Entity
+ * @Entity
  * public class User {
- *     {@literal @}Column(name = "user_id")
+ *     @Column(name = "user_id")
  *     private Long id;
  *     
- *     {@literal @}Column(name = "user_name")
+ *     @Column(name = "user_name")
  *     private String userName;
  *     
- *     {@literal @}Column  // Uses field name "email" as column name
+ *     @Column  // Uses field name "email" as column name
  *     private String email;
  * }
  * }</pre>
@@ -89,7 +89,7 @@ public @interface Column {
      * 
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * {@literal @}Column(name = "created_date")
+     * @Column(name = "created_date")
      * private LocalDateTime createdDate;
      * }</pre>
      * 

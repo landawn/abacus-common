@@ -28,7 +28,7 @@ import com.landawn.abacus.util.Throwables;
  * 
  * <p>For more information about functional interfaces, refer to the JDK API documentation at:
  * <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html">
- * https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a>
+ * https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a></p>
  * 
  * @param <T> the type of the input to the operation
  * 

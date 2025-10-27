@@ -14,6 +14,7 @@
 
 package com.landawn.abacus.util.function;
 
+import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.util.Throwables;
 
 /**
@@ -29,9 +30,9 @@ import com.landawn.abacus.util.Throwables;
  * <p>This is a functional interface whose functional method is
  * {@link #apply(long)}.
  *
- * <p>Refer to JDK API documentation at: 
+ * <p>Refer to JDK API documentation at:
  * <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html">
- * https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a>
+ * https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a></p>
  *
  * @param <R> the type of the result of the function
  *
@@ -63,10 +64,17 @@ public interface LongFunction<R> extends Throwables.LongFunction<R, RuntimeExcep
      *   <li>Computing derived values from long inputs</li>
      * </ul>
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * LongFunction<String> toString = value -> "Value: " + value;
+     * String result = toString.apply(42L); // Returns "Value: 42"
+     * }</pre>
+     *
      * @param value the function argument, a long value to be transformed
      * @return the function result of type R
      */
     @Override
+    @MayReturnNull
     R apply(long value);
 
     /**
@@ -113,6 +121,12 @@ public interface LongFunction<R> extends Throwables.LongFunction<R, RuntimeExcep
      * <p>Note that this returns a Long object (boxed value), not a primitive long.
      * For operations that need to maintain primitive types, consider using
      * {@link java.util.function.LongUnaryOperator} instead.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * LongFunction<Long> identity = LongFunction.identity();
+     * Long result = identity.apply(42L); // Returns 42L (boxed)
+     * }</pre>
      *
      * @return a function that always returns its input argument as a Long object
      */

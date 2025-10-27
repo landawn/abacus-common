@@ -14,6 +14,8 @@
 
 package com.landawn.abacus.util;
 
+import com.landawn.abacus.annotation.MayReturnNull;
+
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
@@ -26,7 +28,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * This class wraps common reflection tasks like field access, method invocation, and object instantiation
  * in an easy-to-use fluent API.
  * 
- * <p>For better performance, add the <a href="https://github.com/EsotericSoftware/reflectasm">reflectasm</a> 
+ * <p>For better performance, add the <a href="https://github.com/EsotericSoftware/reflectasm">reflectasm</a>
  * library to your build path. When available, this class will automatically use ReflectASM for improved
  * reflection performance.</p>
  * 
@@ -185,15 +187,16 @@ public final class Reflection<T> {
 
     /**
      * Returns the target instance being reflected upon.
-     * Returns null if this Reflection was created from a Class rather than an instance.
+     * Returns {@code null} if this Reflection was created from a Class rather than an instance.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * MyClass obj = Reflection.on(MyClass.class)._new().instance();
      * }</pre>
      *
-     * @return the target instance, or null if reflecting on a class
+     * @return the target instance, or {@code null} if reflecting on a class
      */
+    @MayReturnNull
     public T instance() {
         return target;
     }
@@ -438,12 +441,6 @@ public final class Reflection<T> {
         return result;
     }
 
-    /**
-     * Gets the types.
-     *
-     * @param values the array of values from which to extract types
-     * @return an array of Class objects representing the types of the values
-     */
     private Class<?>[] getTypes(final Object... values) {
         if (N.isEmpty(values)) {
             return EMPTY_CLASSES;

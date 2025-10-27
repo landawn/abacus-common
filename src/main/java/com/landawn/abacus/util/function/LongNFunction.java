@@ -14,6 +14,7 @@
 
 package com.landawn.abacus.util.function;
 
+import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.util.Throwables;
 
 /**
@@ -77,6 +78,7 @@ public interface LongNFunction<R> extends Throwables.LongNFunction<R, RuntimeExc
      * @return the function result of type R
      */
     @Override
+    @MayReturnNull
     R apply(long... args);
 
     /**

@@ -37,12 +37,12 @@ import com.landawn.abacus.util.function.ToShortFunction;
 /**
  * Factory utility class for creating and combining Comparator instances.
  * This class provides a comprehensive set of static methods for creating comparators
- * that handle various data types, null values, and complex comparison scenarios.
+ * that handle various data types, {@code null} values, and complex comparison scenarios.
  *
  * <p>The comparators created by this class follow these general principles:</p>
  * <ul>
- *   <li>Null handling: Methods with "nullsFirst" treat null as the minimum value,
- *       while "nullsLast" treats null as the maximum value</li>
+ *   <li>Null handling: Methods with "nullsFirst" treat {@code null} as the minimum value,
+ *       while "nullsLast" treats {@code null} as the maximum value</li>
  *   <li>Natural ordering: Comparable objects are compared using their natural order</li>
  *   <li>Extraction: Methods with key extractors compare objects based on extracted values</li>
  *   <li>Reversal: Methods prefixed with "reversed" invert the comparison order</li>
@@ -88,8 +88,8 @@ public final class Comparators {
      * A comparator for boolean arrays that compares elements lexicographically.
      * The comparison is performed element by element until a difference is found.
      * If all compared elements are equal, the shorter array is considered less than the longer array.
-     * In element comparison, {@code false} is considered less than true.
-     * Null arrays are handled with null considered as the minimum value.
+     * In element comparison, {@code false} is considered less than {@code true}.
+     * Null arrays are handled with {@code null} considered as the minimum value.
      */
     public static final Comparator<boolean[]> BOOLEAN_ARRAY_COMPARATOR = (a, b) -> {
         final int lenA = N.len(a);
@@ -109,7 +109,7 @@ public final class Comparators {
      * The comparison is performed element by element until a difference is found.
      * If all compared elements are equal, the shorter array is considered less than the longer array.
      * Characters are compared by their numeric values.
-     * Null arrays are handled with null considered as the minimum value.
+     * Null arrays are handled with {@code null} considered as the minimum value.
      */
     public static final Comparator<char[]> CHAR_ARRAY_COMPARATOR = (a, b) -> {
         final int lenA = N.len(a);
@@ -129,7 +129,7 @@ public final class Comparators {
      * The comparison is performed element by element until a difference is found.
      * If all compared elements are equal, the shorter array is considered less than the longer array.
      * Bytes are compared as signed values.
-     * Null arrays are handled with null considered as the minimum value.
+     * Null arrays are handled with {@code null} considered as the minimum value.
      */
     public static final Comparator<byte[]> BYTE_ARRAY_COMPARATOR = (a, b) -> {
         final int lenA = N.len(a);
@@ -149,7 +149,7 @@ public final class Comparators {
      * The comparison is performed element by element until a difference is found.
      * If all compared elements are equal, the shorter array is considered less than the longer array.
      * Shorts are compared as signed values.
-     * Null arrays are handled with null considered as the minimum value.
+     * Null arrays are handled with {@code null} considered as the minimum value.
      */
     public static final Comparator<short[]> SHORT_ARRAY_COMPARATOR = (a, b) -> {
         final int lenA = N.len(a);
@@ -169,7 +169,7 @@ public final class Comparators {
      * The comparison is performed element by element until a difference is found.
      * If all compared elements are equal, the shorter array is considered less than the longer array.
      * Integers are compared as signed values.
-     * Null arrays are handled with null considered as the minimum value.
+     * Null arrays are handled with {@code null} considered as the minimum value.
      */
     public static final Comparator<int[]> INT_ARRAY_COMPARATOR = (a, b) -> {
         final int lenA = N.len(a);
@@ -189,7 +189,7 @@ public final class Comparators {
      * The comparison is performed element by element until a difference is found.
      * If all compared elements are equal, the shorter array is considered less than the longer array.
      * Longs are compared as signed values.
-     * Null arrays are handled with null considered as the minimum value.
+     * Null arrays are handled with {@code null} considered as the minimum value.
      */
     public static final Comparator<long[]> LONG_ARRAY_COMPARATOR = (a, b) -> {
         final int lenA = N.len(a);
@@ -209,7 +209,7 @@ public final class Comparators {
      * The comparison is performed element by element until a difference is found.
      * If all compared elements are equal, the shorter array is considered less than the longer array.
      * Floats are compared using {@link Float#compare(float, float)} to handle NaN and -0.0f correctly.
-     * Null arrays are handled with null considered as the minimum value.
+     * Null arrays are handled with {@code null} considered as the minimum value.
      */
     public static final Comparator<float[]> FLOAT_ARRAY_COMPARATOR = (a, b) -> {
         final int lenA = N.len(a);
@@ -232,7 +232,7 @@ public final class Comparators {
      * The comparison is performed element by element until a difference is found.
      * If all compared elements are equal, the shorter array is considered less than the longer array.
      * Doubles are compared using {@link Double#compare(double, double)} to handle NaN and -0.0 correctly.
-     * Null arrays are handled with null considered as the minimum value.
+     * Null arrays are handled with {@code null} considered as the minimum value.
      */
     public static final Comparator<double[]> DOUBLE_ARRAY_COMPARATOR = (a, b) -> {
         final int lenA = N.len(a);
@@ -254,8 +254,8 @@ public final class Comparators {
      * A comparator for Object arrays that compares elements lexicographically using natural ordering.
      * The comparison is performed element by element until a difference is found.
      * If all compared elements are equal, the shorter array is considered less than the longer array.
-     * Elements are compared using their natural ordering with null considered as the minimum value.
-     * Null arrays are handled with null considered as the minimum value.
+     * Elements are compared using their natural ordering with {@code null} considered as the minimum value.
+     * Null arrays are handled with {@code null} considered as the minimum value.
      */
     public static final Comparator<Object[]> OBJECT_ARRAY_COMPARATOR = (a, b) -> {
         final int lenA = N.len(a);
@@ -277,7 +277,7 @@ public final class Comparators {
      * A comparator for Collections that compares elements lexicographically using natural ordering.
      * The comparison is performed by iterating through elements until a difference is found.
      * If all compared elements are equal, the smaller collection is considered less than the larger collection.
-     * Elements are compared using their natural ordering with null considered as the minimum value.
+     * Elements are compared using their natural ordering with {@code null} considered as the minimum value.
      * Empty collections are considered less than non-empty collections.
      */
     @SuppressWarnings("rawtypes")
@@ -312,7 +312,7 @@ public final class Comparators {
 
     /**
      * Returns a comparator that compares {@link Comparable} objects in their natural order.
-     * Null values are considered less than non-null values (nulls first).
+     * Null values are considered less than {@code non-null} values (nulls first).
      * This method is equivalent to {@link #nullsFirst()}.
      *
      * <p><b>Usage Examples:</b></p>
@@ -334,7 +334,7 @@ public final class Comparators {
 
     /**
      * Returns a comparator that compares {@link Comparable} objects in their natural order
-     * with null values considered less than non-null values.
+     * with {@code null} values considered less than {@code non-null} values.
      * This method is equivalent to {@link #naturalOrder()}.
      *
      * <p><b>Usage Examples:</b></p>
@@ -345,7 +345,7 @@ public final class Comparators {
      * }</pre>
      *
      * @param <T> the type of the objects being compared, must extend Comparable
-     * @return a comparator that considers null less than non-null values, comparing non-null values in natural order
+     * @return a comparator that considers {@code null} less than {@code non-null} values, comparing {@code non-null} values in natural order
      * @see #naturalOrder()
      * @see #nullsLast()
      */
@@ -355,8 +355,8 @@ public final class Comparators {
     }
 
     /**
-     * Returns a comparator that considers null values to be less than non-null values.
-     * When both values are non-null, the specified comparator is used for comparison.
+     * Returns a comparator that considers {@code null} values to be less than {@code non-null} values.
+     * When both values are {@code non-null}, the specified comparator is used for comparison.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -367,8 +367,8 @@ public final class Comparators {
      * }</pre>
      *
      * @param <T> the type of the objects being compared
-     * @param cmp the comparator to use for non-null values, may be null
-     * @return a comparator that considers null less than non-null values, comparing non-null values using the specified comparator
+     * @param cmp the comparator to use for {@code non-null} values, may be null
+     * @return a comparator that considers {@code null} less than {@code non-null} values, comparing {@code non-null} values using the specified comparator
      */
     public static <T> Comparator<T> nullsFirst(final Comparator<T> cmp) {
         if (cmp == null || cmp == NULL_FIRST_COMPARATOR) { // NOSONAR
@@ -380,7 +380,7 @@ public final class Comparators {
 
     /**
      * Returns a comparator that compares objects by extracting a {@link Comparable} key using the provided function.
-     * The extracted keys are compared using natural ordering with null keys considered less than non-null keys.
+     * The extracted keys are compared using natural ordering with {@code null} keys considered less than {@code non-null} keys.
      * This is a convenience method that combines key extraction with null-safe natural ordering comparison.
      *
      * <p><b>Usage Examples:</b></p>
@@ -412,9 +412,9 @@ public final class Comparators {
     private static final Comparator NULLS_FIRST_OR_ELSE_EQUAL = (a, b) -> a == null ? (b == null ? 0 : -1) : (b == null ? 1 : 0);
 
     /**
-     * Returns a comparator that considers null values to be less than non-null values,
-     * but treats all non-null values as equal. This is useful when you only want to
-     * separate null from non-null values without ordering the non-null values.
+     * Returns a comparator that considers {@code null} values to be less than {@code non-null} values,
+     * but treats all {@code non-null} values as equal. This is useful when you only want to
+     * separate {@code null} from {@code non-null} values without ordering the {@code non-null} values.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -424,7 +424,7 @@ public final class Comparators {
      * }</pre>
      *
      * @param <T> the type of the objects being compared
-     * @return a comparator that puts nulls first and treats all non-null values as equal
+     * @return a comparator that puts nulls first and treats all {@code non-null} values as equal
      * @see #nullsFirst()
      * @see #nullsLastOrElseEqual()
      */
@@ -435,7 +435,7 @@ public final class Comparators {
 
     /**
      * Returns a comparator that compares {@link Comparable} objects in their natural order
-     * with null values considered greater than non-null values.
+     * with {@code null} values considered greater than {@code non-null} values.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -445,7 +445,7 @@ public final class Comparators {
      * }</pre>
      *
      * @param <T> the type of the objects being compared, must extend Comparable
-     * @return a comparator that considers null greater than non-null values, comparing non-null values in natural order
+     * @return a comparator that considers {@code null} greater than {@code non-null} values, comparing {@code non-null} values in natural order
      * @see #nullsFirst()
      */
     @SuppressWarnings("rawtypes")
@@ -454,8 +454,8 @@ public final class Comparators {
     }
 
     /**
-     * Returns a comparator that considers null values to be greater than non-null values.
-     * When both values are non-null, the specified comparator is used for comparison.
+     * Returns a comparator that considers {@code null} values to be greater than {@code non-null} values.
+     * When both values are {@code non-null}, the specified comparator is used for comparison.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -466,8 +466,8 @@ public final class Comparators {
      * }</pre>
      *
      * @param <T> the type of the objects being compared
-     * @param cmp the comparator to use for non-null values, may be null
-     * @return a comparator that considers null greater than non-null values, comparing non-null values using the specified comparator
+     * @param cmp the comparator to use for {@code non-null} values, may be null
+     * @return a comparator that considers {@code null} greater than {@code non-null} values, comparing {@code non-null} values using the specified comparator
      */
     public static <T> Comparator<T> nullsLast(final Comparator<T> cmp) {
         if (cmp == null || cmp == NULL_LAST_COMPARATOR) { // NOSONAR
@@ -482,7 +482,7 @@ public final class Comparators {
 
     /**
      * Returns a comparator that compares objects by extracting a {@link Comparable} key using the provided function.
-     * The extracted keys are compared using natural ordering with null keys considered greater than non-null keys.
+     * The extracted keys are compared using natural ordering with {@code null} keys considered greater than {@code non-null} keys.
      * This is a convenience method that combines key extraction with null-safe natural ordering comparison.
      *
      * <p><b>Usage Examples:</b></p>
@@ -511,9 +511,9 @@ public final class Comparators {
     }
 
     /**
-     * Returns a comparator that considers null values to be greater than non-null values,
-     * but treats all non-null values as equal. This is useful when you only want to
-     * separate null from non-null values without ordering the non-null values.
+     * Returns a comparator that considers {@code null} values to be greater than {@code non-null} values,
+     * but treats all {@code non-null} values as equal. This is useful when you only want to
+     * separate {@code null} from {@code non-null} values without ordering the {@code non-null} values.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -523,7 +523,7 @@ public final class Comparators {
      * }</pre>
      *
      * @param <T> the type of the objects being compared
-     * @return a comparator that puts nulls last and treats all non-null values as equal
+     * @return a comparator that puts nulls last and treats all {@code non-null} values as equal
      * @see #nullsLast()
      * @see #nullsFirstOrElseEqual()
      */
@@ -636,7 +636,7 @@ public final class Comparators {
 
     /**
      * Returns a comparator that compares objects by extracting a {@link Comparable} key using the provided function.
-     * The extracted keys are compared using natural ordering. This method treats null keys as the minimum value
+     * The extracted keys are compared using natural ordering. This method treats {@code null} keys as the minimum value
      * (equivalent to using nullsFirst for the key comparison).
      *
      * <p><b>Usage Examples:</b></p>
@@ -668,10 +668,10 @@ public final class Comparators {
 
     /**
      * Returns a comparator that compares objects by extracting a {@link Comparable} key using the provided function,
-     * but only compares non-null objects. If either object being compared is null, it is treated as less than
-     * any non-null object. The extracted keys are compared using natural ordering with nulls first.
+     * but only compares {@code non-null} objects. If either object being compared is {@code null}, it is treated as less than
+     * any {@code non-null} object. The extracted keys are compared using natural ordering with nulls first.
      *
-     * <p>This method is useful when you want to handle null objects specially while still comparing
+     * <p>This method is useful when you want to handle {@code null} objects specially while still comparing
      * their extracted keys with null-safe natural ordering.</p>
      *
      * <p><b>Usage Examples:</b></p>
@@ -688,7 +688,7 @@ public final class Comparators {
      *
      * @param <T> the type of the objects being compared
      * @param keyExtractor the function to extract the comparable key from objects
-     * @return a comparator that handles null objects and null keys appropriately
+     * @return a comparator that handles {@code null} objects and {@code null} keys appropriately
      * @throws IllegalArgumentException if keyExtractor is null
      * @see #comparingBy(Function)
      * @see #comparingByIfNotNullOrElseNullsLast(Function)
@@ -706,10 +706,10 @@ public final class Comparators {
 
     /**
      * Returns a comparator that compares objects by extracting a {@link Comparable} key using the provided function,
-     * but only compares non-null objects. If either object being compared is null, it is treated as greater than
-     * any non-null object. The extracted keys are compared using natural ordering with nulls last.
+     * but only compares {@code non-null} objects. If either object being compared is {@code null}, it is treated as greater than
+     * any {@code non-null} object. The extracted keys are compared using natural ordering with nulls last.
      *
-     * <p>This method is useful when you want to handle null objects specially while still comparing
+     * <p>This method is useful when you want to handle {@code null} objects specially while still comparing
      * their extracted keys with null-safe natural ordering.</p>
      *
      * <p><b>Usage Examples:</b></p>
@@ -726,7 +726,7 @@ public final class Comparators {
      *
      * @param <T> the type of the objects being compared
      * @param keyExtractor the function to extract the comparable key from objects
-     * @return a comparator that handles null objects and null keys appropriately
+     * @return a comparator that handles {@code null} objects and {@code null} keys appropriately
      * @throws IllegalArgumentException if keyExtractor is null
      * @see #comparingBy(Function)
      * @see #comparingByIfNotNullOrElseNullsFirst(Function)
@@ -781,8 +781,8 @@ public final class Comparators {
 
     /**
      * Returns a comparator that compares objects by extracting a key using the provided function
-     * and comparing the keys with the specified comparator, but only for non-null objects.
-     * If either object being compared is null, it is treated as less than any non-null object.
+     * and comparing the keys with the specified comparator, but only for {@code non-null} objects.
+     * If either object being compared is {@code null}, it is treated as less than any {@code non-null} object.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -801,7 +801,7 @@ public final class Comparators {
      * @param <U> the type of the keys extracted for comparison
      * @param keyExtractor the function to extract keys from objects
      * @param keyComparator the comparator to use for comparing extracted keys
-     * @return a comparator that handles null objects appropriately
+     * @return a comparator that handles {@code null} objects appropriately
      * @throws IllegalArgumentException if keyExtractor or keyComparator is null
      */
     public static <T, U> Comparator<T> comparingByIfNotNullOrElseNullsFirst(final Function<? super T, ? extends U> keyExtractor,
@@ -814,8 +814,8 @@ public final class Comparators {
 
     /**
      * Returns a comparator that compares objects by extracting a key using the provided function
-     * and comparing the keys with the specified comparator, but only for non-null objects.
-     * If either object being compared is null, it is treated as greater than any non-null object.
+     * and comparing the keys with the specified comparator, but only for {@code non-null} objects.
+     * If either object being compared is {@code null}, it is treated as greater than any {@code non-null} object.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -834,7 +834,7 @@ public final class Comparators {
      * @param <U> the type of the keys extracted for comparison
      * @param keyExtractor the function to extract keys from objects
      * @param keyComparator the comparator to use for comparing extracted keys
-     * @return a comparator that handles null objects appropriately
+     * @return a comparator that handles {@code null} objects appropriately
      * @throws IllegalArgumentException if keyExtractor or keyComparator is null
      */
     public static <T, U> Comparator<T> comparingByIfNotNullOrElseNullsLast(final Function<? super T, ? extends U> keyExtractor,
@@ -1061,7 +1061,7 @@ public final class Comparators {
 
     /**
      * Returns a comparator that compares strings ignoring case differences.
-     * Null values are considered less than non-null values. This comparator
+     * Null values are considered less than {@code non-null} values. This comparator
      * uses {@link String#compareToIgnoreCase(String)} for the comparison.
      *
      * <p><b>Usage Examples:</b></p>
@@ -1079,7 +1079,7 @@ public final class Comparators {
 
     /**
      * Returns a comparator that compares objects by extracting a String value using the provided function
-     * and comparing them ignoring case differences. Null values are considered less than non-null values.
+     * and comparing them ignoring case differences. Null values are considered less than {@code non-null} values.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1343,7 +1343,7 @@ public final class Comparators {
      *
      * <p>The comparison algorithm:</p>
      * <ol>
-     *   <li>If both arrays are empty or null, they are considered equal</li>
+     *   <li>If both arrays are empty or {@code null}, they are considered equal</li>
      *   <li>An empty/null array is considered less than a non-empty array</li>
      *   <li>Elements are compared in order until a difference is found</li>
      *   <li>If all compared elements are equal, the shorter array is considered less</li>
@@ -1818,7 +1818,7 @@ public final class Comparators {
      * @param <T> the type of beans to compare
      * @param propNamesToCompare collection of property names to compare in order
      * @return a comparator that compares beans by the specified properties
-     * @throws IllegalArgumentException if propNamesToCompare is null or contains invalid property names
+     * @throws IllegalArgumentException if propNamesToCompare is {@code null} or contains invalid property names
      * @deprecated call {@code getPropValue} by reflection apis during comparing or sorting may have huge impact to performance. Use {@link ComparisonBuilder} instead.
      * @see Builder#compare(Object, Object, Comparator)
      * @see ComparisonBuilder
@@ -1833,11 +1833,11 @@ public final class Comparators {
     /**
      * Returns a comparator that imposes the reverse of the natural ordering on a collection
      * of {@link Comparable} objects. Unlike {@code Collections.reverseOrder()}, this comparator
-     * handles null values by treating them as greater than non-null values (nulls last).
+     * handles {@code null} values by treating them as greater than {@code non-null} values (nulls last).
      *
      * <p>The returned comparator does NOT throw {@link NullPointerException} when comparing
-     * null values. Instead, null is considered greater than any non-null value, and when both
-     * values are null, they are considered equal.</p>
+     * {@code null} values. Instead, {@code null} is considered greater than any {@code non-null} value, and when both
+     * values are {@code null}, they are considered equal.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1860,7 +1860,7 @@ public final class Comparators {
 
     /**
      * Returns a comparator that imposes the reverse ordering of the specified comparator.
-     * If the specified comparator is null or the natural order comparator, returns the
+     * If the specified comparator is {@code null} or the natural order comparator, returns the
      * reverse natural order comparator. If the specified comparator is already the reverse
      * natural order comparator, returns the natural order comparator.
      *
@@ -1882,7 +1882,7 @@ public final class Comparators {
      * }</pre>
      *
      * @param <T> the type of objects to compare
-     * @param cmp the comparator to reverse, or null for natural order
+     * @param cmp the comparator to reverse, or {@code null} for natural order
      * @return a comparator that imposes the reverse ordering of cmp
      */
     public static <T> Comparator<T> reverseOrder(final Comparator<T> cmp) {
@@ -1901,7 +1901,7 @@ public final class Comparators {
      * than {@code false}.
      *
      * <p>This is useful when you want to sort items with a boolean property where true
-     * values should appear first (since normal boolean ordering places false before true).</p>
+     * values should appear first (since normal boolean ordering places {@code false} before true).</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -2140,12 +2140,12 @@ public final class Comparators {
 
     /**
      * Returns a comparator that compares objects by extracting a {@link Comparable} key
-     * and comparing in reverse order, with special null handling. If either object being
-     * compared is null, it is treated as the minimum value (nulls first). The extracted
+     * and comparing in reverse order, with special {@code null} handling. If either object being
+     * compared is {@code null}, it is treated as the minimum value (nulls first). The extracted
      * keys are compared using reverse natural ordering.
      *
      * <p>This method is useful when you need reverse ordering but want to ensure that
-     * null objects appear at the beginning of the sorted collection.</p>
+     * {@code null} objects appear at the beginning of the sorted collection.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -2174,12 +2174,12 @@ public final class Comparators {
 
     /**
      * Returns a comparator that compares objects by extracting a {@link Comparable} key
-     * and comparing in reverse order, with special null handling. If either object being
-     * compared is null, it is treated as the maximum value (nulls last). The extracted
+     * and comparing in reverse order, with special {@code null} handling. If either object being
+     * compared is {@code null}, it is treated as the maximum value (nulls last). The extracted
      * keys are compared using reverse natural ordering.
      *
      * <p>This method is useful when you need reverse ordering but want to ensure that
-     * null objects appear at the end of the sorted collection.</p>
+     * {@code null} objects appear at the end of the sorted collection.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code

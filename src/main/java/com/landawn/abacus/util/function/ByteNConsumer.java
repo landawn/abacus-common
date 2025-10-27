@@ -29,7 +29,7 @@ public interface ByteNConsumer {
      * Performs this operation on the given byte array arguments.
      * The array can be of any length, including zero.
      *
-     * @param args the byte array input arguments. Can be empty but not null.
+     * @param args the byte array input arguments. Can be empty but not {@code null}.
      */
     void accept(byte... args);
 
@@ -40,7 +40,7 @@ public interface ByteNConsumer {
      * 
      * <p>The byte array is passed to both consumers in the same order.
      *
-     * @param after the operation to perform after this operation. Must not be null.
+     * @param after the operation to perform after this operation. Must not be {@code null}.
      * @return a composed {@code ByteNConsumer} that performs in sequence this operation 
      *         followed by the {@code after} operation
      */

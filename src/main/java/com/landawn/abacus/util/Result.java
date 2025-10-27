@@ -53,9 +53,9 @@ public class Result<T, E extends Throwable> implements Immutable {
 
     /**
      * Creates a new Result instance with the specified value and exception.
-     * Either value or exception can be present, but typically only one should be non-null.
-     * If both are null, it represents a successful operation with a null result.
-     * If both are non-null, the Result is considered to be in failure state (exception takes precedence).
+     * Either value or exception can be present, but typically only one should be {@code non-null}.
+     * If both are {@code null}, it represents a successful operation with a {@code null} result.
+     * If both are {@code non-null}, the Result is considered to be in failure state (exception takes precedence).
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -66,7 +66,7 @@ public class Result<T, E extends Throwable> implements Immutable {
      * @param <T> the type of the result value
      * @param <E> the type of the exception, must extend Throwable
      * @param value the successful result value, can be null
-     * @param exception the exception that occurred during the operation, null if operation was successful
+     * @param exception the exception that occurred during the operation, {@code null} if operation was successful
      * @return a new Result instance containing either the value or the exception
      */
     public static <T, E extends Throwable> Result<T, E> of(final T value, final E exception) {
@@ -75,7 +75,7 @@ public class Result<T, E extends Throwable> implements Immutable {
 
     /**
      * Checks if this Result represents a failed operation.
-     * A Result is considered a failure if it contains a non-null exception.
+     * A Result is considered a failure if it contains a {@code non-null} exception.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -93,7 +93,7 @@ public class Result<T, E extends Throwable> implements Immutable {
     /**
      * Checks if this Result represents a successful operation.
      * A Result is considered successful if it does not contain an exception (exception is null).
-     * Note that a successful Result may still have a null value.
+     * Note that a successful Result may still have a {@code null} value.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -352,7 +352,7 @@ public class Result<T, E extends Throwable> implements Immutable {
     }
 
     /**
-     * Returns the exception contained in this Result, or null if the Result is successful.
+     * Returns the exception contained in this Result, or {@code null} if the Result is successful.
      * This method provides direct access to the exception without wrapping it in an Optional.
      *
      * <p><b>Usage Examples:</b></p>
@@ -363,7 +363,7 @@ public class Result<T, E extends Throwable> implements Immutable {
      * }
      * }</pre>
      *
-     * @return the exception if this Result represents a failure, null if the Result is successful
+     * @return the exception if this Result represents a failure, {@code null} if the Result is successful
      */
     @Beta
     public E getException() {
@@ -390,7 +390,7 @@ public class Result<T, E extends Throwable> implements Immutable {
     /**
      * Converts this Result to a Pair containing both the value and the exception.
      * The first element of the Pair is the value (which may be null), and the second element is the exception (which may be null).
-     * Typically, only one of these will be non-null, but both could be null or non-null depending on how the Result was created.
+     * Typically, only one of these will be {@code non-null}, but both could be {@code null} or {@code non-null} depending on how the Result was created.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -408,7 +408,7 @@ public class Result<T, E extends Throwable> implements Immutable {
     /**
      * Converts this Result to a Tuple2 containing both the value and the exception.
      * The first element of the Tuple2 is the value (which may be null), and the second element is the exception (which may be null).
-     * Typically, only one of these will be non-null, but both could be null or non-null depending on how the Result was created.
+     * Typically, only one of these will be {@code non-null}, but both could be {@code null} or {@code non-null} depending on how the Result was created.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -501,7 +501,7 @@ public class Result<T, E extends Throwable> implements Immutable {
 
         /**
          * Creates a new RR (Result with RuntimeException) instance with the specified value and exception.
-         * Either value or exception can be present, but typically only one should be non-null.
+         * Either value or exception can be present, but typically only one should be {@code non-null}.
          * This factory method provides a convenient way to create Results for operations that may throw RuntimeExceptions,
          * which don't need to be declared in method signatures.
          *
@@ -513,7 +513,7 @@ public class Result<T, E extends Throwable> implements Immutable {
          *
          * @param <T> the type of the result value
          * @param value the successful result value, can be null
-         * @param exception the RuntimeException that occurred during the operation, null if operation was successful
+         * @param exception the RuntimeException that occurred during the operation, {@code null} if operation was successful
          * @return a new RR instance containing either the value or the RuntimeException
          */
         public static <T> Result.RR<T> of(final T value, final RuntimeException exception) {

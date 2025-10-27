@@ -80,6 +80,17 @@ import com.landawn.abacus.util.stream.IntStream;
 import com.landawn.abacus.util.stream.ObjIteratorEx;
 import com.landawn.abacus.util.stream.Stream;
 
+/**
+ * A row-oriented implementation of the Dataset interface that stores data in rows.
+ * This class provides a comprehensive set of operations for data manipulation, transformation,
+ * and analysis similar to a data frame structure in other programming languages.
+ *
+ * <p>The data is organized as rows of records, where each row contains values for multiple columns.
+ * This implementation is cloneable and provides various methods for filtering, sorting, grouping,
+ * joining, and aggregating data.
+ *
+ * @see Dataset
+ */
 @SuppressWarnings({ "java:S1192", "java:S1698", "java:S1854", "java:S6539" })
 public final class RowDataset implements Dataset, Cloneable {
 
@@ -156,18 +167,18 @@ public final class RowDataset implements Dataset, Cloneable {
      * Each column is represented as a List of Objects, and all columns must have the same size
      * to maintain data integrity across rows.</p>
      * 
-     * @param columnNameList the list of column names for the dataset. Must not be null,
+     * @param columnNameList the list of column names for the dataset. Must not be {@code null},
      *                      must not contain empty/null names, and must not contain duplicates.
      *                      The order of names corresponds to the order of columns in columnList.
      * @param columnList the list of columns, where each column is a List of Objects containing
-     *                  the data for that column. Must not be null, and each column must not be null.
+     *                  the data for that column. Must not be {@code null}, and each column must not be {@code null}.
      *                  All columns must have the same size to ensure consistent row structure.
      * 
      * @throws IllegalArgumentException if any of the following conditions are met:
      *         <ul>
      *         <li>columnNameList is null</li>
      *         <li>columnList is null</li>
-     *         <li>columnNameList contains empty or null column names</li>
+     *         <li>columnNameList contains empty or {@code null} column names</li>
      *         <li>columnNameList contains duplicate column names</li>
      *         <li>the size of columnNameList differs from the size of columnList</li>
      *         <li>any column in columnList is null</li>
@@ -187,20 +198,20 @@ public final class RowDataset implements Dataset, Cloneable {
      * Each column is represented as a List of Objects, and all columns must have the same size
      * to maintain data integrity across rows.</p>
      * 
-     * @param columnNameList the list of column names for the dataset. Must not be null,
+     * @param columnNameList the list of column names for the dataset. Must not be {@code null},
      *                      must not contain empty/null names, and must not contain duplicates.
      *                      The order of names corresponds to the order of columns in columnList.
      * @param columnList the list of columns, where each column is a List of Objects containing
-     *                  the data for that column. Must not be null, and each column must not be null.
+     *                  the data for that column. Must not be {@code null}, and each column must not be {@code null}.
      *                  All columns must have the same size to ensure consistent row structure.
      * @param properties optional properties map for storing metadata associated with this dataset.
-     *                  Can be null. A defensive copy is made of the provided properties.
+     *                  Can be {@code null}. A defensive copy is made of the provided properties.
      * 
      * @throws IllegalArgumentException if any of the following conditions are met:
      *         <ul>
      *         <li>columnNameList is null</li>
      *         <li>columnList is null</li>
-     *         <li>columnNameList contains empty or null column names</li>
+     *         <li>columnNameList contains empty or {@code null} column names</li>
      *         <li>columnNameList contains duplicate column names</li>
      *         <li>the size of columnNameList differs from the size of columnList</li>
      *         <li>any column in columnList is null</li>
@@ -9556,9 +9567,6 @@ public final class RowDataset implements Dataset, Cloneable {
             return pageSize;
         }
 
-        /**
-         * @deprecated replaced by {@link #totalPages()}
-         */
         @Deprecated
         @Override
         public int pageCount() {

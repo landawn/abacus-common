@@ -29,4 +29,10 @@ package com.landawn.abacus.util;
 // TODO Design to be done.
 public final class Script { //NOSONAR
 
+    /**
+     * Private constructor to prevent instantiation.
+     */
+    private Script() {
+    }
+
 }

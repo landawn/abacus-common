@@ -57,8 +57,14 @@ public final class MapEntity implements Serializable {
     @Serial
     private static final long serialVersionUID = -6595007303962724540L;
 
+    /**
+     * The name of this entity, used to identify the type or category of this map-based entity.
+     */
     private final String entityName;
 
+    /**
+     * The key-value pairs representing the properties and their values for this entity.
+     */
     private final Map<String, Object> values = new HashMap<>();
 
     /**
@@ -121,20 +127,21 @@ public final class MapEntity implements Serializable {
     /**
      * Gets the value of the specified property.
      * Supports both simple property names and canonical names (e.g., "EntityName.propertyName").
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * MapEntity user = new MapEntity("User");
      * user.set("email", "john@example.com");
-     * 
+     *
      * String email = user.get("email"); // returns "john@example.com"
      * String sameEmail = user.get("User.email"); // also returns "john@example.com"
      * }</pre>
-     * 
+     *
      * @param <T> the type of the property value
      * @param propName the property name (can be simple or canonical)
-     * @return the property value, or null if not found
+     * @return the property value, or {@code null} if not found
      */
+    @MayReturnNull
     @SuppressWarnings("unchecked")
     public <T> T get(final String propName) {
         if (NameUtil.isCanonicalName(entityName, propName)) {
@@ -146,7 +153,7 @@ public final class MapEntity implements Serializable {
 
     /**
      * Gets the value of the specified property and converts it to the target type.
-     * If the property value is null, returns the default value for the target type.
+     * If the property value is {@code null}, returns the default value for the target type.
      * 
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -232,7 +239,7 @@ public final class MapEntity implements Serializable {
      * }</pre>
      * 
      * @param propName the property name to remove (can be simple or canonical)
-     * @return the previous value associated with the property, or null if there was no mapping
+     * @return the previous value associated with the property, or {@code null} if there was no mapping
      */
     @SuppressWarnings("UnusedReturnValue")
     @MayReturnNull

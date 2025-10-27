@@ -55,7 +55,8 @@ public class MutableCharType extends AbstractType<MutableChar> {
      * }</pre>
      *
      * @param x The MutableChar object to convert
-     * @return The string representation of the character, or null if the input is null
+     * @return The string representation of the character, or {@code null} if the input is null
+     @MayReturnNull
      */
     @Override
     public String stringOf(final MutableChar x) {
@@ -79,7 +80,8 @@ public class MutableCharType extends AbstractType<MutableChar> {
      * }</pre>
      *
      * @param str The string to parse
-     * @return A MutableChar containing the parsed character, or null if the input is null or empty
+     * @return A MutableChar containing the parsed character, or {@code null} if the input is {@code null} or empty
+     @MayReturnNull
      */
     @Override
     public MutableChar valueOf(final String str) {
@@ -134,7 +136,7 @@ public class MutableCharType extends AbstractType<MutableChar> {
 
     /**
      * Sets a MutableChar parameter in a PreparedStatement at the specified position.
-     * The character is stored as an integer value. If the MutableChar is null, 0 is stored.
+     * The character is stored as an integer value. If the MutableChar is {@code null}, 0 is stored.
      *
      * <p><b>Usage Examples:</b></p>
      * MutableCharType type = new MutableCharType();
@@ -143,7 +145,7 @@ public class MutableCharType extends AbstractType<MutableChar> {
      * type.set(stmt, 1, mc);
      * stmt.executeUpdate();
      *
-     * // For null value
+     * // For {@code null} value
      * type.set(stmt, 1, null);
      * // This sets the parameter to 0 (character '\0')
      * }</pre>
@@ -160,7 +162,7 @@ public class MutableCharType extends AbstractType<MutableChar> {
 
     /**
      * Sets a MutableChar parameter in a CallableStatement using the specified parameter name.
-     * The character is stored as an integer value. If the MutableChar is null, 0 is stored.
+     * The character is stored as an integer value. If the MutableChar is {@code null}, 0 is stored.
      *
      * <p><b>Usage Examples:</b></p>
      * MutableCharType type = new MutableCharType();
@@ -169,7 +171,7 @@ public class MutableCharType extends AbstractType<MutableChar> {
      * type.set(stmt, "charParam", mc);
      * stmt.execute();
      *
-     * // For null value
+     * // For {@code null} value
      * type.set(stmt, "charParam", null);
      * // This sets the parameter to 0 (character '\0')
      * }</pre>
@@ -186,7 +188,7 @@ public class MutableCharType extends AbstractType<MutableChar> {
 
     /**
      * Appends the string representation of a MutableChar to an Appendable.
-     * The character is written directly or "null" if the value is null.
+     * The character is written directly or "null" if the value is {@code null}.
      *
      * <p><b>Usage Examples:</b></p>
      * MutableCharType type = new MutableCharType();
@@ -215,7 +217,7 @@ public class MutableCharType extends AbstractType<MutableChar> {
 
     /**
      * Writes the character representation of a MutableChar to a CharacterWriter.
-     * The character may be quoted based on the configuration. If null, writes the null character array.
+     * The character may be quoted based on the configuration. If {@code null}, writes the {@code null} character array.
      *
      * <p><b>Usage Examples:</b></p>
      * MutableCharType type = new MutableCharType();
@@ -232,8 +234,8 @@ public class MutableCharType extends AbstractType<MutableChar> {
      * type.writeCharacter(writer, mc, config);
      * // Writes: 'D'
      *
-     * // For null value
-     * type.writeCharacter(writer, null, null);
+     * // For {@code null} value
+     * type.writeCharacter(writer, {@code null}, null);
      * // Writes: null
      * }</pre>
      *

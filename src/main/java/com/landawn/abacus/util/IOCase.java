@@ -99,12 +99,6 @@ public enum IOCase {
 
     //-----------------------------------------------------------------------
 
-    /**
-     * Private constructor for enum constants.
-     *
-     * @param name the name of the constant
-     * @param sensitive true if case-sensitive, {@code false} if case-insensitive
-     */
     IOCase(final String name, final boolean sensitive) {
         this.name = name;
         this.sensitive = sensitive;
@@ -164,7 +158,7 @@ public enum IOCase {
      *
      * @param str1 the first string to compare, not null
      * @param str2 the second string to compare, not null
-     * @return negative if str1 < str2, zero if str1 equals str2, positive if str1 > str2
+     * @return negative if str1 &lt; str2, zero if str1 equals str2, positive if str1 &gt; str2
      * @throws IllegalArgumentException if either string is null
      */
     public int checkCompareTo(final String str1, final String str2) {
@@ -313,11 +307,6 @@ public enum IOCase {
 
     //-----------------------------------------------------------------------
 
-    /**
-     * Gets a string representation of this IOCase constant.
-     *
-     * @return the name of this constant ("Sensitive", "Insensitive", or "System")
-     */
     @Override
     public String toString() {
         return name;

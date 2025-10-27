@@ -47,6 +47,12 @@ import com.landawn.abacus.util.stream.Stream;
 @SuppressWarnings({ "java:S6548" })
 public abstract class TriIterator<A, B, C> extends ImmutableIterator<Triple<A, B, C>> {
 
+    /**
+     * Constructor for subclasses.
+     */
+    protected TriIterator() {
+    }
+
     @SuppressWarnings("rawtypes")
     private static final TriIterator EMPTY = new TriIterator() {
         @Override
@@ -94,7 +100,7 @@ public abstract class TriIterator<A, B, C> extends ImmutableIterator<Triple<A, B
 
     /**
      * Generates an infinite {@code TriIterator} instance with the provided output Consumer.
-     * The output Consumer is responsible for producing the next Triple<A, B, C> on each iteration.
+     * The output Consumer is responsible for producing the next Triple&lt;A, B, C&gt; on each iteration.
      *
      * <p><strong>Warning:</strong> This method creates an infinite iterator. Always use with
      * {@link #limit(long)} or other terminating operations to avoid infinite loops.</p>
@@ -115,8 +121,8 @@ public abstract class TriIterator<A, B, C> extends ImmutableIterator<Triple<A, B
      * @param <A> the first type of elements returned by this iterator
      * @param <B> the second type of elements returned by this iterator
      * @param <C> the third type of elements returned by this iterator
-     * @param output A Consumer that accepts a Triple<A, B, C> and produces the next Triple<A, B, C> on each iteration.
-     * @return A TriIterator<A, B, C> that uses the provided output Consumer to generate its elements.
+     * @param output A Consumer that accepts a Triple&lt;A, B, C&gt; and produces the next Triple&lt;A, B, C&gt; on each iteration.
+     * @return A TriIterator&lt;A, B, C&gt; that uses the provided output Consumer to generate its elements.
      * @see  #generate(BooleanSupplier, Consumer)
      */
     public static <A, B, C> TriIterator<A, B, C> generate(final Consumer<Triple<A, B, C>> output) {
@@ -126,7 +132,7 @@ public abstract class TriIterator<A, B, C> extends ImmutableIterator<Triple<A, B
     /**
      * Generates a TriIterator instance with the provided hasNext BooleanSupplier and output Consumer.
      * The hasNext BooleanSupplier is used to determine if the iterator has more elements.
-     * The output Consumer is responsible for producing the next Triple<A, B, C> on each iteration.
+     * The output Consumer is responsible for producing the next Triple&lt;A, B, C&gt; on each iteration.
      *
      * <p>This method allows creating custom iterators with controlled termination logic.
      * The output consumer should populate the provided Triple object with new values on each call.</p>
@@ -151,8 +157,8 @@ public abstract class TriIterator<A, B, C> extends ImmutableIterator<Triple<A, B
      * @param <B> the second type of elements returned by this iterator
      * @param <C> the third type of elements returned by this iterator
      * @param hasNext A BooleanSupplier that returns {@code true} if the iterator has more elements.
-     * @param output A Consumer that accepts a Triple<A, B, C> and produces the next Triple<A, B, C> on each iteration.
-     * @return A TriIterator<A, B, C> that uses the provided hasNext BooleanSupplier and output Consumer to generate its elements.
+     * @param output A Consumer that accepts a Triple&lt;A, B, C&gt; and produces the next Triple&lt;A, B, C&gt; on each iteration.
+     * @return A TriIterator&lt;A, B, C&gt; that uses the provided hasNext BooleanSupplier and output Consumer to generate its elements.
      * @throws IllegalArgumentException If hasNext or output is {@code null}.
      */
     public static <A, B, C> TriIterator<A, B, C> generate(final BooleanSupplier hasNext, final Consumer<Triple<A, B, C>> output)
@@ -255,7 +261,7 @@ public abstract class TriIterator<A, B, C> extends ImmutableIterator<Triple<A, B
     /**
      * Generates a TriIterator instance with the provided fromIndex, toIndex, and output IntObjConsumer.
      * The fromIndex and toIndex define the range and size of the returned iterator.
-     * The output IntObjConsumer is responsible for producing the next Triple<A, B, C> on each iteration,
+     * The output IntObjConsumer is responsible for producing the next Triple&lt;A, B, C&gt; on each iteration,
      * receiving the current index and a Triple to populate.
      *
      * <p>This is useful for generating indexed sequences where each triple depends on its position.</p>
@@ -276,8 +282,8 @@ public abstract class TriIterator<A, B, C> extends ImmutableIterator<Triple<A, B
      * @param <C> the third type of elements returned by this iterator
      * @param fromIndex The starting index of the iterator (inclusive).
      * @param toIndex The ending index of the iterator (exclusive).
-     * @param output An IntObjConsumer that accepts an integer index and a Triple<A, B, C> to populate on each iteration.
-     * @return A TriIterator<A, B, C> that uses the provided fromIndex, toIndex, and output IntObjConsumer to generate its elements.
+     * @param output An IntObjConsumer that accepts an integer index and a Triple&lt;A, B, C&gt; to populate on each iteration.
+     * @return A TriIterator&lt;A, B, C&gt; that uses the provided fromIndex, toIndex, and output IntObjConsumer to generate its elements.
      * @throws IllegalArgumentException If fromIndex is greater than toIndex.
      * @throws IndexOutOfBoundsException If fromIndex or toIndex is out of range.
      */
@@ -709,7 +715,7 @@ public abstract class TriIterator<A, B, C> extends ImmutableIterator<Triple<A, B
      * @param <B> the type of elements in the second component of the triple
      * @param <C> the type of elements in the third component of the triple
      * @param iter the input iterator
-     * @param unzipFunction a BiConsumer that accepts an element of type T and a Triple<A, B, C> and populates the triple with the unzipped values
+     * @param unzipFunction a BiConsumer that accepts an element of type T and a Triple&lt;A, B, C&gt; and populates the triple with the unzipped values
      * @return a TriIterator that iterates over the unzipped elements
      */
     public static <T, A, B, C> TriIterator<A, B, C> unzip(final Iterator<? extends T> iter, final BiConsumer<? super T, Triple<A, B, C>> unzipFunction) {

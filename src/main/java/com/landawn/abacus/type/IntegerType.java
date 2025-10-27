@@ -48,7 +48,7 @@ public final class IntegerType extends AbstractIntegerType {
      * Indicates whether this type represents a primitive wrapper class.
      * For IntegerType, this always returns {@code true} as Integer is the wrapper class for the primitive int type.
      *
-     * @return true, indicating Integer is a primitive wrapper
+     * @return {@code true}, indicating Integer is a primitive wrapper
      */
     @Override
     public boolean isPrimitiveWrapper() {
@@ -57,19 +57,20 @@ public final class IntegerType extends AbstractIntegerType {
 
     /**
      * Retrieves an Integer value from the specified column in a ResultSet.
-     * This method handles null values and type conversions from the database.
-     * If the column value is null, returns null.
+     * This method handles {@code null} values and type conversions from the database.
+     * If the column value is {@code null}, returns {@code null}.
      * If the value is already an Integer, returns it directly.
      * If the value is another Number type, converts it to Integer.
      * Otherwise, parses the string representation of the value.
      *
      * @param rs the ResultSet to read from
      * @param columnIndex the index of the column to read (1-based)
-     * @return the Integer value from the column, or null if the column value is SQL NULL
+     * @return the Integer value from the column, or {@code null} if the column value is SQL NULL
      * @throws SQLException if a database access error occurs or the columnIndex is invalid
      */
     @MayReturnNull
     @Override
+
     public Integer get(final ResultSet rs, final int columnIndex) throws SQLException {
         final Object ret = rs.getObject(columnIndex);
 
@@ -86,19 +87,20 @@ public final class IntegerType extends AbstractIntegerType {
 
     /**
      * Retrieves an Integer value from the specified column in a ResultSet using the column label.
-     * This method handles null values and type conversions from the database.
-     * If the column value is null, returns null.
+     * This method handles {@code null} values and type conversions from the database.
+     * If the column value is {@code null}, returns {@code null}.
      * If the value is already an Integer, returns it directly.
      * If the value is another Number type, converts it to Integer.
      * Otherwise, parses the string representation of the value.
      *
      * @param rs the ResultSet to read from
      * @param columnLabel the label of the column to read
-     * @return the Integer value from the column, or null if the column value is SQL NULL
+     * @return the Integer value from the column, or {@code null} if the column value is SQL NULL
      * @throws SQLException if a database access error occurs or the columnLabel is not found
      */
     @MayReturnNull
     @Override
+
     public Integer get(final ResultSet rs, final String columnLabel) throws SQLException {
         final Object ret = rs.getObject(columnLabel);
 

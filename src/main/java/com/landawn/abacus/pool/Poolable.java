@@ -173,7 +173,7 @@ public interface Poolable {
 
         /**
          * The object could not be added to the pool.
-         * This happens when autoDestroyOnFailedToAdd is true and the add operation fails.
+         * This happens when autoDestroyOnFailedToAdd is {@code true} and the add operation fails.
          */
         PUT_ADD_FAILURE(4),
 

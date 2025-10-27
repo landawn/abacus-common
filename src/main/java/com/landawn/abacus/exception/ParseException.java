@@ -54,6 +54,10 @@ public class ParseException extends RuntimeException {
     @Serial
     private static final long serialVersionUID = 7678894353902496315L;
 
+    /**
+     * The position or token index where the parse error occurred.
+     * A value of -2 indicates the token position is not set or unknown.
+     */
     private int token = -2; //NOSONAR
 
     /**
@@ -132,7 +136,7 @@ public class ParseException extends RuntimeException {
 
     /**
      * Constructs a new {@code ParseException} with the specified cause and a detail
-     * message of {@code (cause==null ? null : cause.toString())} (which typically contains the
+     * message of {@code (cause==null ? {@code null} : cause.toString())} (which typically contains the
      * class and detail message of {@code cause}). The token value is set to the default of -2.
      * 
      * <p>This constructor is useful for exceptions that are little more than wrappers for other

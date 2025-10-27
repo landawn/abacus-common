@@ -53,7 +53,7 @@ import com.landawn.abacus.util.u.Optional;
  * person.forEach(System.out::println);
  * }</pre>
  *
- * @param <TP> the self-type of the tuple, typically extending Tuple<TP>
+ * @param <TP> the self-type of the tuple, typically extending Tuple&lt;TP&gt;
  * 
  * @see com.landawn.abacus.util.u.Nullable
  * @see com.landawn.abacus.util.u.Optional
@@ -85,10 +85,10 @@ public abstract class Tuple<TP> implements Immutable {
     public abstract int arity();
 
     /**
-     * Checks if any element in this tuple is null.
+     * Checks if any element in this tuple is {@code null}.
      * 
      * <p>This method performs a logical OR operation across all elements,
-     * returning true as soon as any null element is found.</p>
+     * returning {@code true} as soon as any {@code null} element is found.</p>
      * 
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -99,15 +99,15 @@ public abstract class Tuple<TP> implements Immutable {
      * boolean hasNull2 = t2.anyNull(); // Returns false
      * }</pre>
      *
-     * @return {@code true} if at least one element in this tuple is null, {@code false} if all elements are non-null
+     * @return {@code true} if at least one element in this tuple is {@code null}, {@code false} if all elements are non-null
      */
     public abstract boolean anyNull();
 
     /**
-     * Checks if all elements in this tuple are null.
+     * Checks if all elements in this tuple are {@code null}.
      * 
      * <p>This method performs a logical AND operation across all elements,
-     * returning true only if every element is null.</p>
+     * returning {@code true} only if every element is {@code null}.</p>
      * 
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -118,14 +118,14 @@ public abstract class Tuple<TP> implements Immutable {
      * boolean allNull2 = t2.allNull(); // Returns false
      * }</pre>
      *
-     * @return {@code true} if every element in this tuple is null, {@code false} if at least one element is non-null
+     * @return {@code true} if every element in this tuple is {@code null}, {@code false} if at least one element is non-null
      */
     public abstract boolean allNull();
 
     /**
      * Checks if this tuple contains the specified value.
      * 
-     * <p>The comparison is performed using object equality (via N.equals() which handles null values).
+     * <p>The comparison is performed using object equality (via N.equals() which handles {@code null} values).
      * The method checks each element in order and returns {@code true} as soon as a match is found.</p>
      * 
      * <p><b>Usage Examples:</b></p>
@@ -161,7 +161,7 @@ public abstract class Tuple<TP> implements Immutable {
      * Returns an array containing all elements of this tuple, using the specified array type.
      * 
      * <p>If the provided array is large enough to hold all elements, it is used directly and
-     * the element following the last tuple element (if any) is set to null. Otherwise, a new
+     * the element following the last tuple element (if any) is set to {@code null}. Otherwise, a new
      * array of the same runtime type is created with the exact size needed.</p>
      * 
      * <p><b>Usage Examples:</b></p>
@@ -273,7 +273,7 @@ public abstract class Tuple<TP> implements Immutable {
      *
      * @param <E> the type of exception that the predicate may throw
      * @param predicate the predicate to test this tuple against, must not be null
-     * @return an Optional containing this tuple if the predicate returns true, empty Optional otherwise
+     * @return an Optional containing this tuple if the predicate returns {@code true}, empty Optional otherwise
      * @throws E if the predicate throws an exception
      */
     @Beta
@@ -561,8 +561,8 @@ public abstract class Tuple<TP> implements Immutable {
      * <p><b>Note:</b> This method is marked as {@link Beta} and may be subject to change.</p>
      *
      * @param <TP> the type of tuple to create
-     * @param a the array of objects to convert to a tuple, may be null or empty
-     * @return a tuple containing the array elements in order, or Tuple0.EMPTY if array is null or empty
+     * @param a the array of objects to convert to a tuple, may be {@code null} or empty
+     * @return a tuple containing the array elements in order, or Tuple0.EMPTY if array is {@code null} or empty
      * @throws IllegalArgumentException if the array contains more than 9 elements
      */
     @Beta
@@ -635,8 +635,8 @@ public abstract class Tuple<TP> implements Immutable {
      * <p><b>Note:</b> This method is marked as {@link Beta} and may be subject to change.</p>
      *
      * @param <TP> the type of tuple to create
-     * @param c the collection of objects to convert to a tuple, may be null or empty
-     * @return a tuple containing the collection elements in iteration order, or Tuple0.EMPTY if collection is null or empty
+     * @param c the collection of objects to convert to a tuple, may be {@code null} or empty
+     * @return a tuple containing the collection elements in iteration order, or Tuple0.EMPTY if collection is {@code null} or empty
      * @throws IllegalArgumentException if the collection contains more than 9 elements
      */
     @Beta
@@ -936,11 +936,11 @@ public abstract class Tuple<TP> implements Immutable {
         }
 
         /**
-         * Checks if any element in this tuple is null.
+         * Checks if any element in this tuple is {@code null}.
          *
-         * <p>For Tuple0, this always returns {@code false} since there are no elements to be null.</p>
+         * <p>For Tuple0, this always returns {@code false} since there are no elements to be {@code null}.</p>
          *
-         * @return {@code false}, as an empty tuple has no null elements
+         * @return {@code false}, as an empty tuple has no {@code null} elements
          */
         @Override
         public boolean anyNull() {
@@ -948,7 +948,7 @@ public abstract class Tuple<TP> implements Immutable {
         }
 
         /**
-         * Checks if all elements in this tuple are null.
+         * Checks if all elements in this tuple are {@code null}.
          *
          * <p>For Tuple0, this returns {@code true} following the mathematical convention
          * that "all elements" of an empty set satisfy any predicate (vacuous truth).</p>
@@ -986,15 +986,15 @@ public abstract class Tuple<TP> implements Immutable {
         }
 
         /**
-         * Returns the specified array with a null terminator if it has space.
+         * Returns the specified array with a {@code null} terminator if it has space.
          *
-         * <p>For Tuple0 (empty tuple), if the provided array has length > 0,
-         * element at index 0 is set to null to mark the end of tuple elements,
+         * <p>For Tuple0 (empty tuple), if the provided array has length &gt; 0,
+         * element at index 0 is set to {@code null} to mark the end of tuple elements,
          * following Java Collection contract.</p>
          *
          * @param <A> the component type of the array
          * @param a the array to use or a template for creating a new array
-         * @return the same array, potentially with a[0] set to null if a.length > 0
+         * @return the same array, potentially with a[0] set to {@code null} if a.length > 0
          */
         @Override
         public <A> A[] toArray(final A[] a) {
@@ -1060,19 +1060,11 @@ public abstract class Tuple<TP> implements Immutable {
         /** The first and only element of this tuple. May be null. */
         public final T1 _1;
 
-        /**
-         * Instantiates a new tuple 1.
-         */
         // For Kryo
         Tuple1() {
             this(null);
         }
 
-        /**
-         * Instantiates a new tuple 1.
-         *
-         * @param _1 the first element
-         */
         Tuple1(final T1 _1) {
             this._1 = _1;
         }
@@ -1090,11 +1082,11 @@ public abstract class Tuple<TP> implements Immutable {
         }
 
         /**
-         * Checks if any element in this tuple is null.
+         * Checks if any element in this tuple is {@code null}.
          *
-         * <p>For Tuple1, this returns {@code true} if and only if the single element is null.</p>
+         * <p>For Tuple1, this returns {@code true} if and only if the single element is {@code null}.</p>
          *
-         * @return {@code true} if the element is null, {@code false} otherwise
+         * @return {@code true} if the element is {@code null}, {@code false} otherwise
          */
         @Override
         public boolean anyNull() {
@@ -1102,11 +1094,11 @@ public abstract class Tuple<TP> implements Immutable {
         }
 
         /**
-         * Checks if all elements in this tuple are null.
+         * Checks if all elements in this tuple are {@code null}.
          *
-         * <p>For Tuple1, this returns {@code true} if and only if the single element is null.</p>
+         * <p>For Tuple1, this returns {@code true} if and only if the single element is {@code null}.</p>
          *
-         * @return {@code true} if the element is null, {@code false} otherwise
+         * @return {@code true} if the element is {@code null}, {@code false} otherwise
          */
         @Override
         public boolean allNull() {
@@ -1117,7 +1109,7 @@ public abstract class Tuple<TP> implements Immutable {
          * Checks if this tuple contains the specified value.
          * 
          * <p>Since this tuple has only one element, this method returns true
-         * if and only if the element equals the specified value (including null equality).</p>
+         * if and only if the element equals the specified value (including {@code null} equality).</p>
          *
          * @param valueToFind the value to search for
          * @return {@code true} if the element equals the specified value
@@ -1260,20 +1252,11 @@ public abstract class Tuple<TP> implements Immutable {
         /** The second element of this tuple. May be null. */
         public final T2 _2;
 
-        /**
-         * Instantiates a new tuple 2.
-         */
         // For Kryo
         Tuple2() {
             this(null, null);
         }
 
-        /**
-         * Instantiates a new tuple 2.
-         *
-         * @param _1 the first element
-         * @param _2 the second element
-         */
         Tuple2(final T1 _1, final T2 _2) {
             this._1 = _1;
             this._2 = _2;
@@ -1292,11 +1275,11 @@ public abstract class Tuple<TP> implements Immutable {
         }
 
         /**
-         * Checks if any element in this tuple is null.
+         * Checks if any element in this tuple is {@code null}.
          *
-         * <p>For Tuple2, this returns {@code true} if either element is null.</p>
+         * <p>For Tuple2, this returns {@code true} if either element is {@code null}.</p>
          *
-         * @return {@code true} if at least one element is null, {@code false} otherwise
+         * @return {@code true} if at least one element is {@code null}, {@code false} otherwise
          */
         @Override
         public boolean anyNull() {
@@ -1304,11 +1287,11 @@ public abstract class Tuple<TP> implements Immutable {
         }
 
         /**
-         * Checks if all elements in this tuple are null.
+         * Checks if all elements in this tuple are {@code null}.
          *
-         * <p>For Tuple2, this returns {@code true} if both elements are null.</p>
+         * <p>For Tuple2, this returns {@code true} if both elements are {@code null}.</p>
          *
-         * @return {@code true} if both elements are null, {@code false} otherwise
+         * @return {@code true} if both elements are {@code null}, {@code false} otherwise
          */
         @Override
         public boolean allNull() {
@@ -1318,7 +1301,7 @@ public abstract class Tuple<TP> implements Immutable {
         /**
          * Checks if this tuple contains the specified value.
          * 
-         * <p>Returns true if either element equals the specified value.</p>
+         * <p>Returns {@code true} if either element equals the specified value.</p>
          *
          * @param valueToFind the value to search for
          * @return {@code true} if either element equals the specified value
@@ -1494,7 +1477,7 @@ public abstract class Tuple<TP> implements Immutable {
          *
          * @param <E> the type of exception that the predicate may throw
          * @param predicate the bi-predicate to test the tuple elements against
-         * @return an Optional containing this tuple if the predicate returns true, empty Optional otherwise
+         * @return an Optional containing this tuple if the predicate returns {@code true}, empty Optional otherwise
          * @throws E if the predicate throws an exception
          */
         public <E extends Exception> Optional<Tuple2<T1, T2>> filter(final Throwables.BiPredicate<? super T1, ? super T2, E> predicate) throws E {
@@ -1600,20 +1583,13 @@ public abstract class Tuple<TP> implements Immutable {
 
         /**
          * Default constructor for serialization frameworks.
-         * Creates a Tuple3 with all null elements.
+         * Creates a Tuple3 with all {@code null} elements.
          */
         // For Kryo
         Tuple3() {
             this(null, null, null);
         }
 
-        /**
-         * Creates a new Tuple3 with the specified elements.
-         *
-         * @param _1 the first element
-         * @param _2 the second element
-         * @param _3 the third element
-         */
         Tuple3(final T1 _1, final T2 _2, final T3 _3) {
             this._1 = _1;
             this._2 = _2;
@@ -1807,7 +1783,7 @@ public abstract class Tuple<TP> implements Immutable {
          *
          * @param <E> the type of exception that the predicate may throw
          * @param predicate the tri-predicate to test the tuple elements against
-         * @return an Optional containing this tuple if the predicate returns true, empty Optional otherwise
+         * @return an Optional containing this tuple if the predicate returns {@code true}, empty Optional otherwise
          * @throws E if the predicate throws an exception
          */
         public <E extends Exception> Optional<Tuple3<T1, T2, T3>> filter(final Throwables.TriPredicate<? super T1, ? super T2, ? super T3, E> predicate)
@@ -1907,21 +1883,13 @@ public abstract class Tuple<TP> implements Immutable {
 
         /**
          * Default constructor for serialization frameworks.
-         * Creates a Tuple4 with all null elements.
+         * Creates a Tuple4 with all {@code null} elements.
          */
         // For Kryo
         Tuple4() {
             this(null, null, null, null);
         }
 
-        /**
-         * Creates a new Tuple4 with the specified elements.
-         *
-         * @param _1 the first element
-         * @param _2 the second element
-         * @param _3 the third element
-         * @param _4 the fourth element
-         */
         Tuple4(final T1 _1, final T2 _2, final T3 _3, final T4 _4) {
             this._1 = _1;
             this._2 = _2;
@@ -2134,22 +2102,13 @@ public abstract class Tuple<TP> implements Immutable {
 
         /**
          * Default constructor for serialization frameworks.
-         * Creates a Tuple5 with all null elements.
+         * Creates a Tuple5 with all {@code null} elements.
          */
         // For Kryo
         Tuple5() {
             this(null, null, null, null, null);
         }
 
-        /**
-         * Creates a new Tuple5 with the specified elements.
-         *
-         * @param _1 the first element
-         * @param _2 the second element
-         * @param _3 the third element
-         * @param _4 the fourth element
-         * @param _5 the fifth element
-         */
         Tuple5(final T1 _1, final T2 _2, final T3 _3, final T4 _4, final T5 _5) {
             this._1 = _1;
             this._2 = _2;
@@ -2372,23 +2331,13 @@ public abstract class Tuple<TP> implements Immutable {
 
         /**
          * Default constructor for serialization frameworks.
-         * Creates a Tuple6 with all null elements.
+         * Creates a Tuple6 with all {@code null} elements.
          */
         // For Kryo
         Tuple6() {
             this(null, null, null, null, null, null);
         }
 
-        /**
-         * Creates a new Tuple6 with the specified elements.
-         *
-         * @param _1 the first element
-         * @param _2 the second element
-         * @param _3 the third element
-         * @param _4 the fourth element
-         * @param _5 the fifth element
-         * @param _6 the sixth element
-         */
         Tuple6(final T1 _1, final T2 _2, final T3 _3, final T4 _4, final T5 _5, final T6 _6) {
             this._1 = _1;
             this._2 = _2;
@@ -2620,24 +2569,13 @@ public abstract class Tuple<TP> implements Immutable {
 
         /**
          * Default constructor for serialization frameworks.
-         * Creates a Tuple7 with all null elements.
+         * Creates a Tuple7 with all {@code null} elements.
          */
         // For Kryo
         Tuple7() {
             this(null, null, null, null, null, null, null);
         }
 
-        /**
-         * Creates a new Tuple7 with the specified elements.
-         *
-         * @param _1 the first element
-         * @param _2 the second element
-         * @param _3 the third element
-         * @param _4 the fourth element
-         * @param _5 the fifth element
-         * @param _6 the sixth element
-         * @param _7 the seventh element
-         */
         Tuple7(final T1 _1, final T2 _2, final T3 _3, final T4 _4, final T5 _5, final T6 _6, final T7 _7) {
             this._1 = _1;
             this._2 = _2;
@@ -2877,25 +2815,13 @@ public abstract class Tuple<TP> implements Immutable {
 
         /**
          * Default constructor for serialization frameworks.
-         * Creates a Tuple8 with all null elements.
+         * Creates a Tuple8 with all {@code null} elements.
          */
         // For Kryo
         Tuple8() {
             this(null, null, null, null, null, null, null, null);
         }
 
-        /**
-         * Creates a new Tuple8 with the specified elements.
-         *
-         * @param _1 the first element
-         * @param _2 the second element
-         * @param _3 the third element
-         * @param _4 the fourth element
-         * @param _5 the fifth element
-         * @param _6 the sixth element
-         * @param _7 the seventh element
-         * @param _8 the eighth element
-         */
         Tuple8(final T1 _1, final T2 _2, final T3 _3, final T4 _4, final T5 _5, final T6 _6, final T7 _7, final T8 _8) {
             this._1 = _1;
             this._2 = _2;
@@ -3147,7 +3073,7 @@ public abstract class Tuple<TP> implements Immutable {
 
         /**
          * Default no-arg constructor for serialization frameworks (e.g., Kryo).
-         * Creates a Tuple9 with all elements set to null.
+         * Creates a Tuple9 with all elements set to {@code null}.
          * 
          * <p>This constructor is primarily used by serialization libraries and should not
          * be called directly in application code.</p>
@@ -3160,7 +3086,7 @@ public abstract class Tuple<TP> implements Immutable {
         /**
          * Creates a new Tuple9 with the specified elements.
          * 
-         * <p>Any or all elements may be null. The tuple is immutable once created.</p>
+         * <p>Any or all elements may be {@code null}. The tuple is immutable once created.</p>
          * 
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
@@ -3215,10 +3141,10 @@ public abstract class Tuple<TP> implements Immutable {
         }
 
         /**
-         * Checks if any element in this tuple is null.
+         * Checks if any element in this tuple is {@code null}.
          * 
-         * <p>This method performs a short-circuit evaluation, returning true as soon as
-         * the first null element is encountered.</p>
+         * <p>This method performs a short-circuit evaluation, returning {@code true} as soon as
+         * the first {@code null} element is encountered.</p>
          * 
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
@@ -3231,7 +3157,7 @@ public abstract class Tuple<TP> implements Immutable {
          * boolean hasNull2 = t2.anyNull(); // Returns false
          * }</pre>
          *
-         * @return {@code true} if at least one element is null, {@code false} otherwise
+         * @return {@code true} if at least one element is {@code null}, {@code false} otherwise
          */
         @Override
         public boolean anyNull() {
@@ -3239,9 +3165,9 @@ public abstract class Tuple<TP> implements Immutable {
         }
 
         /**
-         * Checks if all elements in this tuple are null.
+         * Checks if all elements in this tuple are {@code null}.
          * 
-         * <p>This method returns {@code true} only when every single element (_1 through _9) is null.</p>
+         * <p>This method returns {@code true} only when every single element (_1 through _9) is {@code null}.</p>
          * 
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
@@ -3254,7 +3180,7 @@ public abstract class Tuple<TP> implements Immutable {
          * boolean allNull2 = t2.allNull(); // Returns false
          * }</pre>
          *
-         * @return {@code true} if all 9 elements are null, {@code false} otherwise
+         * @return {@code true} if all 9 elements are {@code null}, {@code false} otherwise
          */
         @Override
         public boolean allNull() {
@@ -3264,7 +3190,7 @@ public abstract class Tuple<TP> implements Immutable {
         /**
          * Checks if this tuple contains the specified value.
          * 
-         * <p>The comparison uses N.equals() which handles null values correctly.
+         * <p>The comparison uses N.equals() which handles {@code null} values correctly.
          * The method checks each element in order (_1 through _9) and returns true
          * as soon as a matching element is found.</p>
          * 
@@ -3315,7 +3241,7 @@ public abstract class Tuple<TP> implements Immutable {
          * Returns an array containing all elements of this tuple, using the provided array if possible.
          * 
          * <p>If the provided array has a length of at least 9, it is filled with the tuple elements
-         * and returned. If the array is larger than 9, the element at index 9 is set to null.
+         * and returned. If the array is larger than 9, the element at index 9 is set to {@code null}.
          * If the array is smaller than 9, a new array of the same runtime type with length 9 is created.</p>
          * 
          * <p><b>Usage Examples:</b></p>
@@ -3429,7 +3355,7 @@ public abstract class Tuple<TP> implements Immutable {
          * Returns a hash code value for this tuple.
          * 
          * <p>The hash code is computed using all 9 elements. The calculation uses a standard
-         * polynomial hash formula with prime number 31, and handles null values correctly
+         * polynomial hash formula with prime number 31, and handles {@code null} values correctly
          * through N.hashCode().</p>
          * 
          * <p>The hash code is consistent with equals(): two tuples that are equal according
@@ -3466,7 +3392,7 @@ public abstract class Tuple<TP> implements Immutable {
          * Compares this tuple to the specified object for equality.
          * 
          * <p>Two Tuple9 instances are considered equal if and only if all 9 corresponding
-         * elements are equal according to N.equals() (which handles null values correctly).
+         * elements are equal according to N.equals() (which handles {@code null} values correctly).
          * The comparison is type-safe: the object must be exactly a Tuple9 instance.</p>
          * 
          * <p><b>Usage Examples:</b></p>
@@ -3507,7 +3433,7 @@ public abstract class Tuple<TP> implements Immutable {
          * 
          * <p>The string representation consists of the 9 elements enclosed in parentheses
          * and separated by commas and spaces. Each element is converted to string using
-         * N.toString() which handles null values by returning "null".</p>
+         * N.toString() which handles {@code null} values by returning "null".</p>
          * 
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code

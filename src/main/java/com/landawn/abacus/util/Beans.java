@@ -336,10 +336,11 @@ public final class Beans {
      * }</pre>
      *
      * @param cls the class for which the builder information is to be retrieved
-     * @return a tuple containing the builder class type, a supplier for creating builder instances, 
+     * @return a tuple containing the builder class type, a supplier for creating builder instances,
      *         and a function to build the target object from the builder, or {@code null} if no builder is found
      * @throws IllegalArgumentException if the specified class is {@code null}
      */
+    @MayReturnNull
     public static Tuple3<Class<?>, com.landawn.abacus.util.function.Supplier<Object>, com.landawn.abacus.util.function.Function<Object, Object>> getBuilderInfo(
             final Class<?> cls) throws IllegalArgumentException {
         N.checkArgNotNull(cls, cs.cls);
@@ -633,10 +634,10 @@ public final class Beans {
      *
      * <p>This method extracts the property name from method names following JavaBean conventions:</p>
      * <ul>
-     *   <li>getName() -> "name"</li>
-     *   <li>isActive() -> "active"</li>
-     *   <li>hasChildren() -> "children"</li>
-     *   <li>setAge(int) -> "age"</li>
+     *   <li>getName() -&gt; "name"</li>
+     *   <li>isActive() -&gt; "active"</li>
+     *   <li>hasChildren() -&gt; "children"</li>
+     *   <li>setAge(int) -&gt; "age"</li>
      * </ul>
      *
      * <p><b>Usage Examples:</b></p>
@@ -983,13 +984,6 @@ public final class Beans {
         return false;
     }
 
-    /**
-     * Checks if is field getter method.
-     *
-     * @param method the method to check
-     * @param field the field to check against
-     * @return {@code true}, if is field getter method
-     */
     private static boolean isFieldGetMethod(final Method method, final Field field) {
         if (!isGetMethod(method) || Object.class.equals(method.getDeclaringClass()) || !method.getReturnType().isAssignableFrom(field.getType())) {
             return false;
@@ -1008,12 +1002,6 @@ public final class Beans {
         return propName.equalsIgnoreCase(fieldName) || (fieldName.charAt(0) == '_' && propName.equalsIgnoreCase(fieldName.substring(1)));
     }
 
-    /**
-     * Checks if it's a property getter method.
-     *
-     * @param method the method to check
-     * @return {@code true}, if is gets the method
-     */
     private static boolean isGetMethod(final Method method) {
         if (Object.class.equals(method.getDeclaringClass())) {
             return false;
@@ -1025,13 +1013,6 @@ public final class Beans {
                 && (N.isEmpty(method.getParameterTypes())) && !void.class.equals(method.getReturnType()) && !nonGetSetMethodName.contains(mn);
     }
 
-    /**
-     * Checks if is JAXB getter method.
-     *
-     * @param instance the object instance to check
-     * @param method the method to check
-     * @return {@code true}, if is JAXB getter method
-     */
     private static boolean isJAXBGetMethod(final Class<?> cls, final Object instance, final Method method, final Field field) {
         try {
             return (instance != null)
@@ -1057,14 +1038,6 @@ public final class Beans {
         return simpleTypeName.equals("XmlElement") || simpleTypeName.equals("XmlElements");
     }
 
-    /**
-     * Checks if is prop name.
-     *
-     * @param cls the class to check
-     * @param inputPropName the input property name
-     * @param propNameByMethod the property name derived from the method
-     * @return {@code true}, if is prop name
-     */
     private static boolean isPropName(final Class<?> cls, String inputPropName, final String propNameByMethod) {
         if (inputPropName.length() > 128) {
             throw new IllegalArgumentException("The property name exceed 128: " + inputPropName);
@@ -1369,12 +1342,6 @@ public final class Beans {
         }
     }
 
-    /**
-     * Gets the sets the method.
-     *
-     * @param getMethod the getter method to find the corresponding setter for
-     * @return the corresponding setter method for the given getter method, or {@code null} if not found
-     */
     private static Method getSetMethod(final Method getMethod) {
         final Class<?> declaringClass = getMethod.getDeclaringClass();
         final String getMethodName = getMethod.getName();
@@ -1411,13 +1378,6 @@ public final class Beans {
         return null;
     }
 
-    /**
-     * Gets the public static string fields.
-     *
-     * @param <T> the type parameter
-     * @param cls the class to retrieve public static String fields from
-     * @return a map of public static final String field values mapped to themselves
-     */
     private static <T> Map<String, String> getPublicStaticStringFields(final Class<T> cls) {
         final Map<String, String> staticFinalFields = new HashMap<>();
 
@@ -1779,6 +1739,7 @@ public final class Beans {
      * @return the value of the specified property, or {@code null} if the property is not found and ignoreUnmatchedProperty is true
      * @throws IllegalArgumentException if the specified property cannot be retrieved and ignoreUnmatchedProperty is false
      */
+    @MayReturnNull
     public static <T> T getPropValue(final Object bean, final String propName, final boolean ignoreUnmatchedProperty) {
         // N.checkArgNotNull(bean, cs.bean);
 
@@ -2254,11 +2215,11 @@ public final class Beans {
     }
 
     /**
-     * Converts a map into a bean object of the specified type with control over null and unmatched properties.
+     * Converts a map into a bean object of the specified type with control over {@code null} and unmatched properties.
      * This method takes a map where the keys are the property names and the values are the corresponding property values,
      * and transforms it into a bean object of the specified type.
      * The resulting bean object has its properties set to the values from the map.
-     * You can control whether null properties should be ignored and whether unmatched properties should cause an error.
+     * You can control whether {@code null} properties should be ignored and whether unmatched properties should cause an error.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -2281,11 +2242,11 @@ public final class Beans {
      *
      * @param <T> the type of the bean object to be returned.
      * @param m the map to be converted into a bean object.
-     * @param ignoreNullProperty if {@code true}, null values in the map will not be set on the bean.
+     * @param ignoreNullProperty if {@code true}, {@code null} values in the map will not be set on the bean.
      * @param ignoreUnmatchedProperty if {@code true}, map entries with keys that don't match any bean property will be ignored; if {@code false}, an exception will be thrown.
      * @param targetType the type of the bean object to be returned.
-     * @return a bean object of the specified type with its properties set to the values from the map, or null if the input map is null.
-     * @throws IllegalArgumentException if {@code targetType} is not a valid bean class, or if {@code ignoreUnmatchedProperty} is false and an unmatched property is encountered
+     * @return a bean object of the specified type with its properties set to the values from the map, or {@code null} if the input map is {@code null}.
+     * @throws IllegalArgumentException if {@code targetType} is not a valid bean class, or if {@code ignoreUnmatchedProperty} is {@code false} and an unmatched property is encountered
      * @see #map2Bean(Map, Collection, Class)
      */
     @MayReturnNull
@@ -2356,7 +2317,7 @@ public final class Beans {
      * @param m the map to be converted into a bean object.
      * @param selectPropNames a collection of property names to be included in the resulting bean objects.
      * @param targetType the type of the bean object to be returned.
-     * @return a bean object of the specified type with its properties set to the values from the map, or null if the input map is null.
+     * @return a bean object of the specified type with its properties set to the values from the map, or {@code null} if the input map is {@code null}.
      * @throws IllegalArgumentException if {@code targetType} is not a valid bean class
      */
     @MayReturnNull
@@ -2429,7 +2390,7 @@ public final class Beans {
     }
 
     /**
-     * Converts a collection of maps into a list of bean objects of the specified type with control over null and unmatched properties.
+     * Converts a collection of maps into a list of bean objects of the specified type with control over {@code null} and unmatched properties.
      * Each map in the collection represents a bean object where the map's keys are the property names
      * and the values are the corresponding property values.
      * The resulting list contains bean objects of the specified type with their properties set to the values from the corresponding map.
@@ -2797,7 +2758,7 @@ public final class Beans {
     }
 
     /**
-     * Converts a bean object into a map with optional null property filtering.
+     * Converts a bean object into a map with optional {@code null} property filtering.
      * The keys of the map are the property names of the bean, and the values are the corresponding property values of the bean.
      * If <i>ignoreNullProperty</i> is {@code true}, properties of the bean with {@code null} values will not be included in the map.
      *
@@ -2827,7 +2788,7 @@ public final class Beans {
     }
 
     /**
-     * Converts a bean object into a map with optional null property filtering and property exclusion.
+     * Converts a bean object into a map with optional {@code null} property filtering and property exclusion.
      * The keys of the map are the property names of the bean, and the values are the corresponding property values of the bean.
      * If <i>ignoreNullProperty</i> is {@code true}, properties of the bean with {@code null} values will not be included in the map.
      * Properties whose names are included in the <i>ignoredPropNames</i> set will not be added to the map.
@@ -2859,7 +2820,7 @@ public final class Beans {
     }
 
     /**
-     * Converts a bean object into a map with optional null property filtering and property exclusion.
+     * Converts a bean object into a map with optional {@code null} property filtering and property exclusion.
      * The keys of the map are the property names of the bean, and the values are the corresponding property values of the bean.
      * If <i>ignoreNullProperty</i> is {@code true}, properties of the bean with {@code null} values will not be included in the map.
      * Properties whose names are included in the <i>ignoredPropNames</i> set will not be added to the map.
@@ -2893,7 +2854,7 @@ public final class Beans {
     }
 
     /**
-     * Converts a bean object into a map with optional null property filtering, property exclusion, and key naming policy.
+     * Converts a bean object into a map with optional {@code null} property filtering, property exclusion, and key naming policy.
      * The keys of the map are the property names of the bean, and the values are the corresponding property values of the bean.
      * If <i>ignoreNullProperty</i> is {@code true}, properties of the bean with {@code null} values will not be included in the map.
      * Properties whose names are included in the <i>ignoredPropNames</i> set will not be added to the map.
@@ -2930,7 +2891,7 @@ public final class Beans {
     /**
      * Converts a bean object into a map, selecting only the properties specified.
      * The keys of the map are the property names of the bean, and the values are the corresponding property values of the bean.
-     * Properties can be filtered based on null values, excluded by name, and keys can be transformed using a naming policy.
+     * Properties can be filtered based on {@code null} values, excluded by name, and keys can be transformed using a naming policy.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -3429,7 +3390,7 @@ public final class Beans {
     /**
      * Converts the provided bean into a Map where the keys are the property names of the bean and the values are the corresponding property values.
      * This method performs a deep conversion, meaning that if a property value is itself a bean, it will also be converted into a Map.
-     * Properties with null values will be included in the resulting Map.
+     * Properties with {@code null} values will be included in the resulting Map.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -3469,7 +3430,7 @@ public final class Beans {
      *
      * @param bean the bean object to be converted into a Map.
      * @param ignoreNullProperty if {@code true}, properties with {@code null} values will not be included in the resulting Map.
-     * @param ignoredPropNames a set of property names to be ignored during the conversion process. Can be null.
+     * @param ignoredPropNames a set of property names to be ignored during the conversion process. Can be {@code null}.
      * @return a Map representation of the bean with specified properties excluded.
      * @see #deepBean2Map(Object, Collection, NamingPolicy, IntFunction)
      */
@@ -3528,7 +3489,7 @@ public final class Beans {
      * @param bean the bean object to be converted into a Map.
      * @param ignoreNullProperty if {@code true}, properties with {@code null} values will not be included in the resulting Map.
      * @param ignoredPropNames a set of property names to be ignored during the conversion process.
-     * @param keyNamingPolicy the naming policy to apply to the keys in the resulting Map. If null, defaults to LOWER_CAMEL_CASE.
+     * @param keyNamingPolicy the naming policy to apply to the keys in the resulting Map. If {@code null}, defaults to LOWER_CAMEL_CASE.
      * @return a Map representation of the bean with keys transformed according to the naming policy.
      * @see #deepBean2Map(Object, Collection, NamingPolicy, IntFunction)
      */
@@ -3966,9 +3927,9 @@ public final class Beans {
     }
 
     /**
-     * Converts a bean object into a flat map representation with control over null property handling.
+     * Converts a bean object into a flat map representation with control over {@code null} property handling.
      * Values from nested beans are set to the resulting map with property names concatenated with a dot, e.g., {@code "address.city"}.
-     * Properties with null values can be included or excluded based on the ignoreNullProperty parameter.
+     * Properties with {@code null} values can be included or excluded based on the ignoreNullProperty parameter.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -3984,7 +3945,7 @@ public final class Beans {
      *
      * @param bean the bean object to be converted into a flat map.
      * @param ignoreNullProperty if {@code true}, properties with {@code null} values will not be included in the resulting map.
-     * @return a flat map representation of the bean with null handling as specified.
+     * @return a flat map representation of the bean with {@code null} handling as specified.
      * @see #bean2FlatMap(Object, Collection, NamingPolicy, IntFunction)
      */
     public static Map<String, Object> bean2FlatMap(final Object bean, final boolean ignoreNullProperty) {
@@ -3992,9 +3953,9 @@ public final class Beans {
     }
 
     /**
-     * Converts a bean object into a flat map representation with control over null property handling and property exclusion.
+     * Converts a bean object into a flat map representation with control over {@code null} property handling and property exclusion.
      * Values from nested beans are set to the resulting map with property names concatenated with a dot, e.g., {@code "address.city"}.
-     * Combines null value filtering with property name exclusion.
+     * Combines {@code null} value filtering with property name exclusion.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -4018,7 +3979,7 @@ public final class Beans {
     }
 
     /**
-     * Converts a bean object into a flat map representation with control over null handling, property exclusion, and Map type.
+     * Converts a bean object into a flat map representation with control over {@code null} handling, property exclusion, and Map type.
      * Values from nested beans are set to the resulting map with property names concatenated with a dot, e.g., {@code "address.city"}.
      * Provides flexibility in filtering and Map implementation.
      *
@@ -4048,7 +4009,7 @@ public final class Beans {
     }
 
     /**
-     * Converts a bean object into a flat map representation with control over null handling, property exclusion, and key naming policy.
+     * Converts a bean object into a flat map representation with control over {@code null} handling, property exclusion, and key naming policy.
      * Values from nested beans are set to the resulting map with property names concatenated with a dot, e.g., {@code "address.city"}.
      * Provides comprehensive control over the flattening process.
      *
@@ -4125,7 +4086,7 @@ public final class Beans {
     }
 
     /**
-     * Converts a bean object into a flat map representation and stores the result in the provided Map instance with null handling.
+     * Converts a bean object into a flat map representation and stores the result in the provided Map instance with {@code null} handling.
      * Values from nested beans are set to the map with property names concatenated with a dot, e.g., {@code "address.city"}.
      * This is an in-place operation that modifies the provided output Map.
      *
@@ -4154,7 +4115,7 @@ public final class Beans {
     /**
      * Converts a bean object into a flat map representation and stores the result in the provided Map instance with filtering options.
      * Values from nested beans are set to the map with property names concatenated with a dot, e.g., {@code "address.city"}.
-     * Combines in-place operation with null handling and property exclusion.
+     * Combines in-place operation with {@code null} handling and property exclusion.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -5462,13 +5423,12 @@ public final class Beans {
     /**
      * Erases (sets to default values) the specified properties of the given bean.
      *
-     * <p>This method sets the specified properties to their default values:
+     * <p>This method sets the specified properties to their default values:</p>
      * <ul>
      *   <li>Primitive numeric types: 0</li>
      *   <li>Primitive boolean: {@code false}</li>
      *   <li>Object references: {@code null}</li>
      * </ul>
-     * </p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -5531,13 +5491,12 @@ public final class Beans {
     /**
      * Erases all properties of the given bean, setting them to their default values.
      *
-     * <p>This method sets all properties of the bean to their default values:
+     * <p>This method sets all properties of the bean to their default values:</p>
      * <ul>
      *   <li>Primitive numeric types: 0</li>
      *   <li>Primitive boolean: {@code false}</li>
      *   <li>Object references: {@code null}</li>
      * </ul>
-     * </p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -5593,7 +5552,7 @@ public final class Beans {
      * }</pre>
      *
      * @param bean a bean object with getter/setter methods
-     * @throws IllegalArgumentException if bean is null or not a valid bean class
+     * @throws IllegalArgumentException if bean is {@code null} or not a valid bean class
      */
     public static void fill(final Object bean) throws IllegalArgumentException {
         N.checkArgNotNull(bean, cs.bean);
@@ -5619,7 +5578,7 @@ public final class Beans {
      *
      * @param bean a bean object with getter/setter methods
      * @param propNamesToFill collection of property names to fill
-     * @throws IllegalArgumentException if bean is null or not a valid bean class
+     * @throws IllegalArgumentException if bean is {@code null} or not a valid bean class
      */
     public static void fill(final Object bean, final Collection<String> propNamesToFill) {
         N.checkArgNotNull(bean, cs.bean);
@@ -5645,7 +5604,7 @@ public final class Beans {
      * @param <T> the type of the bean
      * @param beanClass bean class with getter/setter methods
      * @return a new instance with all properties filled with random values
-     * @throws IllegalArgumentException if beanClass is null or not a valid bean class
+     * @throws IllegalArgumentException if beanClass is {@code null} or not a valid bean class
      */
     public static <T> T fill(final Class<? extends T> beanClass) throws IllegalArgumentException {
         N.checkArgNotNull(beanClass, cs.beanClass);
@@ -5672,7 +5631,7 @@ public final class Beans {
      * @param beanClass bean class with getter/setter methods
      * @param count number of instances to create
      * @return a list containing the specified number of filled bean instances
-     * @throws IllegalArgumentException if beanClass is null, not a valid bean class, or count is negative
+     * @throws IllegalArgumentException if beanClass is {@code null}, not a valid bean class, or count is negative
      */
     public static <T> List<T> fill(final Class<? extends T> beanClass, final int count) throws IllegalArgumentException {
         N.checkArgNotNull(beanClass, cs.beanClass);
@@ -5697,7 +5656,7 @@ public final class Beans {
      * @param beanClass bean class with getter/setter methods
      * @param propNamesToFill collection of property names to fill
      * @return a new instance with specified properties filled with random values
-     * @throws IllegalArgumentException if beanClass is null or not a valid bean class
+     * @throws IllegalArgumentException if beanClass is {@code null} or not a valid bean class
      */
     public static <T> T fill(final Class<? extends T> beanClass, final Collection<String> propNamesToFill) throws IllegalArgumentException {
         N.checkArgNotNull(beanClass, cs.beanClass);
@@ -5732,7 +5691,7 @@ public final class Beans {
      * @param propNamesToFill collection of property names to fill
      * @param count number of instances to create
      * @return a list containing the specified number of partially filled bean instances
-     * @throws IllegalArgumentException if beanClass is null, not a valid bean class, or count is negative
+     * @throws IllegalArgumentException if beanClass is {@code null}, not a valid bean class, or count is negative
      */
     public static <T> List<T> fill(final Class<? extends T> beanClass, final Collection<String> propNamesToFill, final int count)
             throws IllegalArgumentException {
@@ -5844,7 +5803,7 @@ public final class Beans {
      *
      * <p>This method compares only the specified properties of the two bean objects.
      * Properties are compared using their equals() method. If all specified properties
-     * are equal, the method returns true.</p>
+     * are equal, the method returns {@code true}.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -5856,7 +5815,7 @@ public final class Beans {
      *
      * @param bean1 the first bean to compare, must not be null
      * @param bean2 the second bean to compare, must not be null
-     * @param propNamesToCompare the collection of property names to compare, must not be null or empty
+     * @param propNamesToCompare the collection of property names to compare, must not be {@code null} or empty
      * @return {@code true} if all the specified properties of the beans are equal, {@code false} otherwise
      * @throws IllegalArgumentException if the {@code propNamesToCompare} is empty
      */

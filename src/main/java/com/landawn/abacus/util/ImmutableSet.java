@@ -303,7 +303,7 @@ public class ImmutableSet<E> extends ImmutableCollection<E> implements Set<E> {
      * Returns an ImmutableSet containing up to ten distinct elements.
      * Duplicate elements (as determined by equals()) are included only once in the set.
      * The iteration order is guaranteed to match the order of the first occurrence of each distinct element.
-     * Unlike some set implementations, this method supports null elements.
+     * Unlike some set implementations, this method supports {@code null} elements.
      *
      * @param <E> the type of the elements
      * @param e1 the first element
@@ -327,8 +327,8 @@ public class ImmutableSet<E> extends ImmutableCollection<E> implements Set<E> {
      * Returns an ImmutableSet containing all distinct elements from the provided array.
      * The returned set is independent of the input array; changes to the array after this call
      * will not affect the returned set. Duplicate elements in the array are included only once.
-     * If the array is null or empty, an empty ImmutableSet is returned.
-     * Unlike some collection frameworks, this method supports null elements in the array.
+     * If the array is {@code null} or empty, an empty ImmutableSet is returned.
+     * Unlike some collection frameworks, this method supports {@code null} elements in the array.
      * The iteration order is guaranteed to match the order of first occurrence in the array.
      * 
      * <p><b>Usage Examples:</b></p>
@@ -339,7 +339,7 @@ public class ImmutableSet<E> extends ImmutableCollection<E> implements Set<E> {
      * }</pre>
      *
      * @param <E> the type of the elements
-     * @param a the array of elements to include in the ImmutableSet, may be null or empty
+     * @param a the array of elements to include in the ImmutableSet, may be {@code null} or empty
      * @return an ImmutableSet containing all distinct elements from the array, or empty set if array is null/empty
      * @see Set#of(Object...)
      */
@@ -356,7 +356,7 @@ public class ImmutableSet<E> extends ImmutableCollection<E> implements Set<E> {
     /**
      * Returns an ImmutableSet containing all distinct elements from the provided collection.
      * If the provided collection is already an ImmutableSet, it is returned directly without copying.
-     * If the collection is null or empty, an empty ImmutableSet is returned.
+     * If the collection is {@code null} or empty, an empty ImmutableSet is returned.
      * Otherwise, a new ImmutableSet is created with a defensive copy of the collection's distinct elements.
      * The iteration order is preserved if the source collection is a List, LinkedHashSet, or SortedSet.
      * 
@@ -392,7 +392,7 @@ public class ImmutableSet<E> extends ImmutableCollection<E> implements Set<E> {
      * The returned ImmutableSet is backed by the provided set, so changes to the original set
      * will be reflected in the ImmutableSet. However, the ImmutableSet itself cannot be modified.
      * If the provided set is already an ImmutableSet, it is returned directly.
-     * If the set is null, an empty ImmutableSet is returned.
+     * If the set is {@code null}, an empty ImmutableSet is returned.
      * 
      * <p><b>Warning:</b> Use this method with caution as the immutability guarantee depends on not modifying
      * the original set after wrapping. This method is marked as @Beta.
@@ -534,14 +534,14 @@ public class ImmutableSet<E> extends ImmutableCollection<E> implements Set<E> {
          * Duplicate elements (including duplicates within the array and duplicates of elements
          * already in the set) are included only once. The order of addition may affect the
          * iteration order depending on the underlying set implementation.
-         * If the array is null or empty, no elements are added.
+         * If the array is {@code null} or empty, no elements are added.
          * 
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * builder.add("one", "two", "three");
          * }</pre>
          *
-         * @param elements the elements to add, may be null or empty
+         * @param elements the elements to add, may be {@code null} or empty
          * @return this builder instance for method chaining
          */
         @SafeVarargs
@@ -558,7 +558,7 @@ public class ImmutableSet<E> extends ImmutableCollection<E> implements Set<E> {
          * Duplicate elements (including duplicates within the collection and duplicates of elements
          * already in the set) are included only once. The order of addition may affect the
          * iteration order depending on the underlying set implementation.
-         * If the collection is null or empty, no elements are added.
+         * If the collection is {@code null} or empty, no elements are added.
          * 
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
@@ -566,7 +566,7 @@ public class ImmutableSet<E> extends ImmutableCollection<E> implements Set<E> {
          * builder.addAll(moreElements);
          * }</pre>
          *
-         * @param c the collection containing elements to add, may be null or empty
+         * @param c the collection containing elements to add, may be {@code null} or empty
          * @return this builder instance for method chaining
          */
         public Builder<E> addAll(final Collection<? extends E> c) {
@@ -581,7 +581,7 @@ public class ImmutableSet<E> extends ImmutableCollection<E> implements Set<E> {
          * Adds all elements from the specified iterator to the set being built.
          * Duplicate elements (including duplicates from the iterator and duplicates of elements
          * already in the set) are included only once. The iterator is consumed by this operation.
-         * If the iterator is null or has no elements, no elements are added.
+         * If the iterator is {@code null} or has no elements, no elements are added.
          * 
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code

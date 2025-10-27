@@ -33,7 +33,7 @@ import com.landawn.abacus.annotation.SuppressFBWarnings;
  * matches for given search targets. Methods like {@link #lower}, {@link #floor},
  * {@link #ceiling}, and {@link #higher} return elements respectively less than,
  * less than or equal, greater than or equal, and greater than a given element,
- * returning null if there is no such element.</p>
+ * returning {@code null} if there is no such element.</p>
  * 
  * <p>All mutating operations will throw UnsupportedOperationException. The set maintains
  * elements in sorted order according to their natural ordering or by a Comparator provided
@@ -47,7 +47,6 @@ import com.landawn.abacus.annotation.SuppressFBWarnings;
  * System.out.println(set.higher(5));       // 7
  * System.out.println(set.descendingSet()); // [9, 7, 5, 3, 1]
  * }</pre>
- * </p>
  *
  * @param <E> the type of elements maintained by this set
  * @see ImmutableSortedSet
@@ -329,7 +328,7 @@ public final class ImmutableNavigableSet<E> extends ImmutableSortedSet<E> implem
      * 
      * <p><b>Warning:</b> This method does not create a defensive copy. Changes to the underlying
      * NavigableSet will be visible through the returned ImmutableNavigableSet, which violates the
-     * immutability contract. Use {@link #copyOf(Collection)} for a true immutable copy.</p>
+     * immutability contract. Use {@link #copyOf(Collection)} for a {@code true} immutable copy.</p>
      * 
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -384,7 +383,7 @@ public final class ImmutableNavigableSet<E> extends ImmutableSortedSet<E> implem
      * @param e the value to match
      * @return the greatest element less than {@code e}, or {@code null} if there is no such element
      * @throws ClassCastException if the specified element cannot be compared with the elements currently in the set
-     *         or its comparator does not permit null elements
+     *         or its comparator does not permit {@code null} elements
      */
     @Override
     public E lower(final E e) {
@@ -406,7 +405,7 @@ public final class ImmutableNavigableSet<E> extends ImmutableSortedSet<E> implem
      * @param e the value to match
      * @return the greatest element less than or equal to {@code e}, or {@code null} if there is no such element
      * @throws ClassCastException if the specified element cannot be compared with the elements currently in the set
-     *         or its comparator does not permit null elements
+     *         or its comparator does not permit {@code null} elements
      */
     @Override
     public E floor(final E e) {
@@ -428,7 +427,7 @@ public final class ImmutableNavigableSet<E> extends ImmutableSortedSet<E> implem
      * @param e the value to match
      * @return the least element greater than or equal to {@code e}, or {@code null} if there is no such element
      * @throws ClassCastException if the specified element cannot be compared with the elements currently in the set
-     *         or its comparator does not permit null elements
+     *         or its comparator does not permit {@code null} elements
      */
     @Override
     public E ceiling(final E e) {
@@ -450,7 +449,7 @@ public final class ImmutableNavigableSet<E> extends ImmutableSortedSet<E> implem
      * @param e the value to match
      * @return the least element greater than {@code e}, or {@code null} if there is no such element
      * @throws ClassCastException if the specified element cannot be compared with the elements currently in the set
-     *         or its comparator does not permit null elements
+     *         or its comparator does not permit {@code null} elements
      */
     @Override
     public E higher(final E e) {

@@ -51,7 +51,7 @@ public class AsciiStreamType extends InputStreamType {
      *
      * @param rs the ResultSet to retrieve the ASCII stream from
      * @param columnIndex the column index (1-based) of the ASCII stream
-     * @return an InputStream containing the ASCII data, or null if the value is SQL NULL
+     * @return an InputStream containing the ASCII data, or {@code null} if the value is SQL NULL
      * @throws SQLException if a database access error occurs or the columnIndex is invalid
      */
     @Override
@@ -65,7 +65,7 @@ public class AsciiStreamType extends InputStreamType {
      * @param rs the ResultSet to retrieve the ASCII stream from
      * @param columnLabel the label for the column specified with the SQL AS clause,
      *                    or the column name if no AS clause was specified
-     * @return an InputStream containing the ASCII data, or null if the value is SQL NULL
+     * @return an InputStream containing the ASCII data, or {@code null} if the value is SQL NULL
      * @throws SQLException if a database access error occurs or the columnLabel is invalid
      */
     @Override
@@ -133,7 +133,7 @@ public class AsciiStreamType extends InputStreamType {
 
     /**
      * Appends the content of an ASCII InputStream to an Appendable object.
-     * If the InputStream is null, appends the string "null".
+     * If the InputStream is {@code null}, appends the string "null".
      * For Writer instances, performs direct stream-to-writer copying for efficiency.
      * For other Appendable types, reads the entire stream into a string first.
      *
@@ -156,7 +156,7 @@ public class AsciiStreamType extends InputStreamType {
 
     /**
      * Writes the content of an ASCII InputStream to a CharacterWriter with optional quotation.
-     * This method handles null values and applies string quotation marks if specified in the configuration.
+     * This method handles {@code null} values and applies string quotation marks if specified in the configuration.
      * The stream is read in chunks using a buffer from the object pool for efficiency.
      *
      * @param writer the CharacterWriter to write to

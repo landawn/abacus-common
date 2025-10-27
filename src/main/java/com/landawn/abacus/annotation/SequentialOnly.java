@@ -24,11 +24,11 @@ import java.lang.annotation.Target;
  * Indicates that the annotated method or type must be executed sequentially
  * and does not support parallel execution. This annotation documents that the
  * implementation is not thread-safe and requires sequential access to maintain correctness.
- * 
+ *
  * <p>When applied to a method, it indicates that the method must not be called
  * from multiple threads simultaneously. When applied to a type, it indicates that
  * the type's operations must be executed sequentially.</p>
- * 
+ *
  * <p>This annotation is used to mark:</p>
  * <ul>
  *   <li>Stream operations that cannot be parallelized</li>
@@ -36,8 +36,53 @@ import java.lang.annotation.Target;
  *   <li>Algorithms that depend on processing order</li>
  *   <li>Non-thread-safe utility methods</li>
  * </ul>
- * 
+ *
+ * <p><b>Common reasons for sequential-only operations:</b></p>
+ * <ul>
+ *   <li>Maintaining mutable state across invocations</li>
+ *   <li>Order-dependent processing requirements</li>
+ *   <li>External resource constraints (file handles, connections)</li>
+ *   <li>Complex side effects that must occur in a specific order</li>
+ * </ul>
+ *
+ * <p><b>Usage Examples:</b></p>
+ * <pre>{@code
+ * public class DataProcessor {
+ *     private int counter = 0;
+ *
+ *     @SequentialOnly
+ *     public int processWithCounter(String data) {
+ *         // Not thread-safe due to mutable state
+ *         counter++;
+ *         return processData(data, counter);
+ *     }
+ *
+ *     @SequentialOnly
+ *     public void writeToFile(List<String> lines, Path outputFile) {
+ *         // Must maintain order when writing to file
+ *         try (BufferedWriter writer = Files.newBufferedWriter(outputFile)) {
+ *             for (String line : lines) {
+ *                 writer.write(line);
+ *                 writer.newLine();
+ *             }
+ *         }
+ *     }
+ * }
+ *
+ * @SequentialOnly
+ * public class OrderDependentProcessor {
+ *     // All operations depend on sequential execution
+ *     private List<String> history = new ArrayList<>();
+ *
+ *     public void addEntry(String entry) {
+ *         // Order matters for historical tracking
+ *         history.add(entry);
+ *     }
+ * }
+ * }</pre>
+ *
  * @see ParallelSupported
+ * @see Stateful
  * @since 2018
  */
 @Documented

@@ -58,7 +58,7 @@ public class KryoSerializationConfig extends SerializationConfig<KryoSerializati
     /**
      * Checks if class information should be written during serialization.
      * 
-     * <p>When true, Kryo will write the full class name with the serialized data,
+     * <p>When {@code true}, Kryo will write the full class name with the serialized data,
      * allowing deserialization without specifying the target class. This increases
      * the serialized data size but provides more flexibility.</p>
      *
@@ -71,7 +71,7 @@ public class KryoSerializationConfig extends SerializationConfig<KryoSerializati
     /**
      * Sets whether class information should be written during serialization.
      * 
-     * <p>When set to true, Kryo will include the full class name in the serialized
+     * <p>When set to {@code true}, Kryo will include the full class name in the serialized
      * data. This allows deserializing objects without knowing their type in advance,
      * but increases the size of the serialized data.</p>
      * 
@@ -158,6 +158,12 @@ public class KryoSerializationConfig extends SerializationConfig<KryoSerializati
      * }</pre>
      */
     public static final class KSC extends KryoSerializationConfig {
+
+        /**
+         * Constructs a new KSC instance.
+         */
+        public KSC() {
+        }
 
         /**
          * Creates a new KryoSerializationConfig instance with default settings.

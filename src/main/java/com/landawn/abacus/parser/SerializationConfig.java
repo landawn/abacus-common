@@ -14,6 +14,7 @@
 
 package com.landawn.abacus.parser;
 
+import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.util.DateTimeFormat;
 import com.landawn.abacus.util.N;
 
@@ -37,6 +38,12 @@ import com.landawn.abacus.util.N;
  */
 public abstract class SerializationConfig<C extends SerializationConfig<C>> extends ParserConfig<C> {
 
+    /**
+     * Protected constructor for subclasses.
+     */
+    protected SerializationConfig() {
+    }
+
     protected static final Exclusion defaultExclusion = null; // Keep it null for default behavior. Do not set it to Exclusion.NULL or Exclusion.DEFAULT.
 
     protected static final DateTimeFormat defaultDateTimeFormat = DateTimeFormat.LONG;
@@ -53,9 +60,10 @@ public abstract class SerializationConfig<C extends SerializationConfig<C>> exte
      * <p>The exclusion strategy determines which fields should be excluded from serialization
      * based on their values or other criteria.</p>
      *
-     * @return the current {@link Exclusion} strategy, or null if no exclusion is set
+     * @return the current {@link Exclusion} strategy, or {@code null} if no exclusion is set
      * @see Exclusion
      */
+    @MayReturnNull
     public Exclusion getExclusion() {
         return exclusion;
     }
@@ -72,7 +80,7 @@ public abstract class SerializationConfig<C extends SerializationConfig<C>> exte
      * config.setExclusion(Exclusion.EMPTY); // Exclude empty collections/strings
      * }</pre>
      *
-     * @param exclusion the exclusion strategy to use, or null for no exclusion
+     * @param exclusion the exclusion strategy to use, or {@code null} for no exclusion
      * @return this configuration instance for method chaining
      * @see Exclusion
      */
@@ -85,7 +93,7 @@ public abstract class SerializationConfig<C extends SerializationConfig<C>> exte
     /**
      * Checks whether transient fields should be skipped during serialization.
      * 
-     * <p>When true, fields marked with the {@code transient} keyword or
+     * <p>When {@code true}, fields marked with the {@code transient} keyword or
      * {@code @Transient} annotation will be excluded from serialization.</p>
      *
      * @return {@code true} if transient fields should be skipped, {@code false} otherwise
@@ -97,7 +105,7 @@ public abstract class SerializationConfig<C extends SerializationConfig<C>> exte
     /**
      * Sets whether transient fields should be skipped during serialization.
      * 
-     * <p>When set to true, fields marked with the {@code transient} keyword or
+     * <p>When set to {@code true}, fields marked with the {@code transient} keyword or
      * {@code @Transient} annotation will be excluded from serialization.
      * This is useful for excluding fields that should not be persisted or transmitted.</p>
      * 

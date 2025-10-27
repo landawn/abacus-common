@@ -226,7 +226,7 @@ public abstract sealed class CharacterWriter extends BufferedWriter permits Buff
      * Writes a string with automatic escaping.
      * 
      * <p>Each character in the string is checked against the replacement table,
-     * and escaped if necessary. If the string is null, "null" is written.</p>
+     * and escaped if necessary. If the string is {@code null}, "null" is written.</p>
      * 
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code

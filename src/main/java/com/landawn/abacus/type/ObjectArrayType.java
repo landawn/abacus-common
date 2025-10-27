@@ -99,7 +99,7 @@ public class ObjectArrayType<T> extends AbstractArrayType<T[]> { //NOSONAR
     /**
      * Indicates whether this type represents an object array.
      *
-     * @return true, as this is an object array type
+     * @return {@code true}, as this is an object array type
      */
     @Override
     public boolean isObjectArray() {
@@ -121,13 +121,14 @@ public class ObjectArrayType<T> extends AbstractArrayType<T[]> { //NOSONAR
      * Converts an object array to its JSON string representation.
      * If the element type is serializable, performs custom JSON serialization.
      * Otherwise, delegates to the JSON parser.
-     * 
+     *
      * @param x the array to convert
-     * @return JSON string representation, null if input is null, or "[]" for empty arrays
+     * @return JSON string representation, {@code null} if input is {@code null}, or "[]" for empty arrays
      * @throws UncheckedIOException if an I/O error occurs during serialization
      */
     @MayReturnNull
     @Override
+
     public String stringOf(final T[] x) {
         if (x == null) {
             return null; // NOSONAR
@@ -169,13 +170,14 @@ public class ObjectArrayType<T> extends AbstractArrayType<T[]> { //NOSONAR
 
     /**
      * Converts a JSON string representation to an object array.
-     * Handles null, empty strings, and the special "[]" representation for empty arrays.
-     * 
+     * Handles {@code null}, empty strings, and the special "[]" representation for empty arrays.
+     *
      * @param str the JSON string to parse
-     * @return the parsed array, null if input is null, or empty array for empty representations
+     * @return the parsed array, {@code null} if input is {@code null}, or empty array for empty representations
      */
     @MayReturnNull
     @Override
+
     public T[] valueOf(final String str) {
         if (Strings.isEmpty(str) || Strings.isBlank(str)) {
             return null; // NOSONAR
@@ -189,7 +191,7 @@ public class ObjectArrayType<T> extends AbstractArrayType<T[]> { //NOSONAR
     /**
      * Appends the JSON representation of an object array to an Appendable.
      * Optimizes performance by using buffered writers when appropriate.
-     * 
+     *
      * @param appendable the Appendable to write to
      * @param x the array to append
      * @throws IOException if an I/O error occurs during the append operation
@@ -253,8 +255,8 @@ public class ObjectArrayType<T> extends AbstractArrayType<T[]> { //NOSONAR
 
     /**
      * Writes the JSON character representation of an object array to a CharacterWriter.
-     * This method is typically used for JSON/XML serialization and handles null elements.
-     * 
+     * This method is typically used for JSON/XML serialization and handles {@code null} elements.
+     *
      * @param writer the CharacterWriter to write to
      * @param x the array to write
      * @param config the serialization configuration
@@ -291,12 +293,13 @@ public class ObjectArrayType<T> extends AbstractArrayType<T[]> { //NOSONAR
     /**
      * Converts a Collection to an array of the appropriate type.
      * Creates a new array with the same size as the collection and copies all elements.
-     * 
+     *
      * @param c the collection to convert
-     * @return an array containing all elements from the collection, or null if the collection is null
+     * @return an array containing all elements from the collection, or {@code null} if the collection is null
      */
     @MayReturnNull
     @Override
+
     public T[] collection2Array(final Collection<?> c) {
         if (c == null) {
             return null; // NOSONAR
@@ -315,7 +318,7 @@ public class ObjectArrayType<T> extends AbstractArrayType<T[]> { //NOSONAR
 
     /**
      * Converts an array to a Collection by adding all array elements to the provided collection.
-     * 
+     *
      * @param <E> the element type of the collection
      * @param x the array to convert
      * @param output the collection to add elements to
@@ -332,7 +335,7 @@ public class ObjectArrayType<T> extends AbstractArrayType<T[]> { //NOSONAR
     /**
      * Computes a hash code for the given array.
      * This method computes a shallow hash code based on array elements.
-     * 
+     *
      * @param x the array to hash
      * @return the computed hash code
      */
@@ -344,7 +347,7 @@ public class ObjectArrayType<T> extends AbstractArrayType<T[]> { //NOSONAR
     /**
      * Computes a deep hash code for the given array.
      * This method recursively computes hash codes for nested arrays and objects.
-     * 
+     *
      * @param x the array to hash
      * @return the computed deep hash code
      */
@@ -356,7 +359,7 @@ public class ObjectArrayType<T> extends AbstractArrayType<T[]> { //NOSONAR
     /**
      * Compares two arrays for equality.
      * This method performs a shallow equality check on array elements.
-     * 
+     *
      * @param x the first array
      * @param y the second array
      * @return {@code true} if the arrays are equal, {@code false} otherwise
@@ -369,7 +372,7 @@ public class ObjectArrayType<T> extends AbstractArrayType<T[]> { //NOSONAR
     /**
      * Performs a deep comparison of two arrays for equality.
      * This method recursively compares nested arrays and objects.
-     * 
+     *
      * @param x the first array
      * @param y the second array
      * @return {@code true} if the arrays are deeply equal, {@code false} otherwise
@@ -382,11 +385,12 @@ public class ObjectArrayType<T> extends AbstractArrayType<T[]> { //NOSONAR
     /**
      * Creates a string representation of the array.
      * This method produces a shallow string representation using toString() on elements.
-     * 
+     *
      * @param x the array to convert to string
-     * @return string representation of the array, null if input is null, or "[]" for empty arrays
+     * @return string representation of the array, {@code null} if input is {@code null}, or "[]" for empty arrays
      */
     @Override
+    @MayReturnNull
     public String toString(final Object[] x) {
         if (x == null) {
             return null; // NOSONAR
@@ -400,11 +404,12 @@ public class ObjectArrayType<T> extends AbstractArrayType<T[]> { //NOSONAR
     /**
      * Creates a deep string representation of the array.
      * This method recursively converts nested arrays and objects to strings.
-     * 
+     *
      * @param x the array to convert to string
-     * @return deep string representation of the array, null if input is null, or "[]" for empty arrays
+     * @return deep string representation of the array, {@code null} if input is {@code null}, or "[]" for empty arrays
      */
     @Override
+    @MayReturnNull
     public String deepToString(final Object[] x) {
         if (x == null) {
             return null; // NOSONAR

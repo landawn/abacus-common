@@ -139,7 +139,7 @@ public class NumberType<T extends Number> extends AbstractPrimaryType<T> {
     /**
      * Indicates whether this type represents a numeric value.
      *
-     * @return true, as this is a number type
+     * @return {@code true}, as this is a number type
      */
     @Override
     public boolean isNumber() {
@@ -150,7 +150,7 @@ public class NumberType<T extends Number> extends AbstractPrimaryType<T> {
      * Indicates whether values of this type should be quoted when written to CSV format.
      * Numeric values typically don't require quotes in CSV.
      *
-     * @return true, indicating numeric values don't need quotes in CSV
+     * @return {@code true}, indicating numeric values don't need quotes in CSV
      */
     @Override
     public boolean isNonQuotableCsvType() {
@@ -170,11 +170,12 @@ public class NumberType<T extends Number> extends AbstractPrimaryType<T> {
     /**
      * Converts a string representation to an instance of the number type.
      * This method uses the discovered factory method or constructor to create instances.
-     * 
+     *
      * @param str the string to convert
-     * @return an instance of the number type, or null if the input string is empty or null
+     * @return an instance of the number type, or {@code null} if the input string is empty or null
      * @throws NumberFormatException if the string cannot be parsed as the target number type
      * @throws UnsupportedOperationException if no suitable factory method or constructor was found
+     @MayReturnNull
      */
     @Override
     public T valueOf(final String str) {
@@ -183,22 +184,16 @@ public class NumberType<T extends Number> extends AbstractPrimaryType<T> {
 
     /**
      * Converts a number object to its string representation.
-     * 
+     *
      * @param x the number object to convert
-     * @return the string representation using toString(), or null if the input is null
+     * @return the string representation using toString(), or {@code null} if the input is null
+     @MayReturnNull
      */
     @Override
     public String stringOf(final T x) {
         return (x == null) ? null : x.toString();
     }
 
-    /**
-     * Appends the string representation of a number to an Appendable.
-     * 
-     * @param appendable the Appendable to write to
-     * @param x the number value to append
-     * @throws IOException if an I/O error occurs during the append operation
-     */
     @Override
     public void appendTo(final Appendable appendable, final T x) throws IOException {
         if (x == null) {
@@ -211,7 +206,7 @@ public class NumberType<T extends Number> extends AbstractPrimaryType<T> {
     /**
      * Writes the character representation of a number to a CharacterWriter.
      * This method delegates to the appendTo method and is typically used for JSON/XML serialization.
-     * 
+     *
      * @param writer the CharacterWriter to write to
      * @param x the number value to write
      * @param config the serialization configuration

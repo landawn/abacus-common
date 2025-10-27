@@ -103,7 +103,7 @@ import com.landawn.abacus.util.stream.Stream;
  *   <li>Support for complex types (Dataset, Sheet, EntityId, MapEntity)</li>
  *   <li>Circular reference detection and handling</li>
  *   <li>Streaming support for large JSON arrays</li>
- *   <li>Configurable null value handling and property exclusion</li>
+ *   <li>Configurable {@code null} value handling and property exclusion</li>
  *   <li>Pretty printing and indentation support</li>
  * </ul>
  *
@@ -166,14 +166,6 @@ final class JSONParserImpl extends AbstractJSONParser {
         super(jsc, jdc);
     }
 
-    /**
-     *
-     * @param <T>
-     * @param source
-     * @param config
-     * @param targetClass
-     * @return
-     */
     @Override
     public <T> T readString(final String source, final JSONDeserializationConfig config, final Class<? extends T> targetClass) {
         final JSONDeserializationConfig configToUse = check(config);
@@ -198,12 +190,6 @@ final class JSONParserImpl extends AbstractJSONParser {
         }
     }
 
-    /**
-     *
-     * @param source
-     * @param config
-     * @param output
-     */
     @Override
     public void readString(final String source, final JSONDeserializationConfig config, final Object[] output) {
         final JSONDeserializationConfig configToUse = check(config);
@@ -229,12 +215,6 @@ final class JSONParserImpl extends AbstractJSONParser {
         }
     }
 
-    /**
-     *
-     * @param source
-     * @param config
-     * @param output
-     */
     @Override
     public void readString(final String source, final JSONDeserializationConfig config, final Collection<?> output) {
         final JSONDeserializationConfig configToUse = check(config);
@@ -260,12 +240,6 @@ final class JSONParserImpl extends AbstractJSONParser {
         }
     }
 
-    /**
-     *
-     * @param source
-     * @param config
-     * @param output
-     */
     @Override
     public void readString(final String source, final JSONDeserializationConfig config, final Map<?, ?> output) {
         final JSONDeserializationConfig configToUse = check(config);
@@ -366,14 +340,9 @@ final class JSONParserImpl extends AbstractJSONParser {
         }
     }
 
-    /**
-     *
-     * @param obj
-     * @param config
-     * @return
-     */
     @MayReturnNull
     @Override
+
     public String serialize(final Object obj, final JSONSerializationConfig config) {
         final JSONSerializationConfig configToUse = check(config);
 
@@ -402,12 +371,6 @@ final class JSONParserImpl extends AbstractJSONParser {
         }
     }
 
-    /**
-     *
-     * @param obj
-     * @param config
-     * @param output
-     */
     @Override
     public void serialize(final Object obj, final JSONSerializationConfig config, final File output) {
         final JSONSerializationConfig configToUse = check(config);
@@ -451,12 +414,6 @@ final class JSONParserImpl extends AbstractJSONParser {
         }
     }
 
-    /**
-     *
-     * @param obj
-     * @param config
-     * @param output
-     */
     @Override
     public void serialize(final Object obj, final JSONSerializationConfig config, final OutputStream output) {
         final JSONSerializationConfig configToUse = check(config);
@@ -496,12 +453,6 @@ final class JSONParserImpl extends AbstractJSONParser {
         }
     }
 
-    /**
-     *
-     * @param obj
-     * @param config
-     * @param output
-     */
     @Override
     public void serialize(final Object obj, final JSONSerializationConfig config, final Writer output) {
         final JSONSerializationConfig configToUse = check(config);
@@ -544,16 +495,6 @@ final class JSONParserImpl extends AbstractJSONParser {
         }
     }
 
-    /**
-     *
-     * @param obj
-     * @param config
-     * @param isFirstCall
-     * @param indentation
-     * @param serializedObjects
-     * @param bw
-     * @throws IOException Signals that an I/O exception has occurred.
-     */
     @SuppressWarnings("rawtypes")
     protected void write(final Object obj, final JSONSerializationConfig config, final boolean isFirstCall, final String indentation,
             final IdentityHashSet<Object> serializedObjects, final BufferedJSONWriter bw) throws IOException {
@@ -619,16 +560,6 @@ final class JSONParserImpl extends AbstractJSONParser {
         }
     }
 
-    /**
-     *
-     * @param obj the object to serialize to JSON
-     * @param config the JSON serialization configuration settings
-     * @param serializedObjects set of already serialized objects to detect circular references
-     * @param type the Type information for the object being serialized
-     * @param bw the buffered JSON writer to write the serialized output to
-     * @param flush whether to flush the writer after writing
-     * @throws IOException if an I/O error occurs during writing
-     */
     protected void write(final Object obj, final JSONSerializationConfig config, final IdentityHashSet<Object> serializedObjects, final Type<Object> type,
             final BufferedJSONWriter bw, final boolean flush) throws IOException {
         if (config.bracketRootValue() || !type.isSerializable()) {
@@ -646,18 +577,6 @@ final class JSONParserImpl extends AbstractJSONParser {
         }
     }
 
-    /**
-     *
-     * @param obj the object to serialize to JSON
-     * @param config the JSON serialization configuration settings
-     * @param isFirstCall whether this is the first call in the serialization process
-     * @param indentation the indentation string for formatting the JSON output
-     * @param serializedObjects set of already serialized objects to detect circular references
-     * @param type the Type information for the object being serialized
-     * @param bw the buffered JSON writer to write the serialized output to
-     * @param flush whether to flush the writer after writing
-     * @throws IOException if an I/O error occurs during writing
-     */
     @SuppressWarnings("unused")
     protected void write(final Object obj, final JSONSerializationConfig config, final boolean isFirstCall, final String indentation,
             final IdentityHashSet<Object> serializedObjects, final Type<Object> type, final BufferedJSONWriter bw, final boolean flush) throws IOException {
@@ -672,17 +591,6 @@ final class JSONParserImpl extends AbstractJSONParser {
         }
     }
 
-    /**
-     *
-     * @param obj
-     * @param config
-     * @param isFirstCall
-     * @param indentation
-     * @param serializedObjects
-     * @param type
-     * @param bw
-     * @throws IOException Signals that an I/O exception has occurred.
-     */
     protected void writeBean(final Object obj, final JSONSerializationConfig config, final boolean isFirstCall, final String indentation,
             final IdentityHashSet<Object> serializedObjects, final Type<Object> type, final BufferedJSONWriter bw) throws IOException {
         //    if (hasCircularReference(obj, serializedObjects, config, bw)) {
@@ -838,17 +746,6 @@ final class JSONParserImpl extends AbstractJSONParser {
         }
     }
 
-    /**
-     *
-     * @param m
-     * @param config
-     * @param isFirstCall
-     * @param indentation
-     * @param serializedObjects
-     * @param type
-     * @param bw
-     * @throws IOException Signals that an I/O exception has occurred.
-     */
     @SuppressWarnings("unused")
     protected void writeMap(final Map<?, ?> m, final JSONSerializationConfig config, final boolean isFirstCall, final String indentation,
             final IdentityHashSet<Object> serializedObjects, final Type<Object> type, final BufferedJSONWriter bw) throws IOException {
@@ -940,17 +837,6 @@ final class JSONParserImpl extends AbstractJSONParser {
         }
     }
 
-    /**
-     *
-     * @param obj
-     * @param config
-     * @param isFirstCall
-     * @param indentation
-     * @param serializedObjects
-     * @param type
-     * @param bw
-     * @throws IOException Signals that an I/O exception has occurred.
-     */
     protected void writeArray(final Object obj, final JSONSerializationConfig config, final boolean isFirstCall, final String indentation,
             final IdentityHashSet<Object> serializedObjects, final Type<Object> type, final BufferedJSONWriter bw) throws IOException {
         //    if (hasCircularReference(obj, serializedObjects, config, bw)) {
@@ -1007,17 +893,6 @@ final class JSONParserImpl extends AbstractJSONParser {
         }
     }
 
-    /**
-     *
-     * @param c
-     * @param config
-     * @param isFirstCall
-     * @param indentation
-     * @param serializedObjects
-     * @param type
-     * @param bw
-     * @throws IOException Signals that an I/O exception has occurred.
-     */
     @SuppressWarnings("unused")
     protected void writeCollection(final Collection<?> c, final JSONSerializationConfig config, final boolean isFirstCall, final String indentation,
             final IdentityHashSet<Object> serializedObjects, final Type<Object> type, final BufferedJSONWriter bw) throws IOException {
@@ -1068,17 +943,6 @@ final class JSONParserImpl extends AbstractJSONParser {
         }
     }
 
-    /**
-     * Write map bean.
-     * @param mapEntity
-     * @param config
-     * @param isFirstCall
-     * @param indentation
-     * @param serializedObjects
-     * @param type
-     * @param bw
-     * @throws IOException Signals that an I/O exception has occurred.
-     */
     @SuppressWarnings("unused")
     protected void writeMapEntity(final MapEntity mapEntity, final JSONSerializationConfig config, final boolean isFirstCall, final String indentation,
             final IdentityHashSet<Object> serializedObjects, final Type<Object> type, final BufferedJSONWriter bw) throws IOException {
@@ -1179,17 +1043,6 @@ final class JSONParserImpl extends AbstractJSONParser {
         }
     }
 
-    /**
-     * Write bean id.
-     * @param entityId
-     * @param config
-     * @param isFirstCall
-     * @param indentation
-     * @param serializedObjects
-     * @param type
-     * @param bw
-     * @throws IOException Signals that an I/O exception has occurred.
-     */
     @SuppressWarnings("unused")
     protected void writeEntityId(final EntityId entityId, final JSONSerializationConfig config, final boolean isFirstCall, final String indentation,
             final IdentityHashSet<Object> serializedObjects, final Type<Object> type, final BufferedJSONWriter bw) throws IOException {
@@ -1290,17 +1143,6 @@ final class JSONParserImpl extends AbstractJSONParser {
         }
     }
 
-    /**
-     * Write data set.
-     * @param ds
-     * @param config
-     * @param isFirstCall
-     * @param indentation
-     * @param serializedObjects
-     * @param type
-     * @param bw
-     * @throws IOException Signals that an I/O exception has occurred.
-     */
     @SuppressWarnings({ "unused" })
     protected void writeDataset(final Dataset ds, final JSONSerializationConfig config, final boolean isFirstCall, final String indentation,
             final IdentityHashSet<Object> serializedObjects, final Type<Object> type, final BufferedJSONWriter bw) throws IOException {
@@ -1549,17 +1391,6 @@ final class JSONParserImpl extends AbstractJSONParser {
         }
     }
 
-    /**
-     * Write data set.
-     * @param sheet
-     * @param config
-     * @param isFirstCall
-     * @param indentation
-     * @param serializedObjects
-     * @param type
-     * @param bw
-     * @throws IOException Signals that an I/O exception has occurred.
-     */
     @SuppressWarnings({ "unused", "rawtypes" })
     protected void writeSheet(final Sheet sheet, final JSONSerializationConfig config, final boolean isFirstCall, final String indentation,
             final IdentityHashSet<Object> serializedObjects, final Type<Object> type, final BufferedJSONWriter bw) throws IOException {
@@ -1870,14 +1701,6 @@ final class JSONParserImpl extends AbstractJSONParser {
         return cls;
     }
 
-    /**
-     *
-     * @param <T>
-     * @param source
-     * @param config
-     * @param targetClass
-     * @return
-     */
     @Override
     public <T> T deserialize(final String source, final JSONDeserializationConfig config, final Class<? extends T> targetClass) {
         final JSONDeserializationConfig configToUse = check(config);
@@ -1942,14 +1765,6 @@ final class JSONParserImpl extends AbstractJSONParser {
         }
     }
 
-    /**
-     *
-     * @param <T>
-     * @param source
-     * @param config
-     * @param targetClass
-     * @return
-     */
     @Override
     public <T> T deserialize(final File source, final JSONDeserializationConfig config, final Class<? extends T> targetClass) {
         Reader reader = null;
@@ -1963,14 +1778,6 @@ final class JSONParserImpl extends AbstractJSONParser {
         }
     }
 
-    /**
-     *
-     * @param <T>
-     * @param source
-     * @param config
-     * @param targetClass
-     * @return
-     */
     @Override
     public <T> T deserialize(final InputStream source, final JSONDeserializationConfig config, final Class<? extends T> targetClass) {
 
@@ -1981,28 +1788,12 @@ final class JSONParserImpl extends AbstractJSONParser {
         return deserialize(reader, config, targetClass);
     }
 
-    /**
-     *
-     * @param <T>
-     * @param source
-     * @param config
-     * @param targetClass
-     * @return
-     */
     @Override
     public <T> T deserialize(final Reader source, final JSONDeserializationConfig config, final Class<? extends T> targetClass) {
 
         return read(source, config, targetClass);
     }
 
-    /**
-     *
-     * @param source
-     * @param config
-     * @param targetClass
-     * @param <T>
-     * @return
-     */
     protected <T> T read(final Reader source, final JSONDeserializationConfig config, final Class<? extends T> targetClass) {
         final JSONDeserializationConfig configToUse = check(config);
         final Type<T> type = N.typeOf(targetClass);
@@ -3816,40 +3607,15 @@ final class JSONParserImpl extends AbstractJSONParser {
         }
     }
 
-    /**
-     * Read prop value.
-     * @param jr
-     * @param nullToEmpty
-     * @param valueType
-     *
-     * @return
-     */
     protected Object readValue(final JSONReader jr, final boolean nullToEmpty, final Type<?> valueType) {
         return readNullToEmpty(valueType, jr.readValue(valueType), nullToEmpty);
     }
 
-    /**
-     * Read prop value.
-     * @param jr
-     * @param nullToEmpty
-     * @param propInfo
-     * @param valueType
-     *
-     * @return
-     */
     protected Object readValue(final JSONReader jr, final boolean nullToEmpty, final PropInfo propInfo, final Type<?> valueType) {
         return readNullToEmpty(valueType, propInfo != null && propInfo.hasFormat ? propInfo.readPropValue(jr.readValue(strType)) : jr.readValue(valueType),
                 nullToEmpty);
     }
 
-    /**
-     *
-     * @param <T>
-     * @param source
-     * @param config
-     * @param elementType
-     * @return
-     */
     @Override
     public <T> Stream<T> stream(final String source, final JSONDeserializationConfig config, final Type<? extends T> elementType) {
         checkStreamSupportedType(elementType);
@@ -3876,14 +3642,6 @@ final class JSONParserImpl extends AbstractJSONParser {
         return result;
     }
 
-    /**
-     *
-     * @param <T>
-     * @param source
-     * @param config
-     * @param elementType
-     * @return
-     */
     @Override
     public <T> Stream<T> stream(final File source, final JSONDeserializationConfig config, final Type<? extends T> elementType) {
         Stream<T> result = null;
@@ -3902,15 +3660,6 @@ final class JSONParserImpl extends AbstractJSONParser {
         return result;
     }
 
-    /**
-     *
-     * @param <T>
-     * @param source
-     * @param config
-     * @param closeInputStreamWhenStreamIsClosed
-     * @param elementType
-     * @return
-     */
     @Override
     public <T> Stream<T> stream(final InputStream source, final JSONDeserializationConfig config, final boolean closeInputStreamWhenStreamIsClosed,
             final Type<? extends T> elementType) {
@@ -4160,13 +3909,6 @@ final class JSONParserImpl extends AbstractJSONParser {
         });
     }
 
-    /**
-     * Gets the error msg.
-     *
-     * @param jr
-     * @param token
-     * @return
-     */
     private String getErrorMsg(final JSONReader jr, final int token) {
         switch (token) {
             case START_BRACE:

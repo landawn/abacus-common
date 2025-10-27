@@ -23,7 +23,7 @@ import com.landawn.abacus.util.Numbers;
 /**
  * Type handler for Byte (wrapper class) values.
  * This class provides database operations and type information for Byte objects.
- * It handles the conversion between database values and Java Byte objects, supporting null values.
+ * It handles the conversion between database values and Java Byte objects, supporting {@code null} values.
  */
 public final class ByteType extends AbstractByteType {
 
@@ -47,9 +47,9 @@ public final class ByteType extends AbstractByteType {
 
     /**
      * Indicates whether this type represents a primitive wrapper class.
-     * Since this handles the Byte wrapper class (not the primitive byte), this returns true.
+     * Since this handles the Byte wrapper class (not the primitive byte), this returns {@code true}.
      *
-     * @return true, indicating this is a primitive wrapper type
+     * @return {@code true}, indicating this is a primitive wrapper type
      */
     @Override
     public boolean isPrimitiveWrapper() {
@@ -59,15 +59,16 @@ public final class ByteType extends AbstractByteType {
     /**
      * Retrieves a Byte value from a ResultSet at the specified column index.
      * This method handles various numeric types in the database and converts them to Byte.
-     * If the database value is NULL, this method returns null.
+     * If the database value is NULL, this method returns {@code null}.
      *
      * @param rs the ResultSet containing the data
      * @param columnIndex the column index (1-based) of the byte value
-     * @return The Byte value at the specified column, or null if the column value is SQL NULL
+     * @return The Byte value at the specified column, or {@code null} if the column value is SQL NULL
      * @throws SQLException if a database access error occurs or the column index is invalid
      */
     @MayReturnNull
     @Override
+
     public Byte get(final ResultSet rs, final int columnIndex) throws SQLException {
         final Object ret = rs.getObject(columnIndex);
 
@@ -83,15 +84,16 @@ public final class ByteType extends AbstractByteType {
     /**
      * Retrieves a Byte value from a ResultSet using the specified column label.
      * This method handles various numeric types in the database and converts them to Byte.
-     * If the database value is NULL, this method returns null.
+     * If the database value is NULL, this method returns {@code null}.
      *
      * @param rs the ResultSet containing the data
      * @param columnLabel the label of the column containing the byte value
-     * @return The Byte value in the specified column, or null if the column value is SQL NULL
+     * @return The Byte value in the specified column, or {@code null} if the column value is SQL NULL
      * @throws SQLException if a database access error occurs or the column label is not found
      */
     @MayReturnNull
     @Override
+
     public Byte get(final ResultSet rs, final String columnLabel) throws SQLException {
         final Object ret = rs.getObject(columnLabel);
 

@@ -21,13 +21,13 @@ package com.landawn.abacus.util.function;
  * 
  * <p>This is a functional interface whose functional method is {@link #accept(Object[])}.
  * 
- * <p>The 'N' in NConsumer stands for 'N-ary', indicating that this consumer can accept
+ * <p>The 'N' in NConsumer stands for <i>N-ary</i>, indicating that this consumer can accept
  * any number of arguments of the same type.
  * 
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * NConsumer<String> printAll = args -> {
- *     for (String s : args) {
+     *     for (String s : args) {
  *         System.out.println(s);
  *     }
  * };

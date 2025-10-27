@@ -135,6 +135,8 @@ public final class Maps {
      * <p>This method generates a new entry using the provided key and value.
      * The created entry is mutable, meaning that its key and value can be changed after creation.
      *
+     * @param <K> the type of the key
+     * @param <V> the type of the value
      * @param key the key of the new entry
      * @param value the value of the new entry
      * @return a new Entry with the provided key and value
@@ -151,6 +153,8 @@ public final class Maps {
      * <p>This method generates a new immutable entry (key-value pair) using the provided key and value.
      * The created entry is immutable, meaning that its key and value cannot be changed after creation.
      *
+     * @param <K> the type of the key
+     * @param <V> the type of the value
      * @param key the key of the new entry.
      * @param value the value of the new entry.
      * @return a new ImmutableEntry with the provided key and value.
@@ -163,24 +167,11 @@ public final class Maps {
 
     private static final Set<Class<?>> UNABLE_CREATED_MAP_CLASSES = N.newConcurrentHashSet();
 
-    /**
-     * New target map.
-     *
-     * @param m the map to create a new instance of the same type
-     * @return a new map instance of the same type as the input map, or a HashMap if the input is {@code null}
-     */
     @SuppressWarnings("rawtypes")
     static Map newTargetMap(final Map<?, ?> m) {
         return newTargetMap(m, m == null ? 0 : m.size());
     }
 
-    /**
-     * New target map.
-     *
-     * @param m the map to create a new instance of the same type
-     * @param size the initial capacity of the new map
-     * @return a new map instance of the same type as the input map with the specified size, or a HashMap if the input is {@code null}
-     */
     @SuppressWarnings("rawtypes")
     static Map newTargetMap(final Map<?, ?> m, final int size) {
         if (m == null) {
@@ -210,12 +201,6 @@ public final class Maps {
         }
     }
 
-    /**
-     * New ordering map.
-     *
-     * @param m the map to create a new instance that preserves insertion order
-     * @return a new map instance that preserves insertion order, or a LinkedHashMap if the input type cannot be instantiated
-     */
     @SuppressWarnings("rawtypes")
     static Map newOrderingMap(final Map<?, ?> m) {
         if (m == null) {
@@ -247,8 +232,8 @@ public final class Maps {
     }
 
     /**
-     * Returns the key set of the specified map if it is not null or empty. Otherwise, an empty immutable set is returned.
-     * This is a convenience method that avoids null checks and provides a guaranteed non-null Set result.
+     * Returns the key set of the specified map if it is not {@code null} or empty. Otherwise, an empty immutable set is returned.
+     * This is a convenience method that avoids {@code null} checks and provides a guaranteed {@code non-null} Set result.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -274,9 +259,9 @@ public final class Maps {
     }
 
     /**
-     * Returns the collection of values from the specified map if it is not null or empty. 
+     * Returns the collection of values from the specified map if it is not {@code null} or empty. 
      * Otherwise, an empty immutable list is returned.
-     * This is a convenience method that avoids null checks and provides a guaranteed non-null Collection result.
+     * This is a convenience method that avoids {@code null} checks and provides a guaranteed {@code non-null} Collection result.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -302,9 +287,9 @@ public final class Maps {
     }
 
     /**
-     * Returns the entry set of the specified map if it is not null or empty. 
+     * Returns the entry set of the specified map if it is not {@code null} or empty. 
      * Otherwise, an empty immutable set is returned.
-     * This is a convenience method that avoids null checks and provides a guaranteed non-null Set result.
+     * This is a convenience method that avoids {@code null} checks and provides a guaranteed {@code non-null} Set result.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -499,7 +484,7 @@ public final class Maps {
     /**
      * Returns a {@code Nullable} with the value to which the specified key is mapped,
      * or an empty {@code Nullable} if the map is empty or contains no mapping for the key.
-     * This method properly handles null values in the map.
+     * This method properly handles {@code null} values in the map.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -579,7 +564,7 @@ public final class Maps {
 
     /**
      * Returns the value to which the specified key is mapped, or defaultValue if the key is absent.
-     * A key is considered absent if the map is empty, contains no mapping for the key, or the mapped value is null.
+     * A key is considered absent if the map is empty, contains no mapping for the key, or the mapped value is {@code null}.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -622,7 +607,7 @@ public final class Maps {
     /**
      * Returns the value from a nested map structure, or defaultValue if not found.
      * First retrieves the inner map using the outer key, then retrieves the value using the inner key.
-     * Returns defaultValue if either map is empty, keys are not found, or the value is null.
+     * Returns defaultValue if either map is empty, keys are not found, or the value is {@code null}.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -669,7 +654,7 @@ public final class Maps {
 
     /**
      * Returns the List value to which the specified key is mapped, or an empty immutable List if the key is absent.
-     * A key is considered absent if the map is empty, contains no mapping for the key, or the mapped value is null.
+     * A key is considered absent if the map is empty, contains no mapping for the key, or the mapped value is {@code null}.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -706,7 +691,7 @@ public final class Maps {
 
     /**
      * Returns the Set value to which the specified key is mapped, or an empty immutable Set if the key is absent.
-     * A key is considered absent if the map is empty, contains no mapping for the key, or the mapped value is null.
+     * A key is considered absent if the map is empty, contains no mapping for the key, or the mapped value is {@code null}.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -743,7 +728,7 @@ public final class Maps {
 
     /**
      * Returns the Map value to which the specified key is mapped, or an empty immutable Map if the key is absent.
-     * A key is considered absent if the map is empty, contains no mapping for the key, or the mapped value is null.
+     * A key is considered absent if the map is empty, contains no mapping for the key, or the mapped value is {@code null}.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1233,7 +1218,7 @@ public final class Maps {
      * @param <K> the type of keys maintained by the map
      * @param map the map from which to retrieve the value
      * @param key the key whose associated value is to be returned
-     * @param defaultForNull the default value to return if the value is null or not found
+     * @param defaultForNull the default value to return if the value is {@code null} or not found
      * @return the long value associated with the key, or defaultForNull if not found
      */
     public static <K> long getLong(final Map<? super K, ?> map, final K key, final long defaultForNull) {
@@ -1316,7 +1301,7 @@ public final class Maps {
      * @param <K> the type of keys maintained by the map
      * @param map the map from which to retrieve the value
      * @param key the key whose associated value is to be returned
-     * @param defaultForNull the default value to return if the value is null or not found
+     * @param defaultForNull the default value to return if the value is {@code null} or not found
      * @return the float value associated with the key, or defaultForNull if not found
      */
     public static <K> float getFloat(final Map<? super K, ?> map, final K key, final float defaultForNull) {
@@ -1397,7 +1382,7 @@ public final class Maps {
      * @param <K> the type of keys maintained by the map
      * @param map the map from which to retrieve the value
      * @param key the key whose associated value is to be returned
-     * @param defaultForNull the default value to return if the value is null or not found
+     * @param defaultForNull the default value to return if the value is {@code null} or not found
      * @return the double value associated with the key, or defaultForNull if not found
      */
     public static <K> double getDouble(final Map<? super K, ?> map, final K key, final double defaultForNull) {
@@ -2287,28 +2272,28 @@ public final class Maps {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Map&lt;String, Integer&gt; map1 = new HashMap&lt;&gt;();
+     * Map<String, Integer> map1 = new HashMap<>();
      * map1.put("a", 1);
      * map1.put("b", 2);
      * map1.put("c", 3);
      *
-     * Map&lt;String, Integer&gt; map2 = new HashMap&lt;&gt;();
+     * Map<String, Integer> map2 = new HashMap<>();
      * map2.put("b", 2);
      * map2.put("c", 4);
      * map2.put("d", 5);
      *
-     * Map&lt;String, Integer&gt; result = Maps.intersection(map1, map2); // result will be {"b": 2}
+     * Map<String, Integer> result = Maps.intersection(map1, map2); // result will be {"b": 2}
      * // Only "b" is included because it has the same value in both maps
      *
-     * Map&lt;String, String&gt; map3 = new HashMap&lt;&gt;();
+     * Map<String, String> map3 = new HashMap<>();
      * map3.put("x", "foo");
      * map3.put("y", "bar");
      *
-     * Map&lt;String, String&gt; map4 = new HashMap&lt;&gt;();
+     * Map<String, String> map4 = new HashMap<>();
      * map4.put("x", "foo");
      * map4.put("z", "baz");
      *
-     * Map&lt;String, String&gt; result2 = Maps.intersection(map3, map4); // result will be {"x": "foo"}
+     * Map<String, String> result2 = Maps.intersection(map3, map4); // result will be {"x": "foo"}
      * // Only "x" is included because it has the same value in both maps
      * }</pre>
      *
@@ -2353,10 +2338,10 @@ public final class Maps {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Map&lt;String, Integer&gt; map1 = Maps.of("a", 1, "b", 2, "c", 3);
-     * Map&lt;String, Integer&gt; map2 = Maps.of("a", 1, "b", 20, "d", 4);
+     * Map<String, Integer> map1 = Maps.of("a", 1, "b", 2, "c", 3);
+     * Map<String, Integer> map2 = Maps.of("a", 1, "b", 20, "d", 4);
      * 
-     * Map&lt;String, Pair&lt;Integer, Nullable&lt;Integer&gt;&gt;&gt; diff = Maps.difference(map1, map2);
+     * Map<String, Pair<Integer, Nullable<Integer>>> diff = Maps.difference(map1, map2);
      * // diff contains:
      * // "b" -> Pair.of(2, Nullable.of(20))    // different values
      * // "c" -> Pair.of(3, Nullable.empty())   // key only in map1
@@ -2415,16 +2400,16 @@ public final class Maps {
      * <p>For each key in the result map, the value is a pair where:
      * <ul>
      * <li>If the key exists only in the first map, the pair contains the value from the first map and an empty Nullable</li>
-     * <li>If the key exists only in the second map, the pair contains an empty Nullable and the value from the second map</li>
+     * <li>If the key exists only in the second map, the pair contains an empty {@code Nullable} and the value from the second map</li>
      * <li>If the key exists in both maps with different values, the pair contains both values</li>
      * </ul>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Map&lt;String, Integer&gt; map1 = Maps.of("a", 1, "b", 2, "c", 3);
-     * Map&lt;String, Integer&gt; map2 = Maps.of("b", 2, "c", 4, "d", 5);
+     * Map<String, Integer> map1 = Maps.of("a", 1, "b", 2, "c", 3);
+     * Map<String, Integer> map2 = Maps.of("b", 2, "c", 4, "d", 5);
      * 
-     * Map&lt;String, Pair&lt;Nullable&lt;Integer&gt;, Nullable&lt;Integer&gt;&gt;&gt; result = Maps.symmetricDifference(map1, map2);
+     * Map<String, Pair<Nullable<Integer>, Nullable<Integer>>> result = Maps.symmetricDifference(map1, map2);
      * // result contains:
      * // "a" -> Pair.of(Nullable.of(1), Nullable.empty())   // key only in map1
      * // "c" -> Pair.of(Nullable.of(3), Nullable.of(4))     // different values
@@ -2432,7 +2417,7 @@ public final class Maps {
      * // Note: "b" is not included because it has identical values in both maps
      * }</pre>
      *
-     * <p>If either input map is null, it is treated as an empty map.
+     * <p>If either input map is {@code null}, it is treated as an empty map.
      *
      * @param <K> the type of keys in the maps
      * @param <V> the type of values in the maps
@@ -3446,7 +3431,7 @@ public final class Maps {
      * the second map contains the second elements, and so on.
      * If the collections in the original map are of different sizes, the resulting list's size is equal to the size of the largest collection.
      *
-     * @implSpec {a=[1, 2, 3], b=[4, 5, 6], c=[7, 8]} -> [{a=1, b=4, c=7}, {a=2, b=5, c=8}, {a=3, b=6}].
+     * <p>Example: {a=[1, 2, 3], b=[4, 5, 6], c=[7, 8]} -&gt; [{a=1, b=4, c=7}, {a=2, b=5, c=8}, {a=3, b=6}].</p>
      *
      * @param <K> the type of keys in the input map and the resulting maps.
      * @param <V> the type of values in the collections of the input map and the values in the resulting maps.
@@ -3578,13 +3563,6 @@ public final class Maps {
         return result;
     }
 
-    /**
-     *
-     * @param map the map to flatten
-     * @param prefix the prefix to prepend to keys
-     * @param delimiter the delimiter to use between key parts
-     * @param output the output map to store flattened entries
-     */
     private static void flatten(final Map<String, Object> map, final String prefix, final String delimiter, final Map<String, Object> output) {
         if (N.isEmpty(map)) {
             return;
@@ -3742,7 +3720,7 @@ public final class Maps {
      *
      * @param <K> the type of keys in the map
      * @param map the map whose keys are to be replaced. This map is modified in-place.
-     * @param keyConverter the function to apply to each key. Must not return null.
+     * @param keyConverter the function to apply to each key. Must not return {@code null}.
      */
     @Beta
     public static <K> void replaceKeys(final Map<K, ?> map, final Function<? super K, ? extends K> keyConverter) {
@@ -3794,7 +3772,7 @@ public final class Maps {
      * @param <K> the type of keys in the map
      * @param <V> the type of values in the map
      * @param map the map whose keys are to be replaced. This map is modified in-place.
-     * @param keyConverter the function to apply to each key. Must not return null.
+     * @param keyConverter the function to apply to each key. Must not return {@code null}.
      * @param merger the function to merge values in case of key conflicts. The first argument is the existing value, the second is the new value.
      */
     @Beta

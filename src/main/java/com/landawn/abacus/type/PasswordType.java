@@ -19,6 +19,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
+import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.util.Password;
 
 /**
@@ -54,6 +55,7 @@ public class PasswordType extends AbstractStringType {
      * @return the password string from the database
      * @throws SQLException if a database access error occurs
      */
+    @MayReturnNull
     @Override
     public String get(final ResultSet rs, final int columnIndex) throws SQLException {
         return rs.getString(columnIndex);
@@ -68,6 +70,7 @@ public class PasswordType extends AbstractStringType {
      * @return the password string from the database
      * @throws SQLException if a database access error occurs
      */
+    @MayReturnNull
     @Override
     public String get(final ResultSet rs, final String columnLabel) throws SQLException {
         return rs.getString(columnLabel);

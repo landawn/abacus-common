@@ -97,11 +97,6 @@ public class TripleType<L, M, R> extends AbstractType<Triple<L, M, R>> {
         return parameterTypes;
     }
 
-    /**
-     * Indicates that this is a generic type with type parameters.
-     *
-     * @return true, as Triple is a generic type
-     */
     @Override
     public boolean isGenericType() {
         return true;
@@ -112,9 +107,10 @@ public class TripleType<L, M, R> extends AbstractType<Triple<L, M, R>> {
      * The format is a JSON array: [left, middle, right].
      *
      * @param x the Triple object to convert
-     * @return the JSON string representation, or null if x is null
+     * @return the JSON string representation, or {@code null} if x is null
      */
     @Override
+    @MayReturnNull
     public String stringOf(final Triple<L, M, R> x) {
         return (x == null) ? null : Utils.jsonParser.serialize(N.asArray(x.left(), x.middle(), x.right()), Utils.jsc);
     }
@@ -124,7 +120,7 @@ public class TripleType<L, M, R> extends AbstractType<Triple<L, M, R>> {
      * Expects a JSON array format: [left, middle, right].
      *
      * @param str the string to parse
-     * @return a Triple object containing the parsed values, or null if str is empty
+     * @return a Triple object containing the parsed values, or {@code null} if str is empty
      */
     @MayReturnNull
     @SuppressWarnings("unchecked")
@@ -228,11 +224,11 @@ public class TripleType<L, M, R> extends AbstractType<Triple<L, M, R>> {
 
     /**
      * Generates the type name for a Triple type with the specified element types.
-     * 
+     *
      * @param leftTypeName the name of the left element type
      * @param middleTypeName the name of the middle element type
      * @param rightTypeName the name of the right element type
-     * @param isDeclaringName if true, uses simple class names; if false, uses canonical class names
+     * @param isDeclaringName if {@code true}, uses simple class names; if {@code false}, uses canonical class names
      * @return the generated type name for Triple with the specified element types
      */
     protected static String getTypeName(final String leftTypeName, final String middleTypeName, final String rightTypeName, final boolean isDeclaringName) {

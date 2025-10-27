@@ -116,9 +116,6 @@ final class FileSystemUtil {
         DF = dfPath;
     }
 
-    /**
-     * Instances should NOT be constructed in standard programming.
-     */
     private FileSystemUtil() {
     }
 
@@ -152,7 +149,7 @@ final class FileSystemUtil {
      * }
      * }</pre>
      *
-     * @param path the path to get free space for, not null, not empty on Unix
+     * @param path the path to get free space for, not {@code null}, not empty on Unix
      * @return the amount of free space in kilobytes
      * @throws IOException if an error occurs when finding the free space
      * @throws IllegalArgumentException if the path is invalid
@@ -181,7 +178,7 @@ final class FileSystemUtil {
      * }
      * }</pre>
      *
-     * @param path the path to get free space for, not null, not empty on Unix
+     * @param path the path to get free space for, not {@code null}, not empty on Unix
      * @param timeout the timeout in milliseconds, or 0 or negative for no timeout
      * @return the amount of free space in kilobytes
      * @throws IOException if an error occurs when finding the free space
@@ -425,14 +422,6 @@ final class FileSystemUtil {
 
     //-----------------------------------------------------------------------
 
-    /**
-     * Parses the bytes from a string.
-     *
-     * @param freeSpace the free space string
-     * @param path the path being queried
-     * @return the number of bytes parsed from the string
-     * @throws IOException if an error occurs
-     */
     long parseBytes(final String freeSpace, final String path) throws IOException {
         try {
             final long bytes = Long.parseLong(freeSpace);

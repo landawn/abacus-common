@@ -54,7 +54,7 @@ public class SQLXMLType extends AbstractType<SQLXML> {
      * boolean serializable = type.isSerializable(); // Returns false
      * }</pre>
      *
-     * @return false, indicating this type is not serializable
+     * @return {@code false}, indicating this type is not serializable
      */
     @Override
     public boolean isSerializable() {
@@ -76,6 +76,7 @@ public class SQLXMLType extends AbstractType<SQLXML> {
      * @param x the SQLXML object to convert
      * @return never returns normally
      * @throws UnsupportedOperationException always thrown as SQLXML cannot be directly converted to string
+     @MayReturnNull
      */
     @Override
     public String stringOf(final SQLXML x) throws UnsupportedOperationException {
@@ -97,6 +98,7 @@ public class SQLXMLType extends AbstractType<SQLXML> {
      * @param str the string to convert
      * @return never returns normally
      * @throws UnsupportedOperationException always thrown as SQLXML cannot be created from string
+     @MayReturnNull
      */
     @Override
     public SQLXML valueOf(final String str) throws UnsupportedOperationException {
@@ -116,8 +118,9 @@ public class SQLXMLType extends AbstractType<SQLXML> {
      *
      * @param rs the ResultSet to read from
      * @param columnIndex the 1-based index of the column to retrieve
-     * @return the SQLXML value from the specified column, or null if the column value is SQL NULL
+     * @return the SQLXML value from the specified column, or {@code null} if the column value is SQL NULL
      * @throws SQLException if a database access error occurs or the column index is invalid
+     @MayReturnNull
      */
     @Override
     public SQLXML get(final ResultSet rs, final int columnIndex) throws SQLException {
@@ -137,7 +140,7 @@ public class SQLXMLType extends AbstractType<SQLXML> {
      *
      * @param rs the ResultSet to read from
      * @param columnLabel the label of the column to retrieve (column name or alias)
-     * @return the SQLXML value from the specified column, or null if the column value is SQL NULL
+     * @return the SQLXML value from the specified column, or {@code null} if the column value is SQL NULL
      * @throws SQLException if a database access error occurs or the column label is not found
      */
     @Override

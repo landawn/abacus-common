@@ -97,11 +97,11 @@ public final class WebUtil {
      *     .post(requestBody);
      * }</pre>
      *
-     * @param curl the cURL command string to convert, must not be null or empty
+     * @param curl the cURL command string to convert, must not be {@code null} or empty
      *             and must start with "curl" (case-insensitive)
      * @return Java code string for creating an equivalent HttpRequest, formatted
      *         with proper indentation and line separators
-     * @throws IllegalArgumentException if the curl parameter is null, empty, or
+     * @throws IllegalArgumentException if the curl parameter is {@code null}, empty, or
      *                                  doesn't start with "curl"
      */
     public static String curl2HttpRequest(final String curl) {
@@ -238,11 +238,11 @@ public final class WebUtil {
      *     .post();
      * }</pre>
      *
-     * @param curl the cURL command string to convert, must not be null or empty
+     * @param curl the cURL command string to convert, must not be {@code null} or empty
      *             and must start with "curl" (case-insensitive)
      * @return Java code string for creating an equivalent OkHttpRequest, formatted
      *         with proper indentation and line separators
-     * @throws IllegalArgumentException if the curl parameter is null, empty, or
+     * @throws IllegalArgumentException if the curl parameter is {@code null}, empty, or
      *                                  doesn't start with "curl"
      * @see #curl2HttpRequest(String)
      */
@@ -563,8 +563,8 @@ public final class WebUtil {
      * @param httpMethod the HTTP method (e.g., "GET", "POST", "PUT", "DELETE"), must not be null
      * @param url the target URL, must not be null
      * @param headers map of HTTP headers where values can be String or other types that
-     *                {@link HttpUtil#readHttpHeadValue(Object)} can handle (can be null or empty)
-     * @param body the request body string (can be null or empty for requests without a body)
+     *                {@link HttpUtil#readHttpHeadValue(Object)} can handle (can be {@code null} or empty)
+     * @param body the request body string (can be {@code null} or empty for requests without a body)
      * @param bodyType the MIME type of the body (e.g., "application/json"), used to add
      *                 Content-Type header if not already present in headers (can be null)
      * @param quoteChar the character to use for quoting values in the cURL command,
@@ -620,7 +620,7 @@ public final class WebUtil {
      * <p>This utility method conditionally sets the Content-Type header in the provided
      * {@link HttpHeaders} object. The header is only set if:</p>
      * <ul>
-     *   <li>The {@code requestBodyType} parameter is not null or empty</li>
+     *   <li>The {@code requestBodyType} parameter is not {@code null} or empty</li>
      *   <li>The {@code httpHeaders} does not already have a Content-Type header</li>
      * </ul>
      *
@@ -656,7 +656,7 @@ public final class WebUtil {
      * }</pre>
      *
      * @param requestBodyType the MIME type of the request body (e.g., "application/json",
-     *                        "text/xml", "application/x-www-form-urlencoded"), can be null or empty
+     *                        "text/xml", "application/x-www-form-urlencoded"), can be {@code null} or empty
      * @param httpHeaders the HttpHeaders object to conditionally update, must not be null
      * @see HttpHeaders#setContentType(String)
      * @see HttpHeaders#get(String)

@@ -24,6 +24,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.parser.JSONXMLSerializationConfig;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.ClassUtil;
@@ -138,7 +139,7 @@ public abstract class AbstractType<T> implements Type<T> {
 
     /**
      * Extracts type parameters from a generic type name.
-     * For example, "Map<String, Integer>" returns ["String", "Integer"].
+     * For example, "Map&lt;String, Integer&gt;" returns ["String", "Integer"].
      *
      * @param typeName the type name to parse
      * @return array of type parameter names
@@ -525,10 +526,10 @@ public abstract class AbstractType<T> implements Type<T> {
     }
 
     /**
-     * Checks if this type is optional or nullable.
+     * Checks if this type is optional or {@code nullable}.
      * Default implementation returns {@code false}.
      *
-     * @return {@code true} if this type represents optional or nullable values, {@code false} otherwise
+     * @return {@code true} if this type represents optional or {@code nullable} values, {@code false} otherwise
      */
     @Override
     public boolean isOptionalOrNullable() {
@@ -552,6 +553,7 @@ public abstract class AbstractType<T> implements Type<T> {
      *
      * @return the element type, or {@code null} if not applicable
      */
+    @MayReturnNull
     @Override
     public Type<?> getElementType() {
         return null; // NOSONAR
@@ -574,7 +576,9 @@ public abstract class AbstractType<T> implements Type<T> {
      *
      * @return the default value, typically {@code null}
      */
+    @MayReturnNull
     @Override
+
     public T defaultValue() {
         return null; // NOSONAR
     }
@@ -596,7 +600,7 @@ public abstract class AbstractType<T> implements Type<T> {
      *
      * @param x the first value
      * @param y the second value
-     * @return negative if x < y, zero if x equals y, positive if x > y
+     * @return negative if x &lt; y, zero if x equals y, positive if x &gt; y
      * @throws UnsupportedOperationException if this type is not comparable
      */
     @SuppressWarnings("unchecked")
@@ -617,7 +621,9 @@ public abstract class AbstractType<T> implements Type<T> {
      * @param obj the object to convert
      * @return the converted value
      */
+    @MayReturnNull
     @Override
+
     public T valueOf(final Object obj) {
         return valueOf(obj == null ? null : N.typeOf(obj.getClass()).stringOf(obj));
     }
@@ -632,7 +638,9 @@ public abstract class AbstractType<T> implements Type<T> {
      * @param len the number of characters
      * @return the converted value
      */
+    @MayReturnNull
     @Override
+
     public T valueOf(final char[] cbuf, final int offset, final int len) {
         return valueOf(cbuf == null ? null : String.valueOf(cbuf, offset, len));
     }
@@ -646,6 +654,7 @@ public abstract class AbstractType<T> implements Type<T> {
      * @return the retrieved value
      * @throws SQLException if a database access error occurs
      */
+    @MayReturnNull
     @Override
     public T get(final ResultSet rs, final int columnIndex) throws SQLException {
         return valueOf(rs.getString(columnIndex));
@@ -660,7 +669,9 @@ public abstract class AbstractType<T> implements Type<T> {
      * @return the retrieved value
      * @throws SQLException if a database access error occurs
      */
+    @MayReturnNull
     @Override
+
     public T get(final ResultSet rs, final String columnLabel) throws SQLException {
         return valueOf(rs.getString(columnLabel));
     }
@@ -725,7 +736,7 @@ public abstract class AbstractType<T> implements Type<T> {
 
     /**
      * Appends the string representation of a value to an Appendable.
-     * Default implementation writes "null" for null values,
+     * Default implementation writes "null" for {@code null} values,
      * otherwise uses {@link #stringOf(Object)}.
      *
      * @param appendable the target to append to
@@ -867,6 +878,7 @@ public abstract class AbstractType<T> implements Type<T> {
      * @return the string representation
      */
     @Override
+    @MayReturnNull
     public String toString(final T x) {
         return N.toString(x);
     }
@@ -879,6 +891,7 @@ public abstract class AbstractType<T> implements Type<T> {
      * @return the deep string representation
      */
     @Override
+    @MayReturnNull
     public String deepToString(final T x) {
         return toString(x);
     }
@@ -939,8 +952,8 @@ public abstract class AbstractType<T> implements Type<T> {
     }
 
     /**
-     * Checks if a date string represents a null date/time.
-     * Returns true for empty strings or the literal "null".
+     * Checks if a date string represents a {@code null} date/time.
+     * Returns {@code true} for empty strings or the literal "null".
      *
      * @param date the date string to check
      * @return {@code true} if the date represents null
@@ -1130,7 +1143,7 @@ public abstract class AbstractType<T> implements Type<T> {
      * Parses a string into a Boolean value with enhanced recognition for common true/false indicators.
      * <p>
      * This method extends the standard Boolean parsing functionality by adding special handling
-     * for single-character strings, recognizing "Y", "y", and "1" as true values,
+     * for single-character strings, recognizing "Y", "y", and "1" as {@code true} values,
      * in addition to the standard "true" string.
      * <p>
      * For single-character inputs:

@@ -388,14 +388,7 @@ public abstract class Files { //NOSONAR
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * byte[] data = "Hello, World!".getBytes(StandardCharsets.UTF_8);
-     * File target = new File("backup/output.txt");
-     *
-     * // This will FAIL if "backup" directory doesn't exist
-     * Files.write(data, target);  // FileNotFoundException!
-     *
-     * // Correct approach - create parent first
-     * Files.createParentDirs(target);
-     * Files.write(data, target);  // Works
+     * Files.write(data, new File("output.txt"));
      * }</pre>
      *
      * @param from the bytes to write
@@ -505,8 +498,8 @@ public abstract class Files { //NOSONAR
      * the case of Android, the current app. If that is not possible (as is the case under the very
      * old Android Ice Cream Sandwich release), then this method throws an exception instead of
      * creating a directory that would be more accessible. (This behavior is new in Guava 32.0.0.
-     * Previous versions would create a directory that is more accessible, as discussed in <a
-     * href="https://github.com/google/guava/issues/4011">CVE-2020-8908</a>.)
+     * Previous versions would create a directory that is more accessible, as discussed in
+     * <a href="https://github.com/google/guava/issues/4011">CVE-2020-8908</a>.)
      *
      * <p>Use this method instead of {@link File#createTempFile(String, String)} when you wish to
      * create a directory, not a regular file. A common pitfall is to call {@code createTempFile},
@@ -530,8 +523,8 @@ public abstract class Files { //NOSONAR
      * @return the newly created directory
      * @throws IllegalStateException if the directory could not be created, such as if the system does
      *     not support creating temporary directories securely
-     * @deprecated For Android users, see the <a
-     *     href="https://developer.android.com/training/data-storage" target="_blank">Data and File
+     * @deprecated For Android users, see the
+     *     <a href="https://developer.android.com/training/data-storage" target="_blank">Data and File
      *     Storage overview</a> to select an appropriate temporary directory (perhaps {@code
      *     context.getCacheDir()}), and create your own directory under that. (For example, you might
      *     use {@code new File(context.getCacheDir(), "directoryName").mkdir()}, or, if you need an
@@ -826,8 +819,8 @@ public abstract class Files { //NOSONAR
     }
 
     /**
-     * Returns the file name without its <a
-     * href="http://en.wikipedia.org/wiki/Filename_extension">file extension</a> or path. This is
+     * Returns the file name without its
+     * <a href="http://en.wikipedia.org/wiki/Filename_extension">file extension</a> or path. This is
      * similar to the {@code basename} unix command. The result does not include the '{@code .}'.
      *
      * <p><b>Usage Examples:</b></p>
@@ -848,8 +841,8 @@ public abstract class Files { //NOSONAR
     }
 
     /**
-     * Returns the file name without its <a
-     * href="http://en.wikipedia.org/wiki/Filename_extension">file extension</a> or path. This is
+     * Returns the file name without its
+     * <a href="http://en.wikipedia.org/wiki/Filename_extension">file extension</a> or path. This is
      * similar to the {@code basename} unix command. The result does not include the '{@code .}'.
      *
      * <p><b>Usage Examples:</b></p>
@@ -876,8 +869,8 @@ public abstract class Files { //NOSONAR
      * behavior that the {@link File} API does not already account for. For example, on NTFS it will
      * report {@code "txt"} as the extension for the filename {@code "foo.exe:.txt"} even though NTFS
      * will drop the {@code ":.txt"} part of the name when the file is actually created on the
-     * filesystem due to NTFS's <a
-     * href="https://learn.microsoft.com/en-us/archive/blogs/askcore/alternate-data-streams-in-ntfs">Alternate
+     * filesystem due to NTFS's
+     * <a href="https://learn.microsoft.com/en-us/archive/blogs/askcore/alternate-data-streams-in-ntfs">Alternate
      * Data Streams</a>.
      *
      * <p><b>Usage Examples:</b></p>
@@ -909,8 +902,8 @@ public abstract class Files { //NOSONAR
      * behavior that the {@link Path} API does not already account for. For example, on NTFS it will
      * report {@code "txt"} as the extension for the filename {@code "foo.exe:.txt"} even though NTFS
      * will drop the {@code ":.txt"} part of the name when the file is actually created on the
-     * filesystem due to NTFS's <a
-     * href="https://learn.microsoft.com/en-us/archive/blogs/askcore/alternate-data-streams-in-ntfs">Alternate
+     * filesystem due to NTFS's
+     * <a href="https://learn.microsoft.com/en-us/archive/blogs/askcore/alternate-data-streams-in-ntfs">Alternate
      * Data Streams</a>.
      *
      * <p><b>Usage Examples:</b></p>
@@ -1033,7 +1026,7 @@ public abstract class Files { //NOSONAR
      * after attempting to delete all files, an {@code IOException} is thrown containing those
      * exceptions as {@linkplain Throwable#getSuppressed() suppressed exceptions}.
      *
-     * <h2>Warning: Security of recursive deletes</h2>
+     * <p><b>Warning: Security of recursive deletes</b>
      *
      * <p>On a file system that supports symbolic links and does <i>not</i> support {@link
      * SecureDirectoryStream}, it is possible for a recursive delete to delete files and directories
@@ -1078,7 +1071,7 @@ public abstract class Files { //NOSONAR
      * after attempting to delete all files, an {@code IOException} is thrown containing those
      * exceptions as {@linkplain Throwable#getSuppressed() suppressed exceptions}.
      *
-     * <h2>Warning: Security of recursive deletes</h2>
+     * <p><b>Warning: Security of recursive deletes</b>
      *
      * <p>On a file system that supports symbolic links and does <i>not</i> support {@link
      * SecureDirectoryStream}, it is possible for a recursive delete to delete files and directories
@@ -1324,9 +1317,6 @@ public abstract class Files { //NOSONAR
      */
     public static final class MoreFiles extends Files {
 
-        /**
-         * Instantiates a new more files.
-         */
         private MoreFiles() {
             // singleton
         }

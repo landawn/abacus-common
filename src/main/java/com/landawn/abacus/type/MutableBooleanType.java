@@ -43,7 +43,7 @@ public class MutableBooleanType extends AbstractType<MutableBoolean> {
 
     /**
      * Indicates whether values of this type are comparable.
-     * MutableBoolean implements Comparable, so this returns true.
+     * MutableBoolean implements Comparable, so this returns {@code true}.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -52,7 +52,7 @@ public class MutableBooleanType extends AbstractType<MutableBoolean> {
      * // Returns: true
      * }</pre>
      *
-     * @return true, indicating that MutableBoolean values can be compared
+     * @return {@code true}, indicating that MutableBoolean values can be compared
      */
     @Override
     public boolean isComparable() {
@@ -80,7 +80,8 @@ public class MutableBooleanType extends AbstractType<MutableBoolean> {
      * }</pre>
      *
      * @param x The MutableBoolean object to convert
-     * @return The string representation ("true" or "false"), or null if the input is null
+     * @return The string representation ("true" or "false"), or {@code null} if the input is null
+     @MayReturnNull
      */
     @Override
     public String stringOf(final MutableBoolean x) {
@@ -109,7 +110,8 @@ public class MutableBooleanType extends AbstractType<MutableBoolean> {
      * }</pre>
      *
      * @param str The string to parse
-     * @return A MutableBoolean containing the parsed value, or null if the input is null or empty
+     * @return A MutableBoolean containing the parsed value, or {@code null} if the input is {@code null} or empty
+     @MayReturnNull
      */
     @Override
     public MutableBoolean valueOf(final String str) {
@@ -174,7 +176,7 @@ public class MutableBooleanType extends AbstractType<MutableBoolean> {
 
     /**
      * Sets a MutableBoolean parameter in a PreparedStatement at the specified position.
-     * If the MutableBoolean is null, {@code false} is stored. Otherwise, the wrapped boolean value is stored.
+     * If the MutableBoolean is {@code null}, {@code false} is stored. Otherwise, the wrapped boolean value is stored.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -202,7 +204,7 @@ public class MutableBooleanType extends AbstractType<MutableBoolean> {
 
     /**
      * Sets a MutableBoolean parameter in a CallableStatement using the specified parameter name.
-     * If the MutableBoolean is null, {@code false} is stored. Otherwise, the wrapped boolean value is stored.
+     * If the MutableBoolean is {@code null}, {@code false} is stored. Otherwise, the wrapped boolean value is stored.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code

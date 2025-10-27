@@ -14,6 +14,7 @@
 
 package com.landawn.abacus.util.function;
 
+import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.util.Throwables;
 
 /**
@@ -25,7 +26,7 @@ import com.landawn.abacus.util.Throwables;
  * 
  * <p>This is a functional interface whose functional method is {@link #get()}.
  * 
- * <p>Refer to JDK API documentation at: <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html">https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a>
+ * <p>Refer to JDK API documentation at: <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html">https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a></p>
  * 
  * @param <T> the type of results supplied by this supplier
  * 
@@ -56,6 +57,7 @@ public interface Supplier<T> extends Throwables.Supplier<T, RuntimeException>, j
      * @return a result if a result cannot be supplied
      */
     @Override
+    @MayReturnNull
     T get();
 
     /**
@@ -68,7 +70,7 @@ public interface Supplier<T> extends Throwables.Supplier<T, RuntimeException>, j
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Supplier<String> supplier = () -> "data";
-     * Throwables.Supplier<String, IOException> throwableSupplier = supplier.toThrowable();
+     * var throwableSupplier = supplier.toThrowable();
      *
      * // Can now be used in contexts requiring IOException
      * try {

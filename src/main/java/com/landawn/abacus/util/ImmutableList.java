@@ -317,8 +317,8 @@ public sealed class ImmutableList<E> extends ImmutableCollection<E> implements L
     /**
      * Returns an ImmutableList containing all elements from the provided array in the same order.
      * The returned list is independent of the input array; changes to the array after this call
-     * will not affect the returned list. If the array is null or empty, an empty ImmutableList is returned.
-     * Unlike some collection frameworks, this method supports null elements in the array.
+     * will not affect the returned list. If the array is {@code null} or empty, an empty ImmutableList is returned.
+     * Unlike some collection frameworks, this method supports {@code null} elements in the array.
      * 
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -328,7 +328,7 @@ public sealed class ImmutableList<E> extends ImmutableCollection<E> implements L
      * }</pre>
      *
      * @param <E> the type of the elements
-     * @param a the array of elements to include in the ImmutableList, may be null or empty
+     * @param a the array of elements to include in the ImmutableList, may be {@code null} or empty
      * @return an ImmutableList containing all elements from the array, or empty list if array is null/empty
      * @see List#of(Object...)
      */
@@ -345,7 +345,7 @@ public sealed class ImmutableList<E> extends ImmutableCollection<E> implements L
     /**
      * Returns an ImmutableList containing all elements from the provided collection.
      * If the provided collection is already an ImmutableList, it is returned directly without copying.
-     * If the collection is null or empty, an empty ImmutableList is returned.
+     * If the collection is {@code null} or empty, an empty ImmutableList is returned.
      * Otherwise, a new ImmutableList is created with a defensive copy of the collection's elements.
      * The order of elements is preserved as provided by the collection's iterator.
      * 
@@ -375,7 +375,7 @@ public sealed class ImmutableList<E> extends ImmutableCollection<E> implements L
      * The returned ImmutableList is backed by the provided list, so changes to the original list
      * will be reflected in the ImmutableList. However, the ImmutableList itself cannot be modified.
      * If the provided list is already an ImmutableList, it is returned directly.
-     * If the list is null, an empty ImmutableList is returned.
+     * If the list is {@code null}, an empty ImmutableList is returned.
      * 
      * <p><b>Warning:</b> Use this method with caution as the immutability guarantee depends on not modifying
      * the original list after wrapping. This method is marked as @Beta.
@@ -432,7 +432,7 @@ public sealed class ImmutableList<E> extends ImmutableCollection<E> implements L
      *
      * @param index index of the element to return (0-based)
      * @return the element at the specified position in this list
-     * @throws IndexOutOfBoundsException if the index is out of range (index < 0 || index >= size())
+     * @throws IndexOutOfBoundsException if the index is out of range (index &lt; 0 || index &gt;= size())
      * @see List#get(int)
      */
     @Override
@@ -443,7 +443,7 @@ public sealed class ImmutableList<E> extends ImmutableCollection<E> implements L
     /**
      * Returns the index of the first occurrence of the specified element in this list,
      * or -1 if this list does not contain the element. The search is performed using
-     * the equals() method of the element (or null comparison for null elements).
+     * the equals() method of the element (or {@code null} comparison for {@code null} elements).
      * If multiple equal elements exist, the index of the first one is returned.
      * 
      * <p><b>Usage Examples:</b></p>
@@ -466,7 +466,7 @@ public sealed class ImmutableList<E> extends ImmutableCollection<E> implements L
     /**
      * Returns the index of the last occurrence of the specified element in this list,
      * or -1 if this list does not contain the element. The search is performed using
-     * the equals() method of the element (or null comparison for null elements).
+     * the equals() method of the element (or {@code null} comparison for {@code null} elements).
      * If multiple equal elements exist, the index of the last one is returned.
      * 
      * <p><b>Usage Examples:</b></p>
@@ -525,7 +525,7 @@ public sealed class ImmutableList<E> extends ImmutableCollection<E> implements L
      *
      * @param index index of the first element to be returned from the list iterator (by a call to next())
      * @return an immutable list iterator over the elements in this list starting at the specified position
-     * @throws IndexOutOfBoundsException if the index is out of range (index < 0 || index > size())
+     * @throws IndexOutOfBoundsException if the index is out of range (index &lt; 0 || index &gt; size())
      * @see List#listIterator(int)
      */
     @Override
@@ -553,7 +553,7 @@ public sealed class ImmutableList<E> extends ImmutableCollection<E> implements L
      * @param toIndex high endpoint (exclusive) of the subList
      * @return an immutable view of the specified range within this list
      * @throws IndexOutOfBoundsException for an illegal endpoint index value
-     *         (fromIndex < 0 || toIndex > size || fromIndex > toIndex)
+     *         (fromIndex &lt; 0 || toIndex &gt; size || fromIndex &gt; toIndex)
      * @see List#subList(int, int)
      */
     @Override
@@ -828,14 +828,14 @@ public sealed class ImmutableList<E> extends ImmutableCollection<E> implements L
         /**
          * Adds all provided elements to the list being built.
          * The elements are added to the end of the list in the order they appear in the array.
-         * If the array is null or empty, no elements are added.
+         * If the array is {@code null} or empty, no elements are added.
          * 
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * builder.add("one", "two", "three");
          * }</pre>
          *
-         * @param elements the elements to add, may be null or empty
+         * @param elements the elements to add, may be {@code null} or empty
          * @return this builder instance for method chaining
          */
         @SafeVarargs
@@ -850,7 +850,7 @@ public sealed class ImmutableList<E> extends ImmutableCollection<E> implements L
         /**
          * Adds all elements from the specified collection to the list being built.
          * The elements are added to the end of the list in the order returned by
-         * the collection's iterator. If the collection is null or empty, no elements are added.
+         * the collection's iterator. If the collection is {@code null} or empty, no elements are added.
          * 
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
@@ -858,7 +858,7 @@ public sealed class ImmutableList<E> extends ImmutableCollection<E> implements L
          * builder.addAll(moreElements);
          * }</pre>
          *
-         * @param c the collection containing elements to add, may be null or empty
+         * @param c the collection containing elements to add, may be {@code null} or empty
          * @return this builder instance for method chaining
          */
         public Builder<E> addAll(final Collection<? extends E> c) {
@@ -872,7 +872,7 @@ public sealed class ImmutableList<E> extends ImmutableCollection<E> implements L
         /**
          * Adds all elements from the specified iterator to the list being built.
          * The elements are added to the end of the list in the order returned by the iterator.
-         * The iterator is consumed by this operation. If the iterator is null or has no elements,
+         * The iterator is consumed by this operation. If the iterator is {@code null} or has no elements,
          * no elements are added.
          * 
          * <p><b>Usage Examples:</b></p>

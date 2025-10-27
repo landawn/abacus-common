@@ -143,11 +143,6 @@ public enum NamingPolicy {
 
     private final Function<String, String> converter;
 
-    /**
-     * Constructs a NamingPolicy with the specified converter function.
-     * 
-     * @param converter the function that performs the string transformation
-     */
     NamingPolicy(final Function<String, String> converter) {
         this.converter = converter;
     }

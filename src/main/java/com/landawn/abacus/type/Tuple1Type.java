@@ -90,11 +90,6 @@ public class Tuple1Type<T1> extends AbstractType<Tuple1<T1>> {
         return parameterTypes;
     }
 
-    /**
-     * Indicates that this is a generic type with type parameters.
-     *
-     * @return true, as Tuple1 is a generic type
-     */
     @Override
     public boolean isGenericType() {
         return true;
@@ -105,9 +100,10 @@ public class Tuple1Type<T1> extends AbstractType<Tuple1<T1>> {
      * The format is a JSON array: [value].
      *
      * @param x the Tuple1 object to convert
-     * @return the JSON string representation, or null if x is null
+     * @return the JSON string representation, or {@code null} if x is null
      */
     @Override
+    @MayReturnNull
     public String stringOf(final Tuple1<T1> x) {
         return (x == null) ? null : Utils.jsonParser.serialize(N.asArray(x._1), Utils.jsc);
     }
@@ -117,7 +113,7 @@ public class Tuple1Type<T1> extends AbstractType<Tuple1<T1>> {
      * Expects a JSON array format: [value].
      *
      * @param str the string to parse
-     * @return a Tuple1 object containing the parsed value, or null if str is empty
+     * @return a Tuple1 object containing the parsed value, or {@code null} if str is empty
      */
     @MayReturnNull
     @SuppressWarnings("unchecked")
@@ -207,9 +203,9 @@ public class Tuple1Type<T1> extends AbstractType<Tuple1<T1>> {
 
     /**
      * Generates the type name for a Tuple1 type with the specified element type.
-     * 
+     *
      * @param t1TypeName the name of the element type
-     * @param isDeclaringName if true, uses simple class names; if false, uses canonical class names
+     * @param isDeclaringName if {@code true}, uses simple class names; if {@code false}, uses canonical class names
      * @return the generated type name for Tuple1 with the specified element type
      */
     protected static String getTypeName(final String t1TypeName, final boolean isDeclaringName) {

@@ -45,24 +45,24 @@ import java.lang.annotation.Target;
  * 
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
- * {@literal @}Entity
+ * @Entity
  * public class Product {
- *     {@literal @}Id
+ *     @Id
  *     private Long id;
  *     
- *     {@literal @}Column
+ *     @Column
  *     private String name;
  *     
- *     {@literal @}Column
+ *     @Column
  *     private BigDecimal price;
  *     
- *     {@literal @}Transient
+ *     @Transient
  *     private BigDecimal priceWithTax;  // Calculated field
  *     
- *     {@literal @}Transient
+ *     @Transient
  *     private boolean modified;          // Runtime state
  *     
- *     {@literal @}Transient
+ *     @Transient
  *     private List<Review> reviews;      // Loaded separately
  * }
  * }</pre>

@@ -14,11 +14,6 @@
 
 package com.landawn.abacus.type;
 
-/**
- * Type handler for {@link StringBuffer} objects. This class provides serialization
- * and deserialization support for StringBuffer instances. Note that this class
- * actually handles StringBuffer instances, not StringBuffer, despite its name.
- */
 public class StringBufferType extends AbstractCharSequenceType<StringBuffer> {
 
     /**
@@ -46,7 +41,7 @@ public class StringBufferType extends AbstractCharSequenceType<StringBuffer> {
      * This method returns the string content of the StringBuffer.
      *
      * @param x the StringBuffer object to convert
-     * @return the string representation of the StringBuffer's content, or null if x is null
+          * @return the string representation of the StringBuffer's content, or {@code null} if x is null
      */
     @Override
     public String stringOf(final StringBuffer x) {
@@ -58,7 +53,7 @@ public class StringBufferType extends AbstractCharSequenceType<StringBuffer> {
      * This method creates a new StringBuffer containing the provided string.
      *
      * @param str the string to convert to a StringBuffer
-     * @return a new StringBuffer containing the string content, or null if str is null
+          * @return a new StringBuffer containing the string content, or {@code null} if str is null
      */
     @Override
     public StringBuffer valueOf(final String str) {
@@ -67,9 +62,9 @@ public class StringBufferType extends AbstractCharSequenceType<StringBuffer> {
 
     /**
      * Indicates whether instances of this type are immutable.
-     * StringBuffer instances are mutable, so this returns false.
+     * StringBuffer instances are mutable, so this returns {@code false}.
      *
-     * @return false, as StringBuffer objects are mutable
+     * @return {@code false}, as StringBuffer objects are mutable
      */
     @Override
     public boolean isImmutable() {

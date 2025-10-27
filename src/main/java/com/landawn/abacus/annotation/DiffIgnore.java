@@ -49,13 +49,13 @@ import java.lang.annotation.Target;
  *     private String username;
  *     private String email;
  *     
- *     {@literal @}DiffIgnore
+ *     @DiffIgnore
  *     private Timestamp lastModified;  // Changes on every update
  *     
- *     {@literal @}DiffIgnore
+ *     @DiffIgnore
  *     private Integer version;         // Optimistic locking field
  *     
- *     {@literal @}DiffIgnore
+ *     @DiffIgnore
  *     private String sessionToken;     // Temporary runtime data
  * }
  * 

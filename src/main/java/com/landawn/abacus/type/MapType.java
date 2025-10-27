@@ -74,7 +74,7 @@ public class MapType<K, V, T extends Map<K, V>> extends AbstractType<T> {
      * Returns the declaring name of this Map type.
      * The declaring name includes the fully qualified class names of the key and value types.
      *
-     * @return The declaring name in format "MapClass<KeyDeclaringName, ValueDeclaringName>"
+     * @return The declaring name in format "MapClass&lt;KeyDeclaringName, ValueDeclaringName&gt;"
      */
     @Override
     public String declaringName() {
@@ -94,7 +94,7 @@ public class MapType<K, V, T extends Map<K, V>> extends AbstractType<T> {
     /**
      * Gets the parameter types for this generic Map type.
      * The array contains two elements: the key type at index 0 and the value type at index 1.
-     * For Spring MultiValueMap, the value type will be List<V> instead of V.
+     * For Spring MultiValueMap, the value type will be List&lt;V&gt; instead of V.
      *
      * @return An array containing the key type and value type
      */
@@ -105,9 +105,9 @@ public class MapType<K, V, T extends Map<K, V>> extends AbstractType<T> {
 
     /**
      * Indicates whether this type represents a Map.
-     * For MapType, this always returns true.
+     * For MapType, this always returns {@code true}.
      *
-     * @return true, indicating that this type represents a Map
+     * @return {@code true}, indicating that this type represents a Map
      */
     @Override
     public boolean isMap() {
@@ -118,7 +118,7 @@ public class MapType<K, V, T extends Map<K, V>> extends AbstractType<T> {
      * Indicates whether this is a generic type.
      * For MapType, this always returns {@code true} since Map is parameterized with key and value types.
      *
-     * @return true, indicating that Map is a generic type
+     * @return {@code true}, indicating that Map is a generic type
      */
     @Override
     public boolean isGenericType() {
@@ -129,7 +129,7 @@ public class MapType<K, V, T extends Map<K, V>> extends AbstractType<T> {
      * Indicates whether instances of this type can be serialized.
      * Map objects are not directly serializable through this type handler.
      *
-     * @return false, indicating that Map is not serializable through this type
+     * @return {@code false}, indicating that Map is not serializable through this type
      */
     @Override
     public boolean isSerializable() {
@@ -152,10 +152,11 @@ public class MapType<K, V, T extends Map<K, V>> extends AbstractType<T> {
      * Empty maps are represented as "{}".
      *
      * @param x The Map object to convert
-     * @return The JSON string representation of the Map, or null if the input is null
+     * @return The JSON string representation of the Map, or {@code null} if the input is null
      */
     @MayReturnNull
     @Override
+
     public String stringOf(final T x) {
         if (x == null) {
             return null; // NOSONAR
@@ -169,15 +170,16 @@ public class MapType<K, V, T extends Map<K, V>> extends AbstractType<T> {
     /**
      * Parses a JSON string to create a Map object.
      * The method handles:
-     * - null input returns null
+     * - {@code null} input returns null
      * - Empty string or "{}" returns an empty Map of the appropriate type
      * - Valid JSON object strings are deserialized into the Map
      *
      * @param str The JSON string to parse
-     * @return The parsed Map object, or null if the input is null
+     * @return The parsed Map object, or {@code null} if the input is null
      */
     @MayReturnNull
     @Override
+
     public T valueOf(final String str) {
         if (Strings.isEmpty(str) || Strings.isBlank(str)) {
             return null; // NOSONAR

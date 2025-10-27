@@ -49,6 +49,9 @@ public final class MutableDouble extends Number implements Comparable<MutableDou
     @Serial
     private static final long serialVersionUID = 1587163916L;
 
+    /**
+     * The mutable double value.
+     */
     private double value;
 
     /**
@@ -175,7 +178,7 @@ public final class MutableDouble extends Number implements Comparable<MutableDou
 
     /**
      * Sets the value to newValue if the predicate returns {@code true} for the current value.
-     * If the predicate returns false, the value remains unchanged.
+     * If the predicate returns {@code false}, the value remains unchanged.
      * 
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code

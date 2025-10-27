@@ -42,14 +42,12 @@ import com.landawn.abacus.annotation.SuppressFBWarnings;
  * <li>{@link #copyOf(Collection)} - creates a defensive copy from another collection</li>
  * <li>{@link #wrap(SortedSet)} - wraps an existing sorted set (changes to the underlying set will be reflected)</li>
  * </ul>
- * </p>
  * 
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * ImmutableSortedSet<String> set = ImmutableSortedSet.of("apple", "banana", "cherry");
  * ImmutableSortedSet<String> subset = set.subSet("banana", "cherry");
  * }</pre>
- * </p>
  *
  * @param <E> the type of elements maintained by this set
  * @see ImmutableSet
@@ -332,7 +330,7 @@ public class ImmutableSortedSet<E> extends ImmutableSet<E> implements SortedSet<
      * 
      * <p><b>Warning:</b> This method does not create a defensive copy. Changes to the underlying
      * SortedSet will be visible through the returned ImmutableSortedSet, which violates the
-     * immutability contract. Use {@link #copyOf(Collection)} for a true immutable copy.</p>
+     * immutability contract. Use {@link #copyOf(Collection)} for a {@code true} immutable copy.</p>
      * 
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -416,8 +414,8 @@ public class ImmutableSortedSet<E> extends ImmutableSet<E> implements SortedSet<
      *         {@code fromElement}, inclusive, to {@code toElement}, exclusive
      * @throws ClassCastException if {@code fromElement} and {@code toElement}
      *         cannot be compared to one another using this set's comparator
-     *         is null and this set uses natural ordering, or its comparator
-     *         does not permit null elements
+     *         is {@code null} and this set uses natural ordering, or its comparator
+     *         does not permit {@code null} elements
      * @throws IllegalArgumentException if {@code fromElement} is greater than
      *         {@code toElement}; or if this set itself has a restricted range,
      *         and {@code fromElement} or {@code toElement} lies outside the
@@ -444,7 +442,7 @@ public class ImmutableSortedSet<E> extends ImmutableSet<E> implements SortedSet<
      *         less than {@code toElement}
      * @throws ClassCastException if {@code toElement} is not compatible with
      *         this set's comparator
-     *         natural ordering, or its comparator does not permit null elements
+     *         natural ordering, or its comparator does not permit {@code null} elements
      * @throws IllegalArgumentException if this set itself has a restricted range,
      *         and {@code toElement} lies outside the bounds of the range
      */
@@ -469,7 +467,7 @@ public class ImmutableSortedSet<E> extends ImmutableSet<E> implements SortedSet<
      *         than or equal to {@code fromElement}
      * @throws ClassCastException if {@code fromElement} is not compatible with
      *         this set's comparator
-     *         natural ordering, or its comparator does not permit null elements
+     *         natural ordering, or its comparator does not permit {@code null} elements
      * @throws IllegalArgumentException if this set itself has a restricted range,
      *         and {@code fromElement} lies outside the bounds of the range
      */

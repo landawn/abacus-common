@@ -59,6 +59,7 @@ public class XMLType<T> extends AbstractType<T> {
      * </p>
      *
      * @return the declaring name of this XML type
+     @MayReturnNull
      */
     @Override
     public String declaringName() {
@@ -82,11 +83,12 @@ public class XMLType<T> extends AbstractType<T> {
      * Converts an object to its XML string representation.
      * <p>
      * This method uses the XML parser to serialize the provided object to an XML string.
-     * If the input object is null, this method returns null.
+     * If the input object is {@code null}, this method returns {@code null}.
      * </p>
      *
      * @param x the object to convert to XML
-     * @return the XML string representation of the object, or null if the input is null
+     * @return the XML string representation of the object, or {@code null} if the input is null
+     @MayReturnNull
      */
     @Override
     public String stringOf(final T x) {
@@ -97,12 +99,13 @@ public class XMLType<T> extends AbstractType<T> {
      * Converts an XML string to an object of the target type.
      * <p>
      * This method uses the XML parser to deserialize the provided XML string into an
-     * object of the target class. If the string is null or empty, this method returns null.
+     * object of the target class. If the string is {@code null} or empty, this method returns {@code null}.
      * </p>
      *
      * @param str the XML string to deserialize
-     * @return an object of type T deserialized from the XML string, or null if the string is empty
+     * @return an object of type T deserialized from the XML string, or {@code null} if the string is empty
      * @throws RuntimeException if the XML parsing fails or the XML doesn't match the target type
+     @MayReturnNull
      */
     @Override
     public T valueOf(final String str) {

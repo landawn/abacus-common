@@ -321,7 +321,7 @@ final class ReflectASM<T> {
      * The method must be public and the correct number and types of arguments must be provided.
      * 
      * <p>This method uses bytecode generation for high-performance method invocation.
-     * If the method returns void, null is returned. Otherwise, the return value is
+     * If the method returns void, {@code null} is returned. Otherwise, the return value is
      * automatically cast to the specified type parameter.</p>
      * 
      * <p><b>Usage Examples:</b></p>
@@ -410,11 +410,6 @@ final class ReflectASM<T> {
         return this;
     }
 
-    /**
-     * Gets the field access.
-     *
-     * @return the cached or newly created FieldAccess instance for this class
-     */
     private FieldAccess getFieldAccess() {
         FieldAccess fieldAccess = clsFieldPool.get(cls);
 
@@ -444,12 +439,6 @@ final class ReflectASM<T> {
         return (ConstructorAccess<T>) constructorAccess;
     }
 
-    /**
-     * Gets the method access.
-     *
-     * @param cls the class for which to get the method access
-     * @return the cached or newly created MethodAccess instance for the specified class
-     */
     private MethodAccess getMethodAccess(final Class<?> cls) {
         MethodAccess methodAccess = clsMethodPool.get(cls);
 

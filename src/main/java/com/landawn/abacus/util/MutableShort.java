@@ -49,6 +49,9 @@ public final class MutableShort extends Number implements Comparable<MutableShor
     @Serial
     private static final long serialVersionUID = -2135791679L;
 
+    /**
+     * The mutable short value.
+     */
     private short value;
 
     /**
@@ -173,8 +176,8 @@ public final class MutableShort extends Number implements Comparable<MutableShor
     }
 
     /**
-     * Sets the value to newValue if the predicate evaluates to true for the current value.
-     * If the predicate returns false, the value remains unchanged.
+     * Sets the value to newValue if the predicate evaluates to {@code true} for the current value.
+     * If the predicate returns {@code false}, the value remains unchanged.
      * 
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -359,51 +362,26 @@ public final class MutableShort extends Number implements Comparable<MutableShor
     //-----------------------------------------------------------------------
     // byteValue relies on Number implementation
 
-    /**
-     * Returns the value of this MutableShort as a short.
-     * 
-     * @return the short value
-     */
     @Override
     public short shortValue() {
         return value;
     }
 
-    /**
-     * Returns the value of this MutableShort as an int.
-     * 
-     * @return the value as an int
-     */
     @Override
     public int intValue() {
         return value;
     }
 
-    /**
-     * Returns the value of this MutableShort as a long.
-     * 
-     * @return the value as a long
-     */
     @Override
     public long longValue() {
         return value;
     }
 
-    /**
-     * Returns the value of this MutableShort as a float.
-     * 
-     * @return the value as a float
-     */
     @Override
     public float floatValue() {
         return value;
     }
 
-    /**
-     * Returns the value of this MutableShort as a double.
-     * 
-     * @return the value as a double
-     */
     @Override
     public double doubleValue() {
         return value;

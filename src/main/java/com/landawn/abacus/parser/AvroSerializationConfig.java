@@ -19,6 +19,7 @@ import java.util.Set;
 
 import org.apache.avro.Schema;
 
+import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.annotation.SuppressFBWarnings;
 import com.landawn.abacus.util.N;
 
@@ -51,8 +52,9 @@ public class AvroSerializationConfig extends SerializationConfig<AvroSerializati
      * Gets the Avro schema used for serialization.
      * The schema defines the structure of the data to be serialized.
      *
-     * @return the Avro schema, or null if not set
+     * @return the Avro schema, or {@code null} if not set
      */
+    @MayReturnNull
     public Schema getSchema() {
         return schema;
     }
@@ -129,6 +131,14 @@ public class AvroSerializationConfig extends SerializationConfig<AvroSerializati
      * }</pre>
      */
     public static final class ASC extends AvroSerializationConfig {
+
+        /**
+         * Private constructor to prevent instantiation.
+         * Use the static factory method {@link #create()} instead.
+         */
+        private ASC() {
+            // Private constructor
+        }
 
         /**
          * Creates a new instance of AvroSerializationConfig with default settings.

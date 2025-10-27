@@ -23,7 +23,7 @@ import com.landawn.abacus.util.Throwables;
  * 
  * <p>This is a functional interface whose functional method is {@link #apply(Object, Object)}.
  * 
- * <p>Refer to JDK API documentation at: <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html">https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a>
+ * <p>Refer to JDK API documentation at: <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html">https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a></p>
  *
  * @param <T> the type of the operands and result of the operator
  */
@@ -38,7 +38,7 @@ public interface BinaryOperator<T> extends BiFunction<T, T, T>, Throwables.Binar
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * BinaryOperator<String> concatenator = (s1, s2) -> s1 + s2;
-     * Throwables.BinaryOperator<String, IOException> throwableOp = concatenator.toThrowable();
+     * var throwableOp = concatenator.toThrowable();
      * }</pre>
      *
      * @param <E> the type of exception that the returned operator can throw

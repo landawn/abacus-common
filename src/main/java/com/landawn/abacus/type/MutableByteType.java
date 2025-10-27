@@ -63,7 +63,8 @@ public class MutableByteType extends NumberType<MutableByte> {
      * }</pre>
      *
      * @param x The MutableByte object to convert
-     * @return The string representation of the byte value, or null if the input is null
+     * @return The string representation of the byte value, or {@code null} if the input is null
+     @MayReturnNull
      */
     @Override
     public String stringOf(final MutableByte x) {
@@ -92,8 +93,9 @@ public class MutableByteType extends NumberType<MutableByte> {
      * }</pre>
      *
      * @param str The string to parse
-     * @return A MutableByte containing the parsed value, or null if the input is null or empty
+     * @return A MutableByte containing the parsed value, or {@code null} if the input is {@code null} or empty
      * @throws NumberFormatException if the string cannot be parsed as a byte
+     @MayReturnNull
      */
     @Override
     public MutableByte valueOf(final String str) {
@@ -158,7 +160,7 @@ public class MutableByteType extends NumberType<MutableByte> {
 
     /**
      * Sets a MutableByte parameter in a PreparedStatement at the specified position.
-     * If the MutableByte is null, 0 is stored. Otherwise, the wrapped byte value is stored.
+     * If the MutableByte is {@code null}, 0 is stored. Otherwise, the wrapped byte value is stored.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -186,7 +188,7 @@ public class MutableByteType extends NumberType<MutableByte> {
 
     /**
      * Sets a MutableByte parameter in a CallableStatement using the specified parameter name.
-     * If the MutableByte is null, 0 is stored. Otherwise, the wrapped byte value is stored.
+     * If the MutableByte is {@code null}, 0 is stored. Otherwise, the wrapped byte value is stored.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -249,7 +251,7 @@ public class MutableByteType extends NumberType<MutableByte> {
 
     /**
      * Writes the character representation of a MutableByte to a CharacterWriter.
-     * The value is written as numeric characters or the null character array.
+     * The value is written as numeric characters or the {@code null} character array.
      * This method is optimized for character-based writing.
      *
      * <p><b>Usage Examples:</b></p>

@@ -165,7 +165,7 @@ public final class Sheet<R, C, V> implements Cloneable {
      * <p>
      * The data is provided as a two-dimensional array where each inner array represents a row.
      * The dimensions of the array must match the sizes of the row and column key sets exactly.
-     * The array can contain {@code null} values which will be stored as null cells in the Sheet.
+     * The array can contain {@code null} values which will be stored as {@code null} cells in the Sheet.
      * </p>
      *
      * <p><b>Usage Examples:</b></p>
@@ -524,7 +524,7 @@ public final class Sheet<R, C, V> implements Cloneable {
      * Checks whether the cell at the specified row and column contains a {@code null} value.
      * <p>
      * Returns {@code true} if the cell is {@code null} or if the Sheet has not been initialized
-     * with data yet. Returns {@code false} if the cell contains a non-null value.
+     * with data yet. Returns {@code false} if the cell contains a {@code non-null} value.
      * </p>
      *
      * <p><b>Usage Examples:</b></p>
@@ -561,7 +561,7 @@ public final class Sheet<R, C, V> implements Cloneable {
     /**
      * Checks whether the cell at the specified row and column indices contains a {@code null} value.
      * <p>
-     * This method provides index-based access for checking null values. Indices are zero-based.
+     * This method provides index-based access for checking {@code null} values. Indices are zero-based.
      * </p>
      *
      * <p><b>Usage Examples:</b></p>
@@ -706,6 +706,7 @@ public final class Sheet<R, C, V> implements Cloneable {
      * @throws IndexOutOfBoundsException if the point's indices are out of bounds
      * @see #get(int, int)
      */
+    @MayReturnNull
     @Beta
     public V get(final Point point) throws IndexOutOfBoundsException {
         return get(point.rowIndex, point.columnIndex);
@@ -829,7 +830,7 @@ public final class Sheet<R, C, V> implements Cloneable {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Create two sheets
-     * Sheet&lt;String, String, Integer&gt; targetSheet = Sheet.rows(
+     * Sheet<String, String, Integer> targetSheet = Sheet.rows(
      *     List.of("row1", "row2"),
      *     List.of("col1", "col2", "col3"),
      *     new Integer[][] {
@@ -838,7 +839,7 @@ public final class Sheet<R, C, V> implements Cloneable {
      *     }
      * );
      *
-     * Sheet&lt;String, String, Integer&gt; sourceSheet = Sheet.rows(
+     * Sheet<String, String, Integer> sourceSheet = Sheet.rows(
      *     List.of("row1"),
      *     List.of("col1", "col3"),
      *     new Integer[][] {
@@ -897,7 +898,7 @@ public final class Sheet<R, C, V> implements Cloneable {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Create two sheets with overlapping data
-     * Sheet&lt;String, String, Integer&gt; targetSheet = Sheet.rows(
+     * Sheet<String, String, Integer> targetSheet = Sheet.rows(
      *     List.of("row1", "row2"),
      *     List.of("col1", "col2"),
      *     new Integer[][] {
@@ -906,7 +907,7 @@ public final class Sheet<R, C, V> implements Cloneable {
      *     }
      * );
      *
-     * Sheet&lt;String, String, Integer&gt; sourceSheet = Sheet.rows(
+     * Sheet<String, String, Integer> sourceSheet = Sheet.rows(
      *     List.of("row1", "row2"),
      *     List.of("col1", "col2"),
      *     new Integer[][] {
@@ -1026,7 +1027,7 @@ public final class Sheet<R, C, V> implements Cloneable {
      * @param columnIndex the zero-based index of the column
      * @return the value that was previously stored in the cell, or {@code null} if the cell was empty
      * @throws IllegalStateException if the Sheet is frozen
-     * @throws IndexOutOfBoundsException if rowIndex < 0 or rowIndex >= rowLength() or columnIndex < 0 or columnIndex >= columnLength()
+     * @throws IndexOutOfBoundsException if rowIndex &lt; 0 or rowIndex &gt;= rowLength() or columnIndex &lt; 0 or columnIndex &gt;= columnLength()
      * @see #remove(Object, Object)
      * @see #put(int, int, Object)
      */
@@ -1365,11 +1366,11 @@ public final class Sheet<R, C, V> implements Cloneable {
      * // Sheet now contains rows: ["row1", "row2", "row3"]
      * }</pre>
      *
-     * @param rowIndex the zero-based index where the row should be inserted; must be >= 0 and <= rowLength()
+     * @param rowIndex the zero-based index where the row should be inserted; must be &gt;= 0 and &lt;= rowLength()
      * @param rowKey the unique key for the new row; must not already exist in the Sheet
      * @param row the collection of values for the new row; must match the number of columns or be empty
      * @throws IllegalStateException if the Sheet is frozen
-     * @throws IndexOutOfBoundsException if rowIndex < 0 or rowIndex > rowLength()
+     * @throws IndexOutOfBoundsException if rowIndex &lt; 0 or rowIndex &gt; rowLength()
      * @throws IllegalArgumentException if the row key already exists or the collection size doesn't match column count (unless empty)
      * @see #addRow(Object, Collection)
      * @see #moveRow(Object, int)
@@ -1545,7 +1546,7 @@ public final class Sheet<R, C, V> implements Cloneable {
      * @param newRowIndex the new zero-based index where the row should be positioned
      * @throws IllegalStateException if the Sheet is frozen
      * @throws IllegalArgumentException if the row key does not exist in the Sheet
-     * @throws IndexOutOfBoundsException if newRowIndex < 0 or newRowIndex >= rowLength()
+     * @throws IndexOutOfBoundsException if newRowIndex &lt; 0 or newRowIndex &gt;= rowLength()
      * @see #swapRowPosition(Object, Object)
      */
     public void moveRow(final R rowKey, final int newRowIndex) throws IllegalStateException, IllegalArgumentException, IndexOutOfBoundsException {
@@ -1961,11 +1962,11 @@ public final class Sheet<R, C, V> implements Cloneable {
      * // Sheet now contains columns: ["col1", "col2", "col3"]
      * }</pre>
      *
-     * @param columnIndex the zero-based index where the column should be inserted; must be >= 0 and <= columnLength()
+     * @param columnIndex the zero-based index where the column should be inserted; must be &gt;= 0 and &lt;= columnLength()
      * @param columnKey the unique key for the new column; must not already exist in the Sheet
      * @param column the collection of values for the new column; must match the number of rows or be empty
      * @throws IllegalStateException if the Sheet is frozen
-     * @throws IndexOutOfBoundsException if columnIndex < 0 or columnIndex > columnLength()
+     * @throws IndexOutOfBoundsException if columnIndex &lt; 0 or columnIndex &gt; columnLength()
      * @throws IllegalArgumentException if the column key already exists or collection size doesn't match row count (unless empty)
      * @see #addColumn(Object, Collection)
      * @see #moveColumn(Object, int)
@@ -2138,7 +2139,7 @@ public final class Sheet<R, C, V> implements Cloneable {
      * @param newColumnIndex the new zero-based index where the column should be positioned
      * @throws IllegalStateException if the Sheet is frozen
      * @throws IllegalArgumentException if the column key does not exist in the Sheet
-     * @throws IndexOutOfBoundsException if newColumnIndex < 0 or newColumnIndex >= columnLength()
+     * @throws IndexOutOfBoundsException if newColumnIndex &lt; 0 or newColumnIndex &gt;= columnLength()
      * @see #swapColumnPosition(Object, Object)
      */
     public void moveColumn(final C columnKey, final int newColumnIndex) throws IllegalStateException, IllegalArgumentException, IndexOutOfBoundsException {
@@ -2171,7 +2172,7 @@ public final class Sheet<R, C, V> implements Cloneable {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Create a sheet with three columns
-     * Sheet&lt;String, String, Integer&gt; sheet = Sheet.rows(
+     * Sheet<String, String, Integer> sheet = Sheet.rows(
      *     List.of("row1", "row2", "row3"),
      *     List.of("col1", "col2", "col3"),
      *     new Integer[][] {
@@ -2394,7 +2395,7 @@ public final class Sheet<R, C, V> implements Cloneable {
      * Returns the number of rows in the Sheet.
      * <p>
      * The row length represents the total count of row keys in the Sheet,
-     * regardless of whether the cells contain values or are null.
+     * regardless of whether the cells contain values or are {@code null}.
      * </p>
      *
      * <p><b>Usage Examples:</b></p>
@@ -2419,7 +2420,7 @@ public final class Sheet<R, C, V> implements Cloneable {
      * Returns the number of columns in the Sheet.
      * <p>
      * The column length represents the total count of column keys in the Sheet,
-     * regardless of whether the cells contain values or are null.
+     * regardless of whether the cells contain values or are {@code null}.
      * </p>
      *
      * <p><b>Usage Examples:</b></p>
@@ -3736,10 +3737,10 @@ public final class Sheet<R, C, V> implements Cloneable {
     }
 
     /**
-     * Counts the number of non-null values in the Sheet.
+     * Counts the number of {@code non-null} values in the Sheet.
      * <p>
-     * Iterates through all cells and counts those containing non-null values.
-     * Empty or uninitialized cells are counted as null.
+     * Iterates through all cells and counts those containing {@code non-null} values.
+     * Empty or uninitialized cells are counted as {@code null}.
      * </p>
      *
      * <p><b>Usage Examples:</b></p>
@@ -3753,7 +3754,7 @@ public final class Sheet<R, C, V> implements Cloneable {
      * long count = sheet.countOfNonNullValue(); // returns 4
      * }</pre>
      *
-     * @return the number of non-null values in the Sheet
+     * @return the number of {@code non-null} values in the Sheet
      * @see #isEmpty()
      */
     public long countOfNonNullValue() {
@@ -3804,7 +3805,7 @@ public final class Sheet<R, C, V> implements Cloneable {
     /**
      * Performs the given action for each cell in the Sheet in horizontal order (row by row).
      * <p>
-     * Iterates through cells row by row, calling the action for each cell including null values.
+     * Iterates through cells row by row, calling the action for each cell including {@code null} values.
      * The action receives the row key, column key, and value for each cell.
      * </p>
      *
@@ -3845,7 +3846,7 @@ public final class Sheet<R, C, V> implements Cloneable {
     /**
      * Performs the given action for each cell in the Sheet in vertical order (column by column).
      * <p>
-     * Iterates through cells column by column, calling the action for each cell including null values.
+     * Iterates through cells column by column, calling the action for each cell including {@code null} values.
      * The action receives the row key, column key, and value for each cell.
      * </p>
      *
@@ -3884,10 +3885,10 @@ public final class Sheet<R, C, V> implements Cloneable {
     }
 
     /**
-     * Performs the given action for each non-null cell in the Sheet in horizontal order (row by row).
+     * Performs the given action for each {@code non-null} cell in the Sheet in horizontal order (row by row).
      * <p>
-     * Iterates through cells row by row, calling the action only for cells containing non-null values.
-     * Skips null and uninitialized cells. The action is guaranteed to receive non-null values.
+     * Iterates through cells row by row, calling the action only for cells containing {@code non-null} values.
+     * Skips {@code null} and uninitialized cells. The action is guaranteed to receive {@code non-null} values.
      * </p>
      *
      * <p><b>Usage Examples:</b></p>
@@ -3903,7 +3904,7 @@ public final class Sheet<R, C, V> implements Cloneable {
      * }</pre>
      *
      * @param <E> the type of exception the action may throw
-     * @param action the action to perform on each non-null cell; receives row key, column key, and non-null value
+     * @param action the action to perform on each {@code non-null} cell; receives row key, column key, and {@code non-null} value
      * @throws E if the action throws an exception
      * @see #forEachH(Throwables.TriConsumer)
      * @see #forEachNonNullV(Throwables.TriConsumer)
@@ -3925,10 +3926,10 @@ public final class Sheet<R, C, V> implements Cloneable {
     }
 
     /**
-     * Performs the given action for each non-null cell in the Sheet in vertical order (column by column).
+     * Performs the given action for each {@code non-null} cell in the Sheet in vertical order (column by column).
      * <p>
-     * Iterates through cells column by column, calling the action only for cells containing non-null values.
-     * Skips null and uninitialized cells. The action is guaranteed to receive non-null values.
+     * Iterates through cells column by column, calling the action only for cells containing {@code non-null} values.
+     * Skips {@code null} and uninitialized cells. The action is guaranteed to receive {@code non-null} values.
      * </p>
      *
      * <p><b>Usage Examples:</b></p>
@@ -3944,7 +3945,7 @@ public final class Sheet<R, C, V> implements Cloneable {
      * }</pre>
      *
      * @param <E> the type of exception the action may throw
-     * @param action the action to perform on each non-null cell; receives row key, column key, and non-null value
+     * @param action the action to perform on each {@code non-null} cell; receives row key, column key, and {@code non-null} value
      * @throws E if the action throws an exception
      * @see #forEachV(Throwables.TriConsumer)
      * @see #forEachNonNullH(Throwables.TriConsumer)
@@ -4015,7 +4016,7 @@ public final class Sheet<R, C, V> implements Cloneable {
      * @param fromRowIndex the starting row index (inclusive)
      * @param toRowIndex the ending row index (exclusive)
      * @return a Stream of Cell objects from the specified row range
-     * @throws IndexOutOfBoundsException if indices are out of bounds or fromRowIndex > toRowIndex
+     * @throws IndexOutOfBoundsException if indices are out of bounds or fromRowIndex &gt; toRowIndex
      * @see #cellsH()
      * @see #cellsV(int, int)
      */
@@ -4121,7 +4122,7 @@ public final class Sheet<R, C, V> implements Cloneable {
      * @param fromColumnIndex the starting column index (inclusive)
      * @param toColumnIndex the ending column index (exclusive)
      * @return a Stream of Cell objects from the specified column range
-     * @throws IndexOutOfBoundsException if indices are out of bounds or fromColumnIndex > toColumnIndex
+     * @throws IndexOutOfBoundsException if indices are out of bounds or fromColumnIndex &gt; toColumnIndex
      * @see #cellsV()
      * @see #cellsH(int, int)
      */
@@ -4232,7 +4233,7 @@ public final class Sheet<R, C, V> implements Cloneable {
      * @param fromRowIndex the starting row index (inclusive)
      * @param toRowIndex the ending row index (exclusive)
      * @return a Stream of Streams for the specified row range
-     * @throws IndexOutOfBoundsException if indices are out of bounds or fromRowIndex > toRowIndex
+     * @throws IndexOutOfBoundsException if indices are out of bounds or fromRowIndex &gt; toRowIndex
      * @see #cellsR()
      * @see #cellsC(int, int)
      */
@@ -4369,7 +4370,7 @@ public final class Sheet<R, C, V> implements Cloneable {
      * @param fromColumnIndex the starting column index (inclusive)
      * @param toColumnIndex the ending column index (exclusive)
      * @return a Stream of Streams for the specified column range
-     * @throws IndexOutOfBoundsException if indices are out of bounds or fromColumnIndex > toColumnIndex
+     * @throws IndexOutOfBoundsException if indices are out of bounds or fromColumnIndex &gt; toColumnIndex
      * @see #cellsC()
      * @see #cellsR(int, int)
      */
@@ -4577,7 +4578,7 @@ public final class Sheet<R, C, V> implements Cloneable {
     /**
      * Returns a stream of all values in the Sheet in horizontal order (row by row).
      * <p>
-     * Creates a stream containing all cell values, ordered row by row. Includes null values
+     * Creates a stream containing all cell values, ordered row by row. Includes {@code null} values
      * from empty or uninitialized cells.
      * </p>
      *
@@ -4674,7 +4675,7 @@ public final class Sheet<R, C, V> implements Cloneable {
      * Returns a stream of values from a range of columns in vertical order.
      * <p>
      * Creates a stream containing values from the specified column range [fromColumnIndex, toColumnIndex),
-     * ordered column by column. The toColumnIndex is exclusive. Includes null values from empty cells.
+     * ordered column by column. The toColumnIndex is exclusive. Includes {@code null} values from empty cells.
      * </p>
      *
      * <p><b>Usage Examples:</b></p>
@@ -4693,7 +4694,7 @@ public final class Sheet<R, C, V> implements Cloneable {
      * @param fromColumnIndex the starting column index (inclusive)
      * @param toColumnIndex the ending column index (exclusive)
      * @return a Stream of values from the specified column range
-     * @throws IndexOutOfBoundsException if indices are out of bounds or fromColumnIndex > toColumnIndex
+     * @throws IndexOutOfBoundsException if indices are out of bounds or fromColumnIndex &gt; toColumnIndex
      * @see #streamV()
      * @see #streamH(int, int)
      */
@@ -4750,7 +4751,7 @@ public final class Sheet<R, C, V> implements Cloneable {
      * Returns a stream of row streams, where each inner stream contains the values of one row.
      * <p>
      * Creates a nested stream structure where the outer stream yields rows and each inner stream
-     * contains the values of that row ordered by columns. Includes null values.
+     * contains the values of that row ordered by columns. Includes {@code null} values.
      * </p>
      *
      * <p><b>Usage Examples:</b></p>
@@ -4780,7 +4781,7 @@ public final class Sheet<R, C, V> implements Cloneable {
      * Returns a stream of row streams for a range of rows.
      * <p>
      * Creates a nested stream structure for the specified row range [fromRowIndex, toRowIndex).
-     * Each inner stream contains the values of one row ordered by columns. Includes null values.
+     * Each inner stream contains the values of one row ordered by columns. Includes {@code null} values.
      * </p>
      *
      * <p><b>Usage Examples:</b></p>
@@ -4802,7 +4803,7 @@ public final class Sheet<R, C, V> implements Cloneable {
      * @param fromRowIndex the starting row index (inclusive)
      * @param toRowIndex the ending row index (exclusive)
      * @return a Stream of Streams for the specified row range
-     * @throws IndexOutOfBoundsException if indices are out of bounds or fromRowIndex > toRowIndex
+     * @throws IndexOutOfBoundsException if indices are out of bounds or fromRowIndex &gt; toRowIndex
      * @see #streamR()
      * @see #streamC(int, int)
      */
@@ -4942,7 +4943,7 @@ public final class Sheet<R, C, V> implements Cloneable {
      * @param fromColumnIndex the starting column index (inclusive)
      * @param toColumnIndex the ending column index (exclusive)
      * @return a Stream of Streams for the specified column range
-     * @throws IndexOutOfBoundsException if indices are out of bounds or fromColumnIndex > toColumnIndex
+     * @throws IndexOutOfBoundsException if indices are out of bounds or fromColumnIndex &gt; toColumnIndex
      * @see #streamC()
      * @see #streamR(int, int)
      */
@@ -5180,7 +5181,7 @@ public final class Sheet<R, C, V> implements Cloneable {
      * @param rowMapper a function that takes an integer and a DisposableObjArray as input and produces an object of type T.
      *                  The integer represents the index of the row in the Dataset, and the DisposableObjArray represents the row itself.
      * @return a Stream of Pair objects for the specified row range, where each Pair consists of a row key and a mapped value obtained by applying the {@code rowMapper} function to the row's values, ordered by rows.
-     * @throws IndexOutOfBoundsException if indices are out of bounds or fromRowIndex > toRowIndex
+     * @throws IndexOutOfBoundsException if indices are out of bounds or fromRowIndex &gt; toRowIndex
      */
     public <T> Stream<Pair<R, T>> rows(final int fromRowIndex, final int toRowIndex, final IntObjFunction<? super DisposableObjArray, ? extends T> rowMapper) {
         checkRowFromToIndex(fromRowIndex, toRowIndex, rowLength());
@@ -5294,7 +5295,7 @@ public final class Sheet<R, C, V> implements Cloneable {
      * @param fromColumnIndex the starting column index (inclusive)
      * @param toColumnIndex the ending column index (exclusive)
      * @return a Stream of Pair objects for the specified column range
-     * @throws IndexOutOfBoundsException if indices are out of bounds or fromColumnIndex > toColumnIndex
+     * @throws IndexOutOfBoundsException if indices are out of bounds or fromColumnIndex &gt; toColumnIndex
      * @see #columns()
      * @see #rows(int, int)
      */
@@ -5409,7 +5410,7 @@ public final class Sheet<R, C, V> implements Cloneable {
      * @param columnMapper a function that takes an integer and a DisposableObjArray as input and produces an object of type T.
      *                     The integer represents the index of the column in the Dataset, and the DisposableObjArray represents the column itself.
      * @return a Stream of Pair objects for the specified column range, where each Pair consists of a column key and a mapped value obtained by applying the {@code columnMapper} function to the column's values, ordered by columns.
-     * @throws IndexOutOfBoundsException if indices are out of bounds or fromColumnIndex > toColumnIndex
+     * @throws IndexOutOfBoundsException if indices are out of bounds or fromColumnIndex &gt; toColumnIndex
      */
     public <T> Stream<Pair<C, T>> columns(final int fromColumnIndex, final int toColumnIndex,
             final IntObjFunction<? super DisposableObjArray, ? extends T> columnMapper) {
@@ -6525,6 +6526,9 @@ public final class Sheet<R, C, V> implements Cloneable {
         /**
          * Creates a new Cell with the specified row key, column key, and value.
          *
+         * @param <R> the type of the row key
+         * @param <C> the type of the column key
+         * @param <V> the type of the value
          * @param rowKey the key of the row
          * @param columnKey the key of the column
          * @param value the value stored in the cell

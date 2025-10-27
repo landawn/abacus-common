@@ -66,7 +66,7 @@ public final class PrimitiveLongType extends AbstractLongType {
      * System.out.println(isPrimitive); // Output: true
      * }</pre>
      *
-     * @return true, indicating this is a primitive type
+     * @return {@code true}, indicating this is a primitive type
      */
     @Override
     public boolean isPrimitiveType() {

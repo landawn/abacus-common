@@ -39,13 +39,14 @@ public class SetMultimapType<K, E> extends MultimapType<K, E, Set<E>, SetMultima
 
     /**
      * Converts a SetMultimap to its JSON string representation.
-     * The multimap is first converted to a Map<K, Collection<E>> format where each key
+     * The multimap is first converted to a Map&lt;K, Collection&lt;E&gt;&gt; format where each key
      * maps to a collection of its associated values, then serialized to JSON.
      *
      * @param x the SetMultimap to convert to string
-     * @return the JSON string representation of the multimap, or null if the input is null
+     * @return the JSON string representation of the multimap, or {@code null} if the input is null
      */
     @Override
+    @MayReturnNull
     public String stringOf(final SetMultimap<K, E> x) {
         return (x == null) ? null : Utils.jsonParser.serialize(x.toMap(), Utils.jsc);
     }
@@ -57,7 +58,7 @@ public class SetMultimapType<K, E> extends MultimapType<K, E, Set<E>, SetMultima
      * insertion order while ensuring uniqueness.
      *
      * @param str the JSON string to parse
-     * @return the parsed SetMultimap, or null if the input string is null or empty
+     * @return the parsed SetMultimap, or {@code null} if the input string is {@code null} or empty
      * @throws IllegalArgumentException if the string cannot be parsed as a valid map structure
      */
     @MayReturnNull

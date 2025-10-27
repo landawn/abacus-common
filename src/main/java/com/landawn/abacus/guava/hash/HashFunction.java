@@ -25,24 +25,24 @@ import com.google.common.hash.HashCode;
  * A hash function is a collision-averse pure function that maps an arbitrary block of
  * data to a fixed-size number called a hash code. This interface defines the contract
  * for all hash functions in this library.
- * 
- * <h3>Core Properties</h3>
+ *
+ * <p><b>Core Properties</b></p>
  * <ul>
  *   <li><b>Deterministic:</b> The same input always produces the same output</li>
  *   <li><b>Fixed output size:</b> All hash codes from a function have the same bit length</li>
  *   <li><b>Collision-averse:</b> Different inputs should rarely produce the same output</li>
  *   <li><b>Stateless:</b> Hash functions maintain no state between invocations</li>
  * </ul>
- * 
- * <h3>Types of Hash Functions</h3>
+ *
+ * <p><b>Types of Hash Functions</b></p>
  * <ul>
  *   <li><b>Cryptographic:</b> Designed for security (e.g., SHA-256, SHA-512)</li>
  *   <li><b>Non-cryptographic:</b> Designed for speed and distribution (e.g., Murmur3, CityHash)</li>
  *   <li><b>Checksums:</b> Designed for error detection (e.g., CRC32, Adler32)</li>
  * </ul>
- * 
- * <h3>Usage Patterns</h3>
- * 
+ *
+ * <p><b>Usage Patterns</b></p>
+ *
  * <p><b>Simple hashing:</b>
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
@@ -71,8 +71,8 @@ import com.google.common.hash.HashCode;
  * };
  * HashCode hash = hf.hash(person, personFunnel);
  * }</pre>
- * 
- * <h3>Implementation Notes</h3>
+ *
+ * <p><b>Implementation Notes</b></p>
  * <ul>
  *   <li>All multibyte values are interpreted in little-endian order</li>
  *   <li>Implementations should be thread-safe</li>
@@ -255,22 +255,22 @@ public interface HashFunction {
      * Computes the hash code for an arbitrary object using a {@link Funnel} to decompose
      * the object into primitive values. This is a convenience method equivalent to
      * {@code newHasher().putObject(instance, funnel).hash()}.
-     * 
+     *
      * <p>The funnel defines how to extract data from the object and feed it to the hasher.
      * This approach ensures consistent hashing of complex objects.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * class Person {
      *     String name;
      *     int age;
      * }
-     * 
+     *
      * Funnel<Person> personFunnel = (person, into) -> {
      *     into.putString(person.name, StandardCharsets.UTF_8)
      *         .putInt(person.age);
      * };
-     * 
+     *
      * Person person = new Person("Alice", 30);
      * HashCode hash = Hashing.sha256().hash(person, personFunnel);
      * }</pre>

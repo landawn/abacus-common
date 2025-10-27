@@ -20,6 +20,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
+import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.parser.JSONXMLSerializationConfig;
 import com.landawn.abacus.util.CharacterWriter;
 
@@ -50,11 +51,8 @@ public final class BooleanCharType extends AbstractType<Boolean> {
         return Boolean.class;
     }
 
-    /**
-     * Returns the default value for this boolean type.
-     *
-     * @return Boolean.FALSE as the default value
-     */
+    @MayReturnNull
+
     @Override
     public Boolean defaultValue() {
         return Boolean.FALSE;
@@ -64,7 +62,7 @@ public final class BooleanCharType extends AbstractType<Boolean> {
      * Determines whether this type should be quoted in CSV format.
      * Boolean character values are typically not quoted in CSV files.
      *
-     * @return {@code true} indicating that 'Y'/'N' values should not be quoted in CSV format
+     * @return {@code true} indicating that <i>Y'/'N</i> values should not be quoted in CSV format
      */
     @Override
     public boolean isNonQuotableCsvType() {
@@ -73,10 +71,11 @@ public final class BooleanCharType extends AbstractType<Boolean> {
 
     /**
      * Converts a Boolean value to its character string representation.
-     * Maps true to "Y" and false/null to "N".
+     * Maps {@code true} to "Y" and false/null to "N".
      *
      * @param b the Boolean value to convert
-     * @return "Y" if b is true, "N" if b is false or null
+     * @return "Y" if b is {@code true}, "N" if b is {@code false} or null
+     @MayReturnNull
      */
     @Override
     public String stringOf(final Boolean b) {
@@ -85,10 +84,11 @@ public final class BooleanCharType extends AbstractType<Boolean> {
 
     /**
      * Converts a string representation to a Boolean value.
-     * Case-insensitive parsing where "Y" maps to true, all other values to false.
+     * Case-insensitive parsing where "Y" maps to {@code true}, all other values to {@code false}.
      *
      * @param str the string to parse (typically "Y" or "N")
      * @return Boolean.TRUE if str equals "Y" (case-insensitive), Boolean.FALSE otherwise
+     @MayReturnNull
      */
     @Override
     public Boolean valueOf(final String str) {
@@ -97,12 +97,13 @@ public final class BooleanCharType extends AbstractType<Boolean> {
 
     /**
      * Converts a character array subset to a Boolean value.
-     * Checks if the single character is 'Y' or 'y' for true.
+     * Checks if the single character is 'Y' or 'y' for {@code true}.
      *
      * @param cbuf the character array containing the character
      * @param offset the starting position in the character array
      * @param len the number of characters to examine (should be 1)
      * @return Boolean.TRUE if the single character is 'Y' or 'y', Boolean.FALSE otherwise
+     @MayReturnNull
      */
     @Override
     public Boolean valueOf(final char[] cbuf, final int offset, final int len) {
@@ -117,6 +118,7 @@ public final class BooleanCharType extends AbstractType<Boolean> {
      * @param columnIndex the column index (1-based) of the character value
      * @return Boolean.TRUE if the value is "Y" (case-insensitive), Boolean.FALSE otherwise
      * @throws SQLException if a database access error occurs or the columnIndex is invalid
+     @MayReturnNull
      */
     @Override
     public Boolean get(final ResultSet rs, final int columnIndex) throws SQLException {
@@ -132,6 +134,7 @@ public final class BooleanCharType extends AbstractType<Boolean> {
      *                    or the column name if no AS clause was specified
      * @return Boolean.TRUE if the value is "Y" (case-insensitive), Boolean.FALSE otherwise
      * @throws SQLException if a database access error occurs or the columnLabel is invalid
+     @MayReturnNull
      */
     @Override
     public Boolean get(final ResultSet rs, final String columnLabel) throws SQLException {

@@ -30,7 +30,6 @@ package com.landawn.abacus.util;
  * <li>Caching: Immutable objects can be cached and reused safely</li>
  * <li>Hash stability: Hash codes never change, making them ideal for use as map keys</li>
  * </ul>
- * </p>
  * 
  * <p>Common implementations include:
  * <ul>
@@ -39,7 +38,6 @@ package com.landawn.abacus.util;
  * <li>{@link ImmutableMap} - An immutable map implementation</li>
  * <li>{@link ImmutableArray} - An immutable array wrapper</li>
  * </ul>
- * </p>
  * 
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
@@ -49,7 +47,6 @@ package com.landawn.abacus.util;
  *     sharedCollection = myCollection;
  * }
  * }</pre>
- * </p>
  * 
  * @see ImmutableCollection
  * @see ImmutableList

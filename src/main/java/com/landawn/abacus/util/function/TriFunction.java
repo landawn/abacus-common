@@ -14,6 +14,7 @@
 
 package com.landawn.abacus.util.function;
 
+import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.util.Throwables;
 
 /**
@@ -57,6 +58,7 @@ public interface TriFunction<A, B, C, R> extends Throwables.TriFunction<A, B, C,
      * @return the function result if any error occurs during function execution
      */
     @Override
+    @MayReturnNull
     R apply(A a, B b, C c);
 
     /**
@@ -96,7 +98,7 @@ public interface TriFunction<A, B, C, R> extends Throwables.TriFunction<A, B, C,
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * TriFunction<String, Integer, Boolean, String> function = (s, i, b) -> { ... };
-     * Throwables.TriFunction<String, Integer, Boolean, String, IOException> throwableFunction = 
+     * var throwableFunction = 
      *     function.toThrowable();
      * }</pre>
      *

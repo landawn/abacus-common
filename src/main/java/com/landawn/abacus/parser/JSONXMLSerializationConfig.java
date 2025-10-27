@@ -14,6 +14,7 @@
 
 package com.landawn.abacus.parser;
 
+import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.util.DateTimeFormat;
 import com.landawn.abacus.util.NamingPolicy;
 import com.landawn.abacus.util.WD;
@@ -22,19 +23,20 @@ import com.landawn.abacus.util.WD;
  * Base configuration class for JSON and XML serialization operations.
  * This abstract class provides common configuration options that are shared between
  * JSON and XML serialization configurations.
- * * <p><b>Usage Examples:</b></p>
+ *
+ * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * config.prettyFormat(true)
  *       .setDateTimeFormat(DateTimeFormat.ISO_8601)
  *       .setIndentation("  ");
  * }</pre>
- * 
+ *
  * <p>Common configuration options include:</p>
  * <ul>
  *   <li>Character and string quotation settings</li>
  *   <li>Date/time formatting</li>
  *   <li>Pretty printing with customizable indentation</li>
- *   <li>Number and null value handling</li>
+ *   <li>Number and {@code null} value handling</li>
  *   <li>Property naming policies</li>
  *   <li>Support for circular references</li>
  * </ul>
@@ -45,6 +47,12 @@ import com.landawn.abacus.util.WD;
  * @see XMLSerializationConfig
  */
 public abstract class JSONXMLSerializationConfig<C extends JSONXMLSerializationConfig<C>> extends SerializationConfig<C> {
+
+    /**
+     * Protected constructor for subclasses.
+     */
+    protected JSONXMLSerializationConfig() {
+    }
 
     protected static final DateTimeFormat defaultDateTimeFormat = DateTimeFormat.LONG;
 
@@ -204,6 +212,7 @@ public abstract class JSONXMLSerializationConfig<C extends JSONXMLSerializationC
      *
      * @return the current date time format
      */
+    @MayReturnNull
     public DateTimeFormat getDateTimeFormat() {
         return dateTimeFormat;
     }
@@ -224,6 +233,7 @@ public abstract class JSONXMLSerializationConfig<C extends JSONXMLSerializationC
      * @param dateTimeFormat the date time format to use
      * @return this instance for method chaining
      */
+    @MayReturnNull
     public C setDateTimeFormat(final DateTimeFormat dateTimeFormat) {
         this.dateTimeFormat = dateTimeFormat;
 
@@ -258,6 +268,7 @@ public abstract class JSONXMLSerializationConfig<C extends JSONXMLSerializationC
      * @param prettyFormat {@code true} to enable pretty formatting, {@code false} otherwise
      * @return this instance for method chaining
      */
+    @MayReturnNull
     public C prettyFormat(final boolean prettyFormat) {
         this.prettyFormat = prettyFormat;
 
@@ -270,6 +281,7 @@ public abstract class JSONXMLSerializationConfig<C extends JSONXMLSerializationC
      *
      * @return the indentation string
      */
+    @MayReturnNull
     public String getIndentation() {
         return indentation;
     }
@@ -289,6 +301,7 @@ public abstract class JSONXMLSerializationConfig<C extends JSONXMLSerializationC
      * @param indentation the indentation string to use
      * @return this instance for method chaining
      */
+    @MayReturnNull
     public C setIndentation(final String indentation) {
         this.indentation = indentation;
 
@@ -298,8 +311,9 @@ public abstract class JSONXMLSerializationConfig<C extends JSONXMLSerializationC
     /**
      * Gets the property naming policy used during serialization.
      *
-     * @return the property naming policy, or null if using default naming
+     * @return the property naming policy, or {@code null} if using default naming
      */
+    @MayReturnNull
     public NamingPolicy getPropNamingPolicy() {
         return propNamingPolicy;
     }
@@ -323,6 +337,7 @@ public abstract class JSONXMLSerializationConfig<C extends JSONXMLSerializationC
      * @param propNamingPolicy the naming policy to use
      * @return this instance for method chaining
      */
+    @MayReturnNull
     public C setPropNamingPolicy(final NamingPolicy propNamingPolicy) {
         this.propNamingPolicy = propNamingPolicy;
 
@@ -353,6 +368,7 @@ public abstract class JSONXMLSerializationConfig<C extends JSONXMLSerializationC
      * @param writeLongAsString {@code true} to write longs as strings, {@code false} otherwise
      * @return this instance for method chaining
      */
+    @MayReturnNull
     public C writeLongAsString(final boolean writeLongAsString) {
         this.writeLongAsString = writeLongAsString;
 
@@ -360,17 +376,17 @@ public abstract class JSONXMLSerializationConfig<C extends JSONXMLSerializationC
     }
 
     /**
-     * Checks if null strings should be written as empty strings.
+     * Checks if {@code null} strings should be written as empty strings.
      *
-     * @return {@code true} if null strings are written as empty, {@code false} otherwise
+     * @return {@code true} if {@code null} strings are written as empty, {@code false} otherwise
      */
     public boolean writeNullStringAsEmpty() {
         return writeNullStringAsEmpty;
     }
 
     /**
-     * Sets whether to write null string values as empty strings.
-     * When enabled, null string properties will be serialized as "" instead of null.
+     * Sets whether to write {@code null} string values as empty strings.
+     * When enabled, {@code null} string properties will be serialized as "" instead of {@code null}.
      * 
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -379,9 +395,10 @@ public abstract class JSONXMLSerializationConfig<C extends JSONXMLSerializationC
      * // Output: {"name": ""} instead of {"name": null}
      * }</pre>
      *
-     * @param writeNullStringAsEmpty {@code true} to write null as empty string, {@code false} otherwise
+     * @param writeNullStringAsEmpty {@code true} to write {@code null} as empty string, {@code false} otherwise
      * @return this instance for method chaining
      */
+    @MayReturnNull
     public C writeNullStringAsEmpty(final boolean writeNullStringAsEmpty) {
         this.writeNullStringAsEmpty = writeNullStringAsEmpty;
 
@@ -389,17 +406,17 @@ public abstract class JSONXMLSerializationConfig<C extends JSONXMLSerializationC
     }
 
     /**
-     * Checks if null numbers should be written as zero.
+     * Checks if {@code null} numbers should be written as zero.
      *
-     * @return {@code true} if null numbers are written as zero, {@code false} otherwise
+     * @return {@code true} if {@code null} numbers are written as zero, {@code false} otherwise
      */
     public boolean writeNullNumberAsZero() {
         return writeNullNumberAsZero;
     }
 
     /**
-     * Sets whether to write null number values as zero.
-     * When enabled, null numeric properties will be serialized as 0 (or 0.0 for decimals).
+     * Sets whether to write {@code null} number values as zero.
+     * When enabled, {@code null} numeric properties will be serialized as 0 (or 0.0 for decimals).
      * 
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -408,9 +425,10 @@ public abstract class JSONXMLSerializationConfig<C extends JSONXMLSerializationC
      * // Output: {"count": 0, "price": 0.0}
      * }</pre>
      *
-     * @param writeNullNumberAsZero {@code true} to write null as zero, {@code false} otherwise
+     * @param writeNullNumberAsZero {@code true} to write {@code null} as zero, {@code false} otherwise
      * @return this instance for method chaining
      */
+    @MayReturnNull
     public C writeNullNumberAsZero(final boolean writeNullNumberAsZero) {
         this.writeNullNumberAsZero = writeNullNumberAsZero;
 
@@ -418,17 +436,17 @@ public abstract class JSONXMLSerializationConfig<C extends JSONXMLSerializationC
     }
 
     /**
-     * Checks if null booleans should be written as false.
+     * Checks if {@code null} booleans should be written as {@code false}.
      *
-     * @return {@code true} if null booleans are written as false, {@code false} otherwise
+     * @return {@code true} if {@code null} booleans are written as {@code false}, {@code false} otherwise
      */
     public boolean writeNullBooleanAsFalse() {
         return writeNullBooleanAsFalse;
     }
 
     /**
-     * Sets whether to write null boolean values as false.
-     * When enabled, null Boolean properties will be serialized as false instead of null.
+     * Sets whether to write {@code null} boolean values as {@code false}.
+     * When enabled, {@code null} Boolean properties will be serialized as {@code false} instead of {@code null}.
      * 
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -437,7 +455,7 @@ public abstract class JSONXMLSerializationConfig<C extends JSONXMLSerializationC
      * // Output: {"active": false} instead of {"active": null}
      * }</pre>
      *
-     * @param writeNullBooleanAsFalse {@code true} to write null as false, {@code false} otherwise
+     * @param writeNullBooleanAsFalse {@code true} to write {@code null} as {@code false}, {@code false} otherwise
      * @return this instance for method chaining
      */
     public C writeNullBooleanAsFalse(final boolean writeNullBooleanAsFalse) {

@@ -40,22 +40,23 @@ import java.lang.annotation.Target;
  *   <li>One-to-Many: Collection of related entities</li>
  *   <li>Many-to-Many: Collection through intermediate join table</li>
  * </ul>
- * 
+ *
+ * <h2>Usage Examples</h2>
+ *
  * <h3>One-to-One Join Example:</h3>
- * <p><b>Usage Examples:</b></p>
  * <pre>{@code
- * {@literal @}Entity
+ * @Entity
  * public class User {
- *     {@literal @}Id
+ *     @Id
  *     private Long id;
  *     
- *     {@literal @}JoinedBy("id=userId")
+ *     @JoinedBy("id=userId")
  *     private UserProfile profile;  // Single related profile
  * }
  * 
- * {@literal @}Entity
+ * @Entity
  * public class UserProfile {
- *     {@literal @}Id
+ *     @Id
  *     private Long id;
  *     private Long userId;  // Foreign key to User
  *     private String bio;
@@ -63,20 +64,19 @@ import java.lang.annotation.Target;
  * }</pre>
  *
  * <h3>One-to-Many Join Example:</h3>
- * <p><b>Usage Examples:</b></p>
  * <pre>{@code
- * {@literal @}Entity
+ * @Entity
  * public class Account {
- *     {@literal @}Id
+ *     @Id
  *     private Long id;
  *
- *     {@literal @}JoinedBy("id=accountId")
- *     private List&lt;Device&gt; devices;  // Multiple related devices
+ *     @JoinedBy("id=accountId")
+ *     private List<Device> devices;  // Multiple related devices
  * }
  *
- * {@literal @}Entity
+ * @Entity
  * public class Device {
- *     {@literal @}Id
+ *     @Id
  *     private Long id;
  *     private Long accountId;  // Foreign key to Account
  *     private String deviceName;
@@ -84,26 +84,25 @@ import java.lang.annotation.Target;
  * }</pre>
  *
  * <h3>Many-to-Many Join Example:</h3>
- * <p><b>Usage Examples:</b></p>
  * <pre>{@code
- * {@literal @}Entity
+ * @Entity
  * public class Employee {
- *     {@literal @}Id
+ *     @Id
  *     private Long id;
  *
  *     // Join through intermediate table EmployeeProject
- *     {@literal @}JoinedBy({ "id=EmployeeProject.employeeId", "EmployeeProject.projectId=id" })
- *     private List&lt;Project&gt; projects;
+ *     @JoinedBy({ "id=EmployeeProject.employeeId", "EmployeeProject.projectId=id" })
+ *     private List<Project> projects;
  * }
  *
- * {@literal @}Entity
+ * @Entity
  * public class Project {
- *     {@literal @}Id
+ *     @Id
  *     private Long id;
  *     private String name;
  * }
  *
- * {@literal @}Entity
+ * @Entity
  * public class EmployeeProject {
  *     private Long employeeId;  // FK to Employee
  *     private Long projectId;   // FK to Project
@@ -143,12 +142,12 @@ public @interface JoinedBy {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Simple one-to-many
-     * {@literal @}JoinedBy("id=customerId")
-     * private List&lt;Order&gt; orders;
+     * @JoinedBy("id=customerId")
+     * private List<Order> orders;
      * 
      * // Many-to-many with join table
-     * {@literal @}JoinedBy({"id=UserRole.userId", "UserRole.roleId=id"})
-     * private List&lt;Role&gt; roles;
+     * @JoinedBy({"id=UserRole.userId", "UserRole.roleId=id"})
+     * private List<Role> roles;
      * }</pre>
      * 
      * @return array of join condition strings defining the relationship

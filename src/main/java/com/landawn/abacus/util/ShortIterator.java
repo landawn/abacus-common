@@ -53,6 +53,12 @@ import com.landawn.abacus.util.stream.ShortStream;
 public abstract class ShortIterator extends ImmutableIterator<Short> {
 
     /**
+     * Protected constructor for subclasses.
+     */
+    protected ShortIterator() {
+    }
+
+    /**
      * An empty ShortIterator instance that has no elements.
      * This constant can be used to represent an empty iteration without creating new objects.
      */
@@ -87,7 +93,7 @@ public abstract class ShortIterator extends ImmutableIterator<Short> {
 
     /**
      * Creates a ShortIterator from a short array.
-     * If the array is null or empty, returns an empty iterator.
+     * If the array is {@code null} or empty, returns an empty iterator.
      * 
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -209,7 +215,7 @@ public abstract class ShortIterator extends ImmutableIterator<Short> {
 
     /**
      * Creates an infinite ShortIterator that generates values using the provided supplier.
-     * The iterator will continuously return values from the supplier and never return false from hasNext().
+     * The iterator will continuously return values from the supplier and never return {@code false} from hasNext().
      * 
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -239,7 +245,7 @@ public abstract class ShortIterator extends ImmutableIterator<Short> {
     }
 
     /**
-     * Creates a ShortIterator that generates values using the provided supplier while the hasNext condition is true.
+     * Creates a ShortIterator that generates values using the provided supplier while the hasNext condition is {@code true}.
      * This allows for creating finite iterators with custom termination conditions.
      * 
      * <p><b>Usage Examples:</b></p>

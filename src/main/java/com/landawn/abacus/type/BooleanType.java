@@ -63,7 +63,7 @@ public final class BooleanType extends AbstractBooleanType {
      *
      * @param rs the ResultSet to retrieve the value from
      * @param columnIndex the column index (1-based) of the value
-     * @return the Boolean value, null if SQL NULL, or converted value if not Boolean type
+     * @return the Boolean value, {@code null} if SQL NULL, or converted value if not Boolean type
      * @throws SQLException if a database access error occurs or the columnIndex is invalid
      */
     @Override
@@ -85,7 +85,7 @@ public final class BooleanType extends AbstractBooleanType {
      * @param rs the ResultSet to retrieve the value from
      * @param columnLabel the label for the column specified with the SQL AS clause,
      *                    or the column name if no AS clause was specified
-     * @return the Boolean value, null if SQL NULL, or converted value if not Boolean type
+     * @return the Boolean value, {@code null} if SQL NULL, or converted value if not Boolean type
      * @throws SQLException if a database access error occurs or the columnLabel is invalid
      */
     @Override

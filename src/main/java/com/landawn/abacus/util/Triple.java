@@ -57,7 +57,7 @@ public final class Triple<L, M, R> implements Mutable {
     private R right; //NOSONAR
 
     /**
-     * Constructs an empty Triple with all elements set to null.
+     * Constructs an empty Triple with all elements set to {@code null}.
      * This constructor is typically used when the values will be set later
      * using the setter methods.
      */
@@ -386,7 +386,7 @@ public final class Triple<L, M, R> implements Mutable {
     }
 
     /**
-     * Conditionally sets the left element to the specified new value if the provided predicate returns true.
+     * Conditionally sets the left element to the specified new value if the provided predicate returns {@code true}.
      * The predicate receives both the current Triple instance and the proposed new left value.
      * 
      * <p><b>Usage Examples:</b></p>
@@ -413,7 +413,7 @@ public final class Triple<L, M, R> implements Mutable {
     }
 
     /**
-     * Conditionally sets the middle element to the specified new value if the provided predicate returns true.
+     * Conditionally sets the middle element to the specified new value if the provided predicate returns {@code true}.
      * The predicate receives both the current Triple instance and the proposed new middle value.
      * 
      * <p><b>Usage Examples:</b></p>
@@ -441,7 +441,7 @@ public final class Triple<L, M, R> implements Mutable {
     }
 
     /**
-     * Conditionally sets the right element to the specified new value if the provided predicate returns true.
+     * Conditionally sets the right element to the specified new value if the provided predicate returns {@code true}.
      * The predicate receives both the current Triple instance and the proposed new right value.
      * 
      * <p><b>Usage Examples:</b></p>
@@ -468,9 +468,9 @@ public final class Triple<L, M, R> implements Mutable {
     }
 
     /**
-     * Conditionally sets all three elements to the specified new values if the provided predicate returns true.
+     * Conditionally sets all three elements to the specified new values if the provided predicate returns {@code true}.
      * The predicate receives the current Triple instance and all three proposed new values.
-     * If the predicate returns true, all three elements are updated; otherwise, no changes are made.
+     * If the predicate returns {@code true}, all three elements are updated; otherwise, no changes are made.
      * 
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -574,7 +574,7 @@ public final class Triple<L, M, R> implements Mutable {
      * }</pre>
      *
      * @param <A> the component type of the array
-     * @param a the array into which the elements are to be stored, if it has length >= 3;
+     * @param a the array into which the elements are to be stored, if it has length &gt;= 3;
      *          otherwise, a new array of the same runtime type is allocated
      * @return an array containing the three elements of this Triple
      * @throws ArrayStoreException if the runtime type of the specified array is not a
@@ -722,7 +722,7 @@ public final class Triple<L, M, R> implements Mutable {
      *
      * @param <E> the type of exception that the predicate may throw
      * @param predicate the tri-predicate to test the three elements
-     * @return an Optional containing this Triple if the predicate returns true,
+     * @return an Optional containing this Triple if the predicate returns {@code true},
      *         otherwise an empty Optional
      * @throws E if the predicate throws an exception
      */
@@ -745,7 +745,7 @@ public final class Triple<L, M, R> implements Mutable {
      *
      * @param <E> the type of exception that the predicate may throw
      * @param predicate the predicate to test this Triple
-     * @return an Optional containing this Triple if the predicate returns true,
+     * @return an Optional containing this Triple if the predicate returns {@code true},
      *         otherwise an empty Optional
      * @throws E if the predicate throws an exception
      */
@@ -790,10 +790,10 @@ public final class Triple<L, M, R> implements Mutable {
 
     /**
      * Compares this Triple with the specified object for equality.
-     * Returns true if and only if the specified object is also a Triple
+     * Returns {@code true} if and only if the specified object is also a Triple
      * and both Triples have equal left, middle, and right elements.
      * Element equality is determined using the N.equals utility method,
-     * which handles null values correctly.
+     * which handles {@code null} values correctly.
      * 
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -808,7 +808,7 @@ public final class Triple<L, M, R> implements Mutable {
      *
      * @param obj the object to compare with this Triple for equality
      * @return {@code true} if the specified object is a Triple with equal elements,
-     *         false otherwise
+     *         {@code false} otherwise
      */
     @Override
     public boolean equals(final Object obj) {
@@ -826,7 +826,7 @@ public final class Triple<L, M, R> implements Mutable {
     /**
      * Returns a string representation of this Triple in the format "(left, middle, right)".
      * The string representations of the individual elements are obtained using
-     * the N.toString utility method, which handles null values by converting them
+     * the N.toString utility method, which handles {@code null} values by converting them
      * to the string "null".
      * 
      * <p><b>Usage Examples:</b></p>

@@ -39,9 +39,9 @@ import java.lang.annotation.Target;
  * 
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
- * {@literal @}Record
- * {@literal @}Data
- * {@literal @}AllArgsConstructor
+ * @Record
+ * @Data
+ * @AllArgsConstructor
  * public class PersonRecord {
  *     private final String name;
  *     private final int age;

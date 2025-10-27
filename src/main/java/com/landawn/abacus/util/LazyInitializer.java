@@ -17,6 +17,8 @@ package com.landawn.abacus.util;
 
 import java.util.function.Supplier;
 
+import com.landawn.abacus.annotation.MayReturnNull;
+
 /**
  * A thread-safe lazy initialization wrapper that defers object creation until the first access.
  * This class implements the double-checked locking pattern to ensure thread-safe lazy initialization
@@ -41,12 +43,6 @@ final class LazyInitializer<T> implements com.landawn.abacus.util.function.Suppl
     private volatile boolean initialized = false;
     private volatile T value = null; //NOSONAR
 
-    /**
-     * Constructs a new LazyInitializer with the specified supplier.
-     * 
-     * @param supplier the supplier that will provide the value when first requested; must not be null
-     * @throws IllegalArgumentException if supplier is null
-     */
     LazyInitializer(final Supplier<T> supplier) {
         N.checkArgNotNull(supplier, cs.supplier);
 
@@ -81,20 +77,21 @@ final class LazyInitializer<T> implements com.landawn.abacus.util.function.Suppl
     /**
      * Returns the lazily initialized value. On first call, the value is obtained from the supplier
      * and cached. Subsequent calls return the cached value without invoking the supplier again.
-     * 
+     *
      * <p>This method is thread-safe and uses double-checked locking to ensure the supplier is called
      * only once even in concurrent scenarios.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * LazyInitializer<Connection> dbConnection = LazyInitializer.of(() -> createConnection());
      * Connection conn = dbConnection.get(); // Creates connection on first call
      * Connection same = dbConnection.get(); // Returns cached connection
      * }</pre>
-     * 
+     *
      * @return the lazily initialized value
      * @throws RuntimeException if the supplier throws an exception during initialization
      */
+    @MayReturnNull
     @Override
     public T get() {
         if (!initialized) {

@@ -44,7 +44,7 @@ public class OptionalByteType extends AbstractOptionalType<OptionalByte> {
      * Indicates whether values of this type can be compared.
      * OptionalByte values support comparison operations.
      *
-     * @return true, as OptionalByte values are comparable
+     * @return {@code true}, as OptionalByte values are comparable
      */
     @Override
     public boolean isComparable() {
@@ -55,7 +55,7 @@ public class OptionalByteType extends AbstractOptionalType<OptionalByte> {
      * Indicates whether values of this type should be quoted when written to CSV format.
      * Numeric values typically don't require quotes in CSV.
      *
-     * @return true, indicating byte values don't need quotes in CSV
+     * @return {@code true}, indicating byte values don't need quotes in CSV
      */
     @Override
     public boolean isNonQuotableCsvType() {
@@ -74,9 +74,10 @@ public class OptionalByteType extends AbstractOptionalType<OptionalByte> {
 
     /**
      * Converts an {@link OptionalByte} object to its string representation.
-     * 
+     *
      * @param x the OptionalByte object to convert
-     * @return the string representation of the byte value, or null if empty or null
+     * @return the string representation of the byte value, or {@code null} if empty or null
+     @MayReturnNull
      */
     @Override
     public String stringOf(final OptionalByte x) {
@@ -85,10 +86,11 @@ public class OptionalByteType extends AbstractOptionalType<OptionalByte> {
 
     /**
      * Converts a string representation to an {@link OptionalByte} object.
-     * 
+     *
      * @param str the string to convert
      * @return an OptionalByte containing the parsed byte value, or empty if the input is empty or null
      * @throws NumberFormatException if the string cannot be parsed as a byte
+     @MayReturnNull
      */
     @Override
     public OptionalByte valueOf(final String str) {
@@ -98,11 +100,12 @@ public class OptionalByteType extends AbstractOptionalType<OptionalByte> {
     /**
      * Retrieves a byte value from a ResultSet at the specified column index and wraps it in an {@link OptionalByte}.
      * Handles type conversion if the database column is not a byte type.
-     * 
+     *
      * @param rs the ResultSet to read from
      * @param columnIndex the column index (1-based) to retrieve the value from
      * @return an OptionalByte containing the byte value, or empty if the column value is SQL NULL
      * @throws SQLException if a database access error occurs or the columnIndex is invalid
+     @MayReturnNull
      */
     @Override
     public OptionalByte get(final ResultSet rs, final int columnIndex) throws SQLException {
@@ -114,11 +117,12 @@ public class OptionalByteType extends AbstractOptionalType<OptionalByte> {
     /**
      * Retrieves a byte value from a ResultSet using the specified column label and wraps it in an {@link OptionalByte}.
      * Handles type conversion if the database column is not a byte type.
-     * 
+     *
      * @param rs the ResultSet to read from
      * @param columnLabel the label for the column specified with the SQL AS clause
      * @return an OptionalByte containing the byte value, or empty if the column value is SQL NULL
      * @throws SQLException if a database access error occurs or the columnLabel is invalid
+     @MayReturnNull
      */
     @Override
     public OptionalByte get(final ResultSet rs, final String columnLabel) throws SQLException {
@@ -129,8 +133,8 @@ public class OptionalByteType extends AbstractOptionalType<OptionalByte> {
 
     /**
      * Sets a parameter in a PreparedStatement to the value contained in an {@link OptionalByte}.
-     * If the OptionalByte is null or empty, sets the parameter to SQL NULL.
-     * 
+     * If the OptionalByte is {@code null} or empty, sets the parameter to SQL NULL.
+     *
      * @param stmt the PreparedStatement to set the parameter on
      * @param columnIndex the parameter index (1-based) to set
      * @param x the OptionalByte value to set
@@ -147,8 +151,8 @@ public class OptionalByteType extends AbstractOptionalType<OptionalByte> {
 
     /**
      * Sets a named parameter in a CallableStatement to the value contained in an {@link OptionalByte}.
-     * If the OptionalByte is null or empty, sets the parameter to SQL NULL.
-     * 
+     * If the OptionalByte is {@code null} or empty, sets the parameter to SQL NULL.
+     *
      * @param stmt the CallableStatement to set the parameter on
      * @param parameterName the name of the parameter to set
      * @param x the OptionalByte value to set
@@ -165,7 +169,7 @@ public class OptionalByteType extends AbstractOptionalType<OptionalByte> {
 
     /**
      * Appends the string representation of an {@link OptionalByte} to an Appendable.
-     * 
+     *
      * @param appendable the Appendable to write to
      * @param x the OptionalByte value to append
      * @throws IOException if an I/O error occurs during the append operation
@@ -182,7 +186,7 @@ public class OptionalByteType extends AbstractOptionalType<OptionalByte> {
     /**
      * Writes the character representation of an {@link OptionalByte} to a CharacterWriter.
      * This method is typically used for JSON/XML serialization.
-     * 
+     *
      * @param writer the CharacterWriter to write to
      * @param x the OptionalByte value to write
      * @param config the serialization configuration

@@ -16,6 +16,7 @@
  */
 package com.landawn.abacus.util;
 
+import com.landawn.abacus.annotation.MayReturnNull;
 import java.util.function.Function;
 import java.util.regex.MatchResult;
 import java.util.regex.Matcher;
@@ -195,7 +196,6 @@ public final class RegExUtil {
      *   <li>An optional fractional part, starting with a dot and followed by one or more digits</li>
      * </ul>
      * It can be used to extract signed or unsigned integers and floating-point numbers from text.
-     * </p>
      *
      * <p>Regex breakdown:</p>
      * <ul>
@@ -230,7 +230,6 @@ public final class RegExUtil {
      *   <li>A fractional part (one or more digits)</li>
      * </ul>
      * It can match numbers like {@code .25}, {@code 3.14}, or {@code 100}.
-     * </p>
      *
      * <p>Regex breakdown:</p>
      * <ul>
@@ -263,7 +262,6 @@ public final class RegExUtil {
      *   <li>A fractional part (one or more digits)</li>
      * </ul>
      * It can match numbers like {@code -.25}, {@code -3.14}, or {@code -100}.
-     * </p>
      *
      * <p>Regex breakdown:</p>
      * <ul>
@@ -295,7 +293,6 @@ public final class RegExUtil {
      *   <li>An optional exponent part with 'e' or 'E', followed by an optional sign and digits (e.g., {@code e+10}, {@code E-5})</li>
      * </ul>
      * It can be used to extract integers, floating-point numbers, and scientific notation numbers from text.
-     * </p>
      *
      * <p>Regex breakdown:</p>
      * <ul>
@@ -1192,6 +1189,7 @@ public final class RegExUtil {
      * @see Matcher#find()
      * @see Matcher#group()
      */
+    @MayReturnNull
     public static String findFirst(final String source, final String regex) {
         N.checkArgNotEmpty(regex, cs.regex);
 
@@ -1296,6 +1294,7 @@ public final class RegExUtil {
      * @see Matcher#find()
      * @see Matcher#group()
      */
+    @MayReturnNull
     public static String findLast(final String source, final String regex) {
         N.checkArgNotEmpty(regex, cs.regex);
 
@@ -1667,6 +1666,7 @@ public final class RegExUtil {
      * @see Matcher#replaceFirst(String)
      */
     @Beta
+    @MayReturnNull
     public static String replaceLast(final String source, final String regex, final String replacement) throws IllegalArgumentException {
         N.checkArgNotEmpty(regex, cs.regex);
 

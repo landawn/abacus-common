@@ -14,6 +14,8 @@
 
 package com.landawn.abacus.util;
 
+import com.landawn.abacus.annotation.MayReturnNull;
+
 import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
@@ -284,8 +286,9 @@ public interface EntityId {
      *
      * @param <T> the expected type of the property value
      * @param propName the property name
-     * @return the property value, or null if not found
+     * @return the property value, or {@code null} if not found
      */
+    @MayReturnNull
     <T> T get(String propName);
 
     /**
@@ -328,8 +331,9 @@ public interface EntityId {
      * @param <T> the target type
      * @param propName the property name
      * @param targetType the class to convert the value to
-     * @return the property value converted to the target type, or null if not found
+     * @return the property value converted to the target type, or {@code null} if not found
      */
+    @MayReturnNull
     <T> T get(String propName, Class<? extends T> targetType);
 
     /**

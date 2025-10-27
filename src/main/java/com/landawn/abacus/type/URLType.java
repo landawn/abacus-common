@@ -59,7 +59,7 @@ public class URLType extends AbstractType<URL> {
      * <p>
      * This method returns the external form of the URL by calling its {@code toExternalForm()} method,
      * which produces a string representation of the URL suitable for use in creating new URL instances.
-     * If the input URL is null, this method returns null.
+     * If the input URL is {@code null}, this method returns {@code null}.
      * </p>
      *
      * <p><b>Usage Examples:</b></p>
@@ -70,9 +70,10 @@ public class URLType extends AbstractType<URL> {
      * }</pre>
      *
      * @param x the URL instance to convert to string
-     * @return the external string representation of the URL, or null if the input is null
+     * @return the external string representation of the URL, or {@code null} if the input is null
      */
     @Override
+    @MayReturnNull
     public String stringOf(final URL x) {
         return (x == null) ? null : x.toExternalForm();
     }
@@ -81,7 +82,7 @@ public class URLType extends AbstractType<URL> {
      * Converts a string to a URL instance.
      * <p>
      * This method creates a URL instance from the provided string by first creating a URI
-     * and then converting it to a URL. If the string is null or empty, this method returns null.
+     * and then converting it to a URL. If the string is {@code null} or empty, this method returns {@code null}.
      * </p>
      *
      * <p><b>Usage Examples:</b></p>
@@ -91,11 +92,12 @@ public class URLType extends AbstractType<URL> {
      * }</pre>
      *
      * @param str the string to convert to a URL
-     * @return a URL instance created from the string, or null if the string is empty
+     * @return a URL instance created from the string, or {@code null} if the string is empty
      * @throws RuntimeException if the string is not a valid URL format (wraps MalformedURLException)
      */
     @MayReturnNull
     @Override
+
     public URL valueOf(final String str) {
         if (Strings.isEmpty(str)) {
             return null; // NOSONAR
@@ -124,10 +126,11 @@ public class URLType extends AbstractType<URL> {
      *
      * @param rs the ResultSet to read from
      * @param columnIndex the column index (1-based) of the URL value
-     * @return the URL value, or null if the database value is NULL
+     * @return the URL value, or {@code null} if the database value is NULL
      * @throws SQLException if a database access error occurs or the column index is invalid
      */
     @Override
+    @MayReturnNull
     public URL get(final ResultSet rs, final int columnIndex) throws SQLException {
         return rs.getURL(columnIndex);
     }
@@ -148,10 +151,11 @@ public class URLType extends AbstractType<URL> {
      *
      * @param rs the ResultSet to read from
      * @param columnLabel the label of the column containing the URL value
-     * @return the URL value, or null if the database value is NULL
+     * @return the URL value, or {@code null} if the database value is NULL
      * @throws SQLException if a database access error occurs or the column label is invalid
      */
     @Override
+    @MayReturnNull
     public URL get(final ResultSet rs, final String columnLabel) throws SQLException {
         return rs.getURL(columnLabel);
     }
@@ -160,7 +164,7 @@ public class URLType extends AbstractType<URL> {
      * Sets a URL value in a PreparedStatement at the specified parameter index.
      * <p>
      * This method uses the PreparedStatement's {@code setURL} method to directly set
-     * the URL value. If the URL is null, a NULL value is set in the database.
+     * the URL value. If the URL is {@code null}, a NULL value is set in the database.
      * </p>
      *
      * <p><b>Usage Examples:</b></p>
@@ -172,7 +176,7 @@ public class URLType extends AbstractType<URL> {
      *
      * @param stmt the PreparedStatement to set the value in
      * @param columnIndex the parameter index (1-based) where to set the URL value
-     * @param x the URL value to set, or null for SQL NULL
+     * @param x the URL value to set, or {@code null} for SQL NULL
      * @throws SQLException if a database access error occurs or the parameter index is invalid
      */
     @Override
@@ -184,7 +188,7 @@ public class URLType extends AbstractType<URL> {
      * Sets a URL value in a CallableStatement using the specified parameter name.
      * <p>
      * This method uses the CallableStatement's {@code setURL} method to directly set
-     * the URL value. If the URL is null, a NULL value is set in the database.
+     * the URL value. If the URL is {@code null}, a NULL value is set in the database.
      * </p>
      *
      * <p><b>Usage Examples:</b></p>
@@ -196,7 +200,7 @@ public class URLType extends AbstractType<URL> {
      *
      * @param stmt the CallableStatement to set the value in
      * @param parameterName the name of the parameter where to set the URL value
-     * @param x the URL value to set, or null for SQL NULL
+     * @param x the URL value to set, or {@code null} for SQL NULL
      * @throws SQLException if a database access error occurs or the parameter name is invalid
      */
     @Override

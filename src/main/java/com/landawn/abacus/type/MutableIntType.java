@@ -56,7 +56,8 @@ public class MutableIntType extends NumberType<MutableInt> {
      * }</pre>
      *
      * @param x The MutableInt object to convert
-     * @return The string representation of the integer value, or null if the input is null
+     * @return The string representation of the integer value, or {@code null} if the input is null
+     @MayReturnNull
      */
     @Override
     public String stringOf(final MutableInt x) {
@@ -80,8 +81,9 @@ public class MutableIntType extends NumberType<MutableInt> {
      * }</pre>
      *
      * @param str The string to parse
-     * @return A MutableInt containing the parsed value, or null if the input is null or empty
+     * @return A MutableInt containing the parsed value, or {@code null} if the input is {@code null} or empty
      * @throws NumberFormatException if the string cannot be parsed as an integer
+     @MayReturnNull
      */
     @Override
     public MutableInt valueOf(final String str) {
@@ -136,7 +138,7 @@ public class MutableIntType extends NumberType<MutableInt> {
 
     /**
      * Sets a MutableInt parameter in a PreparedStatement at the specified position.
-     * If the MutableInt is null, 0 is stored. Otherwise, the wrapped integer value is stored.
+     * If the MutableInt is {@code null}, 0 is stored. Otherwise, the wrapped integer value is stored.
      *
      * <p><b>Usage Examples:</b></p>
      * MutableIntType type = new MutableIntType();
@@ -145,7 +147,7 @@ public class MutableIntType extends NumberType<MutableInt> {
      * type.set(stmt, 1, age);
      * stmt.executeUpdate();
      *
-     * // For null value
+     * // For {@code null} value
      * type.set(stmt, 1, null);
      * // This sets the parameter to 0
      * }</pre>
@@ -162,7 +164,7 @@ public class MutableIntType extends NumberType<MutableInt> {
 
     /**
      * Sets a MutableInt parameter in a CallableStatement using the specified parameter name.
-     * If the MutableInt is null, 0 is stored. Otherwise, the wrapped integer value is stored.
+     * If the MutableInt is {@code null}, 0 is stored. Otherwise, the wrapped integer value is stored.
      *
      * <p><b>Usage Examples:</b></p>
      * MutableIntType type = new MutableIntType();
@@ -171,7 +173,7 @@ public class MutableIntType extends NumberType<MutableInt> {
      * type.set(stmt, "counter", counter);
      * stmt.execute();
      *
-     * // For null value
+     * // For {@code null} value
      * type.set(stmt, "counter", null);
      * // This sets the parameter to 0
      * }</pre>
@@ -217,7 +219,7 @@ public class MutableIntType extends NumberType<MutableInt> {
 
     /**
      * Writes the character representation of a MutableInt to a CharacterWriter.
-     * The value is written as numeric characters or the null character array.
+     * The value is written as numeric characters or the {@code null} character array.
      * This method is optimized for character-based writing and uses a specialized writeInt method.
      *
      * <p><b>Usage Examples:</b></p>
@@ -227,7 +229,7 @@ public class MutableIntType extends NumberType<MutableInt> {
      * type.writeCharacter(writer, mi, null);
      * // Writes: 12345
      *
-     * type.writeCharacter(writer, null, null);
+     * type.writeCharacter(writer, {@code null}, null);
      * // Writes: null
      * }</pre>
      *

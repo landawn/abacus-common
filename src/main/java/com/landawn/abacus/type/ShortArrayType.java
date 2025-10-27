@@ -42,11 +42,12 @@ public final class ShortArrayType extends ObjectArrayType<Short> {
      * }</pre>
      *
      * @param x the Short array to convert to string
-     * @return the string representation of the array, or null if the input array is null.
+     * @return the string representation of the array, or {@code null} if the input array is {@code null}.
      *         Returns "[]" for empty arrays.
      */
     @MayReturnNull
     @Override
+
     public String stringOf(final Short[] x) {
         if (x == null) {
             return null; // NOSONAR
@@ -60,7 +61,7 @@ public final class ShortArrayType extends ObjectArrayType<Short> {
     /**
      * Parses a string representation of a Short array and returns the corresponding Short array.
      * The string should contain comma-separated values enclosed in square brackets.
-     * The string "null" (case-sensitive, exactly 4 characters) is parsed as a null element.
+     * The string "null" (case-sensitive, exactly 4 characters) is parsed as a {@code null} element.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -69,12 +70,13 @@ public final class ShortArrayType extends ObjectArrayType<Short> {
      * }</pre>
      *
      * @param str the string to parse, expected format is "[value1, value2, ...]"
-     * @return the parsed Short array, or null if the input string is null.
+     * @return the parsed Short array, or {@code null} if the input string is {@code null}.
      *         Returns an empty array for empty string or "[]".
-     * @throws NumberFormatException if any non-null element in the string cannot be parsed as a short
+     * @throws NumberFormatException if any {@code non-null} element in the string cannot be parsed as a short
      */
     @MayReturnNull
     @Override
+
     public Short[] valueOf(final String str) {
         if (Strings.isEmpty(str) || Strings.isBlank(str)) {
             return null; // NOSONAR
@@ -102,7 +104,7 @@ public final class ShortArrayType extends ObjectArrayType<Short> {
     /**
      * Appends the string representation of a Short array to the given Appendable.
      * The array is formatted as comma-separated values enclosed in square brackets.
-     * Null elements are appended as "null". If the array itself is null, appends "null".
+     * Null elements are appended as "null". If the array itself is {@code null}, appends "null".
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code

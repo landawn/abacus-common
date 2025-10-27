@@ -94,7 +94,7 @@ public interface TriConsumer<A, B, C> extends Throwables.TriConsumer<A, B, C, Ru
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * TriConsumer<String, Integer, Boolean> consumer = (s, i, b) -> { ... };
-     * Throwables.TriConsumer<String, Integer, Boolean, IOException> throwableConsumer = 
+     * var throwableConsumer = 
      *     consumer.toThrowable();
      * }</pre>
      *

@@ -167,78 +167,180 @@ public final class IOUtil {
 
     private static String hostName;
 
+    /**
+     * The number of available processors/CPU cores on the current system.
+     */
     public static final int CPU_CORES = Runtime.getRuntime().availableProcessors();
 
+    /**
+     * Constant representing one kilobyte (1024 bytes).
+     */
     public static final long ONE_KB = 1024;
 
+    /**
+     * Constant representing one megabyte (1024 kilobytes).
+     */
     public static final long ONE_MB = 1024 * ONE_KB;
 
+    /**
+     * Constant representing one gigabyte (1024 megabytes).
+     */
     public static final long ONE_GB = 1024 * ONE_MB;
 
+    /**
+     * Constant representing one terabyte (1024 gigabytes).
+     */
     public static final long ONE_TB = 1024 * ONE_GB;
 
+    /**
+     * Constant representing one petabyte (1024 terabytes).
+     */
     public static final long ONE_PB = 1024 * ONE_TB;
 
+    /**
+     * Constant representing one exabyte (1024 petabytes).
+     */
     public static final long ONE_EB = 1024 * ONE_PB;
 
     // public static final long ONE_ZB = 1024 * ONE_EB; // overflow
 
+    /**
+     * The maximum memory available to the JVM in megabytes.
+     */
     public static final int MAX_MEMORY_IN_MB = (int) (Runtime.getRuntime().maxMemory() / (1024 * 1024));
 
     // ...
+    /**
+     * The operating system name.
+     */
     public static final String OS_NAME = System.getProperty("os.name");
 
+    /**
+     * The operating system version.
+     */
     public static final String OS_VERSION = System.getProperty("os.version");
 
+    /**
+     * The operating system architecture.
+     */
     public static final String OS_ARCH = System.getProperty("os.arch");
 
     //...
+    /**
+     * Flag indicating whether the current operating system is Windows.
+     */
     public static final boolean IS_OS_WINDOWS = OS_NAME.toUpperCase().contains("WINDOWS");
 
+    /**
+     * Flag indicating whether the current operating system is Mac.
+     */
     public static final boolean IS_OS_MAC = OS_NAME.toUpperCase().contains("MAC");
 
+    /**
+     * Flag indicating whether the current operating system is Mac OS X.
+     */
     public static final boolean IS_OS_MAC_OSX = OS_NAME.toUpperCase().contains("MAC OS X");
 
+    /**
+     * Flag indicating whether the current operating system is Linux.
+     */
     public static final boolean IS_OS_LINUX = OS_NAME.toUpperCase().contains("LINUX");
 
+    /**
+     * Flag indicating whether the current platform is Android.
+     */
     public static final boolean IS_PLATFORM_ANDROID = System.getProperty(JAVA_VENDOR_STR).toUpperCase().contains(ANDROID)
             || System.getProperty(JAVA_VM_VENDOR_STR).toUpperCase().contains(ANDROID);
 
     // ...
+    /**
+     * The Java home directory.
+     */
     public static final String JAVA_HOME = System.getProperty("java.home");
 
+    /**
+     * The Java version as a JavaVersion object.
+     */
     public static final JavaVersion JAVA_VERSION = JavaVersion.of(System.getProperty("java.version"));
 
+    /**
+     * The Java vendor name.
+     */
     public static final String JAVA_VENDOR = System.getProperty(JAVA_VENDOR_STR);
 
+    /**
+     * The Java class path.
+     */
     public static final String JAVA_CLASS_PATH = System.getProperty("java.class.path");
 
+    /**
+     * The Java class version.
+     */
     public static final String JAVA_CLASS_VERSION = System.getProperty("java.class.version");
 
+    /**
+     * The Java runtime name.
+     */
     public static final String JAVA_RUNTIME_NAME = System.getProperty("java.runtime.name");
 
+    /**
+     * The Java runtime version.
+     */
     public static final String JAVA_RUNTIME_VERSION = System.getProperty("java.runtime.version");
 
+    /**
+     * The Java specification name.
+     */
     public static final String JAVA_SPECIFICATION_NAME = System.getProperty("java.specification.name");
 
+    /**
+     * The Java specification vendor.
+     */
     public static final String JAVA_SPECIFICATION_VENDOR = System.getProperty("java.specification.vendor");
 
+    /**
+     * The Java specification version.
+     */
     public static final String JAVA_SPECIFICATION_VERSION = System.getProperty("java.specification.version");
 
+    /**
+     * The Java Virtual Machine implementation info.
+     */
     public static final String JAVA_VM_INFO = System.getProperty("java.vm.info");
 
+    /**
+     * The Java Virtual Machine implementation name.
+     */
     public static final String JAVA_VM_NAME = System.getProperty("java.vm.name");
 
+    /**
+     * The Java Virtual Machine specification name.
+     */
     public static final String JAVA_VM_SPECIFICATION_NAME = System.getProperty("java.vm.specification.name");
 
+    /**
+     * The Java Virtual Machine specification vendor.
+     */
     public static final String JAVA_VM_SPECIFICATION_VENDOR = System.getProperty("java.vm.specification.vendor");
 
+    /**
+     * The Java Virtual Machine specification version.
+     */
     public static final String JAVA_VM_SPECIFICATION_VERSION = System.getProperty("java.vm.specification.version");
 
+    /**
+     * The Java Virtual Machine implementation vendor.
+     */
     public static final String JAVA_VM_VENDOR = System.getProperty(JAVA_VM_VENDOR_STR);
 
+    /**
+     * The Java Virtual Machine implementation version.
+     */
     public static final String JAVA_VM_VERSION = System.getProperty("java.vm.version");
 
+    /**
+     * The Java temporary directory.
+     */
     public static final String JAVA_IO_TMPDIR = System.getProperty("java.io.tmpdir");
 
     static final String JAVA_VENDOR_URL = System.getProperty("java.vendor.url");
@@ -263,20 +365,41 @@ public final class IOUtil {
     static final String JAVA_UTIL_PREFS_PREFERENCES_FACTORY = System.getProperty("java.util.prefs.PreferencesFactory");
 
     // ...
+    /**
+     * The user's current working directory.
+     */
     public static final String USER_DIR = System.getProperty("user.dir");
 
+    /**
+     * The user's home directory.
+     */
     public static final String USER_HOME = System.getProperty("user.home");
 
+    /**
+     * The user's account name.
+     */
     public static final String USER_NAME = System.getProperty("user.name");
 
+    /**
+     * The user's timezone.
+     */
     public static final String USER_TIMEZONE = System.getProperty("user.timezone");
 
+    /**
+     * The user's language.
+     */
     public static final String USER_LANGUAGE = System.getProperty("user.language");
 
+    /**
+     * The user's country or region.
+     */
     public static final String USER_COUNTRY = System.getProperty("user.country") == null ? System.getProperty("user.region")
             : System.getProperty("user.country");
 
     /**
+     * The system-dependent path separator character represented as a string.
+     * On UNIX systems, this is ":"; on Microsoft Windows systems, it is ";".
+     *
      * @see File#pathSeparator
      */
     public static final String PATH_SEPARATOR = File.pathSeparator;
@@ -299,6 +422,9 @@ public final class IOUtil {
     public static final String DIR_SEPARATOR_WINDOWS = "\\";
 
     /**
+     * The system-dependent line separator string.
+     * On UNIX systems, it is "\n"; on Microsoft Windows systems, it is "\r\n".
+     *
      * @see System#lineSeparator()
      */
     public static final String LINE_SEPARATOR = System.lineSeparator();
@@ -314,6 +440,9 @@ public final class IOUtil {
     }
 
     // ...
+    /**
+     * Constant representing End-Of-File (or stream).
+     */
     public static final int EOF = -1;
 
     private static final com.landawn.abacus.util.function.BiPredicate<File, File> all_files_filter = (parentDir, file) -> true;
@@ -322,9 +451,6 @@ public final class IOUtil {
 
     private static final com.landawn.abacus.util.function.BiPredicate<File, File> directories_only_filter = (parentDir, file) -> file.isDirectory();
 
-    /**
-     * Constructor for FileUtil.
-     */
     private IOUtil() {
         // no instance;
     }
@@ -561,8 +687,8 @@ public final class IOUtil {
      * }</pre>
      *
      * @param chars the source character array, may be {@code null} or empty
-     * @param offset the starting position in the character array (0-based), must be >= 0
-     * @param charCount the number of characters to convert, must be >= 0
+     * @param offset the starting position in the character array (0-based), must be &gt;= 0
+     * @param charCount the number of characters to convert, must be &gt;= 0
      * @param charset the character set to use for encoding. If {@code null}, the platform's default charset is used.
      * @return the resulting byte array, or an empty byte array if {@code charCount} is zero.
      * @throws IndexOutOfBoundsException if {@code offset} or {@code charCount} is out of bounds.
@@ -633,8 +759,8 @@ public final class IOUtil {
      * }</pre>
      *
      * @param bytes the source byte array, may be {@code null} or empty
-     * @param offset the starting position in the byte array (0-based), must be >= 0
-     * @param byteCount the number of bytes to convert, must be >= 0
+     * @param offset the starting position in the byte array (0-based), must be &gt;= 0
+     * @param byteCount the number of bytes to convert, must be &gt;= 0
      * @param charset the character set to use for decoding. If {@code null}, the platform's default charset is used.
      * @return the resulting character array, or an empty character array if {@code byteCount} is zero.
      * @throws IndexOutOfBoundsException if {@code offset} or {@code byteCount} is out of bounds.
@@ -866,8 +992,8 @@ public final class IOUtil {
      * }</pre>
      *
      * @param source the file to read from, must not be {@code null}
-     * @param offset the starting position in bytes from where to begin reading, must be >= 0
-     * @param maxLen the maximum number of bytes to read, must be >= 0
+     * @param offset the starting position in bytes from where to begin reading, must be &gt;= 0
+     * @param maxLen the maximum number of bytes to read, must be &gt;= 0
      * @return a byte array containing the bytes read from the file. The length of the array will be at most {@code maxLen}
      * @throws IOException if an I/O error occurs
      * @throws IllegalArgumentException if {@code offset} or {@code maxLen} is negative
@@ -931,8 +1057,8 @@ public final class IOUtil {
      * }</pre>
      *
      * @param source the {@code InputStream} to read from, must not be {@code null}
-     * @param offset the starting position in bytes from where to begin reading, must be >= 0
-     * @param maxLen the maximum number of bytes to read, must be >= 0
+     * @param offset the starting position in bytes from where to begin reading, must be &gt;= 0
+     * @param maxLen the maximum number of bytes to read, must be &gt;= 0
      * @return a byte array containing the bytes read from the stream. The length of the array will be at most {@code maxLen}
      * @throws IOException if an I/O error occurs during reading or skipping
      * @throws IllegalArgumentException if {@code offset} or {@code maxLen} is negative
@@ -1207,8 +1333,8 @@ public final class IOUtil {
      * }</pre>
      *
      * @param source the file to read from, must not be {@code null}
-     * @param offset the starting position in characters from where to begin reading, must be >= 0
-     * @param maxLen the maximum number of characters to read, must be >= 0
+     * @param offset the starting position in characters from where to begin reading, must be &gt;= 0
+     * @param maxLen the maximum number of characters to read, must be &gt;= 0
      * @return a character array containing the characters read from the file. The length of the array will be at most {@code maxLen}
      * @throws IOException if an I/O error occurs
      * @throws IllegalArgumentException if {@code offset} or {@code maxLen} is negative
@@ -1234,8 +1360,8 @@ public final class IOUtil {
      *
      * @param source the file to read from, must not be {@code null}
      * @param charset the character set to use for decoding, if {@code null} the platform's default charset is used
-     * @param offset the starting position in characters from where to begin reading, must be >= 0
-     * @param maxLen the maximum number of characters to read, must be >= 0
+     * @param offset the starting position in characters from where to begin reading, must be &gt;= 0
+     * @param maxLen the maximum number of characters to read, must be &gt;= 0
      * @return a character array containing the characters read from the file. The length of the array will be at most {@code maxLen}
      * @throws IOException if an I/O error occurs
      * @throws IllegalArgumentException if {@code offset} or {@code maxLen} is negative
@@ -1334,8 +1460,8 @@ public final class IOUtil {
      * }</pre>
      *
      * @param source the {@code InputStream} to read from, must not be {@code null}
-     * @param offset the starting position in characters from where to begin reading, must be >= 0
-     * @param maxLen the maximum number of characters to read, must be >= 0
+     * @param offset the starting position in characters from where to begin reading, must be &gt;= 0
+     * @param maxLen the maximum number of characters to read, must be &gt;= 0
      * @return a character array containing the characters read from the stream. The length of the array will be at most {@code maxLen}
      * @throws IOException if an I/O error occurs during reading or skipping
      * @throws IllegalArgumentException if {@code offset} or {@code maxLen} is negative
@@ -1364,8 +1490,8 @@ public final class IOUtil {
      *
      * @param source the {@code InputStream} to read from, must not be {@code null}
      * @param charset the character set to use for decoding, if {@code null} the platform's default charset is used
-     * @param offset the starting position in characters from where to begin reading, must be >= 0
-     * @param maxLen the maximum number of characters to read, must be >= 0
+     * @param offset the starting position in characters from where to begin reading, must be &gt;= 0
+     * @param maxLen the maximum number of characters to read, must be &gt;= 0
      * @return a character array containing the characters read from the stream. The length of the array will be at most {@code maxLen}
      * @throws IOException if an I/O error occurs during reading or skipping
      * @throws IllegalArgumentException if {@code offset} or {@code maxLen} is negative
@@ -1429,8 +1555,8 @@ public final class IOUtil {
      * }</pre>
      *
      * @param source the {@code Reader} to read from, must not be {@code null}
-     * @param offset the starting position in characters from where to begin reading, must be >= 0
-     * @param maxLen the maximum number of characters to read, must be >= 0
+     * @param offset the starting position in characters from where to begin reading, must be &gt;= 0
+     * @param maxLen the maximum number of characters to read, must be &gt;= 0
      * @return a character array containing the characters read from the reader. The length of the array will be at most {@code maxLen}
      * @throws IOException if an I/O error occurs during reading or skipping
      * @throws IllegalArgumentException if {@code offset} or {@code maxLen} is negative
@@ -1685,8 +1811,8 @@ public final class IOUtil {
      * }</pre>
      *
      * @param source the file to read from, must not be {@code null}
-     * @param offset the starting position in characters from where to begin reading, must be >= 0
-     * @param maxLen the maximum number of characters to read, must be >= 0
+     * @param offset the starting position in characters from where to begin reading, must be &gt;= 0
+     * @param maxLen the maximum number of characters to read, must be &gt;= 0
      * @return a {@code String} containing the characters read from the file
      * @throws IOException if an I/O error occurs
      * @throws IllegalArgumentException if {@code offset} or {@code maxLen} is negative
@@ -1712,8 +1838,8 @@ public final class IOUtil {
      *
      * @param source the file to read from, must not be {@code null}
      * @param charset the character set to use for decoding, if {@code null} the platform's default charset is used
-     * @param offset the starting position in characters from where to begin reading, must be >= 0
-     * @param maxLen the maximum number of characters to read, must be >= 0
+     * @param offset the starting position in characters from where to begin reading, must be &gt;= 0
+     * @param maxLen the maximum number of characters to read, must be &gt;= 0
      * @return a {@code String} containing the characters read from the file
      * @throws IOException if an I/O error occurs
      * @throws IllegalArgumentException if {@code offset} or {@code maxLen} is negative
@@ -1752,8 +1878,8 @@ public final class IOUtil {
      * }</pre>
      *
      * @param source the {@code InputStream} to read from, must not be {@code null}
-     * @param offset the starting position in characters from where to begin reading, must be >= 0
-     * @param maxLen the maximum number of characters to read, must be >= 0
+     * @param offset the starting position in characters from where to begin reading, must be &gt;= 0
+     * @param maxLen the maximum number of characters to read, must be &gt;= 0
      * @return a {@code String} containing the characters read from the stream
      * @throws IOException if an I/O error occurs during reading or skipping
      * @throws IllegalArgumentException if {@code offset} or {@code maxLen} is negative
@@ -1782,8 +1908,8 @@ public final class IOUtil {
      *
      * @param source the {@code InputStream} to read from, must not be {@code null}
      * @param charset the character set to use for decoding, if {@code null} the platform's default charset is used
-     * @param offset the starting position in characters from where to begin reading, must be >= 0
-     * @param maxLen the maximum number of characters to read, must be >= 0
+     * @param offset the starting position in characters from where to begin reading, must be &gt;= 0
+     * @param maxLen the maximum number of characters to read, must be &gt;= 0
      * @return a {@code String} containing the characters read from the stream
      * @throws IOException if an I/O error occurs during reading or skipping
      * @throws IllegalArgumentException if {@code offset} or {@code maxLen} is negative
@@ -1819,8 +1945,8 @@ public final class IOUtil {
      * }</pre>
      *
      * @param source the {@code Reader} to read from, must not be {@code null}
-     * @param offset the starting position in characters from where to begin reading, must be >= 0
-     * @param maxLen the maximum number of characters to read, must be >= 0
+     * @param offset the starting position in characters from where to begin reading, must be &gt;= 0
+     * @param maxLen the maximum number of characters to read, must be &gt;= 0
      * @return a {@code String} containing the characters read from the reader
      * @throws IOException if an I/O error occurs during reading or skipping
      * @throws IllegalArgumentException if {@code offset} or {@code maxLen} is negative
@@ -1841,7 +1967,7 @@ public final class IOUtil {
      * <pre>{@code
      * File file = new File("text_file.txt");
      * try {
-     *     List&lt;String&gt; lines = IOUtil.readAllLines(file);
+     *     List<String> lines = IOUtil.readAllLines(file);
      *     lines.forEach(System.out::println);
      * } catch (UncheckedIOException e) {
      *     System.err.println("Error reading file: " + e.getMessage());
@@ -1867,7 +1993,7 @@ public final class IOUtil {
      * <pre>{@code
      * File file = new File("text_file.txt");
      * try {
-     *     List&lt;String&gt; lines = IOUtil.readAllLines(file, "UTF-8");
+     *     List<String> lines = IOUtil.readAllLines(file, "UTF-8");
      *     lines.forEach(System.out::println);
      * } catch (UncheckedIOException e) {
      *     System.err.println("Error reading file: " + e.getMessage());
@@ -1895,7 +2021,7 @@ public final class IOUtil {
      * <pre>{@code
      * File file = new File("text_file.txt");
      * try {
-     *     List&lt;String&gt; lines = IOUtil.readAllLines(file, StandardCharsets.UTF_8);
+     *     List<String> lines = IOUtil.readAllLines(file, StandardCharsets.UTF_8);
      *     lines.forEach(System.out::println);
      * } catch (UncheckedIOException e) {
      *     System.err.println("Error reading file: " + e.getMessage());
@@ -1933,7 +2059,7 @@ public final class IOUtil {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * try (InputStream inputStream = new FileInputStream("text_file.txt")) {
-     *     List&lt;String&gt; lines = IOUtil.readAllLines(inputStream);
+     *     List<String> lines = IOUtil.readAllLines(inputStream);
      *     lines.forEach(System.out::println);
      * } catch (IOException e) {
      *     System.err.println("Error reading from stream: " + e.getMessage());
@@ -1960,7 +2086,7 @@ public final class IOUtil {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * try (InputStream inputStream = new FileInputStream("text_file.txt")) {
-     *     List&lt;String&gt; lines = IOUtil.readAllLines(inputStream, StandardCharsets.UTF_8);
+     *     List<String> lines = IOUtil.readAllLines(inputStream, StandardCharsets.UTF_8);
      *     lines.forEach(System.out::println);
      * } catch (UncheckedIOException e) {
      *     System.err.println("Error reading from stream: " + e.getMessage());
@@ -1994,7 +2120,7 @@ public final class IOUtil {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * try (Reader reader = new FileReader("text_file.txt")) {
-     *     List&lt;String&gt; lines = IOUtil.readAllLines(reader);
+     *     List<String> lines = IOUtil.readAllLines(reader);
      *     lines.forEach(System.out::println);
      * } catch (UncheckedIOException e) {
      *     System.err.println("Error reading from reader: " + e.getMessage());
@@ -2036,7 +2162,7 @@ public final class IOUtil {
      * File file = new File("text_file.txt");
      * try {
      *     // Read 10 lines, starting from the 5th line
-     *     List&lt;String&gt; lines = IOUtil.readLines(file, 4, 10);
+     *     List<String> lines = IOUtil.readLines(file, 4, 10);
      *     lines.forEach(System.out::println);
      * } catch (IOException e) {
      *     System.err.println("Error reading lines from file: " + e.getMessage());
@@ -2044,8 +2170,8 @@ public final class IOUtil {
      * }</pre>
      *
      * @param source the file to read from, must not be {@code null}
-     * @param offset the 0-based index of the first line to read, must be >= 0
-     * @param count the number of lines to read, must be >= 0
+     * @param offset the 0-based index of the first line to read, must be &gt;= 0
+     * @param count the number of lines to read, must be &gt;= 0
      * @return a list of strings, each representing a line from the specified range in the file
      * @throws IOException if an I/O error occurs
      * @throws IllegalArgumentException if {@code offset} or {@code count} is negative
@@ -2062,7 +2188,7 @@ public final class IOUtil {
      * File file = new File("text_file.txt");
      * try {
      *     // Read 10 lines, starting from the 5th line, using UTF-8 encoding
-     *     List&lt;String&gt; lines = IOUtil.readLines(file, StandardCharsets.UTF_8, 4, 10);
+     *     List<String> lines = IOUtil.readLines(file, StandardCharsets.UTF_8, 4, 10);
      *     lines.forEach(System.out::println);
      * } catch (IOException e) {
      *     System.err.println("Error reading lines from file: " + e.getMessage());
@@ -2071,8 +2197,8 @@ public final class IOUtil {
      *
      * @param source the file to read from, must not be {@code null}
      * @param charset the character set to use for decoding, if {@code null} the platform's default charset is used
-     * @param offset the 0-based index of the first line to read, must be >= 0
-     * @param count the number of lines to read, must be >= 0
+     * @param offset the 0-based index of the first line to read, must be &gt;= 0
+     * @param count the number of lines to read, must be &gt;= 0
      * @return a list of strings, each representing a line from the specified range in the file
      * @throws IOException if an I/O error occurs
      * @throws IllegalArgumentException if {@code offset} or {@code count} is negative
@@ -2102,7 +2228,7 @@ public final class IOUtil {
      * <pre>{@code
      * try (InputStream inputStream = new FileInputStream("text_file.txt")) {
      *     // Read 10 lines, starting from the 5th line
-     *     List&lt;String&gt; lines = IOUtil.readLines(inputStream, 4, 10);
+     *     List<String> lines = IOUtil.readLines(inputStream, 4, 10);
      *     lines.forEach(System.out::println);
      * } catch (IOException e) {
      *     System.err.println("Error reading lines from stream: " + e.getMessage());
@@ -2110,8 +2236,8 @@ public final class IOUtil {
      * }</pre>
      *
      * @param source the {@code InputStream} to read from, must not be {@code null}
-     * @param offset the 0-based index of the first line to read, must be >= 0
-     * @param count the number of lines to read, must be >= 0
+     * @param offset the 0-based index of the first line to read, must be &gt;= 0
+     * @param count the number of lines to read, must be &gt;= 0
      * @return a list of strings, each representing a line from the specified range in the stream
      * @throws IOException if an I/O error occurs
      * @throws IllegalArgumentException if {@code offset} or {@code count} is negative.
@@ -2130,7 +2256,7 @@ public final class IOUtil {
      * <pre>{@code
      * try (InputStream inputStream = new FileInputStream("text_file.txt")) {
      *     // Read 10 lines, starting from the 5th line, using UTF-8 encoding
-     *     List&lt;String&gt; lines = IOUtil.readLines(inputStream, StandardCharsets.UTF_8, 4, 10);
+     *     List<String> lines = IOUtil.readLines(inputStream, StandardCharsets.UTF_8, 4, 10);
      *     lines.forEach(System.out::println);
      * } catch (IOException e) {
      *     System.err.println("Error reading lines from stream: " + e.getMessage());
@@ -2139,8 +2265,8 @@ public final class IOUtil {
      *
      * @param source the {@code InputStream} to read from, must not be {@code null}
      * @param charset the character set to use for decoding, if {@code null} the platform's default charset is used
-     * @param offset the 0-based index of the first line to read, must be >= 0
-     * @param count the number of lines to read, must be >= 0
+     * @param offset the 0-based index of the first line to read, must be &gt;= 0
+     * @param count the number of lines to read, must be &gt;= 0
      * @return a list of strings, each representing a line from the specified range in the stream
      * @throws IOException if an I/O error occurs
      * @throws IllegalArgumentException if {@code offset} or {@code count} is negative
@@ -2161,7 +2287,7 @@ public final class IOUtil {
      * <pre>{@code
      * try (Reader reader = new FileReader("text_file.txt")) {
      *     // Read 10 lines, starting from the 5th line
-     *     List&lt;String&gt; lines = IOUtil.readLines(reader, 4, 10);
+     *     List<String> lines = IOUtil.readLines(reader, 4, 10);
      *     lines.forEach(System.out::println);
      * } catch (IOException e) {
      *     System.err.println("Error reading lines from reader: " + e.getMessage());
@@ -2169,8 +2295,8 @@ public final class IOUtil {
      * }</pre>
      *
      * @param source the {@code Reader} to read from, must not be {@code null}
-     * @param offset the 0-based index of the first line to read, must be >= 0
-     * @param count the number of lines to read, must be >= 0
+     * @param offset the 0-based index of the first line to read, must be &gt;= 0
+     * @param count the number of lines to read, must be &gt;= 0
      * @return a list of strings, each representing a line from the specified range in the reader
      * @throws IOException if an I/O error occurs
      * @throws IllegalArgumentException if {@code offset} or {@code count} is negative
@@ -2224,6 +2350,7 @@ public final class IOUtil {
      * @return the first line of the file, or {@code null} if the file is empty.
      * @throws IOException if an I/O error occurs.
      */
+    @MayReturnNull
     public static String readFirstLine(final File source) throws IOException {
         return readFirstLine(source, DEFAULT_CHARSET);
     }
@@ -2249,6 +2376,7 @@ public final class IOUtil {
      * @return the first line of the file, or {@code null} if the file is empty
      * @throws IOException if an I/O error occurs
      */
+    @MayReturnNull
     public static String readFirstLine(final File source, final Charset charset) throws IOException {
         final Holder<ZipFile> outputZipFile = new Holder<>();
         InputStream is = null;
@@ -2283,6 +2411,7 @@ public final class IOUtil {
      * @return the first line from the reader, or {@code null} if the reader is empty
      * @throws IOException if an I/O error occurs
      */
+    @MayReturnNull
     public static String readFirstLine(final Reader source) throws IOException {
         return readLine(source, 0);
     }
@@ -2307,6 +2436,7 @@ public final class IOUtil {
      * @return the last line of the file, or {@code null} if the file is empty
      * @throws IOException if an I/O error occurs
      */
+    @MayReturnNull
     public static String readLastLine(final File source) throws IOException {
         return readLastLine(source, DEFAULT_CHARSET);
     }
@@ -2332,6 +2462,7 @@ public final class IOUtil {
      * @return the last line of the file, or {@code null} if the file is empty
      * @throws IOException if an I/O error occurs
      */
+    @MayReturnNull
     public static String readLastLine(final File source, final Charset charset) throws IOException {
         final Holder<ZipFile> outputZipFile = new Holder<>();
         InputStream is = null;
@@ -2366,6 +2497,7 @@ public final class IOUtil {
      * @return a {@code String} containing the last line from the reader, or {@code null} if the reader is empty
      * @throws IOException if an I/O error occurs
      */
+    @MayReturnNull
     public static String readLastLine(final Reader source) throws IOException {
         final boolean isBufferedReader = IOUtil.isBufferedReader(source);
         final BufferedReader br = isBufferedReader ? (BufferedReader) source : Objectory.createBufferedReader(source); //NOSONAR
@@ -2407,6 +2539,7 @@ public final class IOUtil {
      * @throws IllegalArgumentException if the line index is negative.
      * @throws IOException              if an I/O error occurs.
      */
+    @MayReturnNull
     public static String readLine(final File source, final int lineIndex) throws IllegalArgumentException, IOException {
         return readLine(source, DEFAULT_CHARSET, lineIndex);
     }
@@ -2428,11 +2561,12 @@ public final class IOUtil {
      *
      * @param source the file to read from, must not be {@code null}
      * @param charset the character set to use for decoding, if {@code null} the platform's default charset is used
-     * @param lineIndex the index of the line to read, starting from 0 for the first line, must be >= 0
+     * @param lineIndex the index of the line to read, starting from 0 for the first line, must be &gt;= 0
      * @return a {@code String} containing the specified line, or {@code null} if the file has fewer lines
      * @throws IllegalArgumentException if {@code lineIndex} is negative
      * @throws IOException if an I/O error occurs
      */
+    @MayReturnNull
     public static String readLine(final File source, final Charset charset, final int lineIndex) throws IllegalArgumentException, IOException {
         N.checkArgNotNegative(lineIndex, cs.lineIndex);
 
@@ -2469,6 +2603,7 @@ public final class IOUtil {
      * @throws IllegalArgumentException if the line index is negative.
      * @throws IOException              if an I/O error occurs.
      */
+    @MayReturnNull
     @SuppressFBWarnings("RV_DONT_JUST_NULL_CHECK_READLINE")
     public static String readLine(final Reader source, int lineIndex) throws IllegalArgumentException, IOException {
         N.checkArgNotNegative(lineIndex, cs.lineIndex);
@@ -2816,13 +2951,6 @@ public final class IOUtil {
         return n;
     }
 
-    /**
-     * Creates the reader.
-     *
-     * @param source the input stream to read from.
-     * @param encoding the character encoding to use. If {@code null}, the default charset is used.
-     * @return an InputStreamReader configured with the specified encoding.
-     */
     static InputStreamReader createReader(final InputStream source, final Charset encoding) {
         return encoding == null ? IOUtil.newInputStreamReader(source, DEFAULT_CHARSET) : IOUtil.newInputStreamReader(source, encoding);
     }
@@ -4390,8 +4518,8 @@ public final class IOUtil {
      * The input reader is not closed by this method.
      *
      * @param source the {@code Reader} to read from, must not be {@code null}
-     * @param offset the starting position in characters from where to begin reading, must be >= 0
-     * @param count the maximum number of characters to read, must be >= 0
+     * @param offset the starting position in characters from where to begin reading, must be &gt;= 0
+     * @param count the maximum number of characters to read, must be &gt;= 0
      * @param charset the character set to use for encoding, if {@code null} the platform's default charset is used
      * @param targetFile the file where the {@code Reader}'s content is to be appended, must not be {@code null}.
      *                   If the file exists, content will be appended. If the file's parent directory doesn't exist, it will be created
@@ -5867,14 +5995,6 @@ public final class IOUtil {
         }
     }
 
-    /**
-     * Internal copy file method.
-     *
-     * @param srcFile          the validated source file, must not be {@code null}
-     * @param destFile         the validated destination file, must not be {@code null}
-     * @param preserveFileDate whether to preserve the file date
-     * @throws IOException if an error occurs
-     */
     @SuppressFBWarnings("RV_RETURN_VALUE_IGNORED_BAD_PRACTICE")
     private static void doCopyFile(final File srcFile, final File destFile, final boolean preserveFileDate) throws IOException {
         if (destFile.exists()) {
@@ -5934,9 +6054,9 @@ public final class IOUtil {
 
     /**
      * Creates all parent directories for a File object, including any necessary but non-existent parent directories. If a parent directory already exists or
-     * is null, nothing happens.
+     * is {@code null}, nothing happens.
      *
-     * @param file the File that may need parents, which may be null.
+     * @param file the File that may need parents, which may be {@code null}.
      * @return the parent directory, or {@code null} if the given File does have a parent.
      * @since 2.9.0
      */
@@ -5945,10 +6065,10 @@ public final class IOUtil {
     }
 
     /**
-     * Gets the parent of the given file. The given file may be null. Note that a file's parent may be null as well.
+     * Gets the parent of the given file. The given file may be {@code null}. Note that a file's parent may be {@code null} as well.
      *
-     * @param file the file to query, which may be null.
-     * @return the parent file or {@code null}. Note that a file's parent may be null as well.
+     * @param file the file to query, which may be {@code null}.
+     * @return the parent file or {@code null}. Note that a file's parent may be {@code null} as well.
      */
     private static File getParentFile(final File file) {
         return file == null ? null : file.getParentFile();
@@ -6049,7 +6169,7 @@ public final class IOUtil {
      *
      * @param srcFile an existing file to copy, must not be {@code null}
      * @param destFile the new file, must not be {@code null}
-     * @param preserveFileDate true if the file date of the copy should be the same as the original.}.
+     * @param preserveFileDate {@code true} if the file date of the copy should be the same as the original.}.
      * @throws IOException if source or destination is invalid.
      * @throws IOException if an error occurs or setting the last-modified time didn't succeed.
      * @throws IOException if the output file length is not the same as the input file length after the copy completes
@@ -6102,7 +6222,7 @@ public final class IOUtil {
      *
      * @param srcFile an existing file to copy, must not be {@code null}
      * @param destFile the new file, must not be {@code null}
-     * @param preserveFileDate true if the file date of the copy should be the same as the original.
+     * @param preserveFileDate {@code true} if the file date of the copy should be the same as the original.
      * @param copyOptions options specifying how the copy should be done, for example {@link StandardCopyOption}.}.
      * @throws FileNotFoundException if the source does not exist.
      * @throws IllegalArgumentException if {@code srcFile} or {@code destFile} is not a file
@@ -6226,7 +6346,8 @@ public final class IOUtil {
      * @param in      the InputStream to be copied.
      * @param target  the target Path where the InputStream content will be copied to.
      * @param options optional arguments that specify how the copy should be done.
-     * @return the number of bytes read or skipped and written to the target Path. 
+     * @return the number of bytes read or skipped and written to the target Path.
+     * @throws IOException if an I/O error occurs during the copy operation
      * @see Files#copy(InputStream, Path, CopyOption...)
      */
     public static long copy(final InputStream in, final Path target, final CopyOption... options) throws IOException {
@@ -6840,7 +6961,7 @@ public final class IOUtil {
      * @param   file the path to the file.
      * @param   options options indicating how symbolic links are handled
      * @return  {@code true} if the file is a directory; {@code false} if
-     *          the path is null, the file does not exist, is not a directory, or it cannot
+     *          the path is {@code null}, the file does not exist, is not a directory, or it cannot
      *          be determined if the file is a directory or not.
      * @throws SecurityException     In the case of the default provider, and a security manager is installed, the
      *                               {@link SecurityManager#checkRead(String) checkRead} method is invoked to check read
@@ -6858,7 +6979,7 @@ public final class IOUtil {
      * @param   file the path to the file.
      * @param   options options indicating how symbolic links are handled
      * @return  {@code true} if the file is a regular file; {@code false} if
-     *          the path is null, the file does not exist, is not a regular file, or it cannot
+     *          the path is {@code null}, the file does not exist, is not a regular file, or it cannot
      *          be determined if the file is a regular file or not.
      * @throws SecurityException     In the case of the default provider, and a security manager is installed, the
      *                               {@link SecurityManager#checkRead(String) checkRead} method is invoked to check read
@@ -7011,7 +7132,6 @@ public final class IOUtil {
      *
      * @param directory the directory whose size is to be calculated, must not be {@code null}
      * @return the total size as a BigInteger of all files within the directory and its subdirectories.
-     * @throws FileNotFoundException if the directory does not exist.
      * @see #sizeOfDirectory(File)
      * @see #sizeOfAsBigInteger(File)
      */
@@ -7746,13 +7866,6 @@ public final class IOUtil {
         return totalCount;
     }
 
-    /**
-     * Gets the absolute path.
-     *
-     * @param parentDir the parent directory from which to resolve the relative path.
-     * @param relativeFilePath the relative file path to be resolved.
-     * @return the absolute path as a String.
-     */
     @SuppressFBWarnings("RV_RETURN_VALUE_IGNORED_BAD_PRACTICE")
     private static String getAbsolutePath(final File parentDir, String relativeFilePath) {
         String newRelativePath = "";
@@ -7883,13 +7996,6 @@ public final class IOUtil {
         return listFiles(parentPath, recursively, directories_only_filter);
     }
 
-    /**
-     * Gets the relative path.
-     *
-     * @param parentDir the parent directory used as the base for the relative path.
-     * @param file the file whose relative path is to be determined.
-     * @return the relative path from parentDir to file.
-     */
     private static String getRelativePath(final File parentDir, final File file) {
         if (file.equals(parentDir)) {
             return file.getName();
@@ -8195,9 +8301,9 @@ public final class IOUtil {
      * @param file1       the first file
      * @param file2       the second file
      * @param charsetName the name of the requested charset.
-     *                    May be null, in which case the platform default is used
+     *                    May be {@code null}, in which case the platform default is used
      * @return {@code true} if the content of the files are equal or neither exists,
-     * false otherwise
+     * {@code false} otherwise
      * @throws IllegalArgumentException when an input is not a file.
      * @throws IOException in case of an I/O error.
      * @throws UnsupportedCharsetException if the named charset is unavailable (unchecked exception).
@@ -8386,6 +8492,7 @@ public final class IOUtil {
      * @param input1 the first reader
      * @param input2 the second reader
      * @return {@code true} if the content of the readers are equal (ignoring EOL differences),  {@code false} otherwise
+     * @throws IOException if an I/O error occurs during the comparison
      * @throws UncheckedIOException if an I/O error occurs
      */
     public static boolean contentEqualsIgnoreEOL(final Reader input1, final Reader input2) throws IOException {
@@ -8660,6 +8767,8 @@ public final class IOUtil {
      * @param files      the collection of files to be parsed.
      * @param lineOffset the line number from where to start parsing.
      * @param count      the number of lines to be parsed.
+     * @param processThreadNum the number of threads to use for parallel processing
+     * @param queueSize  the size of the queue for buffering lines during parallel processing
      * @param lineAction a Consumer that takes a line of the file as a String and performs the desired operation.
      * @param onComplete a Runnable that is executed after the parsing is complete.
      * @throws UncheckedIOException if an I/O error occurs.

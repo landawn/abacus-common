@@ -147,7 +147,7 @@ public final class XmlMappers {
      * }</pre>
      *
      * @param obj the object to serialize
-     * @param prettyFormat true to enable pretty printing with indentation, {@code false} for compact output
+     * @param prettyFormat {@code true} to enable pretty printing with indentation, {@code false} for compact output
      * @return the XML string representation of the object
      * @throws RuntimeException if serialization fails
      */
@@ -1264,7 +1264,7 @@ public final class XmlMappers {
          * using the wrapped XmlMapper.
          *
          * @param obj the object to serialize
-         * @param prettyFormat true to enable pretty printing with indentation
+         * @param prettyFormat {@code true} to enable pretty printing with indentation
          * @return the XML string representation of the object
          * @throws RuntimeException if serialization fails
          */

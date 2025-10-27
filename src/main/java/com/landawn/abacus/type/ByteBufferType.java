@@ -69,9 +69,10 @@ public class ByteBufferType extends AbstractType<ByteBuffer> {
      *
      * @param x the ByteBuffer to encode
      * @return the Base64-encoded string representation of the buffer's content,
-     *         or null if the input is null
+     *         or {@code null} if the input is null
      */
     @Override
+    @MayReturnNull
     public String stringOf(final ByteBuffer x) {
         return x == null ? null : Strings.base64Encode(byteArrayOf(x));
     }
@@ -82,12 +83,13 @@ public class ByteBufferType extends AbstractType<ByteBuffer> {
      * set to the array length and limit/capacity set to array length.
      *
      * @param str the Base64-encoded string to decode
-     * @return a ByteBuffer containing the decoded data, or null if str is null,
+     * @return a ByteBuffer containing the decoded data, or {@code null} if str is {@code null},
      *         or an empty buffer if str is empty
      * @throws IllegalArgumentException if the input string is not valid Base64
      */
     @MayReturnNull
     @Override
+
     public ByteBuffer valueOf(final String str) {
         if (str == null) {
             return null; // NOSONAR

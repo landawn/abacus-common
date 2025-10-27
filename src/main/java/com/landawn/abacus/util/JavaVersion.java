@@ -499,8 +499,8 @@ public enum JavaVersion {
      * }</pre>
      *
      * @param versionStr the version string to parse (e.g., "1.8", "11", "17.0.1")
-     * @return the corresponding JavaVersion enum constant, or JAVA_RECENT for versions > 39
-     * @throws IllegalArgumentException if the version string is null, invalid, or unrecognized
+     * @return the corresponding JavaVersion enum constant, or JAVA_RECENT for versions &gt; 39
+     * @throws IllegalArgumentException if the version string is {@code null}, invalid, or unrecognized
      */
     static JavaVersion get(final String versionStr) {
         if (versionStr == null) {

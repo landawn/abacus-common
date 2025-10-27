@@ -78,13 +78,14 @@ public final class PrimitiveDoubleArrayType extends AbstractPrimitiveArrayType<d
     /**
      * Converts a double array to its string representation.
      * The format is: [1.5, 2.7, 3.14] with elements separated by commas.
-     * Returns null if the input array is null, or "[]" if the array is empty.
+     * Returns {@code null} if the input array is {@code null}, or "[]" if the array is empty.
      *
      * @param x the double array to convert
-     * @return the string representation of the array, or null if input is null
+     * @return the string representation of the array, or {@code null} if input is null
      */
     @MayReturnNull
     @Override
+
     public String stringOf(final double[] x) {
         if (x == null) {
             return null; // NOSONAR
@@ -98,10 +99,10 @@ public final class PrimitiveDoubleArrayType extends AbstractPrimitiveArrayType<d
     /**
      * Parses a string representation and creates a double array.
      * Expected format: [1.5, 2.7, 3.14] or similar numeric value representations.
-     * Returns null if input is null, empty array if input is empty or "[]".
+     * Returns {@code null} if input is {@code null}, empty array if input is empty or "[]".
      *
      * @param str the string to parse
-     * @return the parsed double array, or null if input is null
+     * @return the parsed double array, or {@code null} if input is null
      */
     @MayReturnNull
     @Override
@@ -128,7 +129,7 @@ public final class PrimitiveDoubleArrayType extends AbstractPrimitiveArrayType<d
     /**
      * Appends the string representation of a double array to an Appendable.
      * The format is: [1.5, 2.7, 3.14] with proper element separation.
-     * Appends "null" if the array is null.
+     * Appends "null" if the array is {@code null}.
      *
      * @param appendable the Appendable to write to
      * @param x the double array to append
@@ -156,7 +157,7 @@ public final class PrimitiveDoubleArrayType extends AbstractPrimitiveArrayType<d
     /**
      * Writes the character representation of a double array to a CharacterWriter.
      * Uses optimized write methods for better performance.
-     * Writes "null" if the array is null.
+     * Writes "null" if the array is {@code null}.
      *
      * @param writer the CharacterWriter to write to
      * @param x the double array to write
@@ -185,10 +186,10 @@ public final class PrimitiveDoubleArrayType extends AbstractPrimitiveArrayType<d
     /**
      * Converts a Collection of Double objects to a primitive double array.
      * Each element in the collection is unboxed to its primitive double value.
-     * Returns null if the input collection is null.
+     * Returns {@code null} if the input collection is {@code null}.
      *
      * @param c the Collection of Double objects to convert
-     * @return a double array containing the unboxed values, or null if input is null
+     * @return a double array containing the unboxed values, or {@code null} if input is null
      */
     @MayReturnNull
     @Override
@@ -211,7 +212,7 @@ public final class PrimitiveDoubleArrayType extends AbstractPrimitiveArrayType<d
     /**
      * Converts a double array to a Collection.
      * Each primitive double value is boxed to a Double object and added to the output collection.
-     * Does nothing if the input array is null or empty.
+     * Does nothing if the input array is {@code null} or empty.
      *
      * @param <E> the type of elements in the output collection
      * @param x the double array to convert
@@ -243,7 +244,7 @@ public final class PrimitiveDoubleArrayType extends AbstractPrimitiveArrayType<d
     /**
      * Compares two double arrays for equality.
      * Arrays are considered equal if they have the same length and all corresponding elements are equal.
-     * Two null arrays are considered equal.
+     * Two {@code null} arrays are considered equal.
      *
      * @param x the first double array
      * @param y the second double array

@@ -31,8 +31,7 @@ import java.lang.annotation.Target;
  *   <li>Each field (marked with {@link Column}) corresponds to a column in the table</li>
  *   <li>The entity name (if specified) or class name determines the table name</li>
  * </ul>
- * </p>
- * 
+ *
  * <p>Entity classes should follow these best practices:</p>
  * <ul>
  *   <li>Have a no-argument constructor (can be private)</li>
@@ -43,15 +42,15 @@ import java.lang.annotation.Target;
  * 
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
- * {@literal @}Entity(name = "users")
+ * @Entity(name = "users")
  * public class User {
- *     {@literal @}Id
+ *     @Id
  *     private Long id;
  *     
- *     {@literal @}Column(name = "user_name")
+ *     @Column(name = "user_name")
  *     private String username;
  *     
- *     {@literal @}Column
+ *     @Column
  *     private String email;
  *     
  *     // Constructors, getters, setters, etc.
@@ -94,10 +93,10 @@ public @interface Entity {
      * 
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * {@literal @}Entity(name = "app_users")  // Maps to 'app_users' table
+     * @Entity(name = "app_users")  // Maps to 'app_users' table
      * public class User { }
      * 
-     * {@literal @}Entity  // Maps to 'Customer' table (class name)
+     * @Entity  // Maps to 'Customer' table (class name)
      * public class Customer { }
      * }</pre>
      * 

@@ -89,9 +89,10 @@ public class JodaDateTimeType extends AbstractJodaDateTimeType<DateTime> {
      * }</pre>
      *
      * @param obj the object to convert to DateTime
-     * @return a DateTime instance, or null if the input is null
+     * @return a DateTime instance, or {@code null} if the input is null
      */
     @Override
+    @MayReturnNull
     public DateTime valueOf(final Object obj) {
         if (obj instanceof Number) {
             return new DateTime(((Number) obj).longValue());
@@ -133,11 +134,12 @@ public class JodaDateTimeType extends AbstractJodaDateTimeType<DateTime> {
      * }</pre>
      *
      * @param str the string to parse
-     * @return a DateTime instance, or null if the string is empty or null
+     * @return a DateTime instance, or {@code null} if the string is empty or null
      * @throws IllegalArgumentException if the string format is invalid
      */
     @MayReturnNull
     @Override
+
     public DateTime valueOf(final String str) {
         if (Strings.isEmpty(str)) {
             return null; // NOSONAR
@@ -182,10 +184,11 @@ public class JodaDateTimeType extends AbstractJodaDateTimeType<DateTime> {
      * @param cbuf the character buffer containing the value to parse
      * @param offset the start offset in the character buffer
      * @param len the number of characters to parse
-     * @return a DateTime instance, or null if the character buffer is null or length is 0
+     * @return a DateTime instance, or {@code null} if the character buffer is {@code null} or length is 0
      */
     @MayReturnNull
     @Override
+
     public DateTime valueOf(final char[] cbuf, final int offset, final int len) {
         if ((cbuf == null) || (len == 0)) {
             return null; // NOSONAR
@@ -208,7 +211,7 @@ public class JodaDateTimeType extends AbstractJodaDateTimeType<DateTime> {
      * from SQL TIMESTAMP columns and converting them to Joda-Time DateTime instances.
      *
      * This method reads a Timestamp from the ResultSet and converts it to a Joda DateTime.
-     * If the timestamp is null, this method returns null.
+     * If the timestamp is {@code null}, this method returns {@code null}.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -228,10 +231,11 @@ public class JodaDateTimeType extends AbstractJodaDateTimeType<DateTime> {
      *
      * @param rs the ResultSet to read from
      * @param columnIndex the column index (1-based) to retrieve the value from
-     * @return a DateTime instance created from the timestamp, or null if the column value is SQL NULL
+     * @return a DateTime instance created from the timestamp, or {@code null} if the column value is SQL NULL
      * @throws SQLException if a database access error occurs or the column index is invalid
      */
     @Override
+    @MayReturnNull
     public DateTime get(final ResultSet rs, final int columnIndex) throws SQLException {
         final Timestamp ts = rs.getTimestamp(columnIndex);
 
@@ -244,7 +248,7 @@ public class JodaDateTimeType extends AbstractJodaDateTimeType<DateTime> {
      * reading from SQL TIMESTAMP columns and converting them to Joda-Time DateTime instances.
      *
      * This method reads a Timestamp from the ResultSet and converts it to a Joda DateTime.
-     * If the timestamp is null, this method returns null.
+     * If the timestamp is {@code null}, this method returns {@code null}.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -265,10 +269,11 @@ public class JodaDateTimeType extends AbstractJodaDateTimeType<DateTime> {
      *
      * @param rs the ResultSet to read from
      * @param columnLabel the column label to retrieve the value from
-     * @return a DateTime instance created from the timestamp, or null if the column value is SQL NULL
+     * @return a DateTime instance created from the timestamp, or {@code null} if the column value is SQL NULL
      * @throws SQLException if a database access error occurs or the column label is invalid
      */
     @Override
+    @MayReturnNull
     public DateTime get(final ResultSet rs, final String columnLabel) throws SQLException {
         final Timestamp ts = rs.getTimestamp(columnLabel);
 
@@ -281,7 +286,7 @@ public class JodaDateTimeType extends AbstractJodaDateTimeType<DateTime> {
      * objects into SQL TIMESTAMP values for database insertion or update operations.
      *
      * This method converts the Joda DateTime to a SQL Timestamp before setting it in the statement.
-     * If the DateTime is null, a SQL NULL is set for the parameter.
+     * If the DateTime is {@code null}, a SQL NULL is set for the parameter.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -301,7 +306,7 @@ public class JodaDateTimeType extends AbstractJodaDateTimeType<DateTime> {
      *
      * @param stmt the PreparedStatement to set the parameter on
      * @param columnIndex the parameter index (1-based) to set
-     * @param x the DateTime value to set, or null for SQL NULL
+     * @param x the DateTime value to set, or {@code null} for SQL NULL
      * @throws SQLException if a database access error occurs or the parameter index is invalid
      */
     @Override
@@ -315,7 +320,7 @@ public class JodaDateTimeType extends AbstractJodaDateTimeType<DateTime> {
      * transforming Joda-Time DateTime objects into SQL TIMESTAMP values using named parameters.
      *
      * This method converts the Joda DateTime to a SQL Timestamp before setting it in the statement.
-     * If the DateTime is null, a SQL NULL is set for the parameter.
+     * If the DateTime is {@code null}, a SQL NULL is set for the parameter.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -335,7 +340,7 @@ public class JodaDateTimeType extends AbstractJodaDateTimeType<DateTime> {
      *
      * @param stmt the CallableStatement to set the parameter on
      * @param parameterName the name of the parameter to set
-     * @param x the DateTime value to set, or null for SQL NULL
+     * @param x the DateTime value to set, or {@code null} for SQL NULL
      * @throws SQLException if a database access error occurs or the parameter name is invalid
      */
     @Override

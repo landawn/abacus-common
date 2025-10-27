@@ -71,16 +71,16 @@ import com.landawn.abacus.util.stream.Stream;
  *   <li><b>String Building:</b> Efficient concatenation and joining operations</li>
  *   <li><b>Pattern Matching:</b> Work with regular expressions and wildcards</li>
  * </ul>
- * 
- * <h3>Design Philosophy</h3>
+ *
+ * <h2>Design Philosophy</h2>
  * <ul>
  *   <li>Methods are designed to be null-safe where reasonable, returning sensible defaults instead of throwing exceptions</li>
  *   <li>Empty strings are preferred over {@code null} as return values</li>
  *   <li>Methods follow consistent naming patterns for discoverability</li>
  *   <li>Performance optimizations are applied for common operations</li>
  * </ul>
- * 
- * <h3>Exception Handling</h3>
+ *
+ * <h2>Exception Handling</h2>
  * <p>This class is designed to avoid throwing unnecessary exceptions. For example:
  * <ul>
  *   <li>Reversing a {@code null} or empty string returns the input unchanged</li>
@@ -164,12 +164,27 @@ public abstract sealed class Strings permits Strings.StringUtil {
      */
     public static final String CR_LF = "\r\n";
 
+    /**
+     * The null character (character with value 0).
+     */
     @Beta
     public static final char CHAR_ZERO = (char) 0;
+
+    /**
+     * The space character ' '.
+     */
     @Beta
     public static final char CHAR_SPACE = WD._SPACE;
+
+    /**
+     * The line feed character '\n' (newline on Unix systems).
+     */
     @Beta
     public static final char CHAR_LF = LF.charAt(0);
+
+    /**
+     * The carriage return character '\r' (part of line ending on Windows systems).
+     */
     @Beta
     public static final char CHAR_CR = CR.charAt(0);
 
@@ -299,6 +314,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @see String#valueOf(char[])
      * @see N#toString(Object)
      */
+    @MayReturnNull
     public static String valueOf(final char[] value) {
         return value == null ? null : String.valueOf(value);
     }
@@ -310,7 +326,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
       * Identifiers cannot start with a number, and they cannot be a Java keyword or boolean literal (true or false).
       * Subsequent characters may include letters, digits, currency characters, or connecting characters.</p>
       *
-      * <p>The method returns {@code false} for null or empty input.</p>
+      * <p>The method returns {@code false} for {@code null} or empty input.</p>
       *
       * <p><b>Usage Examples:</b></p>
       * <pre>{@code
@@ -349,7 +365,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * keywords in the Java programming language. Java keywords include reserved words like
      * {@code class}, {@code public}, {@code if}, {@code else}, etc.</p>
      *
-     * <p>The method returns {@code false} for null or empty input.</p>
+     * <p>The method returns {@code false} for {@code null} or empty input.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -381,10 +397,10 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * Checks if the given CharSequence is a valid email address.
      *
      * <p>This method uses a regular expression (RFC 5322) to validate the email address. It checks for the general form of an email address
-     * which is "local-part@domain". The local-part can contain alphanumeric characters and special characters like !, #, $, %, &, ', *, +, -, /, =, ?, ^, _, `, {, |, } and ~.
+     * which is "local-part@domain". The local-part can contain alphanumeric characters and special characters like !, #, $, %, &amp;, ', *, +, -, /, =, ?, ^, _, `, {, |, } and ~.
      * The domain part contains at least one dot (.) and can contain alphanumeric characters as well as hyphens (-).</p>
      *
-     * <p>The method returns {@code false} for null or empty input.</p>
+     * <p>The method returns {@code false} for {@code null} or empty input.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -421,7 +437,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * which includes protocol, domain, port, path, query parameters, and fragment identifier.
      * The URL can start with various protocols including http, https, ftp, file, etc.</p>
      *
-     * <p>The method returns {@code false} for null or empty input.</p>
+     * <p>The method returns {@code false} for {@code null} or empty input.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -456,7 +472,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * which includes protocol, domain, port, path, query parameters, and fragment identifier.
      * The URL must start with http:// or https://.</p>
      *
-     * <p>The method returns {@code false} for null or empty input.</p>
+     * <p>The method returns {@code false} for {@code null} or empty input.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -509,7 +525,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
     /**
      * Checks if the given CharSequence is {@code null} or contains only whitespace characters.
      *
-     * <p>A CharSequence is considered blank if it is null, empty, or contains only whitespace
+     * <p>A CharSequence is considered blank if it is {@code null}, empty, or contains only whitespace
      * characters as defined by {@link Character#isWhitespace(char)}. This includes spaces,
      * tabs, newlines, and other Unicode whitespace characters.</p>
      *
@@ -548,7 +564,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * Checks if the given CharSequence is not {@code null} and not empty.
      *
      * <p>This method is the opposite of {@link #isEmpty(CharSequence)}. It returns {@code true}
-     * when the CharSequence is not null and has at least one character.</p>
+     * when the CharSequence is not {@code null} and has at least one character.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -570,7 +586,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * Checks if the given CharSequence is not {@code null} and contains non-whitespace characters.
      *
      * <p>This method is the opposite of {@link #isBlank(CharSequence)}. It returns {@code true}
-     * when the CharSequence is not null and contains at least one non-whitespace character.</p>
+     * when the CharSequence is not {@code null} and contains at least one non-whitespace character.</p>
      *
      * <p>This method is marked as @Beta, indicating it may be subject to change in future versions.</p>
      *
@@ -594,7 +610,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
     /**
      * Checks if both of the provided CharSequences are empty or {@code null}.
      *
-     * <p>This method returns {@code true} only when both CharSequences are either null or empty.
+     * <p>This method returns {@code true} only when both CharSequences are either {@code null} or empty.
      * If at least one CharSequence is not empty, the method returns {@code false}.</p>
      *
      * <p><b>Usage Examples:</b></p>
@@ -619,7 +635,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
     /**
      * Checks if all the provided CharSequences are empty or {@code null}.
      *
-     * <p>This method returns {@code true} only when all three CharSequences are either null or empty.
+     * <p>This method returns {@code true} only when all three CharSequences are either {@code null} or empty.
      * If at least one CharSequence is not empty, the method returns {@code false}.</p>
      *
      * <p><b>Usage Examples:</b></p>
@@ -644,8 +660,8 @@ public abstract sealed class Strings permits Strings.StringUtil {
     /**
      * Checks if all the CharSequences are empty or {@code null}.
      *
-     * <p>This method returns {@code true} only when all provided CharSequences are either null or empty.
-     * If the input array itself is null or empty, the method returns {@code true}.
+     * <p>This method returns {@code true} only when all provided CharSequences are either {@code null} or empty.
+     * If the input array itself is {@code null} or empty, the method returns {@code true}.
      * If at least one CharSequence is not empty, the method returns {@code false}.</p>
      *
      * <p><b>Usage Examples:</b></p>
@@ -682,8 +698,8 @@ public abstract sealed class Strings permits Strings.StringUtil {
     /**
      * Checks if all the provided CharSequences in the Iterable are empty or {@code null}.
      *
-     * <p>This method returns {@code true} only when all CharSequences in the Iterable are either null or empty.
-     * If the Iterable itself is null or empty, the method returns {@code true}.
+     * <p>This method returns {@code true} only when all CharSequences in the Iterable are either {@code null} or empty.
+     * If the Iterable itself is {@code null} or empty, the method returns {@code true}.
      * If at least one CharSequence is not empty, the method returns {@code false}.</p>
      *
      * <p><b>Usage Examples:</b></p>
@@ -718,7 +734,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
     /**
      * Checks if both of the provided CharSequences are blank or {@code null}.
      *
-     * <p>This method returns {@code true} only when both CharSequences are either null, empty, or contain only whitespace.
+     * <p>This method returns {@code true} only when both CharSequences are either {@code null}, empty, or contain only whitespace.
      * If at least one CharSequence contains non-whitespace characters, the method returns {@code false}.</p>
      *
      * <p><b>Usage Examples:</b></p>
@@ -742,7 +758,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
     /**
      * Checks if all the provided CharSequences are blank or {@code null}.
      *
-     * <p>This method returns {@code true} only when all three CharSequences are either null, empty, or contain only whitespace.
+     * <p>This method returns {@code true} only when all three CharSequences are either {@code null}, empty, or contain only whitespace.
      * If at least one CharSequence contains non-whitespace characters, the method returns {@code false}.</p>
      *
      * <p><b>Usage Examples:</b></p>
@@ -768,8 +784,8 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *
      * <p>Whitespace is defined by {@link Character#isWhitespace(char)}.</p>
      *
-     * <p>This method returns {@code true} only when all provided CharSequences are either null, empty, or contain only whitespace.
-     * If the input array itself is null or empty, the method returns {@code true}.
+     * <p>This method returns {@code true} only when all provided CharSequences are either {@code null}, empty, or contain only whitespace.
+     * If the input array itself is {@code null} or empty, the method returns {@code true}.
      * If at least one CharSequence contains non-whitespace characters, the method returns {@code false}.</p>
      *
      * <p><b>Usage Examples:</b></p>
@@ -806,8 +822,8 @@ public abstract sealed class Strings permits Strings.StringUtil {
     /**
      * Checks if all the provided CharSequences in the Iterable are blank or {@code null}.
      *
-     * <p>This method returns {@code true} only when all CharSequences in the Iterable are either null, empty, or contain only whitespace.
-     * If the Iterable itself is null or empty, the method returns {@code true}.
+     * <p>This method returns {@code true} only when all CharSequences in the Iterable are either {@code null}, empty, or contain only whitespace.
+     * If the Iterable itself is {@code null} or empty, the method returns {@code true}.
      * If at least one CharSequence contains non-whitespace characters, the method returns {@code false}.</p>
      *
      * <p><b>Usage Examples:</b></p>
@@ -842,7 +858,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
     /**
      * Checks if any of the provided CharSequences are empty or {@code null}.
      *
-     * <p>This method returns {@code true} if at least one of the two CharSequences is either null or empty.
+     * <p>This method returns {@code true} if at least one of the two CharSequences is either {@code null} or empty.
      * It returns {@code false} only when both CharSequences are not empty.</p>
      *
      * <p><b>Usage Examples:</b></p>
@@ -867,7 +883,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
     /**
      * Checks if any of the provided CharSequences are empty or {@code null}.
      *
-     * <p>This method returns {@code true} if at least one of the three CharSequences is either null or empty.
+     * <p>This method returns {@code true} if at least one of the three CharSequences is either {@code null} or empty.
      * It returns {@code false} only when all CharSequences are not empty.</p>
      *
      * <p><b>Usage Examples:</b></p>
@@ -892,8 +908,8 @@ public abstract sealed class Strings permits Strings.StringUtil {
     /**
      * Checks if any of the CharSequences are empty or {@code null}.
      *
-     * <p>This method returns {@code true} if at least one of the provided CharSequences is either null or empty.
-     * If the input array itself is null or has zero length, the method returns {@code false}.
+     * <p>This method returns {@code true} if at least one of the provided CharSequences is either {@code null} or empty.
+     * If the input array itself is {@code null} or has zero length, the method returns {@code false}.
      * It returns {@code false} only when all CharSequences in the array are not empty.</p>
      *
      * <p><b>Usage Examples:</b></p>
@@ -931,8 +947,8 @@ public abstract sealed class Strings permits Strings.StringUtil {
     /**
      * Checks if any of the provided CharSequences in the Iterable are empty or {@code null}.
      *
-     * <p>This method returns {@code true} if at least one CharSequence in the Iterable is either null or empty.
-     * If the Iterable itself is null or empty, the method returns {@code false}.
+     * <p>This method returns {@code true} if at least one CharSequence in the Iterable is either {@code null} or empty.
+     * If the Iterable itself is {@code null} or empty, the method returns {@code false}.
      * It returns {@code false} only when all CharSequences in the Iterable are not empty.</p>
      *
      * <p><b>Usage Examples:</b></p>
@@ -967,7 +983,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
     /**
      * Checks if any of the provided CharSequences are blank or {@code null}.
      *
-     * <p>This method returns {@code true} if at least one of the two CharSequences is either null, empty, or contains only whitespace.
+     * <p>This method returns {@code true} if at least one of the two CharSequences is either {@code null}, empty, or contains only whitespace.
      * It returns {@code false} only when both CharSequences contain non-whitespace characters.</p>
      *
      * <p><b>Usage Examples:</b></p>
@@ -991,7 +1007,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
     /**
      * Checks if any of the provided CharSequences are blank or {@code null}.
      *
-     * <p>This method returns {@code true} if at least one of the three CharSequences is either null, empty, or contains only whitespace.
+     * <p>This method returns {@code true} if at least one of the three CharSequences is either {@code null}, empty, or contains only whitespace.
      * It returns {@code false} only when all CharSequences contain non-whitespace characters.</p>
      *
      * <p><b>Usage Examples:</b></p>
@@ -1017,8 +1033,8 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *
      * <p>Whitespace is defined by {@link Character#isWhitespace(char)}.</p>
      *
-     * <p>This method returns {@code true} if at least one of the provided CharSequences is either null, empty, or contains only whitespace.
-     * If the input array itself is null or has zero length, the method returns {@code false}.
+     * <p>This method returns {@code true} if at least one of the provided CharSequences is either {@code null}, empty, or contains only whitespace.
+     * If the input array itself is {@code null} or has zero length, the method returns {@code false}.
      * It returns {@code false} only when all CharSequences in the array contain non-whitespace characters.</p>
      *
      * <p><b>Usage Examples:</b></p>
@@ -1057,8 +1073,8 @@ public abstract sealed class Strings permits Strings.StringUtil {
     /**
      * Checks if any of the provided CharSequences in the Iterable are blank or {@code null}.
      *
-     * <p>This method returns {@code true} if at least one CharSequence in the Iterable is either null, empty, or contains only whitespace.
-     * If the Iterable itself is null or empty, the method returns {@code false}.
+     * <p>This method returns {@code true} if at least one CharSequence in the Iterable is either {@code null}, empty, or contains only whitespace.
+     * If the Iterable itself is {@code null} or empty, the method returns {@code false}.
      * It returns {@code false} only when all CharSequences in the Iterable contain non-whitespace characters.</p>
      *
      * <p><b>Usage Examples:</b></p>
@@ -1150,8 +1166,8 @@ public abstract sealed class Strings permits Strings.StringUtil {
     /**
      * Returns the specified default value if the given {@code charSequence} is {@code null}, otherwise returns the {@code charSequence} itself.
      *
-     * <p>This method provides a null-safe way to ensure a CharSequence is never null.
-     * The default value must not be null.</p>
+     * <p>This method provides a null-safe way to ensure a CharSequence is never {@code null}.
+     * The default value must not be {@code null}.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1179,8 +1195,8 @@ public abstract sealed class Strings permits Strings.StringUtil {
     /**
      * Returns the default value provided by specified {@code Supplier} if the specified {@code charSequence} is {@code null}, otherwise returns the {@code charSequence} itself.
      *
-     * <p>This method provides a null-safe way to ensure a CharSequence is never null, with lazy evaluation of the default value.
-     * The supplier is only invoked if the input CharSequence is null.</p>
+     * <p>This method provides a null-safe way to ensure a CharSequence is never {@code null}, with lazy evaluation of the default value.
+     * The supplier is only invoked if the input CharSequence is {@code null}.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1210,7 +1226,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
     /**
      * Returns the specified default value if the specified {@code charSequence} is empty, otherwise returns the {@code charSequence} itself.
      *
-     * <p>This method considers a CharSequence empty if it is null or has zero length.
+     * <p>This method considers a CharSequence empty if it is {@code null} or has zero length.
      * The default value must not be empty.</p>
      *
      * <p><b>Usage Examples:</b></p>
@@ -1240,7 +1256,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
     /**
      * Returns the default value provided by specified {@code Supplier} if the specified {@code charSequence} is empty, otherwise returns the {@code charSequence} itself.
      *
-     * <p>This method considers a CharSequence empty if it is null or has zero length.
+     * <p>This method considers a CharSequence empty if it is {@code null} or has zero length.
      * The supplier is only invoked if the input CharSequence is empty.</p>
      *
      * <p><b>Usage Examples:</b></p>
@@ -1272,7 +1288,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
     /**
      * Returns the specified default value if the specified {@code charSequence} is blank, otherwise returns the {@code charSequence} itself.
      *
-     * <p>This method considers a CharSequence blank if it is null, empty, or contains only whitespace characters.
+     * <p>This method considers a CharSequence blank if it is {@code null}, empty, or contains only whitespace characters.
      * The default value must not be blank.</p>
      *
      * <p><b>Usage Examples:</b></p>
@@ -1303,7 +1319,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
     /**
      * Returns the default value provided by specified {@code Supplier} if the specified {@code charSequence} is blank, otherwise returns the {@code charSequence} itself.
      *
-     * <p>This method considers a CharSequence blank if it is null, empty, or contains only whitespace characters.
+     * <p>This method considers a CharSequence blank if it is {@code null}, empty, or contains only whitespace characters.
      * The supplier is only invoked if the input CharSequence is blank.</p>
      *
      * <p><b>Usage Examples:</b></p>
@@ -1336,7 +1352,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * Returns the first non-empty String from the given two Strings.
      *
      * <p>This method checks the strings in order and returns the first one that is not empty.
-     * A string is considered empty if it is null or has zero length.
+     * A string is considered empty if it is {@code null} or has zero length.
      * If both strings are empty, an empty string ("") is returned.</p>
      *
      * <p><b>Usage Examples:</b></p>
@@ -1361,7 +1377,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * Returns the first non-empty String from the given three Strings.
      *
      * <p>This method checks the strings in order and returns the first one that is not empty.
-     * A string is considered empty if it is null or has zero length.
+     * A string is considered empty if it is {@code null} or has zero length.
      * If all strings are empty, an empty string ("") is returned.</p>
      *
      * <p><b>Usage Examples:</b></p>
@@ -1388,7 +1404,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * Returns the first non-empty String from the given array of Strings.
      *
      * <p>This method iterates through the strings and returns the first one that is not empty.
-     * A string is considered empty if it is null or has zero length.
+     * A string is considered empty if it is {@code null} or has zero length.
      * If all values are empty or the array is {@code null} or empty, an empty string ("") is returned.</p>
      *
      * <p><b>Usage Examples:</b></p>
@@ -1425,8 +1441,8 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * Returns the first non-empty String from the given Iterable of Strings.
      *
      * <p>This method iterates through the strings and returns the first one that is not empty.
-     * A string is considered empty if it is null or has zero length.
-     * If all strings are empty or the Iterable is null or empty, an empty string ("") is returned.</p>
+     * A string is considered empty if it is {@code null} or has zero length.
+     * If all strings are empty or the Iterable is {@code null} or empty, an empty string ("") is returned.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1462,7 +1478,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * Returns the first non-blank String from the given two Strings.
      *
      * <p>This method checks the strings in order and returns the first one that is not blank.
-     * A string is considered blank if it is null, empty, or contains only whitespace characters.
+     * A string is considered blank if it is {@code null}, empty, or contains only whitespace characters.
      * If both strings are blank, an empty string ("") is returned.</p>
      *
      * <p><b>Usage Examples:</b></p>
@@ -1487,7 +1503,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * Returns the first non-blank String from the given three Strings.
      *
      * <p>This method checks the strings in order and returns the first one that is not blank.
-     * A string is considered blank if it is null, empty, or contains only whitespace characters.
+     * A string is considered blank if it is {@code null}, empty, or contains only whitespace characters.
      * If all strings are blank, an empty string ("") is returned.</p>
      *
      * <p><b>Usage Examples:</b></p>
@@ -1514,8 +1530,8 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * Returns the first non-blank String from the given Strings.
      *
      * <p>This method checks the strings in order and returns the first one that is not blank.
-     * A string is considered blank if it is null, empty, or contains only whitespace characters.
-     * If all strings are blank or the array is null or empty, an empty string ("") is returned.</p>
+     * A string is considered blank if it is {@code null}, empty, or contains only whitespace characters.
+     * If all strings are blank or the array is {@code null} or empty, an empty string ("") is returned.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1549,8 +1565,8 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * Returns the first non-blank String from the given Iterable of Strings.
      *
      * <p>This method iterates through the strings and returns the first one that is not blank.
-     * A string is considered blank if it is null, empty, or contains only whitespace characters.
-     * If all strings are blank or the Iterable is null or empty, an empty string ("") is returned.</p>
+     * A string is considered blank if it is {@code null}, empty, or contains only whitespace characters.
+     * If all strings are blank or the Iterable is {@code null} or empty, an empty string ("") is returned.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1585,7 +1601,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
     /**
      * Converts the specified String to an empty String {@code ""} if it's {@code null}, otherwise returns the original string.
      *
-     * <p>This method provides a null-safe way to ensure a string is never null, converting null values to empty strings.</p>
+     * <p>This method provides a null-safe way to ensure a string is never {@code null}, converting {@code null} values to empty strings.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1607,7 +1623,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * Converts each {@code null} String element in the specified String array to an empty String {@code ""}.
      * Do nothing if the input array is {@code null} or empty.
      *
-     * <p>This method modifies the array in-place, replacing all null elements with empty strings.
+     * <p>This method modifies the array in-place, replacing all {@code null} elements with empty strings.
      * Non-null elements remain unchanged.</p>
      *
      * <p><b>Usage Examples:</b></p>
@@ -1640,7 +1656,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * Converts the specified String to {@code null} if it's empty, otherwise returns the original string.
      *
      * <p>This method considers a string empty if it has zero length. Strings containing only whitespace
-     * are not considered empty and will not be converted to null.</p>
+     * are not considered empty and will not be converted to {@code null}.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1650,6 +1666,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * emptyToNull("hello");                          // returns "hello"
      * }</pre>
      *
+     * @param <T> the type of the CharSequence
      * @param str the input string to be checked, may be {@code null} or empty
      * @return {@code null} if the input string is empty, otherwise the original string.
      */
@@ -1661,8 +1678,8 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * Converts each empty String element in the specified String array to {@code null}.
      * Do nothing if the input array is {@code null} or empty.
      *
-     * <p>This method modifies the array in-place, replacing all empty string elements with null.
-     * Non-empty elements and null elements remain unchanged.</p>
+     * <p>This method modifies the array in-place, replacing all empty string elements with {@code null}.
+     * Non-empty elements and {@code null} elements remain unchanged.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1676,6 +1693,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * emptyToNull(new String[0]);                    // does nothing
      * }</pre>
      *
+     * @param <T> the type of the CharSequence
      * @param strs the input string array to be checked. Each empty element in the array will be converted to {@code null}, may be {@code null} or empty
      */
     public static <T extends CharSequence> void emptyToNull(final T[] strs) {
@@ -1691,7 +1709,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
     /**
      * Converts the specified String to an empty String {@code ""} if it's blank, otherwise returns the original string.
      *
-     * <p>This method considers a string blank if it is null, empty, or contains only whitespace characters.</p>
+     * <p>This method considers a string blank if it is {@code null}, empty, or contains only whitespace characters.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1715,7 +1733,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * Do nothing if the input array is {@code null} or empty.
      *
      * <p>This method modifies the array in-place, replacing all blank string elements with empty strings.
-     * A string is considered blank if it is null, empty, or contains only whitespace characters.
+     * A string is considered blank if it is {@code null}, empty, or contains only whitespace characters.
      * Non-blank elements remain unchanged.</p>
      *
      * <p><b>Usage Examples:</b></p>
@@ -1745,7 +1763,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
     /**
      * Converts the specified String to {@code null} if it's blank, otherwise returns the original string.
      *
-     * <p>This method considers a string blank if it is null, empty, or contains only whitespace characters.</p>
+     * <p>This method considers a string blank if it is {@code null}, empty, or contains only whitespace characters.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1757,6 +1775,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * blankToNull("  hello  ");                      // returns "  hello  "
      * }</pre>
      *
+     * @param <T> the type of the CharSequence
      * @param str the input string to be checked, may be {@code null} or empty
      * @return {@code null} if the input string is blank, otherwise the original string.
      */
@@ -1768,8 +1787,8 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * Converts each blank String element in the specified String array to {@code null}.
      * Do nothing if the input array is {@code null} or empty.
      *
-     * <p>This method modifies the array in-place, replacing all blank string elements with null.
-     * A string is considered blank if it is null, empty, or contains only whitespace characters.
+     * <p>This method modifies the array in-place, replacing all blank string elements with {@code null}.
+     * A string is considered blank if it is {@code null}, empty, or contains only whitespace characters.
      * Non-blank elements remain unchanged.</p>
      *
      * <p><b>Usage Examples:</b></p>
@@ -1784,6 +1803,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * blankToNull(new String[0]);                    // does nothing
      * }</pre>
      *
+     * @param <T> the type of the CharSequence
      * @param strs the input string array to be checked. Each blank element in the array will be converted to {@code null}, may be {@code null} or empty
      */
     public static <T extends CharSequence> void blankToNull(final T[] strs) {
@@ -2457,7 +2477,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * Repeats the given string a specified number of times and returns the resulting string.
      *
      * <p>This method creates a string consisting of the specified string repeated n times.
-     * If the input string is null or empty, or n is 0, empty string {@code ""} is returned.</p>
+     * If the input string is {@code null} or empty, or n is 0, empty string {@code ""} is returned.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -2471,7 +2491,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *
      * @param str the string to be repeated, may be {@code null} or empty
      * @param n the number of times the string should be repeated. Must be non-negative.
-     * @return a string consisting of the given string repeated n times, an empty string {@code ""} if the input string is null or empty, or n is 0.
+     * @return a string consisting of the given string repeated n times, an empty string {@code ""} if the input string is {@code null} or empty, or n is 0.
      * @throws IllegalArgumentException if n is negative.
      * @see #repeat(char, int, char)
      * @see #repeat(String, int, String)
@@ -4093,7 +4113,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * <p>This method searches for the first occurrence of the target string in the input string without considering case differences,
      * and replaces it with the specified replacement string. The search starts from the beginning of the input string.</p>
      *
-     * <p>The method returns the original string if the target is not found or if the input/target is null or empty.</p>
+     * <p>The method returns the original string if the target is not found or if the input/target is {@code null} or empty.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -4121,7 +4141,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * <p>This method searches for the first occurrence of the target string in the input string starting from the specified index,
      * without considering case differences, and replaces it with the specified replacement string.</p>
      *
-     * <p>The method returns the original string if the target is not found after the specified index or if the input/target is null or empty.</p>
+     * <p>The method returns the original string if the target is not found after the specified index or if the input/target is {@code null} or empty.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -4150,7 +4170,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * without considering case differences, and replaces them with the specified replacement string up to the maximum number specified.</p>
      *
      * <p>If max is -1, all occurrences will be replaced. If max is 0, no replacements will be made.
-     * If the replacement is null, it will be treated as an empty string.</p>
+     * If the replacement is {@code null}, it will be treated as an empty string.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -5390,7 +5410,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * }</pre>
      *
      * @param str the String to be trimmed, may be {@code null}
-     * @return the trimmed string, {@code null} if null String input
+     * @return the trimmed string, {@code null} if {@code null} String input
      */
     public static String trim(final String str) {
         return isEmpty(str) || (!Character.isWhitespace(str.charAt(0)) && !Character.isWhitespace(str.charAt(str.length() - 1))) ? str : str.trim();
@@ -5440,8 +5460,9 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * }</pre>
      *
      * @param str the String to be trimmed, may be {@code null}
-     * @return the trimmed String, {@code null} if only spaces, empty or null String input
+     * @return the trimmed String, {@code null} if only spaces, empty or {@code null} String input
      */
+    @MayReturnNull
     public static String trimToNull(String str) {
         str = trim(str);
 
@@ -5550,7 +5571,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * }</pre>
      *
      * @param str the String to remove whitespace from, may be {@code null}
-     * @return the stripped String, {@code null} if null String input
+     * @return the stripped String, {@code null} if {@code null} String input
      */
     public static String strip(final String str) {
         return strip(str, null);
@@ -5603,8 +5624,9 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * }</pre>
      *
      * @param str the String to be stripped, may be {@code null}
-     * @return the stripped String, {@code null} if whitespace, empty or null String input
+     * @return the stripped String, {@code null} if whitespace, empty or {@code null} String input
      */
+    @MayReturnNull
     public static String stripToNull(String str) {
         str = strip(str, null);
 
@@ -5773,7 +5795,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * }</pre>
      *
      * @param str the String to remove whitespace from, may be {@code null}
-     * @return the stripped String, {@code null} if null String input
+     * @return the stripped String, {@code null} if {@code null} String input
      */
     public static String stripStart(final String str) {
         return stripStart(str, null);
@@ -5870,7 +5892,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * }</pre>
      *
      * @param str the String to remove whitespace from, may be {@code null}
-     * @return the stripped String, {@code null} if null String input
+     * @return the stripped String, {@code null} if {@code null} String input
      */
     public static String stripEnd(final String str) {
         return stripEnd(str, null);
@@ -5971,7 +5993,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * }</pre>
      *
      * @param str the String to strip accents from, may be {@code null}
-     * @return the stripped String, {@code null} if null String input
+     * @return the stripped String, {@code null} if {@code null} String input
      */
     // See also Lucene's ASCIIFoldingFilter (Lucene 2.9) that replaces accented
     // characters by their unaccented equivalent (and uncommitted bug fix:
@@ -7322,7 +7344,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * }</pre>
      *
      * @param cs the CharSequence to check, may be null
-     * @return {@code true} if every character is ASCII printable, {@code false} if the CharSequence is null or contains non-printable characters
+     * @return {@code true} if every character is ASCII printable, {@code false} if the CharSequence is {@code null} or contains non-printable characters
      */
     public static boolean isAsciiPrintable(final CharSequence cs) {
         if (cs == null) {
@@ -7346,7 +7368,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * <p>ASCII alphabetic characters are those in the ranges 'a' through 'z' (lowercase) and 'A' through 'Z' (uppercase).
      * The method does not consider non-ASCII Unicode letters as alphabetic.</p>
      *
-     * <p>The method returns {@code false} for null or empty input.</p>
+     * <p>The method returns {@code false} for {@code null} or empty input.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -7389,7 +7411,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * <p>ASCII alphabetic characters are those in the ranges 'a' through 'z' (lowercase) and 'A' through 'Z' (uppercase).
      * Space character (' ') is also allowed. The method does not consider non-ASCII Unicode letters or other whitespace characters.</p>
      *
-     * <p>The method returns {@code false} for null input, but {@code true} for empty string.</p>
+     * <p>The method returns {@code false} for {@code null} input, but {@code true} for empty string.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -7406,7 +7428,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * }</pre>
      *
      * @param cs the CharSequence to be checked, may be {@code null} or empty
-     * @return {@code true} if the CharSequence contains only ASCII alphabetic characters and spaces and is non-null, {@code false} otherwise.
+     * @return {@code true} if the CharSequence contains only ASCII alphabetic characters and spaces and is {@code non-null}, {@code false} otherwise.
      * @see #isAsciiAlpha(CharSequence)
      * @see #isAlphaSpace(CharSequence)
      */
@@ -7436,7 +7458,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * 'A' through 'Z' (uppercase), and digits '0' through '9'. The method does not consider
      * non-ASCII Unicode letters or digits as alphanumeric.</p>
      *
-     * <p>The method returns {@code false} for null or empty input.</p>
+     * <p>The method returns {@code false} for {@code null} or empty input.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -7483,7 +7505,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * 'A' through 'Z' (uppercase), and digits '0' through '9'. Space character (' ') is also allowed.
      * The method does not consider non-ASCII Unicode letters, digits, or other whitespace characters.</p>
      *
-     * <p>The method returns {@code false} for null input, but {@code true} for empty string.</p>
+     * <p>The method returns {@code false} for {@code null} input, but {@code true} for empty string.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -7500,7 +7522,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * }</pre>
      *
      * @param cs the CharSequence to be checked, may be {@code null} or empty
-     * @return {@code true} if the CharSequence contains only ASCII alphanumeric characters and spaces and is non-null, {@code false} otherwise.
+     * @return {@code true} if the CharSequence contains only ASCII alphanumeric characters and spaces and is {@code non-null}, {@code false} otherwise.
      * @see #isAsciiAlphanumeric(CharSequence)
      * @see #isAlphanumericSpace(CharSequence)
      */
@@ -7529,7 +7551,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * <p>ASCII numeric characters are those in the range '0' through '9'. The method does not
      * consider decimal points, signs (+ or -), or non-ASCII Unicode digits as numeric.</p>
      *
-     * <p>The method returns {@code false} for null or empty input.</p>
+     * <p>The method returns {@code false} for {@code null} or empty input.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -7578,7 +7600,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * all Unicode letters from any language, not just ASCII letters. This is broader than
      * {@link #isAsciiAlpha(CharSequence)} which only checks for ASCII letters.</p>
      *
-     * <p>The method returns {@code false} for null or empty input.</p>
+     * <p>The method returns {@code false} for {@code null} or empty input.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -7625,7 +7647,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * which includes all Unicode letters from any language. Only the space character (' ') is
      * allowed as whitespace; tabs, newlines, and other whitespace characters are not allowed.</p>
      *
-     * <p>The method returns {@code false} for null input, but {@code true} for empty string.</p>
+     * <p>The method returns {@code false} for {@code null} input, but {@code true} for empty string.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -7645,7 +7667,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * }</pre>
      *
      * @param cs the CharSequence to check, may be {@code null}
-     * @return {@code true} if only contains letters and spaces and is non-null, {@code false} otherwise.
+     * @return {@code true} if only contains letters and spaces and is {@code non-null}, {@code false} otherwise.
      * @see #isAlpha(CharSequence)
      * @see #isAsciiAlphaSpace(CharSequence)
      */
@@ -7675,7 +7697,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * which includes all Unicode letters and digits from any language, not just ASCII.
      * This is broader than {@link #isAsciiAlphanumeric(CharSequence)}.</p>
      *
-     * <p>The method returns {@code false} for null or empty input.</p>
+     * <p>The method returns {@code false} for {@code null} or empty input.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -7723,7 +7745,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * which includes all Unicode letters and digits from any language. Only the space character (' ')
      * is allowed as whitespace; tabs, newlines, and other whitespace characters are not allowed.</p>
      *
-     * <p>The method returns {@code false} for null input, but {@code true} for empty string.</p>
+     * <p>The method returns {@code false} for {@code null} input, but {@code true} for empty string.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -7743,7 +7765,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * }</pre>
      *
      * @param cs the CharSequence to check, may be {@code null}
-     * @return {@code true} if only contains letters, digits or spaces and is non-null, {@code false} otherwise.
+     * @return {@code true} if only contains letters, digits or spaces and is {@code non-null}, {@code false} otherwise.
      * @see #isAlphanumeric(CharSequence)
      * @see #isAsciiAlphanumericSpace(CharSequence)
      */
@@ -7773,7 +7795,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * all Unicode digit characters from any language, not just ASCII digits 0-9. A decimal point
      * is not a Unicode digit and returns {@code false}.</p>
      *
-     * <p>The method returns {@code false} for null or empty input.</p>
+     * <p>The method returns {@code false} for {@code null} or empty input.</p>
      *
      * <p>Note that the method does not allow for a leading sign, either positive or negative.
      * Also, if a String passes the numeric test, it may still generate a NumberFormatException
@@ -7829,7 +7851,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * Unicode digit and returns {@code false}. Only the space character (' ') is allowed as
      * whitespace.</p>
      *
-     * <p>The method returns {@code false} for null input, but {@code true} for empty string.</p>
+     * <p>The method returns {@code false} for {@code null} input, but {@code true} for empty string.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -7850,7 +7872,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * }</pre>
      *
      * @param cs the CharSequence to check, may be {@code null}
-     * @return {@code true} if only contains digits or spaces and is non-null, {@code false} otherwise.
+     * @return {@code true} if only contains digits or spaces and is {@code non-null}, {@code false} otherwise.
      * @see #isNumeric(CharSequence)
      * @see Character#isDigit(char)
      */
@@ -7879,7 +7901,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * <p>Whitespace is defined by {@link Character#isWhitespace(char)}, which includes space,
      * tab, newline, carriage return, form feed, and other Unicode whitespace characters.</p>
      *
-     * <p>The method returns {@code false} for null input, but {@code true} for empty string.</p>
+     * <p>The method returns {@code false} for {@code null} input, but {@code true} for empty string.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -7898,7 +7920,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * }</pre>
      *
      * @param cs the CharSequence to check, may be {@code null}
-     * @return {@code true} if only contains whitespace and is non-null, {@code false} otherwise.
+     * @return {@code true} if only contains whitespace and is {@code non-null}, {@code false} otherwise.
      * @see Character#isWhitespace(char)
      */
     public static boolean isWhitespace(final CharSequence cs) {
@@ -7951,7 +7973,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * and exponential notation (e or E). The method validates proper number format including
      * optional sign, integer part, optional decimal part, and optional exponential part.</p>
      *
-     * <p>The method returns {@code false} for null, empty strings, or strings containing spaces.</p>
+     * <p>The method returns {@code false} for {@code null}, empty strings, or strings containing spaces.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -8067,7 +8089,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * The method does not allow decimal points, exponential notation, or any other characters.
      * Empty strings and strings containing only a sign are considered invalid.</p>
      *
-     * <p>The method returns {@code false} for null, empty strings, or strings containing spaces.</p>
+     * <p>The method returns {@code false} for {@code null}, empty strings, or strings containing spaces.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -8134,7 +8156,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * represented by this {@code String} object, then the index of the first such occurrence
      * is returned. The search starts from the beginning of the string.</p>
      *
-     * <p>The method returns {@code -1} for null or empty input strings.</p>
+     * <p>The method returns {@code -1} for {@code null} or empty input strings.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -8172,7 +8194,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * then the index of the first such occurrence is returned. If {@code fromIndex} is negative,
      * it is treated as zero.</p>
      *
-     * <p>The method returns {@code -1} for null or empty input strings.</p>
+     * <p>The method returns {@code -1} for {@code null} or empty input strings.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -8212,7 +8234,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * represented by the input {@code String} object, then the index of the first character
      * of the first such substring is returned. The search starts from the beginning of the string.</p>
      *
-     * <p>The method returns {@code -1} if the substring is not found, or if either parameter is null,
+     * <p>The method returns {@code -1} if the substring is not found, or if either parameter is {@code null},
      * or if the substring is longer than the string.</p>
      *
      * <p><b>Usage Examples:</b></p>
@@ -8252,7 +8274,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * then the index of the first character of the first such substring is returned.
      * If {@code fromIndex} is negative, it is treated as zero.</p>
      *
-     * <p>The method returns {@code -1} if the substring is not found, or if either parameter is null,
+     * <p>The method returns {@code -1} if the substring is not found, or if either parameter is {@code null},
      * or if the substring cannot fit in the remaining portion of the string from {@code fromIndex}.</p>
      *
      * <p><b>Usage Examples:</b></p>
@@ -8294,7 +8316,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * is returned. The search starts from the beginning of the string.</p>
      *
      * <p>The method returns {@code -1} if none of the characters are found, or if the input string
-     * is null or empty, or if the character array is null or empty.</p>
+     * is {@code null} or empty, or if the character array is {@code null} or empty.</p>
      * 
      * <p>Note: Use the {@code indexOf(String, int)} method when searching for a single character to avoid ambiguous compilation errors.</p>
      *
@@ -8332,7 +8354,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * it is treated as zero.</p>
      *
      * <p>The method returns {@code -1} if none of the characters are found, or if the input string
-     * is null or empty, or if the character array is null or empty.</p>
+     * is {@code null} or empty, or if the character array is {@code null} or empty.</p>
      * 
      * <p>Note: Use the {@code indexOf(String, int, int)} method when searching for a single character to avoid ambiguous compilation errors.</p>
      *
@@ -8392,7 +8414,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * the first such substring is returned. The search starts from the beginning of the string.</p>
      *
      * <p>The method returns {@code -1} if none of the substrings are found, or if the input string
-     * is null, or if the substring array is null or empty. Empty substrings in the array are ignored.</p>
+     * is {@code null}, or if the substring array is {@code null} or empty. Empty substrings in the array are ignored.</p>
      * 
      * <p>Note: Use the {@code indexOf(String, String)} method when searching for a single string to avoid ambiguous compilation errors.</p>
      *
@@ -8430,7 +8452,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * If {@code fromIndex} is negative, it is treated as zero.</p>
      *
      * <p>The method returns {@code -1} if none of the substrings are found, or if the input string
-     * is null, or if the substring array is null or empty. Empty substrings in the array are ignored.</p>
+     * is {@code null}, or if the substring array is {@code null} or empty. Empty substrings in the array are ignored.</p>
      * 
      * <p>Note: Use the {@code indexOf(String, String, int)} method when searching for a single string to avoid ambiguous compilation errors.</p>
      *
@@ -8488,7 +8510,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * such occurrence is returned. The search starts from the beginning of the string.</p>
      *
      * <p>The method returns {@code -1} if all characters in the string are in the exclusion array,
-     * or if the string is null or empty. If the exclusion array is null or empty, returns 0
+     * or if the string is {@code null} or empty. If the exclusion array is {@code null} or empty, returns 0
      * (the first character is not excluded).</p>
      *
      * <p><b>Usage Examples:</b></p>
@@ -8525,8 +8547,8 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * If {@code fromIndex} is negative, it is treated as zero.</p>
      *
      * <p>The method returns {@code -1} if all characters from {@code fromIndex} onwards are
-     * in the exclusion array, or if the string is null or empty. If the exclusion array is
-     * null or empty, returns {@code fromIndex} (if valid).</p>
+     * in the exclusion array, or if the string is {@code null} or empty. If the exclusion array is
+     * {@code null} or empty, returns {@code fromIndex} (if valid).</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -9308,15 +9330,6 @@ public abstract sealed class Strings permits Strings.StringUtil {
 
     // Shared code between ordinalIndexOf(String,String,int) and
 
-    /**
-     * Ordinal index of.
-     *
-     * @param str the string to check, may be {@code null}
-     * @param substr the substring to find, may be {@code null}
-     * @param ordinal the ordinal occurrence to find (1-based)
-     * @param isLastIndex {@code true} to search from the end, {@code false} to search from the beginning
-     * @return the index of the ordinal occurrence of the substring, or {@code N.INDEX_NOT_FOUND} if not found
-     */
     // lastOrdinalIndexOf(String,String,int)
     private static int ordinalIndexOf(final String str, final String substr, final int ordinal, final boolean isLastIndex) {
         if (ordinal < 1) {
@@ -10892,7 +10905,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *
      * <p>This method checks if two strings are equal ignoring their case, handling {@code null} 
      * values safely. Two {@code null} values are considered equal. The comparison uses
-     * {@link String#equalsIgnoreCase(String)} for non-null values.</p>
+     * {@link String#equalsIgnoreCase(String)} for {@code non-null} values.</p>
      *
      * <p>This method is null-safe alternative to {@link String#equalsIgnoreCase(String)}.</p>
      *
@@ -11003,10 +11016,10 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * Compares two strings lexicographically, ignoring case considerations.
      *
      * <p>This method performs a case-insensitive lexicographical comparison of two strings,
-     * handling {@code null} values safely. {@code null} is considered less than any non-null string.
+     * handling {@code null} values safely. {@code null} is considered less than any {@code non-null} string.
      * If both strings are {@code null}, they are considered equal (returns 0).</p>
      *
-     * <p>The comparison uses {@link String#compareToIgnoreCase(String)} for non-null values.</p>
+     * <p>The comparison uses {@link String#compareToIgnoreCase(String)} for {@code non-null} values.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -13222,15 +13235,15 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * the first delimiter is not found, or the second delimiter is not found after the first one.</p>
      *
      * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
+     * <pre><code>
      * substringBetween("{{content}}", "{{");               // returns "content"
-     * substringBetween("<tag>value</tag>", "<tag>");      // returns "value</tag>"
+     * substringBetween("&lt;tag&gt;value&lt;/tag&gt;", "&lt;tag&gt;");      // returns "value&lt;/tag&gt;"
      * substringBetween("@@text@@", "@@");                 // returns "text"
      * substringBetween("no-match", "{{");                 // returns null (delimiter not found)
      * substringBetween("{{only-one", "{{");               // returns null (second delimiter not found)
      * substringBetween(null, "{{");                       // returns null
      * substringBetween("test", null);                     // returns null
-     * }</pre>
+     * </code></pre>
      *
      * @param str the string to extract from, may be {@code null}
      * @param delimiter the delimiter string marking both the beginning and end of the substring, may be {@code null}
@@ -13254,8 +13267,8 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * the beginning delimiter is not found, or the ending delimiter is not found after the beginning delimiter.</p>
      *
      * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * substringBetween("<tag>content</tag>", "<tag>", "</tag>");  // returns "content"
+     * <pre><code>
+     * substringBetween("&lt;tag&gt;content&lt;/tag&gt;", "&lt;tag&gt;", "&lt;/tag&gt;");  // returns "content"
      * substringBetween("{{start}}middle{{end}}", "{{start}}", "{{end}}"); // returns "middle"
      * substringBetween("Hello [World]!", "[", "]");               // returns "World"
      * substringBetween("no-match", "{{", "}}");                   // returns null (begin delimiter not found)
@@ -13263,7 +13276,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * substringBetween(null, "{{", "}}");                         // returns null
      * substringBetween("test", null, "}}");                       // returns null
      * substringBetween("test", "{{", null);                       // returns null
-     * }</pre>
+     * </code></pre>
      *
      * @param str the string to extract from, may be {@code null}
      * @param delimiterOfExclusiveBeginIndex the delimiter string marking the beginning of the substring, may be {@code null}
@@ -13342,15 +13355,15 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * the first delimiter is not found, or the second delimiter is not found after the first one.</p>
      *
      * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
+     * <pre><code>
      * substringBetweenIgnoreCaes("{{CONTENT}}", "{{");              // returns "CONTENT"
-     * substringBetweenIgnoreCaes("<TAG>value</TAG>", "<tag>");      // returns "value</TAG>"
+     * substringBetweenIgnoreCaes("&lt;TAG&gt;value&lt;/TAG&gt;", "&lt;tag&gt;");      // returns "value&lt;/TAG&gt;"
      * substringBetweenIgnoreCaes("@@Text@@", "@@");                 // returns "Text"
      * substringBetweenIgnoreCaes("no-match", "{{");                 // returns null (delimiter not found)
      * substringBetweenIgnoreCaes("{{only-one", "{{");               // returns null (second delimiter not found)
      * substringBetweenIgnoreCaes(null, "{{");                       // returns null
      * substringBetweenIgnoreCaes("test", null);                     // returns null
-     * }</pre>
+     * </code></pre>
      *
      * @param str the string to extract from, may be {@code null}
      * @param delimiter the delimiter string marking both the beginning and end of the substring, case-insensitive, may be {@code null}
@@ -13375,8 +13388,8 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * the beginning delimiter is not found, or the ending delimiter is not found after the beginning delimiter.</p>
      *
      * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * substringBetweenIgnoreCaes("<TAG>content</TAG>", "<tag>", "</tag>");  // returns "content"
+     * <pre><code>
+     * substringBetweenIgnoreCaes("&lt;TAG&gt;content&lt;/TAG&gt;", "&lt;tag&gt;", "&lt;/tag&gt;");  // returns "content"
      * substringBetweenIgnoreCaes("{{START}}middle{{END}}", "{{start}}", "{{end}}"); // returns "middle"
      * substringBetweenIgnoreCaes("Hello [WORLD]!", "[", "]");               // returns "WORLD"
      * substringBetweenIgnoreCaes("no-match", "{{", "}}");                   // returns null (begin delimiter not found)
@@ -13384,7 +13397,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * substringBetweenIgnoreCaes(null, "{{", "}}");                         // returns null
      * substringBetweenIgnoreCaes("test", null, "}}");                       // returns null
      * substringBetweenIgnoreCaes("test", "{{", null);                       // returns null
-     * }</pre>
+     * </code></pre>
      *
      * @param str the string to extract from, may be {@code null}
      * @param delimiterOfExclusiveBeginIndex the delimiter string marking the beginning of the substring, case-insensitive, may be {@code null}
@@ -13695,7 +13708,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *   <li>{@code ExtractStrategy.DEFAULT} - Simple sequential matching of begin/end delimiters</li>
      *   <li>{@code ExtractStrategy.STACK_BASED} - Stack-based approach that extracts all nested levels</li>
      *   <li>{@code ExtractStrategy.IGNORE_NESTED} - Stack-based approach that ignores nested substrings</li>
-     * </ul></p>
+     * </ul>
      *
      * <p>The method returns an empty list if the input string is {@code null} or if no matches are found.</p>
      *
@@ -13807,7 +13820,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *   <li>{@code ExtractStrategy.DEFAULT} - Simple sequential matching of begin/end delimiters</li>
      *   <li>{@code ExtractStrategy.STACK_BASED} - Stack-based approach that extracts all nested levels</li>
      *   <li>{@code ExtractStrategy.IGNORE_NESTED} - Stack-based approach that ignores nested substrings</li>
-     * </ul></p>
+     * </ul>
      *
      * <p>The method returns an empty list if the input string is {@code null}, if either delimiter is {@code null},
      * or if no matches are found.</p>
@@ -13887,7 +13900,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *   <li>{@code ExtractStrategy.DEFAULT} - Simple sequential matching of begin/end delimiters</li>
      *   <li>{@code ExtractStrategy.STACK_BASED} - Stack-based approach that extracts all nested levels</li>
      *   <li>{@code ExtractStrategy.IGNORE_NESTED} - Stack-based approach that ignores nested substrings</li>
-     * </ul></p>
+     * </ul>
      *
      * <p>The method returns an empty list if the input string is {@code null}, if either delimiter is {@code null},
      * if {@code maxCount} is 0, or if no matches are found within the specified range.</p>
@@ -13980,7 +13993,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *   <li>{@code ExtractStrategy.DEFAULT} - Simple sequential matching of begin/end delimiters</li>
      *   <li>{@code ExtractStrategy.STACK_BASED} - Stack-based approach that extracts all nested levels</li>
      *   <li>{@code ExtractStrategy.IGNORE_NESTED} - Stack-based approach that ignores nested substrings</li>
-     * </ul></p>
+     * </ul>
      *
      * <p>The method returns an empty list if the input string is {@code null}, empty, or if no matches are found.</p>
      *
@@ -14111,7 +14124,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *   <li>{@code ExtractStrategy.DEFAULT} - Simple sequential matching of begin/end delimiters</li>
      *   <li>{@code ExtractStrategy.STACK_BASED} - Stack-based approach that extracts all nested levels</li>
      *   <li>{@code ExtractStrategy.IGNORE_NESTED} - Stack-based approach that ignores nested substrings</li>
-     * </ul></p>
+     * </ul>
      *
      * <p>The method returns an empty list if the input string is {@code null}, if either delimiter is {@code null}
      * or empty, or if no matches are found.</p>
@@ -14200,7 +14213,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *   <li>{@code ExtractStrategy.DEFAULT} - Simple sequential matching of begin/end delimiters</li>
      *   <li>{@code ExtractStrategy.STACK_BASED} - Stack-based approach that extracts all nested levels</li>
      *   <li>{@code ExtractStrategy.IGNORE_NESTED} - Stack-based approach that ignores nested substrings</li>
-     * </ul></p>
+     * </ul>
      *
      * <p>The method returns an empty list if the input string is {@code null}, if either delimiter is {@code null}
      * or empty, if {@code maxCount} is 0, or if no matches are found within the specified range.</p>
@@ -14396,7 +14409,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * should be positioned in the resulting string. The original string remains unchanged, and a new string
      * with the rearranged characters is returned.</p>
      *
-     * <p>The method returns an empty string for null or empty input.</p>
+     * <p>The method returns an empty string for {@code null} or empty input.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -14452,7 +14465,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * The original string remains unchanged, and a new string without the specified range is returned.
      * If the range is empty (fromIndex == toIndex) or starts beyond the string length, the original string is returned.</p>
      *
-     * <p>The method returns an empty string for null or empty input.</p>
+     * <p>The method returns an empty string for {@code null} or empty input.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -14470,8 +14483,8 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * }</pre>
      *
      * @param str the input string from which a range of characters are to be deleted; may be {@code null}
-     * @param fromIndex the initial index of the range to be deleted, inclusive; must be >= 0 and <= {@code str.length()}
-     * @param toIndex the final index of the range to be deleted, exclusive; must be >= {@code fromIndex} and <= {@code str.length()}
+     * @param fromIndex the initial index of the range to be deleted, inclusive; must be &gt;= 0 and &lt;= {@code str.length()}
+     * @param toIndex the final index of the range to be deleted, exclusive; must be &gt;= {@code fromIndex} and &lt;= {@code str.length()}
      * @return a new string with the specified range of characters deleted. An empty String is returned if the specified String is {@code null} or empty.
      * @throws IndexOutOfBoundsException if the range is invalid
      * @see N#deleteRange(String, int, int)
@@ -14502,7 +14515,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * <p>This method concatenates all elements in the array, separating them with the default
      * element separator. The boolean values are converted to their string representations ("true" or "false").</p>
      *
-     * <p>The method returns an empty string for null or empty arrays.</p>
+     * <p>The method returns an empty string for {@code null} or empty arrays.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -14530,7 +14543,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * delimiter string. The boolean values are converted to their string representations ("true" or "false").
      * If the delimiter is empty, the elements are concatenated without any separator.</p>
      *
-     * <p>The method returns an empty string for null or empty arrays.</p>
+     * <p>The method returns an empty string for {@code null} or empty arrays.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -14565,7 +14578,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * string representations ("true" or "false"). If the delimiter is empty, the elements are
      * concatenated without any separator.</p>
      *
-     * <p>The method returns an empty string for null or empty arrays, or when fromIndex equals toIndex.</p>
+     * <p>The method returns an empty string for {@code null} or empty arrays, or when fromIndex equals toIndex.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -14681,7 +14694,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * <p>This method concatenates all characters in the array, separating them with the default
      * element separator.</p>
      *
-     * <p>The method returns an empty string for null or empty arrays.</p>
+     * <p>The method returns an empty string for {@code null} or empty arrays.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -14708,7 +14721,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * <p>This method concatenates all characters in the array, separating them with the provided
      * delimiter string. If the delimiter is empty, the elements are concatenated without any separator.</p>
      *
-     * <p>The method returns an empty string for null or empty arrays.</p>
+     * <p>The method returns an empty string for {@code null} or empty arrays.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -14742,7 +14755,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * separating them with the provided delimiter string. If the delimiter is empty, the elements are
      * concatenated without any separator.</p>
      *
-     * <p>The method returns an empty string for null or empty arrays, or when fromIndex equals toIndex.</p>
+     * <p>The method returns an empty string for {@code null} or empty arrays, or when fromIndex equals toIndex.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -14857,7 +14870,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * <p>This method concatenates all byte values in the array, separating them with the default
      * element separator. The byte values are converted to their string representations.</p>
      *
-     * <p>The method returns an empty string for null or empty arrays.</p>
+     * <p>The method returns an empty string for {@code null} or empty arrays.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -14885,7 +14898,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * delimiter string. The byte values are converted to their string representations.
      * If the delimiter is empty, the elements are concatenated without any separator.</p>
      *
-     * <p>The method returns an empty string for null or empty arrays.</p>
+     * <p>The method returns an empty string for {@code null} or empty arrays.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -14919,7 +14932,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * separating them with the provided delimiter string. The byte values are converted to their
      * string representations. If the delimiter is empty, the elements are concatenated without any separator.</p>
      *
-     * <p>The method returns an empty string for null or empty arrays, or when fromIndex equals toIndex.</p>
+     * <p>The method returns an empty string for {@code null} or empty arrays, or when fromIndex equals toIndex.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -15035,7 +15048,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * <p>This method concatenates all short values in the array, separating them with the default
      * element separator. The short values are converted to their string representations.</p>
      *
-     * <p>The method returns an empty string for null or empty arrays.</p>
+     * <p>The method returns an empty string for {@code null} or empty arrays.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -15063,7 +15076,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * delimiter string. The short values are converted to their string representations.
      * If the delimiter is empty, the elements are concatenated without any separator.</p>
      *
-     * <p>The method returns an empty string for null or empty arrays.</p>
+     * <p>The method returns an empty string for {@code null} or empty arrays.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -15097,7 +15110,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * separating them with the provided delimiter string. The short values are converted to their
      * string representations. If the delimiter is empty, the elements are concatenated without any separator.</p>
      *
-     * <p>The method returns an empty string for null or empty arrays, or when fromIndex equals toIndex.</p>
+     * <p>The method returns an empty string for {@code null} or empty arrays, or when fromIndex equals toIndex.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -15977,7 +15990,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * <p>This method concatenates all elements in the array, separating each element with the specified delimiter.
      * The resulting string is prefixed and suffixed with the specified strings.
      * Each element is converted to a string representation using its {@code toString()} method.
-     * If trim is true, leading and trailing whitespace is removed from each element's string representation.</p>
+     * If trim is {@code true}, leading and trailing whitespace is removed from each element's string representation.</p>
      *
      * <p>The method returns an empty string if the specified array is {@code null} or empty and both prefix and suffix are empty.</p>
      *
@@ -16038,7 +16051,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * <p>This method concatenates elements in the array from {@code fromIndex} (inclusive) to {@code toIndex} (exclusive),
      * separating each element with the specified delimiter string.
      * Each element is converted to a string representation using its {@code toString()} method.
-     * If trim is true, leading and trailing whitespace is removed from each element's string representation.</p>
+     * If trim is {@code true}, leading and trailing whitespace is removed from each element's string representation.</p>
      *
      * <p>The method returns an empty string if the specified array is {@code null} or empty, or if {@code fromIndex == toIndex}.</p>
      *
@@ -16101,7 +16114,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * separating each element with the specified delimiter string.
      * The resulting string is prefixed and suffixed with the specified strings.
      * Each element is converted to a string representation using its {@code toString()} method.
-     * If trim is true, leading and trailing whitespace is removed from each element's string representation.</p>
+     * If trim is {@code true}, leading and trailing whitespace is removed from each element's string representation.</p>
      *
      * <p>The method handles edge cases gracefully: if the array is {@code null} or empty, or if {@code fromIndex == toIndex},
      * it returns just the concatenation of prefix and suffix (or an empty string if both are empty).</p>
@@ -16256,7 +16269,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * <p>This method concatenates all elements in the iterable, separating each element with the specified delimiter.
      * The resulting string is prefixed and suffixed with the specified strings.
      * Each element is converted to a string representation using its {@code toString()} method.
-     * If trim is true, leading and trailing whitespace is removed from each element's string representation.</p>
+     * If trim is {@code true}, leading and trailing whitespace is removed from each element's string representation.</p>
      *
      * <p>For Collection types, this method delegates to the more efficient range-based join method.
      * For other Iterable types, it uses iterator-based processing.</p>
@@ -16322,7 +16335,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * <p>This method concatenates elements in the collection from {@code fromIndex} (inclusive) to {@code toIndex} (exclusive),
      * separating each element with the specified delimiter string.
      * Each element is converted to a string representation using its {@code toString()} method.
-     * If trim is true, leading and trailing whitespace is removed from each element's string representation.</p>
+     * If trim is {@code true}, leading and trailing whitespace is removed from each element's string representation.</p>
      *
      * <p>The method returns an empty string if the specified Collection is {@code null} or empty, or if {@code fromIndex == toIndex}.</p>
      *
@@ -16385,7 +16398,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * separating each element with the specified delimiter string.
      * The resulting string is prefixed and suffixed with the specified strings.
      * Each element is converted to a string representation using its {@code toString()} method.
-     * If trim is true, leading and trailing whitespace is removed from each element's string representation.</p>
+     * If trim is {@code true}, leading and trailing whitespace is removed from each element's string representation.</p>
      *
      * <p>The method efficiently handles List types with RandomAccess for better performance.
      * It returns just the concatenation of prefix and suffix if the collection is {@code null} or empty or {@code fromIndex == toIndex}.</p>
@@ -16555,7 +16568,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * <p>This method concatenates all elements from the iterator, separating each element with the specified delimiter.
      * The resulting string is prefixed and suffixed with the specified strings.
      * Each element is converted to a string representation using its {@code toString()} method.
-     * If trim is true, leading and trailing whitespace is removed from each element's string representation.
+     * If trim is {@code true}, leading and trailing whitespace is removed from each element's string representation.
      * The iterator is consumed during this operation.</p>
      *
      * <p>The method internally converts the iterator to a list and then uses the collection-based join method for processing.</p>
@@ -16602,7 +16615,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * Each entry is formatted as "key=value" and entries are separated by the default element separator.
      * The iteration order depends on the Map implementation.</p>
      *
-     * <p>The method returns an empty string for null or empty maps.</p>
+     * <p>The method returns an empty string for {@code null} or empty maps.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -16617,7 +16630,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * }</pre>
      *
      * @param m the Map containing the entries to join, may be {@code null} or empty
-     * @return a string representation of the map entries, or an empty string if the map is null or empty.
+     * @return a string representation of the map entries, or an empty string if the map is {@code null} or empty.
      * @see #joinEntries(Map, String, String, String, String, boolean)
      */
     public static String joinEntries(final Map<?, ?> m) {
@@ -16631,7 +16644,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * and entries are separated by the specified delimiter string.
      * The iteration order depends on the Map implementation.</p>
      *
-     * <p>The method returns an empty string for null or empty maps.</p>
+     * <p>The method returns an empty string for {@code null} or empty maps.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -16647,7 +16660,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *
      * @param m the Map containing the entries to join, may be {@code null} or empty
      * @param entryDelimiter the delimiter string that separates each entry.
-     * @return a string representation of the map entries, or an empty string if the map is null or empty.
+     * @return a string representation of the map entries, or an empty string if the map is {@code null} or empty.
      * @see #joinEntries(Map, String, String, String, String, boolean)
      */
     public static String joinEntries(final Map<?, ?> m, final String entryDelimiter) {
@@ -16666,7 +16679,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * The keyValueDelimiter can be empty, in which case the key and value are concatenated directly.
      * The iteration order depends on the Map implementation.</p>
      *
-     * <p>The method returns an empty string for null or empty maps.</p>
+     * <p>The method returns an empty string for {@code null} or empty maps.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -16684,7 +16697,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @param m the Map containing the entries to join, may be {@code null} or empty
      * @param entryDelimiter the delimiter string that separates each entry.
      * @param keyValueDelimiter the delimiter string that separates the key and value within each entry. It can be empty.
-     * @return a string representation of the map entries, or an empty string if the map is null or empty.
+     * @return a string representation of the map entries, or an empty string if the map is {@code null} or empty.
      * @see #joinEntries(Map, String, String, String, String, boolean)
      */
     public static String joinEntries(final Map<?, ?> m, final String entryDelimiter, final String keyValueDelimiter) {
@@ -16703,7 +16716,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * The keyValueDelimiter can be empty, in which case the key and value are concatenated directly.
      * The iteration order depends on the Map implementation.</p>
      *
-     * <p>If the map is null or empty, the method returns only the concatenated prefix and suffix (or empty string if both are empty).</p>
+     * <p>If the map is {@code null} or empty, the method returns only the concatenated prefix and suffix (or empty string if both are empty).</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -16723,7 +16736,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @param keyValueDelimiter the delimiter string that separates the key and value within each entry. It can be empty.
      * @param prefix the prefix to be added at the beginning. It can be empty.
      * @param suffix the suffix to be added at the end. It can be empty.
-     * @return the concatenated string with prefix and suffix, or just prefix+suffix if the map is null or empty.
+     * @return the concatenated string with prefix and suffix, or just prefix+suffix if the map is {@code null} or empty.
      * @see #joinEntries(Map, String, String, String, String, boolean)
      */
     public static String joinEntries(final Map<?, ?> m, final String entryDelimiter, final String keyValueDelimiter, final String prefix, final String suffix) {
@@ -16736,10 +16749,10 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * <p>This method creates a string representation of the map entries where each entry is formatted as "key[keyValueDelimiter]value",
      * entries are separated by the specified entry delimiter, and the entire result is wrapped with prefix and suffix strings.
      * The entryDelimiter and keyValueDelimiter can be empty for direct concatenation.
-     * If trim is true, the string representations of keys and values will be trimmed of leading and trailing whitespace.
+     * If trim is {@code true}, the string representations of keys and values will be trimmed of leading and trailing whitespace.
      * The iteration order depends on the Map implementation.</p>
      *
-     * <p>If the map is null or empty, the method returns only the concatenated prefix and suffix (or empty string if both are empty).</p>
+     * <p>If the map is {@code null} or empty, the method returns only the concatenated prefix and suffix (or empty string if both are empty).</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -16762,7 +16775,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @param prefix the prefix to be added at the beginning. It can be empty.
      * @param suffix the suffix to be added at the end. It can be empty.
      * @param trim if {@code true}, trims the string representations of each key and value.
-     * @return the concatenated string with prefix and suffix, or just prefix+suffix if the map is null or empty.
+     * @return the concatenated string with prefix and suffix, or just prefix+suffix if the map is {@code null} or empty.
      */
     public static String joinEntries(final Map<?, ?> m, final String entryDelimiter, final String keyValueDelimiter, final String prefix, final String suffix,
             final boolean trim) {
@@ -16776,7 +16789,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * where each entry is formatted as "key=value" and entries are separated by the specified delimiter string.
      * The iteration order depends on the Map implementation.</p>
      *
-     * <p>The method returns an empty string if the map is null, empty, or if fromIndex equals toIndex.</p>
+     * <p>The method returns an empty string if the map is {@code null}, empty, or if fromIndex equals toIndex.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -16807,10 +16820,10 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *
      * <p>This method creates a string representation of a range of map entries (from fromIndex inclusive to toIndex exclusive)
      * where each entry is formatted as "key=value" and entries are separated by the specified delimiter string.
-     * If trim is true, the string representations of keys and values will be trimmed of leading and trailing whitespace.
+     * If trim is {@code true}, the string representations of keys and values will be trimmed of leading and trailing whitespace.
      * The iteration order depends on the Map implementation.</p>
      *
-     * <p>The method returns an empty string if the map is null, empty, or if fromIndex equals toIndex.</p>
+     * <p>The method returns an empty string if the map is {@code null}, empty, or if fromIndex equals toIndex.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -16845,7 +16858,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * The keyValueDelimiter can be empty, in which case the key and value are concatenated directly.
      * The iteration order depends on the Map implementation.</p>
      *
-     * <p>The method returns an empty string if the map is null, empty, or if fromIndex equals toIndex.</p>
+     * <p>The method returns an empty string if the map is {@code null}, empty, or if fromIndex equals toIndex.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -16878,10 +16891,10 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * <p>This method creates a string representation of a range of map entries (from fromIndex inclusive to toIndex exclusive)
      * where each entry is formatted as "key[keyValueDelimiter]value" and entries are separated by the specified entry delimiter string.
      * The keyValueDelimiter can be empty, in which case the key and value are concatenated directly.
-     * If trim is true, the string representations of keys and values will be trimmed of leading and trailing whitespace.
+     * If trim is {@code true}, the string representations of keys and values will be trimmed of leading and trailing whitespace.
      * The iteration order depends on the Map implementation.</p>
      *
-     * <p>The method returns an empty string if the map is null, empty, or if fromIndex equals toIndex.</p>
+     * <p>The method returns an empty string if the map is {@code null}, empty, or if fromIndex equals toIndex.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -16918,7 +16931,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * The keyValueDelimiter can be empty, in which case the key and value are concatenated directly.
      * The iteration order depends on the Map implementation.</p>
      *
-     * <p>If the map is null, empty, or if fromIndex equals toIndex, the method returns only the concatenated prefix and suffix 
+     * <p>If the map is {@code null}, empty, or if fromIndex equals toIndex, the method returns only the concatenated prefix and suffix 
      * (or empty string if both are empty).</p>
      *
      * <p><b>Usage Examples:</b></p>
@@ -16955,10 +16968,10 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * where each entry is formatted as "key[keyValueDelimiter]value", entries are separated by the specified entry delimiter,
      * and the entire result is wrapped with prefix and suffix strings.
      * The entryDelimiter and keyValueDelimiter can be empty for direct concatenation.
-     * If trim is true, the string representations of keys and values will be trimmed of leading and trailing whitespace.
+     * If trim is {@code true}, the string representations of keys and values will be trimmed of leading and trailing whitespace.
      * The iteration order depends on the Map implementation.</p>
      *
-     * <p>If the map is null, empty, or if fromIndex equals toIndex, the method returns only the concatenated prefix and suffix 
+     * <p>If the map is {@code null}, empty, or if fromIndex equals toIndex, the method returns only the concatenated prefix and suffix 
      * (or empty string if both are empty).</p>
      *
      * <p><b>Usage Examples:</b></p>
@@ -17057,7 +17070,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * formatted as "key[keyValueDelimiter]value", and joined together with the entry delimiter.
      * The iteration order depends on the Iterable implementation.</p>
      *
-     * <p>The method returns an empty string for null or empty iterables.</p>
+     * <p>The method returns an empty string for {@code null} or empty iterables.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -17085,7 +17098,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @param keyValueDelimiter the delimiter to use between keys and values
      * @param keyExtractor function to extract keys from elements. Must not be {@code null}.
      * @param valueExtractor function to extract values from elements. Must not be {@code null}.
-     * @return a string representation of the iterable's elements, or an empty string if the iterable is null or empty.
+     * @return a string representation of the iterable's elements, or an empty string if the iterable is {@code null} or empty.
      * @throws IllegalArgumentException if keyExtractor or valueExtractor is null
      */
     public static <T> String joinEntries(final Iterable<? extends T> c, final String entryDelimiter, final String keyValueDelimiter,
@@ -17100,10 +17113,10 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * Each element in the iterable is processed using the provided key and value extractor functions,
      * formatted as "key[keyValueDelimiter]value", joined together with the entry delimiter,
      * and wrapped with prefix and suffix strings.
-     * If trim is true, the string representations of extracted keys and values will be trimmed.
+     * If trim is {@code true}, the string representations of extracted keys and values will be trimmed.
      * The iteration order depends on the Iterable implementation.</p>
      *
-     * <p>If the iterable is null or empty, the method returns only the concatenated prefix and suffix 
+     * <p>If the iterable is {@code null} or empty, the method returns only the concatenated prefix and suffix 
      * (or empty string if both are empty).</p>
      *
      * <p><b>Usage Examples:</b></p>
@@ -17137,7 +17150,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @param trim if {@code true}, trims the string representations of extracted keys and values.
      * @param keyExtractor function to extract keys from elements. Must not be {@code null}.
      * @param valueExtractor function to extract values from elements. Must not be {@code null}.
-     * @return a string representation of the iterable's elements with prefix and suffix, or just prefix+suffix if the iterable is null or empty.
+     * @return a string representation of the iterable's elements with prefix and suffix, or just prefix+suffix if the iterable is {@code null} or empty.
      * @throws IllegalArgumentException if keyExtractor or valueExtractor is null
      * 
      * @see #join(Iterable)
@@ -17830,12 +17843,6 @@ public abstract sealed class Strings permits Strings.StringUtil {
         return result;
     }
 
-    /**
-     * Lenient to string.
-     *
-     * @param obj the object to convert to string
-     * @return the string representation of the object, or a safe default if conversion fails
-     */
     private static String lenientToString(final Object obj) {
         try {
             return String.valueOf(obj);
@@ -17870,7 +17877,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * }</pre>
      *
      * @param str the string to be reversed. May be {@code null} or empty.
-     * @return a new string with the characters reversed. If the input string is {@code null} or empty or its length <= 1, the input string is returned.
+     * @return a new string with the characters reversed. If the input string is {@code null} or empty or its length &lt;= 1, the input string is returned.
      */
     public static String reverse(final String str) {
         if (N.len(str) <= 1) {
@@ -17908,7 +17915,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *
      * @param str the string to reverse, which may be {@code null}.
      * @param delimiter the delimiter character to use for splitting and joining.
-     * @return the string with its delimited segments reversed. If the input string is {@code null} or empty or its length <= 1, the input string is returned.
+     * @return the string with its delimited segments reversed. If the input string is {@code null} or empty or its length &lt;= 1, the input string is returned.
      */
     public static String reverseDelimited(final String str, final char delimiter) {
         if (N.len(str) <= 1) {
@@ -17944,7 +17951,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *
      * @param str the string to be reversed. May be {@code null} or empty.
      * @param delimiter the delimiter that separates the elements in the string.
-     * @return the reversed string. If the input string is {@code null} or empty or its length <= 1, the input string is returned.
+     * @return the reversed string. If the input string is {@code null} or empty or its length &lt;= 1, the input string is returned.
      */
     public static String reverseDelimited(final String str, final String delimiter) {
         if (N.len(str) <= 1) {
@@ -17980,7 +17987,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * }</pre>
      *
      * @param str the string whose characters are to be sorted. May be {@code null} or empty.
-     * @return a new sorted string if the specified {@code str} is not {@code null} or empty, otherwise the specified {@code str} is returned. If the input string is {@code null} or empty or its length <= 1, the input string is returned.
+     * @return a new sorted string if the specified {@code str} is not {@code null} or empty, otherwise the specified {@code str} is returned. If the input string is {@code null} or empty or its length &lt;= 1, the input string is returned.
      */
     public static String sort(final String str) {
         if (N.len(str) <= 1) {
@@ -18175,11 +18182,10 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *
      * <p>This method handles three cases:
      * <ul>
-     *   <li>If the string is {@code null} or empty, returns {@code '\0'} (the null character)</li>
+     *   <li>If the string is {@code null} or empty, returns {@code '\0'} (the {@code null} character)</li>
      *   <li>If the string has exactly one character, returns that character</li>
      *   <li>Otherwise, parses the string as an integer and casts it to char</li>
      * </ul>
-     * </p>
      *
      * <p>This allows for both direct character representation and numeric character codes.</p>
      *
@@ -18707,7 +18713,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *
      * <p>This method converts an object (typically a Map or JavaBean) into a URL-encoded string
      * suitable for use in HTTP requests. The encoding follows the application/x-www-form-urlencoded
-     * format where key-value pairs are separated by '&' and spaces are encoded as '+'.</p>
+     * format where key-value pairs are separated by '&amp;' and spaces are encoded as '+'.</p>
      *
      * <p>The method handles various object types including Maps, JavaBeans, and collections.</p>
      *
@@ -19044,7 +19050,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * The regex follows RFC 5322 standards for email address validation. If an email address is
      * found, it is returned; otherwise, the method returns {@code null}.</p>
      *
-     * <p>The method returns {@code null} for null or empty input.</p>
+     * <p>The method returns {@code null} for {@code null} or empty input.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -19064,6 +19070,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @see #isValidEmailAddress(CharSequence)
      * @see #findAllEmailAddresses(CharSequence)
      */
+    @MayReturnNull
     public static String findFirstEmailAddress(final CharSequence cs) {
         if (isEmpty(cs)) {
             return null;
@@ -19232,6 +19239,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @see RegExUtil#findLast(String, Pattern)
      * @see RegExUtil#INTEGER_FINDER
      */
+    @MayReturnNull
     public static String extractFirstInteger(final String str) {
         if (Strings.isEmpty(str)) {
             return null;
@@ -19319,6 +19327,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @see RegExUtil#NUMBER_FINDER
      * @see RegExUtil#SCIENTIFIC_NUMBER_FINDER
      */
+    @MayReturnNull
     public static String extractFirstDouble(final String str, final boolean includingCientificNumber) {
         if (Strings.isEmpty(str)) {
             return null;
@@ -19512,6 +19521,13 @@ public abstract sealed class Strings permits Strings.StringUtil {
         }
     }
 
+    /**
+     * A utility class providing additional string manipulation methods.
+     * This class contains helper methods for string operations that complement
+     * the main Strings class functionality.
+     *
+     * <p>This class cannot be instantiated.
+     */
     public static final class StrUtil {
         private StrUtil() {
             // Utility class.
@@ -19546,7 +19562,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
          * Returns {@code Optional<String>} with value of the substring if it exists, otherwise returns an empty {@code Optional<String>}.
          *
          * <p>This method extracts a substring from the given string starting at the specified inclusive begin index 
-         * and ending at the exclusive end index. If the indices are invalid (negative, begin >= end, or out of bounds), 
+         * and ending at the exclusive end index. If the indices are invalid (negative, begin &gt;= end, or out of bounds), 
          * or if the string is {@code null}, an empty {@code Optional} is returned.</p>
          *
          * <p><b>Usage Examples:</b></p>
@@ -20108,7 +20124,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
          * the substring from that index up to (but not including) the delimiter. If the delimiter
          * is not found after the specified index, an empty {@code Optional} is returned.</p>
          *
-         * <p>The method returns an empty {@code Optional} for null input string or delimiter.</p>
+         * <p>The method returns an empty {@code Optional} for {@code null} input string or delimiter.</p>
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
@@ -20138,7 +20154,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
          * the substring from the beginning up to (but not including) that delimiter. If the delimiter
          * is not found, an empty {@code Optional} is returned.</p>
          *
-         * <p>The method returns an empty {@code Optional} for null input string.</p>
+         * <p>The method returns an empty {@code Optional} for {@code null} input string.</p>
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
@@ -20166,7 +20182,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
          * the substring from the beginning up to (but not including) that delimiter. If the delimiter
          * is not found, an empty {@code Optional} is returned.</p>
          *
-         * <p>The method returns an empty {@code Optional} for null input string or delimiter.</p>
+         * <p>The method returns an empty {@code Optional} for {@code null} input string or delimiter.</p>
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
@@ -20195,7 +20211,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
          * index and returns the substring from that index up to (but not including) the delimiter.
          * If the delimiter is not found after the specified index, an empty {@code Optional} is returned.</p>
          *
-         * <p>The method returns an empty {@code Optional} for null input string or delimiter.</p>
+         * <p>The method returns an empty {@code Optional} for {@code null} input string or delimiter.</p>
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
@@ -20225,7 +20241,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
          * returns the substring from the beginning up to (but not including) that delimiter. If none
          * of the delimiters are found, an empty {@code Optional} is returned.</p>
          *
-         * <p>The method returns an empty {@code Optional} for null input string or null/empty delimiter array.</p>
+         * <p>The method returns an empty {@code Optional} for {@code null} input string or null/empty delimiter array.</p>
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
@@ -20254,7 +20270,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
          * returns the substring from the beginning up to (but not including) that delimiter. If none
          * of the delimiters are found, an empty {@code Optional} is returned.</p>
          *
-         * <p>The method returns an empty {@code Optional} for null input string or null/empty delimiter array.</p>
+         * <p>The method returns an empty {@code Optional} for {@code null} input string or null/empty delimiter array.</p>
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
@@ -20279,7 +20295,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
          * Returns the substring after the specified delimiter if it exists, otherwise returns the default string.
          *
          * <p>This method searches for the first occurrence of the delimiter and returns the substring
-         * after (not including) that delimiter. If the delimiter is not found or the input is null,
+         * after (not including) that delimiter. If the delimiter is not found or the input is {@code null},
          * the default string is returned.</p>
          *
          * <p><b>Usage Examples:</b></p>
@@ -20308,7 +20324,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
          * otherwise returns the default string.
          *
          * <p>This method searches for the last occurrence of the delimiter and returns the substring
-         * after (not including) that delimiter. If the delimiter is not found or the input is null,
+         * after (not including) that delimiter. If the delimiter is not found or the input is {@code null},
          * the default string is returned.</p>
          *
          * <p><b>Usage Examples:</b></p>
@@ -20337,7 +20353,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
          *
          * <p>This method searches for the first occurrence of the delimiter and returns the substring
          * from the beginning up to (but not including) that delimiter. If the delimiter is not found
-         * or the input is null, the default string is returned.</p>
+         * or the input is {@code null}, the default string is returned.</p>
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
@@ -20366,7 +20382,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
          *
          * <p>This method searches for the last occurrence of the delimiter and returns the substring
          * from the beginning up to (but not including) that delimiter. If the delimiter is not found
-         * or the input is null, the default string is returned.</p>
+         * or the input is {@code null}, the default string is returned.</p>
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
@@ -20395,7 +20411,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
          *
          * <p>This method searches for the first occurrence of the delimiter character and returns
          * the substring after (not including) that delimiter. If the delimiter is not found or
-         * the input is null, the original string is returned.</p>
+         * the input is {@code null}, the original string is returned.</p>
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
@@ -20423,7 +20439,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
          *
          * <p>This method searches for the first occurrence of the delimiter string and returns
          * the substring after (not including) that delimiter. If the delimiter is not found or
-         * the input is null, the original string is returned.</p>
+         * the input is {@code null}, the original string is returned.</p>
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
@@ -20451,7 +20467,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
          *
          * <p>This method searches for the first occurrence of the delimiter and returns the substring
          * after (not including) that delimiter up to the specified exclusive end index. If the delimiter
-         * is not found or the input is null, the original string is returned.</p>
+         * is not found or the input is {@code null}, the original string is returned.</p>
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
@@ -20480,7 +20496,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
          *
          * <p>This method searches for the last occurrence of the delimiter character and returns
          * the substring after (not including) that delimiter. If the delimiter is not found or
-         * the input is null, the original string is returned.</p>
+         * the input is {@code null}, the original string is returned.</p>
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
@@ -20508,7 +20524,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
          *
          * <p>This method searches for the last occurrence of the delimiter string and returns
          * the substring after (not including) that delimiter. If the delimiter is not found or
-         * the input is null, the original string is returned.</p>
+         * the input is {@code null}, the original string is returned.</p>
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
@@ -20536,7 +20552,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
          *
          * <p>This method searches for the last occurrence of the delimiter and returns the substring
          * after (not including) that delimiter up to the specified exclusive end index. If the delimiter
-         * is not found or the input is null, the original string is returned.</p>
+         * is not found or the input is {@code null}, the original string is returned.</p>
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
@@ -20565,7 +20581,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
          *
          * <p>This method searches for the first occurrence of the delimiter character and returns
          * the substring from the beginning up to (but not including) that delimiter. If the delimiter
-         * is not found or the input is null, the original string is returned.</p>
+         * is not found or the input is {@code null}, the original string is returned.</p>
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
@@ -20593,7 +20609,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
          *
          * <p>This method searches for the first occurrence of the delimiter string and returns
          * the substring from the beginning up to (but not including) that delimiter. If the delimiter
-         * is not found or the input is null, the original string is returned.</p>
+         * is not found or the input is {@code null}, the original string is returned.</p>
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
@@ -20621,7 +20637,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
          *
          * <p>This method searches for the first occurrence of the delimiter starting from the
          * specified index and returns the substring from that index up to (but not including)
-         * the delimiter. If the delimiter is not found or the input is null, the original string
+         * the delimiter. If the delimiter is not found or the input is {@code null}, the original string
          * is returned.</p>
          *
          * <p><b>Usage Examples:</b></p>
@@ -20651,7 +20667,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
          *
          * <p>This method searches for the last occurrence of the delimiter character and returns
          * the substring from the beginning up to (but not including) that delimiter. If the delimiter
-         * is not found or the input is null, the original string is returned.</p>
+         * is not found or the input is {@code null}, the original string is returned.</p>
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
@@ -20679,7 +20695,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
          *
          * <p>This method searches for the last occurrence of the delimiter string and returns
          * the substring from the beginning up to (but not including) that delimiter. If the delimiter
-         * is not found or the input is null, the original string is returned.</p>
+         * is not found or the input is {@code null}, the original string is returned.</p>
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
@@ -20707,7 +20723,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
          *
          * <p>This method searches for the last occurrence of the delimiter before the specified
          * end index and returns the substring from the beginning up to (but not including) that
-         * delimiter. If the delimiter is not found or the input is null, the original string is returned.</p>
+         * delimiter. If the delimiter is not found or the input is {@code null}, the original string is returned.</p>
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
@@ -20738,7 +20754,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
          * ending before the exclusive end index. If the indices are invalid (negative, out of bounds,
          * or begin index >= end index), an empty {@code Optional} is returned.</p>
          *
-         * <p>The method returns an empty {@code Optional} for null input string.</p>
+         * <p>The method returns an empty {@code Optional} for {@code null} input string.</p>
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
@@ -20767,7 +20783,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
          * ending before the first occurrence of the delimiter character. If the delimiter is not
          * found after the begin index or indices are invalid, an empty {@code Optional} is returned.</p>
          *
-         * <p>The method returns an empty {@code Optional} for null input string.</p>
+         * <p>The method returns an empty {@code Optional} for {@code null} input string.</p>
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
@@ -20795,7 +20811,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
          * ending before the first occurrence of the delimiter string. If the delimiter is not
          * found after the begin index or indices are invalid, an empty {@code Optional} is returned.</p>
          *
-         * <p>The method returns an empty {@code Optional} for null input string or delimiter.</p>
+         * <p>The method returns an empty {@code Optional} for {@code null} input string or delimiter.</p>
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
@@ -20823,7 +20839,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
          * character and ending before the exclusive end index. If the delimiter is not found or
          * indices are invalid, an empty {@code Optional} is returned.</p>
          *
-         * <p>The method returns an empty {@code Optional} for null input string.</p>
+         * <p>The method returns an empty {@code Optional} for {@code null} input string.</p>
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
@@ -20851,7 +20867,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
          * string and ending before the exclusive end index. If the delimiter is not found or
          * indices are invalid, an empty {@code Optional} is returned.</p>
          *
-         * <p>The method returns an empty {@code Optional} for null input string or delimiter.</p>
+         * <p>The method returns an empty {@code Optional} for {@code null} input string or delimiter.</p>
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
@@ -20879,7 +20895,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
          * delimiter and ending before the first occurrence of the end delimiter (after the begin
          * delimiter). If either delimiter is not found, an empty {@code Optional} is returned.</p>
          *
-         * <p>The method returns an empty {@code Optional} for null input string.</p>
+         * <p>The method returns an empty {@code Optional} for {@code null} input string.</p>
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
@@ -20907,7 +20923,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
          * the next occurrence of the same tag. This is equivalent to calling
          * {@code substringBetween(str, tag, tag)}.</p>
          *
-         * <p>The method returns an empty {@code Optional} for null input string or tag.</p>
+         * <p>The method returns an empty {@code Optional} for {@code null} input string or tag.</p>
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
@@ -20935,7 +20951,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
          * delimiter and ending before the first occurrence of the end delimiter (after the begin
          * delimiter). If either delimiter is not found, an empty {@code Optional} is returned.</p>
          *
-         * <p>The method returns an empty {@code Optional} for null input string or delimiters.</p>
+         * <p>The method returns an empty {@code Optional} for {@code null} input string or delimiters.</p>
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
@@ -20964,7 +20980,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
          * extracts the substring between that delimiter and the first occurrence of the end delimiter
          * after it. If either delimiter is not found, an empty {@code Optional} is returned.</p>
          *
-         * <p>The method returns an empty {@code Optional} for null input string or delimiters.</p>
+         * <p>The method returns an empty {@code Optional} for {@code null} input string or delimiters.</p>
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
@@ -20994,7 +21010,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
          * begin index. The function receives the begin index and should return the corresponding end
          * index. If the function returns an invalid index, an empty {@code Optional} is returned.</p>
          *
-         * <p>The method returns an empty {@code Optional} for null input string or function.</p>
+         * <p>The method returns an empty {@code Optional} for {@code null} input string or function.</p>
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
@@ -21025,7 +21041,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
          * end index. The function receives the end index and should return the corresponding begin
          * index. If the function returns an invalid index, an empty {@code Optional} is returned.</p>
          *
-         * <p>The method returns an empty {@code Optional} for null input string or function.</p>
+         * <p>The method returns an empty {@code Optional} for {@code null} input string or function.</p>
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
@@ -21057,7 +21073,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
          * delimiter is not found or the function returns an invalid index, an empty {@code Optional}
          * is returned.</p>
          *
-         * <p>The method returns an empty {@code Optional} for null input string, delimiter, or function.</p>
+         * <p>The method returns an empty {@code Optional} for {@code null} input string, delimiter, or function.</p>
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
@@ -21090,7 +21106,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
          * the delimiter position and should return the begin index. If the delimiter is not found
          * or the function returns an invalid index, an empty {@code Optional} is returned.</p>
          *
-         * <p>The method returns an empty {@code Optional} for null input string, delimiter, or function.</p>
+         * <p>The method returns an empty {@code Optional} for {@code null} input string, delimiter, or function.</p>
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
@@ -21119,7 +21135,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
          *
          * <p>This method handles various integer formats including decimal, hexadecimal (0x or #),
          * and octal (leading 0) numbers. It returns an empty {@code OptionalInt} if the string
-         * is blank, null, or cannot be parsed as a valid integer.</p>
+         * is blank, {@code null}, or cannot be parsed as a valid integer.</p>
          *
          * <p>The method performs a quick validation check before attempting to parse the string.</p>
          *
@@ -21156,7 +21172,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
          *
          * <p>This method handles various long formats including decimal, hexadecimal (0x or #),
          * and octal (leading 0) numbers. It returns an empty {@code OptionalLong} if the string
-         * is blank, null, or cannot be parsed as a valid long.</p>
+         * is blank, {@code null}, or cannot be parsed as a valid long.</p>
          *
          * <p>The method performs a quick validation check before attempting to parse the string.</p>
          *
@@ -21193,7 +21209,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
          *
          * <p>This method handles standard floating-point formats including decimal notation
          * and scientific notation. It returns an empty {@code OptionalFloat} if the string
-         * is blank, null, or cannot be parsed as a valid float.</p>
+         * is blank, {@code null}, or cannot be parsed as a valid float.</p>
          *
          * <p>The method performs a quick validation check before attempting to parse the string.</p>
          *
@@ -21231,7 +21247,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
          *
          * <p>This method handles standard floating-point formats including decimal notation
          * and scientific notation. It returns an empty {@code OptionalDouble} if the string
-         * is blank, null, or cannot be parsed as a valid double.</p>
+         * is blank, {@code null}, or cannot be parsed as a valid double.</p>
          *
          * <p>The method performs a quick validation check before attempting to parse the string.</p>
          *
@@ -21269,7 +21285,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
          *
          * <p>This method handles various integer formats including decimal, hexadecimal (0x or #),
          * and octal (leading 0) numbers. It can handle values larger than Long.MAX_VALUE. It returns
-         * an empty {@code Optional} if the string is blank, null, or cannot be parsed as a valid BigInteger.</p>
+         * an empty {@code Optional} if the string is blank, {@code null}, or cannot be parsed as a valid BigInteger.</p>
          *
          * <p>The method performs a quick validation check before attempting to parse the string.</p>
          *
@@ -21306,7 +21322,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
          *
          * <p>This method handles standard decimal notation and scientific notation. It provides
          * arbitrary precision decimal arithmetic. It returns an empty {@code Optional} if the string
-         * is blank, null, or cannot be parsed as a valid BigDecimal.</p>
+         * is blank, {@code null}, or cannot be parsed as a valid BigDecimal.</p>
          *
          * <p>The method performs a quick validation check before attempting to parse the string.</p>
          *
@@ -21344,7 +21360,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
          * <p>This method automatically determines the most appropriate Number type based on the
          * string format and value. It handles integers, longs, floats, doubles, BigIntegers, and
          * BigDecimals, including hexadecimal and octal formats. It returns an empty {@code Optional}
-         * if the string is blank, null, or cannot be parsed as a valid number.</p>
+         * if the string is blank, {@code null}, or cannot be parsed as a valid number.</p>
          *
          * <p>The method performs a quick validation check before attempting to parse the string.</p>
          *

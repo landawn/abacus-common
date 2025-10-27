@@ -27,6 +27,7 @@ import java.util.Set;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
+import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.pool.Poolable.Caller;
 import com.landawn.abacus.util.ClassUtil;
 import com.landawn.abacus.util.ExceptionUtil;
@@ -95,7 +96,7 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
     final Comparator<Map.Entry<K, E>> cmp;
 
     /**
-     * Future representing the scheduled eviction task, null if eviction is disabled.
+     * Future representing the scheduled eviction task, {@code null} if eviction is disabled.
      */
     ScheduledFuture<?> scheduleFuture;
 
@@ -119,7 +120,7 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
      * @param evictDelay the delay in milliseconds between eviction runs, or 0 to disable
      * @param evictionPolicy the policy to use for selecting entries to evict
      * @param maxMemorySize the maximum total memory in bytes, or 0 for no limit
-     * @param memoryMeasure the function to calculate key-value pair memory size, or null if not using memory limits
+     * @param memoryMeasure the function to calculate key-value pair memory size, or {@code null} if not using memory limits
      */
     protected GenericKeyedObjectPool(final int capacity, final long evictDelay, final EvictionPolicy evictionPolicy, final long maxMemorySize,
             final KeyedObjectPool.MemoryMeasure<K, E> memoryMeasure) {
@@ -150,7 +151,7 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
      * @param autoBalance whether to automatically remove entries when the pool is full
      * @param balanceFactor the proportion of entries to remove during balancing (0-1)
      * @param maxMemorySize the maximum total memory in bytes, or 0 for no limit
-     * @param memoryMeasure the function to calculate key-value pair memory size, or null if not using memory limits
+     * @param memoryMeasure the function to calculate key-value pair memory size, or {@code null} if not using memory limits
      */
     protected GenericKeyedObjectPool(final int capacity, final long evictDelay, final EvictionPolicy evictionPolicy, final boolean autoBalance,
             final float balanceFactor, final long maxMemorySize, final KeyedObjectPool.MemoryMeasure<K, E> memoryMeasure) {
@@ -291,15 +292,17 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
     }
 
     /**
-     * Returns the value associated with the specified key, or null if no mapping exists.
-     * If the value has expired, it is removed and destroyed, and null is returned.
+     * Returns the value associated with the specified key, or {@code null} if no mapping exists.
+     * If the value has expired, it is removed and destroyed, and {@code null} is returned.
      * The value's activity print is updated on successful retrieval.
-     * 
+     *
      * @param key the key whose associated value is to be returned
-     * @return the value associated with the key, or null if no mapping exists or value expired
+     * @return the value associated with the key, or {@code null} if no mapping exists or value expired
      * @throws IllegalStateException if the pool has been closed
      */
+    @MayReturnNull
     @Override
+
     public E get(final K key) throws IllegalStateException {
         assertNotClosed();
 
@@ -338,12 +341,14 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
     /**
      * Removes and returns the value associated with the specified key.
      * The value's activity print is updated before removal.
-     * 
+     *
      * @param key the key whose mapping is to be removed
-     * @return the value previously associated with the key, or null if no mapping existed
+     * @return the value previously associated with the key, or {@code null} if no mapping existed
      * @throws IllegalStateException if the pool has been closed
      */
+    @MayReturnNull
     @Override
+
     public E remove(final K key) throws IllegalStateException {
         assertNotClosed();
 
@@ -374,13 +379,15 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
 
     /**
      * Returns the value associated with the specified key without updating access statistics.
-     * If the value has expired, it is removed and destroyed, and null is returned.
-     * 
+     * If the value has expired, it is removed and destroyed, and {@code null} is returned.
+     *
      * @param key the key whose associated value is to be returned
-     * @return the value associated with the key, or null if no mapping exists or value expired
+     * @return the value associated with the key, or {@code null} if no mapping exists or value expired
      * @throws IllegalStateException if the pool has been closed
      */
+    @MayReturnNull
     @Override
+
     public E peek(final K key) throws IllegalStateException {
         assertNotClosed();
 
@@ -407,7 +414,7 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
     }
 
     /**
-     * Returns true if this pool contains a mapping for the specified key.
+     * Returns {@code true} if this pool contains a mapping for the specified key.
      * 
      * @param key the key whose presence in this pool is to be tested
      * @return {@code true} if this pool contains a mapping for the specified key
@@ -674,12 +681,6 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
         }
     }
 
-    /**
-     * Destroys all entries in the specified map.
-     * 
-     * @param map the map of entries to destroy
-     * @param caller the reason for destruction
-     */
     protected void destroyAll(final Map<K, E> map, final Caller caller) {
         if (N.notEmpty(map)) {
             for (final Map.Entry<K, E> entry : map.entrySet()) {
@@ -688,11 +689,6 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
         }
     }
 
-    /**
-     * Removes and destroys all entries from the pool.
-     * 
-     * @param caller the reason for removal
-     */
     private void removeAll(final Caller caller) {
         lock.lock();
 

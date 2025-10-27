@@ -38,6 +38,12 @@ package com.landawn.abacus.parser;
 public class KryoDeserializationConfig extends DeserializationConfig<KryoDeserializationConfig> {
 
     /**
+     * Constructs a new KryoDeserializationConfig with default settings.
+     */
+    public KryoDeserializationConfig() {
+    }
+
+    /**
      * Factory class for creating {@link KryoDeserializationConfig} instances.
      * Provides convenient static factory methods for configuration creation.
      * 
@@ -53,6 +59,12 @@ public class KryoDeserializationConfig extends DeserializationConfig<KryoDeseria
      * }</pre>
      */
     public static final class KDC extends KryoDeserializationConfig {
+
+        /**
+         * Constructs a new KDC instance.
+         */
+        public KDC() {
+        }
 
         /**
          * Creates a new instance of {@link KryoDeserializationConfig} with default settings.

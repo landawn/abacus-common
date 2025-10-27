@@ -29,6 +29,7 @@ import java.util.Queue;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
+import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.pool.Poolable.Caller;
 import com.landawn.abacus.util.ClassUtil;
 import com.landawn.abacus.util.ExceptionUtil;
@@ -100,7 +101,7 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
     final Comparator<E> cmp;
 
     /**
-     * Future representing the scheduled eviction task, null if eviction is disabled.
+     * Future representing the scheduled eviction task, {@code null} if eviction is disabled.
      */
     ScheduledFuture<?> scheduleFuture;
 
@@ -124,7 +125,7 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
      * @param evictDelay the delay in milliseconds between eviction runs, or 0 to disable
      * @param evictionPolicy the policy to use for selecting objects to evict
      * @param maxMemorySize the maximum total memory in bytes, or 0 for no limit
-     * @param memoryMeasure the function to calculate object memory size, or null if not using memory limits
+     * @param memoryMeasure the function to calculate object memory size, or {@code null} if not using memory limits
      */
     protected GenericObjectPool(final int capacity, final long evictDelay, final EvictionPolicy evictionPolicy, final long maxMemorySize,
             final ObjectPool.MemoryMeasure<E> memoryMeasure) {
@@ -155,7 +156,7 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
      * @param autoBalance whether to automatically remove objects when the pool is full
      * @param balanceFactor the proportion of objects to remove during balancing (0-1)
      * @param maxMemorySize the maximum total memory in bytes, or 0 for no limit
-     * @param memoryMeasure the function to calculate object memory size, or null if not using memory limits
+     * @param memoryMeasure the function to calculate object memory size, or {@code null} if not using memory limits
      */
     protected GenericObjectPool(final int capacity, final long evictDelay, final EvictionPolicy evictionPolicy, final boolean autoBalance,
             final float balanceFactor, final long maxMemorySize, final ObjectPool.MemoryMeasure<E> memoryMeasure) {
@@ -396,14 +397,16 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
     /**
      * Retrieves and removes an element from the pool.
      * Elements are taken from the head of the deque (LIFO order).
-     * 
+     *
      * <p>If the retrieved element has expired, it will be destroyed and the method
-     * will return null. The element's activity print is updated on successful retrieval.
-     * 
-     * @return an element from the pool, or null if the pool is empty
+     * will return {@code null}. The element's activity print is updated on successful retrieval.
+     *
+     * @return an element from the pool, or {@code null} if the pool is empty
      * @throws IllegalStateException if the pool has been closed
      */
+    @MayReturnNull
     @Override
+
     public E take() throws IllegalStateException {
         assertNotClosed();
 
@@ -447,17 +450,19 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
     /**
      * Retrieves and removes an element from the pool within the specified timeout period.
      * This method blocks until an element becomes available, the timeout expires, or the thread is interrupted.
-     * 
+     *
      * <p>Expired elements are automatically destroyed and the method continues waiting
      * for a valid element until the timeout expires.
-     * 
+     *
      * @param timeout the maximum time to wait
      * @param unit the time unit of the timeout argument
-     * @return an element from the pool, or null if the timeout elapsed before an element was available
+     * @return an element from the pool, or {@code null} if the timeout elapsed before an element was available
      * @throws IllegalStateException if the pool has been closed
      * @throws InterruptedException if interrupted while waiting
      */
+    @MayReturnNull
     @Override
+
     public E take(final long timeout, final TimeUnit unit) throws IllegalStateException, InterruptedException {
         assertNotClosed();
 
@@ -732,12 +737,6 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
         }
     }
 
-    /**
-     * Destroys all elements in the specified collection.
-     * 
-     * @param c the collection of elements to destroy
-     * @param caller the reason for destruction
-     */
     protected void destroyAll(final Collection<E> c, final Caller caller) {
         if (N.notEmpty(c)) {
             for (final E e : c) {
@@ -746,11 +745,6 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
         }
     }
 
-    /**
-     * Removes and destroys all elements from the pool.
-     * 
-     * @param caller the reason for removal
-     */
     private void removeAll(final Caller caller) {
         lock.lock();
 

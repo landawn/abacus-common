@@ -189,7 +189,7 @@ public final class Charsets {
      * }</pre>
      *
      * @param charsetName the name of the requested charset; may be either a canonical name
-     *                    (e.g., "UTF-8") or an alias (e.g., "utf8"). Must not be null.
+     *                    (e.g., "UTF-8") or an alias (e.g., "utf8"). Must not be {@code null}.
      * @return a charset object for the named charset, either from cache or newly created
      * @throws IllegalCharsetNameException if the given charset name is illegal (as defined by
      *         {@link Charset#forName(String)})

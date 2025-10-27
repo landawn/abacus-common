@@ -45,8 +45,9 @@ public class MillisCalendarType extends CalendarType {
      *
      * @param rs the ResultSet containing the query results
      * @param columnIndex the index of the column to retrieve (1-based)
-     * @return a Calendar object created from the milliseconds value, or null if the database value was 0
+     * @return a Calendar object created from the milliseconds value, or {@code null} if the database value was 0
      * @throws SQLException if a database access error occurs or the columnIndex is invalid
+     @MayReturnNull
      */
     @Override
     public Calendar get(final ResultSet rs, final int columnIndex) throws SQLException {
@@ -62,8 +63,9 @@ public class MillisCalendarType extends CalendarType {
      *
      * @param rs the ResultSet containing the query results
      * @param columnLabel the label of the column to retrieve
-     * @return a Calendar object created from the milliseconds value, or null if the database value was 0
+     * @return a Calendar object created from the milliseconds value, or {@code null} if the database value was 0
      * @throws SQLException if a database access error occurs or the columnLabel is not found
+     @MayReturnNull
      */
     @Override
     public Calendar get(final ResultSet rs, final String columnLabel) throws SQLException {

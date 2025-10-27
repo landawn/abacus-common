@@ -1044,7 +1044,7 @@ public final class XmlUtil {
     /**
      * Gets the first node with the specified name from the given node or its descendants.
      * This method performs a depth-first search and returns the first matching node found.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Document doc = parser.parse(xmlFile);
@@ -1058,6 +1058,7 @@ public final class XmlUtil {
      * @param nodeName The name of the node to find
      * @return The first node with the specified name, or {@code null} if no such node is found
      */
+    @MayReturnNull
     public static Node getNextNodeByName(final Node node, final String nodeName) {
         if (node.getNodeName().equals(nodeName)) {
             return node;
@@ -1259,7 +1260,7 @@ public final class XmlUtil {
 
     /**
      * Gets the text content of the given XML node, optionally processing whitespace characters.
-     * When ignoreWhiteChar is true, all whitespace characters (tabs, newlines, etc.) within
+     * When ignoreWhiteChar is {@code true}, all whitespace characters (tabs, newlines, etc.) within
      * the text content are normalized to single spaces, and leading/trailing spaces are removed.
      * 
      * <p><b>Usage Examples:</b></p>
@@ -1346,7 +1347,7 @@ public final class XmlUtil {
      * char[] chars = "Hello <world> & \"friends\"".toCharArray();
      * StringBuilder sb = new StringBuilder();
      * XmlUtil.writeCharacters(chars, sb);
-     * // Result: "Hello &lt;world&gt; &amp; &quot;friends&quot;"
+     * // Result: "Hello <world> &amp; &quot;friends&quot;"
      * }</pre>
      *
      * @param cbuf The character array containing the characters to be written
@@ -1366,7 +1367,7 @@ public final class XmlUtil {
      * char[] chars = "Data: <value> & 'text'".toCharArray();
      * StringBuilder sb = new StringBuilder();
      * XmlUtil.writeCharacters(chars, 6, 14, sb);
-     * // Result: "&lt;value&gt; &amp; "
+     * // Result: "<value> &amp; "
      * }</pre>
      *
      * @param cbuf The character array containing the characters to be written
@@ -1382,13 +1383,13 @@ public final class XmlUtil {
     /**
      * Writes XML-escaped characters from the specified string to the given StringBuilder.
      * Special XML characters (&lt;, &gt;, &amp;, ', ") are escaped to their XML entity representations.
-     * If the string is null, the text "null" is written.
+     * If the string is {@code null}, the text "null" is written.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * StringBuilder sb = new StringBuilder();
      * XmlUtil.writeCharacters("<tag attr='value'>text & more</tag>", sb);
-     * // Result: "&lt;tag attr=&apos;value&apos;&gt;text &amp; more&lt;/tag&gt;"
+     * // Result: "<tag attr=&apos;value&apos;>text &amp; more</tag>"
      * }</pre>
      *
      * @param str The string containing the characters to be written
@@ -1409,7 +1410,7 @@ public final class XmlUtil {
      * String text = "Hello <world> & friends";
      * StringBuilder sb = new StringBuilder();
      * XmlUtil.writeCharacters(text, 6, 8, sb);
-     * // Result: "&lt;world&gt;"
+     * // Result: "<world>"
      * }</pre>
      *
      * @param str The string containing the characters to be written
@@ -1431,7 +1432,7 @@ public final class XmlUtil {
      * char[] chars = "<data>value & more</data>".toCharArray();
      * ByteArrayOutputStream baos = new ByteArrayOutputStream();
      * XmlUtil.writeCharacters(chars, baos);
-     * // Result: "&lt;data&gt;value &amp; more&lt;/data&gt;"
+     * // Result: "<data>value &amp; more</data>"
      * }</pre>
      *
      * @param cbuf The character array containing the characters to be written
@@ -1452,7 +1453,7 @@ public final class XmlUtil {
      * char[] chars = "Data: <value> & 'text'".toCharArray();
      * FileOutputStream fos = new FileOutputStream("output.xml");
      * XmlUtil.writeCharacters(chars, 7, 14, fos);
-     * // Writes: "&lt;value&gt; &amp; "
+     * // Writes: "<value> &amp; "
      * fos.close();
      * }</pre>
      *
@@ -1476,14 +1477,14 @@ public final class XmlUtil {
     /**
      * Writes XML-escaped characters from the specified string to the given OutputStream.
      * Special XML characters (&lt;, &gt;, &amp;, ', ") are escaped to their XML entity representations.
-     * If the string is null, the text "null" is written.
+     * If the string is {@code null}, the text "null" is written.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String data = "<message>Hello & goodbye</message>";
      * FileOutputStream fos = new FileOutputStream("output.xml");
      * XmlUtil.writeCharacters(data, fos);
-     * // Writes: "&lt;message&gt;Hello &amp; goodbye&lt;/message&gt;"
+     * // Writes: "<message>Hello &amp; goodbye</message>"
      * fos.close();
      * }</pre>
      *
@@ -1506,7 +1507,7 @@ public final class XmlUtil {
      * String text = "Prefix <tag>content</tag> suffix";
      * FileOutputStream fos = new FileOutputStream("output.xml");
      * XmlUtil.writeCharacters(text, 7, 17, fos);
-     * // Writes: "&lt;tag&gt;content&lt;/tag&gt;"
+     * // Writes: "<tag>content</tag>"
      * fos.close();
      * }</pre>
      *
@@ -1537,7 +1538,7 @@ public final class XmlUtil {
      * StringWriter writer = new StringWriter();
      * XmlUtil.writeCharacters(chars, writer);
      * String result = writer.toString();
-     * // Result: "Test: &lt;value&gt; &amp; &apos;more&apos;"
+     * // Result: "Test: <value> &amp; &apos;more&apos;"
      * }</pre>
      *
      * @param cbuf The character array containing the characters to be written
@@ -1558,7 +1559,7 @@ public final class XmlUtil {
      * char[] chars = "Data: <tag>value</tag> end".toCharArray();
      * StringWriter writer = new StringWriter();
      * XmlUtil.writeCharacters(chars, 6, 16, writer);
-     * // Result: "&lt;tag&gt;value&lt;/tag&gt;"
+     * // Result: "<tag>value</tag>"
      * }</pre>
      *
      * @param cbuf The character array containing the characters to be written
@@ -1584,7 +1585,7 @@ public final class XmlUtil {
     /**
      * Writes XML-escaped characters from the specified string to the given Writer.
      * Special XML characters (&lt;, &gt;, &amp;, ', ") are escaped to their XML entity representations.
-     * If the string is null, the text "null" is written.
+     * If the string is {@code null}, the text "null" is written.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1592,7 +1593,7 @@ public final class XmlUtil {
      * StringWriter writer = new StringWriter();
      * XmlUtil.writeCharacters(xml, writer);
      * String result = writer.toString();
-     * // Result: "&lt;book title=&apos;Java &amp; XML&apos;&gt;Content&lt;/book&gt;"
+     * // Result: "<book title=&apos;Java &amp; XML&apos;>Content</book>"
      * }</pre>
      *
      * @param str The string containing the characters to be written
@@ -1612,7 +1613,7 @@ public final class XmlUtil {
      * <pre>{@code
      * StringWriter writer = new StringWriter();
      * XmlUtil.writeCharacters("Hello <world>", 0, 13, writer);
-     * String result = writer.toString(); // "Hello &lt;world&gt;"
+     * String result = writer.toString(); // "Hello <world>"
      * }</pre>
      *
      * @param str The string containing the characters to be written
@@ -1635,12 +1636,6 @@ public final class XmlUtil {
         }
     }
 
-    /**
-     * Gets the attribute type class.
-     *
-     * @param node the XML node from which to extract the type attribute
-     * @return the Class corresponding to the type attribute, or null if not found or invalid
-     */
     static Class<?> getAttributeTypeClass(final Node node) {
         final String typeAttr = XmlUtil.getAttribute(node, TYPE);
 
@@ -1661,21 +1656,14 @@ public final class XmlUtil {
         }
     }
 
-    /**
-     * Gets the concrete class.
-     *
-     * @param targetClass the target class to check against
-     * @param typeClass the type class extracted from attributes
-     * @return the concrete class to use, preferring targetClass if typeClass is null or not assignable
-     */
     /*
-     * static Class<?> getAttributeTypeClass(Attributes attrs) { if (attrs == null) { return null; }
+     * static Class&lt;?&gt; getAttributeTypeClass(Attributes attrs) { if (attrs == null) { return null; }
      *
      * String typeAttr = attrs.getValue(TYPE);
      *
      * if (typeAttr == null) { return null; }
      *
-     * Type<?> type = N.getType(typeAttr);
+     * Type&lt;?&gt; type = N.getType(typeAttr);
      *
      * if (type != null) { return type.getTypeClass(); }
      *
@@ -1689,13 +1677,6 @@ public final class XmlUtil {
         }
     }
 
-    /**
-     * Gets the concrete class.
-     *
-     * @param targetClass the target class to check against
-     * @param node the XML node containing type information
-     * @return the concrete class to use based on the node's type attribute
-     */
     static Class<?> getConcreteClass(final Class<?> targetClass, final Node node) {
         if (node == null) {
             return targetClass;
@@ -1706,18 +1687,11 @@ public final class XmlUtil {
         return getConcreteClass(targetClass, typeClass);
     }
 
-    /**
-     * Gets the node type.
-     *
-     * @param nodeName the name of the XML node
-     * @param previousNodeType the previous node type in the hierarchy
-     * @return the NodeType enum value corresponding to the node name and context
-     */
     /*
-     * static Class<?> getConcreteClass(Class<?> targetClass, Attributes attrs) { if (attrs == null) { return targetClass;
+     * static Class&lt;?&gt; getConcreteClass(Class&lt;?&gt; targetClass, Attributes attrs) { if (attrs == null) { return targetClass;
      * }
      *
-     * Class<?> typeClass = getAttributeTypeClass(attrs);
+     * Class&lt;?&gt; typeClass = getAttributeTypeClass(attrs);
      *
      * return getConcreteClass(targetClass, typeClass); }
      */

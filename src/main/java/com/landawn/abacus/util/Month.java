@@ -33,7 +33,65 @@ package com.landawn.abacus.util;
  */
 public enum Month {
 
-    JANUARY(1), FEBRUARY(2), MARCH(3), APRIL(4), MAY(5), JUNE(6), JULY(7), AUGUST(8), SEPTEMBER(9), OCTOBER(10), NOVEMBER(11), DECEMBER(12);
+    /**
+     * January, the first month of the year (numeric value: 1).
+     */
+    JANUARY(1),
+
+    /**
+     * February, the second month of the year (numeric value: 2).
+     */
+    FEBRUARY(2),
+
+    /**
+     * March, the third month of the year (numeric value: 3).
+     */
+    MARCH(3),
+
+    /**
+     * April, the fourth month of the year (numeric value: 4).
+     */
+    APRIL(4),
+
+    /**
+     * May, the fifth month of the year (numeric value: 5).
+     */
+    MAY(5),
+
+    /**
+     * June, the sixth month of the year (numeric value: 6).
+     */
+    JUNE(6),
+
+    /**
+     * July, the seventh month of the year (numeric value: 7).
+     */
+    JULY(7),
+
+    /**
+     * August, the eighth month of the year (numeric value: 8).
+     */
+    AUGUST(8),
+
+    /**
+     * September, the ninth month of the year (numeric value: 9).
+     */
+    SEPTEMBER(9),
+
+    /**
+     * October, the tenth month of the year (numeric value: 10).
+     */
+    OCTOBER(10),
+
+    /**
+     * November, the eleventh month of the year (numeric value: 11).
+     */
+    NOVEMBER(11),
+
+    /**
+     * December, the twelfth month of the year (numeric value: 12).
+     */
+    DECEMBER(12);
 
     private final int intValue;
 

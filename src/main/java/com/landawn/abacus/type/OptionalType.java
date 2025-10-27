@@ -17,7 +17,7 @@ import com.landawn.abacus.util.WD;
 import com.landawn.abacus.util.u.Optional;
 
 /**
- * Generic type handler for {@link Optional} wrapper objects, providing serialization, 
+ * Generic type handler for {@link Optional} wrapper objects, providing serialization,
  * deserialization, and database interaction capabilities for optional values of any type.
  * This type handler supports generic type parameters and delegates operations to the
  * appropriate element type handler.
@@ -86,11 +86,6 @@ public class OptionalType<T> extends AbstractOptionalType<Optional<T>> {
         return parameterTypes;
     }
 
-    /**
-     * Indicates whether this is a generic type.
-     *
-     * @return true, as Optional is a generic type
-     */
     @Override
     public boolean isGenericType() {
         return true;
@@ -108,11 +103,12 @@ public class OptionalType<T> extends AbstractOptionalType<Optional<T>> {
 
     /**
      * Converts an {@link Optional} object to its string representation.
-     * If the Optional is null or empty, returns null. Otherwise,
+     * If the Optional is {@code null} or empty, returns {@code null}. Otherwise,
      * delegates to the element type's string conversion.
-     * 
+     *
      * @param x the Optional object to convert
-     * @return the string representation of the contained value, or null if empty
+     * @return the string representation of the contained value, or {@code null} if empty
+     @MayReturnNull
      */
     @Override
     public String stringOf(final Optional<T> x) {
@@ -121,11 +117,11 @@ public class OptionalType<T> extends AbstractOptionalType<Optional<T>> {
 
     /**
      * Converts a string representation to an {@link Optional} object.
-     * If the string is null, returns an empty Optional. Otherwise,
+     * If the string is {@code null}, returns an empty Optional. Otherwise,
      * delegates to the element type's valueOf method and wraps the result.
-     * The result may be an Optional containing null if the element type's
-     * valueOf returns null.
-     * 
+     * The result may be an Optional containing {@code null} if the element type's
+     * valueOf returns {@code null}.
+     *
      * @param str the string to convert
      * @return an Optional containing the parsed value, or empty Optional if input is null
      */
@@ -137,7 +133,7 @@ public class OptionalType<T> extends AbstractOptionalType<Optional<T>> {
     /**
      * Retrieves a value from a ResultSet at the specified column index and wraps it in an {@link Optional}.
      * The method attempts to convert the retrieved value to the element type if necessary.
-     * 
+     *
      * @param rs the ResultSet to read from
      * @param columnIndex the column index (1-based) to retrieve the value from
      * @return an Optional containing the retrieved value, or empty Optional if the value is SQL NULL
@@ -154,7 +150,7 @@ public class OptionalType<T> extends AbstractOptionalType<Optional<T>> {
     /**
      * Retrieves a value from a ResultSet using the specified column label and wraps it in an {@link Optional}.
      * The method attempts to convert the retrieved value to the element type if necessary.
-     * 
+     *
      * @param rs the ResultSet to read from
      * @param columnLabel the label for the column specified with the SQL AS clause
      * @return an Optional containing the retrieved value, or empty Optional if the value is SQL NULL
@@ -170,8 +166,8 @@ public class OptionalType<T> extends AbstractOptionalType<Optional<T>> {
 
     /**
      * Sets a parameter in a PreparedStatement to the value contained in an {@link Optional}.
-     * If the Optional is null or empty, sets the parameter to SQL NULL.
-     * 
+     * If the Optional is {@code null} or empty, sets the parameter to SQL NULL.
+     *
      * @param stmt the PreparedStatement to set the parameter on
      * @param columnIndex the parameter index (1-based) to set
      * @param x the Optional value to set
@@ -184,8 +180,8 @@ public class OptionalType<T> extends AbstractOptionalType<Optional<T>> {
 
     /**
      * Sets a named parameter in a CallableStatement to the value contained in an {@link Optional}.
-     * If the Optional is null or empty, sets the parameter to SQL NULL.
-     * 
+     * If the Optional is {@code null} or empty, sets the parameter to SQL NULL.
+     *
      * @param stmt the CallableStatement to set the parameter on
      * @param parameterName the name of the parameter to set
      * @param x the Optional value to set
@@ -198,9 +194,9 @@ public class OptionalType<T> extends AbstractOptionalType<Optional<T>> {
 
     /**
      * Appends the string representation of an {@link Optional} to an Appendable.
-     * If the Optional is null or empty, appends the NULL_STRING constant.
+     * If the Optional is {@code null} or empty, appends the NULL_STRING constant.
      * Otherwise, delegates to the actual type handler of the contained value.
-     * 
+     *
      * @param appendable the Appendable to write to
      * @param x the Optional value to append
      * @throws IOException if an I/O error occurs during the append operation
@@ -217,10 +213,10 @@ public class OptionalType<T> extends AbstractOptionalType<Optional<T>> {
 
     /**
      * Writes the character representation of an {@link Optional} to a CharacterWriter.
-     * If the Optional is null or empty, writes the NULL_CHAR_ARRAY.
+     * If the Optional is {@code null} or empty, writes the NULL_CHAR_ARRAY.
      * Otherwise, delegates to the actual type handler of the contained value.
      * This method is typically used for JSON/XML serialization.
-     * 
+     *
      * @param writer the CharacterWriter to write to
      * @param x the Optional value to write
      * @param config the serialization configuration

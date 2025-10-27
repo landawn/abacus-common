@@ -25,7 +25,8 @@ import com.landawn.abacus.util.N;
  * Configuration class for JSON serialization operations.
  * This class provides various settings to control how objects are serialized to JSON format.
  * All configuration methods support method chaining for convenient setup.
- * * <p><b>Usage Examples:</b></p>
+ *
+ * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * JSONSerializationConfig config = new JSONSerializationConfig()
  *     .quotePropName(true)
@@ -33,17 +34,17 @@ import com.landawn.abacus.util.N;
  *     .prettyFormat(true)
  *     .setDateTimeFormat(DateTimeFormat.ISO_8601);
  * }</pre>
- * 
+ *
  * <p>Default configuration values:</p>
  * <ul>
- *   <li>quotePropName: true - Property names are quoted by default</li>
- *   <li>quoteMapKey: true - Map keys are quoted by default</li>
- *   <li>bracketRootValue: true - Root values are bracketed by default</li>
- *   <li>wrapRootValue: false - Root values are not wrapped with type name by default</li>
- *   <li>writeNullToEmpty: false - Null values remain null by default</li>
- *   <li>writeDatasetByRow: false - Datasets are written by columns by default</li>
+ *   <li>quotePropName: {@code true} - Property names are quoted by default</li>
+ *   <li>quoteMapKey: {@code true} - Map keys are quoted by default</li>
+ *   <li>bracketRootValue: {@code true} - Root values are bracketed by default</li>
+ *   <li>wrapRootValue: {@code false} - Root values are not wrapped with type name by default</li>
+ *   <li>writeNullToEmpty: {@code false} - Null values remain {@code null} by default</li>
+ *   <li>writeDatasetByRow: {@code false} - Datasets are written by columns by default</li>
  * </ul>
- * 
+ *
  * @since 0.8
  * @see JSONParser
  * @see JSONDeserializationConfig
@@ -94,8 +95,8 @@ public class JSONSerializationConfig extends JSONXMLSerializationConfig<JSONSeri
     }
 
     /**
-     * Checks if null values should be written as empty values.
-     * When enabled, null values will be serialized as empty strings, empty arrays, or empty objects
+     * Checks if {@code null} values should be written as empty values.
+     * When enabled, {@code null} values will be serialized as empty strings, empty arrays, or empty objects
      * depending on the expected type.
      * 
      * <p><b>Usage Examples:</b></p>
@@ -106,16 +107,16 @@ public class JSONSerializationConfig extends JSONXMLSerializationConfig<JSONSeri
      * // null object → {}
      * }</pre>
      * 
-     * @return {@code true} if null values should be written as empty strings/arrays/objects, {@code false} otherwise
+     * @return {@code true} if {@code null} values should be written as empty strings/arrays/objects, {@code false} otherwise
      */
     public boolean writeNullToEmpty() {
         return writeNullToEmpty;
     }
 
     /**
-     * Sets whether null values should be written as empty values during serialization.
-     * When enabled, null values will be serialized as empty strings, empty arrays, or empty objects
-     * depending on the expected type. This is useful when the consuming system cannot handle null values.
+     * Sets whether {@code null} values should be written as empty values during serialization.
+     * When enabled, {@code null} values will be serialized as empty strings, empty arrays, or empty objects
+     * depending on the expected type. This is useful when the consuming system cannot handle {@code null} values.
      * 
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -129,7 +130,7 @@ public class JSONSerializationConfig extends JSONXMLSerializationConfig<JSONSeri
      * // Output: {"name": "", "hobbies": []}
      * }</pre>
      *
-     * @param writeNullToEmpty {@code true} to write null as empty, {@code false} to write as null
+     * @param writeNullToEmpty {@code true} to write {@code null} as empty, {@code false} to write as null
      * @return this instance for method chaining
      */
     public JSONSerializationConfig writeNullToEmpty(final boolean writeNullToEmpty) {
@@ -360,7 +361,7 @@ public class JSONSerializationConfig extends JSONXMLSerializationConfig<JSONSeri
     /**
      * Sets whether property names should be quoted in the JSON output.
      * According to strict JSON specification, property names should always be quoted.
-     * Setting this to false produces non-standard JSON that may not be parseable by all JSON parsers.
+     * Setting this to {@code false} produces non-standard JSON that may not be parseable by all JSON parsers.
      * 
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -393,7 +394,7 @@ public class JSONSerializationConfig extends JSONXMLSerializationConfig<JSONSeri
     /**
      * Sets whether map keys should be quoted in the JSON output.
      * When serializing Map objects, this determines if the keys should be surrounded by quotes.
-     * Note that setting this to false may produce non-standard JSON for non-string keys.
+     * Note that setting this to {@code false} may produce non-standard JSON for non-string keys.
      * 
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -587,6 +588,12 @@ public class JSONSerializationConfig extends JSONXMLSerializationConfig<JSONSeri
      * @see JSONSerializationConfig
      */
     public static final class JSC extends JSONSerializationConfig {
+
+        /**
+         * Constructs a new JSC instance.
+         */
+        public JSC() {
+        }
 
         /**
          * Creates a new instance of JSONSerializationConfig with default settings.

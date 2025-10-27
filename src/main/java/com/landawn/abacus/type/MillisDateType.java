@@ -33,7 +33,7 @@ public class MillisDateType extends DateType {
     /**
      * Retrieves a Date value from a ResultSet at the specified column index.
      * The value is read as a long representing milliseconds since epoch.
-     * A value of 0 is treated as NULL and returns null.
+     * A value of 0 is treated as NULL and returns {@code null}.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -51,8 +51,9 @@ public class MillisDateType extends DateType {
      *
      * @param rs The ResultSet containing the data
      * @param columnIndex The column index (1-based) to retrieve the value from
-     * @return A Date object created from the milliseconds value, or null if the value is 0
+     * @return A Date object created from the milliseconds value, or {@code null} if the value is 0
      * @throws SQLException if a database access error occurs or the column index is invalid
+     @MayReturnNull
      */
     @Override
     public Date get(final ResultSet rs, final int columnIndex) throws SQLException {
@@ -64,7 +65,7 @@ public class MillisDateType extends DateType {
     /**
      * Retrieves a Date value from a ResultSet using the specified column label.
      * The value is read as a long representing milliseconds since epoch.
-     * A value of 0 is treated as NULL and returns null.
+     * A value of 0 is treated as NULL and returns {@code null}.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -82,8 +83,9 @@ public class MillisDateType extends DateType {
      *
      * @param rs The ResultSet containing the data
      * @param columnLabel The label of the column to retrieve the value from
-     * @return A Date object created from the milliseconds value, or null if the value is 0
+     * @return A Date object created from the milliseconds value, or {@code null} if the value is 0
      * @throws SQLException if a database access error occurs or the column label is not found
+     @MayReturnNull
      */
     @Override
     public Date get(final ResultSet rs, final String columnLabel) throws SQLException {
@@ -95,7 +97,7 @@ public class MillisDateType extends DateType {
     /**
      * Sets a Date parameter in a PreparedStatement at the specified position.
      * The Date is stored as a long value representing milliseconds since epoch.
-     * If the Date is null, 0 is stored.
+     * If the Date is {@code null}, 0 is stored.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -113,7 +115,7 @@ public class MillisDateType extends DateType {
      *
      * @param stmt The PreparedStatement to set the parameter on
      * @param columnIndex The parameter index (1-based) to set
-     * @param x The Date value to set, or null to store 0
+     * @param x The Date value to set, or {@code null} to store 0
      * @throws SQLException if a database access error occurs or the parameter index is invalid
      */
     @Override
@@ -124,7 +126,7 @@ public class MillisDateType extends DateType {
     /**
      * Sets a Date parameter in a CallableStatement using the specified parameter name.
      * The Date is stored as a long value representing milliseconds since epoch.
-     * If the Date is null, 0 is stored.
+     * If the Date is {@code null}, 0 is stored.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -141,7 +143,7 @@ public class MillisDateType extends DateType {
      *
      * @param stmt The CallableStatement to set the parameter on
      * @param parameterName The name of the parameter to set
-     * @param x The Date value to set, or null to store 0
+     * @param x The Date value to set, or {@code null} to store 0
      * @throws SQLException if a database access error occurs or the parameter name is not found
      */
     @Override

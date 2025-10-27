@@ -113,7 +113,7 @@ public interface Runnable extends java.lang.Runnable, Throwables.Runnable<Runtim
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Runnable task = () -> System.out.println("Task executed");
-     * Throwables.Runnable<IOException> throwableTask = task.toThrowable();
+     * var throwableTask = task.toThrowable();
      * 
      * // Can now be used in contexts that handle IOException
      * try {

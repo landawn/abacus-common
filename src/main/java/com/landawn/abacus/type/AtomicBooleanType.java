@@ -56,9 +56,26 @@ public class AtomicBooleanType extends AbstractAtomicType<AtomicBoolean> {
      * The boolean value is extracted from the AtomicBoolean and converted to
      * either "true" or "false" string.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * AtomicBooleanType type = (AtomicBooleanType) TypeFactory.getType(AtomicBoolean.class);
+     *
+     * AtomicBoolean trueValue = new AtomicBoolean(true);
+     * String str = type.stringOf(trueValue);
+     * // str: "true"
+     *
+     * AtomicBoolean falseValue = new AtomicBoolean(false);
+     * String strFalse = type.stringOf(falseValue);
+     * // strFalse: "false"
+     *
+     * String nullStr = type.stringOf(null);
+     * // nullStr: null
+     * }</pre>
+     *
      * @param x the AtomicBoolean value to convert
-     * @return "true" if the AtomicBoolean contains true, "false" if it contains false,
-     *         or null if the input is null
+     * @return "true" if the AtomicBoolean contains {@code true}, "false" if it contains {@code false},
+     *         or {@code null} if the input is null
+     @MayReturnNull
      */
     @Override
     public String stringOf(final AtomicBoolean x) {
@@ -70,8 +87,26 @@ public class AtomicBooleanType extends AbstractAtomicType<AtomicBoolean> {
      * Parses the string using Boolean.parseBoolean() and wraps the result
      * in a new AtomicBoolean instance.
      *
-     * @param str the string to parse (case-insensitive "true" results in true, all else false)
-     * @return a new AtomicBoolean containing the parsed value, or null if str is null or empty
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * AtomicBooleanType type = (AtomicBooleanType) TypeFactory.getType(AtomicBoolean.class);
+     *
+     * AtomicBoolean trueValue = type.valueOf("true");
+     * // trueValue.get(): true
+     *
+     * AtomicBoolean trueValue2 = type.valueOf("TRUE");
+     * // trueValue2.get(): true (case-insensitive)
+     *
+     * AtomicBoolean falseValue = type.valueOf("false");
+     * // falseValue.get(): false
+     *
+     * AtomicBoolean nullValue = type.valueOf(null);
+     * // nullValue: null
+     * }</pre>
+     *
+     * @param str the string to parse (case-insensitive "true" results in {@code true}, all else false)
+     * @return a new AtomicBoolean containing the parsed value, or {@code null} if str is {@code null} or empty
+     @MayReturnNull
      */
     @Override
     public AtomicBoolean valueOf(final String str) {
@@ -86,6 +121,7 @@ public class AtomicBooleanType extends AbstractAtomicType<AtomicBoolean> {
      * @param columnIndex the column index (1-based) of the boolean value
      * @return a new AtomicBoolean containing the retrieved value (false if SQL NULL)
      * @throws SQLException if a database access error occurs or the columnIndex is invalid
+     @MayReturnNull
      */
     @Override
     public AtomicBoolean get(final ResultSet rs, final int columnIndex) throws SQLException {
@@ -101,6 +137,7 @@ public class AtomicBooleanType extends AbstractAtomicType<AtomicBoolean> {
      *                    or the column name if no AS clause was specified
      * @return a new AtomicBoolean containing the retrieved value (false if SQL NULL)
      * @throws SQLException if a database access error occurs or the columnLabel is invalid
+     @MayReturnNull
      */
     @Override
     public AtomicBoolean get(final ResultSet rs, final String columnLabel) throws SQLException {
@@ -110,11 +147,11 @@ public class AtomicBooleanType extends AbstractAtomicType<AtomicBoolean> {
     /**
      * Sets an AtomicBoolean parameter in a PreparedStatement at the specified position.
      * The boolean value is extracted from the AtomicBoolean before setting.
-     * If the AtomicBoolean is null, sets false as the parameter value.
+     * If the AtomicBoolean is {@code null}, sets {@code false} as the parameter value.
      *
      * @param stmt the PreparedStatement to set the parameter on
      * @param columnIndex the parameter index (1-based) to set
-     * @param x the AtomicBoolean value to set, may be null (treated as false)
+     * @param x the AtomicBoolean value to set, may be {@code null} (treated as false)
      * @throws SQLException if a database access error occurs or the columnIndex is invalid
      */
     @Override
@@ -125,11 +162,11 @@ public class AtomicBooleanType extends AbstractAtomicType<AtomicBoolean> {
     /**
      * Sets a named AtomicBoolean parameter in a CallableStatement.
      * The boolean value is extracted from the AtomicBoolean before setting.
-     * If the AtomicBoolean is null, sets false as the parameter value.
+     * If the AtomicBoolean is {@code null}, sets {@code false} as the parameter value.
      *
      * @param stmt the CallableStatement to set the parameter on
      * @param parameterName the name of the parameter to set
-     * @param x the AtomicBoolean value to set, may be null (treated as false)
+     * @param x the AtomicBoolean value to set, may be {@code null} (treated as false)
      * @throws SQLException if a database access error occurs or the parameter name is invalid
      */
     @Override

@@ -187,7 +187,6 @@ public enum CalendarField {
      *   <li>{@link Calendar#MONTH} (2) - maps to {@link #MONTH}</li>
      *   <li>{@link Calendar#YEAR} (1) - maps to {@link #YEAR}</li>
      * </ul>
-     * </p>
      *
      * <p><b>Usage Example:</b></p>
      * <pre>{@code
@@ -269,7 +268,6 @@ public enum CalendarField {
      *   <li>{@link #MONTH}.value() returns {@link Calendar#MONTH} (2)</li>
      *   <li>{@link #YEAR}.value() returns {@link Calendar#YEAR} (1)</li>
      * </ul>
-     * </p>
      *
      * <p><b>Usage Example:</b></p>
      * <pre>{@code

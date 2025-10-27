@@ -36,9 +36,11 @@ import org.slf4j.spi.LocationAwareLogger;
  * 
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
- * // Requires SLF4J API and an implementation (e.g., Logback) on classpath
- * Logger logger = new SLF4JLogger("com.example.MyClass");
+ * // SLF4JLogger is automatically used by LoggerFactory when SLF4J is on classpath
+ * Logger logger = LoggerFactory.getLogger(MyClass.class);
+ * String backendName = "Logback";
  * logger.info("Using SLF4J with {}", backendName);
+ * Exception exception = new Exception("Processing error");
  * logger.error("Operation failed", exception);
  * }</pre>
  * 
@@ -78,7 +80,9 @@ class SLF4JLogger extends AbstractLogger {
     /**
      * Checks if TRACE level logging is enabled.
      *
-     * @return {@code true} if TRACE level logging is enabled, {@code false} otherwise
+     * <p>Delegates directly to the SLF4J logger's trace level check.</p>
+     *
+     * @return {@code true} if TRACE level is enabled, {@code false} otherwise
      */
     @Override
     public boolean isTraceEnabled() {
@@ -87,8 +91,13 @@ class SLF4JLogger extends AbstractLogger {
 
     /**
      * Logs a message at TRACE level.
-     * 
+     *
      * <p>Delegates directly to the SLF4J logger.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * logger.trace("Entering method calculateTotal");
+     * }</pre>
      *
      * @param msg the message to log
      */
@@ -99,8 +108,14 @@ class SLF4JLogger extends AbstractLogger {
 
     /**
      * Logs a message at TRACE level with an exception.
-     * 
+     *
      * <p>Delegates directly to the SLF4J logger.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Exception e = new Exception("Detailed trace");
+     * logger.trace("Method execution trace", e);
+     * }</pre>
      *
      * @param msg the message to log
      * @param t the exception to log
@@ -113,7 +128,9 @@ class SLF4JLogger extends AbstractLogger {
     /**
      * Checks if DEBUG level logging is enabled.
      *
-     * @return {@code true} if DEBUG level logging is enabled, {@code false} otherwise
+     * <p>Delegates directly to the SLF4J logger's debug level check.</p>
+     *
+     * @return {@code true} if DEBUG level is enabled, {@code false} otherwise
      */
     @Override
     public boolean isDebugEnabled() {
@@ -122,8 +139,13 @@ class SLF4JLogger extends AbstractLogger {
 
     /**
      * Logs a message at DEBUG level.
-     * 
+     *
      * <p>Delegates directly to the SLF4J logger.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * logger.debug("Database connection established");
+     * }</pre>
      *
      * @param msg the message to log
      */
@@ -134,8 +156,14 @@ class SLF4JLogger extends AbstractLogger {
 
     /**
      * Logs a message at DEBUG level with an exception.
-     * 
+     *
      * <p>Delegates directly to the SLF4J logger.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Exception e = new SQLException("Query failed");
+     * logger.debug("Failed to execute query", e);
+     * }</pre>
      *
      * @param msg the message to log
      * @param t the exception to log
@@ -148,7 +176,9 @@ class SLF4JLogger extends AbstractLogger {
     /**
      * Checks if INFO level logging is enabled.
      *
-     * @return {@code true} if INFO level logging is enabled, {@code false} otherwise
+     * <p>Delegates directly to the SLF4J logger's info level check.</p>
+     *
+     * @return {@code true} if INFO level is enabled, {@code false} otherwise
      */
     @Override
     public boolean isInfoEnabled() {
@@ -157,8 +187,13 @@ class SLF4JLogger extends AbstractLogger {
 
     /**
      * Logs a message at INFO level.
-     * 
+     *
      * <p>Delegates directly to the SLF4J logger.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * logger.info("Service initialized successfully");
+     * }</pre>
      *
      * @param msg the message to log
      */
@@ -169,8 +204,14 @@ class SLF4JLogger extends AbstractLogger {
 
     /**
      * Logs a message at INFO level with an exception.
-     * 
+     *
      * <p>Delegates directly to the SLF4J logger.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Exception e = new IOException("Config file not found");
+     * logger.info("Using default configuration", e);
+     * }</pre>
      *
      * @param msg the message to log
      * @param t the exception to log
@@ -183,7 +224,9 @@ class SLF4JLogger extends AbstractLogger {
     /**
      * Checks if WARN level logging is enabled.
      *
-     * @return {@code true} if WARN level logging is enabled, {@code false} otherwise
+     * <p>Delegates directly to the SLF4J logger's warn level check.</p>
+     *
+     * @return {@code true} if WARN level is enabled, {@code false} otherwise
      */
     @Override
     public boolean isWarnEnabled() {
@@ -192,10 +235,15 @@ class SLF4JLogger extends AbstractLogger {
 
     /**
      * Logs a message at WARN level.
-     * 
+     *
      * <p>If the underlying logger supports location awareness (LocationAwareLogger),
      * it is used to provide accurate caller location information. Otherwise, delegates
      * directly to the standard SLF4J logger.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * logger.warn("Resource usage approaching limit");
+     * }</pre>
      *
      * @param msg the message to log
      */
@@ -210,10 +258,16 @@ class SLF4JLogger extends AbstractLogger {
 
     /**
      * Logs a message at WARN level with an exception.
-     * 
+     *
      * <p>If the underlying logger supports location awareness (LocationAwareLogger),
      * it is used to provide accurate caller location information. Otherwise, delegates
      * directly to the standard SLF4J logger.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Exception e = new TimeoutException("Request timeout");
+     * logger.warn("Request processing delayed", e);
+     * }</pre>
      *
      * @param msg the message to log
      * @param t the exception to log
@@ -230,7 +284,9 @@ class SLF4JLogger extends AbstractLogger {
     /**
      * Checks if ERROR level logging is enabled.
      *
-     * @return {@code true} if ERROR level logging is enabled, {@code false} otherwise
+     * <p>Delegates directly to the SLF4J logger's error level check.</p>
+     *
+     * @return {@code true} if ERROR level is enabled, {@code false} otherwise
      */
     @Override
     public boolean isErrorEnabled() {
@@ -239,10 +295,15 @@ class SLF4JLogger extends AbstractLogger {
 
     /**
      * Logs a message at ERROR level.
-     * 
+     *
      * <p>If the underlying logger supports location awareness (LocationAwareLogger),
      * it is used to provide accurate caller location information. Otherwise, delegates
      * directly to the standard SLF4J logger.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * logger.error("Critical system failure detected");
+     * }</pre>
      *
      * @param msg the message to log
      */
@@ -257,10 +318,20 @@ class SLF4JLogger extends AbstractLogger {
 
     /**
      * Logs a message at ERROR level with an exception.
-     * 
+     *
      * <p>If the underlying logger supports location awareness (LocationAwareLogger),
      * it is used to provide accurate caller location information. Otherwise, delegates
      * directly to the standard SLF4J logger.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * try {
+     *     criticalOperation();
+     * } catch (Exception e) {
+     *     logger.error("Critical operation failed", e);
+     *     throw e;
+     * }
+     * }</pre>
      *
      * @param msg the message to log
      * @param t the exception to log

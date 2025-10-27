@@ -115,14 +115,14 @@ public final class If {
      * }</pre>
      *
      * @param index the index value to check
-     * @return an If instance that is true if the index is non-negative
+     * @return an If instance that is {@code true} if the index is non-negative
      */
     public static If exists(final int index) {
         return index >= 0 ? TRUE : FALSE;
     }
 
     /**
-     * Creates an If instance that checks if the given object is null.
+     * Creates an If instance that checks if the given object is {@code null}.
      * 
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -132,16 +132,16 @@ public final class If {
      * }</pre>
      *
      * @param obj the object to check for null
-     * @return an If instance that is true if the object is null
+     * @return an If instance that is {@code true} if the object is null
      */
     public static If isNull(final Object obj) {
         return is(obj == null);
     }
 
     /**
-     * Creates an If instance that checks if the given CharSequence is null or empty.
+     * Creates an If instance that checks if the given CharSequence is {@code null} or empty.
      * 
-     * <p>A CharSequence is considered empty if it is null or has zero length.</p>
+     * <p>A CharSequence is considered empty if it is {@code null} or has zero length.</p>
      * 
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -150,14 +150,14 @@ public final class If {
      * }</pre>
      *
      * @param s the CharSequence to check
-     * @return an If instance that is true if the CharSequence is null or empty
+     * @return an If instance that is {@code true} if the CharSequence is {@code null} or empty
      */
     public static If isEmpty(final CharSequence s) {
         return is(Strings.isEmpty(s));
     }
 
     /**
-     * Creates an If instance that checks if the given boolean array is null or empty.
+     * Creates an If instance that checks if the given boolean array is {@code null} or empty.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -167,14 +167,14 @@ public final class If {
      * }</pre>
      *
      * @param a the boolean array to check
-     * @return an If instance that is true if the array is null or has zero length
+     * @return an If instance that is {@code true} if the array is {@code null} or has zero length
      */
     public static If isEmpty(final boolean[] a) {
         return is(N.isEmpty(a));
     }
 
     /**
-     * Creates an If instance that checks if the given char array is null or empty.
+     * Creates an If instance that checks if the given char array is {@code null} or empty.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -184,14 +184,14 @@ public final class If {
      * }</pre>
      *
      * @param a the char array to check
-     * @return an If instance that is true if the array is null or has zero length
+     * @return an If instance that is {@code true} if the array is {@code null} or has zero length
      */
     public static If isEmpty(final char[] a) {
         return is(N.isEmpty(a));
     }
 
     /**
-     * Creates an If instance that checks if the given byte array is null or empty.
+     * Creates an If instance that checks if the given byte array is {@code null} or empty.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -201,14 +201,14 @@ public final class If {
      * }</pre>
      *
      * @param a the byte array to check
-     * @return an If instance that is true if the array is null or has zero length
+     * @return an If instance that is {@code true} if the array is {@code null} or has zero length
      */
     public static If isEmpty(final byte[] a) {
         return is(N.isEmpty(a));
     }
 
     /**
-     * Creates an If instance that checks if the given short array is null or empty.
+     * Creates an If instance that checks if the given short array is {@code null} or empty.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -218,14 +218,14 @@ public final class If {
      * }</pre>
      *
      * @param a the short array to check
-     * @return an If instance that is true if the array is null or has zero length
+     * @return an If instance that is {@code true} if the array is {@code null} or has zero length
      */
     public static If isEmpty(final short[] a) {
         return is(N.isEmpty(a));
     }
 
     /**
-     * Creates an If instance that checks if the given int array is null or empty.
+     * Creates an If instance that checks if the given int array is {@code null} or empty.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -235,14 +235,14 @@ public final class If {
      * }</pre>
      *
      * @param a the int array to check
-     * @return an If instance that is true if the array is null or has zero length
+     * @return an If instance that is {@code true} if the array is {@code null} or has zero length
      */
     public static If isEmpty(final int[] a) {
         return is(N.isEmpty(a));
     }
 
     /**
-     * Creates an If instance that checks if the given long array is null or empty.
+     * Creates an If instance that checks if the given long array is {@code null} or empty.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -252,14 +252,14 @@ public final class If {
      * }</pre>
      *
      * @param a the long array to check
-     * @return an If instance that is true if the array is null or has zero length
+     * @return an If instance that is {@code true} if the array is {@code null} or has zero length
      */
     public static If isEmpty(final long[] a) {
         return is(N.isEmpty(a));
     }
 
     /**
-     * Creates an If instance that checks if the given float array is null or empty.
+     * Creates an If instance that checks if the given float array is {@code null} or empty.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -269,14 +269,14 @@ public final class If {
      * }</pre>
      *
      * @param a the float array to check
-     * @return an If instance that is true if the array is null or has zero length
+     * @return an If instance that is {@code true} if the array is {@code null} or has zero length
      */
     public static If isEmpty(final float[] a) {
         return is(N.isEmpty(a));
     }
 
     /**
-     * Creates an If instance that checks if the given double array is null or empty.
+     * Creates an If instance that checks if the given double array is {@code null} or empty.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -286,14 +286,14 @@ public final class If {
      * }</pre>
      *
      * @param a the double array to check
-     * @return an If instance that is true if the array is null or has zero length
+     * @return an If instance that is {@code true} if the array is {@code null} or has zero length
      */
     public static If isEmpty(final double[] a) {
         return is(N.isEmpty(a));
     }
 
     /**
-     * Creates an If instance that checks if the given object array is null or empty.
+     * Creates an If instance that checks if the given object array is {@code null} or empty.
      * 
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -302,14 +302,14 @@ public final class If {
      * }</pre>
      *
      * @param a the object array to check
-     * @return an If instance that is true if the array is null or has zero length
+     * @return an If instance that is {@code true} if the array is {@code null} or has zero length
      */
     public static If isEmpty(final Object[] a) {
         return is(N.isEmpty(a));
     }
 
     /**
-     * Creates an If instance that checks if the given Collection is null or empty.
+     * Creates an If instance that checks if the given Collection is {@code null} or empty.
      * 
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -319,14 +319,14 @@ public final class If {
      * }</pre>
      *
      * @param c the Collection to check
-     * @return an If instance that is true if the Collection is null or empty
+     * @return an If instance that is {@code true} if the Collection is {@code null} or empty
      */
     public static If isEmpty(final Collection<?> c) {
         return is(N.isEmpty(c));
     }
 
     /**
-     * Creates an If instance that checks if the given Map is null or empty.
+     * Creates an If instance that checks if the given Map is {@code null} or empty.
      * 
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -335,17 +335,17 @@ public final class If {
      * }</pre>
      *
      * @param m the Map to check
-     * @return an If instance that is true if the Map is null or empty
+     * @return an If instance that is {@code true} if the Map is {@code null} or empty
      */
     public static If isEmpty(final Map<?, ?> m) {
         return is(N.isEmpty(m));
     }
 
     /**
-     * Creates an If instance that checks if the given PrimitiveList is null or empty.
+     * Creates an If instance that checks if the given PrimitiveList is {@code null} or empty.
      *
      * @param list the PrimitiveList to check
-     * @return an If instance that is true if the PrimitiveList is null or empty
+     * @return an If instance that is {@code true} if the PrimitiveList is {@code null} or empty
      */
     @SuppressWarnings("rawtypes")
     public static If isEmpty(final PrimitiveList list) {
@@ -353,29 +353,29 @@ public final class If {
     }
 
     /**
-     * Creates an If instance that checks if the given Multiset is null or empty.
+     * Creates an If instance that checks if the given Multiset is {@code null} or empty.
      *
      * @param s the Multiset to check
-     * @return an If instance that is true if the Multiset is null or empty
+     * @return an If instance that is {@code true} if the Multiset is {@code null} or empty
      */
     public static If isEmpty(final Multiset<?> s) {
         return is(N.isEmpty(s));
     }
 
     /**
-     * Creates an If instance that checks if the given Multimap is null or empty.
+     * Creates an If instance that checks if the given Multimap is {@code null} or empty.
      *
      * @param m the Multimap to check
-     * @return an If instance that is true if the Multimap is null or empty
+     * @return an If instance that is {@code true} if the Multimap is {@code null} or empty
      */
     public static If isEmpty(final Multimap<?, ?, ?> m) {
         return is(N.isEmpty(m));
     }
 
     /**
-     * Creates an If instance that checks if the given CharSequence is null, empty, or contains only whitespace.
+     * Creates an If instance that checks if the given CharSequence is {@code null}, empty, or contains only whitespace.
      * 
-     * <p>A CharSequence is considered blank if it is null, has zero length, or contains only
+     * <p>A CharSequence is considered blank if it is {@code null}, has zero length, or contains only
      * whitespace characters as defined by {@link Character#isWhitespace(char)}.</p>
      * 
      * <p><b>Usage Examples:</b></p>
@@ -385,7 +385,7 @@ public final class If {
      * }</pre>
      *
      * @param s the CharSequence to check
-     * @return an If instance that is true if the CharSequence is null, empty, or blank
+     * @return an If instance that is {@code true} if the CharSequence is {@code null}, empty, or blank
      */
     // DON'T change 'OrEmptyOrBlank' to 'OrBlank' because of the occurring order in the auto-completed context menu.
     public static If isBlank(final CharSequence s) {
@@ -393,7 +393,7 @@ public final class If {
     }
 
     /**
-     * Creates an If instance that checks if the given object is not null.
+     * Creates an If instance that checks if the given object is not {@code null}.
      * 
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -403,14 +403,14 @@ public final class If {
      * }</pre>
      *
      * @param obj the object to check
-     * @return an If instance that is true if the object is not null
+     * @return an If instance that is {@code true} if the object is not null
      */
     public static If notNull(final Object obj) {
         return is(obj != null);
     }
 
     /**
-     * Creates an If instance that checks if the given CharSequence is not null and not empty.
+     * Creates an If instance that checks if the given CharSequence is not {@code null} and not empty.
      * 
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -419,14 +419,14 @@ public final class If {
      * }</pre>
      *
      * @param s the CharSequence to check
-     * @return an If instance that is true if the CharSequence is not null and has length > 0
+     * @return an If instance that is {@code true} if the CharSequence is not {@code null} and has length > 0
      */
     public static If notEmpty(final CharSequence s) {
         return is(Strings.isNotEmpty(s));
     }
 
     /**
-     * Creates an If instance that checks if the given boolean array is not null and not empty.
+     * Creates an If instance that checks if the given boolean array is not {@code null} and not empty.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -436,14 +436,14 @@ public final class If {
      * }</pre>
      *
      * @param a the boolean array to check
-     * @return an If instance that is true if the array is not null and has length > 0
+     * @return an If instance that is {@code true} if the array is not {@code null} and has length > 0
      */
     public static If notEmpty(final boolean[] a) {
         return is(N.notEmpty(a));
     }
 
     /**
-     * Creates an If instance that checks if the given char array is not null and not empty.
+     * Creates an If instance that checks if the given char array is not {@code null} and not empty.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -453,14 +453,14 @@ public final class If {
      * }</pre>
      *
      * @param a the char array to check
-     * @return an If instance that is true if the array is not null and has length > 0
+     * @return an If instance that is {@code true} if the array is not {@code null} and has length > 0
      */
     public static If notEmpty(final char[] a) {
         return is(N.notEmpty(a));
     }
 
     /**
-     * Creates an If instance that checks if the given byte array is not null and not empty.
+     * Creates an If instance that checks if the given byte array is not {@code null} and not empty.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -470,14 +470,14 @@ public final class If {
      * }</pre>
      *
      * @param a the byte array to check
-     * @return an If instance that is true if the array is not null and has length > 0
+     * @return an If instance that is {@code true} if the array is not {@code null} and has length > 0
      */
     public static If notEmpty(final byte[] a) {
         return is(N.notEmpty(a));
     }
 
     /**
-     * Creates an If instance that checks if the given short array is not null and not empty.
+     * Creates an If instance that checks if the given short array is not {@code null} and not empty.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -487,14 +487,14 @@ public final class If {
      * }</pre>
      *
      * @param a the short array to check
-     * @return an If instance that is true if the array is not null and has length > 0
+     * @return an If instance that is {@code true} if the array is not {@code null} and has length > 0
      */
     public static If notEmpty(final short[] a) {
         return is(N.notEmpty(a));
     }
 
     /**
-     * Creates an If instance that checks if the given int array is not null and not empty.
+     * Creates an If instance that checks if the given int array is not {@code null} and not empty.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -504,14 +504,14 @@ public final class If {
      * }</pre>
      *
      * @param a the int array to check
-     * @return an If instance that is true if the array is not null and has length > 0
+     * @return an If instance that is {@code true} if the array is not {@code null} and has length > 0
      */
     public static If notEmpty(final int[] a) {
         return is(N.notEmpty(a));
     }
 
     /**
-     * Creates an If instance that checks if the given long array is not null and not empty.
+     * Creates an If instance that checks if the given long array is not {@code null} and not empty.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -521,14 +521,14 @@ public final class If {
      * }</pre>
      *
      * @param a the long array to check
-     * @return an If instance that is true if the array is not null and has length > 0
+     * @return an If instance that is {@code true} if the array is not {@code null} and has length > 0
      */
     public static If notEmpty(final long[] a) {
         return is(N.notEmpty(a));
     }
 
     /**
-     * Creates an If instance that checks if the given float array is not null and not empty.
+     * Creates an If instance that checks if the given float array is not {@code null} and not empty.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -538,14 +538,14 @@ public final class If {
      * }</pre>
      *
      * @param a the float array to check
-     * @return an If instance that is true if the array is not null and has length > 0
+     * @return an If instance that is {@code true} if the array is not {@code null} and has length > 0
      */
     public static If notEmpty(final float[] a) {
         return is(N.notEmpty(a));
     }
 
     /**
-     * Creates an If instance that checks if the given double array is not null and not empty.
+     * Creates an If instance that checks if the given double array is not {@code null} and not empty.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -555,14 +555,14 @@ public final class If {
      * }</pre>
      *
      * @param a the double array to check
-     * @return an If instance that is true if the array is not null and has length > 0
+     * @return an If instance that is {@code true} if the array is not {@code null} and has length > 0
      */
     public static If notEmpty(final double[] a) {
         return is(N.notEmpty(a));
     }
 
     /**
-     * Creates an If instance that checks if the given object array is not null and not empty.
+     * Creates an If instance that checks if the given object array is not {@code null} and not empty.
      * 
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -571,14 +571,14 @@ public final class If {
      * }</pre>
      *
      * @param a the object array to check
-     * @return an If instance that is true if the array is not null and has length > 0
+     * @return an If instance that is {@code true} if the array is not {@code null} and has length > 0
      */
     public static If notEmpty(final Object[] a) {
         return is(N.notEmpty(a));
     }
 
     /**
-     * Creates an If instance that checks if the given Collection is not null and not empty.
+     * Creates an If instance that checks if the given Collection is not {@code null} and not empty.
      * 
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -588,14 +588,14 @@ public final class If {
      * }</pre>
      *
      * @param c the Collection to check
-     * @return an If instance that is true if the Collection is not null and not empty
+     * @return an If instance that is {@code true} if the Collection is not {@code null} and not empty
      */
     public static If notEmpty(final Collection<?> c) {
         return is(N.notEmpty(c));
     }
 
     /**
-     * Creates an If instance that checks if the given Map is not null and not empty.
+     * Creates an If instance that checks if the given Map is not {@code null} and not empty.
      * 
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -604,17 +604,17 @@ public final class If {
      * }</pre>
      *
      * @param m the Map to check
-     * @return an If instance that is true if the Map is not null and not empty
+     * @return an If instance that is {@code true} if the Map is not {@code null} and not empty
      */
     public static If notEmpty(final Map<?, ?> m) {
         return is(N.notEmpty(m));
     }
 
     /**
-     * Creates an If instance that checks if the given PrimitiveList is not null and not empty.
+     * Creates an If instance that checks if the given PrimitiveList is not {@code null} and not empty.
      *
      * @param list the PrimitiveList to check
-     * @return an If instance that is true if the PrimitiveList is not null and not empty
+     * @return an If instance that is {@code true} if the PrimitiveList is not {@code null} and not empty
      */
     @SuppressWarnings("rawtypes")
     public static If notEmpty(final PrimitiveList list) {
@@ -622,29 +622,29 @@ public final class If {
     }
 
     /**
-     * Creates an If instance that checks if the given Multiset is not null and not empty.
+     * Creates an If instance that checks if the given Multiset is not {@code null} and not empty.
      *
      * @param s the Multiset to check
-     * @return an If instance that is true if the Multiset is not null and not empty
+     * @return an If instance that is {@code true} if the Multiset is not {@code null} and not empty
      */
     public static If notEmpty(final Multiset<?> s) {
         return is(N.notEmpty(s));
     }
 
     /**
-     * Creates an If instance that checks if the given Multimap is not null and not empty.
+     * Creates an If instance that checks if the given Multimap is not {@code null} and not empty.
      *
      * @param m the Multimap to check
-     * @return an If instance that is true if the Multimap is not null and not empty
+     * @return an If instance that is {@code true} if the Multimap is not {@code null} and not empty
      */
     public static If notEmpty(final Multimap<?, ?, ?> m) {
         return is(N.notEmpty(m));
     }
 
     /**
-     * Creates an If instance that checks if the given CharSequence is not null, not empty, and not blank.
+     * Creates an If instance that checks if the given CharSequence is not {@code null}, not empty, and not blank.
      * 
-     * <p>A CharSequence is considered not blank if it is not null, has length > 0, and contains
+     * <p>A CharSequence is considered not blank if it is not {@code null}, has length > 0, and contains
      * at least one non-whitespace character.</p>
      * 
      * <p><b>Usage Examples:</b></p>
@@ -655,7 +655,7 @@ public final class If {
      * }</pre>
      *
      * @param s the CharSequence to check
-     * @return an If instance that is true if the CharSequence is not null, not empty, and not blank
+     * @return an If instance that is {@code true} if the CharSequence is not {@code null}, not empty, and not blank
      */
     // DON'T change 'OrEmptyOrBlank' to 'OrBlank' because of the occurring order in the auto-completed context menu.
     public static If notBlank(final CharSequence s) {
@@ -663,9 +663,9 @@ public final class If {
     }
 
     /**
-     * Executes no action if the condition is true, but allows chaining to an orElse clause.
+     * Executes no action if the condition is {@code true}, but allows chaining to an orElse clause.
      * 
-     * <p>This method is useful when you only want to execute an action in the false case.</p>
+     * <p>This method is useful when you only want to execute an action in the {@code false} case.</p>
      * 
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -681,7 +681,7 @@ public final class If {
     }
 
     /**
-     * Executes the given runnable if the condition is true.
+     * Executes the given runnable if the condition is {@code true}.
      * 
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -707,7 +707,7 @@ public final class If {
     }
 
     /**
-     * Executes the given consumer with the provided input if the condition is true.
+     * Executes the given consumer with the provided input if the condition is {@code true}.
      * 
      * <p>This method is useful for conditional processing of a value.</p>
      * 
@@ -738,7 +738,7 @@ public final class If {
     }
 
     /**
-     * Throws the exception provided by the supplier if the condition is true.
+     * Throws the exception provided by the supplier if the condition is {@code true}.
      * 
      * <p>This method is useful for validation scenarios where an exception should be thrown
      * when a certain condition is met.</p>
@@ -768,10 +768,10 @@ public final class If {
 
     /**
      * Represents the else clause in a conditional chain, allowing actions to be executed
-     * when the initial condition is false.
+     * when the initial condition is {@code false}.
      * 
      * <p>This class is returned by the then() methods of the If class and provides methods
-     * to specify what should happen when the initial condition evaluates to false.</p>
+     * to specify what should happen when the initial condition evaluates to {@code false}.</p>
      */
     public static final class OrElse {
         /**
@@ -785,7 +785,7 @@ public final class If {
         public static final OrElse FALSE = new OrElse(false);
 
         /**
-         * The boolean state indicating whether the initial If condition was true.
+         * The boolean state indicating whether the initial If condition was {@code true}.
          * Used to determine whether to execute the then clause or the orElse clause.
          */
         private final boolean isIfTrue;
@@ -819,7 +819,7 @@ public final class If {
          * Executes no action in the else case.
          * 
          * <p>This method completes the conditional chain without performing any action
-         * when the initial condition is false. It's implicitly called when no orElse
+         * when the initial condition is {@code false}. It's implicitly called when no orElse
          * method is chained.</p>
          */
         void orElseDoNothing() {
@@ -827,7 +827,7 @@ public final class If {
         }
 
         /**
-         * Executes the given runnable if the initial condition was false.
+         * Executes the given runnable if the initial condition was {@code false}.
          * 
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
@@ -850,7 +850,7 @@ public final class If {
         }
 
         /**
-         * Executes the given consumer with the provided input if the initial condition was false.
+         * Executes the given consumer with the provided input if the initial condition was {@code false}.
          * 
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
@@ -876,7 +876,7 @@ public final class If {
         }
 
         /**
-         * Throws the exception provided by the supplier if the initial condition was false.
+         * Throws the exception provided by the supplier if the initial condition was {@code false}.
          * 
          * <p>This method is useful for validation scenarios where an exception should be thrown
          * when a required condition is not met.</p>

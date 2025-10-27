@@ -25,7 +25,7 @@ import com.landawn.abacus.util.Throwables;
  *
  * <p>This is a functional interface whose functional method is {@link #test(Object)}.
  *
- * <p>Refer to JDK API documentation at: <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html">https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a>
+ * <p>Refer to JDK API documentation at: <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html">https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a></p>
  *
  * @param <T> the type of the input to the predicate
  * @see java.util.function.Predicate
@@ -147,7 +147,7 @@ public interface Predicate<T> extends Throwables.Predicate<T, RuntimeException>,
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Predicate<String> validator = str -> str.matches("[A-Z]+");
-     * Throwables.Predicate<String, IOException> throwableValidator = 
+     * var throwableValidator = 
      *     validator.toThrowable();
      * 
      * // Can now be used in contexts that handle IOException

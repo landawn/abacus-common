@@ -21,7 +21,7 @@ import com.landawn.abacus.util.Strings;
  * Type handler for java.util.OptionalInt.
  * This class provides serialization, deserialization, and database access capabilities for OptionalInt instances.
  * OptionalInt is a container that may or may not contain an int value.
- * Empty optionals are represented as null in serialized form.
+ * Empty optionals are represented as {@code null} in serialized form.
  */
 public class JdkOptionalIntType extends AbstractOptionalType<OptionalInt> {
 
@@ -45,7 +45,7 @@ public class JdkOptionalIntType extends AbstractOptionalType<OptionalInt> {
      * Indicates whether instances of this type implement the Comparable interface.
      * OptionalInt values can be compared when both are present.
      *
-     * @return true, as OptionalInt values are comparable
+     * @return {@code true}, as OptionalInt values are comparable
      */
     @Override
     public boolean isComparable() {
@@ -56,7 +56,7 @@ public class JdkOptionalIntType extends AbstractOptionalType<OptionalInt> {
      * Indicates whether this type should be written without quotes in CSV format.
      * Integer values are numeric and should not be quoted.
      *
-     * @return true, indicating that OptionalInt values should not be quoted in CSV output
+     * @return {@code true}, indicating that OptionalInt values should not be quoted in CSV output
      */
     @Override
     public boolean isNonQuotableCsvType() {
@@ -75,11 +75,12 @@ public class JdkOptionalIntType extends AbstractOptionalType<OptionalInt> {
 
     /**
      * Converts an OptionalInt to its string representation.
-     * If the optional is empty or null, returns null.
+     * If the optional is empty or {@code null}, returns {@code null}.
      * Otherwise, returns the string representation of the contained int value.
      *
      * @param x the OptionalInt to convert to string
-     * @return the string representation of the int value, or null if empty or null
+     * @return the string representation of the int value, or {@code null} if empty or null
+     @MayReturnNull
      */
     @Override
     public String stringOf(final OptionalInt x) {
@@ -88,11 +89,12 @@ public class JdkOptionalIntType extends AbstractOptionalType<OptionalInt> {
 
     /**
      * Parses a string representation into an OptionalInt.
-     * Empty or null strings result in an empty OptionalInt.
+     * Empty or {@code null} strings result in an empty OptionalInt.
      * Non-empty strings are parsed as int values and wrapped in OptionalInt.
      *
      * @param str the string to parse
-     * @return OptionalInt.empty() if the string is null or empty, otherwise OptionalInt containing the parsed value
+     * @return OptionalInt.empty() if the string is {@code null} or empty, otherwise OptionalInt containing the parsed value
+     @MayReturnNull
      */
     @Override
     public OptionalInt valueOf(final String str) {
@@ -101,13 +103,14 @@ public class JdkOptionalIntType extends AbstractOptionalType<OptionalInt> {
 
     /**
      * Retrieves an OptionalInt value from the specified column in a ResultSet.
-     * If the column value is null, returns an empty OptionalInt.
+     * If the column value is {@code null}, returns an empty OptionalInt.
      * Otherwise, converts the value to int and wraps it in OptionalInt.
      *
      * @param rs the ResultSet to read from
      * @param columnIndex the index of the column to read (1-based)
-     * @return OptionalInt.empty() if the column is null, otherwise OptionalInt containing the value
+     * @return OptionalInt.empty() if the column is {@code null}, otherwise OptionalInt containing the value
      * @throws SQLException if a database access error occurs or the columnIndex is invalid
+     @MayReturnNull
      */
     @Override
     public OptionalInt get(final ResultSet rs, final int columnIndex) throws SQLException {
@@ -118,13 +121,14 @@ public class JdkOptionalIntType extends AbstractOptionalType<OptionalInt> {
 
     /**
      * Retrieves an OptionalInt value from the specified column in a ResultSet using the column label.
-     * If the column value is null, returns an empty OptionalInt.
+     * If the column value is {@code null}, returns an empty OptionalInt.
      * Otherwise, converts the value to int and wraps it in OptionalInt.
      *
      * @param rs the ResultSet to read from
      * @param columnLabel the label of the column to read
-     * @return OptionalInt.empty() if the column is null, otherwise OptionalInt containing the value
+     * @return OptionalInt.empty() if the column is {@code null}, otherwise OptionalInt containing the value
      * @throws SQLException if a database access error occurs or the columnLabel is not found
+     @MayReturnNull
      */
     @Override
     public OptionalInt get(final ResultSet rs, final String columnLabel) throws SQLException {
@@ -135,7 +139,7 @@ public class JdkOptionalIntType extends AbstractOptionalType<OptionalInt> {
 
     /**
      * Sets an OptionalInt parameter in a PreparedStatement.
-     * If the OptionalInt is null or empty, sets the parameter to SQL NULL.
+     * If the OptionalInt is {@code null} or empty, sets the parameter to SQL NULL.
      * Otherwise, sets the int value.
      *
      * @param stmt the PreparedStatement to set the parameter on
@@ -154,7 +158,7 @@ public class JdkOptionalIntType extends AbstractOptionalType<OptionalInt> {
 
     /**
      * Sets an OptionalInt parameter in a CallableStatement using a parameter name.
-     * If the OptionalInt is null or empty, sets the parameter to SQL NULL.
+     * If the OptionalInt is {@code null} or empty, sets the parameter to SQL NULL.
      * Otherwise, sets the int value.
      *
      * @param stmt the CallableStatement to set the parameter on
@@ -190,7 +194,7 @@ public class JdkOptionalIntType extends AbstractOptionalType<OptionalInt> {
 
     /**
      * Writes the character representation of an OptionalInt to a CharacterWriter.
-     * Empty optionals are written as null.
+     * Empty optionals are written as {@code null}.
      * Present values are written as numeric values without quotes using the optimized writeInt method.
      *
      * @param writer the CharacterWriter to write to

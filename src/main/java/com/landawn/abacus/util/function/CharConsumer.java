@@ -42,7 +42,7 @@ public interface CharConsumer extends Throwables.CharConsumer<RuntimeException> 
      * followed by the {@code after} operation. If performing either operation throws an exception,
      * it is relayed to the caller of the composed operation.
      *
-     * @param after the operation to perform after this operation. Must not be null.
+     * @param after the operation to perform after this operation. Must not be {@code null}.
      * @return a composed {@code CharConsumer} that performs in sequence this operation
      *         followed by the {@code after} operation
      */

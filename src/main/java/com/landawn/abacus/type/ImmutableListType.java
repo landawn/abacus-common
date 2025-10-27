@@ -59,7 +59,8 @@ public class ImmutableListType<E> extends AbstractType<ImmutableList<E>> {
      * The declaring name represents the type in a simplified format suitable for type declarations,
      * using simple class names rather than fully qualified names.
      *
-     * @return the declaring name of this type (e.g., "ImmutableList<String>")
+     * @return the declaring name of this type (e.g., "ImmutableList&lt;String&gt;")
+     @MayReturnNull
      */
     @Override
     public String declaringName() {
@@ -101,7 +102,7 @@ public class ImmutableListType<E> extends AbstractType<ImmutableList<E>> {
      * Indicates whether this type represents a List or its subtype.
      * ImmutableList is considered a list type.
      *
-     * @return true, as ImmutableList is a list type
+     * @return {@code true}, as ImmutableList is a list type
      */
     @Override
     public boolean isList() {
@@ -112,18 +113,13 @@ public class ImmutableListType<E> extends AbstractType<ImmutableList<E>> {
      * Indicates whether this type represents a Collection or its subtype.
      * ImmutableList is a collection type.
      *
-     * @return true, as ImmutableList is a collection type
+     * @return {@code true}, as ImmutableList is a collection type
      */
     @Override
     public boolean isCollection() {
         return true;
     }
 
-    /**
-     * Indicates that this is a generic type with type parameters.
-     *
-     * @return {@code true} as ImmutableList is a generic type
-     */
     @Override
     public boolean isGenericType() {
         return true;
@@ -145,6 +141,7 @@ public class ImmutableListType<E> extends AbstractType<ImmutableList<E>> {
      * Delegates to the underlying list type for serialization categorization.
      *
      * @return SerializationType.SERIALIZABLE if elements are serializable, SerializationType.COLLECTION otherwise
+     @MayReturnNull
      */
     @Override
     public SerializationType getSerializationType() {
@@ -156,7 +153,7 @@ public class ImmutableListType<E> extends AbstractType<ImmutableList<E>> {
      * Delegates the serialization to the underlying list type handler.
      *
      * @param x the immutable list to convert to string
-     * @return the string representation of the immutable list, or null if the input is null
+     * @return the string representation of the immutable list, or {@code null} if the input is null
      */
     @Override
     public String stringOf(final ImmutableList<E> x) {
@@ -209,8 +206,8 @@ public class ImmutableListType<E> extends AbstractType<ImmutableList<E>> {
      *
      * @param typeClass the ImmutableList class
      * @param parameterTypeName the name of the element type
-     * @param isDeclaringName true to generate a declaring name with simple class names, {@code false} for fully qualified names
-     * @return the formatted type name (e.g., "ImmutableList<String>" or "com.landawn.abacus.util.ImmutableList<java.lang.String>")
+     * @param isDeclaringName {@code true} to generate a declaring name with simple class names, {@code false} for fully qualified names
+     * @return the formatted type name (e.g., "ImmutableList&lt;String&gt;" or "com.landawn.abacus.util.ImmutableList&lt;java.lang.String&gt;")
      */
     protected static String getTypeName(final Class<?> typeClass, final String parameterTypeName, final boolean isDeclaringName) {
         if (isDeclaringName) {

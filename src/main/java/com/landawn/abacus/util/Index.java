@@ -747,7 +747,7 @@ public final class Index {
      * <p>
      * Special cases:
      * <ul>
-     *   <li>If {@code sizeToMatch} is 0 and both arrays are non-null, returns {@code fromIndex} (clamped to valid range)</li>
+     *   <li>If {@code sizeToMatch} is 0 and both arrays are {@code non-null}, returns {@code fromIndex} (clamped to valid range)</li>
      *   <li>If either array is {@code null}, returns empty OptionalInt</li>
      *   <li>If {@code fromIndex} is negative, it's treated as 0</li>
      *   <li>If {@code fromIndex >= sourceArray.length}, returns empty OptionalInt</li>
@@ -1541,7 +1541,7 @@ public final class Index {
      * <p>
      * Special cases:
      * <ul>
-     *   <li>If {@code sizeToMatch} is 0 and both lists are non-null, returns {@code fromIndex} (clamped to valid range)</li>
+     *   <li>If {@code sizeToMatch} is 0 and both lists are {@code non-null}, returns {@code fromIndex} (clamped to valid range)</li>
      *   <li>If either list is {@code null}, returns empty OptionalInt</li>
      *   <li>If {@code fromIndex} is negative, it's treated as 0</li>
      *   <li>If {@code fromIndex >= sourceList.size()}, returns empty OptionalInt</li>
@@ -2078,7 +2078,7 @@ public final class Index {
      * <p>
      * Special cases:
      * <ul>
-     *   <li>If {@code sizeToMatch} is 0, {@code startIndexFromBack >= 0}, and both arrays are non-null,
+     *   <li>If {@code sizeToMatch} is 0, {@code startIndexFromBack >= 0}, and both arrays are {@code non-null},
      *       returns {@code min(startIndexFromBack, sourceArray.length)}</li>
      *   <li>If either array is {@code null}, returns empty OptionalInt</li>
      *   <li>If {@code startIndexFromBack < 0}, returns empty OptionalInt</li>

@@ -47,6 +47,7 @@ import java.util.function.ToLongFunction;
 import java.util.function.UnaryOperator;
 
 import com.landawn.abacus.annotation.Beta;
+import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.annotation.SuppressFBWarnings;
 import com.landawn.abacus.util.Range.BoundType;
 import com.landawn.abacus.util.u.Nullable;
@@ -109,42 +110,48 @@ public final class Iterables {
 
     // Not sure if it is needed. and also, it is not consistent with the other methods which mostly return Optional.
     /**
-     * Returns the first non-null element from the provided two elements.
+     * Returns the first {@code non-null} element from the provided two elements.
      * If both are {@code null}, it returns {@code null}.
      *
+     * @param <T> the type of the elements
      * @param a the first element to evaluate
      * @param b the second element to evaluate
-     * @return the first non-null element, or {@code null} if both are {@code null}
+     * @return the first {@code non-null} element, or {@code null} if both are {@code null}
      * @see N#firstNonNull(Object, Object)
      */
+    @MayReturnNull
     @Beta
     public static <T> T firstNonNull(final T a, final T b) {
         return a != null ? a : b;
     }
 
     /**
-     * Returns the first non-null element from the provided three elements.
+     * Returns the first {@code non-null} element from the provided three elements.
      * If all are {@code null}, it returns {@code null}.
      *
+     * @param <T> the type of the elements
      * @param a the first element to evaluate
      * @param b the second element to evaluate
      * @param c the third element to evaluate
-     * @return the first non-null element, or {@code null} if all are {@code null}
+     * @return the first {@code non-null} element, or {@code null} if all are {@code null}
      * @see N#firstNonNull(Object, Object, Object)
      */
+    @MayReturnNull
     @Beta
     public static <T> T firstNonNull(final T a, final T b, final T c) {
         return a != null ? a : (b != null ? b : c);
     }
 
     /**
-     * Returns the first non-null element from the provided array of elements.
-     * If the array is {@code null} or empty, or all elements are null, it returns {@code null}.
+     * Returns the first {@code non-null} element from the provided array of elements.
+     * If the array is {@code null} or empty, or all elements are {@code null}, it returns {@code null}.
      *
+     * @param <T> the type of the elements
      * @param a the array of elements to evaluate
-     * @return the first non-null element, or {@code null} if the array is {@code null} or empty
+     * @return the first {@code non-null} element, or {@code null} if the array is {@code null} or empty
      * @see N#firstNonNull(Object[])
      */
+    @MayReturnNull
     @Beta
     @SafeVarargs
     public static <T> T firstNonNull(final T... a) {
@@ -162,14 +169,16 @@ public final class Iterables {
     }
 
     /**
-     * Returns the first non-null element from the provided iterable.
-     * If the iterable is {@code null} or empty, or all elements are null, it returns {@code null}.
+     * Returns the first {@code non-null} element from the provided iterable.
+     * If the iterable is {@code null} or empty, or all elements are {@code null}, it returns {@code null}.
      *
+     * @param <T> the type of the elements
      * @param c the iterable of elements to evaluate
-     * @return the first non-null element, or {@code null} if the iterable is {@code null} or empty
+     * @return the first {@code non-null} element, or {@code null} if the iterable is {@code null} or empty
      * @see N#firstNonNull(Iterable)
      * @see Iterables#firstNonNullOrDefault(Iterable, Object)
      */
+    @MayReturnNull
     @Beta
     public static <T> T firstNonNull(final Iterable<? extends T> c) {
         if (N.isEmpty(c)) {
@@ -185,15 +194,17 @@ public final class Iterables {
         return null;
     }
 
-    /**     
-     * Returns the first non-null element from the provided iterator.
-     * If the iterator is {@code null} or empty, or all elements are null, it returns {@code null}.
+    /**
+     * Returns the first {@code non-null} element from the provided iterator.
+     * If the iterator is {@code null} or empty, or all elements are {@code null}, it returns {@code null}.
      *
+     * @param <T> the type of the elements
      * @param iter the iterator of elements to evaluate
-     * @return the first non-null element, or {@code null} if the iterator is {@code null} or empty
+     * @return the first {@code non-null} element, or {@code null} if the iterator is {@code null} or empty
      * @see N#firstNonNull(Iterator)
      * @see Iterables#firstNonNullOrDefault(Iterator, Object)
      */
+    @MayReturnNull
     @Beta
     public static <T> T firstNonNull(final Iterator<? extends T> iter) {
         if (iter == null) {
@@ -212,12 +223,12 @@ public final class Iterables {
     }
 
     /**
-     * Returns the first non-null element of the given iterable if it is not empty, otherwise returns the specified default value.
+     * Returns the first {@code non-null} element of the given iterable if it is not empty, otherwise returns the specified default value.
      *
      * @param <T> the type of the elements in the iterable
      * @param c the iterable to check
      * @param defaultValue the default value to return if the iterable is empty
-     * @return the first non-null element of the given  iterable if it is not empty, otherwise the specified default value
+     * @return the first {@code non-null} element of the given  iterable if it is not empty, otherwise the specified default value
      * @see #firstNonNullOrDefault(Iterator, Object)
      * @see N#firstNonNull(Iterable)
      */
@@ -239,12 +250,12 @@ public final class Iterables {
     }
 
     /**
-     * Returns the first non-null element of the given iterator if it is not empty, otherwise returns the specified default value.
+     * Returns the first {@code non-null} element of the given iterator if it is not empty, otherwise returns the specified default value.
      *
      * @param <T> the type of the elements in the iterator
      * @param iter the iterator to check
      * @param defaultValue the default value to return if the iterator is empty
-     * @return the first non-null element of the given iterator if it is not empty, otherwise the specified default value
+     * @return the first {@code non-null} element of the given iterator if it is not empty, otherwise the specified default value
      * @see #firstNonNullOrDefault(Iterable, Object)
      * @see N#firstNonNull(Iterator) 
      */
@@ -267,42 +278,48 @@ public final class Iterables {
     }
 
     /**
-     * Returns the last non-null element from the provided two elements.
+     * Returns the last {@code non-null} element from the provided two elements.
      * If both are {@code null}, it returns {@code null}.
      *
+     * @param <T> the type of the elements
      * @param a the first element to evaluate
      * @param b the second element to evaluate
-     * @return the last non-null element, or {@code null} if both are {@code null}
+     * @return the last {@code non-null} element, or {@code null} if both are {@code null}
      * @see N#lastNonNull(Object, Object)
      */
+    @MayReturnNull
     @Beta
     public static <T> T lastNonNull(final T a, final T b) {
         return b != null ? b : a;
     }
 
     /**
-     * Returns the last non-null element from the provided three elements.
+     * Returns the last {@code non-null} element from the provided three elements.
      * If all are {@code null}, it returns {@code null}.
      *
+     * @param <T> the type of the elements
      * @param a the first element to evaluate
      * @param b the second element to evaluate
      * @param c the third element to evaluate
-     * @return the last non-null element, or {@code null} if all are {@code null}
+     * @return the last {@code non-null} element, or {@code null} if all are {@code null}
      * @see N#lastNonNull(Object, Object, Object)
      */
+    @MayReturnNull
     @Beta
     public static <T> T lastNonNull(final T a, final T b, final T c) {
         return c != null ? c : (b != null ? b : a);
     }
 
     /**
-     * Returns the last non-null element from the provided array of elements.
-     * If the array is {@code null} or empty, or all elements are null, it returns {@code null}.
+     * Returns the last {@code non-null} element from the provided array of elements.
+     * If the array is {@code null} or empty, or all elements are {@code null}, it returns {@code null}.
      *
+     * @param <T> the type of the elements
      * @param a the array of elements to evaluate
-     * @return the last non-null element, or {@code null} if the array is {@code null} or empty
+     * @return the last {@code non-null} element, or {@code null} if the array is {@code null} or empty
      * @see N#lastNonNull(Object[])
      */
+    @MayReturnNull
     @Beta
     @SafeVarargs
     public static <T> T lastNonNull(final T... a) {
@@ -320,14 +337,16 @@ public final class Iterables {
     }
 
     /**
-     * Returns the last non-null element from the provided iterable.
-     * If the iterable is {@code null} or empty, or all elements are null, it returns {@code null}.
+     * Returns the last {@code non-null} element from the provided iterable.
+     * If the iterable is {@code null} or empty, or all elements are {@code null}, it returns {@code null}.
      *
+     * @param <T> the type of the elements
      * @param c the iterable of elements to evaluate
-     * @return the last non-null element, or {@code null} if the iterable is {@code null} or empty
+     * @return the last {@code non-null} element, or {@code null} if the iterable is {@code null} or empty
      * @see N#lastNonNull(Iterable)
      * @see Iterables#lastNonNullOrDefault(Iterable, Object)
      */
+    @MayReturnNull
     @Beta
     public static <T> T lastNonNull(final Iterable<? extends T> c) {
         if (N.isEmpty(c)) {
@@ -363,15 +382,17 @@ public final class Iterables {
         return lastNonNull(c.iterator());
     }
 
-    /**     
-     * Returns the last non-null element from the provided iterator.
-     * If the iterator is {@code null} or empty, or all elements are null, it returns {@code null}.
+    /**
+     * Returns the last {@code non-null} element from the provided iterator.
+     * If the iterator is {@code null} or empty, or all elements are {@code null}, it returns {@code null}.
      *
+     * @param <T> the type of the elements
      * @param iter the iterator of elements to evaluate
-     * @return the last non-null element, or {@code null} if the iterator is {@code null} or empty
+     * @return the last {@code non-null} element, or {@code null} if the iterator is {@code null} or empty
      * @see N#lastNonNull(Iterator)
      * @see Iterables#lastNonNullOrDefault(Iterator, Object)
      */
+    @MayReturnNull
     @Beta
     public static <T> T lastNonNull(final Iterator<? extends T> iter) {
         if (iter == null) {
@@ -391,12 +412,12 @@ public final class Iterables {
     }
 
     /**
-     * Returns the last non-null element of the given iterable if it is not empty, otherwise returns the specified default value.
+     * Returns the last {@code non-null} element of the given iterable if it is not empty, otherwise returns the specified default value.
      *
      * @param <T> the type of the elements in the iterable
      * @param c the iterable to check
      * @param defaultValue the default value to return if the iterable is empty
-     * @return the last non-null element of the given  iterable if it is not empty, otherwise the specified default value
+     * @return the last {@code non-null} element of the given  iterable if it is not empty, otherwise the specified default value
      * @see #lastNonNullOrDefault(Iterator, Object)
      * @see N#lastNonNull(Iterable)
      */
@@ -410,12 +431,12 @@ public final class Iterables {
     }
 
     /**
-     * Returns the last non-null element of the given iterator if it is not empty, otherwise returns the specified default value.
+     * Returns the last {@code non-null} element of the given iterator if it is not empty, otherwise returns the specified default value.
      *
      * @param <T> the type of the elements in the iterator
      * @param iter the iterator to check
      * @param defaultValue the default value to return if the iterator is empty
-     * @return the last non-null element of the given iterator if it is not empty, otherwise the specified default value
+     * @return the last {@code non-null} element of the given iterator if it is not empty, otherwise the specified default value
      * @see #lastNonNullOrDefault(Iterable, Object)
      * @see N#lastNonNull(Iterator) 
      */
@@ -517,6 +538,7 @@ public final class Iterables {
      * Null values are considered to be maximum value.
      * If the array is {@code null} or empty, it returns an empty {@code Nullable}.
      *
+     * @param <T> the type of the elements
      * @param a the array of elements to evaluate
      * @return a {@code Nullable} containing the minimum value if the array is not {@code null} or empty, otherwise an empty {@code Nullable}
      * @see N#min(Comparable...)
@@ -529,6 +551,7 @@ public final class Iterables {
      * Returns the minimum value from the provided array of elements according to the provided comparator.
      * If the array is {@code null} or empty, it returns an empty {@code Nullable}.
      *
+     * @param <T> the type of the elements
      * @param a the array of elements to evaluate
      * @param cmp the comparator to determine the order of the elements
      * @return a {@code Nullable} containing the minimum value if the array is not {@code null} or empty, otherwise an empty {@code Nullable}
@@ -543,6 +566,7 @@ public final class Iterables {
      * Null values are considered to be maximum value.
      * If the iterable is {@code null} or empty, it returns an empty {@code Nullable}.
      *
+     * @param <T> the type of the elements
      * @param c the iterable of elements to evaluate
      * @return a {@code Nullable} containing the minimum value if the iterable is not {@code null} or empty, otherwise an empty {@code Nullable}
      * @see N#min(Iterable)
@@ -555,6 +579,7 @@ public final class Iterables {
      * Returns the minimum value from the provided iterable of elements according to the provided comparator.
      * If the iterable is {@code null} or empty, it returns an empty {@code Nullable}.
      *
+     * @param <T> the type of the elements
      * @param c the iterable of elements to evaluate
      * @param cmp the comparator to determine the order of the elements
      * @return a {@code Nullable} containing the minimum value if the iterable is not {@code null} or empty, otherwise an empty {@code Nullable}
@@ -569,6 +594,7 @@ public final class Iterables {
      * Null values are considered to be maximum value.
      * If the iterator is {@code null} or empty, it returns an empty {@code Nullable}.
      *
+     * @param <T> the type of the elements
      * @param iter the iterator of elements to evaluate
      * @return a {@code Nullable} containing the minimum value if the iterator is not {@code null} or empty, otherwise an empty {@code Nullable}
      * @see N#min(Iterator)
@@ -581,6 +607,7 @@ public final class Iterables {
      * Returns the minimum value from the provided iterator of elements according to the provided comparator.
      * If the iterator is {@code null} or empty, it returns an empty {@code Nullable}.
      *
+     * @param <T> the type of the elements
      * @param iter the iterator of elements to evaluate
      * @param cmp the comparator to determine the order of the elements
      * @return a {@code Nullable} containing the minimum value if the iterator is not {@code null} or empty, otherwise an empty {@code Nullable}
@@ -617,6 +644,7 @@ public final class Iterables {
      * Null values are considered to be maximum value.
      * If the array is {@code null} or empty, it returns an empty {@code Nullable}.
      *
+     * @param <T> the type of the elements
      * @param a the array of elements to evaluate
      * @param keyExtractor the function to transform the elements into a comparable type for comparison
      * @return a {@code Nullable} containing the minimum value if the array is not {@code null} or empty, otherwise an empty {@code Nullable}
@@ -632,6 +660,7 @@ public final class Iterables {
      * Null values are considered to be maximum value.
      * If the iterable is {@code null} or empty, it returns an empty {@code Nullable}.
      *
+     * @param <T> the type of the elements
      * @param c the iterable of elements to evaluate
      * @param keyExtractor the function to transform the elements into a comparable type for comparison
      * @return a {@code Nullable} containing the minimum value if the iterable is not {@code null} or empty, otherwise an empty {@code Nullable}
@@ -647,6 +676,7 @@ public final class Iterables {
      * Null values are considered to be maximum value.
      * If the iterator is {@code null} or empty, it returns an empty {@code Nullable}.
      *
+     * @param <T> the type of the elements
      * @param iter the iterator of elements to evaluate
      * @param keyExtractor the function to transform the elements into a comparable type for comparison
      * @return a {@code Nullable} containing the minimum value if the iterator is not {@code null} or empty, otherwise an empty {@code Nullable}
@@ -983,6 +1013,7 @@ public final class Iterables {
      * Null values are considered to be minimum value.
      * If the array is {@code null} or empty, it returns an empty {@code Nullable}.
      *
+     * @param <T> the type of the elements
      * @param a the array of elements to evaluate
      * @return a {@code Nullable} containing the maximum value if the array is not {@code null} or empty, otherwise an empty {@code Nullable}
      * @see N#max(Comparable...)
@@ -995,6 +1026,7 @@ public final class Iterables {
      * Returns the maximum value from the provided array of elements according to the provided comparator.
      * If the array is {@code null} or empty, it returns an empty {@code Nullable}.
      *
+     * @param <T> the type of the elements
      * @param a the array of elements to evaluate
      * @param cmp the comparator to determine the order of the elements
      * @return a {@code Nullable} containing the maximum value if the array is not {@code null} or empty, otherwise an empty {@code Nullable}
@@ -1009,6 +1041,7 @@ public final class Iterables {
      * Null values are considered to be minimum value.
      * If the iterable is {@code null} or empty, it returns an empty {@code Nullable}.
      *
+     * @param <T> the type of the elements
      * @param c the iterable of elements to evaluate
      * @return a {@code Nullable} containing the maximum value if the iterable is not {@code null} or empty, otherwise an empty {@code Nullable}
      * @see N#max(Iterable)
@@ -1021,6 +1054,7 @@ public final class Iterables {
      * Returns the maximum value from the provided iterable of elements according to the provided comparator.
      * If the iterable is {@code null} or empty, it returns an empty {@code Nullable}.
      *
+     * @param <T> the type of the elements
      * @param c the iterable of elements to evaluate
      * @param cmp the comparator to determine the order of the elements
      * @return a {@code Nullable} containing the maximum value if the iterable is not {@code null} or empty, otherwise an empty {@code Nullable}
@@ -1035,6 +1069,7 @@ public final class Iterables {
      * Null values are considered to be minimum value.
      * If the iterator is {@code null} or empty, it returns an empty {@code Nullable}.
      *
+     * @param <T> the type of the elements
      * @param iter the iterator of elements to evaluate
      * @return a {@code Nullable} containing the maximum value if the iterator is not {@code null} or empty, otherwise an empty {@code Nullable}
      * @see N#max(Iterator)
@@ -1047,6 +1082,7 @@ public final class Iterables {
      * Returns the maximum value from the provided iterator of elements according to the provided comparator.
      * If the iterator is {@code null} or empty, it returns an empty {@code Nullable}.
      *
+     * @param <T> the type of the elements
      * @param iter the iterator of elements to evaluate
      * @param cmp the comparator to determine the order of the elements
      * @return a {@code Nullable} containing the maximum value if the iterator is not {@code null} or empty, otherwise an empty {@code Nullable}
@@ -1083,6 +1119,7 @@ public final class Iterables {
      * Null values are considered to be minimum value.
      * If the array is {@code null} or empty, it returns an empty {@code Nullable}.
      *
+     * @param <T> the type of the elements
      * @param a the array of elements to evaluate
      * @param keyExtractor the function to transform the elements into a comparable type for comparison
      * @return a {@code Nullable} containing the maximum value if the array is not {@code null} or empty, otherwise an empty {@code Nullable}
@@ -1098,6 +1135,7 @@ public final class Iterables {
      * Null values are considered to be minimum value.
      * If the iterable is {@code null} or empty, it returns an empty {@code Nullable}.
      *
+     * @param <T> the type of the elements
      * @param c the iterable of elements to evaluate
      * @param keyExtractor the function to transform the elements into a comparable type for comparison
      * @return a {@code Nullable} containing the maximum value if the iterable is not {@code null} or empty, otherwise an empty {@code Nullable}
@@ -1113,6 +1151,7 @@ public final class Iterables {
      * Null values are considered to be minimum value.
      * If the iterator is {@code null} or empty, it returns an empty {@code Nullable}.
      *
+     * @param <T> the type of the elements
      * @param iter the iterator of elements to evaluate
      * @param keyExtractor the function to transform the elements into a comparable type for comparison
      * @return a {@code Nullable} containing the maximum value if the iterator is not {@code null} or empty, otherwise an empty {@code Nullable}
@@ -1365,6 +1404,7 @@ public final class Iterables {
      * The result is wrapped in an Optional Pair, where the first element is the minimum and the second is the maximum.
      * If the array is {@code null} or empty, it returns an empty Optional.
      *
+     * @param <T> the type of the elements
      * @param a the array of elements to evaluate
      * @return an Optional Pair containing the minimum and maximum values if the array is not {@code null} or empty, otherwise an empty Optional
      * @see N#minMax(Comparable...)
@@ -1393,6 +1433,7 @@ public final class Iterables {
      * The result is wrapped in an Optional Pair, where the first element is the minimum and the second is the maximum.
      * If the iterable is {@code null} or empty, it returns an empty Optional.
      *
+     * @param <T> the type of the elements
      * @param c the iterable of elements to evaluate
      * @return an Optional Pair containing the minimum and maximum values if the iterable is not {@code null} or empty, otherwise an empty Optional
      * @see N#minMax(Iterable)
@@ -1408,6 +1449,7 @@ public final class Iterables {
      * The result is wrapped in an Optional Pair, where the first element is the minimum and the second is the maximum.
      * If the iterable is {@code null} or empty, it returns an empty Optional.
      *
+     * @param <T> the type of the elements
      * @param c the iterable of elements to evaluate
      * @param cmp the comparator to determine the order of the elements
      * @return an Optional Pair containing the minimum and maximum values if the iterable is not {@code null} or empty, otherwise an empty Optional
@@ -1424,6 +1466,7 @@ public final class Iterables {
      * The result is wrapped in an Optional Pair, where the first element is the minimum and the second is the maximum.
      * If the iterator is {@code null} or empty, it returns an empty Optional.
      *
+     * @param <T> the type of the elements in the iterator
      * @param iter the iterator of elements to evaluate
      * @return an Optional Pair containing the minimum and maximum values if the iterator is not {@code null} or empty, otherwise an empty Optional
      * @see N#minMax(Iterator)
@@ -1437,6 +1480,7 @@ public final class Iterables {
      * The result is wrapped in an Optional Pair, where the first element is the minimum and the second is the maximum.
      * If the iterator is {@code null} or empty, it returns an empty Optional.
      *
+     * @param <T> the type of the elements in the iterator
      * @param iter the iterator of elements to evaluate
      * @param cmp the comparator to determine the order of the elements
      * @return an Optional Pair containing the minimum and maximum values if the iterator is not {@code null} or empty, otherwise an empty Optional
@@ -2633,11 +2677,12 @@ public final class Iterables {
     /**
      * Fills the specified Object array with the values provided by the specified supplier.
      *
+     * @param <T> the type of the elements
      * @param a the Object array to be filled
      * @param supplier provider of the value to fill the array with
      * @see Arrays#fill(Object[], Object)
      * @see N#setAll(Object[], IntFunction)
-     * @see N#replaceAll(Object[], UnaryOperator) 
+     * @see N#replaceAll(Object[], UnaryOperator)
      * @see N#fill(Object[], Object)
      * @see N#fill(Object[], int, int, Object)
      * @see Fn#s(com.landawn.abacus.util.function.Supplier)
@@ -2659,6 +2704,7 @@ public final class Iterables {
     /**
      * Fills the specified Object array with the values provided by the specified supplier from the specified fromIndex (inclusive) to the specified toIndex (exclusive).
      *
+     * @param <T> the type of elements in the array
      * @param a the Object array to be filled
      * @param fromIndex the index to start filling (inclusive)
      * @param toIndex the index to stop filling (exclusive)
@@ -3039,12 +3085,18 @@ public final class Iterables {
         N.checkState(canRemove, "no calls to next() since the last call to remove()");
     }
 
+    /**
+     * An abstract immutable set view that provides additional utility methods.
+     *
+     * @param <E> the type of elements in this set
+     */
     public abstract static class SetView<E> extends ImmutableSet<E> {
         SetView(final Set<? extends E> set) {
             super(set);
         }
 
         /**
+         * Copies all elements from this set view into the specified set.
          *
          * @param <S> the type of the set
          * @param set the set to copy elements into
@@ -3070,7 +3122,7 @@ public final class Iterables {
      * @param set1 the first set
      * @param set2 the second set
      * @return an unmodifiable view of the union of the two sets
-     * @throws IllegalArgumentException
+     * @throws IllegalArgumentException if either set1 or set2 is null (though currently this is not enforced in the implementation)
      */
     public static <E> SetView<E> union(final Set<? extends E> set1, final Set<? extends E> set2) throws IllegalArgumentException {
         // N.checkArgNotNull(set1, "set1");
@@ -3196,7 +3248,7 @@ public final class Iterables {
      * @param set1 the first set
      * @param set2 the second set
      * @return an unmodifiable view of the intersection of the two sets
-     * @throws IllegalArgumentException
+     * @throws IllegalArgumentException if either set1 or set2 is null (though currently this is not enforced in the implementation)
      * @see N#intersection(int[], int[])
      * @see N#intersection(Collection, Collection)
      * @see N#commonSet(Collection, Collection)
@@ -3292,14 +3344,14 @@ public final class Iterables {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Set&lt;String&gt; set1 = new HashSet&lt;&gt;(Arrays.asList("a", "b", "c", "d"));
-     * Set&lt;String&gt; set2 = new HashSet&lt;&gt;(Arrays.asList("b", "d", "e"));
+     * Set<String> set1 = new HashSet<>(Arrays.asList("a", "b", "c", "d"));
+     * Set<String> set2 = new HashSet<>(Arrays.asList("b", "d", "e"));
      * 
-     * SetView&lt;String&gt; difference = Iterables.difference(set1, set2);
+     * SetView<String> difference = Iterables.difference(set1, set2);
      * // difference contains: "a", "c"
      * 
      * // The view can be copied to a new set if needed
-     * Set&lt;String&gt; diffCopy = difference.copyInto(new HashSet&lt;&gt;());
+     * Set<String> diffCopy = difference.copyInto(new HashSet<>());
      * }</pre>
      *
      * <p>The iteration order of the returned set matches that of {@code set1}.
@@ -3411,14 +3463,14 @@ public final class Iterables {
      * 
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Set&lt;String&gt; set1 = new HashSet&lt;&gt;(Arrays.asList("a", "b", "c"));
-     * Set&lt;String&gt; set2 = new HashSet&lt;&gt;(Arrays.asList("b", "c", "d"));
+     * Set<String> set1 = new HashSet<>(Arrays.asList("a", "b", "c"));
+     * Set<String> set2 = new HashSet<>(Arrays.asList("b", "c", "d"));
      * 
-     * SetView&lt;String&gt; symDiff = Iterables.symmetricDifference(set1, set2);
+     * SetView<String> symDiff = Iterables.symmetricDifference(set1, set2);
      * // symDiff contains: "a", "d"
      * 
      * // The view can be copied to a new set if needed
-     * Set&lt;String&gt; symDiffCopy = symDiff.copyInto(new HashSet&lt;&gt;());
+     * Set<String> symDiffCopy = symDiff.copyInto(new HashSet<>());
      * }</pre>
      * 
      * <p>The iteration order of the returned set is undefined.
@@ -3585,13 +3637,12 @@ public final class Iterables {
      * power set is iterated are the individual subsets created, and these subsets
      * themselves occupy only a small constant amount of memory.
      *
-     * @param <E>
+     * @param <E> the type of elements in the set
      * @param set the set of elements to construct a power set from
      * @return the sets of all possible subsets of {@code set}
      * @throws IllegalArgumentException if {@code set} has more than 30 unique
      *     elements (causing the power set size to exceed the {@code int} range)
-     * @see <a href="http://en.wikipedia.org/wiki/Power_set">Power set article at
-     *      Wikipedia</a>
+     * @see <a href="http://en.wikipedia.org/wiki/Power_set">Power set article at Wikipedia</a>
      */
     public static <E> Set<Set<E>> powerSet(final Set<E> set) {
         return new PowerSet<>(N.nullToEmpty(set));
@@ -3639,7 +3690,7 @@ public final class Iterables {
      *
      * <p>An empty collection has only one permutation, which is an empty list.
      *
-     * @param <E>
+     * @param <E> the type of elements in the collection
      * @param elements the original collection whose elements have to be permuted.
      * @return an immutable {@link Collection} containing all the different
      *     permutations of the original collection.
@@ -3674,7 +3725,7 @@ public final class Iterables {
      * <p>This method is equivalent to
      * {@code Collections2.orderedPermutations(list, Ordering.natural())}.
      *
-     * @param <E>
+     * @param <E> the type of elements in the collection, must be Comparable
      * @param elements the original iterable whose elements have to be permuted.
      * @return an immutable {@link Collection} containing all the different
      *     permutations of the original iterable.
@@ -3729,7 +3780,7 @@ public final class Iterables {
      *
      * <p>An empty iterable has only one permutation, which is an empty list.
      *
-     * @param <E>
+     * @param <E> the type of elements in the collection
      * @param elements the original iterable whose elements have to be permuted.
      * @param comparator a comparator for the iterable's elements.
      * @return an immutable {@link Collection} containing all the different
@@ -3746,12 +3797,12 @@ public final class Iterables {
 
     /**
      * <p>Note: It's copied from Google Guava under Apache License 2.0 and may be modified.</p>
-     * 
+     *
      * Returns every possible list that can be formed by choosing one element
      * from each of the given lists in order; the "n-ary
      * <a href="http://en.wikipedia.org/wiki/Cartesian_product">Cartesian
-     * product</a>" of the lists. For example: 
-     * 
+     * product</a>" of the lists. For example:
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      *
@@ -3812,12 +3863,12 @@ public final class Iterables {
 
     /**
      * <p>Note: It's copied from Google Guava under Apache License 2.0 and may be modified.</p>
-     * 
+     *
      * Returns every possible list that can be formed by choosing one element
      * from each of the given lists in order; the "n-ary
      * <a href="http://en.wikipedia.org/wiki/Cartesian_product">Cartesian
-     * product</a>" of the lists. For example: 
-     * 
+     * product</a>" of the lists. For example:
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      *
@@ -3899,39 +3950,21 @@ public final class Iterables {
         /** The input set. */
         final ImmutableMap<E, Integer> inputSet;
 
-        /**
-         * Instantiates a new power set.
-         *
-         * @param input the input set
-         */
         PowerSet(final Set<E> input) {
             inputSet = indexMap(input);
             N.checkArgument(inputSet.size() <= 30, "Too many elements to create power set: %s > 30", inputSet.size());
         }
 
-        /**
-         *
-         * @return the int
-         */
         @Override
         public int size() {
             return 1 << inputSet.size();
         }
 
-        /**
-         * Checks if is empty.
-         *
-         * @return {@code true}, if is empty
-         */
         @Override
         public boolean isEmpty() {
             return false;
         }
 
-        /**
-         *
-         * @return the iterator
-         */
         @Override
         public Iterator<Set<E>> iterator() {
             return new Iterator<>() {
@@ -3959,11 +3992,6 @@ public final class Iterables {
             };
         }
 
-        /**
-         *
-         * @param obj the object to check for containment
-         * @return {@code true} if the object is contained in this power set, otherwise {@code false}
-         */
         @Override
         public boolean contains(final Object obj) {
             if (obj instanceof final Set<?> set) {
@@ -3973,11 +4001,6 @@ public final class Iterables {
             return false;
         }
 
-        /**
-         *
-         * @param obj the object to compare with
-         * @return {@code true} if the object is equal to this power set, otherwise {@code false}
-         */
         @Override
         public boolean equals(final Object obj) {
             if (obj instanceof final PowerSet<?> that) {
@@ -3986,10 +4009,6 @@ public final class Iterables {
             return super.equals(obj);
         }
 
-        /**
-         *
-         * @return the int
-         */
         @Override
         public int hashCode() {
             /*
@@ -4034,22 +4053,12 @@ public final class Iterables {
         /** The mask. */
         private final int mask;
 
-        /**
-         * Instantiates a new subset.
-         *
-         * @param inputSet the input set with element indices
-         * @param mask the bitmask representing which elements are in this subset
-         */
         SubSet(final ImmutableMap<E, Integer> inputSet, final int mask) {
             this.inputSet = inputSet;
             elements = ImmutableList.copyOf(inputSet.keySet());
             this.mask = mask;
         }
 
-        /**
-         *
-         * @return the iterator
-         */
         @Override
         public Iterator<E> iterator() {
             return new Iterator<>() {
@@ -4077,20 +4086,11 @@ public final class Iterables {
             };
         }
 
-        /**
-         *
-         * @return the int
-         */
         @Override
         public int size() {
             return Integer.bitCount(mask);
         }
 
-        /**
-         *
-         * @param o the object to check for containment
-         * @return {@code true} if the object is contained in this subset, otherwise {@code false}
-         */
         @Override
         public boolean contains(final Object o) {
             @SuppressWarnings("SuspiciousMethodCalls")
@@ -4109,48 +4109,25 @@ public final class Iterables {
         /** The input list. */
         final List<E> inputList;
 
-        /**
-         * Instantiates a new permutation collection.
-         *
-         * @param input the input collection
-         */
         PermutationCollection(final Collection<E> input) {
             inputList = ImmutableList.copyOf(input);
         }
 
-        /**
-         *
-         * @return the int
-         */
         @Override
         public int size() {
             return Numbers.factorial(inputList.size());
         }
 
-        /**
-         * Checks if is empty.
-         *
-         * @return {@code true}, if is empty
-         */
         @Override
         public boolean isEmpty() {
             return false;
         }
 
-        /**
-         *
-         * @return the iterator
-         */
         @Override
         public Iterator<List<E>> iterator() {
             return PermutationIterator.of(inputList);
         }
 
-        /**
-         *
-         * @param obj the object to check for containment
-         * @return {@code true} if the object is a permutation of the input list, otherwise {@code false}
-         */
         @Override
         public boolean contains(final Object obj) {
             if (obj instanceof Collection) {
@@ -4160,10 +4137,6 @@ public final class Iterables {
             return false;
         }
 
-        /**
-         *
-         * @return the string
-         */
         @Override
         public String toString() {
             return "permutations(" + inputList + ")";
@@ -4186,12 +4159,6 @@ public final class Iterables {
         /** The size. */
         final int size;
 
-        /**
-         * Instantiates a new ordered permutation collection.
-         *
-         * @param input the input collection
-         * @param comparator the comparator to determine the order of the elements
-         */
         OrderedPermutationCollection(final Collection<E> input, final Comparator<? super E> comparator) {
             inputList = new ArrayList<>(input);
             N.sort(inputList, comparator);
@@ -4199,39 +4166,21 @@ public final class Iterables {
             size = calculateSize(inputList, comparator);
         }
 
-        /**
-         *
-         * @return the int
-         */
         @Override
         public int size() {
             return size;
         }
 
-        /**
-         * Checks if is empty.
-         *
-         * @return {@code true}, if is empty
-         */
         @Override
         public boolean isEmpty() {
             return false;
         }
 
-        /**
-         *
-         * @return the iterator
-         */
         @Override
         public Iterator<List<E>> iterator() {
             return PermutationIterator.ordered(inputList, comparator);
         }
 
-        /**
-         *
-         * @param obj the object to check for containment
-         * @return {@code true} if the object is a permutation of the input list, otherwise {@code false}
-         */
         @Override
         public boolean contains(final Object obj) {
             if (obj instanceof Collection) {
@@ -4240,10 +4189,6 @@ public final class Iterables {
             return false;
         }
 
-        /**
-         *
-         * @return the string
-         */
         @Override
         public String toString() {
             return "orderedPermutationCollection(" + inputList + ")";
@@ -4292,12 +4237,6 @@ public final class Iterables {
             return (int) permutations;
         }
 
-        /**
-         * Checks if is positive int.
-         *
-         * @param n the number to check
-         * @return {@code true}, if is positive int
-         */
         private static boolean isPositiveInt(final long n) {
             return n >= 0 && n <= Integer.MAX_VALUE;
         }
@@ -4316,11 +4255,6 @@ public final class Iterables {
         /** The axes size product. */
         private final transient int[] axesSizeProduct; //NOSONAR
 
-        /**
-         * Instantiates a new cartesian list.
-         *
-         * @param cs the collection of collections to compute the cartesian product
-         */
         CartesianList(final Collection<? extends Collection<? extends E>> cs) {
             final Iterator<? extends Collection<? extends E>> iter = cs.iterator();
             axes = new Object[cs.size()][];
@@ -4359,20 +4293,11 @@ public final class Iterables {
             return result;
         }
 
-        /**
-         *
-         * @return the int
-         */
         @Override
         public int size() {
             return axesSizeProduct[0];
         }
 
-        /**
-         *
-         * @param obj the object to check for containment
-         * @return {@code true} if the object is contained in the cartesian product, otherwise {@code false}
-         */
         @Override
         public boolean contains(final Object obj) {
             if (!(obj instanceof final Collection<?> c) || (c.size() != axes.length)) {
@@ -4398,13 +4323,6 @@ public final class Iterables {
             return true;
         }
 
-        /**
-         * Gets the axis index for product index.
-         *
-         * @param index the product index
-         * @param axis the axis number
-         * @return the axis index for product index
-         */
         private int getAxisIndexForProductIndex(final int index, final int axis) {
             return (index / axesSizeProduct[axis + 1]) % axes[axis].length;
         }
@@ -4424,48 +4342,22 @@ public final class Iterables {
         /** The to index. */
         private final int toIndex;
 
-        /**
-         * Instantiates a new subcollection.
-         *
-         * @param a the array
-         * @param fromIndex the starting index (inclusive)
-         * @param toIndex the ending index (exclusive)
-         */
         Slice(final T[] a, final int fromIndex, final int toIndex) {
             this(Array.asList(a), fromIndex, toIndex);
         }
 
-        /**
-         * Instantiates a new subcollection.
-         *
-         * @param c the source list from which to create the slice
-         * @param fromIndex the starting index (inclusive)
-         * @param toIndex the ending index (exclusive)
-         */
         Slice(final List<? extends T> c, final int fromIndex, final int toIndex) {
             super(fromIndex == 0 && toIndex == c.size() ? c : c.subList(fromIndex, toIndex));
             this.fromIndex = 0;
             this.toIndex = toIndex - fromIndex;
         }
 
-        /**
-         * Instantiates a new subcollection.
-         *
-         * @param c the source collection from which to create the slice
-         * @param fromIndex the starting index (inclusive)
-         * @param toIndex the ending index (exclusive)
-         */
         Slice(final Collection<? extends T> c, final int fromIndex, final int toIndex) {
             super(c instanceof List ? ((List<T>) c).subList(fromIndex, toIndex) : c);
             this.fromIndex = c instanceof List ? 0 : fromIndex;
             this.toIndex = c instanceof List ? toIndex - fromIndex : toIndex;
         }
 
-        /**
-         *
-         * @param o the object to check for containment
-         * @return {@code true} if the object is contained in this slice, otherwise {@code false}
-         */
         @Override
         public boolean contains(final Object o) {
             for (final T element : this) {
@@ -4477,11 +4369,6 @@ public final class Iterables {
             return false;
         }
 
-        /**
-         *
-         * @param c the collection to check
-         * @return {@code true} if all elements are contained in this slice, otherwise {@code false}
-         */
         @Override
         public boolean containsAll(final Collection<?> c) {
             for (final Object e : c) {
@@ -4493,29 +4380,16 @@ public final class Iterables {
             return true;
         }
 
-        /**
-         * Checks if is empty.
-         *
-         * @return {@code true}, if is empty
-         */
         @Override
         public boolean isEmpty() {
             return size() == 0;
         }
 
-        /**
-         *
-         * @return the int
-         */
         @Override
         public int size() {
             return toIndex - fromIndex; //NOSONAR
         }
 
-        /**
-         *
-         * @return the iterator
-         */
         @Override
         public ObjIterator<T> iterator() {
             if (coll == null || fromIndex == toIndex) {
@@ -4535,10 +4409,6 @@ public final class Iterables {
             }
         }
 
-        /**
-         *
-         * @return the object[]
-         */
         @Override
         public Object[] toArray() {
             final Iterator<T> iter = this.iterator();
@@ -4551,12 +4421,6 @@ public final class Iterables {
             return a;
         }
 
-        /**
-         *
-         * @param <A> the type of the array elements
-         * @param a the array into which the elements will be stored
-         * @return the array containing all elements
-         */
         @Override
         public <A> A[] toArray(A[] a) {
             if (a.length < size()) {

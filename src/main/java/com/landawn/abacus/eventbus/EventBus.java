@@ -188,7 +188,7 @@ public class EventBus {
      * }</pre>
      *
      * @param identifier the unique identifier for this EventBus instance
-     * @param executor the executor to use for asynchronous event delivery, or null to use the default executor
+     * @param executor the executor to use for asynchronous event delivery, or {@code null} to use the default executor
      */
     public EventBus(final String identifier, final Executor executor) {
         this.identifier = identifier;
@@ -251,7 +251,7 @@ public class EventBus {
 
     /**
      * Returns all subscribers that are registered to receive events of the specified type or its subtypes.
-     * This method searches for subscribers registered with null event ID.
+     * This method searches for subscribers registered with {@code null} event ID.
      * 
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -278,7 +278,7 @@ public class EventBus {
      * }
      * }</pre>
      *
-     * @param eventId the event ID to match, or null for subscribers without event ID
+     * @param eventId the event ID to match, or {@code null} for subscribers without event ID
      * @param eventType the event type to search for
      * @return a list of subscribers registered for the specified event type and ID
      */
@@ -398,8 +398,8 @@ public class EventBus {
      * }</pre>
      *
      * @param subscriber the subscriber to register
-     * @param eventId the event ID to filter events, or null for no filtering
-     * @param threadMode the thread mode for event delivery, or null for default
+     * @param eventId the event ID to filter events, or {@code null} for no filtering
+     * @param threadMode the thread mode for event delivery, or {@code null} for default
      * @return this EventBus instance for method chaining
      * @throws RuntimeException if the thread mode is not supported or no subscriber methods are found
      */
@@ -493,12 +493,6 @@ public class EventBus {
         return this;
     }
 
-    /**
-     * Gets the class sub list.
-     *
-     * @param cls
-     * @return
-     */
     private List<SubIdentifier> getClassSubList(final Class<?> cls) {
         synchronized (classMetaSubMap) {
             List<SubIdentifier> subs = classMetaSubMap.get(cls);
@@ -680,7 +674,7 @@ public class EventBus {
      * }
      * }</pre>
      *
-     * @param eventId the event ID for filtering subscribers, or null for no filtering
+     * @param eventId the event ID for filtering subscribers, or {@code null} for no filtering
      * @param event the event to post
      * @return this EventBus instance for method chaining
      */
@@ -860,7 +854,7 @@ public class EventBus {
      * }
      * }</pre>
      *
-     * @param eventId the event ID to match, or null for events without ID
+     * @param eventId the event ID to match, or {@code null} for events without ID
      * @param eventType the class type of sticky events to remove
      * @return {@code true} if one or more sticky events were removed, {@code false} otherwise
      */
@@ -941,7 +935,7 @@ public class EventBus {
      * }
      * }</pre>
      *
-     * @param eventId the event ID to match, or null for events without ID
+     * @param eventId the event ID to match, or {@code null} for events without ID
      * @param eventType the class type to search for
      * @return a list of sticky events matching both the type and event ID
      */

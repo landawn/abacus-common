@@ -26,7 +26,7 @@ import com.landawn.abacus.util.WD;
 /**
  * Type handler for Integer array (Integer[]).
  * This class provides optimized serialization and deserialization for arrays of Integer objects,
- * including proper handling of null elements within the array.
+ * including proper handling of {@code null} elements within the array.
  */
 public final class IntegerArrayType extends ObjectArrayType<Integer> {
 
@@ -36,15 +36,16 @@ public final class IntegerArrayType extends ObjectArrayType<Integer> {
 
     /**
      * Converts an Integer array to its string representation.
-     * The array is serialized as a JSON array string with proper null handling.
+     * The array is serialized as a JSON array string with proper {@code null} handling.
      * Null elements are represented as "null" in the output string.
      * This method is optimized for performance using string joining.
      *
      * @param x the Integer array to convert to string
-     * @return the JSON array string representation (e.g., "[1,null,3]"), or null if the input array is null
+     * @return the JSON array string representation (e.g., "[1,null,3]"), or {@code null} if the input array is null
      */
     @MayReturnNull
     @Override
+
     public String stringOf(final Integer[] x) {
         if (x == null) {
             return null; // NOSONAR
@@ -58,15 +59,16 @@ public final class IntegerArrayType extends ObjectArrayType<Integer> {
     /**
      * Parses a string representation into an Integer array.
      * The string should be in JSON array format. Handles the following cases:
-     * - null string: returns null
+     * - {@code null} string: returns null
      * - empty string or "[]": returns empty Integer array
-     * - JSON array: parses each element, treating "null" strings as null values
+     * - JSON array: parses each element, treating "null" strings as {@code null} values
      *
      * @param str the JSON array string to parse (e.g., "[1,null,3]")
-     * @return the parsed Integer array, or null if the input is null
+     * @return the parsed Integer array, or {@code null} if the input is null
      */
     @MayReturnNull
     @Override
+
     public Integer[] valueOf(final String str) {
         if (Strings.isEmpty(str) || Strings.isBlank(str)) {
             return null; // NOSONAR
@@ -93,7 +95,7 @@ public final class IntegerArrayType extends ObjectArrayType<Integer> {
 
     /**
      * Appends the string representation of an Integer array to an Appendable.
-     * The output format is a JSON array with proper null handling.
+     * The output format is a JSON array with proper {@code null} handling.
      * This method is optimized to avoid string concatenation overhead.
      *
      * @param appendable the Appendable to write to
@@ -126,7 +128,7 @@ public final class IntegerArrayType extends ObjectArrayType<Integer> {
     /**
      * Writes the character representation of an Integer array to a CharacterWriter.
      * This method is optimized for performance by using specialized writeInt method
-     * for non-null values, avoiding string conversion overhead.
+     * for {@code non-null} values, avoiding string conversion overhead.
      *
      * @param writer the CharacterWriter to write to
      * @param x the Integer array to write

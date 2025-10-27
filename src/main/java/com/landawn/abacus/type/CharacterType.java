@@ -45,9 +45,9 @@ public final class CharacterType extends AbstractCharacterType {
 
     /**
      * Indicates whether this type represents a primitive wrapper class.
-     * Since this handles the Character wrapper class (not the primitive char), this returns true.
+     * Since this handles the Character wrapper class (not the primitive char), this returns {@code true}.
      *
-     * @return true, indicating this is a primitive wrapper type
+     * @return {@code true}, indicating this is a primitive wrapper type
      */
     @Override
     public boolean isPrimitiveWrapper() {
@@ -57,15 +57,16 @@ public final class CharacterType extends AbstractCharacterType {
     /**
      * Retrieves a Character value from a ResultSet at the specified column index.
      * The method reads the value as a String and returns the first character.
-     * If the database value is NULL or an empty string, this method returns null.
+     * If the database value is NULL or an empty string, this method returns {@code null}.
      *
      * @param rs the ResultSet containing the data
      * @param columnIndex the column index (1-based) of the character value
-     * @return The first character of the string value at the specified column, or null if the column value is SQL NULL
+     * @return The first character of the string value at the specified column, or {@code null} if the column value is SQL NULL
      * @throws SQLException if a database access error occurs or the column index is invalid
      */
     @MayReturnNull
     @Override
+
     public Character get(final ResultSet rs, final int columnIndex) throws SQLException {
         final String ret = rs.getString(columnIndex);
 
@@ -79,15 +80,16 @@ public final class CharacterType extends AbstractCharacterType {
     /**
      * Retrieves a Character value from a ResultSet using the specified column label.
      * The method reads the value as a String and returns the first character.
-     * If the database value is NULL or an empty string, this method returns null.
+     * If the database value is NULL or an empty string, this method returns {@code null}.
      *
      * @param rs the ResultSet containing the data
      * @param columnLabel the label of the column containing the character value
-     * @return The first character of the string value in the specified column, or null if the column value is SQL NULL
+     * @return The first character of the string value in the specified column, or {@code null} if the column value is SQL NULL
      * @throws SQLException if a database access error occurs or the column label is not found
      */
     @MayReturnNull
     @Override
+
     public Character get(final ResultSet rs, final String columnLabel) throws SQLException {
         final String ret = rs.getString(columnLabel);
 

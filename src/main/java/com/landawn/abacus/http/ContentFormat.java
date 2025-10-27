@@ -29,22 +29,39 @@ package com.landawn.abacus.http;
  * }</pre>
  */
 public enum ContentFormat {
+    /** No content format specified. */
     NONE("", ""), //
+    /** JSON content format without compression. */
     JSON("application/json", ""), // //NOSONAR
+    /** JSON content format with LZ4 compression. */
     JSON_LZ4("application/json", "lz4"), //
+    /** JSON content format with Snappy compression. */
     JSON_SNAPPY("application/json", "snappy"), // //NOSONAR
+    /** JSON content format with GZIP compression. */
     JSON_GZIP("application/json", "gzip"), //
+    /** JSON content format with Brotli compression. */
     JSON_BR("application/json", "br"), //
+    /** XML content format without compression. */
     XML("application/xml", ""), // //NOSONAR
+    /** XML content format with LZ4 compression. */
     XML_LZ4("application/xml", "lz4"), //
+    /** XML content format with Snappy compression. */
     XML_SNAPPY("application/xml", "snappy"), //
+    /** XML content format with GZIP compression. */
     XML_GZIP("application/xml", "gzip"), //
+    /** XML content format with Brotli compression. */
     XML_BR("application/xml", "br"), //
+    /** Form URL encoded content format. */
     FormUrlEncoded("application/x-www-form-urlencoded", ""), //
+    /** Kryo serialization format. */
     KRYO("", "kryo"), //
+    /** LZ4 compression only. */
     LZ4("", "lz4"), //
+    /** Snappy compression only. */
     SNAPPY("", "snappy"), //
+    /** GZIP compression only. */
     GZIP("", "gzip"), //
+    /** Brotli compression only. */
     BR("", "br");
 
     private final String contentType;

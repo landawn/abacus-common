@@ -100,10 +100,10 @@ final class JAXBParser extends AbstractXMLParser {
      * Serializes an object to XML string representation.
      * 
      * <p>This method converts a Java object to its XML string representation using JAXB.
-     * If the object is null, an empty string is returned. The object's class must be
+     * If the object is {@code null}, an empty string is returned. The object's class must be
      * properly annotated with JAXB annotations.</p>
      * 
-     * <p>Note: The 'ignoredPropNames' configuration option is not supported by JAXB
+     * <p>Note: The <i>ignoredPropNames</i> configuration option is not supported by JAXB
      * and will throw a {@link ParseException} if specified.</p>
      * 
      * <p><b>Usage Examples:</b></p>
@@ -117,6 +117,7 @@ final class JAXBParser extends AbstractXMLParser {
      * @param config the XML serialization configuration (optional)
      * @return the XML string representation of the object, or empty string if obj is null
      * @throws ParseException if ignoredPropNames is specified in config or if JAXB marshalling fails
+     @MayReturnNull
      */
     @Override
     public String serialize(final Object obj, final XMLSerializationConfig config) {
@@ -495,7 +496,7 @@ final class JAXBParser extends AbstractXMLParser {
      * JAXB unmarshaller for the target class and uses it to convert XML to
      * a Java object.</p>
      * 
-     * <p>Note: The 'ignoredPropNames' configuration option is not supported by JAXB
+     * <p>Note: The <i>ignoredPropNames</i> configuration option is not supported by JAXB
      * and will throw a {@link ParseException} if specified.</p>
      *
      * @param source the reader containing XML data

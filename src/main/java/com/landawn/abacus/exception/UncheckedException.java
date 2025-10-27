@@ -82,7 +82,7 @@ public class UncheckedException extends RuntimeException {
      * }
      * }</pre>
      *
-     * @param checkedException the checked exception to wrap. Must not be null.
+     * @param checkedException the checked exception to wrap. Must not be {@code null}.
      * @throws IllegalArgumentException if checkedException is null
      */
     public UncheckedException(final Throwable checkedException) {
@@ -119,7 +119,7 @@ public class UncheckedException extends RuntimeException {
      *
      * @param message the detail message providing context for why the exception was wrapped.
      *                The detail message is saved for later retrieval by the {@link #getMessage()} method.
-     * @param checkedException the checked exception to wrap. Must not be null.
+     * @param checkedException the checked exception to wrap. Must not be {@code null}.
      * @throws IllegalArgumentException if checkedException is null
      */
     public UncheckedException(final String message, final Throwable checkedException) {
@@ -136,7 +136,7 @@ public class UncheckedException extends RuntimeException {
 
     /**
      * Validates and returns the cause for this exception.
-     * This method ensures that the provided checked exception is not null before using it as the cause.
+     * This method ensures that the provided checked exception is not {@code null} before using it as the cause.
      * 
      * @param checkedException the exception to validate and use as the cause
      * @return the validated exception to be used as the cause

@@ -194,7 +194,7 @@ public abstract class TypeReference<T> {
      * </ul>
      *
      * <p>The returned Type is resolved using {@link TypeFactory#getType(java.lang.reflect.Type)}
-     * during construction and is guaranteed to be non-null (validated in the constructor).</p>
+     * during construction and is guaranteed to be {@code non-null} (validated in the constructor).</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -277,6 +277,28 @@ public abstract class TypeReference<T> {
      * @since 1.0
      */
     public abstract static class TypeToken<T> extends TypeReference<T> {
-        // Constructor is implicitly defined and delegates to TypeReference
+        /**
+         * Constructs a new TypeToken by capturing the generic type parameter
+         * from the concrete subclass. This constructor delegates to the parent
+         * {@link TypeReference} constructor to perform type capture and validation.
+         *
+         * <p>This constructor must be called from a concrete subclass that specifies
+         * the generic type parameter. Direct instantiation of TypeToken is not
+         * possible as it is abstract.
+         *
+         * <p><b>Usage Example:</b></p>
+         * <pre>{@code
+         * // This creates an anonymous subclass that captures List<String>
+         * TypeToken<List<String>> token = new TypeToken<List<String>>() {};
+         * }</pre>
+         *
+         * @throws IllegalArgumentException if the TypeToken is constructed without actual type information,
+         *         or if the parameterized type has no type arguments
+         * @throws IllegalStateException if the type cannot be resolved by TypeFactory
+         * @see TypeReference#TypeReference()
+         */
+        protected TypeToken() {
+            super();
+        }
     }
 }

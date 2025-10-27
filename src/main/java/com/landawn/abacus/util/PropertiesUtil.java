@@ -43,6 +43,7 @@ import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
+import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.annotation.SuppressFBWarnings;
 import com.landawn.abacus.exception.ParseException;
 import com.landawn.abacus.exception.UncheckedIOException;
@@ -177,8 +178,9 @@ public final class PropertiesUtil {
      * }</pre>
      *
      * @param configFileName the name of the configuration file to find
-     * @return the File object representing the found file, or null if not found
+     * @return the File object representing the found file, or {@code null} if not found
      */
+    @MayReturnNull
     public static File findFile(final String configFileName) {
         return Configuration.findFile(configFileName);
     }
@@ -196,8 +198,9 @@ public final class PropertiesUtil {
      * }</pre>
      *
      * @param configDir the name of the configuration directory to find
-     * @return the File object representing the found directory, or null if not found
+     * @return the File object representing the found directory, or {@code null} if not found
      */
+    @MayReturnNull
     public static File findDir(final String configDir) {
         return Configuration.findDir(configDir);
     }
@@ -1625,11 +1628,6 @@ public final class PropertiesUtil {
             return Objects.hash(id, name, content, includedServers, excludedServers, status, description, lastUpdateTime, createdTime);
         }
 
-        /**
-         *
-         * @param obj the object to compare with
-         * @return {@code true} if this ConfigBean is equal to the specified object, {@code false} otherwise
-         */
         @SuppressFBWarnings
         @Override
         public boolean equals(final Object obj) {
@@ -1738,11 +1736,6 @@ public final class PropertiesUtil {
             return prime * result + N.hashCode(filePath);
         }
 
-        /**
-         *
-         * @param obj the object to compare with
-         * @return {@code true} if this Resource is equal to the specified object, {@code false} otherwise
-         */
         @SuppressFBWarnings
         @Override
         public boolean equals(final Object obj) {

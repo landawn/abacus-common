@@ -20,13 +20,13 @@ package com.landawn.abacus.util.function;
  * 
  * <p>This is a functional interface whose functional method is {@link #test(Object[])}.
  * 
- * <p>The 'N' in NPredicate stands for 'N-ary', indicating that this predicate can accept
+ * <p>The 'N' in NPredicate stands for <i>N-ary</i>, indicating that this predicate can accept
  * any number of arguments of the same type.
  * 
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * NPredicate<Integer> allPositive = args -> {
- *     for (Integer n : args) {
+     *     for (Integer n : args) {
  *         if (n <= 0) return false;
  *     }
  *     return true;
@@ -35,7 +35,7 @@ package com.landawn.abacus.util.function;
  * boolean result2 = allPositive.test(1, -2, 3);   // returns false
  * 
  * NPredicate<String> anyEmpty = args -> {
- *     for (String s : args) {
+     *     for (String s : args) {
  *         if (s.isEmpty()) return true;
  *     }
  *     return false;

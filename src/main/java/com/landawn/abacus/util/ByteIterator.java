@@ -53,7 +53,16 @@ import com.landawn.abacus.util.stream.ByteStream;
 public abstract class ByteIterator extends ImmutableIterator<Byte> {
 
     /**
-     * A singleton empty ByteIterator instance.
+     * Constructs a new ByteIterator.
+     */
+    protected ByteIterator() {
+    }
+
+    /**
+     * A singleton empty ByteIterator instance that contains no elements.
+     * This iterator's hasNext() always returns false, and nextByte() always throws NoSuchElementException.
+     *
+     * @see #empty()
      */
     public static final ByteIterator EMPTY = new ByteIterator() {
         @Override
@@ -242,7 +251,7 @@ public abstract class ByteIterator extends ImmutableIterator<Byte> {
 
     /**
      * Returns a {@code ByteIterator} that generates values using the provided supplier
-     * while the hasNext condition returns true.
+     * while the hasNext condition returns {@code true}.
      * 
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code

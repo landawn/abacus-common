@@ -29,7 +29,7 @@ import com.landawn.abacus.annotation.Beta;
  * matches for given search targets. Methods like {@link #lowerEntry}, {@link #floorEntry},
  * {@link #ceilingEntry}, and {@link #higherEntry} return Map.Entry objects associated
  * with keys respectively less than, less than or equal, greater than or equal, and
- * greater than a given key, returning null if there is no such key.</p>
+ * greater than a given key, returning {@code null} if there is no such key.</p>
  * 
  * <p>All mutating operations will throw UnsupportedOperationException. The map maintains
  * elements in sorted order according to their natural ordering or by a Comparator provided
@@ -45,7 +45,6 @@ import com.landawn.abacus.annotation.Beta;
  * System.out.println(map.higherKey(2));     // 3
  * System.out.println(map.descendingMap());  // {4=four, 3=three, 2=two, 1=one}
  * }</pre>
- * </p>
  *
  * @param <K> the key type
  * @param <V> the value type
@@ -60,11 +59,6 @@ public class ImmutableNavigableMap<K, V> extends ImmutableSortedMap<K, V> implem
 
     private final NavigableMap<K, V> navigableMap;
 
-    /**
-     * Constructs an ImmutableNavigableMap from the provided NavigableMap.
-     *
-     * @param navigableMap the NavigableMap to be used as the base for the ImmutableNavigableMap
-     */
     ImmutableNavigableMap(final NavigableMap<? extends K, ? extends V> navigableMap) {
         super(navigableMap);
         this.navigableMap = (NavigableMap<K, V>) navigableMap;
@@ -174,8 +168,14 @@ public class ImmutableNavigableMap<K, V> extends ImmutableSortedMap<K, V> implem
      *
      * @param <K> the type of the keys in the ImmutableNavigableMap, must extend Comparable
      * @param <V> the type of the values in the ImmutableNavigableMap
-     * @param k1 to k4 the keys to be included in the ImmutableNavigableMap
-     * @param v1 to v4 the values to be associated with the keys
+     * @param k1 the first key to be included in the ImmutableNavigableMap
+     * @param v1 the value to be associated with the first key
+     * @param k2 the second key to be included in the ImmutableNavigableMap
+     * @param v2 the value to be associated with the second key
+     * @param k3 the third key to be included in the ImmutableNavigableMap
+     * @param v3 the value to be associated with the third key
+     * @param k4 the fourth key to be included in the ImmutableNavigableMap
+     * @param v4 the value to be associated with the fourth key
      * @return an ImmutableNavigableMap containing the provided key-value pairs
      */
     public static <K extends Comparable<? super K>, V> ImmutableNavigableMap<K, V> of(final K k1, final V v1, final K k2, final V v2, final K k3, final V v3,
@@ -197,8 +197,16 @@ public class ImmutableNavigableMap<K, V> extends ImmutableSortedMap<K, V> implem
      *
      * @param <K> the type of the keys in the ImmutableNavigableMap, must extend Comparable
      * @param <V> the type of the values in the ImmutableNavigableMap
-     * @param k1 to k5 the keys to be included in the ImmutableNavigableMap
-     * @param v1 to v5 the values to be associated with the keys
+     * @param k1 the first key to be included in the ImmutableNavigableMap
+     * @param v1 the value to be associated with the first key
+     * @param k2 the second key to be included in the ImmutableNavigableMap
+     * @param v2 the value to be associated with the second key
+     * @param k3 the third key to be included in the ImmutableNavigableMap
+     * @param v3 the value to be associated with the third key
+     * @param k4 the fourth key to be included in the ImmutableNavigableMap
+     * @param v4 the value to be associated with the fourth key
+     * @param k5 the fifth key to be included in the ImmutableNavigableMap
+     * @param v5 the value to be associated with the fifth key
      * @return an ImmutableNavigableMap containing the provided key-value pairs
      */
     public static <K extends Comparable<? super K>, V> ImmutableNavigableMap<K, V> of(final K k1, final V v1, final K k2, final V v2, final K k3, final V v3,
@@ -221,8 +229,18 @@ public class ImmutableNavigableMap<K, V> extends ImmutableSortedMap<K, V> implem
      *
      * @param <K> the type of the keys in the ImmutableNavigableMap, must extend Comparable
      * @param <V> the type of the values in the ImmutableNavigableMap
-     * @param k1 to k6 the keys to be included in the ImmutableNavigableMap
-     * @param v1 to v6 the values to be associated with the keys
+     * @param k1 the first key to be included in the ImmutableNavigableMap
+     * @param v1 the value to be associated with the first key
+     * @param k2 the second key to be included in the ImmutableNavigableMap
+     * @param v2 the value to be associated with the second key
+     * @param k3 the third key to be included in the ImmutableNavigableMap
+     * @param v3 the value to be associated with the third key
+     * @param k4 the fourth key to be included in the ImmutableNavigableMap
+     * @param v4 the value to be associated with the fourth key
+     * @param k5 the fifth key to be included in the ImmutableNavigableMap
+     * @param v5 the value to be associated with the fifth key
+     * @param k6 the sixth key to be included in the ImmutableNavigableMap
+     * @param v6 the value to be associated with the sixth key
      * @return an ImmutableNavigableMap containing the provided key-value pairs
      */
     public static <K extends Comparable<? super K>, V> ImmutableNavigableMap<K, V> of(final K k1, final V v1, final K k2, final V v2, final K k3, final V v3,
@@ -246,8 +264,20 @@ public class ImmutableNavigableMap<K, V> extends ImmutableSortedMap<K, V> implem
      *
      * @param <K> the type of the keys in the ImmutableNavigableMap, must extend Comparable
      * @param <V> the type of the values in the ImmutableNavigableMap
-     * @param k1 to k7 the keys to be included in the ImmutableNavigableMap
-     * @param v1 to v7 the values to be associated with the keys
+     * @param k1 the first key to be included in the ImmutableNavigableMap
+     * @param v1 the value to be associated with the first key
+     * @param k2 the second key to be included in the ImmutableNavigableMap
+     * @param v2 the value to be associated with the second key
+     * @param k3 the third key to be included in the ImmutableNavigableMap
+     * @param v3 the value to be associated with the third key
+     * @param k4 the fourth key to be included in the ImmutableNavigableMap
+     * @param v4 the value to be associated with the fourth key
+     * @param k5 the fifth key to be included in the ImmutableNavigableMap
+     * @param v5 the value to be associated with the fifth key
+     * @param k6 the sixth key to be included in the ImmutableNavigableMap
+     * @param v6 the value to be associated with the sixth key
+     * @param k7 the seventh key to be included in the ImmutableNavigableMap
+     * @param v7 the value to be associated with the seventh key
      * @return an ImmutableNavigableMap containing the provided key-value pairs
      */
     public static <K extends Comparable<? super K>, V> ImmutableNavigableMap<K, V> of(final K k1, final V v1, final K k2, final V v2, final K k3, final V v3,
@@ -272,8 +302,22 @@ public class ImmutableNavigableMap<K, V> extends ImmutableSortedMap<K, V> implem
      *
      * @param <K> the type of the keys in the ImmutableNavigableMap, must extend Comparable
      * @param <V> the type of the values in the ImmutableNavigableMap
-     * @param k1 to k8 the keys to be included in the ImmutableNavigableMap
-     * @param v1 to v8 the values to be associated with the keys
+     * @param k1 the first key to be included in the ImmutableNavigableMap
+     * @param v1 the value to be associated with the first key
+     * @param k2 the second key to be included in the ImmutableNavigableMap
+     * @param v2 the value to be associated with the second key
+     * @param k3 the third key to be included in the ImmutableNavigableMap
+     * @param v3 the value to be associated with the third key
+     * @param k4 the fourth key to be included in the ImmutableNavigableMap
+     * @param v4 the value to be associated with the fourth key
+     * @param k5 the fifth key to be included in the ImmutableNavigableMap
+     * @param v5 the value to be associated with the fifth key
+     * @param k6 the sixth key to be included in the ImmutableNavigableMap
+     * @param v6 the value to be associated with the sixth key
+     * @param k7 the seventh key to be included in the ImmutableNavigableMap
+     * @param v7 the value to be associated with the seventh key
+     * @param k8 the eighth key to be included in the ImmutableNavigableMap
+     * @param v8 the value to be associated with the eighth key
      * @return an ImmutableNavigableMap containing the provided key-value pairs
      */
     public static <K extends Comparable<? super K>, V> ImmutableNavigableMap<K, V> of(final K k1, final V v1, final K k2, final V v2, final K k3, final V v3,
@@ -299,8 +343,24 @@ public class ImmutableNavigableMap<K, V> extends ImmutableSortedMap<K, V> implem
      *
      * @param <K> the type of the keys in the ImmutableNavigableMap, must extend Comparable
      * @param <V> the type of the values in the ImmutableNavigableMap
-     * @param k1 to k9 the keys to be included in the ImmutableNavigableMap
-     * @param v1 to v9 the values to be associated with the keys
+     * @param k1 the first key to be included in the ImmutableNavigableMap
+     * @param v1 the value to be associated with the first key
+     * @param k2 the second key to be included in the ImmutableNavigableMap
+     * @param v2 the value to be associated with the second key
+     * @param k3 the third key to be included in the ImmutableNavigableMap
+     * @param v3 the value to be associated with the third key
+     * @param k4 the fourth key to be included in the ImmutableNavigableMap
+     * @param v4 the value to be associated with the fourth key
+     * @param k5 the fifth key to be included in the ImmutableNavigableMap
+     * @param v5 the value to be associated with the fifth key
+     * @param k6 the sixth key to be included in the ImmutableNavigableMap
+     * @param v6 the value to be associated with the sixth key
+     * @param k7 the seventh key to be included in the ImmutableNavigableMap
+     * @param v7 the value to be associated with the seventh key
+     * @param k8 the eighth key to be included in the ImmutableNavigableMap
+     * @param v8 the value to be associated with the eighth key
+     * @param k9 the ninth key to be included in the ImmutableNavigableMap
+     * @param v9 the value to be associated with the ninth key
      * @return an ImmutableNavigableMap containing the provided key-value pairs
      */
     public static <K extends Comparable<? super K>, V> ImmutableNavigableMap<K, V> of(final K k1, final V v1, final K k2, final V v2, final K k3, final V v3,
@@ -327,8 +387,26 @@ public class ImmutableNavigableMap<K, V> extends ImmutableSortedMap<K, V> implem
      *
      * @param <K> the type of the keys in the ImmutableNavigableMap, must extend Comparable
      * @param <V> the type of the values in the ImmutableNavigableMap
-     * @param k1 to k10 the keys to be included in the ImmutableNavigableMap
-     * @param v1 to v10 the values to be associated with the keys
+     * @param k1 the first key to be included in the ImmutableNavigableMap
+     * @param v1 the value to be associated with the first key
+     * @param k2 the second key to be included in the ImmutableNavigableMap
+     * @param v2 the value to be associated with the second key
+     * @param k3 the third key to be included in the ImmutableNavigableMap
+     * @param v3 the value to be associated with the third key
+     * @param k4 the fourth key to be included in the ImmutableNavigableMap
+     * @param v4 the value to be associated with the fourth key
+     * @param k5 the fifth key to be included in the ImmutableNavigableMap
+     * @param v5 the value to be associated with the fifth key
+     * @param k6 the sixth key to be included in the ImmutableNavigableMap
+     * @param v6 the value to be associated with the sixth key
+     * @param k7 the seventh key to be included in the ImmutableNavigableMap
+     * @param v7 the value to be associated with the seventh key
+     * @param k8 the eighth key to be included in the ImmutableNavigableMap
+     * @param v8 the value to be associated with the eighth key
+     * @param k9 the ninth key to be included in the ImmutableNavigableMap
+     * @param v9 the value to be associated with the ninth key
+     * @param k10 the tenth key to be included in the ImmutableNavigableMap
+     * @param v10 the value to be associated with the tenth key
      * @return an ImmutableNavigableMap containing the provided key-value pairs
      */
     public static <K extends Comparable<? super K>, V> ImmutableNavigableMap<K, V> of(final K k1, final V v1, final K k2, final V v2, final K k3, final V v3,
@@ -391,7 +469,7 @@ public class ImmutableNavigableMap<K, V> extends ImmutableSortedMap<K, V> implem
      * 
      * <p><b>Warning:</b> This method does not create a defensive copy. Changes to the underlying
      * NavigableMap will be visible through the returned ImmutableNavigableMap, which violates the
-     * immutability contract. Use {@link #copyOf(Map)} for a true immutable copy.</p>
+     * immutability contract. Use {@link #copyOf(Map)} for a {@code true} immutable copy.</p>
      * 
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -451,7 +529,7 @@ public class ImmutableNavigableMap<K, V> extends ImmutableSortedMap<K, V> implem
      * @param key the key
      * @return an entry with the greatest key less than {@code key}, or {@code null} if there is no such key
      * @throws ClassCastException if the specified key cannot be compared with the keys currently in the map
-     *         or its comparator does not permit null keys
+     *         or its comparator does not permit {@code null} keys
      */
     @Override
     public ImmutableEntry<K, V> lowerEntry(final K key) {
@@ -476,7 +554,7 @@ public class ImmutableNavigableMap<K, V> extends ImmutableSortedMap<K, V> implem
      * @param key the key
      * @return the greatest key less than {@code key}, or {@code null} if there is no such key
      * @throws ClassCastException if the specified key cannot be compared with the keys currently in the map
-     *         or its comparator does not permit null keys
+     *         or its comparator does not permit {@code null} keys
      */
     @Override
     public K lowerKey(final K key) {
@@ -501,7 +579,7 @@ public class ImmutableNavigableMap<K, V> extends ImmutableSortedMap<K, V> implem
      * @param key the key
      * @return an entry with the greatest key less than or equal to {@code key}, or {@code null} if there is no such key
      * @throws ClassCastException if the specified key cannot be compared with the keys currently in the map
-     *         or its comparator does not permit null keys
+     *         or its comparator does not permit {@code null} keys
      */
     @Override
     public ImmutableEntry<K, V> floorEntry(final K key) {
@@ -526,7 +604,7 @@ public class ImmutableNavigableMap<K, V> extends ImmutableSortedMap<K, V> implem
      * @param key the key
      * @return the greatest key less than or equal to {@code key}, or {@code null} if there is no such key
      * @throws ClassCastException if the specified key cannot be compared with the keys currently in the map
-     *         or its comparator does not permit null keys
+     *         or its comparator does not permit {@code null} keys
      */
     @Override
     public K floorKey(final K key) {
@@ -551,7 +629,7 @@ public class ImmutableNavigableMap<K, V> extends ImmutableSortedMap<K, V> implem
      * @param key the key
      * @return an entry with the least key greater than or equal to {@code key}, or {@code null} if there is no such key
      * @throws ClassCastException if the specified key cannot be compared with the keys currently in the map
-     *         or its comparator does not permit null keys
+     *         or its comparator does not permit {@code null} keys
      */
     @Override
     public ImmutableEntry<K, V> ceilingEntry(final K key) {
@@ -576,7 +654,7 @@ public class ImmutableNavigableMap<K, V> extends ImmutableSortedMap<K, V> implem
      * @param key the key
      * @return the least key greater than or equal to {@code key}, or {@code null} if there is no such key
      * @throws ClassCastException if the specified key cannot be compared with the keys currently in the map
-     *         or its comparator does not permit null keys
+     *         or its comparator does not permit {@code null} keys
      */
     @Override
     public K ceilingKey(final K key) {
@@ -601,7 +679,7 @@ public class ImmutableNavigableMap<K, V> extends ImmutableSortedMap<K, V> implem
      * @param key the key
      * @return an entry with the least key greater than {@code key}, or {@code null} if there is no such key
      * @throws ClassCastException if the specified key cannot be compared with the keys currently in the map
-     *         or its comparator does not permit null keys
+     *         or its comparator does not permit {@code null} keys
      */
     @Override
     public ImmutableEntry<K, V> higherEntry(final K key) {
@@ -626,7 +704,7 @@ public class ImmutableNavigableMap<K, V> extends ImmutableSortedMap<K, V> implem
      * @param key the key
      * @return the least key greater than {@code key}, or {@code null} if there is no such key
      * @throws ClassCastException if the specified key cannot be compared with the keys currently in the map
-     *         or its comparator does not permit null keys
+     *         or its comparator does not permit {@code null} keys
      */
     @Override
     public K higherKey(final K key) {
@@ -783,7 +861,7 @@ public class ImmutableNavigableMap<K, V> extends ImmutableSortedMap<K, V> implem
     /**
      * Returns a view of the portion of this map whose keys range from {@code fromKey} to
      * {@code toKey}. If {@code fromKey} and {@code toKey} are equal, the returned map is empty
-     * unless {@code fromInclusive} and {@code toInclusive} are both true. The returned map is
+     * unless {@code fromInclusive} and {@code toInclusive} are both {@code true}. The returned map is
      * backed by this map, so changes in the returned map are reflected in this map, and vice-versa.
      * The returned map supports all optional map operations that this map supports.
      * 
@@ -812,7 +890,7 @@ public class ImmutableNavigableMap<K, V> extends ImmutableSortedMap<K, V> implem
      * @return a view of the portion of this map whose keys range from {@code fromKey} to {@code toKey}
      * @throws ClassCastException if {@code fromKey} and {@code toKey} cannot be compared to one another
      *         using this map's comparator (or, if the map has no comparator, using natural ordering)
-     *         permit null keys
+     *         permit {@code null} keys
      * @throws IllegalArgumentException if {@code fromKey} is greater than {@code toKey}
      */
     @Override

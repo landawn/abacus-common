@@ -13,6 +13,8 @@
  */
 package com.landawn.abacus.util;
 
+import com.landawn.abacus.annotation.MayReturnNull;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -90,7 +92,7 @@ public final class FastJson {
      * }</pre>
      * 
      * @param obj the object to be converted to JSON string
-     * @param prettyFormat true to enable pretty formatting with indentation and line breaks, {@code false} for compact output
+     * @param prettyFormat {@code true} to enable pretty formatting with indentation and line breaks, {@code false} for compact output
      * @return the JSON string representation of the object with or without pretty formatting
      */
     public static String toJson(final Object obj, final boolean prettyFormat) {
@@ -104,7 +106,7 @@ public final class FastJson {
     /**
      * Converts the specified object to its JSON string representation using the specified JSONWriter features.
      * This method allows fine-grained control over the JSON serialization process by specifying various
-     * writer features such as pretty formatting, null value handling, date formatting, etc.
+     * writer features such as pretty formatting, {@code null} value handling, date formatting, etc.
      * 
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -341,18 +343,19 @@ public final class FastJson {
      * Deserializes JSON from a byte array into an object of the specified target type.
      * This method is useful when working with JSON data received as byte arrays, such as
      * from network communications or binary storage.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * byte[] jsonBytes = "{\"name\":\"John\",\"age\":30}".getBytes();
      * Person person = FastJson.fromJson(jsonBytes, Person.class);
      * }</pre>
-     * 
+     *
      * @param <T> the type of the target object
      * @param json the byte array containing JSON data
      * @param targetType the Class object representing the target type
-     * @return the deserialized object of type T, or null if the JSON represents null
+     * @return the deserialized object of type T, or {@code null} if the JSON represents null
      */
+    @MayReturnNull
     public static <T> T fromJson(final byte[] json, final Class<? extends T> targetType) {
         return JSON.parseObject(json, targetType);
     }
@@ -373,8 +376,9 @@ public final class FastJson {
      * @param offset the starting position in the byte array
      * @param len the number of bytes to read from the starting position
      * @param targetType the Class object representing the target type
-     * @return the deserialized object of type T, or null if the JSON represents null
+     * @return the deserialized object of type T, or {@code null} if the JSON represents null
      */
+    @MayReturnNull
     public static <T> T fromJson(final byte[] json, final int offset, final int len, final Class<? extends T> targetType) {
         return JSON.parseObject(json, offset, len, targetType);
     }
@@ -392,8 +396,9 @@ public final class FastJson {
      * @param <T> the type of the target object
      * @param json the JSON string to be deserialized
      * @param targetType the Class object representing the target type
-     * @return the deserialized object of type T, or null if the JSON represents null
+     * @return the deserialized object of type T, or {@code null} if the JSON represents null
      */
+    @MayReturnNull
     public static <T> T fromJson(final String json, final Class<? extends T> targetType) {
         return JSON.parseObject(json, targetType);
     }
@@ -412,8 +417,9 @@ public final class FastJson {
      * @param json the JSON string to be deserialized
      * @param targetType the Class object representing the target type
      * @param features variable number of JSONReader features to control deserialization behavior
-     * @return the deserialized object of type T, or null if the JSON represents null
+     * @return the deserialized object of type T, or {@code null} if the JSON represents null
      */
+    @MayReturnNull
     public static <T> T fromJson(final String json, final Class<? extends T> targetType, final JSONReader.Feature... features) {
         return JSON.parseObject(json, targetType, features);
     }
@@ -433,8 +439,9 @@ public final class FastJson {
      * @param json the JSON string to be deserialized
      * @param targetType the Class object representing the target type
      * @param context the JSONReader context containing deserialization configuration
-     * @return the deserialized object of type T, or null if the JSON represents null
+     * @return the deserialized object of type T, or {@code null} if the JSON represents null
      */
+    @MayReturnNull
     public static <T> T fromJson(final String json, final Class<? extends T> targetType, final JSONReader.Context context) {
         return JSON.parseObject(json, targetType, context);
     }
@@ -454,8 +461,9 @@ public final class FastJson {
      * @param <T> the type of the target object
      * @param json the JSON string to be deserialized
      * @param targetType the Type object representing the target type
-     * @return the deserialized object of type T, or null if the JSON represents null
+     * @return the deserialized object of type T, or {@code null} if the JSON represents null
      */
+    @MayReturnNull
     public static <T> T fromJson(final String json, final Type targetType) {
         return JSON.parseObject(json, targetType);
     }
@@ -474,8 +482,9 @@ public final class FastJson {
      * @param json the JSON string to be deserialized
      * @param targetType the Type object representing the target type
      * @param features variable number of JSONReader features to control deserialization behavior
-     * @return the deserialized object of type T, or null if the JSON represents null
+     * @return the deserialized object of type T, or {@code null} if the JSON represents null
      */
+    @MayReturnNull
     public static <T> T fromJson(final String json, final Type targetType, final JSONReader.Feature... features) {
         return JSON.parseObject(json, targetType, features);
     }
@@ -495,8 +504,9 @@ public final class FastJson {
      * @param json the JSON string to be deserialized
      * @param targetType the Type object representing the target type
      * @param context the JSONReader context containing deserialization configuration
-     * @return the deserialized object of type T, or null if the JSON represents null
+     * @return the deserialized object of type T, or {@code null} if the JSON represents null
      */
+    @MayReturnNull
     public static <T> T fromJson(final String json, final Type targetType, final JSONReader.Context context) {
         return JSON.parseObject(json, targetType, context);
     }
@@ -515,8 +525,9 @@ public final class FastJson {
      * @param <T> the type of the target object
      * @param json the JSON string to be deserialized
      * @param typeReference the TypeReference object containing type information
-     * @return the deserialized object of type T, or null if the JSON represents null
+     * @return the deserialized object of type T, or {@code null} if the JSON represents null
      */
+    @MayReturnNull
     public static <T> T fromJson(final String json, final TypeReference<T> typeReference) {
         return JSON.parseObject(json, typeReference);
     }
@@ -535,8 +546,9 @@ public final class FastJson {
      * @param json the JSON string to be deserialized
      * @param typeReference the TypeReference object containing type information
      * @param features variable number of JSONReader features to control deserialization behavior
-     * @return the deserialized object of type T, or null if the JSON represents null
+     * @return the deserialized object of type T, or {@code null} if the JSON represents null
      */
+    @MayReturnNull
     public static <T> T fromJson(final String json, final TypeReference<T> typeReference, final JSONReader.Feature... features) {
         return JSON.parseObject(json, typeReference, features);
     }
@@ -555,8 +567,9 @@ public final class FastJson {
      * @param json the JSON string to be deserialized
      * @param typeReference the TypeReference object containing type information
      * @param context the JSONReader context containing deserialization configuration
-     * @return the deserialized object of type T, or null if the JSON represents null
+     * @return the deserialized object of type T, or {@code null} if the JSON represents null
      */
+    @MayReturnNull
     public static <T> T fromJson(final String json, final TypeReference<T> typeReference, final JSONReader.Context context) {
         return JSON.parseObject(json, typeReference.getType(), context);
     }
@@ -575,8 +588,9 @@ public final class FastJson {
      * @param <T> the type of the target object
      * @param json the Reader containing JSON data
      * @param targetType the Class object representing the target type
-     * @return the deserialized object of type T, or null if the JSON represents null
+     * @return the deserialized object of type T, or {@code null} if the JSON represents null
      */
+    @MayReturnNull
     public static <T> T fromJson(final Reader json, final Class<? extends T> targetType) {
         return JSON.parseObject(json, targetType);
     }
@@ -595,8 +609,9 @@ public final class FastJson {
      * @param json the Reader containing JSON data
      * @param targetType the Class object representing the target type
      * @param features variable number of JSONReader features to control deserialization behavior
-     * @return the deserialized object of type T, or null if the JSON represents null
+     * @return the deserialized object of type T, or {@code null} if the JSON represents null
      */
+    @MayReturnNull
     public static <T> T fromJson(final Reader json, final Class<? extends T> targetType, final JSONReader.Feature... features) {
         return JSON.parseObject(json, targetType, features);
     }
@@ -616,8 +631,9 @@ public final class FastJson {
      * @param json the Reader containing JSON data
      * @param targetType the Class object representing the target type
      * @param context the JSONReader context containing deserialization configuration
-     * @return the deserialized object of type T, or null if the JSON represents null
+     * @return the deserialized object of type T, or {@code null} if the JSON represents null
      */
+    @MayReturnNull
     @Beta
     public static <T> T fromJson(final Reader json, final Class<? extends T> targetType, final JSONReader.Context context) {
         return JSON.parseObject(IOUtil.readAllToString(json), targetType, context);
@@ -638,8 +654,9 @@ public final class FastJson {
      * @param <T> the type of the target object
      * @param json the Reader containing JSON data
      * @param targetType the Type object representing the target type
-     * @return the deserialized object of type T, or null if the JSON represents null
+     * @return the deserialized object of type T, or {@code null} if the JSON represents null
      */
+    @MayReturnNull
     public static <T> T fromJson(final Reader json, final Type targetType) {
         return JSON.parseObject(json, targetType);
     }
@@ -660,8 +677,9 @@ public final class FastJson {
      * @param json the Reader containing JSON data
      * @param targetType the Type object representing the target type
      * @param features variable number of JSONReader features to control deserialization behavior
-     * @return the deserialized object of type T, or null if the JSON represents null
+     * @return the deserialized object of type T, or {@code null} if the JSON represents null
      */
+    @MayReturnNull
     public static <T> T fromJson(final Reader json, final Type targetType, final JSONReader.Feature... features) {
         return JSON.parseObject(json, targetType, features);
     }
@@ -682,8 +700,9 @@ public final class FastJson {
      * @param json the Reader containing JSON data
      * @param targetType the Type object representing the target type
      * @param context the JSONReader context containing deserialization configuration
-     * @return the deserialized object of type T, or null if the JSON represents null
+     * @return the deserialized object of type T, or {@code null} if the JSON represents null
      */
+    @MayReturnNull
     @Beta
     public static <T> T fromJson(final Reader json, final Type targetType, final JSONReader.Context context) {
         return JSON.parseObject(IOUtil.readAllToString(json), targetType, context);

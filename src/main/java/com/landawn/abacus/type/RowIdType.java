@@ -21,6 +21,7 @@ import java.sql.ResultSet;
 import java.sql.RowId;
 import java.sql.SQLException;
 
+import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.parser.JSONXMLSerializationConfig;
 import com.landawn.abacus.util.CharacterWriter;
 
@@ -58,7 +59,7 @@ public class RowIdType extends AbstractType<RowId> {
      * boolean serializable = type.isSerializable(); // Returns false
      * }</pre>
      *
-     * @return false, indicating this type is not serializable
+     * @return {@code false}, indicating this type is not serializable
      */
     @Override
     public boolean isSerializable() {
@@ -77,9 +78,11 @@ public class RowIdType extends AbstractType<RowId> {
      * }</pre>
      *
      * @param x the RowId object to convert
-     * @return the string representation of the RowId, or null if the input is null
+     * @return the string representation of the RowId, or {@code null} if the input is null
      */
+    @MayReturnNull
     @Override
+
     public String stringOf(final RowId x) {
         return x == null ? null : x.toString();
     }
@@ -101,6 +104,7 @@ public class RowIdType extends AbstractType<RowId> {
      * @throws UnsupportedOperationException always thrown as RowId cannot be created from string
      */
     @Override
+    @MayReturnNull
     public RowId valueOf(final String str) throws UnsupportedOperationException {
         throw new UnsupportedOperationException();
     }
@@ -118,10 +122,12 @@ public class RowIdType extends AbstractType<RowId> {
      *
      * @param rs the ResultSet to read from
      * @param columnIndex the 1-based index of the column to retrieve
-     * @return the RowId value from the specified column, or null if the column value is SQL NULL
+     * @return the RowId value from the specified column, or {@code null} if the column value is SQL NULL
      * @throws SQLException if a database access error occurs or the column index is invalid
      */
+    @MayReturnNull
     @Override
+
     public RowId get(final ResultSet rs, final int columnIndex) throws SQLException {
         return rs.getRowId(columnIndex);
     }
@@ -139,10 +145,12 @@ public class RowIdType extends AbstractType<RowId> {
      *
      * @param rs the ResultSet to read from
      * @param columnLabel the label of the column to retrieve (column name or alias)
-     * @return the RowId value from the specified column, or null if the column value is SQL NULL
+     * @return the RowId value from the specified column, or {@code null} if the column value is SQL NULL
      * @throws SQLException if a database access error occurs or the column label is not found
      */
+    @MayReturnNull
     @Override
+
     public RowId get(final ResultSet rs, final String columnLabel) throws SQLException {
         return rs.getRowId(columnLabel);
     }
@@ -191,7 +199,7 @@ public class RowIdType extends AbstractType<RowId> {
 
     /**
      * Writes the character representation of a RowId to the given CharacterWriter.
-     * If the RowId is null, writes "null". Otherwise, writes the string representation
+     * If the RowId is {@code null}, writes "null". Otherwise, writes the string representation
      * of the RowId obtained from its toString() method.
      *
      * <p><b>Usage Examples:</b></p>

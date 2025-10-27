@@ -142,7 +142,7 @@ import com.landawn.abacus.util.stream.Stream;
  * with collections, maps, and other data structures.</p>
  *
  * <p>The class is designed to eliminate boilerplate code in functional programming scenarios by providing
- * pre-built implementations of commonly used functional patterns. It includes utilities for null handling,
+ * pre-built implementations of commonly used functional patterns. It includes utilities for {@code null} handling,
  * type conversions, comparison operations, collection manipulation, and exception handling in functional
  * contexts.</p>
  *
@@ -152,7 +152,7 @@ import com.landawn.abacus.util.stream.Stream;
  *
  * <p>Key features:</p>
  * <ul>
- *   <li>Predicate factories for null checking, equality testing, range validation, and collection testing</li>
+ *   <li>Predicate factories for {@code null} checking, equality testing, range validation, and collection testing</li>
  *   <li>Function factories for type conversion, parsing, formatting, and data extraction</li>
  *   <li>Consumer factories for conditional execution and side effects</li>
  *   <li>Binary operators for selection, comparison, and mathematical operations</li>
@@ -372,48 +372,70 @@ public final class Fn {
 
     private static final Predicate<File> IS_DIRECTORY = file -> file != null && file.isDirectory();
 
+    /** Function to extract the boolean value from an OptionalBoolean. */
     public static final ToBooleanFunction<OptionalBoolean> GET_AS_BOOLEAN = OptionalBoolean::get;
 
+    /** Function to extract the char value from an OptionalChar. */
     public static final ToCharFunction<OptionalChar> GET_AS_CHAR = OptionalChar::get;
 
+    /** Function to extract the byte value from an OptionalByte. */
     public static final ToByteFunction<OptionalByte> GET_AS_BYTE = OptionalByte::get;
 
+    /** Function to extract the short value from an OptionalShort. */
     public static final ToShortFunction<OptionalShort> GET_AS_SHORT = OptionalShort::get;
 
+    /** Function to extract the int value from an OptionalInt. */
     public static final ToIntFunction<OptionalInt> GET_AS_INT = OptionalInt::get;
 
+    /** Function to extract the long value from an OptionalLong. */
     public static final ToLongFunction<OptionalLong> GET_AS_LONG = OptionalLong::get;
 
+    /** Function to extract the float value from an OptionalFloat. */
     public static final ToFloatFunction<OptionalFloat> GET_AS_FLOAT = OptionalFloat::get;
 
+    /** Function to extract the double value from an OptionalDouble. */
     public static final ToDoubleFunction<OptionalDouble> GET_AS_DOUBLE = OptionalDouble::get;
 
+    /** Function to extract the int value from a JDK OptionalInt. */
     public static final ToIntFunction<java.util.OptionalInt> GET_AS_INT_JDK = java.util.OptionalInt::getAsInt;
 
+    /** Function to extract the long value from a JDK OptionalLong. */
     public static final ToLongFunction<java.util.OptionalLong> GET_AS_LONG_JDK = java.util.OptionalLong::getAsLong;
 
+    /** Function to extract the double value from a JDK OptionalDouble. */
     public static final ToDoubleFunction<java.util.OptionalDouble> GET_AS_DOUBLE_JDK = java.util.OptionalDouble::getAsDouble;
 
+    /** Predicate to check if an OptionalBoolean has a value present. */
     public static final Predicate<OptionalBoolean> IS_PRESENT_BOOLEAN = OptionalBoolean::isPresent;
 
+    /** Predicate to check if an OptionalChar has a value present. */
     public static final Predicate<OptionalChar> IS_PRESENT_CHAR = OptionalChar::isPresent;
 
+    /** Predicate to check if an OptionalByte has a value present. */
     public static final Predicate<OptionalByte> IS_PRESENT_BYTE = OptionalByte::isPresent;
 
+    /** Predicate to check if an OptionalShort has a value present. */
     public static final Predicate<OptionalShort> IS_PRESENT_SHORT = OptionalShort::isPresent;
 
+    /** Predicate to check if an OptionalInt has a value present. */
     public static final Predicate<OptionalInt> IS_PRESENT_INT = OptionalInt::isPresent;
 
+    /** Predicate to check if an OptionalLong has a value present. */
     public static final Predicate<OptionalLong> IS_PRESENT_LONG = OptionalLong::isPresent;
 
+    /** Predicate to check if an OptionalFloat has a value present. */
     public static final Predicate<OptionalFloat> IS_PRESENT_FLOAT = OptionalFloat::isPresent;
 
+    /** Predicate to check if an OptionalDouble has a value present. */
     public static final Predicate<OptionalDouble> IS_PRESENT_DOUBLE = OptionalDouble::isPresent;
 
+    /** Predicate to check if a JDK OptionalInt has a value present. */
     public static final Predicate<java.util.OptionalInt> IS_PRESENT_INT_JDK = java.util.OptionalInt::isPresent;
 
+    /** Predicate to check if a JDK OptionalLong has a value present. */
     public static final Predicate<java.util.OptionalLong> IS_PRESENT_LONG_JDK = java.util.OptionalLong::isPresent;
 
+    /** Predicate to check if a JDK OptionalDouble has a value present. */
     public static final Predicate<java.util.OptionalDouble> IS_PRESENT_DOUBLE_JDK = java.util.OptionalDouble::isPresent;
 
     Fn() {
@@ -484,13 +506,13 @@ public final class Fn {
      * }</pre>
      *
      * @param <T> the type of object returned by the supplier
-     * @param supplier the delegate supplier whose results should be cached. Must not be null.
+     * @param supplier the delegate supplier whose results should be cached. Must not be {@code null}.
      *                 This supplier will be called to provide values when the cache is empty
      *                 or expired
      * @param duration the length of time after a value is created that it should remain in
      *                 the cache before expiring. Must be positive. After this duration passes,
      *                 the next call to {@code get()} will invoke the delegate supplier again
-     * @param unit the time unit for the duration parameter. Must not be null. Common units
+     * @param unit the time unit for the duration parameter. Must not be {@code null}. Common units
      *             include {@code TimeUnit.SECONDS}, {@code TimeUnit.MINUTES}, etc.
      * @return a new supplier that caches the result of the delegate supplier for the specified
      *         duration. The returned supplier's {@code get()} method will return cached values
@@ -550,7 +572,7 @@ public final class Fn {
      * concurrent access. 
      *
      * @param <T> the type of object returned by the supplier
-     * @param supplier the delegate supplier whose results should be cached. Must not be null.
+     * @param supplier the delegate supplier whose results should be cached. Must not be {@code null}.
      *                 This supplier will be called to provide values when the cache is empty
      *                 or expired
      * @param duration the length of time after a value is created that it should remain in
@@ -575,11 +597,11 @@ public final class Fn {
      * when called again with the same input, avoiding repeated computation.
      *
      * <p>This implementation is <b>thread-safe</b> and uses a {@link ConcurrentHashMap} internally
-     * for caching non-null inputs and a double-checked locking pattern for null inputs.
+     * for caching {@code non-null} inputs and a double-checked locking pattern for {@code null} inputs.
      * The function will only be invoked once per unique input, even in concurrent scenarios.
      *
-     * <p><b>Null Handling:</b> Both null inputs and null return values are properly supported.
-     * If the function returns null for a given input, that null result will be cached and returned
+     * <p><b>Null Handling:</b> Both {@code null} inputs and {@code null} return values are properly supported.
+     * If the function returns {@code null} for a given input, that {@code null} result will be cached and returned
      * on subsequent invocations with the same input, without re-executing the function.
      *
      * <p><b>Memory Considerations:</b> The cache grows unbounded as new inputs are processed.
@@ -1530,7 +1552,7 @@ public final class Fn {
     }
 
     /**
-     * Returns a UnaryOperator that trims strings and converts null to empty string.
+     * Returns a UnaryOperator that trims strings and converts {@code null} to empty string.
      *
      * @return a UnaryOperator that trims strings to empty
      * @see Strings#trimToEmpty(String)
@@ -1540,7 +1562,7 @@ public final class Fn {
     }
 
     /**
-     * Returns a UnaryOperator that trims strings and converts empty results to null.
+     * Returns a UnaryOperator that trims strings and converts empty results to {@code null}.
      *
      * @return a UnaryOperator that trims strings to null
      * @see Strings#trimToNull(String)
@@ -1561,7 +1583,7 @@ public final class Fn {
     }
 
     /**
-     * Returns a UnaryOperator that strips strings and converts null to empty string.
+     * Returns a UnaryOperator that strips strings and converts {@code null} to empty string.
      *
      * @return a UnaryOperator that strips strings to empty
      * @see Strings#stripToEmpty(String)
@@ -1571,7 +1593,7 @@ public final class Fn {
     }
 
     /**
-     * Returns a UnaryOperator that strips strings and converts empty results to null.
+     * Returns a UnaryOperator that strips strings and converts empty results to {@code null}.
      *
      * @return a UnaryOperator that strips strings to null
      * @see Strings#stripToNull(String)
@@ -1581,9 +1603,9 @@ public final class Fn {
     }
 
     /**
-     * Returns a UnaryOperator that converts null strings to empty strings.
+     * Returns a UnaryOperator that converts {@code null} strings to empty strings.
      *
-     * @return a UnaryOperator that converts null to empty string
+     * @return a UnaryOperator that converts {@code null} to empty string
      * @see Strings#nullToEmpty(String)
      */
     public static UnaryOperator<String> nullToEmpty() {
@@ -1591,10 +1613,10 @@ public final class Fn {
     }
 
     /**
-     * Returns a UnaryOperator that converts null Lists to empty Lists.
+     * Returns a UnaryOperator that converts {@code null} Lists to empty Lists.
      *
      * @param <T> the element type
-     * @return a UnaryOperator that converts null to empty List
+     * @return a UnaryOperator that converts {@code null} to empty List
      * @see N#emptyList()
      */
     @SuppressWarnings("rawtypes")
@@ -1603,10 +1625,10 @@ public final class Fn {
     }
 
     /**
-     * Returns a UnaryOperator that converts null Sets to empty Sets.
+     * Returns a UnaryOperator that converts {@code null} Sets to empty Sets.
      *
      * @param <T> the element type
-     * @return a UnaryOperator that converts null to empty Set
+     * @return a UnaryOperator that converts {@code null} to empty Set
      * @see N#emptySet()
      */
     @SuppressWarnings("rawtypes")
@@ -1615,11 +1637,11 @@ public final class Fn {
     }
 
     /**
-     * Returns a UnaryOperator that converts null Maps to empty Maps.
+     * Returns a UnaryOperator that converts {@code null} Maps to empty Maps.
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @return a UnaryOperator that converts null to empty Map
+     * @return a UnaryOperator that converts {@code null} to empty Map
      * @see N#emptyMap()
      */
     @SuppressWarnings("rawtypes")
@@ -1629,7 +1651,7 @@ public final class Fn {
 
     /**
      * Returns a Function that calculates the length of an array.
-     * Returns 0 for null arrays.
+     * Returns 0 for {@code null} arrays.
      *
      * @param <T> the array element type
      * @return a Function that returns array length
@@ -1692,7 +1714,7 @@ public final class Fn {
     }
 
     /**
-     * Returns a Predicate that always evaluates to true.
+     * Returns a Predicate that always evaluates to {@code true}.
      *
      * @param <T> the type of the input to the predicate
      * @return a Predicate that always returns true
@@ -1702,7 +1724,7 @@ public final class Fn {
     }
 
     /**
-     * Returns a Predicate that always evaluates to false.
+     * Returns a Predicate that always evaluates to {@code false}.
      *
      * @param <T> the type of the input to the predicate
      * @return a Predicate that always returns false
@@ -1712,7 +1734,7 @@ public final class Fn {
     }
 
     /**
-     * Returns a Predicate that tests if the input is null.
+     * Returns a Predicate that tests if the input is {@code null}.
      *
      * @param <T> the type of the input to the predicate
      * @return a Predicate that tests for null
@@ -1722,7 +1744,7 @@ public final class Fn {
     }
 
     /**
-     * Returns a Predicate that tests if a value extracted by the valueExtractor is null.
+     * Returns a Predicate that tests if a value extracted by the valueExtractor is {@code null}.
      *
      * @param <T> the type of the input to the predicate
      * @param valueExtractor the function to extract the value to test
@@ -1733,10 +1755,10 @@ public final class Fn {
     }
 
     /**
-     * Returns a Predicate that tests if a CharSequence is null or empty.
+     * Returns a Predicate that tests if a CharSequence is {@code null} or empty.
      *
      * @param <T> the CharSequence type
-     * @return a Predicate that tests for null or empty
+     * @return a Predicate that tests for {@code null} or empty
      * @see Strings#isEmpty(CharSequence)
      */
     public static <T extends CharSequence> Predicate<T> isEmpty() {
@@ -1755,10 +1777,10 @@ public final class Fn {
     }
 
     /**
-     * Returns a Predicate that tests if a CharSequence is null, empty, or contains only whitespace.
+     * Returns a Predicate that tests if a CharSequence is {@code null}, empty, or contains only whitespace.
      *
      * @param <T> the CharSequence type
-     * @return a Predicate that tests for null, empty, or blank
+     * @return a Predicate that tests for {@code null}, empty, or blank
      * @see Strings#isBlank(CharSequence)
      */
     public static <T extends CharSequence> Predicate<T> isBlank() {
@@ -1777,7 +1799,7 @@ public final class Fn {
     }
 
     /**
-     * Returns a Predicate that tests if an array is null or empty.
+     * Returns a Predicate that tests if an array is {@code null} or empty.
      *
      * @param <T> the array element type
      * @return a Predicate that tests if arrays are empty
@@ -1789,7 +1811,7 @@ public final class Fn {
     }
 
     /**
-     * Returns a Predicate that tests if a Collection is null or empty.
+     * Returns a Predicate that tests if a Collection is {@code null} or empty.
      *
      * @param <T> the Collection type
      * @return a Predicate that tests if Collections are empty
@@ -1801,7 +1823,7 @@ public final class Fn {
     }
 
     /**
-     * Returns a Predicate that tests if a Map is null or empty.
+     * Returns a Predicate that tests if a Map is {@code null} or empty.
      *
      * @param <T> the Map type
      * @return a Predicate that tests if Maps are empty
@@ -1813,7 +1835,7 @@ public final class Fn {
     }
 
     /**
-     * Returns a Predicate that tests if the input is not null.
+     * Returns a Predicate that tests if the input is not {@code null}.
      *
      * @param <T> the type of the input to the predicate
      * @return a Predicate that tests for non-null
@@ -1823,7 +1845,7 @@ public final class Fn {
     }
 
     /**
-     * Returns a Predicate that tests if a value extracted by the valueExtractor is not null.
+     * Returns a Predicate that tests if a value extracted by the valueExtractor is not {@code null}.
      *
      * @param <T> the type of the input to the predicate
      * @param valueExtractor the function to extract the value to test
@@ -1834,7 +1856,7 @@ public final class Fn {
     }
 
     /**
-     * Returns a Predicate that tests if a CharSequence is not null and not empty.
+     * Returns a Predicate that tests if a CharSequence is not {@code null} and not empty.
      *
      * @param <T> the CharSequence type
      * @return a Predicate that tests for non-empty
@@ -1856,7 +1878,7 @@ public final class Fn {
     }
 
     /**
-     * Returns a Predicate that tests if a CharSequence is not null, not empty, and not blank.
+     * Returns a Predicate that tests if a CharSequence is not {@code null}, not empty, and not blank.
      *
      * @param <T> the CharSequence type
      * @return a Predicate that tests for non-blank
@@ -1878,7 +1900,7 @@ public final class Fn {
     }
 
     /**
-     * Returns a Predicate that tests if an array is not null and not empty.
+     * Returns a Predicate that tests if an array is not {@code null} and not empty.
      *
      * @param <T> the array element type
      * @return a Predicate that tests if arrays are not empty
@@ -1890,7 +1912,7 @@ public final class Fn {
     }
 
     /**
-     * Returns a Predicate that tests if a Collection is not null and not empty.
+     * Returns a Predicate that tests if a Collection is not {@code null} and not empty.
      *
      * @param <T> the Collection type
      * @return a Predicate that tests if Collections are not empty
@@ -1902,7 +1924,7 @@ public final class Fn {
     }
 
     /**
-     * Returns a Predicate that tests if a Map is not null and not empty.
+     * Returns a Predicate that tests if a Map is not {@code null} and not empty.
      *
      * @param <T> the Map type
      * @return a Predicate that tests if Maps are not empty
@@ -1989,7 +2011,7 @@ public final class Fn {
      *
      * @param <T> the type of objects that may be compared
      * @param target the value to compare against
-     * @return a Predicate that tests if input > target
+     * @return a Predicate that tests if input &gt; target
      * @see N#compare(Comparable, Comparable)
      */
     public static <T extends Comparable<? super T>> Predicate<T> greaterThan(final T target) {
@@ -2001,7 +2023,7 @@ public final class Fn {
      *
      * @param <T> the type of objects that may be compared
      * @param target the value to compare against
-     * @return a Predicate that tests if input >= target
+     * @return a Predicate that tests if input &gt;= target
      * @see N#compare(Comparable, Comparable)
      */
     public static <T extends Comparable<? super T>> Predicate<T> greaterEqual(final T target) {
@@ -2013,7 +2035,7 @@ public final class Fn {
      *
      * @param <T> the type of objects that may be compared
      * @param target the value to compare against
-     * @return a Predicate that tests if input < target
+     * @return a Predicate that tests if input &lt; target
      * @see N#compare(Comparable, Comparable)
      */
     public static <T extends Comparable<? super T>> Predicate<T> lessThan(final T target) {
@@ -2025,7 +2047,7 @@ public final class Fn {
      *
      * @param <T> the type of objects that may be compared
      * @param target the value to compare against
-     * @return a Predicate that tests if input <= target
+     * @return a Predicate that tests if input &lt;= target
      * @see N#compare(Comparable, Comparable)
      */
     public static <T extends Comparable<? super T>> Predicate<T> lessEqual(final T target) {
@@ -2034,12 +2056,12 @@ public final class Fn {
 
     /**
      * Returns a Predicate that tests if a value is strictly between two bounds.
-     * Tests if: minValue < value < maxValue
+     * Tests if: minValue &lt; value &lt; maxValue
      *
      * @param <T> the type of objects that may be compared
      * @param minValue the lower bound (exclusive)
      * @param maxValue the upper bound (exclusive)
-     * @return a Predicate that tests if minValue < input < maxValue
+     * @return a Predicate that tests if minValue &lt; input &lt; maxValue
      * @see N#compare(Comparable, Comparable)
      */
     public static <T extends Comparable<? super T>> Predicate<T> gtAndLt(final T minValue, final T maxValue) {
@@ -2048,12 +2070,12 @@ public final class Fn {
 
     /**
      * Returns a Predicate that tests if a value is between two bounds (inclusive lower).
-     * Tests if: minValue <= value < maxValue
+     * Tests if: minValue &lt;= value &lt; maxValue
      *
      * @param <T> the type of objects that may be compared
      * @param minValue the lower bound (inclusive)
      * @param maxValue the upper bound (exclusive)
-     * @return a Predicate that tests if minValue <= input < maxValue
+     * @return a Predicate that tests if minValue &lt;= input &lt; maxValue
      * @see N#compare(Comparable, Comparable)
      */
     public static <T extends Comparable<? super T>> Predicate<T> geAndLt(final T minValue, final T maxValue) {
@@ -2062,12 +2084,12 @@ public final class Fn {
 
     /**
      * Returns a Predicate that tests if a value is between two bounds (both inclusive).
-     * Tests if: minValue <= value <= maxValue
+     * Tests if: minValue &lt;= value &lt;= maxValue
      *
      * @param <T> the type of objects that may be compared
      * @param minValue the lower bound (inclusive)
      * @param maxValue the upper bound (inclusive)
-     * @return a Predicate that tests if minValue <= input <= maxValue
+     * @return a Predicate that tests if minValue &lt;= input &lt;= maxValue
      * @see N#compare(Comparable, Comparable)
      */
     public static <T extends Comparable<? super T>> Predicate<T> geAndLe(final T minValue, final T maxValue) {
@@ -2076,12 +2098,12 @@ public final class Fn {
 
     /**
      * Returns a Predicate that tests if a value is between two bounds (inclusive upper).
-     * Tests if: minValue < value <= maxValue
+     * Tests if: minValue &lt; value &lt;= maxValue
      *
      * @param <T> the type of objects that may be compared
      * @param minValue the lower bound (exclusive)
      * @param maxValue the upper bound (inclusive)
-     * @return a Predicate that tests if minValue < input <= maxValue
+     * @return a Predicate that tests if minValue &lt; input &lt;= maxValue
      * @see N#compare(Comparable, Comparable)
      */
     public static <T extends Comparable<? super T>> Predicate<T> gtAndLe(final T minValue, final T maxValue) {
@@ -2090,12 +2112,12 @@ public final class Fn {
 
     /**
      * Returns a Predicate that tests if a value is strictly between two bounds.
-     * Tests if: minValue < value < maxValue
+     * Tests if: minValue &lt; value &lt; maxValue
      *
      * @param <T> the type of objects that may be compared
      * @param minValue the lower bound (exclusive)
      * @param maxValue the upper bound (exclusive)
-     * @return a Predicate that tests if minValue < input < maxValue
+     * @return a Predicate that tests if minValue &lt; input &lt; maxValue
      * @deprecated replaced by {@code gtAndLt}.
      * @see #gtAndLt(Comparable, Comparable)
      */
@@ -2294,7 +2316,7 @@ public final class Fn {
      * Returns a BiPredicate that tests if the first Comparable is greater than the second.
      *
      * @param <T> the type of objects that may be compared
-     * @return a BiPredicate that tests if first > second
+     * @return a BiPredicate that tests if first &gt; second
      * @see N#compare(Comparable, Comparable)
      */
     public static <T extends Comparable<? super T>> BiPredicate<T, T> greaterThan() {
@@ -2305,7 +2327,7 @@ public final class Fn {
      * Returns a BiPredicate that tests if the first Comparable is greater than or equal to the second.
      *
      * @param <T> the type of objects that may be compared
-     * @return a BiPredicate that tests if first >= second
+     * @return a BiPredicate that tests if first &gt;= second
      * @see N#compare(Comparable, Comparable)
      */
     public static <T extends Comparable<? super T>> BiPredicate<T, T> greaterEqual() {
@@ -2316,7 +2338,7 @@ public final class Fn {
      * Returns a BiPredicate that tests if the first Comparable is less than the second.
      *
      * @param <T> the type of objects that may be compared
-     * @return a BiPredicate that tests if first < second
+     * @return a BiPredicate that tests if first &lt; second
      * @see N#compare(Comparable, Comparable)
      */
     public static <T extends Comparable<? super T>> BiPredicate<T, T> lessThan() {
@@ -2327,7 +2349,7 @@ public final class Fn {
      * Returns a BiPredicate that tests if the first Comparable is less than or equal to the second.
      *
      * @param <T> the type of objects that may be compared
-     * @return a BiPredicate that tests if first <= second
+     * @return a BiPredicate that tests if first &lt;= second
      * @see N#compare(Comparable, Comparable)
      */
     public static <T extends Comparable<? super T>> BiPredicate<T, T> lessEqual() {
@@ -2455,7 +2477,7 @@ public final class Fn {
      * @param <T> the type of the input to the predicate
      * @param c the collection of predicates
      * @return a Predicate that returns {@code true} only if all predicates return true
-     * @throws IllegalArgumentException if the collection is null or empty
+     * @throws IllegalArgumentException if the collection is {@code null} or empty
      */
     public static <T> Predicate<T> and(final Collection<? extends java.util.function.Predicate<? super T>> c) throws IllegalArgumentException {
         N.checkArgNotEmpty(c, cs.c);
@@ -2517,7 +2539,7 @@ public final class Fn {
      * @param <U> the type of the second input to the predicate
      * @param c the list of bi-predicates
      * @return a BiPredicate that returns {@code true} only if all bi-predicates return true
-     * @throws IllegalArgumentException if the list is null or empty
+     * @throws IllegalArgumentException if the list is {@code null} or empty
      */
     public static <T, U> BiPredicate<T, U> and(final List<? extends java.util.function.BiPredicate<? super T, ? super U>> c) throws IllegalArgumentException {
         N.checkArgNotEmpty(c, cs.c);
@@ -2609,7 +2631,7 @@ public final class Fn {
      * @param <T> the type of the input to the predicate
      * @param c the collection of predicates
      * @return a Predicate that returns {@code true} if any predicate returns true
-     * @throws IllegalArgumentException if the collection is null or empty
+     * @throws IllegalArgumentException if the collection is {@code null} or empty
      */
     public static <T> Predicate<T> or(final Collection<? extends java.util.function.Predicate<? super T>> c) throws IllegalArgumentException {
         N.checkArgNotEmpty(c, cs.c);
@@ -2671,7 +2693,7 @@ public final class Fn {
      * @param <U> the type of the second input to the predicate
      * @param c the list of bi-predicates
      * @return a BiPredicate that returns {@code true} if any bi-predicate returns true
-     * @throws IllegalArgumentException if the list is null or empty
+     * @throws IllegalArgumentException if the list is {@code null} or empty
      */
     public static <T, U> BiPredicate<T, U> or(final List<? extends java.util.function.BiPredicate<? super T, ? super U>> c) throws IllegalArgumentException {
         N.checkArgNotEmpty(c, cs.c);
@@ -2915,12 +2937,12 @@ public final class Fn {
     }
 
     /**
-     * Returns a Consumer that only accepts non-null values.
-     * If the value is null, the consumer is not invoked.
+     * Returns a Consumer that only accepts {@code non-null} values.
+     * If the value is {@code null}, the consumer is not invoked.
      *
      * @param <T> the type of the input to the consumer
-     * @param consumer the consumer to invoke for non-null values
-     * @return a Consumer that only processes non-null values
+     * @param consumer the consumer to invoke for {@code non-null} values
+     * @return a Consumer that only processes {@code non-null} values
      * @throws IllegalArgumentException if consumer is null
      */
     @Beta
@@ -2984,12 +3006,12 @@ public final class Fn {
     }
 
     /**
-     * Returns a Function that applies a mapper and returns an empty list if the input is null.
+     * Returns a Function that applies a mapper and returns an empty list if the input is {@code null}.
      *
      * @param <T> the type of the input
      * @param <R> the element type of the result collection
-     * @param mapper the function to apply to non-null inputs
-     * @return a Function that safely handles null inputs
+     * @param mapper the function to apply to {@code non-null} inputs
+     * @return a Function that safely handles {@code null} inputs
      */
     @Beta
     public static <T, R> Function<T, Collection<R>> applyIfNotNullOrEmpty(final java.util.function.Function<T, ? extends Collection<R>> mapper) {
@@ -2997,7 +3019,7 @@ public final class Fn {
     }
 
     /**
-     * Returns a Function that applies two mappers in sequence, returning a default value if any step produces null.
+     * Returns a Function that applies two mappers in sequence, returning a default value if any step produces {@code null}.
      *
      * @param <A> the type of the input
      * @param <B> the intermediate type
@@ -3029,7 +3051,7 @@ public final class Fn {
     }
 
     /**
-     * Returns a Function that applies three mappers in sequence, returning a default value if any step produces null.
+     * Returns a Function that applies three mappers in sequence, returning a default value if any step produces {@code null}.
      *
      * @param <A> the type of the input
      * @param <B> the first intermediate type
@@ -3071,7 +3093,7 @@ public final class Fn {
     }
 
     /**
-     * Returns a Function that applies four mappers in sequence, returning a default value if any step produces null.
+     * Returns a Function that applies four mappers in sequence, returning a default value if any step produces {@code null}.
      *
      * @param <A> the type of the input
      * @param <B> the first intermediate type
@@ -3122,7 +3144,7 @@ public final class Fn {
     }
 
     /**
-     * Returns a Function that applies two mappers in sequence, using a supplier for the default value if any step produces null.
+     * Returns a Function that applies two mappers in sequence, using a supplier for the default value if any step produces {@code null}.
      *
      * @param <A> the type of the input
      * @param <B> the intermediate type
@@ -3154,7 +3176,7 @@ public final class Fn {
     }
 
     /**
-     * Returns a Function that applies three mappers in sequence, using a supplier for the default value if any step produces null.
+     * Returns a Function that applies three mappers in sequence, using a supplier for the default value if any step produces {@code null}.
      *
      * @param <A> the type of the input
      * @param <B> the first intermediate type
@@ -3196,7 +3218,7 @@ public final class Fn {
     }
 
     /**
-     * Returns a Function that applies four mappers in sequence, using a supplier for the default value if any step produces null.
+     * Returns a Function that applies four mappers in sequence, using a supplier for the default value if any step produces {@code null}.
      *
      * @param <A> the type of the input
      * @param <B> the first intermediate type
@@ -3303,9 +3325,8 @@ public final class Fn {
     /**
      * Returns a Function that flattens a Map with Collection values into a List of Maps.
      * Each output Map contains one key-value pair from the original Map.
-     * 
-     * @implSpec 
-     * {a=[1, 2, 3], b=[4, 5, 6], c=[7, 8]} -> [{a=1, b=4, c=7}, {a=2, b=5, c=8}, {a=3, b=6}].
+     *
+     * <p>Example: {@code {a=[1, 2, 3], b=[4, 5, 6], c=[7, 8]} -> [{a=1, b=4, c=7}, {a=2, b=5, c=8}, {a=3, b=6}]}.</p>
      *
      * @param <K> the key type
      * @param <V> the value type
@@ -3380,7 +3401,7 @@ public final class Fn {
 
     /**
      * Returns a Function that creates Number objects from Strings.
-     * Returns null for empty strings. The type of Number returned depends on the string format.
+     * Returns {@code null} for empty strings. The type of Number returned depends on the string format.
      *
      * @return a Function that creates Number objects
      * @see Numbers#createNumber(String)
@@ -3427,7 +3448,7 @@ public final class Fn {
 
     /**
      * Returns a stateful Predicate that limits the number of elements that pass through.
-     * The first 'count' elements return true, all subsequent elements return false.
+     * The first <i>count</i> elements return {@code true}, all subsequent elements return {@code false}.
      * Don't save or cache for reuse, but it can be used in parallel stream.
      *
      * @param <T> the type of the input to the predicate
@@ -3464,7 +3485,6 @@ public final class Fn {
     @SuppressWarnings({ "rawtypes" })
     private static final BinaryOperator<Comparable> MIN = (a, b) -> Comparators.NULL_LAST_COMPARATOR.compare(a, b) <= 0 ? a : b;
 
-    /** The Constant MIN_BY_KEY. */
     @SuppressWarnings("rawtypes")
     private static final BinaryOperator<Map.Entry<Comparable, Object>> MIN_BY_KEY = new BinaryOperator<>() {
         private final Comparator<Comparable> cmp = Comparators.NULL_LAST_COMPARATOR;
@@ -3475,7 +3495,6 @@ public final class Fn {
         }
     };
 
-    /** The Constant MIN_BY_VALUE. */
     @SuppressWarnings("rawtypes")
     private static final BinaryOperator<Map.Entry<Object, Comparable>> MIN_BY_VALUE = new BinaryOperator<>() {
         private final Comparator<Comparable> cmp = Comparators.NULL_LAST_COMPARATOR;
@@ -3490,7 +3509,6 @@ public final class Fn {
     @SuppressWarnings("rawtypes")
     private static final BinaryOperator<Comparable> MAX = (a, b) -> Comparators.NULL_FIRST_COMPARATOR.compare(a, b) >= 0 ? a : b;
 
-    /** The Constant MAX_BY_KEY. */
     @SuppressWarnings("rawtypes")
     private static final BinaryOperator<Map.Entry<Comparable, Object>> MAX_BY_KEY = new BinaryOperator<>() {
         private final Comparator<Comparable> cmp = Comparators.NULL_FIRST_COMPARATOR;
@@ -3501,7 +3519,6 @@ public final class Fn {
         }
     };
 
-    /** The Constant MAX_BY_VALUE. */
     @SuppressWarnings("rawtypes")
     private static final BinaryOperator<Map.Entry<Object, Comparable>> MAX_BY_VALUE = new BinaryOperator<>() {
         private final Comparator<Comparable> cmp = Comparators.NULL_FIRST_COMPARATOR;
@@ -3564,7 +3581,7 @@ public final class Fn {
      * @param <T> the type of the input to the predicate
      * @param limit the maximum number of elements to test (must be non-negative)
      * @param predicate the predicate to apply to elements within the limit (must not be null)
-     * @return a stateful {@code Predicate} that tests at most 'limit' elements using the provided predicate
+     * @return a stateful {@code Predicate} that tests at most <i>limit</i> elements using the provided predicate
      * @throws IllegalArgumentException if limit is negative or predicate is null
      * @see #filterThenLimit(java.util.function.Predicate, int)
      */
@@ -3618,13 +3635,13 @@ public final class Fn {
      * Returns a stateful {@code Predicate}. Don't save or cache for reuse, but it can be used in parallel stream.
      * 
      * <p>The predicate first tests elements with the given predicate, and only allows a limited number
-     * of elements that pass the predicate to return true.
+     * of elements that pass the predicate to return {@code true}.
      *
      * @param <T> the type of the input to the predicate
      * @param predicate the predicate to test elements before applying the limit
      * @param limit the maximum number of elements that pass the predicate to allow through
      * @return a stateful {@code Predicate}. Don't save or cache for reuse, but it can be used in parallel stream.
-     * @throws IllegalArgumentException if predicate is null or limit is negative
+     * @throws IllegalArgumentException if predicate is {@code null} or limit is negative
      */
     @Beta
     @Stateful
@@ -3646,14 +3663,14 @@ public final class Fn {
      * Returns a stateful {@code BiPredicate}. Don't save or cache for reuse, but it can be used in parallel stream.
      * 
      * <p>The bi-predicate first tests element pairs with the given bi-predicate, and only allows a limited number
-     * of pairs that pass the bi-predicate to return true.
+     * of pairs that pass the bi-predicate to return {@code true}.
      *
      * @param <T> the type of the first input to the bi-predicate
      * @param <U> the type of the second input to the bi-predicate
      * @param predicate the bi-predicate to test element pairs before applying the limit
      * @param limit the maximum number of element pairs that pass the bi-predicate to allow through
      * @return a stateful {@code BiPredicate}. Don't save or cache for reuse, but it can be used in parallel stream.
-     * @throws IllegalArgumentException if predicate is null or limit is negative
+     * @throws IllegalArgumentException if predicate is {@code null} or limit is negative
      */
     @Beta
     @Stateful
@@ -3794,7 +3811,7 @@ public final class Fn {
     /**
      * Returns a BinaryOperator that finds the minimum of two Comparable values.
      * 
-     * <p>Null values are considered greater than non-null values.
+     * <p>Null values are considered greater than {@code non-null} values.
      *
      * @param <T> the type of the Comparable operands and result
      * @return a BinaryOperator that returns the minimum value
@@ -3821,7 +3838,7 @@ public final class Fn {
     /**
      * Returns a BinaryOperator that finds the minimum of two values by comparing a key extracted from each.
      * 
-     * <p>The key must be Comparable. Null keys are considered greater than non-null keys.
+     * <p>The key must be Comparable. Null keys are considered greater than {@code non-null} keys.
      *
      * @param <T> the type of the operands and result
      * @param keyExtractor the function to extract the Comparable key
@@ -3839,7 +3856,7 @@ public final class Fn {
     /**
      * Returns a BinaryOperator for Map.Entry that finds the entry with the minimum key.
      * 
-     * <p>Keys must be Comparable. Null keys are considered greater than non-null keys.
+     * <p>Keys must be Comparable. Null keys are considered greater than {@code non-null} keys.
      *
      * @param <K> the type of the Comparable keys
      * @param <V> the type of the values
@@ -3853,7 +3870,7 @@ public final class Fn {
     /**
      * Returns a BinaryOperator for Map.Entry that finds the entry with the minimum value.
      * 
-     * <p>Values must be Comparable. Null values are considered greater than non-null values.
+     * <p>Values must be Comparable. Null values are considered greater than {@code non-null} values.
      *
      * @param <K> the type of the keys
      * @param <V> the type of the Comparable values
@@ -3867,7 +3884,7 @@ public final class Fn {
     /**
      * Returns a BinaryOperator that finds the maximum of two Comparable values.
      * 
-     * <p>Null values are considered less than non-null values.
+     * <p>Null values are considered less than {@code non-null} values.
      *
      * @param <T> the type of the Comparable operands and result
      * @return a BinaryOperator that returns the maximum value
@@ -3894,7 +3911,7 @@ public final class Fn {
     /**
      * Returns a BinaryOperator that finds the maximum of two values by comparing a key extracted from each.
      * 
-     * <p>The key must be Comparable. Null keys are considered less than non-null keys.
+     * <p>The key must be Comparable. Null keys are considered less than {@code non-null} keys.
      *
      * @param <T> the type of the operands and result
      * @param keyExtractor the function to extract the Comparable key
@@ -3912,7 +3929,7 @@ public final class Fn {
     /**
      * Returns a BinaryOperator for Map.Entry that finds the entry with the maximum key.
      * 
-     * <p>Keys must be Comparable. Null keys are considered less than non-null keys.
+     * <p>Keys must be Comparable. Null keys are considered less than {@code non-null} keys.
      *
      * @param <K> the type of the Comparable keys
      * @param <V> the type of the values
@@ -3926,7 +3943,7 @@ public final class Fn {
     /**
      * Returns a BinaryOperator for Map.Entry that finds the entry with the maximum value.
      * 
-     * <p>Values must be Comparable. Null values are considered less than non-null values.
+     * <p>Values must be Comparable. Null values are considered less than {@code non-null} values.
      *
      * @param <K> the type of the keys
      * @param <V> the type of the Comparable values
@@ -4207,9 +4224,9 @@ public final class Fn {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Instead of explicitly typing:
-     * Supplier&lt;String&gt; supplier = () -&gt; "value";
+     * Supplier<String> supplier = () -> "value";
      * // You can use:
-     * var supplier = Fn.s(() -&gt; "value");
+     * var supplier = Fn.s(() -> "value");
      * }</pre>
      *
      * @param <T> the type of results supplied by the supplier
@@ -4261,7 +4278,7 @@ public final class Fn {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Instead of explicitly typing:
-     * Predicate&lt;String&gt; predicate = s -> s.length() > 5;
+     * Predicate<String> predicate = s -> s.length() > 5;
      * // You can use:
      * var predicate = Fn.p(s -> s.length() > 5);
      * }</pre>
@@ -4287,7 +4304,7 @@ public final class Fn {
      * <pre>{@code
      * // Create a predicate that checks if a string contains a specific substring
      * String searchText = "error";
-     * Predicate&lt;String&gt; containsError = Fn.p(searchText, String::contains);
+     * Predicate<String> containsError = Fn.p(searchText, String::contains);
      * 
      * boolean result = containsError.test("runtime error occurred"); // Returns true
      * boolean result2 = containsError.test("success"); // Returns false
@@ -4319,7 +4336,7 @@ public final class Fn {
      * <pre>{@code
      * // Create a predicate that checks if a substring appears between two indices
      * String text = "error message";
-     * Predicate&lt;Integer&gt; containsErrorBetween = 
+     * Predicate<Integer> containsErrorBetween = 
      *     Fn.p(text, 0, (str, start, end) -> str.substring(start, end).contains("error"));
      *
      * boolean result = containsErrorBetween.test(5);  // Returns true
@@ -4352,7 +4369,7 @@ public final class Fn {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Instead of explicitly typing:
-     * BiPredicate&lt;String, Integer&gt; biPredicate = (str, len) -> str.length() > len;
+     * BiPredicate<String, Integer> biPredicate = (str, len) -> str.length() > len;
      * // You can use:
      * var biPredicate = Fn.p((String str, Integer len) -> str.length() > len);
      * }</pre>
@@ -4380,7 +4397,7 @@ public final class Fn {
      * <pre>{@code
      * // Create a bi-predicate that checks if a substring appears between two indices
      * String text = "error message";
-     * BiPredicate&lt;Integer, Integer&gt; containsErrorBetween = 
+     * BiPredicate<Integer, Integer> containsErrorBetween = 
      *     Fn.p(text, (str, start, end) -> str.substring(start, end).contains("error"));
      *
      * boolean result = containsErrorBetween.test(0, 5);  // Returns true
@@ -4414,7 +4431,7 @@ public final class Fn {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Instead of explicitly typing:
-     * TriPredicate&lt;String, Integer, Boolean&gt; triPredicate = 
+     * TriPredicate<String, Integer, Boolean> triPredicate = 
      *     (str, len, flag) -> flag && str.length() > len;
      * // You can use:
      * var triPredicate = Fn.p((String str, Integer len, Boolean flag) -> 
@@ -4445,7 +4462,7 @@ public final class Fn {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Instead of explicitly typing:
-     * Consumer&lt;String&gt; logger = str -> System.out.println("Log: " + str);
+     * Consumer<String> logger = str -> System.out.println("Log: " + str);
      * // You can use:
      * var logger = Fn.c((String str) -> System.out.println("Log: " + str));
      * }</pre>
@@ -4471,8 +4488,8 @@ public final class Fn {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Create a consumer that adds elements to a specific list
-     * List&lt;String&gt; myList = new ArrayList&lt;&gt;();
-     * Consumer&lt;String&gt; addToMyList = Fn.c(myList, (list, item) -> list.add(item));
+     * List<String> myList = new ArrayList<>();
+     * Consumer<String> addToMyList = Fn.c(myList, (list, item) -> list.add(item));
      *
      * addToMyList.accept("first");  // Adds "first" to myList
      * addToMyList.accept("second"); // Adds "second" to myList
@@ -4506,7 +4523,7 @@ public final class Fn {
      * // Create a consumer that logs messages with a specific prefix and suffix
      * String prefix = "Log: ";
      * String suffix = " [end]";
-     * Consumer&lt;String&gt; logWithPrefixAndSuffix = Fn.c(prefix, suffix, (p, s, msg) -> 
+     * Consumer<String> logWithPrefixAndSuffix = Fn.c(prefix, suffix, (p, s, msg) -> 
      *     System.out.println(p + msg + s));
      *
      * logWithPrefixAndSuffix.accept("Hello"); // Prints: Log: Hello [end]
@@ -6311,10 +6328,10 @@ public final class Fn {
     }
 
     /**
-     * Returns a Function that extracts the value from an Optional, returning null if the Optional is empty.
+     * Returns a Function that extracts the value from an Optional, returning {@code null} if the Optional is empty.
      * 
      * <p>This function is useful for converting streams of Optionals to their contained values,
-     * with empty Optionals becoming null values.</p>
+     * with empty Optionals becoming {@code null} values.</p>
      *
      * @param <T> the type of the value in the Optional
      * @return a Function that extracts the Optional's value or returns null
@@ -6330,10 +6347,10 @@ public final class Fn {
     static final Function<java.util.Optional, Object> GET_AS_IT_JDK = it -> it.orElse(null);
 
     /**
-     * Returns a Function that extracts the value from a Java Optional, returning null if the Optional is empty.
+     * Returns a Function that extracts the value from a Java Optional, returning {@code null} if the Optional is empty.
      * 
      * <p>This function is useful for converting streams of Java Optionals to their contained values,
-     * with empty Optionals becoming null values. This is the JDK Optional version of getIfPresentOrElseNull.</p>
+     * with empty Optionals becoming {@code null} values. This is the JDK Optional version of getIfPresentOrElseNull.</p>
      *
      * @param <T> the type of the value in the Optional
      * @return a Function that extracts the Java Optional's value or returns null
@@ -6408,6 +6425,12 @@ public final class Fn {
         };
     }
 
+    /**
+     * Utility class providing commonly used {@code LongSupplier} instances.
+     *
+     * <p>This class contains factory methods and constants for creating and accessing
+     * standard long suppliers, such as suppliers for current time.</p>
+     */
     public static final class LongSuppliers {
         private LongSuppliers() {
             // utility class
@@ -7330,7 +7353,6 @@ public final class Fn {
             return t;
         };
 
-        /** The Constant ADD_ALL_TO_BIGGER. */
         private static final BinaryOperator<Collection<Object>> ADD_ALL_TO_BIGGER = (t, u) -> {
             if (t.size() >= u.size()) {
                 t.addAll(u);
@@ -7353,7 +7375,6 @@ public final class Fn {
             return t;
         };
 
-        /** The Constant PUT_ALL_TO_BIGGER. */
         private static final BinaryOperator<Map<Object, Object>> PUT_ALL_TO_BIGGER = (t, u) -> {
             if (t.size() >= u.size()) {
                 t.putAll(u);
@@ -7367,7 +7388,6 @@ public final class Fn {
         /** The Constant MERGE_TO_FIRST. */
         private static final BinaryOperator<Joiner> MERGE_TO_FIRST = Joiner::merge;
 
-        /** The Constant MERGE_TO_BIGGER. */
         private static final BinaryOperator<Joiner> MERGE_TO_BIGGER = (t, u) -> {
             if (t.length() >= u.length()) {
                 return t.merge(u);
@@ -7379,7 +7399,6 @@ public final class Fn {
         /** The Constant APPEND_TO_FIRST. */
         private static final BinaryOperator<StringBuilder> APPEND_TO_FIRST = StringBuilder::append;
 
-        /** The Constant APPEND_TO_BIGGER. */
         private static final BinaryOperator<StringBuilder> APPEND_TO_BIGGER = (t, u) -> {
             if (t.length() >= u.length()) {
                 return t.append(u);
@@ -7885,7 +7904,7 @@ public final class Fn {
          * The list will contain the left element followed by the right element.
          *
          * @param <T> the type of elements in the Pair
-         * @return a Function that converts a Pair<T,T> to a List<T>
+         * @return a Function that converts a Pair&lt;T,T&gt; to a List&lt;T&gt;
          */
         @SuppressWarnings("rawtypes")
         public static <T> Function<Pair<T, T>, List<T>> toList() {
@@ -7897,7 +7916,7 @@ public final class Fn {
          * If both elements are equal, the set will contain only one element.
          *
          * @param <T> the type of elements in the Pair
-         * @return a Function that converts a Pair<T,T> to a Set<T>
+         * @return a Function that converts a Pair&lt;T,T&gt; to a Set&lt;T&gt;
          */
         @SuppressWarnings("rawtypes")
         public static <T> Function<Pair<T, T>, Set<T>> toSet() {
@@ -7928,7 +7947,7 @@ public final class Fn {
          * The list will contain the left element, middle element, and right element in that order.
          *
          * @param <T> the type of elements in the Triple
-         * @return a Function that converts a Triple<T,T,T> to a List<T>
+         * @return a Function that converts a Triple&lt;T,T,T&gt; to a List&lt;T&gt;
          */
         @SuppressWarnings("rawtypes")
         public static <T> Function<Triple<T, T, T>, List<T>> toList() {
@@ -7940,7 +7959,7 @@ public final class Fn {
          * Duplicate elements will appear only once in the resulting set.
          *
          * @param <T> the type of elements in the Triple
-         * @return a Function that converts a Triple<T,T,T> to a Set<T>
+         * @return a Function that converts a Triple&lt;T,T,T&gt; to a Set&lt;T&gt;
          */
         @SuppressWarnings("rawtypes")
         public static <T> Function<Triple<T, T, T>, Set<T>> toSet() {
@@ -8043,7 +8062,7 @@ public final class Fn {
         /**
          * Returns a CharPredicate that tests if a character is zero.
          *
-         * @return a CharPredicate that returns {@code true} if the character is '\0'
+         * @return a CharPredicate that returns {@code true} if the character is <i>\0</i>
          */
         public static CharPredicate isZero() {
             return IS_ZERO;
@@ -8169,7 +8188,7 @@ public final class Fn {
 
         /**
          * Returns a Function that calculates the length of a char array.
-         * Returns 0 for null arrays.
+         * Returns 0 for {@code null} arrays.
          *
          * @return a Function that returns the length of a char array or 0 if null
          */
@@ -8382,7 +8401,7 @@ public final class Fn {
 
         /**
          * Returns a Function that calculates the length of a byte array.
-         * Returns 0 for null arrays.
+         * Returns 0 for {@code null} arrays.
          *
          * @return a Function that returns the length of a byte array or 0 if null
          */
@@ -8408,7 +8427,7 @@ public final class Fn {
 
         /**
          * Returns a Function that calculates the average of all elements in a byte array.
-         * Returns Double.NaN for empty or null arrays.
+         * Returns Double.NaN for empty or {@code null} arrays.
          *
          * @return a Function that returns the average of byte array elements
          */
@@ -8621,7 +8640,7 @@ public final class Fn {
 
         /**
          * Returns a Function that calculates the length of a short array.
-         * Returns 0 for null arrays.
+         * Returns 0 for {@code null} arrays.
          *
          * @return a Function that returns the length of a short array or 0 if null
          */
@@ -8647,7 +8666,7 @@ public final class Fn {
 
         /**
          * Returns a Function that calculates the average of all elements in a short array.
-         * Returns Double.NaN for empty or null arrays.
+         * Returns Double.NaN for empty or {@code null} arrays.
          *
          * @return a Function that returns the average of short array elements
          */
@@ -8860,7 +8879,7 @@ public final class Fn {
 
         /**
          * Returns a Function that calculates the length of an int array.
-         * Returns 0 for null arrays.
+         * Returns 0 for {@code null} arrays.
          *
          * @return a Function that returns the length of an int array or 0 if null
          */
@@ -8885,7 +8904,7 @@ public final class Fn {
 
         /**
          * Returns a Function that calculates the average of all elements in an int array.
-         * Returns Double.NaN for empty or null arrays.
+         * Returns Double.NaN for empty or {@code null} arrays.
          *
          * @return a Function that returns the average of int array elements
          */
@@ -9098,7 +9117,7 @@ public final class Fn {
 
         /**
          * Returns a Function that calculates the length of a long array.
-         * Returns 0 for null arrays.
+         * Returns 0 for {@code null} arrays.
          *
          * @return a Function that returns the length of a long array or 0 if null
          */
@@ -9123,7 +9142,7 @@ public final class Fn {
 
         /**
          * Returns a Function that calculates the average of all elements in a long array.
-         * Returns Double.NaN for empty or null arrays.
+         * Returns Double.NaN for empty or {@code null} arrays.
          *
          * @return a Function that returns the average of long array elements
          */
@@ -9342,7 +9361,7 @@ public final class Fn {
 
         /**
          * Returns a Function that calculates the length of a float array.
-         * Returns 0 for null arrays.
+         * Returns 0 for {@code null} arrays.
          *
          * @return a Function that returns the length of a float array or 0 if null
          */
@@ -9367,7 +9386,7 @@ public final class Fn {
 
         /**
          * Returns a Function that calculates the average of all elements in a float array.
-         * Returns Double.NaN for empty or null arrays.
+         * Returns Double.NaN for empty or {@code null} arrays.
          *
          * @return a Function that returns the average of float array elements as a Double
          */
@@ -9586,7 +9605,7 @@ public final class Fn {
 
         /**
          * Returns a Function that calculates the length of a double array.
-         * Returns 0 for null arrays.
+         * Returns 0 for {@code null} arrays.
          *
          * @return a Function that returns the length of a double array or 0 if null
          */
@@ -9611,7 +9630,7 @@ public final class Fn {
 
         /**
          * Returns a Function that calculates the average of all elements in a double array.
-         * Returns Double.NaN for empty or null arrays.
+         * Returns Double.NaN for empty or {@code null} arrays.
          *
          * @return a Function that returns the average of double array elements
          */

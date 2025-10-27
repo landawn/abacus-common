@@ -59,8 +59,14 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
 
     static final Random RAND = new SecureRandom();
 
+    /**
+     * The array buffer into which the elements of the ByteList are stored.
+     */
     private byte[] elementData = N.EMPTY_BYTE_ARRAY;
 
+    /**
+     * The size of the ByteList (the number of elements it contains).
+     */
     private int size = 0;
 
     /**
@@ -93,7 +99,7 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      * Changes to the array will be reflected in the list and vice versa.
      * The size of the list will be set to the length of the array.
      *
-     * @param a the array to be used as the backing array for this list. Must not be null.
+     * @param a the array to be used as the backing array for this list. Must not be {@code null}.
      */
     public ByteList(final byte[] a) {
         this(N.requireNonNull(a), a.length);
@@ -105,7 +111,7 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      * that uses only a portion of the provided array. The size parameter must not exceed
      * the length of the array.
      *
-     * @param a the array to be used as the backing array for this list. Must not be null.
+     * @param a the array to be used as the backing array for this list. Must not be {@code null}.
      * @param size the number of elements from the array to be included in the list.
      *             Must be between 0 and a.length (inclusive).
      * @throws IndexOutOfBoundsException if size is negative or greater than a.length
@@ -383,7 +389,7 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      * The elements are appended in the order they appear in the specified list.
      * If the specified list is empty, this list remains unchanged.
      *
-     * @param c the ByteList containing elements to be added to this list. Can be null.
+     * @param c the ByteList containing elements to be added to this list. Can be {@code null}.
      * @return {@code true} if this list changed as a result of the call (i.e., if any elements were added)
      */
     @Override
@@ -411,9 +417,9 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      *
      * @param index the index at which to insert the first element from the specified list.
      *              Must be between 0 and size() inclusive.
-     * @param c the ByteList containing elements to be inserted into this list. Can be null.
+     * @param c the ByteList containing elements to be inserted into this list. Can be {@code null}.
      * @return {@code true} if this list changed as a result of the call (i.e., if any elements were added)
-     * @throws IndexOutOfBoundsException if the index is out of range (index < 0 || index > size())
+     * @throws IndexOutOfBoundsException if the index is out of range (index &lt; 0 || index &gt; size())
      */
     @Override
     public boolean addAll(final int index, final ByteList c) {
@@ -443,9 +449,9 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     /**
      * Appends all elements from the specified array to the end of this list.
      * The elements are appended in the order they appear in the array.
-     * If the array is null or empty, this list remains unchanged.
+     * If the array is {@code null} or empty, this list remains unchanged.
      *
-     * @param a the array containing elements to be added to this list. Can be null.
+     * @param a the array containing elements to be added to this list. Can be {@code null}.
      * @return {@code true} if this list changed as a result of the call (i.e., if any elements were added)
      */
     @Override
@@ -461,9 +467,9 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      *
      * @param index the index at which to insert the first element from the array.
      *              Must be between 0 and size() inclusive.
-     * @param a the array containing elements to be inserted into this list. Can be null.
+     * @param a the array containing elements to be inserted into this list. Can be {@code null}.
      * @return {@code true} if this list changed as a result of the call (i.e., if any elements were added)
-     * @throws IndexOutOfBoundsException if the index is out of range (index < 0 || index > size())
+     * @throws IndexOutOfBoundsException if the index is out of range (index &lt; 0 || index &gt; size())
      */
     @Override
     public boolean addAll(final int index, final byte[] a) {
@@ -495,7 +501,7 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      * For add operations, the valid range includes size() to allow appending at the end.
      *
      * @param index the index to check
-     * @throws IndexOutOfBoundsException if index > size || index < 0
+     * @throws IndexOutOfBoundsException if index &gt; size || index &lt; 0
      */
     private void rangeCheckForAdd(final int index) {
         if (index > size || index < 0) {
@@ -577,7 +583,7 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      * After this call returns, this list will contain no elements in common with the specified list.
      * The order of the remaining elements is preserved.
      *
-     * @param c the ByteList containing elements to be removed from this list. Can be null.
+     * @param c the ByteList containing elements to be removed from this list. Can be {@code null}.
      * @return {@code true} if this list changed as a result of the call
      */
     @Override
@@ -594,7 +600,7 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      * After this call returns, this list will contain no elements present in the specified array.
      * The order of the remaining elements is preserved.
      *
-     * @param a the array containing elements to be removed from this list. Can be null.
+     * @param a the array containing elements to be removed from this list. Can be {@code null}.
      * @return {@code true} if this list changed as a result of the call
      */
     @Override
@@ -621,7 +627,7 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      * // list now contains: [1, 3, 5]
      * }</pre>
      *
-     * @param p the predicate which returns {@code true} for elements to be removed. Must not be null.
+     * @param p the predicate which returns {@code true} for elements to be removed. Must not be {@code null}.
      * @return {@code true} if any elements were removed; {@code false} if the list was unchanged
      *
      */
@@ -694,7 +700,7 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      * In other words, removes from this list all elements that are not contained in the specified list.
      * The order of the retained elements is preserved.
      *
-     * @param c the ByteList containing elements to be retained in this list. Can be null.
+     * @param c the ByteList containing elements to be retained in this list. Can be {@code null}.
      * @return {@code true} if this list changed as a result of the call
      */
     @Override
@@ -713,7 +719,7 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      * In other words, removes from this list all elements that are not contained in the specified array.
      * The order of the retained elements is preserved.
      *
-     * @param a the array containing elements to be retained in this list. Can be null.
+     * @param a the array containing elements to be retained in this list. Can be {@code null}.
      * @return {@code true} if this list changed as a result of the call
      */
     @Override
@@ -732,7 +738,7 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      * Removes or retains elements based on whether they are contained in the specified list.
      *
      * @param c the list to check against
-     * @param complement if true, retains elements in c; if false, removes elements in c
+     * @param complement if {@code true}, retains elements in c; if {@code false}, removes elements in c
      * @return the number of elements removed
      */
     private int batchRemove(final ByteList c, final boolean complement) {
@@ -773,7 +779,7 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      *
      * @param index the index of the element to be removed. Must be between 0 and size()-1.
      * @return the element that was removed from the list
-     * @throws IndexOutOfBoundsException if the index is out of range (index < 0 || index >= size())
+     * @throws IndexOutOfBoundsException if the index is out of range (index &lt; 0 || index &gt;= size())
      */
     public byte delete(final int index) {
         rangeCheck(index);
@@ -800,8 +806,8 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      * // list now contains: [10, 30, 50]
      * }</pre>
      *
-     * @param indices the indices of elements to remove. Can be null or empty.
-     *                Invalid indices (negative or >= size) are ignored.
+     * @param indices the indices of elements to remove. Can be {@code null} or empty.
+     *                Invalid indices (negative or &gt;= size) are ignored.
      *
      */
     @Override
@@ -829,7 +835,7 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      * @param fromIndex the index of the first element to be removed (inclusive)
      * @param toIndex the index after the last element to be removed (exclusive)
      * @throws IndexOutOfBoundsException if fromIndex or toIndex is out of bounds,
-     *         or if fromIndex > toIndex
+     *         or if fromIndex &gt; toIndex
      */
     @Override
     public void deleteRange(final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
@@ -893,10 +899,10 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      *
      * @param fromIndex the index of the first element to be replaced (inclusive)
      * @param toIndex the index after the last element to be replaced (exclusive)
-     * @param replacement the ByteList containing elements to insert. Can be null or empty,
+     * @param replacement the ByteList containing elements to insert. Can be {@code null} or empty,
      *                    in which case the range is simply removed.
      * @throws IndexOutOfBoundsException if fromIndex or toIndex is out of bounds,
-     *         or if fromIndex > toIndex
+     *         or if fromIndex &gt; toIndex
      */
     @Override
     public void replaceRange(final int fromIndex, final int toIndex, final ByteList replacement) throws IndexOutOfBoundsException {
@@ -935,10 +941,10 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      *
      * @param fromIndex the index of the first element to be replaced (inclusive)
      * @param toIndex the index after the last element to be replaced (exclusive)
-     * @param replacement the array containing elements to insert. Can be null or empty,
+     * @param replacement the array containing elements to insert. Can be {@code null} or empty,
      *                    in which case the range is simply removed.
      * @throws IndexOutOfBoundsException if fromIndex or toIndex is out of bounds,
-     *         or if fromIndex > toIndex
+     *         or if fromIndex &gt; toIndex
      */
     @Override
     public void replaceRange(final int fromIndex, final int toIndex, final byte[] replacement) throws IndexOutOfBoundsException {
@@ -1009,7 +1015,7 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      * // list now contains: [2, 4, 6]
      * }</pre>
      *
-     * @param operator the operator to apply to each element. Must not be null.
+     * @param operator the operator to apply to each element. Must not be {@code null}.
      *
      */
     public void replaceAll(final ByteUnaryOperator operator) {
@@ -1033,7 +1039,7 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      * // list now contains: [1, 0, 3, 0, 5]
      * }</pre>
      *
-     * @param predicate the predicate to test each element. Must not be null.
+     * @param predicate the predicate to test each element. Must not be {@code null}.
      * @param newValue the value to replace matching elements with
      * @return {@code true} if at least one element was replaced; {@code false} if no elements matched
      *
@@ -1070,7 +1076,7 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      * @param toIndex the index after the last element (exclusive) to be filled
      * @param val the value to fill the range with
      * @throws IndexOutOfBoundsException if fromIndex or toIndex is out of bounds,
-     *         or if fromIndex > toIndex
+     *         or if fromIndex &gt; toIndex
      */
     public void fill(final int fromIndex, final int toIndex, final byte val) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex);
@@ -1097,7 +1103,7 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      * This method returns {@code true} if there is at least one element that appears
      * in both lists.
      *
-     * @param c the ByteList to check for common elements. Can be null.
+     * @param c the ByteList to check for common elements. Can be {@code null}.
      * @return {@code true} if this list contains any element from the specified list,
      *         {@code false} if either list is empty or null
      */
@@ -1115,7 +1121,7 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      * This method returns {@code true} if there is at least one element that appears
      * in both this list and the array.
      *
-     * @param a the array to check for common elements. Can be null.
+     * @param a the array to check for common elements. Can be {@code null}.
      * @return {@code true} if this list contains any element from the specified array,
      *         {@code false} if either this list or the array is empty or null
      */
@@ -1133,9 +1139,9 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      * This method returns {@code true} if every element in the specified list
      * is also present in this list. Duplicate elements are considered independently.
      *
-     * @param c the ByteList to check for containment. Can be null.
+     * @param c the ByteList to check for containment. Can be {@code null}.
      * @return {@code true} if this list contains all elements from the specified list,
-     *         {@code true} if the specified list is null or empty,
+     *         {@code true} if the specified list is {@code null} or empty,
      *         {@code false} otherwise
      */
     @Override
@@ -1170,9 +1176,9 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      * This method returns {@code true} if every element in the specified array
      * is also present in this list. Duplicate elements are considered independently.
      *
-     * @param a the array to check for containment. Can be null.
+     * @param a the array to check for containment. Can be {@code null}.
      * @return {@code true} if this list contains all elements from the specified array,
-     *         {@code true} if the specified array is null or empty,
+     *         {@code true} if the specified array is {@code null} or empty,
      *         {@code false} otherwise
      */
     @Override
@@ -1190,9 +1196,9 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      * Returns {@code true} if this list and the specified ByteList have no elements in common.
      * Two lists are disjoint if they share no common elements.
      *
-     * @param c the ByteList to check for common elements. Can be null.
+     * @param c the ByteList to check for common elements. Can be {@code null}.
      * @return {@code true} if the two lists have no elements in common,
-     *         {@code true} if either list is null or empty,
+     *         {@code true} if either list is {@code null} or empty,
      *         {@code false} otherwise
      */
     @Override
@@ -1224,9 +1230,9 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      * Returns {@code true} if this list and the specified array have no elements in common.
      * This list and the array are disjoint if they share no common elements.
      *
-     * @param b the array to check for common elements. Can be null.
+     * @param b the array to check for common elements. Can be {@code null}.
      * @return {@code true} if this list and the array have no elements in common,
-     *         {@code true} if either this list or the array is null or empty,
+     *         {@code true} if either this list or the array is {@code null} or empty,
      *         {@code false} otherwise
      */
     @Override
@@ -1251,9 +1257,9 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      * ByteList result = list1.intersection(list2); // result: [(byte)1, (byte)2]
      * }</pre>
      *
-     * @param b the list to intersect with this list. Can be null.
+     * @param b the list to intersect with this list. Can be {@code null}.
      * @return a new ByteList containing the intersection of the two lists.
-     *         Returns an empty list if either list is null or empty.
+     *         Returns an empty list if either list is {@code null} or empty.
      * @see #difference(ByteList)
      * @see #symmetricDifference(ByteList)
      */
@@ -1289,9 +1295,9 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      * ByteList result = list.intersection(array); // result: [(byte)1, (byte)2]
      * }</pre>
      *
-     * @param b the array to intersect with this list. Can be null.
+     * @param b the array to intersect with this list. Can be {@code null}.
      * @return a new ByteList containing the intersection of this list and the array.
-     *         Returns an empty list if the array is null or empty.
+     *         Returns an empty list if the array is {@code null} or empty.
      * @see #difference(byte[])
      * @see #symmetricDifference(byte[])
      */
@@ -1317,9 +1323,9 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      * ByteList result = list1.difference(list2); // result: [(byte)1, (byte)2, (byte)3]
      * }</pre>
      *
-     * @param b the list containing elements to be excluded. Can be null.
+     * @param b the list containing elements to be excluded. Can be {@code null}.
      * @return a new ByteList containing elements in this list but not in the specified list.
-     *         Returns a copy of this list if the specified list is null or empty.
+     *         Returns a copy of this list if the specified list is {@code null} or empty.
      * @see #intersection(ByteList)
      * @see #symmetricDifference(ByteList)
      */
@@ -1355,9 +1361,9 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      * ByteList result = list.difference(array); // result: [(byte)1, (byte)2, (byte)3]
      * }</pre>
      *
-     * @param b the array containing elements to be excluded. Can be null.
+     * @param b the array containing elements to be excluded. Can be {@code null}.
      * @return a new ByteList containing elements in this list but not in the specified array.
-     *         Returns a copy of this list if the array is null or empty.
+     *         Returns a copy of this list if the array is {@code null} or empty.
      * @see #intersection(byte[])
      * @see #symmetricDifference(byte[])
      */
@@ -1385,9 +1391,9 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      * // result: [(byte)1, (byte)1, (byte)3, (byte)4]
      * }</pre>
      *
-     * @param b the list to compare with this list. Can be null.
+     * @param b the list to compare with this list. Can be {@code null}.
      * @return a new ByteList containing elements that are in either list but not in both.
-     *         Returns a copy of this list if the specified list is null or empty.
+     *         Returns a copy of this list if the specified list is {@code null} or empty.
      * @see #difference(ByteList)
      * @see #intersection(ByteList)
      */
@@ -1436,9 +1442,9 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      * // result: [(byte)1, (byte)1, (byte)3, (byte)4]
      * }</pre>
      *
-     * @param b the array to compare with this list. Can be null.
+     * @param b the array to compare with this list. Can be {@code null}.
      * @return a new ByteList containing elements that are in either this list or the array but not in both.
-     *         Returns a copy of this list if the array is null or empty,
+     *         Returns a copy of this list if the array is {@code null} or empty,
      *         or a new list containing the array elements if this list is empty.
      * @see #difference(byte[])
      * @see #intersection(byte[])
@@ -1578,7 +1584,7 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      * @return an OptionalByte containing the minimum value in the range,
      *         or an empty OptionalByte if the range is empty
      * @throws IndexOutOfBoundsException if fromIndex or toIndex is out of bounds,
-     *         or if fromIndex > toIndex
+     *         or if fromIndex &gt; toIndex
      */
     public OptionalByte min(final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex);
@@ -1654,7 +1660,7 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      * <p>This method iterates through all elements from index 0 to size-1, applying the specified
      * ByteConsumer action to each element. The action is performed in the order of iteration.</p>
      * 
-     * <p>This is equivalent to:</>
+     * <p>This is equivalent to:&lt;/&gt;
      * <pre>{@code
      * for (int i = 0; i < size(); i++) {
      *     action.accept(get(i));
@@ -2130,7 +2136,7 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      * <ul>
      *   <li>Positive step: moves forward through the list</li>
      *   <li>Negative step: moves backward through the list</li>
-     *   <li>Step magnitude > 1: skips elements</li>
+     *   <li>Step magnitude &gt; 1: skips elements</li>
      * </ul>
      * 
      * <p>Special handling for reverse iteration: if {@code fromIndex > toIndex}, the indices are
@@ -2244,11 +2250,6 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
         return size == 0;
     }
 
-    /**
-     * Returns the number of elements in this list.
-     *
-     * @return the number of elements in this list
-     */
     @Override
     public int size() {
         return size;
@@ -2257,7 +2258,7 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     /**
      * Returns a List containing boxed Byte objects for all elements in this list.
      * 
-     * <p>This method creates a new ArrayList<Byte> and populates it with boxed versions of all
+     * <p>This method creates a new ArrayList&lt;Byte&gt; and populates it with boxed versions of all
      * primitive byte values in this list. The order of elements is preserved. This is useful when
      * you need to interface with APIs that require object types rather than primitives.</p>
      * 
@@ -2265,7 +2266,7 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      * be wrapped in a Byte object, which typically requires 16+ bytes of memory compared to 1 byte
      * for the primitive value.</p>
      *
-     * @return a new List<Byte> containing boxed versions of all elements
+     * @return a new List&lt;Byte&gt; containing boxed versions of all elements
      */
     @Override
     public List<Byte> boxed() {
@@ -2275,20 +2276,20 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     /**
      * Returns a List containing boxed Byte objects for elements in the specified range.
      * 
-     * <p>This method creates a new ArrayList<Byte> containing boxed versions of the primitive byte
+     * <p>This method creates a new ArrayList&lt;Byte&gt; containing boxed versions of the primitive byte
      * values from {@code fromIndex} (inclusive) to {@code toIndex} (exclusive). The relative order
      * of elements is preserved.</p>
      * 
      * <p>This is useful when you need to:</p>
      * <ul>
      *   <li>Pass a subset of values to APIs requiring object types</li>
-     *   <li>Create a mutable List<Byte> from a range of primitive values</li>
+     *   <li>Create a mutable List&lt;Byte&gt; from a range of primitive values</li>
      *   <li>Interface with collections frameworks that don't support primitives</li>
      * </ul>
      *
      * @param fromIndex the starting index (inclusive) of the range to box
      * @param toIndex the ending index (exclusive) of the range to box
-     * @return a new List<Byte> containing boxed versions of the specified range
+     * @return a new List&lt;Byte&gt; containing boxed versions of the specified range
      * @throws IndexOutOfBoundsException if {@code fromIndex < 0} or {@code toIndex > size()} or {@code fromIndex > toIndex}
      */
     @Override
@@ -2398,7 +2399,7 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      * 
      * <p>This method returns a specialized ByteIterator that efficiently iterates over the primitive
      * byte values without boxing. The iterator supports standard operations like hasNext() and nextByte(),
-     * providing better performance than a generic Iterator<Byte>.</p>
+     * providing better performance than a generic Iterator&lt;Byte&gt;.</p>
      * 
      * <p>The returned iterator:</p>
      * <ul>
@@ -2427,7 +2428,7 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      * Stream operations do not modify the original list.</p>
      * 
      * <p>ByteStream provides specialized primitive operations that avoid boxing overhead, making it
-     * more efficient than Stream<Byte> for primitive byte values.</p>
+     * more efficient than Stream&lt;Byte&gt; for primitive byte values.</p>
      * 
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -2596,7 +2597,7 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      * performed element by element in order.</p>
      * 
      * <p>This method provides a fast path for ByteList-to-ByteList comparison and properly handles
-     * all edge cases including null and self-comparison.</p>
+     * all edge cases including {@code null} and self-comparison.</p>
      *
      * @param obj the object to be compared for equality with this list
      * @return {@code true} if the specified object is equal to this list, {@code false} otherwise

@@ -239,7 +239,7 @@ public class AsyncExecutor {
      * <p>Each command is submitted to the executor independently and returns its own ContinuableFuture.
      * The commands execute concurrently based on thread availability in the executor's thread pool.</p>
      *
-     * <p>If the provided list is null or empty, returns an empty list.</p>
+     * <p>If the provided list is {@code null} or empty, returns an empty list.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -255,9 +255,9 @@ public class AsyncExecutor {
      * Futures.allOf(futures).get();
      * }</pre>
      *
-     * @param commands the list of Runnable commands to be executed asynchronously; may be null or empty
+     * @param commands the list of Runnable commands to be executed asynchronously; may be {@code null} or empty
      * @return a list of ContinuableFutures representing the pending completion of this action for each command;
-     *         returns an empty list if commands is null or empty
+     *         returns an empty list if commands is {@code null} or empty
      */
     public List<ContinuableFuture<Void>> execute(final List<? extends Throwables.Runnable<? extends Exception>> commands) {
         if (N.isEmpty(commands)) {
@@ -335,7 +335,7 @@ public class AsyncExecutor {
      * <p>Each command is submitted to the executor independently and returns its own ContinuableFuture.
      * The commands execute concurrently based on thread availability in the executor's thread pool.</p>
      *
-     * <p>If the provided collection is null or empty, returns an empty list.</p>
+     * <p>If the provided collection is {@code null} or empty, returns an empty list.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -354,9 +354,9 @@ public class AsyncExecutor {
      * }</pre>
      *
      * @param <R> the type of the result returned by the Callables
-     * @param commands the collection of Callable commands to be executed asynchronously; may be null or empty
+     * @param commands the collection of Callable commands to be executed asynchronously; may be {@code null} or empty
      * @return a list of ContinuableFutures representing the pending result of this computation for each command;
-     *         returns an empty list if commands is null or empty
+     *         returns an empty list if commands is {@code null} or empty
      */
     public <R> List<ContinuableFuture<R>> execute(final Collection<? extends Callable<R>> commands) {
         if (N.isEmpty(commands)) {
@@ -376,7 +376,7 @@ public class AsyncExecutor {
      * Executes a Runnable command asynchronously with automatic retry on failure.
      *
      * <p>The command will be retried up to the specified number of times if it fails and the
-     * retry condition evaluates to true. A delay is introduced between retry attempts.</p>
+     * retry condition evaluates to {@code true}. A delay is introduced between retry attempts.</p>
      *
      * <p>The total number of execution attempts is retryTimes + 1 (initial attempt plus retries).</p>
      *
@@ -394,7 +394,7 @@ public class AsyncExecutor {
      * @param retryTimes the maximum number of retry attempts (0 means no retry, only initial attempt)
      * @param retryIntervalInMillis the interval in milliseconds to wait between retry attempts
      * @param retryCondition the predicate to determine whether to retry based on the caught exception;
-     *                       receives the exception and returns true to retry, false to fail immediately
+     *                       receives the exception and returns {@code true} to retry, {@code false} to fail immediately
      * @return a ContinuableFuture representing the pending completion of this action (including retries)
      */
     public ContinuableFuture<Void> execute(final Throwables.Runnable<? extends Exception> action, final int retryTimes, final long retryIntervalInMillis,
@@ -409,7 +409,7 @@ public class AsyncExecutor {
      * Executes a Callable command asynchronously with automatic retry on failure or unsatisfactory result.
      *
      * <p>The command will be retried up to the specified number of times if the retry condition
-     * evaluates to true. The retry condition can check both the result value and any exception thrown.
+     * evaluates to {@code true}. The retry condition can check both the result value and any exception thrown.
      * A delay is introduced between retry attempts.</p>
      *
      * <p>The total number of execution attempts is retryTimes + 1 (initial attempt plus retries).</p>
@@ -429,7 +429,7 @@ public class AsyncExecutor {
      * @param retryTimes the maximum number of retry attempts (0 means no retry, only initial attempt)
      * @param retryIntervalInMillis the interval in milliseconds to wait between retry attempts
      * @param retryCondition the bi-predicate to determine whether to retry based on the result and exception;
-     *                       receives (result, exception) where one may be null, returns true to retry, false to complete
+     *                       receives (result, exception) where one may be {@code null}, returns {@code true} to retry, {@code false} to complete
      * @return a ContinuableFuture representing the pending result of this computation (including retries)
      */
     public <R> ContinuableFuture<R> execute(final Callable<R> action, final int retryTimes, final long retryIntervalInMillis,

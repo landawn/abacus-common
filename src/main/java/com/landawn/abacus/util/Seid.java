@@ -229,7 +229,7 @@ public class Seid implements EntityId {
      *
      * @param nameValues a map of property names to their values
      * @return a new Seid instance
-     * @throws IllegalArgumentException if nameValues is null or empty
+     * @throws IllegalArgumentException if nameValues is {@code null} or empty
      */
     public static Seid create(final Map<String, Object> nameValues) {
         N.checkArgNotEmpty(nameValues, "nameValues");
@@ -282,7 +282,7 @@ public class Seid implements EntityId {
      * @param entity the entity object to extract values from
      * @param idPropNames the names of properties to use as ID
      * @return a new Seid containing the specified properties
-     * @throws IllegalArgumentException if idPropNames is null or empty
+     * @throws IllegalArgumentException if idPropNames is {@code null} or empty
      */
     public static Seid create(final Object entity, final Collection<String> idPropNames) {
         if (N.isEmpty(idPropNames)) {
@@ -329,7 +329,7 @@ public class Seid implements EntityId {
      *
      * @param <T> the expected type of the property value
      * @param propName the property name
-     * @return the property value, or null if not found
+     * @return the property value, or {@code null} if not found
      */
     @SuppressWarnings("unchecked")
     @Override
@@ -380,7 +380,7 @@ public class Seid implements EntityId {
 
     /**
      * Gets the value of the specified property, converting it to the target type if necessary.
-     * Returns the default value for the target type if the property value is null.
+     * Returns the default value for the target type if the property value is {@code null}.
      * 
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code

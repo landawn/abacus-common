@@ -112,8 +112,8 @@ import com.landawn.abacus.util.function.TriFunction;
 /**
  * Factory utility class for {@code Collector}.
  *
- * @see {@code java.util.stream.Collector}
- * @see {@code java.util.stream.Collectors}
+ * @see java.util.stream.Collector
+ * @see java.util.stream.Collectors
  */
 @SuppressWarnings({ "java:S1694" })
 public abstract sealed class Collectors permits Collectors.MoreCollectors { // NOSONAR
@@ -3221,7 +3221,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * 
      * <p>This collector finds the minimum element using the provided comparator.
      * The result is wrapped in an {@code Optional} which is empty if the stream is empty.
-     * The comparator is used for all comparisons, including handling of null values
+     * The comparator is used for all comparisons, including handling of {@code null} values
      * if present.</p>
      * 
      * <p><b>Usage Examples:</b></p>
@@ -3307,8 +3307,8 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * <p>This collector is useful when you need a default value instead of dealing
      * with an empty {@code Optional}. The elements must be {@code Comparable}.</p>
      * 
-     * <p>The returned collector handles null values by placing them last in the
-     * ordering (nulls are considered greater than non-null values).</p>
+     * <p>The returned collector handles {@code null} values by placing them last in the
+     * ordering (nulls are considered greater than {@code non-null} values).</p>
      * 
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -3371,8 +3371,8 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * <p>This collector is useful when the absence of elements should be treated as
      * an exceptional condition. The elements must be {@code Comparable}.</p>
      * 
-     * <p>The returned collector handles null values by placing them last in the
-     * ordering (nulls are considered greater than non-null values).</p>
+     * <p>The returned collector handles {@code null} values by placing them last in the
+     * ordering (nulls are considered greater than {@code non-null} values).</p>
      * 
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -3459,8 +3459,8 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * on a specific property. The key extractor function should return a
      * {@code Comparable} value.</p>
      * 
-     * <p>The returned collector handles null keys by placing them last in the
-     * ordering (null keys are considered greater than non-null keys).</p>
+     * <p>The returned collector handles {@code null} keys by placing them last in the
+     * ordering (null keys are considered greater than {@code non-null} keys).</p>
      * 
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -3565,8 +3565,8 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * <p>This collector is the counterpart to {@code min()} and finds the largest
      * element. The elements must be {@code Comparable}.</p>
      * 
-     * <p>The returned collector handles null values by placing them first in the
-     * ordering (nulls are considered less than non-null values).</p>
+     * <p>The returned collector handles {@code null} values by placing them first in the
+     * ordering (nulls are considered less than {@code non-null} values).</p>
      * 
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -6901,7 +6901,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * and values are the result of applying the provided mapping functions to the input elements.
      * 
      * <p>If the mapped keys contain duplicates, an {@code IllegalStateException} is thrown
-     * when the collection operation is performed. This collector does not accept null values.</p>
+     * when the collection operation is performed. This collector does not accept {@code null} values.</p>
      * 
      * <p>The Map is created by the provided supplier function. This allows you to specify
      * the exact type of Map to be created (e.g., {@code HashMap}, {@code TreeMap}, etc.).</p>
@@ -7122,7 +7122,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * 
      * <p>This method delegates to the standard Java {@code Collectors.toUnmodifiableMap} method.
      * If duplicate keys are encountered, an {@code IllegalStateException} is thrown.
-     * The returned map does not permit null keys or values.</p>
+     * The returned map does not permit {@code null} keys or values.</p>
      * 
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -7153,7 +7153,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * 
      * <p>This method delegates to the standard Java {@code Collectors.toUnmodifiableMap} method.
      * When duplicate keys are encountered, the provided merge function is used to combine values.
-     * The returned map does not permit null keys or values.</p>
+     * The returned map does not permit {@code null} keys or values.</p>
      * 
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -9700,7 +9700,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
          * @param merger a function to merge the results array from all downstream collectors
          * @return a {@code Collector} which combines the results of multiple downstream collectors
          *         using the merger function
-         * @throws IllegalArgumentException if downstreams is null or empty, or if merger is null
+         * @throws IllegalArgumentException if downstreams is {@code null} or empty, or if merger is null
          */
         public static <T, R> Collector<T, ?, R> combine(final Collection<? extends Collector<? super T, ?, ?>> downstreams,
                 final Function<Object[], R> merger) { //NOSONAR
@@ -9801,7 +9801,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
          * }</pre>
          *
          * @param <T> the type of input elements
-         * @param columnNames the names of columns for the resulting {@code Dataset}, or null for auto-generated names
+         * @param columnNames the names of columns for the resulting {@code Dataset}, or {@code null} for auto-generated names
          * @return a {@code Collector} which collects all input elements into a {@code Dataset}
          *         with the specified column names
          */

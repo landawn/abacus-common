@@ -14,6 +14,8 @@
 
 package com.landawn.abacus.util;
 
+import com.landawn.abacus.annotation.MayReturnNull;
+
 /**
  * An immutable container that pairs a key with a value, where equality and hashing
  * are based solely on the key. This design provides significant performance improvements
@@ -94,6 +96,7 @@ public sealed class Keyed<K, T> implements Immutable permits IndexedKeyed {
      *
      * @return the key, which may be {@code null}
      */
+    @MayReturnNull
     public K key() {
         return key;
     }
@@ -107,6 +110,7 @@ public sealed class Keyed<K, T> implements Immutable permits IndexedKeyed {
      *
      * @return the value, which may be {@code null}
      */
+    @MayReturnNull
     public T val() {
         return val;
     }
@@ -191,7 +195,7 @@ public sealed class Keyed<K, T> implements Immutable permits IndexedKeyed {
      * Keyed.of("key", null).toString();       // returns "{key=key, val=null}"
      * }</pre>
      *
-     * @return a string representation of this object in the format "{key=<key>, val=<value>}"
+     * @return a string representation of this object in the format "{key=&lt;key&gt;, val=&lt;value&gt;}"
      */
     @Override
     public String toString() {

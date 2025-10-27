@@ -161,7 +161,7 @@ public class BigIntegerSummaryStatistics implements Consumer<BigInteger> {
     }
 
     /**
-     * Returns the minimum value recorded, or null if no values have been recorded.
+     * Returns the minimum value recorded, or {@code null} if no values have been recorded.
      * 
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -171,14 +171,14 @@ public class BigIntegerSummaryStatistics implements Consumer<BigInteger> {
      * BigInteger min = stats.getMin(); // Returns 50
      * }</pre>
      *
-     * @return the minimum value, or null if none
+     * @return the minimum value, or {@code null} if none
      */
     public final BigInteger getMin() {
         return min;
     }
 
     /**
-     * Returns the maximum value recorded, or null if no values have been recorded.
+     * Returns the maximum value recorded, or {@code null} if no values have been recorded.
      * 
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -188,7 +188,7 @@ public class BigIntegerSummaryStatistics implements Consumer<BigInteger> {
      * BigInteger max = stats.getMax(); // Returns 500
      * }</pre>
      *
-     * @return the maximum value, or null if none
+     * @return the maximum value, or {@code null} if none
      */
     public final BigInteger getMax() {
         return max;

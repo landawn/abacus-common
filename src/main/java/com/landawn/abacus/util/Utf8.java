@@ -146,7 +146,7 @@ public class Utf8 {
      * </ul>
      * 
      * <p>This method returns {@code true} if and only if 
-     * {@code Arrays.equals(bytes, new String(bytes, UTF_8).getBytes(UTF_8))} would return true,
+     * {@code Arrays.equals(bytes, new String(bytes, UTF_8).getBytes(UTF_8))} would return {@code true},
      * but is more efficient in both time and space.</p>
      * 
      * <p><b>Usage Examples:</b></p>

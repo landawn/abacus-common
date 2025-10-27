@@ -16,6 +16,8 @@ package com.landawn.abacus.pool;
 
 import java.util.concurrent.TimeUnit;
 
+import com.landawn.abacus.annotation.MayReturnNull;
+
 /**
  * A pool of reusable objects that extends the base Pool interface with object-specific operations.
  * This interface provides methods for adding and retrieving objects from the pool with various
@@ -141,10 +143,10 @@ public interface ObjectPool<E extends Poolable> extends Pool {
     boolean add(E e, long timeout, TimeUnit unit, boolean autoDestroyOnFailedToAdd) throws InterruptedException;
 
     /**
-     * Retrieves and removes an object from the pool, or returns null if the pool is empty.
+     * Retrieves and removes an object from the pool, or returns {@code null} if the pool is empty.
      * The object's activity print is updated to reflect the access.
      * 
-     * <p>If the retrieved object has expired, it will be destroyed and null will be returned.
+     * <p>If the retrieved object has expired, it will be destroyed and {@code null} will be returned.
      * 
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -158,9 +160,10 @@ public interface ObjectPool<E extends Poolable> extends Pool {
      * }
      * }</pre>
      * 
-     * @return the head of the pool, or null if the pool is empty
+     * @return the head of the pool, or {@code null} if the pool is empty
      * @throws IllegalStateException if the pool has been closed
      */
+    @MayReturnNull
     E take();
 
     /**
@@ -186,7 +189,7 @@ public interface ObjectPool<E extends Poolable> extends Pool {
      * 
      * @param timeout the maximum time to wait for an object to become available
      * @param unit the time unit of the timeout argument
-     * @return an object from the pool, or null if timeout elapsed before an object was available
+     * @return an object from the pool, or {@code null} if timeout elapsed before an object was available
      * @throws InterruptedException if interrupted while waiting
      * @throws IllegalStateException if the pool has been closed
      */
@@ -224,7 +227,7 @@ public interface ObjectPool<E extends Poolable> extends Pool {
          * Calculates the memory size of the given object in bytes.
          * The returned value is used to track total memory usage and enforce memory limits.
          * 
-         * @param e the object to measure, never null when called by the pool
+         * @param e the object to measure, never {@code null} when called by the pool
          * @return the size of the object in bytes, should be non-negative
          */
         long sizeOf(E e);

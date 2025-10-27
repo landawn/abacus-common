@@ -34,7 +34,7 @@ import com.landawn.abacus.annotation.Internal;
 public final class BiMap<K, V> implements Map<K, V> {
     /**
      * The maximum capacity, used if a higher value is implicitly specified by either of the constructors with
-     * arguments. MUST be a power of two <= 1<<30.
+     * arguments. MUST be a power of two &lt;= 1&lt;&lt;30.
      */
     static final int MAXIMUM_CAPACITY = 1 << 30;
 
@@ -183,7 +183,7 @@ public final class BiMap<K, V> implements Map<K, V> {
      * @param k2 The second key to be inserted into the BiMap.
      * @param v2 The value to be associated with the second key in the BiMap.
      * @return A BiMap containing the specified key-value pairs.
-     * @throws IllegalArgumentException if any key or value is null, or if any value is duplicated
+     * @throws IllegalArgumentException if any key or value is {@code null}, or if any value is duplicated
      */
     public static <K, V> BiMap<K, V> of(final K k1, final V v1, final K k2, final V v2) {
         final BiMap<K, V> map = new BiMap<>(2);
@@ -207,7 +207,7 @@ public final class BiMap<K, V> implements Map<K, V> {
      * @param k3 The third key to be inserted into the BiMap.
      * @param v3 The value to be associated with the third key in the BiMap.
      * @return A BiMap containing the specified key-value pairs.
-     * @throws IllegalArgumentException if any key or value is null, or if any value is duplicated
+     * @throws IllegalArgumentException if any key or value is {@code null}, or if any value is duplicated
      */
     public static <K, V> BiMap<K, V> of(final K k1, final V v1, final K k2, final V v2, final K k3, final V v3) {
         final BiMap<K, V> map = new BiMap<>(3);
@@ -234,7 +234,7 @@ public final class BiMap<K, V> implements Map<K, V> {
      * @param k4 The fourth key to be inserted into the BiMap.
      * @param v4 The value to be associated with the fourth key in the BiMap.
      * @return A BiMap containing the specified key-value pairs.
-     * @throws IllegalArgumentException if any key or value is null, or if any value is duplicated
+     * @throws IllegalArgumentException if any key or value is {@code null}, or if any value is duplicated
      */
     public static <K, V> BiMap<K, V> of(final K k1, final V v1, final K k2, final V v2, final K k3, final V v3, final K k4, final V v4) {
         final BiMap<K, V> map = new BiMap<>(4);
@@ -264,7 +264,7 @@ public final class BiMap<K, V> implements Map<K, V> {
      * @param k5 The fifth key to be inserted into the BiMap.
      * @param v5 The value to be associated with the fifth key in the BiMap.
      * @return A BiMap containing the specified key-value pairs.
-     * @throws IllegalArgumentException if any key or value is null, or if any value is duplicated
+     * @throws IllegalArgumentException if any key or value is {@code null}, or if any value is duplicated
      */
     public static <K, V> BiMap<K, V> of(final K k1, final V v1, final K k2, final V v2, final K k3, final V v3, final K k4, final V v4, final K k5,
             final V v5) {
@@ -298,7 +298,7 @@ public final class BiMap<K, V> implements Map<K, V> {
      * @param k6 The sixth key to be inserted into the BiMap.
      * @param v6 The value to be associated with the sixth key in the BiMap.
      * @return A BiMap containing the specified key-value pairs.
-     * @throws IllegalArgumentException if any key or value is null, or if any value is duplicated
+     * @throws IllegalArgumentException if any key or value is {@code null}, or if any value is duplicated
      */
     public static <K, V> BiMap<K, V> of(final K k1, final V v1, final K k2, final V v2, final K k3, final V v3, final K k4, final V v4, final K k5, final V v5,
             final K k6, final V v6) {
@@ -335,7 +335,7 @@ public final class BiMap<K, V> implements Map<K, V> {
      * @param k7 The seventh key to be inserted into the BiMap.
      * @param v7 The value to be associated with the seventh key in the BiMap.
      * @return A BiMap containing the specified key-value pairs.
-     * @throws IllegalArgumentException if any key or value is null, or if any value is duplicated
+     * @throws IllegalArgumentException if any key or value is {@code null}, or if any value is duplicated
      */
     public static <K, V> BiMap<K, V> of(final K k1, final V v1, final K k2, final V v2, final K k3, final V v3, final K k4, final V v4, final K k5, final V v5,
             final K k6, final V v6, final K k7, final V v7) {
@@ -375,7 +375,7 @@ public final class BiMap<K, V> implements Map<K, V> {
      * @param k8 The eighth key to be inserted into the BiMap.
      * @param v8 The value to be associated with the eighth key in the BiMap.
      * @return A BiMap containing the specified key-value pairs.
-     * @throws IllegalArgumentException if any key or value is null, or if any value is duplicated
+     * @throws IllegalArgumentException if any key or value is {@code null}, or if any value is duplicated
      */
     public static <K, V> BiMap<K, V> of(final K k1, final V v1, final K k2, final V v2, final K k3, final V v3, final K k4, final V v4, final K k5, final V v5,
             final K k6, final V v6, final K k7, final V v7, final K k8, final V v8) {
@@ -418,7 +418,7 @@ public final class BiMap<K, V> implements Map<K, V> {
      * @param k9 The ninth key to be inserted into the BiMap.
      * @param v9 The value to be associated with the ninth key in the BiMap.
      * @return A BiMap containing the specified key-value pairs.
-     * @throws IllegalArgumentException if any key or value is null, or if any value is duplicated
+     * @throws IllegalArgumentException if any key or value is {@code null}, or if any value is duplicated
      */
     public static <K, V> BiMap<K, V> of(final K k1, final V v1, final K k2, final V v2, final K k3, final V v3, final K k4, final V v4, final K k5, final V v5,
             final K k6, final V v6, final K k7, final V v7, final K k8, final V v8, final K k9, final V v9) {
@@ -464,7 +464,7 @@ public final class BiMap<K, V> implements Map<K, V> {
      * @param k10 The tenth key to be inserted into the BiMap.
      * @param v10 The value to be associated with the tenth key in the BiMap.
      * @return A BiMap containing the specified key-value pairs.
-     * @throws IllegalArgumentException if any key or value is null, or if any value is duplicated
+     * @throws IllegalArgumentException if any key or value is {@code null}, or if any value is duplicated
      */
     public static <K, V> BiMap<K, V> of(final K k1, final V v1, final K k2, final V v2, final K k3, final V v3, final K k4, final V v4, final K k5, final V v5,
             final K k6, final V v6, final K k7, final V v7, final K k8, final V v8, final K k9, final V v9, final K k10, final V v10) {
@@ -500,7 +500,7 @@ public final class BiMap<K, V> implements Map<K, V> {
      * @param <V> The type of the values in the map.
      * @param map The map whose entries are to be placed into the new BiMap.
      * @return A new BiMap containing the same entries as the provided map.
-     * @throws IllegalArgumentException if any key or value in the map is null, or if any value is duplicated
+     * @throws IllegalArgumentException if any key or value in the map is {@code null}, or if any value is duplicated
      */
     public static <K, V> BiMap<K, V> copyOf(final Map<? extends K, ? extends V> map) {
         //noinspection rawtypes
@@ -583,7 +583,7 @@ public final class BiMap<K, V> implements Map<K, V> {
      * @param key The key with which the specified value is to be associated.
      * @param value The value to be associated with the specified key.
      * @return The previous value associated with the key, or {@code null} if there was no mapping for the key.
-     * @throws IllegalArgumentException if the key or value is null, or if the given value is already bound to a different key in this BiMap. The BiMap will remain unmodified in this event. To avoid this exception, call {@link #forcePut} instead.
+     * @throws IllegalArgumentException if the key or value is {@code null}, or if the given value is already bound to a different key in this BiMap. The BiMap will remain unmodified in this event. To avoid this exception, call {@link #forcePut} instead.
      * @see #forcePut(Object, Object)
      */
     @Override
@@ -663,7 +663,7 @@ public final class BiMap<K, V> implements Map<K, V> {
      * }</pre>
      *
      * @param m The map whose entries are to be added to this BiMap.
-     * @throws IllegalArgumentException if any key or value is null, or if an attempt to {@code put} any entry fails due to a duplicate value. Note that some map entries may have been added to the BiMap before the exception was thrown.
+     * @throws IllegalArgumentException if any key or value is {@code null}, or if an attempt to {@code put} any entry fails due to a duplicate value. Note that some map entries may have been added to the BiMap before the exception was thrown.
      * @see #put(Object, Object)
      */
     @Override
@@ -962,9 +962,9 @@ public final class BiMap<K, V> implements Map<K, V> {
      * The string representation consists of a list of key-value mappings in the BiMap, enclosed in braces ("{}").
      * Adjacent mappings are separated by the characters ", " (comma and space).
      * Each key-value mapping is rendered as the key followed by an equal sign ("=") followed by the associated value.
-     * The format is consistent with {@link Map#toString()}.
+     * The format is consistent with {@code Map.toString()}.
      *
-     * <p><b>Usage Examples:</b></p> {@code {one=1, two=2}}
+     * <p><b>Usage Example:</b> {@code {one=1, two=2}}</p>
      *
      * @return a string representation of this BiMap.
      */
@@ -1009,7 +1009,7 @@ public final class BiMap<K, V> implements Map<K, V> {
      * @param <V> The type of the values in the BiMap.
      * @param map The map whose entries are to be placed into the new BiMap.
      * @return A new Builder instance for a BiMap with the specified map as its initial data.
-     * @throws IllegalArgumentException if the specified map is {@code null}, or if any key or value in the map is null, or if any value is duplicated
+     * @throws IllegalArgumentException if the specified map is {@code null}, or if any key or value in the map is {@code null}, or if any value is duplicated
      */
     public static <K, V> Builder<K, V> builder(final Map<K, V> map) throws IllegalArgumentException {
         N.checkArgNotNull(map);
@@ -1051,7 +1051,7 @@ public final class BiMap<K, V> implements Map<K, V> {
          * @param key The key with which the specified value is to be associated.
          * @param value The value to be associated with the specified key.
          * @return This Builder instance to allow for chaining of calls to builder methods.
-         * @throws IllegalArgumentException if the key or value is null, or if the given value is already bound to a different key in this BiMap. The BiMap will remain unmodified in this event.
+         * @throws IllegalArgumentException if the key or value is {@code null}, or if the given value is already bound to a different key in this BiMap. The BiMap will remain unmodified in this event.
          * @see #forcePut(Object, Object)
          */
         public Builder<K, V> put(final K key, final V value) {
@@ -1106,7 +1106,7 @@ public final class BiMap<K, V> implements Map<K, V> {
          *
          * @param m The map whose entries are to be added to this BiMap.
          * @return This Builder instance to allow for chaining of calls to builder methods.
-         * @throws IllegalArgumentException if any key or value is null, or if an attempt to {@code put} any entry fails due to a duplicate value. Note that some map entries may have been added to the BiMap before the exception was thrown.
+         * @throws IllegalArgumentException if any key or value is {@code null}, or if an attempt to {@code put} any entry fails due to a duplicate value. Note that some map entries may have been added to the BiMap before the exception was thrown.
          * @see #put(Object, Object)
          * @see #forcePut(Object, Object)
          */

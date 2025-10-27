@@ -38,7 +38,7 @@ public interface ToFloatFunction<T> extends Throwables.ToFloatFunction<T, Runtim
 
     /**
      * A predefined ToFloatFunction instance that unboxes a Float object to a primitive float.
-     * Returns 0.0f if the input is null, otherwise returns the float value of the Float object.
+     * Returns 0.0f if the input is {@code null}, otherwise returns the float value of the Float object.
      * 
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -51,7 +51,7 @@ public interface ToFloatFunction<T> extends Throwables.ToFloatFunction<T, Runtim
 
     /**
      * A predefined ToFloatFunction instance that converts any Number object to a primitive float.
-     * Returns 0.0f if the input is null, otherwise uses the Numbers.toFloat utility method to
+     * Returns 0.0f if the input is {@code null}, otherwise uses the Numbers.toFloat utility method to
      * perform the conversion. This function can handle various Number subclasses including
      * Integer, Long, Double, BigDecimal, etc.
      * 

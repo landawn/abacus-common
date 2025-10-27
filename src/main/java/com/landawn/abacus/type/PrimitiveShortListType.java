@@ -107,7 +107,8 @@ public final class PrimitiveShortListType extends AbstractPrimitiveListType<Shor
      * }</pre>
      *
      * @param x the ShortList to convert to string
-     * @return the string representation of the list, or null if the input list is null
+     * @return the string representation of the list, or {@code null} if the input list is null
+     @MayReturnNull
      */
     @Override
     public String stringOf(final ShortList x) {
@@ -133,8 +134,9 @@ public final class PrimitiveShortListType extends AbstractPrimitiveListType<Shor
      * }</pre>
      *
      * @param str the string to parse, expected format is "[value1, value2, ...]"
-     * @return the parsed ShortList, or null if the input string is null or empty
+     * @return the parsed ShortList, or {@code null} if the input string is {@code null} or empty
      * @throws NumberFormatException if any element in the string cannot be parsed as a short
+     @MayReturnNull
      */
     @Override
     public ShortList valueOf(final String str) {
@@ -144,7 +146,7 @@ public final class PrimitiveShortListType extends AbstractPrimitiveListType<Shor
     /**
      * Appends the string representation of a ShortList to the given Appendable.
      * The list is formatted as comma-separated values enclosed in square brackets.
-     * If the list is null, appends "null".
+     * If the list is {@code null}, appends "null".
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code

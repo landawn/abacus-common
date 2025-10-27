@@ -42,9 +42,9 @@ public class DurationType extends AbstractType<Duration> {
 
     /**
      * Indicates whether Duration values are comparable.
-     * Duration implements Comparable, so this returns true.
+     * Duration implements Comparable, so this returns {@code true}.
      *
-     * @return true, indicating Duration values are comparable
+     * @return {@code true}, indicating Duration values are comparable
      */
     @Override
     public boolean isComparable() {
@@ -65,7 +65,7 @@ public class DurationType extends AbstractType<Duration> {
      * Indicates whether this type should be quoted in CSV format.
      * Duration values are numeric (milliseconds) and don't require quotes.
      *
-     * @return true, indicating Duration values should not be quoted in CSV
+     * @return {@code true}, indicating Duration values should not be quoted in CSV
      */
     @Override
     public boolean isNonQuotableCsvType() {
@@ -76,8 +76,9 @@ public class DurationType extends AbstractType<Duration> {
      * Converts a Duration to its string representation.
      * The duration is represented as the number of milliseconds.
      *
-     * @param x the Duration to convert. Can be null.
-     * @return A string containing the milliseconds value, or null if input is null
+     * @param x the Duration to convert. Can be {@code null}.
+     * @return A string containing the milliseconds value, or {@code null} if input is null
+     @MayReturnNull
      */
     @Override
     public String stringOf(final Duration x) {
@@ -88,8 +89,9 @@ public class DurationType extends AbstractType<Duration> {
      * Converts a string representation back to a Duration.
      * The string should contain a numeric value representing milliseconds.
      *
-     * @param str the string containing milliseconds value. Can be null or empty.
-     * @return A Duration created from the milliseconds value, or null if input is null/empty
+     * @param str the string containing milliseconds value. Can be {@code null} or empty.
+     * @return A Duration created from the milliseconds value, or {@code null} if input is null/empty
+     @MayReturnNull
      */
     @Override
     public Duration valueOf(final String str) {
@@ -131,7 +133,7 @@ public class DurationType extends AbstractType<Duration> {
      *
      * @param stmt the PreparedStatement in which to set the parameter
      * @param columnIndex the parameter index (1-based) to set
-     * @param x the Duration value to set. Can be null.
+     * @param x the Duration value to set. Can be {@code null}.
      * @throws SQLException if a database access error occurs or the parameter index is invalid
      */
     @Override
@@ -146,7 +148,7 @@ public class DurationType extends AbstractType<Duration> {
      *
      * @param stmt the CallableStatement in which to set the parameter
      * @param parameterName the name of the parameter to set
-     * @param x the Duration value to set. Can be null.
+     * @param x the Duration value to set. Can be {@code null}.
      * @throws SQLException if a database access error occurs or the parameter name is not found
      */
     @Override
@@ -159,7 +161,7 @@ public class DurationType extends AbstractType<Duration> {
      * The duration is written as its milliseconds value.
      *
      * @param appendable the Appendable to write to
-     * @param x the Duration to append. Can be null.
+     * @param x the Duration to append. Can be {@code null}.
      * @throws IOException if an I/O error occurs during writing
      */
     @Override
@@ -176,7 +178,7 @@ public class DurationType extends AbstractType<Duration> {
      * The duration is written as its milliseconds value using optimized numeric writing.
      *
      * @param writer the CharacterWriter to write to
-     * @param x the Duration to write. Can be null.
+     * @param x the Duration to write. Can be {@code null}.
      * @param config the serialization configuration (currently unused for Duration)
      * @throws IOException if an I/O error occurs during writing
      */

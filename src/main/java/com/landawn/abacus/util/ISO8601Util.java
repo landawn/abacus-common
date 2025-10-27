@@ -387,15 +387,6 @@ final class ISO8601Util {
         return (offset < value.length()) && (value.charAt(offset) == expected);
     }
 
-    /**
-     * Parses an integer from a substring of the given string.
-     *
-     * @param value the string containing the integer
-     * @param beginIndex the starting index (inclusive)
-     * @param endIndex the ending index (exclusive)
-     * @return the parsed integer value
-     * @throws NumberFormatException if the substring is not a valid integer
-     */
     private static int parseInt(final String value, final int beginIndex, final int endIndex) throws NumberFormatException {
         if (beginIndex < 0 || endIndex > value.length() || beginIndex > endIndex) {
             throw new NumberFormatException(value);

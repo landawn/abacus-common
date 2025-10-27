@@ -14,6 +14,7 @@
 
 package com.landawn.abacus.util.function;
 
+import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.util.Throwables;
 
 /**
@@ -34,10 +35,11 @@ public interface CharNFunction<R> extends Throwables.CharNFunction<R, RuntimeExc
      * Applies this function to the given char array arguments.
      * The array can be of any length, including zero.
      *
-     * @param args the char array input arguments. Can be empty but not null.
+     * @param args the char array input arguments. Can be empty but not {@code null}.
      * @return the function result of type R
      */
     @Override
+    @MayReturnNull
     R apply(char... args);
 
     /**
@@ -47,7 +49,7 @@ public interface CharNFunction<R> extends Throwables.CharNFunction<R, RuntimeExc
      * the caller of the composed function.
      *
      * @param <V> the type of output of the {@code after} function, and of the composed function
-     * @param after the function to apply after this function is applied. Must not be null.
+     * @param after the function to apply after this function is applied. Must not be {@code null}.
      * @return a composed function that first applies this function and then applies the
      *         {@code after} function
      */

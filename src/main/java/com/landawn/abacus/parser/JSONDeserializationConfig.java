@@ -20,6 +20,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.function.BiConsumer;
 
+import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.annotation.SuppressFBWarnings;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.cs;
@@ -34,7 +35,7 @@ import com.landawn.abacus.util.cs;
  * 
  * <p>Key features:</p>
  * <ul>
- *   <li>Control over null and empty value handling during deserialization</li>
+ *   <li>Control over {@code null} and empty value handling during deserialization</li>
  *   <li>Specification of concrete Map implementation types</li>
  *   <li>Custom property handlers for collection processing</li>
  *   <li>Fluent API for easy configuration</li>
@@ -56,6 +57,12 @@ import com.landawn.abacus.util.cs;
  */
 public class JSONDeserializationConfig extends DeserializationConfig<JSONDeserializationConfig> {
 
+    /**
+     * Constructs a new JSONDeserializationConfig with default settings.
+     */
+    public JSONDeserializationConfig() {
+    }
+
     private boolean ignoreNullOrEmpty = false;
 
     private boolean readNullToEmpty = false;
@@ -66,9 +73,9 @@ public class JSONDeserializationConfig extends DeserializationConfig<JSONDeseria
     private Map<String, BiConsumer<? super Collection<Object>, ?>> propHandlerMap = null;
 
     /**
-     * Checks if null or empty values should be ignored during deserialization.
+     * Checks if {@code null} or empty values should be ignored during deserialization.
      * 
-     * <p>When this setting is enabled, null or empty values in the JSON will not be
+     * <p>When this setting is enabled, {@code null} or empty values in the JSON will not be
      * set on the target object. This applies to:</p>
      * <ul>
      *   <li>CharSequence fields (empty strings)</li>
@@ -77,7 +84,7 @@ public class JSONDeserializationConfig extends DeserializationConfig<JSONDeseria
      *   <li>Map fields (empty maps)</li>
      * </ul>
      *
-     * @return {@code true} if null or empty values are ignored, {@code false} otherwise
+     * @return {@code true} if {@code null} or empty values are ignored, {@code false} otherwise
      * @see #ignoreNullOrEmpty(boolean)
      */
     public boolean ignoreNullOrEmpty() {
@@ -85,11 +92,11 @@ public class JSONDeserializationConfig extends DeserializationConfig<JSONDeseria
     }
 
     /**
-     * Sets whether to ignore null or empty values during deserialization.
+     * Sets whether to ignore {@code null} or empty values during deserialization.
      * 
-     * <p>When enabled, null or empty CharSequence/Array/Collection/Map values won't be set/added/put
+     * <p>When enabled, {@code null} or empty CharSequence/Array/Collection/Map values won't be set/added/put
      * to the target bean/array/list/map. This is useful when you want to preserve existing
-     * values in the target object rather than overwriting them with null or empty values
+     * values in the target object rather than overwriting them with {@code null} or empty values
      * from the JSON.</p>
      * 
      * <p><b>Usage Examples:</b></p>
@@ -99,9 +106,10 @@ public class JSONDeserializationConfig extends DeserializationConfig<JSONDeseria
      * // These empty/null values will not be set on the target object
      * }</pre>
      *
-     * @param ignoreNullOrEmpty {@code true} to ignore null or empty values, {@code false} otherwise
+     * @param ignoreNullOrEmpty {@code true} to ignore {@code null} or empty values, {@code false} otherwise
      * @return this instance for method chaining
      */
+    @MayReturnNull
     public JSONDeserializationConfig ignoreNullOrEmpty(final boolean ignoreNullOrEmpty) {
         this.ignoreNullOrEmpty = ignoreNullOrEmpty;
 
@@ -109,12 +117,12 @@ public class JSONDeserializationConfig extends DeserializationConfig<JSONDeseria
     }
 
     /**
-     * Checks if null values should be read as empty values.
+     * Checks if {@code null} values should be read as empty values.
      * 
-     * <p>This setting determines whether null values in JSON should be converted to
+     * <p>This setting determines whether {@code null} values in JSON should be converted to
      * empty instances of the corresponding type during deserialization.</p>
      *
-     * @return {@code true} if null values are read as empty, {@code false} otherwise
+     * @return {@code true} if {@code null} values are read as empty, {@code false} otherwise
      * @see #readNullToEmpty(boolean)
      */
     public boolean readNullToEmpty() {
@@ -122,10 +130,10 @@ public class JSONDeserializationConfig extends DeserializationConfig<JSONDeseria
     }
 
     /**
-     * Sets whether to deserialize null values to empty CharSequence/Array/Collection/Map.
+     * Sets whether to deserialize {@code null} values to empty CharSequence/Array/Collection/Map.
      * 
-     * <p>When enabled, null values in JSON will be converted to empty instances instead of null.
-     * This is particularly useful when you want to avoid null checks in your code and prefer
+     * <p>When enabled, {@code null} values in JSON will be converted to empty instances instead of {@code null}.
+     * This is particularly useful when you want to avoid {@code null} checks in your code and prefer
      * working with empty collections or strings.</p>
      * 
      * <p>The conversion rules are:</p>
@@ -143,9 +151,10 @@ public class JSONDeserializationConfig extends DeserializationConfig<JSONDeseria
      * // Result: name = "", items = []
      * }</pre>
      *
-     * @param readNullToEmpty {@code true} to read null as empty, {@code false} otherwise
+     * @param readNullToEmpty {@code true} to read {@code null} as empty, {@code false} otherwise
      * @return this instance for method chaining
      */
+    @MayReturnNull
     public JSONDeserializationConfig readNullToEmpty(final boolean readNullToEmpty) {
         this.readNullToEmpty = readNullToEmpty;
 
@@ -192,6 +201,7 @@ public class JSONDeserializationConfig extends DeserializationConfig<JSONDeseria
      * @throws IllegalArgumentException if mapInstanceType is null
      */
     @SuppressWarnings("rawtypes")
+    @MayReturnNull
     public JSONDeserializationConfig setMapInstanceType(final Class<? extends Map> mapInstanceType) throws IllegalArgumentException {
         N.checkArgNotNull(mapInstanceType, cs.mapInstanceType);
 
@@ -241,6 +251,7 @@ public class JSONDeserializationConfig extends DeserializationConfig<JSONDeseria
      * @return this instance for method chaining
      * @throws IllegalArgumentException if propName is empty or handler is null
      */
+    @MayReturnNull
     public JSONDeserializationConfig setPropHandler(final String propName, final BiConsumer<? super Collection<Object>, ?> handler)
             throws IllegalArgumentException {
         N.checkArgNotEmpty(propName, cs.propName);
@@ -260,13 +271,14 @@ public class JSONDeserializationConfig extends DeserializationConfig<JSONDeseria
      * 
      * <p>Returns the custom handler that was previously registered for the given property name
      * using {@link #setPropHandler(String, BiConsumer)}. If no handler has been registered
-     * for the property, this method returns null.</p>
+     * for the property, this method returns {@code null}.</p>
      *
      * @param propName the property name
-     * @return the handler for the property, or null if not set
+     * @return the handler for the property, or {@code null} if not set
      * @throws IllegalArgumentException if propName is empty
      * @see #setPropHandler(String, BiConsumer)
      */
+    @MayReturnNull
     public BiConsumer<? super Collection<Object>, ?> getPropHandler(final String propName) { //NOSONAR
         N.checkArgNotEmpty(propName, cs.propName);
 
@@ -284,8 +296,8 @@ public class JSONDeserializationConfig extends DeserializationConfig<JSONDeseria
      * <ul>
      *   <li>Ignored property names</li>
      *   <li>Ignore unmatched property setting</li>
-     *   <li>Ignore null or empty setting</li>
-     *   <li>Read null to empty setting</li>
+     *   <li>Ignore {@code null} or empty setting</li>
+     *   <li>Read {@code null} to empty setting</li>
      *   <li>Element, map key, and map value types</li>
      *   <li>Map instance type</li>
      *   <li>Property handlers</li>
@@ -378,6 +390,12 @@ public class JSONDeserializationConfig extends DeserializationConfig<JSONDeseria
      * @see JSONDeserializationConfig
      */
     public static final class JDC extends JSONDeserializationConfig {
+
+        /**
+         * Constructs a new JDC instance.
+         */
+        public JDC() {
+        }
 
         /**
          * Creates a new instance of JSONDeserializationConfig with default settings.

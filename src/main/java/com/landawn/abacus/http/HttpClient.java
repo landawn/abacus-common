@@ -189,7 +189,7 @@ public final class HttpClient {
      *
      * @param url The base URL for the HTTP client
      * @return A new HttpClient instance
-     * @throws IllegalArgumentException if url is null or empty
+     * @throws IllegalArgumentException if url is {@code null} or empty
      */
     public static HttpClient create(final String url) {
         return create(url, DEFAULT_MAX_CONNECTION);
@@ -207,7 +207,7 @@ public final class HttpClient {
      * @param url The base URL for the HTTP client
      * @param maxConnection Maximum number of concurrent connections
      * @return A new HttpClient instance
-     * @throws IllegalArgumentException if url is null or empty, or maxConnection is negative
+     * @throws IllegalArgumentException if url is {@code null} or empty, or maxConnection is negative
      */
     public static HttpClient create(final String url, final int maxConnection) {
         return create(url, maxConnection, DEFAULT_CONNECTION_TIMEOUT, DEFAULT_READ_TIMEOUT);
@@ -226,7 +226,7 @@ public final class HttpClient {
      * @param connectionTimeoutInMillis Connection timeout in milliseconds
      * @param readTimeoutInMillis Read timeout in milliseconds
      * @return A new HttpClient instance
-     * @throws IllegalArgumentException if url is null or empty, or timeouts are negative
+     * @throws IllegalArgumentException if url is {@code null} or empty, or timeouts are negative
      */
     public static HttpClient create(final String url, final long connectionTimeoutInMillis, final long readTimeoutInMillis) {
         return create(url, DEFAULT_MAX_CONNECTION, connectionTimeoutInMillis, readTimeoutInMillis);
@@ -245,7 +245,7 @@ public final class HttpClient {
      * @param connectionTimeoutInMillis Connection timeout in milliseconds
      * @param readTimeoutInMillis Read timeout in milliseconds
      * @return A new HttpClient instance
-     * @throws IllegalArgumentException if url is null or empty, or any numeric parameter is negative
+     * @throws IllegalArgumentException if url is {@code null} or empty, or any numeric parameter is negative
      */
     public static HttpClient create(final String url, final int maxConnection, final long connectionTimeoutInMillis, final long readTimeoutInMillis) {
         return create(url, maxConnection, connectionTimeoutInMillis, readTimeoutInMillis, (HttpSettings) null);
@@ -269,7 +269,7 @@ public final class HttpClient {
      * @param settings Additional HTTP settings (headers, content type, etc.)
      * @return A new HttpClient instance
      * @throws UncheckedIOException if an I/O error occurs
-     * @throws IllegalArgumentException if url is null or empty, or any numeric parameter is negative
+     * @throws IllegalArgumentException if url is {@code null} or empty, or any numeric parameter is negative
      */
     public static HttpClient create(final String url, final int maxConnection, final long connectionTimeoutInMillis, final long readTimeoutInMillis,
             final HttpSettings settings) throws UncheckedIOException {
@@ -296,7 +296,7 @@ public final class HttpClient {
      * @param settings Additional HTTP settings
      * @param sharedActiveConnectionCounter Shared counter for active connections across multiple HttpClient instances
      * @return A new HttpClient instance
-     * @throws IllegalArgumentException if url is null or empty, or any numeric parameter is negative
+     * @throws IllegalArgumentException if url is {@code null} or empty, or any numeric parameter is negative
      *
      */
     public static HttpClient create(final String url, final int maxConnection, final long connectionTimeoutInMillis, final long readTimeoutInMillis,
@@ -321,7 +321,7 @@ public final class HttpClient {
      * @param readTimeoutInMillis Read timeout in milliseconds
      * @param executor Custom executor for asynchronous operations
      * @return A new HttpClient instance
-     * @throws IllegalArgumentException if url is null or empty, or any numeric parameter is negative
+     * @throws IllegalArgumentException if url is {@code null} or empty, or any numeric parameter is negative
      *
      */
     public static HttpClient create(final String url, final int maxConnection, final long connectionTimeoutInMillis, final long readTimeoutInMillis,
@@ -350,7 +350,7 @@ public final class HttpClient {
      * @param executor Custom executor for asynchronous operations
      * @return A new HttpClient instance
      * @throws UncheckedIOException if an I/O error occurs
-     * @throws IllegalArgumentException if url is null or empty, or any numeric parameter is negative
+     * @throws IllegalArgumentException if url is {@code null} or empty, or any numeric parameter is negative
      *
      */
     public static HttpClient create(final String url, final int maxConnection, final long connectionTimeoutInMillis, final long readTimeoutInMillis,
@@ -380,7 +380,7 @@ public final class HttpClient {
      * @param sharedActiveConnectionCounter Shared counter for managing active connections across multiple clients
      * @param executor Custom executor for asynchronous operations (null uses default)
      * @return A new HttpClient instance
-     * @throws IllegalArgumentException if url is null or empty, or any numeric parameter is negative
+     * @throws IllegalArgumentException if url is {@code null} or empty, or any numeric parameter is negative
      *
      */
     public static HttpClient create(final String url, final int maxConnection, final long connectionTimeoutInMillis, final long readTimeoutInMillis,
@@ -414,7 +414,7 @@ public final class HttpClient {
      * @param url The base URL for the HTTP client (as a java.net.URL object)
      * @param maxConnection Maximum number of concurrent connections
      * @return A new HttpClient instance
-     * @throws IllegalArgumentException if url is null or maxConnection is negative
+     * @throws IllegalArgumentException if url is {@code null} or maxConnection is negative
      */
     public static HttpClient create(final URL url, final int maxConnection) {
         return create(url, maxConnection, DEFAULT_CONNECTION_TIMEOUT, DEFAULT_READ_TIMEOUT);
@@ -428,7 +428,7 @@ public final class HttpClient {
      * @param connectionTimeoutInMillis Connection timeout in milliseconds
      * @param readTimeoutInMillis Read timeout in milliseconds
      * @return A new HttpClient instance
-     * @throws IllegalArgumentException if url is null or timeouts are negative
+     * @throws IllegalArgumentException if url is {@code null} or timeouts are negative
      */
     public static HttpClient create(final URL url, final long connectionTimeoutInMillis, final long readTimeoutInMillis) {
         return create(url, DEFAULT_MAX_CONNECTION, connectionTimeoutInMillis, readTimeoutInMillis);
@@ -442,7 +442,7 @@ public final class HttpClient {
      * @param connectionTimeoutInMillis Connection timeout in milliseconds
      * @param readTimeoutInMillis Read timeout in milliseconds
      * @return A new HttpClient instance
-     * @throws IllegalArgumentException if url is null or any numeric parameter is negative
+     * @throws IllegalArgumentException if url is {@code null} or any numeric parameter is negative
      */
     public static HttpClient create(final URL url, final int maxConnection, final long connectionTimeoutInMillis, final long readTimeoutInMillis) {
         return create(url, maxConnection, connectionTimeoutInMillis, readTimeoutInMillis, (HttpSettings) null);
@@ -458,7 +458,7 @@ public final class HttpClient {
      * @param settings Additional HTTP settings (headers, content type, proxy, SSL, etc.)
      * @return A new HttpClient instance
      * @throws UncheckedIOException if an I/O error occurs
-     * @throws IllegalArgumentException if url is null or any numeric parameter is negative
+     * @throws IllegalArgumentException if url is {@code null} or any numeric parameter is negative
      */
     public static HttpClient create(final URL url, final int maxConnection, final long connectionTimeoutInMillis, final long readTimeoutInMillis,
             final HttpSettings settings) throws UncheckedIOException {
@@ -476,7 +476,7 @@ public final class HttpClient {
      * @param settings Additional HTTP settings (headers, content type, proxy, SSL, etc.)
      * @param sharedActiveConnectionCounter Shared counter for active connections across multiple clients
      * @return A new HttpClient instance
-     * @throws IllegalArgumentException if url is null or any numeric parameter is negative
+     * @throws IllegalArgumentException if url is {@code null} or any numeric parameter is negative
      */
     public static HttpClient create(final URL url, final int maxConnection, final long connectionTimeoutInMillis, final long readTimeoutInMillis,
             final HttpSettings settings, final AtomicInteger sharedActiveConnectionCounter) {
@@ -493,7 +493,7 @@ public final class HttpClient {
      * @param readTimeoutInMillis Read timeout in milliseconds
      * @param executor Custom executor for asynchronous operations
      * @return A new HttpClient instance
-     * @throws IllegalArgumentException if url is null or any numeric parameter is negative
+     * @throws IllegalArgumentException if url is {@code null} or any numeric parameter is negative
      */
     public static HttpClient create(final URL url, final int maxConnection, final long connectionTimeoutInMillis, final long readTimeoutInMillis,
             final Executor executor) {
@@ -512,7 +512,7 @@ public final class HttpClient {
      * @param executor Custom executor for asynchronous operations
      * @return A new HttpClient instance
      * @throws UncheckedIOException if an I/O error occurs
-     * @throws IllegalArgumentException if url is null or any numeric parameter is negative
+     * @throws IllegalArgumentException if url is {@code null} or any numeric parameter is negative
      */
     public static HttpClient create(final URL url, final int maxConnection, final long connectionTimeoutInMillis, final long readTimeoutInMillis,
             final HttpSettings settings, final Executor executor) throws UncheckedIOException {
@@ -531,7 +531,7 @@ public final class HttpClient {
      * @param sharedActiveConnectionCounter Shared counter for managing active connections across multiple clients
      * @param executor Custom executor for asynchronous operations (null uses default)
      * @return A new HttpClient instance
-     * @throws IllegalArgumentException if url is null or any numeric parameter is negative
+     * @throws IllegalArgumentException if url is {@code null} or any numeric parameter is negative
      */
     public static HttpClient create(final URL url, final int maxConnection, final long connectionTimeoutInMillis, final long readTimeoutInMillis,
             final HttpSettings settings, final AtomicInteger sharedActiveConnectionCounter, final Executor executor) {
@@ -911,7 +911,7 @@ public final class HttpClient {
      * }</pre>
      *
      * @param httpMethod The HTTP method to use
-     * @param request The request body (can be null for GET/DELETE)
+     * @param request The request body (can be {@code null} for GET/DELETE)
      * @return The response body as a String
      * @throws UncheckedIOException if an I/O error occurs
      */
@@ -924,7 +924,7 @@ public final class HttpClient {
      * 
      * @param <T> The type of the response object
      * @param httpMethod The HTTP method to use
-     * @param request The request body (can be null for GET/DELETE)
+     * @param request The request body (can be {@code null} for GET/DELETE)
      * @param resultClass The class of the expected response object
      * @return The deserialized response object
      * @throws UncheckedIOException if an I/O error occurs
@@ -937,7 +937,7 @@ public final class HttpClient {
      * Executes an HTTP request with custom settings.
      * 
      * @param httpMethod The HTTP method to use
-     * @param request The request body (can be null for GET/DELETE)
+     * @param request The request body (can be {@code null} for GET/DELETE)
      * @param settings Additional HTTP settings for this request
      * @return The response body as a String
      * @throws UncheckedIOException if an I/O error occurs
@@ -952,10 +952,10 @@ public final class HttpClient {
      * 
      * @param <T> The type of the response object
      * @param httpMethod The HTTP method to use
-     * @param request The request body (can be null for GET/DELETE)
+     * @param request The request body (can be {@code null} for GET/DELETE)
      * @param settings Additional HTTP settings for this request
      * @param resultClass The class of the expected response object
-     * @return The deserialized response object, or null if resultClass is Void
+     * @return The deserialized response object, or {@code null} if resultClass is Void
      * @throws UncheckedIOException if an I/O error occurs
      */
     public <T> T execute(final HttpMethod httpMethod, final Object request, final HttpSettings settings, final Class<T> resultClass)
@@ -973,7 +973,7 @@ public final class HttpClient {
      * }</pre>
      *
      * @param httpMethod The HTTP method to use
-     * @param request The request body (can be null for GET/DELETE)
+     * @param request The request body (can be {@code null} for GET/DELETE)
      * @param settings Additional HTTP settings for this request
      * @param output The file to write the response to
      * @throws UncheckedIOException if an I/O error occurs
@@ -993,7 +993,7 @@ public final class HttpClient {
      * Executes an HTTP request and writes the response to an output stream.
      * 
      * @param httpMethod The HTTP method to use
-     * @param request The request body (can be null for GET/DELETE)
+     * @param request The request body (can be {@code null} for GET/DELETE)
      * @param settings Additional HTTP settings for this request
      * @param output The output stream to write the response to
      * @throws UncheckedIOException if an I/O error occurs
@@ -1006,7 +1006,7 @@ public final class HttpClient {
      * Executes an HTTP request and writes the response to a writer.
      * 
      * @param httpMethod The HTTP method to use
-     * @param request The request body (can be null for GET/DELETE)
+     * @param request The request body (can be {@code null} for GET/DELETE)
      * @param settings Additional HTTP settings for this request
      * @param output The writer to write the response to
      * @throws UncheckedIOException if an I/O error occurs
@@ -1150,26 +1150,11 @@ public final class HttpClient {
         }
     }
 
-    /**
-     * Checks if is one way request.
-     * @param settings
-     * @param resultClass
-     * @param outputStream
-     * @param outputWriter
-     *
-     * @return {@code true}, if is one way request
-     */
     boolean isOneWayRequest(final HttpSettings settings, final Class<?> resultClass, final OutputStream outputStream, final Writer outputWriter) {
         return (resultClass == null || Void.class.equals(resultClass) || (settings == null ? _settings.isOneWayRequest() : settings.isOneWayRequest()))
                 && outputStream == null && outputWriter == null;
     }
 
-    /**
-     * Gets the content format.
-     *
-     * @param settings
-     * @return
-     */
     ContentFormat getContentFormat(final HttpSettings settings) {
         ContentFormat contentFormat = null;
 
@@ -1184,12 +1169,6 @@ public final class HttpClient {
         return contentFormat;
     }
 
-    /**
-     * Gets the content type.
-     *
-     * @param settings
-     * @return
-     */
     String getContentType(final HttpSettings settings) {
         String contentType = null;
 
@@ -1204,12 +1183,6 @@ public final class HttpClient {
         return contentType;
     }
 
-    /**
-     * Gets the content encoding.
-     *
-     * @param settings
-     * @return
-     */
     private String getContentEncoding(final HttpSettings settings) {
         String contentEncoding = null;
 
@@ -1372,12 +1345,6 @@ public final class HttpClient {
         }
     }
 
-    /**
-     *
-     * @param os
-     * @param is
-     * @param connection
-     */
     void close(final OutputStream os, final InputStream is, @SuppressWarnings("unused") final HttpURLConnection connection) { //NOSONAR
         try {
             IOUtil.closeQuietly(os);
@@ -1781,7 +1748,7 @@ public final class HttpClient {
      * Executes an asynchronous HTTP request with the specified method and request body.
      * 
      * @param httpMethod The HTTP method to use
-     * @param request The request body (can be null for GET/DELETE)
+     * @param request The request body (can be {@code null} for GET/DELETE)
      * @return A ContinuableFuture that will complete with the response body
      */
     public ContinuableFuture<String> asyncExecute(final HttpMethod httpMethod, final Object request) {
@@ -1793,7 +1760,7 @@ public final class HttpClient {
      * 
      * @param <T> The type of the response object
      * @param httpMethod The HTTP method to use
-     * @param request The request body (can be null for GET/DELETE)
+     * @param request The request body (can be {@code null} for GET/DELETE)
      * @param resultClass The class of the expected response object
      * @return A ContinuableFuture that will complete with the deserialized response
      */
@@ -1805,7 +1772,7 @@ public final class HttpClient {
      * Executes an asynchronous HTTP request with custom settings.
      * 
      * @param httpMethod The HTTP method to use
-     * @param request The request body (can be null for GET/DELETE)
+     * @param request The request body (can be {@code null} for GET/DELETE)
      * @param settings Additional HTTP settings for this request
      * @return A ContinuableFuture that will complete with the response body
      */
@@ -1819,7 +1786,7 @@ public final class HttpClient {
      * 
      * @param <T> The type of the response object
      * @param httpMethod The HTTP method to use
-     * @param request The request body (can be null for GET/DELETE)
+     * @param request The request body (can be {@code null} for GET/DELETE)
      * @param settings Additional HTTP settings for this request
      * @param resultClass The class of the expected response object
      * @return A ContinuableFuture that will complete with the deserialized response
@@ -1834,7 +1801,7 @@ public final class HttpClient {
      * Executes an asynchronous HTTP request and writes the response to a file.
      * 
      * @param httpMethod The HTTP method to use
-     * @param request The request body (can be null for GET/DELETE)
+     * @param request The request body (can be {@code null} for GET/DELETE)
      * @param settings Additional HTTP settings for this request
      * @param output The file to write the response to
      * @return A ContinuableFuture that will complete when the file is written
@@ -1853,7 +1820,7 @@ public final class HttpClient {
      * Executes an asynchronous HTTP request and writes the response to an output stream.
      * 
      * @param httpMethod The HTTP method to use
-     * @param request The request body (can be null for GET/DELETE)
+     * @param request The request body (can be {@code null} for GET/DELETE)
      * @param settings Additional HTTP settings for this request
      * @param output The output stream to write the response to
      * @return A ContinuableFuture that will complete when the stream is written
@@ -1872,7 +1839,7 @@ public final class HttpClient {
      * Executes an asynchronous HTTP request and writes the response to a writer.
      * 
      * @param httpMethod The HTTP method to use
-     * @param request The request body (can be null for GET/DELETE)
+     * @param request The request body (can be {@code null} for GET/DELETE)
      * @param settings Additional HTTP settings for this request
      * @param output The writer to write the response to
      * @return A ContinuableFuture that will complete when the writer is written

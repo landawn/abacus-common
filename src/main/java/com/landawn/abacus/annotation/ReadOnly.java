@@ -53,27 +53,27 @@ import java.lang.annotation.Target;
  * 
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
- * {@literal @}Entity
+ * @Entity
  * public class Article {
- *     {@literal @}Id
+ *     @Id
  *     private Long id;
  *     
- *     {@literal @}Column
+ *     @Column
  *     private String title;
  *     
- *     {@literal @}Column
+ *     @Column
  *     private String content;
  *     
- *     {@literal @}ReadOnly
- *     {@literal @}Column(name = "created_time")
+ *     @ReadOnly
+ *     @Column(name = "created_time")
  *     private Timestamp createdTime;  // Set by database DEFAULT or trigger
  *     
- *     {@literal @}ReadOnly
- *     {@literal @}Column(name = "last_modified")
+ *     @ReadOnly
+ *     @Column(name = "last_modified")
  *     private Timestamp lastModified;  // Set by database trigger
  *     
- *     {@literal @}ReadOnly
- *     {@literal @}Column(name = "view_count")
+ *     @ReadOnly
+ *     @Column(name = "view_count")
  *     private Integer viewCount;       // Updated by stored procedure
  * }
  * }</pre>

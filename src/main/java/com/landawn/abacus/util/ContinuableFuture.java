@@ -1251,8 +1251,8 @@ public class ContinuableFuture<T> implements Future<T> {
      * <ul>
      *   <li>result1/exception1 are from this future</li>
      *   <li>result2/exception2 are from the other future</li>
-     *   <li>If a future succeeds, its result is non-null and exception is null</li>
-     *   <li>If a future fails, its result is null and exception is non-null</li>
+     *   <li>If a future succeeds, its result is {@code non-null} and exception is null</li>
+     *   <li>If a future fails, its result is {@code null} and exception is non-null</li>
      * </ul>
      * 
      * <p><b>Usage Examples:</b></p>
@@ -1400,8 +1400,8 @@ public class ContinuableFuture<T> implements Future<T> {
      * with the result of the function. The function always executes, regardless of whether the
      * futures completed normally or exceptionally. This is useful when you need to handle the
      * results of both futures regardless of their success/failure status. The tuple contains:
-     * (result1, exception1, result2, exception2) where results are null if the corresponding
-     * future failed, and exceptions are null if the corresponding future succeeded.
+     * (result1, exception1, result2, exception2) where results are {@code null} if the corresponding
+     * future failed, and exceptions are {@code null} if the corresponding future succeeded.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1498,7 +1498,7 @@ public class ContinuableFuture<T> implements Future<T> {
      *
      * @param other the other ContinuableFuture to race against; must not be null
      * @param action the Runnable to execute after either future completes; must not be null
-     * @return a new ContinuableFuture<Void> that completes after executing the action
+     * @return a new ContinuableFuture&lt;Void&gt; that completes after executing the action
      */
     public ContinuableFuture<Void> runAfterEither(final ContinuableFuture<?> other, final Throwables.Runnable<? extends Exception> action) {
         return execute(() -> {
@@ -1512,7 +1512,7 @@ public class ContinuableFuture<T> implements Future<T> {
     /**
      * Executes the provided Consumer action after either this ContinuableFuture or the other ContinuableFuture completes
      * (successfully or exceptionally). The Consumer receives the result of whichever future completes first.
-     * If the future that completes first fails, the consumer receives null.
+     * If the future that completes first fails, the consumer receives {@code null}.
      * 
      * <p>This method is useful for triggering an action as soon as any of the futures completes,
      * regardless of which one finishes first or whether it succeeds or fails.
@@ -1530,7 +1530,7 @@ public class ContinuableFuture<T> implements Future<T> {
      *
      * @param other the other ContinuableFuture to race against; must not be null
      * @param action the Consumer to execute with the first available result; must not be null
-     * @return a new ContinuableFuture<Void> that completes after executing the action
+     * @return a new ContinuableFuture&lt;Void&gt; that completes after executing the action
      */
     public ContinuableFuture<Void> runAfterEither(final ContinuableFuture<? extends T> other,
             final Throwables.Consumer<? super T, ? extends Exception> action) {
@@ -1567,7 +1567,7 @@ public class ContinuableFuture<T> implements Future<T> {
      *
      * @param other the other ContinuableFuture to race against; must not be null
      * @param action the BiConsumer to execute with the result and exception; must not be null
-     * @return a new ContinuableFuture<Void> that completes after executing the action
+     * @return a new ContinuableFuture&lt;Void&gt; that completes after executing the action
      * @see #gett()
      */
     public ContinuableFuture<Void> runAfterEither(final ContinuableFuture<? extends T> other,
@@ -1614,7 +1614,7 @@ public class ContinuableFuture<T> implements Future<T> {
     /**
      * Executes the provided function after either this ContinuableFuture or the other ContinuableFuture
      * completes (successfully or exceptionally). The function transforms the result of whichever future completes first.
-     * If the future that completes first fails, the function receives null.
+     * If the future that completes first fails, the function receives {@code null}.
      * 
      * <p>This method is useful when you need to compute a new value as soon as either future completes,
      * regardless of which one finishes first or whether it succeeds or fails.
@@ -1702,7 +1702,7 @@ public class ContinuableFuture<T> implements Future<T> {
      *
      * @param other the other ContinuableFuture to wait for; must not be null
      * @param action the Runnable to execute after the first successful completion; must not be null
-     * @return a new ContinuableFuture<Void> that completes after executing the action
+     * @return a new ContinuableFuture&lt;Void&gt; that completes after executing the action
      */
     public ContinuableFuture<Void> runAfterFirstSucceed(final ContinuableFuture<?> other, final Throwables.Runnable<? extends Exception> action) {
         return execute(() -> {
@@ -1743,7 +1743,7 @@ public class ContinuableFuture<T> implements Future<T> {
      *
      * @param other the other ContinuableFuture to wait for; must not be null
      * @param action the Consumer to execute with the first successful result; must not be null
-     * @return a new ContinuableFuture<Void> that completes after executing the action
+     * @return a new ContinuableFuture&lt;Void&gt; that completes after executing the action
      */
     public ContinuableFuture<Void> runAfterFirstSucceed(final ContinuableFuture<? extends T> other,
             final Throwables.Consumer<? super T, ? extends Exception> action) {
@@ -1772,7 +1772,7 @@ public class ContinuableFuture<T> implements Future<T> {
 
     /**
      * Executes the provided BiConsumer action after the first successful completion between this ContinuableFuture
-     * and the other ContinuableFuture. The BiConsumer receives the result and exception, where at least one will be non-null.
+     * and the other ContinuableFuture. The BiConsumer receives the result and exception, where at least one will be {@code non-null}.
      * 
      * <p>If the first future to complete succeeds, the BiConsumer receives (result, null).
      * If both futures fail, the BiConsumer receives (null, firstException).
@@ -1794,7 +1794,7 @@ public class ContinuableFuture<T> implements Future<T> {
      *
      * @param other the other ContinuableFuture to wait for; must not be null
      * @param action the BiConsumer to execute with the result and exception; must not be null
-     * @return a new ContinuableFuture<Void> that completes after executing the action
+     * @return a new ContinuableFuture&lt;Void&gt; that completes after executing the action
      */
     @Beta
     public ContinuableFuture<Void> runAfterFirstSucceed(final ContinuableFuture<? extends T> other,
@@ -1911,7 +1911,7 @@ public class ContinuableFuture<T> implements Future<T> {
 
     /**
      * Executes the provided BiFunction after the first successful completion between this ContinuableFuture
-     * and the other ContinuableFuture. The BiFunction receives the result and exception, where at least one will be non-null.
+     * and the other ContinuableFuture. The BiFunction receives the result and exception, where at least one will be {@code non-null}.
      * 
      * <p>If the first future to complete succeeds, the BiFunction receives (result, null).
      * If both futures fail, the BiFunction receives (null, firstException).
@@ -1998,7 +1998,7 @@ public class ContinuableFuture<T> implements Future<T> {
      *
      * @param delay the delay duration before the next action is executed; must be non-negative
      * @param unit the time unit of the delay parameter; must not be null
-     * @return a new ContinuableFuture configured with the specified delay if delay > 0, or this future if delay <= 0
+     * @return a new ContinuableFuture configured with the specified delay if delay &gt; 0, or this future if delay &lt;= 0
      */
     public ContinuableFuture<T> thenDelay(final long delay, final TimeUnit unit) {
         if (delay <= 0) {

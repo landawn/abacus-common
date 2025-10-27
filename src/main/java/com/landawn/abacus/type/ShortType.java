@@ -27,7 +27,7 @@ public final class ShortType extends AbstractShortType {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * ShortType type = new ShortType();
+     * Type<Short> type = TypeFactory.getType(Short.class);
      * Class<Short> clazz = type.clazz(); // Returns Short.class
      * }</pre>
      *
@@ -43,14 +43,14 @@ public final class ShortType extends AbstractShortType {
      * Indicates whether this type represents a primitive wrapper class.
      * For ShortType, this always returns {@code true} since it represents the Short wrapper class
      * for the primitive short type.
-     * <p>
-     * Usage example:
+     *
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * ShortType type = new ShortType();
+     * Type<Short> type = TypeFactory.getType(Short.class);
      * boolean isWrapper = type.isPrimitiveWrapper(); // Returns true
      * }</pre>
      *
-     * @return true, indicating this is a primitive wrapper type
+     * @return {@code true}, indicating this is a primitive wrapper type
      */
     @Override
     public boolean isPrimitiveWrapper() {

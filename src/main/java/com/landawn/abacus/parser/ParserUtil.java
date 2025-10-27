@@ -1215,15 +1215,15 @@ public final class ParserUtil {
 
         /**
          * Gets property information by property name.
-         * 
-         * <p>This method supports various property name formats including:
+         *
+         * <p>This method supports various property name formats including:</p>
          * <ul>
          *   <li>Direct property names</li>
          *   <li>Nested property paths using dot notation (e.g., "address.street")</li>
          *   <li>Aliases defined via annotations</li>
          *   <li>Column names from database mappings</li>
-         * </ul></p>
-         * 
+         * </ul>
+         *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * PropInfo nameInfo = beanInfo.getPropInfo("name");
@@ -1231,7 +1231,7 @@ public final class ParserUtil {
          * }</pre>
          *
          * @param propName the property name to look up
-         * @return the PropInfo for the property, or null if not found
+         * @return the PropInfo for the property, or {@code null} if not found
          * @see PropInfo
          */
         @Override
@@ -1299,7 +1299,7 @@ public final class ParserUtil {
          * }</pre>
          *
          * @param propInfoFromOtherBean property information from another bean
-         * @return matching PropInfo in this bean, or null if no match found
+         * @return matching PropInfo in this bean, or {@code null} if no match found
          */
         public PropInfo getPropInfo(final PropInfo propInfoFromOtherBean) {
             if (propInfoFromOtherBean.aliases.isEmpty()) {
@@ -1325,7 +1325,7 @@ public final class ParserUtil {
          * Gets the value of a property from the specified object.
          * 
          * <p>Supports nested property access using dot notation (e.g., "address.street").
-         * If any intermediate property in a nested path is null, returns the default
+         * If any intermediate property in a nested path is {@code null}, returns the default
          * value for the final property type.</p>
          * 
          * <p><b>Usage Examples:</b></p>
@@ -1395,7 +1395,7 @@ public final class ParserUtil {
          * Sets the value of a property on the specified object with optional unmatched property handling.
          * 
          * <p>Supports nested property access using dot notation. For nested properties,
-         * intermediate objects are created as needed if they are null.</p>
+         * intermediate objects are created as needed if they are {@code null}.</p>
          * 
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
@@ -1407,7 +1407,7 @@ public final class ParserUtil {
          * @param obj the object to set the property value on
          * @param propName the property name (supports nested paths)
          * @param propValue the value to set
-         * @param ignoreUnmatchedProperty if true, silently ignore properties that don't exist
+         * @param ignoreUnmatchedProperty if {@code true}, silently ignore properties that don't exist
          * @return {@code true} if the property was set, {@code false} if it was ignored
          * @throws IllegalArgumentException if no setter found and ignoreUnmatchedProperty is false
          */
@@ -1511,7 +1511,7 @@ public final class ParserUtil {
          * @param obj the object to set the property value on
          * @param propInfoFromOtherBean property information from another bean
          * @param propValue the value to set
-         * @param ignoreUnmatchedProperty if true, silently ignore properties that don't exist
+         * @param ignoreUnmatchedProperty if {@code true}, silently ignore properties that don't exist
          * @return {@code true} if the property was set, {@code false} if it was ignored
          * @throws RuntimeException if no setter found and ignoreUnmatchedProperty is false
          */
@@ -1643,7 +1643,7 @@ public final class ParserUtil {
          * @param cbuf the character buffer containing the property name
          * @param fromIndex the starting index in the buffer
          * @param toIndex the ending index in the buffer
-         * @return the PropInfo if found, null otherwise
+         * @return the PropInfo if found, {@code null} otherwise
          */
         @Override
         public PropInfo readPropInfo(final char[] cbuf, final int fromIndex, final int toIndex) {
@@ -1714,7 +1714,7 @@ public final class ParserUtil {
          *
          * @param <T> the annotation type
          * @param annotationClass the annotation class to retrieve
-         * @return the annotation instance, or null if not present
+         * @return the annotation instance, or {@code null} if not present
          */
         public <T extends Annotation> T getAnnotation(final Class<T> annotationClass) {
             return (T) annotations.get(annotationClass);
@@ -1875,11 +1875,6 @@ public final class ParserUtil {
             return this == obj || (obj instanceof BeanInfo && N.equals(((BeanInfo) obj).clazz, clazz));
         }
 
-        /**
-         * Returns a string representation of this BeanInfo.
-         *
-         * @return the canonical class name
-         */
         @Override
         public String toString() {
             return ClassUtil.getCanonicalClassName(clazz);
@@ -1951,17 +1946,17 @@ public final class ParserUtil {
         public final Type<Object> type;
 
         /**
-         * The Field object for direct field access, or null if property is only accessible via methods.
+         * The Field object for direct field access, or {@code null} if property is only accessible via methods.
          */
         public final Field field;
 
         /**
-         * The getter method for this property, or null if the property is write-only.
+         * The getter method for this property, or {@code null} if the property is write-only.
          */
         public final Method getMethod;
 
         /**
-         * The setter method for this property, or null if the property is read-only.
+         * The setter method for this property, or {@code null} if the property is read-only.
          */
         public final Method setMethod;
 
@@ -2031,7 +2026,7 @@ public final class ParserUtil {
 
         /**
          * Indicates whether this property should be serialized as raw JSON value.
-         * When true, the value is written directly without quotes or escaping.
+         * When {@code true}, the value is written directly without quotes or escaping.
          */
         final boolean isJsonRawValue;
 
@@ -2146,9 +2141,9 @@ public final class ParserUtil {
          * </ul>
          *
          * @param propName the name of the property
-         * @param field the field object (may be null for method-only properties)
-         * @param getMethod the getter method (may be null for write-only properties)
-         * @param setMethod the setter method (may be null for read-only properties)
+         * @param field the field object (may be {@code null} for method-only properties)
+         * @param getMethod the getter method (may be {@code null} for write-only properties)
+         * @param setMethod the setter method (may be {@code null} for read-only properties)
          * @param jsonXmlConfig configuration for JSON/XML processing
          * @param classAnnotations annotations from the declaring class
          * @param fieldOrder the ordinal position of this field
@@ -2717,7 +2712,6 @@ public final class ParserUtil {
          * @param strValue the string value to parse
          * @return the parsed value in the appropriate type
          * @throws UnsupportedOperationException if date format is specified for unsupported types
-         * @throws ParseException if the string cannot be parsed according to the format
          */
         public Object readPropValue(final String strValue) {
             if (hasFormat) {
@@ -2846,7 +2840,7 @@ public final class ParserUtil {
          *
          * @param <T> the annotation type
          * @param annotationClass the annotation class to retrieve
-         * @return the annotation instance, or null if not present
+         * @return the annotation instance, or {@code null} if not present
          */
         public <T extends Annotation> T getAnnotation(final Class<T> annotationClass) {
             return (T) annotations.get(annotationClass);
@@ -2887,7 +2881,7 @@ public final class ParserUtil {
          * @param field the field
          * @param propClass the property class
          * @param jsonXmlConfig the configuration
-         * @return the type name or null if not specified
+         * @return the type name or {@code null} if not specified
          */
         @SuppressWarnings("unused")
         private String getAnnoType(final Field field, final Class<?> propClass, final JsonXmlConfig jsonXmlConfig) {
@@ -2924,7 +2918,7 @@ public final class ParserUtil {
          * @param field the field
          * @param propClass the property class
          * @param jsonXmlConfig the configuration
-         * @return the type name or null if not specified
+         * @return the type name or {@code null} if not specified
          */
         @SuppressWarnings("unused")
         private String getJsonXmlAnnoType(final Field field, final Class<?> propClass, final JsonXmlConfig jsonXmlConfig) {
@@ -2959,7 +2953,7 @@ public final class ParserUtil {
          * Gets the annotated type name for database operations.
          *
          * @param propClass the property class
-         * @return the type name or null if not specified
+         * @return the type name or {@code null} if not specified
          */
         @SuppressWarnings("unused")
         private String getDBAnnoType(final Class<?> propClass) {
@@ -2976,13 +2970,6 @@ public final class ParserUtil {
             return null;
         }
 
-        /**
-         * Extracts the type name from a Type annotation.
-         * 
-         * @param typeAnno the type annotation
-         * @param propClass the property class
-         * @return the resolved type name
-         */
         private String getTypeName(final com.landawn.abacus.annotation.Type typeAnno, final Class<?> propClass) {
             @SuppressWarnings("deprecation")
             final Optional<String> typeName = N.firstNonEmpty(typeAnno.value(), typeAnno.name());
@@ -3042,17 +3029,6 @@ public final class ParserUtil {
             return null;
         }
 
-        /**
-         * Resolves the Type object for a property.
-         *
-         * @param <T> the type parameter
-         * @param annoType the annotated type name
-         * @param field the field
-         * @param getMethod the getter method
-         * @param setMethod the setter method
-         * @param beanClass the bean class
-         * @return the resolved Type object
-         */
         @SuppressWarnings("unused")
         private <T> Type<T> getType(final String annoType, final Field field, final Method getMethod, final Method setMethod, final Class<?> beanClass) {
             if (Strings.isEmpty(annoType)) {
@@ -3176,25 +3152,12 @@ public final class ParserUtil {
                     : fieldAccess.getIndex(field.getName());
         }
 
-        /**
-         * Gets the prop value.
-         *
-         * @param <T>
-         * @param obj
-         * @return
-         */
         @SuppressWarnings("unchecked")
         @Override
         public <T> T getPropValue(final Object obj) {
             return (T) ((fieldAccessIndex > -1) ? fieldAccess.get(obj, fieldAccessIndex) : getMethodAccess.invoke(obj, getMethodAccessIndex));
         }
 
-        /**
-         * Sets the prop value.
-         *
-         * @param obj
-         * @param propValue
-         */
         @SuppressFBWarnings
         @Override
         public void setPropValue(final Object obj, Object propValue) {

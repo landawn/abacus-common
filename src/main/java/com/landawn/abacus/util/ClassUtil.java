@@ -101,6 +101,7 @@ import java.util.jar.JarFile;
 import javax.xml.datatype.XMLGregorianCalendar;
 
 import com.landawn.abacus.annotation.Internal;
+import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.annotation.SuppressFBWarnings;
 import com.landawn.abacus.exception.UncheckedIOException;
 import com.landawn.abacus.logging.Logger;
@@ -758,6 +759,7 @@ public final class ClassUtil {
      * @param cls the class whose package is to be retrieved
      * @return the package of the class, or {@code null} if the class is a primitive type or no package is defined
      */
+    @MayReturnNull
     public static Package getPackage(final Class<?> cls) {
         Package pkg = packagePool.get(cls);
 
@@ -968,12 +970,6 @@ public final class ClassUtil {
 
     //    /**
 
-    /**
-     * Gets the resources.
-     *
-     * @param pkgName the package name to get resources for
-     * @return a list of URLs for the resources found for the specified package name
-     */
     private static List<URL> getResources(final String pkgName) {
         final List<URL> resourceList = new ArrayList<>();
         final String pkgPath = packageName2FilePath(pkgName);
@@ -1022,23 +1018,11 @@ public final class ClassUtil {
         return resourceList;
     }
 
-    /**
-     * File path 2 package name.
-     *
-     * @param entryName the file path to convert to a package name
-     * @return the package name derived from the file path
-     */
     private static String filePath2PackageName(final String entryName) {
         final String pkgName = entryName.replace('/', '.').replace('\\', '.');
         return pkgName.endsWith(".") ? pkgName.substring(0, pkgName.length() - 1) : pkgName;
     }
 
-    /**
-     * Package name 2 file path.
-     *
-     * @param pkgName the package name to convert to a file path
-     * @return the file path derived from the package name
-     */
     private static String packageName2FilePath(final String pkgName) {
         final String pkgPath = pkgName.replace('.', '/');
         return pkgPath.endsWith("/") ? pkgPath : (pkgPath + "/");
@@ -1116,12 +1100,6 @@ public final class ClassUtil {
         return superTypesFound;
     }
 
-    /**
-     * Gets the all interfaces.
-     *
-     * @param cls the class to get interfaces from
-     * @param interfacesFound the set to accumulate all found interfaces
-     */
     private static void getAllInterfaces(Class<?> cls, final Set<Class<?>> interfacesFound) {
         while (cls != null) {
             final Class<?>[] interfaces = cls.getInterfaces();
@@ -1136,12 +1114,6 @@ public final class ClassUtil {
         }
     }
 
-    /**
-     * Gets the all super types.
-     *
-     * @param cls the class to get super types from
-     * @param superTypesFound the set to accumulate all found super types
-     */
     private static void getAllSuperTypes(Class<?> cls, final Set<Class<?>> superTypesFound) {
         while (cls != null) {
             final Class<?>[] interfaces = cls.getInterfaces();
@@ -1724,13 +1696,6 @@ public final class ClassUtil {
         }
     }
 
-    /**
-     * Make package folder.
-     *
-     * @param srcPath the source path where the package folder should be created
-     * @param pkgName the package name to create a folder for
-     * @return the path to the created or existing package folder
-     */
     static String makeFolderForPackage(String srcPath, final String pkgName) {
         srcPath = (srcPath.endsWith("/") || srcPath.endsWith("\\")) ? srcPath : (srcPath + File.separator);
 
@@ -2085,7 +2050,7 @@ public final class ClassUtil {
      * // Use nullMask as a sentinel value to represent null in contexts where null itself cannot be used
      * }</pre>
      *
-     * @return a new instance of the <i>None</i> class that serves as a null placeholder
+     * @return a new instance of the <i>None</i> class that serves as a {@code null} placeholder
      */
     public static Object createNullMask() {
         return new None();
@@ -2099,9 +2064,6 @@ public final class ClassUtil {
         /** The Constant FIELD_MASK. */
         static final String FIELD_MASK = "FIELD_MASK";
 
-        /**
-         * Method mask.
-         */
         static void methodMask() { //NOSONAR
         }
     }

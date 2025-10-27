@@ -54,7 +54,7 @@ public class SQLArrayType extends AbstractType<Array> {
      * boolean serializable = type.isSerializable(); // Returns false
      * }</pre>
      *
-     * @return false, indicating this type is not serializable
+     * @return {@code false}, indicating this type is not serializable
      */
     @Override
     public boolean isSerializable() {
@@ -76,6 +76,7 @@ public class SQLArrayType extends AbstractType<Array> {
      * @param x the Array object to convert
      * @return never returns normally
      * @throws UnsupportedOperationException always thrown as Array cannot be converted to string
+     @MayReturnNull
      */
     @Override
     public String stringOf(final Array x) throws UnsupportedOperationException {
@@ -97,6 +98,7 @@ public class SQLArrayType extends AbstractType<Array> {
      * @param str the string to convert
      * @return never returns normally
      * @throws UnsupportedOperationException always thrown as Array cannot be created from string
+     @MayReturnNull
      */
     @Override
     public Array valueOf(final String str) throws UnsupportedOperationException {
@@ -116,8 +118,9 @@ public class SQLArrayType extends AbstractType<Array> {
      *
      * @param rs the ResultSet to read from
      * @param columnIndex the 1-based index of the column to retrieve
-     * @return the Array value from the specified column, or null if the column value is SQL NULL
+     * @return the Array value from the specified column, or {@code null} if the column value is SQL NULL
      * @throws SQLException if a database access error occurs or the column index is invalid
+     @MayReturnNull
      */
     @Override
     public Array get(final ResultSet rs, final int columnIndex) throws SQLException {
@@ -137,7 +140,7 @@ public class SQLArrayType extends AbstractType<Array> {
      *
      * @param rs the ResultSet to read from
      * @param columnLabel the label of the column to retrieve (column name or alias)
-     * @return the Array value from the specified column, or null if the column value is SQL NULL
+     * @return the Array value from the specified column, or {@code null} if the column value is SQL NULL
      * @throws SQLException if a database access error occurs or the column label is not found
      */
     @Override

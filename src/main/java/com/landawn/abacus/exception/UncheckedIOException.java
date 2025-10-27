@@ -81,7 +81,7 @@ public class UncheckedIOException extends UncheckedException {
      * }
      * }</pre>
      *
-     * @param cause the {@link IOException} to wrap. Must not be null.
+     * @param cause the {@link IOException} to wrap. Must not be {@code null}.
      * @throws IllegalArgumentException if cause is null
      */
     public UncheckedIOException(final IOException cause) {
@@ -106,7 +106,7 @@ public class UncheckedIOException extends UncheckedException {
      *
      * @param message the detail message providing context about the I/O failure.
      *                The detail message is saved for later retrieval by the {@link #getMessage()} method.
-     * @param cause the {@link IOException} to wrap. Must not be null.
+     * @param cause the {@link IOException} to wrap. Must not be {@code null}.
      * @throws IllegalArgumentException if cause is null
      */
     public UncheckedIOException(final String message, final IOException cause) {

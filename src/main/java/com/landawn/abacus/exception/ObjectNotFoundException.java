@@ -100,7 +100,7 @@ public class ObjectNotFoundException extends IllegalStateException {
 
     /**
      * Constructs a new {@code ObjectNotFoundException} with the specified cause and a detail
-     * message of {@code (cause==null ? null : cause.toString())} (which typically contains the
+     * message of {@code (cause==null ? {@code null} : cause.toString())} (which typically contains the
      * class and detail message of {@code cause}).
      * 
      * <p>This constructor is useful for exceptions that are little more than wrappers for other

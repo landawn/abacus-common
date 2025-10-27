@@ -14,6 +14,8 @@
 
 package com.landawn.abacus.parser;
 
+import com.landawn.abacus.annotation.MayReturnNull;
+
 import java.io.IOException;
 import java.io.Reader;
 import java.util.HashMap;
@@ -140,7 +142,7 @@ class JSONStringReader extends AbstractJSONReader {
      *
      * @param str the JSON string to parse
      * @param cbuf the character buffer to use for parsing
-     * @return a new JSONReader instance
+          * @return a new JSONReader instance
      */
     public static JSONReader parse(final String str, final char[] cbuf) {
         //        return new JSONStreamReader(new StringReader(str), new char[1], cbuf);
@@ -162,7 +164,7 @@ class JSONStringReader extends AbstractJSONReader {
      * @param beginIndex the starting index (inclusive)
      * @param endIndex the ending index (exclusive)
      * @param cbuf the character buffer to use for parsing
-     * @return a new JSONReader instance
+          * @return a new JSONReader instance
      */
     public static JSONReader parse(final String str, final int beginIndex, final int endIndex, final char[] cbuf) {
         return new JSONStringReader(str, beginIndex, endIndex, cbuf);
@@ -314,7 +316,7 @@ class JSONStringReader extends AbstractJSONReader {
 
     /**
      * Checks if the reader has text content available.
-     * This is true when a value has been parsed (string, number, boolean, or null).
+     * This is {@code true} when a value has been parsed (string, number, boolean, or null).
      *
      * @return {@code true} if text content is available, {@code false} otherwise
      */
@@ -517,11 +519,8 @@ class JSONStringReader extends AbstractJSONReader {
                         : String.valueOf(strValue, strBeginIndex - 1, N.min(32, strEndIndex - strBeginIndex + 1))));
     }
 
-    /**
-     * Gets the text.
-     *
-     * @return
-     */
+    @MayReturnNull
+
     @Override
     public String getText() {
         if (text != null) {
@@ -531,12 +530,6 @@ class JSONStringReader extends AbstractJSONReader {
         return (nextChar > 0) ? String.valueOf(cbuf, 0, nextChar) : String.valueOf(strValue, startIndexForText, endIndexForText - startIndexForText);
     }
 
-    /**
-     *
-     * @param <T>
-     * @param type
-     * @return
-     */
     @SuppressWarnings("unchecked")
     @Override
     public <T> T readValue(final Type<? extends T> type) {
@@ -603,12 +596,8 @@ class JSONStringReader extends AbstractJSONReader {
         }
     }
 
-    /**
-     * Read prop info.
-     *
-     * @param symbolReader
-     * @return
-     */
+    @MayReturnNull
+
     @Override
     public PropInfo readPropInfo(final SymbolReader symbolReader) {
         return (nextChar > 0) ? symbolReader.readPropInfo(cbuf, 0, nextChar) : symbolReader.readPropInfo(strValue, startIndexForText, endIndexForText);

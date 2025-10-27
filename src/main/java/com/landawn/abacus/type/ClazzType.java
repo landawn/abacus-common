@@ -14,6 +14,7 @@
 
 package com.landawn.abacus.type;
 
+import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.util.ClassUtil;
 import com.landawn.abacus.util.Strings;
 
@@ -51,7 +52,7 @@ public class ClazzType extends AbstractType<Class> {
      * Indicates whether instances of this type are immutable.
      * Class objects are immutable in Java.
      *
-     * @return true, indicating Class objects are immutable
+     * @return {@code true}, indicating Class objects are immutable
      */
     @Override
     public boolean isImmutable() {
@@ -62,10 +63,12 @@ public class ClazzType extends AbstractType<Class> {
      * Converts a Class object to its string representation.
      * Uses the canonical class name for serialization.
      *
-     * @param x the Class object to convert. Can be null.
-     * @return The canonical name of the class, or null if input is null
+     * @param x the Class object to convert. Can be {@code null}.
+     * @return The canonical name of the class, or {@code null} if input is null
      */
+    @MayReturnNull
     @Override
+
     public String stringOf(final Class x) {
         return x == null ? null : ClassUtil.getCanonicalClassName(x);
     }
@@ -76,11 +79,13 @@ public class ClazzType extends AbstractType<Class> {
      * Uses ClassUtil.forClass to load the class, which handles primitive types
      * and array notations appropriately.
      *
-     * @param str the fully qualified class name. Can be null or empty.
-     * @return The Class object for the specified name, or null if input is null/empty
+     * @param str the fully qualified class name. Can be {@code null} or empty.
+     * @return The Class object for the specified name, or {@code null} if input is null/empty
      * @throws RuntimeException if the class cannot be found or loaded
      */
+    @MayReturnNull
     @Override
+
     public Class valueOf(final String str) {
         return Strings.isEmpty(str) ? null : ClassUtil.forClass(str);
     }

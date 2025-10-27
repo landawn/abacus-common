@@ -56,7 +56,7 @@ import com.landawn.abacus.util.stream.Stream;
  *
  * <p>The class extends the functionality of standard Java functional interfaces by providing versions that
  * can throw checked exceptions, along with utilities to convert between standard and throwable variants.
- * It also includes specialized functions for common operations like null checking, string conversion,
+ * It also includes specialized functions for common operations like {@code null} checking, string conversion,
  * map entry manipulation, and rate limiting.</p>
  *
  * <p>Key features:</p>
@@ -551,7 +551,7 @@ public final class Fnn {
 
     /**
      * Returns a Throwables.Consumer that closes an AutoCloseable resource.
-     * The consumer calls close() on the resource if it is not null.
+     * The consumer calls close() on the resource if it is not {@code null}.
      *
      * @param <T> the type of AutoCloseable
      * @return a Consumer that closes the AutoCloseable resource
@@ -599,7 +599,7 @@ public final class Fnn {
     }
 
     /**
-     * Returns a Throwables.Predicate that tests if its input is null.
+     * Returns a Throwables.Predicate that tests if its input is {@code null}.
      * This method is marked as Beta.
      *
      * @param <T> the type of the input to the predicate
@@ -637,7 +637,7 @@ public final class Fnn {
 
     /**
      * Returns a Throwables.Predicate that tests if an array is empty.
-     * The predicate returns {@code true} if the array is null or has length 0.
+     * The predicate returns {@code true} if the array is {@code null} or has length 0.
      * This method is marked as Beta.
      *
      * @param <T> the component type of the array
@@ -652,7 +652,7 @@ public final class Fnn {
 
     /**
      * Returns a Throwables.Predicate that tests if a Collection is empty.
-     * The predicate returns {@code true} if the Collection is null or has size 0.
+     * The predicate returns {@code true} if the Collection is {@code null} or has size 0.
      * This method is marked as Beta.
      *
      * @param <T> the type of Collection
@@ -667,7 +667,7 @@ public final class Fnn {
 
     /**
      * Returns a Throwables.Predicate that tests if a Map is empty.
-     * The predicate returns {@code true} if the Map is null or has size 0.
+     * The predicate returns {@code true} if the Map is {@code null} or has size 0.
      * This method is marked as Beta.
      *
      * @param <T> the type of Map
@@ -681,11 +681,11 @@ public final class Fnn {
     }
 
     /**
-     * Returns a Predicate that tests whether its input is not null.
+     * Returns a Predicate that tests whether its input is not {@code null}.
      * 
      * @param <T> the type of the input to the predicate
      * @param <E> the type of the exception that may be thrown
-     * @return a Predicate that returns {@code true} if the input is not null, {@code false} otherwise
+     * @return a Predicate that returns {@code true} if the input is not {@code null}, {@code false} otherwise
      * @see java.util.Objects#nonNull(Object)
      */
     @Beta
@@ -695,7 +695,7 @@ public final class Fnn {
 
     /**
      * Returns a Predicate that tests whether a CharSequence is not empty.
-     * A CharSequence is considered not empty if it is not null and has a length greater than 0.
+     * A CharSequence is considered not empty if it is not {@code null} and has a length greater than 0.
      * 
      * @param <T> the type of the CharSequence to test
      * @param <E> the type of the exception that may be thrown
@@ -708,7 +708,7 @@ public final class Fnn {
 
     /**
      * Returns a Predicate that tests whether a CharSequence is not blank.
-     * A CharSequence is considered not blank if it is not null, not empty, 
+     * A CharSequence is considered not blank if it is not {@code null}, not empty, 
      * and contains at least one non-whitespace character.
      * 
      * @param <T> the type of the CharSequence to test
@@ -722,7 +722,7 @@ public final class Fnn {
 
     /**
      * Returns a Predicate that tests whether an array is not empty.
-     * An array is considered not empty if it is not null and has a length greater than 0.
+     * An array is considered not empty if it is not {@code null} and has a length greater than 0.
      * 
      * @param <T> the component type of the array
      * @param <E> the type of the exception that may be thrown
@@ -737,7 +737,7 @@ public final class Fnn {
 
     /**
      * Returns a Predicate that tests whether a Collection is not empty.
-     * A Collection is considered not empty if it is not null and has a size greater than 0.
+     * A Collection is considered not empty if it is not {@code null} and has a size greater than 0.
      * 
      * @param <T> the type of the Collection to test
      * @param <E> the type of the exception that may be thrown
@@ -752,7 +752,7 @@ public final class Fnn {
 
     /**
      * Returns a Predicate that tests whether a Map is not empty.
-     * A Map is considered not empty if it is not null and has a size greater than 0.
+     * A Map is considered not empty if it is not {@code null} and has a size greater than 0.
      * 
      * @param <T> the type of the Map to test
      * @param <E> the type of the exception that may be thrown
@@ -1148,7 +1148,7 @@ public final class Fnn {
 
     /**
      * Returns a Predicate that represents the logical negation of the given predicate.
-     * When evaluated, the returned predicate returns {@code true} if the given predicate returns false, and vice versa.
+     * When evaluated, the returned predicate returns {@code true} if the given predicate returns {@code false}, and vice versa.
      * 
      * @param <T> the type of the input to the predicate
      * @param <E> the type of the exception that may be thrown
@@ -1165,7 +1165,7 @@ public final class Fnn {
 
     /**
      * Returns a BiPredicate that represents the logical negation of the given bi-predicate.
-     * When evaluated, the returned bi-predicate returns {@code true} if the given bi-predicate returns false, and vice versa.
+     * When evaluated, the returned bi-predicate returns {@code true} if the given bi-predicate returns {@code false}, and vice versa.
      * 
      * @param <T> the type of the first argument to the predicate
      * @param <U> the type of the second argument to the predicate
@@ -1184,7 +1184,7 @@ public final class Fnn {
 
     /**
      * Returns a TriPredicate that represents the logical negation of the given tri-predicate.
-     * When evaluated, the returned tri-predicate returns {@code true} if the given tri-predicate returns false, and vice versa.
+     * When evaluated, the returned tri-predicate returns {@code true} if the given tri-predicate returns {@code false}, and vice versa.
      * 
      * @param <A> the type of the first argument to the predicate
      * @param <B> the type of the second argument to the predicate
@@ -1203,14 +1203,14 @@ public final class Fnn {
 
     /**
      * Returns a stateful Predicate that returns {@code true} for at most the specified number of evaluations.
-     * The predicate maintains an internal counter that decrements with each test, returning true 
-     * while the counter is positive and false once it reaches zero. This predicate is thread-safe
+     * The predicate maintains an internal counter that decrements with each test, returning {@code true} 
+     * while the counter is positive and {@code false} once it reaches zero. This predicate is thread-safe
      * and can be used in parallel streams.
      * 
      * @param <T> the type of the input to the predicate
      * @param <E> the type of the exception that may be thrown
      * @param count the maximum number of times the predicate should return true
-     * @return a stateful Predicate that limits the number of true results. Don't save or cache for reuse.
+     * @return a stateful Predicate that limits the number of {@code true} results. Don't save or cache for reuse.
      * @throws IllegalArgumentException if count is negative
      */
     @Beta
@@ -2439,9 +2439,9 @@ public final class Fnn {
     }
 
     /**
-     * Converts a Consumer to a Function that returns null after executing the consumer.
+     * Converts a Consumer to a Function that returns {@code null} after executing the consumer.
      * The returned function will execute the consumer's accept method on its input
-     * and then return null.
+     * and then return {@code null}.
      *
      * @param <T> the type of the input to the consumer/function
      * @param <E> the type of the checked exception that may be thrown
@@ -2486,9 +2486,9 @@ public final class Fnn {
     }
 
     /**
-     * Converts a BiConsumer to a BiFunction that returns null after executing the consumer.
+     * Converts a BiConsumer to a BiFunction that returns {@code null} after executing the consumer.
      * The returned function will execute the consumer's accept method on its inputs
-     * and then return null.
+     * and then return {@code null}.
      *
      * @param <T> the type of the first argument to the consumer/function
      * @param <U> the type of the second argument to the consumer/function
@@ -2536,9 +2536,9 @@ public final class Fnn {
     }
 
     /**
-     * Converts a TriConsumer to a TriFunction that returns null after executing the consumer.
+     * Converts a TriConsumer to a TriFunction that returns {@code null} after executing the consumer.
      * The returned function will execute the consumer's accept method on its inputs
-     * and then return null.
+     * and then return {@code null}.
      *
      * @param <A> the type of the first argument to the consumer/function
      * @param <B> the type of the second argument to the consumer/function
@@ -2681,8 +2681,8 @@ public final class Fnn {
     }
 
     /**
-     * Converts a Runnable to a Callable that returns null after executing the runnable.
-     * The returned callable will execute the runnable's run method and then return null.
+     * Converts a Runnable to a Callable that returns {@code null} after executing the runnable.
+     * The returned callable will execute the runnable's run method and then return {@code null}.
      *
      * @param <E> the type of the checked exception that may be thrown
      * @param runnable the runnable to convert to a callable

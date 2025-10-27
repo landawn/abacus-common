@@ -45,7 +45,7 @@ public class CurrencyType extends AbstractType<Currency> {
      * Indicates whether instances of this type are immutable.
      * Currency objects are immutable in Java.
      *
-     * @return true, indicating Currency objects are immutable
+     * @return {@code true}, indicating Currency objects are immutable
      */
     @Override
     public boolean isImmutable() {
@@ -56,8 +56,9 @@ public class CurrencyType extends AbstractType<Currency> {
      * Converts a Currency object to its string representation.
      * Uses the ISO 4217 currency code for serialization.
      *
-     * @param x the Currency object to convert. Can be null.
-     * @return The ISO 4217 currency code (e.g., "USD"), or null if input is null
+     * @param x the Currency object to convert. Can be {@code null}.
+     * @return The ISO 4217 currency code (e.g., "USD"), or {@code null} if input is null
+     @MayReturnNull
      */
     @Override
     public String stringOf(final Currency x) {
@@ -68,9 +69,10 @@ public class CurrencyType extends AbstractType<Currency> {
      * Converts a string representation back to a Currency object.
      * The string should be a valid ISO 4217 currency code.
      *
-     * @param str the ISO 4217 currency code. Can be null or empty.
-     * @return The Currency instance for the specified code, or null if input is null/empty
+     * @param str the ISO 4217 currency code. Can be {@code null} or empty.
+     * @return The Currency instance for the specified code, or {@code null} if input is null/empty
      * @throws IllegalArgumentException if the currency code is not a supported ISO 4217 code
+     @MayReturnNull
      */
     @Override
     public Currency valueOf(final String str) {

@@ -53,13 +53,13 @@ import java.lang.annotation.Target;
  * 
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
- * {@literal @}Internal
+ * @Internal
  * public class InternalHelper {
  *     // This class should not be used by external code
  * }
  * 
  * public class PublicAPI {
- *     {@literal @}Internal
+ *     @Internal
  *     public void frameworkMethod() {
  *         // This method is for framework use only
  *     }

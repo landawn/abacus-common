@@ -34,4 +34,10 @@ package com.landawn.abacus.util;
  * @since 1.0
  */
 public final class SecurityUtil {//NOSONAR
+
+    /**
+     * Private constructor to prevent instantiation.
+     */
+    private SecurityUtil() {
+    }
 }

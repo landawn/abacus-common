@@ -17,6 +17,8 @@
 
 package com.landawn.abacus.util;
 
+import com.landawn.abacus.annotation.MayReturnNull;
+
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -260,6 +262,7 @@ public class DigestUtil {
      *
      * @since 1.11
      */
+    @MayReturnNull
     public static MessageDigest getDigest(final String algorithm, final MessageDigest defaultMessageDigest) {
         try {
             return getMessageDigest(algorithm);

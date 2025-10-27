@@ -48,13 +48,13 @@ import java.lang.annotation.Target;
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * public class User {
- *     {@literal @}Type(name = "EncryptedString", scope = Scope.PERSISTENCE)
+ *     @Type(name = "EncryptedString", scope = Scope.PERSISTENCE)
  *     private String password;  // Encrypted when saved to DB
  *     
- *     {@literal @}Type(enumerated = EnumBy.ORDINAL)
+ *     @Type(enumerated = EnumBy.ORDINAL)
  *     private Status status;    // Stored as integer in DB
  *     
- *     {@literal @}Type(clazz = CustomDateType.class)
+ *     @Type(clazz = CustomDateType.class)
  *     private Date createdDate; // Uses custom date formatting
  * }
  * }</pre>
@@ -69,7 +69,7 @@ public @interface Type {
     /**
      * Use {@code name} to specify attribute explicitly
      *
-     * @return
+     * @return the type name value, or empty string if not specified
      * @deprecated use {@code name} to specify attribute explicitly.
      */
     @Deprecated

@@ -14,6 +14,7 @@
 
 package com.landawn.abacus.util.function;
 
+import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.util.Throwables;
 
 /**
@@ -35,6 +36,7 @@ public interface BooleanNFunction<R> extends Throwables.BooleanNFunction<R, Runt
      * @return the function result
      */
     @Override
+    @MayReturnNull
     R apply(boolean... args);
 
     /**

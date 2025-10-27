@@ -288,9 +288,10 @@ public final class HttpUtil {
      * String header2 = HttpUtil.readHttpHeadValue(values); // "gzip,deflate"
      * }</pre>
      *
-     * @param value The header value (can be null, String, Collection, or any object)
+     * @param value The header value (can be {@code null}, String, Collection, or any object)
      * @return The header value as a string, or {@code null} string if value is null
      */
+    @MayReturnNull
     public static String readHttpHeadValue(final Object value) {
         if (value == null) {
             return null;
@@ -314,7 +315,7 @@ public final class HttpUtil {
      * Looks for both "Content-Type" and "content-type" keys.
      *
      * @param httpHeaders The HTTP headers map
-     * @return The Content-Type value, or null if not found
+     * @return The Content-Type value, or {@code null} if not found
      */
     @MayReturnNull
     public static String getContentType(final Map<String, ?> httpHeaders) {
@@ -335,7 +336,7 @@ public final class HttpUtil {
      * Gets the Content-Type header value from HttpHeaders.
      *
      * @param httpHeaders The HttpHeaders object
-     * @return The Content-Type value, or null if not found
+     * @return The Content-Type value, or {@code null} if not found
      */
     @MayReturnNull
     public static String getContentType(final HttpHeaders httpHeaders) {
@@ -356,7 +357,7 @@ public final class HttpUtil {
      * Gets the Content-Type from HttpSettings.
      *
      * @param httpSettings The HttpSettings object
-     * @return The Content-Type value, or null if not found
+     * @return The Content-Type value, or {@code null} if not found
      */
     @MayReturnNull
     public static String getContentType(final HttpSettings httpSettings) {
@@ -371,7 +372,7 @@ public final class HttpUtil {
      * Gets the Content-Type from an HttpURLConnection.
      *
      * @param connection The HTTP connection
-     * @return The Content-Type value, or null if not found
+     * @return The Content-Type value, or {@code null} if not found
      */
     @MayReturnNull
     public static String getContentType(final HttpURLConnection connection) {
@@ -383,7 +384,7 @@ public final class HttpUtil {
      * Looks for both "Content-Encoding" and "content-encoding" keys.
      *
      * @param httpHeaders The HTTP headers map
-     * @return The Content-Encoding value, or null if not found
+     * @return The Content-Encoding value, or {@code null} if not found
      */
     @MayReturnNull
     public static String getContentEncoding(final Map<String, ?> httpHeaders) {
@@ -404,7 +405,7 @@ public final class HttpUtil {
      * Gets the Content-Encoding header value from HttpHeaders.
      *
      * @param httpHeaders The HttpHeaders object
-     * @return The Content-Encoding value, or null if not found
+     * @return The Content-Encoding value, or {@code null} if not found
      */
     @MayReturnNull
     public static String getContentEncoding(final HttpHeaders httpHeaders) {
@@ -425,7 +426,7 @@ public final class HttpUtil {
      * Gets the Content-Encoding from HttpSettings.
      *
      * @param httpSettings The HttpSettings object
-     * @return The Content-Encoding value, or null if not found
+     * @return The Content-Encoding value, or {@code null} if not found
      */
     @MayReturnNull
     public static String getContentEncoding(final HttpSettings httpSettings) {
@@ -440,7 +441,7 @@ public final class HttpUtil {
      * Gets the Content-Encoding from an HttpURLConnection.
      *
      * @param connection The HTTP connection
-     * @return The Content-Encoding value, or null if not found
+     * @return The Content-Encoding value, or {@code null} if not found
      */
     @MayReturnNull
     public static String getContentEncoding(final HttpURLConnection connection) {
@@ -452,7 +453,7 @@ public final class HttpUtil {
      * Looks for both "Accept" and "accept" keys.
      *
      * @param httpHeaders The HTTP headers map
-     * @return The Accept value, or null if not found
+     * @return The Accept value, or {@code null} if not found
      */
     @MayReturnNull
     public static String getAccept(final Map<String, ?> httpHeaders) {
@@ -473,7 +474,7 @@ public final class HttpUtil {
      * Gets the Accept header value from HttpHeaders.
      *
      * @param httpHeaders The HttpHeaders object
-     * @return The Accept value, or null if not found
+     * @return The Accept value, or {@code null} if not found
      */
     @MayReturnNull
     public static String getAccept(final HttpHeaders httpHeaders) {
@@ -494,7 +495,7 @@ public final class HttpUtil {
      * Gets the Accept header from HttpSettings.
      *
      * @param httpSettings The HttpSettings object
-     * @return The Accept value, or null if not found
+     * @return The Accept value, or {@code null} if not found
      */
     @MayReturnNull
     public static String getAccept(final HttpSettings httpSettings) {
@@ -509,7 +510,7 @@ public final class HttpUtil {
      * Gets the Accept header from an HttpURLConnection.
      *
      * @param connection The HTTP connection
-     * @return The Accept value, or null if not found
+     * @return The Accept value, or {@code null} if not found
      */
     @MayReturnNull
     public static String getAccept(final HttpURLConnection connection) {
@@ -521,7 +522,7 @@ public final class HttpUtil {
      * Looks for both "Accept-Encoding" and "accept-encoding" keys.
      *
      * @param httpHeaders The HTTP headers map
-     * @return The Accept-Encoding value, or null if not found
+     * @return The Accept-Encoding value, or {@code null} if not found
      */
     @MayReturnNull
     public static String getAcceptEncoding(final Map<String, ?> httpHeaders) {
@@ -542,7 +543,7 @@ public final class HttpUtil {
      * Gets the Accept-Encoding header value from HttpHeaders.
      *
      * @param httpHeaders The HttpHeaders object
-     * @return The Accept-Encoding value, or null if not found
+     * @return The Accept-Encoding value, or {@code null} if not found
      */
     @MayReturnNull
     public static String getAcceptEncoding(final HttpHeaders httpHeaders) {
@@ -563,7 +564,7 @@ public final class HttpUtil {
      * Gets the Accept-Encoding header from HttpSettings.
      *
      * @param httpSettings The HttpSettings object
-     * @return The Accept-Encoding value, or null if not found
+     * @return The Accept-Encoding value, or {@code null} if not found
      */
     @MayReturnNull
     public static String getAcceptEncoding(final HttpSettings httpSettings) {
@@ -578,7 +579,7 @@ public final class HttpUtil {
      * Gets the Accept-Encoding header from an HttpURLConnection.
      *
      * @param connection The HTTP connection
-     * @return The Accept-Encoding value, or null if not found
+     * @return The Accept-Encoding value, or {@code null} if not found
      */
     @MayReturnNull
     public static String getAcceptEncoding(final HttpURLConnection connection) {
@@ -590,7 +591,7 @@ public final class HttpUtil {
      * Looks for both "Accept-Charset" and "accept-charset" keys.
      *
      * @param httpHeaders The HTTP headers map
-     * @return The Accept-Charset value, or null if not found
+     * @return The Accept-Charset value, or {@code null} if not found
      */
     @MayReturnNull
     public static String getAcceptCharset(final Map<String, ?> httpHeaders) {
@@ -611,7 +612,7 @@ public final class HttpUtil {
      * Gets the Accept-Charset header value from HttpHeaders.
      *
      * @param httpHeaders The HttpHeaders object
-     * @return The Accept-Charset value, or null if not found
+     * @return The Accept-Charset value, or {@code null} if not found
      */
     @MayReturnNull
     public static String getAcceptCharset(final HttpHeaders httpHeaders) {
@@ -632,7 +633,7 @@ public final class HttpUtil {
      * Gets the Accept-Charset header from HttpSettings.
      *
      * @param httpSettings The HttpSettings object
-     * @return The Accept-Charset value, or null if not found
+     * @return The Accept-Charset value, or {@code null} if not found
      */
     @MayReturnNull
     public static String getAcceptCharset(final HttpSettings httpSettings) {
@@ -647,7 +648,7 @@ public final class HttpUtil {
      * Gets the Accept-Charset header from an HttpURLConnection.
      *
      * @param connection The HTTP connection
-     * @return The Accept-Charset value, or null if not found
+     * @return The Accept-Charset value, or {@code null} if not found
      */
     @MayReturnNull
     public static String getAcceptCharset(final HttpURLConnection connection) {
@@ -659,9 +660,8 @@ public final class HttpUtil {
      * For example, ContentFormat.JSON returns "application/json".
      *
      * @param contentFormat The content format
-     * @return The content type string, or an empty string "" if contentFormat is null or NONE
+     * @return The content type string, or an empty string "" if contentFormat is {@code null} or NONE
      */
-    @MayReturnNull
     public static String getContentType(final ContentFormat contentFormat) {
         if (contentFormat == null || contentFormat == ContentFormat.NONE) {
             return Strings.EMPTY;
@@ -675,9 +675,8 @@ public final class HttpUtil {
      * For example, ContentFormat.JSON_GZIP returns "gzip".
      *
      * @param contentFormat The content format
-     * @return The content encoding string,  or an empty string "" if contentFormat is null or has no encoding
+     * @return The content encoding string,  or an empty string "" if contentFormat is {@code null} or has no encoding
      */
-    @MayReturnNull
     public static String getContentEncoding(final ContentFormat contentFormat) {
         if (contentFormat == null || contentFormat == ContentFormat.NONE) {
             return Strings.EMPTY;
@@ -1139,9 +1138,10 @@ public final class HttpUtil {
          * }</pre>
          *
          * @param value The date string to parse
-         * @return The parsed Date, or null if the value couldn't be parsed
-         * 
+         * @return The parsed Date, or {@code null} if the value couldn't be parsed
+         *
          */
+        @MayReturnNull
         public static Date parse(final String value) {
             if (value.isEmpty()) {
                 return null;

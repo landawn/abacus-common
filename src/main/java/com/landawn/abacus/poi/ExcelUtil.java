@@ -53,6 +53,7 @@ import com.landawn.abacus.util.WD;
 import com.landawn.abacus.util.function.TriConsumer;
 import com.landawn.abacus.util.stream.Stream;
 
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 
@@ -1042,7 +1043,7 @@ public final class ExcelUtil {
          * value transformations, or custom handling of specific cell types.
          *
          * <p>The cellMapper function is applied to each cell individually, giving you complete
-         * control over formatting numbers, dates, handling null cells, or applying business logic
+         * control over formatting numbers, dates, handling {@code null} cells, or applying business logic
          * during the conversion process.</p>
          *
          * <p><b>Usage Examples:</b></p>
@@ -1197,13 +1198,26 @@ public final class ExcelUtil {
      * 
      * ExcelUtil.writeSheet("Report", data, options, new File("report.xlsx"));
      * }</pre>
+     *
+     * <p>Configuration options for creating Excel sheets with specific formatting and behavior.
+     * This class provides various settings to control sheet creation including auto-sizing,
+     * freeze panes, filtering, and cell styling.</p>
      */
     @Data
     @Builder
+    @AllArgsConstructor
     public static class SheetCreateOptions {
+
+        /**
+         * Creates a new instance of SheetCreateOptions with default values.
+         * All boolean flags are initialized to false and object references to null.
+         */
+        public SheetCreateOptions() {
+        }
+
         /**
          * Whether to automatically size columns to fit their content.
-         * When true, columns will be resized after all data is written.
+         * When {@code true}, columns will be resized after all data is written.
          */
         private boolean autoSizeColumn;
 

@@ -160,13 +160,13 @@ public abstract sealed class Dates permits Dates.DateUtil {
 
     /**
      * Date/Time format: {@code yyyy-MM-dd'T'HH:mm:ss}
-     * @see {@link DateTimeFormatter#ISO_LOCAL_DATE_TIME}
+     * @see DateTimeFormatter#ISO_LOCAL_DATE_TIME
      */
     public static final String ISO_LOCAL_DATE_TIME_FORMAT = "yyyy-MM-dd'T'HH:mm:ss";
 
     /**
      * Date/Time format: {@code yyyy-MM-dd'T'HH:mm:ssXXX}
-     * @see {@link DateTimeFormatter#ISO_OFFSET_DATE_TIME}
+     * @see DateTimeFormatter#ISO_OFFSET_DATE_TIME
      */
     public static final String ISO_OFFSET_DATE_TIME_FORMAT = "yyyy-MM-dd'T'HH:mm:ssXXX";
 
@@ -2288,7 +2288,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * Sets the years field to a date returning a new object.
      * The original {@code Date} is unchanged.
      *
-     * @param <T>
+     * @param <T> the type of the date object, which must extend java.util.Date
      * @param date the date, not null
      * @param amount the amount to set
      * @return a new {@code Date} set with the specified value
@@ -2307,7 +2307,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * Sets the months field to a date returning a new object.
      * The original {@code Date} is unchanged.
      *
-     * @param <T>
+     * @param <T> the type of the date object, which must extend java.util.Date
      * @param date the date, not null
      * @param amount the amount to set
      * @return a new {@code Date} set with the specified value
@@ -2326,7 +2326,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * Sets the day of month field to a date returning a new object.
      * The original {@code Date} is unchanged.
      *
-     * @param <T>
+     * @param <T> the type of the date object, which must extend java.util.Date
      * @param date the date, not null
      * @param amount the amount to set
      * @return a new {@code Date} set with the specified value
@@ -2346,7 +2346,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * Hours range from 0-23.
      * The original {@code Date} is unchanged.
      *
-     * @param <T>
+     * @param <T> the type of the date object, which must extend java.util.Date
      * @param date the date, not null
      * @param amount the amount to set
      * @return a new {@code Date} set with the specified value
@@ -2365,7 +2365,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * Sets the minute field to a date returning a new object.
      * The original {@code Date} is unchanged.
      *
-     * @param <T>
+     * @param <T> the type of the date object, which must extend java.util.Date
      * @param date the date, not null
      * @param amount the amount to set
      * @return a new {@code Date} set with the specified value
@@ -2384,7 +2384,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * Sets the seconds field to a date returning a new object.
      * The original {@code Date} is unchanged.
      *
-     * @param <T>
+     * @param <T> the type of the date object, which must extend java.util.Date
      * @param date the date, not null
      * @param amount the amount to set
      * @return a new {@code Date} set with the specified value
@@ -2403,7 +2403,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * Sets the milliseconds field to a date returning a new object.
      * The original {@code Date} is unchanged.
      *
-     * @param <T>
+     * @param <T> the type of the date object, which must extend java.util.Date
      * @param date the date, not null
      * @param amount the amount to set
      * @return a new {@code Date} set with the specified value
@@ -2455,7 +2455,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * @param amount the amount of time to add or subtract (negative values subtract)
      * @param unit the time unit to use for rolling
      * @return a new instance of Date with the specified amount rolled.
-     * @throws IllegalArgumentException
+     * @throws IllegalArgumentException if the date is null
      */
     @Beta
     public static <T extends java.util.Date> T roll(final T date, final long amount, final TimeUnit unit) throws IllegalArgumentException {
@@ -2476,7 +2476,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * @param amount the amount to add or subtract (negative values subtract)
      * @param unit the calendar field unit to use for rolling
      * @return a new instance of Date with the specified amount rolled.
-     * @throws IllegalArgumentException
+     * @throws IllegalArgumentException if the date or unit is null
      */
     @Beta
     public static <T extends java.util.Date> T roll(final T date, final int amount, final CalendarField unit) throws IllegalArgumentException {
@@ -2510,7 +2510,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * @param amount the amount of time to add or subtract (negative values subtract)
      * @param unit the time unit to use for rolling
      * @return a new instance of Calendar with the specified amount rolled.
-     * @throws IllegalArgumentException
+     * @throws IllegalArgumentException if the calendar or unit is null
      */
     @Beta
     public static <T extends Calendar> T roll(final T calendar, final long amount, final TimeUnit unit) throws IllegalArgumentException {
@@ -2532,7 +2532,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * @param amount the amount to add or subtract (negative values subtract)
      * @param unit the calendar field unit to use for rolling
      * @return a new instance of Calendar with the specified amount rolled.
-     * @throws IllegalArgumentException
+     * @throws IllegalArgumentException if the calendar or unit is null
      */
     @Beta
     public static <T extends Calendar> T roll(final T calendar, final int amount, final CalendarField unit) throws IllegalArgumentException {
@@ -2954,11 +2954,11 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * <li>March 30, 2003 02:40 rounds to March 30, 2003 04:00</li>
      * </ul>
      *
-     * @param <T>
+     * @param <T> the type of the date object, which must extend java.util.Date
      * @param date the date to work with, not null
      * @param field the field from {@code Calendar} or {@code SEMI_MONTH}
      * @return a new date object of type T, rounded to the nearest whole unit as specified by the field
-     * @throws IllegalArgumentException
+     * @throws IllegalArgumentException if the date is null
      * @throws ArithmeticException if the year is over 280 million
      */
     public static <T extends java.util.Date> T round(final T date, final int field) throws IllegalArgumentException {
@@ -3011,7 +3011,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * <li>March 30, 2003 02:40 rounds to March 30, 2003 04:00</li>
      * </ul>
      *
-     * @param <T>
+     * @param <T> the type of the calendar object, which must extend java.util.Calendar
      * @param calendar the date to work with, not null
      * @param field the field from {@code Calendar} or {@code SEMI_MONTH}
      * @return a new calendar object of type T, rounded to the nearest whole unit as specified by the field
@@ -3062,7 +3062,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * 2002 13:00:00.000.  If this was passed with MONTH, it would
      * return 1 Mar 2002 0:00:00.000.</p>
      *
-     * @param <T>
+     * @param <T> the type of the date object, which must extend java.util.Date
      * @param date the date to work with, not null
      * @param field the field from {@code Calendar} or {@code SEMI_MONTH}
      * @return a new date object of type T, truncated to the specified field
@@ -3108,7 +3108,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * 2002 13:00:00.000.  If this was passed with MONTH, it would
      * return 1 Mar 2002 0:00:00.000.</p>
      *
-     * @param <T>
+     * @param <T> the type of the calendar object, which must extend java.util.Calendar
      * @param calendar the date to work with, not null
      * @param field the field from {@code Calendar} or {@code SEMI_MONTH}
      * @return a new calendar object of type T, truncated to the specified field
@@ -3159,7 +3159,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * 2002 14:00:00.000.  If this was passed with MONTH, it would
      * return 1 Apr 2002 0:00:00.000.</p>
      *
-     * @param <T>
+     * @param <T> the type of the date object, which must extend java.util.Date
      * @param date the date to work with, not null
      * @param field the field from {@code Calendar} or {@code SEMI_MONTH}
      * @return a new date object of type T, adjusted to the ceiling of the specified field
@@ -3205,7 +3205,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * 2002 14:00:00.000.  If this was passed with MONTH, it would
      * return 1 Apr 2002 0:00:00.000.</p>
      *
-     * @param <T>
+     * @param <T> the type of the calendar object, which must extend java.util.Calendar
      * @param calendar the date to work with, not null
      * @param field the field from {@code Calendar} or {@code SEMI_MONTH}
      * @return a new calendar object of type T, adjusted to the ceiling of the specified field
@@ -4568,67 +4568,67 @@ public abstract sealed class Dates permits Dates.DateUtil {
     /**
      * The major purpose of this class is to get rid of the millisecond part: {@code .SSS} or nanosecond part: {@code .SSSSSS}
      *
-     * @see {@code DateTimeFormatter}
+     * @see DateTimeFormatter
      */
     public static final class DTF {
 
         /**
          * Date/Time format: {@code yyyy-MM-dd'T'HH:mm:ssXXX'['VV']'}
-         * @see {@link DateTimeFormatter#ISO_ZONED_DATE_TIME}
+         * @see DateTimeFormatter#ISO_ZONED_DATE_TIME
          */
         static final String ISO_ZONED_DATE_TIME_FORMAT = "yyyy-MM-dd'T'HH:mm:ssXXX'['VV']'";
 
         /**
          * Date/Time format: {@code yyyy-MM-dd}
-         * @see {@link #LOCAL_DATE_FORMAT}
+         * @see #LOCAL_DATE_FORMAT
          */
         public static final DTF LOCAL_DATE = new DTF(Dates.LOCAL_DATE_FORMAT);
 
         /**
          * Date/Time format: {@code HH:mm:ss}
-         * @see {@link #LOCAL_TIME_FORMAT}
+         * @see #LOCAL_TIME_FORMAT
          */
         public static final DTF LOCAL_TIME = new DTF(Dates.LOCAL_TIME_FORMAT);
 
         /**
          * Date/Time format: {@code yyyy-MM-dd HH:mm:ss}
-         * @see {@link #LOCAL_DATE_TIME_FORMAT}
+         * @see #LOCAL_DATE_TIME_FORMAT
          */
         public static final DTF LOCAL_DATE_TIME = new DTF(Dates.LOCAL_DATE_TIME_FORMAT);
 
         /**
          * Date/Time format: {@code yyyy-MM-dd'T'HH:mm:ss}
-         * @see {@link #ISO_LOCAL_DATE_TIME_FORMAT}
+         * @see #ISO_LOCAL_DATE_TIME_FORMAT
          */
         public static final DTF ISO_LOCAL_DATE_TIME = new DTF(Dates.ISO_LOCAL_DATE_TIME_FORMAT);
 
         /**
          * Date/Time format: {@code yyyy-MM-dd'T'HH:mm:ssXXX}
-         * @see {@link #ISO_OFFSET_DATE_TIME_FORMAT}
+         * @see #ISO_OFFSET_DATE_TIME_FORMAT
          */
         public static final DTF ISO_OFFSET_DATE_TIME = new DTF(Dates.ISO_OFFSET_DATE_TIME_FORMAT);
 
         /**
          * Date/Time format: {@code yyyy-MM-dd'T'HH:mm:ssXXX'['VV']'}
-         * @see {@link #ISO_ZONED_DATE_TIME_FORMAT}
+         * @see #ISO_ZONED_DATE_TIME_FORMAT
          */
         public static final DTF ISO_ZONED_DATE_TIME = new DTF(ISO_ZONED_DATE_TIME_FORMAT);
 
         /**
          * Date/Time format: {@code yyyy-MM-dd'T'HH:mm:ss'Z'}.
-         * @see {@link #ISO_8601_DATE_TIME_FORMAT}
+         * @see #ISO_8601_DATE_TIME_FORMAT
          */
         public static final DTF ISO_8601_DATE_TIME = new DTF(Dates.ISO_8601_DATE_TIME_FORMAT);
 
         /**
          * Date/Time format: {@code yyyy-MM-dd'T'HH:mm:ss.SSS'Z'}.
-         * @see {@link #ISO_8601_TIMESTAMP_FORMAT}
+         * @see #ISO_8601_TIMESTAMP_FORMAT
          */
         public static final DTF ISO_8601_TIMESTAMP = new DTF(Dates.ISO_8601_TIMESTAMP_FORMAT);
 
         /**
          * Date/Time format: {@code EEE, dd MMM yyyy HH:mm:ss zzz}.
-         * @see {@link #RFC_1123_DATE_TIME_FORMAT}
+         * @see #RFC_1123_DATE_TIME_FORMAT
          */
         public static final DTF RFC_1123_DATE_TIME = new DTF(Dates.RFC_1123_DATE_TIME_FORMAT);
 
@@ -4648,7 +4648,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
          * @param date the java.util.Date instance to format.
          * @return a string representation of the provided java.util.Date instance.
          * @throws DateTimeException if an error occurs during formatting.
-         * @see {@link DateTimeFormatter#format(TemporalAccessor)}
+         * @see DateTimeFormatter#format(TemporalAccessor)
          */
         @MayReturnNull
         public String format(final java.util.Date date) {
@@ -4665,7 +4665,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
          * @param calenar the java.util.Calendar instance to format.
          * @return a string representation of the provided java.util.Calendar instance.
          * @throws DateTimeException if an error occurs during formatting.
-         * @see {@link DateTimeFormatter#format(TemporalAccessor)}
+         * @see DateTimeFormatter#format(TemporalAccessor)
          */
         @MayReturnNull
         public String format(final java.util.Calendar calenar) {
@@ -4682,7 +4682,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
          * @param temporal the TemporalAccessor instance to format.
          * @return a string representation of the provided TemporalAccessor instance.
          * @throws DateTimeException if an error occurs during formatting.
-         * @see {@link DateTimeFormatter#format(TemporalAccessor)}
+         * @see DateTimeFormatter#format(TemporalAccessor)
          */
         @MayReturnNull
         public String format(final TemporalAccessor temporal) {
@@ -4699,7 +4699,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
          * @param date the java.util.Date instance to format.
          * @param appendable the Appendable to which the formatted string will be appended.
          * @throws DateTimeException if an error occurs during formatting.
-         * @see {@link DateTimeFormatter#formatTo(TemporalAccessor, Appendable)}
+         * @see DateTimeFormatter#formatTo(TemporalAccessor, Appendable)
          */
         @MayReturnNull
         public void formatTo(final java.util.Date date, final Appendable appendable) {
@@ -4717,7 +4717,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
          * @param calendar the java.util.Calendar instance to format.
          * @param appendable the Appendable to which the formatted string will be appended.
          * @throws DateTimeException if an error occurs during formatting.
-         * @see {@link DateTimeFormatter#formatTo(TemporalAccessor, Appendable)}
+         * @see DateTimeFormatter#formatTo(TemporalAccessor, Appendable)
          */
         @MayReturnNull
         public void formatTo(final java.util.Calendar calendar, final Appendable appendable) {
@@ -4735,7 +4735,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
          * @param temporal the TemporalAccessor instance to format.
          * @param appendable the Appendable to which the formatted string will be appended.
          * @throws DateTimeException if an error occurs during formatting.
-         * @see {@link DateTimeFormatter#formatTo(TemporalAccessor, Appendable)}
+         * @see DateTimeFormatter#formatTo(TemporalAccessor, Appendable)
          */
         @MayReturnNull
         public void formatTo(final TemporalAccessor temporal, final Appendable appendable) {
@@ -4875,7 +4875,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
          * @throws DateTimeParseException if the text cannot be parsed to a date and time.
          * @see Instant#ofEpochMilli(long)
          * @see OffsetDateTime#ofInstant(Instant, ZoneId)
-         * @see OffsetDateTime#from(TemporalAccessor
+         * @see OffsetDateTime#from(TemporalAccessor)
          */
         @MayReturnNull
         public OffsetDateTime parseToOffsetDateTime(final CharSequence text) {
@@ -5000,6 +5000,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
          * Parses the provided CharSequence into a java.util.Date instance.
          *
          * @param text the CharSequence to parse. Must not be {@code null}.
+         * @param tz the time zone to use for parsing the date and time
          * @return a java.util.Date instance representing the parsed date and time.
          * @throws DateTimeParseException if the text cannot be parsed to a date and time.
          * @see Instant#ofEpochMilli(long)
@@ -5036,6 +5037,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
          * Parses the provided CharSequence into a java.sql.Date instance.
          *
          * @param text the CharSequence to parse. Must not be {@code null}.
+         * @param tz the time zone to use for parsing the date and time
          * @return a java.sql.Date instance representing the parsed date and time.
          * @throws DateTimeParseException if the text cannot be parsed to a date and time.
          * @see Instant#ofEpochMilli(long)
@@ -5072,6 +5074,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
          * Parses the provided CharSequence into a java.sql.Time instance.
          *
          * @param text the CharSequence to parse. Must not be {@code null}.
+         * @param tz the time zone to use for parsing the date and time
          * @return a java.sql.Time instance representing the parsed date and time.
          * @throws DateTimeParseException if the text cannot be parsed to a date and time.
          * @see Instant#ofEpochMilli(long)
@@ -5108,6 +5111,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
          * Parses the provided CharSequence into a java.sql.Timestamp instance.
          *
          * @param text the CharSequence to parse. Must not be {@code null}.
+         * @param tz the time zone to use for parsing the date and time
          * @return a java.sql.Timestamp instance representing the parsed date and time.
          * @throws DateTimeParseException if the text cannot be parsed to a date and time.
          * @see Instant#ofEpochMilli(long)
@@ -5142,6 +5146,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
          * Parses the provided CharSequence into a java.util.Calendar instance.
          *
          * @param text the CharSequence to parse. Must not be {@code null}.
+         * @param tz the time zone to use for parsing the date and time
          * @return a java.util.Calendar instance representing the parsed date and time.
          * @throws DateTimeParseException if the text cannot be parsed to a date and time.
          */
@@ -5159,11 +5164,6 @@ public abstract sealed class Dates permits Dates.DateUtil {
             return dateTimeFormatter.parse(text);
         }
 
-        /**
-         * Returns a string representation of the DTF object.
-         *
-         * @return a string that represents the format of the DTF object.
-         */
         @Override
         public String toString() {
             return format;

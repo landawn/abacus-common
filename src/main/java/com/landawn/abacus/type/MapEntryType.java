@@ -69,7 +69,7 @@ public class MapEntryType<K, V> extends AbstractType<Map.Entry<K, V>> {
      * Returns the declaring name of this MapEntry type.
      * The declaring name includes the fully qualified class names of the key and value types.
      *
-     * @return The declaring name in format "Map.Entry<KeyDeclaringName, ValueDeclaringName>"
+     * @return The declaring name in format "Map.Entry&lt;KeyDeclaringName, ValueDeclaringName&gt;"
      */
     @Override
     public String declaringName() {
@@ -101,7 +101,7 @@ public class MapEntryType<K, V> extends AbstractType<Map.Entry<K, V>> {
      * Indicates whether this is a generic type.
      * For MapEntryType, this always returns {@code true} since Map.Entry is parameterized with key and value types.
      *
-     * @return true, indicating that Map.Entry is a generic type
+     * @return {@code true}, indicating that Map.Entry is a generic type
      */
     @Override
     public boolean isGenericType() {
@@ -113,9 +113,10 @@ public class MapEntryType<K, V> extends AbstractType<Map.Entry<K, V>> {
      * The entry is serialized as a JSON object with a single key-value pair.
      *
      * @param x The Map.Entry object to convert
-     * @return The JSON string representation in format "{key:value}", or null if the input is null
+     * @return The JSON string representation in format "{key:value}", or {@code null} if the input is null
      */
     @Override
+    @MayReturnNull
     public String stringOf(final Map.Entry<K, V> x) {
         return (x == null) ? null : Utils.jsonParser.serialize(N.asMap(x.getKey(), x.getValue()));
     }
@@ -125,7 +126,7 @@ public class MapEntryType<K, V> extends AbstractType<Map.Entry<K, V>> {
      * The string should represent a JSON object with exactly one key-value pair.
      *
      * @param str The JSON string to parse
-     * @return The parsed Map.Entry object, or null if the input is null, empty, or represents an empty object "{}"
+     * @return The parsed Map.Entry object, or {@code null} if the input is {@code null}, empty, or represents an empty object "{}"
      */
     @MayReturnNull
     @Override

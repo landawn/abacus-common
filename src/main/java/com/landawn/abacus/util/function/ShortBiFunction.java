@@ -14,6 +14,7 @@
 
 package com.landawn.abacus.util.function;
 
+import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.util.Throwables;
 
 /**
@@ -61,6 +62,7 @@ public interface ShortBiFunction<R> extends Throwables.ShortBiFunction<R, Runtim
      * @return the function result
      */
     @Override
+    @MayReturnNull
     R apply(short t, short u);
 
     /**

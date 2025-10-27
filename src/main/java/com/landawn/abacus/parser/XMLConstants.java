@@ -49,31 +49,31 @@ public class XMLConstants {
 
     /**
      * Field NULL_END_ELEMENT (value is {@code -128})
-     * Used as a special marker for null end elements in XML processing.
+     * Used as a special marker for {@code null} end elements in XML processing.
      */
     public static final int NULL_END_ELEMENT = -128;
 
     /**
      * Field IS_NULL (value is {@code "isNull"})
-     * XML attribute name used to indicate null values.
+     * XML attribute name used to indicate {@code null} values.
      */
     public static final String IS_NULL = "isNull";
 
     /**
      * Field TRUE (value is {@code "true"})
-     * String representation of boolean true value in XML.
+     * String representation of boolean {@code true} value in XML.
      */
     public static final String TRUE = "true";
 
     /**
      * Field FALSE (value is {@code "false"})
-     * String representation of boolean false value in XML.
+     * String representation of boolean {@code false} value in XML.
      */
     public static final String FALSE = "false";
 
     /**
      * Field IS_NULL_ATTR (value is {@code " isNull=\"true\""})
-     * Pre-formatted XML attribute string for null values.
+     * Pre-formatted XML attribute string for {@code null} values.
      */
     public static final String IS_NULL_ATTR = " isNull=\"true\"";
 
@@ -103,7 +103,7 @@ public class XMLConstants {
 
     /**
      * Field NULL_NULL_ELE (value is {@code "<null isNull=\"true\" />"})
-     * Self-closing XML element representing a null value.
+     * Self-closing XML element representing a {@code null} value.
      */
     public static final String NULL_NULL_ELE = "<null isNull=\"true\" />";
 
@@ -127,7 +127,7 @@ public class XMLConstants {
 
     /**
      * Field ARRAY_NULL_ELE (value is {@code "<array isNull=\"true\" />"})
-     * Self-closing XML element representing a null array.
+     * Self-closing XML element representing a {@code null} array.
      */
     public static final String ARRAY_NULL_ELE = "<array isNull=\"true\" />";
 
@@ -151,7 +151,7 @@ public class XMLConstants {
 
     /**
      * Field LIST_NULL_ELE (value is {@code "<list isNull=\"true\" />"})
-     * Self-closing XML element representing a null list.
+     * Self-closing XML element representing a {@code null} list.
      */
     public static final String LIST_NULL_ELE = "<list isNull=\"true\" />";
 
@@ -175,7 +175,7 @@ public class XMLConstants {
 
     /**
      * Field SET_NULL_ELE (value is {@code "<set isNull=\"true\" />"})
-     * Self-closing XML element representing a null set.
+     * Self-closing XML element representing a {@code null} set.
      */
     public static final String SET_NULL_ELE = "<set isNull=\"true\" />";
 
@@ -199,7 +199,7 @@ public class XMLConstants {
 
     /**
      * Field COLLECTION_NULL_ELE (value is {@code "<collection isNull=\"true\" />"})
-     * Self-closing XML element representing a null collection.
+     * Self-closing XML element representing a {@code null} collection.
      */
     public static final String COLLECTION_NULL_ELE = "<collection isNull=\"true\" />";
 
@@ -223,7 +223,7 @@ public class XMLConstants {
 
     /**
      * Field E_NULL_ELE (value is {@code "<e isNull=\"true\" />"})
-     * Self-closing XML element representing a null element.
+     * Self-closing XML element representing a {@code null} element.
      */
     public static final String E_NULL_ELE = "<e isNull=\"true\" />";
 
@@ -247,7 +247,7 @@ public class XMLConstants {
 
     /**
      * Field MAP_NULL_ELE (value is {@code "<map isNull=\"true\" />"})
-     * Self-closing XML element representing a null map.
+     * Self-closing XML element representing a {@code null} map.
      */
     public static final String MAP_NULL_ELE = "<map isNull=\"true\" />";
 
@@ -289,7 +289,7 @@ public class XMLConstants {
 
     /**
      * Field KEY_NULL_ELE (value is {@code "<key isNull=\"true\" />"})
-     * Self-closing XML element representing a null key.
+     * Self-closing XML element representing a {@code null} key.
      */
     public static final String KEY_NULL_ELE = "<key isNull=\"true\" />";
 
@@ -313,7 +313,7 @@ public class XMLConstants {
 
     /**
      * Field VALUE_NULL_ELE (value is {@code "<value isNull=\"true\" />"})
-     * Self-closing XML element representing a null value.
+     * Self-closing XML element representing a {@code null} value.
      */
     public static final String VALUE_NULL_ELE = "<value isNull=\"true\" />";
 
@@ -337,7 +337,7 @@ public class XMLConstants {
 
     /**
      * Field ENTITY_ID_NULL_ELE (value is {@code "<entityId isNull=\"true\" />"})
-     * Self-closing XML element representing a null entity ID.
+     * Self-closing XML element representing a {@code null} entity ID.
      */
     public static final String ENTITY_ID_NULL_ELE = "<entityId isNull=\"true\" />";
 
@@ -361,7 +361,7 @@ public class XMLConstants {
 
     /**
      * Field ENTITY_IDS_NULL_ELE (value is {@code "<entityIds isNull=\"true\" />"})
-     * Self-closing XML element representing a null entity IDs collection.
+     * Self-closing XML element representing a {@code null} entity IDs collection.
      */
     public static final String ENTITY_IDS_NULL_ELE = "<entityIds isNull=\"true\" />";
 
@@ -385,7 +385,7 @@ public class XMLConstants {
 
     /**
      * Field ENTITY_NULL_ELE (value is {@code "<bean isNull=\"true\" />"})
-     * Self-closing XML element representing a null entity/bean.
+     * Self-closing XML element representing a {@code null} entity/bean.
      */
     public static final String ENTITY_NULL_ELE = "<bean isNull=\"true\" />";
 
@@ -409,7 +409,7 @@ public class XMLConstants {
 
     /**
      * Field ENTITY_NAME_NULL_ELE (value is {@code "<beanName isNull=\"true\" />"})
-     * Self-closing XML element representing a null entity/bean name.
+     * Self-closing XML element representing a {@code null} entity/bean name.
      */
     public static final String ENTITY_NAME_NULL_ELE = "<beanName isNull=\"true\" />";
 
@@ -433,7 +433,7 @@ public class XMLConstants {
 
     /**
      * Field ENTITY_CLASS_NULL_ELE (value is {@code "<beanClass isNull=\"true\" />"})
-     * Self-closing XML element representing a null entity/bean class.
+     * Self-closing XML element representing a {@code null} entity/bean class.
      */
     public static final String ENTITY_CLASS_NULL_ELE = "<beanClass isNull=\"true\" />";
 
@@ -457,7 +457,7 @@ public class XMLConstants {
 
     /**
      * Field PROPERTY_NULL_ELE (value is {@code "<property isNull=\"true\" />"})
-     * Self-closing XML element representing a null property.
+     * Self-closing XML element representing a {@code null} property.
      */
     public static final String PROPERTY_NULL_ELE = "<property isNull=\"true\" />";
 
@@ -481,7 +481,7 @@ public class XMLConstants {
 
     /**
      * Field PROPERTIES_NULL_ELE (value is {@code "<properties isNull=\"true\" />"})
-     * Self-closing XML element representing a null properties collection.
+     * Self-closing XML element representing a {@code null} properties collection.
      */
     public static final String PROPERTIES_NULL_ELE = "<properties isNull=\"true\" />";
 
@@ -505,7 +505,7 @@ public class XMLConstants {
 
     /**
      * Field PROP_NULL_ELE (value is {@code "<prop isNull=\"true\" />"})
-     * Self-closing XML element representing a null abbreviated property.
+     * Self-closing XML element representing a {@code null} abbreviated property.
      */
     public static final String PROP_NULL_ELE = "<prop isNull=\"true\" />";
 
@@ -529,7 +529,7 @@ public class XMLConstants {
 
     /**
      * Field PROP_NAME_NULL_ELE (value is {@code "<propName isNull=\"true\" />"})
-     * Self-closing XML element representing a null property name.
+     * Self-closing XML element representing a {@code null} property name.
      */
     public static final String PROP_NAME_NULL_ELE = "<propName isNull=\"true\" />";
 
@@ -553,7 +553,7 @@ public class XMLConstants {
 
     /**
      * Field PROP_VALUE_NULL_ELE (value is {@code "<propValue isNull=\"true\" />"})
-     * Self-closing XML element representing a null property value.
+     * Self-closing XML element representing a {@code null} property value.
      */
     public static final String PROP_VALUE_NULL_ELE = "<propValue isNull=\"true\" />";
 
@@ -577,7 +577,7 @@ public class XMLConstants {
 
     /**
      * Field PROPS_NULL_ELE (value is {@code "<props isNull=\"true\" />"})
-     * Self-closing XML element representing a null properties collection.
+     * Self-closing XML element representing a {@code null} properties collection.
      */
     public static final String PROPS_NULL_ELE = "<props isNull=\"true\" />";
 
@@ -601,7 +601,7 @@ public class XMLConstants {
 
     /**
      * Field PROPS_LIST_NULL_ELE (value is {@code "<propsList isNull=\"true\" />"})
-     * Self-closing XML element representing a null properties list.
+     * Self-closing XML element representing a {@code null} properties list.
      */
     public static final String PROPS_LIST_NULL_ELE = "<propsList isNull=\"true\" />";
 
@@ -625,7 +625,7 @@ public class XMLConstants {
 
     /**
      * Field ENTITIES_NULL_ELE (value is {@code "<entities isNull=\"true\" />"})
-     * Self-closing XML element representing a null entities collection.
+     * Self-closing XML element representing a {@code null} entities collection.
      */
     public static final String ENTITIES_NULL_ELE = "<entities isNull=\"true\" />";
 
@@ -649,7 +649,7 @@ public class XMLConstants {
 
     /**
      * Field RESULT_NULL_ELE (value is {@code "<result isNull=\"true\" />"})
-     * Self-closing XML element representing a null result.
+     * Self-closing XML element representing a {@code null} result.
      */
     public static final String RESULT_NULL_ELE = "<result isNull=\"true\" />";
 
@@ -673,7 +673,7 @@ public class XMLConstants {
 
     /**
      * Field DATA_SET_NULL_ELE (value is {@code "<dataset isNull=\"true\" />"})
-     * Self-closing XML element representing a null data set.
+     * Self-closing XML element representing a {@code null} data set.
      */
     public static final String DATA_SET_NULL_ELE = "<dataset isNull=\"true\" />";
 

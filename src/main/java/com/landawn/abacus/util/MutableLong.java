@@ -49,6 +49,9 @@ public final class MutableLong extends Number implements Comparable<MutableLong>
     @Serial
     private static final long serialVersionUID = 62986528375L;
 
+    /**
+     * The mutable long value.
+     */
     private long value;
 
     /**
@@ -173,8 +176,8 @@ public final class MutableLong extends Number implements Comparable<MutableLong>
     }
 
     /**
-     * Sets the value to newValue if the predicate evaluates to true for the current value.
-     * If the predicate returns false, the value remains unchanged.
+     * Sets the value to newValue if the predicate evaluates to {@code true} for the current value.
+     * If the predicate returns {@code false}, the value remains unchanged.
      * 
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -366,11 +369,6 @@ public final class MutableLong extends Number implements Comparable<MutableLong>
         return (int) value;
     }
 
-    /**
-     * Returns the value of this MutableLong as a long.
-     * 
-     * @return the long value
-     */
     @Override
     public long longValue() {
         return value;
@@ -387,11 +385,6 @@ public final class MutableLong extends Number implements Comparable<MutableLong>
         return value;
     }
 
-    /**
-     * Returns the value of this MutableLong as a double.
-     * 
-     * @return the value as a double
-     */
     @Override
     public double doubleValue() {
         return value;

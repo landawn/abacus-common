@@ -17,6 +17,8 @@ package com.landawn.abacus.pool;
 import java.util.Collection;
 import java.util.Set;
 
+import com.landawn.abacus.annotation.MayReturnNull;
+
 /**
  * A pool that manages objects associated with keys, similar to a Map but with pooling capabilities.
  * This interface extends Pool to provide key-based storage and retrieval of poolable objects.
@@ -106,10 +108,10 @@ public interface KeyedObjectPool<K, E extends Poolable> extends Pool {
     boolean put(K key, E e, boolean autoDestroyOnFailedToPut);
 
     /**
-     * Returns the element associated with the specified key, or null if no mapping exists.
+     * Returns the element associated with the specified key, or {@code null} if no mapping exists.
      * The element's activity print is updated to reflect this access.
      * 
-     * <p>If the retrieved element has expired, it will be destroyed and null will be returned.
+     * <p>If the retrieved element has expired, it will be destroyed and {@code null} will be returned.
      * 
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -124,9 +126,10 @@ public interface KeyedObjectPool<K, E extends Poolable> extends Pool {
      * }</pre>
      * 
      * @param key the key whose associated element is to be returned
-     * @return the element associated with the key, or null if no mapping exists or element expired
+     * @return the element associated with the key, or {@code null} if no mapping exists or element expired
      * @throws IllegalStateException if the pool has been closed
      */
+    @MayReturnNull
     E get(K key);
 
     /**
@@ -137,7 +140,7 @@ public interface KeyedObjectPool<K, E extends Poolable> extends Pool {
      * so it will not be available for future requests unless re-added.
      * 
      * @param key the key whose mapping is to be removed from the pool
-     * @return the element previously associated with the key, or null if no mapping existed
+     * @return the element previously associated with the key, or {@code null} if no mapping existed
      * @throws IllegalStateException if the pool has been closed
      */
     E remove(K key);
@@ -146,11 +149,11 @@ public interface KeyedObjectPool<K, E extends Poolable> extends Pool {
      * Returns the element associated with the specified key without updating access statistics.
      * This method is useful for monitoring or administrative purposes.
      * 
-     * <p>If the element has expired, it will be removed and destroyed, and null will be returned.
+     * <p>If the element has expired, it will be removed and destroyed, and {@code null} will be returned.
      * Unlike {@link #get(Object)}, this method does not update the last access time or access count.
      * 
      * @param key the key whose associated element is to be returned
-     * @return the element associated with the key, or null if no mapping exists or element expired
+     * @return the element associated with the key, or {@code null} if no mapping exists or element expired
      * @throws IllegalStateException if the pool has been closed
      */
     E peek(K key);
@@ -215,8 +218,8 @@ public interface KeyedObjectPool<K, E extends Poolable> extends Pool {
          * Calculates the memory size of the given key-value pair in bytes.
          * The returned value is used to track total memory usage and enforce memory limits.
          * 
-         * @param key the key part of the pair, never null when called by the pool
-         * @param e the value part of the pair, never null when called by the pool
+         * @param key the key part of the pair, never {@code null} when called by the pool
+         * @param e the value part of the pair, never {@code null} when called by the pool
          * @return the combined size of the key-value pair in bytes, should be non-negative
          */
         long sizeOf(K key, E e);

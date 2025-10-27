@@ -36,6 +36,17 @@ public abstract class AbstractOptionalType<T> extends AbstractType<T> {
      * of the Map type. The Map type is used internally for converting
      * Optional values to/from Map representations during serialization.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * // Internal use for Optional serialization
+     * Type<Map<Object, Object>> mapType = AbstractOptionalType.getMapType();
+     * // The map type is used to convert Optional values to Maps with structure:
+     * // {
+     * //   "isPresent": true/false,
+     * //   "value": actual_value (if present)
+     * // }
+     * }</pre>
+     *
      * @return the Map type instance for Map&lt;Object, Object&gt;
      */
     protected static synchronized Type<Map<Object, Object>> getMapType() {
@@ -47,11 +58,11 @@ public abstract class AbstractOptionalType<T> extends AbstractType<T> {
     }
 
     /**
-     * Checks if this type represents an Optional or nullable type.
+     * Checks if this type represents an Optional or {@code nullable} type.
      * This method always returns {@code true} for Optional types,
      * indicating that values of this type may or may not be present.
      *
-     * @return {@code true}, indicating this is an Optional or nullable type
+     * @return {@code true}, indicating this is an Optional or {@code nullable} type
      */
     @Override
     public boolean isOptionalOrNullable() {

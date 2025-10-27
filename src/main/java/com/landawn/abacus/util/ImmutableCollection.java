@@ -41,7 +41,6 @@ import com.landawn.abacus.annotation.Beta;
  * System.out.println(immutable.contains("b")); // true
  * // immutable.add("d"); // throws UnsupportedOperationException
  * }</pre>
- * </p>
  *
  * @param <E> the type of elements in this collection
  * @see Immutable
@@ -64,7 +63,7 @@ public class ImmutableCollection<E> extends AbstractCollection<E> implements Imm
      * backed by the provided Collection. 
      * 
      * <p><b>Warning:</b> Changes to the specified Collection will be reflected in the ImmutableCollection.
-     * This method does not create a defensive copy. For a true immutable copy, use the specific
+     * This method does not create a defensive copy. For a {@code true} immutable copy, use the specific
      * immutable collection type's copyOf method (e.g., {@link ImmutableList#copyOf}).</p>
      * 
      * <p><b>Usage Examples:</b></p>
@@ -211,7 +210,7 @@ public class ImmutableCollection<E> extends AbstractCollection<E> implements Imm
      * @return {@code true} if this collection contains the specified element
      * @throws ClassCastException if the type of the specified element
      *         is incompatible with this collection (optional)
-     *         collection does not permit null elements (optional)
+     *         collection does not permit {@code null} elements (optional)
      */
     @Override
     public boolean contains(final Object valueToFind) {

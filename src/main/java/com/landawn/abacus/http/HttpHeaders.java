@@ -25,6 +25,7 @@ import java.util.SortedMap;
 import java.util.function.BiConsumer;
 
 import com.landawn.abacus.annotation.Beta;
+import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.http.HttpUtil.HttpDate;
 import com.landawn.abacus.util.Charsets;
 import com.landawn.abacus.util.N;
@@ -47,11 +48,11 @@ import com.landawn.abacus.util.cs;
  *     .setContentType("application/json")
  *     .setAuthorization("Bearer token123")
  *     .setAcceptEncoding("gzip, deflate")
- *     .header("X-Custom-Header", "value");
- *     
+ *     .set("X-Custom-Header", "value");
+ *
  * // Or create with initial values
- * HttpHeaders headers = HttpHeaders.of("Content-Type", "application/json",
- *                                      "Accept", "application/json");
+ * HttpHeaders headers2 = HttpHeaders.of("Content-Type", "application/json",
+ *                                       "Accept", "application/json");
  * }</pre>
  * 
  * @see HttpClient
@@ -924,7 +925,7 @@ public final class HttpHeaders {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * headers.setAccept("application/json, text/plain);
+     * headers.setAccept("application/json, text/plain");
      * }</pre>
      *
      * @param value The media types the client can accept (e.g., "application/json")
@@ -1063,8 +1064,9 @@ public final class HttpHeaders {
      * }</pre>
      *
      * @param headerName The name of the header to retrieve
-     * @return The header value, or null if not present
+     * @return The header value, or {@code null} if not present
      */
+    @MayReturnNull
     public Object get(final String headerName) {
         return map.get(headerName);
     }
@@ -1079,8 +1081,9 @@ public final class HttpHeaders {
      * }</pre>
      *
      * @param headerName The name of the header to remove
-     * @return The previous value associated with the header, or null if there was no mapping
+     * @return The previous value associated with the header, or {@code null} if there was no mapping
      */
+    @MayReturnNull
     public Object remove(final String headerName) {
         return map.remove(headerName);
     }

@@ -75,6 +75,12 @@ import com.landawn.abacus.util.stream.Stream;
 @SuppressWarnings({ "java:S6548" })
 public abstract class ObjListIterator<T> extends ImmutableIterator<T> implements ListIterator<T> {
 
+    /**
+     * Protected constructor for subclasses.
+     */
+    protected ObjListIterator() {
+    }
+
     @SuppressWarnings("rawtypes")
     private static final ObjListIterator EMPTY = new ObjListIterator() {
         @Override
@@ -134,7 +140,7 @@ public abstract class ObjListIterator<T> extends ImmutableIterator<T> implements
 
     /**
      * Returns an empty ObjListIterator that has no elements.
-     * The returned iterator's hasNext() and hasPrevious() methods always return false.
+     * The returned iterator's hasNext() and hasPrevious() methods always return {@code false}.
      *
      * @param <T> the type of elements (not) returned by the iterator
      * @return an empty ObjListIterator
@@ -204,7 +210,7 @@ public abstract class ObjListIterator<T> extends ImmutableIterator<T> implements
      * @param fromIndex the index of the first element to iterate (inclusive)
      * @param toIndex the index after the last element to iterate (exclusive)
      * @return an ObjListIterator over the specified range of array elements
-     * @throws IndexOutOfBoundsException if fromIndex < 0, toIndex > array length, or fromIndex > toIndex
+     * @throws IndexOutOfBoundsException if fromIndex &lt; 0, toIndex &gt; array length, or fromIndex &gt; toIndex
      */
     public static <T> ObjListIterator<T> of(final T[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         N.checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
@@ -220,7 +226,7 @@ public abstract class ObjListIterator<T> extends ImmutableIterator<T> implements
 
     /**
      * Returns an ObjListIterator over the elements in the specified List.
-     * If the List is null, returns an empty ObjListIterator.
+     * If the List is {@code null}, returns an empty ObjListIterator.
      * The iterator supports all ListIterator operations.
      * 
      * <p><b>Usage Examples:</b></p>
@@ -239,7 +245,7 @@ public abstract class ObjListIterator<T> extends ImmutableIterator<T> implements
 
     /**
      * Returns an ObjListIterator that wraps the specified ListIterator.
-     * If the ListIterator is null, returns an empty ObjListIterator.
+     * If the ListIterator is {@code null}, returns an empty ObjListIterator.
      * If the ListIterator is already an ObjListIterator, returns it as-is.
      * 
      * <p>Note: The returned ObjListIterator does not support set() and add()
@@ -511,8 +517,8 @@ public abstract class ObjListIterator<T> extends ImmutableIterator<T> implements
     }
 
     /**
-     * Returns the first element of this iterator wrapped in a Nullable.
-     * If the iterator is empty, returns an empty Nullable.
+     * Returns the first element of this iterator wrapped in a {@code Nullable}.
+     * If the iterator is empty, returns an empty {@code Nullable}.
      * This operation consumes the first element if present.
      * 
      * <p><b>Usage Examples:</b></p>
@@ -521,7 +527,7 @@ public abstract class ObjListIterator<T> extends ImmutableIterator<T> implements
      * Nullable<String> first = iter.first(); // Nullable.of("first")
      * }</pre>
      *
-     * @return a Nullable containing the first element, or empty if no elements
+     * @return a {@code Nullable} containing the first element, or empty if no elements
      */
     public Nullable<T> first() {
         if (hasNext()) {
@@ -532,9 +538,9 @@ public abstract class ObjListIterator<T> extends ImmutableIterator<T> implements
     }
 
     /**
-     * Returns the first non-null element of this iterator wrapped in an Optional.
-     * If no non-null element is found, returns an empty Optional.
-     * This operation may consume multiple elements until a non-null element is found.
+     * Returns the first {@code non-null} element of this iterator wrapped in an Optional.
+     * If no {@code non-null} element is found, returns an empty Optional.
+     * This operation may consume multiple elements until a {@code non-null} element is found.
      * 
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -542,7 +548,7 @@ public abstract class ObjListIterator<T> extends ImmutableIterator<T> implements
      * Optional<String> first = iter.firstNonNull(); // Optional.of("found")
      * }</pre>
      *
-     * @return an Optional containing the first non-null element, or empty if none found
+     * @return an Optional containing the first {@code non-null} element, or empty if none found
      */
     public u.Optional<T> firstNonNull() {
         T next = null;
@@ -559,8 +565,8 @@ public abstract class ObjListIterator<T> extends ImmutableIterator<T> implements
     }
 
     /**
-     * Returns the last element of this iterator wrapped in a Nullable.
-     * If the iterator is empty, returns an empty Nullable.
+     * Returns the last element of this iterator wrapped in a {@code Nullable}.
+     * If the iterator is empty, returns an empty {@code Nullable}.
      * This operation consumes all remaining elements.
      * 
      * <p><b>Usage Examples:</b></p>
@@ -569,7 +575,7 @@ public abstract class ObjListIterator<T> extends ImmutableIterator<T> implements
      * Nullable<Integer> last = iter.last(); // Nullable.of(4)
      * }</pre>
      *
-     * @return a Nullable containing the last element, or empty if no elements
+     * @return a {@code Nullable} containing the last element, or empty if no elements
      */
     public Nullable<T> last() {
         if (hasNext()) {

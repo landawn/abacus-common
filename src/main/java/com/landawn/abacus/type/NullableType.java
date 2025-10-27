@@ -17,8 +17,8 @@ import com.landawn.abacus.util.WD;
 import com.landawn.abacus.util.u.Nullable;
 
 /**
- * Generic type handler for {@link Nullable} wrapper objects, providing serialization, 
- * deserialization, and database interaction capabilities for nullable values of any type.
+ * Generic type handler for {@link Nullable} wrapper objects, providing serialization,
+ * deserialization, and database interaction capabilities for {@code nullable} values of any type.
  * This type handler supports generic type parameters and delegates operations to the
  * appropriate element type handler.
  *
@@ -45,7 +45,7 @@ public class NullableType<T> extends AbstractOptionalType<Nullable<T>> {
 
     /**
      * Returns the declaring name of this type, which includes the full generic type declaration.
-     * For example, "Nullable&lt;String&gt;" for a Nullable containing String values.
+     * For example, "Nullable&lt;String&gt;" for a {@code Nullable} containing String values.
      *
      * @return the declaring name with generic type information
      */
@@ -66,7 +66,7 @@ public class NullableType<T> extends AbstractOptionalType<Nullable<T>> {
     }
 
     /**
-     * Gets the type handler for the element type contained within the Nullable.
+     * Gets the type handler for the element type contained within the {@code Nullable}.
      *
      * @return the Type handler for the wrapped element type
      */
@@ -77,7 +77,7 @@ public class NullableType<T> extends AbstractOptionalType<Nullable<T>> {
 
     /**
      * Gets the array of parameter types for this generic type.
-     * For Nullable, this returns a single-element array containing the element type.
+     * For {@code Nullable}, this returns a single-element array containing the element type.
      *
      * @return an array containing the element type
      */
@@ -86,20 +86,15 @@ public class NullableType<T> extends AbstractOptionalType<Nullable<T>> {
         return parameterTypes;
     }
 
-    /**
-     * Indicates whether this is a generic type.
-     *
-     * @return true, as Nullable is a generic type
-     */
     @Override
     public boolean isGenericType() {
         return true;
     }
 
     /**
-     * Returns the default value for Nullable type, which is an empty Nullable.
+     * Returns the default value for {@code Nullable} type, which is an empty {@code Nullable}.
      *
-     * @return Nullable.empty()
+     * @return {@code Nullable}.empty()
      */
     @Override
     public Nullable<T> defaultValue() {
@@ -108,11 +103,12 @@ public class NullableType<T> extends AbstractOptionalType<Nullable<T>> {
 
     /**
      * Converts a {@link Nullable} object to its string representation.
-     * If the Nullable is null or contains null, returns null. Otherwise,
+     * If the {@code Nullable} is {@code null} or contains {@code null}, returns {@code null}. Otherwise,
      * delegates to the element type's string conversion.
-     * 
-     * @param x the Nullable object to convert
-     * @return the string representation of the contained value, or null if empty
+     *
+     * @param x the {@code Nullable} object to convert
+     * @return the string representation of the contained value, or {@code null} if empty
+     @MayReturnNull
      */
     @Override
     public String stringOf(final Nullable<T> x) {
@@ -121,11 +117,11 @@ public class NullableType<T> extends AbstractOptionalType<Nullable<T>> {
 
     /**
      * Converts a string representation to a {@link Nullable} object.
-     * If the string is null, returns an empty Nullable. Otherwise,
+     * If the string is {@code null}, returns an empty {@code Nullable}. Otherwise,
      * delegates to the element type's valueOf method and wraps the result.
-     * 
+     *
      * @param str the string to convert
-     * @return a Nullable containing the parsed value, or empty Nullable if input is null
+     * @return a {@code Nullable} containing the parsed value, or empty {@code Nullable} if input is null
      */
     @Override
     public Nullable<T> valueOf(final String str) {
@@ -135,10 +131,10 @@ public class NullableType<T> extends AbstractOptionalType<Nullable<T>> {
     /**
      * Retrieves a value from a ResultSet at the specified column index and wraps it in a {@link Nullable}.
      * The method attempts to convert the retrieved value to the element type if necessary.
-     * 
+     *
      * @param rs the ResultSet to read from
      * @param columnIndex the column index (1-based) to retrieve the value from
-     * @return a Nullable containing the retrieved value, or empty Nullable if the value is SQL NULL
+     * @return a {@code Nullable} containing the retrieved value, or empty {@code Nullable} if the value is SQL NULL
      * @throws SQLException if a database access error occurs or the columnIndex is invalid
      */
     @Override
@@ -152,10 +148,10 @@ public class NullableType<T> extends AbstractOptionalType<Nullable<T>> {
     /**
      * Retrieves a value from a ResultSet using the specified column label and wraps it in a {@link Nullable}.
      * The method attempts to convert the retrieved value to the element type if necessary.
-     * 
+     *
      * @param rs the ResultSet to read from
      * @param columnLabel the label for the column specified with the SQL AS clause
-     * @return a Nullable containing the retrieved value, or empty Nullable if the value is SQL NULL
+     * @return a {@code Nullable} containing the retrieved value, or empty {@code Nullable} if the value is SQL NULL
      * @throws SQLException if a database access error occurs or the columnLabel is invalid
      */
     @Override
@@ -168,11 +164,11 @@ public class NullableType<T> extends AbstractOptionalType<Nullable<T>> {
 
     /**
      * Sets a parameter in a PreparedStatement to the value contained in a {@link Nullable}.
-     * If the Nullable is null or empty, sets the parameter to SQL NULL.
-     * 
+     * If the {@code Nullable} is {@code null} or empty, sets the parameter to SQL NULL.
+     *
      * @param stmt the PreparedStatement to set the parameter on
      * @param columnIndex the parameter index (1-based) to set
-     * @param x the Nullable value to set
+     * @param x the {@code Nullable} value to set
      * @throws SQLException if a database access error occurs or the columnIndex is invalid
      */
     @Override
@@ -182,11 +178,11 @@ public class NullableType<T> extends AbstractOptionalType<Nullable<T>> {
 
     /**
      * Sets a named parameter in a CallableStatement to the value contained in a {@link Nullable}.
-     * If the Nullable is null or empty, sets the parameter to SQL NULL.
-     * 
+     * If the {@code Nullable} is {@code null} or empty, sets the parameter to SQL NULL.
+     *
      * @param stmt the CallableStatement to set the parameter on
      * @param parameterName the name of the parameter to set
-     * @param x the Nullable value to set
+     * @param x the {@code Nullable} value to set
      * @throws SQLException if a database access error occurs or the parameterName is invalid
      */
     @Override
@@ -196,11 +192,11 @@ public class NullableType<T> extends AbstractOptionalType<Nullable<T>> {
 
     /**
      * Appends the string representation of a {@link Nullable} to an Appendable.
-     * If the Nullable is null or empty, appends the NULL_STRING constant.
+     * If the {@code Nullable} is {@code null} or empty, appends the NULL_STRING constant.
      * Otherwise, delegates to the actual type handler of the contained value.
-     * 
+     *
      * @param appendable the Appendable to write to
-     * @param x the Nullable value to append
+     * @param x the {@code Nullable} value to append
      * @throws IOException if an I/O error occurs during the append operation
      */
     @Override
@@ -215,12 +211,12 @@ public class NullableType<T> extends AbstractOptionalType<Nullable<T>> {
 
     /**
      * Writes the character representation of a {@link Nullable} to a CharacterWriter.
-     * If the Nullable is null or empty, writes the NULL_CHAR_ARRAY.
+     * If the {@code Nullable} is {@code null} or empty, writes the NULL_CHAR_ARRAY.
      * Otherwise, delegates to the actual type handler of the contained value.
      * This method is typically used for JSON/XML serialization.
-     * 
+     *
      * @param writer the CharacterWriter to write to
-     * @param x the Nullable value to write
+     * @param x the {@code Nullable} value to write
      * @param config the serialization configuration
      * @throws IOException if an I/O error occurs during the write operation
      */

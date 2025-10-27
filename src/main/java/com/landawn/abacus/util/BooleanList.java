@@ -63,8 +63,14 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
 
     static final Random RAND = new SecureRandom();
 
+    /**
+     * The array buffer into which the elements of the BooleanList are stored.
+     */
     private boolean[] elementData = N.EMPTY_BOOLEAN_ARRAY;
 
+    /**
+     * The size of the BooleanList (the number of elements it contains).
+     */
     private int size = 0;
 
     /**
@@ -684,7 +690,7 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
      * Performs a batch removal operation based on the specified collection and complement flag.
      *
      * @param c the collection of elements to check against
-     * @param complement if true, retain elements in c; if false, remove elements in c
+     * @param complement if {@code true}, retain elements in c; if {@code false}, remove elements in c
      * @return the number of elements removed
      */
     private int batchRemove(final BooleanList c, final boolean complement) {
@@ -1523,7 +1529,7 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
      * Performs the given action for each element in this list in sequential order.
      * The action is performed on each element from index 0 to size-1.
      *
-     * @param action the action to be performed for each element. Must not be null.
+     * @param action the action to be performed for each element. Must not be {@code null}.
      */
     public void forEach(final BooleanConsumer action) {
         forEach(0, size, action);
@@ -1539,7 +1545,7 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
      *
      * @param fromIndex the starting index (inclusive) of the range to process
      * @param toIndex the ending index (exclusive) of the range to process, or -1 to process from fromIndex to 0
-     * @param action the action to be performed for each element. Must not be null.
+     * @param action the action to be performed for each element. Must not be {@code null}.
      * @throws IndexOutOfBoundsException if {@code fromIndex} or {@code toIndex} is out of range
      *         ({@code fromIndex < 0 || toIndex > size() || (fromIndex > toIndex && toIndex != -1)})
      */
@@ -1604,11 +1610,11 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
     /**
      * Checks whether this list contains duplicate elements. For a boolean list,
      * duplicates exist if the list contains at least two elements with the same value
-     * (either two or more true values, or two or more false values).
+     * (either two or more {@code true} values, or two or more {@code false} values).
      *
      * @return {@code true} if this list contains duplicate elements, {@code false} otherwise.
      *         An empty list or a list with one element returns {@code false}.
-     *         A list with exactly two different boolean values (one true and one false) returns {@code false}.
+     *         A list with exactly two different boolean values (one {@code true} and one false) returns {@code false}.
      */
     @Override
     public boolean hasDuplicates() {
@@ -1623,7 +1629,7 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
 
     /**
      * Checks whether the elements in this list are sorted in ascending order.
-     * For boolean values, ascending order means false values come before true values.
+     * For boolean values, ascending order means {@code false} values come before {@code true} values.
      * An empty list or a list with a single element is considered sorted.
      *
      * @return {@code true} if all elements are sorted in ascending order (false before true),
@@ -1635,8 +1641,8 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
     }
 
     /**
-     * Sorts this list in ascending order. For boolean values, this means all false values
-     * will be placed before all true values. The relative order of equal elements is not preserved.
+     * Sorts this list in ascending order. For boolean values, this means all {@code false} values
+     * will be placed before all {@code true} values. The relative order of equal elements is not preserved.
      * 
      * <p>This operation modifies the list in-place and has O(n) time complexity.</p>
      */
@@ -1662,8 +1668,8 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
     }
 
     /**
-     * Sorts this list in descending order. For boolean values, this means all true values
-     * will be placed before all false values. This is equivalent to calling {@link #sort()}
+     * Sorts this list in descending order. For boolean values, this means all {@code true} values
+     * will be placed before all {@code false} values. This is equivalent to calling {@link #sort()}
      * followed by {@link #reverse()}.
      * 
      * <p>This operation modifies the list in-place and has O(n) time complexity.</p>
@@ -1745,7 +1751,7 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
      * Each possible permutation occurs with approximately equal probability, assuming that
      * the source of randomness is fair.
      *
-     * @param rnd the random number generator to use for shuffling. Must not be null.
+     * @param rnd the random number generator to use for shuffling. Must not be {@code null}.
      */
     @Override
     public void shuffle(final Random rnd) {
@@ -1809,7 +1815,7 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
      * The first element sampled is at {@code fromIndex}, then {@code fromIndex + step}, and so on.</p>
      *
      * @param fromIndex the starting index (inclusive) of the range to copy
-     * @param toIndex the ending index (exclusive) of the range to copy. May be -1 when fromIndex > toIndex
+     * @param toIndex the ending index (exclusive) of the range to copy. May be -1 when fromIndex &gt; toIndex
      * @param step the sampling interval. Must not be zero. Positive for forward sampling,
      *             negative for backward sampling
      * @return a new {@code BooleanList} containing the sampled elements
@@ -1896,11 +1902,6 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
         return size == 0;
     }
 
-    /**
-     * Returns the number of elements in this list.
-     *
-     * @return the number of elements in this list
-     */
     @Override
     public int size() {
         return size;
@@ -2179,8 +2180,8 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
      * Returns a string representation of this list. The string representation consists
      * of the list's elements in order, enclosed in square brackets ("[]"). Adjacent
      * elements are separated by the characters ", " (comma and space).
-     * 
-     * <p><b>Usage Examples:</b></p> A list containing true, false, true would return "[true, false, true]"</p>
+     *
+     * <p><b>Usage Example:</b> A list containing {@code true}, {@code false}, {@code true} would return "{@code [true, false, true]}".</p>
      *
      * @return a string representation of this list
      */

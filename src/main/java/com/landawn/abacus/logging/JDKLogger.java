@@ -34,8 +34,10 @@ import java.util.logging.LogRecord;
  * 
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
- * Logger logger = new JDKLogger("com.example.MyClass");
+ * // JDKLogger is automatically used by LoggerFactory when appropriate
+ * Logger logger = LoggerFactory.getLogger(MyClass.class);
  * logger.info("Application started");
+ * Exception exception = new Exception("Connection error");
  * logger.error("Failed to connect", exception);
  * }</pre>
  * 
@@ -51,8 +53,15 @@ class JDKLogger extends AbstractLogger {
 
     /**
      * Constructs a JDKLogger with the specified name.
-     * 
+     *
      * <p>The name is passed directly to the underlying java.util.logging.Logger.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * // Typically instantiated by LoggerFactory, not directly
+     * JDKLogger logger = new JDKLogger("com.example.MyClass");
+     * logger.info("Logger initialized");
+     * }</pre>
      *
      * @param name the name of the logger
      */
@@ -138,6 +147,8 @@ class JDKLogger extends AbstractLogger {
     /**
      * Checks if INFO level logging is enabled.
      *
+     * <p>In JDK logging, INFO level corresponds directly to Level.INFO.</p>
+     *
      * @return {@code true} if INFO level logging is enabled, {@code false} otherwise
      */
     @Override
@@ -148,6 +159,8 @@ class JDKLogger extends AbstractLogger {
     /**
      * Logs a message at INFO level.
      *
+     * <p>The message is logged at INFO level in JDK logging.</p>
+     *
      * @param msg the message to log
      */
     @Override
@@ -157,6 +170,8 @@ class JDKLogger extends AbstractLogger {
 
     /**
      * Logs a message at INFO level with an exception.
+     *
+     * <p>The message and exception are logged at INFO level in JDK logging.</p>
      *
      * @param msg the message to log
      * @param t the exception to log
@@ -242,9 +257,15 @@ class JDKLogger extends AbstractLogger {
 
     /**
      * Logs a message at the specified level.
-     * 
+     *
      * <p>This method creates a LogRecord and fills in caller information before
      * delegating to the JDK logger.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * log(Level.INFO, "Application started");
+     * log(Level.WARNING, "Configuration file not found");
+     * }</pre>
      *
      * @param level the logging level
      * @param msg the message to log
@@ -255,9 +276,15 @@ class JDKLogger extends AbstractLogger {
 
     /**
      * Logs a message at the specified level with an exception.
-     * 
+     *
      * <p>This method creates a LogRecord and fills in caller information before
      * delegating to the JDK logger.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Exception e = new IOException("File not found");
+     * log(Level.SEVERE, "Failed to load configuration", e);
+     * }</pre>
      *
      * @param level the logging level
      * @param msg the message to log
@@ -269,12 +296,19 @@ class JDKLogger extends AbstractLogger {
 
     /**
      * Logs a message at the specified level with the specified throwable if any.
-     * 
+     *
      * <p>This method creates a LogRecord and fills in caller data before calling
      * this instance's JDK logger. The caller information is determined by walking
      * the stack trace to find the first frame outside of the logging framework.</p>
-     * 
+     *
      * <p>See bug report #13 for more details about why this approach is necessary.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * log(SELF, Level.INFO, "Processing started", null);
+     * Exception ex = new RuntimeException("Error");
+     * log(SELF, Level.SEVERE, "Processing failed", ex);
+     * }</pre>
      *
      * @param callerFQCN the fully qualified class name of the caller
      * @param level the logging level

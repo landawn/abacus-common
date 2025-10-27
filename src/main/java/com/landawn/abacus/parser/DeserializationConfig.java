@@ -17,6 +17,7 @@ package com.landawn.abacus.parser;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.parser.ParserUtil.BeanInfo;
 import com.landawn.abacus.parser.ParserUtil.PropInfo;
 import com.landawn.abacus.type.Type;
@@ -54,6 +55,13 @@ import com.landawn.abacus.util.N;
  */
 public abstract class DeserializationConfig<C extends DeserializationConfig<C>> extends ParserConfig<C> {
 
+    /**
+     * Constructs a new DeserializationConfig.
+     */
+    protected DeserializationConfig() {
+    }
+
+    /** Whether to ignore properties in the source data that don't have corresponding fields in the target class. */
     boolean ignoreUnmatchedProperty = true;
 
     Type<?> elementType;
@@ -68,8 +76,8 @@ public abstract class DeserializationConfig<C extends DeserializationConfig<C>> 
 
     /**
      * Checks if unmatched properties should be ignored during deserialization.
-     * When set to true (default), properties in the source data that don't match
-     * any property in the target class will be silently ignored. When false,
+     * When set to {@code true} (default), properties in the source data that don't match
+     * any property in the target class will be silently ignored. When {@code false},
      * unmatched properties will cause an error.
      * 
      * <p><b>Usage Examples:</b></p>
@@ -113,8 +121,9 @@ public abstract class DeserializationConfig<C extends DeserializationConfig<C>> 
      * to determine the type of elements in the collection.
      *
      * @param <T> the element type
-     * @return the configured element type, or null if not set
+     * @return the configured element type, or {@code null} if not set
      */
+    @MayReturnNull
     public <T> Type<T> getElementType() {
         return (Type<T>) elementType;
     }
@@ -182,8 +191,9 @@ public abstract class DeserializationConfig<C extends DeserializationConfig<C>> 
      * the type of keys in the map.
      *
      * @param <T> the key type
-     * @return the configured map key type, or null if not set
+     * @return the configured map key type, or {@code null} if not set
      */
+    @MayReturnNull
     public <T> Type<T> getMapKeyType() {
         return (Type<T>) mapKeyType;
     }
@@ -242,8 +252,9 @@ public abstract class DeserializationConfig<C extends DeserializationConfig<C>> 
      * the type of values in the map.
      *
      * @param <T> the value type
-     * @return the configured map value type, or null if not set
+     * @return the configured map value type, or {@code null} if not set
      */
+    @MayReturnNull
     public <T> Type<T> getMapValueType() {
         return (Type<T>) mapValueType;
     }
@@ -299,7 +310,7 @@ public abstract class DeserializationConfig<C extends DeserializationConfig<C>> 
 
     /**
      * Checks if any value types have been configured.
-     * Returns true if either individual value types have been set for specific properties
+     * Returns {@code true} if either individual value types have been set for specific properties
      * or a bean class has been set for value type information.
      *
      * @return {@code true} if value types are configured, {@code false} otherwise
@@ -323,8 +334,9 @@ public abstract class DeserializationConfig<C extends DeserializationConfig<C>> 
      *
      * @param <T> the value type
      * @param keyName the property name, supporting nested properties (e.g., "account.devices.model")
-     * @return the type for the specified property, or null if not configured
+     * @return the type for the specified property, or {@code null} if not configured
      */
+    @MayReturnNull
     public <T> Type<T> getValueType(final String keyName) {
         return getValueType(keyName, null);
     }
@@ -345,6 +357,7 @@ public abstract class DeserializationConfig<C extends DeserializationConfig<C>> 
      * @param defaultType the type to return if no type is configured for the property
      * @return the type for the specified property, or defaultType if not configured
      */
+    @MayReturnNull
     public <T> Type<T> getValueType(final String keyName, final Type<T> defaultType) {
         Type<T> ret = null;
 
@@ -375,8 +388,9 @@ public abstract class DeserializationConfig<C extends DeserializationConfig<C>> 
      *
      * @param <T> the value type
      * @param keyName the property name, supporting nested properties (e.g., "account.devices.model")
-     * @return the class for the specified property, or null if not configured
+     * @return the class for the specified property, or {@code null} if not configured
      */
+    @MayReturnNull
     public <T> Class<T> getValueTypeClass(final String keyName) {
         return getValueTypeClass(keyName, null);
     }
@@ -396,6 +410,7 @@ public abstract class DeserializationConfig<C extends DeserializationConfig<C>> 
      * @param defaultTypeClass the class to return if no type is configured for the property
      * @return the class for the specified property, or defaultTypeClass if not configured
      */
+    @MayReturnNull
     public <T> Class<T> getValueTypeClass(final String keyName, final Class<T> defaultTypeClass) {
         final Type<T> ret = getValueType(keyName);
 
@@ -417,6 +432,7 @@ public abstract class DeserializationConfig<C extends DeserializationConfig<C>> 
      * @param typeClass the class to use for deserializing this property
      * @return this instance for method chaining
      */
+    @MayReturnNull
     public C setValueType(final String keyName, final Class<?> typeClass) {
         return setValueType(keyName, N.typeOf(typeClass));
     }
@@ -435,6 +451,7 @@ public abstract class DeserializationConfig<C extends DeserializationConfig<C>> 
      * @param type the type to use for deserializing this property
      * @return this instance for method chaining
      */
+    @MayReturnNull
     public C setValueType(final String keyName, final Type<?> type) {
         if (valueTypeMap == null) {
             valueTypeMap = new HashMap<>();

@@ -31,6 +31,7 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
+import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.exception.ParseException;
 import com.landawn.abacus.exception.UncheckedIOException;
 import com.landawn.abacus.logging.Logger;
@@ -290,9 +291,10 @@ public abstract class Configuration {
      * }</pre>
      *
      * @param configDir the name of the configuration directory to find
-     * @return the found directory as a File object, or null if not found
+     * @return the found directory as a File object, or {@code null} if not found
      * @see #findFile(String)
      */
+    @MayReturnNull
     public static File findDir(final String configDir) {
         return findFile(configDir, true, null);
     }
@@ -312,10 +314,11 @@ public abstract class Configuration {
      * }</pre>
      *
      * @param configFileName the name of the configuration file to find
-     * @return the found file as a File object, or null if not found
+     * @return the found file as a File object, or {@code null} if not found
      * @see #findDir(String)
      * @see #findFileByFile(File, String)
      */
+    @MayReturnNull
     public static File findFile(final String configFileName) {
         return findFile(configFileName, false, null);
     }
@@ -421,8 +424,9 @@ public abstract class Configuration {
      *
      * @param srcFile the source file whose directory will be used as the starting point
      * @param targetFileName the name of the file to find
-     * @return the found file, or null if not found
+     * @return the found file, or {@code null} if not found
      */
+    @MayReturnNull
     public static File findFileByFile(final File srcFile, final String targetFileName) {
         File targetFile = new File(targetFileName);
 
@@ -454,10 +458,11 @@ public abstract class Configuration {
      *
      * @param configFileName the name of the file or directory to find (can include relative path)
      * @param dir the directory to search in
-     * @param isDir true if searching for a directory, {@code false} for a file
-     * @return the found file or directory, or null if not found
+     * @param isDir {@code true} if searching for a directory, {@code false} for a file
+     * @return the found file or directory, or {@code null} if not found
      * @throws RuntimeException if the target file name is empty or null
      */
+    @MayReturnNull
     public static File findFileInDir(final String configFileName, final File dir, final boolean isDir) {
         if (Strings.isEmpty(configFileName)) {
             throw new RuntimeException("target file name can't be empty or null: " + configFileName);
@@ -548,11 +553,6 @@ public abstract class Configuration {
         return null;
     }
 
-    /**
-     * Gets the current source code location.
-     *
-     * @return the File representing the current source code location directory
-     */
     private static File getCurrentSourceCodeLocation() {
         File dir = new File(getSourceCodeLocation(Configuration.class));
 
@@ -689,7 +689,7 @@ public abstract class Configuration {
      * }</pre>
      *
      * @param value the string value representing time duration
-     * @return the time duration in milliseconds, or 0 if value is null or empty
+     * @return the time duration in milliseconds, or 0 if value is {@code null} or empty
      */
     public static long readTimeInMillis(String value) {
         value = Strings.trimToNull(value);
@@ -767,7 +767,7 @@ public abstract class Configuration {
 
     /**
      * Gets the value of the specified attribute.
-     * Returns null if the attribute doesn't exist. Attribute values are always
+     * Returns {@code null} if the attribute doesn't exist. Attribute values are always
      * returned as strings, even if they were originally numeric in the XML.
      *
      * <p><b>Usage Examples:</b></p>
@@ -780,7 +780,7 @@ public abstract class Configuration {
      * }</pre>
      *
      * @param attrName the name of the attribute
-     * @return the attribute value, or null if the attribute doesn't exist
+     * @return the attribute value, or {@code null} if the attribute doesn't exist
      * @see #hasAttribute(String)
      * @see #getAttributes()
      */
@@ -848,7 +848,7 @@ public abstract class Configuration {
      *
      * @param attrName the name of the attribute
      * @param attrValue the value of the attribute (will be trimmed)
-     * @return the previous value of the attribute, or null if it didn't exist
+     * @return the previous value of the attribute, or {@code null} if it didn't exist
      */
     @SuppressWarnings("UnusedReturnValue")
     protected String setAttribute(final String attrName, String attrValue) {
@@ -874,7 +874,7 @@ public abstract class Configuration {
      * }</pre>
      *
      * @param attrName the name of the attribute to remove
-     * @return the value of the removed attribute, or null if it didn't exist
+     * @return the value of the removed attribute, or {@code null} if it didn't exist
      */
     protected String removeAttribute(final String attrName) {
         return attrs.remove(attrName);

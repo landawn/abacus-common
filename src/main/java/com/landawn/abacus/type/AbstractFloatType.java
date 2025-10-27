@@ -52,6 +52,7 @@ public abstract class AbstractFloatType extends NumberType<Number> {
      */
     @MayReturnNull
     @Override
+
     public String stringOf(final Number x) {
         if (x == null) {
             return null; // NOSONAR
@@ -73,7 +74,9 @@ public abstract class AbstractFloatType extends NumberType<Number> {
      * @return the Float value
      * @throws NumberFormatException if the string cannot be parsed as a float
      */
+    @MayReturnNull
     @Override
+
     public Float valueOf(final String str) {
         try {
             return Strings.isEmpty(str) ? ((Float) defaultValue()) : Float.valueOf(str);
@@ -98,7 +101,7 @@ public abstract class AbstractFloatType extends NumberType<Number> {
     /**
      * Retrieves a float value from a ResultSet at the specified column index.
      * This method uses rs.getFloat() which returns 0.0f for SQL NULL values.
-     * Subclasses may override this to return null for SQL NULL values.
+     * Subclasses may override this to return {@code null} for SQL NULL values.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -117,6 +120,7 @@ public abstract class AbstractFloatType extends NumberType<Number> {
      * @throws SQLException if a database access error occurs or the columnIndex is invalid
      */
     @Override
+    @MayReturnNull
     public Float get(final ResultSet rs, final int columnIndex) throws SQLException {
         return rs.getFloat(columnIndex);
     }
@@ -124,7 +128,7 @@ public abstract class AbstractFloatType extends NumberType<Number> {
     /**
      * Retrieves a float value from a ResultSet using the specified column label.
      * This method uses rs.getFloat() which returns 0.0f for SQL NULL values.
-     * Subclasses may override this to return null for SQL NULL values.
+     * Subclasses may override this to return {@code null} for SQL NULL values.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -143,6 +147,7 @@ public abstract class AbstractFloatType extends NumberType<Number> {
      * @throws SQLException if a database access error occurs or the columnLabel is not found
      */
     @Override
+    @MayReturnNull
     public Float get(final ResultSet rs, final String columnLabel) throws SQLException {
         return rs.getFloat(columnLabel);
     }
