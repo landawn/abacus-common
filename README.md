@@ -102,16 +102,6 @@ Abacus-common is a *mega-library* unlike most others. It contains thousands of p
 more [Collectors](https://htmlpreview.github.io/?https://github.com/landawn/abacus-common/master/docs/Collectors_view.html) and 
 [Throwables](https://htmlpreview.github.io/?https://github.com/landawn/abacus-common/master/docs/Throwables_view.html).
 
-* Primitive Mutable: 
-[MutableBoolean](https://htmlpreview.github.io/?https://github.com/landawn/abacus-common/master/docs/MutableBoolean_view.html), 
-[MutableChar](https://htmlpreview.github.io/?https://github.com/landawn/abacus-common/master/docs/MutableChar_view.html), 
-[MutableByte](https://htmlpreview.github.io/?https://github.com/landawn/abacus-common/master/docs/MutableByte_view.html), 
-[MutableShort](https://htmlpreview.github.io/?https://github.com/landawn/abacus-common/master/docs/MutableShort_view.html), 
-[MutableInt](https://htmlpreview.github.io/?https://github.com/landawn/abacus-common/master/docs/MutableInt_view.html), 
-[MutableLong](https://htmlpreview.github.io/?https://github.com/landawn/abacus-common/master/docs/MutableLong_view.html), 
-[MutableFloat](https://htmlpreview.github.io/?https://github.com/landawn/abacus-common/master/docs/MutableFloat_view.html) and 
-[MutableDouble](https://htmlpreview.github.io/?https://github.com/landawn/abacus-common/master/docs/MutableDouble_view.html).
-
 * Optional: 
 [OptionalBoolean](https://htmlpreview.github.io/?https://github.com/landawn/abacus-common/master/docs/OptionalBoolean_view.html), 
 [OptionalChar](https://htmlpreview.github.io/?https://github.com/landawn/abacus-common/master/docs/OptionalChar_view.html), 
@@ -123,6 +113,16 @@ more [Collectors](https://htmlpreview.github.io/?https://github.com/landawn/abac
 [OptionalDouble](https://htmlpreview.github.io/?https://github.com/landawn/abacus-common/master/docs/OptionalDouble_view.html), 
 [Optional](https://htmlpreview.github.io/?https://github.com/landawn/abacus-common/master/docs/Optional_view.html) and 
 [Nullable](https://htmlpreview.github.io/?https://github.com/landawn/abacus-common/master/docs/Nullable_view.html)
+
+* Primitive Mutable: 
+[MutableBoolean](https://htmlpreview.github.io/?https://github.com/landawn/abacus-common/master/docs/MutableBoolean_view.html), 
+[MutableChar](https://htmlpreview.github.io/?https://github.com/landawn/abacus-common/master/docs/MutableChar_view.html), 
+[MutableByte](https://htmlpreview.github.io/?https://github.com/landawn/abacus-common/master/docs/MutableByte_view.html), 
+[MutableShort](https://htmlpreview.github.io/?https://github.com/landawn/abacus-common/master/docs/MutableShort_view.html), 
+[MutableInt](https://htmlpreview.github.io/?https://github.com/landawn/abacus-common/master/docs/MutableInt_view.html), 
+[MutableLong](https://htmlpreview.github.io/?https://github.com/landawn/abacus-common/master/docs/MutableLong_view.html), 
+[MutableFloat](https://htmlpreview.github.io/?https://github.com/landawn/abacus-common/master/docs/MutableFloat_view.html) and 
+[MutableDouble](https://htmlpreview.github.io/?https://github.com/landawn/abacus-common/master/docs/MutableDouble_view.html).
 
 * Primitive List: 
 [PrimitiveList](https://htmlpreview.github.io/?https://github.com/landawn/abacus-common/master/docs/PrimitiveList_view.html), 
@@ -236,10 +236,6 @@ To fully leverage abacus-common, familiarity with Java 8+ lambdas and the Stream
 
 [Kotlin vs Java 8 on Collection](./Java_Kotlin.md)
 
-
-## User Guide:
-
-Please refer to [Wiki](https://github.com/landawn/abacus-common/wiki)
 
 
 ## Also See: [abacus-jdbc](https://github.com/landawn/abacus-jdbc), [abacus-query](https://github.com/landawn/abacus-query), [abacus-extra](https://github.com/landawn/abacus-extra), [abacus-cache](https://github.com/landawn/abacus-cache) and [abacus-android](https://github.com/landawn/abacus-android)

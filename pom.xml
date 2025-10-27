@@ -35,6 +35,7 @@
 		<java.version>17</java.version>
 		<maven.compiler.source>17</maven.compiler.source>
 		<maven.compiler.target>17</maven.compiler.target>
+		<maven.compiler.release>17</maven.compiler.release>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 		<junit.jupiter.version>5.13.4</junit.jupiter.version>
@@ -398,10 +399,11 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
-				<version>3.12.1</version>
+				<version>3.14.1</version>
 				<configuration>
 					<source>${maven.compiler.source}</source>
 					<target>${maven.compiler.target}</target>
+					<release>${maven.compiler.release}</release>
 			        <annotationProcessorPaths>
 			          <path>
 			            <groupId>org.projectlombok</groupId>
@@ -415,10 +417,9 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-source-plugin</artifactId>
-				<version>3.3.0</version>
+				<version>3.3.1</version>
 				<configuration>
-				</configuration>
-
+				</configuration> 
 				<executions>
 					<execution>
 						<id>attach-sources</id>
@@ -434,19 +435,20 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-javadoc-plugin</artifactId>
-				<version>3.6.3</version>
+				<version>3.12.0</version>
 				<configuration>
-					<doctitle>abacus-common</doctitle>
+					<doctitle>abacus-extra</doctitle>
 					<show>public</show>
-					<doclint>none</doclint>
+			        <source>25</source>
+			        <encoding>UTF-8</encoding>
+			        <doclint>all</doclint>    
 					<source>${maven.compiler.source}</source>
 					<detectJavaApiLink>false</detectJavaApiLink>
 					<sourceFileExcludes>
 						<exclude>/com/landawn/abacus/type/**/*.java</exclude>
 						<exclude>/com/landawn/abacus/logging/**/*.java</exclude>
 						<exclude>/com/landawn/abacus/util/cs.java</exclude>
-					</sourceFileExcludes>
-
+					</sourceFileExcludes> 
 				</configuration>
 				<executions>
 					<execution>
@@ -457,10 +459,11 @@
 					</execution>
 				</executions>
 			</plugin>
+
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-surefire-plugin</artifactId>
-				<version>3.5.3</version>
+				<version>3.5.4</version>
 				<configuration>
 					<includes>
 						<include>**/AbacusCommonUnitSuite.java</include>
@@ -484,7 +487,7 @@
 			<plugin>
 				<groupId>org.jacoco</groupId>
 				<artifactId>jacoco-maven-plugin</artifactId>
-				<version>0.8.12</version>
+				<version>0.8.14</version>
 				<executions>
 					<!-- Prepare agent in all modules via inheritance -->
 					<execution>
