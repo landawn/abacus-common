@@ -124,17 +124,6 @@ more [Collectors](https://htmlpreview.github.io/?https://github.com/landawn/abac
 [MutableFloat](https://htmlpreview.github.io/?https://github.com/landawn/abacus-common/master/docs/MutableFloat_view.html) and 
 [MutableDouble](https://htmlpreview.github.io/?https://github.com/landawn/abacus-common/master/docs/MutableDouble_view.html).
 
-* Primitive List: 
-[PrimitiveList](https://htmlpreview.github.io/?https://github.com/landawn/abacus-common/master/docs/PrimitiveList_view.html), 
-[BooleanList](https://htmlpreview.github.io/?https://github.com/landawn/abacus-common/master/docs/BooleanList_view.html), 
-[CharList](https://htmlpreview.github.io/?https://github.com/landawn/abacus-common/master/docs/CharList_view.html), 
-[ByteList](https://htmlpreview.github.io/?https://github.com/landawn/abacus-common/master/docs/ByteList_view.html), 
-[ShortList](https://htmlpreview.github.io/?https://github.com/landawn/abacus-common/master/docs/ShortList_view.html), 
-[IntList](https://htmlpreview.github.io/?https://github.com/landawn/abacus-common/master/docs/IntList_view.html), 
-[LongList](https://htmlpreview.github.io/?https://github.com/landawn/abacus-common/master/docs/LongList_view.html), 
-[FloatList](https://htmlpreview.github.io/?https://github.com/landawn/abacus-common/master/docs/FloatList_view.html) and
-[DoubleList](https://htmlpreview.github.io/?https://github.com/landawn/abacus-common/master/docs/DoubleList_view.html).
-
 * Primitive/Immutable Iterator: 
 [ObjIterator](https://htmlpreview.github.io/?https://github.com/landawn/abacus-common/master/docs/ObjIterator_view.html),
 [BooleanIterator](https://htmlpreview.github.io/?https://github.com/landawn/abacus-common/master/docs/BooleanIterator_view.html), 
@@ -148,6 +137,17 @@ more [Collectors](https://htmlpreview.github.io/?https://github.com/landawn/abac
 [BiIterator](https://htmlpreview.github.io/?https://github.com/landawn/abacus-common/master/docs/BiIterator_view.html),
 [TriIterator](https://htmlpreview.github.io/?https://github.com/landawn/abacus-common/master/docs/TriIterator_view.html) and 
 [LineIterator](https://htmlpreview.github.io/?https://github.com/landawn/abacus-common/master/docs/LineIterator_view.html). 
+
+* Primitive List: 
+[PrimitiveList](https://htmlpreview.github.io/?https://github.com/landawn/abacus-common/master/docs/PrimitiveList_view.html), 
+[BooleanList](https://htmlpreview.github.io/?https://github.com/landawn/abacus-common/master/docs/BooleanList_view.html), 
+[CharList](https://htmlpreview.github.io/?https://github.com/landawn/abacus-common/master/docs/CharList_view.html), 
+[ByteList](https://htmlpreview.github.io/?https://github.com/landawn/abacus-common/master/docs/ByteList_view.html), 
+[ShortList](https://htmlpreview.github.io/?https://github.com/landawn/abacus-common/master/docs/ShortList_view.html), 
+[IntList](https://htmlpreview.github.io/?https://github.com/landawn/abacus-common/master/docs/IntList_view.html), 
+[LongList](https://htmlpreview.github.io/?https://github.com/landawn/abacus-common/master/docs/LongList_view.html), 
+[FloatList](https://htmlpreview.github.io/?https://github.com/landawn/abacus-common/master/docs/FloatList_view.html) and
+[DoubleList](https://htmlpreview.github.io/?https://github.com/landawn/abacus-common/master/docs/DoubleList_view.html).
 
 * JSON/XML Data Binding: 
 [Parser](https://htmlpreview.github.io/?https://github.com/landawn/abacus-common/master/docs/Parser_view.html), 
@@ -274,15 +274,17 @@ To fully leverage abacus-common, familiarity with Java 8+ lambdas and the Stream
 * Methods are designed to support broad and general use cases. `null` parameters are usually allowed, as long as they do not violate the contract of the method. For example: `Numbers.createNumber(...)` or `N.filter(...)`. It is up to the user to handle `null` values appropriately if they are invalid in a given context.
 
 
-* Due to the large number of methods in this library, consistently handling exceptions such as `IllegalArgumentException`, `NullPointerException`, `IndexOutOfBoundsException`, and similar across the entire codebase is challenging. Therefore, these exceptions should not be treated differently. The following approach is not recommended:
+* Due to the large number of methods in this library, consistently handling exceptions such as `IllegalArgumentException`, `IndexOutOfBoundsException`,  `NullPointerException` and similar across the entire codebase is challenging. Therefore, these exceptions should not be treated differently. The following approach is not recommended:
 
 ```java
 		try {
-		    call some methods which may throw IllegalArgumentException or NullPointerException in this library.
+		    call some methods which may throw IllegalArgumentException, IndexOutOfBoundsException or NullPointerException in this library.
 		} catch (IllegalArgumentException e) {
-		    // do something.
+		    // do something...
+		} catch (IndexOutOfBoundsException e) {
+		    // do something else...
 		} catch (NullPointerException e) {
-		    // do something else.
+		    // otherwise...
 		}
 ```
 
