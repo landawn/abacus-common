@@ -245,7 +245,7 @@ compile 'com.landawn:abacus-common:6.25.3'
 		}
 ```
 
-* More refer to: [How To Design A Good API and Why it Matters](https://www.youtube.com/watch?v=aAb7hSCtvGw)
+* More refer to: [How To Design A Good API and Why it Matters](https://static.googleusercontent.com/media/research.google.com/en//pubs/archive/32713.pdf), [video](https://www.youtube.com/watch?v=aAb7hSCtvGw)
 
 
 ### Functional Programming:
@@ -297,3 +297,4 @@ If Proposals is slow with Big class: N, Strings, Stream, Open the class file and
 ![image](https://github.com/landawn/abacus-common/assets/16568599/248990bb-f2c8-43e0-956b-edaa1477d5cd)
 
                                ...beyond imagination...
+
