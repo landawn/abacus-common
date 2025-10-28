@@ -223,6 +223,31 @@ compile 'com.landawn:abacus-common:6.25.3'
 ```
 
 
+### A Few Principles About Design and Implementation in This Library:
+
+* In general, empty `String`, `Collection`, `Map`, etc., are returned instead of `null`. However, `null` may be returned in certain methods, such as `Strings.firstNonEmpty()` or `Strings.emptyToNull()`. Methods that may return `null` are typically annotated with `@MayReturnNull`.
+
+
+* Methods are designed to support broad and general use cases. `null` parameters are usually allowed, as long as they do not violate the contract of the method. For example: `Numbers.createNumber(...)` or `N.filter(...)`. It is up to the user to handle `null` values appropriately if they are invalid in a given context.
+
+
+* Due to the large number of methods in this library, consistently handling exceptions such as `IllegalArgumentException`, `IndexOutOfBoundsException`,  `NullPointerException` and similar across the entire codebase is challenging. Therefore, these exceptions should not be treated differently. The following approach is not recommended:
+
+```java
+		try {
+		    call some methods which may throw IllegalArgumentException, IndexOutOfBoundsException or NullPointerException in this library.
+		} catch (IllegalArgumentException e) {
+		    // do something...
+		} catch (IndexOutOfBoundsException e) {
+		    // do something else...
+		} catch (NullPointerException e) {
+		    // otherwise...
+		}
+```
+
+* More refer to: [How To Design A Good API and Why it Matters](https://www.youtube.com/watch?v=aAb7hSCtvGw)
+
+
 ### Functional Programming:
 To fully leverage abacus-common, familiarity with Java 8+ lambdas and the Stream API is recommended. Helpful resources include:
 
@@ -264,31 +289,6 @@ To fully leverage abacus-common, familiarity with Java 8+ lambdas and the Stream
 
 ## Recommended Java programming tools:
 [Spotbugs](https://github.com/spotbugs/spotbugs), [JaCoCo](https://www.eclemma.org/jacoco/)...
-
-
-### A Few Principles About Design and Implementation in This Library:
-
-* In general, empty `String`, `Collection`, `Map`, etc., are returned instead of `null`. However, `null` may be returned in certain methods, such as `Strings.firstNonEmpty()` or `Strings.emptyToNull()`. Methods that may return `null` are typically annotated with `@MayReturnNull`.
-
-
-* Methods are designed to support broad and general use cases. `null` parameters are usually allowed, as long as they do not violate the contract of the method. For example: `Numbers.createNumber(...)` or `N.filter(...)`. It is up to the user to handle `null` values appropriately if they are invalid in a given context.
-
-
-* Due to the large number of methods in this library, consistently handling exceptions such as `IllegalArgumentException`, `IndexOutOfBoundsException`,  `NullPointerException` and similar across the entire codebase is challenging. Therefore, these exceptions should not be treated differently. The following approach is not recommended:
-
-```java
-		try {
-		    call some methods which may throw IllegalArgumentException, IndexOutOfBoundsException or NullPointerException in this library.
-		} catch (IllegalArgumentException e) {
-		    // do something...
-		} catch (IndexOutOfBoundsException e) {
-		    // do something else...
-		} catch (NullPointerException e) {
-		    // otherwise...
-		}
-```
-
-* More refer to: [How To Design A Good API and Why it Matters](https://www.youtube.com/watch?v=aAb7hSCtvGw)
 
 
 ## 
