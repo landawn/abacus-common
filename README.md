@@ -18,9 +18,9 @@
 
 2. *Simple and concise*:
    All APIs are well organized and follow consistent design principles:
-	* Always return an empty string or collection instead of `null`.
 	* Use concise, consistent method names and parameter orders.
 	* Ensure predictable and uniform behavior across components.
+	* Empty `strings/collections/maps` or `Optional` are preferred over `null` as return values whenever appropriate.
 	* More...
 
 3. *Powerful and extensive*:
