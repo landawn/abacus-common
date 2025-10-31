@@ -247,6 +247,9 @@ compile 'com.landawn:abacus-common:6.25.3'
 		}
 ```
 
+
+
+
 ### Comparison with *Apache Commons Lang*, *Google Guava* and other libraries:
 
 First of all, some code in *abacus-common* was originally derived from *Apache Commons Lang*, *Google Guava*, and other libraries under *the Apache License v2*.
