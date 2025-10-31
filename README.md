@@ -21,7 +21,7 @@
 	* Use concise, consistent method names and parameter orders.
 	* Ensure predictable and uniform behavior across components.
 	* Empty `strings/collections/maps` or `Optional` are preferred over `null` as return values whenever appropriate.
-	* More...
+	* More ... refer to: [How To Design A Good API and Why it Matters](https://static.googleusercontent.com/media/research.google.com/en//pubs/archive/32713.pdf), [video](https://www.youtube.com/watch?v=aAb7hSCtvGw)
 
 3. *Powerful and extensive*:
    The library provides thousands of utility methods — covering everything from daily-use helpers to advanced support for I/O, concurrency, JSON/XML serialization, and functional programming.
@@ -245,7 +245,6 @@ compile 'com.landawn:abacus-common:6.25.3'
 		}
 ```
 
-* More refer to: [How To Design A Good API and Why it Matters](https://static.googleusercontent.com/media/research.google.com/en//pubs/archive/32713.pdf), [video](https://www.youtube.com/watch?v=aAb7hSCtvGw)
 
 
 ### Functional Programming:
