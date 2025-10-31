@@ -255,14 +255,17 @@ compile 'com.landawn:abacus-common:6.25.3'
 First of all, some code in *abacus-common* was originally derived from *Apache Commons Lang*, *Google Guava*, and other libraries under *the Apache License v2*.
 In addition, *abacus-common* includes wrapper classes built on top of third-party APIs. Whether the code is adapted from existing libraries or implemented as wrappers(e.g., `OkHttpRequest`), the primary goal is to provide a unified API and consistent programming experience through a cohesive and integrated design.
 
-*abacus-common* can serve as a replacement for *Apache Commons Lang* or *Google Guava* in certain scenarios; however, this is **not** a recommendation. Developers are encouraged to choose the library that best fits their preferences and project requirements.
+*abacus-common* could serve as a replacement for *Apache Commons Lang* or *Google Guava* in certain scenarios; however, this is **not** a recommendation. Developers are encouraged to choose the library that best fits their preferences and project requirements.
 
-Secondly, although *abacus-common* includes thousands of public methods across dozens of classes and additional data structures, its APIs mainly focus on solving common everyday programming problems. The design centers around the most frequently used JDK data structures, such as `String/Number/Collection/Map/Bean/...`
+Secondly, although *abacus-common* includes thousands of public methods across dozens of classes and additional data structures, its APIs mainly focus on solving common everyday programming problems. The design centers around the most frequently used Java data structures, such as `String/Number/Collection/Map/Bean/...`
 
 APIs for HTTP web requests and `JSON/XML` serialization are also included because these are widely used in daily programming—much like collections.
 Beyond that, the library provides a few small miscellaneous utility classes.
 
 There are **no plans** to extend *abacus-common* into unrelated domains such as *compression*, *artificial intelligence*, or other specialized areas. The focus remains on providing a clean, consistent, and integrated utility foundation for general-purpose Java programming. The APIs are designed to be stable, with no major modifications expected in future releases.
+
+<br>
+<br>
 
 ### Functional Programming:
 To fully leverage abacus-common, familiarity with Java 8+ lambdas and the Stream API is recommended. Helpful resources include:
