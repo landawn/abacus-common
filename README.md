@@ -233,7 +233,7 @@ compile 'com.landawn:abacus-common:6.25.3'
 * Most methods are designed to support broad and general use cases. `null` parameters are generally permitted, provided they do not violate the method’s intended contract. For example: `Numbers.createNumber(...)` or `N.filter(...)`. It is the user’s responsibility to handle `null` values appropriately if they are considered invalid in a given context.
 
 
-* Given the large number of methods across this library, maintaining strict consistency in handling exceptions such as `IllegalArgumentException`, `IndexOutOfBoundsException`,  `NullPointerException`, and similar is inherently challenging. Therefore, these exceptions are not treated differently, and the following approach ** must be avoided**:
+* Given the large number of methods across this library, maintaining strict consistency in handling exceptions such as `IllegalArgumentException`, `IndexOutOfBoundsException`,  `NullPointerException`, and similar is inherently challenging. Therefore, these exceptions are not treated differently, and the following approach **must be avoided**:
 
 ```java
 		try {
