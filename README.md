@@ -225,15 +225,15 @@ compile 'com.landawn:abacus-common:6.25.3'
 ```
 
 
-### A Few Principles About Design and Implementation in This Library:
+### Design and Implementation Considerations:
 
-* In general, empty `String`, `Collection`, `Map`, etc., are returned instead of `null`. However, `null` may be returned in certain methods, such as `Strings.firstNonEmpty()` or `Strings.emptyToNull()`. Methods that may return `null` are typically annotated with `@MayReturnNull`.
-
-
-* Methods are designed to support broad and general use cases. `null` parameters are usually allowed, as long as they do not violate the contract of the method. For example: `Numbers.createNumber(...)` or `N.filter(...)`. It is up to the user to handle `null` values appropriately if they are invalid in a given context.
+* In general, empty values—such as an empty `String`, `Collection`, or `Map`—are returned instead of `null`. However, certain methods (e.g., `Strings.firstNonEmpty()` or `Strings.emptyToNull()`) may legitimately return `null`. Methods that may return `null` are typically annotated with `@MayReturnNull`.
 
 
-* Due to the large number of methods in this library, consistently handling exceptions such as `IllegalArgumentException`, `IndexOutOfBoundsException`,  `NullPointerException` and similar across the entire codebase is challenging. Therefore, these exceptions should not be treated differently. The following approach is not recommended:
+* Most methods are designed to support broad and general use cases. `null` parameters are generally permitted, provided they do not violate the method’s intended contract. For example: `Numbers.createNumber(...)` or `N.filter(...)`. It is the user’s responsibility to handle `null` values appropriately if they are considered invalid in a given context.
+
+
+* Given the large number of methods across this library, maintaining strict consistency in handling exceptions such as `IllegalArgumentException`, `IndexOutOfBoundsException`,  `NullPointerException`, and similar is inherently challenging. Therefore, these exceptions are not treated differently, and the following approach ** must be avoided**:
 
 ```java
 		try {
@@ -247,25 +247,17 @@ compile 'com.landawn:abacus-common:6.25.3'
 		}
 ```
 
-<br>
-<br>
 
 ### Comparison with *Apache Commons Lang*, *Google Guava* and other libraries:
 
 First of all, some code in *abacus-common* was originally derived from *Apache Commons Lang*, *Google Guava*, and other libraries under *the Apache License v2*.
-In addition, *abacus-common* includes wrapper classes built on top of third-party APIs. Whether the code is adapted from existing libraries or implemented as wrappers(e.g., `OkHttpRequest`), the primary goal is to provide a unified API and consistent programming experience through a cohesive and integrated design.
+In addition, *abacus-common* includes wrapper classes built on top of third-party APIs. Whether the code is adapted from existing libraries or implemented as wrappers(e.g., `OkHttpRequest/Hashing`), the primary goal is to provide a unified API and consistent programming experience through a cohesive and integrated design.  (*abacus-common could serve as a replacement for Apache Commons Lang or Google Guava in certain scenarios; however, this is not a recommendation. Developers are encouraged to choose the library that best fits their preferences and project requirements.*)
 
-*abacus-common* could serve as a replacement for *Apache Commons Lang* or *Google Guava* in certain scenarios; however, this is **not** a recommendation. Developers are encouraged to choose the library that best fits their preferences and project requirements.
-
-Secondly, although *abacus-common* includes thousands of public methods across dozens of classes and additional data structures, its APIs mainly focus on solving common everyday programming problems. The design centers around the most frequently used Java data structures, such as `String/Number/Collection/Map/Bean/...`
-
-APIs for HTTP web requests and `JSON/XML` serialization are also included because these are widely used in daily programming—much like collections.
+Secondly, although *abacus-common* includes thousands of public methods across dozens of classes and additional data structures, its APIs mainly focus on solving common everyday programming problems. The design centers around the most frequently used Java data structures, such as `String/Number/Collection/Map/Bean/Stream...`. APIs for HTTP web requests and `JSON/XML` serialization are also included because these are widely used in daily programming—much like collections.
 Beyond that, the library provides a few small miscellaneous utility classes.
 
-There are **no plans** to extend *abacus-common* into unrelated domains such as *compression*, *artificial intelligence*, or other specialized areas. The focus remains on providing a clean, consistent, and integrated utility foundation for general-purpose Java programming. The APIs are designed to be stable, with no major modifications expected in future releases.
+There are **no plans** to extend *abacus-common* into unrelated domains such as *compression*, *artificial intelligence*, or other specialized areas. The focus remains on providing a clean, consistent, and integrated utility foundation for general-purpose Java programming. The APIs are designed to remain stable and long-lasting, with no major changes anticipated in future releases, even though there have been numerous iterations and modifications in the past.
 
-<br>
-<br>
 
 ### Functional Programming:
 To fully leverage abacus-common, familiarity with Java 8+ lambdas and the Stream API is recommended. Helpful resources include:
