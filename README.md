@@ -167,7 +167,7 @@ and [More](https://www.javadoc.io/static/com.landawn/abacus-common/6.25.3/com/la
 and [More](https://www.javadoc.io/static/com.landawn/abacus-common/6.25.3/com/landawn/abacus/parser/package-summary.html) ...
 
 * Pool: 
-[Pool](https://static.javadoc.io/com.landawn/abacus-common/6.25.3/com/landawn/abacus/pool/Pool_view.html), 
+[Pool](https://static.javadoc.io/com.landawn/abacus-common/6.25.3/com/landawn/abacus/pool/Pool.html), 
 [ObjectPool](https://static.javadoc.io/com.landawn/abacus-common/6.25.3/com/landawn/abacus/pool/ObjectPool.html), 
 [KeyedObjectPool](https://static.javadoc.io/com.landawn/abacus-common/6.25.3/com/landawn/abacus/pool/KeyedObjectPool.html), 
 [PoolFactory](https://static.javadoc.io/com.landawn/abacus-common/6.25.3/com/landawn/abacus/pool/PoolFactory.html)
@@ -308,4 +308,5 @@ If Proposals is slow with Big class: N, Strings, Stream, Open the class file and
 ![image](https://github.com/landawn/abacus-common/assets/16568599/248990bb-f2c8-43e0-956b-edaa1477d5cd)
 
                                ...beyond imagination...
+
 
