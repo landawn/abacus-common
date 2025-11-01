@@ -3,7 +3,7 @@
 [![Javadocs](https://img.shields.io/badge/javadoc-6.25.3-brightgreen.svg)](https://www.javadoc.io/doc/com.landawn/abacus-common/6.25.3/index.html)
 
 
-**Abacus-common** is a general-purpose Java programming library that provides a rich set of utilities, data structures, and functional APIs.
+**abacus-common** is a general-purpose Java programming library that provides a rich set of utilities, data structures, and functional APIs.
 
 ##### Key Features
 
@@ -26,9 +26,9 @@
 3. *Powerful and extensive*:
    The library provides thousands of utility methods — covering everything from daily-use helpers to advanced support for I/O, concurrency, JSON/XML serialization, and functional programming.
 
-##### Why Abacus-common?
+##### Why abacus-common?
 
-Abacus-common is a *mega-library* unlike most others. It contains thousands of public methods across tens of classes, covering nearly all common programming use cases. You no longer need to search multiple libraries or maintain your own `StringUtils` or `CollectionUtils` — everything is conveniently available in one place with clean, consistent, and easy-to-use APIs. The ultimate goal is to make code that uses this library easy to read and maintain by simplifying the implementation and enhancing readability through concise APIs and data structures.
+abacus-common is a *mega-library* unlike most others. It contains thousands of public methods across tens of classes, covering nearly all common programming use cases. You no longer need to search multiple libraries or maintain your own `StringUtils` or `CollectionUtils` — everything is conveniently available in one place with clean, consistent, and easy-to-use APIs. The ultimate goal is to make code that uses this library easy to read and maintain by simplifying the implementation and enhancing readability through concise APIs and data structures.
 
 ## Features:
 
@@ -308,5 +308,6 @@ If Proposals is slow with Big class: N, Strings, Stream, Open the class file and
 ![image](https://github.com/landawn/abacus-common/assets/16568599/248990bb-f2c8-43e0-956b-edaa1477d5cd)
 
                                ...beyond imagination...
+
 
 
