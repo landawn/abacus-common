@@ -61,6 +61,8 @@ abacus-common is a *mega-library* unlike most others. It contains thousands of p
 [Tuple](https://htmlpreview.github.io/?https://github.com/landawn/abacus-common/master/docs/Tuple_view.html), 
 [Range](https://htmlpreview.github.io/?https://github.com/landawn/abacus-common/master/docs/Range_view.html), 
 [Duration](https://htmlpreview.github.io/?https://github.com/landawn/abacus-common/master/docs/Duration_view.html), 
+[Stopwatch](https://static.javadoc.io/com.landawn/abacus-common/6.25.3/com/landawn/abacus/util/Stopwatch.html), 
+[RateLimiter](https://static.javadoc.io/com.landawn/abacus-common/6.25.3/com/landawn/abacus/util/RateLimiter.html), 
 [Fraction](https://htmlpreview.github.io/?https://github.com/landawn/abacus-common/master/docs/Fraction_view.html), 
 [Splitter](https://htmlpreview.github.io/?https://github.com/landawn/abacus-common/master/docs/Splitter_view.html), 
 [Joiner](https://htmlpreview.github.io/?https://github.com/landawn/abacus-common/master/docs/Joiner_view.html), 
@@ -69,13 +71,17 @@ abacus-common is a *mega-library* unlike most others. It contains thousands of p
 [Comparators](https://htmlpreview.github.io/?https://github.com/landawn/abacus-common/master/docs/Comparators_view.html), 
 [Index](https://htmlpreview.github.io/?https://github.com/landawn/abacus-common/master/docs/Index_view.html), 
 [Median](https://static.javadoc.io/com.landawn/abacus-common/6.25.3/com/landawn/abacus/util/Median.html), 
+[Wrapper](https://static.javadoc.io/com.landawn/abacus-common/6.25.3/com/landawn/abacus/util/Wrapper.html), 
 [Indexed](https://htmlpreview.github.io/?https://github.com/landawn/abacus-common/master/docs/Indexed_view.html), 
 [Keyed](https://htmlpreview.github.io/?https://github.com/landawn/abacus-common/master/docs/Keyed_view.html), 
+[Timed](https://static.javadoc.io/com.landawn/abacus-common/6.25.3/com/landawn/abacus/util/Timed.html), 
+[IndexedKeyed](https://static.javadoc.io/com.landawn/abacus-common/6.25.3/com/landawn/abacus/util/IndexedKeyed.html), 
 [If](https://htmlpreview.github.io/?https://github.com/landawn/abacus-common/master/docs/If_view.html), 
 [Try](https://htmlpreview.github.io/?https://github.com/landawn/abacus-common/master/docs/Try_view.html), 
 [Synchronized](https://htmlpreview.github.io/?https://github.com/landawn/abacus-common/master/docs/Synchronized_view.html), 
 [Retry](https://htmlpreview.github.io/?https://github.com/landawn/abacus-common/master/docs/Retry_view.html), 
 [Hashing](https://htmlpreview.github.io/?https://github.com/landawn/abacus-common/master/docs/Hashing_view.html), 
+[TypeReference](https://static.javadoc.io/com.landawn/abacus-common/6.25.3/com/landawn/abacus/util/TypeReference.html), 
 [Clazz](https://htmlpreview.github.io/?https://github.com/landawn/abacus-common/master/docs/Clazz_view.html), 
 [Hex](https://htmlpreview.github.io/?https://github.com/landawn/abacus-common/master/docs/Hex_view.html), 
 [DigestUtil](https://htmlpreview.github.io/?https://github.com/landawn/abacus-common/master/docs/DigestUtil_view.html), 
@@ -86,8 +92,7 @@ abacus-common is a *mega-library* unlike most others. It contains thousands of p
 [Futures](https://htmlpreview.github.io/?https://github.com/landawn/abacus-common/master/docs/Futures_view.html),
 [Profiler](https://htmlpreview.github.io/?https://github.com/landawn/abacus-common/master/docs/Profiler_view.html)...
 
-* Streams, both sequential and parallel, are supported with more functions: 
-[Seq](https://htmlpreview.github.io/?https://github.com/landawn/abacus-common/master/docs/Seq_view.html), 
+* Streams, both sequential and parallel, are supported with more functions:  
 [BaseStream](https://htmlpreview.github.io/?https://github.com/landawn/abacus-common/master/docs/BaseStream_view.html), 
 [Stream](https://htmlpreview.github.io/?https://github.com/landawn/abacus-common/master/docs/Stream_view.html), 
 [CharStream](https://htmlpreview.github.io/?https://github.com/landawn/abacus-common/master/docs/CharStream_view.html), 
@@ -99,7 +104,9 @@ abacus-common is a *mega-library* unlike most others. It contains thousands of p
 [DoubleStream](https://htmlpreview.github.io/?https://github.com/landawn/abacus-common/master/docs/DoubleStream_view.html), 
 [EntryStream](https://htmlpreview.github.io/?https://github.com/landawn/abacus-common/master/docs/EntryStream_view.html), 
 [Fn](https://htmlpreview.github.io/?https://github.com/landawn/abacus-common/master/docs/Fn_view.html), 
-more [Collectors](https://htmlpreview.github.io/?https://github.com/landawn/abacus-common/master/docs/Collectors_view.html) and 
+more [Collectors](https://htmlpreview.github.io/?https://github.com/landawn/abacus-common/master/docs/Collectors_view.html), 
+[Seq](https://htmlpreview.github.io/?https://github.com/landawn/abacus-common/master/docs/Seq_view.html), 
+[Fnn](https://static.javadoc.io/com.landawn/abacus-common/6.25.3/com/landawn/abacus/util/Fnn.html) and 
 [Throwables](https://htmlpreview.github.io/?https://github.com/landawn/abacus-common/master/docs/Throwables_view.html).
 
 * Optional: 
@@ -187,7 +194,6 @@ and [More](https://www.javadoc.io/static/com.landawn/abacus-common/6.25.3/com/la
 [PropertiesUtil](https://static.javadoc.io/com.landawn/abacus-common/6.25.3/com/landawn/abacus/util/PropertiesUtil.html),
 [Configuration](https://static.javadoc.io/com.landawn/abacus-common/6.25.3/com/landawn/abacus/util/Configuration.html),
 [XmlUtil](https://static.javadoc.io/com.landawn/abacus-common/6.25.3/com/landawn/abacus/util/XmlUtil.html),
-[Wrapper](https://static.javadoc.io/com.landawn/abacus-common/6.25.3/com/landawn/abacus/util/Wrapper.html),
 [ClassUtil](https://static.javadoc.io/com.landawn/abacus-common/6.25.3/com/landawn/abacus/util/ClassUtil.html),
 [EscapeUtil](https://static.javadoc.io/com.landawn/abacus-common/6.25.3/com/landawn/abacus/util/EscapeUtil.html),
 [FilenameUtil](https://static.javadoc.io/com.landawn/abacus-common/6.25.3/com/landawn/abacus/util/FilenameUtil.html),
@@ -195,11 +201,6 @@ and [More](https://www.javadoc.io/static/com.landawn/abacus-common/6.25.3/com/la
 [WSSecurityUtil](https://static.javadoc.io/com.landawn/abacus-common/6.25.3/com/landawn/abacus/util/WSSecurityUtil.html),
 [EmailUtil](https://static.javadoc.io/com.landawn/abacus-common/6.25.3/com/landawn/abacus/util/EmailUtil.html),
 [IEEE754rUtil](https://static.javadoc.io/com.landawn/abacus-common/6.25.3/com/landawn/abacus/util/IEEE754rUtil.html),
-[Timed](https://static.javadoc.io/com.landawn/abacus-common/6.25.3/com/landawn/abacus/util/Timed.html),
-[IndexedKeyed](https://static.javadoc.io/com.landawn/abacus-common/6.25.3/com/landawn/abacus/util/IndexedKeyed.html),
-[Stopwatch](https://static.javadoc.io/com.landawn/abacus-common/6.25.3/com/landawn/abacus/util/Stopwatch.html),
-[RateLimiter](https://static.javadoc.io/com.landawn/abacus-common/6.25.3/com/landawn/abacus/util/RateLimiter.html),
-[TypeReference](https://static.javadoc.io/com.landawn/abacus-common/6.25.3/com/landawn/abacus/util/TypeReference.html),
 [WebUtil](https://static.javadoc.io/com.landawn/abacus-common/6.25.3/com/landawn/abacus/http/WebUtil.html),
 [Files](https://static.javadoc.io/com.landawn/abacus-common/6.25.3/com/landawn/abacus/guava/Files.html),
 [Traverser](https://static.javadoc.io/com.landawn/abacus-common/6.25.3/com/landawn/abacus/guava/Traverser.html)(copied from Apache commons, Google Guava...under Apache License v2) ...
