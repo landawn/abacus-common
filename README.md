@@ -186,6 +186,7 @@ and [More](https://www.javadoc.io/static/com.landawn/abacus-common/6.25.3/com/la
 
 * More:
 [CodeGenerationUtil](https://static.javadoc.io/com.landawn/abacus-common/6.25.3/com/landawn/abacus/util/CodeGenerationUtil.html), 
+[ClassUtil](https://static.javadoc.io/com.landawn/abacus-common/6.25.3/com/landawn/abacus/util/ClassUtil.html),
 [Charsets](https://static.javadoc.io/com.landawn/abacus-common/6.25.3/com/landawn/abacus/util/Charsets.html),
 [Ascii](https://static.javadoc.io/com.landawn/abacus-common/6.25.3/com/landawn/abacus/util/Ascii.html),
 [CalendarField](https://static.javadoc.io/com.landawn/abacus-common/6.25.3/com/landawn/abacus/util/CalendarField.html),
@@ -194,7 +195,6 @@ and [More](https://www.javadoc.io/static/com.landawn/abacus-common/6.25.3/com/la
 [PropertiesUtil](https://static.javadoc.io/com.landawn/abacus-common/6.25.3/com/landawn/abacus/util/PropertiesUtil.html),
 [Configuration](https://static.javadoc.io/com.landawn/abacus-common/6.25.3/com/landawn/abacus/util/Configuration.html),
 [XmlUtil](https://static.javadoc.io/com.landawn/abacus-common/6.25.3/com/landawn/abacus/util/XmlUtil.html),
-[ClassUtil](https://static.javadoc.io/com.landawn/abacus-common/6.25.3/com/landawn/abacus/util/ClassUtil.html),
 [EscapeUtil](https://static.javadoc.io/com.landawn/abacus-common/6.25.3/com/landawn/abacus/util/EscapeUtil.html),
 [FilenameUtil](https://static.javadoc.io/com.landawn/abacus-common/6.25.3/com/landawn/abacus/util/FilenameUtil.html),
 [AddrUtil](https://static.javadoc.io/com.landawn/abacus-common/6.25.3/com/landawn/abacus/util/AddrUtil.html),
@@ -309,6 +309,7 @@ If Proposals is slow with Big class: N, Strings, Stream, Open the class file and
 ![image](https://github.com/landawn/abacus-common/assets/16568599/248990bb-f2c8-43e0-956b-edaa1477d5cd)
 
                                ...beyond imagination...
+
 
 
 
