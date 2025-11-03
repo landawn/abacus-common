@@ -29,7 +29,7 @@ import com.landawn.abacus.util.Strings;
  * deserialization, and database operations for Time instances. It supports parsing
  * time values from various string formats and millisecond values.
  */
-class TimeType extends AbstractDateType<Time> {
+public class TimeType extends AbstractDateType<Time> {
 
     /**
      * The type name identifier for Time type.

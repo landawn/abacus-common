@@ -30,7 +30,7 @@ import com.landawn.abacus.util.Strings;
  * It extends AbstractCalendarType to inherit common calendar handling functionality.
  */
 @SuppressWarnings("java:S2160")
-class GregorianCalendarType extends AbstractCalendarType<GregorianCalendar> {
+public class GregorianCalendarType extends AbstractCalendarType<GregorianCalendar> {
 
     public static final String GREGORIAN_CALENDAR = GregorianCalendar.class.getSimpleName();
 

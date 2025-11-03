@@ -25,7 +25,7 @@ import org.joda.time.DateTime;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Strings;
 
-class JodaDateTimeType extends AbstractJodaDateTimeType<DateTime> {
+public class JodaDateTimeType extends AbstractJodaDateTimeType<DateTime> {
 
     public static final String JODA_DATE_TIME = "JodaDateTime";
 

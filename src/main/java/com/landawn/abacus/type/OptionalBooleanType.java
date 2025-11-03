@@ -21,7 +21,7 @@ import com.landawn.abacus.util.u.OptionalBoolean;
  * and database interaction capabilities for optional boolean values. This handler manages
  * the conversion between database boolean values and OptionalBoolean wrapper objects.
  */
-class OptionalBooleanType extends AbstractOptionalType<OptionalBoolean> {
+public class OptionalBooleanType extends AbstractOptionalType<OptionalBoolean> {
 
     public static final String OPTIONAL_BOOLEAN = OptionalBoolean.class.getSimpleName();
 

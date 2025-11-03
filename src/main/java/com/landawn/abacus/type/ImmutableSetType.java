@@ -31,7 +31,7 @@ import com.landawn.abacus.util.WD;
  * @param <E> the element type of the immutable set
  */
 @SuppressWarnings("java:S2160")
-class ImmutableSetType<E> extends AbstractType<ImmutableSet<E>> {
+public class ImmutableSetType<E> extends AbstractType<ImmutableSet<E>> {
 
     private final String declaringName;
 

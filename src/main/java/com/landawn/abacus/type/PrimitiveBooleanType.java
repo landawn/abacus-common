@@ -38,7 +38,7 @@ package com.landawn.abacus.type;
  * }
  * }</pre>
  */
-final class PrimitiveBooleanType extends AbstractBooleanType {
+public final class PrimitiveBooleanType extends AbstractBooleanType {
 
     public static final String BOOLEAN = boolean.class.getSimpleName();
 

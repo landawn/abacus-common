@@ -55,7 +55,7 @@ import com.landawn.abacus.util.WD;
  * @param <T> the type of values in the range, must be Comparable
  */
 @SuppressWarnings("java:S2160")
-class RangeType<T extends Comparable<? super T>> extends AbstractType<Range<T>> {
+public class RangeType<T extends Comparable<? super T>> extends AbstractType<Range<T>> {
 
     static final Type<String> strType = TypeFactory.getType(String.class);
 

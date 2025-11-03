@@ -39,7 +39,7 @@ package com.landawn.abacus.type;
  * }</pre>
  */
 @SuppressWarnings("java:S2160")
-final class PrimitiveCharType extends AbstractCharacterType {
+public final class PrimitiveCharType extends AbstractCharacterType {
 
     public static final String CHAR = char.class.getSimpleName();
 

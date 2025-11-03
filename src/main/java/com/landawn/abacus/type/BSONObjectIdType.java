@@ -24,7 +24,7 @@ import com.landawn.abacus.util.Strings;
  * and their hexadecimal string representations, enabling storage and
  * transmission of MongoDB ObjectIds in text formats.
  */
-class BSONObjectIdType extends AbstractType<ObjectId> {
+public class BSONObjectIdType extends AbstractType<ObjectId> {
 
     /**
      * The type name constant for BSON ObjectId type identification.

@@ -26,7 +26,7 @@ import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Strings;
 
 @SuppressWarnings({ "java:S1942", "java:S2143", "java:S2160" })
-class JUDateType extends AbstractDateType<Date> {
+public class JUDateType extends AbstractDateType<Date> {
 
     public static final String JU_DATE = "JUDate";
 

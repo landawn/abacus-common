@@ -26,7 +26,7 @@ package com.landawn.abacus.type;
  * }</pre>
  */
 @SuppressWarnings("java:S2160")
-final class PrimitiveIntType extends AbstractIntegerType {
+public final class PrimitiveIntType extends AbstractIntegerType {
 
     public static final String INT = int.class.getSimpleName();
 

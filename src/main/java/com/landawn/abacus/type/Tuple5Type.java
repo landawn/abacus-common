@@ -42,7 +42,7 @@ import com.landawn.abacus.util.WD;
  * @param <T5> the type of the fifth element in the tuple
  */
 @SuppressWarnings("java:S2160")
-class Tuple5Type<T1, T2, T3, T4, T5> extends AbstractType<Tuple5<T1, T2, T3, T4, T5>> {
+public class Tuple5Type<T1, T2, T3, T4, T5> extends AbstractType<Tuple5<T1, T2, T3, T4, T5>> {
 
     private final String declaringName;
 

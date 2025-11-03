@@ -43,7 +43,7 @@ import com.landawn.abacus.util.WD;
  * @param <T6> the type of the sixth element in the tuple
  */
 @SuppressWarnings("java:S2160")
-class Tuple6Type<T1, T2, T3, T4, T5, T6> extends AbstractType<Tuple6<T1, T2, T3, T4, T5, T6>> {
+public class Tuple6Type<T1, T2, T3, T4, T5, T6> extends AbstractType<Tuple6<T1, T2, T3, T4, T5, T6>> {
 
     private final String declaringName;
 

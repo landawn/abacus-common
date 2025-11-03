@@ -24,7 +24,7 @@ import com.landawn.abacus.util.Numbers;
  * This class provides functionality to handle Integer objects in database operations and type conversions.
  * It extends AbstractIntegerType to inherit common integer type handling behavior.
  */
-final class IntegerType extends AbstractIntegerType {
+public final class IntegerType extends AbstractIntegerType {
 
     public static final String INTEGER = Integer.class.getSimpleName();
 

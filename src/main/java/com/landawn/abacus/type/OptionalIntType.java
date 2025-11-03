@@ -22,7 +22,7 @@ import com.landawn.abacus.util.u.OptionalInt;
  * and database interaction capabilities for optional integer values. This handler manages
  * the conversion between database integer values and OptionalInt wrapper objects.
  */
-class OptionalIntType extends AbstractOptionalType<OptionalInt> {
+public class OptionalIntType extends AbstractOptionalType<OptionalInt> {
 
     public static final String OPTIONAL_INT = OptionalInt.class.getSimpleName();
 

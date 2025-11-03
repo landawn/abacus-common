@@ -26,7 +26,7 @@ import java.sql.SQLException;
  * Note that Blob objects cannot be converted to/from strings, so string conversion
  * methods throw UnsupportedOperationException.
  */
-class BlobType extends AbstractType<Blob> {
+public class BlobType extends AbstractType<Blob> {
 
     /**
      * The type name constant for Blob type identification.

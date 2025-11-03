@@ -31,7 +31,7 @@ import com.landawn.abacus.util.Strings;
  * This class provides serialization/deserialization and database operations
  * for java.util.concurrent.atomic.AtomicLong instances.
  */
-class AtomicLongType extends AbstractAtomicType<AtomicLong> {
+public class AtomicLongType extends AbstractAtomicType<AtomicLong> {
 
     /**
      * The type name constant for AtomicLong type identification.

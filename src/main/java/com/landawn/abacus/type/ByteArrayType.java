@@ -32,7 +32,7 @@ import com.landawn.abacus.util.WD;
  * This class provides serialization/deserialization and database operations
  * for Byte[] arrays, including conversion between primitive byte[] and Byte[].
  */
-final class ByteArrayType extends ObjectArrayType<Byte> {
+public final class ByteArrayType extends ObjectArrayType<Byte> {
 
     ByteArrayType() {
         super(Byte[].class);

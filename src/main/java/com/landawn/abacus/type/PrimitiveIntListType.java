@@ -23,7 +23,7 @@ import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Strings;
 
 @SuppressWarnings("java:S2160")
-final class PrimitiveIntListType extends AbstractPrimitiveListType<IntList> {
+public final class PrimitiveIntListType extends AbstractPrimitiveListType<IntList> {
 
     public static final String INT_LIST = IntList.class.getSimpleName();
 

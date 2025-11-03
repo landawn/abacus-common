@@ -20,7 +20,7 @@ import java.sql.SQLException;
 import com.landawn.abacus.util.Numbers;
 
 @SuppressWarnings("java:S2160")
-final class PrimitiveShortType extends AbstractShortType {
+public final class PrimitiveShortType extends AbstractShortType {
 
     public static final String SHORT = short.class.getSimpleName();
 

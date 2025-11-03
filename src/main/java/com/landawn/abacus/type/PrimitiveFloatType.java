@@ -39,7 +39,7 @@ package com.landawn.abacus.type;
  * }</pre>
  */
 @SuppressWarnings("java:S2160")
-final class PrimitiveFloatType extends AbstractFloatType {
+public final class PrimitiveFloatType extends AbstractFloatType {
 
     public static final String FLOAT = float.class.getSimpleName();
 

@@ -29,7 +29,7 @@ package com.landawn.abacus.type;
  * String str = type.stringOf(value);
  * }</pre>
  */
-final class ShortType extends AbstractShortType {
+public final class ShortType extends AbstractShortType {
 
     public static final String SHORT = Short.class.getSimpleName();
 

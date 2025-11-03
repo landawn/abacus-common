@@ -30,7 +30,7 @@ import com.landawn.abacus.util.Strings;
  * This class provides serialization/deserialization and database operations
  * for java.util.concurrent.atomic.AtomicBoolean instances.
  */
-class AtomicBooleanType extends AbstractAtomicType<AtomicBoolean> {
+public class AtomicBooleanType extends AbstractAtomicType<AtomicBoolean> {
 
     /**
      * The type name constant for AtomicBoolean type identification.

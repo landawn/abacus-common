@@ -24,7 +24,7 @@ import com.landawn.abacus.util.N;
  * This class provides handling for java.lang.Boolean values in database operations,
  * with automatic type conversion for non-Boolean database values.
  */
-final class BooleanType extends AbstractBooleanType {
+public final class BooleanType extends AbstractBooleanType {
 
     /**
      * The type name constant for Boolean type identification.

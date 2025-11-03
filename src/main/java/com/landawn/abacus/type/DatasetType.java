@@ -47,7 +47,7 @@ import com.landawn.abacus.util.Strings;
  * }</pre>
  */
 @SuppressWarnings("java:S2160")
-class DatasetType extends AbstractType<Dataset> {
+public class DatasetType extends AbstractType<Dataset> {
 
     public static final String DATA_SET = Dataset.class.getSimpleName();
 

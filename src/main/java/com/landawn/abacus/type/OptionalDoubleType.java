@@ -22,7 +22,7 @@ import com.landawn.abacus.util.u.OptionalDouble;
  * and database interaction capabilities for optional double-precision floating-point values.
  * This handler manages the conversion between database numeric values and OptionalDouble wrapper objects.
  */
-class OptionalDoubleType extends AbstractOptionalType<OptionalDouble> {
+public class OptionalDoubleType extends AbstractOptionalType<OptionalDouble> {
 
     public static final String OPTIONAL_DOUBLE = OptionalDouble.class.getSimpleName();
 

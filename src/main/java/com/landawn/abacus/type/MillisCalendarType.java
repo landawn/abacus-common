@@ -27,7 +27,7 @@ import com.landawn.abacus.util.Dates;
  * in the database. This implementation converts between Calendar instances and their
  * millisecond representation (time since epoch).
  */
-class MillisCalendarType extends CalendarType {
+public class MillisCalendarType extends CalendarType {
 
     /**
      * The type name identifier for this Calendar type handler that uses milliseconds.

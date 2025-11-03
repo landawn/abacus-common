@@ -25,7 +25,7 @@ import com.landawn.abacus.util.u.Nullable;
  * @param <T> the type of value wrapped by the Nullable
  */
 @SuppressWarnings("java:S2160")
-class NullableType<T> extends AbstractOptionalType<Nullable<T>> {
+public class NullableType<T> extends AbstractOptionalType<Nullable<T>> {
 
     public static final String NULLABLE = Nullable.class.getSimpleName();
 

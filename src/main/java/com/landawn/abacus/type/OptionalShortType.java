@@ -22,7 +22,7 @@ import com.landawn.abacus.util.u.OptionalShort;
  * and database interaction capabilities for optional short integer values. This handler manages
  * the conversion between database short values and OptionalShort wrapper objects.
  */
-class OptionalShortType extends AbstractOptionalType<OptionalShort> {
+public class OptionalShortType extends AbstractOptionalType<OptionalShort> {
 
     public static final String OPTIONAL_SHORT = OptionalShort.class.getSimpleName();
 

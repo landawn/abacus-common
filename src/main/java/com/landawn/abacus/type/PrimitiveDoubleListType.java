@@ -28,7 +28,7 @@ import com.landawn.abacus.util.Strings;
  * by delegating to the underlying double array type handler.
  */
 @SuppressWarnings("java:S2160")
-final class PrimitiveDoubleListType extends AbstractPrimitiveListType<DoubleList> {
+public final class PrimitiveDoubleListType extends AbstractPrimitiveListType<DoubleList> {
 
     public static final String DOUBLE_LIST = DoubleList.class.getSimpleName();
 

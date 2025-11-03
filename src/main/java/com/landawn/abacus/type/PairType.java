@@ -51,7 +51,7 @@ import com.landawn.abacus.util.WD;
  * @param <R> the type of the right element in the pair
  */
 @SuppressWarnings("java:S2160")
-class PairType<L, R> extends AbstractType<Pair<L, R>> {
+public class PairType<L, R> extends AbstractType<Pair<L, R>> {
 
     private final String declaringName;
 

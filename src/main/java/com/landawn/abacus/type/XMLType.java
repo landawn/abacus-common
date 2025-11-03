@@ -31,7 +31,7 @@ import com.landawn.abacus.util.WD;
  * @param <T> the type of objects handled by this XMLType
  */
 @SuppressWarnings("java:S2160")
-class XMLType<T> extends AbstractType<T> {
+public class XMLType<T> extends AbstractType<T> {
 
     public static final String XML = "XML";
 

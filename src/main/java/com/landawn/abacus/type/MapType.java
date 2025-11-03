@@ -35,7 +35,7 @@ import com.landawn.abacus.util.WD;
  * @param <T> the specific Map implementation type
  */
 @SuppressWarnings("java:S2160")
-class MapType<K, V, T extends Map<K, V>> extends AbstractType<T> {
+public class MapType<K, V, T extends Map<K, V>> extends AbstractType<T> {
 
     private final String declaringName;
 

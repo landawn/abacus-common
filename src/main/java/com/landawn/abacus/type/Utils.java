@@ -43,7 +43,7 @@ import com.landawn.abacus.parser.XMLParser;
  *   <li>Default JSON deserialization configuration</li>
  * </ul>
  */
-final class Utils {
+public final class Utils {
 
     // lazy initialization to avoid: NoClassDefFoundError: Could not initialize class com.landawn.abacus.parser.JSONParserImpl
     /**

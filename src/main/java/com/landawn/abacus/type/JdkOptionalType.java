@@ -25,7 +25,7 @@ import com.landawn.abacus.util.WD;
  * @param <T> the type of value that may be present in the Optional
  */
 @SuppressWarnings("java:S2160")
-class JdkOptionalType<T> extends AbstractOptionalType<Optional<T>> {
+public class JdkOptionalType<T> extends AbstractOptionalType<Optional<T>> {
 
     public static final String OPTIONAL = "JdkOptional";
 

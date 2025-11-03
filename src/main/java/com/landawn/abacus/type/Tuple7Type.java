@@ -44,7 +44,7 @@ import com.landawn.abacus.util.WD;
  * @param <T7> the type of the seventh element in the tuple
  */
 @SuppressWarnings("java:S2160")
-class Tuple7Type<T1, T2, T3, T4, T5, T6, T7> extends AbstractType<Tuple7<T1, T2, T3, T4, T5, T6, T7>> {
+public class Tuple7Type<T1, T2, T3, T4, T5, T6, T7> extends AbstractType<Tuple7<T1, T2, T3, T4, T5, T6, T7>> {
 
     private final String declaringName;
 

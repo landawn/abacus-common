@@ -24,7 +24,7 @@ import java.sql.SQLException;
 import com.landawn.abacus.parser.JSONXMLSerializationConfig;
 import com.landawn.abacus.util.CharacterWriter;
 
-class RowIdType extends AbstractType<RowId> {
+public class RowIdType extends AbstractType<RowId> {
 
     public static final String ROW_ID = RowId.class.getSimpleName();
 

@@ -30,7 +30,7 @@ import com.landawn.abacus.util.Strings;
  * SQL Dates represent dates without time components (year, month, day only).
  * It supports conversion from various formats including timestamps, date strings, and the special "sysTime" value.
  */
-class DateType extends AbstractDateType<Date> {
+public class DateType extends AbstractDateType<Date> {
 
     public static final String DATE = Date.class.getSimpleName();
 

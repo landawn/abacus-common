@@ -26,7 +26,7 @@ import java.sql.SQLException;
  * This class specializes in converting between SQL Blob objects and InputStreams,
  * providing seamless integration between database BLOB data and Java I/O streams.
  */
-class BlobInputStreamType extends InputStreamType {
+public class BlobInputStreamType extends InputStreamType {
 
     /**
      * The type name constant for BLOB InputStream type identification.

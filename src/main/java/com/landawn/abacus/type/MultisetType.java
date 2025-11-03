@@ -32,7 +32,7 @@ import com.landawn.abacus.util.WD;
  * @param <E> the element type
  */
 @SuppressWarnings("java:S2160")
-class MultisetType<E> extends AbstractType<Multiset<E>> {
+public class MultisetType<E> extends AbstractType<Multiset<E>> {
 
     private final String declaringName;
 

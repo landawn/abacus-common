@@ -26,7 +26,7 @@ import com.landawn.abacus.util.Strings;
  * and their Base64-encoded string representations, enabling storage and
  * transmission of binary buffer data in text formats.
  */
-class ByteBufferType extends AbstractType<ByteBuffer> {
+public class ByteBufferType extends AbstractType<ByteBuffer> {
 
     /**
      * The type name constant for ByteBuffer type identification.

@@ -18,7 +18,7 @@ import com.landawn.abacus.util.MapEntity;
 import com.landawn.abacus.util.Strings;
 
 @SuppressWarnings("java:S2160")
-class MapEntityType extends AbstractType<MapEntity> {
+public class MapEntityType extends AbstractType<MapEntity> {
 
     public static final String MAP_ENTITY = MapEntity.class.getSimpleName();
 

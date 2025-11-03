@@ -22,7 +22,7 @@ import java.sql.SQLException;
 
 import com.landawn.abacus.util.Strings;
 
-class URIType extends AbstractType<URI> {
+public class URIType extends AbstractType<URI> {
 
     public static final String URI = URI.class.getSimpleName();
 

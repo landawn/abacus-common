@@ -22,7 +22,7 @@ import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Strings;
 import com.landawn.abacus.util.WD;
 
-final class ShortArrayType extends ObjectArrayType<Short> {
+public final class ShortArrayType extends ObjectArrayType<Short> {
 
     ShortArrayType() {
         super(Short[].class);

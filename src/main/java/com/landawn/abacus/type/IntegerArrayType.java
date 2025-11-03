@@ -27,7 +27,7 @@ import com.landawn.abacus.util.WD;
  * This class provides optimized serialization and deserialization for arrays of Integer objects,
  * including proper handling of {@code null} elements within the array.
  */
-final class IntegerArrayType extends ObjectArrayType<Integer> {
+public final class IntegerArrayType extends ObjectArrayType<Integer> {
 
     IntegerArrayType() {
         super(Integer[].class);

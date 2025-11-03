@@ -29,7 +29,7 @@ import com.landawn.abacus.util.Strings;
  * This class provides methods to convert between Timestamp objects and their string representations,
  * as well as methods to interact with JDBC result sets and statements.
  */
-class TimestampType extends AbstractDateType<Timestamp> {
+public class TimestampType extends AbstractDateType<Timestamp> {
 
     /**
      * The type name constant for Timestamp type.

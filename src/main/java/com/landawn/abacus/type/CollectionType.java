@@ -67,7 +67,7 @@ import com.landawn.abacus.util.WD;
  * @param <T> the collection type (must extend Collection&lt;E&gt;)
  */
 @SuppressWarnings("java:S2160")
-class CollectionType<E, T extends Collection<E>> extends AbstractType<T> {
+public class CollectionType<E, T extends Collection<E>> extends AbstractType<T> {
 
     private final String declaringName;
 

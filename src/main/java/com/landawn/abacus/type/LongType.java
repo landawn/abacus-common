@@ -24,7 +24,7 @@ import com.landawn.abacus.util.Numbers;
  * This class provides functionality to handle Long objects in database operations and type conversions.
  * It extends AbstractLongType to inherit common long type handling behavior.
  */
-final class LongType extends AbstractLongType {
+public final class LongType extends AbstractLongType {
 
     public static final String LONG = Long.class.getSimpleName();
 

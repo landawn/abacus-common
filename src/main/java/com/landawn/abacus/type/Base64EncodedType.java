@@ -21,7 +21,7 @@ import com.landawn.abacus.util.Strings;
  * This class provides conversion between byte arrays and their Base64 string representations,
  * enabling storage and transmission of binary data as text.
  */
-class Base64EncodedType extends AbstractType<byte[]> {
+public class Base64EncodedType extends AbstractType<byte[]> {
 
     /**
      * The type name constant for Base64-encoded type identification.

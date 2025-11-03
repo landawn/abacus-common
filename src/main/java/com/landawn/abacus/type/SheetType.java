@@ -28,7 +28,7 @@ import com.landawn.abacus.util.WD;
  * @param <E> the element/value type
  */
 @SuppressWarnings("java:S2160")
-class SheetType<R, C, E> extends AbstractType<Sheet<R, C, E>> {
+public class SheetType<R, C, E> extends AbstractType<Sheet<R, C, E>> {
     private final String declaringName;
 
     private final Class<Sheet<R, C, E>> typeClass;

@@ -24,7 +24,7 @@ import com.landawn.abacus.util.Strings;
  * Note: Uses raw types for compatibility with generic Class handling.
  */
 @SuppressWarnings({ "rawtypes", "java:S2160" })
-class ClazzType extends AbstractType<Class> {
+public class ClazzType extends AbstractType<Class> {
 
     public static final String CLAZZ = "Clazz"; //NOSONAR
 

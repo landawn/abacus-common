@@ -35,7 +35,7 @@ import com.landawn.abacus.util.Numbers;
  * and database interaction capabilities for date-time values with timezone offset information.
  * This handler supports multiple date-time formats including ISO-8601 and epoch milliseconds.
  */
-class OffsetDateTimeType extends AbstractTemporalType<OffsetDateTime> {
+public class OffsetDateTimeType extends AbstractTemporalType<OffsetDateTime> {
 
     public static final String OFFSET_DATE_TIME = OffsetDateTime.class.getSimpleName();
 

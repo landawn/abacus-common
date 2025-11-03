@@ -24,7 +24,7 @@ import com.landawn.abacus.util.Numbers;
  * This class provides database operations and type information for Double objects.
  * It handles the conversion between database values and Java Double objects, supporting {@code null} values.
  */
-final class DoubleType extends AbstractDoubleType {
+public final class DoubleType extends AbstractDoubleType {
 
     public static final String DOUBLE = Double.class.getSimpleName();
 

@@ -22,7 +22,7 @@ import java.sql.Timestamp;
 
 import com.landawn.abacus.util.Dates;
 
-class MillisTimestampType extends TimestampType {
+public class MillisTimestampType extends TimestampType {
 
     public static final String MILLIS_TIMESTAMP = "MillisTimestamp";
 

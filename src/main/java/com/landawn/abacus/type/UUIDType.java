@@ -31,7 +31,7 @@ import com.landawn.abacus.util.Strings;
  * String str = type.stringOf(uuid); // Returns the UUID string representation
  * }</pre>
  */
-class UUIDType extends AbstractType<UUID> {
+public class UUIDType extends AbstractType<UUID> {
 
     public static final String UUID = "UUID";
 

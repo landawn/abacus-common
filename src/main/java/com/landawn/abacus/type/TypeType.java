@@ -57,7 +57,7 @@ import com.landawn.abacus.util.Strings;
  * @see AbstractType
  */
 @SuppressWarnings("rawtypes")
-class TypeType extends AbstractType<Type> {
+public class TypeType extends AbstractType<Type> {
 
     public static final String TYPE = "Type";
 

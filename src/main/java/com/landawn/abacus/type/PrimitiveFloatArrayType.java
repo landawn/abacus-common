@@ -29,7 +29,7 @@ import com.landawn.abacus.util.WD;
  * float arrays and their string representations or collections.
  */
 @SuppressWarnings("java:S2160")
-final class PrimitiveFloatArrayType extends AbstractPrimitiveArrayType<float[]> {
+public final class PrimitiveFloatArrayType extends AbstractPrimitiveArrayType<float[]> {
 
     public static final String FLOAT_ARRAY = float[].class.getSimpleName();
 

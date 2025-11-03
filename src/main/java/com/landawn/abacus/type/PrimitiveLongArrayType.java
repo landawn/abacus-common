@@ -24,7 +24,7 @@ import com.landawn.abacus.util.Strings;
 import com.landawn.abacus.util.WD;
 
 @SuppressWarnings("java:S2160")
-final class PrimitiveLongArrayType extends AbstractPrimitiveArrayType<long[]> {
+public final class PrimitiveLongArrayType extends AbstractPrimitiveArrayType<long[]> {
 
     public static final String LONG_ARRAY = long[].class.getSimpleName();
 

@@ -31,7 +31,7 @@ import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Numbers;
 import com.landawn.abacus.util.Strings;
 
-class JodaInstantType extends AbstractJodaDateTimeType<Instant> {
+public class JodaInstantType extends AbstractJodaDateTimeType<Instant> {
 
     public static final String INSTANT = "JodaInstant";
 

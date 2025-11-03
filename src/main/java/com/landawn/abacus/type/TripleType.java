@@ -39,7 +39,7 @@ import com.landawn.abacus.util.WD;
  * @param <R> the type of the right element
  */
 @SuppressWarnings("java:S2160")
-class TripleType<L, M, R> extends AbstractType<Triple<L, M, R>> {
+public class TripleType<L, M, R> extends AbstractType<Triple<L, M, R>> {
 
     private final String declaringName;
 

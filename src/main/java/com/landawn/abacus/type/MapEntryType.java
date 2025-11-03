@@ -39,7 +39,7 @@ import com.landawn.abacus.util.WD;
  * @param <V> the value type
  */
 @SuppressWarnings("java:S2160")
-class MapEntryType<K, V> extends AbstractType<Map.Entry<K, V>> {
+public class MapEntryType<K, V> extends AbstractType<Map.Entry<K, V>> {
 
     private final String declaringName;
 

@@ -28,7 +28,7 @@ import com.landawn.abacus.util.Strings;
  * by delegating to the underlying char array type handler.
  */
 @SuppressWarnings("java:S2160")
-final class PrimitiveCharListType extends AbstractPrimitiveListType<CharList> {
+public final class PrimitiveCharListType extends AbstractPrimitiveListType<CharList> {
 
     public static final String CHAR_LIST = CharList.class.getSimpleName();
 

@@ -40,7 +40,7 @@ import com.landawn.abacus.util.WD;
  * @param <T> the multiset type (must extend Multiset&lt;E&gt;)
  */
 @SuppressWarnings("java:S2160")
-class GuavaMultisetType<E, T extends Multiset<E>> extends AbstractType<T> {
+public class GuavaMultisetType<E, T extends Multiset<E>> extends AbstractType<T> {
 
     private final String declaringName;
 

@@ -25,7 +25,7 @@ import java.sql.SQLException;
  * This type is specifically designed for databases that distinguish between
  * regular strings and national character strings.
  */
-class NStringType extends AbstractStringType {
+public class NStringType extends AbstractStringType {
 
     public static final String NSTRING = "NString";
 

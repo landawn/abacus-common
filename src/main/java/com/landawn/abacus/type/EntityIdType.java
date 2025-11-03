@@ -24,7 +24,7 @@ import com.landawn.abacus.util.Strings;
  * EntityIds are serialized to and from JSON format.
  */
 @SuppressWarnings("java:S2160")
-class EntityIdType extends AbstractType<EntityId> {
+public class EntityIdType extends AbstractType<EntityId> {
 
     public static final String ENTITY_ID = EntityId.class.getSimpleName();
 

@@ -24,7 +24,7 @@ import com.landawn.abacus.util.Numbers;
  * This class provides functionality to handle Float objects in database operations and type conversions.
  * It extends AbstractFloatType to inherit common float type handling behavior.
  */
-final class FloatType extends AbstractFloatType {
+public final class FloatType extends AbstractFloatType {
 
     public static final String FLOAT = Float.class.getSimpleName();
 

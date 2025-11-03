@@ -39,7 +39,7 @@ import com.landawn.abacus.util.WD;
  * @param <T2> the type of the second element in the tuple
  */
 @SuppressWarnings("java:S2160")
-class Tuple2Type<T1, T2> extends AbstractType<Tuple2<T1, T2>> {
+public class Tuple2Type<T1, T2> extends AbstractType<Tuple2<T1, T2>> {
 
     private final String declaringName;
 

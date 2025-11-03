@@ -28,7 +28,7 @@ import com.landawn.abacus.exception.UncheckedSQLException;
  * Note that string serialization/deserialization is not supported for CLOB types
  * as CLOBs are database-specific objects that cannot be meaningfully represented as strings.
  */
-class ClobType extends AbstractType<Clob> {
+public class ClobType extends AbstractType<Clob> {
 
     public static final String CLOB = Clob.class.getSimpleName();
 

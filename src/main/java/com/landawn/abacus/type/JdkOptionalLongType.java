@@ -23,7 +23,7 @@ import com.landawn.abacus.util.Strings;
  * OptionalLong is a container that may or may not contain a long value.
  * Empty optionals are represented as {@code null} in serialized form.
  */
-class JdkOptionalLongType extends AbstractOptionalType<OptionalLong> {
+public class JdkOptionalLongType extends AbstractOptionalType<OptionalLong> {
 
     public static final String OPTIONAL_LONG = "JdkOptionalLong";
 

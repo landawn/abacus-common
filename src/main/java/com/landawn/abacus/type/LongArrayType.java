@@ -22,7 +22,7 @@ import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Strings;
 import com.landawn.abacus.util.WD;
 
-final class LongArrayType extends ObjectArrayType<Long> {
+public final class LongArrayType extends ObjectArrayType<Long> {
 
     LongArrayType() {
         super(Long[].class);

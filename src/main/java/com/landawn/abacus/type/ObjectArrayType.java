@@ -65,7 +65,7 @@ import com.landawn.abacus.util.WD;
  *
  * @param <T> the component type of the array
  */
-class ObjectArrayType<T> extends AbstractArrayType<T[]> { //NOSONAR
+public class ObjectArrayType<T> extends AbstractArrayType<T[]> { //NOSONAR
 
     protected final Class<T[]> typeClass;
 

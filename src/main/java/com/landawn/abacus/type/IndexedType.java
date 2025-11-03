@@ -35,7 +35,7 @@ import com.landawn.abacus.util.WD;
  * @param <T> the type of value stored in the Indexed container
  */
 @SuppressWarnings("java:S2160")
-class IndexedType<T> extends AbstractType<Indexed<T>> {
+public class IndexedType<T> extends AbstractType<Indexed<T>> {
 
     private final String declaringName;
 

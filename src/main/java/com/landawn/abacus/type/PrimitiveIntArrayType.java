@@ -24,7 +24,7 @@ import com.landawn.abacus.util.Strings;
 import com.landawn.abacus.util.WD;
 
 @SuppressWarnings("java:S2160")
-final class PrimitiveIntArrayType extends AbstractPrimitiveArrayType<int[]> {
+public final class PrimitiveIntArrayType extends AbstractPrimitiveArrayType<int[]> {
 
     public static final String INT_ARRAY = int[].class.getSimpleName();
 

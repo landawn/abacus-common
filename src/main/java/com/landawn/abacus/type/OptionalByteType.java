@@ -22,7 +22,7 @@ import com.landawn.abacus.util.u.OptionalByte;
  * and database interaction capabilities for optional byte values. This handler manages
  * the conversion between database byte/numeric values and OptionalByte wrapper objects.
  */
-class OptionalByteType extends AbstractOptionalType<OptionalByte> {
+public class OptionalByteType extends AbstractOptionalType<OptionalByte> {
 
     public static final String OPTIONAL_BYTE = OptionalByte.class.getSimpleName();
 

@@ -21,7 +21,7 @@ import com.landawn.abacus.util.u.OptionalChar;
  * and database interaction capabilities for optional character values. This handler manages
  * the conversion between database character/integer values and OptionalChar wrapper objects.
  */
-class OptionalCharType extends AbstractOptionalType<OptionalChar> {
+public class OptionalCharType extends AbstractOptionalType<OptionalChar> {
 
     public static final String OPTIONAL_CHAR = OptionalChar.class.getSimpleName();
 

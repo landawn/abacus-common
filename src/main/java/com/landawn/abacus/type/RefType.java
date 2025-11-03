@@ -20,7 +20,7 @@ import java.sql.Ref;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-class RefType extends AbstractType<Ref> {
+public class RefType extends AbstractType<Ref> {
 
     public static final String REF = Ref.class.getSimpleName();
 

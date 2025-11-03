@@ -38,7 +38,7 @@ import com.landawn.abacus.util.WD;
  * @param <T1> the type of the single element in the tuple
  */
 @SuppressWarnings("java:S2160")
-class Tuple1Type<T1> extends AbstractType<Tuple1<T1>> {
+public class Tuple1Type<T1> extends AbstractType<Tuple1<T1>> {
 
     private final String declaringName;
 

@@ -29,7 +29,7 @@ import com.landawn.abacus.util.WD;
  * boolean arrays and their string representations or collections.
  */
 @SuppressWarnings("java:S2160")
-final class PrimitiveBooleanArrayType extends AbstractPrimitiveArrayType<boolean[]> {
+public final class PrimitiveBooleanArrayType extends AbstractPrimitiveArrayType<boolean[]> {
 
     public static final String BOOLEAN_ARRAY = boolean[].class.getSimpleName();
 

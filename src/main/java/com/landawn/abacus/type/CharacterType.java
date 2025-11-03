@@ -23,7 +23,7 @@ import java.sql.SQLException;
  * It handles the conversion between database string values and Java Character objects,
  * extracting the first character from string values when available.
  */
-final class CharacterType extends AbstractCharacterType {
+public final class CharacterType extends AbstractCharacterType {
 
     public static final String CHARACTER = Character.class.getSimpleName();
 

@@ -41,7 +41,7 @@ import com.landawn.abacus.util.WD;
  * @param <T4> the type of the fourth element in the tuple
  */
 @SuppressWarnings("java:S2160")
-class Tuple4Type<T1, T2, T3, T4> extends AbstractType<Tuple4<T1, T2, T3, T4>> {
+public class Tuple4Type<T1, T2, T3, T4> extends AbstractType<Tuple4<T1, T2, T3, T4>> {
 
     private final String declaringName;
 

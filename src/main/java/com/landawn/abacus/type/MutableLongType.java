@@ -21,7 +21,7 @@ import com.landawn.abacus.util.Strings;
  * Type handler for {@link MutableLong} objects, providing serialization, deserialization,
  * and database interaction capabilities for mutable long wrapper objects.
  */
-class MutableLongType extends NumberType<MutableLong> {
+public class MutableLongType extends NumberType<MutableLong> {
 
     public static final String MUTABLE_LONG = MutableLong.class.getSimpleName();
 

@@ -23,7 +23,7 @@ import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Strings;
 
 @SuppressWarnings("java:S2160")
-final class PrimitiveLongListType extends AbstractPrimitiveListType<LongList> {
+public final class PrimitiveLongListType extends AbstractPrimitiveListType<LongList> {
 
     public static final String LONG_LIST = LongList.class.getSimpleName();
 

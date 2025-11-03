@@ -37,7 +37,7 @@ import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Objectory;
 
 @SuppressWarnings("java:S2160")
-class ReaderType extends AbstractType<Reader> {
+public class ReaderType extends AbstractType<Reader> {
 
     public static final String READER = Reader.class.getSimpleName();
 

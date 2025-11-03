@@ -25,7 +25,7 @@ import org.joda.time.MutableDateTime;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Strings;
 
-class JodaMutableDateTimeType extends AbstractJodaDateTimeType<MutableDateTime> {
+public class JodaMutableDateTimeType extends AbstractJodaDateTimeType<MutableDateTime> {
 
     public static final String JODA_MUTABLE_DATE_TIME = "JodaMutableDateTime";
 

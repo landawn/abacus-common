@@ -31,7 +31,7 @@ import com.landawn.abacus.util.Strings;
  * This class provides serialization/deserialization and database operations
  * for java.util.concurrent.atomic.AtomicInteger instances.
  */
-class AtomicIntegerType extends AbstractAtomicType<AtomicInteger> {
+public class AtomicIntegerType extends AbstractAtomicType<AtomicInteger> {
 
     /**
      * The type name constant for AtomicInteger type identification.

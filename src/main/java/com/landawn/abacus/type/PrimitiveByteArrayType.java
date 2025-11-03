@@ -38,7 +38,7 @@ import com.landawn.abacus.util.WD;
  * and conversion between byte arrays and their various representations including Blob objects.
  */
 @SuppressWarnings("java:S2160")
-final class PrimitiveByteArrayType extends AbstractPrimitiveArrayType<byte[]> {
+public final class PrimitiveByteArrayType extends AbstractPrimitiveArrayType<byte[]> {
 
     public static final String BYTE_ARRAY = byte[].class.getSimpleName();
 

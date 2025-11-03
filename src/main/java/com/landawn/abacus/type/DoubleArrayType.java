@@ -27,7 +27,7 @@ import com.landawn.abacus.util.WD;
  * This class provides serialization, deserialization, and output operations for Double arrays.
  * It handles proper formatting with brackets, separators, and {@code null} value representation.
  */
-final class DoubleArrayType extends ObjectArrayType<Double> {
+public final class DoubleArrayType extends ObjectArrayType<Double> {
 
     DoubleArrayType() {
         super(Double[].class);

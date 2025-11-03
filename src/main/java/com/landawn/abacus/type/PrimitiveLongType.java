@@ -26,7 +26,7 @@ package com.landawn.abacus.type;
  * }</pre>
  */
 @SuppressWarnings("java:S2160")
-final class PrimitiveLongType extends AbstractLongType {
+public final class PrimitiveLongType extends AbstractLongType {
 
     public static final String LONG = long.class.getSimpleName();
 

@@ -17,7 +17,7 @@ import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Numbers;
 import com.landawn.abacus.util.Strings;
 
-class MutableDoubleType extends NumberType<MutableDouble> {
+public class MutableDoubleType extends NumberType<MutableDouble> {
 
     public static final String MUTABLE_DOUBLE = MutableDouble.class.getSimpleName();
 

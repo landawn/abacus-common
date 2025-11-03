@@ -30,7 +30,7 @@ import com.landawn.abacus.util.Dates;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Strings;
 
-class XMLGregorianCalendarType extends AbstractType<XMLGregorianCalendar> {
+public class XMLGregorianCalendarType extends AbstractType<XMLGregorianCalendar> {
 
     public static final String XML_GREGORIAN_CALENDAR = XMLGregorianCalendar.class.getSimpleName();
 

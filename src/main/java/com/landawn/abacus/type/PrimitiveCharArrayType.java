@@ -37,7 +37,7 @@ import com.landawn.abacus.util.WD;
  * Character elements are quoted in string representations to handle special characters properly.
  */
 @SuppressWarnings("java:S2160")
-final class PrimitiveCharArrayType extends AbstractPrimitiveArrayType<char[]> {
+public final class PrimitiveCharArrayType extends AbstractPrimitiveArrayType<char[]> {
 
     public static final String CHAR_ARRAY = char[].class.getSimpleName();
 

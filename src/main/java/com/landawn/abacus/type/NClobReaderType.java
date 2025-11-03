@@ -27,7 +27,7 @@ import java.sql.SQLException;
  * This type automatically converts NCLOB database values to Reader objects and manages
  * the lifecycle of the NCLOB resources.
  */
-class NClobReaderType extends ReaderType {
+public class NClobReaderType extends ReaderType {
 
     public static final String NCLOB_READER = "NClobReader";
 

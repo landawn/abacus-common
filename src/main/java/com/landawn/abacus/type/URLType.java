@@ -25,7 +25,7 @@ import java.sql.SQLException;
 import com.landawn.abacus.util.ExceptionUtil;
 import com.landawn.abacus.util.Strings;
 
-class URLType extends AbstractType<URL> {
+public class URLType extends AbstractType<URL> {
 
     public static final String URL = URL.class.getSimpleName();
 

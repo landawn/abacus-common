@@ -25,7 +25,7 @@ import com.landawn.abacus.util.u.Optional;
  * @param <T> the type of value wrapped by the Optional
  */
 @SuppressWarnings("java:S2160")
-class OptionalType<T> extends AbstractOptionalType<Optional<T>> {
+public class OptionalType<T> extends AbstractOptionalType<Optional<T>> {
 
     public static final String OPTIONAL = Optional.class.getSimpleName();
 

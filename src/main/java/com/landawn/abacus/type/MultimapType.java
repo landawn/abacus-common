@@ -39,7 +39,7 @@ import com.landawn.abacus.util.WD;
  * @param <T> the specific Multimap implementation type
  */
 @SuppressWarnings("java:S2160")
-class MultimapType<K, E, V extends Collection<E>, T extends Multimap<K, E, V>> extends AbstractType<T> {
+public class MultimapType<K, E, V extends Collection<E>, T extends Multimap<K, E, V>> extends AbstractType<T> {
 
     private final Class<?> typeClass;
 

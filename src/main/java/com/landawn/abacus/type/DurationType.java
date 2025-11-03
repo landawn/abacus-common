@@ -32,7 +32,7 @@ import com.landawn.abacus.util.Strings;
  * This class provides serialization, deserialization, and database operations for Duration objects.
  * Durations are stored as milliseconds (long values) in the database and string representations.
  */
-class DurationType extends AbstractType<Duration> {
+public class DurationType extends AbstractType<Duration> {
 
     public static final String DURATION = Duration.class.getSimpleName();
 

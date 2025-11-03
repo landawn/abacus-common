@@ -35,7 +35,7 @@ import com.landawn.abacus.util.Objectory;
  * provides conversion between InputStream and various output formats specifically
  * for ASCII-encoded data.
  */
-class AsciiStreamType extends InputStreamType {
+public class AsciiStreamType extends InputStreamType {
 
     /**
      * The type name constant for ASCII stream type identification.

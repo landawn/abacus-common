@@ -39,7 +39,7 @@ package com.landawn.abacus.type;
  * }</pre>
  */
 @SuppressWarnings("java:S2160")
-final class PrimitiveByteType extends AbstractByteType {
+public final class PrimitiveByteType extends AbstractByteType {
 
     public static final String BYTE = byte.class.getSimpleName();
 

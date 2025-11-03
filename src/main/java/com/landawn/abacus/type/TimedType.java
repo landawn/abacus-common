@@ -38,7 +38,7 @@ import com.landawn.abacus.util.WD;
  * @param <T> the type of value wrapped in the Timed object
  */
 @SuppressWarnings("java:S2160")
-class TimedType<T> extends AbstractType<Timed<T>> { //NOSONAR
+public class TimedType<T> extends AbstractType<Timed<T>> { //NOSONAR
 
     private final String declaringName;
 

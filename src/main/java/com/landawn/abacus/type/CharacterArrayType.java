@@ -28,7 +28,7 @@ import com.landawn.abacus.util.WD;
  * This class provides serialization, deserialization, and output operations for Character arrays.
  * It handles proper formatting with brackets, separators, and {@code null} value representation.
  */
-final class CharacterArrayType extends ObjectArrayType<Character> {
+public final class CharacterArrayType extends ObjectArrayType<Character> {
 
     CharacterArrayType() {
         super(Character[].class);

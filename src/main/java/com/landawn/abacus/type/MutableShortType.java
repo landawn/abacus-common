@@ -21,7 +21,7 @@ import com.landawn.abacus.util.Strings;
  * Type handler for {@link MutableShort} objects, providing serialization, deserialization,
  * and database interaction capabilities for mutable short wrapper objects.
  */
-class MutableShortType extends NumberType<MutableShort> {
+public class MutableShortType extends NumberType<MutableShort> {
 
     public static final String MUTABLE_SHORT = MutableShort.class.getSimpleName();
 

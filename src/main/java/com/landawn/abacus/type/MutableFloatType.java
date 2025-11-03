@@ -22,7 +22,7 @@ import com.landawn.abacus.util.Strings;
  * deserialization, and database operations for MutableFloat instances, which are
  * mutable wrappers around primitive float values.
  */
-class MutableFloatType extends NumberType<MutableFloat> {
+public class MutableFloatType extends NumberType<MutableFloat> {
 
     /**
      * The type name identifier for MutableFloat type.

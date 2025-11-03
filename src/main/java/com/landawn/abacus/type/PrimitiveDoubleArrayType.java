@@ -29,7 +29,7 @@ import com.landawn.abacus.util.WD;
  * double arrays and their string representations or collections.
  */
 @SuppressWarnings("java:S2160")
-final class PrimitiveDoubleArrayType extends AbstractPrimitiveArrayType<double[]> {
+public final class PrimitiveDoubleArrayType extends AbstractPrimitiveArrayType<double[]> {
 
     public static final String DOUBLE_ARRAY = double[].class.getSimpleName();
 

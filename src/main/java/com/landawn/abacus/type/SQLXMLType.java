@@ -20,7 +20,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.SQLXML;
 
-class SQLXMLType extends AbstractType<SQLXML> {
+public class SQLXMLType extends AbstractType<SQLXML> {
 
     public static final String SQL_XML = SQLXML.class.getSimpleName();
 

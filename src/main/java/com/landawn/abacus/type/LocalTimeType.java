@@ -26,7 +26,7 @@ import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Numbers;
 import com.landawn.abacus.util.Strings;
 
-class LocalTimeType extends AbstractTemporalType<LocalTime> {
+public class LocalTimeType extends AbstractTemporalType<LocalTime> {
 
     public static final String LOCAL_TIME = LocalTime.class.getSimpleName();
 

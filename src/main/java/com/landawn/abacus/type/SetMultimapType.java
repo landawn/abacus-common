@@ -30,7 +30,7 @@ import com.landawn.abacus.util.Strings;
  * @param <E> the element type in the value sets
  */
 @SuppressWarnings("java:S2160")
-class SetMultimapType<K, E> extends MultimapType<K, E, Set<E>, SetMultimap<K, E>> {
+public class SetMultimapType<K, E> extends MultimapType<K, E, Set<E>, SetMultimap<K, E>> {
 
     SetMultimapType(final Class<?> typeClass, final String keyTypeName, final String valueElementTypeName) {
         super(typeClass, keyTypeName, valueElementTypeName, null);

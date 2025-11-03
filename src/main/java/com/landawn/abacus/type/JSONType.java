@@ -28,7 +28,7 @@ import com.landawn.abacus.util.WD;
  * @param <T> the type of object this JSONType handles
  */
 @SuppressWarnings("java:S2160")
-class JSONType<T> extends AbstractType<T> {
+public class JSONType<T> extends AbstractType<T> {
 
     public static final String JSON = "JSON";
 

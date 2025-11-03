@@ -49,7 +49,7 @@ import com.landawn.abacus.util.WD;
  * @param <T> the multimap type (must extend Multimap&lt;K, V&gt;)
  */
 @SuppressWarnings("java:S2160")
-class GuavaMultimapType<K, V, T extends Multimap<K, V>> extends AbstractType<T> {
+public class GuavaMultimapType<K, V, T extends Multimap<K, V>> extends AbstractType<T> {
 
     private final String declaringName;
 

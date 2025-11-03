@@ -46,7 +46,7 @@ import com.landawn.abacus.util.Password;
  * }</pre>
  */
 @SuppressWarnings("java:S2160")
-class PasswordType extends AbstractStringType {
+public class PasswordType extends AbstractStringType {
 
     public static final String PASSWORD = "Password";
 

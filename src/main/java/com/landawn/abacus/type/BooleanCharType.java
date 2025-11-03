@@ -30,7 +30,7 @@ import com.landawn.abacus.util.CharacterWriter;
  * as character fields.
  */
 @SuppressWarnings("java:S2160")
-final class BooleanCharType extends AbstractType<Boolean> {
+public final class BooleanCharType extends AbstractType<Boolean> {
 
     private static final String typeName = "BooleanChar";
     private static final String Y = "Y";

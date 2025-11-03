@@ -23,7 +23,7 @@ import com.landawn.abacus.util.Strings;
  * This class provides serialization and deserialization for java.util.Currency objects.
  * Currencies are represented by their ISO 4217 currency codes (e.g., "USD", "EUR", "JPY").
  */
-class CurrencyType extends AbstractType<Currency> {
+public class CurrencyType extends AbstractType<Currency> {
 
     public static final String CURRENCY = Currency.class.getSimpleName();
 

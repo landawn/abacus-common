@@ -31,7 +31,7 @@ import com.landawn.abacus.util.Strings;
  * This class provides serialization/deserialization and database operations
  * for java.math.BigDecimal instances with unlimited precision.
  */
-final class BigDecimalType extends NumberType<BigDecimal> {
+public final class BigDecimalType extends NumberType<BigDecimal> {
 
     /**
      * The type name constant for BigDecimal type identification.

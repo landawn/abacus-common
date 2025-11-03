@@ -42,7 +42,7 @@ import com.landawn.abacus.util.N;
  * Note that the InputStream content is consumed during serialization.
  */
 @SuppressWarnings("java:S2160")
-class InputStreamType extends AbstractType<InputStream> {
+public class InputStreamType extends AbstractType<InputStream> {
 
     public static final String INPUT_STREAM = InputStream.class.getSimpleName();
 

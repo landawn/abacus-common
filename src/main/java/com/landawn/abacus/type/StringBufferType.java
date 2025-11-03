@@ -14,7 +14,7 @@
 
 package com.landawn.abacus.type;
 
-class StringBufferType extends AbstractCharSequenceType<StringBuffer> {
+public class StringBufferType extends AbstractCharSequenceType<StringBuffer> {
 
     /**
      * The type name identifier for StringBuffer type.

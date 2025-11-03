@@ -23,7 +23,7 @@ import com.landawn.abacus.util.ShortList;
 import com.landawn.abacus.util.Strings;
 
 @SuppressWarnings("java:S2160")
-final class PrimitiveShortListType extends AbstractPrimitiveListType<ShortList> {
+public final class PrimitiveShortListType extends AbstractPrimitiveListType<ShortList> {
 
     public static final String SHORT_LIST = ShortList.class.getSimpleName();
 

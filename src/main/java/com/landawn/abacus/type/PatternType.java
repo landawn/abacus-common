@@ -36,7 +36,7 @@ import com.landawn.abacus.util.Strings;
  * boolean matches = restored.matcher("test@example.com").matches(); // true
  * }</pre>
  */
-class PatternType extends AbstractType<Pattern> {
+public class PatternType extends AbstractType<Pattern> {
 
     public static final String PATTERN = "Pattern";
 

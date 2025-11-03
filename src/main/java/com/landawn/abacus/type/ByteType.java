@@ -24,7 +24,7 @@ import com.landawn.abacus.util.Numbers;
  * This class provides database operations and type information for Byte objects.
  * It handles the conversion between database values and Java Byte objects, supporting {@code null} values.
  */
-final class ByteType extends AbstractByteType {
+public final class ByteType extends AbstractByteType {
 
     public static final String BYTE = Byte.class.getSimpleName();
 

@@ -14,7 +14,7 @@
 
 package com.landawn.abacus.type;
 
-class StringBuilderType extends AbstractCharSequenceType<StringBuilder> {
+public class StringBuilderType extends AbstractCharSequenceType<StringBuilder> {
 
     /**
      * The type name identifier for StringBuilder type.

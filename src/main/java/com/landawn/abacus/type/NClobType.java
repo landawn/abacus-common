@@ -38,7 +38,7 @@ import com.landawn.abacus.exception.UncheckedSQLException;
  * type.set(preparedStatement, 1, nclob);
  * }</pre>
  */
-class NClobType extends AbstractType<NClob> {
+public class NClobType extends AbstractType<NClob> {
 
     public static final String NCLOB = NClob.class.getSimpleName();
 

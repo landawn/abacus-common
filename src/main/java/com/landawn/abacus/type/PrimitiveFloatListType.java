@@ -28,7 +28,7 @@ import com.landawn.abacus.util.Strings;
  * by delegating to the underlying float array type handler.
  */
 @SuppressWarnings("java:S2160")
-final class PrimitiveFloatListType extends AbstractPrimitiveListType<FloatList> {
+public final class PrimitiveFloatListType extends AbstractPrimitiveListType<FloatList> {
 
     public static final String FLOAT_LIST = FloatList.class.getSimpleName();
 

@@ -30,7 +30,7 @@ import com.landawn.abacus.util.DateTimeFormat;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Numbers;
 
-class ZonedDateTimeType extends AbstractTemporalType<ZonedDateTime> {
+public class ZonedDateTimeType extends AbstractTemporalType<ZonedDateTime> {
 
     public static final String ZONED_DATE_TIME = ZonedDateTime.class.getSimpleName();
 

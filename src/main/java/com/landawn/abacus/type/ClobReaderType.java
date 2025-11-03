@@ -27,7 +27,7 @@ import java.sql.SQLException;
  * as character Readers. It extends ReaderType to handle CLOB data specifically
  * through character stream representations.
  */
-class ClobReaderType extends ReaderType {
+public class ClobReaderType extends ReaderType {
 
     public static final String CLOB_READER = "ClobReader";
 

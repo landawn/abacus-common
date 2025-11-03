@@ -35,7 +35,7 @@ import com.landawn.abacus.util.N;
  *
  * @param <T> the specific Number subclass this type handler manages
  */
-class NumberType<T extends Number> extends AbstractPrimaryType<T> {
+public class NumberType<T extends Number> extends AbstractPrimaryType<T> {
 
     private final Class<T> typeClass;
     private final Function<String, T> creator;

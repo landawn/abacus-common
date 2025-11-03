@@ -45,7 +45,7 @@ import com.landawn.abacus.util.WD;
  * @param <T8> the type of the eighth element in the tuple
  */
 @SuppressWarnings("java:S2160")
-class Tuple8Type<T1, T2, T3, T4, T5, T6, T7, T8> extends AbstractType<Tuple8<T1, T2, T3, T4, T5, T6, T7, T8>> {
+public class Tuple8Type<T1, T2, T3, T4, T5, T6, T7, T8> extends AbstractType<Tuple8<T1, T2, T3, T4, T5, T6, T7, T8>> {
 
     private final String declaringName;
 

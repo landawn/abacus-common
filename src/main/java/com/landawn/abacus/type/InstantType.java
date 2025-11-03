@@ -34,7 +34,7 @@ import com.landawn.abacus.util.Numbers;
  * This class provides serialization, deserialization, and database access capabilities for Instant instances.
  * Instant represents a point on the time-line in UTC timezone. The default string format is ISO-8601 timestamp.
  */
-class InstantType extends AbstractTemporalType<Instant> {
+public class InstantType extends AbstractTemporalType<Instant> {
 
     public static final String INSTANT = Instant.class.getSimpleName();
 

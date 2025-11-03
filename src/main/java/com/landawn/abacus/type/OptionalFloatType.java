@@ -22,7 +22,7 @@ import com.landawn.abacus.util.u.OptionalFloat;
  * and database interaction capabilities for optional single-precision floating-point values.
  * This handler manages the conversion between database numeric values and OptionalFloat wrapper objects.
  */
-class OptionalFloatType extends AbstractOptionalType<OptionalFloat> {
+public class OptionalFloatType extends AbstractOptionalType<OptionalFloat> {
 
     public static final String OPTIONAL_FLOAT = OptionalFloat.class.getSimpleName();
 

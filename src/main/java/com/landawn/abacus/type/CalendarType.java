@@ -28,7 +28,7 @@ import com.landawn.abacus.util.Strings;
  * This class provides serialization, deserialization, and database operations for Calendar objects.
  * It supports conversion from various formats including timestamps, date strings, and the special "sysTime" value.
  */
-class CalendarType extends AbstractCalendarType<Calendar> {
+public class CalendarType extends AbstractCalendarType<Calendar> {
 
     public static final String CALENDAR = Calendar.class.getSimpleName();
 

@@ -32,7 +32,7 @@ import com.landawn.abacus.util.Strings;
  * for ByteList instances by delegating to the underlying byte array type handler.
  */
 @SuppressWarnings("java:S2160")
-final class PrimitiveByteListType extends AbstractPrimitiveListType<ByteList> {
+public final class PrimitiveByteListType extends AbstractPrimitiveListType<ByteList> {
 
     public static final String BYTE_LIST = ByteList.class.getSimpleName();
 

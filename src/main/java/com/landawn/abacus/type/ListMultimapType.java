@@ -30,7 +30,7 @@ import com.landawn.abacus.util.Strings;
  * @param <E> the element type stored in the lists of the multimap
  */
 @SuppressWarnings("java:S2160")
-class ListMultimapType<K, E> extends MultimapType<K, E, List<E>, ListMultimap<K, E>> {
+public class ListMultimapType<K, E> extends MultimapType<K, E, List<E>, ListMultimap<K, E>> {
 
     ListMultimapType(final Class<?> typeClass, final String keyTypeName, final String valueElementTypeName) {
         super(typeClass, keyTypeName, valueElementTypeName, null);

@@ -40,7 +40,7 @@ import com.landawn.abacus.util.WD;
  * @param <T3> the type of the third element in the tuple
  */
 @SuppressWarnings("java:S2160")
-class Tuple3Type<T1, T2, T3> extends AbstractType<Tuple3<T1, T2, T3>> {
+public class Tuple3Type<T1, T2, T3> extends AbstractType<Tuple3<T1, T2, T3>> {
 
     private final String declaringName;
 

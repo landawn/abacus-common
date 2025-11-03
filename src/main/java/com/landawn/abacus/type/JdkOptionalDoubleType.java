@@ -23,7 +23,7 @@ import com.landawn.abacus.util.Strings;
  * OptionalDouble is a container that may or may not contain a double value.
  * Empty optionals are represented as {@code null} in serialized form.
  */
-class JdkOptionalDoubleType extends AbstractOptionalType<OptionalDouble> {
+public class JdkOptionalDoubleType extends AbstractOptionalType<OptionalDouble> {
 
     public static final String OPTIONAL_DOUBLE = "JdkOptionalDouble";
 

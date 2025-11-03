@@ -31,7 +31,7 @@ import com.landawn.abacus.util.WD;
  * @param <E> the element type of the immutable list
  */
 @SuppressWarnings("java:S2160")
-class ImmutableListType<E> extends AbstractType<ImmutableList<E>> {
+public class ImmutableListType<E> extends AbstractType<ImmutableList<E>> {
 
     private final String declaringName;
 

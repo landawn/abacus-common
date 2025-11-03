@@ -27,7 +27,7 @@ import com.landawn.abacus.util.WD;
  * This class provides serialization, deserialization, and output operations for Float arrays.
  * It handles proper formatting with brackets, separators, and {@code null} value representation.
  */
-final class FloatArrayType extends ObjectArrayType<Float> {
+public final class FloatArrayType extends ObjectArrayType<Float> {
 
     FloatArrayType() {
         super(Float[].class);

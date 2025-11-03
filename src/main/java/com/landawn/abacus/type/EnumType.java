@@ -69,7 +69,7 @@ import com.landawn.abacus.util.Strings;
  * @param <T> the enum type, must extend Enum&lt;T&gt;
  */
 @SuppressWarnings("java:S2160")
-final class EnumType<T extends Enum<T>> extends SingleValueType<T> {
+public final class EnumType<T extends Enum<T>> extends SingleValueType<T> {
     public static final String ENUM = Enum.class.getSimpleName();
 
     private static final String NULL = "null";

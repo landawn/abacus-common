@@ -28,7 +28,7 @@ import com.landawn.abacus.util.Strings;
  * for java.math.BigInteger instances. BigInteger values are stored as strings
  * in the database to preserve precision.
  */
-final class BigIntegerType extends NumberType<BigInteger> {
+public final class BigIntegerType extends NumberType<BigInteger> {
 
     /**
      * The type name constant for BigInteger type identification.

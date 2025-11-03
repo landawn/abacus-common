@@ -27,7 +27,7 @@ import com.landawn.abacus.util.WD;
  * @param <T> the type of value stored in the HBaseColumn
  */
 @SuppressWarnings("java:S2160")
-class HBaseColumnType<T> extends AbstractType<HBaseColumn<T>> {
+public class HBaseColumnType<T> extends AbstractType<HBaseColumn<T>> {
 
     private static final String SEPARATOR = ":";
 

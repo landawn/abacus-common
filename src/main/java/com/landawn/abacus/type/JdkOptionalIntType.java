@@ -23,7 +23,7 @@ import com.landawn.abacus.util.Strings;
  * OptionalInt is a container that may or may not contain an int value.
  * Empty optionals are represented as {@code null} in serialized form.
  */
-class JdkOptionalIntType extends AbstractOptionalType<OptionalInt> {
+public class JdkOptionalIntType extends AbstractOptionalType<OptionalInt> {
 
     public static final String OPTIONAL_INT = "JdkOptionalInt";
 

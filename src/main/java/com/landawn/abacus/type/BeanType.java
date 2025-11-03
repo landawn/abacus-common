@@ -43,7 +43,7 @@ import com.landawn.abacus.util.Strings;
  * @param <T> the JavaBean type this handler manages
  */
 @SuppressWarnings("java:S2160")
-final class BeanType<T> extends AbstractType<T> {
+public final class BeanType<T> extends AbstractType<T> {
 
     private final Class<T> typeClass;
 

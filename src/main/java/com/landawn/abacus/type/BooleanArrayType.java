@@ -27,7 +27,7 @@ import com.landawn.abacus.util.WD;
  * This class provides serialization/deserialization and I/O operations
  * for Boolean[] arrays, handling {@code null} elements and array formatting.
  */
-final class BooleanArrayType extends ObjectArrayType<Boolean> {
+public final class BooleanArrayType extends ObjectArrayType<Boolean> {
 
     BooleanArrayType() {
         super(Boolean[].class);

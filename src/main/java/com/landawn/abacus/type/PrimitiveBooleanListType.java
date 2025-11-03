@@ -28,7 +28,7 @@ import com.landawn.abacus.util.Strings;
  * by delegating to the underlying boolean array type handler.
  */
 @SuppressWarnings("java:S2160")
-final class PrimitiveBooleanListType extends AbstractPrimitiveListType<BooleanList> {
+public final class PrimitiveBooleanListType extends AbstractPrimitiveListType<BooleanList> {
 
     public static final String BOOLEAN_LIST = BooleanList.class.getSimpleName();
 
