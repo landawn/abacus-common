@@ -11,26 +11,25 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-
 package com.landawn.abacus.util.function;
 
-import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.util.Throwables;
 
 /**
  * Represents a function that accepts a variable number of short-valued arguments and produces a result.
  * This is the variable-arity specialization of {@link ShortFunction}.
- * 
+ *
  * <p>This is a functional interface whose functional method is {@link #apply(short...)}.
- * 
+ *
  * @param <R> the type of the result of the function
- * 
+ *
  * @see ShortFunction
  * @see java.util.function.Function
+ *
+ * <p>Refer to JDK API documentation at: <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html">https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a></p>
  */
 @FunctionalInterface
 public interface ShortNFunction<R> extends Throwables.ShortNFunction<R, RuntimeException> { //NOSONAR
-
     /**
      * Applies this function to the given arguments.
      *
@@ -56,7 +55,6 @@ public interface ShortNFunction<R> extends Throwables.ShortNFunction<R, RuntimeE
      * @return the function result
      */
     @Override
-    @MayReturnNull
     R apply(short... args);
 
     /**

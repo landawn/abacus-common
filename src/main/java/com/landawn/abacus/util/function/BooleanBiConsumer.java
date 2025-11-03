@@ -11,7 +11,6 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-
 package com.landawn.abacus.util.function;
 
 import com.landawn.abacus.util.Throwables;
@@ -19,13 +18,13 @@ import com.landawn.abacus.util.Throwables;
 /**
  * Represents an operation that accepts two {@code boolean}-valued arguments and returns no result.
  * This is the primitive type specialization of {@link BiConsumer} for {@code boolean}.
- * 
+ *
  * <p>This is a functional interface whose functional method is {@link #accept(boolean, boolean)}.
  *
+ * <p>Refer to JDK API documentation at: <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html">https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a></p>
  */
 @FunctionalInterface
 public interface BooleanBiConsumer extends Throwables.BooleanBiConsumer<RuntimeException> { //NOSONAR
-
     /**
      * Performs this operation on the given arguments.
      *

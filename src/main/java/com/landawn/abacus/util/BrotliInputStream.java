@@ -38,7 +38,6 @@ import java.io.InputStream;
  * }</pre>
  * 
  * @see java.io.InputStream
- * @since 1.0
  */
 public final class BrotliInputStream extends InputStream {
 

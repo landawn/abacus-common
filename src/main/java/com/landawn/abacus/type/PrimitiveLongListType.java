@@ -23,7 +23,7 @@ import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Strings;
 
 @SuppressWarnings("java:S2160")
-public final class PrimitiveLongListType extends AbstractPrimitiveListType<LongList> {
+final class PrimitiveLongListType extends AbstractPrimitiveListType<LongList> {
 
     public static final String LONG_LIST = LongList.class.getSimpleName();
 
@@ -41,7 +41,7 @@ public final class PrimitiveLongListType extends AbstractPrimitiveListType<LongL
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * PrimitiveLongListType type = new PrimitiveLongListType();
+     * Type<LongList> type = TypeFactory.getType(LongList.class);
      * Class<LongList> clazz = type.clazz();
      * System.out.println(clazz.getName()); // Output: com.landawn.abacus.util.LongList
      * }</pre>
@@ -59,7 +59,7 @@ public final class PrimitiveLongListType extends AbstractPrimitiveListType<LongL
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * PrimitiveLongListType type = new PrimitiveLongListType();
+     * Type<LongList> type = TypeFactory.getType(LongList.class);
      * Type<?> elementType = type.getElementType();
      * System.out.println(elementType.name()); // Output: long
      * }</pre>
@@ -76,7 +76,7 @@ public final class PrimitiveLongListType extends AbstractPrimitiveListType<LongL
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * PrimitiveLongListType type = new PrimitiveLongListType();
+     * Type<LongList> type = TypeFactory.getType(LongList.class);
      * Type<Long>[] paramTypes = type.getParameterTypes();
      * System.out.println(paramTypes.length); // Output: 1
      * System.out.println(paramTypes[0].name()); // Output: long
@@ -97,7 +97,7 @@ public final class PrimitiveLongListType extends AbstractPrimitiveListType<LongL
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * PrimitiveLongListType type = new PrimitiveLongListType();
+     * Type<LongList> type = TypeFactory.getType(LongList.class);
      * LongList list = LongList.of(1L, 2L, 3L);
      * String str = type.stringOf(list);
      * System.out.println(str); // Output: [1, 2, 3]
@@ -108,7 +108,6 @@ public final class PrimitiveLongListType extends AbstractPrimitiveListType<LongL
      *
      * @param x the LongList to convert to string
      * @return the string representation of the list, or {@code null} if the input list is null
-     @MayReturnNull
      */
     @Override
     public String stringOf(final LongList x) {
@@ -121,7 +120,7 @@ public final class PrimitiveLongListType extends AbstractPrimitiveListType<LongL
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * PrimitiveLongListType type = new PrimitiveLongListType();
+     * Type<LongList> type = TypeFactory.getType(LongList.class);
      * LongList list = type.valueOf("[1, 2, 3]");
      * System.out.println(list.size()); // Output: 3
      * System.out.println(list.get(0)); // Output: 1
@@ -136,7 +135,6 @@ public final class PrimitiveLongListType extends AbstractPrimitiveListType<LongL
      * @param str the string to parse, expected format is "[value1, value2, ...]"
      * @return the parsed LongList, or {@code null} if the input string is {@code null} or empty
      * @throws NumberFormatException if any element in the string cannot be parsed as a long
-     @MayReturnNull
      */
     @Override
     public LongList valueOf(final String str) {
@@ -150,7 +148,7 @@ public final class PrimitiveLongListType extends AbstractPrimitiveListType<LongL
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * PrimitiveLongListType type = new PrimitiveLongListType();
+     * Type<LongList> type = TypeFactory.getType(LongList.class);
      * LongList list = LongList.of(10L, 20L, 30L);
      * StringBuilder sb = new StringBuilder("Values: ");
      * type.appendTo(sb, list);
@@ -182,7 +180,7 @@ public final class PrimitiveLongListType extends AbstractPrimitiveListType<LongL
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * PrimitiveLongListType type = new PrimitiveLongListType();
+     * Type<LongList> type = TypeFactory.getType(LongList.class);
      * LongList list = LongList.of(100L, 200L, 300L);
      * CharacterWriter writer = new CharacterWriter();
      * JSONXMLSerializationConfig<?> config = new JSONXMLSerializationConfig<>();

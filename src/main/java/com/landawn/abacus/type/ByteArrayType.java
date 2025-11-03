@@ -20,7 +20,6 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.parser.JSONXMLSerializationConfig;
 import com.landawn.abacus.util.Array;
 import com.landawn.abacus.util.CharacterWriter;
@@ -33,7 +32,7 @@ import com.landawn.abacus.util.WD;
  * This class provides serialization/deserialization and database operations
  * for Byte[] arrays, including conversion between primitive byte[] and Byte[].
  */
-public final class ByteArrayType extends ObjectArrayType<Byte> {
+final class ByteArrayType extends ObjectArrayType<Byte> {
 
     ByteArrayType() {
         super(Byte[].class);
@@ -48,9 +47,7 @@ public final class ByteArrayType extends ObjectArrayType<Byte> {
      * @return a string representation like "[1, 2, null]", or {@code null} if input is {@code null},
      *         or "[]" if the array is empty
      */
-    @MayReturnNull
     @Override
-
     public String stringOf(final Byte[] x) {
         if (x == null) {
             return null; // NOSONAR
@@ -71,9 +68,7 @@ public final class ByteArrayType extends ObjectArrayType<Byte> {
      *         or an empty array if str is empty or equals "[]"
      * @throws NumberFormatException if any {@code non-null} element cannot be parsed as a byte
      */
-    @MayReturnNull
     @Override
-
     public Byte[] valueOf(final String str) {
         if (Strings.isEmpty(str) || Strings.isBlank(str)) {
             return null; // NOSONAR

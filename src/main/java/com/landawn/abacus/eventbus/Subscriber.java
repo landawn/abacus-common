@@ -25,24 +25,21 @@ package com.landawn.abacus.eventbus;
  * 
  * <p><b>Usage Examples with lambda expression:</b></p>
  * <pre>{@code
- * {@code
  * EventBus eventBus = EventBus.getDefault();
- * 
+ *
  * // Lambda subscriber for String events
  * eventBus.register((Subscriber<String>) event -> {
  *     System.out.println("Received: " + event);
  * }, "stringEvents");
- * 
+ *
  * // Lambda subscriber for custom event types
  * eventBus.register((Subscriber<UserLoginEvent>) event -> {
  *     System.out.println("User logged in: " + event.getUserId());
  * }, "userEvents");
- * }
  * }</pre>
  * 
  * <p><b>Usage Examples with anonymous inner class:</b></p>
  * <pre>{@code
- * {@code
  * Subscriber<Integer> numberSubscriber = new Subscriber<Integer>() {
  *     @Override
  *     public void on(Integer event) {
@@ -50,27 +47,23 @@ package com.landawn.abacus.eventbus;
  *     }
  * };
  * eventBus.register(numberSubscriber, "numberEvents");
- * }
  * }</pre>
  * 
  * <p><b>Usage Examples with method reference:</b></p>
  * <pre>{@code
- * {@code
  * public class MyHandler {
  *     public void handleString(String message) {
  *         System.out.println("Handling: " + message);
  *     }
  * }
- * 
+ *
  * MyHandler handler = new MyHandler();
  * eventBus.register((Subscriber<String>) handler::handleString, "messages");
- * }
  * }</pre>
  * 
  * @param <E> the type of event this subscriber will receive
  * @see EventBus
  * @see Subscribe
- * @since 1.0
  */
 @FunctionalInterface
 public interface Subscriber<E> {
@@ -87,12 +80,10 @@ public interface Subscriber<E> {
      * 
      * <p><b>Usage Examples for implementation:</b></p>
      * <pre>{@code
-     * {@code
      * public void on(UserEvent event) {
      *     // Process the user event
      *     updateUserInterface(event.getUser());
      *     logUserActivity(event);
-     * }
      * }
      * }</pre>
      *

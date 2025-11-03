@@ -11,7 +11,6 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-
 package com.landawn.abacus.util.function;
 
 import com.landawn.abacus.util.Throwables;
@@ -19,14 +18,15 @@ import com.landawn.abacus.util.Throwables;
 /**
  * Represents an operation on a single short-valued operand that produces a short-valued result.
  * This is the primitive type specialization of {@link java.util.function.UnaryOperator} for {@code short}.
- * 
+ *
  * <p>This is a functional interface whose functional method is {@link #applyAsShort(short)}.
- * 
+ *
+ * <p>Refer to JDK API documentation at: <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html">https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a></p>
+ *
  * @see java.util.function.UnaryOperator
  */
 @FunctionalInterface
 public interface ShortUnaryOperator extends Throwables.ShortUnaryOperator<RuntimeException> { //NOSONAR
-
     /**
      * Applies this operator to the given operand.
      *
@@ -46,7 +46,7 @@ public interface ShortUnaryOperator extends Throwables.ShortUnaryOperator<Runtim
      * }</pre>
      *
      * @param operand the operand
-     * @return the operator result if the operation cannot be completed
+     * @return the operator result
      */
     @Override
     short applyAsShort(short operand);
@@ -58,7 +58,7 @@ public interface ShortUnaryOperator extends Throwables.ShortUnaryOperator<Runtim
      *
      * @param before the operator to apply before this operator is applied
      * @return a composed operator that first applies the {@code before} operator and then applies this operator
-     * 
+     *
      * @see #andThen(ShortUnaryOperator)
      */
     default ShortUnaryOperator compose(final ShortUnaryOperator before) {
@@ -72,7 +72,7 @@ public interface ShortUnaryOperator extends Throwables.ShortUnaryOperator<Runtim
      *
      * @param after the operator to apply after this operator is applied
      * @return a composed operator that first applies this operator and then applies the {@code after} operator
-     * 
+     *
      * @see #compose(ShortUnaryOperator)
      */
     default ShortUnaryOperator andThen(final ShortUnaryOperator after) {

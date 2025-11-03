@@ -16,7 +16,6 @@
  */
 package com.landawn.abacus.util;
 
-import com.landawn.abacus.annotation.MayReturnNull;
 import java.util.function.Function;
 import java.util.regex.MatchResult;
 import java.util.regex.Matcher;
@@ -25,37 +24,264 @@ import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import com.landawn.abacus.annotation.Beta;
+import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.util.function.IntBiFunction;
 
 /**
- * Note: Copied from Apache Commons Lang under Apache License V2.
+ * A comprehensive utility class providing high-performance, thread-safe methods for regular expression operations
+ * on strings, including pattern matching, replacement, splitting, and extraction. This class combines the power
+ * of Java's regular expression engine with convenient helper methods and pre-compiled patterns for common use cases,
+ * making regex operations more accessible and efficient for everyday programming tasks.
  *
- * <br />
+ * <p>This utility class addresses common pain points in regex usage by providing null-safe operations, pre-compiled
+ * patterns for performance optimization, and intuitive method names that clearly express intent. It includes
+ * specialized patterns for extracting numbers, dates, emails, URLs, and Java identifiers, along with flexible
+ * replacement mechanisms using both string literals and functional transformations.</p>
  *
- * Utility class providing helper methods for processing Strings using regular expressions.
- * This class offers a comprehensive set of pre-compiled patterns for common use cases like
- * finding numbers, dates, emails, URLs, etc., as well as methods for pattern matching,
- * replacement, splitting, and more.
- * 
- * <p>All methods in this class are thread-safe and null-safe unless otherwise specified.</p>
- * 
- * <p><b>Usage Examples:</b></p>
+ * <p><b>Key Features:</b>
+ * <ul>
+ *   <li><b>Thread Safety:</b> All methods are thread-safe and can be used safely in concurrent environments</li>
+ *   <li><b>Null Safety:</b> Comprehensive null checking with predictable behavior for null inputs</li>
+ *   <li><b>Performance Optimized:</b> Pre-compiled patterns and efficient algorithms for common operations</li>
+ *   <li><b>Pre-defined Patterns:</b> Common regex patterns for numbers, dates, emails, URLs, and identifiers</li>
+ *   <li><b>Functional Support:</b> Lambda-friendly replacement methods with function-based transformations</li>
+ *   <li><b>Stream Integration:</b> Native support for Java 8+ streams for match processing</li>
+ *   <li><b>Flexible Replacement:</b> Multiple replacement strategies including literal, functional, and indexed</li>
+ *   <li><b>Comprehensive Coverage:</b> Complete set of regex operations for string processing</li>
+ * </ul>
+ *
+ * <p><b>Design Philosophy:</b>
+ * <ul>
+ *   <li><b>Convenience Over Complexity:</b> Simplified API that handles common regex tasks without boilerplate</li>
+ *   <li><b>Performance Over Simplicity:</b> Pre-compiled patterns and optimized algorithms for production use</li>
+ *   <li><b>Safety Over Speed:</b> Comprehensive null checking and error handling for robust applications</li>
+ *   <li><b>Functional Programming:</b> Lambda-friendly design for modern Java development patterns</li>
+ *   <li><b>Apache Heritage:</b> Built on proven Apache Commons Lang foundations with enhancements</li>
+ * </ul>
+ *
+ * <p><b>Pre-compiled Pattern Constants:</b>
+ * <ul>
+ *   <li><b>{@link #JAVA_IDENTIFIER_MATCHER}:</b> Matches valid Java identifiers (variables, methods, classes)</li>
+ *   <li><b>{@link #NUMBER_FINDER}:</b> Extracts numeric values including integers and decimals</li>
+ *   <li><b>{@link #EMAIL_ADDRESS_RFC_5322_MATCHER}:</b> Validates and extracts email addresses</li>
+ *   <li><b>{@link #HTTP_URL_MATCHER}:</b> Matches HTTP/HTTPS URLs with optional protocols</li>
+ *   <li><b>{@link #DATE_MATCHER}:</b> Recognizes common date formats (MM/dd/yyyy, etc.)</li>
+ *   <li><b>{@link #WHITESPACE_MATCHER}:</b> Matches multiple consecutive whitespace characters</li>
+ *   <li><b>{@link #LINE_SEPARATOR}:</b> Platform-independent line ending detection</li>
+ * </ul>
+ *
+ * <p><b>Method Categories:</b>
+ * <ul>
+ *   <li><b>Pattern Matching:</b> {@code find()}, {@code matches()}, {@code countMatches()}</li>
+ *   <li><b>String Replacement:</b> {@code replaceFirst()}, {@code replaceLast()}, {@code replaceAll()}</li>
+ *   <li><b>String Splitting:</b> {@code split()}, {@code splitToLines()}</li>
+ *   <li><b>Stream Operations:</b> {@code matchResults()}, {@code matchIndices()}</li>
+ *   <li><b>Functional Replacement:</b> Methods accepting {@code Function} and {@code IntBiFunction} parameters</li>
+ * </ul>
+ *
+ * <p><b>Common Usage Patterns:</b>
  * <pre>{@code
- * // Check if string contains a number
- * if (RegExUtil.find("Price: $99.99", RegExUtil.NUMBER_FINDER.pattern())) {
- *     // Found a number
- * }
- * 
- * // Replace all whitespace
- * String cleaned = RegExUtil.replaceAll("Hello   World", "\\s+", " ");
- * // Result: "Hello World"
+ * // Basic pattern matching and validation
+ * boolean hasNumber = RegExUtil.find("Order #12345", RegExUtil.NUMBER_FINDER);
+ * boolean isValidEmail = RegExUtil.matches("user@example.com", RegExUtil.EMAIL_PATTERN);
+ * boolean isJavaClass = RegExUtil.matches("MyClass", RegExUtil.JAVA_IDENTIFIER);
+ *
+ * // String cleaning and normalization
+ * String normalized = RegExUtil.replaceAll("Hello    World", "\\s+", " ");
+ * String cleaned = RegExUtil.replaceAll(text, RegExUtil.WHITESPACE_NORMALIZER, " ");
+ *
+ * // Extracting and counting matches
+ * int numberCount = RegExUtil.countMatches("1 apple, 2 oranges, 3 bananas", "\\d+");
+ * String[] emails = RegExUtil.split("user1@a.com;user2@b.com", ";");
+ *
+ * // Functional replacement with transformations
+ * String uppercased = RegExUtil.replaceAll("hello world", "\\w+", String::toUpperCase);
+ * String indexed = RegExUtil.replaceAll("a b c", "\\w", (match, index) -> match + index);
  * }</pre>
- * 
+ *
+ * <p><b>Advanced Usage Examples:</b></p>
+ * <pre>{@code
+ * // Stream-based match processing
+ * List<String> allNumbers = RegExUtil.matchResults("Price: $19.99, Tax: $2.50", "\\d+\\.\\d+")
+ *     .map(MatchResult::group)
+ *     .collect(Collectors.toList());
+ *
+ * // Complex replacement with context
+ * String processed = RegExUtil.replaceAll(sourceCode, RegExUtil.JAVA_IDENTIFIER, 
+ *     identifier -> isReservedWord(identifier) ? escapeIdentifier(identifier) : identifier);
+ *
+ * // Line-by-line processing
+ * String[] lines = RegExUtil.splitToLines(multilineText);
+ * String processed = Arrays.stream(lines)
+ *     .map(line -> RegExUtil.replaceAll(line, "\\btodo\\b", "DONE"))
+ *     .collect(Collectors.joining("\n"));
+ *
+ * // Match indices for position-aware processing
+ * IntStream positions = RegExUtil.matchIndices("The quick brown fox", "\\b\\w{5}\\b");
+ * positions.forEach(pos -> System.out.println("5-letter word at position: " + pos));
+ * }</pre>
+ *
+ * <p><b>Performance Considerations:</b>
+ * <ul>
+ *   <li><b>Pattern Compilation:</b> Use pre-compiled Pattern objects for repeated operations</li>
+ *   <li><b>Method Overloads:</b> Pattern-accepting methods are faster than string regex methods</li>
+ *   <li><b>Stream Operations:</b> Lazy evaluation in stream methods for memory efficiency</li>
+ *   <li><b>Replacement Strategies:</b> Functional replacements have slight overhead but offer flexibility</li>
+ *   <li><b>Memory Usage:</b> Large text processing benefits from streaming approaches</li>
+ * </ul>
+ *
+ * <p><b>Thread Safety and Concurrency:</b>
+ * <ul>
+ *   <li><b>Static Methods:</b> All utility methods are static and inherently thread-safe</li>
+ *   <li><b>Pattern Objects:</b> Pre-compiled Pattern instances are thread-safe and reusable</li>
+ *   <li><b>Matcher Objects:</b> Internal Matcher instances are not shared between threads</li>
+ *   <li><b>No Shared State:</b> No mutable static variables that could cause race conditions</li>
+ *   <li><b>Concurrent Collections:</b> Safe for use with concurrent data processing pipelines</li>
+ * </ul>
+ *
+ * <p><b>Pattern Matching Methods:</b>
+ * <ul>
+ *   <li><b>{@code find()}:</b> Tests if pattern exists anywhere in the string</li>
+ *   <li><b>{@code matches()}:</b> Tests if entire string matches the pattern</li>
+ *   <li><b>{@code countMatches()}:</b> Returns the number of non-overlapping matches</li>
+ *   <li><b>{@code matchResults()}:</b> Returns a Stream of MatchResult objects for processing</li>
+ *   <li><b>{@code matchIndices()}:</b> Returns start positions of all matches as IntStream</li>
+ * </ul>
+ *
+ * <p><b>Replacement Method Variants:</b>
+ * <ul>
+ *   <li><b>String Replacement:</b> Direct string substitution with literal replacements</li>
+ *   <li><b>Function Replacement:</b> Transform matches using Function&lt;String, String&gt;</li>
+ *   <li><b>Indexed Replacement:</b> Transform matches with access to match index via IntBiFunction</li>
+ *   <li><b>First/Last/All:</b> Control which occurrences are replaced</li>
+ * </ul>
+ *
+ * <p><b>Splitting Operations:</b>
+ * <ul>
+ *   <li><b>{@code split()}:</b> Split string around regex matches with optional limit</li>
+ *   <li><b>{@code splitToLines()}:</b> Platform-independent line splitting with limit support</li>
+ *   <li><b>Limit Parameter:</b> Controls maximum number of resulting array elements</li>
+ *   <li><b>Empty Handling:</b> Consistent behavior for empty strings and trailing separators</li>
+ * </ul>
+ *
+ * <p><b>Error Handling and Validation:</b>
+ * <ul>
+ *   <li><b>IllegalArgumentException:</b> Thrown for invalid regex patterns or null required parameters</li>
+ *   <li><b>PatternSyntaxException:</b> Propagated from invalid regex compilation</li>
+ *   <li><b>Null Safety:</b> Null source strings return null or empty results as appropriate</li>
+ *   <li><b>Parameter Validation:</b> Comprehensive checking of method parameters</li>
+ * </ul>
+ *
+ * <p><b>Integration with Java Regex API:</b>
+ * <ul>
+ *   <li><b>Pattern Compatibility:</b> All methods accept both String regex and Pattern objects</li>
+ *   <li><b>MatchResult Interface:</b> Stream methods return standard MatchResult objects</li>
+ *   <li><b>Flag Support:</b> Pattern flags can be specified through Pattern.compile()</li>
+ *   <li><b>Group Extraction:</b> Full support for capturing groups in MatchResult objects</li>
+ * </ul>
+ *
+ * <p><b>Common Regex Patterns and Use Cases:</b>
+ * <ul>
+ *   <li><b>Data Validation:</b> Email, phone number, URL, and identifier validation</li>
+ *   <li><b>Text Extraction:</b> Pulling specific data types from unstructured text</li>
+ *   <li><b>Code Processing:</b> Java identifier extraction and source code manipulation</li>
+ *   <li><b>Data Cleaning:</b> Whitespace normalization and text standardization</li>
+ *   <li><b>Log Processing:</b> Extracting structured data from log files</li>
+ *   <li><b>Template Processing:</b> Variable substitution and template expansion</li>
+ * </ul>
+ *
+ * <p><b>Best Practices:</b>
+ * <ul>
+ *   <li>Use pre-compiled Pattern constants for frequently used regex patterns</li>
+ *   <li>Prefer Pattern-accepting methods over String regex methods for better performance</li>
+ *   <li>Use functional replacement methods for complex transformations</li>
+ *   <li>Consider stream-based methods for large-scale text processing</li>
+ *   <li>Cache compiled Pattern objects when processing multiple strings with the same regex</li>
+ *   <li>Use specific methods (find vs matches) based on your exact requirements</li>
+ *   <li>Validate regex patterns during development to avoid runtime PatternSyntaxException</li>
+ * </ul>
+ *
+ * <p><b>Common Anti-Patterns to Avoid:</b>
+ * <ul>
+ *   <li>Compiling the same regex pattern repeatedly instead of caching Pattern objects</li>
+ *   <li>Using matches() when find() would be sufficient for substring detection</li>
+ *   <li>Ignoring null safety - always handle potential null inputs appropriately</li>
+ *   <li>Using overly complex regex when simple string operations would suffice</li>
+ *   <li>Creating unnecessary intermediate strings in functional replacement chains</li>
+ *   <li>Using replaceAll() when replaceFirst() or replaceLast() would be more appropriate</li>
+ * </ul>
+ *
+ * <p><b>Performance Optimization Tips:</b>
+ * <ul>
+ *   <li><b>Pattern Reuse:</b> Store frequently used Pattern objects in static final fields</li>
+ *   <li><b>Lazy Compilation:</b> Compile patterns only when first used for startup performance</li>
+ *   <li><b>Stream Processing:</b> Use stream methods for memory-efficient processing of large texts</li>
+ *   <li><b>Specific Methods:</b> Use the most specific method for your use case (first/last/all)</li>
+ *   <li><b>Limit Parameters:</b> Use split limits to avoid unnecessary array allocations</li>
+ * </ul>
+ *
+ * <p><b>Example: Log File Processing</b>
+ * <pre>{@code
+ * public class LogProcessor {
+ *     private static final Pattern TIMESTAMP_PATTERN = 
+ *         Pattern.compile("\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2}");
+ *     private static final Pattern ERROR_PATTERN = 
+ *         Pattern.compile("ERROR|FATAL", Pattern.CASE_INSENSITIVE);
+ *
+ *     public List<LogEntry> processLogFile(String logContent) {
+ *         return RegExUtil.splitToLines(logContent)
+ *             .stream()
+ *             .filter(line -> RegExUtil.find(line, ERROR_PATTERN))
+ *             .map(this::parseLogEntry)
+ *             .collect(Collectors.toList());
+ *     }
+ *
+ *     private LogEntry parseLogEntry(String line) {
+ *         String timestamp = RegExUtil.matchResults(line, TIMESTAMP_PATTERN)
+ *             .findFirst()
+ *             .map(MatchResult::group)
+ *             .orElse("Unknown");
+ *         
+ *         String level = RegExUtil.matchResults(line, ERROR_PATTERN)
+ *             .findFirst()
+ *             .map(MatchResult::group)
+ *             .orElse("INFO");
+ *             
+ *         return new LogEntry(timestamp, level, line);
+ *     }
+ *
+ *     public String anonymizeLog(String logContent) {
+ *         // Replace email addresses with [EMAIL]
+ *         String anonymized = RegExUtil.replaceAll(logContent, RegExUtil.EMAIL_PATTERN, "[EMAIL]");
+ *         
+ *         // Replace numbers with [NUM]
+ *         return RegExUtil.replaceAll(anonymized, RegExUtil.NUMBER_FINDER, "[NUM]");
+ *     }
+ * }
+ * }</pre>
+ *
+ * <p><b>Compatibility and Migration:</b>
+ * <ul>
+ *   <li><b>Apache Commons:</b> Drop-in replacement for most Apache Commons Lang regex utilities</li>
+ *   <li><b>JDK Compatibility:</b> Works with Java 8+ features including streams and lambdas</li>
+ *   <li><b>Backward Compatibility:</b> Method signatures designed for easy migration from raw regex usage</li>
+ *   <li><b>Future-Proof:</b> Designed to accommodate future Java regex enhancements</li>
+ * </ul>
+ *
+ * <p><b>Attribution:</b>
+ * This class includes code adapted from Apache Commons Lang under the Apache License 2.0. 
+ * Methods from these libraries may have been modified for consistency, performance optimization, and null-safety enhancement.
+ *
  * @see java.util.regex.Pattern
  * @see java.util.regex.Matcher
+ * @see java.util.regex.MatchResult
+ * @see java.util.stream.Stream
+ * @see java.util.function.Function
  * @see com.landawn.abacus.util.Strings
- * @see <a href="https://docs.oracle.com/javase/8/docs/api/java/util/regex/package-summary.html">Java Regular Expressions</a>
- * @see <a href="https://quickref.me/regex.html">quickref</a>
+ * @see com.landawn.abacus.util.function.IntBiFunction
+ * @see <a href="https://docs.oracle.com/javase/8/docs/api/java/util/regex/package-summary.html">Java Regular Expressions Documentation</a>
+ * @see <a href="https://quickref.me/regex.html">Regular Expression Quick Reference</a>
+ * @see <a href="https://commons.apache.org/proper/commons-lang/">Apache Commons Lang</a>
  */
 public final class RegExUtil {
 

@@ -79,13 +79,13 @@ public final class Pair<L, R> implements Map.Entry<L, R>, Mutable {
     }
 
     /**
-     * Creates a new Pair with the specified left and right elements.
-     * This is the preferred way to create a Pair instance as it provides
-     * a more concise syntax than using the constructor.
-     * 
-     * <p>Both elements can be {@code null}. The returned pair is mutable, allowing
+     * Creates a new Pair instance containing the specified left and right elements.
+     *
+     * <p>This is a static factory method that provides a convenient and type-safe way to create
+     * a Pair instance. The method allows for type inference, making the code more concise.
+     * Both elements can be {@code null}. The returned pair is mutable, allowing
      * modification of its elements after creation.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Pair<String, Integer> coordinates = Pair.of("X", 10);
@@ -94,22 +94,22 @@ public final class Pair<L, R> implements Map.Entry<L, R>, Mutable {
      *
      * @param <L> the type of the left element
      * @param <R> the type of the right element
-     * @param l the left element of the pair (can be null)
-     * @param r the right element of the pair (can be null)
-     * @return a new Pair containing the specified left and right elements
+     * @param l the left element of the pair, may be {@code null}
+     * @param r the right element of the pair, may be {@code null}
+     * @return a new Pair instance containing the specified left and right elements
      */
     public static <L, R> Pair<L, R> of(final L l, final R r) {
         return new Pair<>(l, r);
     }
 
     /**
-     * Creates a new Pair from an existing Map.Entry.
+     * Creates a new Pair instance from an existing Map.Entry.
+     *
+     * <p>This is a static factory method that converts a Map.Entry to a Pair instance.
      * The key of the entry becomes the left element of the pair,
-     * and the value becomes the right element.
-     * 
-     * <p>This method is useful when working with Map entries and you need
-     * to convert them to Pair objects for further processing.</p>
-     * 
+     * and the value becomes the right element. This method is useful when working with Map entries
+     * and you need to convert them to Pair objects for further processing.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Map<String, Integer> map = new HashMap<>();
@@ -121,8 +121,8 @@ public final class Pair<L, R> implements Map.Entry<L, R>, Mutable {
      *
      * @param <K> the key type of the Map.Entry, which becomes the left element type
      * @param <V> the value type of the Map.Entry, which becomes the right element type
-     * @param entry the Map.Entry to convert to a Pair (must not be null)
-     * @return a new Pair with the key as the left element and the value as the right element
+     * @param entry the Map.Entry to convert to a Pair, must not be {@code null}
+     * @return a new Pair instance with the key as the left element and the value as the right element
      */
     public static <K, V> Pair<K, V> create(final Map.Entry<K, V> entry) {
         return new Pair<>(entry.getKey(), entry.getValue());
@@ -131,19 +131,17 @@ public final class Pair<L, R> implements Map.Entry<L, R>, Mutable {
     private static final Pair<?, ?>[] EMPTY_ARRAY = new Pair[0];
 
     /**
-     * Returns a type-safe empty array of Pairs.
-     * This method is useful when you need to return an empty array of Pairs
-     * from a method or pass it as a parameter, avoiding the need to create
-     * a new empty array each time.
-     * 
-     * <p>The returned array is immutable and shared across all calls to this method.
-     * Attempting to modify the returned array will result in an exception.</p>
-     * 
+     * Returns a type-safe empty array of Pair instances.
+     *
+     * <p>This method provides a reusable empty array, avoiding the need to create
+     * a new empty array each time. The returned array is immutable and shared across
+     * all calls to this method.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Pair<String, Integer>[] emptyPairs = Pair.emptyArray();
      * // emptyPairs.length == 0
-     * 
+     *
      * // Useful in methods that return arrays:
      * public Pair<String, Integer>[] getPairs() {
      *     if (someCondition) {
@@ -155,7 +153,7 @@ public final class Pair<L, R> implements Map.Entry<L, R>, Mutable {
      *
      * @param <L> the type of the left elements in the array
      * @param <R> the type of the right elements in the array
-     * @return an empty array of Pairs
+     * @return an empty, immutable array of Pair instances
      */
     @SuppressWarnings("unchecked")
     public static <L, R> Pair<L, R>[] emptyArray() {
@@ -164,16 +162,17 @@ public final class Pair<L, R> implements Map.Entry<L, R>, Mutable {
 
     /**
      * Returns the left element of this pair.
-     * This is the preferred method for accessing the left element,
-     * providing a more concise alternative to {@link #getLeft()}.
-     * 
+     *
+     * <p>This is the preferred method for accessing the left element,
+     * providing a more concise alternative to {@link #getLeft()}.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Pair<String, Integer> pair = Pair.of("Hello", 42);
      * String left = pair.left(); // Returns "Hello"
      * }</pre>
      *
-     * @return the left element of this pair (can be null)
+     * @return the left element of this pair, may be {@code null}
      */
     public L left() {
         return this.left;
@@ -181,16 +180,17 @@ public final class Pair<L, R> implements Map.Entry<L, R>, Mutable {
 
     /**
      * Returns the right element of this pair.
-     * This is the preferred method for accessing the right element,
-     * providing a more concise alternative to {@link #getRight()}.
-     * 
+     *
+     * <p>This is the preferred method for accessing the right element,
+     * providing a more concise alternative to {@link #getRight()}.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Pair<String, Integer> pair = Pair.of("Hello", 42);
      * Integer right = pair.right(); // Returns 42
      * }</pre>
      *
-     * @return the right element of this pair (can be null)
+     * @return the right element of this pair, may be {@code null}
      */
     public R right() {
         return this.right;
@@ -210,16 +210,17 @@ public final class Pair<L, R> implements Map.Entry<L, R>, Mutable {
 
     /**
      * Sets the left element of this pair to the specified value.
-     * The value can be {@code null}. This method modifies the pair in place.
-     * 
+     *
+     * <p>This method modifies the pair in place. The value may be {@code null}.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Pair<String, Integer> pair = Pair.of("Old", 10);
      * pair.setLeft("New");
-     * // pair.left now returns "New"
+     * // pair.left() now returns "New"
      * }</pre>
      *
-     * @param left the new value for the left element (can be null)
+     * @param left the new value for the left element, may be {@code null}
      */
     public void setLeft(final L left) {
         this.left = left;
@@ -239,16 +240,17 @@ public final class Pair<L, R> implements Map.Entry<L, R>, Mutable {
 
     /**
      * Sets the right element of this pair to the specified value.
-     * The value can be {@code null}. This method modifies the pair in place.
-     * 
+     *
+     * <p>This method modifies the pair in place. The value may be {@code null}.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Pair<String, Integer> pair = Pair.of("Hello", 10);
      * pair.setRight(20);
-     * // pair.right now returns 20
+     * // pair.right() now returns 20
      * }</pre>
      *
-     * @param right the new value for the right element (can be null)
+     * @param right the new value for the right element, may be {@code null}
      */
     public void setRight(final R right) {
         this.right = right;
@@ -256,18 +258,19 @@ public final class Pair<L, R> implements Map.Entry<L, R>, Mutable {
 
     /**
      * Sets both the left and right elements of this pair in a single operation.
-     * This is a convenience method equivalent to calling {@link #setLeft(Object)}
-     * followed by {@link #setRight(Object)}.
-     * 
+     *
+     * <p>This is a convenience method equivalent to calling {@link #setLeft(Object)}
+     * followed by {@link #setRight(Object)}.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Pair<String, Integer> pair = Pair.of("Old", 10);
      * pair.set("New", 20);
-     * // pair.left returns "New", pair.right returns 20
+     * // pair.left() returns "New", pair.right() returns 20
      * }</pre>
      *
-     * @param left the new value for the left element (can be null)
-     * @param right the new value for the right element (can be null)
+     * @param left the new value for the left element, may be {@code null}
+     * @param right the new value for the right element, may be {@code null}
      */
     public void set(final L left, final R right) {
         this.setLeft(left);
@@ -275,18 +278,20 @@ public final class Pair<L, R> implements Map.Entry<L, R>, Mutable {
     }
 
     /**
-     * Returns the current left value and then sets it to the specified new value.
-     * This method is useful when you need to retrieve the old value while updating it.
-     * 
+     * Atomically sets the left element to the given value and returns the previous value.
+     *
+     * <p>This method performs a swap operation: it sets the new value and returns what was
+     * previously held. This is particularly useful when you need to track state changes.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Pair<String, Integer> pair = Pair.of("Old", 10);
      * String oldLeft = pair.getAndSetLeft("New");
-     * // oldLeft contains "Old", pair.left returns "New"
+     * // oldLeft contains "Old", pair.left() returns "New"
      * }</pre>
      *
-     * @param newLeft the new value to set for the left element (can be null)
-     * @return the previous value of the left element (can be null)
+     * @param newLeft the new value to set for the left element, may be {@code null}
+     * @return the previous value of the left element, may be {@code null}
      */
     public L getAndSetLeft(final L newLeft) {
         final L res = left;
@@ -295,19 +300,20 @@ public final class Pair<L, R> implements Map.Entry<L, R>, Mutable {
     }
 
     /**
-     * Sets the left element to the specified value and then returns the new value.
-     * This method is useful when you want to update the value and immediately
-     * use the new value in subsequent operations.
-     * 
+     * Sets the left element to the given value and returns the new value.
+     *
+     * <p>This method sets a new value and returns that same value, allowing for method chaining
+     * or immediate usage of the newly set value.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Pair<String, Integer> pair = Pair.of("Old", 10);
      * String newLeft = pair.setAndGetLeft("New");
-     * // newLeft contains "New", pair.left also returns "New"
+     * // newLeft contains "New", pair.left() also returns "New"
      * }</pre>
      *
-     * @param newLeft the new value to set for the left element (can be null)
-     * @return the new value of the left element (same as the parameter)
+     * @param newLeft the new value to set for the left element, may be {@code null}
+     * @return the new value of the left element (same as the parameter), may be {@code null}
      */
     public L setAndGetLeft(final L newLeft) {
         setLeft(newLeft);
@@ -315,18 +321,20 @@ public final class Pair<L, R> implements Map.Entry<L, R>, Mutable {
     }
 
     /**
-     * Returns the current right value and then sets it to the specified new value.
-     * This method is useful when you need to retrieve the old value while updating it.
-     * 
+     * Atomically sets the right element to the given value and returns the previous value.
+     *
+     * <p>This method performs a swap operation: it sets the new value and returns what was
+     * previously held. This is particularly useful when you need to track state changes.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Pair<String, Integer> pair = Pair.of("Hello", 10);
      * Integer oldRight = pair.getAndSetRight(20);
-     * // oldRight contains 10, pair.right returns 20
+     * // oldRight contains 10, pair.right() returns 20
      * }</pre>
      *
-     * @param newRight the new value to set for the right element (can be null)
-     * @return the previous value of the right element (can be null)
+     * @param newRight the new value to set for the right element, may be {@code null}
+     * @return the previous value of the right element, may be {@code null}
      */
     public R getAndSetRight(final R newRight) {
         final R res = right;
@@ -335,19 +343,20 @@ public final class Pair<L, R> implements Map.Entry<L, R>, Mutable {
     }
 
     /**
-     * Sets the right element to the specified value and then returns the new value.
-     * This method is useful when you want to update the value and immediately
-     * use the new value in subsequent operations.
-     * 
+     * Sets the right element to the given value and returns the new value.
+     *
+     * <p>This method sets a new value and returns that same value, allowing for method chaining
+     * or immediate usage of the newly set value.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Pair<String, Integer> pair = Pair.of("Hello", 10);
      * Integer newRight = pair.setAndGetRight(20);
-     * // newRight contains 20, pair.right also returns 20
+     * // newRight contains 20, pair.right() also returns 20
      * }</pre>
      *
-     * @param newRight the new value to set for the right element (can be null)
-     * @return the new value of the right element (same as the parameter)
+     * @param newRight the new value to set for the right element, may be {@code null}
+     * @return the new value of the right element (same as the parameter), may be {@code null}
      */
     public R setAndGetRight(final R newRight) {
         setRight(newRight);

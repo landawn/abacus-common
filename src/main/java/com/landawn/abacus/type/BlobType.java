@@ -20,15 +20,13 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-import com.landawn.abacus.annotation.MayReturnNull;
-
 /**
  * Type handler for SQL Blob (Binary Large Object) operations.
  * This class provides direct handling of java.sql.Blob objects for database operations.
  * Note that Blob objects cannot be converted to/from strings, so string conversion
  * methods throw UnsupportedOperationException.
  */
-public class BlobType extends AbstractType<Blob> {
+class BlobType extends AbstractType<Blob> {
 
     /**
      * The type name constant for Blob type identification.
@@ -90,7 +88,6 @@ public class BlobType extends AbstractType<Blob> {
      * @return the Blob object at the specified column, or {@code null} if the value is SQL NULL
      * @throws SQLException if a database access error occurs or the columnIndex is invalid
      */
-    @MayReturnNull
     @Override
     public Blob get(final ResultSet rs, final int columnIndex) throws SQLException {
         return rs.getBlob(columnIndex);
@@ -105,7 +102,6 @@ public class BlobType extends AbstractType<Blob> {
      * @return the Blob object in the specified column, or {@code null} if the value is SQL NULL
      * @throws SQLException if a database access error occurs or the columnLabel is invalid
      */
-    @MayReturnNull
     @Override
     public Blob get(final ResultSet rs, final String columnLabel) throws SQLException {
         return rs.getBlob(columnLabel);

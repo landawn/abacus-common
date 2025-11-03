@@ -17,7 +17,6 @@ package com.landawn.abacus.type;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.util.Numbers;
 
 /**
@@ -25,7 +24,7 @@ import com.landawn.abacus.util.Numbers;
  * This class provides functionality to handle Integer objects in database operations and type conversions.
  * It extends AbstractIntegerType to inherit common integer type handling behavior.
  */
-public final class IntegerType extends AbstractIntegerType {
+final class IntegerType extends AbstractIntegerType {
 
     public static final String INTEGER = Integer.class.getSimpleName();
 
@@ -34,9 +33,9 @@ public final class IntegerType extends AbstractIntegerType {
     }
 
     /**
-     * Returns the Class object representing the Integer wrapper type.
+     * Returns the Class object representing the Integer class.
      *
-     * @return Integer.class
+     * @return the Class object for Integer.class
      */
     @SuppressWarnings({ "rawtypes", "unchecked" })
     @Override
@@ -46,7 +45,7 @@ public final class IntegerType extends AbstractIntegerType {
 
     /**
      * Indicates whether this type represents a primitive wrapper class.
-     * For IntegerType, this always returns {@code true} as Integer is the wrapper class for the primitive int type.
+     * Integer is the wrapper class for the primitive int type.
      *
      * @return {@code true}, indicating Integer is a primitive wrapper
      */
@@ -56,21 +55,22 @@ public final class IntegerType extends AbstractIntegerType {
     }
 
     /**
-     * Retrieves an Integer value from the specified column in a ResultSet.
-     * This method handles {@code null} values and type conversions from the database.
-     * If the column value is {@code null}, returns {@code null}.
-     * If the value is already an Integer, returns it directly.
-     * If the value is another Number type, converts it to Integer.
-     * Otherwise, parses the string representation of the value.
+     * Retrieves an Integer value from a ResultSet at the specified column index.
+     * This method handles various numeric types in the database and converts them to Integer.
      *
-     * @param rs the ResultSet to read from
-     * @param columnIndex the index of the column to read (1-based)
-     * @return the Integer value from the column, or {@code null} if the column value is SQL NULL
-     * @throws SQLException if a database access error occurs or the columnIndex is invalid
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Type<Integer> type = TypeFactory.getType(Integer.class);
+     * ResultSet rs = ...; // from SQL query
+     * Integer age = type.get(rs, 1); // retrieves Integer from column 1
+     * }</pre>
+     *
+     * @param rs the ResultSet containing the data, must not be {@code null}
+     * @param columnIndex the column index (1-based) to retrieve the value from
+     * @return the Integer value at the specified column, or {@code null} if the column value is SQL NULL
+     * @throws SQLException if a database access error occurs
      */
-    @MayReturnNull
     @Override
-
     public Integer get(final ResultSet rs, final int columnIndex) throws SQLException {
         final Object ret = rs.getObject(columnIndex);
 
@@ -86,21 +86,22 @@ public final class IntegerType extends AbstractIntegerType {
     }
 
     /**
-     * Retrieves an Integer value from the specified column in a ResultSet using the column label.
-     * This method handles {@code null} values and type conversions from the database.
-     * If the column value is {@code null}, returns {@code null}.
-     * If the value is already an Integer, returns it directly.
-     * If the value is another Number type, converts it to Integer.
-     * Otherwise, parses the string representation of the value.
+     * Retrieves an Integer value from a ResultSet using the specified column label.
+     * This method handles various numeric types in the database and converts them to Integer.
      *
-     * @param rs the ResultSet to read from
-     * @param columnLabel the label of the column to read
-     * @return the Integer value from the column, or {@code null} if the column value is SQL NULL
-     * @throws SQLException if a database access error occurs or the columnLabel is not found
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Type<Integer> type = TypeFactory.getType(Integer.class);
+     * ResultSet rs = ...; // from SQL query
+     * Integer age = type.get(rs, "age"); // retrieves Integer from "age" column
+     * }</pre>
+     *
+     * @param rs the ResultSet containing the data, must not be {@code null}
+     * @param columnLabel the label of the column to retrieve the value from, must not be {@code null}
+     * @return the Integer value in the specified column, or {@code null} if the column value is SQL NULL
+     * @throws SQLException if a database access error occurs
      */
-    @MayReturnNull
     @Override
-
     public Integer get(final ResultSet rs, final String columnLabel) throws SQLException {
         final Object ret = rs.getObject(columnLabel);
 

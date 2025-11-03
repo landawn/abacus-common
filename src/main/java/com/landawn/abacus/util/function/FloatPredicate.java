@@ -11,7 +11,6 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-
 package com.landawn.abacus.util.function;
 
 import com.landawn.abacus.util.N;
@@ -20,55 +19,48 @@ import com.landawn.abacus.util.Throwables;
 /**
  * Represents a predicate (boolean-valued function) of one float-valued argument.
  * This is a functional interface whose functional method is {@link #test(float)}.
- * 
+ *
  * <p>This is a primitive type specialization of {@link java.util.function.Predicate} for {@code float}.</p>
- * 
- * @since 1.0
+ *
  * @see java.util.function.Predicate
+ *
+ * <p>Refer to JDK API documentation at: <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html">https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a></p>
  */
 @FunctionalInterface
 public interface FloatPredicate extends Throwables.FloatPredicate<RuntimeException> { //NOSONAR
-
     /**
      * A predicate that always evaluates to {@code true}.
      */
     FloatPredicate ALWAYS_TRUE = value -> true;
-
     /**
      * A predicate that always evaluates to {@code false}.
      */
     FloatPredicate ALWAYS_FALSE = value -> false;
-
     /**
      * A predicate that tests if the float value is equal to zero.
      * Uses {@link N#equals(float, float)} for comparison to handle floating-point precision.
      */
     FloatPredicate IS_ZERO = value -> N.equals(value, 0);
-
     /**
      * A predicate that tests if the float value is not equal to zero.
      * Uses {@link N#compare(float, float)} for comparison to handle floating-point precision.
      */
     FloatPredicate NOT_ZERO = value -> N.compare(value, 0) != 0;
-
     /**
      * A predicate that tests if the float value is positive (greater than zero).
      * Uses {@link N#compare(float, float)} for comparison to handle floating-point precision.
      */
     FloatPredicate IS_POSITIVE = value -> N.compare(value, 0) > 0;
-
     /**
      * A predicate that tests if the float value is not positive (less than or equal to zero).
      * Uses {@link N#compare(float, float)} for comparison to handle floating-point precision.
      */
     FloatPredicate NOT_POSITIVE = value -> N.compare(value, 0) <= 0;
-
     /**
      * A predicate that tests if the float value is negative (less than zero).
      * Uses {@link N#compare(float, float)} for comparison to handle floating-point precision.
      */
     FloatPredicate IS_NEGATIVE = value -> N.compare(value, 0) < 0;
-
     /**
      * A predicate that tests if the float value is not negative (greater than or equal to zero).
      * Uses {@link N#compare(float, float)} for comparison to handle floating-point precision.
@@ -78,16 +70,21 @@ public interface FloatPredicate extends Throwables.FloatPredicate<RuntimeExcepti
     /**
      * Evaluates this predicate on the given float value.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * FloatPredicate isPositive = value -> value > 0.0f;
+     * boolean result = isPositive.test(3.14f); // Returns true
+     * }</pre>
+     *
      * @param value the float value to test
-     * @return {@code true} if the input argument matches the predicate,
-     *         otherwise {@code false}
+     * @return {@code true} if the input argument matches the predicate, {@code false} otherwise
      */
     @Override
     boolean test(float value);
 
     /**
      * Returns the specified predicate instance.
-     * 
+     *
      * <p>This method is useful for explicit type declaration or method references.</p>
      *
      * @param predicate the predicate to return
@@ -209,7 +206,6 @@ public interface FloatPredicate extends Throwables.FloatPredicate<RuntimeExcepti
      * @param minValue the exclusive lower bound
      * @param maxValue the exclusive upper bound
      * @return a predicate that tests if the input is between {@code minValue} and {@code maxValue}
-     * @throws IllegalArgumentException if {@code minValue} is greater than or equal to {@code maxValue}
      */
     static FloatPredicate between(final float minValue, final float maxValue) {
         return value -> N.compare(value, minValue) > 0 && N.compare(value, maxValue) < 0;

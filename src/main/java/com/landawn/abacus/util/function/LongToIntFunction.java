@@ -11,7 +11,6 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-
 package com.landawn.abacus.util.function;
 
 import com.landawn.abacus.util.Throwables;
@@ -19,33 +18,34 @@ import com.landawn.abacus.util.Throwables;
 /**
  * Represents a function that accepts a long-valued argument and produces an int-valued result.
  * This is the long-to-int primitive specialization for {@code Function}.
- * 
+ *
  * <p>This is a functional interface whose functional method is {@link #applyAsInt(long)}.
- * 
- * <p>The interface extends both {@code Throwables.LongToIntFunction} with {@code RuntimeException} 
+ *
+ * <p>The interface extends both {@code Throwables.LongToIntFunction} with {@code RuntimeException}
  * and {@code java.util.function.LongToIntFunction}, providing compatibility with the Java standard library
  * while adding a predefined default conversion function.
- * 
+ *
  * @see java.util.function.Function
  * @see java.util.function.LongToIntFunction
+ *
+ * <p>Refer to JDK API documentation at: <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html">https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a></p>
  */
 @FunctionalInterface
 public interface LongToIntFunction extends Throwables.LongToIntFunction<RuntimeException>, java.util.function.LongToIntFunction { //NOSONAR
-
     /**
      * A function that converts a long value to an int value using a narrowing primitive conversion (cast).
-     * 
+     *
      * <p>This default conversion function truncates the long value to fit within the int range.
      * If the long value is outside the range of int (Integer.MIN_VALUE to Integer.MAX_VALUE),
      * the result will be the low-order 32 bits of the long value, which may produce unexpected results.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * LongToIntFunction converter = LongToIntFunction.DEFAULT;
      * int result1 = converter.applyAsInt(42L);        // returns 42
      * int result2 = converter.applyAsInt(2147483648L); // returns -2147483648 (overflow)
      * }</pre>
-     * 
+     *
      * <p>Warning: This conversion can lose information about the overall magnitude
      * of the long value and may produce a result with opposite sign.
      */
@@ -53,7 +53,7 @@ public interface LongToIntFunction extends Throwables.LongToIntFunction<RuntimeE
 
     /**
      * Applies this function to the given argument.
-     * 
+     *
      * <p>Converts a long value to an int value according to the function's implementation.
      * The specific conversion logic depends on the implementation, but common use cases include:
      * <ul>
@@ -63,7 +63,7 @@ public interface LongToIntFunction extends Throwables.LongToIntFunction<RuntimeE
      *   <li>Index calculations where the result must be an int</li>
      *   <li>Custom business logic requiring int output</li>
      * </ul>
-     * 
+     *
      * <p>Important: When converting from long to int, be aware that:
      * <ul>
      *   <li>Values outside the int range will be truncated</li>
@@ -72,7 +72,7 @@ public interface LongToIntFunction extends Throwables.LongToIntFunction<RuntimeE
      * </ul>
      *
      * @param value the function argument as a long
-     * @return the function result as an int if any error occurs during the function execution
+     * @return the function result as an int
      */
     @Override
     int applyAsInt(long value);

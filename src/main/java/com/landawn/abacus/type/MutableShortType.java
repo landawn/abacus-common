@@ -21,7 +21,7 @@ import com.landawn.abacus.util.Strings;
  * Type handler for {@link MutableShort} objects, providing serialization, deserialization,
  * and database interaction capabilities for mutable short wrapper objects.
  */
-public class MutableShortType extends NumberType<MutableShort> {
+class MutableShortType extends NumberType<MutableShort> {
 
     public static final String MUTABLE_SHORT = MutableShort.class.getSimpleName();
 
@@ -44,7 +44,6 @@ public class MutableShortType extends NumberType<MutableShort> {
      *
      * @param x the MutableShort object to convert
      * @return the string representation of the short value, or {@code null} if the input is null
-     @MayReturnNull
      */
     @Override
     public String stringOf(final MutableShort x) {
@@ -57,7 +56,6 @@ public class MutableShortType extends NumberType<MutableShort> {
      * @param str the string to convert
      * @return a MutableShort containing the parsed short value, or {@code null} if the input string is empty or null
      * @throws NumberFormatException if the string cannot be parsed as a short
-     @MayReturnNull
      */
     @Override
     public MutableShort valueOf(final String str) {

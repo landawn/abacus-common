@@ -16,7 +16,6 @@ package com.landawn.abacus.type;
 
 import java.io.IOException;
 
-import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.parser.JSONXMLSerializationConfig;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.N;
@@ -28,7 +27,7 @@ import com.landawn.abacus.util.WD;
  * This class provides serialization, deserialization, and output operations for Double arrays.
  * It handles proper formatting with brackets, separators, and {@code null} value representation.
  */
-public final class DoubleArrayType extends ObjectArrayType<Double> {
+final class DoubleArrayType extends ObjectArrayType<Double> {
 
     DoubleArrayType() {
         super(Double[].class);
@@ -44,9 +43,7 @@ public final class DoubleArrayType extends ObjectArrayType<Double> {
      * @param x the Double array to convert. Can be {@code null}.
      * @return A string representation of the array, or {@code null} if input is null
      */
-    @MayReturnNull
     @Override
-
     public String stringOf(final Double[] x) {
         if (x == null) {
             return null; // NOSONAR
@@ -67,9 +64,7 @@ public final class DoubleArrayType extends ObjectArrayType<Double> {
      * @param str the string to parse. Can be {@code null}.
      * @return A Double array parsed from the string, or {@code null} if input is null
      */
-    @MayReturnNull
     @Override
-
     public Double[] valueOf(final String str) {
         if (Strings.isEmpty(str) || Strings.isBlank(str)) {
             return null; // NOSONAR

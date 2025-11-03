@@ -11,7 +11,6 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-
 package com.landawn.abacus.util.function;
 
 import com.landawn.abacus.util.Throwables;
@@ -19,15 +18,16 @@ import com.landawn.abacus.util.Throwables;
 /**
  * Represents an operation upon three short-valued operands and producing a short-valued result.
  * This is the primitive type specialization of ternary operator for {@code short}.
- * 
+ *
  * <p>This is a functional interface whose functional method is {@link #applyAsShort(short, short, short)}.
- * 
+ *
  * @see java.util.function.BinaryOperator
  * @see ShortBinaryOperator
+ *
+ * <p>Refer to JDK API documentation at: <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html">https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a></p>
  */
 @FunctionalInterface
 public interface ShortTernaryOperator extends Throwables.ShortTernaryOperator<RuntimeException> { //NOSONAR
-
     /**
      * Applies this operator to the given operands.
      *
@@ -51,7 +51,7 @@ public interface ShortTernaryOperator extends Throwables.ShortTernaryOperator<Ru
      * @param a the first operand
      * @param b the second operand
      * @param c the third operand
-     * @return the operator result as a short value if the operation cannot be completed
+     * @return the operator result as a short value
      */
     @Override
     short applyAsShort(short a, short b, short c);

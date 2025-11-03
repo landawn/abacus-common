@@ -11,7 +11,6 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-
 package com.landawn.abacus.util.function;
 
 import com.landawn.abacus.util.Throwables;
@@ -19,21 +18,21 @@ import com.landawn.abacus.util.Throwables;
 /**
  * Represents a predicate (boolean-valued function) of three short-valued arguments.
  * This is the three-arity specialization of predicate for short values.
- * 
+ *
  * <p>This is a functional interface whose functional method is {@link #test(short, short, short)}.
- * 
+ *
  * @see ShortPredicate
  * @see ShortBiPredicate
  * @see java.util.function.Predicate
+ *
+ * <p>Refer to JDK API documentation at: <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html">https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a></p>
  */
 @FunctionalInterface
 public interface ShortTriPredicate extends Throwables.ShortTriPredicate<RuntimeException> { //NOSONAR
-
     /**
      * A predicate that always returns {@code true} regardless of the input values.
      */
     ShortTriPredicate ALWAYS_TRUE = (a, b, c) -> true;
-
     /**
      * A predicate that always returns {@code false} regardless of the input values.
      */
@@ -67,7 +66,7 @@ public interface ShortTriPredicate extends Throwables.ShortTriPredicate<RuntimeE
 
     /**
      * Returns a predicate that represents the logical negation of this predicate.
-     * 
+     *
      * @return a predicate that represents the logical negation of this predicate
      */
     default ShortTriPredicate negate() {

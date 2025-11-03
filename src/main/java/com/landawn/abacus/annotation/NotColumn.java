@@ -44,26 +44,29 @@ import java.lang.annotation.Target;
  * 
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
+ * import java.math.BigDecimal;
+ * import java.util.List;
+ *
  * @Entity
  * public class Product {
  *     @Id
  *     private Long id;
- *     
+ *
  *     @Column
  *     private String name;
- *     
+ *
  *     @Column
  *     private BigDecimal basePrice;
- *     
+ *
  *     @NotColumn
  *     private BigDecimal discountedPrice;  // Calculated at runtime
- *     
+ *
  *     @NotColumn
  *     private List<Review> reviews;         // Loaded separately via JOIN
- *     
+ *
  *     @NotColumn
  *     private boolean inCart;               // UI state, not persisted
- *     
+ *
  *     public BigDecimal getDiscountedPrice() {
  *         // Calculate based on current promotions
  *         return basePrice.multiply(getCurrentDiscount());
@@ -71,7 +74,6 @@ import java.lang.annotation.Target;
  * }
  * }</pre>
  * 
- * @since 2020
  * @see Transient
  * @see Column
  */

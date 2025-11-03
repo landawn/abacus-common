@@ -23,7 +23,7 @@ import com.landawn.abacus.util.Strings;
  * OptionalLong is a container that may or may not contain a long value.
  * Empty optionals are represented as {@code null} in serialized form.
  */
-public class JdkOptionalLongType extends AbstractOptionalType<OptionalLong> {
+class JdkOptionalLongType extends AbstractOptionalType<OptionalLong> {
 
     public static final String OPTIONAL_LONG = "JdkOptionalLong";
 
@@ -80,7 +80,6 @@ public class JdkOptionalLongType extends AbstractOptionalType<OptionalLong> {
      *
      * @param x the OptionalLong to convert to string
      * @return the string representation of the long value, or {@code null} if empty or null
-     @MayReturnNull
      */
     @Override
     public String stringOf(final OptionalLong x) {
@@ -94,7 +93,6 @@ public class JdkOptionalLongType extends AbstractOptionalType<OptionalLong> {
      *
      * @param str the string to parse
      * @return OptionalLong.empty() if the string is {@code null} or empty, otherwise OptionalLong containing the parsed value
-     @MayReturnNull
      */
     @Override
     public OptionalLong valueOf(final String str) {
@@ -110,7 +108,6 @@ public class JdkOptionalLongType extends AbstractOptionalType<OptionalLong> {
      * @param columnIndex the index of the column to read (1-based)
      * @return OptionalLong.empty() if the column is {@code null}, otherwise OptionalLong containing the value
      * @throws SQLException if a database access error occurs or the columnIndex is invalid
-     @MayReturnNull
      */
     @Override
     public OptionalLong get(final ResultSet rs, final int columnIndex) throws SQLException {
@@ -128,7 +125,6 @@ public class JdkOptionalLongType extends AbstractOptionalType<OptionalLong> {
      * @param columnLabel the label of the column to read
      * @return OptionalLong.empty() if the column is {@code null}, otherwise OptionalLong containing the value
      * @throws SQLException if a database access error occurs or the columnLabel is not found
-     @MayReturnNull
      */
     @Override
     public OptionalLong get(final ResultSet rs, final String columnLabel) throws SQLException {

@@ -53,32 +53,33 @@ import java.lang.annotation.Target;
  * 
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
+ * import java.sql.Timestamp;
+ *
  * @Entity
  * public class Article {
  *     @Id
  *     private Long id;
- *     
+ *
  *     @Column
  *     private String title;
- *     
+ *
  *     @Column
  *     private String content;
- *     
+ *
  *     @ReadOnly
  *     @Column(name = "created_time")
  *     private Timestamp createdTime;  // Set by database DEFAULT or trigger
- *     
+ *
  *     @ReadOnly
  *     @Column(name = "last_modified")
  *     private Timestamp lastModified;  // Set by database trigger
- *     
+ *
  *     @ReadOnly
  *     @Column(name = "view_count")
  *     private Integer viewCount;       // Updated by stored procedure
  * }
  * }</pre>
  * 
- * @since 2018
  * @see Transient
  * @see NonUpdatable
  * @see Column

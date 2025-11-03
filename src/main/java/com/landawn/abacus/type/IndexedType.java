@@ -16,7 +16,6 @@ package com.landawn.abacus.type;
 
 import java.io.IOException;
 
-import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.exception.UncheckedIOException;
 import com.landawn.abacus.parser.JSONXMLSerializationConfig;
 import com.landawn.abacus.util.CharacterWriter;
@@ -36,7 +35,7 @@ import com.landawn.abacus.util.WD;
  * @param <T> the type of value stored in the Indexed container
  */
 @SuppressWarnings("java:S2160")
-public class IndexedType<T> extends AbstractType<Indexed<T>> {
+class IndexedType<T> extends AbstractType<Indexed<T>> {
 
     private final String declaringName;
 
@@ -63,7 +62,6 @@ public class IndexedType<T> extends AbstractType<Indexed<T>> {
      * @return the declaring name of this type (e.g., "Indexed&lt;String&gt;")
      */
     @Override
-    @MayReturnNull
     public String declaringName() {
         return declaringName;
     }
@@ -102,7 +100,6 @@ public class IndexedType<T> extends AbstractType<Indexed<T>> {
      * @return the JSON array representation "[index,value]", or {@code null} if the input is null
      */
     @Override
-    @MayReturnNull
     public String stringOf(final Indexed<T> x) {
         return (x == null) ? null : Utils.jsonParser.serialize(N.asArray(x.index(), x.value()), Utils.jsc);
     }
@@ -116,7 +113,6 @@ public class IndexedType<T> extends AbstractType<Indexed<T>> {
      * @param str the JSON array string to parse (e.g., "[0,\"hello\"]")
      * @return a new Indexed instance with the parsed index and value, or {@code null} if the input is {@code null} or empty
      */
-    @MayReturnNull
     @SuppressWarnings("unchecked")
     @Override
     public Indexed<T> valueOf(final String str) {

@@ -18,9 +18,28 @@ package com.landawn.abacus.type;
  * Type handler for primitive char values.
  * This class handles the primitive char type specifically, as opposed to the Character wrapper class.
  * It provides type information and default value handling for char primitives.
+ *
+ * <p><b>Usage Examples:</b></p>
+ * <pre>{@code
+ * Type<Character> type = TypeFactory.getType(char.class);
+ *
+ * // Convert string to char
+ * Character value = type.valueOf("A"); // Returns 'A'
+ * Character value2 = type.valueOf("9"); // Returns '9'
+ *
+ * // Get default value
+ * Character defaultVal = type.defaultValue(); // Returns '\0' (null character)
+ *
+ * // Read from database
+ * try (ResultSet rs = stmt.executeQuery("SELECT grade FROM grades")) {
+ *     if (rs.next()) {
+ *         Character grade = type.get(rs, 1);
+ *     }
+ * }
+ * }</pre>
  */
 @SuppressWarnings("java:S2160")
-public final class PrimitiveCharType extends AbstractCharacterType {
+final class PrimitiveCharType extends AbstractCharacterType {
 
     public static final String CHAR = char.class.getSimpleName();
 

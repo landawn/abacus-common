@@ -17,8 +17,6 @@ package com.landawn.abacus.util;
 
 import java.util.function.Supplier;
 
-import com.landawn.abacus.annotation.MayReturnNull;
-
 /**
  * A thread-safe lazy initialization wrapper that defers object creation until the first access.
  * This class implements the double-checked locking pattern to ensure thread-safe lazy initialization
@@ -36,7 +34,6 @@ import com.landawn.abacus.annotation.MayReturnNull;
  * }</pre>
  * 
  * @param <T> the type of the lazily initialized object
- * @since 1.0
  */
 final class LazyInitializer<T> implements com.landawn.abacus.util.function.Supplier<T> {
     private final Supplier<T> supplier;
@@ -91,7 +88,6 @@ final class LazyInitializer<T> implements com.landawn.abacus.util.function.Suppl
      * @return the lazily initialized value
      * @throws RuntimeException if the supplier throws an exception during initialization
      */
-    @MayReturnNull
     @Override
     public T get() {
         if (!initialized) {

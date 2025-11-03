@@ -42,16 +42,134 @@ import com.landawn.abacus.util.stream.EntryStream;
 import com.landawn.abacus.util.stream.Stream;
 
 /**
- * Similar to {@link Map}, but in which each key may be associated with <i>multiple</i> values.
+ * A collection that maps keys to multiple values, similar to {@link Map} but allowing each key
+ * to be associated with a collection of values rather than a single value. This sealed class
+ * provides a comprehensive implementation for managing key-to-collection mappings with efficient
+ * operations for adding, removing, and querying multiple values per key.
  *
+ * <p>Unlike a standard Map where each key maps to exactly one value, a Multimap allows:</p>
  * <ul>
- * <li>a -&gt;1, 2
- * <li>b -&gt; 3
+ *   <li>Multiple values per key: {@code key1 -> [value1, value2, value3]}</li>
+ *   <li>Empty collections for keys: {@code key2 -> []}</li>
+ *   <li>Different collection types for values (List, Set, etc.)</li>
  * </ul>
  *
- * @param <K> the key type
- * @param <E> the element type stored in the value collections
- * @param <V> the value type
+ * <p><b>Key Features:</b>
+ * <ul>
+ *   <li><b>Flexible Value Storage:</b> Supports any Collection type for storing values</li>
+ *   <li><b>Type Safety:</b> Strongly typed with separate key and element type parameters</li>
+ *   <li><b>Efficient Operations:</b> Optimized for common multimap operations like put, get, remove</li>
+ *   <li><b>Collection Integration:</b> Seamless integration with Java Collections Framework</li>
+ *   <li><b>Stream Support:</b> Full support for stream operations and functional programming</li>
+ *   <li><b>Customizable Backing:</b> Configurable backing Map and Collection implementations</li>
+ *   <li><b>Thread Safety:</b> Thread safety depends on chosen backing implementations</li>
+ * </ul>
+ *
+ * <p><b>⚠️ IMPORTANT - Sealed Class:</b>
+ * <ul>
+ *   <li>This is a <b>sealed class</b> that only permits {@link ListMultimap} and {@link SetMultimap}</li>
+ *   <li>Use factory methods in {@link N} class to create instances</li>
+ *   <li>Cannot be extended by classes outside this package</li>
+ *   <li>Provides controlled inheritance for type safety and API consistency</li>
+ * </ul>
+ *
+ * <p><b>Common Use Cases:</b>
+ * <ul>
+ *   <li><b>Grouping Data:</b> Grouping objects by categories, types, or attributes</li>
+ *   <li><b>Index Structures:</b> Creating indexes where keys map to multiple related items</li>
+ *   <li><b>Graph Representations:</b> Representing adjacency lists in graphs</li>
+ *   <li><b>Configuration Management:</b> Managing configuration entries with multiple values</li>
+ *   <li><b>Data Processing:</b> Collecting and organizing related data items</li>
+ *   <li><b>Caching:</b> Caching multiple results per key</li>
+ * </ul>
+ *
+ * <p><b>Usage Examples:</b>
+ * <pre>{@code
+ * // Creating different types of multimaps
+ * ListMultimap<String, Integer> listMultimap = N.newListMultimap();
+ * SetMultimap<String, String> setMultimap = N.newSetMultimap();
+ *
+ * // Basic operations
+ * listMultimap.put("scores", 85);
+ * listMultimap.put("scores", 92);
+ * listMultimap.put("scores", 78);
+ * List<Integer> scores = listMultimap.get("scores"); // [85, 92, 78]
+ *
+ * // Bulk operations
+ * listMultimap.putMany("grades", Arrays.asList(90, 85, 88));
+ * listMultimap.removeMany("scores", Arrays.asList(78, 92));
+ *
+ * // Functional operations
+ * listMultimap.stream()
+ *     .filter(entry -> entry.getValue().size() > 1)
+ *     .forEach(entry -> System.out.println(entry.getKey() + ": " + entry.getValue()));
+ *
+ * // Conversion operations
+ * Map<String, List<Integer>> map = listMultimap.toMap();
+ * Multiset<String> keyFrequency = listMultimap.toMultiset();
+ *
+ * // Statistical analysis
+ * int totalValues = listMultimap.totalCountOfValues();
+ * boolean hasData = !listMultimap.isEmpty();
+ * }</pre>
+ *
+ * <p><b>Specialized Implementations:</b>
+ * <ul>
+ *   <li><b>{@link ListMultimap}:</b> Values stored in List collections, preserving order and allowing duplicates</li>
+ *   <li><b>{@link SetMultimap}:</b> Values stored in Set collections, ensuring uniqueness per key</li>
+ * </ul>
+ *
+ * <p><b>Factory Methods:</b>
+ * Use the {@link N} utility class for creating Multimap instances:
+ * <ul>
+ *   <li>{@code N.newListMultimap()} - Creates ListMultimap with HashMap+ArrayList</li>
+ *   <li>{@code N.newSetMultimap()} - Creates SetMultimap with HashMap+HashSet</li>
+ *   <li>{@code N.newListMultimap(Class, Class)} - Custom backing types</li>
+ *   <li>{@code N.newMultimap(Supplier, Supplier)} - Custom suppliers</li>
+ * </ul>
+ *
+ * <p><b>Collection Types:</b>
+ * The value collection type V determines behavior:
+ * <ul>
+ *   <li><b>List:</b> Preserves insertion order, allows duplicates</li>
+ *   <li><b>Set:</b> No duplicates, no guaranteed order (unless specialized Set)</li>
+ *   <li><b>Queue/Deque:</b> Specialized ordering for queue-based operations</li>
+ *   <li><b>SortedSet:</b> Maintains sorted order of values</li>
+ * </ul>
+ *
+ * <p><b>Performance Characteristics:</b>
+ * <ul>
+ *   <li>Backed by Map for key storage - performance depends on Map implementation</li>
+ *   <li>Value collection performance depends on Collection implementation</li>
+ *   <li>HashMap backing: O(1) average time for key operations</li>
+ *   <li>TreeMap backing: O(log n) operations but sorted key iteration</li>
+ *   <li>Memory usage: O(k + v) where k is keys and v is total values</li>
+ * </ul>
+ *
+ * <p><b>Thread Safety:</b>
+ * Thread safety depends on the backing implementations:
+ * <ul>
+ *   <li>HashMap+ArrayList: Not thread-safe, external synchronization required</li>
+ *   <li>ConcurrentHashMap+synchronized collections: Thread-safe for concurrent access</li>
+ *   <li>Individual operations are atomic only if backing collections are thread-safe</li>
+ * </ul>
+ *
+ * <p><b>Comparison with Alternatives:</b>
+ * <ul>
+ *   <li><b>vs Map&lt;K,Collection&lt;E&gt;&gt;:</b> Automatic collection creation, specialized operations</li>
+ *   <li><b>vs Google Guava Multimap:</b> Similar API with additional utility methods</li>
+ *   <li><b>vs Apache Commons MultiValuedMap:</b> Different API design, comparable functionality</li>
+ * </ul>
+ *
+ * <p><b>Attribution:</b>
+ * This class may include code adapted from Apache Commons Lang, Google Guava, and other
+ * open source projects under the Apache License 2.0. Methods from these libraries may have been
+ * modified for consistency, performance optimization, and null-safety enhancement.
+ *
+ * @param <K> the type of keys maintained by this multimap
+ * @param <E> the type of individual elements stored in the value collections
+ * @param <V> the type of collection used to store values (must extend Collection&lt;E&gt;)
+ *
  * @see N#newMultimap(Supplier, Supplier)
  * @see N#newListMultimap()
  * @see N#newListMultimap(Class, Class)
@@ -59,7 +177,13 @@ import com.landawn.abacus.util.stream.Stream;
  * @see N#newSetMultimap()
  * @see N#newSetMultimap(Class, Class)
  * @see N#newSetMultimap(Supplier, Supplier)
- *
+ * @see ListMultimap
+ * @see SetMultimap
+ * @see Map
+ * @see Collection
+ * @see Stream
+ * @see EntryStream
+ * @see Multiset
  */
 public sealed class Multimap<K, E, V extends Collection<E>> implements Iterable<Map.Entry<K, V>> permits ListMultimap, SetMultimap {
 

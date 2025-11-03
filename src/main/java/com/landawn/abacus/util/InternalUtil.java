@@ -23,17 +23,16 @@ import java.util.List;
 
 import com.landawn.abacus.annotation.Beta;
 import com.landawn.abacus.annotation.Internal;
-import com.landawn.abacus.annotation.MayReturnNull;
 
 /**
- * Internal utility class for the Abacus library.
+ * Internal utility class for the abacus-common library.
  * 
  * <p><strong>WARNING:</strong> This class is for internal use only. Do not use any methods
  * in this class directly. The API is subject to change without notice and may break
  * your code in future versions.</p>
  * 
  * <p>This class contains various internal constants and helper methods used throughout
- * the Abacus library for performance optimization and internal operations.</p>
+ * the abacus-common library for performance optimization and internal operations.</p>
  *
  * @see Internal
  */
@@ -108,7 +107,6 @@ public final class InternalUtil {
      */
     @Deprecated
     @Beta
-    @MayReturnNull
     static Object[] getInternalArray(final Collection<?> c) {
         if (c == null) {
             return null; // NOSONAR

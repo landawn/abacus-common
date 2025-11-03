@@ -150,21 +150,21 @@ public class ImmutableSet<E> extends ImmutableCollection<E> implements Set<E> {
     }
 
     /**
-     * Returns an ImmutableSet containing exactly two distinct elements.
+     * Returns an ImmutableSet containing up to two distinct elements.
      * If the two elements are equal according to their equals() method, the resulting set
      * will contain only one element. The iteration order is guaranteed to match the order
      * of the first occurrence of each distinct element.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ImmutableSet<String> pair = ImmutableSet.of("first", "second");
      * System.out.println(pair.size()); // prints: 2
-     * 
+     *
      * ImmutableSet<String> duplicate = ImmutableSet.of("same", "same");
      * System.out.println(duplicate.size()); // prints: 1
      * }</pre>
      *
-     * @param <E> the type of the elements
+     * @param <E> the type of elements
      * @param e1 the first element
      * @param e2 the second element
      * @return an ImmutableSet containing the specified distinct elements
@@ -178,7 +178,7 @@ public class ImmutableSet<E> extends ImmutableCollection<E> implements Set<E> {
      * Duplicate elements (as determined by equals()) are included only once in the set.
      * The iteration order is guaranteed to match the order of the first occurrence of each distinct element.
      *
-     * @param <E> the type of the elements
+     * @param <E> the type of elements
      * @param e1 the first element
      * @param e2 the second element
      * @param e3 the third element
@@ -193,7 +193,7 @@ public class ImmutableSet<E> extends ImmutableCollection<E> implements Set<E> {
      * Duplicate elements (as determined by equals()) are included only once in the set.
      * The iteration order is guaranteed to match the order of the first occurrence of each distinct element.
      *
-     * @param <E> the type of the elements
+     * @param <E> the type of elements
      * @param e1 the first element
      * @param e2 the second element
      * @param e3 the third element
@@ -209,7 +209,7 @@ public class ImmutableSet<E> extends ImmutableCollection<E> implements Set<E> {
      * Duplicate elements (as determined by equals()) are included only once in the set.
      * The iteration order is guaranteed to match the order of the first occurrence of each distinct element.
      *
-     * @param <E> the type of the elements
+     * @param <E> the type of elements
      * @param e1 the first element
      * @param e2 the second element
      * @param e3 the third element

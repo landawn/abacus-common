@@ -11,20 +11,20 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-
 package com.landawn.abacus.util.function;
 
 /**
- * Represents an operation that accepts an int-valued argument and an IntConsumer, 
+ * Represents an operation that accepts an int-valued argument and an IntConsumer,
  * and returns no result. This functional interface is used to implement a one-to-many
- * transformation operation, similar to flatMap. The IntConsumer parameter can be 
+ * transformation operation, similar to flatMap. The IntConsumer parameter can be
  * invoked multiple times to pass multiple values downstream.
  *
  * @see java.util.stream.IntStream.IntMapMultiConsumer
+ *
+ * <p>Refer to JDK API documentation at: <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html">https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a></p>
  */
 @FunctionalInterface
 public interface IntMapMultiConsumer extends java.util.stream.IntStream.IntMapMultiConsumer { //NOSONAR
-
     /**
      * Performs a one-to-many transformation on the given int value.
      *

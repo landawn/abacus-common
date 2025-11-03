@@ -46,9 +46,16 @@ import java.lang.annotation.Target;
  *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
+ * import java.nio.file.Files;
+ * import java.nio.file.Path;
+ * import java.util.List;
+ * import java.util.function.Function;
+ * import java.util.function.Supplier;
+ * import java.util.stream.Stream;
+ *
  * public class DataProcessor {
  *     @LazyEvaluation
- *     public Stream<String> processLargeFile(Path filePath) {
+ *     public Stream<String> processLargeFile(Path filePath) throws IOException {
  *         // Returns stream without reading file yet
  *         // File is read only when terminal operation is called
  *         return Files.lines(filePath).map(String::trim);
@@ -72,7 +79,6 @@ import java.lang.annotation.Target;
  * }
  * }</pre>
  *
- * @since 2020
  * @see IntermediateOp
  */
 @Target({ ElementType.METHOD, ElementType.TYPE })

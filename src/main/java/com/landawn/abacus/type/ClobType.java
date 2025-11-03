@@ -28,7 +28,7 @@ import com.landawn.abacus.exception.UncheckedSQLException;
  * Note that string serialization/deserialization is not supported for CLOB types
  * as CLOBs are database-specific objects that cannot be meaningfully represented as strings.
  */
-public class ClobType extends AbstractType<Clob> {
+class ClobType extends AbstractType<Clob> {
 
     public static final String CLOB = Clob.class.getSimpleName();
 
@@ -54,16 +54,16 @@ public class ClobType extends AbstractType<Clob> {
     }
 
     /**
-     * String serialization is not supported for CLOB objects.
-     * CLOBs are database-specific objects that must be handled through JDBC.
+     * Converts a CLOB object to its string representation by extracting the complete character content.
+     * This method reads the entire CLOB content and returns it as a String.
+     * The CLOB is automatically freed after reading.
      *
-     * @param x the CLOB object (parameter is ignored)
-     * @return Never returns normally
-     * @throws UnsupportedOperationException always thrown as this operation is not supported
-     @MayReturnNull
+     * @param x the CLOB object to convert. Can be {@code null}.
+     * @return The complete character content of the CLOB as a String, or {@code null} if input is null
+     * @throws UncheckedSQLException if a SQLException occurs while reading the CLOB content or freeing resources
      */
     @Override
-    public String stringOf(final Clob x) throws UnsupportedOperationException {
+    public String stringOf(final Clob x) {
         if (x == null) {
             return null;
         }

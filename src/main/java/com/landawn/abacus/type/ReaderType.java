@@ -26,7 +26,6 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.annotation.SuppressFBWarnings;
 import com.landawn.abacus.exception.UncheckedIOException;
 import com.landawn.abacus.exception.UncheckedSQLException;
@@ -38,7 +37,7 @@ import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Objectory;
 
 @SuppressWarnings("java:S2160")
-public class ReaderType extends AbstractType<Reader> {
+class ReaderType extends AbstractType<Reader> {
 
     public static final String READER = Reader.class.getSimpleName();
 
@@ -80,7 +79,7 @@ public class ReaderType extends AbstractType<Reader> {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * ReaderType type = new ReaderType();
+     * Type<Reader> type = TypeFactory.getType(Reader.class);
      * Class<Reader> clazz = type.clazz();
      * System.out.println(clazz.getName()); // Output: java.io.Reader
      * }</pre>
@@ -98,7 +97,7 @@ public class ReaderType extends AbstractType<Reader> {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * ReaderType type = new ReaderType();
+     * Type<Reader> type = TypeFactory.getType(Reader.class);
      * boolean isReader = type.isReader();
      * System.out.println(isReader); // Output: true
      * }</pre>
@@ -116,7 +115,7 @@ public class ReaderType extends AbstractType<Reader> {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * ReaderType type = new ReaderType();
+     * Type<Reader> type = TypeFactory.getType(Reader.class);
      * Reader reader = new StringReader("Hello World");
      * String content = type.stringOf(reader);
      * System.out.println(content); // Output: Hello World
@@ -129,9 +128,7 @@ public class ReaderType extends AbstractType<Reader> {
      * @return the string containing all content read from the Reader, or {@code null} if the input is null
      * @throws UncheckedIOException if an I/O error occurs while reading from the Reader
      */
-    @MayReturnNull
     @Override
-
     public String stringOf(final Reader x) {
         return x == null ? null : IOUtil.readAllToString(x);
     }
@@ -143,7 +140,7 @@ public class ReaderType extends AbstractType<Reader> {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * ReaderType type = new ReaderType();
+     * Type<Reader> type = TypeFactory.getType(Reader.class);
      * Reader reader = type.valueOf("Sample text");
      * String content = IOUtil.readAllToString(reader);
      * System.out.println(content); // Output: Sample text
@@ -156,9 +153,7 @@ public class ReaderType extends AbstractType<Reader> {
      * @return a Reader containing the string content, or {@code null} if the input string is null
      * @throws RuntimeException if the constructor invocation fails
      */
-    @MayReturnNull
     @Override
-
     public Reader valueOf(final String str) {
         if (str == null) {
             return null; // NOSONAR
@@ -180,7 +175,7 @@ public class ReaderType extends AbstractType<Reader> {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * ReaderType type = new ReaderType();
+     * Type<Reader> type = TypeFactory.getType(Reader.class);
      *
      * // From String
      * Reader reader1 = type.valueOf("Hello");
@@ -198,7 +193,6 @@ public class ReaderType extends AbstractType<Reader> {
      * @return a Reader representation of the object, or {@code null} if the input is null
      * @throws UncheckedSQLException if accessing the Clob's character stream fails
      */
-    @MayReturnNull
     @SuppressFBWarnings
     @Override
     public Reader valueOf(final Object obj) {
@@ -220,7 +214,7 @@ public class ReaderType extends AbstractType<Reader> {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * ReaderType type = new ReaderType();
+     * Type<Reader> type = TypeFactory.getType(Reader.class);
      * // Assuming rs is a ResultSet with a character stream in column 1
      * Reader reader = type.get(rs, 1);
      * String content = IOUtil.readAllToString(reader);
@@ -232,9 +226,7 @@ public class ReaderType extends AbstractType<Reader> {
      * @return the Reader for the specified column, or {@code null} if the column value is SQL NULL
      * @throws SQLException if a database access error occurs or the column index is invalid
      */
-    @MayReturnNull
     @Override
-
     public Reader get(final ResultSet rs, final int columnIndex) throws SQLException {
         return rs.getCharacterStream(columnIndex);
     }
@@ -244,7 +236,7 @@ public class ReaderType extends AbstractType<Reader> {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * ReaderType type = new ReaderType();
+     * Type<Reader> type = TypeFactory.getType(Reader.class);
      * // Assuming rs is a ResultSet with a character stream in column "content"
      * Reader reader = type.get(rs, "content");
      * String text = IOUtil.readAllToString(reader);
@@ -256,7 +248,6 @@ public class ReaderType extends AbstractType<Reader> {
      * @return the Reader for the specified column, or {@code null} if the column value is SQL NULL
      * @throws SQLException if a database access error occurs or the column label is not found
      */
-    @MayReturnNull
     @Override
     public Reader get(final ResultSet rs, final String columnLabel) throws SQLException {
         return rs.getCharacterStream(columnLabel);
@@ -268,7 +259,7 @@ public class ReaderType extends AbstractType<Reader> {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * ReaderType type = new ReaderType();
+     * Type<Reader> type = TypeFactory.getType(Reader.class);
      * PreparedStatement stmt = connection.prepareStatement("INSERT INTO docs (content) VALUES (?)");
      * Reader reader = new StringReader("Large text content");
      * type.set(stmt, 1, reader);
@@ -291,7 +282,7 @@ public class ReaderType extends AbstractType<Reader> {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * ReaderType type = new ReaderType();
+     * Type<Reader> type = TypeFactory.getType(Reader.class);
      * CallableStatement stmt = connection.prepareCall("{call update_content(?)}");
      * Reader reader = new StringReader("Updated content");
      * type.set(stmt, "content", reader);
@@ -314,7 +305,7 @@ public class ReaderType extends AbstractType<Reader> {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * ReaderType type = new ReaderType();
+     * Type<Reader> type = TypeFactory.getType(Reader.class);
      * PreparedStatement stmt = connection.prepareStatement("INSERT INTO docs (content) VALUES (?)");
      * String text = "Fixed length content";
      * Reader reader = new StringReader(text);
@@ -339,7 +330,7 @@ public class ReaderType extends AbstractType<Reader> {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * ReaderType type = new ReaderType();
+     * Type<Reader> type = TypeFactory.getType(Reader.class);
      * CallableStatement stmt = connection.prepareCall("{call update_content(?)}");
      * String text = "Content with known length";
      * Reader reader = new StringReader(text);
@@ -366,7 +357,7 @@ public class ReaderType extends AbstractType<Reader> {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * ReaderType type = new ReaderType();
+     * Type<Reader> type = TypeFactory.getType(Reader.class);
      * Reader reader = new StringReader("Hello World");
      * StringBuilder sb = new StringBuilder("Message: ");
      * type.appendTo(sb, reader);
@@ -403,7 +394,7 @@ public class ReaderType extends AbstractType<Reader> {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * ReaderType type = new ReaderType();
+     * Type<Reader> type = TypeFactory.getType(Reader.class);
      * Reader reader = new StringReader("Sample text");
      * CharacterWriter writer = new CharacterWriter();
      * JSONXMLSerializationConfig<?> config = new JSONXMLSerializationConfig<>();

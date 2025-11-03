@@ -27,7 +27,6 @@ import java.time.ZonedDateTime;
 import java.util.Calendar;
 import java.util.Date;
 
-import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.parser.JSONXMLSerializationConfig;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.N;
@@ -55,9 +54,7 @@ public abstract class AbstractLongType extends NumberType<Number> {
      * @param x the Number value to convert
      * @return the string representation of the long value, or {@code null} if input is {@code null}
      */
-    @MayReturnNull
     @Override
-
     public String stringOf(final Number x) {
         if (x == null) {
             return null; // NOSONAR
@@ -79,12 +76,18 @@ public abstract class AbstractLongType extends NumberType<Number> {
      *   <li>Other objects are converted to string and parsed</li>
      * </ul>
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * AbstractLongType type = TypeFactory.getType(Long.class);
+     * Long value1 = type.valueOf(new Date());           // returns timestamp in milliseconds
+     * Long value2 = type.valueOf(Instant.now());        // returns epoch milliseconds
+     * Long value3 = type.valueOf("1234567890");         // returns 1234567890L
+     * }</pre>
+     *
      * @param obj the object to convert
      * @return the Long value representing milliseconds for date/time types, or parsed value for others
      */
-    @MayReturnNull
     @Override
-
     public Long valueOf(final Object obj) {
         if (obj == null) {
             return (Long) defaultValue();
@@ -114,13 +117,20 @@ public abstract class AbstractLongType extends NumberType<Number> {
      *   <li>Valid numeric strings are parsed to long values</li>
      * </ul>
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * AbstractLongType type = TypeFactory.getType(Long.class);
+     * Long value1 = type.valueOf("1234567890");    // returns 1234567890L
+     * Long value2 = type.valueOf("9999999999L");   // returns 9999999999L (suffix stripped)
+     * Long value3 = type.valueOf("42");            // returns 42L
+     * Long value4 = type.valueOf("");              // returns default value
+     * }</pre>
+     *
      * @param str the string to convert
      * @return the Long value
      * @throws NumberFormatException if the string cannot be parsed as a long
      */
-    @MayReturnNull
     @Override
-
     public Long valueOf(final String str) {
         if (Strings.isEmpty(str)) {
             return (Long) defaultValue();
@@ -145,18 +155,38 @@ public abstract class AbstractLongType extends NumberType<Number> {
      * Converts a character array to a Long value.
      * Delegates to the {@link #parseLong(char[], int, int)} method for parsing.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * AbstractLongType type = TypeFactory.getType(Long.class);
+     * char[] buffer = "9876543210".toCharArray();
+     * Long value = type.valueOf(buffer, 0, 10); // returns 9876543210L
+     * }</pre>
+     *
      * @param cbuf the character array to convert
      * @param offset the starting position in the array
      * @param len the number of characters to read
      * @return the Long value, or default value if input is {@code null} or empty
      */
-    @MayReturnNull
     @Override
-
     public Long valueOf(final char[] cbuf, final int offset, final int len) {
         return ((cbuf == null) || (len == 0)) ? ((Long) defaultValue()) : (Long) parseLong(cbuf, offset, len);
     }
 
+    /**
+     * Checks if this type represents a long type.
+     * This method always returns {@code true} for long types.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * AbstractLongType type = TypeFactory.getType(Long.class);
+     * if (type.isLong()) {
+     *     // Handle long type specific logic
+     *     System.out.println("This is a long type");
+     * }
+     * }</pre>
+     *
+     * @return {@code true}, indicating this is a long type
+     */
     @Override
     public boolean isLong() {
         return true;
@@ -184,7 +214,6 @@ public abstract class AbstractLongType extends NumberType<Number> {
      * @throws SQLException if a database access error occurs or the columnIndex is invalid
      */
     @Override
-    @MayReturnNull
     public Long get(final ResultSet rs, final int columnIndex) throws SQLException {
         return rs.getLong(columnIndex);
     }
@@ -211,7 +240,6 @@ public abstract class AbstractLongType extends NumberType<Number> {
      * @throws SQLException if a database access error occurs or the columnLabel is not found
      */
     @Override
-    @MayReturnNull
     public Long get(final ResultSet rs, final String columnLabel) throws SQLException {
         return rs.getLong(columnLabel);
     }

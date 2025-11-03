@@ -48,37 +48,264 @@ import com.landawn.abacus.util.IOUtil;
 import com.landawn.abacus.util.ImmutableList;
 
 /**
- * <p>Note: It's copied from Google Guava under Apache License 2.0 and may be modified.</p>
- * 
- * A utility class that provides unified file operations by wrapping Google Guava's file utilities.
- * This class serves as a facade to provide consistent APIs for file manipulation, combining
- * functionality from both {@code com.google.common.io.Files} and {@code com.google.common.io.MoreFiles}.
- * 
- * <p>This class offers various file operations including:
+ * A comprehensive file manipulation utility class that provides unified file operations by wrapping and extending
+ * Google Guava's file utilities. This class serves as a facade combining functionality from both
+ * {@code com.google.common.io.Files} and {@code com.google.common.io.MoreFiles}, offering a consistent and
+ * enhanced API for file manipulation, I/O operations, and path management with improved null safety and
+ * performance optimizations.
+ *
+ * <p>Note: This class is copied from Google Guava under Apache License 2.0 and may be modified for enhanced
+ * functionality, performance improvements, and integration with the Abacus framework utilities.</p>
+ *
+ * <p><b>Key Features:</b>
  * <ul>
- *   <li>Reading and writing files with different character sets</li>
- *   <li>File comparison and manipulation</li>
- *   <li>Directory traversal and management</li>
- *   <li>Memory-mapped file operations</li>
- *   <li>Path simplification and file extension handling</li>
+ *   <li><b>Unified API:</b> Single interface combining multiple Google Guava file utility classes</li>
+ *   <li><b>Enhanced I/O Operations:</b> Improved file reading, writing, and streaming capabilities</li>
+ *   <li><b>Charset Management:</b> Comprehensive character encoding support with sensible defaults</li>
+ *   <li><b>Path Manipulation:</b> Advanced path simplification and file extension handling</li>
+ *   <li><b>Directory Operations:</b> Recursive directory traversal, creation, and deletion utilities</li>
+ *   <li><b>Memory Mapping:</b> High-performance memory-mapped file operations for large files</li>
+ *   <li><b>Source/Sink Abstraction:</b> Guava's ByteSource/ByteSink and CharSource/CharSink integration</li>
+ *   <li><b>NIO.2 Integration:</b> Modern Java NIO.2 Path support alongside legacy File operations</li>
  * </ul>
- * 
- * <p>All methods in this class are static. The class cannot be instantiated.
- * 
- * <p><b>Usage Examples:</b></p>
+ *
+ * <p><b>Design Philosophy:</b>
+ * <ul>
+ *   <li><b>Guava Integration:</b> Seamless wrapper around Google Guava's proven file utilities</li>
+ *   <li><b>Performance Focus:</b> Optimized operations with minimal overhead and efficient algorithms</li>
+ *   <li><b>Safety First:</b> Robust error handling and null-safe operations throughout</li>
+ *   <li><b>Modern Standards:</b> Support for both legacy File and modern Path APIs</li>
+ *   <li><b>Consistency:</b> Uniform API design across all file operations</li>
+ * </ul>
+ *
+ * <p><b>Core Operation Categories:</b>
+ * <ul>
+ *   <li><b>Reader/Writer Creation:</b> Buffered readers and writers with charset support</li>
+ *   <li><b>Source/Sink Operations:</b> ByteSource, ByteSink, CharSource, and CharSink factory methods</li>
+ *   <li><b>File Content Operations:</b> Reading, writing, and comparing file contents</li>
+ *   <li><b>File Manipulation:</b> Copy, move, touch, and parent directory creation</li>
+ *   <li><b>Memory Mapping:</b> High-performance memory-mapped file access</li>
+ *   <li><b>Path Utilities:</b> Path simplification and filename/extension extraction</li>
+ *   <li><b>Directory Traversal:</b> File and path tree traversal with predicates</li>
+ *   <li><b>Recursive Operations:</b> Recursive deletion and directory content management</li>
+ * </ul>
+ *
+ * <p><b>Charset Handling:</b>
+ * <ul>
+ *   <li><b>Default Charset:</b> UTF-8 as the default for text operations</li>
+ *   <li><b>StandardCharsets:</b> Full support for all standard Java charset constants</li>
+ *   <li><b>Custom Charsets:</b> Ability to specify any valid Charset for encoding/decoding</li>
+ *   <li><b>Platform Independence:</b> Consistent behavior across different operating systems</li>
+ * </ul>
+ *
+ * <p><b>Common Usage Patterns:</b>
  * <pre>{@code
- * // Read all lines from a file
- * List<String> lines = Files.readAllLines(new File("data.txt"), StandardCharsets.UTF_8);
- * 
- * // Copy a file
- * Files.copy(new File("source.txt"), new File("dest.txt"));
+ * // Reading file content
+ * String content = Files.readString(new File("config.json"));
+ * List<String> lines = Files.readAllLines(new File("data.txt"));
+ * byte[] bytes = Files.readAllBytes(new File("image.png"));
+ *
+ * // Writing file content
+ * Files.write("Hello World".getBytes(), new File("output.txt"));
+ * Files.asCharSink(file, UTF_8).write("Hello World");
+ *
+ * // File operations
+ * Files.copy(sourceFile, targetFile);
+ * Files.move(sourceFile, destinationFile);
+ * Files.touch(new File("timestamp.txt"));
+ *
+ * // Directory operations
+ * Files.createParentDirs(new File("path/to/nested/file.txt"));
+ * Files.deleteRecursively(tempDir.toPath());
+ *
+ * // Advanced I/O with Sources and Sinks
+ * ByteSource source = Files.asByteSource(inputFile);
+ * ByteSink sink = Files.asByteSink(outputFile);
+ * source.copyTo(sink);
+ *
+ * // Memory-mapped files for large data
+ * MappedByteBuffer buffer = Files.map(largeFile, MapMode.READ_ONLY);
  * }</pre>
  *
- * @see java.nio.file.Files
+ * <p><b>Advanced File Operations:</b>
+ * <pre>{@code
+ * // File comparison
+ * boolean identical = Files.equal(file1, file2);
+ * boolean pathsEqual = Files.equal(path1, path2);
+ *
+ * // Path manipulation
+ * String simplified = Files.simplifyPath("/usr/local/../bin/./tool");
+ * String name = Files.getNameWithoutExtension("document.pdf");
+ * String extension = Files.getFileExtension("archive.tar.gz");
+ *
+ * // Directory traversal
+ * Traverser<File> fileTraverser = Files.fileTraverser();
+ * for (File file : fileTraverser.depthFirstPreOrder(rootDir)) {
+ *     if (file.isFile()) {
+ *         processFile(file);
+ *     }
+ * }
+ *
+ * // Path-based operations
+ * List<Path> files = Files.listFiles(directory);
+ * Predicate<Path> isRegularFile = Files.isRegularFile();
+ * files.stream().filter(isRegularFile).forEach(this::processPath);
+ * }</pre>
+ *
+ * <p><b>Integration with Guava Sources and Sinks:</b>
+ * <ul>
+ *   <li><b>ByteSource:</b> Readable byte stream abstraction with fluent operations</li>
+ *   <li><b>ByteSink:</b> Writable byte stream abstraction with various write modes</li>
+ *   <li><b>CharSource:</b> Readable character stream with charset-aware operations</li>
+ *   <li><b>CharSink:</b> Writable character stream with charset and mode configuration</li>
+ * </ul>
+ *
+ * <p><b>Performance Characteristics:</b>
+ * <ul>
+ *   <li><b>File Reading:</b> O(n) where n is file size, optimized buffering for large files</li>
+ *   <li><b>File Writing:</b> O(n) with efficient buffering and flush strategies</li>
+ *   <li><b>File Comparison:</b> O(n) with early termination for different sizes</li>
+ *   <li><b>Directory Traversal:</b> O(n) where n is number of files, lazy evaluation</li>
+ *   <li><b>Memory Mapping:</b> O(1) access time after initial mapping overhead</li>
+ * </ul>
+ *
+ * <p><b>Thread Safety:</b>
+ * <ul>
+ *   <li><b>Stateless Design:</b> All utility methods are stateless and thread-safe</li>
+ *   <li><b>Concurrent Access:</b> Safe for concurrent access from multiple threads</li>
+ *   <li><b>File System Operations:</b> Thread-safe at the file system level</li>
+ *   <li><b>Object Creation:</b> Factory methods create new instances without shared state</li>
+ * </ul>
+ *
+ * <p><b>Error Handling:</b>
+ * <ul>
+ *   <li><b>IOException Propagation:</b> Proper exception handling and propagation</li>
+ *   <li><b>Security Exceptions:</b> Handles SecurityManager restrictions gracefully</li>
+ *   <li><b>File Not Found:</b> Clear error messages for missing files and directories</li>
+ *   <li><b>Path Validation:</b> Validates paths and file operations before execution</li>
+ * </ul>
+ *
+ * <p><b>Memory Management:</b>
+ * <ul>
+ *   <li><b>Buffered Operations:</b> Intelligent buffering for optimal memory usage</li>
+ *   <li><b>Large File Handling:</b> Memory-mapped files for efficient large file processing</li>
+ *   <li><b>Stream Resources:</b> Automatic resource management with try-with-resources</li>
+ *   <li><b>Memory Mapping:</b> Platform-optimized memory mapping for direct file access</li>
+ * </ul>
+ *
+ * <p><b>Platform Compatibility:</b>
+ * <ul>
+ *   <li><b>Cross-Platform Paths:</b> Handles platform-specific path separators and conventions</li>
+ *   <li><b>File System Features:</b> Adapts to different file system capabilities</li>
+ *   <li><b>Symbolic Links:</b> Proper handling of symbolic links and junction points</li>
+ *   <li><b>Security Contexts:</b> Works within various security manager configurations</li>
+ * </ul>
+ *
+ * <p><b>Integration with Java NIO.2:</b>
+ * <ul>
+ *   <li><b>Path Support:</b> Full integration with {@code java.nio.file.Path} operations</li>
+ *   <li><b>OpenOption Support:</b> Configurable file opening options for advanced control</li>
+ *   <li><b>FileAttribute Support:</b> File attribute handling for permissions and metadata</li>
+ *   <li><b>Link Options:</b> Control over symbolic link following behavior</li>
+ * </ul>
+ *
+ * <p><b>File Extension and Path Utilities:</b>
+ * <ul>
+ *   <li><b>Extension Extraction:</b> Reliable file extension parsing with edge case handling</li>
+ *   <li><b>Name Without Extension:</b> Clean filename extraction without extension</li>
+ *   <li><b>Path Simplification:</b> Resolves relative path components (./ and ../)</li>
+ *   <li><b>Cross-Platform Paths:</b> Consistent path handling across operating systems</li>
+ * </ul>
+ *
+ * <p><b>Best Practices:</b>
+ * <ul>
+ *   <li>Use try-with-resources for automatic resource cleanup with readers/writers</li>
+ *   <li>Specify explicit charsets to avoid platform-dependent behavior</li>
+ *   <li>Use memory-mapped files for large file operations to improve performance</li>
+ *   <li>Leverage ByteSource/ByteSink abstractions for composable I/O operations</li>
+ *   <li>Use Path-based methods for new code, File-based methods for legacy compatibility</li>
+ *   <li>Consider file locking for concurrent write operations</li>
+ * </ul>
+ *
+ * <p><b>Common Anti-Patterns to Avoid:</b>
+ * <ul>
+ *   <li>Reading entire large files into memory when streaming would suffice</li>
+ *   <li>Not closing resources properly (use try-with-resources)</li>
+ *   <li>Using platform-default charset without explicit specification</li>
+ *   <li>Performing file operations without checking existence or permissions</li>
+ *   <li>Ignoring IOException in file operations</li>
+ * </ul>
+ *
+ * <p><b>Comparison with Standard Libraries:</b>
+ * <ul>
+ *   <li><b>vs. java.nio.file.Files:</b> Enhanced API with Guava integration and additional utilities</li>
+ *   <li><b>vs. Apache Commons IO:</b> More focused API with better type safety and fluent operations</li>
+ *   <li><b>vs. Raw File I/O:</b> Higher-level abstractions with built-in best practices</li>
+ *   <li><b>vs. IOUtil:</b> Specialized for Guava integration while IOUtil provides broader I/O utilities</li>
+ * </ul>
+ *
+ * <p><b>MoreFiles Nested Class:</b>
+ * <ul>
+ *   <li><b>Extended Functionality:</b> Additional file operations beyond standard Guava Files</li>
+ *   <li><b>Path-Centric:</b> Focused on modern Path-based operations</li>
+ *   <li><b>Advanced Features:</b> Recursive operations, directory streaming, and enhanced predicates</li>
+ *   <li><b>NIO.2 Optimization:</b> Leverages advanced NIO.2 features for better performance</li>
+ * </ul>
+ *
+ * <p><b>Related Utility Classes:</b>
+ * <ul>
+ *   <li><b>{@link com.landawn.abacus.util.IOUtil}:</b> Comprehensive I/O utilities with broader scope</li>
+ *   <li><b>{@link com.google.common.io.Files}:</b> Original Google Guava Files class</li>
+ *   <li><b>{@link com.google.common.io.MoreFiles}:</b> Extended Guava file operations</li>
+ *   <li><b>{@link java.nio.file.Files}:</b> Standard Java NIO.2 file operations</li>
+ *   <li><b>{@link com.landawn.abacus.util.Strings}:</b> String manipulation utilities</li>
+ * </ul>
+ *
+ * <p><b>Example: Complete File Processing Workflow</b>
+ * <pre>{@code
+ * // Process configuration files with error handling
+ * File configDir = new File("config");
+ * File outputDir = new File("processed");
+ * Files.createParentDirs(new File(outputDir, "dummy"));
+ *
+ * // Traverse all configuration files
+ * Traverser<File> traverser = Files.fileTraverser();
+ * for (File file : traverser.depthFirstPreOrder(configDir)) {
+ *     if (file.isFile() && Files.getFileExtension(file.getName()).equals("json")) {
+ *         try {
+ *             // Read and process configuration
+ *             String content = Files.readString(file);
+ *             String processed = processConfiguration(content);
+ *
+ *             // Write to output directory
+ *             String outputName = Files.getNameWithoutExtension(file.getName()) + ".processed";
+ *             File outputFile = new File(outputDir, outputName);
+ *             Files.asCharSink(outputFile, UTF_8).write(processed);
+ *
+ *             // Create backup
+ *             File backupFile = new File(file.getParent(), file.getName() + ".bak");
+ *             Files.copy(file, backupFile);
+ *
+ *         } catch (IOException e) {
+ *             logger.error("Failed to process file: " + file, e);
+ *         }
+ *     }
+ * }
+ * }</pre>
+ *
+ * @see com.landawn.abacus.util.IOUtil
  * @see com.google.common.io.Files
  * @see com.google.common.io.MoreFiles
- * @see com.landawn.abacus.util.IOUtil
+ * @see java.nio.file.Files
  * @see com.landawn.abacus.util.Strings
+ * @see com.google.common.io.ByteSource
+ * @see com.google.common.io.ByteSink
+ * @see com.google.common.io.CharSource
+ * @see com.google.common.io.CharSink
+ * @see java.nio.file.Path
+ * @see java.io.File
+ * @see java.nio.charset.Charset
+ * @see java.nio.charset.StandardCharsets
  */
 public abstract class Files { //NOSONAR
 
@@ -107,9 +334,8 @@ public abstract class Files { //NOSONAR
      * }</pre>
      *
      * @param file the file to read from
-     * @param charset the charset used to decode the input stream; see {@link StandardCharsets} for
-     *     helpful predefined constants
-     * @return the buffered reader
+     * @param charset the charset used to decode the input stream (see {@link StandardCharsets} for helpful predefined constants)
+     * @return a BufferedReader instance for reading from the file
      * @throws FileNotFoundException if the file does not exist, is a directory rather than a regular file,
      *     or for some other reason cannot be opened for reading
      */
@@ -138,9 +364,8 @@ public abstract class Files { //NOSONAR
      * }</pre>
      *
      * @param file the file to write to
-     * @param charset the charset used to encode the output stream; see {@link StandardCharsets} for
-     *     helpful predefined constants
-     * @return the buffered writer
+     * @param charset the charset used to encode the output stream (see {@link StandardCharsets} for helpful predefined constants)
+     * @return a BufferedWriter instance for writing to the file
      * @throws FileNotFoundException if the file exists but is a directory rather than a regular file,
      *     does not exist but cannot be created, or cannot be opened for any other reason
      */
@@ -391,8 +616,8 @@ public abstract class Files { //NOSONAR
      * Files.write(data, new File("output.txt"));
      * }</pre>
      *
-     * @param from the bytes to write
-     * @param to the destination file
+     * @param from the byte array containing data to write to the file
+     * @param to the destination file to write to
      * @throws FileNotFoundException if the parent directory of {@code to} doesn't exist
      * @throws IOException if an I/O error occurs while writing to the file
      */
@@ -936,12 +1161,13 @@ public abstract class Files { //NOSONAR
      * a directory, no exception will be thrown and the returned {@link Iterable} will contain a
      * single element: that file.
      *
-     * <p><b>Usage Examples:</b></p> {@code Files.fileTraverser().depthFirstPreOrder(new File("/"))} may return files
-     * with the following paths: {@code ["/", "/etc", "/etc/config.txt", "/etc/fonts", "/home",
-     * "/home/alice", ...]}
-     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
+     * // Depth-first traversal
+     * Files.fileTraverser().depthFirstPreOrder(new File("/"));
+     * // may return files with the paths: ["/", "/etc", "/etc/config.txt", "/etc/fonts", "/home", "/home/alice", ...]
+     *
+     * // Breadth-first traversal
      * Traverser<File> traverser = Files.fileTraverser();
      * for (File file : traverser.breadthFirst(new File("/home/user"))) {
      *     System.out.println(file.getPath());
@@ -971,13 +1197,12 @@ public abstract class Files { //NOSONAR
      * created by this traverser if an {@link IOException} is thrown by a call to {@link
      * #listFiles(Path)}.
      *
-     * <p><b>Usage Examples:</b></p> {@code MoreFiles.fileTraverser().depthFirstPreOrder(Paths.get("/"))} may return the
-     * following paths: {@code ["/", "/etc", "/etc/config.txt", "/etc/fonts", "/home", "/home/alice",
-     * ...]}
-     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Traverser<Path> traverser = Files.pathTraverser();
+     * Iterable<Path> paths = traverser.depthFirstPreOrder(Paths.get("/"));
+     * // may return the paths: ["/", "/etc", "/etc/config.txt", "/etc/fonts", "/home", "/home/alice", ...]
+     *
      * for (Path path : traverser.breadthFirst(Paths.get("/home/user"))) {
      *     System.out.println(path);
      * }
@@ -1259,7 +1484,7 @@ public abstract class Files { //NOSONAR
      * <pre>{@code
      * List<String> lines = Files.readAllLines(new File("data.txt"));
      * for (String line : lines) {
-     *     processLine(line);
+     *     System.out.println(line);
      * }
      * }</pre>
      *
@@ -1298,11 +1523,10 @@ public abstract class Files { //NOSONAR
      * }</pre>
      *
      * @param file the file to read from
-     * @param cs the character set used to decode the input stream; see {@link StandardCharsets} for
-     *     helpful predefined constants
-     * @return a mutable {@link List} containing all the lines
-     * @throws IOException if an I/O error occurs
-     * @throws SecurityException In the case of the default provider, and a security manager is
+     * @param cs the character set used to decode the input stream (see {@link StandardCharsets} for helpful predefined constants)
+     * @return a mutable {@link List} containing all the lines from the file
+     * @throws IOException if an I/O error occurs while reading from the file
+     * @throws SecurityException in the case of the default provider, and a security manager is
      *         installed, the {@link SecurityManager#checkRead(String) checkRead} method is invoked
      *         to check read access to the file
      * @see java.nio.file.Files#readAllLines(Path, Charset)

@@ -11,18 +11,17 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-
 package com.landawn.abacus.util.function;
 
 /**
  * Represents a predicate (boolean-valued function) of a variable number of arguments.
  * This is a variable-arity (varargs) generalization of {@code Predicate}.
- * 
+ *
  * <p>This is a functional interface whose functional method is {@link #test(Object[])}.
- * 
+ *
  * <p>The 'N' in NPredicate stands for <i>N-ary</i>, indicating that this predicate can accept
  * any number of arguments of the same type.
- * 
+ *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * NPredicate<Integer> allPositive = args -> {
@@ -33,7 +32,7 @@ package com.landawn.abacus.util.function;
  * };
  * boolean result1 = allPositive.test(1, 2, 3, 4); // returns true
  * boolean result2 = allPositive.test(1, -2, 3);   // returns false
- * 
+ *
  * NPredicate<String> anyEmpty = args -> {
      *     for (String s : args) {
  *         if (s.isEmpty()) return true;
@@ -41,21 +40,22 @@ package com.landawn.abacus.util.function;
  *     return false;
  * };
  * }</pre>
- * 
+ *
  * @param <T> the type of the input to the predicate
- * 
+ *
  * @see java.util.function.Predicate
  * @see java.util.function.BiPredicate
+ *
+ * <p>Refer to JDK API documentation at: <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html">https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a></p>
  */
 @FunctionalInterface
 public interface NPredicate<T> {
-
     /**
      * Evaluates this predicate on the given arguments.
-     * 
+     *
      * <p>The varargs parameter allows this method to accept any number of arguments
      * of type T, including zero arguments (empty array), and produces a boolean result.
-     * 
+     *
      * <p>Common use cases include:
      * <ul>
      *   <li>Validating multiple values against a condition</li>
@@ -63,7 +63,7 @@ public interface NPredicate<T> {
      *   <li>Implementing complex multi-argument validation rules</li>
      *   <li>Testing relationships between multiple values</li>
      * </ul>
-     * 
+     *
      * <p>Note: The {@code @SuppressWarnings("unchecked")} annotation is used because
      * varargs with generics can generate unchecked warnings at the call site.
      *
@@ -75,10 +75,10 @@ public interface NPredicate<T> {
 
     /**
      * Returns a predicate that represents the logical negation of this predicate.
-     * 
+     *
      * <p>The returned predicate will return {@code true} when this predicate returns {@code false},
      * and {@code false} when this predicate returns {@code true}.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * NPredicate<Integer> allEven = args -> {
@@ -90,7 +90,7 @@ public interface NPredicate<T> {
      * NPredicate<Integer> notAllEven = allEven.negate();
      * notAllEven.test(2, 4, 5); // returns {@code true} (not all are even)
      * }</pre>
-     * 
+     *
      * @return a predicate that represents the logical negation of this predicate
      */
     default NPredicate<T> negate() {
@@ -100,14 +100,14 @@ public interface NPredicate<T> {
     /**
      * Returns a composed predicate that represents a short-circuiting logical
      * AND of this predicate and another.
-     * 
+     *
      * <p>When evaluating the composed predicate, if this predicate is {@code false},
      * then the {@code other} predicate is not evaluated.
-     * 
+     *
      * <p>Any exceptions thrown during evaluation of either predicate are relayed
      * to the caller; if evaluation of this predicate throws an exception, the
      * {@code other} predicate will not be evaluated.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * NPredicate<Integer> allPositive = args -> {
@@ -138,14 +138,14 @@ public interface NPredicate<T> {
     /**
      * Returns a composed predicate that represents a short-circuiting logical
      * OR of this predicate and another.
-     * 
+     *
      * <p>When evaluating the composed predicate, if this predicate is {@code true},
      * then the {@code other} predicate is not evaluated.
-     * 
+     *
      * <p>Any exceptions thrown during evaluation of either predicate are relayed
      * to the caller; if evaluation of this predicate throws an exception, the
      * {@code other} predicate will not be evaluated.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * NPredicate<String> anyEmpty = args -> {

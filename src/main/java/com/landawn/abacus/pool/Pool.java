@@ -20,11 +20,11 @@ import java.io.Serializable;
  * Base interface for all pool implementations, providing fundamental pool operations.
  * A pool is a cache of pre-initialized objects that can be reused to improve performance
  * by avoiding the overhead of creating new objects.
- * 
+ *
  * <p>All pool implementations must be thread-safe and support concurrent access.
  * The pool lifecycle includes creation, usage, and eventual closure. Once closed,
  * a pool cannot be reopened.
- * 
+ *
  * <p>Common operations include:
  * <ul>
  *   <li>Checking pool capacity and current size</li>
@@ -32,7 +32,7 @@ import java.io.Serializable;
  *   <li>Retrieving pool statistics</li>
  *   <li>Proper cleanup via close()</li>
  * </ul>
- * 
+ *
  * @see ObjectPool
  * @see KeyedObjectPool
  */
@@ -41,10 +41,10 @@ public interface Pool extends Serializable {
     /**
      * Acquires an exclusive lock on this pool.
      * This method blocks until the lock is available.
-     * 
+     *
      * <p>The lock must be released by calling {@link #unlock()} in a finally block
      * to ensure proper cleanup even if an exception occurs.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * pool.lock();
@@ -54,6 +54,8 @@ public interface Pool extends Serializable {
      *     pool.unlock();
      * }
      * }</pre>
+     *
+     * @throws IllegalStateException if the pool has been closed
      */
     void lock();
 
@@ -134,8 +136,8 @@ public interface Pool extends Serializable {
 
     /**
      * Returns a snapshot of statistics for this pool.
-     * 
-     * <p>The statistics include information such as:
+     *
+     * <p>The statistics include information such as:</p>
      * <ul>
      *   <li>Pool capacity and current size</li>
      *   <li>Number of put and get operations</li>
@@ -143,15 +145,15 @@ public interface Pool extends Serializable {
      *   <li>Number of evictions</li>
      *   <li>Memory usage (if applicable)</li>
      * </ul>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * PoolStats stats = pool.stats();
-     * double hitRate = stats.getCount() > 0 ? 
-     *     (double) stats.hitCount() / stats.getCount() : 0;
-     * System.out.println("Cache hit rate: " + hitRate);
+     * System.out.println("Pool capacity: " + stats.capacity());
+     * System.out.println("Pool size: " + stats.size());
+     * System.out.println("Eviction count: " + stats.evictionCount());
      * }</pre>
-     * 
+     *
      * @return a PoolStats object containing current pool statistics
      */
     PoolStats stats();

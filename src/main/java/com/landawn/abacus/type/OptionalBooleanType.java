@@ -21,7 +21,7 @@ import com.landawn.abacus.util.u.OptionalBoolean;
  * and database interaction capabilities for optional boolean values. This handler manages
  * the conversion between database boolean values and OptionalBoolean wrapper objects.
  */
-public class OptionalBooleanType extends AbstractOptionalType<OptionalBoolean> {
+class OptionalBooleanType extends AbstractOptionalType<OptionalBoolean> {
 
     public static final String OPTIONAL_BOOLEAN = OptionalBoolean.class.getSimpleName();
 
@@ -31,6 +31,13 @@ public class OptionalBooleanType extends AbstractOptionalType<OptionalBoolean> {
 
     /**
      * Returns the Java class type that this type handler manages.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Type<OptionalBoolean> type = TypeFactory.getType(OptionalBoolean.class);
+     * Class<OptionalBoolean> clazz = type.clazz();
+     * // Returns: OptionalBoolean.class
+     * }</pre>
      *
      * @return the {@link OptionalBoolean} class object
      */
@@ -74,9 +81,25 @@ public class OptionalBooleanType extends AbstractOptionalType<OptionalBoolean> {
     /**
      * Converts an {@link OptionalBoolean} object to its string representation.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Type<OptionalBoolean> type = TypeFactory.getType(OptionalBoolean.class);
+     *
+     * OptionalBoolean opt = OptionalBoolean.of(true);
+     * String result = type.stringOf(opt);
+     * // Returns: "true"
+     *
+     * opt = OptionalBoolean.of(false);
+     * result = type.stringOf(opt);
+     * // Returns: "false"
+     *
+     * opt = OptionalBoolean.empty();
+     * result = type.stringOf(opt);
+     * // Returns: null
+     * }</pre>
+     *
      * @param x the OptionalBoolean object to convert
      * @return "true" or "false" if the Optional contains a value, or {@code null} if empty or null
-     @MayReturnNull
      */
     @Override
     public String stringOf(final OptionalBoolean x) {
@@ -86,9 +109,25 @@ public class OptionalBooleanType extends AbstractOptionalType<OptionalBoolean> {
     /**
      * Converts a string representation to an {@link OptionalBoolean} object.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Type<OptionalBoolean> type = TypeFactory.getType(OptionalBoolean.class);
+     *
+     * OptionalBoolean result = type.valueOf("true");
+     * // Returns: OptionalBoolean.of(true)
+     *
+     * result = type.valueOf("false");
+     * // Returns: OptionalBoolean.of(false)
+     *
+     * result = type.valueOf(null);
+     * // Returns: OptionalBoolean.empty()
+     *
+     * result = type.valueOf("");
+     * // Returns: OptionalBoolean.empty()
+     * }</pre>
+     *
      * @param str the string to convert ("true", "false", or parseable boolean strings)
      * @return an OptionalBoolean containing the parsed boolean value, or empty if the input is empty or null
-     @MayReturnNull
      */
     @Override
     public OptionalBoolean valueOf(final String str) {
@@ -99,11 +138,24 @@ public class OptionalBooleanType extends AbstractOptionalType<OptionalBoolean> {
      * Retrieves a boolean value from a ResultSet at the specified column index and wraps it in an {@link OptionalBoolean}.
      * Handles type conversion if the database column is not a boolean type.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Type<OptionalBoolean> type = TypeFactory.getType(OptionalBoolean.class);
+     * ResultSet rs = ...; // obtained from database query
+     *
+     * // Column contains boolean value true
+     * OptionalBoolean opt = type.get(rs, 1);
+     * // Returns: OptionalBoolean.of(true)
+     *
+     * // Column contains SQL NULL
+     * opt = type.get(rs, 2);
+     * // Returns: OptionalBoolean.empty()
+     * }</pre>
+     *
      * @param rs the ResultSet to read from
      * @param columnIndex the column index (1-based) to retrieve the value from
      * @return an OptionalBoolean containing the boolean value, or empty if the column value is SQL NULL
      * @throws SQLException if a database access error occurs or the columnIndex is invalid
-     @MayReturnNull
      */
     @Override
     public OptionalBoolean get(final ResultSet rs, final int columnIndex) throws SQLException {
@@ -116,11 +168,24 @@ public class OptionalBooleanType extends AbstractOptionalType<OptionalBoolean> {
      * Retrieves a boolean value from a ResultSet using the specified column label and wraps it in an {@link OptionalBoolean}.
      * Handles type conversion if the database column is not a boolean type.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Type<OptionalBoolean> type = TypeFactory.getType(OptionalBoolean.class);
+     * ResultSet rs = ...; // obtained from database query
+     *
+     * // Column "is_active" contains boolean value true
+     * OptionalBoolean opt = type.get(rs, "is_active");
+     * // Returns: OptionalBoolean.of(true)
+     *
+     * // Column "is_deleted" contains SQL NULL
+     * opt = type.get(rs, "is_deleted");
+     * // Returns: OptionalBoolean.empty()
+     * }</pre>
+     *
      * @param rs the ResultSet to read from
      * @param columnLabel the label for the column specified with the SQL AS clause
      * @return an OptionalBoolean containing the boolean value, or empty if the column value is SQL NULL
      * @throws SQLException if a database access error occurs or the columnLabel is invalid
-     @MayReturnNull
      */
     @Override
     public OptionalBoolean get(final ResultSet rs, final String columnLabel) throws SQLException {
@@ -132,6 +197,21 @@ public class OptionalBooleanType extends AbstractOptionalType<OptionalBoolean> {
     /**
      * Sets a parameter in a PreparedStatement to the value contained in an {@link OptionalBoolean}.
      * If the OptionalBoolean is {@code null} or empty, sets the parameter to SQL NULL.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Type<OptionalBoolean> type = TypeFactory.getType(OptionalBoolean.class);
+     * PreparedStatement stmt = connection.prepareStatement(
+     *     "INSERT INTO users (id, is_active) VALUES (?, ?)");
+     *
+     * OptionalBoolean opt = OptionalBoolean.of(true);
+     * type.set(stmt, 2, opt);
+     * // Sets parameter to true
+     *
+     * opt = OptionalBoolean.empty();
+     * type.set(stmt, 2, opt);
+     * // Sets parameter to SQL NULL
+     * }</pre>
      *
      * @param stmt the PreparedStatement to set the parameter on
      * @param columnIndex the parameter index (1-based) to set
@@ -150,6 +230,20 @@ public class OptionalBooleanType extends AbstractOptionalType<OptionalBoolean> {
     /**
      * Sets a named parameter in a CallableStatement to the value contained in an {@link OptionalBoolean}.
      * If the OptionalBoolean is {@code null} or empty, sets the parameter to SQL NULL.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Type<OptionalBoolean> type = TypeFactory.getType(OptionalBoolean.class);
+     * CallableStatement stmt = connection.prepareCall("{call update_status(?, ?)}");
+     *
+     * OptionalBoolean opt = OptionalBoolean.of(true);
+     * type.set(stmt, "p_is_active", opt);
+     * // Sets parameter to true
+     *
+     * opt = OptionalBoolean.empty();
+     * type.set(stmt, "p_is_deleted", opt);
+     * // Sets parameter to SQL NULL
+     * }</pre>
      *
      * @param stmt the CallableStatement to set the parameter on
      * @param parameterName the name of the parameter to set

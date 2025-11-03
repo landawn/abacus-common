@@ -21,7 +21,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
 
-import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.parser.JSONXMLSerializationConfig;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.N;
@@ -49,9 +48,7 @@ public abstract class AbstractByteType extends NumberType<Number> {
      * @param x the Number value to convert
      * @return the string representation of the byte value, or {@code null} if input is {@code null}
      */
-    @MayReturnNull
     @Override
-
     public String stringOf(final Number x) {
         if (x == null) {
             return null; // NOSONAR
@@ -69,13 +66,20 @@ public abstract class AbstractByteType extends NumberType<Number> {
      *   <li>Valid numeric strings are parsed to byte values</li>
      * </ul>
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * AbstractByteType type = TypeFactory.getType(Byte.class);
+     * Byte value1 = type.valueOf("42");    // returns 42
+     * Byte value2 = type.valueOf("127");   // returns 127
+     * Byte value3 = type.valueOf("42L");   // returns 42 (suffix stripped)
+     * Byte value4 = type.valueOf("");      // returns default value
+     * }</pre>
+     *
      * @param str the string to convert
      * @return the Byte value
      * @throws NumberFormatException if the string cannot be parsed as a byte
      */
-    @MayReturnNull
     @Override
-
     public Byte valueOf(final String str) {
         if (Strings.isEmpty(str)) {
             return (Byte) defaultValue();
@@ -101,15 +105,20 @@ public abstract class AbstractByteType extends NumberType<Number> {
      * Parses the character array as an integer and checks if it's within byte range
      * (Byte.MIN_VALUE to Byte.MAX_VALUE).
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * AbstractByteType type = TypeFactory.getType(Byte.class);
+     * char[] buffer = "100".toCharArray();
+     * Byte value = type.valueOf(buffer, 0, 3); // returns 100
+     * }</pre>
+     *
      * @param cbuf the character array to convert
      * @param offset the starting position in the array
      * @param len the number of characters to read
      * @return the Byte value, or default value if input is {@code null} or empty
      * @throws NumberFormatException if the value is out of byte range or not a valid number
      */
-    @MayReturnNull
     @Override
-
     public Byte valueOf(final char[] cbuf, final int offset, final int len) {
         if ((cbuf == null) || (len == 0)) {
             return (Byte) defaultValue();
@@ -146,11 +155,25 @@ public abstract class AbstractByteType extends NumberType<Number> {
      * @throws SQLException if a database access error occurs or the columnIndex is invalid
      */
     @Override
-    @MayReturnNull
     public Byte get(final ResultSet rs, final int columnIndex) throws SQLException {
         return rs.getByte(columnIndex);
     }
 
+    /**
+     * Checks if this type represents a byte type.
+     * This method always returns {@code true} for byte types.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * AbstractByteType type = TypeFactory.getType(Byte.class);
+     * if (type.isByte()) {
+     *     // Handle byte type specific logic
+     *     System.out.println("This is a byte type");
+     * }
+     * }</pre>
+     *
+     * @return {@code true}, indicating this is a byte type
+     */
     @Override
     public boolean isByte() {
         return true;
@@ -178,7 +201,6 @@ public abstract class AbstractByteType extends NumberType<Number> {
      * @throws SQLException if a database access error occurs or the columnLabel is not found
      */
     @Override
-    @MayReturnNull
     public Byte get(final ResultSet rs, final String columnLabel) throws SQLException {
         return rs.getByte(columnLabel);
     }

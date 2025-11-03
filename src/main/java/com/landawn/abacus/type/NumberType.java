@@ -35,7 +35,7 @@ import com.landawn.abacus.util.N;
  *
  * @param <T> the specific Number subclass this type handler manages
  */
-public class NumberType<T extends Number> extends AbstractPrimaryType<T> {
+class NumberType<T extends Number> extends AbstractPrimaryType<T> {
 
     private final Class<T> typeClass;
     private final Function<String, T> creator;
@@ -175,7 +175,6 @@ public class NumberType<T extends Number> extends AbstractPrimaryType<T> {
      * @return an instance of the number type, or {@code null} if the input string is empty or null
      * @throws NumberFormatException if the string cannot be parsed as the target number type
      * @throws UnsupportedOperationException if no suitable factory method or constructor was found
-     @MayReturnNull
      */
     @Override
     public T valueOf(final String str) {
@@ -187,13 +186,31 @@ public class NumberType<T extends Number> extends AbstractPrimaryType<T> {
      *
      * @param x the number object to convert
      * @return the string representation using toString(), or {@code null} if the input is null
-     @MayReturnNull
      */
     @Override
     public String stringOf(final T x) {
         return (x == null) ? null : x.toString();
     }
 
+    /**
+     * Appends the string representation of a number to an Appendable.
+     * <p>
+     * If the number is {@code null}, appends the string "null". Otherwise, appends
+     * the number's string representation as returned by {@link #stringOf(Number)}.
+     * </p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * StringBuilder sb = new StringBuilder();
+     * NumberType<Integer> type = new NumberType<>(Integer.class);
+     * type.appendTo(sb, 42); // Appends "42"
+     * type.appendTo(sb, null); // Appends "null"
+     * }</pre>
+     *
+     * @param appendable the Appendable to write to
+     * @param x the number value to append
+     * @throws IOException if an I/O error occurs during the append operation
+     */
     @Override
     public void appendTo(final Appendable appendable, final T x) throws IOException {
         if (x == null) {

@@ -11,7 +11,6 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-
 package com.landawn.abacus.util.function;
 
 import com.landawn.abacus.annotation.SuppressFBWarnings;
@@ -20,14 +19,16 @@ import com.landawn.abacus.util.Throwables;
 /**
  * Represents a function that accepts a double-valued argument and produces a long-valued result.
  * This is the {@code double}-to-{@code long} primitive specialization for {@link java.util.function.Function}.
- * 
+ *
  * <p>This functional interface extends both {@link Throwables.DoubleToLongFunction} with {@link RuntimeException}
  * and {@link java.util.function.DoubleToLongFunction}, providing a bridge between the Throwables-based
  * exception handling and the standard Java functional interface.</p>
- * 
+ *
  * <p>The interface provides a {@code DEFAULT} constant that performs a simple cast conversion
  * from double to long, truncating any decimal portion.</p>
- * 
+ *
+ * <p>Refer to JDK API documentation at: <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html">https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a></p>
+ *
  * @see java.util.function.Function
  * @see java.util.function.DoubleToLongFunction
  * @see Throwables.DoubleToLongFunction
@@ -35,7 +36,6 @@ import com.landawn.abacus.util.Throwables;
 @SuppressFBWarnings("NM_SAME_SIMPLE_NAME_AS_INTERFACE")
 @FunctionalInterface
 public interface DoubleToLongFunction extends Throwables.DoubleToLongFunction<RuntimeException>, java.util.function.DoubleToLongFunction { //NOSONAR
-
     /**
      * A default implementation that converts a double value to long by casting.
      * The conversion truncates the decimal portion of the double value.
@@ -45,7 +45,7 @@ public interface DoubleToLongFunction extends Throwables.DoubleToLongFunction<Ru
 
     /**
      * Applies this function to the given double-valued argument and returns a long result.
-     * 
+     *
      * <p>This method converts a double value to a long value according to the implementation's logic.
      * The specific conversion behavior depends on the implementation, but typical uses include:</p>
      * <ul>
@@ -53,9 +53,18 @@ public interface DoubleToLongFunction extends Throwables.DoubleToLongFunction<Ru
      *   <li>Rounding to nearest integer</li>
      *   <li>Custom conversion logic based on business rules</li>
      * </ul>
-     * 
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * DoubleToLongFunction truncate = DoubleToLongFunction.DEFAULT;
+     * long result = truncate.applyAsLong(3.14); // Returns 3L
+     *
+     * DoubleToLongFunction rounder = val -> Math.round(val);
+     * long result2 = rounder.applyAsLong(3.7); // Returns 4L
+     * }</pre>
+     *
      * @param value the double value to be converted to long
-     * @return the long result of applying this function to the input value if the function implementation encounters an error during conversion
+     * @return the long result of applying this function to the input value
      */
     @Override
     long applyAsLong(double value);

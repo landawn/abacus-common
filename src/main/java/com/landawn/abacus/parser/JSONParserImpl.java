@@ -49,7 +49,6 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 
 import com.landawn.abacus.annotation.JsonXmlField;
-import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.exception.ParseException;
 import com.landawn.abacus.exception.UncheckedIOException;
 import com.landawn.abacus.parser.JSONDeserializationConfig.JDC;
@@ -340,9 +339,7 @@ final class JSONParserImpl extends AbstractJSONParser {
         }
     }
 
-    @MayReturnNull
     @Override
-
     public String serialize(final Object obj, final JSONSerializationConfig config) {
         final JSONSerializationConfig configToUse = check(config);
 

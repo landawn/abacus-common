@@ -22,7 +22,7 @@ import com.landawn.abacus.util.u.OptionalByte;
  * and database interaction capabilities for optional byte values. This handler manages
  * the conversion between database byte/numeric values and OptionalByte wrapper objects.
  */
-public class OptionalByteType extends AbstractOptionalType<OptionalByte> {
+class OptionalByteType extends AbstractOptionalType<OptionalByte> {
 
     public static final String OPTIONAL_BYTE = OptionalByte.class.getSimpleName();
 
@@ -77,7 +77,6 @@ public class OptionalByteType extends AbstractOptionalType<OptionalByte> {
      *
      * @param x the OptionalByte object to convert
      * @return the string representation of the byte value, or {@code null} if empty or null
-     @MayReturnNull
      */
     @Override
     public String stringOf(final OptionalByte x) {
@@ -90,7 +89,6 @@ public class OptionalByteType extends AbstractOptionalType<OptionalByte> {
      * @param str the string to convert
      * @return an OptionalByte containing the parsed byte value, or empty if the input is empty or null
      * @throws NumberFormatException if the string cannot be parsed as a byte
-     @MayReturnNull
      */
     @Override
     public OptionalByte valueOf(final String str) {
@@ -105,7 +103,6 @@ public class OptionalByteType extends AbstractOptionalType<OptionalByte> {
      * @param columnIndex the column index (1-based) to retrieve the value from
      * @return an OptionalByte containing the byte value, or empty if the column value is SQL NULL
      * @throws SQLException if a database access error occurs or the columnIndex is invalid
-     @MayReturnNull
      */
     @Override
     public OptionalByte get(final ResultSet rs, final int columnIndex) throws SQLException {
@@ -122,7 +119,6 @@ public class OptionalByteType extends AbstractOptionalType<OptionalByte> {
      * @param columnLabel the label for the column specified with the SQL AS clause
      * @return an OptionalByte containing the byte value, or empty if the column value is SQL NULL
      * @throws SQLException if a database access error occurs or the columnLabel is invalid
-     @MayReturnNull
      */
     @Override
     public OptionalByte get(final ResultSet rs, final String columnLabel) throws SQLException {

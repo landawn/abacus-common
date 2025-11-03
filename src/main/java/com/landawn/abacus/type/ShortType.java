@@ -14,7 +14,22 @@
 
 package com.landawn.abacus.type;
 
-public final class ShortType extends AbstractShortType {
+/**
+ * Type handler for Short wrapper type.
+ * This class provides functionality to handle Short objects in database operations and type conversions.
+ * It extends AbstractShortType to inherit common short type handling behavior.
+ *
+ * <p><b>Usage Examples:</b></p>
+ * <pre>{@code
+ * // Getting a Type instance
+ * Type<Short> type = TypeFactory.getType(Short.class);
+ *
+ * // Converting values
+ * Short value = type.valueOf("123");
+ * String str = type.stringOf(value);
+ * }</pre>
+ */
+final class ShortType extends AbstractShortType {
 
     public static final String SHORT = Short.class.getSimpleName();
 
@@ -23,13 +38,7 @@ public final class ShortType extends AbstractShortType {
     }
 
     /**
-     * Returns the Class object representing the Short wrapper type.
-     *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * Type<Short> type = TypeFactory.getType(Short.class);
-     * Class<Short> clazz = type.clazz(); // Returns Short.class
-     * }</pre>
+     * Returns the Class object representing the Short class.
      *
      * @return the Class object for Short.class
      */
@@ -41,16 +50,9 @@ public final class ShortType extends AbstractShortType {
 
     /**
      * Indicates whether this type represents a primitive wrapper class.
-     * For ShortType, this always returns {@code true} since it represents the Short wrapper class
-     * for the primitive short type.
+     * Short is the wrapper class for the primitive short type.
      *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * Type<Short> type = TypeFactory.getType(Short.class);
-     * boolean isWrapper = type.isPrimitiveWrapper(); // Returns true
-     * }</pre>
-     *
-     * @return {@code true}, indicating this is a primitive wrapper type
+     * @return {@code true}, indicating Short is a primitive wrapper
      */
     @Override
     public boolean isPrimitiveWrapper() {

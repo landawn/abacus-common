@@ -11,10 +11,8 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-
 package com.landawn.abacus.util.function;
 
-import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.util.Throwables;
 
 /**
@@ -23,7 +21,7 @@ import com.landawn.abacus.util.Throwables;
  * {@link java.util.function.Function} for {@code long} values.
  *
  * <p>This interface extends {@link Throwables.LongNFunction} with
- * {@link RuntimeException}, providing compatibility with the Abacus framework's
+ * {@link RuntimeException}, providing compatibility with the abacus-common framework's
  * exception handling capabilities.
  *
  * <p>This interface is particularly useful when you need to compute a result
@@ -38,11 +36,11 @@ import com.landawn.abacus.util.Throwables;
  * @see java.util.function.Function
  * @see LongFunction
  * @see LongBiFunction
- * @since 1.8
+ *
+ * <p>Refer to JDK API documentation at: <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html">https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a></p>
  */
 @FunctionalInterface
 public interface LongNFunction<R> extends Throwables.LongNFunction<R, RuntimeException> { //NOSONAR
-
     /**
      * Applies this function to the given arguments.
      *
@@ -78,7 +76,6 @@ public interface LongNFunction<R> extends Throwables.LongNFunction<R, RuntimeExc
      * @return the function result of type R
      */
     @Override
-    @MayReturnNull
     R apply(long... args);
 
     /**
@@ -107,7 +104,7 @@ public interface LongNFunction<R> extends Throwables.LongNFunction<R, RuntimeExc
      * @param <V> the type of output of the {@code after} function, and of the
      *           composed function
      * @param after the function to apply after this function is applied.
-     *              Must not be null
+     *              Must not be {@code null}.
      * @return a composed function that first applies this function and then
      *         applies the {@code after} function
      */

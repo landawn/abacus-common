@@ -24,7 +24,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.parser.JSONXMLSerializationConfig;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.ClassUtil;
@@ -553,7 +552,6 @@ public abstract class AbstractType<T> implements Type<T> {
      *
      * @return the element type, or {@code null} if not applicable
      */
-    @MayReturnNull
     @Override
     public Type<?> getElementType() {
         return null; // NOSONAR
@@ -576,9 +574,7 @@ public abstract class AbstractType<T> implements Type<T> {
      *
      * @return the default value, typically {@code null}
      */
-    @MayReturnNull
     @Override
-
     public T defaultValue() {
         return null; // NOSONAR
     }
@@ -621,9 +617,7 @@ public abstract class AbstractType<T> implements Type<T> {
      * @param obj the object to convert
      * @return the converted value
      */
-    @MayReturnNull
     @Override
-
     public T valueOf(final Object obj) {
         return valueOf(obj == null ? null : N.typeOf(obj.getClass()).stringOf(obj));
     }
@@ -638,9 +632,7 @@ public abstract class AbstractType<T> implements Type<T> {
      * @param len the number of characters
      * @return the converted value
      */
-    @MayReturnNull
     @Override
-
     public T valueOf(final char[] cbuf, final int offset, final int len) {
         return valueOf(cbuf == null ? null : String.valueOf(cbuf, offset, len));
     }
@@ -654,7 +646,6 @@ public abstract class AbstractType<T> implements Type<T> {
      * @return the retrieved value
      * @throws SQLException if a database access error occurs
      */
-    @MayReturnNull
     @Override
     public T get(final ResultSet rs, final int columnIndex) throws SQLException {
         return valueOf(rs.getString(columnIndex));
@@ -669,9 +660,7 @@ public abstract class AbstractType<T> implements Type<T> {
      * @return the retrieved value
      * @throws SQLException if a database access error occurs
      */
-    @MayReturnNull
     @Override
-
     public T get(final ResultSet rs, final String columnLabel) throws SQLException {
         return valueOf(rs.getString(columnLabel));
     }
@@ -878,7 +867,6 @@ public abstract class AbstractType<T> implements Type<T> {
      * @return the string representation
      */
     @Override
-    @MayReturnNull
     public String toString(final T x) {
         return N.toString(x);
     }
@@ -891,7 +879,6 @@ public abstract class AbstractType<T> implements Type<T> {
      * @return the deep string representation
      */
     @Override
-    @MayReturnNull
     public String deepToString(final T x) {
         return toString(x);
     }

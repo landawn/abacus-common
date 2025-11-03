@@ -14,7 +14,6 @@
 
 package com.landawn.abacus.type;
 
-import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.util.ClassUtil;
 import com.landawn.abacus.util.Sheet;
 import com.landawn.abacus.util.Strings;
@@ -29,7 +28,7 @@ import com.landawn.abacus.util.WD;
  * @param <E> the element/value type
  */
 @SuppressWarnings("java:S2160")
-public class SheetType<R, C, E> extends AbstractType<Sheet<R, C, E>> {
+class SheetType<R, C, E> extends AbstractType<Sheet<R, C, E>> {
     private final String declaringName;
 
     private final Class<Sheet<R, C, E>> typeClass;
@@ -58,7 +57,6 @@ public class SheetType<R, C, E> extends AbstractType<Sheet<R, C, E>> {
      * and its parameterized types in angle brackets using declaring names.
      *
      * @return the declaring name in the format "Sheet&lt;RowType, ColumnType, ElementType&gt;"
-     @MayReturnNull
      */
     @Override
     public String declaringName() {
@@ -108,8 +106,6 @@ public class SheetType<R, C, E> extends AbstractType<Sheet<R, C, E>> {
         return false;
     }
 
-    @MayReturnNull
-
     @Override
     public SerializationType getSerializationType() {
         return SerializationType.SHEET;
@@ -122,7 +118,6 @@ public class SheetType<R, C, E> extends AbstractType<Sheet<R, C, E>> {
      * @param x the Sheet to convert to string
      * @return the JSON string representation of the sheet, or {@code null} if the input is null
      */
-    @MayReturnNull
     @SuppressWarnings("rawtypes")
     @Override
     public String stringOf(final Sheet x) {
@@ -137,7 +132,6 @@ public class SheetType<R, C, E> extends AbstractType<Sheet<R, C, E>> {
      * @return the parsed Sheet object, or {@code null} if the input string is {@code null} or empty
      * @throws IllegalArgumentException if the string cannot be parsed as a valid Sheet structure
      */
-    @MayReturnNull
     @SuppressWarnings("rawtypes")
     @Override
     public Sheet valueOf(final String str) {

@@ -41,7 +41,6 @@ import java.util.Arrays;
  * }</pre>
  * 
  * @see java.io.ByteArrayOutputStream
- * @since 1.0
  */
 public final class ByteArrayOutputStream extends OutputStream {
 

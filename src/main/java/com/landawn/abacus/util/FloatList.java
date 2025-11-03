@@ -36,24 +36,277 @@ import com.landawn.abacus.util.function.FloatUnaryOperator;
 import com.landawn.abacus.util.stream.FloatStream;
 
 /**
- * A resizable-array implementation for primitive float values. This class provides methods to manipulate
- * the size of the array that is used internally to store the list. The size, isEmpty, get, set,
- * iterator, and listIterator operations run in constant time. The add operation runs in amortized
- * constant time. All of the other operations run in linear time (roughly speaking).
- * 
- * <p>This implementation is not synchronized. If multiple threads access a FloatList instance concurrently,
- * and at least one of the threads modifies the list structurally, it must be synchronized externally.
- * A structural modification is any operation that adds or deletes one or more elements, or explicitly
- * resizes the backing array; merely setting the value of an element is not a structural modification.
- * 
- * <p>The iterators returned by this class's iterator and listIterator methods are fail-fast: if the list
- * is structurally modified at any time after the iterator is created, in any way except through the
- * iterator's own remove or add methods, the iterator will throw a ConcurrentModificationException.
+ * A high-performance, resizable array implementation for primitive float values that provides
+ * specialized operations optimized for single-precision floating-point data types. This class extends
+ * {@link PrimitiveList} to offer memory-efficient storage and operations that avoid the boxing overhead
+ * associated with {@code List<Float>}, making it ideal for applications requiring intensive float array
+ * manipulation with optimal performance characteristics.
  *
+ * <p>FloatList is specifically designed for scenarios involving large collections of floating-point
+ * values such as scientific computing, graphics programming, audio processing, machine learning,
+ * signal processing, and performance-critical applications requiring single-precision arithmetic.
+ * The implementation uses a compact float array as the underlying storage mechanism, providing
+ * direct primitive access without wrapper object allocation.</p>
+ *
+ * <p><b>Key Features:</b>
+ * <ul>
+ *   <li><b>Zero-Boxing Overhead:</b> Direct float primitive storage without Float wrapper allocation</li>
+ *   <li><b>Memory Efficiency:</b> Compact float array storage with minimal memory overhead</li>
+ *   <li><b>Single-Precision Arithmetic:</b> Full support for IEEE 754 single-precision operations</li>
+ *   <li><b>High Performance:</b> Optimized algorithms for floating-point specific operations</li>
+ *   <li><b>Rich Mathematical API:</b> Statistical operations like min, max, median, sum</li>
+ *   <li><b>Set Operations:</b> Efficient intersection, union, and difference operations</li>
+ *   <li><b>Range Generation:</b> Built-in support for arithmetic progressions and sequences</li>
+ *   <li><b>Random Access:</b> O(1) element access and modification by index</li>
+ *   <li><b>Dynamic Sizing:</b> Automatic capacity management with intelligent growth</li>
+ *   <li><b>Type Conversions:</b> Seamless conversion to other numeric primitive lists</li>
+ * </ul>
+ *
+ * <p><b>Common Use Cases:</b>
+ * <ul>
+ *   <li><b>Graphics Programming:</b> 3D coordinates, vertices, color values, texture coordinates</li>
+ *   <li><b>Audio Processing:</b> Digital signal processing, audio samples, frequency analysis</li>
+ *   <li><b>Scientific Computing:</b> Numerical simulations, experimental data, measurements</li>
+ *   <li><b>Machine Learning:</b> Feature vectors, weights, neural network parameters</li>
+ *   <li><b>Game Development:</b> Physics calculations, animation data, particle systems</li>
+ *   <li><b>Image Processing:</b> Pixel values, filters, transformations, computer vision</li>
+ *   <li><b>Financial Modeling:</b> Price data, returns, volatility calculations</li>
+ *   <li><b>Signal Processing:</b> Digital filters, Fourier transforms, sensor data</li>
+ * </ul>
+ *
+ * <p><b>Usage Examples:</b></p>
+ * <pre>{@code
+ * // Creating and initializing float lists
+ * FloatList coordinates = FloatList.of(1.5f, 2.7f, 3.14f, 4.2f);
+ * FloatList range = FloatList.range(0.0f, 10.0f, 0.5f);    // [0.0, 0.5, 1.0, ..., 9.5]
+ * FloatList audioSamples = new FloatList(44100);           // Pre-sized for 1 second at 44.1kHz
+ * FloatList random = FloatList.random(0.0f, 1.0f, 1000);   // 1000 random floats [0.0, 1.0)
+ *
+ * // Basic operations
+ * coordinates.add(5.8f);                                   // Append float value
+ * float x = coordinates.get(0);                            // Access by index: 1.5
+ * coordinates.set(1, 3.0f);                                // Modify existing value
+ *
+ * // Mathematical operations for floating-point data
+ * OptionalFloat min = coordinates.min();                   // Find minimum value
+ * OptionalFloat max = coordinates.max();                   // Find maximum value
+ * OptionalFloat median = coordinates.median();             // Calculate median value
+ * double sum = coordinates.stream().sum();                 // Calculate sum
+ *
+ * // Set operations for data analysis
+ * FloatList set1 = FloatList.of(1.0f, 2.0f, 3.0f, 4.0f);
+ * FloatList set2 = FloatList.of(3.0f, 4.0f, 5.0f, 6.0f);
+ * FloatList intersection = set1.intersection(set2);        // [3.0, 4.0]
+ * FloatList difference = set1.difference(set2);            // [1.0, 2.0]
+ *
+ * // High-performance sorting and searching
+ * coordinates.sort();                                      // Sort in ascending order
+ * coordinates.parallelSort();                              // Parallel sort for large datasets
+ * int index = coordinates.binarySearch(3.14f);             // Fast lookup
+ *
+ * // Type conversions for different precision needs
+ * DoubleList doubleValues = coordinates.toDoubleList();    // Convert to double precision
+ * IntList roundedValues = coordinates.stream()             // Convert to rounded integers
+ *     .mapToInt(f -> Math.round(f))
+ *     .collect(IntList::new, IntList::add, IntList::addAll);
+ * float[] primitiveArray = coordinates.toArray();          // To primitive array
+ * List<Float> boxedList = coordinates.boxed();             // To boxed collection
+ * }</pre>
+ *
+ * <p><b>Performance Characteristics:</b>
+ * <ul>
+ *   <li><b>Element Access:</b> O(1) for get/set operations by index</li>
+ *   <li><b>Insertion:</b> O(1) amortized for append, O(n) for middle insertion</li>
+ *   <li><b>Deletion:</b> O(1) for last element, O(n) for arbitrary position</li>
+ *   <li><b>Search:</b> O(n) for contains/indexOf, O(log n) for binary search on sorted data</li>
+ *   <li><b>Sorting:</b> O(n log n) using optimized primitive sorting algorithms</li>
+ *   <li><b>Parallel Sorting:</b> O(n log n) with improved constants on multi-core systems</li>
+ *   <li><b>Set Operations:</b> O(n) to O(n²) depending on algorithm selection and data size</li>
+ *   <li><b>Mathematical Operations:</b> O(n) for statistical calculations</li>
+ * </ul>
+ *
+ * <p><b>Memory Efficiency:</b>
+ * <ul>
+ *   <li><b>Storage:</b> 4 bytes per element (32 bits) with no object overhead</li>
+ *   <li><b>vs List&lt;Float&gt;:</b> ~4x less memory usage (no Float wrapper objects)</li>
+ *   <li><b>Capacity Management:</b> 1.75x growth factor balances memory and performance</li>
+ *   <li><b>Maximum Size:</b> Limited by {@code MAX_ARRAY_SIZE} (typically Integer.MAX_VALUE - 8)</li>
+ * </ul>
+ *
+ * <p><b>Floating-Point Considerations:</b>
+ * <ul>
+ *   <li><b>IEEE 754 Compliance:</b> Full support for single-precision floating-point standard</li>
+ *   <li><b>Special Values:</b> Proper handling of NaN, positive/negative infinity</li>
+ *   <li><b>Precision:</b> ~7 decimal digits of precision (24-bit mantissa)</li>
+ *   <li><b>Range:</b> Approximately ±3.4 × 10^38 with subnormal support</li>
+ *   <li><b>Comparison:</b> NaN-aware comparison operations</li>
+ * </ul>
+ *
+ * <p><b>Float-Specific Operations:</b>
+ * <ul>
+ *   <li><b>Range Generation:</b> {@code range()}, {@code rangeClosed()} for arithmetic sequences</li>
+ *   <li><b>Mathematical Functions:</b> {@code min()}, {@code max()}, {@code median()}</li>
+ *   <li><b>Type Conversions:</b> {@code toDoubleList()} for increased precision</li>
+ *   <li><b>Random Generation:</b> {@code random()} methods for simulations and testing</li>
+ *   <li><b>Parallel Operations:</b> {@code parallelSort()} for large dataset optimization</li>
+ * </ul>
+ *
+ * <p><b>Factory Methods:</b>
+ * <ul>
+ *   <li><b>{@code of(float...)}:</b> Create from varargs array</li>
+ *   <li><b>{@code copyOf(float[])}:</b> Create defensive copy of array</li>
+ *   <li><b>{@code range(float, float, float)}:</b> Create arithmetic sequence with step</li>
+ *   <li><b>{@code repeat(float, int)}:</b> Create with repeated values</li>
+ *   <li><b>{@code random(int)}:</b> Create with random float values</li>
+ * </ul>
+ *
+ * <p><b>Conversion Methods:</b>
+ * <ul>
+ *   <li><b>{@code toArray()}:</b> Convert to primitive float array</li>
+ *   <li><b>{@code toDoubleList()}:</b> Convert to DoubleList with increased precision</li>
+ *   <li><b>{@code boxed()}:</b> Convert to {@code List<Float>}</li>
+ *   <li><b>{@code stream()}:</b> Convert to FloatStream for functional processing</li>
+ * </ul>
+ *
+ * <p><b>Deque-like Operations:</b>
+ * <ul>
+ *   <li><b>{@code addFirst(float)}:</b> Insert at beginning (O(n) operation)</li>
+ *   <li><b>{@code addLast(float)}:</b> Insert at end (O(1) amortized)</li>
+ *   <li><b>{@code removeFirst()}:</b> Remove from beginning (O(n) operation)</li>
+ *   <li><b>{@code removeLast()}:</b> Remove from end (O(1) operation)</li>
+ *   <li><b>{@code getFirst()}:</b> Access first element (O(1) operation)</li>
+ *   <li><b>{@code getLast()}:</b> Access last element (O(1) operation)</li>
+ * </ul>
+ *
+ * <p><b>Thread Safety:</b>
+ * <ul>
+ *   <li><b>Not Thread-Safe:</b> This implementation is not synchronized</li>
+ *   <li><b>External Synchronization:</b> Required for concurrent access</li>
+ *   <li><b>Fail-Fast Iterators:</b> Detect concurrent modifications</li>
+ *   <li><b>Read-Only Access:</b> Multiple threads can safely read simultaneously</li>
+ * </ul>
+ *
+ * <p><b>Capacity Management:</b>
+ * <ul>
+ *   <li><b>Initial Capacity:</b> Default capacity of 10 elements</li>
+ *   <li><b>Growth Strategy:</b> 1.75x expansion when capacity exceeded</li>
+ *   <li><b>Manual Control:</b> {@code ensureCapacity()} for performance optimization</li>
+ *   <li><b>Trimming:</b> {@code trimToSize()} to reduce memory footprint</li>
+ * </ul>
+ *
+ * <p><b>Error Handling:</b>
+ * <ul>
+ *   <li><b>IndexOutOfBoundsException:</b> For invalid index access</li>
+ *   <li><b>NoSuchElementException:</b> For operations on empty lists</li>
+ *   <li><b>IllegalArgumentException:</b> For invalid method parameters</li>
+ *   <li><b>OutOfMemoryError:</b> When capacity exceeds available memory</li>
+ * </ul>
+ *
+ * <p><b>Serialization Support:</b>
+ * <ul>
+ *   <li><b>Serializable:</b> Implements {@link java.io.Serializable}</li>
+ *   <li><b>Version Compatibility:</b> Stable serialVersionUID for version compatibility</li>
+ *   <li><b>Efficient Format:</b> Optimized serialization of float arrays</li>
+ *   <li><b>Cross-Platform:</b> Platform-independent serialized format</li>
+ * </ul>
+ *
+ * <p><b>Integration with Collections Framework:</b>
+ * <ul>
+ *   <li><b>RandomAccess:</b> Indicates efficient random access capabilities</li>
+ *   <li><b>Collection Compatibility:</b> Seamless conversion to standard collections</li>
+ *   <li><b>Utility Integration:</b> Works with Collections utility methods via boxed()</li>
+ *   <li><b>Stream API:</b> Full integration with FloatStream for functional processing</li>
+ * </ul>
+ *
+ * <p><b>Mathematical and Statistical Operations:</b>
+ * <ul>
+ *   <li><b>Aggregation:</b> Sum, min, max operations via stream API</li>
+ *   <li><b>Central Tendency:</b> Median calculation with efficient sorting</li>
+ *   <li><b>Occurrence Counting:</b> {@code occurrencesOf()} for frequency analysis</li>
+ *   <li><b>Duplicate Detection:</b> {@code hasDuplicates()}, {@code removeDuplicates()}</li>
+ * </ul>
+ *
+ * <p><b>Comparison with Alternatives:</b>
+ * <ul>
+ *   <li><b>vs List&lt;Float&gt;:</b> 4x less memory, significantly faster operations</li>
+ *   <li><b>vs float[]:</b> Dynamic sizing, rich API, set operations, statistical functions</li>
+ *   <li><b>vs DoubleList:</b> Half the memory usage, lower precision, faster for simple operations</li>
+ *   <li><b>vs ArrayList&lt;Float&gt;:</b> No boxing overhead, primitive-specific methods</li>
+ * </ul>
+ *
+ * <p><b>Best Practices:</b>
+ * <ul>
+ *   <li>Use {@code FloatList} when single-precision is sufficient for your application</li>
+ *   <li>Specify initial capacity for known data sizes to avoid resizing</li>
+ *   <li>Use bulk operations ({@code addAll}, {@code removeAll}) instead of loops</li>
+ *   <li>Convert to {@code DoubleList} when higher precision is required</li>
+ *   <li>Leverage parallel sorting for large datasets (>10,000 elements)</li>
+ *   <li>Be aware of floating-point precision limitations in comparisons</li>
+ * </ul>
+ *
+ * <p><b>Performance Tips:</b>
+ * <ul>
+ *   <li>Pre-size lists with known capacity using constructor or {@code ensureCapacity()}</li>
+ *   <li>Use {@code addLast()} instead of {@code addFirst()} for better performance</li>
+ *   <li>Sort data before using {@code binarySearch()} for O(log n) lookups</li>
+ *   <li>Use {@code parallelSort()} for large datasets to leverage multi-core processors</li>
+ *   <li>Consider {@code stream()} API for complex transformations and filtering</li>
+ * </ul>
+ *
+ * <p><b>Common Patterns:</b>
+ * <ul>
+ *   <li><b>3D Graphics:</b> {@code FloatList vertices = FloatList.of(x1, y1, z1, x2, y2, z2);}</li>
+ *   <li><b>Audio Processing:</b> {@code FloatList samples = new FloatList(sampleRate);}</li>
+ *   <li><b>Machine Learning:</b> {@code FloatList features = dataset.stream().mapToFloat(...).collect(...);}</li>
+ *   <li><b>Scientific Data:</b> {@code FloatList measurements = FloatList.random(minVal, maxVal, count);}</li>
+ * </ul>
+ *
+ * <p><b>Related Classes:</b>
+ * <ul>
+ *   <li><b>{@link PrimitiveList}:</b> Abstract base class for all primitive list types</li>
+ *   <li><b>{@link DoubleList}:</b> Higher precision floating-point list implementation</li>
+ *   <li><b>{@link IntList}:</b> Integer primitive list for discrete values</li>
+ *   <li><b>{@link FloatIterator}:</b> Specialized iterator for float primitives</li>
+ *   <li><b>{@link FloatStream}:</b> Functional processing of float sequences</li>
+ * </ul>
+ *
+ * <p><b>Example: Graphics Programming</b>
+ * <pre>{@code
+ * // Define 3D vertex data for a triangle
+ * FloatList vertices = new FloatList(9);  // 3 vertices × 3 coordinates
+ *
+ * // Add vertex coordinates (x, y, z)
+ * vertices.addAll(new float[]{
+ *     0.0f,  0.5f, 0.0f,   // Top vertex
+ *    -0.5f, -0.5f, 0.0f,   // Bottom left
+ *     0.5f, -0.5f, 0.0f    // Bottom right
+ * });
+ *
+ * // Transform vertices (scale by 2.0)
+ * vertices.replaceAll(coord -> coord * 2.0f);
+ *
+ * // Extract coordinates
+ * float[] vertexArray = vertices.toArray();
+ *
+ * // Calculate bounding box
+ * OptionalFloat minX = vertices.stream().skip(0).filter((i, v) -> i % 3 == 0).min();
+ * OptionalFloat maxX = vertices.stream().skip(0).filter((i, v) -> i % 3 == 0).max();
+ * OptionalFloat minY = vertices.stream().skip(1).filter((i, v) -> i % 3 == 1).min();
+ * OptionalFloat maxY = vertices.stream().skip(1).filter((i, v) -> i % 3 == 1).max();
+ * }</pre>
+ *
+ * @see PrimitiveList
+ * @see FloatIterator
+ * @see FloatStream
+ * @see DoubleList
+ * @see IntList
  * @see com.landawn.abacus.util.N
  * @see com.landawn.abacus.util.Array
  * @see com.landawn.abacus.util.Iterables
  * @see com.landawn.abacus.util.Iterators
+ * @see java.util.List
+ * @see java.util.RandomAccess
+ * @see java.io.Serializable
  */
 public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
 

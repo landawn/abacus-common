@@ -11,10 +11,8 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-
 package com.landawn.abacus.util.function;
 
-import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.util.Throwables;
 
 /**
@@ -22,7 +20,7 @@ import com.landawn.abacus.util.Throwables;
  * a result. This is the three-arity specialization of {@link java.util.function.Function}.
  *
  * <p>This interface extends {@link Throwables.IntTriFunction} with
- * {@link RuntimeException}, providing compatibility with the Abacus framework's
+ * {@link RuntimeException}, providing compatibility with the abacus-common framework's
  * exception handling capabilities.
  *
  * <p>This is a functional interface whose functional method is
@@ -32,18 +30,18 @@ import com.landawn.abacus.util.Throwables;
  *
  * @see java.util.function.Function
  * @see java.util.function.BiFunction
- * @since 1.8
+ *
+ * <p>Refer to JDK API documentation at: <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html">https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a></p>
  */
 @FunctionalInterface
 public interface IntTriFunction<R> extends Throwables.IntTriFunction<R, RuntimeException> { //NOSONAR
-
     /**
      * Applies this function to the given arguments.
      *
      * <p>The function processes three int values and produces a result of type R.
      * Common use cases include:
      * <ul>
-     *   <li>Computing values from 3D coordinates (x, y, z)</li>
+     *   <li>Computing values from three-dimensional coordinates (x, y, z)</li>
      *   <li>Creating objects from RGB color components</li>
      *   <li>Performing calculations on three numeric inputs</li>
      *   <li>Aggregating or reducing three int values to a single result</li>
@@ -57,7 +55,6 @@ public interface IntTriFunction<R> extends Throwables.IntTriFunction<R, RuntimeE
      * @return the function result of type R
      */
     @Override
-    @MayReturnNull
     R apply(int a, int b, int c);
 
     /**
@@ -80,7 +77,7 @@ public interface IntTriFunction<R> extends Throwables.IntTriFunction<R, RuntimeE
      * @param <V> the type of output of the {@code after} function, and of the
      *           composed function
      * @param after the function to apply after this function is applied.
-     *              Must not be null
+     *              Must not be {@code null}.
      * @return a composed function that first applies this function and then
      *         applies the {@code after} function
      */

@@ -47,7 +47,6 @@ import com.landawn.abacus.annotation.SuppressFBWarnings;
  * }</pre>
  * 
  * @see java.io.BufferedReader
- * @since 1.0
  */
 @SuppressFBWarnings
 final class BufferedReader extends java.io.BufferedReader { // NOSONAR

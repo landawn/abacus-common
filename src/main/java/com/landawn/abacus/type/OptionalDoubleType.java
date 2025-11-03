@@ -22,7 +22,7 @@ import com.landawn.abacus.util.u.OptionalDouble;
  * and database interaction capabilities for optional double-precision floating-point values.
  * This handler manages the conversion between database numeric values and OptionalDouble wrapper objects.
  */
-public class OptionalDoubleType extends AbstractOptionalType<OptionalDouble> {
+class OptionalDoubleType extends AbstractOptionalType<OptionalDouble> {
 
     public static final String OPTIONAL_DOUBLE = OptionalDouble.class.getSimpleName();
 
@@ -77,7 +77,6 @@ public class OptionalDoubleType extends AbstractOptionalType<OptionalDouble> {
      *
      * @param x the OptionalDouble object to convert
      * @return the string representation of the double value, or {@code null} if empty or null
-     @MayReturnNull
      */
     @Override
     public String stringOf(final OptionalDouble x) {
@@ -90,7 +89,6 @@ public class OptionalDoubleType extends AbstractOptionalType<OptionalDouble> {
      * @param str the string to convert
      * @return an OptionalDouble containing the parsed double value, or empty if the input is empty or null
      * @throws NumberFormatException if the string cannot be parsed as a double
-     @MayReturnNull
      */
     @Override
     public OptionalDouble valueOf(final String str) {
@@ -105,7 +103,6 @@ public class OptionalDoubleType extends AbstractOptionalType<OptionalDouble> {
      * @param columnIndex the column index (1-based) to retrieve the value from
      * @return an OptionalDouble containing the double value, or empty if the column value is SQL NULL
      * @throws SQLException if a database access error occurs or the columnIndex is invalid
-     @MayReturnNull
      */
     @Override
     public OptionalDouble get(final ResultSet rs, final int columnIndex) throws SQLException {
@@ -122,7 +119,6 @@ public class OptionalDoubleType extends AbstractOptionalType<OptionalDouble> {
      * @param columnLabel the label for the column specified with the SQL AS clause
      * @return an OptionalDouble containing the double value, or empty if the column value is SQL NULL
      * @throws SQLException if a database access error occurs or the columnLabel is invalid
-     @MayReturnNull
      */
     @Override
     public OptionalDouble get(final ResultSet rs, final String columnLabel) throws SQLException {

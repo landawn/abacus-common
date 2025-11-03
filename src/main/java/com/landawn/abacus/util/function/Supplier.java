@@ -11,30 +11,27 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-
 package com.landawn.abacus.util.function;
 
-import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.util.Throwables;
 
 /**
  * Represents a supplier of results.
- * 
+ *
  * <p>This is an extended version of {@link java.util.function.Supplier} that implements both
  * the standard Java supplier interface and a throwable variant. There is no requirement that
  * a new or distinct result be returned each time the supplier is invoked.
- * 
+ *
  * <p>This is a functional interface whose functional method is {@link #get()}.
- * 
+ *
  * <p>Refer to JDK API documentation at: <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html">https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a></p>
- * 
+ *
  * @param <T> the type of results supplied by this supplier
- * 
+ *
  * @see java.util.function.Supplier
  */
 @FunctionalInterface
 public interface Supplier<T> extends Throwables.Supplier<T, RuntimeException>, java.util.function.Supplier<T> { //NOSONAR
-
     /**
      * Gets a result.
      *
@@ -54,10 +51,9 @@ public interface Supplier<T> extends Throwables.Supplier<T, RuntimeException>, j
      * ExpensiveObject obj = lazyInit.get(); // creates object only when needed
      * }</pre>
      *
-     * @return a result if a result cannot be supplied
+     * @return a result
      */
     @Override
-    @MayReturnNull
     T get();
 
     /**

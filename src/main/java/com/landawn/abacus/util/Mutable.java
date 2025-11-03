@@ -72,7 +72,6 @@ package com.landawn.abacus.util;
  * <p>Note: This interface is adapted from Apache Commons Lang.</p>
  * 
  * @version $Id: Mutable.java 1478488 2013-05-02 19:05:44Z ggregory $
- * @since 1.0
  */
 public interface Mutable {
 

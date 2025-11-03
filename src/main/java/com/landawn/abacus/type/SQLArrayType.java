@@ -20,7 +20,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-public class SQLArrayType extends AbstractType<Array> {
+class SQLArrayType extends AbstractType<Array> {
 
     static final String SQL_ARRAY = "SQLArray";
 
@@ -33,7 +33,7 @@ public class SQLArrayType extends AbstractType<Array> {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * SQLArrayType type = new SQLArrayType();
+     * Type<Array> type = TypeFactory.getType(Array.class);
      * Class<Array> clazz = type.clazz(); // Returns Array.class
      * }</pre>
      *
@@ -50,7 +50,7 @@ public class SQLArrayType extends AbstractType<Array> {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * SQLArrayType type = new SQLArrayType();
+     * Type<Array> type = TypeFactory.getType(Array.class);
      * boolean serializable = type.isSerializable(); // Returns false
      * }</pre>
      *
@@ -68,7 +68,7 @@ public class SQLArrayType extends AbstractType<Array> {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * SQLArrayType type = new SQLArrayType();
+     * Type<Array> type = TypeFactory.getType(Array.class);
      * // This will throw UnsupportedOperationException
      * String str = type.stringOf(sqlArray);
      * }</pre>
@@ -76,7 +76,6 @@ public class SQLArrayType extends AbstractType<Array> {
      * @param x the Array object to convert
      * @return never returns normally
      * @throws UnsupportedOperationException always thrown as Array cannot be converted to string
-     @MayReturnNull
      */
     @Override
     public String stringOf(final Array x) throws UnsupportedOperationException {
@@ -90,7 +89,7 @@ public class SQLArrayType extends AbstractType<Array> {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * SQLArrayType type = new SQLArrayType();
+     * Type<Array> type = TypeFactory.getType(Array.class);
      * // This will throw UnsupportedOperationException
      * Array array = type.valueOf("[1, 2, 3]");
      * }</pre>
@@ -98,7 +97,6 @@ public class SQLArrayType extends AbstractType<Array> {
      * @param str the string to convert
      * @return never returns normally
      * @throws UnsupportedOperationException always thrown as Array cannot be created from string
-     @MayReturnNull
      */
     @Override
     public Array valueOf(final String str) throws UnsupportedOperationException {
@@ -111,7 +109,7 @@ public class SQLArrayType extends AbstractType<Array> {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * SQLArrayType type = new SQLArrayType();
+     * Type<Array> type = TypeFactory.getType(Array.class);
      * ResultSet rs = statement.executeQuery("SELECT tags FROM products");
      * Array tags = type.get(rs, 1); // Get array from first column
      * }</pre>
@@ -120,7 +118,6 @@ public class SQLArrayType extends AbstractType<Array> {
      * @param columnIndex the 1-based index of the column to retrieve
      * @return the Array value from the specified column, or {@code null} if the column value is SQL NULL
      * @throws SQLException if a database access error occurs or the column index is invalid
-     @MayReturnNull
      */
     @Override
     public Array get(final ResultSet rs, final int columnIndex) throws SQLException {
@@ -133,7 +130,7 @@ public class SQLArrayType extends AbstractType<Array> {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * SQLArrayType type = new SQLArrayType();
+     * Type<Array> type = TypeFactory.getType(Array.class);
      * ResultSet rs = statement.executeQuery("SELECT tags FROM products");
      * Array tags = type.get(rs, "tags"); // Get array by column name
      * }</pre>
@@ -154,7 +151,7 @@ public class SQLArrayType extends AbstractType<Array> {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * SQLArrayType type = new SQLArrayType();
+     * Type<Array> type = TypeFactory.getType(Array.class);
      * PreparedStatement stmt = conn.prepareStatement("INSERT INTO products (tags) VALUES (?)");
      * type.set(stmt, 1, tagsArray); // Set array at parameter index 1
      * }</pre>
@@ -176,7 +173,7 @@ public class SQLArrayType extends AbstractType<Array> {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * SQLArrayType type = new SQLArrayType();
+     * Type<Array> type = TypeFactory.getType(Array.class);
      * CallableStatement stmt = conn.prepareCall("{call update_product_tags(?)}");
      * type.set(stmt, "tags_param", tagsArray); // Set array by parameter name
      * }</pre>

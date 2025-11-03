@@ -139,7 +139,16 @@ public final class PoolableWrapper<T> extends AbstractPoolable implements Immuta
 
     /**
      * Returns the wrapped object.
-     * 
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * PoolableWrapper<String> wrapped = pool.take();
+     * if (wrapped != null) {
+     *     String data = wrapped.value();
+     *     // use data
+     * }
+     * }</pre>
+     *
      * @return the object wrapped by this PoolableWrapper, may be null
      */
     public T value() {

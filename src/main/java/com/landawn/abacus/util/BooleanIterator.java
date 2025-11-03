@@ -48,7 +48,6 @@ import com.landawn.abacus.util.stream.Stream;
  * @see TriIterator
  * @see com.landawn.abacus.util.Iterators
  * @see com.landawn.abacus.util.Enumerations
- * @since 1.0
  */
 @SuppressWarnings({ "java:S6548" })
 public abstract class BooleanIterator extends ImmutableIterator<Boolean> {
@@ -78,15 +77,20 @@ public abstract class BooleanIterator extends ImmutableIterator<Boolean> {
     };
 
     /**
-     * Returns an empty BooleanIterator.
-     * 
+     * Returns an empty {@code BooleanIterator} with no elements.
+     *
+     * <p>The returned iterator's {@code hasNext()} will always return {@code false},
+     * and calling {@code nextBoolean()} will always throw a {@code NoSuchElementException}.</p>
+     *
+     * <p>This method always returns the same singleton instance for efficiency.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * BooleanIterator iter = BooleanIterator.empty();
      * System.out.println(iter.hasNext()); // false
      * }</pre>
      *
-     * @return an empty BooleanIterator instance
+     * @return an empty {@code BooleanIterator}
      */
     @SuppressWarnings("SameReturnValue")
     public static BooleanIterator empty() {//NOSONAR
@@ -94,24 +98,31 @@ public abstract class BooleanIterator extends ImmutableIterator<Boolean> {
     }
 
     /**
-     * Creates a BooleanIterator from a boolean array.
-     * 
+     * Creates a {@code BooleanIterator} from the specified boolean array.
+     *
+     * <p>If the array is {@code null} or empty, returns an empty iterator.
+     * The iterator will iterate over all elements in the array from start to end.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * BooleanIterator iter = BooleanIterator.of(true, false, true);
      * // Iterates over three boolean values
      * }</pre>
      *
-     * @param a the boolean array to create an iterator from
-     * @return a BooleanIterator over the array elements
+     * @param a the boolean array (may be {@code null})
+     * @return a new {@code BooleanIterator} over the array elements, or an empty iterator if the array is {@code null} or empty
      */
     public static BooleanIterator of(final boolean... a) {
         return N.isEmpty(a) ? EMPTY : of(a, 0, a.length);
     }
 
     /**
-     * Creates a BooleanIterator from a portion of a boolean array.
-     * 
+     * Creates a {@code BooleanIterator} from a subsequence of the specified boolean array.
+     *
+     * <p>The iterator will iterate over elements from {@code fromIndex} (inclusive) to
+     * {@code toIndex} (exclusive). If {@code fromIndex} equals {@code toIndex}, an empty
+     * iterator is returned.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * boolean[] array = {true, false, true, false, true};
@@ -119,10 +130,10 @@ public abstract class BooleanIterator extends ImmutableIterator<Boolean> {
      * // Iterates over elements at indices 1, 2, and 3 (false, true, false)
      * }</pre>
      *
-     * @param a the boolean array
+     * @param a the boolean array (may be {@code null})
      * @param fromIndex the starting index (inclusive)
      * @param toIndex the ending index (exclusive)
-     * @return a BooleanIterator over the specified range
+     * @return a new {@code BooleanIterator} over the specified range, or an empty iterator if the array is {@code null} or fromIndex equals toIndex
      * @throws IndexOutOfBoundsException if the indices are out of range
      */
     public static BooleanIterator of(final boolean[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
@@ -225,7 +236,7 @@ public abstract class BooleanIterator extends ImmutableIterator<Boolean> {
      *
      * @param supplier the supplier function to generate boolean values
      * @return an infinite BooleanIterator
-     * @throws IllegalArgumentException if supplier is null
+     * @throws IllegalArgumentException if {@code supplier} is {@code null}
      */
     public static BooleanIterator generate(final BooleanSupplier supplier) throws IllegalArgumentException {
         N.checkArgNotNull(supplier);
@@ -259,7 +270,7 @@ public abstract class BooleanIterator extends ImmutableIterator<Boolean> {
      * @param hasNext the supplier that determines if there are more elements
      * @param supplier the supplier function to generate boolean values
      * @return a conditional BooleanIterator
-     * @throws IllegalArgumentException if hasNext or supplier is null
+     * @throws IllegalArgumentException if {@code hasNext} or {@code supplier} is {@code null}
      */
     public static BooleanIterator generate(final BooleanSupplier hasNext, final BooleanSupplier supplier) throws IllegalArgumentException {
         N.checkArgNotNull(hasNext);
@@ -414,7 +425,7 @@ public abstract class BooleanIterator extends ImmutableIterator<Boolean> {
      *
      * @param predicate the predicate to test elements
      * @return a new BooleanIterator containing only elements that match the predicate
-     * @throws IllegalArgumentException if predicate is null
+     * @throws IllegalArgumentException if {@code predicate} is {@code null}
      */
     public BooleanIterator filter(final BooleanPredicate predicate) throws IllegalArgumentException {
         N.checkArgNotNull(predicate, cs.Predicate);
@@ -670,7 +681,7 @@ public abstract class BooleanIterator extends ImmutableIterator<Boolean> {
      *
      * @param <E> the type of exception that the action may throw
      * @param action the action to be performed for each element with its index
-     * @throws IllegalArgumentException if action is null
+     * @throws IllegalArgumentException if {@code action} is {@code null}
      * @throws E if the action throws an exception
      */
     public <E extends Exception> void foreachIndexed(final Throwables.IntBooleanConsumer<E> action) throws IllegalArgumentException, E {

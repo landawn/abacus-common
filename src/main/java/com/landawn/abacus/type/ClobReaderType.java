@@ -27,7 +27,7 @@ import java.sql.SQLException;
  * as character Readers. It extends ReaderType to handle CLOB data specifically
  * through character stream representations.
  */
-public class ClobReaderType extends ReaderType {
+class ClobReaderType extends ReaderType {
 
     public static final String CLOB_READER = "ClobReader";
 
@@ -42,7 +42,6 @@ public class ClobReaderType extends ReaderType {
      * @param columnIndex the column index (1-based) of the CLOB value
      * @return A Reader containing the character stream of the CLOB, or {@code null} if the column value is SQL NULL
      * @throws SQLException if a database access error occurs or the column index is invalid
-     @MayReturnNull
      */
     @Override
     public Reader get(final ResultSet rs, final int columnIndex) throws SQLException {
@@ -57,7 +56,6 @@ public class ClobReaderType extends ReaderType {
      * @param columnLabel the label of the column containing the CLOB value
      * @return A Reader containing the character stream of the CLOB, or {@code null} if the column value is SQL NULL
      * @throws SQLException if a database access error occurs or the column label is not found
-     @MayReturnNull
      */
     @Override
     public Reader get(final ResultSet rs, final String columnLabel) throws SQLException {

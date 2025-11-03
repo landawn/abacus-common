@@ -20,16 +20,25 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.exception.UncheckedSQLException;
 
 /**
  * Type handler for {@link NClob} (National Character Large Object) objects, providing
  * database interaction capabilities for handling large Unicode text data.
- * Note that this type does not support string conversion operations as NCLOBs
- * are typically handled as database-specific objects.
+ *
+ * <p><b>Usage Examples:</b></p>
+ * <pre>{@code
+ * Type<NClob> type = TypeFactory.getType(NClob.class);
+ *
+ * // Reading from database
+ * NClob nclob = type.get(resultSet, 1);
+ * String content = type.stringOf(nclob); // Converts NClob to String
+ *
+ * // Writing to database
+ * type.set(preparedStatement, 1, nclob);
+ * }</pre>
  */
-public class NClobType extends AbstractType<NClob> {
+class NClobType extends AbstractType<NClob> {
 
     public static final String NCLOB = NClob.class.getSimpleName();
 
@@ -56,16 +65,23 @@ public class NClobType extends AbstractType<NClob> {
 
     /**
      * Converts an {@link NClob} object to its string representation.
-     * This operation is not supported for NCLOB types due to their potentially large size
-     * and database-specific nature.
+     * <p>
+     * This method extracts the entire content of the NClob as a string. The NClob is
+     * automatically freed after extraction. Note that this operation loads the entire
+     * NClob content into memory, which may not be suitable for very large objects.
+     * </p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * NClob nclob = resultSet.getNClob(1);
+     * String content = type.stringOf(nclob); // Extracts full content and frees NClob
+     * }</pre>
      *
      * @param x the NClob object to convert
-     * @return never returns normally
-     * @throws UnsupportedOperationException always thrown as this operation is not supported
+     * @return the string content of the NClob, or {@code null} if the input is null
+     * @throws UncheckedSQLException if a database access error occurs during extraction or freeing
      */
-    @MayReturnNull
     @Override
-
     public String stringOf(final NClob x) throws UnsupportedOperationException {
         if (x == null) {
             return null;
@@ -106,7 +122,6 @@ public class NClobType extends AbstractType<NClob> {
      * @return the NClob object from the ResultSet, or {@code null} if the column value is SQL NULL
      * @throws SQLException if a database access error occurs or the columnIndex is invalid
      */
-    @MayReturnNull
     @Override
     public NClob get(final ResultSet rs, final int columnIndex) throws SQLException {
         return rs.getNClob(columnIndex);
@@ -120,7 +135,6 @@ public class NClobType extends AbstractType<NClob> {
      * @return the NClob object from the ResultSet, or {@code null} if the column value is SQL NULL
      * @throws SQLException if a database access error occurs or the columnLabel is invalid
      */
-    @MayReturnNull
     @Override
     public NClob get(final ResultSet rs, final String columnLabel) throws SQLException {
         return rs.getNClob(columnLabel);

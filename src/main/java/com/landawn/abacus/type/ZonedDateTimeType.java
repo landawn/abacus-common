@@ -24,14 +24,13 @@ import java.time.Instant;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeParseException;
 
-import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.parser.JSONXMLSerializationConfig;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.DateTimeFormat;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Numbers;
 
-public class ZonedDateTimeType extends AbstractTemporalType<ZonedDateTime> {
+class ZonedDateTimeType extends AbstractTemporalType<ZonedDateTime> {
 
     public static final String ZONED_DATE_TIME = ZonedDateTime.class.getSimpleName();
 
@@ -47,7 +46,8 @@ public class ZonedDateTimeType extends AbstractTemporalType<ZonedDateTime> {
      * </p>
      *
      * <p><b>Usage Examples:</b></p>
-     * ZonedDateTimeType type = new ZonedDateTimeType();
+     * <pre>{@code
+     * Type<ZonedDateTime> type = TypeFactory.getType(ZonedDateTime.class);
      * Class&lt;ZonedDateTime&gt; clazz = type.clazz(); // Returns ZonedDateTime.class
      * }</pre>
      *
@@ -66,6 +66,7 @@ public class ZonedDateTimeType extends AbstractTemporalType<ZonedDateTime> {
      * </p>
      *
      * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
      * ZonedDateTime zdt = ZonedDateTime.now();
      * String str = type.stringOf(zdt); // Returns "2023-10-15T10:30:00.123Z"
      * }</pre>
@@ -74,7 +75,6 @@ public class ZonedDateTimeType extends AbstractTemporalType<ZonedDateTime> {
      * @return the ISO 8601 timestamp string representation, or {@code null} if the input is null
      */
     @Override
-    @MayReturnNull
     public String stringOf(final ZonedDateTime x) {
         return (x == null) ? null : iso8601TimestampDTF.format(x);
     }
@@ -91,6 +91,7 @@ public class ZonedDateTimeType extends AbstractTemporalType<ZonedDateTime> {
      * </p>
      *
      * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
      * ZonedDateTime zdt1 = type.valueOf(1697364600000L); // From epoch milliseconds
      * ZonedDateTime zdt2 = type.valueOf("2023-10-15T10:30:00Z"); // From string
      * }</pre>
@@ -99,7 +100,6 @@ public class ZonedDateTimeType extends AbstractTemporalType<ZonedDateTime> {
      * @return a ZonedDateTime instance, or {@code null} if the input is null
      */
     @Override
-    @MayReturnNull
     public ZonedDateTime valueOf(final Object obj) {
         if (obj instanceof Number) {
             return ZonedDateTime.ofInstant(Instant.ofEpochMilli(((Number) obj).longValue()), DEFAULT_ZONE_ID);
@@ -123,6 +123,7 @@ public class ZonedDateTimeType extends AbstractTemporalType<ZonedDateTime> {
      * </p>
      *
      * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
      * ZonedDateTime zdt1 = type.valueOf("2023-10-15T10:30:00Z"); // ISO 8601 format
      * ZonedDateTime zdt2 = type.valueOf("SYS_TIME"); // Current time
      * }</pre>
@@ -131,9 +132,7 @@ public class ZonedDateTimeType extends AbstractTemporalType<ZonedDateTime> {
      * @return a ZonedDateTime instance, or {@code null} if the string is empty
      * @throws DateTimeParseException if the string cannot be parsed as a valid date/time
      */
-    @MayReturnNull
     @Override
-
     public ZonedDateTime valueOf(final String str) {
         if (isNullDateTime(str)) {
             return null; // NOSONAR
@@ -166,6 +165,7 @@ public class ZonedDateTimeType extends AbstractTemporalType<ZonedDateTime> {
      * </p>
      *
      * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
      * char[] chars = "1697364600000".toCharArray();
      * ZonedDateTime zdt = type.valueOf(chars, 0, chars.length); // From epoch millis
      * }</pre>
@@ -175,9 +175,7 @@ public class ZonedDateTimeType extends AbstractTemporalType<ZonedDateTime> {
      * @param len the number of characters to process
      * @return a ZonedDateTime instance, or {@code null} if the input is {@code null} or empty
      */
-    @MayReturnNull
     @Override
-
     public ZonedDateTime valueOf(final char[] cbuf, final int offset, final int len) {
         if ((cbuf == null) || (len == 0)) {
             return null; // NOSONAR
@@ -202,6 +200,7 @@ public class ZonedDateTimeType extends AbstractTemporalType<ZonedDateTime> {
      * </p>
      *
      * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
      * ZonedDateTime zdt = type.get(resultSet, 1);
      * // Retrieves timestamp from first column as ZonedDateTime
      * }</pre>
@@ -212,7 +211,6 @@ public class ZonedDateTimeType extends AbstractTemporalType<ZonedDateTime> {
      * @throws SQLException if a database access error occurs or the column index is invalid
      */
     @Override
-    @MayReturnNull
     public ZonedDateTime get(final ResultSet rs, final int columnIndex) throws SQLException {
         final Timestamp ts = rs.getTimestamp(columnIndex);
 
@@ -220,26 +218,26 @@ public class ZonedDateTimeType extends AbstractTemporalType<ZonedDateTime> {
     }
 
     /**
-     * Retrieves a ZonedDateTime value from a ResultSet using the specified column name.
+     * Retrieves a ZonedDateTime value from a ResultSet using the specified column label.
      * <p>
      * This method reads a Timestamp value from the ResultSet and converts it to a
      * ZonedDateTime in the default timezone.
      * </p>
      *
      * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
      * ZonedDateTime zdt = type.get(resultSet, "created_date");
      * // Retrieves timestamp from <i>created_date</i> column
      * }</pre>
      *
      * @param rs the ResultSet to read from
-     * @param columnName the name of the column containing the timestamp value
+     * @param columnLabel the label for the column specified with the SQL AS clause
      * @return the ZonedDateTime value, or {@code null} if the database value is NULL
-     * @throws SQLException if a database access error occurs or the column name is invalid
+     * @throws SQLException if a database access error occurs or the column label is invalid
      */
     @Override
-    @MayReturnNull
-    public ZonedDateTime get(final ResultSet rs, final String columnName) throws SQLException {
-        final Timestamp ts = rs.getTimestamp(columnName);
+    public ZonedDateTime get(final ResultSet rs, final String columnLabel) throws SQLException {
+        final Timestamp ts = rs.getTimestamp(columnLabel);
 
         return ts == null ? null : ZonedDateTime.ofInstant(ts.toInstant(), DEFAULT_ZONE_ID);
     }
@@ -252,6 +250,7 @@ public class ZonedDateTimeType extends AbstractTemporalType<ZonedDateTime> {
      * </p>
      *
      * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
      * ZonedDateTime zdt = ZonedDateTime.now();
      * type.set(preparedStatement, 1, zdt); // Sets timestamp at first parameter
      * }</pre>
@@ -274,18 +273,19 @@ public class ZonedDateTimeType extends AbstractTemporalType<ZonedDateTime> {
      * </p>
      *
      * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
      * ZonedDateTime zdt = ZonedDateTime.now();
      * type.set(callableStatement, "created_date", zdt); // Sets timestamp parameter
      * }</pre>
      *
      * @param stmt the CallableStatement to set the value in
-     * @param columnName the name of the parameter where to set the value
+     * @param parameterName the name of the parameter where to set the value
      * @param x the ZonedDateTime value to set, or {@code null} for SQL NULL
      * @throws SQLException if a database access error occurs or the parameter name is invalid
      */
     @Override
-    public void set(final CallableStatement stmt, final String columnName, final ZonedDateTime x) throws SQLException {
-        stmt.setTimestamp(columnName, x == null ? null : Timestamp.from(x.toInstant()));
+    public void set(final CallableStatement stmt, final String parameterName, final ZonedDateTime x) throws SQLException {
+        stmt.setTimestamp(parameterName, x == null ? null : Timestamp.from(x.toInstant()));
     }
 
     /**
@@ -296,6 +296,7 @@ public class ZonedDateTimeType extends AbstractTemporalType<ZonedDateTime> {
      * </p>
      *
      * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
      * StringBuilder sb = new StringBuilder();
      * type.appendTo(sb, ZonedDateTime.now()); // Appends formatted date/time
      * }</pre>

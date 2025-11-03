@@ -25,19 +25,254 @@ import com.landawn.abacus.util.Tuple.Tuple2;
 import com.landawn.abacus.util.u.Optional;
 
 /**
- * This class encapsulates a result of an operation that can either be a value of type {@code T} or an exception of type {@code E}.
- * The class implements the Immutable interface, indicating that instances of this class are immutable.
- * The class is parameterized by two types: {@code T} which is the type of the result value, and {@code E} which is the type of the exception.
- * The exception type {@code E} is constrained to be a subtype of {@code Throwable}.
+ * A type-safe container for operation results that can either hold a successful value of type {@code T} 
+ * or an exception of type {@code E}, providing a functional programming approach to error handling 
+ * without throwing exceptions. This class serves as an alternative to traditional try-catch blocks 
+ * by encapsulating both success and failure states in a single immutable object, enabling more 
+ * explicit and composable error handling patterns.
  *
- * @param <T> the type of the result value.
- * @param <E> the type of the exception. Must be a subtype of {@code Throwable}.
- * @see com.landawn.abacus.util.u.Optional
- * @see com.landawn.abacus.util.u.Nullable
- * @see com.landawn.abacus.util.Holder
- * @see com.landawn.abacus.util.Pair
- * @see com.landawn.abacus.util.Triple
- * @see com.landawn.abacus.util.Tuple
+ * <p>The {@code Result} class follows the Railway-Oriented Programming pattern, where operations 
+ * can be chained together and failures are propagated through the chain without interrupting 
+ * the execution flow. This approach makes error handling more predictable and reduces the risk 
+ * of unhandled exceptions while maintaining type safety through generic constraints.</p>
+ *
+ * <p><b>Key Features:</b>
+ * <ul>
+ *   <li><b>Type Safety:</b> Generic constraints ensure exception type {@code E} extends {@code Throwable}</li>
+ *   <li><b>Immutable Design:</b> All instances are immutable, ensuring thread safety and preventing side effects</li>
+ *   <li><b>Explicit Error Handling:</b> Forces developers to handle both success and failure cases explicitly</li>
+ *   <li><b>Functional API:</b> Provides functional-style methods for conditional execution and transformation</li>
+ *   <li><b>No Exception Throwing:</b> Encapsulates exceptions rather than throwing them immediately</li>
+ *   <li><b>Railway Pattern:</b> Enables chaining operations with automatic failure propagation</li>
+ *   <li><b>Memory Efficient:</b> Minimal overhead with only two instance fields</li>
+ *   <li><b>Integration Ready:</b> Seamless conversion to other container types like Pair and Tuple</li>
+ * </ul>
+ *
+ * <p><b>⚠️ IMPORTANT - Immutable Design:</b>
+ * <ul>
+ *   <li>This class implements {@link Immutable}, guaranteeing that instances cannot be modified after creation</li>
+ *   <li>Both {@code value} and {@code exception} fields are final and set only during construction</li>
+ *   <li>Thread-safe by design due to immutability and lack of mutable state</li>
+ *   <li>All methods return new instances or extracted values without modifying the original object</li>
+ * </ul>
+ *
+ * <p><b>Design Philosophy:</b>
+ * <ul>
+ *   <li><b>Explicit Over Implicit:</b> Makes error states visible and forces explicit handling</li>
+ *   <li><b>Composition Over Control Flow:</b> Enables functional composition instead of imperative error handling</li>
+ *   <li><b>Type Safety Over Runtime Errors:</b> Uses generic constraints to prevent type-related runtime issues</li>
+ *   <li><b>Predictability Over Convenience:</b> Ensures predictable behavior even at the cost of some verbosity</li>
+ *   <li><b>Immutability Over Performance:</b> Prioritizes correctness and thread safety over minimal performance gains</li>
+ * </ul>
+ *
+ * <p><b>Core State Model:</b>
+ * <ul>
+ *   <li><b>Success State:</b> {@code value != null, exception == null} - Operation completed successfully</li>
+ *   <li><b>Success with Null:</b> {@code value == null, exception == null} - Operation succeeded but returned null</li>
+ *   <li><b>Failure State:</b> {@code exception != null} - Operation failed with an exception (value ignored)</li>
+ *   <li><b>Undefined State:</b> {@code value != null, exception != null} - Both present, exception takes precedence</li>
+ * </ul>
+ *
+ * <p><b>Generic Type Parameters:</b>
+ * <ul>
+ *   <li><b>{@code T}:</b> The type of the successful result value, can be any type including primitives (boxed)</li>
+ *   <li><b>{@code E extends Throwable}:</b> The type of exception, constrained to Throwable subtypes for type safety</li>
+ * </ul>
+ *
+ * <p><b>Common Usage Patterns:</b>
+ * <pre>{@code
+ * // Creating success and failure results
+ * Result<String, IOException> success = Result.of("Hello World", null);
+ * Result<String, IOException> failure = Result.of(null, new IOException("File not found"));
+ *
+ * // Checking result state
+ * if (result.isSuccess()) {
+ *     String value = result.orElseThrow(); // Safe to call
+ * } else {
+ *     IOException error = result.getException();
+ *     handleError(error);
+ * }
+ *
+ * // Conditional execution based on state
+ * result.ifSuccess(value -> processValue(value))
+ *       .ifFailure(error -> logError(error));
+ *
+ * // Safe value extraction with defaults
+ * String safeValue = result.orElseIfFailure("default value");
+ * String computedDefault = result.orElseGetIfFailure(() -> computeDefault());
+ *
+ * // Exception transformation and re-throwing
+ * String value = result.orElseThrow(IOException::new);
+ * String value2 = result.orElseThrow(() -> new CustomException("Operation failed"));
+ * }</pre>
+ *
+ * <p><b>Advanced Error Handling Patterns:</b>
+ * <pre>{@code
+ * // Chain operations with automatic failure propagation
+ * public Result<String, IOException> processFile(String filename) {
+ *     return readFile(filename)
+ *         .flatMap(content -> validateContent(content))
+ *         .flatMap(validContent -> transformContent(validContent));
+ * }
+ *
+ * // Convert between different exception types
+ * Result<Data, SQLException> dbResult = fetchFromDatabase();
+ * Result<Data, ServiceException> serviceResult = dbResult.mapFailure(
+ *     sqlEx -> new ServiceException("Database operation failed", sqlEx)
+ * );
+ *
+ * // Combine multiple results
+ * Result<String, Exception> combined = combineResults(
+ *     result1.ifFailureOrElse(
+ *         error -> handleFirstError(error),
+ *         value -> processFirstValue(value)
+ *     ),
+ *     result2.ifSuccessOrElse(
+ *         value -> processSecondValue(value),
+ *         error -> handleSecondError(error)
+ *     )
+ * );
+ * }</pre>
+ *
+ * <p><b>Integration with Existing Code:</b>
+ * <pre>{@code
+ * // Converting from traditional exception-based code
+ * public Result<String, FileNotFoundException> readFileAsResult(String path) {
+ *     try {
+ *         String content = Files.readString(Paths.get(path));
+ *         return Result.of(content, null);
+ *     } catch (FileNotFoundException e) {
+ *         return Result.of(null, e);
+ *     }
+ * }
+ *
+ * // Converting to other container types
+ * Pair<String, IOException> pair = result.toPair();
+ * Tuple2<String, IOException> tuple = result.toTuple();
+ * Optional<String> optional = result.isSuccess() 
+ *     ? Optional.of(result.orElseThrow()) 
+ *     : Optional.empty();
+ * }</pre>
+ *
+ * <p><b>RR Nested Class - RuntimeException Specialization:</b>
+ * <ul>
+ *   <li><b>Convenience Subclass:</b> Specialized for {@code RuntimeException} to reduce generic verbosity</li>
+ *   <li><b>Common Use Case:</b> Most application-level errors are RuntimeExceptions</li>
+ *   <li><b>Simplified API:</b> {@code Result.RR<T>} instead of {@code Result<T, RuntimeException>}</li>
+ *   <li><b>Beta Feature:</b> Subject to API refinement based on usage feedback</li>
+ * </ul>
+ *
+ * <p><b>Performance Characteristics:</b>
+ * <ul>
+ *   <li><b>Creation Cost:</b> O(1) - Simple object allocation with two field assignments</li>
+ *   <li><b>Memory Overhead:</b> Minimal - Only two object references plus standard object header</li>
+ *   <li><b>Method Calls:</b> O(1) - All operations are simple field access or condition checks</li>
+ *   <li><b>GC Impact:</b> Low - Immutable objects are GC-friendly and eligible for early collection</li>
+ *   <li><b>Thread Contention:</b> None - Immutable design eliminates synchronization needs</li>
+ * </ul>
+ *
+ * <p><b>Thread Safety:</b>
+ * <ul>
+ *   <li><b>Immutable State:</b> All fields are final and set only during construction</li>
+ *   <li><b>Concurrent Access:</b> Safe for concurrent read access from multiple threads</li>
+ *   <li><b>No Synchronization:</b> No locks or synchronization needed due to immutability</li>
+ *   <li><b>Safe Publication:</b> Can be safely published between threads without additional synchronization</li>
+ * </ul>
+ *
+ * <p><b>Memory Management:</b>
+ * <ul>
+ *   <li><b>No Memory Leaks:</b> Immutable design prevents accidental reference retention</li>
+ *   <li><b>Efficient Allocation:</b> Small object size minimizes allocation overhead</li>
+ *   <li><b>GC Optimization:</b> Immutable objects can be allocated in young generation for faster collection</li>
+ *   <li><b>Reference Cleanup:</b> No circular references or complex cleanup required</li>
+ * </ul>
+ *
+ * <p><b>Error Handling Philosophy:</b>
+ * <ul>
+ *   <li><b>Explicit Failures:</b> All potential failures are represented explicitly in the type system</li>
+ *   <li><b>No Hidden Exceptions:</b> Methods that can fail return Result instead of throwing</li>
+ *   <li><b>Composable Errors:</b> Error handling can be composed and chained functionally</li>
+ *   <li><b>Type-Safe Recovery:</b> Recovery strategies are enforced by the type system</li>
+ * </ul>
+ *
+ * <p><b>Best Practices:</b>
+ * <ul>
+ *   <li>Always check {@code isSuccess()} or {@code isFailure()} before extracting values</li>
+ *   <li>Use {@code orElseThrow()} only when you're certain the Result contains a success value</li>
+ *   <li>Prefer {@code ifSuccess()} and {@code ifFailure()} for conditional execution</li>
+ *   <li>Use {@code orElseIfFailure()} with meaningful default values</li>
+ *   <li>Leverage functional composition to build error-handling pipelines</li>
+ *   <li>Document which exceptions your methods can produce in their Result types</li>
+ *   <li>Use appropriate exception types in the generic parameter {@code E}</li>
+ * </ul>
+ *
+ * <p><b>Common Anti-Patterns to Avoid:</b>
+ * <ul>
+ *   <li>Creating Results with both value and exception non-null (ambiguous state)</li>
+ *   <li>Calling {@code orElseThrow()} without checking {@code isSuccess()} first</li>
+ *   <li>Ignoring failure cases and only handling success scenarios</li>
+ *   <li>Using Result for control flow instead of genuine error scenarios</li>
+ *   <li>Converting back to exception-throwing methods unnecessarily</li>
+ *   <li>Using overly broad exception types like {@code Exception} instead of specific types</li>
+ * </ul>
+ *
+ * <p><b>Comparison with Alternative Approaches:</b>
+ * <ul>
+ *   <li><b>vs. Optional:</b> Result handles both success/failure states, Optional only handles presence/absence</li>
+ *   <li><b>vs. Try-Catch:</b> Result makes error handling explicit and composable vs. imperative</li>
+ *   <li><b>vs. Checked Exceptions:</b> Result provides functional composition without method signature pollution</li>
+ *   <li><b>vs. Either Type:</b> Result is specialized for success/failure scenarios with exception semantics</li>
+ *   <li><b>vs. Nullable Returns:</b> Result distinguishes between null success values and actual failures</li>
+ * </ul>
+ *
+ * <p><b>Integration Ecosystem:</b>
+ * <ul>
+ *   <li><b>{@link Optional}:</b> Can be converted to/from Optional for value presence scenarios</li>
+ *   <li><b>{@link Pair}:</b> Direct conversion via {@code toPair()} for tuple-like usage</li>
+ *   <li><b>{@link Tuple}:</b> Direct conversion via {@code toTuple()} for structured data scenarios</li>
+ *   <li><b>{@link Throwables}:</b> Compatible with throwable utility methods for exception handling</li>
+ * </ul>
+ *
+ * <p><b>Example: File Processing Pipeline</b>
+ * <pre>{@code
+ * public class FileProcessor {
+ *     public Result<ProcessedData, IOException> processFile(String filename) {
+ *         return readFile(filename)
+ *             .flatMap(this::validateFileContent)
+ *             .flatMap(this::parseContent)
+ *             .flatMap(this::transformData)
+ *             .ifFailure(error -> logProcessingError(filename, error));
+ *     }
+ *
+ *     private Result<String, IOException> readFile(String filename) {
+ *         try {
+ *             String content = Files.readString(Paths.get(filename));
+ *             return Result.of(content, null);
+ *         } catch (IOException e) {
+ *             return Result.of(null, e);
+ *         }
+ *     }
+ *
+ *     public void handleProcessingResult(Result<ProcessedData, IOException> result) {
+ *         result.ifSuccessOrElse(
+ *             data -> saveProcessedData(data),
+ *             error -> notifyProcessingFailure(error)
+ *         );
+ *     }
+ * }
+ * }</pre>
+ *
+ * @param <T> the type of the successful result value
+ * @param <E> the type of the exception, must extend {@code Throwable}
+ * @see Immutable
+ * @see Optional
+ * @see Pair
+ * @see Tuple
+ * @see Throwables
+ * @see RuntimeException
+ * @see Throwable
+ * @see Function
+ * @see Supplier
  */
 @com.landawn.abacus.annotation.Immutable
 public class Result<T, E extends Throwable> implements Immutable {

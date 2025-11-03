@@ -18,7 +18,7 @@ package com.landawn.abacus.pool;
  * Factory class for creating various types of object pools.
  * This class provides static factory methods to create ObjectPool and KeyedObjectPool instances
  * with different configurations.
- * 
+ *
  * <p>The factory methods allow creating pools with various combinations of:
  * <ul>
  *   <li>Capacity limits</li>
@@ -26,29 +26,41 @@ package com.landawn.abacus.pool;
  *   <li>Auto-balancing behavior</li>
  *   <li>Memory-based constraints</li>
  * </ul>
- * 
+ *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
+ * // Example Poolable resource class
+ * class MyResource extends AbstractPoolable {
+ *     // ... resource implementation
+ * }
+ *
  * // Simple object pool with capacity 100
  * ObjectPool<MyResource> pool1 = PoolFactory.createObjectPool(100);
- * 
+ *
  * // Object pool with eviction every 5 minutes
  * ObjectPool<MyResource> pool2 = PoolFactory.createObjectPool(100, 300000);
- * 
+ *
  * // Keyed pool with custom eviction policy
- * KeyedObjectPool<String, Connection> pool3 = PoolFactory.createKeyedObjectPool(
+ * class DBConnection extends AbstractPoolable {
+ *     // ... connection implementation
+ * }
+ * KeyedObjectPool<String, DBConnection> pool3 = PoolFactory.createKeyedObjectPool(
  *     50, 60000, EvictionPolicy.ACCESS_COUNT
  * );
- * 
+ *
  * // Pool with memory constraints
- * MemoryMeasure<Buffer> measure = buffer -> buffer.capacity();
- * ObjectPool<Buffer> pool4 = PoolFactory.createObjectPool(
+ * class PooledBuffer extends AbstractPoolable {
+ *     private int capacity;
+ *     public int capacity() { return capacity; }
+ * }
+ * ObjectPool.MemoryMeasure<PooledBuffer> measure = buffer -> buffer.capacity();
+ * ObjectPool<PooledBuffer> pool4 = PoolFactory.createObjectPool(
  *     1000, 30000, EvictionPolicy.LAST_ACCESS_TIME,
  *     1024 * 1024 * 100, // 100MB max
  *     measure
  * );
  * }</pre>
- * 
+ *
  * @see ObjectPool
  * @see KeyedObjectPool
  * @see GenericObjectPool
@@ -75,10 +87,10 @@ public abstract class PoolFactory { //NOSONAR
     /**
      * Creates a new ObjectPool with the specified capacity and eviction delay.
      * Uses LAST_ACCESS_TIME eviction policy.
-     * 
+     *
      * @param <E> the type of elements in the pool, must implement Poolable
      * @param capacity the maximum number of objects the pool can hold
-     * @param evictDelay the interval between eviction runs in milliseconds, or 0 to disable eviction
+     * @param evictDelay the interval in milliseconds between eviction runs, or 0 to disable eviction
      * @return a new ObjectPool instance with the specified capacity and eviction delay
      */
     public static <E extends Poolable> ObjectPool<E> createObjectPool(final int capacity, final long evictDelay) {
@@ -87,10 +99,10 @@ public abstract class PoolFactory { //NOSONAR
 
     /**
      * Creates a new ObjectPool with the specified capacity, eviction delay, and eviction policy.
-     * 
+     *
      * @param <E> the type of elements in the pool, must implement Poolable
      * @param capacity the maximum number of objects the pool can hold
-     * @param evictDelay the interval between eviction runs in milliseconds, or 0 to disable eviction
+     * @param evictDelay the interval in milliseconds between eviction runs, or 0 to disable eviction
      * @param evictionPolicy the policy to use for evicting elements (LAST_ACCESS_TIME, ACCESS_COUNT, or EXPIRATION_TIME)
      * @return a new ObjectPool instance with the specified configuration
      */
@@ -101,12 +113,12 @@ public abstract class PoolFactory { //NOSONAR
     /**
      * Creates a new ObjectPool with memory-based capacity constraints.
      * Uses default auto-balancing with a balance factor of 0.2.
-     * 
+     *
      * @param <E> the type of elements in the pool, must implement Poolable
      * @param capacity the maximum number of objects the pool can hold
-     * @param evictDelay the interval between eviction runs in milliseconds, or 0 to disable eviction
+     * @param evictDelay the interval in milliseconds between eviction runs, or 0 to disable eviction
      * @param evictionPolicy the policy to use for evicting elements
-     * @param maxMemorySize the maximum total memory size in bytes the pool can use
+     * @param maxMemorySize the maximum total memory in bytes the pool can use
      * @param memoryMeasure the function to calculate memory size of pool elements
      * @return a new ObjectPool instance with memory constraints
      */
@@ -118,10 +130,10 @@ public abstract class PoolFactory { //NOSONAR
     /**
      * Creates a new ObjectPool with custom auto-balancing configuration.
      * Does not use memory-based constraints.
-     * 
+     *
      * @param <E> the type of elements in the pool, must implement Poolable
      * @param capacity the maximum number of objects the pool can hold
-     * @param evictDelay the interval between eviction runs in milliseconds, or 0 to disable eviction
+     * @param evictDelay the interval in milliseconds between eviction runs, or 0 to disable eviction
      * @param evictionPolicy the policy to use for evicting elements
      * @param autoBalance whether to automatically remove objects when the pool is full
      * @param balanceFactor the proportion of objects to remove during balancing (typically 0.1 to 0.5)
@@ -135,14 +147,14 @@ public abstract class PoolFactory { //NOSONAR
     /**
      * Creates a new ObjectPool with full configuration options including memory constraints and auto-balancing.
      * This is the most flexible factory method for creating object pools.
-     * 
+     *
      * @param <E> the type of elements in the pool, must implement Poolable
      * @param capacity the maximum number of objects the pool can hold
-     * @param evictDelay the interval between eviction runs in milliseconds, or 0 to disable eviction
+     * @param evictDelay the interval in milliseconds between eviction runs, or 0 to disable eviction
      * @param evictionPolicy the policy to use for evicting elements (default: LAST_ACCESS_TIME)
      * @param autoBalance whether to automatically remove objects when the pool is full (default: true)
-     * @param balanceFactor the proportion of objects to remove during balancing (default: 0.2)
-     * @param maxMemorySize the maximum total memory size in bytes, or 0 for no memory limit
+     * @param balanceFactor the proportion of objects to remove during balancing, typically 0.1 to 0.5 (default: 0.2)
+     * @param maxMemorySize the maximum total memory in bytes, or 0 for no memory limit
      * @param memoryMeasure the function to calculate memory size of pool elements, or {@code null} if not using memory limits
      * @return a new ObjectPool instance with full configuration
      */
@@ -167,11 +179,11 @@ public abstract class PoolFactory { //NOSONAR
     /**
      * Creates a new KeyedObjectPool with the specified capacity and eviction delay.
      * Uses LAST_ACCESS_TIME eviction policy.
-     * 
+     *
      * @param <K> the type of keys maintained by the pool
      * @param <E> the type of pooled values, must implement Poolable
      * @param capacity the maximum number of key-value pairs the pool can hold
-     * @param evictDelay the interval between eviction runs in milliseconds, or 0 to disable eviction
+     * @param evictDelay the interval in milliseconds between eviction runs, or 0 to disable eviction
      * @return a new KeyedObjectPool instance with the specified capacity and eviction delay
      */
     public static <K, E extends Poolable> KeyedObjectPool<K, E> createKeyedObjectPool(final int capacity, final long evictDelay) {
@@ -180,11 +192,11 @@ public abstract class PoolFactory { //NOSONAR
 
     /**
      * Creates a new KeyedObjectPool with the specified capacity, eviction delay, and eviction policy.
-     * 
+     *
      * @param <K> the type of keys maintained by the pool
      * @param <E> the type of pooled values, must implement Poolable
      * @param capacity the maximum number of key-value pairs the pool can hold
-     * @param evictDelay the interval between eviction runs in milliseconds, or 0 to disable eviction
+     * @param evictDelay the interval in milliseconds between eviction runs, or 0 to disable eviction
      * @param evictionPolicy the policy to use for evicting entries (LAST_ACCESS_TIME, ACCESS_COUNT, or EXPIRATION_TIME)
      * @return a new KeyedObjectPool instance with the specified configuration
      */
@@ -196,13 +208,13 @@ public abstract class PoolFactory { //NOSONAR
     /**
      * Creates a new KeyedObjectPool with memory-based capacity constraints.
      * Uses default auto-balancing with a balance factor of 0.2.
-     * 
+     *
      * @param <K> the type of keys maintained by the pool
      * @param <E> the type of pooled values, must implement Poolable
      * @param capacity the maximum number of key-value pairs the pool can hold
-     * @param evictDelay the interval between eviction runs in milliseconds, or 0 to disable eviction
+     * @param evictDelay the interval in milliseconds between eviction runs, or 0 to disable eviction
      * @param evictionPolicy the policy to use for evicting entries
-     * @param maxMemorySize the maximum total memory size in bytes the pool can use
+     * @param maxMemorySize the maximum total memory in bytes the pool can use
      * @param memoryMeasure the function to calculate memory size of key-value pairs
      * @return a new KeyedObjectPool instance with memory constraints
      */
@@ -214,11 +226,11 @@ public abstract class PoolFactory { //NOSONAR
     /**
      * Creates a new KeyedObjectPool with custom auto-balancing configuration.
      * Does not use memory-based constraints.
-     * 
+     *
      * @param <K> the type of keys maintained by the pool
      * @param <E> the type of pooled values, must implement Poolable
      * @param capacity the maximum number of key-value pairs the pool can hold
-     * @param evictDelay the interval between eviction runs in milliseconds, or 0 to disable eviction
+     * @param evictDelay the interval in milliseconds between eviction runs, or 0 to disable eviction
      * @param evictionPolicy the policy to use for evicting entries
      * @param autoBalance whether to automatically remove entries when the pool is full
      * @param balanceFactor the proportion of entries to remove during balancing (typically 0.1 to 0.5)
@@ -232,25 +244,31 @@ public abstract class PoolFactory { //NOSONAR
     /**
      * Creates a new KeyedObjectPool with full configuration options including memory constraints and auto-balancing.
      * This is the most flexible factory method for creating keyed object pools.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * MemoryMeasure<String, Connection> measure = (key, conn) -> 
+     * // Example Poolable connection class
+     * class DBConnection extends AbstractPoolable {
+     *     private long memoryUsage = 1024; // example size in bytes
+     *     public long getMemoryUsage() { return memoryUsage; }
+     * }
+     *
+     * KeyedObjectPool.MemoryMeasure<String, DBConnection> measure = (key, conn) ->
      *     key.length() * 2 + conn.getMemoryUsage();
-     * KeyedObjectPool<String, Connection> pool = PoolFactory.createKeyedObjectPool(
-     *     100, 60000, EvictionPolicy.LAST_ACCESS_TIME, 
+     * KeyedObjectPool<String, DBConnection> pool = PoolFactory.createKeyedObjectPool(
+     *     100, 60000, EvictionPolicy.LAST_ACCESS_TIME,
      *     true, 0.3f, 1024*1024*50, measure
      * );
      * }</pre>
-     * 
+     *
      * @param <K> the type of keys maintained by the pool
      * @param <E> the type of pooled values, must implement Poolable
      * @param capacity the maximum number of key-value pairs the pool can hold
-     * @param evictDelay the interval between eviction runs in milliseconds, or 0 to disable eviction
+     * @param evictDelay the interval in milliseconds between eviction runs, or 0 to disable eviction
      * @param evictionPolicy the policy to use for evicting entries (default: LAST_ACCESS_TIME)
      * @param autoBalance whether to automatically remove entries when the pool is full (default: true)
-     * @param balanceFactor the proportion of entries to remove during balancing (default: 0.2)
-     * @param maxMemorySize the maximum total memory size in bytes, or 0 for no memory limit
+     * @param balanceFactor the proportion of entries to remove during balancing, typically 0.1 to 0.5 (default: 0.2)
+     * @param maxMemorySize the maximum total memory in bytes, or 0 for no memory limit
      * @param memoryMeasure the function to calculate memory size of key-value pairs, or {@code null} if not using memory limits
      * @return a new KeyedObjectPool instance with full configuration
      */

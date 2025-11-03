@@ -11,10 +11,8 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-
 package com.landawn.abacus.util.function;
 
-import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.util.Fn;
 import com.landawn.abacus.util.Throwables;
 
@@ -22,17 +20,18 @@ import com.landawn.abacus.util.Throwables;
  * A task that returns a result and may throw a RuntimeException.
  * This interface extends {@link java.util.concurrent.Callable} but restricts the exception type to RuntimeException,
  * making it more convenient to use in contexts where checked exceptions are not desired.
- * 
+ *
  * <p>This is a functional interface whose functional method is {@link #call()}.
- * 
+ *
  * @param <R> the result type of method {@code call}
- * 
+ *
  * @see java.util.concurrent.Callable
  * @see Runnable
+ *
+ * <p>Refer to JDK API documentation at: <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html">https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a></p>
  */
 @FunctionalInterface
 public interface Callable<R> extends java.util.concurrent.Callable<R>, Throwables.Callable<R, RuntimeException> { //NOSONAR
-
     /**
      * Computes a result, or throws a RuntimeException if unable to do so.
      * Unlike {@link java.util.concurrent.Callable#call()}, this method only throws RuntimeException,
@@ -47,7 +46,6 @@ public interface Callable<R> extends java.util.concurrent.Callable<R>, Throwable
      * @return the computed result
      */
     @Override
-    @MayReturnNull
     R call();
 
     /**

@@ -11,10 +11,8 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-
 package com.landawn.abacus.util.function;
 
-import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.util.Throwables;
 
 /**
@@ -46,12 +44,13 @@ public interface ObjIntFunction<T, R> extends Throwables.ObjIntFunction<T, R, Ru
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * ObjIntFunction<List<String>, String> getAtIndex = (list, index) -> 
+     * ObjIntFunction<List<String>, String> getAtIndex = (list, index) ->
      *     list.get(index);
-     * ObjIntFunction<String, String> repeat = (str, times) -> 
+     * ObjIntFunction<String, String> repeat = (str, times) ->
      *     str.repeat(times);
-     * 
-     * String element = getAtIndex.apply(myList, 2);
+     *
+     * List<String> items = List.of("a", "b", "c");
+     * String element = getAtIndex.apply(items, 2); // Returns "c"
      * String repeated = repeat.apply("Hello", 3); // Returns "HelloHelloHello"
      * }</pre>
      *
@@ -60,7 +59,6 @@ public interface ObjIntFunction<T, R> extends Throwables.ObjIntFunction<T, R, Ru
      * @return the function result of type R
      */
     @Override
-    @MayReturnNull
     R apply(T t, int u);
 
     /**
@@ -75,14 +73,14 @@ public interface ObjIntFunction<T, R> extends Throwables.ObjIntFunction<T, R, Ru
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * ObjIntFunction<String[], String> getElement = (array, index) -> 
+     * ObjIntFunction<String[], String> getElement = (array, index) ->
      *     array[index];
-     * Function<String, Integer> parseLength = str -> 
+     * Function<String, Integer> parseLength = str ->
      *     str.length();
-     * 
-     * ObjIntFunction<String[], Integer> getElementLength = 
+     *
+     * ObjIntFunction<String[], Integer> getElementLength =
      *     getElement.andThen(parseLength);
-     * 
+     *
      * String[] words = {"Hello", "World", "Java"};
      * Integer length = getElementLength.apply(words, 1); // Returns 5 (length of "World")
      * }</pre>

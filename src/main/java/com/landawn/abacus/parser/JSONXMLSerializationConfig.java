@@ -14,7 +14,6 @@
 
 package com.landawn.abacus.parser;
 
-import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.util.DateTimeFormat;
 import com.landawn.abacus.util.NamingPolicy;
 import com.landawn.abacus.util.WD;
@@ -42,7 +41,6 @@ import com.landawn.abacus.util.WD;
  * </ul>
  *
  * @param <C> the concrete configuration type for method chaining
- * @since 0.8
  * @see JSONSerializationConfig
  * @see XMLSerializationConfig
  */
@@ -212,7 +210,6 @@ public abstract class JSONXMLSerializationConfig<C extends JSONXMLSerializationC
      *
      * @return the current date time format
      */
-    @MayReturnNull
     public DateTimeFormat getDateTimeFormat() {
         return dateTimeFormat;
     }
@@ -233,7 +230,6 @@ public abstract class JSONXMLSerializationConfig<C extends JSONXMLSerializationC
      * @param dateTimeFormat the date time format to use
      * @return this instance for method chaining
      */
-    @MayReturnNull
     public C setDateTimeFormat(final DateTimeFormat dateTimeFormat) {
         this.dateTimeFormat = dateTimeFormat;
 
@@ -268,7 +264,6 @@ public abstract class JSONXMLSerializationConfig<C extends JSONXMLSerializationC
      * @param prettyFormat {@code true} to enable pretty formatting, {@code false} otherwise
      * @return this instance for method chaining
      */
-    @MayReturnNull
     public C prettyFormat(final boolean prettyFormat) {
         this.prettyFormat = prettyFormat;
 
@@ -281,7 +276,6 @@ public abstract class JSONXMLSerializationConfig<C extends JSONXMLSerializationC
      *
      * @return the indentation string
      */
-    @MayReturnNull
     public String getIndentation() {
         return indentation;
     }
@@ -301,7 +295,6 @@ public abstract class JSONXMLSerializationConfig<C extends JSONXMLSerializationC
      * @param indentation the indentation string to use
      * @return this instance for method chaining
      */
-    @MayReturnNull
     public C setIndentation(final String indentation) {
         this.indentation = indentation;
 
@@ -313,7 +306,6 @@ public abstract class JSONXMLSerializationConfig<C extends JSONXMLSerializationC
      *
      * @return the property naming policy, or {@code null} if using default naming
      */
-    @MayReturnNull
     public NamingPolicy getPropNamingPolicy() {
         return propNamingPolicy;
     }
@@ -337,7 +329,6 @@ public abstract class JSONXMLSerializationConfig<C extends JSONXMLSerializationC
      * @param propNamingPolicy the naming policy to use
      * @return this instance for method chaining
      */
-    @MayReturnNull
     public C setPropNamingPolicy(final NamingPolicy propNamingPolicy) {
         this.propNamingPolicy = propNamingPolicy;
 
@@ -368,7 +359,6 @@ public abstract class JSONXMLSerializationConfig<C extends JSONXMLSerializationC
      * @param writeLongAsString {@code true} to write longs as strings, {@code false} otherwise
      * @return this instance for method chaining
      */
-    @MayReturnNull
     public C writeLongAsString(final boolean writeLongAsString) {
         this.writeLongAsString = writeLongAsString;
 
@@ -398,7 +388,6 @@ public abstract class JSONXMLSerializationConfig<C extends JSONXMLSerializationC
      * @param writeNullStringAsEmpty {@code true} to write {@code null} as empty string, {@code false} otherwise
      * @return this instance for method chaining
      */
-    @MayReturnNull
     public C writeNullStringAsEmpty(final boolean writeNullStringAsEmpty) {
         this.writeNullStringAsEmpty = writeNullStringAsEmpty;
 
@@ -428,7 +417,6 @@ public abstract class JSONXMLSerializationConfig<C extends JSONXMLSerializationC
      * @param writeNullNumberAsZero {@code true} to write {@code null} as zero, {@code false} otherwise
      * @return this instance for method chaining
      */
-    @MayReturnNull
     public C writeNullNumberAsZero(final boolean writeNullNumberAsZero) {
         this.writeNullNumberAsZero = writeNullNumberAsZero;
 
@@ -476,12 +464,12 @@ public abstract class JSONXMLSerializationConfig<C extends JSONXMLSerializationC
     /**
      * Sets whether to write BigDecimal values in plain format (without scientific notation).
      * When enabled, BigDecimal values will always be written in plain decimal notation.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * config.writeBigDecimalAsPlain(true);
-     * // BigDecimal("1.23E+5") will be written as "123000" 
-     * // instead of "1.23E+5"
+     * // BigDecimal("1.23E+5") will be written as 123000
+     * // instead of 1.23E+5
      * }</pre>
      *
      * @param writeBigDecimalAsPlain {@code true} to write in plain format, {@code false} otherwise

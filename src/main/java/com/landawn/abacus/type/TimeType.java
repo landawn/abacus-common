@@ -20,7 +20,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Time;
 
-import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.util.Dates;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Strings;
@@ -30,7 +29,7 @@ import com.landawn.abacus.util.Strings;
  * deserialization, and database operations for Time instances. It supports parsing
  * time values from various string formats and millisecond values.
  */
-public class TimeType extends AbstractDateType<Time> {
+class TimeType extends AbstractDateType<Time> {
 
     /**
      * The type name identifier for Time type.
@@ -62,9 +61,7 @@ public class TimeType extends AbstractDateType<Time> {
      * @param obj the object to convert
      * @return a Time object, or {@code null} if obj is null
      */
-    @MayReturnNull
     @Override
-
     public Time valueOf(final Object obj) {
         if (obj instanceof Number) {
             return new Time(((Number) obj).longValue());
@@ -82,9 +79,7 @@ public class TimeType extends AbstractDateType<Time> {
      * @param str the string to parse
      * @return a Time object, or {@code null} if str is empty
      */
-    @MayReturnNull
     @Override
-
     public Time valueOf(final String str) {
         return Strings.isEmpty(str) ? null : (N.equals(str, SYS_TIME) ? Dates.currentTime() : Dates.parseTime(str));
     }
@@ -99,9 +94,7 @@ public class TimeType extends AbstractDateType<Time> {
      * @param len the number of characters to use
      * @return a Time object, or {@code null} if the input is {@code null} or empty
      */
-    @MayReturnNull
     @Override
-
     public Time valueOf(final char[] cbuf, final int offset, final int len) {
         if ((cbuf == null) || (len == 0)) {
             return null; // NOSONAR
@@ -126,7 +119,6 @@ public class TimeType extends AbstractDateType<Time> {
      * @return a Time object, or {@code null} if the database value is null
      * @throws SQLException if a database access error occurs or the columnIndex is invalid
      */
-    @MayReturnNull
     @Override
     public Time get(final ResultSet rs, final int columnIndex) throws SQLException {
         return rs.getTime(columnIndex);
@@ -140,7 +132,6 @@ public class TimeType extends AbstractDateType<Time> {
      * @return a Time object, or {@code null} if the database value is null
      * @throws SQLException if a database access error occurs or the columnLabel is not found
      */
-    @MayReturnNull
     @Override
     public Time get(final ResultSet rs, final String columnLabel) throws SQLException {
         return rs.getTime(columnLabel);

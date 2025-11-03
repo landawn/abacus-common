@@ -83,22 +83,57 @@ import com.landawn.abacus.util.stream.ObjIteratorEx;
 import com.landawn.abacus.util.stream.Stream;
 
 /**
- * The sequence class is an abstract class that represents a sequence of elements and supports different kinds of computations.
- * The sequence operations are divided into intermediate and terminal operations, and are combined to form sequence pipelines.
- * A sequence pipeline consists of a source (which might be an array, a collection, a generator function, an I/O channel, etc.),
- * zero or more intermediate operations (which transform a sequence into another sequence, such as {@code filter(Predicate)}),
- * and a terminal operation (which produces a result or side-effect, such as {@code count()} or {@code forEach(Consumer)}).
- * Sequences are lazy; computation on the source data is only performed when the terminal operation is initiated,
- * and source elements are consumed only as needed.
+ * A sequence class that represents a lazy, functional sequence of elements supporting both intermediate 
+ * and terminal operations, similar to Java Streams but with support for checked exceptions.
  *
- * <p>The sequence will be automatically closed after a terminal method is called/triggered</p>
+ * <p>The {@code Seq} class is designed to handle stream-like operations while allowing methods to throw 
+ * checked exceptions, making it particularly useful for I/O operations, database queries, and other 
+ * operations that may throw checked exceptions without requiring wrapping them in unchecked exceptions.
  *
- * <p>{@code Seq} can be easily transformed to {@code Stream} by the {@code transformB} methods</p>
- * <p>Refer to {@code com.landawn.abacus.util.stream.BaseStream} and {@code com.landawn.abacus.util.stream.Stream} for more APIs docs.</p>
+ * <p>Sequences are lazy; computation on the source data is only performed when a terminal operation 
+ * is initiated, and source elements are consumed only as needed. The sequence will be automatically 
+ * closed after a terminal method is called or triggered.
  *
- * @param <T> the type of the elements in this stream
- * @param <E> the type of the checked exception this sequence can throw
+ * <p><b>Key Features:</b>
+ * <ul>
+ *   <li>Supports checked exceptions in stream operations</li>
+ *   <li>Lazy evaluation - operations are not executed until a terminal operation is called</li>
+ *   <li>Auto-closeable - automatically closes resources when terminal operations complete</li>
+ *   <li>Immutable - operations return new sequence instances</li>
+ *   <li>Sequential processing only (not parallel)</li>
+ *   <li>Easy transformation to standard Java {@link Stream} via {@code stream()} method</li>
+ * </ul>
  *
+ * <p><b>Usage Examples:</b></p>
+ * <pre>{@code
+ * // Basic sequence operations with exception handling
+ * Seq<String, IOException> lines = Seq.lines(Paths.get("file.txt"))
+ *     .filter(line -> !line.isEmpty())
+ *     .map(String::trim);
+ *
+ * // Database operations without wrapping exceptions
+ * Seq<User, SQLException> users = Seq.of(userIds)
+ *     .map(id -> userDao.findById(id))  // May throw SQLException
+ *     .filter(user -> user.isActive());
+ *
+ * // Conversion to standard Stream
+ * Stream<String> stream = Seq.of("a", "b", "c").stream();
+ * }</pre>
+ *
+ * <p><b>Operation Types:</b>
+ * <ul>
+ *   <li><b>Intermediate Operations:</b> Transform the sequence and return a new {@code Seq} 
+ *       (e.g., {@code filter()}, {@code map()}, {@code sorted()})</li>
+ *   <li><b>Terminal Operations:</b> Produce a result or side-effect and close the sequence 
+ *       (e.g., {@code forEach()}, {@code collect()}, {@code toList()})</li>
+ * </ul>
+ *
+ * @param <T> the type of elements in this sequence
+ * @param <E> the type of checked exception that operations in this sequence may throw 
+ *
+ * @see com.landawn.abacus.util.Throwables
+ * @see com.landawn.abacus.util.Fnn
+ * @see com.landawn.abacus.util.Fn
  * @see com.landawn.abacus.util.stream.BaseStream
  * @see com.landawn.abacus.util.stream.Stream
  * @see com.landawn.abacus.util.stream.EntryStream
@@ -106,12 +141,10 @@ import com.landawn.abacus.util.stream.Stream;
  * @see com.landawn.abacus.util.stream.LongStream
  * @see com.landawn.abacus.util.stream.DoubleStream
  * @see com.landawn.abacus.util.stream.Collectors
- * @see com.landawn.abacus.util.Fn
  * @see com.landawn.abacus.util.Comparators
  * @see com.landawn.abacus.util.ExceptionUtil
  * @see com.landawn.abacus.util.CSVUtil
  * @see java.util.stream.Stream
- *
  */
 @Beta
 @LazyEvaluation

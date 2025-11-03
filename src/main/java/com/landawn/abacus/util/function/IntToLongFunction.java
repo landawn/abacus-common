@@ -11,7 +11,6 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-
 package com.landawn.abacus.util.function;
 
 import com.landawn.abacus.util.Throwables;
@@ -24,7 +23,7 @@ import com.landawn.abacus.util.Throwables;
  * <p>This interface extends both {@link Throwables.IntToLongFunction} with
  * {@link RuntimeException} and {@link java.util.function.IntToLongFunction},
  * providing compatibility with the Java standard library while supporting the
- * Abacus framework's exception handling capabilities.
+ * abacus-common framework's exception handling capabilities.
  *
  * <p>This is a functional interface whose functional method is
  * {@link #applyAsLong(int)}.
@@ -35,11 +34,9 @@ import com.landawn.abacus.util.Throwables;
  *
  * @see java.util.function.Function
  * @see java.util.function.IntToLongFunction
- * @since 1.8
  */
 @FunctionalInterface
 public interface IntToLongFunction extends Throwables.IntToLongFunction<RuntimeException>, java.util.function.IntToLongFunction { //NOSONAR
-
     /**
      * A default implementation that performs a widening primitive conversion
      * from {@code int} to {@code long}. This conversion is lossless as every

@@ -11,14 +11,13 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-
 package com.landawn.abacus.util.function;
 
 import com.landawn.abacus.util.Throwables;
 
 /**
  * A functional interface that represents a predicate (boolean-valued function) of one argument.
- * 
+ *
  * <p>This interface extends both {@link Throwables.Predicate} and {@link java.util.function.Predicate},
  * providing compatibility with the standard Java functional interfaces while adding exception
  * handling capabilities through the Throwables framework.
@@ -32,7 +31,6 @@ import com.landawn.abacus.util.Throwables;
  */
 @FunctionalInterface
 public interface Predicate<T> extends Throwables.Predicate<T, RuntimeException>, java.util.function.Predicate<T> { //NOSONAR
-
     /**
      * Evaluates this predicate on the given argument.
      *
@@ -44,14 +42,13 @@ public interface Predicate<T> extends Throwables.Predicate<T, RuntimeException>,
      * <pre>{@code
      * Predicate<String> isEmpty = str -> str.isEmpty();
      * Predicate<Integer> isPositive = num -> num > 0;
-     * 
+     *
      * boolean result1 = isEmpty.test(""); // Returns true
      * boolean result2 = isPositive.test(5); // Returns true
      * }</pre>
      *
      * @param value the input argument to be tested
-     * @return {@code true} if the input argument matches the predicate,
-     *         otherwise {@code false} if the predicate evaluation fails
+     * @return {@code true} if the input argument matches the predicate, {@code false} otherwise
      */
     @Override
     boolean test(T value);
@@ -67,7 +64,7 @@ public interface Predicate<T> extends Throwables.Predicate<T, RuntimeException>,
      * <pre>{@code
      * Predicate<String> isEmpty = str -> str.isEmpty();
      * Predicate<String> isNotEmpty = isEmpty.negate();
-     * 
+     *
      * boolean result = isNotEmpty.test("Hello"); // Returns true
      * }</pre>
      *
@@ -92,14 +89,15 @@ public interface Predicate<T> extends Throwables.Predicate<T, RuntimeException>,
      * <pre>{@code
      * Predicate<String> isNotEmpty = str -> !str.isEmpty();
      * Predicate<String> startsWithA = str -> str.startsWith("A");
-     * 
+     *
      * Predicate<String> isNotEmptyAndStartsWithA = isNotEmpty.and(startsWithA);
      * boolean result = isNotEmptyAndStartsWithA.test("Apple"); // Returns true
      * }</pre>
      *
-     * @param other a predicate that will be logically-ANDed with this predicate
-     * @return a composed predicate that represents the short-circuiting logical
+     * @param other a predicate that will be logically-ANDed with this predicate. Must not be {@code null}.
+     * @return a composed {@code Predicate} that represents the short-circuiting logical
      *         AND of this predicate and the {@code other} predicate
+     * @throws NullPointerException if {@code other} is null
      */
     @Override
     default Predicate<T> and(final java.util.function.Predicate<? super T> other) {
@@ -120,15 +118,16 @@ public interface Predicate<T> extends Throwables.Predicate<T, RuntimeException>,
      * <pre>{@code
      * Predicate<Integer> isEven = num -> num % 2 == 0;
      * Predicate<Integer> isNegative = num -> num < 0;
-     * 
+     *
      * Predicate<Integer> isEvenOrNegative = isEven.or(isNegative);
      * boolean result1 = isEvenOrNegative.test(4); // Returns true (even)
      * boolean result2 = isEvenOrNegative.test(-3); // Returns true (negative)
      * }</pre>
      *
-     * @param other a predicate that will be logically-ORed with this predicate
-     * @return a composed predicate that represents the short-circuiting logical
+     * @param other a predicate that will be logically-ORed with this predicate. Must not be {@code null}.
+     * @return a composed {@code Predicate} that represents the short-circuiting logical
      *         OR of this predicate and the {@code other} predicate
+     * @throws NullPointerException if {@code other} is null
      */
     @Override
     default Predicate<T> or(final java.util.function.Predicate<? super T> other) {
@@ -147,9 +146,9 @@ public interface Predicate<T> extends Throwables.Predicate<T, RuntimeException>,
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Predicate<String> validator = str -> str.matches("[A-Z]+");
-     * var throwableValidator = 
+     * var throwableValidator =
      *     validator.toThrowable();
-     * 
+     *
      * // Can now be used in contexts that handle IOException
      * }</pre>
      *

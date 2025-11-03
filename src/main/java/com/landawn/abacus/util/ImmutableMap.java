@@ -107,17 +107,17 @@ public class ImmutableMap<K, V> extends AbstractMap<K, V> implements Immutable {
      * Returns an ImmutableMap containing a single key-value mapping.
      * The returned map is immutable and will have a size of 1.
      * The iteration order is guaranteed to match the order of insertion.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ImmutableMap<String, Integer> singleEntry = ImmutableMap.of("count", 42);
      * System.out.println(singleEntry.get("count")); // 42
      * }</pre>
      *
-     * @param <K> the type of the key
-     * @param <V> the type of the value
-     * @param k1 the key of the single mapping
-     * @param v1 the value of the single mapping
+     * @param <K> the type of keys
+     * @param <V> the type of values
+     * @param k1 the first key
+     * @param v1 the first value
      * @return an ImmutableMap containing only the specified key-value pair
      */
     public static <K, V> ImmutableMap<K, V> of(final K k1, final V v1) {
@@ -129,7 +129,7 @@ public class ImmutableMap<K, V> extends AbstractMap<K, V> implements Immutable {
      * The returned map is immutable and will have a size of 2.
      * The iteration order is guaranteed to match the order of insertion.
      * If the same key is provided twice, an IllegalArgumentException may be thrown.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ImmutableMap<String, String> map = ImmutableMap.of(
@@ -138,8 +138,8 @@ public class ImmutableMap<K, V> extends AbstractMap<K, V> implements Immutable {
      * );
      * }</pre>
      *
-     * @param <K> the type of the keys
-     * @param <V> the type of the values
+     * @param <K> the type of keys
+     * @param <V> the type of values
      * @param k1 the first key
      * @param v1 the first value
      * @param k2 the second key
@@ -155,7 +155,7 @@ public class ImmutableMap<K, V> extends AbstractMap<K, V> implements Immutable {
      * The returned map is immutable and will have a size of 3.
      * The iteration order is guaranteed to match the order of insertion.
      * If duplicate keys are provided, an IllegalArgumentException may be thrown.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ImmutableMap<String, Integer> scores = ImmutableMap.of(
@@ -165,8 +165,8 @@ public class ImmutableMap<K, V> extends AbstractMap<K, V> implements Immutable {
      * );
      * }</pre>
      *
-     * @param <K> the type of the keys
-     * @param <V> the type of the values
+     * @param <K> the type of keys
+     * @param <V> the type of values
      * @param k1 the first key
      * @param v1 the first value
      * @param k2 the second key
@@ -185,8 +185,8 @@ public class ImmutableMap<K, V> extends AbstractMap<K, V> implements Immutable {
      * The iteration order is guaranteed to match the order of insertion.
      * If duplicate keys are provided, an IllegalArgumentException may be thrown.
      *
-     * @param <K> the type of the keys
-     * @param <V> the type of the values
+     * @param <K> the type of keys
+     * @param <V> the type of values
      * @param k1 the first key
      * @param v1 the first value
      * @param k2 the second key
@@ -207,8 +207,8 @@ public class ImmutableMap<K, V> extends AbstractMap<K, V> implements Immutable {
      * The iteration order is guaranteed to match the order of insertion.
      * If duplicate keys are provided, an IllegalArgumentException may be thrown.
      *
-     * @param <K> the type of the keys
-     * @param <V> the type of the values
+     * @param <K> the type of keys
+     * @param <V> the type of values
      * @param k1 the first key
      * @param v1 the first value
      * @param k2 the second key

@@ -11,7 +11,6 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-
 package com.landawn.abacus.util.function;
 
 import com.landawn.abacus.util.Throwables;
@@ -19,45 +18,47 @@ import com.landawn.abacus.util.Throwables;
 /**
  * Represents a predicate (boolean-valued function) of a long-valued argument and an object argument.
  * This is a two-arity specialization of {@code Predicate}.
- * 
+ *
  * <p>This is a functional interface whose functional method is {@link #test(long, Object)}.
- * 
+ *
  * <p>The interface extends {@code Throwables.LongObjPredicate} with {@code RuntimeException} as the exception type,
  * making it suitable for use in contexts where checked exceptions are not required.
- * 
+ *
  * @param <T> the type of the object argument to the predicate
- * 
+ *
  * @see java.util.function.Predicate
  * @see java.util.function.BiPredicate
+ *
+ * <p>Refer to JDK API documentation at: <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html">https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a></p>
  */
 @FunctionalInterface
 public interface LongObjPredicate<T> extends Throwables.LongObjPredicate<T, RuntimeException> { // NOSONAR
     /**
      * Evaluates this predicate on the given arguments.
-     * 
+     *
      * <p>This method takes a primitive long value as the first argument and an object of type T
      * as the second argument, then evaluates them to produce a boolean result.
      *
      * @param t the long-valued first argument
      * @param u the object second argument of type T
-     * @return {@code true} if the input arguments match the predicate, otherwise {@code false} if any error occurs during predicate evaluation
+     * @return {@code true} if the input arguments match the predicate, otherwise {@code false}
      */
     @Override
     boolean test(long t, T u);
 
     /**
      * Returns a predicate that represents the logical negation of this predicate.
-     * 
+     *
      * <p>The returned predicate will return {@code true} when this predicate returns {@code false},
      * and {@code false} when this predicate returns {@code true}.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * LongObjPredicate<String> isLongGreaterThanLength = (l, s) -> l > s.length();
      * LongObjPredicate<String> isLongNotGreaterThanLength = isLongGreaterThanLength.negate();
      * // isLongNotGreaterThanLength.test(3L, "hello") returns {@code true} (3 is not > 5)
      * }</pre>
-     * 
+     *
      * @return a predicate that represents the logical negation of this predicate
      */
     default LongObjPredicate<T> negate() {
@@ -67,14 +68,14 @@ public interface LongObjPredicate<T> extends Throwables.LongObjPredicate<T, Runt
     /**
      * Returns a composed predicate that represents a short-circuiting logical
      * AND of this predicate and another.
-     * 
+     *
      * <p>When evaluating the composed predicate, if this predicate is {@code false},
      * then the {@code other} predicate is not evaluated.
-     * 
+     *
      * <p>Any exceptions thrown during evaluation of either predicate are relayed
      * to the caller; if evaluation of this predicate throws an exception, the
      * {@code other} predicate will not be evaluated.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * LongObjPredicate<String> isPositive = (l, s) -> l > 0;
@@ -94,14 +95,14 @@ public interface LongObjPredicate<T> extends Throwables.LongObjPredicate<T, Runt
     /**
      * Returns a composed predicate that represents a short-circuiting logical
      * OR of this predicate and another.
-     * 
+     *
      * <p>When evaluating the composed predicate, if this predicate is {@code true},
      * then the {@code other} predicate is not evaluated.
-     * 
+     *
      * <p>Any exceptions thrown during evaluation of either predicate are relayed
      * to the caller; if evaluation of this predicate throws an exception, the
      * {@code other} predicate will not be evaluated.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * LongObjPredicate<String> isZero = (l, s) -> l == 0;

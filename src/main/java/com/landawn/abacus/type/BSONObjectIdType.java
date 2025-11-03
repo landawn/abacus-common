@@ -24,7 +24,7 @@ import com.landawn.abacus.util.Strings;
  * and their hexadecimal string representations, enabling storage and
  * transmission of MongoDB ObjectIds in text formats.
  */
-public class BSONObjectIdType extends AbstractType<ObjectId> {
+class BSONObjectIdType extends AbstractType<ObjectId> {
 
     /**
      * The type name constant for BSON ObjectId type identification.
@@ -53,7 +53,6 @@ public class BSONObjectIdType extends AbstractType<ObjectId> {
      * @param x the ObjectId to convert
      * @return the 24-character hexadecimal string representation of the ObjectId,
      *         or {@code null} if the input is null
-     @MayReturnNull
      */
     @Override
     public String stringOf(final ObjectId x) {
@@ -68,7 +67,6 @@ public class BSONObjectIdType extends AbstractType<ObjectId> {
      * @return a new ObjectId created from the hexadecimal string,
      *         or {@code null} if str is {@code null} or empty
      * @throws IllegalArgumentException if the string is not a valid 24-character hex string
-     @MayReturnNull
      */
     @Override
     public ObjectId valueOf(final String str) {

@@ -11,32 +11,36 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-
 package com.landawn.abacus.util.function;
 
-import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.util.Throwables;
 
 /**
  * Represents a function that accepts two {@code byte}-valued arguments and produces a result.
  * This is the primitive type specialization of {@link BiFunction} for {@code byte}.
- * 
+ *
  * <p>This is a functional interface whose functional method is {@link #apply(byte, byte)}.
  *
  * @param <R> the type of the result of the function
+ *
+ * <p>Refer to JDK API documentation at: <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html">https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a></p>
  */
 @FunctionalInterface
 public interface ByteBiFunction<R> extends Throwables.ByteBiFunction<R, RuntimeException> { //NOSONAR
-
     /**
      * Applies this function to the given arguments.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * ByteBiFunction<String> formatter = (a, b) -> String.format("%d+%d=%d", a, b, a+b);
+     * String result = formatter.apply((byte)5, (byte)3); // Returns "5+3=8"
+     * }</pre>
      *
      * @param t the first function argument
      * @param u the second function argument
      * @return the function result
      */
     @Override
-    @MayReturnNull
     R apply(byte t, byte u);
 
     /**

@@ -11,7 +11,6 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-
 package com.landawn.abacus.util.function;
 
 import com.landawn.abacus.util.Throwables;
@@ -44,9 +43,9 @@ public interface ObjDoublePredicate<T> extends Throwables.ObjDoublePredicate<T, 
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * ObjDoublePredicate<Product> isPriceAbove = (product, threshold) -> 
-     *     product.getPrice() > threshold;
-     * boolean isExpensive = isPriceAbove.test(myProduct, 100.0);
+     * ObjDoublePredicate<String> isLengthAbove = (str, threshold) ->
+     *     str.length() > threshold;
+     * boolean isLong = isLengthAbove.test("Hello World", 5.0); // Returns true
      * }</pre>
      *
      * @param t the first input argument of type T
@@ -66,7 +65,7 @@ public interface ObjDoublePredicate<T> extends Throwables.ObjDoublePredicate<T, 
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * ObjDoublePredicate<Product> isPriceAbove = (product, threshold) -> 
+     * ObjDoublePredicate<Product> isPriceAbove = (product, threshold) ->
      *     product.getPrice() > threshold;
      * ObjDoublePredicate<Product> isPriceNotAbove = isPriceAbove.negate();
      * // isPriceNotAbove tests if price <= threshold
@@ -90,12 +89,12 @@ public interface ObjDoublePredicate<T> extends Throwables.ObjDoublePredicate<T, 
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * ObjDoublePredicate<Product> isPriceInRange = (product, max) -> 
+     * ObjDoublePredicate<Product> isPriceInRange = (product, max) ->
      *     product.getPrice() >= 0 && product.getPrice() <= max;
-     * ObjDoublePredicate<Product> isAvailable = (product, ignored) -> 
+     * ObjDoublePredicate<Product> isAvailable = (product, ignored) ->
      *     product.isInStock();
-     * 
-     * ObjDoublePredicate<Product> isAffordableAndAvailable = 
+     *
+     * ObjDoublePredicate<Product> isAffordableAndAvailable =
      *     isPriceInRange.and(isAvailable);
      * }</pre>
      *
@@ -119,12 +118,12 @@ public interface ObjDoublePredicate<T> extends Throwables.ObjDoublePredicate<T, 
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * ObjDoublePredicate<Product> isCheap = (product, threshold) -> 
+     * ObjDoublePredicate<Product> isCheap = (product, threshold) ->
      *     product.getPrice() < threshold;
-     * ObjDoublePredicate<Product> isOnSale = (product, ignored) -> 
+     * ObjDoublePredicate<Product> isOnSale = (product, ignored) ->
      *     product.hasDiscount();
-     * 
-     * ObjDoublePredicate<Product> isGoodDeal = 
+     *
+     * ObjDoublePredicate<Product> isGoodDeal =
      *     isCheap.or(isOnSale);
      * }</pre>
      *

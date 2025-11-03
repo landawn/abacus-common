@@ -23,7 +23,6 @@ package com.landawn.abacus.util;
  * as either an int or long value.</p>
  * 
  * @see Immutable
- * @since 1.0
  */
 @com.landawn.abacus.annotation.Immutable
 abstract class AbstractIndexed implements Immutable {

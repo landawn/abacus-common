@@ -14,8 +14,6 @@
 
 package com.landawn.abacus.parser;
 
-import com.landawn.abacus.annotation.MayReturnNull;
-
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -64,9 +62,23 @@ import com.landawn.abacus.util.Tuple.Tuple2;
 import com.landawn.abacus.util.WD;
 
 /**
+ * Abstract base class providing common functionality for parser implementations.
+ * This class implements the {@link Parser} interface and provides default implementations
+ * and utility methods for serialization and deserialization operations.
  *
- * @param <SC>
- * @param <DC>
+ * <p>Key responsibilities:</p>
+ * <ul>
+ *   <li>Provides default method implementations that delegate to configuration-based variants</li>
+ *   <li>Manages common constants and type definitions used across parsers</li>
+ *   <li>Handles circular reference detection during serialization</li>
+ *   <li>Provides utilities for instance creation and type conversion</li>
+ * </ul>
+ *
+ * <p>This class serves as the foundation for specific parser implementations such as
+ * JSON parsers and XML parsers, providing shared infrastructure and behavior.</p>
+ *
+ * @param <SC> the serialization configuration type
+ * @param <DC> the deserialization configuration type
  */
 abstract class AbstractParser<SC extends SerializationConfig<?>, DC extends DeserializationConfig<?>> implements Parser<SC, DC> {
 
@@ -108,8 +120,6 @@ abstract class AbstractParser<SC extends SerializationConfig<?>, DC extends Dese
     static final Type<Boolean> boolType = TypeFactory.getType(Boolean.class);
 
     static final Type<Map<String, Object>> propsMapType = TypeFactory.getType("Map<String, Object>");
-
-    @MayReturnNull
 
     @Override
     public String serialize(final Object obj) {

@@ -11,25 +11,30 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-
 package com.landawn.abacus.util.function;
 
-import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.util.Throwables;
 
 /**
  * Represents a function that accepts three {@code boolean}-valued arguments and produces a result.
  * This is the three-arity specialization of {@link BooleanFunction}.
- * 
+ *
  * <p>This is a functional interface whose functional method is {@link #apply(boolean, boolean, boolean)}.
  *
  * @param <R> the type of the result of the function
+ *
+ * <p>Refer to JDK API documentation at: <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html">https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a></p>
  */
 @FunctionalInterface
 public interface BooleanTriFunction<R> extends Throwables.BooleanTriFunction<R, RuntimeException> { //NOSONAR
-
     /**
      * Applies this function to the given arguments.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * BooleanTriFunction<String> formatter = (a, b, c) -> String.format("%b,%b,%b", a, b, c);
+     * String result = formatter.apply(true, false, true); // Returns "true,false,true"
+     * }</pre>
      *
      * @param a the first function argument
      * @param b the second function argument
@@ -37,7 +42,6 @@ public interface BooleanTriFunction<R> extends Throwables.BooleanTriFunction<R, 
      * @return the function result
      */
     @Override
-    @MayReturnNull
     R apply(boolean a, boolean b, boolean c);
 
     /**

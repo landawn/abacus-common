@@ -11,7 +11,6 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-
 package com.landawn.abacus.util.function;
 
 import com.landawn.abacus.util.Throwables;
@@ -30,10 +29,11 @@ import com.landawn.abacus.util.Throwables;
  * @param <T> the type of the object argument to the operation
  * @see ObjDoubleConsumer
  * @see java.util.function.BiConsumer
+ *
+ * <p>Refer to JDK API documentation at: <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html">https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a></p>
  */
 @FunctionalInterface
 public interface ObjFloatConsumer<T> extends Throwables.ObjFloatConsumer<T, RuntimeException> { //NOSONAR
-
     /**
      * Performs this operation on the given arguments.
      *

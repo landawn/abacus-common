@@ -11,23 +11,31 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-
 package com.landawn.abacus.util.function;
 
 /**
  * Represents an operation that accepts a variable number of {@code boolean}-valued arguments and returns no result.
  * This is the N-arity specialization of {@link BooleanConsumer}.
  * Unlike most other functional interfaces, {@code BooleanNConsumer} is expected to operate via side-effects.
- * 
+ *
  * <p>This is a functional interface whose functional method is {@link #accept(boolean...)}.
  *
+ * <p>Refer to JDK API documentation at: <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html">https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a></p>
  */
 @FunctionalInterface
 public interface BooleanNConsumer {
-
     /**
      * Performs this operation on the given arguments.
      * The behavior of this operation is generally expected to be side-effecting.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * BooleanNConsumer logger = values -> {
+     *     for (boolean v : values) System.out.print(v + " ");
+     *     System.out.println();
+     * };
+     * logger.accept(true, false, true); // Prints: true false true
+     * }</pre>
      *
      * @param args the input arguments as a variable-length array of {@code boolean} values.
      *             May be empty but must not be {@code null}.

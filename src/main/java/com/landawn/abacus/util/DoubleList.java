@@ -36,28 +36,290 @@ import com.landawn.abacus.util.u.OptionalDouble;
 import com.landawn.abacus.util.stream.DoubleStream;
 
 /**
- * A resizable list of primitive double values that provides better performance and memory efficiency
- * compared to {@code ArrayList<Double>}. This class avoids the overhead of auto-boxing and unboxing
- * that occurs with the generic ArrayList.
- * 
- * <p>The class provides a rich set of operations including:
- * <ul>
- *   <li>Basic list operations (add, remove, get, set)</li>
- *   <li>Bulk operations (addAll, removeAll, retainAll)</li>
- *   <li>Array operations (toArray, sort, reverse)</li>
- *   <li>Set operations (intersection, difference, symmetric difference)</li>
- *   <li>Statistical operations (min, max, median)</li>
- *   <li>Functional operations (forEach, replaceAll, removeIf)</li>
- *   <li>Stream support for functional programming</li>
- * </ul>
- * 
- * <p>This class is not thread-safe. If multiple threads access a DoubleList instance concurrently,
- * and at least one of the threads modifies the list structurally, it must be synchronized externally.
+ * A high-performance, resizable array implementation for primitive double values that provides
+ * specialized operations optimized for double-precision floating-point data types. This class extends
+ * {@link PrimitiveList} to offer memory-efficient storage and operations that avoid the boxing overhead
+ * associated with {@code List<Double>}, making it ideal for applications requiring intensive double array
+ * manipulation with optimal performance characteristics.
  *
+ * <p>DoubleList is specifically designed for scenarios involving large collections of high-precision
+ * floating-point values such as scientific computing, financial calculations, statistical analysis,
+ * numerical simulations, mathematical modeling, and performance-critical applications requiring
+ * double-precision arithmetic. The implementation uses a compact double array as the underlying storage
+ * mechanism, providing direct primitive access without wrapper object allocation.</p>
+ *
+ * <p><b>Key Features:</b>
+ * <ul>
+ *   <li><b>Zero-Boxing Overhead:</b> Direct double primitive storage without Double wrapper allocation</li>
+ *   <li><b>Memory Efficiency:</b> Compact double array storage with minimal memory overhead</li>
+ *   <li><b>Double-Precision Arithmetic:</b> Full support for IEEE 754 double-precision operations</li>
+ *   <li><b>High Performance:</b> Optimized algorithms for floating-point specific operations</li>
+ *   <li><b>Rich Mathematical API:</b> Statistical operations like min, max, median, sum, average</li>
+ *   <li><b>Set Operations:</b> Efficient intersection, union, and difference operations</li>
+ *   <li><b>Range Generation:</b> Built-in support for arithmetic progressions and sequences</li>
+ *   <li><b>Random Access:</b> O(1) element access and modification by index</li>
+ *   <li><b>Dynamic Sizing:</b> Automatic capacity management with intelligent growth</li>
+ *   <li><b>Stream Integration:</b> Full compatibility with DoubleStream for functional processing</li>
+ * </ul>
+ *
+ * <p><b>Common Use Cases:</b>
+ * <ul>
+ *   <li><b>Scientific Computing:</b> Numerical simulations, mathematical modeling, research calculations</li>
+ *   <li><b>Financial Analysis:</b> Price data, returns, risk calculations, portfolio optimization</li>
+ *   <li><b>Statistical Analysis:</b> Data science, hypothesis testing, regression analysis</li>
+ *   <li><b>Engineering Applications:</b> CAD calculations, finite element analysis, optimization problems</li>
+ *   <li><b>Machine Learning:</b> Training data, feature vectors, model parameters, predictions</li>
+ *   <li><b>Signal Processing:</b> Digital filters, Fourier transforms, time series analysis</li>
+ *   <li><b>Geospatial Computing:</b> Coordinates, distances, geographic calculations</li>
+ *   <li><b>Physics Simulations:</b> Particle systems, molecular dynamics, quantum calculations</li>
+ * </ul>
+ *
+ * <p><b>Usage Examples:</b></p>
+ * <pre>{@code
+ * // Creating and initializing double lists
+ * DoubleList prices = DoubleList.of(100.50, 101.25, 99.75, 102.10);
+ * DoubleList range = DoubleList.range(0.0, 10.0, 0.1);     // [0.0, 0.1, 0.2, ..., 9.9]
+ * DoubleList measurements = new DoubleList(10000);         // Pre-sized for large dataset
+ * DoubleList random = DoubleList.random(0.0, 1.0, 1000);   // 1000 random doubles [0.0, 1.0)
+ *
+ * // Basic operations
+ * prices.add(103.45);                                      // Append double value
+ * double firstPrice = prices.get(0);                       // Access by index: 100.50
+ * prices.set(1, 101.50);                                   // Modify existing value
+ *
+ * // Mathematical operations for high-precision data
+ * OptionalDouble min = prices.min();                       // Find minimum value
+ * OptionalDouble max = prices.max();                       // Find maximum value
+ * OptionalDouble median = prices.median();                 // Calculate median value
+ * double sum = prices.stream().sum();                      // Calculate sum
+ * double average = prices.stream().average().orElse(0.0);  // Calculate average
+ *
+ * // Set operations for data analysis
+ * DoubleList set1 = DoubleList.of(1.0, 2.5, 3.7, 4.2);
+ * DoubleList set2 = DoubleList.of(3.7, 4.2, 5.1, 6.8);
+ * DoubleList intersection = set1.intersection(set2);       // [3.7, 4.2]
+ * DoubleList difference = set1.difference(set2);           // [1.0, 2.5]
+ *
+ * // High-performance sorting and searching
+ * prices.sort();                                           // Sort in ascending order
+ * prices.parallelSort();                                   // Parallel sort for large datasets
+ * int index = prices.binarySearch(101.25);                 // Fast lookup
+ *
+ * // Statistical and functional operations
+ * DoubleList returns = prices.stream()                     // Calculate returns
+ *     .skip(1)
+ *     .map((i, current) -> (current - prices.get(i)) / prices.get(i))
+ *     .collect(DoubleList::new, DoubleList::add, DoubleList::addAll);
+ *
+ * // Type conversions
+ * FloatList floatValues = prices.stream()                  // Convert to float (precision loss)
+ *     .mapToFloat(d -> (float) d)
+ *     .collect(FloatList::new, FloatList::add, FloatList::addAll);
+ * double[] primitiveArray = prices.toArray();              // To primitive array
+ * List<Double> boxedList = prices.boxed();                 // To boxed collection
+ * }</pre>
+ *
+ * <p><b>Performance Characteristics:</b>
+ * <ul>
+ *   <li><b>Element Access:</b> O(1) for get/set operations by index</li>
+ *   <li><b>Insertion:</b> O(1) amortized for append, O(n) for middle insertion</li>
+ *   <li><b>Deletion:</b> O(1) for last element, O(n) for arbitrary position</li>
+ *   <li><b>Search:</b> O(n) for contains/indexOf, O(log n) for binary search on sorted data</li>
+ *   <li><b>Sorting:</b> O(n log n) using optimized primitive sorting algorithms</li>
+ *   <li><b>Parallel Sorting:</b> O(n log n) with improved constants on multi-core systems</li>
+ *   <li><b>Set Operations:</b> O(n) to O(n²) depending on algorithm selection and data size</li>
+ *   <li><b>Mathematical Operations:</b> O(n) for statistical calculations</li>
+ * </ul>
+ *
+ * <p><b>Memory Efficiency:</b>
+ * <ul>
+ *   <li><b>Storage:</b> 8 bytes per element (64 bits) with no object overhead</li>
+ *   <li><b>vs List&lt;Double&gt;:</b> ~3x less memory usage (no Double wrapper objects)</li>
+ *   <li><b>Capacity Management:</b> 1.75x growth factor balances memory and performance</li>
+ *   <li><b>Maximum Size:</b> Limited by {@code MAX_ARRAY_SIZE} (typically Integer.MAX_VALUE - 8)</li>
+ * </ul>
+ *
+ * <p><b>Floating-Point Considerations:</b>
+ * <ul>
+ *   <li><b>IEEE 754 Compliance:</b> Full support for double-precision floating-point standard</li>
+ *   <li><b>Special Values:</b> Proper handling of NaN, positive/negative infinity</li>
+ *   <li><b>Precision:</b> ~15-17 decimal digits of precision (53-bit mantissa)</li>
+ *   <li><b>Range:</b> Approximately ±1.8 × 10^308 with subnormal support</li>
+ *   <li><b>Comparison:</b> NaN-aware comparison operations</li>
+ * </ul>
+ *
+ * <p><b>Double-Specific Operations:</b>
+ * <ul>
+ *   <li><b>Range Generation:</b> {@code range()}, {@code rangeClosed()} for arithmetic sequences</li>
+ *   <li><b>Mathematical Functions:</b> {@code min()}, {@code max()}, {@code median()}</li>
+ *   <li><b>Statistical Analysis:</b> Full integration with DoubleStream for advanced operations</li>
+ *   <li><b>Random Generation:</b> {@code random()} methods for simulations and testing</li>
+ *   <li><b>Parallel Operations:</b> {@code parallelSort()} for large dataset optimization</li>
+ * </ul>
+ *
+ * <p><b>Factory Methods:</b>
+ * <ul>
+ *   <li><b>{@code of(double...)}:</b> Create from varargs array</li>
+ *   <li><b>{@code copyOf(double[])}:</b> Create defensive copy of array</li>
+ *   <li><b>{@code range(double, double, double)}:</b> Create arithmetic sequence with step</li>
+ *   <li><b>{@code repeat(double, int)}:</b> Create with repeated values</li>
+ *   <li><b>{@code random(int)}:</b> Create with random double values</li>
+ * </ul>
+ *
+ * <p><b>Conversion Methods:</b>
+ * <ul>
+ *   <li><b>{@code toArray()}:</b> Convert to primitive double array</li>
+ *   <li><b>{@code boxed()}:</b> Convert to {@code List<Double>}</li>
+ *   <li><b>{@code stream()}:</b> Convert to DoubleStream for functional processing</li>
+ * </ul>
+ *
+ * <p><b>Deque-like Operations:</b>
+ * <ul>
+ *   <li><b>{@code addFirst(double)}:</b> Insert at beginning (O(n) operation)</li>
+ *   <li><b>{@code addLast(double)}:</b> Insert at end (O(1) amortized)</li>
+ *   <li><b>{@code removeFirst()}:</b> Remove from beginning (O(n) operation)</li>
+ *   <li><b>{@code removeLast()}:</b> Remove from end (O(1) operation)</li>
+ *   <li><b>{@code getFirst()}:</b> Access first element (O(1) operation)</li>
+ *   <li><b>{@code getLast()}:</b> Access last element (O(1) operation)</li>
+ * </ul>
+ *
+ * <p><b>Thread Safety:</b>
+ * <ul>
+ *   <li><b>Not Thread-Safe:</b> This implementation is not synchronized</li>
+ *   <li><b>External Synchronization:</b> Required for concurrent access</li>
+ *   <li><b>Fail-Fast Iterators:</b> Detect concurrent modifications</li>
+ *   <li><b>Read-Only Access:</b> Multiple threads can safely read simultaneously</li>
+ * </ul>
+ *
+ * <p><b>Capacity Management:</b>
+ * <ul>
+ *   <li><b>Initial Capacity:</b> Default capacity of 10 elements</li>
+ *   <li><b>Growth Strategy:</b> 1.75x expansion when capacity exceeded</li>
+ *   <li><b>Manual Control:</b> {@code ensureCapacity()} for performance optimization</li>
+ *   <li><b>Trimming:</b> {@code trimToSize()} to reduce memory footprint</li>
+ * </ul>
+ *
+ * <p><b>Error Handling:</b>
+ * <ul>
+ *   <li><b>IndexOutOfBoundsException:</b> For invalid index access</li>
+ *   <li><b>NoSuchElementException:</b> For operations on empty lists</li>
+ *   <li><b>IllegalArgumentException:</b> For invalid method parameters</li>
+ *   <li><b>OutOfMemoryError:</b> When capacity exceeds available memory</li>
+ * </ul>
+ *
+ * <p><b>Serialization Support:</b>
+ * <ul>
+ *   <li><b>Serializable:</b> Implements {@link java.io.Serializable}</li>
+ *   <li><b>Version Compatibility:</b> Stable serialVersionUID for version compatibility</li>
+ *   <li><b>Efficient Format:</b> Optimized serialization of double arrays</li>
+ *   <li><b>Cross-Platform:</b> Platform-independent serialized format</li>
+ * </ul>
+ *
+ * <p><b>Integration with Collections Framework:</b>
+ * <ul>
+ *   <li><b>RandomAccess:</b> Indicates efficient random access capabilities</li>
+ *   <li><b>Collection Compatibility:</b> Seamless conversion to standard collections</li>
+ *   <li><b>Utility Integration:</b> Works with Collections utility methods via boxed()</li>
+ *   <li><b>Stream API:</b> Full integration with DoubleStream for functional processing</li>
+ * </ul>
+ *
+ * <p><b>Mathematical and Statistical Operations:</b>
+ * <ul>
+ *   <li><b>Aggregation:</b> Sum, min, max, average operations via stream API</li>
+ *   <li><b>Central Tendency:</b> Median calculation with efficient sorting</li>
+ *   <li><b>Occurrence Counting:</b> {@code occurrencesOf()} for frequency analysis</li>
+ *   <li><b>Duplicate Detection:</b> {@code hasDuplicates()}, {@code removeDuplicates()}</li>
+ *   <li><b>Advanced Statistics:</b> Standard deviation, variance via stream operations</li>
+ * </ul>
+ *
+ * <p><b>Comparison with Alternatives:</b>
+ * <ul>
+ *   <li><b>vs List&lt;Double&gt;:</b> 3x less memory, significantly faster operations</li>
+ *   <li><b>vs double[]:</b> Dynamic sizing, rich API, set operations, statistical functions</li>
+ *   <li><b>vs FloatList:</b> Higher precision, larger range, better for scientific computing</li>
+ *   <li><b>vs ArrayList&lt;Double&gt;:</b> No boxing overhead, primitive-specific methods</li>
+ * </ul>
+ *
+ * <p><b>Best Practices:</b>
+ * <ul>
+ *   <li>Use {@code DoubleList} when high precision is required for calculations</li>
+ *   <li>Specify initial capacity for known data sizes to avoid resizing</li>
+ *   <li>Use bulk operations ({@code addAll}, {@code removeAll}) instead of loops</li>
+ *   <li>Leverage DoubleStream for complex mathematical transformations</li>
+ *   <li>Consider parallel operations for large datasets (>10,000 elements)</li>
+ *   <li>Be aware of floating-point precision limitations in equality comparisons</li>
+ * </ul>
+ *
+ * <p><b>Performance Tips:</b>
+ * <ul>
+ *   <li>Pre-size lists with known capacity using constructor or {@code ensureCapacity()}</li>
+ *   <li>Use {@code addLast()} instead of {@code addFirst()} for better performance</li>
+ *   <li>Sort data before using {@code binarySearch()} for O(log n) lookups</li>
+ *   <li>Use {@code parallelSort()} for large datasets to leverage multi-core processors</li>
+ *   <li>Consider {@code stream().parallel()} for CPU-intensive mathematical operations</li>
+ * </ul>
+ *
+ * <p><b>Common Patterns:</b>
+ * <ul>
+ *   <li><b>Financial Data:</b> {@code DoubleList prices = new DoubleList(tradingDays);}</li>
+ *   <li><b>Scientific Data:</b> {@code DoubleList measurements = DoubleList.random(minVal, maxVal, count);}</li>
+ *   <li><b>Statistical Analysis:</b> {@code DoubleList results = dataset.stream().mapToDouble(...).collect(...);}</li>
+ *   <li><b>Mathematical Modeling:</b> {@code DoubleList coefficients = DoubleList.of(a, b, c, d);}</li>
+ * </ul>
+ *
+ * <p><b>Related Classes:</b>
+ * <ul>
+ *   <li><b>{@link PrimitiveList}:</b> Abstract base class for all primitive list types</li>
+ *   <li><b>{@link FloatList}:</b> Single-precision floating-point list implementation</li>
+ *   <li><b>{@link LongList}:</b> 64-bit integer primitive list for discrete values</li>
+ *   <li><b>{@link DoubleIterator}:</b> Specialized iterator for double primitives</li>
+ *   <li><b>{@link DoubleStream}:</b> Functional processing of double sequences</li>
+ * </ul>
+ *
+ * <p><b>Example: Financial Analysis</b>
+ * <pre>{@code
+ * // Analyze stock price data
+ * DoubleList prices = DoubleList.of(100.0, 102.5, 101.8, 105.2, 103.7, 106.1);
+ *
+ * // Calculate daily returns
+ * DoubleList returns = new DoubleList(prices.size() - 1);
+ * for (int i = 1; i < prices.size(); i++) {
+ *     double returnValue = (prices.get(i) - prices.get(i - 1)) / prices.get(i - 1);
+ *     returns.add(returnValue);
+ * }
+ *
+ * // Statistical analysis
+ * double avgReturn = returns.stream().average().orElse(0.0);
+ * double totalReturn = (prices.getLast() - prices.getFirst()) / prices.getFirst();
+ * OptionalDouble maxReturn = returns.max();
+ * OptionalDouble minReturn = returns.min();
+ *
+ * // Risk analysis using stream operations
+ * double variance = returns.stream()
+ *     .map(r -> Math.pow(r - avgReturn, 2))
+ *     .average()
+ *     .orElse(0.0);
+ * double volatility = Math.sqrt(variance);
+ *
+ * // Portfolio optimization
+ * DoubleList weights = DoubleList.of(0.3, 0.4, 0.3);
+ * double portfolioReturn = returns.stream()
+ *     .mapToDouble((i, r) -> r * weights.get(i % weights.size()))
+ *     .sum();
+ * }</pre>
+ *
+ * @see PrimitiveList
+ * @see DoubleIterator
+ * @see DoubleStream
+ * @see FloatList
+ * @see LongList
  * @see com.landawn.abacus.util.N
  * @see com.landawn.abacus.util.Array
  * @see com.landawn.abacus.util.Iterables
  * @see com.landawn.abacus.util.Iterators
+ * @see java.util.List
+ * @see java.util.RandomAccess
+ * @see java.io.Serializable
  */
 public final class DoubleList extends PrimitiveList<Double, double[], DoubleList> {
 

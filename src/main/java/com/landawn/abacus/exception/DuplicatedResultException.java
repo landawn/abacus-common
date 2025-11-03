@@ -37,7 +37,6 @@ import java.io.Serial;
  * }
  * }</pre>
  * 
- * @since 1.0
  * @see IllegalStateException
  */
 public class DuplicatedResultException extends IllegalStateException {

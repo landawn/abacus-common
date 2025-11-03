@@ -16,14 +16,13 @@ package com.landawn.abacus.type;
 
 import java.io.IOException;
 
-import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.parser.JSONXMLSerializationConfig;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Strings;
 import com.landawn.abacus.util.WD;
 
-public final class ShortArrayType extends ObjectArrayType<Short> {
+final class ShortArrayType extends ObjectArrayType<Short> {
 
     ShortArrayType() {
         super(Short[].class);
@@ -36,7 +35,7 @@ public final class ShortArrayType extends ObjectArrayType<Short> {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * ShortArrayType type = new ShortArrayType();
+     * Type<Short[]> type = TypeFactory.getType(Short[].class);
      * Short[] array = {1, null, 3};
      * String str = type.stringOf(array); // Returns "[1, null, 3]"
      * }</pre>
@@ -45,9 +44,7 @@ public final class ShortArrayType extends ObjectArrayType<Short> {
      * @return the string representation of the array, or {@code null} if the input array is {@code null}.
      *         Returns "[]" for empty arrays.
      */
-    @MayReturnNull
     @Override
-
     public String stringOf(final Short[] x) {
         if (x == null) {
             return null; // NOSONAR
@@ -65,7 +62,7 @@ public final class ShortArrayType extends ObjectArrayType<Short> {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * ShortArrayType type = new ShortArrayType();
+     * Type<Short[]> type = TypeFactory.getType(Short[].class);
      * Short[] array = type.valueOf("[1, null, 3]"); // Returns {1, null, 3}
      * }</pre>
      *
@@ -74,9 +71,7 @@ public final class ShortArrayType extends ObjectArrayType<Short> {
      *         Returns an empty array for empty string or "[]".
      * @throws NumberFormatException if any {@code non-null} element in the string cannot be parsed as a short
      */
-    @MayReturnNull
     @Override
-
     public Short[] valueOf(final String str) {
         if (Strings.isEmpty(str) || Strings.isBlank(str)) {
             return null; // NOSONAR
@@ -108,7 +103,7 @@ public final class ShortArrayType extends ObjectArrayType<Short> {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * ShortArrayType type = new ShortArrayType();
+     * Type<Short[]> type = TypeFactory.getType(Short[].class);
      * StringBuilder sb = new StringBuilder();
      * type.appendTo(sb, new Short[] {1, 2, 3}); // Appends "[1, 2, 3]"
      * }</pre>
@@ -148,7 +143,7 @@ public final class ShortArrayType extends ObjectArrayType<Short> {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * ShortArrayType type = new ShortArrayType();
+     * Type<Short[]> type = TypeFactory.getType(Short[].class);
      * CharacterWriter writer = new CharacterWriter();
      * type.writeCharacter(writer, new Short[] {1, 2, 3}, config); // Writes "[1, 2, 3]"
      * }</pre>

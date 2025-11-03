@@ -11,7 +11,6 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-
 package com.landawn.abacus.util.function;
 
 import com.landawn.abacus.util.Throwables;
@@ -24,10 +23,11 @@ import com.landawn.abacus.util.Throwables;
  *
  * @param <T> the type of the object argument to the operation
  * @see java.util.function.BiConsumer
+ *
+ * <p>Refer to JDK API documentation at: <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html">https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a></p>
  */
 @FunctionalInterface
 public interface ObjShortConsumer<T> extends Throwables.ObjShortConsumer<T, RuntimeException> { //NOSONAR
-
     /**
      * Performs this operation on the given arguments.
      *
@@ -39,11 +39,13 @@ public interface ObjShortConsumer<T> extends Throwables.ObjShortConsumer<T, Runt
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * ObjShortConsumer<ShortBuffer> addToBuffer = (buffer, value) -> buffer.put(value);
-     * ObjShortConsumer<Config> setPort = (config, port) -> config.setPort(port);
-     * 
-     * addToBuffer.accept(myBuffer, (short) 42);
-     * setPort.accept(myConfig, (short) 8080);
+     * ObjShortConsumer<List<Short>> addToList = (list, value) -> list.add(value);
+     * ObjShortConsumer<StringBuilder> appendShort = (sb, value) -> sb.append(value);
+     *
+     * List<Short> values = new ArrayList<>();
+     * addToList.accept(values, (short) 42);
+     * StringBuilder sb = new StringBuilder("Port: ");
+     * appendShort.accept(sb, (short) 8080);
      * }</pre>
      *
      * @param t the first input argument of type T

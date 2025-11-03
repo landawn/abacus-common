@@ -33,7 +33,6 @@ package com.landawn.abacus.parser;
  * 
  * @see DeserializationConfig
  * @see KryoParser
- * @since 1.0
  */
 public class KryoDeserializationConfig extends DeserializationConfig<KryoDeserializationConfig> {
 

@@ -36,30 +36,289 @@ import com.landawn.abacus.util.function.CharUnaryOperator;
 import com.landawn.abacus.util.stream.CharStream;
 
 /**
- * A resizable, primitive char array implementation of a list.
- * This class provides a more memory-efficient alternative to {@code List<Character>}
- * when working with large collections of char values.
- * 
- * <p>Like {@code ArrayList}, the size, isEmpty, get, set, iterator, and listIterator
- * operations run in constant time. The add operation runs in amortized constant time,
- * that is, adding n elements requires O(n) time. All other operations run in linear time.
- * 
- * <p>Each CharList instance has a capacity. The capacity is the size of the array used
- * to store the elements in the list. It is always at least as large as the list size.
- * As elements are added to a CharList, its capacity grows automatically.
- * 
- * <p>An application can increase the capacity of a CharList instance before adding a
- * large number of elements using the ensureCapacity operation. This may reduce the
- * amount of incremental reallocation.
- * 
- * <p><strong>Note that this implementation is not synchronized.</strong>
- * If multiple threads access a CharList instance concurrently, and at least one of
- * the threads modifies the list structurally, it must be synchronized externally.
- * 
+ * A high-performance, resizable array implementation for primitive char values that provides
+ * specialized operations optimized for character data types. This class extends {@link PrimitiveList}
+ * to offer memory-efficient storage and operations that avoid the boxing overhead associated with
+ * {@code List<Character>}, making it ideal for applications requiring intensive character array
+ * manipulation with optimal performance characteristics.
+ *
+ * <p>CharList is specifically designed for scenarios involving large collections of character
+ * values such as text processing, string manipulation, character encoding/decoding, lexical
+ * analysis, document processing, and performance-critical applications requiring efficient
+ * character storage. The implementation uses a compact char array as the underlying storage
+ * mechanism, providing direct primitive access without wrapper object allocation.</p>
+ *
+ * <p><b>Key Features:</b>
+ * <ul>
+ *   <li><b>Zero-Boxing Overhead:</b> Direct char primitive storage without Character wrapper allocation</li>
+ *   <li><b>Memory Efficiency:</b> Compact char array storage with minimal memory overhead</li>
+ *   <li><b>Unicode Support:</b> Full support for 16-bit Unicode characters (BMP)</li>
+ *   <li><b>High Performance:</b> Optimized algorithms for character-specific operations</li>
+ *   <li><b>Rich Text API:</b> String conversion, character search, pattern matching</li>
+ *   <li><b>Set Operations:</b> Efficient intersection, union, and difference operations</li>
+ *   <li><b>Range Generation:</b> Built-in support for character sequences and alphabets</li>
+ *   <li><b>Random Access:</b> O(1) element access and modification by index</li>
+ *   <li><b>Dynamic Sizing:</b> Automatic capacity management with intelligent growth</li>
+ *   <li><b>String Integration:</b> Seamless conversion to/from String and StringBuilder</li>
+ * </ul>
+ *
+ * <p><b>Common Use Cases:</b>
+ * <ul>
+ *   <li><b>Text Processing:</b> Document parsing, text analysis, natural language processing</li>
+ *   <li><b>String Building:</b> Efficient string construction, character buffer management</li>
+ *   <li><b>Lexical Analysis:</b> Tokenizers, parsers, compilers, syntax highlighting</li>
+ *   <li><b>Data Encoding:</b> Base64 encoding, URL encoding, character set conversion</li>
+ *   <li><b>Template Engines:</b> Dynamic text generation, template processing</li>
+ *   <li><b>Configuration Parsing:</b> INI files, CSV processing, configuration readers</li>
+ *   <li><b>Protocol Processing:</b> Network protocols, message parsing, data serialization</li>
+ *   <li><b>Search Algorithms:</b> Text search, pattern matching, string algorithms</li>
+ * </ul>
+ *
+ * <p><b>Usage Examples:</b></p>
+ * <pre>{@code
+ * // Creating and initializing character lists
+ * CharList buffer = CharList.of('H', 'e', 'l', 'l', 'o');
+ * CharList alphabet = CharList.range('A', 'Z');              // ['A', 'B', 'C', ..., 'Z']
+ * CharList digits = CharList.range('0', '9');                // ['0', '1', '2', ..., '9']
+ * CharList textBuffer = new CharList(1000);                  // Pre-sized for text processing
+ *
+ * // String integration
+ * CharList fromString = CharList.of("Hello World");          // Convert from string
+ * String result = buffer.toString();                         // Convert to string: "Hello"
+ * char[] charArray = buffer.toArray();                       // Convert to char array
+ *
+ * // Text manipulation operations
+ * buffer.add(' ');                                           // Append space
+ * buffer.addAll(CharList.of("World"));                       // Append more characters
+ * char firstChar = buffer.get(0);                            // Access by index: 'H'
+ * buffer.set(0, 'h');                                        // Modify: "hello World"
+ *
+ * // Character searching and analysis
+ * int spaceIndex = buffer.indexOf(' ');                      // Find space character
+ * boolean hasVowels = buffer.stream().anyMatch(c -> "aeiou".indexOf(c) >= 0);
+ * long letterCount = buffer.stream().filter(Character::isLetter).count();
+ *
+ * // Case conversion and transformations
+ * CharList uppercase = buffer.stream()
+ *     .map(Character::toUpperCase)
+ *     .collect(CharList::new, CharList::add, CharList::addAll);
+ *
+ * // Set operations for character analysis
+ * CharList vowels = CharList.of('a', 'e', 'i', 'o', 'u');
+ * CharList consonants = alphabet.difference(vowels);         // Remove vowels
+ * CharList common = buffer.intersection(vowels);             // Find vowels in text
+ *
+ * // High-performance sorting and searching
+ * buffer.sort();                                             // Sort characters
+ * int index = buffer.binarySearch('e');                      // Fast character lookup
+ *
+ * // Efficient text building
+ * CharList builder = new CharList();
+ * builder.addAll("The quick ");
+ * builder.addAll("brown fox ");
+ * builder.addAll("jumps over");
+ * String sentence = builder.toString();                      // "The quick brown fox jumps over"
+ * }</pre>
+ *
+ * <p><b>Performance Characteristics:</b>
+ * <ul>
+ *   <li><b>Element Access:</b> O(1) for get/set operations by index</li>
+ *   <li><b>Insertion:</b> O(1) amortized for append, O(n) for middle insertion</li>
+ *   <li><b>Deletion:</b> O(1) for last element, O(n) for arbitrary position</li>
+ *   <li><b>Search:</b> O(n) for contains/indexOf, O(log n) for binary search on sorted data</li>
+ *   <li><b>Sorting:</b> O(n log n) using optimized primitive sorting algorithms</li>
+ *   <li><b>String Conversion:</b> O(n) with efficient array copying</li>
+ *   <li><b>Set Operations:</b> O(n) to O(n²) depending on algorithm selection and data size</li>
+ * </ul>
+ *
+ * <p><b>Memory Efficiency:</b>
+ * <ul>
+ *   <li><b>Storage:</b> 2 bytes per element (16 bits) with no object overhead</li>
+ *   <li><b>vs List&lt;Character&gt;:</b> ~8x less memory usage (no Character wrapper objects)</li>
+ *   <li><b>vs String:</b> Mutable with similar memory footprint when capacity matches size</li>
+ *   <li><b>vs StringBuilder:</b> Comparable memory usage with primitive-specific operations</li>
+ *   <li><b>Capacity Management:</b> 1.75x growth factor balances memory and performance</li>
+ *   <li><b>Maximum Size:</b> Limited by {@code MAX_ARRAY_SIZE} (typically Integer.MAX_VALUE - 8)</li>
+ * </ul>
+ *
+ * <p><b>Character-Specific Operations:</b>
+ * <ul>
+ *   <li><b>Range Generation:</b> {@code range()}, {@code rangeClosed()} for character sequences</li>
+ *   <li><b>String Integration:</b> {@code toString()}, {@code of(String)} for string conversion</li>
+ *   <li><b>Character Analysis:</b> Integration with Character utility methods</li>
+ *   <li><b>Case Operations:</b> Efficient case conversion via stream transformations</li>
+ *   <li><b>Pattern Matching:</b> Character-level pattern searching and matching</li>
+ * </ul>
+ *
+ * <p><b>Factory Methods:</b>
+ * <ul>
+ *   <li><b>{@code of(char...)}:</b> Create from varargs array</li>
+ *   <li><b>{@code of(String)}:</b> Create from string characters</li>
+ *   <li><b>{@code copyOf(char[])}:</b> Create defensive copy of array</li>
+ *   <li><b>{@code range(char, char)}:</b> Create character sequence [start, end)</li>
+ *   <li><b>{@code rangeClosed(char, char)}:</b> Create character sequence [start, end]</li>
+ *   <li><b>{@code repeat(char, int)}:</b> Create with repeated characters</li>
+ *   <li><b>{@code random(int)}:</b> Create with random characters</li>
+ * </ul>
+ *
+ * <p><b>Conversion Methods:</b>
+ * <ul>
+ *   <li><b>{@code toArray()}:</b> Convert to primitive char array</li>
+ *   <li><b>{@code toString()}:</b> Convert to String</li>
+ *   <li><b>{@code toStringBuilder()}:</b> Convert to StringBuilder</li>
+ *   <li><b>{@code boxed()}:</b> Convert to {@code List<Character>}</li>
+ *   <li><b>{@code stream()}:</b> Convert to CharStream for functional processing</li>
+ * </ul>
+ *
+ * <p><b>Deque-like Operations:</b>
+ * <ul>
+ *   <li><b>{@code addFirst(char)}:</b> Insert at beginning (O(n) operation)</li>
+ *   <li><b>{@code addLast(char)}:</b> Insert at end (O(1) amortized)</li>
+ *   <li><b>{@code removeFirst()}:</b> Remove from beginning (O(n) operation)</li>
+ *   <li><b>{@code removeLast()}:</b> Remove from end (O(1) operation)</li>
+ *   <li><b>{@code getFirst()}:</b> Access first character (O(1) operation)</li>
+ *   <li><b>{@code getLast()}:</b> Access last character (O(1) operation)</li>
+ * </ul>
+ *
+ * <p><b>Thread Safety:</b>
+ * <ul>
+ *   <li><b>Not Thread-Safe:</b> This implementation is not synchronized</li>
+ *   <li><b>External Synchronization:</b> Required for concurrent access</li>
+ *   <li><b>Fail-Fast Iterators:</b> Detect concurrent modifications</li>
+ *   <li><b>Read-Only Access:</b> Multiple threads can safely read simultaneously</li>
+ * </ul>
+ *
+ * <p><b>Capacity Management:</b>
+ * <ul>
+ *   <li><b>Initial Capacity:</b> Default capacity of 10 elements</li>
+ *   <li><b>Growth Strategy:</b> 1.75x expansion when capacity exceeded</li>
+ *   <li><b>Manual Control:</b> {@code ensureCapacity()} for performance optimization</li>
+ *   <li><b>Trimming:</b> {@code trimToSize()} to reduce memory footprint</li>
+ * </ul>
+ *
+ * <p><b>Error Handling:</b>
+ * <ul>
+ *   <li><b>IndexOutOfBoundsException:</b> For invalid index access</li>
+ *   <li><b>NoSuchElementException:</b> For operations on empty lists</li>
+ *   <li><b>IllegalArgumentException:</b> For invalid method parameters</li>
+ *   <li><b>OutOfMemoryError:</b> When capacity exceeds available memory</li>
+ * </ul>
+ *
+ * <p><b>Serialization Support:</b>
+ * <ul>
+ *   <li><b>Serializable:</b> Implements {@link java.io.Serializable}</li>
+ *   <li><b>Version Compatibility:</b> Stable serialVersionUID for version compatibility</li>
+ *   <li><b>Efficient Format:</b> Optimized serialization of char arrays</li>
+ *   <li><b>Cross-Platform:</b> Platform-independent serialized format</li>
+ * </ul>
+ *
+ * <p><b>Integration with Collections Framework:</b>
+ * <ul>
+ *   <li><b>RandomAccess:</b> Indicates efficient random access capabilities</li>
+ *   <li><b>Collection Compatibility:</b> Seamless conversion to standard collections</li>
+ *   <li><b>Utility Integration:</b> Works with Collections utility methods via boxed()</li>
+ *   <li><b>Stream API:</b> Full integration with CharStream for functional processing</li>
+ * </ul>
+ *
+ * <p><b>Text Processing Operations:</b>
+ * <ul>
+ *   <li><b>Character Counting:</b> {@code occurrencesOf()} for frequency analysis</li>
+ *   <li><b>Case Analysis:</b> Integration with Character.isUpperCase(), isLowerCase()</li>
+ *   <li><b>Character Classification:</b> Letter, digit, whitespace detection via streams</li>
+ *   <li><b>Duplicate Detection:</b> {@code hasDuplicates()}, {@code removeDuplicates()}</li>
+ * </ul>
+ *
+ * <p><b>Comparison with Alternatives:</b>
+ * <ul>
+ *   <li><b>vs List&lt;Character&gt;:</b> 8x less memory, significantly faster operations</li>
+ *   <li><b>vs char[]:</b> Dynamic sizing, rich API, set operations, text functions</li>
+ *   <li><b>vs String:</b> Mutable, can be modified in-place, similar memory footprint</li>
+ *   <li><b>vs StringBuilder:</b> Primitive operations, set operations, statistical functions</li>
+ * </ul>
+ *
+ * <p><b>Best Practices:</b>
+ * <ul>
+ *   <li>Use {@code CharList} for mutable character sequences requiring set operations</li>
+ *   <li>Specify initial capacity for known text sizes to avoid resizing</li>
+ *   <li>Use bulk operations ({@code addAll}, {@code removeAll}) instead of loops</li>
+ *   <li>Convert to String only when immutable result is needed</li>
+ *   <li>Leverage stream API for complex text transformations</li>
+ *   <li>Sort character data before using binary search operations</li>
+ * </ul>
+ *
+ * <p><b>Performance Tips:</b>
+ * <ul>
+ *   <li>Pre-size lists with known capacity using constructor or {@code ensureCapacity()}</li>
+ *   <li>Use {@code addLast()} instead of {@code addFirst()} for better performance</li>
+ *   <li>Sort data before using {@code binarySearch()} for O(log n) lookups</li>
+ *   <li>Use {@code stream()} API for complex character transformations</li>
+ *   <li>Consider {@code StringBuilder} for simple string building without set operations</li>
+ * </ul>
+ *
+ * <p><b>Common Patterns:</b>
+ * <ul>
+ *   <li><b>Text Building:</b> {@code CharList buffer = new CharList(expectedLength);}</li>
+ *   <li><b>Character Analysis:</b> {@code CharList chars = CharList.of(text);}</li>
+ *   <li><b>Alphabet Generation:</b> {@code CharList letters = CharList.range('a', 'z');}</li>
+ *   <li><b>Character Filtering:</b> {@code CharList filtered = chars.stream().filter(...).collect(...);}</li>
+ * </ul>
+ *
+ * <p><b>Related Classes:</b>
+ * <ul>
+ *   <li><b>{@link PrimitiveList}:</b> Abstract base class for all primitive list types</li>
+ *   <li><b>{@link String}:</b> Immutable character sequence</li>
+ *   <li><b>{@link StringBuilder}:</b> Mutable character sequence builder</li>
+ *   <li><b>{@link CharIterator}:</b> Specialized iterator for char primitives</li>
+ *   <li><b>{@link CharStream}:</b> Functional processing of character sequences</li>
+ * </ul>
+ *
+ * <p><b>Example: Text Processing</b>
+ * <pre>{@code
+ * // Process text document
+ * String document = "The Quick Brown Fox Jumps Over The Lazy Dog";
+ * CharList text = CharList.of(document);
+ *
+ * // Character analysis
+ * long letterCount = text.stream().filter(Character::isLetter).count();
+ * long digitCount = text.stream().filter(Character::isDigit).count();
+ * long spaceCount = text.stream().filter(Character::isWhitespace).count();
+ *
+ * // Case conversion
+ * CharList lowercase = text.stream()
+ *     .map(Character::toLowerCase)
+ *     .collect(CharList::new, CharList::add, CharList::addAll);
+ *
+ * // Character frequency analysis
+ * CharList uniqueChars = text.stream()
+ *     .distinct()
+ *     .sorted()
+ *     .collect(CharList::new, CharList::add, CharList::addAll);
+ *
+ * // Build modified text
+ * CharList result = new CharList();
+ * result.addAll("Processed: ");
+ * result.addAll(lowercase);
+ * result.add('!');
+ * String processed = result.toString();
+ *
+ * // Pattern matching
+ * CharList vowels = CharList.of("aeiou");
+ * CharList consonants = CharList.range('a', 'z').difference(vowels);
+ * boolean hasAllVowels = vowels.stream().allMatch(v -> text.contains(v));
+ * }</pre>
+ *
+ * @see PrimitiveList
+ * @see CharIterator
+ * @see CharStream
+ * @see String
+ * @see StringBuilder
  * @see com.landawn.abacus.util.N
  * @see com.landawn.abacus.util.Array
  * @see com.landawn.abacus.util.Iterables
  * @see com.landawn.abacus.util.Iterators
+ * @see java.util.List
+ * @see java.util.RandomAccess
+ * @see java.io.Serializable
  */
 public final class CharList extends PrimitiveList<Character, char[], CharList> {
 

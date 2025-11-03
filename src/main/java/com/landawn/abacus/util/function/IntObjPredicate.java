@@ -11,7 +11,6 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-
 package com.landawn.abacus.util.function;
 
 import com.landawn.abacus.util.Throwables;
@@ -30,13 +29,18 @@ import com.landawn.abacus.util.Throwables;
  */
 @FunctionalInterface
 public interface IntObjPredicate<T> extends Throwables.IntObjPredicate<T, RuntimeException> { // NOSONAR
-
     /**
      * Evaluates this predicate on the given arguments.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * IntObjPredicate<String> indexInRange = (index, str) -> index >= 0 && index < str.length();
+     * boolean valid = indexInRange.test(5, "Hello World"); // Returns true
+     * }</pre>
+     *
      * @param t the {@code int} argument
      * @param u the object argument
-     * @return {@code true} if the input arguments match the predicate, otherwise {@code false}
+     * @return {@code true} if the input arguments match the predicate, {@code false} otherwise
      */
     @Override
     boolean test(int t, T u);

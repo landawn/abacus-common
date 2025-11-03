@@ -20,7 +20,6 @@
  * LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
  * OF CONTRACT, TORT OR OTHERWISE,  ARISING FROM, OUT OF OR IN CONNECTION
  * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
- *
  */
 
 package com.landawn.abacus.logging;
@@ -29,7 +28,7 @@ import java.util.function.Supplier;
 
 /**
  * The main Logger interface providing a unified API for logging across different implementations.
- * 
+ *
  * <p>This interface is inspired by SLF4J but provides additional features such as:</p>
  * <ul>
  *   <li>Support for multiple parameter substitution (up to 7 parameters)</li>
@@ -37,7 +36,7 @@ import java.util.function.Supplier;
  *   <li>Consistent method signatures across all log levels</li>
  *   <li>Both (Throwable, String) and (String, Throwable) parameter orders</li>
  * </ul>
- * 
+ *
  * <p>The interface supports five log levels in increasing order of severity:</p>
  * <ol>
  *   <li>TRACE - Most detailed information</li>
@@ -46,17 +45,17 @@ import java.util.function.Supplier;
  *   <li>WARN - Warning messages for potentially harmful situations</li>
  *   <li>ERROR - Error messages for error events</li>
  * </ol>
- * 
+ *
  * <p>Typical usage pattern:</p>
  * <pre>{@code
  * import com.landawn.abacus.logging.Logger;
  * import com.landawn.abacus.logging.LoggerFactory;
- * 
+ *
  * public class Wombat {
  *   static final Logger logger = LoggerFactory.getLogger(Wombat.class);
  *   Integer t;
  *   Integer oldT;
- * 
+ *
  *   public void setTemperature(Integer temperature) {
  *     oldT = t;
  *     t = temperature;
@@ -67,9 +66,9 @@ import java.util.function.Supplier;
  *   }
  * }
  * }</pre>
- * 
+ *
+ * @see AbstractLogger
  * @author Ceki G&uuml;lc&uuml; (original SLF4J author) (adaptations for Abacus)
- * @since 1.0
  */
 public interface Logger {
 
@@ -197,14 +196,14 @@ public interface Logger {
 
     /**
      * Logs a message at the TRACE level with variable number of arguments.
-     * 
+     *
      * <p>This form avoids superfluous object creation when the logger is disabled
      * for the TRACE level. However, the Supplier-based methods are preferred for
      * expensive message construction.</p>
      *
      * @param template the template string
      * @param args an array of arguments
-     * @deprecated {@link #trace(Supplier)} is recommended for lazy evaluation
+     * @deprecated Prefer {@link #trace(Supplier)} for lazy evaluation to avoid object creation
      */
     @Deprecated
     void trace(String template, Object... args);
@@ -213,17 +212,17 @@ public interface Logger {
      * Logs an exception at the TRACE level with an accompanying message.
      *
      * @param msg the message accompanying the exception
-     * @param t the exception (throwable) to log
+     * @param t the exception or error to log
      */
     void trace(String msg, Throwable t);
 
     /**
      * Logs an exception at the TRACE level with an accompanying message.
-     * 
-     * <p>This method provides an alternative parameter order for consistency
-     * with other APIs.</p>
      *
-     * @param t the exception (throwable) to log
+     * <p>This method provides an alternative parameter order where the exception comes first
+     * for consistency with other exception-handling patterns in the framework.</p>
+     *
+     * @param t the exception or error to log
      * @param msg the message accompanying the exception
      */
     void trace(Throwable t, String msg);
@@ -231,7 +230,7 @@ public interface Logger {
     /**
      * Logs an exception at the TRACE level with a formatted message and one parameter.
      *
-     * @param t the exception to log
+     * @param t the exception or error to log
      * @param template the message template
      * @param arg the argument to be substituted in the template
      */
@@ -240,7 +239,7 @@ public interface Logger {
     /**
      * Logs an exception at the TRACE level with a formatted message and two parameters.
      *
-     * @param t the exception to log
+     * @param t the exception or error to log
      * @param template the message template
      * @param arg1 the first argument
      * @param arg2 the second argument
@@ -250,7 +249,7 @@ public interface Logger {
     /**
      * Logs an exception at the TRACE level with a formatted message and three parameters.
      *
-     * @param t the exception to log
+     * @param t the exception or error to log
      * @param template the message template
      * @param arg1 the first argument
      * @param arg2 the second argument
@@ -272,10 +271,10 @@ public interface Logger {
 
     /**
      * Logs a message at the TRACE level with an exception using a supplier.
-     * 
+     *
      * @param supplier the supplier that provides the message
-     * @param t the exception to log
-     * @deprecated Use {@link #trace(Throwable, Supplier)} for consistent parameter order
+     * @param t the exception or error to log
+     * @deprecated Use {@link #trace(Throwable, Supplier)} for consistent exception-first parameter order
      */
     @Deprecated
     void trace(Supplier<String> supplier, Throwable t);
@@ -283,7 +282,7 @@ public interface Logger {
     /**
      * Logs a message at the TRACE level with an exception using a supplier for lazy evaluation.
      *
-     * @param t the exception to log
+     * @param t the exception or error to log
      * @param supplier the supplier that provides the message
      */
     void trace(Throwable t, Supplier<String> supplier);
@@ -385,13 +384,13 @@ public interface Logger {
 
     /**
      * Logs a message at the DEBUG level with variable number of arguments.
-     * 
+     *
      * <p>This form avoids superfluous object creation when the logger is disabled
      * for the DEBUG level.</p>
      *
      * @param template the template string
      * @param args an array of arguments
-     * @deprecated {@link #debug(Supplier)} is recommended for lazy evaluation
+     * @deprecated Prefer {@link #debug(Supplier)} for lazy evaluation to avoid object creation
      */
     @Deprecated
     void debug(String template, Object... args);
@@ -400,17 +399,17 @@ public interface Logger {
      * Logs an exception at the DEBUG level with an accompanying message.
      *
      * @param msg the message accompanying the exception
-     * @param t the exception (throwable) to log
+     * @param t the exception or error to log
      */
     void debug(String msg, Throwable t);
 
     /**
      * Logs an exception at the DEBUG level with an accompanying message.
-     * 
-     * <p>This method provides an alternative parameter order for consistency
-     * with other APIs.</p>
      *
-     * @param t the exception (throwable) to log
+     * <p>This method provides an alternative parameter order where the exception comes first
+     * for consistency with other exception-handling patterns in the framework.</p>
+     *
+     * @param t the exception or error to log
      * @param msg the message accompanying the exception
      */
     void debug(Throwable t, String msg);
@@ -418,7 +417,7 @@ public interface Logger {
     /**
      * Logs an exception at the DEBUG level with a formatted message and one parameter.
      *
-     * @param t the exception to log
+     * @param t the exception or error to log
      * @param template the message template
      * @param arg the argument to be substituted in the template
      */
@@ -427,7 +426,7 @@ public interface Logger {
     /**
      * Logs an exception at the DEBUG level with a formatted message and two parameters.
      *
-     * @param t the exception to log
+     * @param t the exception or error to log
      * @param template the message template
      * @param arg1 the first argument
      * @param arg2 the second argument
@@ -437,7 +436,7 @@ public interface Logger {
     /**
      * Logs an exception at the DEBUG level with a formatted message and three parameters.
      *
-     * @param t the exception to log
+     * @param t the exception or error to log
      * @param template the message template
      * @param arg1 the first argument
      * @param arg2 the second argument
@@ -459,10 +458,10 @@ public interface Logger {
 
     /**
      * Logs a message at the DEBUG level with an exception using a supplier.
-     * 
+     *
      * @param supplier the supplier that provides the message
-     * @param t the exception to log
-     * @deprecated Use {@link #debug(Throwable, Supplier)} for consistent parameter order
+     * @param t the exception or error to log
+     * @deprecated Use {@link #debug(Throwable, Supplier)} for consistent exception-first parameter order
      */
     @Deprecated
     void debug(Supplier<String> supplier, Throwable t);
@@ -470,7 +469,7 @@ public interface Logger {
     /**
      * Logs a message at the DEBUG level with an exception using a supplier for lazy evaluation.
      *
-     * @param t the exception to log
+     * @param t the exception or error to log
      * @param supplier the supplier that provides the message
      */
     void debug(Throwable t, Supplier<String> supplier);
@@ -578,13 +577,13 @@ public interface Logger {
 
     /**
      * Logs a message at the INFO level with variable number of arguments.
-     * 
+     *
      * <p>This form avoids superfluous object creation when the logger is disabled
      * for the INFO level.</p>
      *
      * @param template the template string
      * @param args an array of arguments
-     * @deprecated {@link #info(Supplier)} is recommended for lazy evaluation
+     * @deprecated Prefer {@link #info(Supplier)} for lazy evaluation to avoid object creation
      */
     @Deprecated
     void info(String template, Object... args);
@@ -593,17 +592,17 @@ public interface Logger {
      * Logs an exception at the INFO level with an accompanying message.
      *
      * @param msg the message accompanying the exception
-     * @param t the exception (throwable) to log
+     * @param t the exception or error to log
      */
     void info(String msg, Throwable t);
 
     /**
      * Logs an exception at the INFO level with an accompanying message.
-     * 
-     * <p>This method provides an alternative parameter order for consistency
-     * with other APIs.</p>
      *
-     * @param t the exception (throwable) to log
+     * <p>This method provides an alternative parameter order where the exception comes first
+     * for consistency with other exception-handling patterns in the framework.</p>
+     *
+     * @param t the exception or error to log
      * @param msg the message accompanying the exception
      */
     void info(Throwable t, String msg);
@@ -611,7 +610,7 @@ public interface Logger {
     /**
      * Logs an exception at the INFO level with a formatted message and one parameter.
      *
-     * @param t the exception to log
+     * @param t the exception or error to log
      * @param template the message template
      * @param arg the argument to be substituted in the template
      */
@@ -620,7 +619,7 @@ public interface Logger {
     /**
      * Logs an exception at the INFO level with a formatted message and two parameters.
      *
-     * @param t the exception to log
+     * @param t the exception or error to log
      * @param template the message template
      * @param arg1 the first argument
      * @param arg2 the second argument
@@ -630,7 +629,7 @@ public interface Logger {
     /**
      * Logs an exception at the INFO level with a formatted message and three parameters.
      *
-     * @param t the exception to log
+     * @param t the exception or error to log
      * @param template the message template
      * @param arg1 the first argument
      * @param arg2 the second argument
@@ -652,10 +651,10 @@ public interface Logger {
 
     /**
      * Logs a message at the INFO level with an exception using a supplier.
-     * 
+     *
      * @param supplier the supplier that provides the message
-     * @param t the exception to log
-     * @deprecated Use {@link #info(Throwable, Supplier)} for consistent parameter order
+     * @param t the exception or error to log
+     * @deprecated Use {@link #info(Throwable, Supplier)} for consistent exception-first parameter order
      */
     @Deprecated
     void info(Supplier<String> supplier, Throwable t);
@@ -663,7 +662,7 @@ public interface Logger {
     /**
      * Logs a message at the INFO level with an exception using a supplier for lazy evaluation.
      *
-     * @param t the exception to log
+     * @param t the exception or error to log
      * @param supplier the supplier that provides the message
      */
     void info(Throwable t, Supplier<String> supplier);
@@ -771,13 +770,13 @@ public interface Logger {
 
     /**
      * Logs a message at the WARN level with variable number of arguments.
-     * 
+     *
      * <p>This form avoids superfluous object creation when the logger is disabled
      * for the WARN level.</p>
      *
      * @param template the template string
      * @param args an array of arguments
-     * @deprecated {@link #warn(Supplier)} is recommended for lazy evaluation
+     * @deprecated Prefer {@link #warn(Supplier)} for lazy evaluation to avoid object creation
      */
     @Deprecated
     void warn(String template, Object... args);
@@ -786,17 +785,17 @@ public interface Logger {
      * Logs an exception at the WARN level with an accompanying message.
      *
      * @param msg the message accompanying the exception
-     * @param t the exception (throwable) to log
+     * @param t the exception or error to log
      */
     void warn(String msg, Throwable t);
 
     /**
      * Logs an exception at the WARN level with an accompanying message.
-     * 
-     * <p>This method provides an alternative parameter order for consistency
-     * with other APIs.</p>
      *
-     * @param t the exception (throwable) to log
+     * <p>This method provides an alternative parameter order where the exception comes first
+     * for consistency with other exception-handling patterns in the framework.</p>
+     *
+     * @param t the exception or error to log
      * @param msg the message accompanying the exception
      */
     void warn(Throwable t, String msg);
@@ -804,7 +803,7 @@ public interface Logger {
     /**
      * Logs an exception at the WARN level with a formatted message and one parameter.
      *
-     * @param t the exception to log
+     * @param t the exception or error to log
      * @param template the message template
      * @param arg the argument to be substituted in the template
      */
@@ -813,7 +812,7 @@ public interface Logger {
     /**
      * Logs an exception at the WARN level with a formatted message and two parameters.
      *
-     * @param t the exception to log
+     * @param t the exception or error to log
      * @param template the message template
      * @param arg1 the first argument
      * @param arg2 the second argument
@@ -823,7 +822,7 @@ public interface Logger {
     /**
      * Logs an exception at the WARN level with a formatted message and three parameters.
      *
-     * @param t the exception to log
+     * @param t the exception or error to log
      * @param template the message template
      * @param arg1 the first argument
      * @param arg2 the second argument
@@ -845,10 +844,10 @@ public interface Logger {
 
     /**
      * Logs a message at the WARN level with an exception using a supplier.
-     * 
+     *
      * @param supplier the supplier that provides the message
-     * @param t the exception to log
-     * @deprecated Use {@link #warn(Throwable, Supplier)} for consistent parameter order
+     * @param t the exception or error to log
+     * @deprecated Use {@link #warn(Throwable, Supplier)} for consistent exception-first parameter order
      */
     @Deprecated
     void warn(Supplier<String> supplier, Throwable t);
@@ -856,7 +855,7 @@ public interface Logger {
     /**
      * Logs a message at the WARN level with an exception using a supplier for lazy evaluation.
      *
-     * @param t the exception to log
+     * @param t the exception or error to log
      * @param supplier the supplier that provides the message
      */
     void warn(Throwable t, Supplier<String> supplier);
@@ -964,13 +963,13 @@ public interface Logger {
 
     /**
      * Logs a message at the ERROR level with variable number of arguments.
-     * 
+     *
      * <p>This form avoids superfluous object creation when the logger is disabled
      * for the ERROR level.</p>
      *
      * @param template the template string
      * @param args an array of arguments
-     * @deprecated {@link #error(Supplier)} is recommended for lazy evaluation
+     * @deprecated Prefer {@link #error(Supplier)} for lazy evaluation to avoid object creation
      */
     @Deprecated
     void error(String template, Object... args);
@@ -988,17 +987,17 @@ public interface Logger {
      * }</pre>
      *
      * @param msg the message accompanying the exception
-     * @param t the exception (throwable) to log
+     * @param t the exception or error to log
      */
     void error(String msg, Throwable t);
 
     /**
      * Logs an exception at the ERROR level with an accompanying message.
-     * 
-     * <p>This method provides an alternative parameter order for consistency
-     * with other APIs.</p>
      *
-     * @param t the exception (throwable) to log
+     * <p>This method provides an alternative parameter order where the exception comes first
+     * for consistency with other exception-handling patterns in the framework.</p>
+     *
+     * @param t the exception or error to log
      * @param msg the message accompanying the exception
      */
     void error(Throwable t, String msg);
@@ -1006,7 +1005,7 @@ public interface Logger {
     /**
      * Logs an exception at the ERROR level with a formatted message and one parameter.
      *
-     * @param t the exception to log
+     * @param t the exception or error to log
      * @param template the message template
      * @param arg the argument to be substituted in the template
      */
@@ -1015,7 +1014,7 @@ public interface Logger {
     /**
      * Logs an exception at the ERROR level with a formatted message and two parameters.
      *
-     * @param t the exception to log
+     * @param t the exception or error to log
      * @param template the message template
      * @param arg1 the first argument
      * @param arg2 the second argument
@@ -1025,7 +1024,7 @@ public interface Logger {
     /**
      * Logs an exception at the ERROR level with a formatted message and three parameters.
      *
-     * @param t the exception to log
+     * @param t the exception or error to log
      * @param template the message template
      * @param arg1 the first argument
      * @param arg2 the second argument
@@ -1047,10 +1046,10 @@ public interface Logger {
 
     /**
      * Logs a message at the ERROR level with an exception using a supplier.
-     * 
+     *
      * @param supplier the supplier that provides the message
-     * @param t the exception to log
-     * @deprecated Use {@link #error(Throwable, Supplier)} for consistent parameter order
+     * @param t the exception or error to log
+     * @deprecated Use {@link #error(Throwable, Supplier)} for consistent exception-first parameter order
      */
     @Deprecated
     void error(Supplier<String> supplier, Throwable t);
@@ -1058,7 +1057,7 @@ public interface Logger {
     /**
      * Logs a message at the ERROR level with an exception using a supplier for lazy evaluation.
      *
-     * @param t the exception to log
+     * @param t the exception or error to log
      * @param supplier the supplier that provides the message
      */
     void error(Throwable t, Supplier<String> supplier);

@@ -11,7 +11,6 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-
 package com.landawn.abacus.util.function;
 
 import com.landawn.abacus.util.Throwables;
@@ -21,7 +20,7 @@ import com.landawn.abacus.util.Throwables;
  * and an int-valued argument, and returns no result. This is a specialization of BiConsumer
  * for the case where the second argument is a primitive int.
  *
- * <p>This interface extends both {@link Throwables.ObjIntConsumer} and 
+ * <p>This interface extends both {@link Throwables.ObjIntConsumer} and
  * {@link java.util.function.ObjIntConsumer}, providing compatibility with the standard
  * Java functional interfaces while adding exception handling capabilities.
  *
@@ -45,9 +44,9 @@ public interface ObjIntConsumer<T> extends Throwables.ObjIntConsumer<T, RuntimeE
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * ObjIntConsumer<List<String>> setAtIndex = (list, index) -> 
+     * ObjIntConsumer<List<String>> setAtIndex = (list, index) ->
      *     list.set(index, "Updated");
-     * ObjIntConsumer<Counter> incrementBy = (counter, amount) -> 
+     * ObjIntConsumer<Counter> incrementBy = (counter, amount) ->
      *     counter.add(amount);
      * }</pre>
      *
@@ -70,14 +69,14 @@ public interface ObjIntConsumer<T> extends Throwables.ObjIntConsumer<T, RuntimeE
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * ObjIntConsumer<StringBuilder> appendIndex = (sb, index) -> 
+     * ObjIntConsumer<StringBuilder> appendIndex = (sb, index) ->
      *     sb.append("[").append(index).append("]");
-     * ObjIntConsumer<StringBuilder> appendNewline = (sb, ignored) -> 
+     * ObjIntConsumer<StringBuilder> appendNewline = (sb, ignored) ->
      *     sb.append("\n");
-     * 
+     *
      * ObjIntConsumer<StringBuilder> combined = appendIndex.andThen(appendNewline);
-     * // This will append "[5]\n" to the StringBuilder
-     * combined.accept(myStringBuilder, 5);
+     * StringBuilder builder = new StringBuilder();
+     * combined.accept(builder, 5); // builder contains "[5]\n"
      * }</pre>
      *
      * @param after the operation to perform after this operation

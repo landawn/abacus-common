@@ -39,7 +39,6 @@ import java.util.function.Function;
 
 import javax.xml.datatype.XMLGregorianCalendar;
 
-import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.logging.Logger;
 import com.landawn.abacus.logging.LoggerFactory;
 import com.landawn.abacus.parser.JSONParser;
@@ -79,7 +78,108 @@ import com.landawn.abacus.util.u.Nullable;
 import com.landawn.abacus.util.u.Optional;
 
 /**
- * A factory for creating Type objects.
+ * A factory class for creating, registering, and retrieving Type objects in the abacus-common type system.
+ * This final class serves as the central entry point for all type-related operations, providing
+ * comprehensive type management including built-in type registration, custom type registration,
+ * and efficient type lookup with caching mechanisms.
+ *
+ * <p>TypeFactory is the core component that bridges Java's reflection system with Abacus's type abstraction,
+ * enabling type-safe serialization, deserialization, and data conversion operations across the entire framework.
+ * It maintains a registry of all available types and provides factory methods for obtaining Type instances
+ * from various sources including Class objects, type name strings, and java.lang.reflect.Type instances.
+ *
+ * <p><b>Key Features:</b>
+ * <ul>
+ *   <li><b>Type Registry:</b> Central registry for all built-in and custom Type implementations</li>
+ *   <li><b>Performance Optimization:</b> Efficient caching mechanisms for Type instances</li>
+ *   <li><b>Flexible Type Creation:</b> Support for creating types from classes, strings, and reflection types</li>
+ *   <li><b>Custom Type Registration:</b> APIs for registering custom Type implementations</li>
+ *   <li><b>Generic Type Support:</b> Full support for parameterized types and complex generic structures</li>
+ *   <li><b>Built-in Type Library:</b> Comprehensive set of pre-registered types for common Java classes</li>
+ *   <li><b>Thread Safety:</b> All operations are thread-safe with concurrent access support</li>
+ * </ul>
+ *
+ * <p><b>⚠️ IMPORTANT - Type Registration:</b>
+ * <ul>
+ *   <li>Type names must be <b>unique</b> - duplicate registrations throw IllegalArgumentException</li>
+ *   <li>Built-in types cannot be overridden once registered</li>
+ *   <li>Custom types are cached permanently and cannot be unregistered</li>
+ *   <li>Type registration is thread-safe but should ideally be done during application startup</li>
+ * </ul>
+ *
+ * <p><b>Common Use Cases:</b>
+ * <ul>
+ *   <li><b>Type Retrieval:</b> Getting Type instances for serialization/deserialization operations</li>
+ *   <li><b>Custom Type Registration:</b> Registering custom types for domain-specific classes</li>
+ *   <li><b>Generic Type Handling:</b> Working with parameterized types like List&lt;String&gt;, Map&lt;K,V&gt;</li>
+ *   <li><b>Framework Integration:</b> Integrating with ORM, JSON libraries, and data conversion frameworks</li>
+ *   <li><b>Configuration Management:</b> Type-safe configuration parsing and validation</li>
+ * </ul>
+ *
+ * <p><b>Usage Examples:</b>
+ * <pre>{@code
+ * // Basic type retrieval
+ * Type<String> stringType = TypeFactory.getType(String.class);
+ * Type<Integer> intType = TypeFactory.getType(Integer.class);
+ * Type<List> listType = TypeFactory.getType(List.class);
+ *
+ * // Generic type retrieval using type names
+ * Type<List<String>> listStringType = TypeFactory.getType("List<String>");
+ * Type<Map<String, Integer>> mapType = TypeFactory.getType("Map<String, Integer>");
+ * Type<Optional<Person>> optionalType = TypeFactory.getType("Optional<Person>");
+ *
+ * // Custom type registration with simple functions
+ * TypeFactory.registerType(
+ *     LocalDate.class,
+ *     date -> date.toString(),                    // Serialization function
+ *     str -> LocalDate.parse(str)                // Deserialization function
+ * );
+ *
+ * // Custom type registration with JSONParser support
+ * TypeFactory.registerType(
+ *     MyCustomClass.class,
+ *     (obj, parser) -> obj.toJson(),             // Serialization with parser
+ *     (str, parser) -> parser.deserialize(str, MyCustomClass.class) // Deserialization with parser
+ * );
+ *
+ * // Named type registration for specialized handling
+ * TypeFactory.registerType(
+ *     "ISODateTime",
+ *     LocalDateTime.class,
+ *     dt -> dt.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME),
+ *     str -> LocalDateTime.parse(str, DateTimeFormatter.ISO_LOCAL_DATE_TIME)
+ * );
+ *
+ * // Using registered types
+ * Type<LocalDate> dateType = TypeFactory.getType(LocalDate.class);
+ * String serialized = dateType.stringOf(LocalDate.now());
+ * LocalDate deserialized = dateType.valueOf(serialized);
+ * }</pre>
+ *
+ * <p><b>Built-in Type Categories:</b>
+ * <ul>
+ *   <li><b>Primitive Types:</b> boolean, byte, char, short, int, long, float, double</li>
+ *   <li><b>Wrapper Types:</b> Boolean, Byte, Character, Short, Integer, Long, Float, Double</li>
+ *   <li><b>String Types:</b> String, StringBuilder, StringBuffer</li>
+ *   <li><b>Date/Time Types:</b> Date, Time, Timestamp, Calendar, LocalDate, LocalTime, etc.</li>
+ *   <li><b>Collection Types:</b> List, Set, Queue, Deque and their implementations</li>
+ *   <li><b>Map Types:</b> Map, SortedMap, NavigableMap and their implementations</li>
+ *   <li><b>Array Types:</b> All primitive and object array types</li>
+ *   <li><b>Optional Types:</b> Optional, OptionalInt, OptionalLong, OptionalDouble, Nullable</li>
+ *   <li><b>Utility Types:</b> Pair, Triple, Tuple types, Indexed, Timed</li>
+ *   <li><b>Database Types:</b> Blob, Clob, Array, SQLXML, ResultSet parameter types</li>
+ * </ul>
+ *
+ * <p><b>Type Name Formats:</b>
+ * The factory supports various type name formats:
+ * <ul>
+ *   <li>Simple names: "String", "Integer", "List"</li>
+ *   <li>Fully qualified names: "java.lang.String", "java.util.List"</li>
+ *   <li>Generic types: "List&lt;String&gt;", "Map&lt;String,Integer&gt;"</li>
+ *   <li>Nested generics: "List&lt;Map&lt;String,Integer&gt;&gt;"</li>
+ *   <li>Array types: "String[]", "int[][]", "List&lt;String&gt;[]"</li>
+ *   <li>Special types: "JSON&lt;Person&gt;", "XML&lt;Order&gt;"</li>
+ * </ul>
  *
  * @see com.landawn.abacus.util.TypeReference
  * @see com.landawn.abacus.util.TypeReference.TypeToken
@@ -1252,14 +1352,10 @@ public final class TypeFactory {
                 return targetClass;
             }
 
-            @MayReturnNull
-
             @Override
             public String stringOf(final T x) {
                 return toStringFunc.apply(x, Utils.jsonParser);
             }
-
-            @MayReturnNull
 
             @Override
             public T valueOf(final String str) {
@@ -1304,14 +1400,10 @@ public final class TypeFactory {
                 return cls;
             }
 
-            @MayReturnNull
-
             @Override
             public String stringOf(final T x) {
                 return toStringFunc.apply(x);
             }
-
-            @MayReturnNull
 
             @Override
             public T valueOf(final String str) {
@@ -1400,14 +1492,10 @@ public final class TypeFactory {
                 return targetClass;
             }
 
-            @MayReturnNull
-
             @Override
             public String stringOf(final T x) {
                 return toStringFunc.apply(x, Utils.jsonParser);
             }
-
-            @MayReturnNull
 
             @Override
             public T valueOf(final String str) {
@@ -1463,14 +1551,10 @@ public final class TypeFactory {
                 return targetClass;
             }
 
-            @MayReturnNull
-
             @Override
             public String stringOf(final T x) {
                 return toStringFunc.apply(x);
             }
-
-            @MayReturnNull
 
             @Override
             public T valueOf(final String str) {

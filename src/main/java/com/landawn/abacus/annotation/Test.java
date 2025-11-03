@@ -47,7 +47,6 @@ import java.lang.annotation.Target;
  *     }
  * }
  * }</pre>
- *
  */
 @Documented
 @Retention(value = RetentionPolicy.CLASS)

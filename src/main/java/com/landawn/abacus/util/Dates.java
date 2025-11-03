@@ -58,12 +58,225 @@ import com.landawn.abacus.logging.Logger;
 import com.landawn.abacus.logging.LoggerFactory;
 
 /**
- * <p>
- * Note: This class includes codes copied from Apache Commons Lang, Google Guava and other open source projects under the Apache License 2.0.
- * The methods copied from other libraries/frameworks/projects may be modified in this class.
- * </p>
+ * A comprehensive utility class providing date and time manipulation, parsing, formatting, and conversion operations
+ * for both legacy Java date/time types (java.util.Date, Calendar, SQL date types) and modern Java 8+ time types.
+ * This class serves as the foundation for date/time operations in the Abacus framework with extensive support
+ * for various date formats, time zones, and high-performance operations.
+ *
+ * <p><b>Key Features:</b>
+ * <ul>
+ *   <li><b>Multi-Format Support:</b> Extensive support for ISO-8601, RFC-1123, local, and custom date formats</li>
+ *   <li><b>Time Zone Handling:</b> Comprehensive time zone support with UTC, GMT, and system default zones</li>
+ *   <li><b>Type Conversion:</b> Seamless conversion between legacy and modern Java date/time types</li>
+ *   <li><b>High Performance:</b> Optimized parsing and formatting with object pooling for thread safety</li>
+ *   <li><b>Null Safety:</b> Graceful handling of null inputs with appropriate return values</li>
+ *   <li><b>SQL Integration:</b> Native support for SQL Date, Time, and Timestamp types</li>
+ *   <li><b>Calendar Operations:</b> Rich set of calendar arithmetic and manipulation operations</li>
+ *   <li><b>Fragment Analysis:</b> Detailed time fragment extraction and analysis capabilities</li>
+ * </ul>
+ *
+ * <p><b>Supported Date/Time Types:</b>
+ * <ul>
+ *   <li><b>Legacy Types:</b> {@code java.util.Date}, {@code java.util.Calendar}, {@code GregorianCalendar}</li>
+ *   <li><b>SQL Types:</b> {@code java.sql.Date}, {@code java.sql.Time}, {@code java.sql.Timestamp}</li>
+ *   <li><b>XML Types:</b> {@code XMLGregorianCalendar} for XML schema compatibility</li>
+ *   <li><b>Modern Types:</b> Integration with {@code LocalDate}, {@code LocalDateTime}, {@code ZonedDateTime}</li>
+ *   <li><b>Primitive Types:</b> Long timestamps in milliseconds since epoch</li>
+ * </ul>
+ *
+ * <p><b>Standard Date Format Constants:</b>
+ * <ul>
+ *   <li><b>Local Formats:</b> {@code LOCAL_DATE_FORMAT} ("yyyy-MM-dd"), {@code LOCAL_TIME_FORMAT} ("HH:mm:ss")</li>
+ *   <li><b>ISO Formats:</b> {@code ISO_LOCAL_DATE_TIME_FORMAT} ("yyyy-MM-dd'T'HH:mm:ss")</li>
+ *   <li><b>UTC Formats:</b> {@code ISO_8601_DATE_TIME_FORMAT} ("yyyy-MM-dd'T'HH:mm:ss'Z'")</li>
+ *   <li><b>RFC Formats:</b> {@code RFC_1123_DATE_TIME_FORMAT} ("EEE, dd MMM yyyy HH:mm:ss zzz")</li>
+ *   <li><b>Timestamp Formats:</b> {@code LOCAL_TIMESTAMP_FORMAT} ("yyyy-MM-dd HH:mm:ss.SSS")</li>
+ * </ul>
+ *
+ * <p><b>Time Zone Support:</b>
+ * <ul>
+ *   <li><b>System Default:</b> {@code DEFAULT_TIME_ZONE} and {@code DEFAULT_ZONE_ID}</li>
+ *   <li><b>UTC Support:</b> {@code UTC_TIME_ZONE} and {@code UTC_ZONE_ID} for coordinated universal time</li>
+ *   <li><b>GMT Support:</b> {@code GMT_TIME_ZONE} and {@code GMT_ZONE_ID} for Greenwich Mean Time</li>
+ *   <li><b>Custom Zones:</b> Support for any valid time zone identifier</li>
+ * </ul>
+ *
+ * <p><b>Core Operation Categories:</b>
+ * <ul>
+ *   <li><b>Creation:</b> create*, current* methods for object instantiation</li>
+ *   <li><b>Parsing:</b> parse* methods with automatic format detection and custom format support</li>
+ *   <li><b>Formatting:</b> format* and formatTo* methods for string representation</li>
+ *   <li><b>Arithmetic:</b> add*, set*, roll* methods for date/time calculations</li>
+ *   <li><b>Rounding:</b> round, truncate, ceiling operations for precision control</li>
+ *   <li><b>Comparison:</b> isSame*, truncatedEquals, truncatedCompareTo for date comparisons</li>
+ *   <li><b>Fragment Analysis:</b> getFragment* methods for extracting time components</li>
+ *   <li><b>Utility Operations:</b> overlap detection, range checking, last date calculations</li>
+ * </ul>
+ *
+ * <p><b>Performance Optimizations:</b>
+ * <ul>
+ *   <li><b>Object Pooling:</b> Thread-safe pooling of {@code DateFormat} and {@code Calendar} instances</li>
+ *   <li><b>Fast Parsing:</b> Optimized parsing for common formats without regex overhead</li>
+ *   <li><b>Cache Systems:</b> Cached formatters and creators for frequently used operations</li>
+ *   <li><b>Memory Efficiency:</b> Reuse of char arrays and buffers for string operations</li>
+ * </ul>
+ *
+ * <p><b>Common Usage Patterns:</b>
+ * <pre>{@code
+ * // Current date/time creation
+ * Date today = Dates.currentDate();
+ * Timestamp now = Dates.currentTimestamp();
+ * Calendar calendar = Dates.currentCalendar();
+ *
+ * // Parsing with automatic format detection
+ * Date parsed = Dates.parseDate("2023-12-25");
+ * Timestamp ts = Dates.parseTimestamp("2023-12-25 15:30:00.123");
+ *
+ * // Custom format parsing
+ * Date custom = Dates.parseDate("25/12/2023", "dd/MM/yyyy");
+ * Date withTZ = Dates.parseDate("2023-12-25 15:30", "yyyy-MM-dd HH:mm", TimeZone.getTimeZone("UTC"));
+ *
+ * // Formatting operations
+ * String formatted = Dates.format(new Date());
+ * String custom = Dates.format(new Date(), "dd-MMM-yyyy");
+ * String utc = Dates.format(new Date(), Dates.ISO_8601_DATE_TIME_FORMAT, Dates.UTC_TIME_ZONE);
+ *
+ * // Date arithmetic
+ * Date nextWeek = Dates.addDays(today, 7);
+ * Date nextMonth = Dates.addMonths(today, 1);
+ * Date startOfDay = Dates.truncate(today, Calendar.DAY_OF_MONTH);
+ *
+ * // Comparisons and checks
+ * boolean sameDay = Dates.isSameDay(date1, date2);
+ * boolean isLastDay = Dates.isLastDateOfMonth(today);
+ * boolean overlaps = Dates.isOverlap(start1, end1, start2, end2);
+ *
+ * // SQL type conversions
+ * java.sql.Date sqlDate = Dates.createDate(System.currentTimeMillis());
+ * java.sql.Time sqlTime = Dates.createTime(calendar);
+ * java.sql.Timestamp sqlTimestamp = Dates.createTimestamp(javaUtilDate);
+ * }</pre>
+ *
+ * <p><b>Advanced Operations:</b>
+ * <pre>{@code
+ * // Calendar field manipulations
+ * Calendar cal = Dates.currentCalendar();
+ * Calendar rounded = Dates.round(cal, Calendar.HOUR_OF_DAY);
+ * Calendar ceiling = Dates.ceiling(cal, Calendar.MINUTE);
+ *
+ * // Fragment analysis
+ * long millisInDay = Dates.getFragmentInMilliseconds(date, CalendarField.DAY_OF_MONTH);
+ * long minutesInHour = Dates.getFragmentInMinutes(date, CalendarField.HOUR_OF_DAY);
+ *
+ * // Time rolling operations (Beta)
+ * Date future = Dates.roll(date, 30, TimeUnit.DAYS);
+ * Calendar rolledCal = Dates.roll(calendar, 6, CalendarField.MONTH);
+ *
+ * // Registration of custom creators
+ * Dates.registerDateCreator(CustomDate.class, CustomDate::new);
+ * Dates.registerCalendarCreator(CustomCalendar.class, (millis, cal) -> new CustomCalendar(millis));
+ * }</pre>
+ *
+ * <p><b>Thread Safety:</b>
+ * <ul>
+ *   <li><b>Stateless Design:</b> All static methods are stateless and thread-safe</li>
+ *   <li><b>Object Pooling:</b> Internal object pools use thread-safe concurrent collections</li>
+ *   <li><b>No Shared Mutable State:</b> No static mutable fields that could cause race conditions</li>
+ *   <li><b>Concurrent Access:</b> Safe for concurrent access from multiple threads</li>
+ * </ul>
+ *
+ * <p><b>Error Handling:</b>
+ * <ul>
+ *   <li><b>Null Safety:</b> Most methods handle null inputs gracefully, returning null or appropriate defaults</li>
+ *   <li><b>ParseException Handling:</b> Parsing methods catch exceptions and return null for invalid input</li>
+ *   <li><b>IllegalArgumentException:</b> Thrown for invalid parameters that violate method contracts</li>
+ *   <li><b>Logging:</b> Internal operations are logged for debugging and monitoring purposes</li>
+ * </ul>
+ *
+ * <p><b>Memory Management:</b>
+ * <ul>
+ *   <li><b>Object Pooling:</b> Reuses expensive objects like DateFormat and Calendar instances</li>
+ *   <li><b>Pool Size Control:</b> Configurable pool sizes based on system capacity</li>
+ *   <li><b>Automatic Cleanup:</b> Pools automatically manage object lifecycle</li>
+ *   <li><b>Memory Efficient:</b> Minimizes object allocation in high-frequency operations</li>
+ * </ul>
+ *
+ * <p><b>Integration with Java Time API:</b>
+ * <ul>
+ *   <li><b>Conversion Support:</b> Methods for converting between legacy and modern types</li>
+ *   <li><b>DateTimeFormatter Integration:</b> Compatible with Java 8+ formatter patterns</li>
+ *   <li><b>ZoneId Support:</b> Seamless integration with modern time zone handling</li>
+ *   <li><b>Temporal Accessor:</b> Support for parsing to TemporalAccessor types</li>
+ * </ul>
+ *
+ * <p><b>XML and Web Service Integration:</b>
+ * <ul>
+ *   <li><b>XMLGregorianCalendar:</b> Full support for XML Schema date/time types</li>
+ *   <li><b>ISO-8601 Compliance:</b> Standard formats for web service interoperability</li>
+ *   <li><b>RFC-1123 Support:</b> HTTP date header format support</li>
+ *   <li><b>Timezone Serialization:</b> Proper handling of timezone information in XML</li>
+ * </ul>
+ *
+ * <p><b>Best Practices:</b>
+ * <ul>
+ *   <li>Use standard format constants when possible for consistency and performance</li>
+ *   <li>Specify explicit time zones when working with distributed systems</li>
+ *   <li>Prefer the modern Java Time API for new code, use these utilities for legacy integration</li>
+ *   <li>Use the parsing methods with automatic format detection for user input</li>
+ *   <li>Leverage the object pooling by reusing format strings and time zones</li>
+ * </ul>
+ *
+ * <p><b>Performance Characteristics:</b>
+ * <ul>
+ *   <li><b>Parsing:</b> O(1) for fast formats, O(n) for complex patterns</li>
+ *   <li><b>Formatting:</b> O(1) for cached formatters, minimal string allocation</li>
+ *   <li><b>Arithmetic:</b> O(1) for most operations, calendar field dependent</li>
+ *   <li><b>Comparison:</b> O(1) for instant comparisons, O(1) for truncated comparisons</li>
+ * </ul>
+ *
+ * <p><b>Related Classes:</b>
+ * <ul>
+ *   <li><b>{@link DateTimeFormatter}:</b> Java 8+ date/time formatting</li>
+ *   <li><b>{@link ISO8601Util}:</b> Specialized ISO-8601 utilities</li>
+ *   <li><b>{@link CalendarField}:</b> Type-safe calendar field enumeration</li>
+ *   <li><b>{@link java.time.LocalDateTime}:</b> Modern local date/time representation</li>
+ *   <li><b>{@link java.time.ZonedDateTime}:</b> Modern zoned date/time representation</li>
+ * </ul>
+ *
+ * <p><b>Extension Points:</b>
+ * <ul>
+ *   <li><b>Custom Date Types:</b> Register custom date class creators</li>
+ *   <li><b>Custom Calendar Types:</b> Register custom calendar class creators</li>
+ *   <li><b>Format Extensions:</b> Add support for additional date formats</li>
+ *   <li><b>Time Zone Extensions:</b> Custom time zone handling logic</li>
+ * </ul>
+ *
+ * <p><b>Migration Guide:</b>
+ * <ul>
+ *   <li>Legacy {@code SimpleDateFormat} → Use {@code Dates.format()} methods</li>
+ *   <li>Manual date arithmetic → Use {@code add*()}, {@code set*()}, {@code roll*()} methods</li>
+ *   <li>Custom parsing logic → Use {@code parse*()} methods with format detection</li>
+ *   <li>Time zone conversions → Use methods with explicit {@code TimeZone} parameters</li>
+ * </ul>
+ *
+ * <p><b>Attribution:</b>
+ * This class includes code adapted from Apache Commons Lang, Google Guava, and other
+ * open source projects under the Apache License 2.0. Methods from these libraries may have been
+ * modified for consistency, performance optimization, and null-safety enhancement.
+ *
  * @see DateTimeFormatter
  * @see ISO8601Util
+ * @see CalendarField
+ * @see java.util.Date
+ * @see java.util.Calendar
+ * @see java.sql.Date
+ * @see java.sql.Time
+ * @see java.sql.Timestamp
+ * @see javax.xml.datatype.XMLGregorianCalendar
+ * @see java.time.LocalDateTime
+ * @see java.time.ZonedDateTime
+ * @see java.util.TimeZone
+ * @see java.time.ZoneId
  */
 @SuppressWarnings({ "java:S1694", "java:S2143" })
 public abstract sealed class Dates permits Dates.DateUtil {

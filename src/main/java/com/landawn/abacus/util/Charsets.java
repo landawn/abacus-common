@@ -45,7 +45,6 @@ import java.util.Map;
  * 
  * @see java.nio.charset.Charset
  * @see java.nio.charset.StandardCharsets
- * @since 1.0
  */
 public final class Charsets {
 
@@ -173,7 +172,7 @@ public final class Charsets {
      * {@code Charset.forName()} directly, especially in scenarios where the same charset is accessed
      * frequently. The method is thread-safe, ensuring correct behavior in concurrent environments.</p>
      *
-     * <p><b>Usage Example:</b></p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Get charset by canonical name
      * Charset gbk = Charsets.get("GBK");

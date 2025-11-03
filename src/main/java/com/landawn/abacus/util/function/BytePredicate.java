@@ -8,49 +8,43 @@ import com.landawn.abacus.util.Throwables;
 /**
  * Represents a predicate (boolean-valued function) of one byte-valued argument.
  * This is the byte-consuming primitive type specialization of {@link java.util.function.Predicate}.
- * 
+ *
  * <p>This is a functional interface whose functional method is {@link #test(byte)}.
- * 
+ *
  * @see java.util.function.Predicate
+ *
+ * <p>Refer to JDK API documentation at: <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html">https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a></p>
  */
 @FunctionalInterface
 public interface BytePredicate extends Throwables.BytePredicate<RuntimeException> { //NOSONAR
-
     /**
      * A predicate that always evaluates to {@code true}, regardless of the input byte value.
      */
     BytePredicate ALWAYS_TRUE = value -> true;
-
     /**
      * A predicate that always evaluates to {@code false}, regardless of the input byte value.
      */
     BytePredicate ALWAYS_FALSE = value -> false;
-
     /**
      * A predicate that tests if the byte value is equal to zero.
      */
     BytePredicate IS_ZERO = value -> value == 0;
-
     /**
      * A predicate that tests if the byte value is not equal to zero.
      */
     BytePredicate NOT_ZERO = value -> value != 0;
-
     /**
      * A predicate that tests if the byte value is positive (greater than zero).
      */
     BytePredicate IS_POSITIVE = value -> value > 0;
-
     /**
      * A predicate that tests if the byte value is not positive (less than or equal to zero).
      */
     BytePredicate NOT_POSITIVE = value -> value <= 0;
-
     /**
      * A predicate that tests if the byte value is negative (less than zero).
      */
     BytePredicate IS_NEGATIVE = value -> value < 0;
-
     /**
      * A predicate that tests if the byte value is not negative (greater than or equal to zero).
      */
@@ -59,8 +53,14 @@ public interface BytePredicate extends Throwables.BytePredicate<RuntimeException
     /**
      * Evaluates this predicate on the given byte argument.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * BytePredicate isPositive = value -> value > 0;
+     * boolean result = isPositive.test((byte) 5); // Returns true
+     * }</pre>
+     *
      * @param value the byte input argument
-     * @return {@code true} if the input argument matches the predicate, otherwise {@code false}
+     * @return {@code true} if the input argument matches the predicate, {@code false} otherwise
      */
     @Override
     boolean test(byte value);
@@ -175,7 +175,6 @@ public interface BytePredicate extends Throwables.BytePredicate<RuntimeException
      * @param minValue the exclusive lower bound
      * @param maxValue the exclusive upper bound
      * @return a predicate that tests if the input is between {@code minValue} and {@code maxValue} (exclusive)
-     * @throws IllegalArgumentException if {@code minValue} is greater than or equal to {@code maxValue}
      */
     static BytePredicate between(final byte minValue, final byte maxValue) {
         return value -> value > minValue && value < maxValue;

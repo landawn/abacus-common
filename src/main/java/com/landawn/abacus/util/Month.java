@@ -29,7 +29,6 @@ package com.landawn.abacus.util;
  * Month decoded = Month.valueOf(3); // returns MARCH
  * }</pre>
  * 
- * @since 1.0
  */
 public enum Month {
 

@@ -11,7 +11,6 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-
 package com.landawn.abacus.util.function;
 
 import com.landawn.abacus.util.Throwables;
@@ -28,6 +27,8 @@ import com.landawn.abacus.util.Throwables;
  *
  * <p>This is a functional interface whose functional method is {@link #applyAsShort(short, short)}.
  *
+ * <p>Refer to JDK API documentation at: <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html">https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a></p>
+ *
  * @see java.util.function.BinaryOperator
  * @see java.util.function.IntBinaryOperator
  * @see java.util.function.LongBinaryOperator
@@ -36,7 +37,6 @@ import com.landawn.abacus.util.Throwables;
  */
 @FunctionalInterface
 public interface ShortBinaryOperator extends Throwables.ShortBinaryOperator<RuntimeException> { //NOSONAR
-
     /**
      * Applies this operator to the given short operands.
      *
@@ -53,11 +53,11 @@ public interface ShortBinaryOperator extends Throwables.ShortBinaryOperator<Runt
      * ShortBinaryOperator add = (a, b) -> (short) (a + b);
      * ShortBinaryOperator max = (a, b) -> (short) Math.max(a, b);
      * ShortBinaryOperator bitwiseAnd = (a, b) -> (short) (a & b);
-     * 
+     *
      * short sum = add.applyAsShort((short) 100, (short) 200); // Returns 300
      * short maximum = max.applyAsShort((short) -50, (short) 75); // Returns 75
      * short result = bitwiseAnd.applyAsShort((short) 0xFF, (short) 0x0F); // Returns 0x0F
-     * 
+     *
      * // Using with reduce operations
      * short[] values = {1, 2, 3, 4, 5};
      * short total = Arrays.stream(values)
@@ -66,7 +66,7 @@ public interface ShortBinaryOperator extends Throwables.ShortBinaryOperator<Runt
      *
      * @param left the first operand
      * @param right the second operand
-     * @return the operator result if the operation cannot be completed
+     * @return the operator result
      */
     @Override
     short applyAsShort(short left, short right);

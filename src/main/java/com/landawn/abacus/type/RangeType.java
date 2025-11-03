@@ -19,7 +19,6 @@ import java.io.IOException;
 import java.io.Writer;
 import java.lang.reflect.Array;
 
-import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.exception.UncheckedIOException;
 import com.landawn.abacus.parser.JSONXMLSerializationConfig;
 import com.landawn.abacus.util.BufferedJSONWriter;
@@ -36,10 +35,27 @@ import com.landawn.abacus.util.WD;
  * Type handler for Range objects containing comparable values.
  * This class handles serialization and deserialization of Range instances.
  *
+ * <p><b>Usage Examples:</b></p>
+ * <pre>{@code
+ * // Create a RangeType for Integer
+ * Type<Range<Integer>> type = TypeFactory.getType("Range<Integer>");
+ *
+ * // Serialize a Range to string
+ * Range<Integer> closedRange = Range.closed(1, 10); // [1, 10]
+ * String str1 = type.stringOf(closedRange); // Returns "[1, 10]"
+ *
+ * Range<Integer> openRange = Range.open(1, 10); // (1, 10)
+ * String str2 = type.stringOf(openRange); // Returns "(1, 10)"
+ *
+ * // Deserialize string to Range
+ * Range<Integer> restored = type.valueOf("[1, 10]");
+ * boolean contains5 = restored.contains(5); // true
+ * }</pre>
+ *
  * @param <T> the type of values in the range, must be Comparable
  */
 @SuppressWarnings("java:S2160")
-public class RangeType<T extends Comparable<? super T>> extends AbstractType<Range<T>> {
+class RangeType<T extends Comparable<? super T>> extends AbstractType<Range<T>> {
 
     static final Type<String> strType = TypeFactory.getType(String.class);
 
@@ -128,9 +144,7 @@ public class RangeType<T extends Comparable<? super T>> extends AbstractType<Ran
      * @param x the Range to convert to string
      * @return the string representation of the Range, or {@code null} if the input is null
      */
-    @MayReturnNull
     @Override
-
     public String stringOf(final Range<T> x) {
         if (x == null) {
             return null; // NOSONAR
@@ -162,7 +176,6 @@ public class RangeType<T extends Comparable<? super T>> extends AbstractType<Ran
      * @return the parsed Range object, or {@code null} if the input string is {@code null} or empty
      * @throws IllegalArgumentException if the string format is invalid
      */
-    @MayReturnNull
     @Override
     public Range<T> valueOf(String str) {
         str = Strings.trim(str);

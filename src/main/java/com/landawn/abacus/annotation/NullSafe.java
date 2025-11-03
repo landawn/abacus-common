@@ -70,7 +70,6 @@ import java.lang.annotation.Target;
  * }
  * }</pre>
  * 
- * @since 2018
  * @see NotNull
  * @see MayReturnNull
  */

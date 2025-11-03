@@ -30,9 +30,7 @@ package com.landawn.abacus.util;
  * comparison and parsing version strings.
  * </p>
  * 
- * <p>
- * <b>Usage Examples:</b>
- * </p>
+ * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * // Check if current Java version is at least Java 8
  * JavaVersion current = JavaVersion.of(System.getProperty("java.specification.version"));
@@ -49,7 +47,6 @@ package com.landawn.abacus.util;
  * Note: This class includes codes copied from Apache Commons Lang, under the Apache License 2.0.
  * </p>
  *
- * @since 1.0
  */
 public enum JavaVersion {
 
@@ -503,7 +500,7 @@ public enum JavaVersion {
      * @throws IllegalArgumentException if the version string is {@code null}, invalid, or unrecognized
      */
     static JavaVersion get(final String versionStr) {
-        if (versionStr == null) {
+        if (Strings.isEmpty(versionStr)) {
             throw new IllegalArgumentException("Invalid Java version: " + versionStr);
         }
 

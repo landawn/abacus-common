@@ -11,7 +11,6 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-
 package com.landawn.abacus.util.function;
 
 import com.landawn.abacus.util.Fn;
@@ -20,22 +19,20 @@ import com.landawn.abacus.util.Throwables;
 /**
  * Represents a function that accepts one argument and produces a result.
  * This is a functional interface whose functional method is {@link #apply(Object)}.
- * 
+ *
  * <p>This interface extends both {@link Throwables.Function} and {@link java.util.function.Function},
  * providing compatibility with Java's standard functional interfaces while adding support for
  * the Throwables framework.</p>
- * 
+ *
  * <p>Refer to JDK API documentation at: <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html">https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a></p>
- * 
+ *
  * @param <T> the type of the input to the function
  * @param <R> the type of the result of the function
- * 
- * @since 1.0
+ *
  * @see java.util.function.Function
  */
 @FunctionalInterface
 public interface Function<T, R> extends Throwables.Function<T, R, RuntimeException>, java.util.function.Function<T, R> { //NOSONAR
-
     /**
      * Returns a function that always returns its input argument unchanged.
      *
@@ -71,9 +68,10 @@ public interface Function<T, R> extends Throwables.Function<T, R, RuntimeExcepti
      *
      * @param <V> the type of input to the {@code before} function, and to the
      *           composed function
-     * @param before the function to apply before this function is applied
-     * @return a composed function that first applies the {@code before}
+     * @param before the function to apply before this function is applied. Must not be {@code null}.
+     * @return a composed {@code Function} that first applies the {@code before}
      *         function and then applies this function
+     * @throws NullPointerException if {@code before} is null
      *
      * @see #andThen(java.util.function.Function)
      */
@@ -98,8 +96,8 @@ public interface Function<T, R> extends Throwables.Function<T, R, RuntimeExcepti
      *
      * @param <V> the type of output of the {@code after} function, and of the
      *           composed function
-     * @param after the function to apply after this function is applied
-     * @return a composed function that first applies this function and then
+     * @param after the function to apply after this function is applied. Must not be {@code null}.
+     * @return a composed {@code Function} that first applies this function and then
      *         applies the {@code after} function
      *
      * @see #compose(java.util.function.Function)

@@ -11,7 +11,6 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-
 package com.landawn.abacus.util.function;
 
 import com.landawn.abacus.util.Throwables;
@@ -33,6 +32,13 @@ import com.landawn.abacus.util.Throwables;
 public interface IntObjConsumer<T> extends Throwables.IntObjConsumer<T, RuntimeException> { // NOSONAR
     /**
      * Performs this operation on the given arguments.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * IntObjConsumer<StringBuilder> appender = (value, sb) -> sb.append(value);
+     * StringBuilder sb = new StringBuilder("Value: ");
+     * appender.accept(42, sb); // sb becomes "Value: 42"
+     * }</pre>
      *
      * @param i the {@code int} argument
      * @param t the object argument

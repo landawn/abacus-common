@@ -53,19 +53,100 @@ import com.landawn.abacus.util.SetMultimap;
 import com.landawn.abacus.util.TypeReference;
 
 /**
- * The Type interface represents a type in the Abacus type system.
- * It provides comprehensive type information and operations for converting between
+ * The core type abstraction interface representing types in the abacus-common type system.
+ * This interface provides comprehensive type information and operations for converting between
  * different representations (String, Object, database types, etc.) and performing
  * type-specific operations like serialization, comparison, and equality checking.
  *
- * <p>This interface is the core abstraction for type handling in Abacus, supporting:</p>
+ * <p>Type serves as the foundation for type-safe operations throughout Abacus, providing:</p>
  * <ul>
- *   <li>Type identification and metadata (name, class, generic parameters)</li>
- *   <li>Type conversion operations (valueOf, stringOf)</li>
- *   <li>Database operations (get/set with ResultSet/PreparedStatement)</li>
- *   <li>Serialization support (JSON/XML writing)</li>
- *   <li>Collection/Array conversions</li>
- *   <li>Type-specific operations (comparison, equality, hash codes)</li>
+ *   <li><b>Type Identification:</b> Name, class, and generic parameter information</li>
+ *   <li><b>Type Conversion:</b> String/Object conversion with proper type handling</li>
+ *   <li><b>Database Integration:</b> JDBC ResultSet/PreparedStatement operations</li>
+ *   <li><b>Serialization Support:</b> JSON/XML writing with configuration</li>
+ *   <li><b>Collection/Array Operations:</b> Efficient conversion between formats</li>
+ *   <li><b>Type-Specific Operations:</b> Comparison, equality, hash codes, string representation</li>
+ * </ul>
+ *
+ * <p><b>⚠️ IMPORTANT - Type Safety:</b>
+ * <ul>
+ *   <li>All Type instances are <b>immutable</b> and thread-safe</li>
+ *   <li>Type operations preserve type safety through generic parameters</li>
+ *   <li>Invalid conversions throw appropriate exceptions rather than returning null</li>
+ *   <li>Use {@link TypeFactory} for obtaining Type instances</li>
+ * </ul>
+ *
+ * <p><b>Common Use Cases:</b>
+ * <ul>
+ *   <li><b>Data Conversion:</b> Converting between strings, objects, and database values</li>
+ *   <li><b>Serialization:</b> JSON/XML serialization with type-specific formatting</li>
+ *   <li><b>Database Operations:</b> Type-safe JDBC parameter setting and result retrieval</li>
+ *   <li><b>Configuration Management:</b> Type-aware property parsing and validation</li>
+ *   <li><b>Generic Programming:</b> Runtime type information for generic operations</li>
+ * </ul>
+ *
+ * <p><b>Usage Examples:</b>
+ * <pre>{@code
+ * // Basic type operations
+ * Type<String> stringType = Type.of(String.class);
+ * String value = stringType.valueOf("Hello");        // Parse from string
+ * String repr = stringType.stringOf(value);          // Convert to string
+ *
+ * // Generic type handling
+ * Type<List<Integer>> listType = Type.of(new TypeReference<List<Integer>>(){});
+ * List<Integer> numbers = listType.valueOf("[1,2,3]");  // Parse JSON array
+ *
+ * // Database operations
+ * Type<Date> dateType = Type.of(Date.class);
+ * Date date = dateType.get(resultSet, "created_date"); // Get from ResultSet
+ * dateType.set(preparedStmt, 1, date);                 // Set parameter
+ *
+ * // Collection/Array conversions
+ * Type<int[]> arrayType = Type.of(int[].class);
+ * int[] array = arrayType.collection2Array(List.of(1, 2, 3)); // Collection to array
+ * List<Integer> list = arrayType.array2Collection(array, ArrayList.class); // Array to collection
+ *
+ * // Type checking and metadata
+ * if (type.isNumber()) {
+ *     // Handle numeric types
+ *     int comparison = type.compare(value1, value2);
+ * }
+ * if (type.isSerializable()) {
+ *     // Direct serialization possible
+ *     type.writeCharacter(writer, value, config);
+ * }
+ * }</pre>
+ *
+ * <p><b>Type Categories:</b>
+ * <ul>
+ *   <li><b>Primitive Types:</b> {@code int}, {@code long}, {@code double}, etc.</li>
+ *   <li><b>Wrapper Types:</b> {@code Integer}, {@code Long}, {@code Double}, etc.</li>
+ *   <li><b>String Types:</b> {@code String}, {@code CharSequence} implementations</li>
+ *   <li><b>Date/Time Types:</b> {@code Date}, {@code Calendar}, Joda DateTime</li>
+ *   <li><b>Collection Types:</b> {@code List}, {@code Set}, {@code Queue}, etc.</li>
+ *   <li><b>Map Types:</b> {@code Map}, {@code SortedMap}, {@code ConcurrentMap}, etc.</li>
+ *   <li><b>Array Types:</b> Primitive and object arrays</li>
+ *   <li><b>Bean Types:</b> POJOs with properties</li>
+ * </ul>
+ *
+ * <p><b>Factory Methods:</b>
+ * The Type interface provides numerous static factory methods for common type patterns:
+ * <ul>
+ *   <li>{@code Type.of(Class)} - Basic type from class</li>
+ *   <li>{@code Type.ofList(Class)} - List type with element type</li>
+ *   <li>{@code Type.ofMap(Class, Class)} - Map type with key/value types</li>
+ *   <li>{@code Type.ofPropsMap()} - Properties map (String to Object)</li>
+ *   <li>Many others for specific collection and map types</li>
+ * </ul>
+ *
+ * <p><b>Serialization Support:</b>
+ * Types are classified by {@link SerializationType} for serialization handling:
+ * <ul>
+ *   <li>{@code SERIALIZABLE} - Direct string conversion (primitives, dates)</li>
+ *   <li>{@code ENTITY} - Bean/POJO types with properties</li>
+ *   <li>{@code COLLECTION} - Collection types requiring element processing</li>
+ *   <li>{@code MAP} - Map types requiring key-value processing</li>
+ *   <li>{@code ARRAY} - Array types with element processing</li>
  * </ul>
  *
  * @param <T> the Java type that this Type represents
@@ -79,6 +160,17 @@ public interface Type<T> {
      * This method handles all Java type representations including Class,
      * ParameterizedType, GenericArrayType, etc.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * // Get type from a reflection Type
+     * java.lang.reflect.Type reflectType = String.class;
+     * Type<String> stringType = Type.of(reflectType);
+     *
+     * // Get type from a generic type
+     * ParameterizedType listType = (ParameterizedType) new TypeReference<List<String>>(){}.getType();
+     * Type<List<String>> type = Type.of(listType);
+     * }</pre>
+     *
      * @param <T> the type parameter
      * @param type the Java reflection type
      * @return the corresponding Type instance
@@ -90,6 +182,15 @@ public interface Type<T> {
     /**
      * Returns the Type instance for the given TypeReference.
      * TypeReference provides a way to capture generic type information at runtime.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * // Capture generic type using TypeReference
+     * Type<List<String>> listType = Type.of(new TypeReference<List<String>>(){});
+     *
+     * // Capture complex generic types
+     * Type<Map<String, List<Integer>>> mapType = Type.of(new TypeReference<Map<String, List<Integer>>>(){});
+     * }</pre>
      *
      * @param <T> the type parameter
      * @param typeRef the type reference
@@ -103,6 +204,18 @@ public interface Type<T> {
      * Returns the Type instance for the given Class.
      * This is the most common way to obtain a Type for non-generic classes.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * // Get type for String
+     * Type<String> stringType = Type.of(String.class);
+     *
+     * // Get type for Integer
+     * Type<Integer> intType = Type.of(Integer.class);
+     *
+     * // Get type for a custom class
+     * Type<User> userType = Type.of(User.class);
+     * }</pre>
+     *
      * @param <T> the type parameter
      * @param cls the class
      * @return the corresponding Type instance
@@ -114,6 +227,18 @@ public interface Type<T> {
     /**
      * Returns the Type instance by parsing the given type name string.
      * Supports both simple and generic type names (e.g., "String", "List&lt;String&gt;").
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * // Simple type by name
+     * Type<String> stringType = Type.of("String");
+     *
+     * // Generic type by name
+     * Type<List<Integer>> listType = Type.of("List<Integer>");
+     *
+     * // Complex generic type by name
+     * Type<Map<String, List<Long>>> mapType = Type.of("Map<String, List<Long>>");
+     * }</pre>
      *
      * @param <T> the type parameter
      * @param typeName the type name string

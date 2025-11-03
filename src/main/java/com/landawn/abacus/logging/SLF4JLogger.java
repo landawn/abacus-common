@@ -44,7 +44,6 @@ import org.slf4j.spi.LocationAwareLogger;
  * logger.error("Operation failed", exception);
  * }</pre>
  * 
- * @since 1.0
  */
 class SLF4JLogger extends AbstractLogger {
 
@@ -56,13 +55,23 @@ class SLF4JLogger extends AbstractLogger {
 
     /**
      * Constructs a SLF4JLogger with the specified name.
-     * 
+     *
      * <p>This constructor obtains a SLF4J logger instance from the SLF4J LoggerFactory.
      * If SLF4J is not properly initialized (i.e., using NOPLoggerFactory), a RuntimeException
      * is thrown.</p>
-     * 
+     *
      * <p>If the obtained logger implements LocationAwareLogger, it will be used for
      * WARN and ERROR level logging to provide accurate caller location information.</p>
+     *
+     * <p><b>Note:</b> This constructor is package-private and should not be called directly.
+     * Use {@link LoggerFactory#getLogger(Class)} or {@link LoggerFactory#getLogger(String)} instead.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * // Correct way to obtain a logger
+     * Logger logger = LoggerFactory.getLogger(MyClass.class);
+     * logger.info("SLF4J logger initialized");
+     * }</pre>
      *
      * @param name the name of the logger
      * @throws RuntimeException if SLF4J is not properly initialized
@@ -82,7 +91,7 @@ class SLF4JLogger extends AbstractLogger {
      *
      * <p>Delegates directly to the SLF4J logger's trace level check.</p>
      *
-     * @return {@code true} if TRACE level is enabled, {@code false} otherwise
+     * @return {@code true} if this Logger is enabled for the TRACE level, {@code false} otherwise
      */
     @Override
     public boolean isTraceEnabled() {
@@ -118,7 +127,7 @@ class SLF4JLogger extends AbstractLogger {
      * }</pre>
      *
      * @param msg the message to log
-     * @param t the exception to log
+     * @param t the exception or error to log
      */
     @Override
     public void trace(final String msg, final Throwable t) {
@@ -130,7 +139,7 @@ class SLF4JLogger extends AbstractLogger {
      *
      * <p>Delegates directly to the SLF4J logger's debug level check.</p>
      *
-     * @return {@code true} if DEBUG level is enabled, {@code false} otherwise
+     * @return {@code true} if this Logger is enabled for the DEBUG level, {@code false} otherwise
      */
     @Override
     public boolean isDebugEnabled() {
@@ -166,7 +175,7 @@ class SLF4JLogger extends AbstractLogger {
      * }</pre>
      *
      * @param msg the message to log
-     * @param t the exception to log
+     * @param t the exception or error to log
      */
     @Override
     public void debug(final String msg, final Throwable t) {
@@ -178,7 +187,7 @@ class SLF4JLogger extends AbstractLogger {
      *
      * <p>Delegates directly to the SLF4J logger's info level check.</p>
      *
-     * @return {@code true} if INFO level is enabled, {@code false} otherwise
+     * @return {@code true} if this Logger is enabled for the INFO level, {@code false} otherwise
      */
     @Override
     public boolean isInfoEnabled() {
@@ -214,7 +223,7 @@ class SLF4JLogger extends AbstractLogger {
      * }</pre>
      *
      * @param msg the message to log
-     * @param t the exception to log
+     * @param t the exception or error to log
      */
     @Override
     public void info(final String msg, final Throwable t) {
@@ -226,7 +235,7 @@ class SLF4JLogger extends AbstractLogger {
      *
      * <p>Delegates directly to the SLF4J logger's warn level check.</p>
      *
-     * @return {@code true} if WARN level is enabled, {@code false} otherwise
+     * @return {@code true} if this Logger is enabled for the WARN level, {@code false} otherwise
      */
     @Override
     public boolean isWarnEnabled() {
@@ -270,7 +279,7 @@ class SLF4JLogger extends AbstractLogger {
      * }</pre>
      *
      * @param msg the message to log
-     * @param t the exception to log
+     * @param t the exception or error to log
      */
     @Override
     public void warn(final String msg, final Throwable t) {
@@ -286,7 +295,7 @@ class SLF4JLogger extends AbstractLogger {
      *
      * <p>Delegates directly to the SLF4J logger's error level check.</p>
      *
-     * @return {@code true} if ERROR level is enabled, {@code false} otherwise
+     * @return {@code true} if this Logger is enabled for the ERROR level, {@code false} otherwise
      */
     @Override
     public boolean isErrorEnabled() {
@@ -334,7 +343,7 @@ class SLF4JLogger extends AbstractLogger {
      * }</pre>
      *
      * @param msg the message to log
-     * @param t the exception to log
+     * @param t the exception or error to log
      */
     @Override
     public void error(final String msg, final Throwable t) {

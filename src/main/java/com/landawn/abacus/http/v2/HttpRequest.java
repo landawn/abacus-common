@@ -55,16 +55,16 @@ import com.landawn.abacus.util.URLEncodedUtil;
  * HttpResponse<String> response = HttpRequest.url("https://api.example.com/users")
  *     .header("Accept", "application/json")
  *     .get();
- * 
+ *
  * // POST request with JSON body
  * User user = new User("John", "Doe");
  * User createdUser = HttpRequest.url("https://api.example.com/users")
  *     .jsonBody(user)
  *     .post(User.class);
- * 
+ *
  * // Asynchronous request
- * CompletableFuture<HttpResponse<String>> future = HttpRequest.url("https://api.example.com/data")
- *     .asyncGet();
+ * CompletableFuture<String> future = HttpRequest.url("https://api.example.com/data")
+ *     .asyncGet(String.class);
  * }</pre>
  *
  * @see URLEncodedUtil

@@ -31,7 +31,7 @@ import com.landawn.abacus.util.WD;
  * @param <T> the type of objects handled by this XMLType
  */
 @SuppressWarnings("java:S2160")
-public class XMLType<T> extends AbstractType<T> {
+class XMLType<T> extends AbstractType<T> {
 
     public static final String XML = "XML";
 
@@ -59,7 +59,6 @@ public class XMLType<T> extends AbstractType<T> {
      * </p>
      *
      * @return the declaring name of this XML type
-     @MayReturnNull
      */
     @Override
     public String declaringName() {
@@ -88,7 +87,6 @@ public class XMLType<T> extends AbstractType<T> {
      *
      * @param x the object to convert to XML
      * @return the XML string representation of the object, or {@code null} if the input is null
-     @MayReturnNull
      */
     @Override
     public String stringOf(final T x) {
@@ -105,7 +103,6 @@ public class XMLType<T> extends AbstractType<T> {
      * @param str the XML string to deserialize
      * @return an object of type T deserialized from the XML string, or {@code null} if the string is empty
      * @throws RuntimeException if the XML parsing fails or the XML doesn't match the target type
-     @MayReturnNull
      */
     @Override
     public T valueOf(final String str) {

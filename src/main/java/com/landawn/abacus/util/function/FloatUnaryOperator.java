@@ -11,7 +11,6 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-
 package com.landawn.abacus.util.function;
 
 import com.landawn.abacus.util.Throwables;
@@ -19,22 +18,22 @@ import com.landawn.abacus.util.Throwables;
 /**
  * Represents an operation on a single float-valued operand that produces a float-valued result.
  * This is a functional interface whose functional method is {@link #applyAsFloat(float)}.
- * 
+ *
  * <p>This is a primitive type specialization of {@link java.util.function.UnaryOperator} for {@code float}.
  * This is also a specialization of {@link FloatFunction} for the case where the operand and result
  * are of the same primitive type.</p>
- * 
- * @since 1.0
+ *
  * @see java.util.function.UnaryOperator
  * @see java.util.function.DoubleUnaryOperator
  * @see java.util.function.IntUnaryOperator
+ *
+ * <p>Refer to JDK API documentation at: <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html">https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a></p>
  */
 @FunctionalInterface
 public interface FloatUnaryOperator extends Throwables.FloatUnaryOperator<RuntimeException> { //NOSONAR
-
     /**
      * Applies this operator to the given float operand.
-     * 
+     *
      * <p>The implementation should define how the float value is transformed.
      * Common implementations include mathematical operations like negation,
      * absolute value, or other unary transformations.</p>
@@ -54,7 +53,7 @@ public interface FloatUnaryOperator extends Throwables.FloatUnaryOperator<Runtim
      * @param before the operator to apply before this operator is applied
      * @return a composed operator that first applies the {@code before}
      *         operator and then applies this operator
-     * 
+     *
      * @see #andThen(FloatUnaryOperator)
      */
     default FloatUnaryOperator compose(final FloatUnaryOperator before) {
@@ -70,7 +69,7 @@ public interface FloatUnaryOperator extends Throwables.FloatUnaryOperator<Runtim
      * @param after the operator to apply after this operator is applied
      * @return a composed operator that first applies this operator and then
      *         applies the {@code after} operator
-     * 
+     *
      * @see #compose(FloatUnaryOperator)
      */
     default FloatUnaryOperator andThen(final FloatUnaryOperator after) {

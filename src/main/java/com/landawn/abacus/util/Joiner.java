@@ -31,13 +31,198 @@ import com.landawn.abacus.parser.ParserUtil.BeanInfo;
 import com.landawn.abacus.util.u.Optional;
 
 /**
- * This is the Joiner class. It provides various methods to join elements into a string.
- * The class implements the Closeable interface, indicating that instances of this class can be closed to release resources.
- * The class provides methods to append different types of elements, including primitives, arrays, collections, and maps.
- * It also provides methods to control the joining behavior, such as whether to trim before appending, whether to skip nulls, and whether to use a cached buffer.
- * The class also includes methods for repeating a string, merging another Joiner, and converting the joined elements into a string, a map, or a stream.
+ * A fluent string joining utility that concatenates elements into a single string with configurable
+ * separators, prefixes, and suffixes. This final class provides a builder-pattern API for efficiently
+ * constructing formatted strings from various data types including primitives, arrays, collections,
+ * maps, and Java beans with extensive customization options for output formatting.
+ *
+ * <p>Joiner excels at creating formatted strings for logging, output generation, CSV creation, and
+ * any scenario requiring controlled string concatenation. It supports automatic null handling,
+ * whitespace trimming, conditional appending, and efficient buffer management for high-performance
+ * string building operations with minimal memory allocation overhead.</p>
+ *
+ * <p><b>Key Features:</b>
+ * <ul>
+ *   <li><b>Fluent Interface:</b> Method chaining for readable and concise string building</li>
+ *   <li><b>Flexible Separators:</b> Custom delimiters between elements and key-value pairs</li>
+ *   <li><b>Prefix/Suffix Support:</b> Automatic wrapping with configurable prefix and suffix</li>
+ *   <li><b>Null Handling:</b> Skip nulls or replace with custom text</li>
+ *   <li><b>Whitespace Control:</b> Automatic trimming before appending elements</li>
+ *   <li><b>Type Diversity:</b> Support for primitives, objects, arrays, collections, maps, and beans</li>
+ *   <li><b>Buffer Reuse:</b> Optional buffer caching for reduced memory allocation</li>
+ *   <li><b>Resource Management:</b> Implements {@link Closeable} for proper resource cleanup</li>
+ * </ul>
+ *
+ * <p><b>IMPORTANT - Final Class &amp; Resource Management:</b>
+ * <ul>
+ *   <li>This is a <b>final class</b> that cannot be extended for API stability</li>
+ *   <li>Implements {@link Closeable} - should be closed when buffer reuse is enabled</li>
+ *   <li>Not thread-safe - each thread should use separate instances</li>
+ *   <li>Internal buffer is recycled after {@link #toString()} when reuse is enabled</li>
+ * </ul>
+ *
+ * <p><b>Common Use Cases:</b>
+ * <ul>
+ *   <li><b>Logging &amp; Debug Output:</b> Formatted object representation for debugging</li>
+ *   <li><b>CSV/TSV Generation:</b> Creating structured data files with custom delimiters</li>
+ *   <li><b>SQL Query Building:</b> Concatenating parameter lists and conditions</li>
+ *   <li><b>HTML/XML Generation:</b> Building markup with proper separators</li>
+ *   <li><b>Configuration Display:</b> Formatted key-value pair output</li>
+ *   <li><b>Report Generation:</b> Structured text output with custom formatting</li>
+ *   <li><b>API Response Formatting:</b> Creating formatted response strings</li>
+ * </ul>
+ *
+ * <p><b>Usage Examples:</b></p>
+ * <pre>{@code
+ * // Basic element joining
+ * String result = Joiner.with(", ").append("apple").append("banana").append("cherry").toString();
+ * // Result: "apple, banana, cherry"
+ *
+ * // Collection joining with prefix/suffix
+ * List<String> names = Arrays.asList("Alice", "Bob", "Charlie");
+ * String formatted = Joiner.with(", ", "[", "]").appendAll(names).toString();
+ * // Result: "[Alice, Bob, Charlie]"
+ *
+ * // Map entries with custom key-value separator
+ * Map<String, Integer> scores = Map.of("Alice", 95, "Bob", 87, "Charlie", 92);
+ * String report = Joiner.with(", ", "=", "Scores: {", "}")
+ *                       .appendEntries(scores)
+ *                       .toString();
+ * // Result: "Scores: {Alice=95, Bob=87, Charlie=92}"
+ *
+ * // Null handling and trimming
+ * String clean = Joiner.with(" | ")
+ *                      .skipNulls()
+ *                      .trimBeforeAppend()
+ *                      .append("  hello  ")
+ *                      .append(null)           // skipped
+ *                      .append("  world  ")
+ *                      .toString();
+ * // Result: "hello | world"
+ *
+ * // Bean property joining
+ * Person person = new Person("John", 30, "Engineer");
+ * String info = Joiner.with(", ")
+ *                     .appendBean(person)
+ *                     .toString();
+ * // Result: "name=John, age=30, title=Engineer"
+ *
+ * // High-performance with buffer reuse
+ * try (Joiner joiner = Joiner.with(",").reuseCachedBuffer()) {
+ *     for (int i = 0; i < 1000; i++) {
+ *         joiner.append(i);
+ *     }
+ *     return joiner.toString();
+ * } // Automatic buffer cleanup
+ * }</pre>
+ *
+ * <p><b>Factory Methods:</b>
+ * <ul>
+ *   <li>{@link #defauLt()} - Default configuration with comma separator</li>
+ *   <li>{@link #with(CharSequence)} - Simple separator configuration</li>
+ *   <li>{@link #with(CharSequence, CharSequence)} - Separator and key-value delimiter</li>
+ *   <li>{@link #with(CharSequence, CharSequence, CharSequence)} - Separator with prefix/suffix</li>
+ *   <li>{@link #with(CharSequence, CharSequence, CharSequence, CharSequence)} - Full configuration</li>
+ * </ul>
+ *
+ * <p><b>Configuration Methods:</b>
+ * <ul>
+ *   <li>{@link #setEmptyValue(CharSequence)} - Value returned when no elements are appended</li>
+ *   <li>{@link #trimBeforeAppend()} - Trim whitespace from elements before appending</li>
+ *   <li>{@link #skipNulls()} - Skip null elements instead of converting to text</li>
+ *   <li>{@link #useForNull(String)} - Custom text for null values (default: "null")</li>
+ *   <li>{@link #reuseCachedBuffer()} - Enable buffer reuse for performance optimization</li>
+ * </ul>
+ *
+ * <p><b>Append Operations:</b>
+ * <ul>
+ *   <li><b>Primitives:</b> {@code append(boolean/char/int/long/float/double)}</li>
+ *   <li><b>Objects:</b> {@code append(Object)}, {@code appendIfNotNull(Object)}</li>
+ *   <li><b>Arrays:</b> {@code appendAll(type[])} for all primitive and object arrays</li>
+ *   <li><b>Collections:</b> {@code appendAll(Collection/Iterable/Iterator)} with optional filtering</li>
+ *   <li><b>Key-Value Pairs:</b> {@code appendEntry(key, value)}, {@code appendEntries(Map)}</li>
+ *   <li><b>Java Beans:</b> {@code appendBean(Object)} with property filtering options</li>
+ * </ul>
+ *
+ * <p><b>Performance Characteristics:</b>
+ * <ul>
+ *   <li>Element appending: O(1) amortized time with StringBuilder backing</li>
+ *   <li>Collection appending: O(n) where n is the number of elements</li>
+ *   <li>Memory usage: O(total content length) with optional buffer reuse</li>
+ *   <li>Buffer management: Efficient reuse reduces garbage collection pressure</li>
+ * </ul>
+ *
+ * <p><b>Thread Safety:</b>
+ * Joiner instances are <b>not thread-safe</b>:
+ * <ul>
+ *   <li>Each thread should use separate Joiner instances</li>
+ *   <li>Concurrent access requires external synchronization</li>
+ *   <li>Only the {@link #close()} method is synchronized for resource cleanup</li>
+ *   <li>Buffer reuse is thread-local for safety</li>
+ * </ul>
+ *
+ * <p><b>Memory Management:</b>
+ * <ul>
+ *   <li>Use {@link #reuseCachedBuffer()} for high-frequency operations</li>
+ *   <li>Call {@link #close()} or use try-with-resources when buffer reuse is enabled</li>
+ *   <li>Internal buffer is automatically recycled after {@link #toString()}</li>
+ *   <li>Consider buffer reuse for operations with many small strings</li>
+ * </ul>
+ *
+ * <p><b>Comparison with Alternatives:</b>
+ * <ul>
+ *   <li><b>vs Java 8 Collectors.joining():</b> More flexible with prefix/suffix and null handling</li>
+ *   <li><b>vs StringBuilder:</b> Higher-level API with automatic separator management</li>
+ *   <li><b>vs String.join():</b> More configuration options and type support</li>
+ *   <li><b>vs Google Guava Joiner:</b> Similar API with additional bean and map support</li>
+ * </ul>
+ *
+ * <p><b>Integration Points:</b>
+ * <ul>
+ *   <li><b>{@link Splitter}:</b> Complementary class for string splitting operations</li>
+ *   <li><b>{@link com.landawn.abacus.util.stream.Stream}:</b> Works with stream collectors and terminal operations</li>
+ *   <li><b>{@link N}:</b> Utility class provides additional string manipulation methods</li>
+ *   <li><b>Collections Framework:</b> Full compatibility with all collection types</li>
+ * </ul>
+ *
+ * <p><b>Best Practices:</b>
+ * <ul>
+ *   <li>Use try-with-resources when enabling buffer reuse for automatic cleanup</li>
+ *   <li>Configure null handling and trimming before appending elements</li>
+ *   <li>Use appropriate factory methods to minimize configuration code</li>
+ *   <li>Consider using {@link #mapIfNotEmpty(Function)} for conditional processing</li>
+ *   <li>Cache Joiner configurations for repeated use patterns</li>
+ * </ul>
+ *
+ * <p><b>Advanced Features:</b>
+ * <ul>
+ *   <li><b>Conditional Appending:</b> {@code appendIf(boolean, Supplier)} for dynamic content</li>
+ *   <li><b>String Repetition:</b> {@code repeat(String, int)} for pattern generation</li>
+ *   <li><b>Joiner Merging:</b> {@code merge(Joiner)} for combining multiple joiners</li>
+ *   <li><b>Functional Mapping:</b> {@code map(Function)} and {@code mapIfNotEmpty(Function)}</li>
+ *   <li><b>Bean Filtering:</b> Property selection and filtering for bean serialization</li>
+ * </ul>
+ *
+ * <p><b>Error Handling:</b>
+ * <ul>
+ *   <li>Throws {@link IllegalArgumentException} for null factory method parameters</li>
+ *   <li>Throws {@link IllegalStateException} when using closed joiner instances</li>
+ *   <li>Throws {@link IndexOutOfBoundsException} for invalid range operations</li>
+ *   <li>Handles {@link IOException} in {@link #appendTo(Appendable)} operations</li>
+ * </ul>
+ *
+ * <p><b>Constants:</b>
+ * <ul>
+ *   <li>{@link #DEFAULT_DELIMITER} - Default element separator (", ")</li>
+ *   <li>{@link #DEFAULT_KEY_VALUE_DELIMITER} - Default key-value separator ("=")</li>
+ * </ul>
  *
  * @see Splitter
+ * @see StringBuilder
+ * @see Closeable
+ * @see com.landawn.abacus.util.stream.Stream
+ * @see java.util.stream.Collectors#joining()
+ * @see String#join(CharSequence, CharSequence...)
  */
 public final class Joiner implements Closeable {
 

@@ -11,7 +11,6 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-
 package com.landawn.abacus.util.function;
 
 import com.landawn.abacus.util.Throwables;
@@ -33,7 +32,6 @@ import com.landawn.abacus.util.Throwables;
  */
 @FunctionalInterface
 public interface IntConsumer extends Throwables.IntConsumer<RuntimeException>, java.util.function.IntConsumer { //NOSONAR
-
     /**
      * Performs this operation on the given argument.
      * This method is expected to operate via side-effects.

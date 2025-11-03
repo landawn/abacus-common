@@ -60,7 +60,6 @@ import com.landawn.abacus.util.ThreadMode;
  * 
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
- * {@code
  * // Create a subscriber using the Subscriber interface
  * final Subscriber<String> strSubscriber = new Subscriber<String>() {
  *     @Override
@@ -68,7 +67,7 @@ import com.landawn.abacus.util.ThreadMode;
  *         System.out.println("Received: " + event);
  *     }
  * };
- * 
+ *
  * // Create a subscriber using @Subscribe annotation
  * final Object annotatedSubscriber = new Object() {
  *     @Subscribe(threadMode = ThreadMode.THREAD_POOL_EXECUTOR)
@@ -76,29 +75,27 @@ import com.landawn.abacus.util.ThreadMode;
  *         System.out.println("Handled: " + event);
  *     }
  * };
- * 
+ *
  * // Register subscribers
  * EventBus eventBus = EventBus.getDefault();
  * eventBus.register(strSubscriber, "myEventId");
  * eventBus.register(annotatedSubscriber);
- * 
+ *
  * // Post events
  * eventBus.post("Hello World");
  * eventBus.post("myEventId", "Targeted Event");
- * 
+ *
  * // Post sticky event
  * eventBus.postSticky("Sticky Message");
- * 
+ *
  * // Unregister when done
  * eventBus.unregister(strSubscriber);
- * }
  * }</pre>
  * 
  * <p>This class is thread-safe and can be used in multi-threaded environments.</p>
  *
  * @see Subscriber
  * @see Subscribe
- * @since 1.0
  */
 public class EventBus {
 
@@ -147,9 +144,7 @@ public class EventBus {
      * 
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * {@code
      * EventBus eventBus = new EventBus();
-     * }
      * }</pre>
      */
     @SuppressFBWarnings("SING_SINGLETON_HAS_NONPRIVATE_CONSTRUCTOR")
@@ -163,9 +158,7 @@ public class EventBus {
      * 
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * {@code
      * EventBus eventBus = new EventBus("myEventBus");
-     * }
      * }</pre>
      *
      * @param identifier the unique identifier for this EventBus instance
@@ -181,10 +174,8 @@ public class EventBus {
      * 
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * {@code
      * ExecutorService executor = Executors.newFixedThreadPool(4);
      * EventBus eventBus = new EventBus("myEventBus", executor);
-     * }
      * }</pre>
      *
      * @param identifier the unique identifier for this EventBus instance
@@ -219,10 +210,8 @@ public class EventBus {
      * 
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * {@code
      * EventBus eventBus = EventBus.getDefault();
      * eventBus.post("Hello World");
-     * }
      * }</pre>
      *
      * @return the default EventBus instance
@@ -237,10 +226,8 @@ public class EventBus {
      * 
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * {@code
      * EventBus eventBus = new EventBus("myBus");
      * String id = eventBus.identifier(); // Returns "myBus"
-     * }
      * }</pre>
      *
      * @return the identifier of this EventBus
@@ -255,9 +242,7 @@ public class EventBus {
      * 
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * {@code
      * List<Object> stringSubscribers = eventBus.getSubscribers(String.class);
-     * }
      * }</pre>
      *
      * @param eventType the event type to search for
@@ -273,9 +258,7 @@ public class EventBus {
      * 
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * {@code
      * List<Object> subscribers = eventBus.getSubscribers("userEvents", User.class);
-     * }
      * }</pre>
      *
      * @param eventId the event ID to match, or {@code null} for subscribers without event ID
@@ -305,10 +288,8 @@ public class EventBus {
      * 
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * {@code
      * List<Object> allSubscribers = eventBus.getAllSubscribers();
      * System.out.println("Total subscribers: " + allSubscribers.size());
-     * }
      * }</pre>
      *
      * @return a list of all registered subscribers
@@ -326,13 +307,11 @@ public class EventBus {
      * 
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * {@code
      * eventBus.register(new Subscriber<String>() {
      *     public void on(String event) {
      *         System.out.println("Received: " + event);
      *     }
      * });
-     * }
      * }</pre>
      *
      * @param subscriber the subscriber to register
@@ -349,10 +328,8 @@ public class EventBus {
      * 
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * {@code
      * eventBus.register(mySubscriber, "userEvents");
      * // This subscriber will only receive events posted with "userEvents" ID
-     * }
      * }</pre>
      *
      * @param subscriber the subscriber to register
@@ -957,7 +934,42 @@ public class EventBus {
      * Checks if the specified thread mode is supported by this EventBus.
      * Currently supports DEFAULT and THREAD_POOL_EXECUTOR modes.
      *
-     * @param threadMode the thread mode to check
+     * <p>This method is designed to be overridden by subclasses that want to support additional
+     * thread modes. When extending EventBus to add custom thread modes, override this method to
+     * return {@code true} for your custom modes, and override {@link #dispatch(SubIdentifier, Object)}
+     * to handle the custom thread mode dispatch logic.</p>
+     *
+     * <p><b>Thread Safety:</b> This method is thread-safe and can be called concurrently from multiple threads.</p>
+     *
+     * <p><b>Supported Thread Modes:</b></p>
+     * <ul>
+     *   <li>{@code null} or {@link ThreadMode#DEFAULT} - Events are delivered on the posting thread</li>
+     *   <li>{@link ThreadMode#THREAD_POOL_EXECUTOR} - Events are delivered asynchronously on a background thread pool</li>
+     * </ul>
+     *
+     * <p><b>Extension Example:</b></p>
+     * <pre>{@code
+     * public class CustomEventBus extends EventBus {
+     *     @Override
+     *     protected boolean isSupportedThreadMode(ThreadMode threadMode) {
+     *         if (threadMode == ThreadMode.MAIN_THREAD) {
+     *             return true; // Add support for main thread delivery
+     *         }
+     *         return super.isSupportedThreadMode(threadMode);
+     *     }
+     *
+     *     @Override
+     *     protected void dispatch(SubIdentifier identifier, Object event) {
+     *         if (identifier.threadMode == ThreadMode.MAIN_THREAD) {
+     *             mainThreadExecutor.execute(() -> post(identifier, event));
+     *             return;
+     *         }
+     *         super.dispatch(identifier, event);
+     *     }
+     * }
+     * }</pre>
+     *
+     * @param threadMode the thread mode to check, may be {@code null}
      * @return {@code true} if the thread mode is supported, {@code false} otherwise
      */
     protected boolean isSupportedThreadMode(final ThreadMode threadMode) {
@@ -966,10 +978,43 @@ public class EventBus {
 
     /**
      * Dispatches an event to a subscriber according to its thread mode configuration.
-     * This method determines whether to deliver the event synchronously or asynchronously.
+     * This method determines whether to deliver the event synchronously or asynchronously
+     * based on the thread mode specified in the subscriber identifier.
      *
-     * @param identifier the subscriber identifier containing delivery configuration
-     * @param event the event to dispatch
+     * <p>This method is designed to be overridden by subclasses that want to support additional
+     * thread modes. When extending EventBus, override this method to add custom dispatch logic
+     * for your custom thread modes, and remember to also override {@link #isSupportedThreadMode(ThreadMode)}
+     * to indicate support for those modes.</p>
+     *
+     * <p><b>Thread Safety:</b> This method is thread-safe and can be called concurrently from multiple threads.
+     * However, the actual thread on which the event is delivered depends on the thread mode configuration.</p>
+     *
+     * <p><b>Default Dispatch Behavior:</b></p>
+     * <ul>
+     *   <li>{@link ThreadMode#DEFAULT} - Event is delivered synchronously on the calling thread</li>
+     *   <li>{@link ThreadMode#THREAD_POOL_EXECUTOR} - Event is delivered asynchronously on a background thread from the executor pool</li>
+     * </ul>
+     *
+     * <p><b>Extension Example:</b></p>
+     * <pre>{@code
+     * public class CustomEventBus extends EventBus {
+     *     private final Handler mainHandler = new Handler(Looper.getMainLooper());
+     *
+     *     @Override
+     *     protected void dispatch(SubIdentifier identifier, Object event) {
+     *         if (identifier.threadMode == ThreadMode.MAIN_THREAD) {
+     *             mainHandler.post(() -> post(identifier, event));
+     *             return;
+     *         }
+     *         super.dispatch(identifier, event);
+     *     }
+     * }
+     * }</pre>
+     *
+     * @param identifier the subscriber identifier containing delivery configuration including thread mode,
+     *                   subscriber instance, and method to invoke
+     * @param event the event object to dispatch to the subscriber
+     * @throws RuntimeException if the thread mode is not supported (should not happen if isSupportedThreadMode is properly implemented)
      */
     protected void dispatch(final SubIdentifier identifier, final Object event) {
         switch (identifier.threadMode) {
@@ -990,10 +1035,48 @@ public class EventBus {
 
     /**
      * Delivers an event to a specific subscriber method.
-     * This method handles interval filtering, deduplication, and actual method invocation.
+     * This method handles interval filtering, deduplication, and actual method invocation
+     * by calling the subscriber's method via reflection.
      *
-     * @param sub the subscriber identifier
-     * @param event the event to deliver
+     * <p>This method is designed to be overridden by subclasses that want to customize
+     * event delivery behavior, add pre/post-processing hooks, or modify filtering logic.
+     * When overriding, you can add custom validation, logging, or transformation of events
+     * before they reach the subscriber.</p>
+     *
+     * <p><b>Thread Safety:</b> This method is thread-safe. When interval filtering or deduplication
+     * is enabled, synchronization is performed on the SubIdentifier instance to ensure thread-safe
+     * access to the last post time and previous event tracking.</p>
+     *
+     * <p><b>Event Filtering:</b></p>
+     * <ul>
+     *   <li><b>Interval Filtering:</b> If {@code interval} is set on the subscriber, events posted
+     *       within the specified interval (in milliseconds) will be ignored. This is useful for
+     *       throttling high-frequency events.</li>
+     *   <li><b>Deduplication:</b> If {@code deduplicate} is enabled, consecutive duplicate events
+     *       (determined by {@code equals()}) will be ignored. This prevents redundant processing
+     *       of unchanged data.</li>
+     * </ul>
+     *
+     * <p><b>Extension Example:</b></p>
+     * <pre>{@code
+     * public class LoggingEventBus extends EventBus {
+     *     @Override
+     *     protected void post(SubIdentifier sub, Object event) {
+     *         logger.info("Delivering event {} to {}", event, sub.method.getName());
+     *         long startTime = System.currentTimeMillis();
+     *         try {
+     *             super.post(sub, event);
+     *         } finally {
+     *             long duration = System.currentTimeMillis() - startTime;
+     *             logger.info("Event delivery took {}ms", duration);
+     *         }
+     *     }
+     * }
+     * }</pre>
+     *
+     * @param sub the subscriber identifier containing the method to invoke, subscriber instance,
+     *            and filtering configuration (interval, deduplicate)
+     * @param event the event object to deliver to the subscriber
      */
     protected void post(final SubIdentifier sub, final Object event) {
         try {

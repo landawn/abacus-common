@@ -24,7 +24,7 @@ import com.landawn.abacus.util.N;
  * This class provides handling for java.lang.Boolean values in database operations,
  * with automatic type conversion for non-Boolean database values.
  */
-public final class BooleanType extends AbstractBooleanType {
+final class BooleanType extends AbstractBooleanType {
 
     /**
      * The type name constant for Boolean type identification.
@@ -46,10 +46,10 @@ public final class BooleanType extends AbstractBooleanType {
     }
 
     /**
-     * Determines whether this type represents a primitive wrapper class.
+     * Indicates whether this type represents a primitive wrapper class.
      * Boolean is the wrapper class for the primitive boolean type.
      *
-     * @return {@code true} indicating Boolean is a primitive wrapper
+     * @return {@code true}, indicating Boolean is a primitive wrapper
      */
     @Override
     public boolean isPrimitiveWrapper() {
@@ -61,10 +61,17 @@ public final class BooleanType extends AbstractBooleanType {
      * This method handles type conversion for non-Boolean database columns,
      * automatically converting numeric and string values to Boolean.
      *
-     * @param rs the ResultSet to retrieve the value from
-     * @param columnIndex the column index (1-based) of the value
-     * @return the Boolean value, {@code null} if SQL NULL, or converted value if not Boolean type
-     * @throws SQLException if a database access error occurs or the columnIndex is invalid
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Type<Boolean> type = TypeFactory.getType(Boolean.class);
+     * ResultSet rs = ...; // from SQL query
+     * Boolean isActive = type.get(rs, 1); // retrieves Boolean from column 1
+     * }</pre>
+     *
+     * @param rs the ResultSet containing the data, must not be {@code null}
+     * @param columnIndex the column index (1-based) to retrieve the value from
+     * @return the Boolean value at the specified column, or {@code null} if the column value is SQL NULL
+     * @throws SQLException if a database access error occurs
      */
     @Override
     public Boolean get(final ResultSet rs, final int columnIndex) throws SQLException {
@@ -82,11 +89,17 @@ public final class BooleanType extends AbstractBooleanType {
      * This method handles type conversion for non-Boolean database columns,
      * automatically converting numeric and string values to Boolean.
      *
-     * @param rs the ResultSet to retrieve the value from
-     * @param columnLabel the label for the column specified with the SQL AS clause,
-     *                    or the column name if no AS clause was specified
-     * @return the Boolean value, {@code null} if SQL NULL, or converted value if not Boolean type
-     * @throws SQLException if a database access error occurs or the columnLabel is invalid
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Type<Boolean> type = TypeFactory.getType(Boolean.class);
+     * ResultSet rs = ...; // from SQL query
+     * Boolean isActive = type.get(rs, "is_active"); // retrieves Boolean from "is_active" column
+     * }</pre>
+     *
+     * @param rs the ResultSet containing the data, must not be {@code null}
+     * @param columnLabel the label of the column to retrieve the value from, must not be {@code null}
+     * @return the Boolean value in the specified column, or {@code null} if the column value is SQL NULL
+     * @throws SQLException if a database access error occurs
      */
     @Override
     public Boolean get(final ResultSet rs, final String columnLabel) throws SQLException {

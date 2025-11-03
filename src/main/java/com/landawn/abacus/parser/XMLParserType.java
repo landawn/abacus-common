@@ -47,7 +47,6 @@ package com.landawn.abacus.parser;
  * }</pre>
  * 
  * @see XMLParserImpl
- * @since 1.0
  */
 enum XMLParserType {
 

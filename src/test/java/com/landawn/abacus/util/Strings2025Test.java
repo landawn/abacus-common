@@ -3296,4 +3296,280 @@ public class Strings2025Test extends TestBase {
         assertEquals("Value: 123", Strings.lenientFormat("Value: %s", 123));
         assertNotNull(Strings.lenientFormat("Test %s %s", "a"));
     }
+
+    // ===== Tests for substringBetweenFirstAndLast methods in Strings class =====
+
+    @Test
+    @DisplayName("Test substringBetweenFirstAndLast(String, String) - basic cases")
+    public void testSubstringBetweenFirstAndLast_SingleDelimiter_Basic() {
+        // Normal cases
+        assertEquals("middle", Strings.substringBetweenFirstAndLast("[middle[]]", "["));
+        assertEquals("value", Strings.substringBetweenFirstAndLast("<tag>value<tag>", "<tag>"));
+        assertEquals("text", Strings.substringBetweenFirstAndLast("@@text@@", "@@"));
+
+        // Edge cases
+        assertNull(Strings.substringBetweenFirstAndLast("no-match", "[["));
+        assertNull(Strings.substringBetweenFirstAndLast("[[only-one", "[["));
+        assertNull(Strings.substringBetweenFirstAndLast(null, "[["));
+        assertNull(Strings.substringBetweenFirstAndLast("test", null));
+    }
+
+    @Test
+    @DisplayName("Test substringBetweenFirstAndLast(String, String) - multiple occurrences")
+    public void testSubstringBetweenFirstAndLast_SingleDelimiter_Multiple() {
+        assertEquals("a::b::c", Strings.substringBetweenFirstAndLast("::a::b::c::", "::"));
+        assertEquals("first**second", Strings.substringBetweenFirstAndLast("**first**second**", "**"));
+        assertEquals("1|2|3", Strings.substringBetweenFirstAndLast("|1|2|3|", "|"));
+    }
+
+    @Test
+    @DisplayName("Test substringBetweenFirstAndLast(String, String) - adjacent delimiters")
+    public void testSubstringBetweenFirstAndLast_SingleDelimiter_Adjacent() {
+        assertEquals("", Strings.substringBetweenFirstAndLast("[[]]", "["));
+        assertEquals("", Strings.substringBetweenFirstAndLast("####", "##"));
+    }
+
+    @Test
+    @DisplayName("Test substringBetweenFirstAndLast(String, String) - single occurrence")
+    public void testSubstringBetweenFirstAndLast_SingleDelimiter_OnlyOne() {
+        assertNull(Strings.substringBetweenFirstAndLast("[content", "["));
+        assertNull(Strings.substringBetweenFirstAndLast("content]", "]"));
+    }
+
+    @Test
+    @DisplayName("Test substringBetweenFirstAndLast(String, String, String) - basic cases")
+    public void testSubstringBetweenFirstAndLast_TwoDelimiters_Basic() {
+        // Normal cases
+        assertEquals("middle[]", Strings.substringBetweenFirstAndLast("[middle[]]", "[", "]"));
+        assertEquals("content", Strings.substringBetweenFirstAndLast("<tag>content</tag>", "<tag>", "</tag>"));
+        assertEquals("World", Strings.substringBetweenFirstAndLast("Hello [World]!", "[", "]"));
+
+        // Edge cases
+        assertNull(Strings.substringBetweenFirstAndLast("no-match", "[[", "]]"));
+        assertNull(Strings.substringBetweenFirstAndLast("[[no-end", "[[", "]]"));
+        assertNull(Strings.substringBetweenFirstAndLast(null, "[[", "]]"));
+        assertNull(Strings.substringBetweenFirstAndLast("test", null, "]]"));
+        assertNull(Strings.substringBetweenFirstAndLast("test", "[[", null));
+    }
+
+    @Test
+    @DisplayName("Test substringBetweenFirstAndLast(String, String, String) - nested delimiters")
+    public void testSubstringBetweenFirstAndLast_TwoDelimiters_Nested() {
+        assertEquals("outer<inner>content</inner>outer",
+                     Strings.substringBetweenFirstAndLast("<outer<inner>content</inner>outer>", "<", ">"));
+        assertEquals("a[b[c]]d", Strings.substringBetweenFirstAndLast("[a[b[c]]d]", "[", "]"));
+    }
+
+    @Test
+    @DisplayName("Test substringBetweenFirstAndLast(String, String, String) - multiple pairs")
+    public void testSubstringBetweenFirstAndLast_TwoDelimiters_MultiplePairs() {
+        assertEquals("first</tag><tag>second",
+                     Strings.substringBetweenFirstAndLast("<tag>first</tag><tag>second</tag>", "<tag>", "</tag>"));
+        assertEquals("a](b)[c", Strings.substringBetweenFirstAndLast("[a](b)[c]", "[", "]"));
+    }
+
+    @Test
+    @DisplayName("Test substringBetweenFirstAndLast(String, String, String) - same delimiters")
+    public void testSubstringBetweenFirstAndLast_TwoDelimiters_SameDelimiters() {
+        assertEquals("content", Strings.substringBetweenFirstAndLast("|content|", "|", "|"));
+        assertEquals("a|b", Strings.substringBetweenFirstAndLast("|a|b|", "|", "|"));
+    }
+
+    @Test
+    @DisplayName("Test substringBetweenFirstAndLast(String, String, String) - empty result")
+    public void testSubstringBetweenFirstAndLast_TwoDelimiters_EmptyResult() {
+        assertEquals("", Strings.substringBetweenFirstAndLast("<>", "<", ">"));
+        assertEquals("", Strings.substringBetweenFirstAndLast("[]", "[", "]"));
+    }
+
+    @Test
+    @DisplayName("Test substringBetweenFirstAndLast(String, int, String, String) - basic cases")
+    public void testSubstringBetweenFirstAndLast_WithIndex_Basic() {
+        // Normal cases
+        assertEquals("data", Strings.substringBetweenFirstAndLast("<<data>>more<<data>>", 2, "<<", ">>"));
+        assertEquals("y", Strings.substringBetweenFirstAndLast("{{x}}{{y}}", 3, "{{", "}}"));
+        assertEquals(" ", Strings.substringBetweenFirstAndLast("Hello World", 0, "Hello", "World"));
+
+        // Edge cases
+        assertNull(Strings.substringBetweenFirstAndLast("test", 10, "t", "t"));
+        assertNull(Strings.substringBetweenFirstAndLast("no-match", 0, "{{", "}}"));
+        assertNull(Strings.substringBetweenFirstAndLast(null, 0, "{{", "}}"));
+        assertNull(Strings.substringBetweenFirstAndLast("test", 0, null, "}}"));
+        assertNull(Strings.substringBetweenFirstAndLast("test", 0, "{{", null));
+    }
+
+    @Test
+    @DisplayName("Test substringBetweenFirstAndLast(String, int, String, String) - fromIndex variations")
+    public void testSubstringBetweenFirstAndLast_WithIndex_Variations() {
+        String input = "<a>first</a><b>second</b>";
+
+        // Start from beginning
+        assertEquals("a>first</a><b>second</b", Strings.substringBetweenFirstAndLast(input, 0, "<", ">"));
+
+        // Start from middle
+        assertEquals("b>second</b", Strings.substringBetweenFirstAndLast(input, 12, "<", ">"));
+
+        // Negative index (treated as 0)
+        assertEquals("a>first</a><b>second</b", Strings.substringBetweenFirstAndLast(input, -1, "<", ">"));
+    }
+
+    @Test
+    @DisplayName("Test substringBetweenFirstAndLast(String, int, String, String) - boundary conditions")
+    public void testSubstringBetweenFirstAndLast_WithIndex_Boundaries() {
+        String input = "[[text]]";
+
+        assertEquals("text", Strings.substringBetweenFirstAndLast(input, 0, "[[", "]]"));
+        assertEquals(null, Strings.substringBetweenFirstAndLast(input, 1, "[[", "]]"));
+        assertNull(Strings.substringBetweenFirstAndLast(input, 9, "[[", "]]"));
+    }
+
+    @Test
+    @DisplayName("Test substringBetweenFirstAndLast(String, int, String, String) - overlapping delimiters")
+    public void testSubstringBetweenFirstAndLast_WithIndex_OverlappingDelimiters() {
+        assertEquals("ba", Strings.substringBetweenFirstAndLast("aaabaaaa", 0, "aaa", "aaa"));
+    }
+
+    // ===== Tests for substringBetweenFirstAndLast methods in StrUtil class =====
+
+    @Test
+    @DisplayName("Test StrUtil.substringBetweenFirstAndLast(String, String) - basic cases")
+    public void testStrUtil_SubstringBetweenFirstAndLast_SingleDelimiter_Basic() {
+        // Normal cases
+        assertEquals("value", StrUtil.substringBetweenFirstAndLast("a<tag>value<tag>b", "<tag>").get());
+        assertEquals("world", StrUtil.substringBetweenFirstAndLast("hello::world::java", "::").get());
+
+        // Empty optional cases
+        assertFalse(StrUtil.substringBetweenFirstAndLast("hello<tag>world", "<tag>").isPresent());
+        assertFalse(StrUtil.substringBetweenFirstAndLast(null, "<tag>").isPresent());
+        assertFalse(StrUtil.substringBetweenFirstAndLast("test", null).isPresent());
+    }
+
+    @Test
+    @DisplayName("Test StrUtil.substringBetweenFirstAndLast(String, String) - multiple occurrences")
+    public void testStrUtil_SubstringBetweenFirstAndLast_SingleDelimiter_Multiple() {
+        assertEquals("start|middle|end", StrUtil.substringBetweenFirstAndLast("|start|middle|end|", "|").get());
+        assertEquals("a::b", StrUtil.substringBetweenFirstAndLast("**a::b**", "**").get());
+    }
+
+    @Test
+    @DisplayName("Test StrUtil.substringBetweenFirstAndLast(String, String) - adjacent delimiters")
+    public void testStrUtil_SubstringBetweenFirstAndLast_SingleDelimiter_Adjacent() {
+        assertEquals("", StrUtil.substringBetweenFirstAndLast("####", "##").get());
+        assertTrue(StrUtil.substringBetweenFirstAndLast("####", "##").isPresent());
+    }
+
+    @Test
+    @DisplayName("Test StrUtil.substringBetweenFirstAndLast(String, String, String) - basic cases")
+    public void testStrUtil_SubstringBetweenFirstAndLast_TwoDelimiters_Basic() {
+        // Normal cases
+        assertEquals("value", StrUtil.substringBetweenFirstAndLast("a<tag>value</tag>b", "<tag>", "</tag>").get());
+        assertEquals("world", StrUtil.substringBetweenFirstAndLast("hello::world::java", "::", "::").get());
+
+        // Empty optional cases
+        assertFalse(StrUtil.substringBetweenFirstAndLast("hello<start>world", "<start>", "</end>").isPresent());
+        assertFalse(StrUtil.substringBetweenFirstAndLast(null, "<start>", "</end>").isPresent());
+        assertFalse(StrUtil.substringBetweenFirstAndLast("test", null, "</end>").isPresent());
+        assertFalse(StrUtil.substringBetweenFirstAndLast("test", "<start>", null).isPresent());
+    }
+
+    @Test
+    @DisplayName("Test StrUtil.substringBetweenFirstAndLast(String, String, String) - nested delimiters")
+    public void testStrUtil_SubstringBetweenFirstAndLast_TwoDelimiters_Nested() {
+        assertEquals("outer<inner>text</inner>outer",
+                     StrUtil.substringBetweenFirstAndLast("<outer<inner>text</inner>outer>", "<", ">").get());
+    }
+
+    @Test
+    @DisplayName("Test StrUtil.substringBetweenFirstAndLast(String, String, String) - empty result")
+    public void testStrUtil_SubstringBetweenFirstAndLast_TwoDelimiters_EmptyResult() {
+        assertEquals("", StrUtil.substringBetweenFirstAndLast("<>", "<", ">").get());
+        assertTrue(StrUtil.substringBetweenFirstAndLast("[]", "[", "]").isPresent());
+    }
+
+    @Test
+    @DisplayName("Test StrUtil.substringBetweenFirstAndLast(String, int, String, String) - basic cases")
+    public void testStrUtil_SubstringBetweenFirstAndLast_WithIndex_Basic() {
+        // Normal cases
+        assertEquals("java", StrUtil.substringBetweenFirstAndLast("a<tag>value</tag><tag>java</tag>b", 5, "<tag>", "</tag>").get());
+        assertEquals("world", StrUtil.substringBetweenFirstAndLast("hello::world::java", 0, "::", "::").get());
+
+        // Empty optional cases
+        assertFalse(StrUtil.substringBetweenFirstAndLast("hello<start>world", 0, "<start>", "</end>").isPresent());
+        assertFalse(StrUtil.substringBetweenFirstAndLast(null, 0, "<start>", "</end>").isPresent());
+        assertFalse(StrUtil.substringBetweenFirstAndLast("test", 0, null, "</end>").isPresent());
+        assertFalse(StrUtil.substringBetweenFirstAndLast("test", 0, "<start>", null).isPresent());
+    }
+
+    @Test
+    @DisplayName("Test StrUtil.substringBetweenFirstAndLast(String, int, String, String) - fromIndex variations")
+    public void testStrUtil_SubstringBetweenFirstAndLast_WithIndex_Variations() {
+        String input = "[a][b][c]";
+
+        // Start from beginning
+        assertEquals("a][b][c", StrUtil.substringBetweenFirstAndLast(input, 0, "[", "]").get());
+
+        // Start from middle
+        assertEquals("b][c", StrUtil.substringBetweenFirstAndLast(input, 3, "[", "]").get());
+        assertEquals("c", StrUtil.substringBetweenFirstAndLast(input, 6, "[", "]").get());
+
+        // Negative index (treated as 0)
+        assertEquals("a][b][c", StrUtil.substringBetweenFirstAndLast(input, -1, "[", "]").get());
+    }
+
+    @Test
+    @DisplayName("Test StrUtil.substringBetweenFirstAndLast(String, int, String, String) - boundary conditions")
+    public void testStrUtil_SubstringBetweenFirstAndLast_WithIndex_Boundaries() {
+        assertFalse(StrUtil.substringBetweenFirstAndLast("test", 10, "[", "]").isPresent());
+        assertFalse(StrUtil.substringBetweenFirstAndLast("test", 100, "[", "]").isPresent());
+    }
+
+    @Test
+    @DisplayName("Test StrUtil.substringBetweenFirstAndLast(String, int, String, String) - complex nested case")
+    public void testStrUtil_SubstringBetweenFirstAndLast_WithIndex_Complex() {
+        String input = "<div><span>text1</span></div><div><span>text2</span></div>";
+
+        // From beginning - gets text1</span></div><div><span>text2
+        assertEquals("div><span>text1</span></div><div><span>text2</span></div",
+                     StrUtil.substringBetweenFirstAndLast(input, 0, "<", ">").get());
+
+        // From after first div - gets span>text1</span></div><div><span>text2
+        assertEquals("span>text1</span></div><div><span>text2</span></div",
+                     StrUtil.substringBetweenFirstAndLast(input, 5, "<", ">").get());
+    }
+
+    @Test
+    @DisplayName("Test substringBetweenFirstAndLast - special characters in delimiters")
+    public void testSubstringBetweenFirstAndLast_SpecialCharacters() {
+        // Strings class
+        assertEquals("text", Strings.substringBetweenFirstAndLast("$$$text$$$", "$$$"));
+        assertEquals("value", Strings.substringBetweenFirstAndLast("...value...", "..."));
+        assertEquals("data", Strings.substringBetweenFirstAndLast("+++data+++", "+++"));
+
+        // StrUtil class
+        assertEquals("text", StrUtil.substringBetweenFirstAndLast("***text***", "***").get());
+        assertEquals("value", StrUtil.substringBetweenFirstAndLast("###value###", "###").get());
+    }
+
+    @Test
+    @DisplayName("Test substringBetweenFirstAndLast - whitespace handling")
+    public void testSubstringBetweenFirstAndLast_Whitespace() {
+        // Strings class
+        assertEquals("  text  ", Strings.substringBetweenFirstAndLast("|  text  |", "|"));
+        assertEquals(" preserved spaces ", Strings.substringBetweenFirstAndLast("[ preserved spaces ]", "[", "]"));
+
+        // StrUtil class
+        assertEquals("\ttext\t", StrUtil.substringBetweenFirstAndLast("|\ttext\t|", "|").get());
+        assertEquals(" ", StrUtil.substringBetweenFirstAndLast("< >", "<", ">").get());
+    }
+
+    @Test
+    @DisplayName("Test substringBetweenFirstAndLast - long delimiters")
+    public void testSubstringBetweenFirstAndLast_LongDelimiters() {
+        // Strings class
+        assertEquals("content", Strings.substringBetweenFirstAndLast("<!--START-->content<!--START-->", "<!--START-->"));
+        assertEquals("value", Strings.substringBetweenFirstAndLast("[[BEGIN]]value[[END]]", "[[BEGIN]]", "[[END]]"));
+
+        // StrUtil class
+        assertEquals("data", StrUtil.substringBetweenFirstAndLast("{{{{data}}}}", "{{{{", "}}}}").get());
+    }
 }

@@ -11,7 +11,6 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-
 package com.landawn.abacus.util.function;
 
 import com.landawn.abacus.util.Throwables;
@@ -19,27 +18,28 @@ import com.landawn.abacus.util.Throwables;
 /**
  * Represents a function that accepts a long-valued argument and produces a double-valued result.
  * This is the long-to-double primitive specialization for {@code Function}.
- * 
+ *
  * <p>This is a functional interface whose functional method is {@link #applyAsDouble(long)}.
- * 
- * <p>The interface extends both {@code Throwables.LongToDoubleFunction} with {@code RuntimeException} 
+ *
+ * <p>The interface extends both {@code Throwables.LongToDoubleFunction} with {@code RuntimeException}
  * and {@code java.util.function.LongToDoubleFunction}, providing compatibility with the Java standard library
  * while adding a predefined identity function.
- * 
+ *
  * @see java.util.function.Function
  * @see java.util.function.LongToDoubleFunction
+ *
+ * <p>Refer to JDK API documentation at: <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html">https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a></p>
  */
 @FunctionalInterface
 public interface LongToDoubleFunction extends Throwables.LongToDoubleFunction<RuntimeException>, java.util.function.LongToDoubleFunction { //NOSONAR
-
     /**
      * A function that converts a long value to a double value using a simple cast.
-     * 
+     *
      * <p>This is the default conversion function that preserves the numeric value
      * as closely as possible when converting from long to double. Note that for
      * very large long values, there may be some loss of precision due to the
      * limitations of double representation.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * LongToDoubleFunction converter = LongToDoubleFunction.DEFAULT;
@@ -50,7 +50,7 @@ public interface LongToDoubleFunction extends Throwables.LongToDoubleFunction<Ru
 
     /**
      * Applies this function to the given argument.
-     * 
+     *
      * <p>Converts a long value to a double value according to the function's implementation.
      * The specific conversion logic depends on the implementation, but common use cases include:
      * <ul>
@@ -61,7 +61,7 @@ public interface LongToDoubleFunction extends Throwables.LongToDoubleFunction<Ru
      * </ul>
      *
      * @param value the function argument as a long
-     * @return the function result as a double if any error occurs during the function execution
+     * @return the function result as a double
      */
     @Override
     double applyAsDouble(long value);

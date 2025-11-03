@@ -21,25 +21,25 @@ import com.landawn.abacus.util.Objectory;
 
 /**
  * Abstract base implementation of the Logger interface providing template-based logging methods.
- * 
+ *
  * <p>This class implements all the template-based logging methods defined in the Logger interface,
  * delegating to the abstract methods that must be implemented by concrete logger implementations.
  * It provides efficient string formatting using placeholders ({} or %s) and lazy evaluation
  * through Supplier-based methods.</p>
- * 
+ *
  * <p>The formatting supports two placeholder styles:</p>
  * <ul>
  *   <li>{} - SLF4J style placeholders</li>
  *   <li>%s - printf style placeholders</li>
  * </ul>
- * 
+ *
  * <p><b>Usage Examples for implementation:</b></p>
  * <pre>{@code
  * public class MyLogger extends AbstractLogger {
  *     public MyLogger(String name) {
  *         super(name);
  *     }
- *     
+ *
  *     @Override
  *     public void info(String msg) {
  *         // Implementation specific logging
@@ -47,8 +47,8 @@ import com.landawn.abacus.util.Objectory;
  *     // ... implement other abstract methods
  * }
  * }</pre>
- * 
- * @since 1.0
+ *
+ * @see Logger
  */
 public abstract class AbstractLogger implements Logger {
 
@@ -65,9 +65,9 @@ public abstract class AbstractLogger implements Logger {
 
     /**
      * Logs a message at TRACE level with one parameter.
-     * 
+     *
      * <p>The message template can use {} or %s as placeholder.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * logger.trace("User {} logged in", username);
@@ -85,7 +85,7 @@ public abstract class AbstractLogger implements Logger {
 
     /**
      * Logs a message at TRACE level with two parameters.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * logger.trace("Processing {} items for user {}", itemCount, userId);
@@ -190,10 +190,10 @@ public abstract class AbstractLogger implements Logger {
 
     /**
      * Logs a message at TRACE level with variable number of parameters.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * logger.trace("Processing batch: id={}, size={}, status={}, timestamp={}", 
+     * logger.trace("Processing batch: id={}, size={}, status={}, timestamp={}",
      *              batchId, size, status, timestamp);
      * }</pre>
      *
@@ -208,11 +208,11 @@ public abstract class AbstractLogger implements Logger {
     }
 
     /**
-     * Logs a message at TRACE level with an exception.
-     * 
+     * Logs an exception at the TRACE level with an accompanying message.
+     *
      * <p>This method is a convenience wrapper that delegates to trace(String, Throwable).</p>
      *
-     * @param t the exception to log
+     * @param t the exception or error to log
      * @param msg the message to log
      */
     @Override
@@ -223,7 +223,7 @@ public abstract class AbstractLogger implements Logger {
     /**
      * Logs a formatted message at TRACE level with an exception and one parameter.
      *
-     * @param t the exception to log
+     * @param t the exception or error to log
      * @param template the message template
      * @param arg the argument to be substituted in the template
      */
@@ -237,7 +237,7 @@ public abstract class AbstractLogger implements Logger {
     /**
      * Logs a formatted message at TRACE level with an exception and two parameters.
      *
-     * @param t the exception to log
+     * @param t the exception or error to log
      * @param template the message template
      * @param arg1 the first argument
      * @param arg2 the second argument
@@ -252,7 +252,7 @@ public abstract class AbstractLogger implements Logger {
     /**
      * Logs a formatted message at TRACE level with an exception and three parameters.
      *
-     * @param t the exception to log
+     * @param t the exception or error to log
      * @param template the message template
      * @param arg1 the first argument
      * @param arg2 the second argument
@@ -267,9 +267,9 @@ public abstract class AbstractLogger implements Logger {
 
     /**
      * Logs a message at TRACE level using a supplier for lazy evaluation.
-     * 
+     *
      * <p>The supplier is only called if TRACE level is enabled.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * logger.trace(() -> "Expensive calculation result: " + calculateExpensiveValue());
@@ -288,7 +288,7 @@ public abstract class AbstractLogger implements Logger {
      * Logs a message at TRACE level with an exception using a supplier.
      * 
      * @param supplier the supplier that provides the message
-     * @param t the exception to log
+     * @param t the exception or error to log
      * @deprecated Use {@link #trace(Throwable, Supplier)} instead
      */
     @Deprecated
@@ -302,7 +302,7 @@ public abstract class AbstractLogger implements Logger {
     /**
      * Logs a message at TRACE level with an exception using a supplier for lazy evaluation.
      *
-     * @param t the exception to log
+     * @param t the exception or error to log
      * @param supplier the supplier that provides the message
      */
     @Override
@@ -314,7 +314,7 @@ public abstract class AbstractLogger implements Logger {
 
     /**
      * Logs a message at DEBUG level with one parameter.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * logger.debug("Loading configuration from: {}", configPath);
@@ -443,6 +443,15 @@ public abstract class AbstractLogger implements Logger {
         }
     }
 
+    /**
+     * Logs an exception at the DEBUG level with an accompanying message.
+     *
+     * <p>This method provides an alternative parameter order for consistency
+     * with other APIs.</p>
+     *
+     * @param t the exception (throwable) to log
+     * @param msg the message accompanying the exception
+     */
     @Override
     public void debug(final Throwable t, final String msg) {
         debug(msg, t);
@@ -451,7 +460,7 @@ public abstract class AbstractLogger implements Logger {
     /**
      * Logs a formatted message at DEBUG level with an exception and one parameter.
      *
-     * @param t the exception to log
+     * @param t the exception or error to log
      * @param template the message template
      * @param arg the argument to be substituted in the template
      */
@@ -465,7 +474,7 @@ public abstract class AbstractLogger implements Logger {
     /**
      * Logs a formatted message at DEBUG level with an exception and two parameters.
      *
-     * @param t the exception to log
+     * @param t the exception or error to log
      * @param template the message template
      * @param arg1 the first argument
      * @param arg2 the second argument
@@ -480,7 +489,7 @@ public abstract class AbstractLogger implements Logger {
     /**
      * Logs a formatted message at DEBUG level with an exception and three parameters.
      *
-     * @param t the exception to log
+     * @param t the exception or error to log
      * @param template the message template
      * @param arg1 the first argument
      * @param arg2 the second argument
@@ -509,7 +518,7 @@ public abstract class AbstractLogger implements Logger {
      * Logs a message at DEBUG level with an exception using a supplier.
      * 
      * @param supplier the supplier that provides the message
-     * @param t the exception to log
+     * @param t the exception or error to log
      * @deprecated Use {@link #debug(Throwable, Supplier)} instead
      */
     @Deprecated
@@ -523,7 +532,7 @@ public abstract class AbstractLogger implements Logger {
     /**
      * Logs a message at DEBUG level with an exception using a supplier for lazy evaluation.
      *
-     * @param t the exception to log
+     * @param t the exception or error to log
      * @param supplier the supplier that provides the message
      */
     @Override
@@ -535,7 +544,7 @@ public abstract class AbstractLogger implements Logger {
 
     /**
      * Logs a message at INFO level with one parameter.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * logger.info("Application started on port {}", port);
@@ -664,6 +673,15 @@ public abstract class AbstractLogger implements Logger {
         }
     }
 
+    /**
+     * Logs an exception at the INFO level with an accompanying message.
+     *
+     * <p>This method provides an alternative parameter order for consistency
+     * with other APIs.</p>
+     *
+     * @param t the exception (throwable) to log
+     * @param msg the message accompanying the exception
+     */
     @Override
     public void info(final Throwable t, final String msg) {
         info(msg, t);
@@ -672,7 +690,7 @@ public abstract class AbstractLogger implements Logger {
     /**
      * Logs a formatted message at INFO level with an exception and one parameter.
      *
-     * @param t the exception to log
+     * @param t the exception or error to log
      * @param template the message template
      * @param arg the argument to be substituted in the template
      */
@@ -686,7 +704,7 @@ public abstract class AbstractLogger implements Logger {
     /**
      * Logs a formatted message at INFO level with an exception and two parameters.
      *
-     * @param t the exception to log
+     * @param t the exception or error to log
      * @param template the message template
      * @param arg1 the first argument
      * @param arg2 the second argument
@@ -701,7 +719,7 @@ public abstract class AbstractLogger implements Logger {
     /**
      * Logs a formatted message at INFO level with an exception and three parameters.
      *
-     * @param t the exception to log
+     * @param t the exception or error to log
      * @param template the message template
      * @param arg1 the first argument
      * @param arg2 the second argument
@@ -730,7 +748,7 @@ public abstract class AbstractLogger implements Logger {
      * Logs a message at INFO level with an exception using a supplier.
      * 
      * @param supplier the supplier that provides the message
-     * @param t the exception to log
+     * @param t the exception or error to log
      * @deprecated Use {@link #info(Throwable, Supplier)} instead
      */
     @Deprecated
@@ -744,7 +762,7 @@ public abstract class AbstractLogger implements Logger {
     /**
      * Logs a message at INFO level with an exception using a supplier for lazy evaluation.
      *
-     * @param t the exception to log
+     * @param t the exception or error to log
      * @param supplier the supplier that provides the message
      */
     @Override
@@ -756,7 +774,7 @@ public abstract class AbstractLogger implements Logger {
 
     /**
      * Logs a message at WARN level with one parameter.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * logger.warn("Connection pool exhausted, size: {}", poolSize);
@@ -885,6 +903,15 @@ public abstract class AbstractLogger implements Logger {
         }
     }
 
+    /**
+     * Logs an exception at the WARN level with an accompanying message.
+     *
+     * <p>This method provides an alternative parameter order for consistency
+     * with other APIs.</p>
+     *
+     * @param t the exception (throwable) to log
+     * @param msg the message accompanying the exception
+     */
     @Override
     public void warn(final Throwable t, final String msg) {
         warn(msg, t);
@@ -893,7 +920,7 @@ public abstract class AbstractLogger implements Logger {
     /**
      * Logs a formatted message at WARN level with an exception and one parameter.
      *
-     * @param t the exception to log
+     * @param t the exception or error to log
      * @param template the message template
      * @param arg the argument to be substituted in the template
      */
@@ -907,7 +934,7 @@ public abstract class AbstractLogger implements Logger {
     /**
      * Logs a formatted message at WARN level with an exception and two parameters.
      *
-     * @param t the exception to log
+     * @param t the exception or error to log
      * @param template the message template
      * @param arg1 the first argument
      * @param arg2 the second argument
@@ -922,7 +949,7 @@ public abstract class AbstractLogger implements Logger {
     /**
      * Logs a formatted message at WARN level with an exception and three parameters.
      *
-     * @param t the exception to log
+     * @param t the exception or error to log
      * @param template the message template
      * @param arg1 the first argument
      * @param arg2 the second argument
@@ -951,7 +978,7 @@ public abstract class AbstractLogger implements Logger {
      * Logs a message at WARN level with an exception using a supplier.
      * 
      * @param supplier the supplier that provides the message
-     * @param t the exception to log
+     * @param t the exception or error to log
      * @deprecated Use {@link #warn(Throwable, Supplier)} instead
      */
     @Deprecated
@@ -965,7 +992,7 @@ public abstract class AbstractLogger implements Logger {
     /**
      * Logs a message at WARN level with an exception using a supplier for lazy evaluation.
      *
-     * @param t the exception to log
+     * @param t the exception or error to log
      * @param supplier the supplier that provides the message
      */
     @Override
@@ -977,7 +1004,7 @@ public abstract class AbstractLogger implements Logger {
 
     /**
      * Logs a message at ERROR level with one parameter.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * logger.error("Failed to connect to database: {}", dbUrl);
@@ -1106,6 +1133,15 @@ public abstract class AbstractLogger implements Logger {
         }
     }
 
+    /**
+     * Logs an exception at the ERROR level with an accompanying message.
+     *
+     * <p>This method provides an alternative parameter order for consistency
+     * with other APIs.</p>
+     *
+     * @param t the exception (throwable) to log
+     * @param msg the message accompanying the exception
+     */
     @Override
     public void error(final Throwable t, final String msg) {
         error(msg, t);
@@ -1114,7 +1150,7 @@ public abstract class AbstractLogger implements Logger {
     /**
      * Logs a formatted message at ERROR level with an exception and one parameter.
      *
-     * @param t the exception to log
+     * @param t the exception or error to log
      * @param template the message template
      * @param arg the argument to be substituted in the template
      */
@@ -1128,7 +1164,7 @@ public abstract class AbstractLogger implements Logger {
     /**
      * Logs a formatted message at ERROR level with an exception and two parameters.
      *
-     * @param t the exception to log
+     * @param t the exception or error to log
      * @param template the message template
      * @param arg1 the first argument
      * @param arg2 the second argument
@@ -1143,7 +1179,7 @@ public abstract class AbstractLogger implements Logger {
     /**
      * Logs a formatted message at ERROR level with an exception and three parameters.
      *
-     * @param t the exception to log
+     * @param t the exception or error to log
      * @param template the message template
      * @param arg1 the first argument
      * @param arg2 the second argument
@@ -1172,7 +1208,7 @@ public abstract class AbstractLogger implements Logger {
      * Logs a message at ERROR level with an exception using a supplier.
      * 
      * @param supplier the supplier that provides the message
-     * @param t the exception to log
+     * @param t the exception or error to log
      * @deprecated Use {@link #error(Throwable, Supplier)} instead
      */
     @Deprecated
@@ -1186,7 +1222,7 @@ public abstract class AbstractLogger implements Logger {
     /**
      * Logs a message at ERROR level with an exception using a supplier for lazy evaluation.
      *
-     * @param t the exception to log
+     * @param t the exception or error to log
      * @param supplier the supplier that provides the message
      */
     @Override
@@ -1410,15 +1446,15 @@ public abstract class AbstractLogger implements Logger {
 
     /**
      * Formats a message template with variable number of arguments.
-     * 
+     *
      * <p>Substitutes each {} or %s in the template with an argument. These are matched by
      * position: the first placeholder gets args[0], etc. If there are more arguments than
      * placeholders, the unmatched arguments will be appended to the end of the formatted
      * message in square brackets.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * String msg = format("User {} performed {} operations in {}ms", 
+     * String msg = format("User {} performed {} operations in {}ms",
      *                     username, opCount, duration);
      * }</pre>
      *

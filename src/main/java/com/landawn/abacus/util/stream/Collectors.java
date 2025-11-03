@@ -110,10 +110,212 @@ import com.landawn.abacus.util.function.TriFunction;
 // Claude Opus 4 and generate the Javadoc with blow prompts 
 // Please generate comprehensive javadoc for all public methods starting from line 6 in Collectors.java, including public static methods.  Please use javadoc of method "toCollection" as a template to generate javadoc for other methods. Please include a very simple sample in couple of lines if appropriate. Please don't take shortcut. The generated javadoc should be specific and details enough to describe the behavior of the method. And merge the generated javadoc into source file Collectors.java to replace existing javadoc in Collectors.java. Don't generate javadoc for method which is not found in Collectors.java. Remember don't use any cache file because I have modified Collectors.java. Again, don't generate javadoc for the method which is not in the attached file. Please read and double check if the method is in the attached file before starting to generate javadoc. If the method is not the attached file, don't generate javadoc for it.
 /**
- * Factory utility class for {@code Collector}.
+ * A comprehensive factory utility class providing static methods for creating {@link Collector} instances
+ * for use with Java Streams. This abstract sealed class extends the functionality of the standard
+ * {@code java.util.stream.Collectors} with additional collectors for specialized data structures,
+ * advanced aggregations, and custom collection types specific to the abacus-common framework.
+ *
+ * <p>Collectors serves as the central hub for all stream collection operations, offering pre-built
+ * collectors for common scenarios and sophisticated collectors for complex data transformations.
+ * The class provides collectors for primitive lists, immutable collections, multimaps, bidirectional
+ * maps, statistical summaries, and advanced grouping operations with extensive customization options.</p>
+ *
+ * <p><b>Key Features:</b>
+ * <ul>
+ *   <li><b>Extended Collection Types:</b> Collectors for primitive lists, immutable collections, and specialized maps</li>
+ *   <li><b>Advanced Grouping:</b> Sophisticated grouping and partitioning with custom downstream collectors</li>
+ *   <li><b>Statistical Aggregation:</b> Comprehensive summary statistics for all numeric types including BigDecimal</li>
+ *   <li><b>Multimap Support:</b> Collection of values per key with various collection types</li>
+ *   <li><b>Bidirectional Maps:</b> BiMap collectors for reversible key-value associations</li>
+ *   <li><b>Functional Composition:</b> Teeing and combining collectors for parallel processing</li>
+ *   <li><b>Performance Optimization:</b> Specialized collectors optimized for specific data types</li>
+ *   <li><b>Null Safety:</b> Consistent null handling across all collector implementations</li>
+ * </ul>
+ *
+ * <p><b>Common Use Cases:</b>
+ * <ul>
+ *   <li><b>Data Aggregation:</b> Collecting stream elements into various container types</li>
+ *   <li><b>Grouping Operations:</b> Partitioning data by keys with downstream processing</li>
+ *   <li><b>Statistical Analysis:</b> Computing summary statistics and numerical aggregations</li>
+ *   <li><b>Data Transformation:</b> Converting streams to specialized collection types</li>
+ *   <li><b>Performance Optimization:</b> Using primitive collections to avoid boxing overhead</li>
+ *   <li><b>Immutable Collections:</b> Creating thread-safe immutable data structures</li>
+ *   <li><b>Multi-valued Mappings:</b> Building maps with multiple values per key</li>
+ * </ul>
+ *
+ * <p><b>Usage Examples:</b>
+ * <pre>{@code
+ * // Primitive list collection (avoiding boxing)
+ * IntList numbers = stream.of(1, 2, 3, 4, 5)
+ *     .collect(Collectors.toIntList());
+ *
+ * // Immutable collection creation
+ * ImmutableList<String> names = people.stream()
+ *     .map(Person::getName)
+ *     .collect(Collectors.toImmutableList());
+ *
+ * // BiMap for bidirectional lookups
+ * BiMap<String, Integer> userIds = users.stream()
+ *     .collect(Collectors.toBiMap(User::getName, User::getId));
+ *
+ * // Multimap grouping with value transformation
+ * ListMultimap<Department, Employee> byDept = employees.stream()
+ *     .collect(Collectors.toMultimap(Employee::getDepartment));
+ *
+ * // Advanced grouping with downstream processing
+ * Map<String, Double> avgSalaryByDept = employees.stream()
+ *     .collect(Collectors.groupingBy(
+ *         Employee::getDepartment,
+ *         Collectors.averagingDouble(Employee::getSalary)));
+ *
+ * // Statistical summary collection
+ * DoubleSummaryStatistics stats = values.stream()
+ *     .collect(Collectors.summarizingDouble(Double::doubleValue));
+ *
+ * // Teeing for parallel collection
+ * Pair<Integer, Double> countAndAvg = numbers.stream()
+ *     .collect(Collectors.teeing(
+ *         Collectors.counting(),
+ *         Collectors.averagingDouble(Number::doubleValue),
+ *         Pair::of));
+ * }</pre>
+ *
+ * <p><b>Collector Categories:</b>
+ * <ul>
+ *   <li><b>Basic Collections:</b> {@code toList()}, {@code toSet()}, {@code toCollection()}</li>
+ *   <li><b>Primitive Collections:</b> {@code toIntList()}, {@code toLongList()}, {@code toDoubleList()}, etc.</li>
+ *   <li><b>Immutable Collections:</b> {@code toImmutableList()}, {@code toImmutableSet()}, {@code toImmutableMap()}</li>
+ *   <li><b>Maps:</b> {@code toMap()}, {@code toLinkedHashMap()}, {@code toConcurrentMap()}, {@code toBiMap()}</li>
+ *   <li><b>Multimaps:</b> {@code toMultimap()}, {@code flatMappingToMultimap()}</li>
+ *   <li><b>Grouping:</b> {@code groupingBy()}, {@code partitioningBy()}, {@code countingBy()}</li>
+ *   <li><b>Aggregation:</b> {@code summingInt()}, {@code averagingDouble()}, {@code summarizing*()}</li>
+ *   <li><b>Reduction:</b> {@code reducing()}, {@code maxBy()}, {@code minBy()}</li>
+ *   <li><b>String Operations:</b> {@code joining()}, {@code commonPrefix()}, {@code commonSuffix()}</li>
+ * </ul>
+ *
+ * <p><b>Primitive Collection Support:</b>
+ * <ul>
+ *   <li><b>Performance Benefit:</b> Avoid boxing/unboxing overhead for primitive types</li>
+ *   <li><b>Memory Efficiency:</b> Reduced memory footprint compared to wrapper collections</li>
+ *   <li><b>Type Safety:</b> Compile-time type checking for primitive operations</li>
+ *   <li><b>Available Types:</b> boolean, byte, char, short, int, long, float, double</li>
+ * </ul>
+ *
+ * <p><b>Immutable Collection Benefits:</b>
+ * <ul>
+ *   <li><b>Thread Safety:</b> Immutable collections are inherently thread-safe</li>
+ *   <li><b>Defensive Copying:</b> Prevents accidental modification of shared data</li>
+ *   <li><b>API Clarity:</b> Clear intent that data should not be modified</li>
+ *   <li><b>Performance:</b> Optimized implementations for read-only access patterns</li>
+ * </ul>
+ *
+ * <p><b>Advanced Grouping Features:</b>
+ * <ul>
+ *   <li><b>Downstream Collectors:</b> Chain collectors for complex aggregations</li>
+ *   <li><b>Custom Map Types:</b> Control ordering and concurrency with map suppliers</li>
+ *   <li><b>Value Transformation:</b> Transform grouped values with downstream processing</li>
+ *   <li><b>Concurrent Grouping:</b> Thread-safe grouping operations for parallel streams</li>
+ * </ul>
+ *
+ * <p><b>BiMap Collector Features:</b>
+ * <ul>
+ *   <li><b>Bidirectional Lookup:</b> Efficient key-to-value and value-to-key operations</li>
+ *   <li><b>Uniqueness Enforcement:</b> Ensures bijective relationship between keys and values</li>
+ *   <li><b>Merge Functions:</b> Handle duplicate keys or values with custom merge logic</li>
+ *   <li><b>Force Operations:</b> Override uniqueness constraints when necessary</li>
+ * </ul>
+ *
+ * <p><b>Multimap Collector Options:</b>
+ * <ul>
+ *   <li><b>Collection Types:</b> Choose List, Set, or custom collections for values</li>
+ *   <li><b>Flat Mapping:</b> Expand single elements into multiple key-value pairs</li>
+ *   <li><b>Key/Value Extraction:</b> Flexible mapping from elements to keys and values</li>
+ *   <li><b>Custom Implementations:</b> Support for different Multimap implementations</li>
+ * </ul>
+ *
+ * <p><b>Statistical Collectors:</b>
+ * <ul>
+ *   <li><b>Primitive Statistics:</b> int, long, double with count, sum, min, max, average</li>
+ *   <li><b>BigDecimal/BigInteger:</b> High-precision arithmetic with overflow protection</li>
+ *   <li><b>Custom Numeric Types:</b> byte, short, float with specialized summary statistics</li>
+ *   <li><b>Kahan Summation:</b> Improved accuracy for floating-point summation</li>
+ * </ul>
+ *
+ * <p><b>Performance Characteristics:</b>
+ * <ul>
+ *   <li>Collection building: O(n) time where n is the number of elements</li>
+ *   <li>Grouping operations: O(n) time with O(k) space where k is the number of groups</li>
+ *   <li>Map construction: O(n) average time, O(n²) worst case for hash-based maps</li>
+ *   <li>Statistical aggregation: O(n) time with O(1) space for most operations</li>
+ * </ul>
+ *
+ * <p><b>Thread Safety:</b>
+ * <ul>
+ *   <li><b>Collector Instances:</b> All collectors are thread-safe and can be reused</li>
+ *   <li><b>Concurrent Collections:</b> Some collectors produce thread-safe results</li>
+ *   <li><b>Parallel Streams:</b> Full support for parallel stream operations</li>
+ *   <li><b>Accumulator Safety:</b> Internal accumulators handle concurrent access appropriately</li>
+ * </ul>
+ *
+ * <p><b>Error Handling:</b>
+ * <ul>
+ *   <li>Throws {@link IllegalArgumentException} for null required parameters</li>
+ *   <li>Throws {@link IllegalStateException} for constraint violations (e.g., duplicate keys)</li>
+ *   <li>Handles null elements according to the specific collector's documented behavior</li>
+ *   <li>Provides clear error messages for debugging collection failures</li>
+ * </ul>
+ *
+ * <p><b>Integration with Standard Collectors:</b>
+ * <ul>
+ *   <li>Fully compatible with {@code java.util.stream.Collectors}</li>
+ *   <li>Can be used as downstream collectors in standard grouping operations</li>
+ *   <li>Supports all {@link Collector.Characteristics} for optimization</li>
+ *   <li>Works seamlessly with custom collectors and third-party libraries</li>
+ * </ul>
+ *
+ * <p><b>Best Practices:</b>
+ * <ul>
+ *   <li>Use primitive collectors when working with primitive streams for better performance</li>
+ *   <li>Choose immutable collectors for shared or cached data structures</li>
+ *   <li>Consider concurrent collectors for parallel stream processing</li>
+ *   <li>Use appropriate initial capacity hints for known data sizes</li>
+ *   <li>Prefer specific collectors over generic ones for type safety and performance</li>
+ * </ul>
+ *
+ * <p><b>Extension Points:</b>
+ * <ul>
+ *   <li><b>{@link MoreCollectors}:</b> Additional specialized collectors for advanced use cases</li>
+ *   <li><b>Custom Suppliers:</b> Provide custom collection implementations via suppliers</li>
+ *   <li><b>Merge Functions:</b> Define custom behavior for handling duplicate keys/values</li>
+ *   <li><b>Downstream Collectors:</b> Chain collectors for complex data transformations</li>
+ * </ul>
+ *
+ * <p><b>Memory Management:</b>
+ * <ul>
+ *   <li>Collectors optimize memory usage based on known collection characteristics</li>
+ *   <li>Primitive collections reduce memory overhead compared to object collections</li>
+ *   <li>Immutable collections may share internal structures for memory efficiency</li>
+ *   <li>Consider using streaming collectors for very large datasets</li>
+ * </ul>
+ *
+ * <p><b>Comparison with Standard Collectors:</b>
+ * <ul>
+ *   <li><b>Extended Types:</b> Support for primitive and immutable collections</li>
+ *   <li><b>Enhanced Features:</b> BiMaps, Multimaps, and advanced statistical operations</li>
+ *   <li><b>Better Performance:</b> Optimized implementations for specific use cases</li>
+ *   <li><b>Null Safety:</b> More predictable null handling across all operations</li>
+ * </ul>
  *
  * @see java.util.stream.Collector
  * @see java.util.stream.Collectors
+ * @see MoreCollectors
+ * @see Stream
+ * @see ImmutableList
+ * @see ImmutableSet
+ * @see ImmutableMap
+ * @see BiMap
+ * @see Multimap
+ * @see ListMultimap
  */
 @SuppressWarnings({ "java:S1694" })
 public abstract sealed class Collectors permits Collectors.MoreCollectors { // NOSONAR

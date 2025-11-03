@@ -14,7 +14,6 @@
 
 package com.landawn.abacus.type;
 
-import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.util.Strings;
 
 /**
@@ -22,10 +21,29 @@ import com.landawn.abacus.util.Strings;
  * This class provides JSON-based serialization and deserialization for arbitrary JavaBean types,
  * enabling conversion between bean instances and their JSON string representations.
  *
+ * <p>BeanType instances are typically obtained through the TypeFactory and are used internally
+ * by the serialization framework. Users rarely need to interact with BeanType directly,
+ * as the framework automatically handles bean conversions.</p>
+ *
+ * <p><b>Usage Examples:</b></p>
+ * <pre>{@code
+ * // Get BeanType through TypeFactory
+ * Type<User> userType = TypeFactory.getType(User.class);
+ *
+ * // Serialize bean to string
+ * User user = new User("John", "john@example.com");
+ * String json = userType.stringOf(user);
+ * // Result: {"name":"John","email":"john@example.com"}
+ *
+ * // Deserialize string to bean
+ * String jsonInput = "{\"name\":\"Jane\",\"email\":\"jane@example.com\"}";
+ * User parsedUser = userType.valueOf(jsonInput);
+ * }</pre>
+ *
  * @param <T> the JavaBean type this handler manages
  */
 @SuppressWarnings("java:S2160")
-public final class BeanType<T> extends AbstractType<T> {
+final class BeanType<T> extends AbstractType<T> {
 
     private final Class<T> typeClass;
 
@@ -84,9 +102,7 @@ public final class BeanType<T> extends AbstractType<T> {
      * @param x the bean instance to serialize
      * @return the JSON string representation of the bean, or {@code null} if the input is null
      */
-    @MayReturnNull
     @Override
-
     public String stringOf(final T x) {
         return (x == null) ? null : Utils.jsonParser.serialize(x, Utils.jsc);
     }
@@ -100,9 +116,7 @@ public final class BeanType<T> extends AbstractType<T> {
      *         or {@code null} if the input string is {@code null} or empty
      * @throws com.landawn.abacus.exception.ParseException if the JSON is invalid or cannot be mapped to the bean type
      */
-    @MayReturnNull
     @Override
-
     public T valueOf(final String str) {
         return (Strings.isEmpty(str)) ? null : Utils.jsonParser.deserialize(str, typeClass);
     }

@@ -47,6 +47,11 @@ import java.lang.annotation.Target;
  *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
+ * import java.util.List;
+ * import java.util.concurrent.ConcurrentHashMap;
+ * import java.util.concurrent.ConcurrentMap;
+ * import java.util.function.Function;
+ *
  * public class MathUtils {
  *     @ParallelSupported
  *     public static int square(int n) {
@@ -76,7 +81,6 @@ import java.lang.annotation.Target;
  *
  * @see SequentialOnly
  * @see Stateful
- * @since 2018
  */
 @Documented
 @Retention(value = RetentionPolicy.CLASS)

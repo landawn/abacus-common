@@ -66,7 +66,6 @@ import com.landawn.abacus.exception.UncheckedIOException;
  * 
  * @see java.io.BufferedWriter
  * @see CharacterWriter
- * @since 1.0
  */
 @SuppressFBWarnings
 sealed class BufferedWriter extends java.io.BufferedWriter permits CharacterWriter { // NOSONAR

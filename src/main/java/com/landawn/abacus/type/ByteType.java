@@ -17,7 +17,6 @@ package com.landawn.abacus.type;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.util.Numbers;
 
 /**
@@ -25,7 +24,7 @@ import com.landawn.abacus.util.Numbers;
  * This class provides database operations and type information for Byte objects.
  * It handles the conversion between database values and Java Byte objects, supporting {@code null} values.
  */
-public final class ByteType extends AbstractByteType {
+final class ByteType extends AbstractByteType {
 
     public static final String BYTE = Byte.class.getSimpleName();
 
@@ -34,10 +33,9 @@ public final class ByteType extends AbstractByteType {
     }
 
     /**
-     * Returns the Java class type handled by this type handler.
-     * Note: The method uses raw types for compatibility reasons.
+     * Returns the Class object representing the Byte class.
      *
-     * @return The Class object representing Byte.class
+     * @return the Class object for Byte.class
      */
     @SuppressWarnings({ "rawtypes", "unchecked" })
     @Override
@@ -47,9 +45,9 @@ public final class ByteType extends AbstractByteType {
 
     /**
      * Indicates whether this type represents a primitive wrapper class.
-     * Since this handles the Byte wrapper class (not the primitive byte), this returns {@code true}.
+     * Byte is the wrapper class for the primitive byte type.
      *
-     * @return {@code true}, indicating this is a primitive wrapper type
+     * @return {@code true}, indicating Byte is a primitive wrapper
      */
     @Override
     public boolean isPrimitiveWrapper() {
@@ -59,16 +57,20 @@ public final class ByteType extends AbstractByteType {
     /**
      * Retrieves a Byte value from a ResultSet at the specified column index.
      * This method handles various numeric types in the database and converts them to Byte.
-     * If the database value is NULL, this method returns {@code null}.
      *
-     * @param rs the ResultSet containing the data
-     * @param columnIndex the column index (1-based) of the byte value
-     * @return The Byte value at the specified column, or {@code null} if the column value is SQL NULL
-     * @throws SQLException if a database access error occurs or the column index is invalid
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * ByteType type = TypeFactory.getType(Byte.class);
+     * ResultSet rs = ...; // from SQL query
+     * Byte status = type.get(rs, 1); // retrieves Byte from column 1
+     * }</pre>
+     *
+     * @param rs the ResultSet containing the data, must not be {@code null}
+     * @param columnIndex the column index (1-based) to retrieve the value from
+     * @return the Byte value at the specified column, or {@code null} if the column value is SQL NULL
+     * @throws SQLException if a database access error occurs
      */
-    @MayReturnNull
     @Override
-
     public Byte get(final ResultSet rs, final int columnIndex) throws SQLException {
         final Object ret = rs.getObject(columnIndex);
 
@@ -84,16 +86,20 @@ public final class ByteType extends AbstractByteType {
     /**
      * Retrieves a Byte value from a ResultSet using the specified column label.
      * This method handles various numeric types in the database and converts them to Byte.
-     * If the database value is NULL, this method returns {@code null}.
      *
-     * @param rs the ResultSet containing the data
-     * @param columnLabel the label of the column containing the byte value
-     * @return The Byte value in the specified column, or {@code null} if the column value is SQL NULL
-     * @throws SQLException if a database access error occurs or the column label is not found
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * ByteType type = TypeFactory.getType(Byte.class);
+     * ResultSet rs = ...; // from SQL query
+     * Byte status = type.get(rs, "status"); // retrieves Byte from "status" column
+     * }</pre>
+     *
+     * @param rs the ResultSet containing the data, must not be {@code null}
+     * @param columnLabel the label of the column to retrieve the value from, must not be {@code null}
+     * @return the Byte value in the specified column, or {@code null} if the column value is SQL NULL
+     * @throws SQLException if a database access error occurs
      */
-    @MayReturnNull
     @Override
-
     public Byte get(final ResultSet rs, final String columnLabel) throws SQLException {
         final Object ret = rs.getObject(columnLabel);
 

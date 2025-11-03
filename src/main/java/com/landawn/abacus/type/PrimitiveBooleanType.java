@@ -18,8 +18,27 @@ package com.landawn.abacus.type;
  * Type handler for primitive boolean values.
  * This class handles the primitive boolean type specifically, as opposed to the Boolean wrapper class.
  * It provides type information and default value handling for boolean primitives.
+ *
+ * <p><b>Usage Examples:</b></p>
+ * <pre>{@code
+ * Type<Boolean> type = TypeFactory.getType(boolean.class);
+ *
+ * // Convert string to boolean
+ * Boolean value = type.valueOf("true"); // Returns true
+ * Boolean value2 = type.valueOf("false"); // Returns false
+ *
+ * // Get default value
+ * Boolean defaultVal = type.defaultValue(); // Returns false
+ *
+ * // Read from database
+ * try (ResultSet rs = stmt.executeQuery("SELECT active FROM users")) {
+ *     if (rs.next()) {
+ *         Boolean active = type.get(rs, 1);
+ *     }
+ * }
+ * }</pre>
  */
-public final class PrimitiveBooleanType extends AbstractBooleanType {
+final class PrimitiveBooleanType extends AbstractBooleanType {
 
     public static final String BOOLEAN = boolean.class.getSimpleName();
 

@@ -53,7 +53,6 @@ import com.landawn.abacus.util.cs;
  * }
  * }</pre>
  * 
- * @since 1.0
  * @see RuntimeException
  * @see UncheckedIOException
  * @see UncheckedSQLException
@@ -69,10 +68,10 @@ public class UncheckedException extends RuntimeException {
      * Constructs a new {@code UncheckedException} by wrapping the specified checked exception.
      * This constructor preserves all information from the original exception including its
      * stack trace and any suppressed exceptions.
-     * 
+     *
      * <p>The wrapped exception becomes the cause of this UncheckedException, allowing the
      * original exception information to be preserved and accessed via {@link #getCause()}.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * try {
@@ -82,14 +81,14 @@ public class UncheckedException extends RuntimeException {
      * }
      * }</pre>
      *
-     * @param checkedException the checked exception to wrap. Must not be {@code null}.
-     * @throws IllegalArgumentException if checkedException is null
+     * @param cause the checked exception to wrap. Must not be {@code null}.
+     * @throws IllegalArgumentException if cause is null
      */
-    public UncheckedException(final Throwable checkedException) {
-        super(getCause(checkedException));
-        // this.checkedException = checkedException;
+    public UncheckedException(final Throwable cause) {
+        super(getCause(cause));
+        // this.checkedException = cause;
 
-        final Throwable[] suspend = checkedException.getSuppressed();
+        final Throwable[] suspend = cause.getSuppressed();
         if (N.notEmpty(suspend)) {
             for (Throwable e : suspend) {
                 this.addSuppressed(e);
@@ -98,16 +97,16 @@ public class UncheckedException extends RuntimeException {
     }
 
     /**
-     * Constructs a new {@code UncheckedException} with a custom message and the specified checked exception.
+     * Constructs a new {@code UncheckedException} with the specified detail message and checked exception.
      * This constructor allows you to provide additional context while preserving all information
      * from the original exception.
-     * 
-     * <p>The custom message helps provide context about where or why the exception was wrapped,
+     *
+     * <p>The custom error message helps provide context about where or why the exception was wrapped,
      * while the original exception's message and stack trace remain accessible through the cause.</p>
-     * 
+     *
      * <p>All suppressed exceptions from the original exception are also preserved and added to
      * this UncheckedException.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * try {
@@ -119,14 +118,14 @@ public class UncheckedException extends RuntimeException {
      *
      * @param message the detail message providing context for why the exception was wrapped.
      *                The detail message is saved for later retrieval by the {@link #getMessage()} method.
-     * @param checkedException the checked exception to wrap. Must not be {@code null}.
-     * @throws IllegalArgumentException if checkedException is null
+     * @param cause the checked exception to wrap. Must not be {@code null}.
+     * @throws IllegalArgumentException if cause is null
      */
-    public UncheckedException(final String message, final Throwable checkedException) {
-        super(message, getCause(checkedException));
-        // this.checkedException = checkedException;
+    public UncheckedException(final String message, final Throwable cause) {
+        super(message, getCause(cause));
+        // this.checkedException = cause;
 
-        final Throwable[] suspend = checkedException.getSuppressed();
+        final Throwable[] suspend = cause.getSuppressed();
         if (N.notEmpty(suspend)) {
             for (Throwable e : suspend) {
                 this.addSuppressed(e);
@@ -137,18 +136,18 @@ public class UncheckedException extends RuntimeException {
     /**
      * Validates and returns the cause for this exception.
      * This method ensures that the provided checked exception is not {@code null} before using it as the cause.
-     * 
-     * @param checkedException the exception to validate and use as the cause
+     *
+     * @param cause the exception to validate and use as the cause
      * @return the validated exception to be used as the cause
-     * @throws IllegalArgumentException if checkedException is null
+     * @throws IllegalArgumentException if cause is null
      */
-    private static Throwable getCause(final Throwable checkedException) {
-        N.checkArgNotNull(checkedException, cs.checkedException);
+    private static Throwable getCause(final Throwable cause) {
+        N.checkArgNotNull(cause, cs.cause);
 
         // Refer to ExceptionUtil.tryToGetOriginalCheckedException(Throwable e). It should/must be the original checked exception.
-        // return checkedException.getCause() == null ? checkedException : checkedException.getCause();
+        // return cause.getCause() == null ? cause : cause.getCause();
 
-        return checkedException;
+        return cause;
     }
 
 }

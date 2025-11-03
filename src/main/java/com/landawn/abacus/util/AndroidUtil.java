@@ -31,7 +31,6 @@ import com.landawn.abacus.annotation.Internal;
  * 
  * <p>The class is marked as {@code @Internal} and is intended for framework use only.</p>
  * 
- * @since 1.0
  */
 @Internal
 public final class AndroidUtil {

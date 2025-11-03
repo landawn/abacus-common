@@ -46,7 +46,6 @@ import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
 
 import com.landawn.abacus.annotation.Internal;
-import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.parser.DeserializationConfig;
 import com.landawn.abacus.parser.JSONParser;
 import com.landawn.abacus.parser.KryoParser;
@@ -291,7 +290,6 @@ public final class HttpUtil {
      * @param value The header value (can be {@code null}, String, Collection, or any object)
      * @return The header value as a string, or {@code null} string if value is null
      */
-    @MayReturnNull
     public static String readHttpHeadValue(final Object value) {
         if (value == null) {
             return null;
@@ -317,7 +315,6 @@ public final class HttpUtil {
      * @param httpHeaders The HTTP headers map
      * @return The Content-Type value, or {@code null} if not found
      */
-    @MayReturnNull
     public static String getContentType(final Map<String, ?> httpHeaders) {
         if (httpHeaders == null) {
             return null;
@@ -338,7 +335,6 @@ public final class HttpUtil {
      * @param httpHeaders The HttpHeaders object
      * @return The Content-Type value, or {@code null} if not found
      */
-    @MayReturnNull
     public static String getContentType(final HttpHeaders httpHeaders) {
         if (httpHeaders == null) {
             return null;
@@ -359,7 +355,6 @@ public final class HttpUtil {
      * @param httpSettings The HttpSettings object
      * @return The Content-Type value, or {@code null} if not found
      */
-    @MayReturnNull
     public static String getContentType(final HttpSettings httpSettings) {
         if (httpSettings == null || httpSettings.headers() == null) {
             return null;
@@ -374,7 +369,6 @@ public final class HttpUtil {
      * @param connection The HTTP connection
      * @return The Content-Type value, or {@code null} if not found
      */
-    @MayReturnNull
     public static String getContentType(final HttpURLConnection connection) {
         return getContentType(connection.getHeaderFields());
     }
@@ -386,7 +380,6 @@ public final class HttpUtil {
      * @param httpHeaders The HTTP headers map
      * @return The Content-Encoding value, or {@code null} if not found
      */
-    @MayReturnNull
     public static String getContentEncoding(final Map<String, ?> httpHeaders) {
         if (httpHeaders == null) {
             return null;
@@ -407,7 +400,6 @@ public final class HttpUtil {
      * @param httpHeaders The HttpHeaders object
      * @return The Content-Encoding value, or {@code null} if not found
      */
-    @MayReturnNull
     public static String getContentEncoding(final HttpHeaders httpHeaders) {
         if (httpHeaders == null) {
             return null;
@@ -428,7 +420,6 @@ public final class HttpUtil {
      * @param httpSettings The HttpSettings object
      * @return The Content-Encoding value, or {@code null} if not found
      */
-    @MayReturnNull
     public static String getContentEncoding(final HttpSettings httpSettings) {
         if (httpSettings == null || httpSettings.headers() == null) {
             return null;
@@ -443,7 +434,6 @@ public final class HttpUtil {
      * @param connection The HTTP connection
      * @return The Content-Encoding value, or {@code null} if not found
      */
-    @MayReturnNull
     public static String getContentEncoding(final HttpURLConnection connection) {
         return getContentEncoding(connection.getHeaderFields());
     }
@@ -455,7 +445,6 @@ public final class HttpUtil {
      * @param httpHeaders The HTTP headers map
      * @return The Accept value, or {@code null} if not found
      */
-    @MayReturnNull
     public static String getAccept(final Map<String, ?> httpHeaders) {
         if (httpHeaders == null) {
             return null;
@@ -476,7 +465,6 @@ public final class HttpUtil {
      * @param httpHeaders The HttpHeaders object
      * @return The Accept value, or {@code null} if not found
      */
-    @MayReturnNull
     public static String getAccept(final HttpHeaders httpHeaders) {
         if (httpHeaders == null) {
             return null;
@@ -497,7 +485,6 @@ public final class HttpUtil {
      * @param httpSettings The HttpSettings object
      * @return The Accept value, or {@code null} if not found
      */
-    @MayReturnNull
     public static String getAccept(final HttpSettings httpSettings) {
         if (httpSettings == null || httpSettings.headers() == null) {
             return null;
@@ -512,7 +499,6 @@ public final class HttpUtil {
      * @param connection The HTTP connection
      * @return The Accept value, or {@code null} if not found
      */
-    @MayReturnNull
     public static String getAccept(final HttpURLConnection connection) {
         return getAccept(connection.getHeaderFields());
     }
@@ -524,7 +510,6 @@ public final class HttpUtil {
      * @param httpHeaders The HTTP headers map
      * @return The Accept-Encoding value, or {@code null} if not found
      */
-    @MayReturnNull
     public static String getAcceptEncoding(final Map<String, ?> httpHeaders) {
         if (httpHeaders == null) {
             return null;
@@ -545,7 +530,6 @@ public final class HttpUtil {
      * @param httpHeaders The HttpHeaders object
      * @return The Accept-Encoding value, or {@code null} if not found
      */
-    @MayReturnNull
     public static String getAcceptEncoding(final HttpHeaders httpHeaders) {
         if (httpHeaders == null) {
             return null;
@@ -566,7 +550,6 @@ public final class HttpUtil {
      * @param httpSettings The HttpSettings object
      * @return The Accept-Encoding value, or {@code null} if not found
      */
-    @MayReturnNull
     public static String getAcceptEncoding(final HttpSettings httpSettings) {
         if (httpSettings == null || httpSettings.headers() == null) {
             return null;
@@ -581,7 +564,6 @@ public final class HttpUtil {
      * @param connection The HTTP connection
      * @return The Accept-Encoding value, or {@code null} if not found
      */
-    @MayReturnNull
     public static String getAcceptEncoding(final HttpURLConnection connection) {
         return getAcceptEncoding(connection.getHeaderFields());
     }
@@ -593,7 +575,6 @@ public final class HttpUtil {
      * @param httpHeaders The HTTP headers map
      * @return The Accept-Charset value, or {@code null} if not found
      */
-    @MayReturnNull
     public static String getAcceptCharset(final Map<String, ?> httpHeaders) {
         if (httpHeaders == null) {
             return null;
@@ -614,7 +595,6 @@ public final class HttpUtil {
      * @param httpHeaders The HttpHeaders object
      * @return The Accept-Charset value, or {@code null} if not found
      */
-    @MayReturnNull
     public static String getAcceptCharset(final HttpHeaders httpHeaders) {
         if (httpHeaders == null) {
             return null;
@@ -635,7 +615,6 @@ public final class HttpUtil {
      * @param httpSettings The HttpSettings object
      * @return The Accept-Charset value, or {@code null} if not found
      */
-    @MayReturnNull
     public static String getAcceptCharset(final HttpSettings httpSettings) {
         if (httpSettings == null || httpSettings.headers() == null) {
             return null;
@@ -650,7 +629,6 @@ public final class HttpUtil {
      * @param connection The HTTP connection
      * @return The Accept-Charset value, or {@code null} if not found
      */
-    @MayReturnNull
     public static String getAcceptCharset(final HttpURLConnection connection) {
         return getAcceptCharset(connection.getHeaderFields());
     }
@@ -1139,9 +1117,7 @@ public final class HttpUtil {
          *
          * @param value The date string to parse
          * @return The parsed Date, or {@code null} if the value couldn't be parsed
-         *
          */
-        @MayReturnNull
         public static Date parse(final String value) {
             if (value.isEmpty()) {
                 return null;

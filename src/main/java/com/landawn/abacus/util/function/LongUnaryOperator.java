@@ -11,7 +11,6 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-
 package com.landawn.abacus.util.function;
 
 import com.landawn.abacus.util.Throwables;
@@ -19,34 +18,35 @@ import com.landawn.abacus.util.Throwables;
 /**
  * Represents an operation on a single long-valued operand that produces a long-valued result.
  * This is the primitive type specialization of {@code UnaryOperator} for {@code long}.
- * 
+ *
  * <p>This is a functional interface whose functional method is {@link #applyAsLong(long)}.
- * 
- * <p>The interface extends both {@code Throwables.LongUnaryOperator} with {@code RuntimeException} 
+ *
+ * <p>The interface extends both {@code Throwables.LongUnaryOperator} with {@code RuntimeException}
  * and {@code java.util.function.LongUnaryOperator}, providing compatibility with the Java standard library
  * while adding function composition capabilities.
- * 
+ *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * LongUnaryOperator increment = x -> x + 1;
  * LongUnaryOperator doubleValue = x -> x * 2;
  * LongUnaryOperator incrementThenDouble = increment.andThen(doubleValue);
- * 
+ *
  * long result = incrementThenDouble.applyAsLong(5L); // returns 12L ((5 + 1) * 2)
  * }</pre>
- * 
+ *
+ * <p>Refer to JDK API documentation at: <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html">https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a></p>
+ *
  * @see java.util.function.LongUnaryOperator
  * @see java.util.function.UnaryOperator
  */
 @FunctionalInterface
 public interface LongUnaryOperator extends Throwables.LongUnaryOperator<RuntimeException>, java.util.function.LongUnaryOperator { //NOSONAR
-
     /**
      * Applies this operator to the given operand.
-     * 
+     *
      * <p>This method takes a long value as input and produces a long result.
      * The implementation defines how the operand is transformed.
-     * 
+     *
      * <p>Common implementations include:
      * <ul>
      *   <li>Mathematical operations (increment, decrement, negation)</li>
@@ -56,7 +56,7 @@ public interface LongUnaryOperator extends Throwables.LongUnaryOperator<RuntimeE
      * </ul>
      *
      * @param operand the operand
-     * @return the operator result if any error occurs during the operation
+     * @return the operator result
      */
     @Override
     long applyAsLong(long operand);
@@ -64,23 +64,23 @@ public interface LongUnaryOperator extends Throwables.LongUnaryOperator<RuntimeE
     /**
      * Returns a composed operator that first applies the {@code before}
      * operator to its input, and then applies this operator to the result.
-     * 
+     *
      * <p>If evaluation of either operator throws an exception, it is relayed to
      * the caller of the composed operator.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * LongUnaryOperator multiplyBy3 = x -> x * 3;
      * LongUnaryOperator add10 = x -> x + 10;
      * LongUnaryOperator add10ThenMultiplyBy3 = multiplyBy3.compose(add10);
-     * 
+     *
      * long result = add10ThenMultiplyBy3.applyAsLong(5L); // returns 45L ((5 + 10) * 3)
      * }</pre>
      *
      * @param before the operator to apply before this operator is applied
      * @return a composed operator that first applies the {@code before}
      *         operator and then applies this operator
-     * 
+     *
      * @see #andThen(java.util.function.LongUnaryOperator)
      */
     @Override
@@ -91,23 +91,23 @@ public interface LongUnaryOperator extends Throwables.LongUnaryOperator<RuntimeE
     /**
      * Returns a composed operator that first applies this operator to its input,
      * and then applies the {@code after} operator to the result.
-     * 
+     *
      * <p>If evaluation of either operator throws an exception, it is relayed to
      * the caller of the composed operator.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * LongUnaryOperator multiplyBy2 = x -> x * 2;
      * LongUnaryOperator subtract5 = x -> x - 5;
      * LongUnaryOperator multiplyBy2ThenSubtract5 = multiplyBy2.andThen(subtract5);
-     * 
+     *
      * long result = multiplyBy2ThenSubtract5.applyAsLong(10L); // returns 15L ((10 * 2) - 5)
      * }</pre>
      *
      * @param after the operator to apply after this operator is applied
      * @return a composed operator that first applies this operator and then
      *         applies the {@code after} operator
-     * 
+     *
      * @see #compose(java.util.function.LongUnaryOperator)
      */
     @Override
@@ -117,10 +117,10 @@ public interface LongUnaryOperator extends Throwables.LongUnaryOperator<RuntimeE
 
     /**
      * Returns a unary operator that always returns its input argument.
-     * 
+     *
      * <p>This is useful as a default operator or in functional pipelines where
      * no transformation is needed for certain conditions.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * LongUnaryOperator op = condition ? x -> x * 2 : LongUnaryOperator.identity();

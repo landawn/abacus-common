@@ -133,96 +133,221 @@ import com.landawn.abacus.util.stream.Stream;
 // Please generate comprehensive javadoc for all public methods starting from line 6 in Fn.java, including public static methods. Please use javadoc of method "toStr()" as a template to generate javadoc for other methods. Please don't take shortcut. The generated javadoc should be specific and details enough to describe the behavior of the method. And merge the generated javadoc into source file Fn.java to replace existing javadoc in Fn.java. Don't generate javadoc for method which is not found in Fn.java. Remember don't use any cache file because I have modified Fn.java. Again, don't generate javadoc for the method which is not in the attached file. Please read and double check if the method is in the attached file before starting to generate javadoc. If the method is not the attached file, don't generate javadoc for it.
 
 /**
- * Factory utility class for creating and manipulating functional interfaces.
+ * A comprehensive factory utility class providing static methods for creating and manipulating
+ * standard Java functional interfaces. This final class serves as the primary toolkit for
+ * functional programming constructs, offering extensive utilities for predicates, functions,
+ * consumers, suppliers, and operators with sophisticated null handling, type conversions,
+ * and specialized operations for collections, maps, and primitive types.
  *
- * <p>This class provides a comprehensive set of static methods for creating various functional interface
- * implementations including predicates, consumers, functions, suppliers, and operators. It serves as a
- * central hub for functional programming utilities, offering convenient factory methods for common
- * operations, conversions between different functional types, and specialized utilities for working
- * with collections, maps, and other data structures.</p>
+ * <p>Fn bridges the gap between imperative and functional programming paradigms by providing
+ * pre-built implementations of commonly used functional patterns. The class eliminates boilerplate
+ * code in functional programming scenarios and offers convenient factory methods for complex
+ * operations, exception handling, synchronization, and data transformation tasks that would
+ * otherwise require verbose lambda expressions or custom implementations.</p>
  *
- * <p>The class is designed to eliminate boilerplate code in functional programming scenarios by providing
- * pre-built implementations of commonly used functional patterns. It includes utilities for {@code null} handling,
- * type conversions, comparison operations, collection manipulation, and exception handling in functional
- * contexts.</p>
- *
- * <p><b>Important Note:</b> Usually you shouldn't cache or reuse any Function/Predicate/Consumer/... created
- * by calling the methods in this class. These methods should be called every time to ensure proper behavior
- * and avoid potential issues with stateful operations.</p>
- *
- * <p>Key features:</p>
+ * <p><b>Key Features:</b>
  * <ul>
- *   <li>Predicate factories for {@code null} checking, equality testing, range validation, and collection testing</li>
- *   <li>Function factories for type conversion, parsing, formatting, and data extraction</li>
- *   <li>Consumer factories for conditional execution and side effects</li>
- *   <li>Binary operators for selection, comparison, and mathematical operations</li>
- *   <li>Utilities for working with Map.Entry objects and key-value pairs</li>
- *   <li>Exception-safe functional interface conversions</li>
- *   <li>Synchronization wrappers for thread-safe operations</li>
- *   <li>Specialized nested classes for specific functional interface types</li>
- *   <li>Support for both standard Java and custom functional interfaces</li>
+ *   <li><b>Comprehensive Predicate Factory:</b> Null checking, equality testing, range validation, and collection testing</li>
+ *   <li><b>Type-Safe Function Factory:</b> Type conversion, parsing, formatting, and data extraction operations</li>
+ *   <li><b>Conditional Consumers:</b> Side effects with conditional execution and null safety</li>
+ *   <li><b>Mathematical Operators:</b> Selection, comparison, and arithmetic operations for all numeric types</li>
+ *   <li><b>Map Entry Utilities:</b> Specialized operations for key-value pairs and map transformations</li>
+ *   <li><b>Exception Safety:</b> Wrapper functions that handle exceptions gracefully with default values</li>
+ *   <li><b>Synchronization Support:</b> Thread-safe wrappers for functional interfaces</li>
+ *   <li><b>Primitive Specializations:</b> Optimized operations for primitive types avoiding boxing overhead</li>
+ * </ul>
+ *
+ * <p><b>IMPORTANT - Final Class &amp; Usage Notes:</b>
+ * <ul>
+ *   <li>This is a <b>final class</b> that cannot be extended for API stability</li>
+ *   <li>All methods are static - no instance creation needed or allowed</li>
+ *   <li><b>No Caching Recommended:</b> Don't cache or reuse functional interfaces created by these methods</li>
+ *   <li>Methods should be called every time to ensure proper behavior and avoid stateful operation issues</li>
+ *   <li>Some methods marked with {@code @Stateful} return stateful functions requiring careful concurrent usage</li>
+ * </ul>
+ *
+ * <p><b>Common Use Cases:</b>
+ * <ul>
+ *   <li><b>Stream Processing:</b> Filtering, mapping, and reducing operations in stream pipelines</li>
+ *   <li><b>Collection Manipulation:</b> Sorting, grouping, and transforming collections with functional operations</li>
+ *   <li><b>Data Validation:</b> Complex validation logic using composable predicates</li>
+ *   <li><b>Type Conversion:</b> Safe type transformations with null handling and default values</li>
+ *   <li><b>Map Operations:</b> Key-value pair processing and map entry transformations</li>
+ *   <li><b>Exception Handling:</b> Wrapping exception-prone operations in safe functional interfaces</li>
+ *   <li><b>Conditional Logic:</b> Building complex conditional operations through function composition</li>
  * </ul>
  *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
- * // Common predicate operations
- * Predicate<String> notEmpty = Fn.notEmpty();
- * Predicate<Integer> inRange = Fn.geAndLe(1, 100);
- * Predicate<Object> notNull = Fn.notNull();
+ * // Predicate operations for filtering and validation
+ * List<String> names = Arrays.asList("Alice", "", null, "Bob", "Charlie");
+ * List<String> validNames = names.stream()
+ *     .filter(Fn.notNull())
+ *     .filter(Fn.notEmpty())
+ *     .collect(Collectors.toList());
  *
- * // Map entry operations
- * Map<String, Integer> map = N.asMap("a", 1, "b", 2, "c", 3);
- * // Instead of: stream.filter(e -> e.getKey().equals("a") || e.getKey().equals("b"))
- * // Using Fn: stream.filter(Fn.testByKey(k -> k.equals("a") || k.equals("b")))
- * Stream.of(map)
- *     .filter(Fn.testByKey(k -> k.equals("a") || k.equals("b")))
- *     .collect(Collectors.toMap());
+ * // Range validation with numeric predicates
+ * List<Integer> scores = Arrays.asList(85, 92, 67, 88, 91);
+ * List<Integer> passingScores = scores.stream()
+ *     .filter(Fn.geAndLe(70, 100))  // >= 70 and <= 100
+ *     .collect(Collectors.toList());
  *
- * // Function composition and conversion
- * Function<String, Integer> parser = Fn.parseInt();
- * Function<Object, String> toString = Fn.toStr();
- * BinaryOperator<Integer> min = Fn.min();
+ * // Map entry processing with key/value operations
+ * Map<String, Integer> userScores = Map.of("Alice", 95, "Bob", 87, "Charlie", 92);
+ * // Filter entries by key pattern and transform values
+ * Map<String, String> results = userScores.entrySet().stream()
+ *     .filter(Fn.testByKey(k -> k.startsWith("A")))
+ *     .collect(Collectors.toMap(
+ *         Fn.key(),
+ *         Fn.applyByValue(score -> score >= 90 ? "Excellent" : "Good")
+ *     ));
  *
- * // Conditional operations
- * Consumer<String> conditionalPrint = Fn.acceptIfNotNull(System.out::println);
- * Function<String, String> safeTransform = Fn.applyIfNotNullOrDefault(
- *     String::toUpperCase, "DEFAULT");
+ * // Safe type conversion with default values
+ * List<String> numbers = Arrays.asList("123", "invalid", "456", null);
+ * List<Integer> parsed = numbers.stream()
+ *     .map(Fn.parseInt(0))  // Returns 0 for invalid/null inputs
+ *     .collect(Collectors.toList());
  *
- * // Exception handling
- * Predicate<String> safePredicate = Fn.pp(throwingPredicate);
- * Function<String, Integer> safeFunction = Fn.ff(throwingFunction, -1);
+ * // Function composition and chaining
+ * Function<String, String> processor = Fn.chain(
+ *     Fn.trim(),
+ *     Fn.toLowerCase(),
+ *     s -> s.replace(" ", "_")
+ * );
+ *
+ * // Binary operators for reduction operations
+ * Optional<Integer> maxValue = numbers.stream()
+ *     .map(Fn.parseInt(0))
+ *     .reduce(Fn.max());
+ *
+ * // Conditional consumers for side effects
+ * list.forEach(Fn.acceptIfNotNull(item -> logger.info("Processing: " + item)));
+ *
+ * // Exception-safe operations
+ * List<URL> urls = stringUrls.stream()
+ *     .map(Fn.ff(URL::new, null))  // Returns null for invalid URLs
+ *     .filter(Objects::nonNull)
+ *     .collect(Collectors.toList());
  * }</pre>
  *
- * <p>The class includes several nested utility classes for specific functional interface types:</p>
+ * <p><b>Functional Interface Categories:</b>
  * <ul>
- *   <li>{@link Predicates} - Additional predicate utilities</li>
- *   <li>{@link Functions} - Additional function utilities</li>
- *   <li>{@link Consumers} - Additional consumer utilities</li>
- *   <li>{@link BinaryOperators} - Binary operator utilities</li>
- *   <li>{@link Entries} - Map.Entry specific utilities</li>
- *   <li>Primitive-specific utilities (FC, FB, FS, FI, FL, FF, FD)</li>
+ *   <li><b>Predicates:</b> {@code isNull()}, {@code notNull()}, {@code equal()}, {@code in()}, {@code ge()}, {@code le()}</li>
+ *   <li><b>Functions:</b> {@code identity()}, {@code constant()}, {@code toStr()}, {@code parseInt()}, {@code length()}</li>
+ *   <li><b>Consumers:</b> {@code doNothing()}, {@code acceptIfNotNull()}, {@code println()}</li>
+ *   <li><b>Suppliers:</b> {@code supply()}, {@code random()}, {@code uuid()}</li>
+ *   <li><b>Binary Operators:</b> {@code min()}, {@code max()}, {@code selectFirst()}, {@code selectSecond()}</li>
+ *   <li><b>Conversion:</b> {@code c2f()}, {@code f2c()}, {@code pp()}, {@code ff()}, {@code cc()}</li>
  * </ul>
  *
- * <p><b>Thread Safety:</b> All static methods in this class are thread-safe. However, individual functional
- * interfaces returned by these methods may or may not be thread-safe depending on their implementation.
- * Some methods marked with {@code @Stateful} return stateful functions that are not thread-safe and should
- * be used with caution in concurrent environments.</p>
+ * <p><b>Null Safety Philosophy:</b>
+ * <ul>
+ *   <li><b>Null-Safe Predicates:</b> Handle null inputs gracefully with defined behavior</li>
+ *   <li><b>Default Value Functions:</b> Provide fallback values for null or invalid inputs</li>
+ *   <li><b>Conditional Operations:</b> Execute operations only when inputs meet safety criteria</li>
+ *   <li><b>Optional Integration:</b> Seamless integration with Optional for null handling</li>
+ * </ul>
  *
- * <p><b>Performance Considerations:</b> Many methods in this class create new functional interface instances
- * on each call. For performance-critical code, consider the overhead of repeated method calls and object
- * creation. Methods marked with {@code @Beta} are experimental and may have different performance
- * characteristics or behavior in future versions.</p>
+ * <p><b>Performance Characteristics:</b>
+ * <ul>
+ *   <li>Factory method calls: O(1) - minimal object creation overhead</li>
+ *   <li>Primitive operations: Optimized to avoid boxing/unboxing when possible</li>
+ *   <li>Stateless functions: No memory overhead beyond the function object itself</li>
+ *   <li>Stateful functions: May maintain internal state - use with caution in concurrent environments</li>
+ * </ul>
  *
- * @since 1.0
+ * <p><b>Thread Safety:</b>
+ * <ul>
+ *   <li><b>Static Methods:</b> All static factory methods are thread-safe</li>
+ *   <li><b>Returned Functions:</b> Most returned functional interfaces are stateless and thread-safe</li>
+ *   <li><b>Stateful Exceptions:</b> Methods marked with {@code @Stateful} return non-thread-safe functions</li>
+ *   <li><b>Synchronization Wrappers:</b> Provide explicit thread-safety through synchronization</li>
+ * </ul>
+ *
+ * <p><b>Nested Utility Classes:</b>
+ * <ul>
+ *   <li><b>{@link Predicates}:</b> Extended predicate operations and compositions</li>
+ *   <li><b>{@link Functions}:</b> Advanced function utilities and transformations</li>
+ *   <li><b>{@link Consumers}:</b> Consumer operations with enhanced functionality</li>
+ *   <li><b>{@link BinaryOperators}:</b> Binary operations for reduction and selection</li>
+ *   <li><b>{@link Entries}:</b> Map.Entry specific operations and transformations</li>
+ *   <li><b>Primitive Classes:</b> FC, FB, FS, FI, FL, FF, FD for type-specific operations</li>
+ * </ul>
+ *
+ * <p><b>Exception Handling Strategy:</b>
+ * <ul>
+ *   <li><b>Safe Wrappers:</b> Convert exception-throwing operations to safe variants with default values</li>
+ *   <li><b>Exception Conversion:</b> Transform checked exceptions to runtime exceptions when appropriate</li>
+ *   <li><b>Graceful Degradation:</b> Provide meaningful default behavior when operations fail</li>
+ *   <li><b>Error Logging:</b> Optional error logging for debugging failed operations</li>
+ * </ul>
+ *
+ * <p><b>Integration with Java Streams:</b>
+ * <ul>
+ *   <li>Perfect compatibility with all Stream operations (filter, map, reduce, etc.)</li>
+ *   <li>Optimized for parallel stream processing where applicable</li>
+ *   <li>Chainable operations for complex stream pipelines</li>
+ *   <li>Support for both sequential and parallel execution models</li>
+ * </ul>
+ *
+ * <p><b>Advanced Features:</b>
+ * <ul>
+ *   <li><b>Function Composition:</b> Chain multiple functions for complex transformations</li>
+ *   <li><b>Conditional Execution:</b> Execute functions based on predicate conditions</li>
+ *   <li><b>Type Bridging:</b> Convert between different functional interface types</li>
+ *   <li><b>Reflection Integration:</b> Dynamic function creation based on runtime information</li>
+ * </ul>
+ *
+ * <p><b>Best Practices:</b>
+ * <ul>
+ *   <li>Don't cache functional interfaces - call factory methods each time for safety</li>
+ *   <li>Use primitive-specific methods when working with primitive types for better performance</li>
+ *   <li>Prefer composition over complex lambda expressions for better readability</li>
+ *   <li>Use null-safe variants when input data might contain null values</li>
+ *   <li>Consider using default value functions instead of exception-throwing operations</li>
+ * </ul>
+ *
+ * <p><b>Error Handling:</b>
+ * <ul>
+ *   <li>Throws {@link IllegalArgumentException} for invalid arguments to factory methods</li>
+ *   <li>Provides safe wrappers that return default values instead of throwing exceptions</li>
+ *   <li>Handles null inputs gracefully according to each method's documented behavior</li>
+ *   <li>Offers exception-to-runtime-exception conversion utilities</li>
+ * </ul>
+ *
+ * <p><b>Memory Management:</b>
+ * <ul>
+ *   <li>Most functional interfaces are lightweight with minimal memory footprint</li>
+ *   <li>Stateful functions may retain references - ensure proper cleanup when necessary</li>
+ *   <li>Avoid caching function instances to prevent potential memory leaks</li>
+ *   <li>Use primitive-specific operations to reduce garbage collection pressure</li>
+ * </ul>
+ *
+ * <p><b>Comparison with Related Classes:</b>
+ * <ul>
+ *   <li><b>vs {@link Fnn}:</b> Fn works with standard Java interfaces while Fnn handles checked exceptions</li>
+ *   <li><b>vs Standard Java:</b> Enhanced with null safety, default values, and convenience operations</li>
+ *   <li><b>vs Guava:</b> Similar functionality with different API design and additional features</li>
+ * </ul>
+ *
+ * <p><b>Sequential-Only Operations:</b>
+ * Methods marked with {@link SequentialOnly} should not be used in parallel streams:
+ * <ul>
+ *   <li>Designed for sequential processing only</li>
+ *   <li>May produce incorrect results or throw exceptions in parallel contexts</li>
+ *   <li>Typically involve stateful operations that require sequential access</li>
+ * </ul>
+ *
  * @see Fnn
- * @see Suppliers
- * @see IntFunctions
- * @see java.util.function
  * @see Predicate
  * @see Function
  * @see Consumer
+ * @see Supplier
  * @see BinaryOperator
  * @see Throwables
+ * @see java.util.function
+ * @see java.util.stream.Stream
+ * @see java.util.Optional
  */
 @SuppressWarnings({ "java:S6539", "java:S1192", "java:S1221", "java:S1452", "java:S2445" })
 public final class Fn {
@@ -1716,6 +1841,15 @@ public final class Fn {
     /**
      * Returns a Predicate that always evaluates to {@code true}.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * List<String> list = Arrays.asList("a", "b", "c");
+     * list.stream().filter(Fn.alwaysTrue()).count();  // Returns 3 (all elements pass)
+     *
+     * // Useful as a default predicate or placeholder
+     * Predicate<String> condition = someCondition ? Fn.alwaysTrue() : s -> s.length() > 5;
+     * }</pre>
+     *
      * @param <T> the type of the input to the predicate
      * @return a Predicate that always returns true
      */
@@ -1725,6 +1859,15 @@ public final class Fn {
 
     /**
      * Returns a Predicate that always evaluates to {@code false}.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * List<String> list = Arrays.asList("a", "b", "c");
+     * list.stream().filter(Fn.alwaysFalse()).count();  // Returns 0 (no elements pass)
+     *
+     * // Useful as a default predicate or to exclude all elements
+     * Predicate<String> filter = disabled ? Fn.alwaysFalse() : s -> s.startsWith("a");
+     * }</pre>
      *
      * @param <T> the type of the input to the predicate
      * @return a Predicate that always returns false
@@ -1837,6 +1980,14 @@ public final class Fn {
     /**
      * Returns a Predicate that tests if the input is not {@code null}.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * List<String> list = Arrays.asList("a", null, "b", null, "c");
+     * List<String> nonNullList = list.stream()
+     *     .filter(Fn.notNull())
+     *     .collect(Collectors.toList());  // Returns ["a", "b", "c"]
+     * }</pre>
+     *
      * @param <T> the type of the input to the predicate
      * @return a Predicate that tests for non-null
      */
@@ -1857,6 +2008,14 @@ public final class Fn {
 
     /**
      * Returns a Predicate that tests if a CharSequence is not {@code null} and not empty.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * List<String> list = Arrays.asList("hello", "", "world", null, "  ");
+     * List<String> nonEmptyList = list.stream()
+     *     .filter(Fn.notEmpty())
+     *     .collect(Collectors.toList());  // Returns ["hello", "world", "  "] (whitespace is not empty)
+     * }</pre>
      *
      * @param <T> the CharSequence type
      * @return a Predicate that tests for non-empty

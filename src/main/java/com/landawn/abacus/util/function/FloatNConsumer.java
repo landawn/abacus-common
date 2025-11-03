@@ -11,24 +11,23 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-
 package com.landawn.abacus.util.function;
 
 /**
  * Represents an operation that accepts a variable number of float-valued arguments and returns no result.
  * This is a functional interface whose functional method is {@link #accept(float...)}.
- * 
+ *
  * <p>This is a primitive type specialization of {@code Consumer} for {@code float} varargs.</p>
- * 
- * @since 1.0
+ *
  * @see java.util.function.Consumer
+ *
+ * <p>Refer to JDK API documentation at: <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html">https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a></p>
  */
 @FunctionalInterface
 public interface FloatNConsumer {
-
     /**
      * Performs this operation on the given float arguments.
-     * 
+     *
      * <p>The behavior of this method is implementation-dependent and may process
      * the float values in any manner required by the specific use case.</p>
      *

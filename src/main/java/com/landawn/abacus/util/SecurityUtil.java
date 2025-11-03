@@ -31,7 +31,6 @@ package com.landawn.abacus.util;
  * <p>The class uses the NOSONAR comment to suppress SonarQube warnings about
  * the empty class, as it is intentionally left empty for future development.
  * 
- * @since 1.0
  */
 public final class SecurityUtil {//NOSONAR
 

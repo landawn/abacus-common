@@ -49,7 +49,6 @@ import java.io.Writer;
  * @see BufferedJSONWriter
  * @see BufferedXMLWriter
  * @see BufferedCSVWriter
- * @since 1.0
  */
 public abstract sealed class CharacterWriter extends BufferedWriter permits BufferedJSONWriter, BufferedXMLWriter, BufferedCSVWriter {
 

@@ -114,7 +114,12 @@ public final class ActivityPrint implements Cloneable, Serializable {
     /**
      * Factory method to create a new ActivityPrint with the specified lifetime and idle time limits.
      * This is a convenience method equivalent to calling the constructor.
-     * 
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * ActivityPrint activity = ActivityPrint.valueOf(3600000, 300000);
+     * }</pre>
+     *
      * @param liveTime maximum lifetime in milliseconds (must be positive)
      * @param maxIdleTime maximum idle time in milliseconds (must be positive)
      * @return a new ActivityPrint instance
@@ -135,7 +140,12 @@ public final class ActivityPrint implements Cloneable, Serializable {
 
     /**
      * Sets the maximum lifetime for this activity print.
-     * 
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * activity.setLiveTime(7200000); // set to 2 hours
+     * }</pre>
+     *
      * @param liveTime the new maximum lifetime in milliseconds
      * @return this ActivityPrint instance for method chaining
      * @throws IllegalArgumentException if liveTime is negative
@@ -161,7 +171,12 @@ public final class ActivityPrint implements Cloneable, Serializable {
 
     /**
      * Sets the maximum idle time for this activity print.
-     * 
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * activity.setMaxIdleTime(600000); // set to 10 minutes
+     * }</pre>
+     *
      * @param maxIdleTime the new maximum idle time in milliseconds
      * @return this ActivityPrint instance for method chaining
      * @throws IllegalArgumentException if maxIdleTime is negative
@@ -235,6 +250,11 @@ public final class ActivityPrint implements Cloneable, Serializable {
     /**
      * Increments the access count by one.
      * This method should be called whenever the associated object is accessed from the pool.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * pooledObject.activityPrint().updateAccessCount();
+     * }</pre>
      */
     public void updateAccessCount() {
         accessCount++;
@@ -243,7 +263,13 @@ public final class ActivityPrint implements Cloneable, Serializable {
     /**
      * Calculates and returns the expiration time for the associated object.
      * The expiration time is the creation time plus the live time.
-     * 
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * long expirationTime = activity.getExpirationTime();
+     * long timeUntilExpiration = expirationTime - System.currentTimeMillis();
+     * }</pre>
+     *
      * @return the expiration time in milliseconds since epoch, or Long.MAX_VALUE if it would overflow
      */
     public long getExpirationTime() {
@@ -252,13 +278,20 @@ public final class ActivityPrint implements Cloneable, Serializable {
 
     /**
      * Checks whether the associated object has expired based on its lifetime or idle time.
-     * 
+     *
      * <p>An object is considered expired if either:
      * <ul>
      *   <li>It has exceeded its maximum lifetime (current time - creation time &gt; live time)</li>
      *   <li>It has been idle too long (current time - last access time &gt; max idle time)</li>
      * </ul>
-     * 
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * if (pooledObject.activityPrint().isExpired()) {
+     *     pooledObject.destroy(Caller.EVICT);
+     * }
+     * }</pre>
+     *
      * @return {@code true} if the object has expired, {@code false} otherwise
      */
     public boolean isExpired() {

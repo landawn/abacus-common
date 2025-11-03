@@ -20,10 +20,9 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.util.Strings;
 
-public class URIType extends AbstractType<URI> {
+class URIType extends AbstractType<URI> {
 
     public static final String URI = URI.class.getSimpleName();
 
@@ -40,7 +39,7 @@ public class URIType extends AbstractType<URI> {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * URIType type = new URIType();
+     * Type<URI> type = TypeFactory.getType(URI.class);
      * Class<URI> clazz = type.clazz(); // Returns URI.class
      * }</pre>
      *
@@ -60,7 +59,7 @@ public class URIType extends AbstractType<URI> {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * URIType type = new URIType();
+     * Type<URI> type = TypeFactory.getType(URI.class);
      * URI uri = URI.create("https://example.com/path");
      * String str = type.stringOf(uri); // Returns "https://example.com/path"
      * }</pre>
@@ -69,13 +68,12 @@ public class URIType extends AbstractType<URI> {
      * @return the string representation of the URI, or {@code null} if the input is null
      */
     @Override
-    @MayReturnNull
     public String stringOf(final URI x) {
         return (x == null) ? null : x.toString();
     }
 
     /**
-     * Converts a string to a URI instance.
+     * Parses a string representation to create a URI instance.
      * <p>
      * This method creates a URI instance from the provided string using {@link URI#create(String)}.
      * If the string is {@code null} or empty, this method returns {@code null}.
@@ -83,7 +81,7 @@ public class URIType extends AbstractType<URI> {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * URIType type = new URIType();
+     * Type<URI> type = TypeFactory.getType(URI.class);
      * URI uri = type.valueOf("https://example.com/path"); // Creates a URI
      * }</pre>
      *
@@ -91,9 +89,7 @@ public class URIType extends AbstractType<URI> {
      * @return a URI instance created from the string, or {@code null} if the string is empty
      * @throws IllegalArgumentException if the string violates RFC 2396 URI syntax rules
      */
-    @MayReturnNull
     @Override
-
     public URI valueOf(final String str) {
         if (Strings.isEmpty(str)) {
             return null; // NOSONAR
@@ -111,7 +107,7 @@ public class URIType extends AbstractType<URI> {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * URIType type = new URIType();
+     * Type<URI> type = TypeFactory.getType(URI.class);
      * ResultSet rs = statement.executeQuery("SELECT homepage FROM websites");
      * URI homepage = type.get(rs, 1); // Get URI from first column
      * }</pre>
@@ -122,7 +118,6 @@ public class URIType extends AbstractType<URI> {
      * @throws SQLException if a database access error occurs or the column index is invalid
      */
     @Override
-    @MayReturnNull
     public URI get(final ResultSet rs, final int columnIndex) throws SQLException {
         return valueOf(rs.getString(columnIndex));
     }
@@ -136,7 +131,7 @@ public class URIType extends AbstractType<URI> {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * URIType type = new URIType();
+     * Type<URI> type = TypeFactory.getType(URI.class);
      * ResultSet rs = statement.executeQuery("SELECT homepage FROM websites");
      * URI homepage = type.get(rs, "homepage"); // Get URI by column name
      * }</pre>
@@ -147,7 +142,6 @@ public class URIType extends AbstractType<URI> {
      * @throws SQLException if a database access error occurs or the column label is invalid
      */
     @Override
-    @MayReturnNull
     public URI get(final ResultSet rs, final String columnLabel) throws SQLException {
         return valueOf(rs.getString(columnLabel));
     }
@@ -161,7 +155,7 @@ public class URIType extends AbstractType<URI> {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * URIType type = new URIType();
+     * Type<URI> type = TypeFactory.getType(URI.class);
      * PreparedStatement stmt = conn.prepareStatement("INSERT INTO websites (homepage) VALUES (?)");
      * type.set(stmt, 1, URI.create("https://example.com")); // Set URI at parameter index 1
      * }</pre>
@@ -185,7 +179,7 @@ public class URIType extends AbstractType<URI> {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * URIType type = new URIType();
+     * Type<URI> type = TypeFactory.getType(URI.class);
      * CallableStatement stmt = conn.prepareCall("{call update_website(?)}");
      * type.set(stmt, "homepage", URI.create("https://example.com")); // Set URI by parameter name
      * }</pre>

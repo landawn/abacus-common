@@ -17,7 +17,7 @@ import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Numbers;
 import com.landawn.abacus.util.Strings;
 
-public class MutableByteType extends NumberType<MutableByte> {
+class MutableByteType extends NumberType<MutableByte> {
 
     public static final String MUTABLE_BYTE = MutableByte.class.getSimpleName();
 
@@ -30,7 +30,7 @@ public class MutableByteType extends NumberType<MutableByte> {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * MutableByteType type = new MutableByteType();
+     * Type<MutableByte> type = TypeFactory.getType(MutableByte.class);
      * Class<MutableByte> clazz = type.clazz();
      * // Returns: MutableByte.class
      * }</pre>
@@ -48,7 +48,7 @@ public class MutableByteType extends NumberType<MutableByte> {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * MutableByteType type = new MutableByteType();
+     * Type<MutableByte> type = TypeFactory.getType(MutableByte.class);
      *
      * MutableByte mb = MutableByte.of((byte) 42);
      * String result = type.stringOf(mb);
@@ -64,7 +64,6 @@ public class MutableByteType extends NumberType<MutableByte> {
      *
      * @param x The MutableByte object to convert
      * @return The string representation of the byte value, or {@code null} if the input is null
-     @MayReturnNull
      */
     @Override
     public String stringOf(final MutableByte x) {
@@ -77,7 +76,7 @@ public class MutableByteType extends NumberType<MutableByte> {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * MutableByteType type = new MutableByteType();
+     * Type<MutableByte> type = TypeFactory.getType(MutableByte.class);
      *
      * MutableByte result = type.valueOf("42");
      * // Returns: MutableByte with value 42
@@ -95,7 +94,6 @@ public class MutableByteType extends NumberType<MutableByte> {
      * @param str The string to parse
      * @return A MutableByte containing the parsed value, or {@code null} if the input is {@code null} or empty
      * @throws NumberFormatException if the string cannot be parsed as a byte
-     @MayReturnNull
      */
     @Override
     public MutableByte valueOf(final String str) {
@@ -108,7 +106,7 @@ public class MutableByteType extends NumberType<MutableByte> {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * MutableByteType type = new MutableByteType();
+     * Type<MutableByte> type = TypeFactory.getType(MutableByte.class);
      * ResultSet rs = ...; // obtained from database query
      *
      * // Column contains byte value 42
@@ -136,7 +134,7 @@ public class MutableByteType extends NumberType<MutableByte> {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * MutableByteType type = new MutableByteType();
+     * Type<MutableByte> type = TypeFactory.getType(MutableByte.class);
      * ResultSet rs = ...; // obtained from database query
      *
      * // Column "status_code" contains byte value 1
@@ -164,7 +162,7 @@ public class MutableByteType extends NumberType<MutableByte> {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * MutableByteType type = new MutableByteType();
+     * Type<MutableByte> type = TypeFactory.getType(MutableByte.class);
      * PreparedStatement stmt = connection.prepareStatement(
      *     "INSERT INTO settings (id, status) VALUES (?, ?)");
      *
@@ -192,7 +190,7 @@ public class MutableByteType extends NumberType<MutableByte> {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * MutableByteType type = new MutableByteType();
+     * Type<MutableByte> type = TypeFactory.getType(MutableByte.class);
      * CallableStatement stmt = connection.prepareCall("{call update_status(?, ?)}");
      *
      * MutableByte mb = MutableByte.of((byte) 1);
@@ -219,7 +217,7 @@ public class MutableByteType extends NumberType<MutableByte> {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * MutableByteType type = new MutableByteType();
+     * Type<MutableByte> type = TypeFactory.getType(MutableByte.class);
      * StringBuilder sb = new StringBuilder();
      *
      * MutableByte mb = MutableByte.of((byte) 42);
@@ -256,7 +254,7 @@ public class MutableByteType extends NumberType<MutableByte> {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * MutableByteType type = new MutableByteType();
+     * Type<MutableByte> type = TypeFactory.getType(MutableByte.class);
      * CharacterWriter writer = new CharacterWriter();
      * JSONXMLSerializationConfig config = JSONXMLSerializationConfig.of();
      *

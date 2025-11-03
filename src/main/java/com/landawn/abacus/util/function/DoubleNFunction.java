@@ -11,26 +11,25 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-
 package com.landawn.abacus.util.function;
 
-import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.util.Throwables;
 
 /**
  * Represents a function that accepts a variable number of double-valued arguments and produces a result.
  * This is the N-arity specialization of {@link DoubleFunction}.
- * 
+ *
  * <p>This is a functional interface whose functional method is {@link #apply(double...)}.
  *
  * @param <R> the type of the result of the function
  *
  * @see DoubleFunction
  * @see DoubleBiFunction
+ *
+ * <p>Refer to JDK API documentation at: <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html">https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a></p>
  */
 @FunctionalInterface
 public interface DoubleNFunction<R> extends Throwables.DoubleNFunction<R, RuntimeException> { //NOSONAR
-
     /**
      * Applies this function to the given arguments.
      *
@@ -62,7 +61,6 @@ public interface DoubleNFunction<R> extends Throwables.DoubleNFunction<R, Runtim
      * @return the function result
      */
     @Override
-    @MayReturnNull
     R apply(double... args);
 
     /**
@@ -77,7 +75,7 @@ public interface DoubleNFunction<R> extends Throwables.DoubleNFunction<R, Runtim
      * }</pre>
      *
      * @param <V> the type of output of the {@code after} function, and of the composed function
-     * @param after the function to apply after this function is applied. Must not be null
+     * @param after the function to apply after this function is applied. Must not be {@code null}.
      * @return a composed function that first applies this function and then applies the {@code after} function
      */
     @Override

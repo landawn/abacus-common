@@ -36,7 +36,6 @@ package com.landawn.abacus.parser;
  * writer.write(XMLConstants.ARRAY_ELE_END);
  * }</pre>
  * 
- * @since 1.0
  */
 public class XMLConstants {
 

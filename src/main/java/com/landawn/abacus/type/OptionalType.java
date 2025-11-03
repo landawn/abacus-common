@@ -25,7 +25,7 @@ import com.landawn.abacus.util.u.Optional;
  * @param <T> the type of value wrapped by the Optional
  */
 @SuppressWarnings("java:S2160")
-public class OptionalType<T> extends AbstractOptionalType<Optional<T>> {
+class OptionalType<T> extends AbstractOptionalType<Optional<T>> {
 
     public static final String OPTIONAL = Optional.class.getSimpleName();
 
@@ -46,6 +46,12 @@ public class OptionalType<T> extends AbstractOptionalType<Optional<T>> {
     /**
      * Returns the declaring name of this type, which includes the full generic type declaration.
      * For example, "Optional&lt;String&gt;" for an Optional containing String values.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Type<Optional<String>> type = TypeFactory.getType("Optional<String>");
+     * String name = type.declaringName(); // Returns "Optional<String>"
+     * }</pre>
      *
      * @return the declaring name with generic type information
      */
@@ -94,6 +100,12 @@ public class OptionalType<T> extends AbstractOptionalType<Optional<T>> {
     /**
      * Returns the default value for Optional type, which is an empty Optional.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Type<Optional<String>> type = TypeFactory.getType("Optional<String>");
+     * Optional<String> defaultVal = type.defaultValue(); // Returns Optional.empty()
+     * }</pre>
+     *
      * @return Optional.empty()
      */
     @Override
@@ -106,9 +118,18 @@ public class OptionalType<T> extends AbstractOptionalType<Optional<T>> {
      * If the Optional is {@code null} or empty, returns {@code null}. Otherwise,
      * delegates to the element type's string conversion.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Type<Optional<String>> type = TypeFactory.getType("Optional<String>");
+     * Optional<String> opt = Optional.of("hello");
+     * String str = type.stringOf(opt); // Returns "hello"
+     *
+     * Optional<String> empty = Optional.empty();
+     * String str2 = type.stringOf(empty); // Returns null
+     * }</pre>
+     *
      * @param x the Optional object to convert
      * @return the string representation of the contained value, or {@code null} if empty
-     @MayReturnNull
      */
     @Override
     public String stringOf(final Optional<T> x) {
@@ -122,6 +143,14 @@ public class OptionalType<T> extends AbstractOptionalType<Optional<T>> {
      * The result may be an Optional containing {@code null} if the element type's
      * valueOf returns {@code null}.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Type<Optional<Integer>> type = TypeFactory.getType("Optional<Integer>");
+     * Optional<Integer> opt = type.valueOf("42"); // Returns Optional.of(42)
+     *
+     * Optional<Integer> empty = type.valueOf(null); // Returns Optional.empty()
+     * }</pre>
+     *
      * @param str the string to convert
      * @return an Optional containing the parsed value, or empty Optional if input is null
      */
@@ -133,6 +162,19 @@ public class OptionalType<T> extends AbstractOptionalType<Optional<T>> {
     /**
      * Retrieves a value from a ResultSet at the specified column index and wraps it in an {@link Optional}.
      * The method attempts to convert the retrieved value to the element type if necessary.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Type<Optional<String>> type = TypeFactory.getType("Optional<String>");
+     * try (ResultSet rs = stmt.executeQuery()) {
+     *     if (rs.next()) {
+     *         Optional<String> name = type.get(rs, 1);
+     *         if (name.isPresent()) {
+     *             System.out.println("Name: " + name.get());
+     *         }
+     *     }
+     * }
+     * }</pre>
      *
      * @param rs the ResultSet to read from
      * @param columnIndex the column index (1-based) to retrieve the value from

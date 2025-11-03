@@ -37,7 +37,6 @@ import com.landawn.abacus.util.function.ByteConsumer;
  * }</pre>
  * 
  * @see ByteConsumer
- * @since 1.0
  */
 public class ByteSummaryStatistics implements ByteConsumer {
 

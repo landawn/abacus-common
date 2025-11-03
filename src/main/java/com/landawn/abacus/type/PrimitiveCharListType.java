@@ -28,7 +28,7 @@ import com.landawn.abacus.util.Strings;
  * by delegating to the underlying char array type handler.
  */
 @SuppressWarnings("java:S2160")
-public final class PrimitiveCharListType extends AbstractPrimitiveListType<CharList> {
+final class PrimitiveCharListType extends AbstractPrimitiveListType<CharList> {
 
     public static final String CHAR_LIST = CharList.class.getSimpleName();
 
@@ -79,7 +79,6 @@ public final class PrimitiveCharListType extends AbstractPrimitiveListType<CharL
      *
      * @param x the CharList to convert
      * @return the string representation of the list, or {@code null} if input is null
-     @MayReturnNull
      */
     @Override
     public String stringOf(final CharList x) {
@@ -93,7 +92,6 @@ public final class PrimitiveCharListType extends AbstractPrimitiveListType<CharL
      *
      * @param str the string to parse
      * @return a CharList created from the parsed values, or {@code null} if input is {@code null} or empty
-     @MayReturnNull
      */
     @Override
     public CharList valueOf(final String str) {

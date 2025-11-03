@@ -20,7 +20,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 
-import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.util.Dates;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Strings;
@@ -30,7 +29,7 @@ import com.landawn.abacus.util.Strings;
  * This class provides methods to convert between Timestamp objects and their string representations,
  * as well as methods to interact with JDBC result sets and statements.
  */
-public class TimestampType extends AbstractDateType<Timestamp> {
+class TimestampType extends AbstractDateType<Timestamp> {
 
     /**
      * The type name constant for Timestamp type.
@@ -47,6 +46,12 @@ public class TimestampType extends AbstractDateType<Timestamp> {
 
     /**
      * Returns the Java class that this type handler manages.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Type<Timestamp> type = TypeFactory.getType(Timestamp.class);
+     * Class<Timestamp> clazz = type.clazz(); // Returns Timestamp.class
+     * }</pre>
      *
      * @return {@code Timestamp.class}
      */
@@ -66,12 +71,18 @@ public class TimestampType extends AbstractDateType<Timestamp> {
      *   <li>Otherwise, converts obj to string and parses it as a Timestamp</li>
      * </ul>
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Type<Timestamp> type = TypeFactory.getType(Timestamp.class);
+     * Timestamp ts1 = type.valueOf(1609459200000L); // From milliseconds
+     * Timestamp ts2 = type.valueOf(new Date()); // From Date
+     * Timestamp ts3 = type.valueOf("2021-01-01 00:00:00"); // From String
+     * }</pre>
+     *
      * @param obj the object to convert to Timestamp
      * @return a Timestamp representation of the object, or {@code null} if obj is null
      */
-    @MayReturnNull
     @Override
-
     public Timestamp valueOf(final Object obj) {
         if (obj instanceof Number) {
             return new Timestamp(((Number) obj).longValue());
@@ -92,12 +103,18 @@ public class TimestampType extends AbstractDateType<Timestamp> {
      *   <li>Otherwise, parses the string using the configured date format</li>
      * </ul>
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Type<Timestamp> type = TypeFactory.getType(Timestamp.class);
+     * Timestamp ts1 = type.valueOf("2021-01-01 12:30:45");
+     * Timestamp ts2 = type.valueOf("SYS_TIME"); // Returns current timestamp
+     * Timestamp ts3 = type.valueOf(null); // Returns null
+     * }</pre>
+     *
      * @param str the string to parse
      * @return a Timestamp parsed from the string, or {@code null} if str is empty
      */
-    @MayReturnNull
     @Override
-
     public Timestamp valueOf(final String str) {
         return Strings.isEmpty(str) ? null : (N.equals(str, SYS_TIME) ? Dates.currentTimestamp() : Dates.parseTimestamp(str));
     }
@@ -114,9 +131,7 @@ public class TimestampType extends AbstractDateType<Timestamp> {
      * @param len the number of characters to parse
      * @return a Timestamp parsed from the character array, or {@code null} if the array is {@code null} or length is 0
      */
-    @MayReturnNull
     @Override
-
     public Timestamp valueOf(final char[] cbuf, final int offset, final int len) {
         if ((cbuf == null) || (len == 0)) {
             return null; // NOSONAR
@@ -136,12 +151,22 @@ public class TimestampType extends AbstractDateType<Timestamp> {
     /**
      * Retrieves a Timestamp value from the specified column in the ResultSet.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Type<Timestamp> type = TypeFactory.getType(Timestamp.class);
+     * try (ResultSet rs = stmt.executeQuery()) {
+     *     if (rs.next()) {
+     *         Timestamp createdAt = type.get(rs, 1);
+     *         System.out.println("Created at: " + createdAt);
+     *     }
+     * }
+     * }</pre>
+     *
      * @param rs the ResultSet to read from
      * @param columnIndex the column index (1-based)
      * @return the Timestamp value at the specified column, or {@code null} if the column value is SQL NULL
      * @throws SQLException if a database access error occurs or the column index is invalid
      */
-    @MayReturnNull
     @Override
     public Timestamp get(final ResultSet rs, final int columnIndex) throws SQLException {
         return rs.getTimestamp(columnIndex);
@@ -155,7 +180,6 @@ public class TimestampType extends AbstractDateType<Timestamp> {
      * @return the Timestamp value at the specified column, or {@code null} if the column value is SQL NULL
      * @throws SQLException if a database access error occurs or the column label is invalid
      */
-    @MayReturnNull
     @Override
     public Timestamp get(final ResultSet rs, final String columnLabel) throws SQLException {
         return rs.getTimestamp(columnLabel);
@@ -163,6 +187,16 @@ public class TimestampType extends AbstractDateType<Timestamp> {
 
     /**
      * Sets a Timestamp parameter in the PreparedStatement.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Type<Timestamp> type = TypeFactory.getType(Timestamp.class);
+     * Timestamp now = new Timestamp(System.currentTimeMillis());
+     * try (PreparedStatement stmt = conn.prepareStatement("INSERT INTO events (created_at) VALUES (?)")) {
+     *     type.set(stmt, 1, now);
+     *     stmt.executeUpdate();
+     * }
+     * }</pre>
      *
      * @param stmt the PreparedStatement to set the parameter on
      * @param columnIndex the parameter index (1-based)

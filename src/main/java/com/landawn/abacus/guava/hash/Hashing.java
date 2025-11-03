@@ -53,12 +53,14 @@ import com.landawn.abacus.util.N;
  * <pre>{@code
  * // Simple hashing
  * HashCode hash = Hashing.sha256().hash("Hello World".getBytes());
- * 
+ *
  * // Using a Hasher for multiple inputs
+ * long userId = 12345L;
+ * String userName = "john";
  * HashCode combined = Hashing.murmur3_128()
  *     .newHasher()
- *     .putLong(userId)
- *     .putString(userName, StandardCharsets.UTF_8)
+ *     .put(userId)
+ *     .put(userName, StandardCharsets.UTF_8)
  *     .hash();
  * }</pre>
  *
@@ -78,20 +80,20 @@ public final class Hashing {
     /**
      * Returns a general-purpose, temporary-use, non-cryptographic hash function that produces
      * hash codes of at least the specified number of bits. The returned function is suitable
-     * for in-memory data structures but should not be used for persistent storage or 
+     * for in-memory data structures but should not be used for persistent storage or
      * cross-process communication.
-     * 
+     *
      * <p>The algorithm implemented by the returned function is unspecified and may change
      * between different executions of the program. A new random seed is chosen each time
      * the Hashing class is loaded.
-     * 
+     *
      * <p><b>Warning:</b> Do not use this method if hash codes may escape the current process
      * in any way (e.g., being sent over RPC or saved to disk). The hash codes will not be
      * consistent across different JVM instances.
-     * 
+     *
      * <p>Multiple calls to this method with the same {@code minimumBits} value within the
      * same JVM instance will return identically-behaving HashFunction instances.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * HashFunction hashFunc = Hashing.goodFastHash(128);
@@ -99,8 +101,8 @@ public final class Hashing {
      * }</pre>
      *
      * @param minimumBits a positive integer specifying the minimum number of bits the
-     *                    hash code should have. The actual number of bits may be higher
-     *                    (typically rounded up to a multiple of 32 or 64).
+     *                    hash code should have (the actual number of bits may be higher,
+     *                    typically rounded up to a multiple of 32 or 64)
      * @return a hash function that produces hash codes of length {@code minimumBits} or greater
      * @throws IllegalArgumentException if {@code minimumBits} is not positive
      */
@@ -112,21 +114,20 @@ public final class Hashing {
      * Returns a hash function implementing the 32-bit Murmur3 algorithm (x86 variant) with
      * the specified seed value. This is a non-cryptographic hash function known for its
      * speed and good distribution properties.
-     * 
+     *
      * <p>The implementation corresponds to the MurmurHash3_x86_32 function (Murmur3A) from
      * the original C++ implementation. This is the little-endian variant.
-     * 
+     *
      * <p>This method returns the fixed version that corrects a bug in the original
      * implementation, hence the internal name {@code murmur3_32_fixed}.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * HashFunction murmur = Hashing.murmur3_32(42); // seed = 42
      * HashCode hash = murmur.hash("example".getBytes());
      * }</pre>
      *
-     * @param seed the seed value to initialize the hash function. Different seeds will
-     *             produce different hash values for the same input.
+     * @param seed the seed value to initialize the hash function (different seeds produce different hash values for the same input)
      * @return a Murmur3 32-bit hash function initialized with the given seed
      */
     public static HashFunction murmur3_32(final int seed) { //NOSONAR
@@ -156,17 +157,17 @@ public final class Hashing {
      * Returns a hash function implementing the 128-bit Murmur3 algorithm (x64 variant) with
      * the specified seed value. This produces a 128-bit hash value and is suitable for
      * applications requiring larger hash codes.
-     * 
+     *
      * <p>The implementation corresponds to the MurmurHash3_x64_128 function (Murmur3F) from
      * the original C++ implementation. This is the little-endian variant.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * HashFunction murmur128 = Hashing.murmur3_128(12345);
      * HashCode hash = murmur128.hash("large data set".getBytes());
      * }</pre>
      *
-     * @param seed the seed value to initialize the hash function
+     * @param seed the seed value to initialize the hash function (different seeds produce different hash values for the same input)
      * @return a Murmur3 128-bit hash function initialized with the given seed
      */
     public static HashFunction murmur3_128(final int seed) { //NOSONAR
@@ -213,7 +214,7 @@ public final class Hashing {
      * Returns a hash function implementing the 64-bit SipHash-2-4 algorithm using the
      * specified 128-bit key (provided as two 64-bit values). This allows for keyed hashing
      * which can be useful for hash tables with untrusted input.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * long k0 = 0x0706050403020100L;
@@ -222,8 +223,8 @@ public final class Hashing {
      * HashCode hash = sipHash.hash("keyed data".getBytes());
      * }</pre>
      *
-     * @param k0 the first 64 bits of the 128-bit key
-     * @param k1 the second 64 bits of the 128-bit key
+     * @param k0 the first 64 bits of the 128-bit key (low order bits)
+     * @param k1 the second 64 bits of the 128-bit key (high order bits)
      * @return a SipHash-2-4 hash function initialized with the given key
      */
     public static HashFunction sipHash24(final long k0, final long k1) {
@@ -358,7 +359,7 @@ public final class Hashing {
      * Returns a hash function implementing HMAC-MD5 using a {@link javax.crypto.spec.SecretKeySpec}
      * created from the given byte array. This is a convenience method that creates the
      * key specification internally.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * byte[] keyBytes = "secret key".getBytes(StandardCharsets.UTF_8);
@@ -366,9 +367,9 @@ public final class Hashing {
      * HashCode mac = hmac.hash("message".getBytes());
      * }</pre>
      *
-     * @param key the key material for the secret key
+     * @param key the key material for the secret key as a byte array
      * @return a hash function implementing HMAC-MD5 with a key created from the given bytes
-     * @throws IllegalArgumentException if key is empty or null
+     * @throws IllegalArgumentException if {@code key} is empty or null
      */
     public static HashFunction hmacMd5(final byte[] key) {
         return GuavaHashFunction.wrap(com.google.common.hash.Hashing.hmacMd5(key));
@@ -396,16 +397,16 @@ public final class Hashing {
     /**
      * Returns a hash function implementing HMAC-SHA1 using a {@link javax.crypto.spec.SecretKeySpec}
      * created from the given byte array.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * HashFunction hmac = Hashing.hmacSha1("mySecretKey".getBytes());
      * HashCode mac = hmac.hash("authenticated message".getBytes());
      * }</pre>
      *
-     * @param key the key material for the secret key
+     * @param key the key material for the secret key as a byte array
      * @return a hash function implementing HMAC-SHA1 with a key created from the given bytes
-     * @throws IllegalArgumentException if key is empty or null
+     * @throws IllegalArgumentException if {@code key} is empty or null
      */
     public static HashFunction hmacSha1(final byte[] key) {
         return GuavaHashFunction.wrap(com.google.common.hash.Hashing.hmacSha1(key));
@@ -434,7 +435,7 @@ public final class Hashing {
     /**
      * Returns a hash function implementing HMAC-SHA256 using a {@link javax.crypto.spec.SecretKeySpec}
      * created from the given byte array.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * byte[] key = "strongSecretKey".getBytes(StandardCharsets.UTF_8);
@@ -442,9 +443,9 @@ public final class Hashing {
      * HashCode mac = hmac.hash("important data".getBytes());
      * }</pre>
      *
-     * @param key the key material for the secret key
+     * @param key the key material for the secret key as a byte array
      * @return a hash function implementing HMAC-SHA256 with a key created from the given bytes
-     * @throws IllegalArgumentException if key is empty or null
+     * @throws IllegalArgumentException if {@code key} is empty or null
      */
     public static HashFunction hmacSha256(final byte[] key) {
         return GuavaHashFunction.wrap(com.google.common.hash.Hashing.hmacSha256(key));
@@ -473,7 +474,7 @@ public final class Hashing {
     /**
      * Returns a hash function implementing HMAC-SHA512 using a {@link javax.crypto.spec.SecretKeySpec}
      * created from the given byte array.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * byte[] key = new byte[64]; // 512-bit key
@@ -482,9 +483,9 @@ public final class Hashing {
      * HashCode mac = hmac.hash("top secret data".getBytes());
      * }</pre>
      *
-     * @param key the key material for the secret key
+     * @param key the key material for the secret key as a byte array
      * @return a hash function implementing HMAC-SHA512 with a key created from the given bytes
-     * @throws IllegalArgumentException if key is empty or null
+     * @throws IllegalArgumentException if {@code key} is empty or null
      */
     public static HashFunction hmacSha512(final byte[] key) {
         return GuavaHashFunction.wrap(com.google.common.hash.Hashing.hmacSha512(key));
@@ -635,11 +636,11 @@ public final class Hashing {
      * Returns a hash function that computes its hash code by concatenating the hash codes
      * of the underlying hash functions in the provided iterable. This can be useful for
      * generating hash codes of specific lengths or combining multiple hash algorithms.
-     * 
+     *
      * <p>The resulting hash function will have a bit length equal to the sum of the bit
      * lengths of all input functions. The hash codes are concatenated in the order the
      * functions appear in the iterable.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Create a 1024-bit hash function
@@ -650,9 +651,9 @@ public final class Hashing {
      * HashFunction hash1024 = Hashing.concatenating(functions);
      * }</pre>
      *
-     * @param hashFunctions an iterable of hash functions to concatenate
+     * @param hashFunctions an iterable of hash functions to concatenate (must not be empty)
      * @return a hash function that concatenates the results of all input functions
-     * @throws IllegalArgumentException if the iterable is empty
+     * @throws IllegalArgumentException if {@code hashFunctions} is empty
      */
     public static HashFunction concatenating(final Iterable<HashFunction> hashFunctions) {
         final Iterator<HashFunction> iter = hashFunctions.iterator();
@@ -669,7 +670,7 @@ public final class Hashing {
      * Combines two hash codes in an ordered fashion to produce a new hash code with the
      * same bit length as the input hash codes. The combination is order-dependent, meaning
      * that {@code combineOrdered(a, b)} is different from {@code combineOrdered(b, a)}.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * HashCode hash1 = Hashing.sha256().hash("first".getBytes());
@@ -677,8 +678,8 @@ public final class Hashing {
      * HashCode combined = Hashing.combineOrdered(hash1, hash2);
      * }</pre>
      *
-     * @param first the first hash code
-     * @param second the second hash code
+     * @param first the first hash code to combine
+     * @param second the second hash code to combine
      * @return a hash code combining the input hash codes in order
      * @throws IllegalArgumentException if the hash codes have different bit lengths
      * @see #combineOrdered(Iterable)
@@ -690,7 +691,7 @@ public final class Hashing {
     /**
      * Combines three hash codes in an ordered fashion to produce a new hash code with the
      * same bit length as the input hash codes.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * HashCode hash1 = Hashing.md5().hash("part1".getBytes());
@@ -699,9 +700,9 @@ public final class Hashing {
      * HashCode combined = Hashing.combineOrdered(hash1, hash2, hash3);
      * }</pre>
      *
-     * @param first the first hash code
-     * @param second the second hash code
-     * @param third the third hash code
+     * @param first the first hash code to combine
+     * @param second the second hash code to combine
+     * @param third the third hash code to combine
      * @return a hash code combining the input hash codes in order
      * @throws IllegalArgumentException if the hash codes have different bit lengths
      * @see #combineOrdered(Iterable)
@@ -742,7 +743,7 @@ public final class Hashing {
      * Combines two hash codes in an unordered fashion to produce a new hash code with the
      * same bit length as the input hash codes. The combination is order-independent, meaning
      * that {@code combineUnordered(a, b)} equals {@code combineUnordered(b, a)}.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * HashCode hash1 = Hashing.sha256().hash("item1".getBytes());
@@ -750,8 +751,8 @@ public final class Hashing {
      * HashCode combined = Hashing.combineUnordered(hash1, hash2);
      * }</pre>
      *
-     * @param first the first hash code
-     * @param second the second hash code
+     * @param first the first hash code to combine
+     * @param second the second hash code to combine
      * @return a hash code combining the input hash codes without regard to order
      * @throws IllegalArgumentException if the hash codes have different bit lengths
      * @see #combineUnordered(Iterable)
@@ -763,7 +764,7 @@ public final class Hashing {
     /**
      * Combines three hash codes in an unordered fashion to produce a new hash code with the
      * same bit length as the input hash codes.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * HashCode hash1 = Hashing.murmur3_128().hash("a".getBytes());
@@ -772,9 +773,9 @@ public final class Hashing {
      * HashCode combined = Hashing.combineUnordered(hash1, hash2, hash3);
      * }</pre>
      *
-     * @param first the first hash code
-     * @param second the second hash code
-     * @param third the third hash code
+     * @param first the first hash code to combine
+     * @param second the second hash code to combine
+     * @param third the third hash code to combine
      * @return a hash code combining the input hash codes without regard to order
      * @throws IllegalArgumentException if the hash codes have different bit lengths
      * @see #combineUnordered(Iterable)
@@ -816,21 +817,21 @@ public final class Hashing {
      * Assigns a "bucket" index in the range {@code [0, buckets)} to the given hash code
      * using consistent hashing. This method minimizes the need for remapping as the number
      * of buckets grows.
-     * 
+     *
      * <p>Specifically, {@code consistentHash(h, n)} equals:
      * <ul>
      *   <li>{@code n - 1}, with approximate probability {@code 1/n}</li>
      *   <li>{@code consistentHash(h, n - 1)}, otherwise (probability {@code 1 - 1/n})</li>
      * </ul>
-     * 
+     *
      * <p>This property makes consistent hashing ideal for distributed systems where you want
      * to minimize redistribution when adding or removing nodes. When the number of buckets
      * increases from n-1 to n, only approximately 1/n of the items need to be remapped.
-     * 
+     *
      * <p><b>Important limitation:</b> This algorithm assumes that buckets are added/removed
      * from the end. It's not suitable for scenarios where arbitrary buckets might be removed
      * (e.g., specific servers going offline in a cluster).
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * HashCode itemHash = Hashing.sha256().hash("user123".getBytes());
@@ -840,7 +841,7 @@ public final class Hashing {
      * }</pre>
      *
      * @param hashCode the hash code to assign to a bucket
-     * @param buckets the number of buckets (must be positive)
+     * @param buckets the number of buckets available (must be positive)
      * @return a bucket index in the range {@code [0, buckets)}
      * @throws IllegalArgumentException if {@code buckets} is not positive
      * @see <a href="http://en.wikipedia.org/wiki/Consistent_hashing">Consistent hashing on Wikipedia</a>
@@ -853,11 +854,11 @@ public final class Hashing {
      * Assigns a "bucket" index in the range {@code [0, buckets)} to the given long value
      * using consistent hashing. This is a convenience method equivalent to
      * {@code consistentHash(HashCode.fromLong(input), buckets)}.
-     * 
+     *
      * <p>This method provides the same consistent hashing properties as
      * {@link #consistentHash(HashCode, int)}, minimizing redistribution when the number
      * of buckets changes.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * long userId = 12345L;
@@ -867,7 +868,7 @@ public final class Hashing {
      * }</pre>
      *
      * @param input the input value to assign to a bucket
-     * @param buckets the number of buckets (must be positive)
+     * @param buckets the number of buckets available (must be positive)
      * @return a bucket index in the range {@code [0, buckets)}
      * @throws IllegalArgumentException if {@code buckets} is not positive
      * @see #consistentHash(HashCode, int)

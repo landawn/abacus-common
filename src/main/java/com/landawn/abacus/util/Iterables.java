@@ -61,46 +61,262 @@ import com.landawn.abacus.util.u.OptionalLong;
 import com.landawn.abacus.util.u.OptionalShort;
 
 /**
- * <p>
- * Note: This class includes codes copied from Apache Commons Lang, Google Guava and other open source projects under the Apache License 2.0.
- * The methods copied from other libraries/frameworks/projects may be modified in this class.
- * </p>
+ * A comprehensive utility class providing an extensive collection of static methods for iterable operations,
+ * transformations, aggregations, and manipulations. This class serves as the primary iterable utility facade
+ * in the Abacus library, offering null-safe, performance-optimized operations for all types of Iterable
+ * collections with a focus on Optional-based return types and functional programming patterns.
  *
+ * <p>The {@code Iterables} class is designed as a final utility class that provides a complete toolkit
+ * for iterable processing including filtering, mapping, reducing, searching, sorting, and statistical
+ * operations. All methods are static, thread-safe, and designed to handle edge cases gracefully while
+ * maintaining optimal performance for large-scale data processing.</p>
  *
- * <p>
- * When to throw exception? It's designed to avoid throwing any unnecessary
- * exception if the contract defined by method is not broken. For example, if
- * user tries to reverse a {@code null} or empty String. The input String will be
- * returned. But exception will be thrown if try to add an element to a {@code null} Object array or collection.
+ * <p><b>Key Features:</b>
+ * <ul>
+ *   <li><b>Optional-Based Returns:</b> Most methods return Optional types for null-safe value handling</li>
+ *   <li><b>Comprehensive Operations:</b> Complete set of functional operations for iterables</li>
+ *   <li><b>Null-Safe Design:</b> All methods handle null inputs gracefully without throwing exceptions</li>
+ *   <li><b>Performance Optimized:</b> Efficient algorithms with minimal object allocation</li>
+ *   <li><b>Statistical Functions:</b> Mathematical operations like sum, average, min, max, median</li>
+ *   <li><b>Functional Programming:</b> Support for map, filter, reduce, and other functional patterns</li>
+ *   <li><b>Type Safety:</b> Generic methods with compile-time type checking</li>
+ *   <li><b>Stream Integration:</b> Seamless integration with Java Stream API patterns</li>
+ * </ul>
  *
- * <br />
- * An empty String/Array/Collection/Map/Iterator/Iterable/InputStream/Reader will always be a preferred choice than a {@code null} for the return value of a method.
+ * <p><b>Core Functional Categories:</b>
+ * <ul>
+ *   <li><b>Aggregation Operations:</b> sum, average, min, max, count, median for various number types</li>
+ *   <li><b>Search Operations:</b> find, findFirst, findLast, contains, indexOf with Optional returns</li>
+ *   <li><b>Transformation Operations:</b> map, flatMap, filter, distinct, reverse, shuffle</li>
+ *   <li><b>Reduction Operations:</b> reduce operations with initial values and accumulators</li>
+ *   <li><b>Comparison Operations:</b> equals, compare, isSubset, intersection, union, difference</li>
+ *   <li><b>Validation Operations:</b> isEmpty, isNotEmpty, allMatch, anyMatch, noneMatch</li>
+ *   <li><b>Conversion Operations:</b> toArray, toList, toSet, toMap with various collection types</li>
+ *   <li><b>Partitioning Operations:</b> partition, groupBy, split with predicate-based logic</li>
+ * </ul>
  *
- * <br />
- * The methods in this class should only read the input {@code Collection/Array/Iterator} parameters, not modify them.
+ * <p><b>Design Philosophy:</b>
+ * <ul>
+ *   <li><b>Optional First:</b> Methods prefer returning Optional types over element types to handle
+ *       empty results gracefully and avoid null pointer exceptions</li>
+ *   <li><b>Null Safety:</b> Methods handle {@code null} inputs gracefully, typically returning
+ *       empty Optional or sensible defaults rather than throwing exceptions</li>
+ *   <li><b>Read-Only Operations:</b> Methods only read input parameters without modifying them</li>
+ *   <li><b>Exception Minimization:</b> Exceptions are thrown only when method contracts are violated,
+ *       not for edge cases like empty collections</li>
+ *   <li><b>Performance First:</b> Optimized algorithms with lazy evaluation where appropriate</li>
+ * </ul>
  *
- * <br />
- * The input parameters of most methods in this class should be {@code Iterable/Array}, instead of {@code Collection/Array}.
- * The returned type of most methods in this class should be a type of {@code Optional}, instead of element type of the input {@code Collection/Array}.
- * This class is a utility class, which is designed to extend the methods in {@code CommonUtil/N} class for handling empty input {@code Collection/Array/Iterator/Iterable} parameters or result.
- * </p>
+ * <p><b>Usage Examples:</b></p>
+ * <pre>{@code
+ * // Statistical operations with Optional returns
+ * List<Integer> numbers = Arrays.asList(1, 2, 3, 4, 5);
+ * OptionalDouble average = Iterables.average(numbers);        // OptionalDouble[3.0]
+ * OptionalInt max = Iterables.max(numbers);                   // OptionalInt[5]
+ * OptionalLong sum = Iterables.sumToLong(numbers);           // OptionalLong[15]
  *
- * @see com.landawn.abacus.util.Comparators
- * @see com.landawn.abacus.util.Fn
- * @see com.landawn.abacus.util.Fnn
- * @see com.landawn.abacus.util.Array
- * @see com.landawn.abacus.util.CommonUtil
+ * // Search operations with null safety
+ * List<String> names = Arrays.asList("Alice", "Bob", "Charlie");
+ * Optional<String> found = Iterables.findFirst(names, s -> s.startsWith("B")); // Optional[Bob]
+ * Optional<String> notFound = Iterables.findFirst(names, s -> s.startsWith("X")); // Optional.empty()
+ *
+ * // Null-safe operations
+ * OptionalInt maxFromNull = Iterables.max((List<Integer>) null);  // OptionalInt.empty()
+ * boolean isEmpty = Iterables.isEmpty(null);                      // Returns true
+ *
+ * // Functional transformations
+ * List<String> words = Arrays.asList("hello", "world", "java");
+ * List<Integer> lengths = Iterables.map(words, String::length);   // [5, 5, 4]
+ * List<String> filtered = Iterables.filter(words, s -> s.length() > 4); // [hello, world]
+ *
+ * // Collection operations
+ * List<Integer> list1 = Arrays.asList(1, 2, 3);
+ * List<Integer> list2 = Arrays.asList(2, 3, 4);
+ * List<Integer> intersection = Iterables.intersection(list1, list2); // [2, 3]
+ * List<Integer> union = Iterables.union(list1, list2);              // [1, 2, 3, 4]
+ *
+ * // Validation and matching
+ * boolean allPositive = Iterables.allMatch(numbers, n -> n > 0);   // true
+ * boolean anyEven = Iterables.anyMatch(numbers, n -> n % 2 == 0);  // true
+ * boolean noneNegative = Iterables.noneMatch(numbers, n -> n < 0); // true
+ *
+ * // Conversion operations
+ * Integer[] array = Iterables.toArray(numbers, Integer.class);
+ * Set<Integer> set = Iterables.toSet(numbers);
+ * Map<Integer, String> map = Iterables.toMap(numbers, Object::toString);
+ * }</pre>
+ *
+ * <p><b>Optional-Based Return Types:</b>
+ * <ul>
+ *   <li><b>Primitive Optionals:</b> {@code OptionalInt}, {@code OptionalLong}, {@code OptionalDouble}</li>
+ *   <li><b>Object Optional:</b> {@code Optional<T>} for object types</li>
+ *   <li><b>Specialized Optionals:</b> {@code OptionalByte}, {@code OptionalChar}, {@code OptionalFloat}, etc.</li>
+ *   <li><b>Empty Handling:</b> All methods return empty Optional for null or empty inputs</li>
+ * </ul>
+ *
+ * <p><b>Statistical Operations:</b>
+ * <ul>
+ *   <li><b>Aggregation:</b> {@code sum()}, {@code average()}, {@code count()}, {@code median()}</li>
+ *   <li><b>Extremes:</b> {@code min()}, {@code max()}, {@code minBy()}, {@code maxBy()}</li>
+ *   <li><b>Type-Specific:</b> Specialized methods for int, long, double, BigInteger, BigDecimal</li>
+ *   <li><b>Custom Extractors:</b> Support for ToIntFunction, ToLongFunction, ToDoubleFunction</li>
+ * </ul>
+ *
+ * <p><b>Functional Operations:</b>
+ * <ul>
+ *   <li><b>Mapping:</b> {@code map()}, {@code flatMap()}, {@code mapToInt()}, {@code mapToLong()}</li>
+ *   <li><b>Filtering:</b> {@code filter()}, {@code filterNot()}, {@code distinct()}</li>
+ *   <li><b>Reduction:</b> {@code reduce()}, {@code reduceLeft()}, {@code reduceRight()}</li>
+ *   <li><b>Transformation:</b> {@code reverse()}, {@code shuffle()}, {@code sort()}</li>
+ * </ul>
+ *
+ * <p><b>Performance Characteristics:</b>
+ * <ul>
+ *   <li><b>Lazy Evaluation:</b> Operations are performed only when necessary</li>
+ *   <li><b>Memory Efficient:</b> Minimal object allocation and copying</li>
+ *   <li><b>Iterator-Based:</b> Efficient iteration patterns optimized for different collection types</li>
+ *   <li><b>Short-Circuit Operations:</b> Early termination for operations like findFirst, anyMatch</li>
+ *   <li><b>Algorithm Selection:</b> Optimal algorithms chosen based on collection type and size</li>
+ * </ul>
+ *
+ * <p><b>Thread Safety:</b>
+ * <ul>
+ *   <li><b>Stateless Design:</b> All static methods are stateless and thread-safe</li>
+ *   <li><b>Immutable Operations:</b> Methods create new collections rather than modifying inputs</li>
+ *   <li><b>No Shared State:</b> No static mutable fields that could cause race conditions</li>
+ *   <li><b>Concurrent Access:</b> Safe for concurrent access from multiple threads</li>
+ * </ul>
+ *
+ * <p><b>Integration with Java Collections:</b>
+ * <ul>
+ *   <li><b>Iterable Compatibility:</b> Works with all Java Collection types</li>
+ *   <li><b>Stream API Alignment:</b> Similar patterns to Java 8+ Stream operations</li>
+ *   <li><b>Collection Factory Methods:</b> Integration with collection creation utilities</li>
+ *   <li><b>Functional Interface Support:</b> Full support for standard functional interfaces</li>
+ * </ul>
+ *
+ * <p><b>Error Handling Strategy:</b>
+ * <ul>
+ *   <li><b>Graceful Degradation:</b> Methods handle edge cases gracefully without exceptions</li>
+ *   <li><b>Null Tolerance:</b> Comprehensive null input handling throughout the API</li>
+ *   <li><b>Empty Collection Support:</b> Proper handling of empty collections in all operations</li>
+ *   <li><b>Optional Returns:</b> Use of Optional types to avoid null return values</li>
+ * </ul>
+ *
+ * <p><b>Best Practices:</b>
+ * <ul>
+ *   <li>Use Optional-returning methods to avoid null pointer exceptions</li>
+ *   <li>Prefer Iterables utilities over manual iteration for complex operations</li>
+ *   <li>Leverage the null-safe design for robust code</li>
+ *   <li>Use appropriate functional interfaces for transformation operations</li>
+ *   <li>Take advantage of the statistical functions for data analysis</li>
+ *   <li>Use validation methods before processing collections</li>
+ * </ul>
+ *
+ * <p><b>Performance Tips:</b>
+ * <ul>
+ *   <li>Use appropriate collection types for input data structure</li>
+ *   <li>Consider the cost of conversion operations for large collections</li>
+ *   <li>Leverage short-circuit operations for better performance</li>
+ *   <li>Use primitive-specific methods when working with numeric data</li>
+ *   <li>Prefer lazy evaluation patterns for chained operations</li>
+ * </ul>
+ *
+ * <p><b>Common Patterns:</b>
+ * <ul>
+ *   <li><b>Safe Aggregation:</b> {@code OptionalDouble avg = Iterables.average(numbers);}</li>
+ *   <li><b>Null-Safe Search:</b> {@code Optional<T> result = Iterables.findFirst(collection, predicate);}</li>
+ *   <li><b>Validation:</b> {@code if (Iterables.isNotEmpty(collection)) { ... }}</li>
+ *   <li><b>Transformation:</b> {@code List<R> result = Iterables.map(input, mapper);}</li>
+ * </ul>
+ *
+ * <p><b>Related Utility Classes:</b>
+ * <ul>
+ *   <li><b>{@link com.landawn.abacus.util.N}:</b> General utility class with collection operations</li>
+ *   <li><b>{@link com.landawn.abacus.util.Iterators}:</b> Iterator-specific utility operations</li>
+ *   <li><b>{@link com.landawn.abacus.util.CommonUtil}:</b> Base utility operations</li>
+ *   <li><b>{@link com.landawn.abacus.util.stream.Stream}:</b> Stream-based processing utilities</li>
+ *   <li><b>{@link com.landawn.abacus.util.Maps}:</b> Map-specific utilities and operations</li>
+ *   <li><b>{@link com.landawn.abacus.util.Array}:</b> Array manipulation utilities</li>
+ *   <li><b>{@link java.util.Collections}:</b> Core Java collection utilities</li>
+ *   <li><b>{@link java.util.stream.Stream}:</b> Java 8+ Stream API</li>
+ * </ul>
+ *
+ * <p><b>Example: Data Analysis Pipeline</b>
+ * <pre>{@code
+ * // Complete data analysis example
+ * List<Double> salesData = Arrays.asList(1200.50, 1450.75, 980.25, 1350.00, null, 1600.25);
+ *
+ * // Statistical analysis with null safety
+ * OptionalDouble average = Iterables.average(salesData);  // Handles null values
+ * OptionalDouble max = Iterables.max(salesData);
+ * OptionalDouble min = Iterables.min(salesData);
+ * OptionalLong count = Iterables.count(salesData);
+ *
+ * // Filtering and transformation
+ * List<Double> validSales = Iterables.filter(salesData, Objects::nonNull);
+ * List<Double> highSales = Iterables.filter(validSales, sale -> sale > 1300.0);
+ * List<String> formattedSales = Iterables.map(highSales, sale -> String.format("$%.2f", sale));
+ *
+ * // Validation and aggregation
+ * boolean hasHighSales = Iterables.anyMatch(validSales, sale -> sale > 1500.0);
+ * boolean allPositive = Iterables.allMatch(validSales, sale -> sale > 0.0);
+ *
+ * // Partitioning for analysis
+ * Map<Boolean, List<Double>> partitioned = Iterables.partition(validSales, sale -> sale > 1300.0);
+ * List<Double> premium = partitioned.get(true);
+ * List<Double> standard = partitioned.get(false);
+ *
+ * // Summary statistics
+ * OptionalDouble premiumAvg = Iterables.average(premium);
+ * OptionalDouble standardAvg = Iterables.average(standard);
+ * }</pre>
+ *
+ * <p><b>Example: Collection Operations</b>
+ * <pre>{@code
+ * // Collection manipulation and analysis
+ * List<String> categories = Arrays.asList("Electronics", "Books", "Clothing", "Electronics", "Books");
+ * List<Integer> prices = Arrays.asList(299, 25, 79, 399, 35);
+ *
+ * // Unique operations
+ * List<String> uniqueCategories = Iterables.distinct(categories);
+ * Set<String> categorySet = Iterables.toSet(categories);
+ *
+ * // Finding operations with Optional safety
+ * Optional<String> expensiveCategory = Iterables.findFirst(categories, cat -> 
+ *     Iterables.max(prices).orElse(0) > 300);
+ *
+ * // Indexing and position
+ * OptionalInt electronicsIndex = Iterables.indexOf(categories, "Electronics");
+ *
+ * // Comparison operations
+ * List<String> otherCategories = Arrays.asList("Electronics", "Books");
+ * boolean isSubset = Iterables.isSubset(otherCategories, categories);
+ * List<String> commonCategories = Iterables.intersection(categories, otherCategories);
+ *
+ * // Transformation and grouping
+ * Map<String, Long> categoryFrequency = Iterables.groupBy(categories, Function.identity())
+ *     .entrySet().stream()
+ *     .collect(Collectors.toMap(Map.Entry::getKey, e -> (long) e.getValue().size()));
+ * }</pre>
+ *
+ * <p><b>Attribution:</b>
+ * This class includes code adapted from Apache Commons Lang, Google Guava, and other open source
+ * projects under the Apache License 2.0. Methods from these libraries may have been modified for
+ * consistency, performance optimization, and enhanced null-safety within the Abacus framework.</p>
+ *
  * @see com.landawn.abacus.util.N
  * @see com.landawn.abacus.util.Iterators
- * @see com.landawn.abacus.util.Index
- * @see com.landawn.abacus.util.Median
+ * @see com.landawn.abacus.util.CommonUtil
+ * @see com.landawn.abacus.util.stream.Stream
  * @see com.landawn.abacus.util.Maps
+ * @see com.landawn.abacus.util.Array
  * @see com.landawn.abacus.util.Strings
  * @see com.landawn.abacus.util.Numbers
- * @see com.landawn.abacus.util.IOUtil
- * @see java.lang.reflect.Array
- * @see java.util.Arrays
+ * @see com.landawn.abacus.util.u.Optional
  * @see java.util.Collections
+ * @see java.util.stream.Stream
+ * @see java.lang.Iterable
  */
 public final class Iterables {
 
@@ -112,6 +328,13 @@ public final class Iterables {
     /**
      * Returns the first {@code non-null} element from the provided two elements.
      * If both are {@code null}, it returns {@code null}.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * String result = Iterables.firstNonNull("hello", "world"); // returns "hello"
+     * String result2 = Iterables.firstNonNull(null, "world"); // returns "world"
+     * String result3 = Iterables.firstNonNull(null, null); // returns null
+     * }</pre>
      *
      * @param <T> the type of the elements
      * @param a the first element to evaluate
@@ -129,6 +352,14 @@ public final class Iterables {
      * Returns the first {@code non-null} element from the provided three elements.
      * If all are {@code null}, it returns {@code null}.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * String result = Iterables.firstNonNull("hello", "world", "test"); // returns "hello"
+     * String result2 = Iterables.firstNonNull(null, "world", "test"); // returns "world"
+     * String result3 = Iterables.firstNonNull(null, null, "test"); // returns "test"
+     * String result4 = Iterables.firstNonNull(null, null, null); // returns null
+     * }</pre>
+     *
      * @param <T> the type of the elements
      * @param a the first element to evaluate
      * @param b the second element to evaluate
@@ -145,6 +376,13 @@ public final class Iterables {
     /**
      * Returns the first {@code non-null} element from the provided array of elements.
      * If the array is {@code null} or empty, or all elements are {@code null}, it returns {@code null}.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * String result = Iterables.firstNonNull("a", "b", "c"); // returns "a"
+     * String result2 = Iterables.firstNonNull(null, null, "c", "d"); // returns "c"
+     * String result3 = Iterables.firstNonNull(null, null, null); // returns null
+     * }</pre>
      *
      * @param <T> the type of the elements
      * @param a the array of elements to evaluate
@@ -172,6 +410,17 @@ public final class Iterables {
      * Returns the first {@code non-null} element from the provided iterable.
      * If the iterable is {@code null} or empty, or all elements are {@code null}, it returns {@code null}.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * List<String> list = Arrays.asList(null, null, "first", "second");
+     * String result = Iterables.firstNonNull(list);
+     * // result => "first"
+     *
+     * List<Integer> allNulls = Arrays.asList(null, null, null);
+     * Integer result2 = Iterables.firstNonNull(allNulls);
+     * // result2 => null
+     * }</pre>
+     *
      * @param <T> the type of the elements
      * @param c the iterable of elements to evaluate
      * @return the first {@code non-null} element, or {@code null} if the iterable is {@code null} or empty
@@ -197,6 +446,12 @@ public final class Iterables {
     /**
      * Returns the first {@code non-null} element from the provided iterator.
      * If the iterator is {@code null} or empty, or all elements are {@code null}, it returns {@code null}.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * List<String> list = Arrays.asList(null, "first", "second");
+     * String result = Iterables.firstNonNull(list.iterator()); // returns "first"
+     * }</pre>
      *
      * @param <T> the type of the elements
      * @param iter the iterator of elements to evaluate
@@ -225,6 +480,14 @@ public final class Iterables {
     /**
      * Returns the first {@code non-null} element of the given iterable if it is not empty, otherwise returns the specified default value.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * List<String> list = Arrays.asList(null, "first", "second");
+     * String result = Iterables.firstNonNullOrDefault(list, "default"); // returns "first"
+     * List<String> empty = Arrays.asList();
+     * String result2 = Iterables.firstNonNullOrDefault(empty, "default"); // returns "default"
+     * }</pre>
+     *
      * @param <T> the type of the elements in the iterable
      * @param c the iterable to check
      * @param defaultValue the default value to return if the iterable is empty
@@ -252,12 +515,18 @@ public final class Iterables {
     /**
      * Returns the first {@code non-null} element of the given iterator if it is not empty, otherwise returns the specified default value.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * List<String> list = Arrays.asList(null, "first", "second");
+     * String result = Iterables.firstNonNullOrDefault(list.iterator(), "default"); // returns "first"
+     * }</pre>
+     *
      * @param <T> the type of the elements in the iterator
      * @param iter the iterator to check
      * @param defaultValue the default value to return if the iterator is empty
      * @return the first {@code non-null} element of the given iterator if it is not empty, otherwise the specified default value
      * @see #firstNonNullOrDefault(Iterable, Object)
-     * @see N#firstNonNull(Iterator) 
+     * @see N#firstNonNull(Iterator)
      */
     @Beta
     public static <T> T firstNonNullOrDefault(final Iterator<? extends T> iter, T defaultValue) {
@@ -281,6 +550,13 @@ public final class Iterables {
      * Returns the last {@code non-null} element from the provided two elements.
      * If both are {@code null}, it returns {@code null}.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * String result = Iterables.lastNonNull("hello", "world"); // returns "world"
+     * String result2 = Iterables.lastNonNull("hello", null); // returns "hello"
+     * String result3 = Iterables.lastNonNull(null, null); // returns null
+     * }</pre>
+     *
      * @param <T> the type of the elements
      * @param a the first element to evaluate
      * @param b the second element to evaluate
@@ -296,6 +572,14 @@ public final class Iterables {
     /**
      * Returns the last {@code non-null} element from the provided three elements.
      * If all are {@code null}, it returns {@code null}.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * String result = Iterables.lastNonNull("hello", "world", "test"); // returns "test"
+     * String result2 = Iterables.lastNonNull("hello", "world", null); // returns "world"
+     * String result3 = Iterables.lastNonNull("hello", null, null); // returns "hello"
+     * String result4 = Iterables.lastNonNull(null, null, null); // returns null
+     * }</pre>
      *
      * @param <T> the type of the elements
      * @param a the first element to evaluate
@@ -313,6 +597,13 @@ public final class Iterables {
     /**
      * Returns the last {@code non-null} element from the provided array of elements.
      * If the array is {@code null} or empty, or all elements are {@code null}, it returns {@code null}.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * String result = Iterables.lastNonNull("a", "b", "c"); // returns "c"
+     * String result2 = Iterables.lastNonNull("a", "b", null); // returns "b"
+     * String result3 = Iterables.lastNonNull(null, null, null); // returns null
+     * }</pre>
      *
      * @param <T> the type of the elements
      * @param a the array of elements to evaluate
@@ -339,6 +630,14 @@ public final class Iterables {
     /**
      * Returns the last {@code non-null} element from the provided iterable.
      * If the iterable is {@code null} or empty, or all elements are {@code null}, it returns {@code null}.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * List<String> list = Arrays.asList("first", "second", null);
+     * String result = Iterables.lastNonNull(list); // returns "second"
+     * List<Integer> allNulls = Arrays.asList(null, null, null);
+     * Integer result2 = Iterables.lastNonNull(allNulls); // returns null
+     * }</pre>
      *
      * @param <T> the type of the elements
      * @param c the iterable of elements to evaluate
@@ -385,6 +684,12 @@ public final class Iterables {
     /**
      * Returns the last {@code non-null} element from the provided iterator.
      * If the iterator is {@code null} or empty, or all elements are {@code null}, it returns {@code null}.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * List<String> list = Arrays.asList("first", "second", null);
+     * String result = Iterables.lastNonNull(list.iterator()); // returns "second"
+     * }</pre>
      *
      * @param <T> the type of the elements
      * @param iter the iterator of elements to evaluate

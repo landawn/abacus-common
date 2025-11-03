@@ -73,7 +73,6 @@ import com.landawn.abacus.annotation.MayReturnNull;
  * }
  * }</pre>
  * 
- * @since 1.0
  * @see UncheckedException
  * @see SQLException
  * @see java.sql.SQLWarning
@@ -114,12 +113,12 @@ public class UncheckedSQLException extends UncheckedException {
     }
 
     /**
-     * Constructs a new {@code UncheckedSQLException} with a custom error message
-     * and the specified {@link SQLException}.
-     * 
+     * Constructs a new {@code UncheckedSQLException} with the specified detail message
+     * and {@link SQLException}.
+     *
      * <p>This constructor allows you to provide additional context about the database operation
      * that failed, while preserving all SQL-specific information from the original exception.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * try {
@@ -130,13 +129,13 @@ public class UncheckedSQLException extends UncheckedException {
      * }
      * }</pre>
      *
-     * @param errorMsg the detail message providing context about the SQL failure.
-     *                 The detail message is saved for later retrieval by the {@link #getMessage()} method.
+     * @param message the detail message providing context about the SQL failure.
+     *                The detail message is saved for later retrieval by the {@link #getMessage()} method.
      * @param cause the {@link SQLException} to wrap. Must not be {@code null}.
      * @throws IllegalArgumentException if cause is null
      */
-    public UncheckedSQLException(final String errorMsg, final SQLException cause) {
-        super(errorMsg, cause);
+    public UncheckedSQLException(final String message, final SQLException cause) {
+        super(message, cause);
         sqlException = cause;
     }
 
@@ -174,13 +173,13 @@ public class UncheckedSQLException extends UncheckedException {
 
     /**
      * Retrieves the vendor-specific error code from the underlying SQLException.
-     * <p>
-     * This method provides access to the database vendor-specific error code that identifies
+     *
+     * <p>This method provides access to the database vendor-specific error code that identifies
      * the specific error that occurred during a database operation. Unlike SQL state codes,
      * these error codes are specific to the database vendor (MySQL, Oracle, SQL Server, etc.)
-     * and provide more granular information about the exact nature of the error.
-     * <p>
-     * Common uses include:
+     * and provide more granular information about the exact nature of the error.</p>
+     *
+     * <p>Common uses include:</p>
      * <ul>
      *   <li>Identifying specific database constraint violations</li>
      *   <li>Detecting known database-specific errors for specialized handling</li>
@@ -197,7 +196,7 @@ public class UncheckedSQLException extends UncheckedException {
      *         // Handle duplicate key violation
      *     }
      *     // Log with both general and specific error information
-     *     logger.error("Database error: state={}, code={}", 
+     *     logger.error("Database error: state={}, code={}",
      *                  e.getSQLState(), e.getErrorCode());
      * }
      * }</pre>

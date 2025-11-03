@@ -20,7 +20,6 @@ import java.util.Map;
 import java.util.Set;
 
 import com.landawn.abacus.annotation.JsonXmlField;
-import com.landawn.abacus.annotation.MayReturnNull;
 
 /**
  * Abstract base class for parser configuration that provides common settings
@@ -63,7 +62,6 @@ public abstract class ParserConfig<C extends ParserConfig<C>> implements Cloneab
      *
      * @return the map of ignored properties by class, or {@code null} if none are configured
      */
-    @MayReturnNull
     public Map<Class<?>, Set<String>> getIgnoredPropNames() {
         return ignoredBeanPropNameMap;
     }
@@ -86,7 +84,6 @@ public abstract class ParserConfig<C extends ParserConfig<C>> implements Cloneab
      * @param cls the class to get ignored properties for
      * @return collection of ignored property names, or {@code null} if none are configured
      */
-    @MayReturnNull
     public Collection<String> getIgnoredPropNames(final Class<?> cls) {
         if (ignoredBeanPropNameMap == null) {
             return null; // NOSONAR

@@ -19,7 +19,6 @@ import java.io.IOException;
 import java.io.Writer;
 import java.util.Collection;
 
-import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.exception.UncheckedIOException;
 import com.landawn.abacus.parser.JSONDeserializationConfig;
 import com.landawn.abacus.parser.JSONDeserializationConfig.JDC;
@@ -40,9 +39,33 @@ import com.landawn.abacus.util.WD;
  * This handler supports JSON serialization and handles nested array elements
  * by delegating to their respective type handlers.
  *
+ * <p>ObjectArrayType instances are created by TypeFactory and manage the conversion
+ * between object arrays and their string representations (typically JSON format).
+ * The handler properly handles the element type for correct serialization.</p>
+ *
+ * <p><b>Usage Examples:</b></p>
+ * <pre>{@code
+ * // Get ObjectArrayType for String[]
+ * Type<String[]> stringArrayType = TypeFactory.getType(String[].class);
+ *
+ * // Serialize array to string
+ * String[] names = {"Alice", "Bob", "Charlie"};
+ * String json = stringArrayType.stringOf(names);
+ * // Result: ["Alice","Bob","Charlie"]
+ *
+ * // Deserialize string to array
+ * String jsonInput = "[\"David\",\"Eve\",\"Frank\"]";
+ * String[] parsedNames = stringArrayType.valueOf(jsonInput);
+ *
+ * // Works with complex element types
+ * Type<Integer[]> intArrayType = TypeFactory.getType(Integer[].class);
+ * Integer[] numbers = {1, 2, 3, 4, 5};
+ * String numbersJson = intArrayType.stringOf(numbers);
+ * }</pre>
+ *
  * @param <T> the component type of the array
  */
-public class ObjectArrayType<T> extends AbstractArrayType<T[]> { //NOSONAR
+class ObjectArrayType<T> extends AbstractArrayType<T[]> { //NOSONAR
 
     protected final Class<T[]> typeClass;
 
@@ -126,9 +149,7 @@ public class ObjectArrayType<T> extends AbstractArrayType<T[]> { //NOSONAR
      * @return JSON string representation, {@code null} if input is {@code null}, or "[]" for empty arrays
      * @throws UncheckedIOException if an I/O error occurs during serialization
      */
-    @MayReturnNull
     @Override
-
     public String stringOf(final T[] x) {
         if (x == null) {
             return null; // NOSONAR
@@ -175,9 +196,7 @@ public class ObjectArrayType<T> extends AbstractArrayType<T[]> { //NOSONAR
      * @param str the JSON string to parse
      * @return the parsed array, {@code null} if input is {@code null}, or empty array for empty representations
      */
-    @MayReturnNull
     @Override
-
     public T[] valueOf(final String str) {
         if (Strings.isEmpty(str) || Strings.isBlank(str)) {
             return null; // NOSONAR
@@ -297,9 +316,7 @@ public class ObjectArrayType<T> extends AbstractArrayType<T[]> { //NOSONAR
      * @param c the collection to convert
      * @return an array containing all elements from the collection, or {@code null} if the collection is null
      */
-    @MayReturnNull
     @Override
-
     public T[] collection2Array(final Collection<?> c) {
         if (c == null) {
             return null; // NOSONAR
@@ -390,7 +407,6 @@ public class ObjectArrayType<T> extends AbstractArrayType<T[]> { //NOSONAR
      * @return string representation of the array, {@code null} if input is {@code null}, or "[]" for empty arrays
      */
     @Override
-    @MayReturnNull
     public String toString(final Object[] x) {
         if (x == null) {
             return null; // NOSONAR
@@ -409,7 +425,6 @@ public class ObjectArrayType<T> extends AbstractArrayType<T[]> { //NOSONAR
      * @return deep string representation of the array, {@code null} if input is {@code null}, or "[]" for empty arrays
      */
     @Override
-    @MayReturnNull
     public String deepToString(final Object[] x) {
         if (x == null) {
             return null; // NOSONAR

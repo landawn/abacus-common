@@ -21,7 +21,7 @@ import com.landawn.abacus.util.Strings;
  * Type handler for {@link MutableLong} objects, providing serialization, deserialization,
  * and database interaction capabilities for mutable long wrapper objects.
  */
-public class MutableLongType extends NumberType<MutableLong> {
+class MutableLongType extends NumberType<MutableLong> {
 
     public static final String MUTABLE_LONG = MutableLong.class.getSimpleName();
 
@@ -44,7 +44,6 @@ public class MutableLongType extends NumberType<MutableLong> {
      *
      * @param x the MutableLong object to convert
      * @return the string representation of the long value, or {@code null} if the input is null
-     @MayReturnNull
      */
     @Override
     public String stringOf(final MutableLong x) {
@@ -57,7 +56,6 @@ public class MutableLongType extends NumberType<MutableLong> {
      * @param str the string to convert
      * @return a MutableLong containing the parsed long value, or {@code null} if the input string is empty or null
      * @throws NumberFormatException if the string cannot be parsed as a long
-     @MayReturnNull
      */
     @Override
     public MutableLong valueOf(final String str) {

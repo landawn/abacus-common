@@ -30,14 +30,205 @@ import java.util.function.IntFunction;
 import com.landawn.abacus.annotation.Beta;
 
 /**
- * The PrimitiveList is an abstract class that represents a list of primitive data types.
- * It provides a blueprint for classes that need to implement a list of primitives.
- * This class implements the RandomAccess and Serializable interfaces.
+ * An abstract base class that provides a comprehensive framework for implementing lists of primitive data types
+ * with high-performance operations and extensive functionality. This class serves as the foundation for all
+ * primitive list implementations in the abacus-common framework, offering optimized storage and operations that avoid
+ * the boxing overhead associated with standard Java collections containing primitive wrapper objects.
  *
- * @param <B> the boxed type of the primitive, for example, Integer for int, Double for double, etc.
- * @param <A> the array type of the primitive, for example, int[] for int, double[] for double, etc.
- * @param <L> the type of the list itself, used for methods that return the list. It must extend PrimitiveList.
+ * <p>PrimitiveList extends the concept of traditional collections by providing specialized implementations
+ * for primitive types (boolean, byte, char, short, int, long, float, double) with type-safe operations,
+ * memory-efficient storage, and performance-optimized algorithms. The class design follows the template
+ * method pattern, defining the contract and common functionality while allowing concrete implementations
+ * to optimize type-specific operations.</p>
  *
+ * <p><b>Key Features:</b>
+ * <ul>
+ *   <li><b>Zero-Boxing Overhead:</b> Direct primitive storage without wrapper object allocation</li>
+ *   <li><b>Memory Efficiency:</b> Compact array-based storage with intelligent capacity management</li>
+ *   <li><b>Type Safety:</b> Compile-time type checking with generic type parameters</li>
+ *   <li><b>Rich API:</b> Comprehensive set of operations including sorting, searching, and set operations</li>
+ *   <li><b>Performance Optimization:</b> Specialized algorithms optimized for primitive data types</li>
+ *   <li><b>Collection Integration:</b> Seamless interoperability with standard Java collections</li>
+ *   <li><b>Serialization Support:</b> Built-in serialization capabilities for persistence and transmission</li>
+ *   <li><b>Random Access:</b> O(1) element access by index through RandomAccess interface</li>
+ * </ul>
+ *
+ * <p><b>Generic Type Parameters:</b>
+ * <ul>
+ *   <li><b>B:</b> The boxed wrapper type (e.g., Integer for int, Double for double, Boolean for boolean)</li>
+ *   <li><b>A:</b> The primitive array type (e.g., int[] for int, double[] for double, boolean[] for boolean)</li>
+ *   <li><b>L:</b> The concrete list type extending this class (enabling fluent method chaining)</li>
+ * </ul>
+ *
+ * <p><b>Common Use Cases:</b>
+ * <ul>
+ *   <li><b>High-Performance Computing:</b> Numerical computations requiring minimal memory overhead</li>
+ *   <li><b>Large Dataset Processing:</b> Efficient storage and manipulation of primitive arrays</li>
+ *   <li><b>Mathematical Operations:</b> Vector and matrix operations with primitive data</li>
+ *   <li><b>Data Analysis:</b> Statistical computations on large numeric datasets</li>
+ *   <li><b>Game Development:</b> Coordinate systems, physics calculations, and rendering data</li>
+ *   <li><b>Financial Systems:</b> Price data, trading algorithms, and risk calculations</li>
+ *   <li><b>Scientific Computing:</b> Sensor data, experimental results, and simulations</li>
+ * </ul>
+ *
+ * <p><b>Usage Examples:</b></p>
+ * <pre>{@code
+ * // Creating and populating primitive lists
+ * IntList numbers = IntList.of(1, 2, 3, 4, 5);
+ * DoubleList prices = DoubleList.create();
+ * prices.addAll(new double[]{19.99, 29.99, 39.99});
+ *
+ * // High-performance operations without boxing
+ * int sum = numbers.sum();
+ * double average = prices.average().orElse(0.0);
+ * int max = numbers.max().orElse(Integer.MIN_VALUE);
+ *
+ * // Set operations for data analysis
+ * IntList set1 = IntList.of(1, 2, 3, 4);
+ * IntList set2 = IntList.of(3, 4, 5, 6);
+ * IntList intersection = set1.intersection(set2); // [3, 4]
+ * IntList difference = set1.difference(set2);     // [1, 2]
+ *
+ * // Efficient sorting and searching
+ * numbers.sort();
+ * boolean found = numbers.contains(3);
+ * int index = numbers.binarySearch(4);
+ *
+ * // Conversion to standard collections when needed
+ * List<Integer> boxedList = numbers.boxed();
+ * Set<Integer> uniqueValues = numbers.toSet();
+ * int[] primitiveArray = numbers.toArray();
+ * }</pre>
+ *
+ * <p><b>Core Operations Categories:</b>
+ * <ul>
+ *   <li><b>Basic Operations:</b> add, remove, get, set, size, isEmpty, clear</li>
+ *   <li><b>Bulk Operations:</b> addAll, removeAll, retainAll, containsAll</li>
+ *   <li><b>Search Operations:</b> contains, indexOf, lastIndexOf, binarySearch</li>
+ *   <li><b>Sorting Operations:</b> sort, reverseSort, isSorted</li>
+ *   <li><b>Set Operations:</b> intersection, difference, symmetricDifference, disjoint</li>
+ *   <li><b>Transformation:</b> reverse, rotate, shuffle, swap</li>
+ *   <li><b>Range Operations:</b> subList, deleteRange, replaceRange</li>
+ *   <li><b>Conversion:</b> toArray, boxed, toSet, toCollection</li>
+ * </ul>
+ *
+ * <p><b>Performance Characteristics:</b>
+ * <ul>
+ *   <li><b>Access:</b> O(1) random access by index</li>
+ *   <li><b>Insertion:</b> O(1) amortized for append, O(n) for middle insertion</li>
+ *   <li><b>Deletion:</b> O(1) for last element, O(n) for arbitrary position</li>
+ *   <li><b>Search:</b> O(n) linear search, O(log n) binary search on sorted data</li>
+ *   <li><b>Sorting:</b> O(n log n) using optimized primitive-specific algorithms</li>
+ *   <li><b>Set Operations:</b> O(n) to O(n²) depending on algorithm selection</li>
+ * </ul>
+ *
+ * <p><b>Memory Management:</b>
+ * <ul>
+ *   <li><b>Dynamic Capacity:</b> Automatic resizing with 1.75x growth factor</li>
+ *   <li><b>Memory Efficiency:</b> Primitive arrays avoid object header overhead</li>
+ *   <li><b>Capacity Optimization:</b> Intelligent initial sizing and trimming support</li>
+ *   <li><b>Maximum Size:</b> Limited by {@code MAX_ARRAY_SIZE} for platform compatibility</li>
+ * </ul>
+ *
+ * <p><b>Thread Safety:</b>
+ * <ul>
+ *   <li><b>Not Thread-Safe:</b> Implementations are not synchronized by default</li>
+ *   <li><b>External Synchronization:</b> Use Collections.synchronizedList() or manual synchronization</li>
+ *   <li><b>Concurrent Access:</b> Undefined behavior under concurrent modification</li>
+ *   <li><b>Read-Only Access:</b> Multiple threads can safely read without synchronization</li>
+ * </ul>
+ *
+ * <p><b>Serialization Support:</b>
+ * <ul>
+ *   <li><b>Serializable Interface:</b> Implements {@link java.io.Serializable} for persistence</li>
+ *   <li><b>Version Compatibility:</b> Stable serialVersionUID for version compatibility</li>
+ *   <li><b>Custom Serialization:</b> Subclasses may implement custom serialization logic</li>
+ *   <li><b>Cross-Platform:</b> Serialized form is platform-independent</li>
+ * </ul>
+ *
+ * <p><b>Integration with Java Collections Framework:</b>
+ * <ul>
+ *   <li><b>RandomAccess:</b> Indicates efficient random access capabilities</li>
+ *   <li><b>Boxed Conversion:</b> Seamless conversion to standard List&lt;B&gt;</li>
+ *   <li><b>Collection Compatibility:</b> Works with Collections utility methods</li>
+ *   <li><b>Stream Integration:</b> Can be converted to streams for functional processing</li>
+ * </ul>
+ *
+ * <p><b>Advanced Set Operations:</b>
+ * <ul>
+ *   <li><b>Mathematical Sets:</b> Union, intersection, difference, symmetric difference</li>
+ *   <li><b>Algorithm Selection:</b> Automatic choice between linear and hash-based algorithms</li>
+ *   <li><b>Disjoint Testing:</b> Efficient checking for common elements</li>
+ *   <li><b>Duplicate Handling:</b> Detection and removal of duplicate elements</li>
+ * </ul>
+ *
+ * <p><b>Range Operations:</b>
+ * <ul>
+ *   <li><b>Subrange Processing:</b> Operations on specified index ranges</li>
+ *   <li><b>Range Deletion:</b> Efficient bulk removal of elements</li>
+ *   <li><b>Range Replacement:</b> Bulk replacement with another list or array</li>
+ *   <li><b>Range Movement:</b> Efficient reordering of list segments</li>
+ * </ul>
+ *
+ * <p><b>Error Handling:</b>
+ * <ul>
+ *   <li><b>IndexOutOfBoundsException:</b> For invalid index access</li>
+ *   <li><b>NoSuchElementException:</b> For operations on empty lists</li>
+ *   <li><b>IllegalArgumentException:</b> For invalid method arguments</li>
+ *   <li><b>OutOfMemoryError:</b> For capacity exceeding available memory</li>
+ * </ul>
+ *
+ * <p><b>Capacity Management:</b>
+ * <ul>
+ *   <li><b>Initial Capacity:</b> Default capacity of 10 elements</li>
+ *   <li><b>Growth Strategy:</b> 1.75x expansion factor for balanced performance</li>
+ *   <li><b>Maximum Capacity:</b> Platform-specific maximum array size</li>
+ *   <li><b>Trimming:</b> Ability to reduce capacity to actual size</li>
+ * </ul>
+ *
+ * <p><b>Comparison with Standard Collections:</b>
+ * <ul>
+ *   <li><b>Performance:</b> Significantly faster for primitive operations</li>
+ *   <li><b>Memory Usage:</b> 2-4x less memory consumption than boxed collections</li>
+ *   <li><b>Type Safety:</b> Compile-time prevention of type mixing</li>
+ *   <li><b>Functionality:</b> Additional primitive-specific operations</li>
+ * </ul>
+ *
+ * <p><b>Best Practices:</b>
+ * <ul>
+ *   <li>Use primitive lists when working primarily with primitive data</li>
+ *   <li>Consider initial capacity hints for known data sizes</li>
+ *   <li>Convert to boxed collections only when necessary for API compatibility</li>
+ *   <li>Use set operations instead of manual loops for better performance</li>
+ *   <li>Leverage sorting for improved search performance</li>
+ * </ul>
+ *
+ * <p><b>Extension Points:</b>
+ * <ul>
+ *   <li><b>Custom Suppliers:</b> Override create*Supplier() methods for custom collection types</li>
+ *   <li><b>Algorithm Tuning:</b> Override needToSet() for custom algorithm selection heuristics</li>
+ *   <li><b>Validation Logic:</b> Extend range checking and validation methods</li>
+ *   <li><b>Serialization:</b> Implement custom serialization for specific requirements</li>
+ * </ul>
+ *
+ * <p><b>Related Classes:</b>
+ * <ul>
+ *   <li><b>Concrete Implementations:</b> IntList, DoubleList, LongList, BooleanList, etc.</li>
+ *   <li><b>Utility Classes:</b> Primitive arrays utilities and conversion helpers</li>
+ *   <li><b>Collection Framework:</b> Integration with standard Java collections</li>
+ * </ul>
+ *
+ * @param <B> the boxed wrapper type corresponding to the primitive type
+ *            (e.g., Integer for int, Double for double, Boolean for boolean)
+ * @param <A> the primitive array type for bulk operations
+ *            (e.g., int[] for int, double[] for double, boolean[] for boolean)
+ * @param <L> the concrete list type extending this class, enabling type-safe method chaining
+ *            and fluent API patterns (e.g., IntList for int primitives)
+ *
+ * @see RandomAccess
+ * @see java.io.Serializable
+ * @see java.util.List
+ * @see java.util.Collection
  */
 public abstract class PrimitiveList<B, A, L extends PrimitiveList<B, A, L>> implements RandomAccess, java.io.Serializable { // Iterable<B>, // reference to notEmpty is ambiguous both methods notEmpty(java.lang.Iterable<?>)
 

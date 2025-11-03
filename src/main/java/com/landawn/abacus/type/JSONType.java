@@ -28,7 +28,7 @@ import com.landawn.abacus.util.WD;
  * @param <T> the type of object this JSONType handles
  */
 @SuppressWarnings("java:S2160")
-public class JSONType<T> extends AbstractType<T> {
+class JSONType<T> extends AbstractType<T> {
 
     public static final String JSON = "JSON";
 
@@ -89,7 +89,6 @@ public class JSONType<T> extends AbstractType<T> {
      *
      * @param x the object to convert to JSON string
      * @return the JSON string representation of the object, or {@code null} if the input is null
-     @MayReturnNull
      */
     @Override
     public String stringOf(final T x) {
@@ -104,7 +103,6 @@ public class JSONType<T> extends AbstractType<T> {
      *
      * @param str the JSON string to parse
      * @return the deserialized object of type T, or {@code null} if the string is empty or null
-     @MayReturnNull
      */
     @Override
     public T valueOf(final String str) {

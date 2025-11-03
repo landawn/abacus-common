@@ -11,7 +11,6 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-
 package com.landawn.abacus.util.function;
 
 import com.landawn.abacus.util.Throwables;
@@ -24,7 +23,7 @@ import com.landawn.abacus.util.Throwables;
  * <p>This interface extends both {@link Throwables.LongBinaryOperator} with
  * {@link RuntimeException} and {@link java.util.function.LongBinaryOperator},
  * providing compatibility with the Java standard library while supporting the
- * Abacus framework's exception handling capabilities.
+ * abacus-common framework's exception handling capabilities.
  *
  * <p>This is a functional interface whose functional method is
  * {@link #applyAsLong(long, long)}.
@@ -36,11 +35,9 @@ import com.landawn.abacus.util.Throwables;
  * @see java.util.function.BinaryOperator
  * @see java.util.function.LongBinaryOperator
  * @see LongUnaryOperator
- * @since 1.8
  */
 @FunctionalInterface
 public interface LongBinaryOperator extends Throwables.LongBinaryOperator<RuntimeException>, java.util.function.LongBinaryOperator { //NOSONAR
-
     /**
      * Applies this operator to the given operands.
      *

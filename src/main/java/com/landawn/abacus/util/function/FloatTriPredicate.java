@@ -11,7 +11,6 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-
 package com.landawn.abacus.util.function;
 
 import com.landawn.abacus.util.Throwables;
@@ -19,24 +18,23 @@ import com.landawn.abacus.util.Throwables;
 /**
  * Represents a predicate (boolean-valued function) of three float-valued arguments.
  * This is a functional interface whose functional method is {@link #test(float, float, float)}.
- * 
+ *
  * <p>This is a primitive type specialization of predicate for three {@code float} arguments.
  * This interface is similar to {@link java.util.function.BiPredicate} but accepts three arguments
  * instead of two.</p>
- * 
- * @since 1.0
+ *
  * @see java.util.function.Predicate
  * @see java.util.function.BiPredicate
  * @see FloatPredicate
+ *
+ * <p>Refer to JDK API documentation at: <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html">https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a></p>
  */
 @FunctionalInterface
 public interface FloatTriPredicate extends Throwables.FloatTriPredicate<RuntimeException> { //NOSONAR
-
     /**
      * A predicate that always evaluates to {@code true} regardless of the input values.
      */
     FloatTriPredicate ALWAYS_TRUE = (a, b, c) -> true;
-
     /**
      * A predicate that always evaluates to {@code false} regardless of the input values.
      */
@@ -44,7 +42,7 @@ public interface FloatTriPredicate extends Throwables.FloatTriPredicate<RuntimeE
 
     /**
      * Evaluates this predicate on the given float arguments.
-     * 
+     *
      * <p>The implementation should define the condition under which the three float
      * arguments satisfy this predicate.</p>
      *
@@ -71,7 +69,7 @@ public interface FloatTriPredicate extends Throwables.FloatTriPredicate<RuntimeE
      * AND of this predicate and another. When evaluating the composed
      * predicate, if this predicate is {@code false}, then the {@code other}
      * predicate is not evaluated.
-     * 
+     *
      * <p>Any exceptions thrown during evaluation of either predicate are relayed
      * to the caller; if evaluation of this predicate throws an exception, the
      * {@code other} predicate will not be evaluated.</p>
@@ -89,7 +87,7 @@ public interface FloatTriPredicate extends Throwables.FloatTriPredicate<RuntimeE
      * OR of this predicate and another. When evaluating the composed
      * predicate, if this predicate is {@code true}, then the {@code other}
      * predicate is not evaluated.
-     * 
+     *
      * <p>Any exceptions thrown during evaluation of either predicate are relayed
      * to the caller; if evaluation of this predicate throws an exception, the
      * {@code other} predicate will not be evaluated.</p>

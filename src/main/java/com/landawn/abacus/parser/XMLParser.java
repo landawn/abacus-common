@@ -60,7 +60,6 @@ import org.w3c.dom.Node;
  * @see Parser
  * @see XMLSerializationConfig
  * @see XMLDeserializationConfig
- * @since 1.0
  */
 public interface XMLParser extends Parser<XMLSerializationConfig, XMLDeserializationConfig> {
 
@@ -106,7 +105,7 @@ public interface XMLParser extends Parser<XMLSerializationConfig, XMLDeserializa
      *
      * @param <T> the type of the target object
      * @param source the DOM node containing the XML data to deserialize; must not be {@code null}
-     * @param config the deserialization configuration to control parsing behavior; may be {@code null} to use defaults
+     * @param config the deserialization configuration to use (may be {@code null} for default behavior)
      * @param targetClass the class of the object to create; must not be {@code null}
      * @return the deserialized object of type {@code T}, never {@code null}
      * @throws IllegalArgumentException if source or targetClass is {@code null}
@@ -134,7 +133,7 @@ public interface XMLParser extends Parser<XMLSerializationConfig, XMLDeserializa
      *
      * @param <T> the type of the target object
      * @param source the input stream containing XML data to deserialize; must not be {@code null}
-     * @param config the deserialization configuration to control parsing behavior; may be {@code null} to use defaults
+     * @param config the deserialization configuration to use (may be {@code null} for default behavior)
      * @param nodeClasses mapping of XML element names to their corresponding Java classes; must not be {@code null}
      * @return the deserialized object of type {@code T}, or {@code null} if the stream is empty
      * @throws IllegalArgumentException if source or nodeClasses is {@code null}
@@ -165,7 +164,7 @@ public interface XMLParser extends Parser<XMLSerializationConfig, XMLDeserializa
      *
      * @param <T> the type of the target object
      * @param source the reader containing XML data to deserialize; must not be {@code null}
-     * @param config the deserialization configuration to control parsing behavior; may be {@code null} to use defaults
+     * @param config the deserialization configuration to use (may be {@code null} for default behavior)
      * @param nodeClasses mapping of XML element names to their corresponding Java classes; must not be {@code null}
      * @return the deserialized object of type {@code T}, or {@code null} if the reader is empty
      * @throws IllegalArgumentException if source or nodeClasses is {@code null}
@@ -198,7 +197,7 @@ public interface XMLParser extends Parser<XMLSerializationConfig, XMLDeserializa
      *
      * @param <T> the type of the target object
      * @param source the DOM node containing XML data to deserialize; must not be {@code null}
-     * @param config the deserialization configuration to control parsing behavior; may be {@code null} to use defaults
+     * @param config the deserialization configuration to use (may be {@code null} for default behavior)
      * @param nodeClasses mapping of XML element names to their corresponding Java classes; must not be {@code null}
      * @return the deserialized object of type {@code T}, or {@code null} if the node is empty
      * @throws IllegalArgumentException if source or nodeClasses is {@code null}

@@ -68,7 +68,6 @@ import jakarta.xml.bind.Unmarshaller;
  * Person restored = parser.deserialize(xml, null, Person.class);
  * }</pre>
  * 
- * @since 0.8
  * @see AbstractXMLParser
  * @see jakarta.xml.bind.JAXB
  */
@@ -97,15 +96,15 @@ final class JAXBParser extends AbstractXMLParser {
     }
 
     /**
-     * Serializes an object to XML string representation.
-     * 
+     * Serializes an object to a string representation.
+     *
      * <p>This method converts a Java object to its XML string representation using JAXB.
      * If the object is {@code null}, an empty string is returned. The object's class must be
      * properly annotated with JAXB annotations.</p>
-     * 
+     *
      * <p>Note: The <i>ignoredPropNames</i> configuration option is not supported by JAXB
      * and will throw a {@link ParseException} if specified.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Person person = new Person("Alice", 25);
@@ -113,11 +112,10 @@ final class JAXBParser extends AbstractXMLParser {
      * // Result: <?xml version="1.0"?><person><name>Alice</name><age>25</age></person>
      * }</pre>
      *
-     * @param obj the object to serialize
-     * @param config the XML serialization configuration (optional)
-     * @return the XML string representation of the object, or empty string if obj is null
+     * @param obj the object to serialize (may be {@code null} depending on implementation)
+     * @param config the serialization configuration to use (may be {@code null} for default behavior)
+     * @return the XML string representation of the serialized object, or empty string if obj is null
      * @throws ParseException if ignoredPropNames is specified in config or if JAXB marshalling fails
-     @MayReturnNull
      */
     @Override
     public String serialize(final Object obj, final XMLSerializationConfig config) {
@@ -137,11 +135,12 @@ final class JAXBParser extends AbstractXMLParser {
     }
 
     /**
-     * Serializes an object to an XML file.
-     * 
+     * Serializes an object to a file.
+     *
      * <p>This method serializes a Java object to XML and writes it to the specified file.
-     * If the file doesn't exist, it will be created. If it exists, it will be overwritten.</p>
-     * 
+     * The file will be created if it doesn't exist, or overwritten if it does.
+     * Parent directories must exist or an exception will be thrown.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Person person = new Person("Bob", 35);
@@ -149,10 +148,10 @@ final class JAXBParser extends AbstractXMLParser {
      * parser.serialize(person, null, outputFile);
      * }</pre>
      *
-     * @param obj the object to serialize
-     * @param config the XML serialization configuration (optional)
-     * @param output the file to write the XML to
-     * @throws UncheckedIOException if an I/O error occurs during file operations
+     * @param obj the object to serialize (may be {@code null} depending on implementation)
+     * @param config the serialization configuration to use (may be {@code null} for default behavior)
+     * @param output the output file to write to (must not be {@code null})
+     * @throws UncheckedIOException if an I/O error occurs during file writing
      * @throws ParseException if JAXB marshalling fails
      */
     @Override
@@ -175,12 +174,12 @@ final class JAXBParser extends AbstractXMLParser {
     }
 
     /**
-     * Serializes an object to an XML output stream.
-     * 
-     * <p>This method serializes a Java object to XML and writes it to the specified
-     * output stream. The stream is buffered internally for better performance but
-     * is not closed by this method.</p>
-     * 
+     * Serializes an object to an output stream.
+     *
+     * <p>The stream is not closed after writing, allowing the caller to manage stream
+     * lifecycle. The stream will be flushed after serialization. The stream is buffered
+     * internally for better performance.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Person person = new Person("Carol", 28);
@@ -189,10 +188,10 @@ final class JAXBParser extends AbstractXMLParser {
      * }
      * }</pre>
      *
-     * @param obj the object to serialize
-     * @param config the XML serialization configuration (optional)
-     * @param output the output stream to write the XML to
-     * @throws UncheckedIOException if an I/O error occurs during writing
+     * @param obj the object to serialize (may be {@code null} depending on implementation)
+     * @param config the serialization configuration to use (may be {@code null} for default behavior)
+     * @param output the output stream to write to (must not be {@code null})
+     * @throws UncheckedIOException if an I/O error occurs during stream writing
      * @throws ParseException if JAXB marshalling fails
      */
     @Override
@@ -211,12 +210,12 @@ final class JAXBParser extends AbstractXMLParser {
     }
 
     /**
-     * Serializes an object to an XML writer.
-     * 
-     * <p>This method serializes a Java object to XML and writes it to the specified
-     * writer. The writer is automatically buffered if it's not already a BufferedWriter.
-     * The writer is flushed but not closed by this method.</p>
-     * 
+     * Serializes an object to a writer.
+     *
+     * <p>The writer is not closed after writing, allowing the caller to manage writer
+     * lifecycle. The writer will be flushed after serialization. The writer is automatically
+     * buffered if it's not already a BufferedWriter.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Person person = new Person("Dave", 40);
@@ -225,9 +224,9 @@ final class JAXBParser extends AbstractXMLParser {
      * String xml = sw.toString();
      * }</pre>
      *
-     * @param obj the object to serialize
-     * @param config the XML serialization configuration (optional)
-     * @param output the writer to write the XML to
+     * @param obj the object to serialize (may be {@code null} depending on implementation)
+     * @param config the serialization configuration to use (may be {@code null} for default behavior)
+     * @param output the writer to write to (must not be {@code null})
      * @throws UncheckedIOException if an I/O error occurs during writing
      * @throws ParseException if JAXB marshalling fails
      */
@@ -291,23 +290,23 @@ final class JAXBParser extends AbstractXMLParser {
     }
 
     /**
-     * Deserializes an XML string to an object of the specified type.
-     * 
+     * Deserializes an object from a string representation.
+     *
      * <p>This method converts an XML string representation back to a Java object
      * using JAXB unmarshalling. The target class must be properly annotated with
      * JAXB annotations.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String xml = "<?xml version=\"1.0\"?><person><name>Eve</name><age>22</age></person>";
      * Person person = parser.deserialize(xml, null, Person.class);
      * }</pre>
      *
-     * @param <T> the type of the object to deserialize to
-     * @param source the XML string to deserialize
-     * @param config the XML deserialization configuration (optional)
-     * @param targetClass the class of the object to create
-     * @return the deserialized object, or the default value of targetClass if source is empty
+     * @param <T> the target type
+     * @param source the source string to deserialize from (must not be {@code null})
+     * @param config the deserialization configuration to use (may be {@code null} for default behavior)
+     * @param targetClass the class of the object to create (must not be {@code null})
+     * @return the deserialized object instance, or the default value of targetClass if source is empty
      * @throws ParseException if JAXB unmarshalling fails
      */
     @Override
@@ -326,23 +325,23 @@ final class JAXBParser extends AbstractXMLParser {
     }
 
     /**
-     * Deserializes an XML file to an object of the specified type.
-     * 
+     * Deserializes an object from a file.
+     *
      * <p>This method reads XML from a file and converts it to a Java object
      * using JAXB unmarshalling.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * File xmlFile = new File("person.xml");
      * Person person = parser.deserialize(xmlFile, null, Person.class);
      * }</pre>
      *
-     * @param <T> the type of the object to deserialize to
-     * @param source the XML file to read from
-     * @param config the XML deserialization configuration (optional)
-     * @param targetClass the class of the object to create
-     * @return the deserialized object
-     * @throws UncheckedIOException if an I/O error occurs reading the file
+     * @param <T> the target type
+     * @param source the source file to read from (must not be {@code null} and must exist)
+     * @param config the deserialization configuration to use (may be {@code null} for default behavior)
+     * @param targetClass the class of the object to create (must not be {@code null})
+     * @return the deserialized object instance
+     * @throws UncheckedIOException if an I/O error occurs or the file doesn't exist
      * @throws ParseException if JAXB unmarshalling fails
      */
     @Override
@@ -359,12 +358,11 @@ final class JAXBParser extends AbstractXMLParser {
     }
 
     /**
-     * Deserializes XML from an input stream to an object of the specified type.
-     * 
-     * <p>This method reads XML from an input stream and converts it to a Java object
-     * using JAXB unmarshalling. The stream is buffered internally for better performance
-     * but is not closed by this method.</p>
-     * 
+     * Deserializes an object from an input stream.
+     *
+     * <p>The stream is not closed after reading, allowing the caller to manage stream lifecycle.
+     * The stream is buffered internally for better performance.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * try (FileInputStream fis = new FileInputStream("person.xml")) {
@@ -372,11 +370,12 @@ final class JAXBParser extends AbstractXMLParser {
      * }
      * }</pre>
      *
-     * @param <T> the type of the object to deserialize to
-     * @param source the input stream containing XML data
-     * @param config the XML deserialization configuration (optional)
-     * @param targetClass the class of the object to create
-     * @return the deserialized object
+     * @param <T> the target type
+     * @param source the input stream to read from (must not be {@code null})
+     * @param config the deserialization configuration to use (may be {@code null} for default behavior)
+     * @param targetClass the class of the object to create (must not be {@code null})
+     * @return the deserialized object instance
+     * @throws UncheckedIOException if an I/O error occurs during stream reading
      * @throws ParseException if JAXB unmarshalling fails
      */
     @Override
@@ -391,22 +390,23 @@ final class JAXBParser extends AbstractXMLParser {
     }
 
     /**
-     * Deserializes XML from a reader to an object of the specified type.
-     * 
-     * <p>This method reads XML from a reader and converts it to a Java object
-     * using JAXB unmarshalling. The reader is not closed by this method.</p>
-     * 
+     * Deserializes an object from a reader.
+     *
+     * <p>The reader is not closed after reading, allowing the caller to manage reader lifecycle.
+     * The reader content is read and parsed according to the parser's format.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * StringReader sr = new StringReader(xmlString);
      * Person person = parser.deserialize(sr, null, Person.class);
      * }</pre>
      *
-     * @param <T> the type of the object to deserialize to
-     * @param source the reader containing XML data
-     * @param config the XML deserialization configuration (optional)
-     * @param targetClass the class of the object to create
-     * @return the deserialized object
+     * @param <T> the target type
+     * @param source the reader to read from (must not be {@code null})
+     * @param config the deserialization configuration to use (may be {@code null} for default behavior)
+     * @param targetClass the class of the object to create (must not be {@code null})
+     * @return the deserialized object instance
+     * @throws UncheckedIOException if an I/O error occurs during reading
      * @throws ParseException if JAXB unmarshalling fails
      */
     @Override

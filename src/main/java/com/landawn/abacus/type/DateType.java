@@ -20,7 +20,6 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.util.Dates;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Strings;
@@ -31,7 +30,7 @@ import com.landawn.abacus.util.Strings;
  * SQL Dates represent dates without time components (year, month, day only).
  * It supports conversion from various formats including timestamps, date strings, and the special "sysTime" value.
  */
-public class DateType extends AbstractDateType<Date> {
+class DateType extends AbstractDateType<Date> {
 
     public static final String DATE = Date.class.getSimpleName();
 
@@ -65,7 +64,6 @@ public class DateType extends AbstractDateType<Date> {
      * @return A SQL Date instance representing the input value, or {@code null} if input is null
      */
     @Override
-    @MayReturnNull
     public Date valueOf(final Object obj) {
         if (obj instanceof Number) {
             return new Date(((Number) obj).longValue());
@@ -87,7 +85,6 @@ public class DateType extends AbstractDateType<Date> {
      * @return A SQL Date instance parsed from the string, or {@code null} if input is null/empty
      */
     @Override
-    @MayReturnNull
     public Date valueOf(final String str) {
         return Strings.isEmpty(str) ? null : (N.equals(str, SYS_TIME) ? Dates.currentDate() : Dates.parseDate(str));
     }
@@ -103,9 +100,7 @@ public class DateType extends AbstractDateType<Date> {
      * @param len the number of characters to use
      * @return A SQL Date instance parsed from the character array, or {@code null} if input is {@code null} or empty
      */
-    @MayReturnNull
     @Override
-
     public Date valueOf(final char[] cbuf, final int offset, final int len) {
         if ((cbuf == null) || (len == 0)) {
             return null; // NOSONAR

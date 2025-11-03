@@ -48,6 +48,10 @@ import java.lang.annotation.Target;
  * 
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
+ * import java.util.Comparator;
+ * import java.util.List;
+ * import java.util.stream.Collectors;
+ *
  * public class StreamProcessor<T> {
  *     @TerminalOpTriggered
  *     public StreamProcessor<T> sorted(Comparator<T> comparator) {
@@ -76,7 +80,6 @@ import java.lang.annotation.Target;
  *   <li>Test with large datasets to ensure acceptable memory usage</li>
  * </ul>
  * 
- * @since 2018
  * @see IntermediateOp
  * @see TerminalOp
  * @see <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/stream/Stream.html">java.util.Stream</a>

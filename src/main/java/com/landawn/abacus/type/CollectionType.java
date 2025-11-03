@@ -22,7 +22,6 @@ import java.util.List;
 import java.util.Queue;
 import java.util.Set;
 
-import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.exception.UncheckedIOException;
 import com.landawn.abacus.parser.JSONDeserializationConfig;
 import com.landawn.abacus.parser.JSONDeserializationConfig.JDC;
@@ -40,11 +39,35 @@ import com.landawn.abacus.util.WD;
  * Type handler for Collection implementations including List, Set, Queue and their concrete implementations.
  * This class provides serialization and deserialization capabilities for collection types with generic element types.
  *
+ * <p>CollectionType instances are created by the TypeFactory and handle the conversion between collection
+ * objects and their string representations (typically JSON format). The handler preserves generic type
+ * information for proper serialization and deserialization of collection elements.</p>
+ *
+ * <p><b>Usage Examples:</b></p>
+ * <pre>{@code
+ * // Get CollectionType for List<String>
+ * Type<List<String>> listType = TypeFactory.getType("List<String>");
+ *
+ * // Serialize collection to string
+ * List<String> names = Arrays.asList("Alice", "Bob", "Charlie");
+ * String json = listType.stringOf(names);
+ * // Result: ["Alice","Bob","Charlie"]
+ *
+ * // Deserialize string to collection
+ * String jsonInput = "[\"David\",\"Eve\",\"Frank\"]";
+ * List<String> parsedNames = listType.valueOf(jsonInput);
+ *
+ * // Works with complex element types
+ * Type<Set<Integer>> setType = TypeFactory.getType("Set<Integer>");
+ * Set<Integer> numbers = new HashSet<>(Arrays.asList(1, 2, 3));
+ * String setJson = setType.stringOf(numbers);
+ * }</pre>
+ *
  * @param <E> the element type of the collection
  * @param <T> the collection type (must extend Collection&lt;E&gt;)
  */
 @SuppressWarnings("java:S2160")
-public class CollectionType<E, T extends Collection<E>> extends AbstractType<T> {
+class CollectionType<E, T extends Collection<E>> extends AbstractType<T> {
 
     private final String declaringName;
 
@@ -210,9 +233,7 @@ public class CollectionType<E, T extends Collection<E>> extends AbstractType<T> 
      * @param x the collection to convert to string
      * @return the string representation of the collection, or {@code null} if the input is null
      */
-    @MayReturnNull
     @Override
-
     public String stringOf(final T x) {
         if (x == null) {
             return null; // NOSONAR
@@ -260,9 +281,7 @@ public class CollectionType<E, T extends Collection<E>> extends AbstractType<T> 
      * @param str the string to parse
      * @return a new collection instance containing the parsed elements, or {@code null} if the input is null
      */
-    @MayReturnNull
     @Override
-
     public T valueOf(final String str) {
         if (Strings.isEmpty(str) || Strings.isBlank(str)) {
             return null; // NOSONAR

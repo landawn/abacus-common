@@ -11,10 +11,8 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-
 package com.landawn.abacus.util.function;
 
-import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.util.Throwables;
 
 /**
@@ -45,7 +43,7 @@ public interface ObjDoubleFunction<T, R> extends Throwables.ObjDoubleFunction<T,
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * ObjDoubleFunction<String, String> formatter = (str, value) -> 
+     * ObjDoubleFunction<String, String> formatter = (str, value) ->
      *     String.format("%s: %.2f", str, value);
      * String result = formatter.apply("Price", 19.99); // Returns "Price: 19.99"
      * }</pre>
@@ -55,7 +53,6 @@ public interface ObjDoubleFunction<T, R> extends Throwables.ObjDoubleFunction<T,
      * @return the function result of type R
      */
     @Override
-    @MayReturnNull
     R apply(T t, double u);
 
     /**
@@ -70,15 +67,15 @@ public interface ObjDoubleFunction<T, R> extends Throwables.ObjDoubleFunction<T,
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * ObjDoubleFunction<Product, Double> priceCalculator = (product, discount) -> 
-     *     product.getPrice() * (1 - discount);
-     * Function<Double, String> formatter = price -> 
+     * ObjDoubleFunction<String, Double> priceCalculator = (name, discount) ->
+     *     100.0 * (1 - discount); // base price $100
+     * Function<Double, String> formatter = price ->
      *     String.format("$%.2f", price);
-     * 
-     * ObjDoubleFunction<Product, String> discountedPriceFormatter = 
+     *
+     * ObjDoubleFunction<String, String> discountedPriceFormatter =
      *     priceCalculator.andThen(formatter);
-     * 
-     * String result = discountedPriceFormatter.apply(myProduct, 0.2); // 20% discount
+     *
+     * String result = discountedPriceFormatter.apply("Product", 0.2); // Returns "$80.00"
      * }</pre>
      *
      * @param <V> the type of output of the {@code after} function, and of the

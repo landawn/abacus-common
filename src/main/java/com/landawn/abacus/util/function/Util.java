@@ -11,7 +11,6 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-
 package com.landawn.abacus.util.function;
 
 import java.security.SecureRandom;
@@ -21,18 +20,18 @@ import java.util.Random;
  * Internal utility class providing secure random number generators for different primitive types.
  * This class is used by functional interfaces and suppliers to generate random values in a
  * cryptographically secure manner.
- * 
+ *
  * <p>Each primitive type has its own dedicated {@link SecureRandom} instance to ensure
  * thread-safe random value generation without contention. Using separate instances also
  * allows for better performance in multi-threaded environments.</p>
- * 
+ *
  * <p>The random generators in this class are used by:</p>
  * <ul>
  *   <li>Default supplier implementations for primitive types</li>
  *   <li>Random value generators in functional interfaces</li>
  *   <li>Test data generation utilities</li>
  * </ul>
- * 
+ *
  * <p><strong>Note:</strong> This class uses {@link SecureRandom} rather than {@link Random}
  * to ensure cryptographically strong random values, which is important for:</p>
  * <ul>
@@ -40,7 +39,6 @@ import java.util.Random;
  *   <li>Avoiding predictable patterns in generated values</li>
  *   <li>Better distribution of random values</li>
  * </ul>
- * 
  */
 final class Util {
     private Util() {
@@ -52,49 +50,41 @@ final class Util {
      * Used by BooleanSupplier implementations.
      */
     static final Random RAND_BOOLEAN = new SecureRandom();
-
     /**
      * Secure random generator for char values.
      * Used by CharSupplier implementations.
      */
     static final Random RAND_CHAR = new SecureRandom();
-
     /**
      * Secure random generator for byte values.
      * Used by ByteSupplier implementations.
      */
     static final Random RAND_BYTE = new SecureRandom();
-
     /**
      * Secure random generator for short values.
      * Used by ShortSupplier implementations.
      */
     static final Random RAND_SHORT = new SecureRandom();
-
     /**
      * Secure random generator for int values.
      * Used by IntSupplier implementations.
      */
     static final Random RAND_INT = new SecureRandom();
-
     /**
      * Secure random generator for long values.
      * Used by LongSupplier implementations.
      */
     static final Random RAND_LONG = new SecureRandom();
-
     /**
      * Secure random generator for float values.
      * Used by FloatSupplier implementations.
      */
     static final Random RAND_FLOAT = new SecureRandom();
-
     /**
      * Secure random generator for double values.
      * Used by DoubleSupplier implementations.
      */
     static final Random RAND_DOUBLE = new SecureRandom();
-
     /**
      * Modulo value for generating random char values.
      * Equals to Character.MAX_VALUE + 1 (65536).

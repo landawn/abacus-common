@@ -17,7 +17,6 @@ package com.landawn.abacus.type;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.util.Numbers;
 
 /**
@@ -25,7 +24,7 @@ import com.landawn.abacus.util.Numbers;
  * This class provides functionality to handle Long objects in database operations and type conversions.
  * It extends AbstractLongType to inherit common long type handling behavior.
  */
-public final class LongType extends AbstractLongType {
+final class LongType extends AbstractLongType {
 
     public static final String LONG = Long.class.getSimpleName();
 
@@ -34,9 +33,9 @@ public final class LongType extends AbstractLongType {
     }
 
     /**
-     * Returns the Class object representing the Long wrapper type.
+     * Returns the Class object representing the Long class.
      *
-     * @return The Class object for Long
+     * @return the Class object for Long.class
      */
     @SuppressWarnings({ "rawtypes", "unchecked" })
     @Override
@@ -46,9 +45,9 @@ public final class LongType extends AbstractLongType {
 
     /**
      * Indicates whether this type represents a primitive wrapper class.
-     * For LongType, this always returns {@code true} since Long is the wrapper class for the primitive long type.
+     * Long is the wrapper class for the primitive long type.
      *
-     * @return {@code true}, indicating that Long is a primitive wrapper
+     * @return {@code true}, indicating Long is a primitive wrapper
      */
     @Override
     public boolean isPrimitiveWrapper() {
@@ -57,21 +56,21 @@ public final class LongType extends AbstractLongType {
 
     /**
      * Retrieves a Long value from a ResultSet at the specified column index.
-     * The method handles various data types that can be converted to Long:
-     * - If the value is already a Long, it is returned directly
-     * - If the value is any other Number type, it is converted to Long
-     * - If the value is a String, it is parsed as a Long
-     * - If the value is NULL in the database, {@code null} is returned
+     * This method handles various numeric types in the database and converts them to Long.
      *
-     * @param rs The ResultSet containing the data
-     * @param columnIndex The column index (1-based) to retrieve the value from
-     * @return The Long value from the ResultSet, or {@code null} if the database value is NULL
-     * @throws SQLException if a database access error occurs or the column index is invalid
-     * @throws NumberFormatException if the value is a String that cannot be parsed as a Long
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Type<Long> type = TypeFactory.getType(Long.class);
+     * ResultSet rs = ...; // from SQL query
+     * Long userId = type.get(rs, 1); // retrieves Long from column 1
+     * }</pre>
+     *
+     * @param rs the ResultSet containing the data, must not be {@code null}
+     * @param columnIndex the column index (1-based) to retrieve the value from
+     * @return the Long value at the specified column, or {@code null} if the column value is SQL NULL
+     * @throws SQLException if a database access error occurs
      */
-    @MayReturnNull
     @Override
-
     public Long get(final ResultSet rs, final int columnIndex) throws SQLException {
         final Object ret = rs.getObject(columnIndex);
 
@@ -88,21 +87,21 @@ public final class LongType extends AbstractLongType {
 
     /**
      * Retrieves a Long value from a ResultSet using the specified column label.
-     * The method handles various data types that can be converted to Long:
-     * - If the value is already a Long, it is returned directly
-     * - If the value is any other Number type, it is converted to Long
-     * - If the value is a String, it is parsed as a Long
-     * - If the value is NULL in the database, {@code null} is returned
+     * This method handles various numeric types in the database and converts them to Long.
      *
-     * @param rs The ResultSet containing the data
-     * @param columnLabel The label of the column to retrieve the value from
-     * @return The Long value from the ResultSet, or {@code null} if the database value is NULL
-     * @throws SQLException if a database access error occurs or the column label is not found
-     * @throws NumberFormatException if the value is a String that cannot be parsed as a Long
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Type<Long> type = TypeFactory.getType(Long.class);
+     * ResultSet rs = ...; // from SQL query
+     * Long userId = type.get(rs, "user_id"); // retrieves Long from "user_id" column
+     * }</pre>
+     *
+     * @param rs the ResultSet containing the data, must not be {@code null}
+     * @param columnLabel the label of the column to retrieve the value from, must not be {@code null}
+     * @return the Long value in the specified column, or {@code null} if the column value is SQL NULL
+     * @throws SQLException if a database access error occurs
      */
-    @MayReturnNull
     @Override
-
     public Long get(final ResultSet rs, final String columnLabel) throws SQLException {
         final Object ret = rs.getObject(columnLabel);
 

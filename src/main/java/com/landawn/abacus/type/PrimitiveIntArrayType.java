@@ -17,7 +17,6 @@ package com.landawn.abacus.type;
 import java.io.IOException;
 import java.util.Collection;
 
-import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.parser.JSONXMLSerializationConfig;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.N;
@@ -25,7 +24,7 @@ import com.landawn.abacus.util.Strings;
 import com.landawn.abacus.util.WD;
 
 @SuppressWarnings("java:S2160")
-public final class PrimitiveIntArrayType extends AbstractPrimitiveArrayType<int[]> {
+final class PrimitiveIntArrayType extends AbstractPrimitiveArrayType<int[]> {
 
     public static final String INT_ARRAY = int[].class.getSimpleName();
 
@@ -43,8 +42,9 @@ public final class PrimitiveIntArrayType extends AbstractPrimitiveArrayType<int[
      * Returns the Class object representing the primitive int array type (int[].class).
      *
      * <p><b>Usage Examples:</b></p>
-     * PrimitiveIntArrayType type = new PrimitiveIntArrayType();
-     * Class&lt;int[]&gt; clazz = type.clazz();
+     * <pre>{@code
+     * Type<int[]> type = TypeFactory.getType(int[].class);
+     * Class<int[]> clazz = type.clazz();
      * // clazz equals int[].class
      * }</pre>
      *
@@ -60,8 +60,9 @@ public final class PrimitiveIntArrayType extends AbstractPrimitiveArrayType<int[
      * This method provides access to the Type representation of individual array elements.
      *
      * <p><b>Usage Examples:</b></p>
-     * PrimitiveIntArrayType type = new PrimitiveIntArrayType();
-     * Type&lt;Integer&gt; elemType = type.getElementType();
+     * <pre>{@code
+     * Type<int[]> type = TypeFactory.getType(int[].class);
+     * Type<Integer> elemType = type.getElementType();
      * // elemType can be used for element-level operations
      * }</pre>
      *
@@ -76,8 +77,9 @@ public final class PrimitiveIntArrayType extends AbstractPrimitiveArrayType<int[
      * Returns the parameter types associated with this array type.
      *
      * <p><b>Usage Examples:</b></p>
-     * PrimitiveIntArrayType type = new PrimitiveIntArrayType();
-     * Type&lt;Integer&gt;[] paramTypes = type.getParameterTypes();
+     * <pre>{@code
+     * Type<int[]> type = TypeFactory.getType(int[].class);
+     * Type<Integer>[] paramTypes = type.getParameterTypes();
      * // paramTypes[0] represents the element type
      * }</pre>
      *
@@ -95,7 +97,8 @@ public final class PrimitiveIntArrayType extends AbstractPrimitiveArrayType<int[
      * For example, an array {1, 2, 3} becomes "[1, 2, 3]".
      *
      * <p><b>Usage Examples:</b></p>
-     * PrimitiveIntArrayType type = new PrimitiveIntArrayType();
+     * <pre>{@code
+     * Type<int[]> type = TypeFactory.getType(int[].class);
      * int[] arr = {1, 2, 3};
      * String str = type.stringOf(arr);
      * // str equals "[1, 2, 3]"
@@ -111,9 +114,7 @@ public final class PrimitiveIntArrayType extends AbstractPrimitiveArrayType<int[
      * @return the string representation of the array, or {@code null} if the input array is {@code null}.
      *         Returns "[]" for empty arrays.
      */
-    @MayReturnNull
     @Override
-
     public String stringOf(final int[] x) {
         if (x == null) {
             return null; // NOSONAR
@@ -130,7 +131,8 @@ public final class PrimitiveIntArrayType extends AbstractPrimitiveArrayType<int[
      * For example, "[1, 2, 3]" will be parsed to an int array {1, 2, 3}.
      *
      * <p><b>Usage Examples:</b></p>
-     * PrimitiveIntArrayType type = new PrimitiveIntArrayType();
+     * <pre>{@code
+     * Type<int[]> type = TypeFactory.getType(int[].class);
      * int[] arr = type.valueOf("[1, 2, 3]");
      * // arr equals {1, 2, 3}
      *
@@ -146,7 +148,6 @@ public final class PrimitiveIntArrayType extends AbstractPrimitiveArrayType<int[
      *         Returns an empty array for empty string or "[]".
      * @throws NumberFormatException if any element in the string cannot be parsed as an integer
      */
-    @MayReturnNull
     @Override
     public int[] valueOf(final String str) {
         if (Strings.isEmpty(str) || Strings.isBlank(str)) {
@@ -174,7 +175,8 @@ public final class PrimitiveIntArrayType extends AbstractPrimitiveArrayType<int[
      * If the array is {@code null}, appends "null".
      *
      * <p><b>Usage Examples:</b></p>
-     * PrimitiveIntArrayType type = new PrimitiveIntArrayType();
+     * <pre>{@code
+     * Type<int[]> type = TypeFactory.getType(int[].class);
      * StringBuilder sb = new StringBuilder();
      * int[] arr = {10, 20, 30};
      * type.appendTo(sb, arr);
@@ -214,13 +216,14 @@ public final class PrimitiveIntArrayType extends AbstractPrimitiveArrayType<int[
      * The array is formatted as comma-separated values enclosed in square brackets.
      *
      * <p><b>Usage Examples:</b></p>
-     * PrimitiveIntArrayType type = new PrimitiveIntArrayType();
+     * <pre>{@code
+     * Type<int[]> type = TypeFactory.getType(int[].class);
      * CharacterWriter writer = new CharacterWriter();
      * int[] arr = {5, 10, 15};
      * type.writeCharacter(writer, arr, null);
      * // Writes: [5, 10, 15]
      *
-     * type.writeCharacter(writer, {@code null}, null);
+     * type.writeCharacter(writer, null, null);
      * // Writes: null
      * }</pre>
      *
@@ -253,8 +256,9 @@ public final class PrimitiveIntArrayType extends AbstractPrimitiveArrayType<int[
      * Each element in the collection is unboxed to its primitive int value.
      *
      * <p><b>Usage Examples:</b></p>
-     * PrimitiveIntArrayType type = new PrimitiveIntArrayType();
-     * List&lt;Integer&gt; list = Arrays.asList(1, 2, 3, 4);
+     * <pre>{@code
+     * Type<int[]> type = TypeFactory.getType(int[].class);
+     * List<Integer> list = Arrays.asList(1, 2, 3, 4);
      * int[] arr = type.collection2Array(list);
      * // arr equals {1, 2, 3, 4}
      *
@@ -267,7 +271,6 @@ public final class PrimitiveIntArrayType extends AbstractPrimitiveArrayType<int[
      *         or {@code null} if the input collection is null
      * @throws ClassCastException if any element in the collection is not an Integer
      */
-    @MayReturnNull
     @Override
     public int[] collection2Array(final Collection<?> c) {
         if (c == null) {
@@ -290,9 +293,10 @@ public final class PrimitiveIntArrayType extends AbstractPrimitiveArrayType<int[
      * Each primitive int value is autoboxed to an Integer object before being added.
      *
      * <p><b>Usage Examples:</b></p>
-     * PrimitiveIntArrayType type = new PrimitiveIntArrayType();
+     * <pre>{@code
+     * Type<int[]> type = TypeFactory.getType(int[].class);
      * int[] arr = {1, 2, 3};
-     * List&lt;Integer&gt; list = new ArrayList&lt;&gt;();
+     * List<Integer> list = new ArrayList<>();
      * type.array2Collection(arr, list);
      * // list now contains [1, 2, 3]
      *
@@ -322,7 +326,8 @@ public final class PrimitiveIntArrayType extends AbstractPrimitiveArrayType<int[
      * array hash code algorithm, which considers all elements in the array.
      *
      * <p><b>Usage Examples:</b></p>
-     * PrimitiveIntArrayType type = new PrimitiveIntArrayType();
+     * <pre>{@code
+     * Type<int[]> type = TypeFactory.getType(int[].class);
      * int[] arr1 = {1, 2, 3};
      * int[] arr2 = {1, 2, 3};
      * int hash1 = type.hashCode(arr1);
@@ -347,7 +352,8 @@ public final class PrimitiveIntArrayType extends AbstractPrimitiveArrayType<int[
      * elements in the same order. Two {@code null} references are considered equal.
      *
      * <p><b>Usage Examples:</b></p>
-     * PrimitiveIntArrayType type = new PrimitiveIntArrayType();
+     * <pre>{@code
+     * Type<int[]> type = TypeFactory.getType(int[].class);
      * int[] arr1 = {1, 2, 3};
      * int[] arr2 = {1, 2, 3};
      * int[] arr3 = {3, 2, 1};

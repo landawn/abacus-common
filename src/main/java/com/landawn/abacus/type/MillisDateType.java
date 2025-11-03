@@ -22,7 +22,7 @@ import java.sql.SQLException;
 
 import com.landawn.abacus.util.Dates;
 
-public class MillisDateType extends DateType {
+class MillisDateType extends DateType {
 
     public static final String MILLIS_DATE = "MillisDate";
 
@@ -37,7 +37,7 @@ public class MillisDateType extends DateType {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * MillisDateType type = new MillisDateType();
+     * Type<java.sql.Date> type = TypeFactory.getType(java.sql.Date.class);
      * ResultSet rs = ...; // obtained from database query
      *
      * // Column contains milliseconds value 1609459200000 (Jan 1, 2021)
@@ -53,7 +53,6 @@ public class MillisDateType extends DateType {
      * @param columnIndex The column index (1-based) to retrieve the value from
      * @return A Date object created from the milliseconds value, or {@code null} if the value is 0
      * @throws SQLException if a database access error occurs or the column index is invalid
-     @MayReturnNull
      */
     @Override
     public Date get(final ResultSet rs, final int columnIndex) throws SQLException {
@@ -69,7 +68,7 @@ public class MillisDateType extends DateType {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * MillisDateType type = new MillisDateType();
+     * Type<java.sql.Date> type = TypeFactory.getType(java.sql.Date.class);
      * ResultSet rs = ...; // obtained from database query
      *
      * // Column "created_date" contains milliseconds value 1609459200000
@@ -85,7 +84,6 @@ public class MillisDateType extends DateType {
      * @param columnLabel The label of the column to retrieve the value from
      * @return A Date object created from the milliseconds value, or {@code null} if the value is 0
      * @throws SQLException if a database access error occurs or the column label is not found
-     @MayReturnNull
      */
     @Override
     public Date get(final ResultSet rs, final String columnLabel) throws SQLException {
@@ -101,7 +99,7 @@ public class MillisDateType extends DateType {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * MillisDateType type = new MillisDateType();
+     * Type<java.sql.Date> type = TypeFactory.getType(java.sql.Date.class);
      * PreparedStatement stmt = connection.prepareStatement(
      *     "INSERT INTO users (id, created_date) VALUES (?, ?)");
      *
@@ -130,7 +128,7 @@ public class MillisDateType extends DateType {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * MillisDateType type = new MillisDateType();
+     * Type<java.sql.Date> type = TypeFactory.getType(java.sql.Date.class);
      * CallableStatement stmt = connection.prepareCall("{call update_date(?, ?)}");
      *
      * Date date = new Date(1609459200000L); // Jan 1, 2021

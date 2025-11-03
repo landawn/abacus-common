@@ -785,7 +785,7 @@ public class IntStream100Test extends TestBase {
     }
 
     @Test
-    @DisplayName("flatten() should flatten 2D array")
+    @DisplayName("flatten() should flatten two-dimensional array")
     public void testFlatten2D_2() {
         int[][] array = { { 1, 2 }, { 3, 4 } };
         int[] result = IntStream.flatten(array, false).toArray();
@@ -796,7 +796,7 @@ public class IntStream100Test extends TestBase {
     }
 
     @Test
-    @DisplayName("flatten() should flatten 2D array")
+    @DisplayName("flatten() should flatten two-dimensional array")
     public void testFlatten2D_3() {
         int[][] array = { { 1, 2 }, { 3, 4, 5 } };
         int[] result = IntStream.flatten(array, 0, false).toArray();

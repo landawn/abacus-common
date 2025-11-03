@@ -58,7 +58,6 @@ import java.util.function.ToIntFunction;
  * }</pre>
  *
  * @param <T> The type of the object that this wrapper will hold
- * @since 0.8
  * @see Keyed
  * @see IndexedKeyed
  */

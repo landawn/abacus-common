@@ -11,7 +11,6 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-
 package com.landawn.abacus.util.function;
 
 import com.landawn.abacus.util.Throwables;
@@ -19,15 +18,21 @@ import com.landawn.abacus.util.Throwables;
 /**
  * Represents an operation upon two {@code byte} operands and producing a {@code byte} result.
  * This is the primitive type specialization of {@link BinaryOperator} for {@code byte}.
- * 
+ *
  * <p>This is a functional interface whose functional method is {@link #applyAsByte(byte, byte)}.
  *
+ * <p>Refer to JDK API documentation at: <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html">https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a></p>
  */
 @FunctionalInterface
 public interface ByteBinaryOperator extends Throwables.ByteBinaryOperator<RuntimeException> { //NOSONAR
-
     /**
      * Applies this operator to the given operands.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * ByteBinaryOperator adder = (a, b) -> (byte)(a + b);
+     * byte result = adder.applyAsByte((byte)5, (byte)3); // Returns 8
+     * }</pre>
      *
      * @param left the first operand
      * @param right the second operand

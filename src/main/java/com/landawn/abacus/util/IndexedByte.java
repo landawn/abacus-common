@@ -30,7 +30,6 @@ package com.landawn.abacus.util;
  * System.out.println(ib.index()); // prints: 5
  * }</pre>
  * 
- * @since 1.0
  */
 public final class IndexedByte extends AbstractIndexed {
 

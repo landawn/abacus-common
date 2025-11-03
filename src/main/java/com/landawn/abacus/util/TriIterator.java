@@ -42,7 +42,6 @@ import com.landawn.abacus.util.stream.Stream;
  *
  * @see com.landawn.abacus.util.Iterators
  * @see com.landawn.abacus.util.Enumerations
- *
  */
 @SuppressWarnings({ "java:S6548" })
 public abstract class TriIterator<A, B, C> extends ImmutableIterator<Triple<A, B, C>> {

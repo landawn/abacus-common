@@ -43,15 +43,11 @@ import java.io.Serial;
  * }
  * }</pre>
  * 
- * @since 3.0
  * @see IllegalStateException
  * @see DuplicatedResultException
  */
 public class TooManyElementsException extends IllegalStateException {
 
-    /**
-     * The serial version UID for serialization compatibility.
-     */
     @Serial
     private static final long serialVersionUID = 4230938963102900489L;
 

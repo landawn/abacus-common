@@ -11,7 +11,6 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-
 package com.landawn.abacus.util.function;
 
 import com.landawn.abacus.util.Throwables;
@@ -21,7 +20,7 @@ import com.landawn.abacus.util.Throwables;
  * long-producing primitive specialization for {@link java.util.function.Function}.
  *
  * <p>This interface extends both the Throwables.ToLongFunction and the standard Java
- * ToLongFunction, providing compatibility with both the Abacus framework's error handling
+ * ToLongFunction, providing compatibility with both the abacus-common framework's error handling
  * mechanisms and the standard Java functional interfaces.
  *
  * <p>This is a functional interface whose functional method is {@link #applyAsLong(Object)}.
@@ -32,11 +31,10 @@ import com.landawn.abacus.util.Throwables;
  */
 @FunctionalInterface
 public interface ToLongFunction<T> extends Throwables.ToLongFunction<T, RuntimeException>, java.util.function.ToLongFunction<T> { //NOSONAR
-
     /**
      * A predefined ToLongFunction instance that unboxes a Long object to a primitive long.
      * Returns 0L if the input is {@code null}, otherwise returns the long value of the Long object.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Long boxed = 42L;
@@ -45,26 +43,25 @@ public interface ToLongFunction<T> extends Throwables.ToLongFunction<T, RuntimeE
      * }</pre>
      */
     ToLongFunction<Long> UNBOX = value -> value == null ? 0 : value;
-
     /**
      * A predefined ToLongFunction instance that converts any Number object to a primitive long.
      * Returns 0L if the input is {@code null}, otherwise calls the longValue() method on the Number object.
      * This function can handle various Number subclasses including Integer, Double, Float, BigDecimal, etc.
-     * 
+     *
      * <p>Note: This conversion may result in loss of precision for floating-point numbers or
      * overflow for numbers outside the long range.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Integer intValue = 100;
      * long result1 = ToLongFunction.FROM_NUM.applyAsLong(intValue); // returns 100L
-     * 
+     *
      * Double doubleValue = 123.456;
      * long result2 = ToLongFunction.FROM_NUM.applyAsLong(doubleValue); // returns 123L (truncated)
-     * 
+     *
      * BigDecimal bigDecimal = new BigDecimal("9999999999");
      * long result3 = ToLongFunction.FROM_NUM.applyAsLong(bigDecimal); // returns 9999999999L
-     * 
+     *
      * long defaultValue = ToLongFunction.FROM_NUM.applyAsLong(null); // returns 0L
      * }</pre>
      */
@@ -73,8 +70,20 @@ public interface ToLongFunction<T> extends Throwables.ToLongFunction<T, RuntimeE
     /**
      * Applies this function to the given argument and returns a long result.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * ToLongFunction<String> lengthFunction = str -> str.length();
+     * long length = lengthFunction.applyAsLong("Hello World"); // Returns 11L
+     *
+     * ToLongFunction<Date> timestampFunction = Date::getTime;
+     * long timestamp = timestampFunction.applyAsLong(new Date()); // Returns milliseconds since epoch
+     *
+     * ToLongFunction<List<Integer>> sizeFunction = list -> list.size();
+     * long size = sizeFunction.applyAsLong(Arrays.asList(1, 2, 3, 4)); // Returns 4L
+     * }</pre>
+     *
      * @param value the function argument
-     * @return the function result as a primitive long if any error occurs during function execution
+     * @return the function result as a primitive long
      */
     @Override
     long applyAsLong(T value);

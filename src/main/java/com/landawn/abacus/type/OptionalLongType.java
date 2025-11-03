@@ -22,7 +22,7 @@ import com.landawn.abacus.util.u.OptionalLong;
  * and database interaction capabilities for optional long integer values. This handler manages
  * the conversion between database long values and OptionalLong wrapper objects.
  */
-public class OptionalLongType extends AbstractOptionalType<OptionalLong> {
+class OptionalLongType extends AbstractOptionalType<OptionalLong> {
 
     public static final String OPTIONAL_LONG = OptionalLong.class.getSimpleName();
 
@@ -77,7 +77,6 @@ public class OptionalLongType extends AbstractOptionalType<OptionalLong> {
      *
      * @param x the OptionalLong object to convert
      * @return the string representation of the long value, or {@code null} if empty or null
-     @MayReturnNull
      */
     @Override
     public String stringOf(final OptionalLong x) {

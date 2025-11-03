@@ -49,7 +49,6 @@ import static java.lang.Character.MIN_SURROGATE;
  *
  * @author Martin Buchholz
  * @author Clément Roux
- * @since 0.8
  */
 public class Utf8 {
 

@@ -18,7 +18,6 @@ import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.Writer;
 
-import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.exception.UncheckedIOException;
 import com.landawn.abacus.parser.JSONXMLSerializationConfig;
 import com.landawn.abacus.util.CharacterWriter;
@@ -43,7 +42,7 @@ import com.landawn.abacus.util.WD;
  * @param <T5> the type of the fifth element in the tuple
  */
 @SuppressWarnings("java:S2160")
-public class Tuple5Type<T1, T2, T3, T4, T5> extends AbstractType<Tuple5<T1, T2, T3, T4, T5>> {
+class Tuple5Type<T1, T2, T3, T4, T5> extends AbstractType<Tuple5<T1, T2, T3, T4, T5>> {
 
     private final String declaringName;
 
@@ -126,7 +125,6 @@ public class Tuple5Type<T1, T2, T3, T4, T5> extends AbstractType<Tuple5<T1, T2, 
      * @return a JSON string representation of the tuple, or {@code null} if x is null
      */
     @Override
-    @MayReturnNull
     public String stringOf(final Tuple5<T1, T2, T3, T4, T5> x) {
         return (x == null) ? null : Utils.jsonParser.serialize(N.asArray(x._1, x._2, x._3, x._4, x._5), Utils.jsc);
     }
@@ -139,7 +137,6 @@ public class Tuple5Type<T1, T2, T3, T4, T5> extends AbstractType<Tuple5<T1, T2, 
      * @param str the JSON string to parse
      * @return a Tuple5 object parsed from the string, or {@code null} if str is empty
      */
-    @MayReturnNull
     @SuppressWarnings("unchecked")
     @Override
     public Tuple5<T1, T2, T3, T4, T5> valueOf(final String str) {

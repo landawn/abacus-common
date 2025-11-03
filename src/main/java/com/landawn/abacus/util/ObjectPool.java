@@ -61,7 +61,6 @@ import com.landawn.abacus.logging.LoggerFactory;
  *
  * @param <K> the type of keys maintained by this map
  * @param <V> the type of mapped values
- * @since 1.0
  * @see AbstractMap
  * @see Map
  */

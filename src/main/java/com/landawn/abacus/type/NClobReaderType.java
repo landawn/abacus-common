@@ -21,15 +21,13 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-import com.landawn.abacus.annotation.MayReturnNull;
-
 /**
  * Type handler for NClobReader objects, providing database interaction capabilities
  * for handling National Character Large Objects (NCLOB) as Reader streams.
  * This type automatically converts NCLOB database values to Reader objects and manages
  * the lifecycle of the NCLOB resources.
  */
-public class NClobReaderType extends ReaderType {
+class NClobReaderType extends ReaderType {
 
     public static final String NCLOB_READER = "NClobReader";
 
@@ -46,7 +44,6 @@ public class NClobReaderType extends ReaderType {
      * @return a Reader for the NCLOB character stream, or {@code null} if the column value is SQL NULL
      * @throws SQLException if a database access error occurs or the columnIndex is invalid
      */
-    @MayReturnNull
     @Override
     public Reader get(final ResultSet rs, final int columnIndex) throws SQLException {
         final NClob clob = rs.getNClob(columnIndex);
@@ -62,7 +59,6 @@ public class NClobReaderType extends ReaderType {
      * @return a Reader for the NCLOB character stream, or {@code null} if the column value is SQL NULL
      * @throws SQLException if a database access error occurs or the columnLabel is invalid
      */
-    @MayReturnNull
     @Override
     public Reader get(final ResultSet rs, final String columnLabel) throws SQLException {
         return clob2Reader(rs.getNClob(columnLabel));
@@ -142,7 +138,6 @@ public class NClobReaderType extends ReaderType {
      * @return a Reader for the NCLOB character stream, or {@code null} if the input NCLOB is null
      * @throws SQLException if a database access error occurs while accessing the NCLOB
      */
-    @MayReturnNull
     static Reader clob2Reader(final NClob clob) throws SQLException {
         Reader reader = null;
 

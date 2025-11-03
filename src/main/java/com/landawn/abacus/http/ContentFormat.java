@@ -17,10 +17,10 @@ package com.landawn.abacus.http;
 /**
  * Enum representing various content formats for HTTP requests and responses.
  * Each format specifies a content type and content encoding combination.
- * 
- * <p>This enum is used to define how data should be serialized/deserialized 
+ *
+ * <p>This enum is used to define how data should be serialized/deserialized
  * and compressed/decompressed during HTTP communication.</p>
- * 
+ *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * ContentFormat format = ContentFormat.JSON_GZIP;

@@ -214,16 +214,16 @@ public class HttpResponse {
      * <pre>{@code
      * // Get as string
      * String text = response.body(String.class);
-     * 
+     *
      * // Get as custom object (assumes JSON response)
      * User user = response.body(User.class);
-     * 
+     *
      * // Get as raw bytes
      * byte[] data = response.body(byte[].class);
      * }</pre>
      *
      * @param <T> The type to deserialize to
-     * @param resultClass The class of the desired result type
+     * @param resultClass The class of the expected response object
      * @return The deserialized response body
      * @throws IllegalArgumentException if resultClass is null
      */

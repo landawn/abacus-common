@@ -46,7 +46,6 @@ import java.io.Writer;
  * 
  * @see com.landawn.abacus.util.CSVUtil
  * @see CharacterWriter
- * @since 1.0
  */
 public final class BufferedCSVWriter extends CharacterWriter {
     private static final char[] BACK_SLASH_CHAR_ARRAY = "\\\"".toCharArray();

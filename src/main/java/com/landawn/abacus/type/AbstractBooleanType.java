@@ -20,7 +20,6 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.parser.JSONXMLSerializationConfig;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.Strings;
@@ -44,9 +43,7 @@ public abstract class AbstractBooleanType extends AbstractPrimaryType<Boolean> {
      * @param b the Boolean value to convert
      * @return the string representation of the boolean value, or  {@code null} if input is {@code null}
      */
-    @MayReturnNull
     @Override
-
     public String stringOf(final Boolean b) {
         return (b == null) ? null : b.toString();
     }
@@ -65,9 +62,7 @@ public abstract class AbstractBooleanType extends AbstractPrimaryType<Boolean> {
      * @param src the source object to convert
      * @return the Boolean value, or default value if input is {@code null}
      */
-    @MayReturnNull
     @Override
-
     public Boolean valueOf(final Object src) {
         if (src == null) {
             return defaultValue();
@@ -100,9 +95,7 @@ public abstract class AbstractBooleanType extends AbstractPrimaryType<Boolean> {
      * @param str the string to convert
      * @return the Boolean value, or default value if input is empty or {@code null}
      */
-    @MayReturnNull
     @Override
-
     public Boolean valueOf(final String str) {
         if (Strings.isEmpty(str)) {
             return defaultValue();
@@ -121,9 +114,7 @@ public abstract class AbstractBooleanType extends AbstractPrimaryType<Boolean> {
      * @param len the number of characters to read
      * @return {@code true} if the array contains "true" (case-insensitive), {@code false} otherwise
      */
-    @MayReturnNull
     @Override
-
     public Boolean valueOf(final char[] cbuf, final int offset, final int len) {
         return ((cbuf == null) || (len == 0)) ? defaultValue()
                 : (((len == 4) && (((cbuf[offset] == 't') || (cbuf[offset] == 'T')) && ((cbuf[offset + 1] == 'r') || (cbuf[offset + 1] == 'R'))
@@ -164,7 +155,6 @@ public abstract class AbstractBooleanType extends AbstractPrimaryType<Boolean> {
      * @throws SQLException if a database access error occurs
      */
     @Override
-    @MayReturnNull
     public Boolean get(final ResultSet rs, final int columnIndex) throws SQLException {
         return rs.getBoolean(columnIndex);
     }
@@ -180,7 +170,6 @@ public abstract class AbstractBooleanType extends AbstractPrimaryType<Boolean> {
      * @throws SQLException if a database access error occurs
      */
     @Override
-    @MayReturnNull
     public Boolean get(final ResultSet rs, final String columnLabel) throws SQLException {
         return rs.getBoolean(columnLabel);
     }

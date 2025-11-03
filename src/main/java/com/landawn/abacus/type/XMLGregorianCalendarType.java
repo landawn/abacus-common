@@ -23,7 +23,6 @@ import java.sql.Timestamp;
 
 import javax.xml.datatype.XMLGregorianCalendar;
 
-import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.parser.JSONXMLSerializationConfig;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.DateTimeFormat;
@@ -31,7 +30,7 @@ import com.landawn.abacus.util.Dates;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Strings;
 
-public class XMLGregorianCalendarType extends AbstractType<XMLGregorianCalendar> {
+class XMLGregorianCalendarType extends AbstractType<XMLGregorianCalendar> {
 
     public static final String XML_GREGORIAN_CALENDAR = XMLGregorianCalendar.class.getSimpleName();
 
@@ -47,7 +46,8 @@ public class XMLGregorianCalendarType extends AbstractType<XMLGregorianCalendar>
      * </p>
      *
      * <p><b>Usage Examples:</b></p>
-     * XMLGregorianCalendarType type = new XMLGregorianCalendarType();
+     * <pre>{@code
+     * Type<XMLGregorianCalendar> type = TypeFactory.getType(XMLGregorianCalendar.class);
      * Class&lt;XMLGregorianCalendar&gt; clazz = type.clazz(); // Returns XMLGregorianCalendar.class
      * }</pre>
      *
@@ -70,6 +70,7 @@ public class XMLGregorianCalendarType extends AbstractType<XMLGregorianCalendar>
      * </p>
      *
      * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
      * XMLGregorianCalendar cal1 = type.valueOf("2023-10-15T10:30:00");
      * XMLGregorianCalendar cal2 = type.valueOf("SYS_TIME"); // Current time
      * }</pre>
@@ -79,7 +80,6 @@ public class XMLGregorianCalendarType extends AbstractType<XMLGregorianCalendar>
      * @throws IllegalArgumentException if the string cannot be parsed as a valid date/time
      */
     @Override
-    @MayReturnNull
     public XMLGregorianCalendar valueOf(final String str) {
         return Strings.isEmpty(str) ? null : (N.equals(str, SYS_TIME) ? Dates.currentXMLGregorianCalendar() : Dates.parseXMLGregorianCalendar(str));
     }
@@ -93,6 +93,7 @@ public class XMLGregorianCalendarType extends AbstractType<XMLGregorianCalendar>
      * </p>
      *
      * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
      * char[] chars = "1697364600000".toCharArray();
      * XMLGregorianCalendar cal = type.valueOf(chars, 0, chars.length); // From epoch millis
      * }</pre>
@@ -102,9 +103,7 @@ public class XMLGregorianCalendarType extends AbstractType<XMLGregorianCalendar>
      * @param len the number of characters to process
      * @return an XMLGregorianCalendar instance, or {@code null} if the input is {@code null} or empty
      */
-    @MayReturnNull
     @Override
-
     public XMLGregorianCalendar valueOf(final char[] cbuf, final int offset, final int len) {
         if ((cbuf == null) || (len == 0)) {
             return null; // NOSONAR
@@ -129,6 +128,7 @@ public class XMLGregorianCalendarType extends AbstractType<XMLGregorianCalendar>
      * </p>
      *
      * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
      * XMLGregorianCalendar cal = Dates.currentXMLGregorianCalendar();
      * String str = type.stringOf(cal); // Returns formatted date/time string
      * }</pre>
@@ -137,7 +137,6 @@ public class XMLGregorianCalendarType extends AbstractType<XMLGregorianCalendar>
      * @return the string representation of the XMLGregorianCalendar, or {@code null} if the input is null
      */
     @Override
-    @MayReturnNull
     public String stringOf(final XMLGregorianCalendar x) {
         return (x == null) ? null : Dates.format(x);
     }
@@ -150,6 +149,7 @@ public class XMLGregorianCalendarType extends AbstractType<XMLGregorianCalendar>
      * </p>
      *
      * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
      * XMLGregorianCalendar cal = type.get(resultSet, 1);
      * // Retrieves timestamp from first column as XMLGregorianCalendar
      * }</pre>
@@ -160,7 +160,6 @@ public class XMLGregorianCalendarType extends AbstractType<XMLGregorianCalendar>
      * @throws SQLException if a database access error occurs or the column index is invalid
      */
     @Override
-    @MayReturnNull
     public XMLGregorianCalendar get(final ResultSet rs, final int columnIndex) throws SQLException {
         final Timestamp ts = rs.getTimestamp(columnIndex);
         return ts == null ? null : Dates.createXMLGregorianCalendar(ts);
@@ -174,6 +173,7 @@ public class XMLGregorianCalendarType extends AbstractType<XMLGregorianCalendar>
      * </p>
      *
      * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
      * XMLGregorianCalendar cal = type.get(resultSet, "created_date");
      * // Retrieves timestamp from <i>created_date</i> column
      * }</pre>
@@ -184,7 +184,6 @@ public class XMLGregorianCalendarType extends AbstractType<XMLGregorianCalendar>
      * @throws SQLException if a database access error occurs or the column label is invalid
      */
     @Override
-    @MayReturnNull
     public XMLGregorianCalendar get(final ResultSet rs, final String columnLabel) throws SQLException {
         final Timestamp ts = rs.getTimestamp(columnLabel);
         return ts == null ? null : Dates.createXMLGregorianCalendar(ts);
@@ -198,6 +197,7 @@ public class XMLGregorianCalendarType extends AbstractType<XMLGregorianCalendar>
      * </p>
      *
      * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
      * XMLGregorianCalendar cal = Dates.currentXMLGregorianCalendar();
      * type.set(preparedStatement, 1, cal); // Sets timestamp at first parameter
      * }</pre>
@@ -220,6 +220,7 @@ public class XMLGregorianCalendarType extends AbstractType<XMLGregorianCalendar>
      * </p>
      *
      * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
      * XMLGregorianCalendar cal = Dates.currentXMLGregorianCalendar();
      * type.set(callableStatement, "created_date", cal); // Sets timestamp parameter
      * }</pre>
@@ -242,6 +243,7 @@ public class XMLGregorianCalendarType extends AbstractType<XMLGregorianCalendar>
      * </p>
      *
      * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
      * StringBuilder sb = new StringBuilder();
      * type.appendTo(sb, xmlGregorianCalendar); // Appends formatted date/time
      * }</pre>

@@ -11,7 +11,6 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-
 package com.landawn.abacus.util.function;
 
 import com.landawn.abacus.util.Throwables;
@@ -33,9 +32,29 @@ import com.landawn.abacus.util.Throwables;
  */
 @FunctionalInterface
 public interface IntBinaryOperator extends Throwables.IntBinaryOperator<RuntimeException>, java.util.function.IntBinaryOperator { //NOSONAR
-
     /**
-     * Applies this operator to the given operands.
+     * Applies this operator to the given {@code int}-valued operands and produces an {@code int}-valued result.
+     *
+     * <p>This method performs an operation on two int operands of the same type and returns an int result.
+     * Common use cases include:
+     * <ul>
+     *   <li>Arithmetic operations (addition, subtraction, multiplication, division)</li>
+     *   <li>Bitwise operations (AND, OR, XOR, shift operations)</li>
+     *   <li>Comparison operations (min, max)</li>
+     *   <li>Custom binary operations for reduction in streams</li>
+     * </ul>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * IntBinaryOperator adder = (a, b) -> a + b;
+     * int sum = adder.applyAsInt(5, 3); // Returns 8
+     *
+     * IntBinaryOperator multiplier = (a, b) -> a * b;
+     * int product = multiplier.applyAsInt(4, 7); // Returns 28
+     *
+     * IntBinaryOperator max = Math::max;
+     * int maximum = max.applyAsInt(10, 20); // Returns 20
+     * }</pre>
      *
      * @param left the first operand
      * @param right the second operand

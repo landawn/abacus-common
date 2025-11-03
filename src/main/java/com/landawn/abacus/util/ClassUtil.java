@@ -129,43 +129,251 @@ import com.landawn.abacus.util.u.OptionalLong;
 import com.landawn.abacus.util.u.OptionalShort;
 
 /**
- * A comprehensive utility class for Java reflection operations and class manipulation.
- * This class provides extensive functionality for working with Java classes, methods, fields,
- * and properties at runtime. It includes support for bean introspection, property access,
- * type conversion, and various reflection-based operations.
- * 
- * <p>Key features include:</p>
+ * A comprehensive utility class providing advanced Java reflection operations, class manipulation,
+ * and dynamic bean introspection capabilities. This class serves as a powerful toolkit for runtime class analysis,
+ * property access, method invocation, and type conversion operations commonly required in enterprise applications,
+ * frameworks, serialization libraries, and dynamic programming scenarios where compile-time type information
+ * is unavailable or insufficient for complex runtime operations.
+ *
+ * <p><b>Key Features and Capabilities:</b>
  * <ul>
- *   <li>Dynamic class loading and instantiation</li>
- *   <li>Property getter/setter method discovery and invocation</li>
- *   <li>Field access and manipulation</li>
- *   <li>Type conversion and wrapping/unwrapping of primitive types</li>
- *   <li>Bean property introspection with caching for performance</li>
- *   <li>Support for XML binding classes and JAXB annotations</li>
- *   <li>Package scanning and class discovery</li>
- *   <li>Method handle creation for improved performance</li>
+ *   <li><b>Advanced Reflection Operations:</b> High-performance class loading, instantiation, and metadata access</li>
+ *   <li><b>Bean Property Introspection:</b> Comprehensive JavaBean property discovery and manipulation</li>
+ *   <li><b>Type Conversion System:</b> Sophisticated type conversion between primitives, wrappers, and objects</li>
+ *   <li><b>Method Handle Support:</b> Modern method handle creation for improved reflection performance</li>
+ *   <li><b>Package Scanning:</b> Efficient class discovery and classpath scanning capabilities</li>
+ *   <li><b>XML Binding Integration:</b> Support for JAXB and XML binding class operations</li>
+ *   <li><b>Cached Metadata:</b> Thread-safe caching of reflection metadata for optimal performance</li>
+ *   <li><b>Security Aware:</b> Proper handling of security managers and access control</li>
  * </ul>
- * 
- * <p>This class maintains internal caches for frequently accessed metadata to improve
- * performance in reflection-heavy applications.</p>
- * 
- * <p><b>Usage Examples:</b></p>
+ *
+ * <p><b>Design Philosophy:</b>
+ * <ul>
+ *   <li><b>Performance First:</b> Extensive caching and optimization for high-throughput reflection operations</li>
+ *   <li><b>Type Safety Priority:</b> Strong typing support with comprehensive type conversion capabilities</li>
+ *   <li><b>Cache Efficiency:</b> Intelligent caching strategies to balance memory usage and performance</li>
+ *   <li><b>Security Conscious:</b> Proper access control and security manager integration</li>
+ *   <li><b>Framework Integration:</b> Designed for seamless integration with enterprise frameworks</li>
+ * </ul>
+ *
+ * <p><b>Core Operation Categories:</b>
+ * <table border="1" style="border-collapse: collapse;">
+ *   <caption><b>ClassUtil Operation Types and Methods</b></caption>
+ *   <tr style="background-color: #f2f2f2;">
+ *     <th>Operation Type</th>
+ *     <th>Primary Methods</th>
+ *     <th>Caching</th>
+ *     <th>Use Cases</th>
+ *   </tr>
+ *   <tr>
+ *     <td>Class Loading</td>
+ *     <td>forClass(), loadClass()</td>
+ *     <td>ClassLoader cache</td>
+ *     <td>Dynamic class loading, plugin systems</td>
+ *   </tr>
+ *   <tr>
+ *     <td>Bean Introspection</td>
+ *     <td>getPropInfo(), getPropNameList()</td>
+ *     <td>Property metadata cache</td>
+ *     <td>ORM frameworks, serialization</td>
+ *   </tr>
+ *   <tr>
+ *     <td>Property Access</td>
+ *     <td>getPropValue(), setPropValue()</td>
+ *     <td>Method handle cache</td>
+ *     <td>Data binding, configuration management</td>
+ *   </tr>
+ *   <tr>
+ *     <td>Type Conversion</td>
+ *     <td>wrap(), unwrap(), convert()</td>
+ *     <td>Type mapping cache</td>
+ *     <td>Type safety, primitive handling</td>
+ *   </tr>
+ *   <tr>
+ *     <td>Method Operations</td>
+ *     <td>getDeclaredMethod(), invoke()</td>
+ *     <td>Method signature cache</td>
+ *     <td>Dynamic method invocation</td>
+ *   </tr>
+ * </table>
+ *
+ * <p><b>Bean Property Operations:</b>
+ * <ul>
+ *   <li><b>Property Discovery:</b> Automatic discovery of JavaBean properties using getter/setter conventions</li>
+ *   <li><b>Type-Safe Access:</b> Strong typing for property values with automatic type conversion</li>
+ *   <li><b>Nested Properties:</b> Support for nested property access using dot notation</li>
+ *   <li><b>Collection Handling:</b> Special handling for List, Set, Map, and array properties</li>
+ *   <li><b>Annotation Support:</b> Integration with property annotations for metadata</li>
+ *   <li><b>Performance Optimized:</b> Cached property descriptors for repeated access</li>
+ * </ul>
+ *
+ * <p><b>Common Usage Patterns:</b>
  * <pre>{@code
- * // Load a class dynamically
+ * // Dynamic class loading and instantiation
  * Class<?> clazz = ClassUtil.forClass("com.example.MyClass");
- * 
- * // Get property value
- * Object bean = new MyBean();
- * String name = Beans.getPropValue(bean, "name");
- * 
- * // Set property value
- * Beans.setPropValue(bean, "name", "John");
- * 
- * // Get all property names
- * List<String> propNames = Beans.getPropNameList(MyBean.class);
+ * Object instance = ClassUtil.newInstance(clazz);
+ *
+ * // Bean property introspection
+ * List<String> properties = ClassUtil.getPropNameList(MyBean.class);
+ * Map<String, PropertyInfo> propInfo = ClassUtil.getPropInfoMap(MyBean.class);
+ *
+ * // Property value access
+ * MyBean bean = new MyBean();
+ * String name = (String) ClassUtil.getPropValue(bean, "name");
+ * ClassUtil.setPropValue(bean, "name", "John Doe");
+ *
+ * // Nested property access
+ * Address address = (Address) ClassUtil.getPropValue(bean, "address");
+ * String city = (String) ClassUtil.getPropValue(bean, "address.city");
+ * ClassUtil.setPropValue(bean, "address.city", "New York");
+ *
+ * // Type conversion operations
+ * Class<?> wrapperType = ClassUtil.wrap(int.class);  // Returns Integer.class
+ * Class<?> primitiveType = ClassUtil.unwrap(Integer.class);  // Returns int.class
+ *
+ * // Method handle creation for performance
+ * Method getter = ClassUtil.getPropGetMethod(MyBean.class, "name");
+ * MethodHandle handle = ClassUtil.createMethodHandle(getter);
  * }</pre>
- * 
- * @since 0.8
+ *
+ * <p><b>Advanced Reflection Patterns:</b>
+ * <pre>{@code
+ * public class DynamicBeanProcessor {
+ *
+ *     // Generic bean copying with type conversion
+ *     public void copyProperties(Object source, Object target) {
+ *         Class<?> sourceClass = source.getClass();
+ *         Class<?> targetClass = target.getClass();
+ *
+ *         Map<String, PropertyInfo> sourceProps = ClassUtil.getPropInfoMap(sourceClass);
+ *         Map<String, PropertyInfo> targetProps = ClassUtil.getPropInfoMap(targetClass);
+ *
+ *         for (String propName : sourceProps.keySet()) {
+ *             if (targetProps.containsKey(propName)) {
+ *                 try {
+ *                     Object value = ClassUtil.getPropValue(source, propName);
+ *                     if (value != null) {
+ *                         PropertyInfo targetProp = targetProps.get(propName);
+ *                         Object convertedValue = convertValue(value, targetProp.getType());
+ *                         ClassUtil.setPropValue(target, propName, convertedValue);
+ *                     }
+ *                 } catch (Exception e) {
+ *                     logger.warn("Failed to copy property: " + propName, e);
+ *                 }
+ *             }
+ *         }
+ *     }
+ *
+ *     // Dynamic configuration binding
+ *     public <T> T bindConfiguration(Map<String, Object> config, Class<T> targetClass) {
+ *         try {
+ *             T instance = ClassUtil.newInstance(targetClass);
+ *             Map<String, PropertyInfo> properties = ClassUtil.getPropInfoMap(targetClass);
+ *
+ *             for (Map.Entry<String, Object> entry : config.entrySet()) {
+ *                 String key = entry.getKey();
+ *                 Object value = entry.getValue();
+ *
+ *                 if (properties.containsKey(key)) {
+ *                     PropertyInfo propInfo = properties.get(key);
+ *                     Object convertedValue = convertToType(value, propInfo.getType());
+ *                     ClassUtil.setPropValue(instance, key, convertedValue);
+ *                 }
+ *             }
+ *
+ *             return instance;
+ *         } catch (Exception e) {
+ *             throw new RuntimeException("Failed to bind configuration", e);
+ *         }
+ *     }
+ *
+ *     // Dynamic proxy with method interception
+ *     public Object createProxy(Object target, MethodInterceptor interceptor) {
+ *         Class<?> targetClass = target.getClass();
+ *         
+ *         return Proxy.newProxyInstance(
+ *             targetClass.getClassLoader(),
+ *             targetClass.getInterfaces(),
+ *             (proxy, method, args) -> {
+ *                 // Pre-processing
+ *                 Object[] processedArgs = interceptor.beforeMethod(method, args);
+ *                 
+ *                 // Method invocation
+ *                 Object result = ClassUtil.invokeMethod(target, method, processedArgs);
+ *                 
+ *                 // Post-processing
+ *                 return interceptor.afterMethod(method, result);
+ *             }
+ *         );
+ *     }
+ * }
+ * }</pre>
+ *
+ * <p><b>Type Conversion and Wrapping:</b>
+ * <ul>
+ *   <li><b>Primitive Wrapping:</b> Automatic conversion between primitive types and their wrapper classes</li>
+ *   <li><b>Type Compatibility:</b> Intelligent type compatibility checking and conversion</li>
+ *   <li><b>Collection Types:</b> Support for generic collection type handling and conversion</li>
+ *   <li><b>Null Safety:</b> Proper null handling in type conversion operations</li>
+ *   <li><b>Custom Converters:</b> Extensible type conversion system for custom types</li>
+ * </ul>
+ *
+ * <p><b>Performance Optimization Features:</b>
+ * <ul>
+ *   <li><b>Metadata Caching:</b> Thread-safe caches for class metadata, reducing reflection overhead</li>
+ *   <li><b>Method Handle Support:</b> Modern method handles for improved performance over reflection</li>
+ *   <li><b>Lazy Initialization:</b> On-demand loading of class metadata and property information</li>
+ *   <li><b>Memory Efficiency:</b> Optimized memory usage patterns for cache management</li>
+ *   <li><b>Concurrent Access:</b> Thread-safe operations for high-concurrency environments</li>
+ * </ul>
+ *
+ * <p><b>Security and Access Control:</b>
+ * <ul>
+ *   <li><b>Security Manager Integration:</b> Proper handling of security manager restrictions</li>
+ *   <li><b>Access Control:</b> Respect for Java access modifiers and visibility rules</li>
+ *   <li><b>Privilege Escalation:</b> Controlled access to restricted members when necessary</li>
+ *   <li><b>ClassLoader Isolation:</b> Proper handling of different class loader contexts</li>
+ * </ul>
+ *
+ * <p><b>Framework Integration Patterns:</b>
+ * <ul>
+ *   <li><b>ORM Frameworks:</b> Bean property access for object-relational mapping</li>
+ *   <li><b>Serialization Libraries:</b> Dynamic property enumeration and value extraction</li>
+ *   <li><b>Dependency Injection:</b> Bean instantiation and property injection</li>
+ *   <li><b>Configuration Management:</b> Dynamic binding of configuration properties</li>
+ *   <li><b>Data Binding:</b> Automatic conversion between different object representations</li>
+ * </ul>
+ *
+ * <p><b>Package Scanning and Class Discovery:</b>
+ * <ul>
+ *   <li><b>Classpath Scanning:</b> Efficient discovery of classes in packages and JAR files</li>
+ *   <li><b>Annotation-Based Discovery:</b> Find classes with specific annotations</li>
+ *   <li><b>Interface Implementation:</b> Discover classes implementing specific interfaces</li>
+ *   <li><b>Filter Support:</b> Configurable filters for class discovery operations</li>
+ *   <li><b>JAR File Processing:</b> Efficient scanning of JAR files and nested archives</li>
+ * </ul>
+ *
+ * <p><b>XML Binding and JAXB Integration:</b>
+ * <ul>
+ *   <li><b>JAXB Class Support:</b> Special handling for JAXB-annotated classes</li>
+ *   <li><b>XML Element Mapping:</b> Integration with XML element and attribute annotations</li>
+ *   <li><b>Schema Generation:</b> Support for XML schema generation from Java classes</li>
+ *   <li><b>Namespace Handling:</b> Proper XML namespace processing for binding operations</li>
+ * </ul>
+ *
+ * <p><b>Attribution:</b>
+ * This class includes code adapted from Apache Commons Lang under the Apache License 2.0. 
+ * Methods from these libraries may have been modified for consistency, performance optimization, and null-safety enhancement.
+ *
+ * @see java.lang.reflect.Method
+ * @see java.lang.reflect.Field
+ * @see java.lang.reflect.Constructor
+ * @see java.lang.invoke.MethodHandle
+ * @see java.beans.PropertyDescriptor
+ * @see java.beans.Introspector
+ * @see com.landawn.abacus.type.Type
+ * @see <a href="https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/lang/reflect/package-summary.html">Java Reflection API</a>
+ * @see <a href="https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/lang/invoke/MethodHandle.html">Method Handles</a>
  */
 @SuppressWarnings({ "java:S1942" })
 public final class ClassUtil {
@@ -728,8 +936,6 @@ public final class ClassUtil {
         return nameClassPool.computeIfAbsent(cls, k -> cls.getName());
     }
 
-    //    /**
-
     /**
      * Retrieves the simple name of the specified class as returned by {@link Class#getSimpleName()}.
      * The simple name is the name of the class without the package prefix.
@@ -826,28 +1032,189 @@ public final class ClassUtil {
     }
 
     /**
-     * Retrieves a filtered list of classes in the specified package.
-     * This method scans the classpath to discover classes within the given package and applies the specified predicate filter.
+     * Retrieves a filtered list of classes in the specified package by scanning the classpath and applying
+     * a configurable predicate filter. This method provides advanced package scanning capabilities with
+     * comprehensive error handling, recursive sub-package traversal, and flexible class filtering options
+     * essential for framework development, plugin systems, and dynamic class discovery scenarios in
+     * enterprise applications requiring runtime class enumeration and analysis.
      *
-     * <p><b>Note:</b> This method does not work for JDK packages (e.g., java.lang, java.util).</p>
+     * <p>This method performs sophisticated classpath scanning to discover all classes within the specified
+     * package hierarchy, supporting both JAR-based and file system-based class discovery mechanisms. It
+     * handles complex scenarios including nested JAR files, custom class loaders, and mixed deployment
+     * environments commonly found in enterprise application servers and modular application architectures
+     * where dynamic class discovery is critical for plugin loading and configuration management.</p>
      *
-     * <p><b>Usage Examples:</b></p>
+     * <p><b>⚠️ IMPORTANT - JDK Package Limitation:</b>
+     * This method does not work for JDK core packages (e.g., java.lang, java.util, javax.*) as these
+     * packages are typically loaded from the bootstrap classpath and may not be accessible through
+     * standard resource enumeration mechanisms. Use this method only for application-specific packages
+     * and third-party library packages available on the standard classpath.</p>
+     *
+     * <p><b>Key Features and Capabilities:</b>
+     * <ul>
+     *   <li><b>Recursive Package Scanning:</b> Optional deep traversal of package hierarchies and sub-packages</li>
+     *   <li><b>Flexible Class Filtering:</b> Predicate-based filtering for selective class discovery</li>
+     *   <li><b>Error Recovery:</b> Configurable handling of class loading failures during scanning</li>
+     *   <li><b>JAR File Support:</b> Comprehensive scanning of classes within JAR archives</li>
+     *   <li><b>ClassLoader Compatibility:</b> Works with various class loader implementations</li>
+     *   <li><b>Performance Optimized:</b> Efficient scanning algorithms minimizing I/O overhead</li>
+     * </ul>
+     *
+     * <p><b>Scanning Process and Algorithm:</b>
+     * <ol>
+     *   <li><b>Resource Discovery:</b> Locate package resources on classpath using class loader</li>
+     *   <li><b>Path Analysis:</b> Determine if resources are file system directories or JAR entries</li>
+     *   <li><b>Class Enumeration:</b> Recursively enumerate .class files based on recursive flag</li>
+     *   <li><b>Class Loading:</b> Attempt to load each discovered class using appropriate class loader</li>
+     *   <li><b>Error Handling:</b> Skip or propagate class loading errors based on configuration</li>
+     *   <li><b>Filtering:</b> Apply predicate filter to loaded classes for selective inclusion</li>
+     *   <li><b>Result Assembly:</b> Collect filtered classes into result list for return</li>
+     * </ol>
+     *
+     * <p><b>Use Cases and Applications:</b>
+     * <ul>
+     *   <li><b>Plugin Systems:</b> Dynamic discovery of plugin classes implementing specific interfaces</li>
+     *   <li><b>Framework Development:</b> Automatic registration of components, services, and handlers</li>
+     *   <li><b>Testing Frameworks:</b> Discovery of test classes and test suites for automated execution</li>
+     *   <li><b>Configuration Management:</b> Enumeration of configuration classes for property binding</li>
+     *   <li><b>Dependency Injection:</b> Discovery of annotated classes for container registration</li>
+     *   <li><b>Code Analysis:</b> Static analysis tools requiring comprehensive class enumeration</li>
+     * </ul>
+     *
+     * <p><b>Common Usage Patterns:</b>
      * <pre>{@code
-     * List<Class<?>> interfaces = ClassUtil.getClassesByPackage(
+     * // Basic package scanning for all classes
+     * List<Class<?>> allClasses = ClassUtil.getClassesByPackage(
      *     "com.example.myapp",
+     *     true,  // Recursive
+     *     true,  // Skip loading errors
+     *     Fn.alwaysTrue()  // No filtering
+     * );
+     *
+     * // Filter for interface classes only
+     * List<Class<?>> interfaces = ClassUtil.getClassesByPackage(
+     *     "com.example.api",
      *     true,
      *     false,
-     *     cls -> cls.isInterface()
+     *     Class::isInterface
+     * );
+     *
+     * // Find classes with specific annotation
+     * List<Class<?>> services = ClassUtil.getClassesByPackage(
+     *     "com.example.services",
+     *     true,
+     *     true,
+     *     cls -> cls.isAnnotationPresent(Service.class)
+     * );
+     *
+     * // Find concrete implementation classes
+     * List<Class<?>> implementations = ClassUtil.getClassesByPackage(
+     *     "com.example.impl",
+     *     false,  // Non-recursive
+     *     true,
+     *     cls -> !cls.isInterface() && !cls.isAbstract()
      * );
      * }</pre>
      *
-     * @param pkgName the name of the package to search for classes
-     * @param isRecursive if {@code true}, searches recursively in sub-packages
-     * @param skipClassLoadingException if {@code true}, skips classes that cannot be loaded and continues scanning
-     * @param predicate a predicate to filter the classes; only classes for which the predicate returns {@code true} are included
-     * @return a list of classes in the specified package that match the predicate
-     * @throws IllegalArgumentException if no resources are found for the specified package (e.g., package does not exist or JDK packages)
-     * @throws UncheckedIOException if an I/O error occurs during package scanning
+     * <p><b>Advanced Filtering Examples:</b>
+     * <pre>{@code
+     * // Complex predicate combining multiple criteria
+     * Predicate<Class<?>> complexFilter = cls ->
+     *     !cls.isInterface() &&
+     *     !Modifier.isAbstract(cls.getModifiers()) &&
+     *     cls.isAnnotationPresent(Component.class) &&
+     *     Arrays.stream(cls.getInterfaces())
+     *           .anyMatch(intf -> intf.equals(Processor.class));
+     *
+     * List<Class<?>> processors = ClassUtil.getClassesByPackage(
+     *     "com.example.processors",
+     *     true,
+     *     true,
+     *     complexFilter
+     * );
+     *
+     * // Filter by class hierarchy
+     * List<Class<?>> subclasses = ClassUtil.getClassesByPackage(
+     *     "com.example.handlers",
+     *     true,
+     *     false,
+     *     cls -> BaseHandler.class.isAssignableFrom(cls) &&
+     *            !cls.equals(BaseHandler.class)
+     * );
+     * }</pre>
+     *
+     * <p><b>Error Handling Strategies:</b>
+     * <ul>
+     *   <li><b>Skip Loading Errors (skipClassLoadingException = true):</b>
+     *       <ul>
+     *         <li>Continues scanning when individual classes fail to load</li>
+     *         <li>Logs warnings for failed class loading attempts</li>
+     *         <li>Suitable for exploratory scanning and plugin discovery</li>
+     *         <li>Prevents single malformed class from stopping entire scan</li>
+     *       </ul>
+     *   </li>
+     *   <li><b>Fail Fast (skipClassLoadingException = false):</b>
+     *       <ul>
+     *         <li>Throws exception immediately when class loading fails</li>
+     *         <li>Ensures all discovered classes are successfully loadable</li>
+     *         <li>Suitable for strict validation and deployment verification</li>
+     *         <li>Provides precise error reporting for debugging purposes</li>
+     *       </ul>
+     *   </li>
+     * </ul>
+     *
+     * <p><b>Performance Considerations:</b>
+     * <ul>
+     *   <li><b>Classpath Size Impact:</b> Scanning time increases with classpath complexity</li>
+     *   <li><b>JAR File Overhead:</b> Additional I/O cost for scanning classes within JAR archives</li>
+     *   <li><b>Recursive Scanning Cost:</b> Deep package hierarchies increase scanning time</li>
+     *   <li><b>Class Loading Overhead:</b> Each class loading operation has initialization cost</li>
+     *   <li><b>Memory Usage:</b> Large result sets consume significant memory</li>
+     * </ul>
+     *
+     * <p><b>Security and ClassLoader Considerations:</b>
+     * <ul>
+     *   <li><b>ClassLoader Context:</b> Uses current thread's context class loader for resource discovery</li>
+     *   <li><b>Security Manager:</b> Respects security manager restrictions on class loading</li>
+     *   <li><b>Package Access:</b> May fail for packages with restricted access permissions</li>
+     *   <li><b>Module System:</b> Limited compatibility with Java 9+ module system restrictions</li>
+     * </ul>
+     *
+     * <p><b>Debugging and Troubleshooting:</b>
+     * <ul>
+     *   <li><b>Empty Results:</b> Check package name spelling and classpath configuration</li>
+     *   <li><b>Class Loading Failures:</b> Enable debug logging to identify problematic classes</li>
+     *   <li><b>Performance Issues:</b> Use non-recursive scanning for large package hierarchies</li>
+     *   <li><b>Memory Consumption:</b> Implement result streaming for large class sets</li>
+     * </ul>
+     *
+     * @param pkgName the fully qualified name of the package to scan for classes (e.g., "com.example.services").
+     *                Must not be null or empty. JDK packages (java.*, javax.*) are not supported.
+     * @param isRecursive if {@code true}, recursively scans sub-packages within the specified package hierarchy.
+     *                    If {@code false}, scans only the immediate package without descending into sub-packages.
+     * @param skipClassLoadingException if {@code true}, continues scanning when individual classes fail to load,
+     *                                  logging warnings for failed attempts. If {@code false}, throws an exception
+     *                                  immediately when any class loading operation fails.
+     * @param predicate a filtering predicate applied to each successfully loaded class. Only classes for which
+     *                  this predicate returns {@code true} are included in the result list. Must not be null.
+     *                  Use {@code Fn.alwaysTrue()} to include all discovered classes without filtering.
+     * @return a list containing all classes found in the specified package that satisfy the predicate filter.
+     *         Returns an empty list if no matching classes are found. The list is modifiable and contains
+     *         no duplicate classes. Classes are returned in the order they are discovered during scanning.
+     * @throws IllegalArgumentException if {@code pkgName} is null, empty, or if no classpath resources are found
+     *                                  for the specified package (e.g., package does not exist, typo in package name,
+     *                                  or attempting to scan JDK packages which are not supported).
+     * @throws UncheckedIOException if an I/O error occurs during classpath scanning, JAR file reading, or
+     *                              resource enumeration. This typically indicates file system issues, corrupted
+     *                              JAR files, or insufficient permissions for accessing classpath resources.
+     * @throws RuntimeException if {@code skipClassLoadingException} is {@code false} and any class loading
+     *                         operation fails. The exception will contain details about the specific class
+     *                         that failed to load and the underlying cause of the failure.
+     *
+     * @see #getClassesByPackage(String, boolean, boolean)
+     * @see java.lang.ClassLoader#getResources(String)
+     * @see java.util.function.Predicate
+     * @see java.util.jar.JarFile
      */
     public static List<Class<?>> getClassesByPackage(final String pkgName, final boolean isRecursive, final boolean skipClassLoadingException,
             final Predicate<? super Class<?>> predicate) throws IllegalArgumentException, UncheckedIOException {
@@ -1399,13 +1766,155 @@ public final class ClassUtil {
     // ----------------------------------------------------------------------
 
     /**
-     * Formats the parameterized type name by removing unnecessary prefixes and suffixes.
-     * This method handles array types and removes "class" and "interface" prefixes.
+     * Formats and normalizes parameterized type names by removing unnecessary prefixes, suffixes, and performing
+     * intelligent transformations to create clean, readable type representations. This method serves as a crucial
+     * utility for type introspection, documentation generation, serialization frameworks, and development tools
+     * requiring human-readable type names from Java's verbose reflection-based type representations commonly
+     * encountered in generic programming, framework development, and runtime type analysis scenarios.
      *
-     * @param parameterizedTypeName the parameterized type name to format
-     * @return the formatted parameterized type name
+     * <p>This method addresses the complexity of Java's type system representation by transforming verbose,
+     * implementation-specific type names into standardized, readable formats suitable for user interfaces,
+     * logging, documentation, and API responses. It handles the intricacies of array types, nested classes,
+     * generic parameters, and built-in type mappings while maintaining type accuracy and readability across
+     * different Java versions and compilation environments where type name representation may vary.</p>
+     *
+     * <p><b>Key Transformation Operations:</b>
+     * <ul>
+     *   <li><b>Built-in Type Mapping:</b> Removes "java.lang." from jdk built-in types</li>
+     *   <li><b>Prefix Removal:</b> Removes "class " and "interface " prefixes from type names</li>
+     *   <li><b>Array Type Handling:</b> Transforms array notation from internal format to readable format</li>
+     *   <li><b>Inner Class Notation:</b> Converts '$' notation to '.' for nested class readability</li>
+     *   <li><b>Generic Type Cleanup:</b> Normalizes generic type parameter representations</li>
+     *   <li><b>Package Path Optimization:</b> Handles fully qualified names with appropriate formatting</li>
+     * </ul>
+     *
+     * <p><b>Type Name Transformation Examples:</b>
+     * <table border="1" style="border-collapse: collapse;">
+     *   <caption><b>Common Type Name Transformations</b></caption>
+     *   <tr style="background-color: #f2f2f2;">
+     *     <th>Input Type Name</th>
+     *     <th>Formatted Output</th>
+     *     <th>Transformation Applied</th>
+     *   </tr>
+     *   <tr>
+     *     <td>class java.lang.String</td>
+     *     <td>String</td>
+     *     <td>Class prefix removal</td>
+     *   </tr>
+     *   <tr>
+     *     <td>interface java.util.List</td>
+     *     <td>java.util.List</td>
+     *     <td>Interface prefix removal</td>
+     *   </tr>
+     *   <tr>
+     *     <td>[Ljava.lang.String;</td>
+     *     <td>String[]</td>
+     *     <td>Array notation conversion</td>
+     *   </tr>
+     *   <tr>
+     *     <td>com.example.Outer$Inner</td>
+     *     <td>com.example.Outer.Inner</td>
+     *     <td>Inner class notation</td>
+     *   </tr>
+     *   <tr>
+     *     <td>java.util.List&lt;java.lang.String&gt;</td>
+     *     <td>java.util.List&lt;String&gt;</td>
+     *     <td>Generic type preservation</td>
+     *   </tr>
+     * </table>
+     *
+     * <p><b>Common Usage Patterns:</b>
+     * <pre>{@code
+     * // Format reflection-based type names for display
+     * Field field = MyClass.class.getDeclaredField("myProperty");
+     * String typeName = field.getGenericType().getTypeName();
+     * String formatted = ClassUtil.formatParameterizedTypeName(typeName);
+     * System.out.println("Property type: " + formatted);
+     *
+     * // Clean up method return type names
+     * Method method = MyService.class.getMethod("processData");
+     * String returnType = method.getGenericReturnType().getTypeName();
+     * String cleanType = ClassUtil.formatParameterizedTypeName(returnType);
+     *
+     * // Format parameter types for documentation
+     * Parameter[] params = method.getParameters();
+     * for (Parameter param : params) {
+     *     String paramType = param.getParameterizedType().getTypeName();
+     *     String formattedType = ClassUtil.formatParameterizedTypeName(paramType);
+     *     System.out.println(param.getName() + ": " + formattedType);
+     * }
+     *
+     * // API response type formatting
+     * public class TypeInfoResponse {
+     *     public String getFormattedType(Class<?> clazz) {
+     *         return ClassUtil.formatParameterizedTypeName(clazz.getTypeName());
+     *     }
+     * }
+     * }</pre>
+     *
+     * <p><b>Array Type Handling:</b>
+     * <ul>
+     *   <li><b>Primitive Arrays:</b> Converts internal representations like "[I" to "int[]"</li>
+     *   <li><b>Object Arrays:</b> Transforms "[Ljava.lang.String;" to "java.lang.String[]"</li>
+     *   <li><b>Multi-dimensional Arrays:</b> Handles nested array notation correctly</li>
+     *   <li><b>Generic Array Types:</b> Preserves generic information in array element types</li>
+     * </ul>
+     *
+     * <p><b>Inner Class and Nested Type Processing:</b>
+     * <ul>
+     *   <li><b>Dollar Sign Conversion:</b> Transforms '$' to '.' for improved readability</li>
+     *   <li><b>Anonymous Class Handling:</b> Processes anonymous class type representations</li>
+     *   <li><b>Local Class Support:</b> Handles local class naming conventions</li>
+     *   <li><b>Static Nested Classes:</b> Maintains proper nested class hierarchy notation</li>
+     * </ul>
+     *
+     * <p><b>Comparison and Compatibility:</b>
+     * <ul>
+     *   <li><b>vs. Class.getSimpleName():</b> Handles generic types and provides more comprehensive formatting</li>
+     *   <li><b>vs. Type.getTypeName():</b> Adds intelligent cleanup and standardization</li>
+     *   <li><b>vs. toString() methods:</b> Consistent formatting across different type implementations</li>
+     *   <li><b>Cross-JVM Compatibility:</b> Standardizes type names across different Java implementations</li>
+     * </ul>
+     *
+     * <p><b>Error Handling and Edge Cases:</b>
+     * <ul>
+     *   <li><b>Null Input:</b> Handles null input gracefully without throwing exceptions</li>
+     *   <li><b>Empty Strings:</b> Processes empty type names appropriately</li>
+     *   <li><b>Malformed Names:</b> Robust handling of unexpected type name formats</li>
+     *   <li><b>Unicode Characters:</b> Proper handling of Unicode characters in type names</li>
+     * </ul>
+     *
+     * <p><b>Best Practices and Recommendations:</b>
+     * <ul>
+     *   <li>Use this method for user-facing type name display to ensure consistency</li>
+     *   <li>Cache formatted type names if performing repeated formatting operations</li>
+     *   <li>Combine with other ClassUtil methods for comprehensive type introspection</li>
+     *   <li>Consider locale-specific formatting requirements for internationalized applications</li>
+     *   <li>Use in combination with validation to ensure type name accuracy</li>
+     *   <li>Document the expected input format when integrating with external systems</li>
+     * </ul>
+     *
+     * @param parameterizedTypeName the raw parameterized type name to format, typically obtained from
+     *                              {@code Type.getTypeName()}, {@code Class.getTypeName()}, or reflection
+     *                              operations. May contain prefixes like "class " or "interface ", array
+     *                              notation, generic type parameters, and inner class '$' notation.
+     *                              Null values are handled gracefully.
+     * @return a formatted, human-readable type name with prefixes removed, array notation normalized,
+     *         inner class notation converted to dot notation, and built-in type mappings applied.
+     *         Returns null if the input is null, or an appropriately formatted string representation
+     *         that is suitable for display, logging, documentation, or user interface purposes.
+     *
+     * @see Class#getTypeName()
+     * @see Class#getSimpleName()
+     * @see Class#getCanonicalName()
+     * @see #getParameterizedTypeNameByField(Field)
+     * @see #getParameterizedTypeNameByMethod(Method)
      */
     public static String formatParameterizedTypeName(final String parameterizedTypeName) {
+        if (Strings.isEmpty(parameterizedTypeName)) {
+            return parameterizedTypeName;
+        }
+
         String res = builtinTypeNameMap.get(parameterizedTypeName);
 
         if (res != null) {

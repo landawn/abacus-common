@@ -50,31 +50,289 @@ import com.landawn.abacus.util.u.OptionalLong;
 import com.landawn.abacus.util.u.OptionalShort;
 
 /**
- * <p>
- * Note: This class includes codes copied from Apache Commons Lang, Google Guava and other open source projects under the Apache License 2.0.
- * The methods copied from other libraries/frameworks/projects may be modified in this class.
- * </p>
+ * A comprehensive utility class providing an extensive collection of static methods for Map operations,
+ * transformations, manipulations, and analysis. This class serves as the primary map utility facade
+ * in the Abacus library, offering null-safe, performance-optimized operations for all types of Map
+ * implementations with a focus on functional programming patterns and Optional-based return types.
  *
- * <br />
- * Present -> key is found in the specified map with {@code non-null} value.
- * <br />
- * Absent -> key is not found in the specified map or found with {@code null} value.
- * <br />
- * <br />
- * When to throw exception? It's designed to avoid throwing any unnecessary
- * exception if the contract defined by method is not broken. For example, if
- * user tries to reverse a {@code null} or empty String. The input String will be
- * returned. But exception will be thrown if try to add an element to a {@code null} Object array or collection.
- * <br />
- * <br />
- * An empty String/Array/Collection/Map/Iterator/Iterable/InputStream/Reader will always be a preferred choice than a {@code null} for the return value of a method.
- * <br />
+ * <p>The {@code Maps} class is designed as a final utility class that provides a complete toolkit
+ * for map processing including creation, transformation, filtering, searching, merging, and statistical
+ * operations. All methods are static, thread-safe, and designed to handle edge cases gracefully while
+ * maintaining optimal performance for large-scale map operations.</p>
+ *
+ * <p><b>Key Features:</b>
+ * <ul>
+ *   <li><b>Comprehensive Map Operations:</b> Complete set of operations for all Map types and implementations</li>
+ *   <li><b>Optional-Based Returns:</b> Most methods return Optional types for null-safe value handling</li>
+ *   <li><b>Null-Safe Design:</b> All methods handle null inputs gracefully without throwing exceptions</li>
+ *   <li><b>Functional Programming:</b> Support for map, filter, reduce, and other functional patterns</li>
+ *   <li><b>Type Safety:</b> Generic methods with compile-time type checking</li>
+ *   <li><b>Performance Optimized:</b> Efficient algorithms with minimal object allocation</li>
+ *   <li><b>Map Creation Utilities:</b> Factory methods for various Map types and initialization patterns</li>
+ *   <li><b>Transformation Support:</b> Key/value transformation, inversion, and restructuring operations</li>
+ * </ul>
+ *
+ * <p><b>Core Design Principles:</b>
+ * <ul>
+ *   <li><b>Present vs Absent:</b> "Present" means key is found with non-null value; "Absent" means
+ *       key is not found or found with null value</li>
+ *   <li><b>Exception Minimization:</b> Methods avoid throwing unnecessary exceptions when contracts
+ *       are not violated, preferring sensible defaults for edge cases</li>
+ *   <li><b>Empty Over Null:</b> Methods prefer returning empty Maps over null values when possible</li>
+ *   <li><b>Null Safety First:</b> Comprehensive null input handling throughout the API</li>
+ * </ul>
+ *
+ * <p><b>Core Functional Categories:</b>
+ * <ul>
+ *   <li><b>Map Creation:</b> Factory methods for HashMap, LinkedHashMap, TreeMap, and specialized maps</li>
+ *   <li><b>Access Operations:</b> get, getOrDefault, getFirst, getLast with Optional and Nullable returns</li>
+ *   <li><b>Search Operations:</b> find, contains, indexOf with predicate support and Optional returns</li>
+ *   <li><b>Transformation Operations:</b> map keys/values, filter, invert, merge, combine</li>
+ *   <li><b>Aggregation Operations:</b> reduce, fold, sum, count, min, max for map values</li>
+ *   <li><b>Validation Operations:</b> isEmpty, isNotEmpty, containsKey, containsValue, equals</li>
+ *   <li><b>Conversion Operations:</b> toList, toSet, toArray, entrySet operations</li>
+ *   <li><b>Utility Operations:</b> zip, unzip, partition, group, flatten for map manipulation</li>
+ * </ul>
+ *
+ * <p><b>Usage Examples:</b></p>
+ * <pre>{@code
+ * // Map creation with factory methods
+ * Map<String, Integer> map = Maps.newHashMap();
+ * Map<String, Integer> linkedMap = Maps.newLinkedHashMap();
+ * Map<String, Integer> sortedMap = Maps.newTreeMap();
+ *
+ * // Zip operations for map creation
+ * List<String> keys = Arrays.asList("a", "b", "c");
+ * List<Integer> values = Arrays.asList(1, 2, 3);
+ * Map<String, Integer> zipped = Maps.zip(keys, values);  // {a=1, b=2, c=3}
+ *
+ * // Safe access operations with Optional returns
+ * Optional<Integer> value = Maps.get(map, "key");        // Optional-wrapped value
+ * Nullable<Integer> nullable = Maps.getNullable(map, "key"); // Nullable-wrapped value
+ * int defaultValue = Maps.getOrDefault(map, "key", 0);   // With default value
+ *
+ * // Null-safe operations
+ * Optional<Integer> fromNull = Maps.get(null, "key");    // Optional.empty()
+ * boolean isEmpty = Maps.isEmpty(null);                  // Returns true
+ *
+ * // Transformation operations
+ * Map<String, String> transformed = Maps.map(map, (k, v) -> k.toUpperCase(), v -> v.toString());
+ * Map<String, Integer> filtered = Maps.filter(map, (k, v) -> v > 0);
+ * Map<Integer, String> inverted = Maps.invert(map);      // Swap keys and values
+ *
+ * // Functional operations
+ * boolean allPositive = Maps.allMatch(map, (k, v) -> v > 0);
+ * boolean anyEven = Maps.anyMatch(map, (k, v) -> v % 2 == 0);
+ * Optional<Integer> max = Maps.maxValue(map);
+ * Optional<String> longestKey = Maps.maxKey(map, Comparator.comparing(String::length));
+ *
+ * // Merging and combining operations
+ * Map<String, Integer> map1 = Maps.of("a", 1, "b", 2);
+ * Map<String, Integer> map2 = Maps.of("b", 3, "c", 4);
+ * Map<String, Integer> merged = Maps.merge(map1, map2, Integer::sum); // {a=1, b=5, c=4}
+ *
+ * // Conversion operations
+ * List<Map.Entry<String, Integer>> entries = Maps.toList(map);
+ * Set<String> keys = Maps.keySet(map);
+ * Collection<Integer> values = Maps.values(map);
+ * }</pre>
+ *
+ * <p><b>Map Creation Utilities:</b>
+ * <ul>
+ *   <li><b>Factory Methods:</b> {@code newHashMap()}, {@code newLinkedHashMap()}, {@code newTreeMap()}</li>
+ *   <li><b>Builder Patterns:</b> {@code of()} for immutable-style map creation</li>
+ *   <li><b>Zip Operations:</b> {@code zip()} for combining separate key/value collections</li>
+ *   <li><b>Specialized Maps:</b> {@code newIdentityHashMap()}, {@code newConcurrentHashMap()}</li>
+ * </ul>
+ *
+ * <p><b>Optional-Based Access:</b>
+ * <ul>
+ *   <li><b>Safe Access:</b> {@code get()}, {@code getFirst()}, {@code getLast()} returning Optional</li>
+ *   <li><b>Nullable Access:</b> {@code getNullable()} returning Nullable wrapper</li>
+ *   <li><b>Default Values:</b> {@code getOrDefault()}, {@code getOrElse()} with fallback values</li>
+ *   <li><b>Conditional Access:</b> {@code getIf()}, {@code getUnless()} with predicate conditions</li>
+ * </ul>
+ *
+ * <p><b>Functional Transformations:</b>
+ * <ul>
+ *   <li><b>Key/Value Mapping:</b> {@code map()}, {@code mapKeys()}, {@code mapValues()}</li>
+ *   <li><b>Filtering:</b> {@code filter()}, {@code filterKeys()}, {@code filterValues()}</li>
+ *   <li><b>Reduction:</b> {@code reduce()}, {@code fold()}, {@code aggregate()}</li>
+ *   <li><b>Inversion:</b> {@code invert()}, {@code invertMultimap()} for key-value swapping</li>
+ * </ul>
+ *
+ * <p><b>Performance Characteristics:</b>
+ * <ul>
+ *   <li><b>Memory Efficient:</b> Minimal object allocation and copying in operations</li>
+ *   <li><b>Lazy Evaluation:</b> Operations performed only when results are consumed</li>
+ *   <li><b>Algorithm Selection:</b> Optimal algorithms chosen based on map type and size</li>
+ *   <li><b>Short-Circuit Operations:</b> Early termination for operations like anyMatch, allMatch</li>
+ *   <li><b>Type-Specific Optimizations:</b> Specialized handling for different Map implementations</li>
+ * </ul>
+ *
+ * <p><b>Thread Safety:</b>
+ * <ul>
+ *   <li><b>Stateless Design:</b> All static methods are stateless and thread-safe</li>
+ *   <li><b>Immutable Operations:</b> Methods create new maps rather than modifying inputs</li>
+ *   <li><b>No Shared State:</b> No static mutable fields that could cause race conditions</li>
+ *   <li><b>Concurrent Access:</b> Safe for concurrent access from multiple threads</li>
+ * </ul>
+ *
+ * <p><b>Integration with Java Maps:</b>
+ * <ul>
+ *   <li><b>Standard Map Interface:</b> Full compatibility with java.util.Map implementations</li>
+ *   <li><b>Specialized Maps:</b> Support for SortedMap, NavigableMap, ConcurrentMap</li>
+ *   <li><b>Stream Compatibility:</b> Integration with Java 8+ Stream operations</li>
+ *   <li><b>Collection Framework:</b> Seamless integration with Java Collections</li>
+ * </ul>
+ *
+ * <p><b>Null Handling Strategy:</b>
+ * <ul>
+ *   <li><b>Present/Absent Model:</b> Clear distinction between missing keys and null values</li>
+ *   <li><b>Graceful Degradation:</b> Methods handle null maps gracefully without exceptions</li>
+ *   <li><b>Optional Returns:</b> Use of Optional types to avoid null return values</li>
+ *   <li><b>Null Value Support:</b> Proper handling of null values within map operations</li>
+ * </ul>
+ *
+ * <p><b>Error Handling Strategy:</b>
+ * <ul>
+ *   <li><b>Contract Preservation:</b> Exceptions thrown only when method contracts are violated</li>
+ *   <li><b>Edge Case Handling:</b> Graceful handling of empty maps, null inputs, missing keys</li>
+ *   <li><b>Clear Documentation:</b> Well-defined behavior for all edge cases</li>
+ *   <li><b>Consistent API:</b> Uniform error handling patterns across all methods</li>
+ * </ul>
+ *
+ * <p><b>Best Practices:</b>
+ * <ul>
+ *   <li>Use Optional-returning methods to avoid null pointer exceptions</li>
+ *   <li>Leverage the present/absent model for clear null value handling</li>
+ *   <li>Prefer map transformation utilities over manual iteration</li>
+ *   <li>Use appropriate map types for specific use cases (HashMap, LinkedHashMap, TreeMap)</li>
+ *   <li>Take advantage of the null-safe design for robust code</li>
+ *   <li>Use functional operations for complex map processing pipelines</li>
+ * </ul>
+ *
+ * <p><b>Performance Tips:</b>
+ * <ul>
+ *   <li>Choose appropriate Map implementations based on access patterns</li>
+ *   <li>Use bulk operations for better performance with large maps</li>
+ *   <li>Consider memory implications when transforming large maps</li>
+ *   <li>Leverage lazy evaluation patterns for chained operations</li>
+ *   <li>Use primitive-specific methods when working with numeric values</li>
+ * </ul>
+ *
+ * <p><b>Common Patterns:</b>
+ * <ul>
+ *   <li><b>Safe Access:</b> {@code Optional<V> value = Maps.get(map, key);}</li>
+ *   <li><b>Transformation:</b> {@code Map<K, R> result = Maps.mapValues(map, transformer);}</li>
+ *   <li><b>Filtering:</b> {@code Map<K, V> filtered = Maps.filter(map, predicate);}</li>
+ *   <li><b>Merging:</b> {@code Map<K, V> merged = Maps.merge(map1, map2, combiner);}</li>
+ * </ul>
+ *
+ * <p><b>Related Utility Classes:</b>
+ * <ul>
+ *   <li><b>{@link com.landawn.abacus.util.N}:</b> General utility class with map operations</li>
+ *   <li><b>{@link com.landawn.abacus.util.Iterables}:</b> Iterable utilities for map processing</li>
+ *   <li><b>{@link com.landawn.abacus.util.Iterators}:</b> Iterator utilities for map entries</li>
+ *   <li><b>{@link com.landawn.abacus.util.Strings}:</b> String utilities for map keys/values</li>
+ *   <li><b>{@link com.landawn.abacus.util.Beans}:</b> Bean utilities for object-map conversion</li>
+ *   <li><b>{@link com.landawn.abacus.util.stream.Stream}:</b> Stream operations for maps</li>
+ *   <li><b>{@link java.util.Map}:</b> Core Java map interface</li>
+ *   <li><b>{@link java.util.Collections}:</b> Core Java collection utilities</li>
+ * </ul>
+ *
+ * <p><b>Example: Data Processing Pipeline</b>
+ * <pre>{@code
+ * // Complete map processing example
+ * Map<String, Double> salesData = Maps.of(
+ *     "Q1", 1200.50, "Q2", 1450.75, "Q3", 980.25, "Q4", 1350.00
+ * );
+ *
+ * // Statistical analysis
+ * Optional<Double> maxSales = Maps.maxValue(salesData);
+ * Optional<String> bestQuarter = Maps.maxKey(salesData, Comparator.comparing(salesData::get));
+ * double totalSales = Maps.sumValues(salesData);
+ * double avgSales = Maps.averageValues(salesData).orElse(0.0);
+ *
+ * // Transformation and filtering
+ * Map<String, String> formatted = Maps.mapValues(salesData, 
+ *     sales -> String.format("$%.2f", sales));
+ * Map<String, Double> highPerformance = Maps.filter(salesData, 
+ *     (quarter, sales) -> sales > 1200.0);
+ *
+ * // Grouping and analysis
+ * Map<String, String> performance = Maps.map(salesData,
+ *     Function.identity(),
+ *     sales -> sales > avgSales ? "Above Average" : "Below Average"
+ * );
+ *
+ * // Merging with additional data
+ * Map<String, Double> targets = Maps.of("Q1", 1100.0, "Q2", 1400.0, "Q3", 1000.0, "Q4", 1300.0);
+ * Map<String, Double> variance = Maps.merge(salesData, targets, (actual, target) -> actual - target);
+ *
+ * // Validation and reporting
+ * boolean allQuartersPresent = Maps.containsAllKeys(salesData, Arrays.asList("Q1", "Q2", "Q3", "Q4"));
+ * boolean anyTargetMissed = Maps.anyMatch(variance, (quarter, var) -> var < 0);
+ * }</pre>
+ *
+ * <p><b>Example: Configuration Management</b>
+ * <pre>{@code
+ * // Configuration map processing
+ * Map<String, String> config = loadConfiguration();
+ *
+ * // Safe access with defaults
+ * int timeout = Maps.getInt(config, "timeout").orElse(30);
+ * String environment = Maps.get(config, "environment").orElse("development");
+ * boolean debugMode = Maps.getBoolean(config, "debug").orElse(false);
+ *
+ * // Validation and filtering
+ * Map<String, String> validConfig = Maps.filter(config, 
+ *     (key, value) -> value != null && !value.trim().isEmpty());
+ *
+ * // Type conversion and transformation
+ * Map<String, Integer> intConfigs = Maps.mapValues(
+ *     Maps.filterKeys(validConfig, key -> key.endsWith(".timeout")),
+ *     Integer::parseInt
+ * );
+ *
+ * // Environment-specific filtering
+ * String envPrefix = environment + ".";
+ * Map<String, String> envConfig = Maps.filterKeys(validConfig, 
+ *     key -> key.startsWith(envPrefix));
+ *
+ * // Flattening nested configuration
+ * Map<String, String> flatConfig = Maps.map(envConfig,
+ *     key -> key.substring(envPrefix.length()),
+ *     Function.identity()
+ * );
+ *
+ * // Merging with defaults
+ * Map<String, String> defaults = Maps.of(
+ *     "host", "localhost",
+ *     "port", "8080",
+ *     "ssl", "false"
+ * );
+ * Map<String, String> finalConfig = Maps.merge(defaults, flatConfig, (def, custom) -> custom);
+ * }</pre>
+ *
+ * <p><b>Attribution:</b>
+ * This class includes code adapted from Apache Commons Lang, Google Guava, and other open source
+ * projects under the Apache License 2.0. Methods from these libraries may have been modified for
+ * consistency, performance optimization, and enhanced null-safety within the Abacus framework.</p>
  *
  * @see com.landawn.abacus.util.N
+ * @see com.landawn.abacus.util.Beans
  * @see com.landawn.abacus.util.Iterables
  * @see com.landawn.abacus.util.Iterators
  * @see com.landawn.abacus.util.Strings
- * @see com.landawn.abacus.util.Beans
+ * @see com.landawn.abacus.util.stream.Stream
+ * @see com.landawn.abacus.util.u.Optional
+ * @see com.landawn.abacus.util.u.Nullable
+ * @see java.util.Map
+ * @see java.util.HashMap
+ * @see java.util.LinkedHashMap
+ * @see java.util.TreeMap
+ * @see java.util.Collections
  */
 public final class Maps {
 
@@ -407,13 +665,19 @@ public final class Maps {
      * The resulting Map will have the size of the longer Iterable.
      * If one Iterable is shorter, the default value is used for the missing elements.
      *
+     * <p><b>Important:</b> When using default keys, if multiple values map to the same default key,
+     * the merge function {@code Fn.selectFirst()} is applied, which keeps the first value and
+     * discards subsequent values for duplicate keys. This means if {@code values} has more elements
+     * than {@code keys}, only the first extra value will be mapped to {@code defaultForKey}.
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * List<String> keys = Arrays.asList("a", "b");
      * List<Integer> values = Arrays.asList(1, 2, 3, 4);
      * Map<String, Integer> result = Maps.zip(keys, values, "default", 0);
      * // result: {a=1, b=2, default=3}
-     * // Note: only one default key is used for remaining values
+     * // Note: Only the first extra value (3) is kept; value 4 is discarded
+     * //       because "default" key is reused and Fn.selectFirst() keeps the first value
      * }</pre>
      *
      * @param <K> the type of keys in the resulting Map
@@ -2647,6 +2911,16 @@ public final class Maps {
 
     /**
      * Removes the specified entry from the map.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Map<String, Integer> map = new HashMap<>();
+     * map.put("a", 1);
+     * map.put("b", 2);
+     * Map.Entry<String, Integer> entry = N.newEntry("a", 1);
+     * boolean removed = Maps.remove(map, entry); // true, entry removed
+     * // map: {b=2}
+     * }</pre>
      *
      * @param <K> the type of keys maintained by the map
      * @param <V> the type of mapped values

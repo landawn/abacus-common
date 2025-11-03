@@ -16,7 +16,6 @@ package com.landawn.abacus.parser;
 
 import org.apache.avro.Schema;
 
-import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.annotation.SuppressFBWarnings;
 import com.landawn.abacus.util.N;
 
@@ -36,7 +35,6 @@ import com.landawn.abacus.util.N;
  * List<Person> people = parser.deserialize(inputStream, config, List.class);
  * }</pre>
  * 
- * @since 0.8
  */
 public class AvroDeserializationConfig extends DeserializationConfig<AvroDeserializationConfig> {
     private Schema schema;
@@ -55,7 +53,6 @@ public class AvroDeserializationConfig extends DeserializationConfig<AvroDeseria
      *
      * @return the Avro schema, or {@code null} if not set
      */
-    @MayReturnNull
     public Schema getSchema() {
         return schema;
     }

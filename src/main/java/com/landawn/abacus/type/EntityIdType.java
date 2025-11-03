@@ -24,7 +24,7 @@ import com.landawn.abacus.util.Strings;
  * EntityIds are serialized to and from JSON format.
  */
 @SuppressWarnings("java:S2160")
-public class EntityIdType extends AbstractType<EntityId> {
+class EntityIdType extends AbstractType<EntityId> {
 
     public static final String ENTITY_ID = EntityId.class.getSimpleName();
 
@@ -84,7 +84,6 @@ public class EntityIdType extends AbstractType<EntityId> {
      *
      * @param x the EntityId to convert. Can be {@code null}.
      * @return A JSON string representation of the EntityId, or {@code null} if input is null
-     @MayReturnNull
      */
     @Override
     public String stringOf(final EntityId x) {
@@ -98,7 +97,6 @@ public class EntityIdType extends AbstractType<EntityId> {
      *
      * @param str the JSON string to parse. Can be {@code null} or empty.
      * @return An EntityId parsed from the JSON string, or {@code null} if input is null/empty
-     @MayReturnNull
      */
     @Override
     public EntityId valueOf(final String str) {

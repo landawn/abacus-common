@@ -11,7 +11,6 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-
 package com.landawn.abacus.util.function;
 
 import com.landawn.abacus.util.Throwables;
@@ -20,18 +19,31 @@ import com.landawn.abacus.util.Throwables;
  * Represents an operation that accepts two double-valued arguments and returns no result.
  * This is the two-arity specialization of {@link java.util.function.Consumer}.
  * Unlike most other functional interfaces, {@code DoubleBiConsumer} is expected to operate via side-effects.
- * 
+ *
  * <p>This is a functional interface whose functional method is {@link #accept(double, double)}.
  *
  * @see java.util.function.Consumer
  * @see java.util.function.BiConsumer
  * @see DoubleConsumer
+ *
+ * <p>Refer to JDK API documentation at: <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html">https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a></p>
  */
 @FunctionalInterface
 public interface DoubleBiConsumer extends Throwables.DoubleBiConsumer<RuntimeException> { //NOSONAR
-
     /**
      * Performs this operation on the given arguments.
+     * This method is expected to operate via side-effects.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * DoubleBiConsumer pointPrinter = (x, y) ->
+     *     System.out.println("Point: (" + x + ", " + y + ")");
+     * pointPrinter.accept(3.5, 7.2); // Prints: Point: (3.5, 7.2)
+     *
+     * Map<Double, Double> coordinates = new HashMap<>();
+     * DoubleBiConsumer coordRecorder = (lat, lon) -> coordinates.put(lat, lon);
+     * coordRecorder.accept(40.7128, -74.0060);
+     * }</pre>
      *
      * @param t the first double input argument
      * @param u the second double input argument
@@ -44,7 +56,15 @@ public interface DoubleBiConsumer extends Throwables.DoubleBiConsumer<RuntimeExc
      * If performing either operation throws an exception, it is relayed to the caller of the composed operation.
      * If performing this operation throws an exception, the {@code after} operation will not be performed.
      *
-     * @param after the operation to perform after this operation
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * DoubleBiConsumer logger = (x, y) -> System.out.println("Values: " + x + ", " + y);
+     * DoubleBiConsumer validator = (x, y) -> { if (x < 0 || y < 0) throw new IllegalArgumentException(); };
+     * DoubleBiConsumer combined = logger.andThen(validator);
+     * combined.accept(1.5, 2.5); // Logs then validates
+     * }</pre>
+     *
+     * @param after the operation to perform after this operation. Must not be {@code null}.
      * @return a composed {@code DoubleBiConsumer} that performs in sequence this operation followed by the {@code after} operation
      */
     default DoubleBiConsumer andThen(final DoubleBiConsumer after) {

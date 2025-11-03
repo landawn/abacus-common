@@ -11,7 +11,6 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-
 package com.landawn.abacus.util.function;
 
 import com.landawn.abacus.util.Throwables;
@@ -21,7 +20,7 @@ import com.landawn.abacus.util.Throwables;
  * and a long-valued argument, and returns no result. This is a specialization of BiConsumer
  * for the case where the second argument is a primitive long.
  *
- * <p>This interface extends both {@link Throwables.ObjLongConsumer} and 
+ * <p>This interface extends both {@link Throwables.ObjLongConsumer} and
  * {@link java.util.function.ObjLongConsumer}, providing compatibility with the standard
  * Java functional interfaces while adding exception handling capabilities.
  *
@@ -35,7 +34,6 @@ import com.landawn.abacus.util.Throwables;
  */
 @FunctionalInterface
 public interface ObjLongConsumer<T> extends Throwables.ObjLongConsumer<T, RuntimeException>, java.util.function.ObjLongConsumer<T> { //NOSONAR
-
     /**
      * Performs this operation on the given arguments.
      *
@@ -46,13 +44,15 @@ public interface ObjLongConsumer<T> extends Throwables.ObjLongConsumer<T, Runtim
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * ObjLongConsumer<Event> setTimestamp = (event, timestamp) -> 
-     *     event.setTimestamp(timestamp);
-     * ObjLongConsumer<Account> adjustBalance = (account, amount) -> 
-     *     account.addToBalance(amount);
-     * 
-     * setTimestamp.accept(myEvent, System.currentTimeMillis());
-     * adjustBalance.accept(myAccount, 1000L);
+     * ObjLongConsumer<StringBuilder> appendLong = (sb, value) ->
+     *     sb.append(value);
+     * ObjLongConsumer<List<Long>> addToList = (list, value) ->
+     *     list.add(value);
+     *
+     * StringBuilder sb = new StringBuilder("Value: ");
+     * appendLong.accept(sb, System.currentTimeMillis());
+     * List<Long> values = new ArrayList<>();
+     * addToList.accept(values, 1000L);
      * }</pre>
      *
      * @param t the first input argument of type T
@@ -74,14 +74,14 @@ public interface ObjLongConsumer<T> extends Throwables.ObjLongConsumer<T, Runtim
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * ObjLongConsumer<Logger> logTimestamp = (logger, timestamp) -> 
-     *     logger.log("Timestamp: " + timestamp);
-     * ObjLongConsumer<Logger> logDate = (logger, timestamp) -> 
-     *     logger.log("Date: " + new Date(timestamp));
-     * 
-     * ObjLongConsumer<Logger> logBoth = logTimestamp.andThen(logDate);
+     * ObjLongConsumer<String> logTimestamp = (prefix, timestamp) ->
+     *     System.out.println(prefix + " Timestamp: " + timestamp);
+     * ObjLongConsumer<String> logDate = (prefix, timestamp) ->
+     *     System.out.println(prefix + " Date: " + new Date(timestamp));
+     *
+     * ObjLongConsumer<String> logBoth = logTimestamp.andThen(logDate);
      * // This will log both the timestamp and its date representation
-     * logBoth.accept(myLogger, System.currentTimeMillis());
+     * logBoth.accept("Event", System.currentTimeMillis());
      * }</pre>
      *
      * @param after the operation to perform after this operation

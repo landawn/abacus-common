@@ -21,7 +21,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
 
-import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.parser.JSONXMLSerializationConfig;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.N;
@@ -49,9 +48,7 @@ public abstract class AbstractDoubleType extends NumberType<Number> {
      * @param x the Number value to convert
      * @return the string representation of the double value, or {@code null} if input is {@code null}
      */
-    @MayReturnNull
     @Override
-
     public String stringOf(final Number x) {
         if (x == null) {
             return null; // NOSONAR
@@ -69,13 +66,20 @@ public abstract class AbstractDoubleType extends NumberType<Number> {
      *   <li>Valid numeric strings are parsed to double values</li>
      * </ul>
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * AbstractDoubleType type = TypeFactory.getType(Double.class);
+     * Double value1 = type.valueOf("3.14159");  // returns 3.14159
+     * Double value2 = type.valueOf("100.5D");   // returns 100.5 (suffix stripped)
+     * Double value3 = type.valueOf("42.0f");    // returns 42.0 (suffix stripped)
+     * Double value4 = type.valueOf("");         // returns default value
+     * }</pre>
+     *
      * @param str the string to convert
      * @return the Double value
      * @throws NumberFormatException if the string cannot be parsed as a double
      */
-    @MayReturnNull
     @Override
-
     public Double valueOf(final String str) {
         try {
             return Strings.isEmpty(str) ? ((Double) defaultValue()) : Double.valueOf(str);
@@ -92,6 +96,21 @@ public abstract class AbstractDoubleType extends NumberType<Number> {
         }
     }
 
+    /**
+     * Checks if this type represents a double type.
+     * This method always returns {@code true} for double types.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * AbstractDoubleType type = TypeFactory.getType(Double.class);
+     * if (type.isDouble()) {
+     *     // Handle double type specific logic
+     *     System.out.println("This is a double type");
+     * }
+     * }</pre>
+     *
+     * @return {@code true}, indicating this is a double type
+     */
     @Override
     public boolean isDouble() {
         return true;
@@ -119,7 +138,6 @@ public abstract class AbstractDoubleType extends NumberType<Number> {
      * @throws SQLException if a database access error occurs or the columnIndex is invalid
      */
     @Override
-    @MayReturnNull
     public Double get(final ResultSet rs, final int columnIndex) throws SQLException {
         return rs.getDouble(columnIndex);
     }
@@ -146,7 +164,6 @@ public abstract class AbstractDoubleType extends NumberType<Number> {
      * @throws SQLException if a database access error occurs or the columnLabel is not found
      */
     @Override
-    @MayReturnNull
     public Double get(final ResultSet rs, final String columnLabel) throws SQLException {
         return rs.getDouble(columnLabel);
     }

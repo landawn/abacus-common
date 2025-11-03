@@ -16,7 +16,7 @@ import com.landawn.abacus.util.MutableBoolean;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Strings;
 
-public class MutableBooleanType extends AbstractType<MutableBoolean> {
+class MutableBooleanType extends AbstractType<MutableBoolean> {
 
     public static final String MUTABLE_BOOLEAN = MutableBoolean.class.getSimpleName();
 
@@ -29,7 +29,7 @@ public class MutableBooleanType extends AbstractType<MutableBoolean> {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * MutableBooleanType type = new MutableBooleanType();
+     * Type<MutableBoolean> type = TypeFactory.getType(MutableBoolean.class);
      * Class<MutableBoolean> clazz = type.clazz();
      * // Returns: MutableBoolean.class
      * }</pre>
@@ -47,7 +47,7 @@ public class MutableBooleanType extends AbstractType<MutableBoolean> {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * MutableBooleanType type = new MutableBooleanType();
+     * Type<MutableBoolean> type = TypeFactory.getType(MutableBoolean.class);
      * boolean comparable = type.isComparable();
      * // Returns: true
      * }</pre>
@@ -65,7 +65,7 @@ public class MutableBooleanType extends AbstractType<MutableBoolean> {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * MutableBooleanType type = new MutableBooleanType();
+     * Type<MutableBoolean> type = TypeFactory.getType(MutableBoolean.class);
      *
      * MutableBoolean mb = MutableBoolean.of(true);
      * String result = type.stringOf(mb);
@@ -81,7 +81,6 @@ public class MutableBooleanType extends AbstractType<MutableBoolean> {
      *
      * @param x The MutableBoolean object to convert
      * @return The string representation ("true" or "false"), or {@code null} if the input is null
-     @MayReturnNull
      */
     @Override
     public String stringOf(final MutableBoolean x) {
@@ -94,7 +93,7 @@ public class MutableBooleanType extends AbstractType<MutableBoolean> {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * MutableBooleanType type = new MutableBooleanType();
+     * Type<MutableBoolean> type = TypeFactory.getType(MutableBoolean.class);
      *
      * MutableBoolean result = type.valueOf("true");
      * // Returns: MutableBoolean with value true
@@ -111,7 +110,6 @@ public class MutableBooleanType extends AbstractType<MutableBoolean> {
      *
      * @param str The string to parse
      * @return A MutableBoolean containing the parsed value, or {@code null} if the input is {@code null} or empty
-     @MayReturnNull
      */
     @Override
     public MutableBoolean valueOf(final String str) {
@@ -124,7 +122,7 @@ public class MutableBooleanType extends AbstractType<MutableBoolean> {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * MutableBooleanType type = new MutableBooleanType();
+     * Type<MutableBoolean> type = TypeFactory.getType(MutableBoolean.class);
      * ResultSet rs = ...; // obtained from database query
      *
      * // Column contains boolean value true
@@ -152,7 +150,7 @@ public class MutableBooleanType extends AbstractType<MutableBoolean> {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * MutableBooleanType type = new MutableBooleanType();
+     * Type<MutableBoolean> type = TypeFactory.getType(MutableBoolean.class);
      * ResultSet rs = ...; // obtained from database query
      *
      * // Column "is_active" contains boolean value true
@@ -180,7 +178,7 @@ public class MutableBooleanType extends AbstractType<MutableBoolean> {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * MutableBooleanType type = new MutableBooleanType();
+     * Type<MutableBoolean> type = TypeFactory.getType(MutableBoolean.class);
      * PreparedStatement stmt = connection.prepareStatement(
      *     "INSERT INTO users (id, is_active) VALUES (?, ?)");
      *
@@ -208,7 +206,7 @@ public class MutableBooleanType extends AbstractType<MutableBoolean> {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * MutableBooleanType type = new MutableBooleanType();
+     * Type<MutableBoolean> type = TypeFactory.getType(MutableBoolean.class);
      * CallableStatement stmt = connection.prepareCall("{call update_status(?, ?)}");
      *
      * MutableBoolean mb = MutableBoolean.of(true);
@@ -235,7 +233,7 @@ public class MutableBooleanType extends AbstractType<MutableBoolean> {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * MutableBooleanType type = new MutableBooleanType();
+     * Type<MutableBoolean> type = TypeFactory.getType(MutableBoolean.class);
      * StringBuilder sb = new StringBuilder();
      *
      * MutableBoolean mb = MutableBoolean.of(true);
@@ -268,7 +266,7 @@ public class MutableBooleanType extends AbstractType<MutableBoolean> {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * MutableBooleanType type = new MutableBooleanType();
+     * Type<MutableBoolean> type = TypeFactory.getType(MutableBoolean.class);
      * CharacterWriter writer = new CharacterWriter();
      * JSONXMLSerializationConfig config = JSONXMLSerializationConfig.of();
      *

@@ -11,21 +11,21 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-
 package com.landawn.abacus.util.function;
 
 /**
  * Represents a function that accepts a short-valued argument and produces an int-valued result.
  * This is the {@code short}-to-{@code int} primitive specialization for {@link java.util.function.Function}.
- * 
+ *
  * <p>This is a functional interface whose functional method is {@link #applyAsInt(short)}.
- * 
+ *
  * @see java.util.function.Function
  * @see java.util.function.ToIntFunction
+ *
+ * <p>Refer to JDK API documentation at: <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html">https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a></p>
  */
 @FunctionalInterface
 public interface ShortToIntFunction {
-
     /**
      * A function that performs a widening primitive conversion from short to int.
      * This is equivalent to a simple cast operation and will always preserve the exact numeric value.

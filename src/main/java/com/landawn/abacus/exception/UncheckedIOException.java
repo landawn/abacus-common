@@ -56,7 +56,6 @@ import java.io.Serial;
  * };
  * }</pre>
  * 
- * @since 1.0
  * @see UncheckedException
  * @see IOException
  * @see java.io.UncheckedIOException
@@ -89,11 +88,12 @@ public class UncheckedIOException extends UncheckedException {
     }
 
     /**
-     * Constructs a new {@code UncheckedIOException} with a custom message and the specified {@link IOException}.
-     * 
+     * Constructs a new {@code UncheckedIOException} with the specified detail message
+     * and {@link IOException}.
+     *
      * <p>This constructor allows you to provide additional context about the I/O operation
      * that failed, while preserving all information from the original exception.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * try {

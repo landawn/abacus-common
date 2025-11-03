@@ -11,7 +11,6 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-
 package com.landawn.abacus.util.function;
 
 /**
@@ -23,11 +22,11 @@ package com.landawn.abacus.util.function;
  * {@link #applyAsByte(int)}.
  *
  * @see java.util.function.Function
- * @since 1.8
+ *
+ * <p>Refer to JDK API documentation at: <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html">https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a></p>
  */
 @FunctionalInterface
 public interface IntToByteFunction {
-
     /**
      * A default implementation that performs a narrowing primitive conversion
      * from {@code int} to {@code byte}. This may result in loss of information
@@ -43,6 +42,20 @@ public interface IntToByteFunction {
      * from {@code int} to {@code byte} may result in loss of precision,
      * as {@code byte} can only represent values from -128 to 127, while
      * {@code int} can represent values from -2,147,483,648 to 2,147,483,647.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * IntToByteFunction toByte = value -> (byte) value;
+     * byte result1 = toByte.applyAsByte(65); // Returns 65 (ASCII 'A')
+     * byte result2 = toByte.applyAsByte(255); // Returns -1 (overflow)
+     *
+     * IntToByteFunction clampToByte = value -> {
+     *     if (value > 127) return 127;
+     *     if (value < -128) return -128;
+     *     return (byte) value;
+     * };
+     * byte result3 = clampToByte.applyAsByte(200); // Returns 127 (clamped)
+     * }</pre>
      *
      * @param value the function argument, an int value to be converted to byte
      * @return the function result as a byte value. If the input value is outside

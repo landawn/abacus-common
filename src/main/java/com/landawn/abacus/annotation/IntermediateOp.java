@@ -55,13 +55,16 @@ import java.lang.annotation.Target;
  * 
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
+ * import java.util.function.Function;
+ * import java.util.function.Predicate;
+ *
  * public class StreamProcessor<T> {
  *     @IntermediateOp
  *     public StreamProcessor<T> filter(Predicate<T> predicate) {
  *         // Returns new stream without processing elements
  *         return new FilteredStream<>(this, predicate);
  *     }
- *     
+ *
  *     @IntermediateOp
  *     public <R> StreamProcessor<R> map(Function<T, R> mapper) {
  *         // Lazy transformation operation
@@ -73,7 +76,6 @@ import java.lang.annotation.Target;
  * @see TerminalOp
  * @see LazyEvaluation
  * @see <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/stream/Stream.html">java.util.Stream</a>
- * @since 2018
  */
 @Documented
 @Retention(value = RetentionPolicy.CLASS)

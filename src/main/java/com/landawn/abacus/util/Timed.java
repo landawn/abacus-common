@@ -37,7 +37,6 @@ package com.landawn.abacus.util;
  * }</pre>
  * 
  * @param <T> the type of the value being timed
- * @since 1.0
  */
 @com.landawn.abacus.annotation.Immutable
 public final class Timed<T> implements Immutable {

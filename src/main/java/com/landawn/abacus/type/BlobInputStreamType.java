@@ -26,7 +26,7 @@ import java.sql.SQLException;
  * This class specializes in converting between SQL Blob objects and InputStreams,
  * providing seamless integration between database BLOB data and Java I/O streams.
  */
-public class BlobInputStreamType extends InputStreamType {
+class BlobInputStreamType extends InputStreamType {
 
     /**
      * The type name constant for BLOB InputStream type identification.
@@ -45,7 +45,6 @@ public class BlobInputStreamType extends InputStreamType {
      * @param columnIndex the column index (1-based) of the BLOB value
      * @return an InputStream for reading the BLOB data, or {@code null} if the value is SQL NULL
      * @throws SQLException if a database access error occurs or the columnIndex is invalid
-     @MayReturnNull
      */
     @Override
     public InputStream get(final ResultSet rs, final int columnIndex) throws SQLException {
@@ -62,7 +61,6 @@ public class BlobInputStreamType extends InputStreamType {
      *                    or the column name if no AS clause was specified
      * @return an InputStream for reading the BLOB data, or {@code null} if the value is SQL NULL
      * @throws SQLException if a database access error occurs or the columnLabel is invalid
-     @MayReturnNull
      */
     @Override
     public InputStream get(final ResultSet rs, final String columnLabel) throws SQLException {

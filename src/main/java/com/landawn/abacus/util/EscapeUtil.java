@@ -29,13 +29,17 @@ import java.util.Set;
 
 import com.landawn.abacus.annotation.MayReturnNull;
 
-/**
- * Note: it's copied from StringEscaperUtils in Apache Commons Lang under Apache License 2.0
+/** 
  *
  * <p>Escapes and unescapes {@code String}s for
  * Java, Java Script, HTML and XML.</p>
  *
  * <p>#ThreadSafe#</p>
+ *
+ * <p><b>Attribution:</b>
+ * This class includes code adapted from Apache Commons Lang, Google Guava, and other
+ * open source projects under the Apache License 2.0. Methods from these libraries may have been
+ * modified for consistency, performance optimization, and null-safety enhancement.
  */
 @SuppressWarnings({ "java:S100", "java:S3878", "UnnecessaryUnicodeEscape", "SpellCheckingInspection" })
 public final class EscapeUtil {
@@ -63,7 +67,6 @@ public final class EscapeUtil {
      * While {@link #escapeJava(String)} is the expected method of use, this
      * object allows the Java escaping functionality to be used
      * as the foundation for a custom translator.
-     *
      */
     public static final CharSequenceTranslator ESCAPE_JAVA = new LookupTranslator(new String[][] { { "\"", "\\\"" }, { "\\", "\\\\" }, })
             .with(new LookupTranslator(BeanArrays.JAVA_CTRL_CHARS_ESCAPE()))
@@ -75,7 +78,6 @@ public final class EscapeUtil {
      * While {@link #escapeEcmaScript(String)} is the expected method of use, this
      * object allows the EcmaScript escaping functionality to be used
      * as the foundation for a custom translator.
-     *
      */
     public static final CharSequenceTranslator ESCAPE_ECMASCRIPT = new AggregateTranslator(
             new LookupTranslator(new String[][] { { "'", "\\'" }, { "\"", "\\\"" }, { "\\", "\\\\" }, { "/", "\\/" } }),
@@ -87,7 +89,6 @@ public final class EscapeUtil {
      * While {@link #escapeJson(String)} is the expected method of use, this
      * object allows the JSON escaping functionality to be used
      * as the foundation for a custom translator.
-     *
      */
     public static final CharSequenceTranslator ESCAPE_JSON = new AggregateTranslator(
             new LookupTranslator(new String[][] { { "\"", "\\\"" }, { "\\", "\\\\" }, { "/", "\\/" } }),
@@ -99,7 +100,6 @@ public final class EscapeUtil {
      * While {@link #escapeXml10(String)} is the expected method of use, this
      * object allows the XML escaping functionality to be used
      * as the foundation for a custom translator.
-     *
      */
     public static final CharSequenceTranslator ESCAPE_XML10 = new AggregateTranslator(new LookupTranslator(BeanArrays.BASIC_ESCAPE()),
             new LookupTranslator(BeanArrays.APOS_ESCAPE()),
@@ -119,7 +119,6 @@ public final class EscapeUtil {
      * While {@link #escapeXml11(String)} is the expected method of use, this
      * object allows the XML escaping functionality to be used
      * as the foundation for a custom translator.
-     *
      */
     public static final CharSequenceTranslator ESCAPE_XML11 = new AggregateTranslator(new LookupTranslator(BeanArrays.BASIC_ESCAPE()),
             new LookupTranslator(BeanArrays.APOS_ESCAPE()),
@@ -134,7 +133,6 @@ public final class EscapeUtil {
      * While {@link #escapeHtml3(String)} is the expected method of use, this
      * object allows the HTML escaping functionality to be used
      * as the foundation for a custom translator.
-     *
      */
     public static final CharSequenceTranslator ESCAPE_HTML3 = new AggregateTranslator(new LookupTranslator(BeanArrays.BASIC_ESCAPE()),
             new LookupTranslator(BeanArrays.ISO8859_1_ESCAPE()));
@@ -145,7 +143,6 @@ public final class EscapeUtil {
      * While {@link #escapeHtml4(String)} is the expected method of use, this
      * object allows the HTML escaping functionality to be used
      * as the foundation for a custom translator.
-     *
      */
     public static final CharSequenceTranslator ESCAPE_HTML4 = new AggregateTranslator(new LookupTranslator(BeanArrays.BASIC_ESCAPE()),
             new LookupTranslator(BeanArrays.ISO8859_1_ESCAPE()), new LookupTranslator(BeanArrays.HTML40_EXTENDED_ESCAPE()));
@@ -156,7 +153,6 @@ public final class EscapeUtil {
      * While {@link #escapeCsv(String)} is the expected method of use, this
      * object allows the CSV escaping functionality to be used
      * as the foundation for a custom translator.
-     *
      */
     public static final CharSequenceTranslator ESCAPE_CSV = new CsvEscaper();
 
@@ -168,7 +164,6 @@ public final class EscapeUtil {
      * While {@link #unescapeJava(String)} is the expected method of use, this
      * object allows the Java unescaping functionality to be used
      * as the foundation for a custom translator.
-     *
      */
     // TODO: throw "illegal character: \92" as an Exception if a \ on the end of the Java (as per the compiler)?
     public static final CharSequenceTranslator UNESCAPE_JAVA = new AggregateTranslator(new OctalUnescaper(), // .between('\1', '\377'),
@@ -181,7 +176,6 @@ public final class EscapeUtil {
      * While {@link #unescapeEcmaScript(String)} is the expected method of use, this
      * object allows the EcmaScript unescaping functionality to be used
      * as the foundation for a custom translator.
-     *
      */
     public static final CharSequenceTranslator UNESCAPE_ECMASCRIPT = UNESCAPE_JAVA;
 
@@ -191,7 +185,6 @@ public final class EscapeUtil {
      * While {@link #unescapeJson(String)} is the expected method of use, this
      * object allows the JSON unescaping functionality to be used
      * as the foundation for a custom translator.
-     *
      */
     public static final CharSequenceTranslator UNESCAPE_JSON = UNESCAPE_JAVA;
 
@@ -201,7 +194,6 @@ public final class EscapeUtil {
      * While {@link #unescapeHtml3(String)} is the expected method of use, this
      * object allows the HTML unescaping functionality to be used
      * as the foundation for a custom translator.
-     *
      */
     public static final CharSequenceTranslator UNESCAPE_HTML3 = new AggregateTranslator(new LookupTranslator(BeanArrays.BASIC_UNESCAPE()),
             new LookupTranslator(BeanArrays.ISO8859_1_UNESCAPE()), new NumericBeanUnescaper());
@@ -212,7 +204,6 @@ public final class EscapeUtil {
      * While {@link #unescapeHtml4(String)} is the expected method of use, this
      * object allows the HTML unescaping functionality to be used
      * as the foundation for a custom translator.
-     *
      */
     public static final CharSequenceTranslator UNESCAPE_HTML4 = new AggregateTranslator(new LookupTranslator(BeanArrays.BASIC_UNESCAPE()),
             new LookupTranslator(BeanArrays.ISO8859_1_UNESCAPE()), new LookupTranslator(BeanArrays.HTML40_EXTENDED_UNESCAPE()), new NumericBeanUnescaper());
@@ -223,7 +214,6 @@ public final class EscapeUtil {
      * While {@link #unescapeXml(String)} is the expected method of use, this
      * object allows the XML unescaping functionality to be used
      * as the foundation for a custom translator.
-     *
      */
     public static final CharSequenceTranslator UNESCAPE_XML = new AggregateTranslator(new LookupTranslator(BeanArrays.BASIC_UNESCAPE()),
             new LookupTranslator(BeanArrays.APOS_UNESCAPE()), new NumericBeanUnescaper());
@@ -234,7 +224,6 @@ public final class EscapeUtil {
      * While {@link #unescapeCsv(String)} is the expected method of use, this
      * object allows the CSV unescaping functionality to be used
      * as the foundation for a custom translator.
-     *
      */
     public static final CharSequenceTranslator UNESCAPE_CSV = new CsvUnescaper();
 
@@ -688,7 +677,6 @@ public final class EscapeUtil {
      * An API for translating text.
      * Its core use is to escape and unescape text. Because escaping and unescaping
      * is completely contextual, the API does not present two separate signatures.
-     *
      */
     public abstract static class CharSequenceTranslator {
 
@@ -806,7 +794,6 @@ public final class EscapeUtil {
     /**
      * Executes a sequence of translators one after the other. Execution ends whenever
      * the first translator consumes codepoints from the input.
-     *
      */
     static class AggregateTranslator extends CharSequenceTranslator {
 
@@ -841,7 +828,6 @@ public final class EscapeUtil {
 
     /**
      * Translates codepoints to their Unicode escaped value suitable for Java source.
-     *
      */
     static class JavaUnicodeEscaper extends UnicodeEscaper {
 
@@ -925,7 +911,6 @@ public final class EscapeUtil {
 
     /**
      * Translates codepoints to their XML numeric bean escaped value.
-     *
      */
     static class NumericBeanEscaper extends CodePointTranslator {
 
@@ -1043,7 +1028,6 @@ public final class EscapeUtil {
     /**
      * Translates escaped Unicode values of the form {@code \\u+\d\d\d\d} back to Unicode.
      * It supports multiple {@code 'u'} characters and will work with or without the {@code +}.
-     *
      */
     static class UnicodeUnescaper extends CharSequenceTranslator {
 
@@ -1084,7 +1068,6 @@ public final class EscapeUtil {
 
     /**
      * Translates codepoints to their Unicode escaped value.
-     *
      */
     static class UnicodeEscaper extends CodePointTranslator {
 
@@ -1208,7 +1191,6 @@ public final class EscapeUtil {
      *
      * Note that this currently only supports the viable range of octal for Java; namely
      * 1 to 377. This is because parsing Java is the main use case.
-     *
      */
     static class OctalUnescaper extends CharSequenceTranslator {
 
@@ -1264,7 +1246,6 @@ public final class EscapeUtil {
      * the specific codepoint.
      *
      * Note that the semicolon is optional.
-     *
      */
     static class NumericBeanUnescaper extends CharSequenceTranslator {
 
@@ -1385,7 +1366,6 @@ public final class EscapeUtil {
 
     /**
      * Translates a value using a lookup table.
-     *
      */
     static class LookupTranslator extends CharSequenceTranslator {
 
@@ -1460,7 +1440,6 @@ public final class EscapeUtil {
     /**
      * Helper subclass to CharSequenceTranslator to allow for translations that
      * will replace up to one character at a time.
-     *
      */
     abstract static class CodePointTranslator extends CharSequenceTranslator {
 
@@ -1588,7 +1567,6 @@ public final class EscapeUtil {
      * Class holding various bean data for HTML and XML - generally for use with
      * the LookupTranslator.
      * All arrays are of length [*][2].
-     *
      */
     static class BeanArrays {
         private BeanArrays() {

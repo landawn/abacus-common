@@ -26,7 +26,7 @@ import com.landawn.abacus.type.Type;
 
 /**
  * Internal utility class that provides commonly used static instances of parsers, serialization configurations,
- * and type objects for the Abacus framework. This class serves as a centralized registry for frequently
+ * and type objects for the abacus-common framework. This class serves as a centralized registry for frequently
  * accessed objects to improve performance and reduce object creation overhead.
  * 
  * <p>This class is package-private and intended for internal use only within the util package.

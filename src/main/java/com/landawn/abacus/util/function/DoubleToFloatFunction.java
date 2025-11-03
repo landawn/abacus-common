@@ -11,22 +11,22 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-
 package com.landawn.abacus.util.function;
 
 /**
  * Represents a function that accepts a double-valued argument and produces a float-valued result.
  * This is the double-to-float primitive specialization for {@link java.util.function.Function}.
- * 
+ *
  * <p>This is a functional interface whose functional method is {@link #applyAsFloat(double)}.
  *
  * @see java.util.function.Function
  * @see DoubleToIntFunction
  * @see DoubleToLongFunction
+ *
+ * <p>Refer to JDK API documentation at: <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html">https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a></p>
  */
 @FunctionalInterface
 public interface DoubleToFloatFunction {
-
     /**
      * A default implementation that casts the double value to float.
      * Note that this conversion may lose precision for large double values.
@@ -35,6 +35,15 @@ public interface DoubleToFloatFunction {
 
     /**
      * Applies this function to the given argument.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * DoubleToFloatFunction toFloat = DoubleToFloatFunction.DEFAULT;
+     * float result = toFloat.applyAsFloat(3.14159); // Returns 3.14159f
+     *
+     * DoubleToFloatFunction rounder = val -> Math.round(val * 100) / 100.0f;
+     * float result2 = rounder.applyAsFloat(3.14159); // Returns 3.14f
+     * }</pre>
      *
      * @param value the double function argument
      * @return the float function result

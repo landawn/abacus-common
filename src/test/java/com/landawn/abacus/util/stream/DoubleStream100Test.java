@@ -449,7 +449,7 @@ public class DoubleStream100Test extends TestBase {
     }
 
     @Test
-    @DisplayName("flatten() should flatten 2D array")
+    @DisplayName("flatten() should flatten two-dimensional array")
     public void testFlatten2D_2() {
         double[][] array = { { 1.0d, 2.0d }, { 3.0d, 4.0d } };
         double[] result = DoubleStream.flatten(array, false).toArray();
@@ -460,7 +460,7 @@ public class DoubleStream100Test extends TestBase {
     }
 
     @Test
-    @DisplayName("flatten() should flatten 2D array")
+    @DisplayName("flatten() should flatten two-dimensional array")
     public void testFlatten2D_3() {
         double[][] array = { { 1.0d, 2.0d }, { 3.0d, 4.0d, 5.f } };
         double[] result = DoubleStream.flatten(array, 0.0d, false).toArray();

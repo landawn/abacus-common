@@ -17,15 +17,13 @@ package com.landawn.abacus.type;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-import com.landawn.abacus.annotation.MayReturnNull;
-
 /**
  * Type handler for Character (wrapper class) values.
  * This class provides database operations and type information for Character objects.
  * It handles the conversion between database string values and Java Character objects,
  * extracting the first character from string values when available.
  */
-public final class CharacterType extends AbstractCharacterType {
+final class CharacterType extends AbstractCharacterType {
 
     public static final String CHARACTER = Character.class.getSimpleName();
 
@@ -34,9 +32,9 @@ public final class CharacterType extends AbstractCharacterType {
     }
 
     /**
-     * Returns the Java class type handled by this type handler.
+     * Returns the Class object representing the Character class.
      *
-     * @return The Class object representing Character.class
+     * @return the Class object for Character.class
      */
     @Override
     public Class<Character> clazz() {
@@ -45,9 +43,9 @@ public final class CharacterType extends AbstractCharacterType {
 
     /**
      * Indicates whether this type represents a primitive wrapper class.
-     * Since this handles the Character wrapper class (not the primitive char), this returns {@code true}.
+     * Character is the wrapper class for the primitive char type.
      *
-     * @return {@code true}, indicating this is a primitive wrapper type
+     * @return {@code true}, indicating Character is a primitive wrapper
      */
     @Override
     public boolean isPrimitiveWrapper() {
@@ -57,16 +55,20 @@ public final class CharacterType extends AbstractCharacterType {
     /**
      * Retrieves a Character value from a ResultSet at the specified column index.
      * The method reads the value as a String and returns the first character.
-     * If the database value is NULL or an empty string, this method returns {@code null}.
      *
-     * @param rs the ResultSet containing the data
-     * @param columnIndex the column index (1-based) of the character value
-     * @return The first character of the string value at the specified column, or {@code null} if the column value is SQL NULL
-     * @throws SQLException if a database access error occurs or the column index is invalid
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Type<Character> type = TypeFactory.getType(Character.class);
+     * ResultSet rs = ...; // from SQL query
+     * Character initial = type.get(rs, 1); // retrieves Character from column 1
+     * }</pre>
+     *
+     * @param rs the ResultSet containing the data, must not be {@code null}
+     * @param columnIndex the column index (1-based) to retrieve the value from
+     * @return the first character of the string value at the specified column, or {@code null} if the column value is SQL NULL
+     * @throws SQLException if a database access error occurs
      */
-    @MayReturnNull
     @Override
-
     public Character get(final ResultSet rs, final int columnIndex) throws SQLException {
         final String ret = rs.getString(columnIndex);
 
@@ -80,16 +82,20 @@ public final class CharacterType extends AbstractCharacterType {
     /**
      * Retrieves a Character value from a ResultSet using the specified column label.
      * The method reads the value as a String and returns the first character.
-     * If the database value is NULL or an empty string, this method returns {@code null}.
      *
-     * @param rs the ResultSet containing the data
-     * @param columnLabel the label of the column containing the character value
-     * @return The first character of the string value in the specified column, or {@code null} if the column value is SQL NULL
-     * @throws SQLException if a database access error occurs or the column label is not found
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Type<Character> type = TypeFactory.getType(Character.class);
+     * ResultSet rs = ...; // from SQL query
+     * Character initial = type.get(rs, "initial"); // retrieves Character from "initial" column
+     * }</pre>
+     *
+     * @param rs the ResultSet containing the data, must not be {@code null}
+     * @param columnLabel the label of the column to retrieve the value from, must not be {@code null}
+     * @return the first character of the string value in the specified column, or {@code null} if the column value is SQL NULL
+     * @throws SQLException if a database access error occurs
      */
-    @MayReturnNull
     @Override
-
     public Character get(final ResultSet rs, final String columnLabel) throws SQLException {
         final String ret = rs.getString(columnLabel);
 

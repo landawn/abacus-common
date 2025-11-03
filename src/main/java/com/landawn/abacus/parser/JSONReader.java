@@ -41,7 +41,6 @@ import com.landawn.abacus.type.Type;
  * 
  * <p>This is an internal interface and should not be used directly by application code.</p>
  * 
- * @since 0.8
  */
 interface JSONReader {
     // < 32 = ' ' (Space) White space
@@ -266,9 +265,6 @@ interface JSONReader {
      * 
      * <p>This is an internal interface used for performance optimization
      * and should not be implemented by application code.</p>
-     * 
-     * @author HaiYang Li
-     * @since 0.8
      */
     interface SymbolReader {
         /**

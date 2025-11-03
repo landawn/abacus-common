@@ -18,7 +18,6 @@ import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.Writer;
 
-import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.exception.UncheckedIOException;
 import com.landawn.abacus.parser.JSONXMLSerializationConfig;
 import com.landawn.abacus.util.CharacterWriter;
@@ -47,7 +46,7 @@ import com.landawn.abacus.util.WD;
  * @param <T9> the type of the ninth element in the tuple
  */
 @SuppressWarnings("java:S2160")
-public class Tuple9Type<T1, T2, T3, T4, T5, T6, T7, T8, T9> extends AbstractType<Tuple9<T1, T2, T3, T4, T5, T6, T7, T8, T9>> {
+class Tuple9Type<T1, T2, T3, T4, T5, T6, T7, T8, T9> extends AbstractType<Tuple9<T1, T2, T3, T4, T5, T6, T7, T8, T9>> {
 
     private final String declaringName;
 
@@ -133,7 +132,6 @@ public class Tuple9Type<T1, T2, T3, T4, T5, T6, T7, T8, T9> extends AbstractType
      * @return a JSON string representation of the tuple, or {@code null} if x is null
      */
     @Override
-    @MayReturnNull
     public String stringOf(final Tuple9<T1, T2, T3, T4, T5, T6, T7, T8, T9> x) {
         return (x == null) ? null : Utils.jsonParser.serialize(N.asArray(x._1, x._2, x._3, x._4, x._5, x._6, x._7, x._8, x._9), Utils.jsc);
     }
@@ -146,7 +144,6 @@ public class Tuple9Type<T1, T2, T3, T4, T5, T6, T7, T8, T9> extends AbstractType
      * @param str the JSON string to parse
      * @return a Tuple9 object parsed from the string, or {@code null} if str is empty
      */
-    @MayReturnNull
     @SuppressWarnings({ "unchecked", "deprecation" })
     @Override
     public Tuple9<T1, T2, T3, T4, T5, T6, T7, T8, T9> valueOf(final String str) {

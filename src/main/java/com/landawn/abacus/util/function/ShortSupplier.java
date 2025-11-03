@@ -11,7 +11,6 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-
 package com.landawn.abacus.util.function;
 
 import com.landawn.abacus.util.Throwables;
@@ -19,22 +18,22 @@ import com.landawn.abacus.util.Throwables;
 /**
  * Represents a supplier of short-valued results. This is the short-producing
  * primitive specialization of {@link java.util.function.Supplier}.
- * 
+ *
  * <p>There is no requirement that a new or distinct result be returned each time the supplier is invoked.
- * 
+ *
  * <p>This is a functional interface whose functional method is {@link #getAsShort()}.
- * 
+ *
  * @see java.util.function.Supplier
+ *
+ * <p>Refer to JDK API documentation at: <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html">https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a></p>
  */
 @FunctionalInterface
 public interface ShortSupplier extends Throwables.ShortSupplier<RuntimeException> { //NOSONAR
-
     /**
      * A supplier that always returns zero (0).
      * This supplier returns the same value on every invocation.
      */
     ShortSupplier ZERO = () -> 0;
-
     /**
      * A supplier that returns random short values.
      * Each invocation returns a different pseudo-random short value within the full range of short values.
@@ -61,7 +60,7 @@ public interface ShortSupplier extends Throwables.ShortSupplier<RuntimeException
      * short value4 = counter.getAsShort(); // returns 1
      * }</pre>
      *
-     * @return a short value if a value cannot be supplied
+     * @return a short value
      */
     @Override
     short getAsShort();

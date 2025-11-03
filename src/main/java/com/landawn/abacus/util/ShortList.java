@@ -36,20 +36,279 @@ import com.landawn.abacus.util.function.ShortUnaryOperator;
 import com.landawn.abacus.util.stream.ShortStream;
 
 /**
- * A resizable, primitive short array implementation that provides better performance than ArrayList&lt;Short&gt;
- * by avoiding autoboxing/unboxing overhead. This class is similar to ArrayList but stores primitive short values
- * directly. It automatically grows as elements are added.
- * 
- * <p>This class is NOT thread-safe. If multiple threads access a ShortList instance concurrently,
- * and at least one thread modifies the list structurally, it must be synchronized externally.</p>
- * 
- * <p>The iterators returned by this class's iterator methods are fail-fast: if the list is structurally
- * modified at any time after the iterator is created, the iterator will throw a ConcurrentModificationException.</p>
+ * A high-performance, resizable array implementation for primitive short values that provides
+ * specialized operations optimized for 16-bit integer data types. This class extends {@link PrimitiveList}
+ * to offer memory-efficient storage and operations that avoid the boxing overhead associated with
+ * {@code List<Short>}, making it ideal for applications requiring intensive short integer array
+ * manipulation with optimal performance characteristics.
  *
+ * <p>ShortList is specifically designed for scenarios involving large collections of small integer
+ * values such as audio sample data, compact integer storage, memory-constrained applications,
+ * embedded systems programming, and performance-critical applications requiring 16-bit integer
+ * precision. The implementation uses a compact short array as the underlying storage mechanism,
+ * providing direct primitive access without wrapper object allocation.</p>
+ *
+ * <p><b>Key Features:</b>
+ * <ul>
+ *   <li><b>Zero-Boxing Overhead:</b> Direct short primitive storage without Short wrapper allocation</li>
+ *   <li><b>Memory Efficiency:</b> Compact short array storage with minimal memory overhead</li>
+ *   <li><b>16-bit Integer Range:</b> Full support for short integer range (-32,768 to 32,767)</li>
+ *   <li><b>High Performance:</b> Optimized algorithms for short-specific operations</li>
+ *   <li><b>Rich Mathematical API:</b> Statistical operations like min, max, median</li>
+ *   <li><b>Set Operations:</b> Efficient intersection, union, and difference operations</li>
+ *   <li><b>Range Generation:</b> Built-in support for arithmetic progressions and sequences</li>
+ *   <li><b>Random Access:</b> O(1) element access and modification by index</li>
+ *   <li><b>Dynamic Sizing:</b> Automatic capacity management with intelligent growth</li>
+ *   <li><b>Type Conversions:</b> Seamless conversion to other numeric primitive lists</li>
+ * </ul>
+ *
+ * <p><b>Common Use Cases:</b>
+ * <ul>
+ *   <li><b>Audio Processing:</b> 16-bit audio samples, digital signal processing, sound data</li>
+ *   <li><b>Memory-Constrained Systems:</b> Embedded systems, IoT devices, mobile applications</li>
+ *   <li><b>Image Processing:</b> Pixel values, grayscale data, compressed image formats</li>
+ *   <li><b>Network Protocols:</b> Port numbers, packet headers, protocol fields</li>
+ *   <li><b>Data Compression:</b> Compact integer storage, delta encoding, difference arrays</li>
+ *   <li><b>Gaming Applications:</b> Tile IDs, sprite indices, game state data</li>
+ *   <li><b>Sensor Data:</b> Accelerometer readings, temperature values, measurement data</li>
+ *   <li><b>Database Systems:</b> Compact integer columns, index storage, enumeration values</li>
+ * </ul>
+ *
+ * <p><b>Usage Examples:</b></p>
+ * <pre>{@code
+ * // Creating and initializing short lists
+ * ShortList audioSamples = ShortList.of((short) 1024, (short) -512, (short) 2048);
+ * ShortList range = ShortList.range((short) 1, (short) 100);    // [1, 2, 3, ..., 99]
+ * ShortList sequence = ShortList.range((short) 0, (short) 50, (short) 5); // [0, 5, 10, ..., 45]
+ * ShortList sensorData = new ShortList(1000);                  // Pre-sized for performance
+ *
+ * // Basic operations
+ * audioSamples.add((short) 3072);                             // Add audio sample
+ * short firstSample = audioSamples.get(0);                    // Access by index: 1024
+ * audioSamples.set(1, (short) -1024);                         // Modify existing sample
+ *
+ * // Mathematical operations for 16-bit data
+ * OptionalShort min = audioSamples.min();                     // Find minimum sample
+ * OptionalShort max = audioSamples.max();                     // Find maximum sample
+ * OptionalShort median = audioSamples.median();               // Calculate median sample
+ *
+ * // Set operations for data analysis
+ * ShortList set1 = ShortList.of((short) 100, (short) 200, (short) 300);
+ * ShortList set2 = ShortList.of((short) 200, (short) 300, (short) 400);
+ * ShortList intersection = set1.intersection(set2);           // [200, 300]
+ * ShortList difference = set1.difference(set2);               // [100]
+ *
+ * // High-performance sorting and searching
+ * audioSamples.sort();                                        // Sort samples
+ * audioSamples.parallelSort();                                // Parallel sort for large datasets
+ * int index = audioSamples.binarySearch((short) 1024);        // Fast lookup
+ *
+ * // Type conversions for different precision needs
+ * IntList intValues = audioSamples.toIntList();               // Convert to int (no precision loss)
+ * LongList longValues = audioSamples.toLongList();            // Convert to long (no precision loss)
+ * FloatList floatValues = audioSamples.toFloatList();         // Convert to float
+ * short[] primitiveArray = audioSamples.toArray();            // To primitive array
+ * List<Short> boxedList = audioSamples.boxed();               // To boxed collection
+ * }</pre>
+ *
+ * <p><b>Performance Characteristics:</b>
+ * <ul>
+ *   <li><b>Element Access:</b> O(1) for get/set operations by index</li>
+ *   <li><b>Insertion:</b> O(1) amortized for append, O(n) for middle insertion</li>
+ *   <li><b>Deletion:</b> O(1) for last element, O(n) for arbitrary position</li>
+ *   <li><b>Search:</b> O(n) for contains/indexOf, O(log n) for binary search on sorted data</li>
+ *   <li><b>Sorting:</b> O(n log n) using optimized primitive sorting algorithms</li>
+ *   <li><b>Set Operations:</b> O(n) to O(n²) depending on algorithm selection and data size</li>
+ *   <li><b>Mathematical Operations:</b> O(n) for statistical calculations</li>
+ * </ul>
+ *
+ * <p><b>Memory Efficiency:</b>
+ * <ul>
+ *   <li><b>Storage:</b> 2 bytes per element (16 bits) with no object overhead</li>
+ *   <li><b>vs List&lt;Short&gt;:</b> ~8x less memory usage (no Short wrapper objects)</li>
+ *   <li><b>vs IntList:</b> 50% less memory usage for values within short range</li>
+ *   <li><b>Capacity Management:</b> 1.75x growth factor balances memory and performance</li>
+ *   <li><b>Maximum Size:</b> Limited by {@code MAX_ARRAY_SIZE} (typically Integer.MAX_VALUE - 8)</li>
+ * </ul>
+ *
+ * <p><b>Short-Specific Operations:</b>
+ * <ul>
+ *   <li><b>Range Generation:</b> {@code range()}, {@code rangeClosed()} for arithmetic sequences</li>
+ *   <li><b>Mathematical Functions:</b> {@code min()}, {@code max()}, {@code median()}</li>
+ *   <li><b>Type Conversions:</b> {@code toIntList()}, {@code toLongList()}, {@code toFloatList()}, {@code toDoubleList()}</li>
+ *   <li><b>Random Generation:</b> {@code random()} methods for test data and simulations</li>
+ *   <li><b>Bulk Updates:</b> {@code replaceAll()}, {@code replaceIf()} for value transformations</li>
+ * </ul>
+ *
+ * <p><b>Factory Methods:</b>
+ * <ul>
+ *   <li><b>{@code of(short...)}:</b> Create from varargs array</li>
+ *   <li><b>{@code copyOf(short[])}:</b> Create defensive copy of array</li>
+ *   <li><b>{@code range(short, short)}:</b> Create arithmetic sequence [start, end)</li>
+ *   <li><b>{@code rangeClosed(short, short)}:</b> Create arithmetic sequence [start, end]</li>
+ *   <li><b>{@code repeat(short, int)}:</b> Create with repeated values</li>
+ *   <li><b>{@code random(int)}:</b> Create with random short values</li>
+ * </ul>
+ *
+ * <p><b>Conversion Methods:</b>
+ * <ul>
+ *   <li><b>{@code toArray()}:</b> Convert to primitive short array</li>
+ *   <li><b>{@code toIntList()}:</b> Convert to IntList with promoted values</li>
+ *   <li><b>{@code toLongList()}:</b> Convert to LongList with promoted values</li>
+ *   <li><b>{@code toFloatList()}:</b> Convert to FloatList with promoted values</li>
+ *   <li><b>{@code toDoubleList()}:</b> Convert to DoubleList with promoted values</li>
+ *   <li><b>{@code boxed()}:</b> Convert to {@code List<Short>}</li>
+ *   <li><b>{@code stream()}:</b> Convert to ShortStream for functional processing</li>
+ * </ul>
+ *
+ * <p><b>Deque-like Operations:</b>
+ * <ul>
+ *   <li><b>{@code addFirst(short)}:</b> Insert at beginning (O(n) operation)</li>
+ *   <li><b>{@code addLast(short)}:</b> Insert at end (O(1) amortized)</li>
+ *   <li><b>{@code removeFirst()}:</b> Remove from beginning (O(n) operation)</li>
+ *   <li><b>{@code removeLast()}:</b> Remove from end (O(1) operation)</li>
+ *   <li><b>{@code getFirst()}:</b> Access first element (O(1) operation)</li>
+ *   <li><b>{@code getLast()}:</b> Access last element (O(1) operation)</li>
+ * </ul>
+ *
+ * <p><b>Thread Safety:</b>
+ * <ul>
+ *   <li><b>Not Thread-Safe:</b> This implementation is not synchronized</li>
+ *   <li><b>External Synchronization:</b> Required for concurrent access</li>
+ *   <li><b>Fail-Fast Iterators:</b> Detect concurrent modifications</li>
+ *   <li><b>Read-Only Access:</b> Multiple threads can safely read simultaneously</li>
+ * </ul>
+ *
+ * <p><b>Capacity Management:</b>
+ * <ul>
+ *   <li><b>Initial Capacity:</b> Default capacity of 10 elements</li>
+ *   <li><b>Growth Strategy:</b> 1.75x expansion when capacity exceeded</li>
+ *   <li><b>Manual Control:</b> {@code ensureCapacity()} for performance optimization</li>
+ *   <li><b>Trimming:</b> {@code trimToSize()} to reduce memory footprint</li>
+ * </ul>
+ *
+ * <p><b>Error Handling:</b>
+ * <ul>
+ *   <li><b>IndexOutOfBoundsException:</b> For invalid index access</li>
+ *   <li><b>NoSuchElementException:</b> For operations on empty lists</li>
+ *   <li><b>IllegalArgumentException:</b> For invalid method parameters</li>
+ *   <li><b>OutOfMemoryError:</b> When capacity exceeds available memory</li>
+ * </ul>
+ *
+ * <p><b>Serialization Support:</b>
+ * <ul>
+ *   <li><b>Serializable:</b> Implements {@link java.io.Serializable}</li>
+ *   <li><b>Version Compatibility:</b> Stable serialVersionUID for version compatibility</li>
+ *   <li><b>Efficient Format:</b> Optimized serialization of short arrays</li>
+ *   <li><b>Cross-Platform:</b> Platform-independent serialized format</li>
+ * </ul>
+ *
+ * <p><b>Integration with Collections Framework:</b>
+ * <ul>
+ *   <li><b>RandomAccess:</b> Indicates efficient random access capabilities</li>
+ *   <li><b>Collection Compatibility:</b> Seamless conversion to standard collections</li>
+ *   <li><b>Utility Integration:</b> Works with Collections utility methods via boxed()</li>
+ *   <li><b>Stream API:</b> Full integration with ShortStream for functional processing</li>
+ * </ul>
+ *
+ * <p><b>Mathematical and Statistical Operations:</b>
+ * <ul>
+ *   <li><b>Aggregation:</b> Sum, min, max operations via stream API</li>
+ *   <li><b>Central Tendency:</b> Median calculation with efficient sorting</li>
+ *   <li><b>Occurrence Counting:</b> {@code occurrencesOf()} for frequency analysis</li>
+ *   <li><b>Duplicate Detection:</b> {@code hasDuplicates()}, {@code removeDuplicates()}</li>
+ * </ul>
+ *
+ * <p><b>Comparison with Alternatives:</b>
+ * <ul>
+ *   <li><b>vs List&lt;Short&gt;:</b> 8x less memory, significantly faster operations</li>
+ *   <li><b>vs short[]:</b> Dynamic sizing, rich API, set operations, statistical functions</li>
+ *   <li><b>vs IntList:</b> 50% less memory for values within short range</li>
+ *   <li><b>vs ArrayList&lt;Short&gt;:</b> No boxing overhead, primitive-specific methods</li>
+ * </ul>
+ *
+ * <p><b>Best Practices:</b>
+ * <ul>
+ *   <li>Use {@code ShortList} when working with values in range [-32,768, 32,767]</li>
+ *   <li>Specify initial capacity for known data sizes to avoid resizing</li>
+ *   <li>Use bulk operations ({@code addAll}, {@code removeAll}) instead of loops</li>
+ *   <li>Convert to larger primitive types when values exceed short range</li>
+ *   <li>Leverage sorting for improved binary search performance</li>
+ *   <li>Consider memory savings when storing large collections of small integers</li>
+ * </ul>
+ *
+ * <p><b>Performance Tips:</b>
+ * <ul>
+ *   <li>Pre-size lists with known capacity using constructor or {@code ensureCapacity()}</li>
+ *   <li>Use {@code addLast()} instead of {@code addFirst()} for better performance</li>
+ *   <li>Sort data before using {@code binarySearch()} for O(log n) lookups</li>
+ *   <li>Use {@code stream()} API for complex transformations and filtering</li>
+ *   <li>Consider {@code parallelSort()} for large datasets</li>
+ * </ul>
+ *
+ * <p><b>Common Patterns:</b>
+ * <ul>
+ *   <li><b>Audio Samples:</b> {@code ShortList samples = new ShortList(sampleRate);}</li>
+ *   <li><b>Port Numbers:</b> {@code ShortList ports = ShortList.range((short) 8000, (short) 9000);}</li>
+ *   <li><b>Sensor Data:</b> {@code ShortList readings = ShortList.random((short) -1000, (short) 1000, count);}</li>
+ *   <li><b>Compact Storage:</b> {@code ShortList ids = data.stream().mapToShort(...).collect(...);}</li>
+ * </ul>
+ *
+ * <p><b>Related Classes:</b>
+ * <ul>
+ *   <li><b>{@link PrimitiveList}:</b> Abstract base class for all primitive list types</li>
+ *   <li><b>{@link IntList}:</b> 32-bit integer primitive list for larger values</li>
+ *   <li><b>{@link LongList}:</b> 64-bit integer primitive list for large values</li>
+ *   <li><b>{@link ByteList}:</b> 8-bit integer primitive list for smaller values</li>
+ *   <li><b>{@link ShortIterator}:</b> Specialized iterator for short primitives</li>
+ *   <li><b>{@link ShortStream}:</b> Functional processing of short sequences</li>
+ * </ul>
+ *
+ * <p><b>Example: Audio Sample Processing</b>
+ * <pre>{@code
+ * // Process 16-bit audio samples
+ * ShortList leftChannel = new ShortList(44100);   // 1 second at 44.1kHz
+ * ShortList rightChannel = new ShortList(44100);
+ *
+ * // Read audio samples (simulated)
+ * for (int i = 0; i < 44100; i++) {
+ *     leftChannel.add((short) (Math.sin(2 * Math.PI * 440 * i / 44100.0) * 32767));
+ *     rightChannel.add((short) (Math.sin(2 * Math.PI * 880 * i / 44100.0) * 32767));
+ * }
+ *
+ * // Audio processing
+ * OptionalShort maxAmplitude = leftChannel.max();  // Find peak amplitude
+ * OptionalShort minAmplitude = leftChannel.min();  // Find minimum amplitude
+ *
+ * // Apply gain (volume adjustment)
+ * double gain = 0.5;
+ * leftChannel.replaceAll(sample -> (short) (sample * gain));
+ *
+ * // Mix channels (mono conversion)
+ * ShortList monoChannel = new ShortList(leftChannel.size());
+ * for (int i = 0; i < leftChannel.size(); i++) {
+ *     short mixed = (short) ((leftChannel.get(i) + rightChannel.get(i)) / 2);
+ *     monoChannel.add(mixed);
+ * }
+ *
+ * // Convert to float for DSP processing
+ * FloatList floatSamples = monoChannel.stream()
+ *     .mapToFloat(sample -> sample / 32768.0f)
+ *     .collect(FloatList::new, FloatList::add, FloatList::addAll);
+ * }</pre>
+ *
+ * @see PrimitiveList
+ * @see ShortIterator
+ * @see ShortStream
+ * @see IntList
+ * @see ByteList
  * @see com.landawn.abacus.util.N
  * @see com.landawn.abacus.util.Array
  * @see com.landawn.abacus.util.Iterables
  * @see com.landawn.abacus.util.Iterators
+ * @see java.util.List
+ * @see java.util.RandomAccess
+ * @see java.io.Serializable
  */
 public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
 

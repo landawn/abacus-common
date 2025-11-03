@@ -14,8 +14,6 @@
 
 package com.landawn.abacus.parser;
 
-import com.landawn.abacus.annotation.MayReturnNull;
-
 import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
@@ -66,7 +64,6 @@ import com.landawn.abacus.util.cs;
  * @see XMLParser
  * @see AvroParser
  * @see KryoParser
- * @since 1.0
  */
 @SuppressWarnings("unused")
 public final class ParserFactory {
@@ -169,10 +166,10 @@ public final class ParserFactory {
     }
 
     /**
-     * Checks if Abacus XML parser is available.
-     * Abacus XML parser provides extended XML functionality specific to the Abacus framework.
+     * Checks if abacus-common XML parser is available.
+     * abacus-common XML parser provides extended XML functionality specific to the abacus-common framework.
      * 
-     * @return {@code true} if Abacus XML parser is available, {@code false} otherwise
+     * @return {@code true} if abacus-common XML parser is available, {@code false} otherwise
      */
     public static boolean isAbacusXMLAvailable() {
         return isAbacusXMLAvailable;
@@ -286,7 +283,7 @@ public final class ParserFactory {
     }
 
     /**
-     * Creates a new Abacus XML parser instance with default configuration.
+     * Creates a new abacus-common XML parser instance with default configuration.
      * Uses StAX (Streaming API for XML) as the default parser type.
      *
      * <p><b>Usage Examples:</b></p>
@@ -297,15 +294,15 @@ public final class ParserFactory {
      * }
      * }</pre>
      *
-     * @return a new Abacus {@link XMLParser} instance
-     * @throws NoClassDefFoundError if Abacus XML support is not available
+     * @return a new abacus-common {@link XMLParser} instance
+     * @throws NoClassDefFoundError if abacus-common XML support is not available
      */
     public static XMLParser createAbacusXMLParser() {
         return new AbacusXMLParserImpl(XMLParserType.StAX);
     }
 
     /**
-     * Creates a new Abacus XML parser instance with specified configurations.
+     * Creates a new abacus-common XML parser instance with specified configurations.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -320,38 +317,38 @@ public final class ParserFactory {
      *
      * @param xsc the XML serialization configuration
      * @param xdc the XML deserialization configuration
-     * @return a new Abacus {@link XMLParser} instance with the specified configurations
-     * @throws NoClassDefFoundError if Abacus XML support is not available
+     * @return a new abacus-common {@link XMLParser} instance with the specified configurations
+     * @throws NoClassDefFoundError if abacus-common XML support is not available
      */
     public static XMLParser createAbacusXMLParser(final XMLSerializationConfig xsc, final XMLDeserializationConfig xdc) {
         return new AbacusXMLParserImpl(XMLParserType.StAX, xsc, xdc);
     }
 
     /**
-     * Creates a new Abacus XML SAX parser instance.
+     * Creates a new abacus-common XML SAX parser instance.
      * SAX parser is event-driven and memory efficient for large documents.
      * 
-     * @return a new Abacus XML SAX parser
+     * @return a new abacus-common XML SAX parser
      */
     static XMLParser createAbacusXMLSAXParser() {
         return new AbacusXMLParserImpl(XMLParserType.SAX);
     }
 
     /**
-     * Creates a new Abacus XML StAX parser instance.
+     * Creates a new abacus-common XML StAX parser instance.
      * StAX parser provides a good balance between performance and ease of use.
      * 
-     * @return a new Abacus XML StAX parser
+     * @return a new abacus-common XML StAX parser
      */
     static XMLParser createAbacusXMLStAXParser() {
         return new AbacusXMLParserImpl(XMLParserType.StAX);
     }
 
     /**
-     * Creates a new Abacus XML DOM parser instance.
+     * Creates a new abacus-common XML DOM parser instance.
      * DOM parser loads the entire document into memory but provides random access.
      * 
-     * @return a new Abacus XML DOM parser
+     * @return a new abacus-common XML DOM parser
      */
     static XMLParser createAbacusXMLDOMParser() {
         return new AbacusXMLParserImpl(XMLParserType.DOM);

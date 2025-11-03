@@ -11,7 +11,6 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-
 package com.landawn.abacus.util.function;
 
 /**
@@ -23,12 +22,23 @@ package com.landawn.abacus.util.function;
  *
  * @see IntConsumer
  * @see IntBiConsumer
+ *
+ * <p>Refer to JDK API documentation at: <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html">https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a></p>
  */
 @FunctionalInterface
 public interface IntNConsumer {
-
     /**
      * Performs this operation on the given arguments.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * IntNConsumer summer = values -> {
+     *     int sum = 0;
+     *     for (int v : values) sum += v;
+     *     System.out.println("Sum: " + sum);
+     * };
+     * summer.accept(1, 2, 3, 4); // Prints: Sum: 10
+     * }</pre>
      *
      * @param args the input arguments as a variable-length array of {@code int} values
      */

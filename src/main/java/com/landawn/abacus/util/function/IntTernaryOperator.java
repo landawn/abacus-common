@@ -11,7 +11,6 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-
 package com.landawn.abacus.util.function;
 
 import com.landawn.abacus.util.Throwables;
@@ -24,12 +23,19 @@ import com.landawn.abacus.util.Throwables;
  *
  * @see IntBinaryOperator
  * @see java.util.function.UnaryOperator
+ *
+ * <p>Refer to JDK API documentation at: <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html">https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a></p>
  */
 @FunctionalInterface
 public interface IntTernaryOperator extends Throwables.IntTernaryOperator<RuntimeException> { //NOSONAR
-
     /**
      * Applies this operator to the given operands.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * IntTernaryOperator summer = (a, b, c) -> a + b + c;
+     * int result = summer.applyAsInt(1, 2, 3); // Returns 6
+     * }</pre>
      *
      * @param a the first operand
      * @param b the second operand

@@ -30,21 +30,27 @@ package com.landawn.abacus.pool;
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * PoolStats stats = pool.stats();
- * 
+ *
  * // Calculate hit rate
- * double hitRate = stats.getCount() > 0 ? 
+ * double hitRate = stats.getCount() > 0 ?
  *     (double) stats.hitCount() / stats.getCount() : 0.0;
  * System.out.println("Cache hit rate: " + (hitRate * 100) + "%");
- * 
+ *
  * // Monitor pool utilization
  * double utilization = (double) stats.size() / stats.capacity();
  * System.out.println("Pool utilization: " + (utilization * 100) + "%");
- * 
+ *
  * // Check memory usage
  * if (stats.maxMemory() > 0) {
  *     double memoryUsage = (double) stats.dataSize() / stats.maxMemory();
  *     System.out.println("Memory usage: " + (memoryUsage * 100) + "%");
  * }
+ *
+ * // Analyze pool efficiency
+ * System.out.println("Total operations: " + (stats.putCount() + stats.getCount()));
+ * System.out.println("Objects evicted: " + stats.evictionCount());
+ * System.out.println("Miss rate: " +
+ *     (stats.getCount() > 0 ? (double) stats.missCount() / stats.getCount() * 100 : 0) + "%");
  * }</pre>
  * 
  * @param capacity the maximum number of objects the pool can hold

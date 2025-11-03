@@ -20,31 +20,257 @@ import java.util.function.Supplier;
 import com.landawn.abacus.annotation.Beta;
 
 /**
- * A functional programming utility class for creating fluent conditional execution chains.
- * 
- * <p>This class provides a fluent API for conditional logic, offering an alternative to traditional
- * if-else statements and ternary operators. It's particularly useful in functional programming contexts
- * where method chaining is preferred.</p>
- * 
- * <p><strong>Note:</strong> While this class provides a functional approach, traditional if-else statements
- * or ternary operators are generally preferred for better readability and performance.</p>
- * 
- * <p><b>Usage Examples:</b></p>
+ * A functional programming utility class for creating fluent conditional execution chains that provides
+ * an alternative to traditional if-else statements through method chaining. This class enables elegant
+ * conditional logic in functional programming contexts while maintaining readability and supporting
+ * various condition types including null checks, emptiness validation, and custom boolean conditions.
+ *
+ * <p>The {@code If} class follows a fluent API pattern where conditions are evaluated once and subsequent
+ * actions are executed based on that evaluation. It provides a more expressive way to handle conditional
+ * logic, especially in scenarios involving method chaining, functional transformations, or when building
+ * complex conditional workflows.</p>
+ *
+ * <p><b>⚠️ IMPORTANT - Performance Consideration:</b>
+ * While this class provides a functional approach to conditionals, traditional if-else statements
+ * or ternary operators are generally preferred for better readability and performance in most cases.
+ * Use this class when the fluent API significantly improves code expressiveness or when integrating
+ * with functional programming patterns.</p>
+ *
+ * <p><b>Key Features:</b>
+ * <ul>
+ *   <li><b>Fluent API Design:</b> Method chaining for readable conditional logic</li>
+ *   <li><b>Comprehensive Condition Types:</b> Boolean, null, empty, blank, and existence checks</li>
+ *   <li><b>Exception Safety:</b> Built-in exception handling with custom exception suppliers</li>
+ *   <li><b>Type Safety:</b> Generic support for various data types and collections</li>
+ *   <li><b>Functional Integration:</b> Seamless integration with lambda expressions and method references</li>
+ *   <li><b>Lazy Evaluation:</b> Actions are only executed when conditions are met</li>
+ *   <li><b>Immutable Design:</b> Thread-safe and side-effect free condition evaluation</li>
+ *   <li><b>Beta Features:</b> Experimental enhancements for advanced use cases</li>
+ * </ul>
+ *
+ * <p><b>⚠️ IMPORTANT - Final Class Design:</b>
+ * <ul>
+ *   <li>This is a <b>final utility class</b> that cannot be extended</li>
+ *   <li>Uses static factory methods for creating {@code If} instances</li>
+ *   <li>Immutable condition state ensures predictable behavior</li>
+ *   <li>Thread-safe design with no mutable static state</li>
+ * </ul>
+ *
+ * <p><b>Design Philosophy:</b>
+ * <ul>
+ *   <li><b>Expressiveness:</b> Makes conditional logic more readable through natural language-like syntax</li>
+ *   <li><b>Functional Style:</b> Embraces functional programming paradigms with lambda support</li>
+ *   <li><b>Error Prevention:</b> Reduces common mistakes through type-safe APIs</li>
+ *   <li><b>Composability:</b> Enables building complex conditional workflows</li>
+ *   <li><b>Consistency:</b> Uniform API across different condition types</li>
+ * </ul>
+ *
+ * <p><b>Core API Pattern:</b>
+ * <ul>
+ *   <li><b>Condition Creation:</b> Static factory methods ({@code is()}, {@code notNull()}, {@code notEmpty()}, etc.)</li>
+ *   <li><b>Action Execution:</b> {@code then()} methods for conditional execution</li>
+ *   <li><b>Alternative Handling:</b> {@code orElse()} methods for fallback logic</li>
+ *   <li><b>Exception Throwing:</b> {@code thenThrow()} and {@code orElseThrow()} for error scenarios</li>
+ * </ul>
+ *
+ * <p><b>Supported Condition Types:</b>
+ * <ul>
+ *   <li><b>Boolean Conditions:</b> {@code is(boolean)}, {@code not(boolean)}</li>
+ *   <li><b>Null Checks:</b> {@code isNull(Object)}, {@code notNull(Object)}</li>
+ *   <li><b>Empty Checks:</b> Arrays, Collections, Maps, Strings, and specialized containers</li>
+ *   <li><b>Blank Checks:</b> {@code isBlank(CharSequence)}, {@code notBlank(CharSequence)}</li>
+ *   <li><b>Existence Checks:</b> {@code exists(int)} for index validation</li>
+ * </ul>
+ *
+ * <p><b>Common Usage Patterns:</b>
  * <pre>{@code
- * // Basic condition checking
- * If.is(x > 0)
- *   .then(() -> System.out.println("Positive"))
- *   .orElse(() -> System.out.println("Non-positive"));
- * 
- * // Null checking with action
- * If.notNull(user)
- *   .then(u -> processUser(u))
- *   .orElse(() -> handleNullUser());
- * 
- * // Collection checking
- * If.notEmpty(list)
- *   .then(() -> processList(list))
- *   .orElseThrow(() -> new IllegalStateException("List is empty"));
+ * // Basic boolean condition with action
+ * If.is(user.isActive())
+ *   .then(() -> sendWelcomeEmail(user))
+ *   .orElse(() -> sendReactivationEmail(user));
+ *
+ * // Null safety with conditional processing
+ * If.notNull(user.getProfile())
+ *   .then(profile -> updateProfile(profile))
+ *   .orElse(() -> createDefaultProfile(user));
+ *
+ * // Collection emptiness checking
+ * If.notEmpty(orders)
+ *   .then(() -> processOrders(orders))
+ *   .orElseThrow(() -> new IllegalStateException("No orders to process"));
+ *
+ * // String validation
+ * If.notBlank(email)
+ *   .then(() -> sendNotification(email))
+ *   .orElse(() -> logMissingEmailWarning());
+ *
+ * // Complex conditional logic
+ * If.is(user.hasPermission() && resource.isAvailable())
+ *   .then(() -> grantAccess(user, resource))
+ *   .orElseThrow(() -> new AccessDeniedException("Insufficient permissions"));
+ * }</pre>
+ *
+ * <p><b>Advanced Usage Examples:</b></p>
+ * <pre>{@code
+ * // Beta feature: action with initialization parameter
+ * If.notEmpty(dataList)
+ *   .then(new ProcessingContext(), (context, list) -> {
+ *       context.initialize();
+ *       processDataWithContext(context, list);
+ *   })
+ *   .orElse(context -> handleEmptyData(context));
+ *
+ * // Chaining multiple conditions
+ * public void processUser(User user) {
+ *     If.notNull(user)
+ *       .then(() -> validateUser(user))
+ *       .orElseThrow(() -> new IllegalArgumentException("User cannot be null"));
+ *
+ *     If.notBlank(user.getEmail())
+ *       .then(() -> sendEmail(user.getEmail()))
+ *       .orElse(() -> logEmailMissing(user.getId()));
+ *
+ *     If.notEmpty(user.getPreferences())
+ *       .then(() -> applyPreferences(user.getPreferences()))
+ *       .orElse(() -> setDefaultPreferences(user));
+ * }
+ *
+ * // Exception handling patterns
+ * If.is(criticalCondition)
+ *   .thenThrow(() -> new CriticalException("System failure detected"))
+ *   .orElse(() -> continueNormalOperation());
+ *
+ * // Working with arrays
+ * If.notEmpty(dataArray)
+ *   .then(() -> Arrays.stream(dataArray).forEach(this::processItem))
+ *   .orElse(() -> handleEmptyArray());
+ * }</pre>
+ *
+ * <p><b>OrElse Nested Class:</b>
+ * <ul>
+ *   <li><b>Fluent Continuation:</b> Returned by {@code then()} methods to enable {@code orElse()} chaining</li>
+ *   <li><b>Lazy Evaluation:</b> {@code orElse()} actions only execute if the original condition was false</li>
+ *   <li><b>Multiple Options:</b> Supports actions, exception throwing, and no-operation alternatives</li>
+ *   <li><b>Type Safety:</b> Maintains generic type information through the chain</li>
+ * </ul>
+ *
+ * <p><b>Performance Characteristics:</b>
+ * <ul>
+ *   <li><b>Condition Evaluation:</b> O(1) for boolean conditions, O(1) for null checks</li>
+ *   <li><b>Collection Checks:</b> O(1) for size-based emptiness checks</li>
+ *   <li><b>String Operations:</b> O(n) for blank checking (whitespace scanning)</li>
+ *   <li><b>Memory Overhead:</b> Minimal object creation, cached instances for common cases</li>
+ *   <li><b>Method Calls:</b> Additional method call overhead compared to direct if-else</li>
+ * </ul>
+ *
+ * <p><b>Thread Safety:</b>
+ * <ul>
+ *   <li><b>Immutable State:</b> {@code If} instances are immutable after creation</li>
+ *   <li><b>Concurrent Access:</b> Safe for concurrent access from multiple threads</li>
+ *   <li><b>Static Methods:</b> All factory methods are thread-safe</li>
+ *   <li><b>Action Execution:</b> Thread safety depends on the provided lambda expressions</li>
+ * </ul>
+ *
+ * <p><b>Error Handling:</b>
+ * <ul>
+ *   <li><b>IllegalArgumentException:</b> Thrown for null action parameters where not allowed</li>
+ *   <li><b>Custom Exceptions:</b> Support for throwing custom exceptions via suppliers</li>
+ *   <li><b>Exception Propagation:</b> Exceptions from lambda expressions are propagated correctly</li>
+ *   <li><b>Type Safety:</b> Compile-time checking prevents many runtime errors</li>
+ * </ul>
+ *
+ * <p><b>Memory Management:</b>
+ * <ul>
+ *   <li><b>Instance Caching:</b> {@code TRUE} and {@code FALSE} instances are cached for reuse</li>
+ *   <li><b>Minimal Allocation:</b> Reduces object creation for common boolean conditions</li>
+ *   <li><b>Lambda Efficiency:</b> Lambda expressions are compiled efficiently by the JVM</li>
+ *   <li><b>No Leaks:</b> No references held beyond the execution chain</li>
+ * </ul>
+ *
+ * <p><b>Integration with Functional Programming:</b>
+ * <ul>
+ *   <li><b>Lambda Expressions:</b> Full support for lambda expressions and method references</li>
+ *   <li><b>Stream API:</b> Can be used within stream operations for conditional processing</li>
+ *   <li><b>Optional Integration:</b> Complements {@code Optional} for different conditional scenarios</li>
+ *   <li><b>Function Composition:</b> Enables building complex conditional workflows</li>
+ * </ul>
+ *
+ * <p><b>Beta Features:</b>
+ * <ul>
+ *   <li><b>Parameter Passing:</b> {@code then(T init, Consumer<T>)} allows passing initialization parameters</li>
+ *   <li><b>Experimental API:</b> Subject to change in future versions</li>
+ *   <li><b>Enhanced Expressiveness:</b> Provides additional ways to structure conditional logic</li>
+ *   <li><b>Feedback Requested:</b> Beta features are for evaluation and feedback</li>
+ * </ul>
+ *
+ * <p><b>Comparison with Alternatives:</b>
+ * <ul>
+ *   <li><b>vs. if-else:</b> More expressive but with slight performance overhead</li>
+ *   <li><b>vs. ternary operator:</b> Better for complex conditions and multiple actions</li>
+ *   <li><b>vs. Optional:</b> Different use case - conditional execution vs. value presence</li>
+ *   <li><b>vs. Guards:</b> More fluent than guard clauses but less explicit</li>
+ * </ul>
+ *
+ * <p><b>Best Practices:</b>
+ * <ul>
+ *   <li>Use for complex conditional logic where readability is improved</li>
+ *   <li>Prefer traditional if-else for simple boolean conditions</li>
+ *   <li>Chain multiple conditions for related validation logic</li>
+ *   <li>Use meaningful lambda expressions and avoid complex inline logic</li>
+ *   <li>Consider performance implications for hot code paths</li>
+ *   <li>Leverage type safety features to prevent runtime errors</li>
+ * </ul>
+ *
+ * <p><b>Common Anti-Patterns to Avoid:</b>
+ * <ul>
+ *   <li>Overusing fluent API where simple if-else would be clearer</li>
+ *   <li>Creating overly complex lambda expressions inline</li>
+ *   <li>Ignoring the performance overhead in performance-critical code</li>
+ *   <li>Using for simple boolean conditions that don't benefit from fluency</li>
+ *   <li>Nesting {@code If} chains unnecessarily</li>
+ * </ul>
+ *
+ * <p><b>Related Utility Methods:</b>
+ * <ul>
+ *   <li><b>{@link N#ifOrEmpty}:</b> Alternative conditional execution utilities</li>
+ *   <li><b>{@link N#ifOrElse}:</b> Simple if-else utility methods</li>
+ *   <li><b>{@link N#ifNotNull}:</b> Null-safe conditional execution</li>
+ *   <li><b>{@link N#ifNotEmpty}:</b> Emptiness-aware conditional execution</li>
+ * </ul>
+ *
+ * <p><b>Example: User Validation Workflow</b>
+ * <pre>{@code
+ * public class UserValidator {
+ *     public void validateAndProcess(User user, UserContext context) {
+ *         // Comprehensive user validation using If chains
+ *         If.notNull(user)
+ *           .then(() -> validateUserStructure(user))
+ *           .orElseThrow(() -> new IllegalArgumentException("User cannot be null"));
+ *
+ *         If.notBlank(user.getUsername())
+ *           .then(() -> checkUsernameAvailability(user.getUsername()))
+ *           .orElseThrow(() -> new ValidationException("Username is required"));
+ *
+ *         If.notBlank(user.getEmail())
+ *           .then(() -> validateEmailFormat(user.getEmail()))
+ *           .orElse(() -> user.setEmail(generateTemporaryEmail()));
+ *
+ *         If.notEmpty(user.getRoles())
+ *           .then(() -> validateRoles(user.getRoles()))
+ *           .orElse(() -> assignDefaultRole(user));
+ *
+ *         If.is(user.isActive() && context.isRegistrationOpen())
+ *           .then(() -> processActiveUser(user, context))
+ *           .orElse(() -> queueForLaterProcessing(user));
+ *
+ *         If.notEmpty(user.getPreferences())
+ *           .then(context, (ctx, prefs) -> {
+ *               ctx.setProcessingMode(CUSTOM);
+ *               applyUserPreferences(prefs, ctx);
+ *           })
+ *           .orElse(ctx -> ctx.setProcessingMode(DEFAULT));
+ *     }
+ * }
  * }</pre>
  *
  * @see N#ifOrEmpty(boolean, Throwables.Supplier)
@@ -53,6 +279,13 @@ import com.landawn.abacus.annotation.Beta;
  * @see N#ifNotEmpty(CharSequence, Throwables.Consumer)
  * @see N#ifNotEmpty(Collection, Throwables.Consumer)
  * @see N#ifNotEmpty(Map, Throwables.Consumer)
+ * @see u.Optional
+ * @see Supplier
+ * @see Throwables.Runnable
+ * @see Throwables.Consumer
+ * @see Collection
+ * @see Map
+ * @see CharSequence
  */
 @Beta
 public final class If {

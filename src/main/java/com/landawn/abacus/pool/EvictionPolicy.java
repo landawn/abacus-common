@@ -17,35 +17,35 @@ package com.landawn.abacus.pool;
 /**
  * Enumeration of eviction policies that determine which objects to remove from a pool
  * when it reaches capacity or during periodic eviction runs.
- * 
+ *
  * <p>The eviction policy affects both:
  * <ul>
  *   <li>Automatic eviction of expired objects during scheduled eviction runs</li>
  *   <li>Selection of objects to remove during vacate operations when the pool is full</li>
  * </ul>
- * 
+ *
  * <p>Each policy uses different criteria from the object's {@link ActivityPrint} to determine
  * eviction priority. Objects with lower values according to the policy's criteria are
  * evicted first.
- * 
+ *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * // LRU-style pool - evicts least recently used objects
  * ObjectPool<Resource> lruPool = PoolFactory.createObjectPool(
  *     100, 60000, EvictionPolicy.LAST_ACCESS_TIME
  * );
- * 
- * // LFU-style pool - evicts least frequently used objects  
+ *
+ * // LFU-style pool - evicts least frequently used objects
  * ObjectPool<Resource> lfuPool = PoolFactory.createObjectPool(
  *     100, 60000, EvictionPolicy.ACCESS_COUNT
  * );
- * 
+ *
  * // Time-based pool - evicts objects closest to expiration
  * ObjectPool<Resource> timePool = PoolFactory.createObjectPool(
  *     100, 60000, EvictionPolicy.EXPIRATION_TIME
  * );
  * }</pre>
- * 
+ *
  * @see AbstractPool
  * @see ActivityPrint
  * @see PoolFactory

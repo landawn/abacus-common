@@ -31,7 +31,7 @@ import com.landawn.abacus.util.Strings;
  * This class provides serialization/deserialization and database operations
  * for java.util.concurrent.atomic.AtomicInteger instances.
  */
-public class AtomicIntegerType extends AbstractAtomicType<AtomicInteger> {
+class AtomicIntegerType extends AbstractAtomicType<AtomicInteger> {
 
     /**
      * The type name constant for AtomicInteger type identification.
@@ -74,7 +74,6 @@ public class AtomicIntegerType extends AbstractAtomicType<AtomicInteger> {
      *
      * @param x the AtomicInteger value to convert
      * @return the string representation of the integer value, or {@code null} if input is null
-     @MayReturnNull
      */
     @Override
     public String stringOf(final AtomicInteger x) {
@@ -105,7 +104,6 @@ public class AtomicIntegerType extends AbstractAtomicType<AtomicInteger> {
      * @param str the string to parse as an integer
      * @return a new AtomicInteger containing the parsed value, or {@code null} if str is {@code null} or empty
      * @throws NumberFormatException if the string cannot be parsed as an integer
-     @MayReturnNull
      */
     @Override
     public AtomicInteger valueOf(final String str) {
@@ -120,7 +118,6 @@ public class AtomicIntegerType extends AbstractAtomicType<AtomicInteger> {
      * @param columnIndex the column index (1-based) of the integer value
      * @return a new AtomicInteger containing the retrieved value (0 if SQL NULL)
      * @throws SQLException if a database access error occurs or the columnIndex is invalid
-     @MayReturnNull
      */
     @Override
     public AtomicInteger get(final ResultSet rs, final int columnIndex) throws SQLException {
@@ -136,7 +133,6 @@ public class AtomicIntegerType extends AbstractAtomicType<AtomicInteger> {
      *                    or the column name if no AS clause was specified
      * @return a new AtomicInteger containing the retrieved value (0 if SQL NULL)
      * @throws SQLException if a database access error occurs or the columnLabel is invalid
-     @MayReturnNull
      */
     @Override
     public AtomicInteger get(final ResultSet rs, final String columnLabel) throws SQLException {

@@ -84,7 +84,6 @@ import com.landawn.abacus.util.Strings;
  * parser.serialize(data, config, outputStream);
  * }</pre>
  * 
- * @since 0.8
  */
 public final class AvroParser extends AbstractParser<AvroSerializationConfig, AvroDeserializationConfig> {
 
@@ -97,9 +96,12 @@ public final class AvroParser extends AbstractParser<AvroSerializationConfig, Av
     }
 
     /**
-     * Serializes an object to Avro format encoded as a Base64 string.
-     * The content is Base64 encoded to make it suitable for text-based transmission.
-     * 
+     * Serializes an object to a Base64 encoded string representation.
+     *
+     * <p>This method converts the object to Avro binary format, then encodes the result
+     * as a Base64 string suitable for text-based transmission. The output is Base64 encoded
+     * to make it suitable for text-based storage and transmission.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * User user = new User("John", 30);
@@ -108,9 +110,9 @@ public final class AvroParser extends AbstractParser<AvroSerializationConfig, Av
      * String base64Encoded = parser.serialize(user, config);
      * }</pre>
      *
-     * @param obj the object to serialize
-     * @param config the serialization configuration (must contain schema if obj is not SpecificRecord)
-     * @return Base64 encoded string of the Avro binary data
+     * @param obj the object to serialize (may be {@code null} depending on implementation)
+     * @param config the serialization configuration to use (must contain schema if obj is not SpecificRecord)
+     * @return the Base64 encoded string representation of the serialized object
      * @throws IllegalArgumentException if schema is not specified for non-SpecificRecord objects
      */
     @Override
@@ -127,9 +129,12 @@ public final class AvroParser extends AbstractParser<AvroSerializationConfig, Av
     }
 
     /**
-     * Serializes an object to an Avro file.
-     * The content is written in binary format without Base64 encoding.
-     * 
+     * Serializes an object to a file.
+     *
+     * <p>The file will be created if it doesn't exist, or overwritten if it does.
+     * Parent directories must exist or an exception will be thrown. The content
+     * is written in raw binary format without Base64 encoding.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * List<User> users = Arrays.asList(
@@ -139,10 +144,10 @@ public final class AvroParser extends AbstractParser<AvroSerializationConfig, Av
      * parser.serialize(users, new File("users.avro"));
      * }</pre>
      *
-     * @param obj the object to serialize
-     * @param config the serialization configuration
-     * @param output the output file
-     * @throws UncheckedIOException if I/O error occurs
+     * @param obj the object to serialize (may be {@code null} depending on implementation)
+     * @param config the serialization configuration to use (may be {@code null} for default behavior)
+     * @param output the output file to write to (must not be {@code null})
+     * @throws UncheckedIOException if an I/O error occurs during file writing
      */
     @Override
     public void serialize(final Object obj, final AvroSerializationConfig config, final File output) {
@@ -164,9 +169,12 @@ public final class AvroParser extends AbstractParser<AvroSerializationConfig, Av
     }
 
     /**
-     * Serializes an object to an OutputStream in Avro binary format.
-     * The content is NOT Base64 encoded for performance reasons.
-     * 
+     * Serializes an object to an output stream.
+     *
+     * <p>The stream is not closed after writing, allowing the caller to manage stream
+     * lifecycle. The stream will be flushed after serialization. The content is written
+     * in raw binary format without Base64 encoding.</p>
+     *
      * <p>This method supports:</p>
      * <ul>
      *   <li>SpecificRecord instances (Avro generated classes)</li>
@@ -174,7 +182,7 @@ public final class AvroParser extends AbstractParser<AvroSerializationConfig, Av
      *   <li>GenericRecord instances</li>
      *   <li>Regular Java beans and Maps (requires schema in config)</li>
      * </ul>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // With SpecificRecord
@@ -182,7 +190,7 @@ public final class AvroParser extends AbstractParser<AvroSerializationConfig, Av
      * try (OutputStream os = new FileOutputStream("user.avro")) {
      *     parser.serialize(user, null, os);
      * }
-     * 
+     *
      * // With regular bean and schema
      * Person person = new Person("John", 30);
      * AvroSerializationConfig config = new AvroSerializationConfig()
@@ -190,11 +198,11 @@ public final class AvroParser extends AbstractParser<AvroSerializationConfig, Av
      * parser.serialize(person, config, outputStream);
      * }</pre>
      *
-     * @param obj the object to serialize
-     * @param config the serialization configuration (optional for SpecificRecord)
-     * @param output the output stream
+     * @param obj the object to serialize (may be {@code null} depending on implementation)
+     * @param config the serialization configuration to use (may be {@code null} for default behavior)
+     * @param output the output stream to write to (must not be {@code null})
      * @throws IllegalArgumentException if schema is not specified for non-SpecificRecord objects
-     * @throws UncheckedIOException if I/O error occurs
+     * @throws UncheckedIOException if an I/O error occurs during stream writing
      */
     @SuppressFBWarnings
     @Override
@@ -322,9 +330,11 @@ public final class AvroParser extends AbstractParser<AvroSerializationConfig, Av
     }
 
     /**
-     * Deserializes a Base64 encoded Avro string to an object.
-     * The input string must be Base64 encoded Avro binary data.
-     * 
+     * Deserializes an object from a Base64 encoded string representation.
+     *
+     * <p>This method decodes the Base64 string and uses Avro deserialization to convert
+     * the binary data back to an object. The input string must be Base64 encoded Avro binary data.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String base64Data = "..."; // Base64 encoded Avro data
@@ -334,10 +344,10 @@ public final class AvroParser extends AbstractParser<AvroSerializationConfig, Av
      * }</pre>
      *
      * @param <T> the target type
-     * @param source Base64 encoded Avro data
-     * @param config the deserialization configuration
-     * @param targetClass the target class
-     * @return the deserialized object
+     * @param source the Base64 encoded string to deserialize from (must not be {@code null})
+     * @param config the deserialization configuration to use (may be {@code null} for default behavior)
+     * @param targetClass the class of the object to create (must not be {@code null})
+     * @return the deserialized object instance
      */
     @Override
     public <T> T deserialize(final String source, final AvroDeserializationConfig config, final Class<? extends T> targetClass) {
@@ -345,9 +355,11 @@ public final class AvroParser extends AbstractParser<AvroSerializationConfig, Av
     }
 
     /**
-     * Deserializes an Avro file to an object.
-     * The file should contain binary Avro data (not Base64 encoded).
-     * 
+     * Deserializes an object from a file.
+     *
+     * <p>This method reads binary Avro data from the specified file and deserializes it
+     * to an object instance. The file should contain raw binary Avro data (not Base64 encoded).</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * File avroFile = new File("users.avro");
@@ -355,10 +367,11 @@ public final class AvroParser extends AbstractParser<AvroSerializationConfig, Av
      * }</pre>
      *
      * @param <T> the target type
-     * @param source the Avro file
-     * @param config the deserialization configuration
-     * @param targetClass the target class
-     * @return the deserialized object
+     * @param source the source file to read from (must not be {@code null} and must exist)
+     * @param config the deserialization configuration to use (may be {@code null} for default behavior)
+     * @param targetClass the class of the object to create (must not be {@code null})
+     * @return the deserialized object instance
+     * @throws UncheckedIOException if an I/O error occurs or the file doesn't exist
      */
     @Override
     public <T> T deserialize(final File source, final AvroDeserializationConfig config, final Class<? extends T> targetClass) {
@@ -374,9 +387,11 @@ public final class AvroParser extends AbstractParser<AvroSerializationConfig, Av
     }
 
     /**
-     * Deserializes Avro data from an InputStream to an object.
-     * The stream should contain binary Avro data (not Base64 encoded).
-     * 
+     * Deserializes an object from an input stream.
+     *
+     * <p>The stream is not closed after reading, allowing the caller to manage stream lifecycle.
+     * The stream should contain raw binary Avro data (not Base64 encoded).</p>
+     *
      * <p>This method supports:</p>
      * <ul>
      *   <li>SpecificRecord classes (Avro generated classes)</li>
@@ -384,14 +399,14 @@ public final class AvroParser extends AbstractParser<AvroSerializationConfig, Av
      *   <li>GenericRecord</li>
      *   <li>Regular Java beans and Maps (requires schema in config)</li>
      * </ul>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Deserialize to SpecificRecord
      * try (InputStream is = new FileInputStream("user.avro")) {
      *     User user = parser.deserialize(is, null, User.class);
      * }
-     * 
+     *
      * // Deserialize to regular bean with schema
      * AvroDeserializationConfig config = new AvroDeserializationConfig()
      *     .setSchema(schema)
@@ -400,12 +415,12 @@ public final class AvroParser extends AbstractParser<AvroSerializationConfig, Av
      * }</pre>
      *
      * @param <T> the target type
-     * @param source the input stream with Avro data
-     * @param config the deserialization configuration
-     * @param targetClass the target class
-     * @return the deserialized object
+     * @param source the input stream to read from (must not be {@code null})
+     * @param config the deserialization configuration to use (may be {@code null} for default behavior)
+     * @param targetClass the class of the object to create (must not be {@code null})
+     * @return the deserialized object instance
      * @throws IllegalArgumentException if schema is not specified for non-SpecificRecord types
-     * @throws UncheckedIOException if I/O error occurs
+     * @throws UncheckedIOException if an I/O error occurs during stream reading
      */
     @Override
     public <T> T deserialize(final InputStream source, final AvroDeserializationConfig config, final Class<? extends T> targetClass) {

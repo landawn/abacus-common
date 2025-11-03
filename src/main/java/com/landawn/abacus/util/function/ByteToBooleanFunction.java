@@ -11,21 +11,21 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-
 package com.landawn.abacus.util.function;
 
 /**
  * Represents a function that accepts a byte-valued argument and produces a boolean-valued result.
  * This is the {@code byte}-to-{@code boolean} primitive specialization for {@link java.util.function.Function}.
- * 
+ *
  * <p>This is a functional interface whose functional method is {@link #applyAsBoolean(byte)}.
- * 
+ *
  * @see java.util.function.Function
  * @see ByteToIntFunction
+ *
+ * <p>Refer to JDK API documentation at: <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html">https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a></p>
  */
 @FunctionalInterface
 public interface ByteToBooleanFunction {
-
     /**
      * A default implementation that converts a byte value to a boolean.
      * Returns {@code true} if the byte value is greater than 0, otherwise {@code false}.
@@ -36,6 +36,15 @@ public interface ByteToBooleanFunction {
 
     /**
      * Applies this function to the given byte argument and returns a boolean result.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * ByteToBooleanFunction isPositive = value -> value > 0;
+     * boolean result = isPositive.applyAsBoolean((byte) 5); // Returns true
+     *
+     * // Using DEFAULT
+     * boolean defaultResult = ByteToBooleanFunction.DEFAULT.applyAsBoolean((byte) 0); // Returns false
+     * }</pre>
      *
      * @param value the byte function argument
      * @return the boolean function result

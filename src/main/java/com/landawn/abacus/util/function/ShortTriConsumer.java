@@ -11,7 +11,6 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-
 package com.landawn.abacus.util.function;
 
 import com.landawn.abacus.util.Throwables;
@@ -20,15 +19,16 @@ import com.landawn.abacus.util.Throwables;
  * Represents an operation that accepts three short-valued arguments and returns no result.
  * This is the three-arity specialization of {@link ShortConsumer}.
  * Unlike most other functional interfaces, {@code ShortTriConsumer} is expected to operate via side-effects.
- * 
+ *
  * <p>This is a functional interface whose functional method is {@link #accept(short, short, short)}.
- * 
+ *
  * @see ShortConsumer
  * @see ShortBiConsumer
+ *
+ * <p>Refer to JDK API documentation at: <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html">https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a></p>
  */
 @FunctionalInterface
 public interface ShortTriConsumer extends Throwables.ShortTriConsumer<RuntimeException> { //NOSONAR
-
     /**
      * Performs this operation on the given arguments.
      *
@@ -49,7 +49,7 @@ public interface ShortTriConsumer extends Throwables.ShortTriConsumer<RuntimeExc
      *
      * @param a the first input argument
      * @param b the second input argument
-     * @param c the third input argument if the operation cannot be completed
+     * @param c the third input argument
      */
     @Override
     void accept(short a, short b, short c);
@@ -59,7 +59,15 @@ public interface ShortTriConsumer extends Throwables.ShortTriConsumer<RuntimeExc
      * If performing either operation throws an exception, it is relayed to the caller of the composed operation.
      * If performing this operation throws an exception, the {@code after} operation will not be performed.
      *
-     * @param after the operation to perform after this operation
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * ShortTriConsumer logger = (a, b, c) -> System.out.println("Values: " + a + ", " + b + ", " + c);
+     * ShortTriConsumer sum = (a, b, c) -> System.out.println("Sum: " + (a + b + c));
+     * ShortTriConsumer combined = logger.andThen(sum);
+     * combined.accept((short) 10, (short) 20, (short) 30); // Logs then calculates sum
+     * }</pre>
+     *
+     * @param after the operation to perform after this operation. Must not be {@code null}.
      * @return a composed {@code ShortTriConsumer} that performs in sequence this operation followed by the {@code after} operation
      */
     default ShortTriConsumer andThen(final ShortTriConsumer after) {

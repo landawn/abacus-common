@@ -57,7 +57,6 @@ import com.landawn.abacus.type.TypeFactory;
  * @param <T> the type to be captured and represented
  * @see Type
  * @see TypeFactory
- * @since 1.0
  */
 @SuppressWarnings({ "java:S1694" })
 public abstract class TypeReference<T> {
@@ -286,7 +285,7 @@ public abstract class TypeReference<T> {
          * the generic type parameter. Direct instantiation of TypeToken is not
          * possible as it is abstract.
          *
-         * <p><b>Usage Example:</b></p>
+         * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * // This creates an anonymous subclass that captures List<String>
          * TypeToken<List<String>> token = new TypeToken<List<String>>() {};

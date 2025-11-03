@@ -30,7 +30,7 @@ import com.landawn.abacus.util.Strings;
  * This class provides serialization/deserialization and database operations
  * for java.util.concurrent.atomic.AtomicBoolean instances.
  */
-public class AtomicBooleanType extends AbstractAtomicType<AtomicBoolean> {
+class AtomicBooleanType extends AbstractAtomicType<AtomicBoolean> {
 
     /**
      * The type name constant for AtomicBoolean type identification.
@@ -75,7 +75,6 @@ public class AtomicBooleanType extends AbstractAtomicType<AtomicBoolean> {
      * @param x the AtomicBoolean value to convert
      * @return "true" if the AtomicBoolean contains {@code true}, "false" if it contains {@code false},
      *         or {@code null} if the input is null
-     @MayReturnNull
      */
     @Override
     public String stringOf(final AtomicBoolean x) {
@@ -106,7 +105,6 @@ public class AtomicBooleanType extends AbstractAtomicType<AtomicBoolean> {
      *
      * @param str the string to parse (case-insensitive "true" results in {@code true}, all else false)
      * @return a new AtomicBoolean containing the parsed value, or {@code null} if str is {@code null} or empty
-     @MayReturnNull
      */
     @Override
     public AtomicBoolean valueOf(final String str) {
@@ -121,7 +119,6 @@ public class AtomicBooleanType extends AbstractAtomicType<AtomicBoolean> {
      * @param columnIndex the column index (1-based) of the boolean value
      * @return a new AtomicBoolean containing the retrieved value (false if SQL NULL)
      * @throws SQLException if a database access error occurs or the columnIndex is invalid
-     @MayReturnNull
      */
     @Override
     public AtomicBoolean get(final ResultSet rs, final int columnIndex) throws SQLException {
@@ -137,7 +134,6 @@ public class AtomicBooleanType extends AbstractAtomicType<AtomicBoolean> {
      *                    or the column name if no AS clause was specified
      * @return a new AtomicBoolean containing the retrieved value (false if SQL NULL)
      * @throws SQLException if a database access error occurs or the columnLabel is invalid
-     @MayReturnNull
      */
     @Override
     public AtomicBoolean get(final ResultSet rs, final String columnLabel) throws SQLException {

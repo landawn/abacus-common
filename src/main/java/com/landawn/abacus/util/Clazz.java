@@ -38,32 +38,243 @@ import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.LinkedBlockingQueue;
 
 /**
- * A utility class that provides a convenient way to parameterize generic types for collection classes.
- * This class is designed to work around Java's type erasure limitation by providing typed Class references
- * for generic collections.
- * 
- * <p><b>Important Note:</b> The Class objects returned by all methods in this utility do NOT contain
- * actual type parameter information due to Java's type erasure. These methods are primarily useful for
- * providing type hints to APIs that accept Class parameters.</p>
- * 
- * <p>For retaining actual type parameter information, consider using:</p>
+ * A specialized utility class that provides convenient typed Class references for parameterized collection types,
+ * designed to work around Java's type erasure limitations while maintaining type safety and code readability.
+ * This class serves as a bridge between Java's generic type system and APIs that require Class objects,
+ * particularly useful in reflection, serialization, and framework integration scenarios.
+ *
+ * <p>Due to Java's type erasure, generic type information is not available at runtime, making it impossible
+ * to obtain a {@code Class<List<String>>} object directly. This utility provides a convenient way to obtain
+ * typed Class references that can be used for type hints, API parameters, and improved code documentation,
+ * even though the actual generic type parameters are erased at runtime.</p>
+ *
+ * <p><b>⚠️ IMPORTANT - Type Erasure Limitation:</b>
  * <ul>
- *   <li>{@code Type.of("List<String>")} or {@code Type.ofList(String.class)}</li>
- *   <li>{@code new TypeReference<List<String>>() {}.type()}</li>
+ *   <li>The Class objects returned by all methods do NOT contain actual runtime type parameter information</li>
+ *   <li>These are primarily useful for providing type hints to APIs that accept Class parameters</li>
+ *   <li>For true runtime type parameter information, use {@code Type.of()} or {@code TypeReference}</li>
+ *   <li>The generic type parameters exist only for compile-time type safety and documentation</li>
  * </ul>
- * 
- * <p><b>Usage Examples:</b></p>
+ *
+ * <p><b>Key Features:</b>
+ * <ul>
+ *   <li><b>Type Safety:</b> Provides compile-time type checking for parameterized collection types</li>
+ *   <li><b>Code Readability:</b> Clear, expressive method names that document intended generic types</li>
+ *   <li><b>API Integration:</b> Seamless integration with frameworks and APIs expecting Class parameters</li>
+ *   <li><b>Predefined Constants:</b> Common collection type combinations available as static constants</li>
+ *   <li><b>Comprehensive Coverage:</b> Support for all major Java collection interfaces and implementations</li>
+ *   <li><b>Performance Optimized:</b> Zero runtime overhead beyond normal Class object usage</li>
+ *   <li><b>Null-Safe Design:</b> All methods properly handle parameter validation</li>
+ *   <li><b>Framework Friendly:</b> Designed for use with serialization, ORM, and dependency injection frameworks</li>
+ * </ul>
+ *
+ * <p><b>Design Philosophy:</b>
+ * <ul>
+ *   <li><b>Pragmatic Type Safety:</b> Provides type safety where possible within JVM limitations</li>
+ *   <li><b>Developer Experience:</b> Prioritizes code clarity and ease of use over theoretical purity</li>
+ *   <li><b>Framework Integration:</b> Designed to work seamlessly with existing Java frameworks and libraries</li>
+ *   <li><b>Performance First:</b> Zero runtime overhead beyond standard Java reflection costs</li>
+ *   <li><b>Comprehensive Coverage:</b> Supports all common collection types and patterns</li>
+ * </ul>
+ *
+ * <p><b>Supported Collection Types:</b>
+ * <ul>
+ *   <li><b>Core Collections:</b> {@code List}, {@code Set}, {@code Map}, {@code Queue}, {@code Deque}</li>
+ *   <li><b>Sorted Collections:</b> {@code SortedSet}, {@code SortedMap}, {@code NavigableSet}, {@code NavigableMap}</li>
+ *   <li><b>Concurrent Collections:</b> {@code ConcurrentMap}, {@code BlockingQueue}, {@code ConcurrentLinkedQueue}</li>
+ *   <li><b>Specialized Collections:</b> {@code BiMap}, {@code Multiset}, {@code ListMultimap}, {@code SetMultimap}</li>
+ *   <li><b>Implementation-Specific:</b> {@code ArrayList}, {@code LinkedList}, {@code HashSet}, {@code TreeMap}, etc.</li>
+ * </ul>
+ *
+ * <p><b>Method Categories:</b>
+ * <ul>
+ *   <li><b>Generic Methods:</b> {@code ofList()}, {@code ofSet()}, {@code ofMap()} - Work with interface types</li>
+ *   <li><b>Implementation-Specific:</b> {@code ofArrayList()}, {@code ofHashMap()} - Target specific implementations</li>
+ *   <li><b>Parameterized Variants:</b> Methods accepting Class parameters for documentation purposes</li>
+ *   <li><b>Constants:</b> Pre-defined Class objects for common type combinations</li>
+ * </ul>
+ *
+ * <p><b>Common Usage Patterns:</b>
  * <pre>{@code
- * // Get a typed Class reference (without actual type parameters)
- * Class<List<String>> listClass = Clazz.ofList(String.class);
- * 
- * // Use predefined constants
+ * // Basic collection type references
+ * Class<List<String>> stringList = Clazz.ofList(String.class);
+ * Class<Set<Integer>> integerSet = Clazz.ofSet(Integer.class);
+ * Class<Map<String, Object>> stringObjectMap = Clazz.ofMap(String.class, Object.class);
+ *
+ * // Using predefined constants
  * Class<Map<String, Object>> propsMap = Clazz.PROPS_MAP;
+ * Class<List<String>> stringList = Clazz.STRING_LIST;
+ * Class<Set<String>> stringSet = Clazz.STRING_SET;
+ *
+ * // Implementation-specific types
+ * Class<ArrayList<String>> arrayList = Clazz.ofArrayList(String.class);
+ * Class<HashMap<String, Object>> hashMap = Clazz.ofHashMap(String.class, Object.class);
+ * Class<TreeSet<Integer>> treeSet = Clazz.ofTreeSet(Integer.class);
+ *
+ * // Concurrent collection types
+ * Class<ConcurrentMap<String, Object>> concurrentMap = Clazz.ofConcurrentHashMap(String.class, Object.class);
+ * Class<BlockingQueue<String>> blockingQueue = Clazz.ofLinkedBlockingQueue(String.class);
  * }</pre>
+ *
+ * <p><b>Framework Integration Examples:</b>
+ * <pre>{@code
+ * // JSON/XML serialization frameworks
+ * ObjectMapper mapper = new ObjectMapper();
+ * List<Person> people = mapper.readValue(json, Clazz.ofList(Person.class));
+ *
+ * // Dependency injection frameworks
+ * @Inject
+ * Provider<List<Service>> serviceProvider;
+ * // Can use Clazz.ofList(Service.class) for type hints
+ *
+ * // ORM and database frameworks
+ * Query query = entityManager.createQuery("SELECT p FROM Person p", Clazz.ofList(Person.class));
+ *
+ * // Configuration and properties handling
+ * Properties props = loadProperties();
+ * Map<String, Object> configMap = convertToMap(props, Clazz.PROPS_MAP);
+ * }</pre>
+ *
+ * <p><b>Specialized Collection Support:</b>
+ * <ul>
+ *   <li><b>BiMap:</b> Bidirectional map collections with {@code ofBiMap()} methods</li>
+ *   <li><b>Multiset:</b> Collections allowing duplicate elements with {@code ofMultiset()} methods</li>
+ *   <li><b>Multimap:</b> Maps with multiple values per key via {@code ofListMultimap()} and {@code ofSetMultimap()}</li>
+ *   <li><b>Concurrent Collections:</b> Thread-safe collections for concurrent programming</li>
+ * </ul>
+ *
+ * <p><b>Type Parameter Documentation:</b>
+ * <ul>
+ *   <li>All methods accepting Class parameters use {@code @SuppressWarnings("unused")} annotations</li>
+ *   <li>The Class parameters serve purely as documentation and compile-time type checking</li>
+ *   <li>Runtime behavior is identical whether parameters are provided or not</li>
+ *   <li>Method overloads exist for convenience - parameterized and non-parameterized versions</li>
+ * </ul>
+ *
+ * <p><b>Performance Characteristics:</b>
+ * <ul>
+ *   <li><b>Creation Cost:</b> O(1) - Simple cast operations with no additional computation</li>
+ *   <li><b>Memory Overhead:</b> Zero - Returns existing Class objects via type casting</li>
+ *   <li><b>Runtime Impact:</b> Minimal - Equivalent to direct Class.class access</li>
+ *   <li><b>Compile-Time Benefits:</b> Enhanced type safety and IDE support</li>
+ * </ul>
+ *
+ * <p><b>Thread Safety:</b>
+ * <ul>
+ *   <li><b>Stateless Design:</b> All methods are static and stateless</li>
+ *   <li><b>No Mutable State:</b> No instance variables or mutable static fields</li>
+ *   <li><b>Class Object Safety:</b> Class objects are inherently thread-safe</li>
+ *   <li><b>Concurrent Access:</b> Safe for concurrent access from multiple threads</li>
+ * </ul>
+ *
+ * <p><b>Predefined Constants:</b>
+ * <ul>
+ *   <li><b>{@code PROPS_MAP}:</b> {@code Map<String, Object>} implemented as LinkedHashMap</li>
+ *   <li><b>{@code STRING_LIST}:</b> {@code List<String>} for common string collections</li>
+ *   <li><b>{@code STRING_SET}:</b> {@code Set<String>} for unique string collections</li>
+ *   <li><b>{@code OBJECT_LIST}:</b> {@code List<Object>} for heterogeneous collections</li>
+ * </ul>
+ *
+ * <p><b>Integration with Type System:</b>
+ * <ul>
+ *   <li><b>com.landawn.abacus.type.Type:</b> For full runtime type information including generics</li>
+ *   <li><b>TypeReference:</b> For creating TypeToken objects with complete generic information</li>
+ *   <li><b>Class Objects:</b> For basic type information and framework integration</li>
+ *   <li><b>Reflection APIs:</b> Standard Java reflection works with returned Class objects</li>
+ * </ul>
+ *
+ * <p><b>Best Practices:</b>
+ * <ul>
+ *   <li>Use this class for framework APIs that require Class parameters but need type hints</li>
+ *   <li>Prefer predefined constants for common type combinations to reduce object allocation</li>
+ *   <li>Use {@code Type.of()} or {@code TypeReference} when actual runtime generic information is needed</li>
+ *   <li>Document the intended generic types clearly when using these Class objects</li>
+ *   <li>Consider using parameterized method variants for better code documentation</li>
+ *   <li>Cache frequently used Class references in static final fields</li>
+ * </ul>
+ *
+ * <p><b>Common Anti-Patterns to Avoid:</b>
+ * <ul>
+ *   <li>Expecting runtime generic type information from returned Class objects</li>
+ *   <li>Using this class when {@code Type} or {@code TypeReference} would be more appropriate</li>
+ *   <li>Creating new Class references repeatedly instead of using cached constants</li>
+ *   <li>Assuming different parameterized versions return different Class objects</li>
+ *   <li>Using for collections where raw types would be more appropriate</li>
+ * </ul>
+ *
+ * <p><b>Comparison with Alternative Approaches:</b>
+ * <ul>
+ *   <li><b>vs. Raw Class.class:</b> Provides type safety and documentation vs. raw types</li>
+ *   <li><b>vs. Type.of():</b> Simpler but no runtime generic info vs. complete type information</li>
+ *   <li><b>vs. TypeReference:</b> Lighter weight but less powerful vs. full generic support</li>
+ *   <li><b>vs. Manual Casting:</b> Type-safe and documented vs. error-prone manual casts</li>
+ * </ul>
+ *
+ * <p><b>Error Handling:</b>
+ * <ul>
+ *   <li><b>No Runtime Exceptions:</b> All methods are guaranteed to succeed</li>
+ *   <li><b>Compile-Time Safety:</b> Generic type constraints prevent most errors at compile time</li>
+ *   <li><b>ClassCastException:</b> Potential only if returned Class is misused with incompatible types</li>
+ *   <li><b>Parameter Validation:</b> Methods are designed to be null-safe where appropriate</li>
+ * </ul>
+ *
+ * <p><b>Use Cases and Applications:</b>
+ * <ul>
+ *   <li><b>JSON/XML Serialization:</b> Providing type hints to serialization frameworks</li>
+ *   <li><b>Dependency Injection:</b> Documenting generic types in injection configurations</li>
+ *   <li><b>ORM Frameworks:</b> Specifying collection types for database mapping</li>
+ *   <li><b>Configuration Systems:</b> Type-safe configuration property handling</li>
+ *   <li><b>API Documentation:</b> Clearly expressing intended generic types in method signatures</li>
+ *   <li><b>Testing Frameworks:</b> Providing type information for mock object creation</li>
+ * </ul>
+ *
+ * <p><b>Example: Configuration System Integration</b>
+ * <pre>{@code
+ * public class ConfigurationManager {
+ *     private final Map<String, Object> properties;
+ *
+ *     public ConfigurationManager(Properties props) {
+ *         // Using Clazz for type-safe conversion
+ *         this.properties = convertProperties(props, Clazz.PROPS_MAP);
+ *     }
+ *
+ *     @SuppressWarnings("unchecked")
+ *     public <T> List<T> getListProperty(String key, Class<T> elementType) {
+ *         Object value = properties.get(key);
+ *         if (value instanceof String) {
+ *             // Parse string to list using type information
+ *             return parseStringToList((String) value, Clazz.ofList(elementType));
+ *         }
+ *         return (List<T>) value;
+ *     }
+ *
+ *     public List<String> getStringList(String key) {
+ *         return getListProperty(key, String.class);
+ *     }
+ *
+ *     public Set<Integer> getIntegerSet(String key) {
+ *         List<Integer> list = getListProperty(key, Integer.class);
+ *         return new HashSet<>(list);
+ *     }
+ * }
+ * }</pre>
+ *
+ * <p><b>Static Analysis and IDE Benefits:</b>
+ * <ul>
+ *   <li><b>Type Inference:</b> IDEs can provide better code completion and error detection</li>
+ *   <li><b>Refactoring Support:</b> Type-safe refactoring across generic collection usage</li>
+ *   <li><b>Documentation:</b> Clear intent expression in method signatures and variable declarations</li>
+ *   <li><b>Code Navigation:</b> Better find-usages and dependency analysis</li>
+ * </ul>
  *
  * @see com.landawn.abacus.type.Type
  * @see TypeReference
  * @see TypeReference.TypeToken
+ * @see Class
+ * @see java.lang.reflect.ParameterizedType
+ * @see java.util.Collection
+ * @see java.util.Map
+ * @see java.util.concurrent.ConcurrentMap
  */
 @SuppressWarnings("java:S1172")
 public final class Clazz {

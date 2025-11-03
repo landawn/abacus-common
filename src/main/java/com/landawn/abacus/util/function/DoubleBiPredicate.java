@@ -11,7 +11,6 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-
 package com.landawn.abacus.util.function;
 
 import com.landawn.abacus.util.Throwables;
@@ -19,56 +18,50 @@ import com.landawn.abacus.util.Throwables;
 /**
  * Represents a predicate (boolean-valued function) of two double-valued arguments.
  * This is the two-arity specialization of {@link java.util.function.Predicate}.
- * 
+ *
  * <p>This is a functional interface whose functional method is {@link #test(double, double)}.
  *
  * @see java.util.function.Predicate
  * @see java.util.function.BiPredicate
  * @see DoublePredicate
+ *
+ * <p>Refer to JDK API documentation at: <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html">https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a></p>
  */
 @FunctionalInterface
 public interface DoubleBiPredicate extends Throwables.DoubleBiPredicate<RuntimeException> { //NOSONAR
-
     /**
      * A predicate that always evaluates to {@code true}, regardless of the input values.
      */
     DoubleBiPredicate ALWAYS_TRUE = (t, u) -> true;
-
     /**
      * A predicate that always evaluates to {@code false}, regardless of the input values.
      */
     DoubleBiPredicate ALWAYS_FALSE = (t, u) -> false;
-
     /**
      * A predicate that tests if two double values are equal using {@link Double#compare(double, double)}.
      * Returns {@code true} if the comparison result is 0.
      */
     DoubleBiPredicate EQUAL = (t, u) -> Double.compare(t, u) == 0;
-
     /**
      * A predicate that tests if two double values are not equal using {@link Double#compare(double, double)}.
      * Returns {@code true} if the comparison result is not 0.
      */
     DoubleBiPredicate NOT_EQUAL = (t, u) -> Double.compare(t, u) != 0;
-
     /**
      * A predicate that tests if the first double value is greater than the second using {@link Double#compare(double, double)}.
      * Returns {@code true} if the first value is greater than the second.
      */
     DoubleBiPredicate GREATER_THAN = (t, u) -> Double.compare(t, u) > 0;
-
     /**
      * A predicate that tests if the first double value is greater than or equal to the second using {@link Double#compare(double, double)}.
      * Returns {@code true} if the first value is greater than or equal to the second.
      */
     DoubleBiPredicate GREATER_EQUAL = (t, u) -> Double.compare(t, u) >= 0;
-
     /**
      * A predicate that tests if the first double value is less than the second using {@link Double#compare(double, double)}.
      * Returns {@code true} if the first value is less than the second.
      */
     DoubleBiPredicate LESS_THAN = (t, u) -> Double.compare(t, u) < 0;
-
     /**
      * A predicate that tests if the first double value is less than or equal to the second using {@link Double#compare(double, double)}.
      * Returns {@code true} if the first value is less than or equal to the second.
@@ -77,6 +70,15 @@ public interface DoubleBiPredicate extends Throwables.DoubleBiPredicate<RuntimeE
 
     /**
      * Evaluates this predicate on the given arguments.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * DoubleBiPredicate areClose = (d1, d2) -> Math.abs(d1 - d2) < 0.001;
+     * boolean result = areClose.test(1.0001, 1.0002); // Returns true
+     *
+     * DoubleBiPredicate firstGreater = (d1, d2) -> d1 > d2;
+     * boolean result2 = firstGreater.test(5.5, 3.3); // Returns true
+     * }</pre>
      *
      * @param t the first double input argument
      * @param u the second double input argument
@@ -88,6 +90,13 @@ public interface DoubleBiPredicate extends Throwables.DoubleBiPredicate<RuntimeE
     /**
      * Returns a predicate that represents the logical negation of this predicate.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * DoubleBiPredicate areEqual = EQUAL;
+     * DoubleBiPredicate areNotEqual = areEqual.negate();
+     * boolean result = areNotEqual.test(1.5, 2.5); // Returns true
+     * }</pre>
+     *
      * @return a predicate that represents the logical negation of this predicate
      */
     default DoubleBiPredicate negate() {
@@ -97,6 +106,14 @@ public interface DoubleBiPredicate extends Throwables.DoubleBiPredicate<RuntimeE
     /**
      * Returns a composed predicate that represents a short-circuiting logical AND of this predicate and another.
      * When evaluating the composed predicate, if this predicate is {@code false}, then the {@code other} predicate is not evaluated.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * DoubleBiPredicate bothPositive = (d1, d2) -> d1 > 0 && d2 > 0;
+     * DoubleBiPredicate bothLessThan100 = (d1, d2) -> d1 < 100 && d2 < 100;
+     * DoubleBiPredicate combined = bothPositive.and(bothLessThan100);
+     * boolean result = combined.test(5.0, 10.0); // Returns true
+     * }</pre>
      *
      * @param other a predicate that will be logically-ANDed with this predicate
      * @return a composed predicate that represents the short-circuiting logical AND of this predicate and the {@code other} predicate
@@ -108,6 +125,14 @@ public interface DoubleBiPredicate extends Throwables.DoubleBiPredicate<RuntimeE
     /**
      * Returns a composed predicate that represents a short-circuiting logical OR of this predicate and another.
      * When evaluating the composed predicate, if this predicate is {@code true}, then the {@code other} predicate is not evaluated.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * DoubleBiPredicate areEqual = EQUAL;
+     * DoubleBiPredicate firstIsZero = (d1, d2) -> d1 == 0.0;
+     * DoubleBiPredicate combined = areEqual.or(firstIsZero);
+     * boolean result = combined.test(0.0, 5.0); // Returns true (first is zero)
+     * }</pre>
      *
      * @param other a predicate that will be logically-ORed with this predicate
      * @return a composed predicate that represents the short-circuiting logical OR of this predicate and the {@code other} predicate

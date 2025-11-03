@@ -11,19 +11,17 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-
 package com.landawn.abacus.util.function;
 
-import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.annotation.SuppressFBWarnings;
 import com.landawn.abacus.util.Throwables;
 
 /**
  * Represents a function that accepts two arguments and produces a result.
  * This is the two-arity specialization of {@link java.util.function.Function}.
- * 
+ *
  * <p>This is a functional interface whose functional method is {@link #apply(Object, Object)}.
- * 
+ *
  * <p>Refer to JDK API documentation at: <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html">https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a></p>
  *
  * @param <T> the type of the first argument to the function
@@ -33,7 +31,6 @@ import com.landawn.abacus.util.Throwables;
 @SuppressFBWarnings("NM_SAME_SIMPLE_NAME_AS_INTERFACE")
 @FunctionalInterface
 public interface BiFunction<T, U, R> extends Throwables.BiFunction<T, U, R, RuntimeException>, java.util.function.BiFunction<T, U, R> { //NOSONAR
-
     /**
      * Applies this function to the given arguments.
      *
@@ -51,7 +48,6 @@ public interface BiFunction<T, U, R> extends Throwables.BiFunction<T, U, R, Runt
      * @return the function result
      */
     @Override
-    @MayReturnNull
     R apply(T t, U u);
 
     /**
@@ -68,7 +64,7 @@ public interface BiFunction<T, U, R> extends Throwables.BiFunction<T, U, R, Runt
      *
      * @param <V> the type of output of the {@code after} function, and of the composed function
      * @param after the function to apply after this function is applied. Must not be {@code null}.
-     * @return a composed function that first applies this function and then applies the {@code after} function
+     * @return a composed {@code BiFunction} that first applies this function and then applies the {@code after} function
      */
     @Override
     default <V> BiFunction<T, U, V> andThen(final java.util.function.Function<? super R, ? extends V> after) {

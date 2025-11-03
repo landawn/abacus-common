@@ -18,7 +18,6 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
 
-import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.SetMultimap;
 import com.landawn.abacus.util.Strings;
@@ -31,7 +30,7 @@ import com.landawn.abacus.util.Strings;
  * @param <E> the element type in the value sets
  */
 @SuppressWarnings("java:S2160")
-public class SetMultimapType<K, E> extends MultimapType<K, E, Set<E>, SetMultimap<K, E>> {
+class SetMultimapType<K, E> extends MultimapType<K, E, Set<E>, SetMultimap<K, E>> {
 
     SetMultimapType(final Class<?> typeClass, final String keyTypeName, final String valueElementTypeName) {
         super(typeClass, keyTypeName, valueElementTypeName, null);
@@ -42,11 +41,26 @@ public class SetMultimapType<K, E> extends MultimapType<K, E, Set<E>, SetMultima
      * The multimap is first converted to a Map&lt;K, Collection&lt;E&gt;&gt; format where each key
      * maps to a collection of its associated values, then serialized to JSON.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * SetMultimapType<String, Integer> type = new SetMultimapType<>(SetMultimap.class, "String", "Integer");
+     * SetMultimap<String, Integer> multimap = N.newLinkedSetMultimap();
+     * multimap.put("tags", 1);
+     * multimap.put("tags", 2);
+     * multimap.put("tags", 1);  // Duplicate, will be ignored in Set
+     * multimap.put("ids", 100);
+     *
+     * String json = type.stringOf(multimap);
+     * // Returns: {"tags":[1,2],"ids":[100]} (note: only unique values)
+     *
+     * json = type.stringOf(null);
+     * // Returns: null
+     * }</pre>
+     *
      * @param x the SetMultimap to convert to string
      * @return the JSON string representation of the multimap, or {@code null} if the input is null
      */
     @Override
-    @MayReturnNull
     public String stringOf(final SetMultimap<K, E> x) {
         return (x == null) ? null : Utils.jsonParser.serialize(x.toMap(), Utils.jsc);
     }
@@ -57,11 +71,25 @@ public class SetMultimapType<K, E> extends MultimapType<K, E, Set<E>, SetMultima
      * The resulting SetMultimap will use LinkedHashSet for value collections to maintain
      * insertion order while ensuring uniqueness.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * SetMultimapType<String, Integer> type = new SetMultimapType<>(SetMultimap.class, "String", "Integer");
+     *
+     * SetMultimap<String, Integer> multimap = type.valueOf("{\"tags\":[1,2,1],\"ids\":[100]}");
+     * // Returns: SetMultimap with "tags" -> [1, 2] (duplicates removed) and "ids" -> [100]
+     * // multimap.get("tags") returns a Set containing [1, 2]
+     *
+     * multimap = type.valueOf(null);
+     * // Returns: null
+     *
+     * multimap = type.valueOf("{}");
+     * // Returns: empty SetMultimap
+     * }</pre>
+     *
      * @param str the JSON string to parse
      * @return the parsed SetMultimap, or {@code null} if the input string is {@code null} or empty
      * @throws IllegalArgumentException if the string cannot be parsed as a valid map structure
      */
-    @MayReturnNull
     @SuppressWarnings("unchecked")
     @Override
     public SetMultimap<K, E> valueOf(final String str) {

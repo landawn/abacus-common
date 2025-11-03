@@ -42,7 +42,6 @@ import org.apache.logging.log4j.spi.ExtendedLogger;
  * logger.error("Database connection failed", sqlException);
  * }</pre>
  * 
- * @since 1.0
  */
 class Log4Jv2Logger extends AbstractLogger {
 
@@ -59,10 +58,13 @@ class Log4Jv2Logger extends AbstractLogger {
      * <p>This constructor obtains a Log4j 2 logger instance from the LogManager
      * and casts it to ExtendedLogger for access to advanced features.</p>
      *
+     * <p><b>Note:</b> This constructor is package-private and should not be called directly.
+     * Use {@link LoggerFactory#getLogger(Class)} or {@link LoggerFactory#getLogger(String)} instead.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * // Typically instantiated by LoggerFactory, not directly
-     * Log4Jv2Logger logger = new Log4Jv2Logger("com.example.MyClass");
+     * // Correct way to obtain a logger
+     * Logger logger = LoggerFactory.getLogger(MyClass.class);
      * logger.info("Log4j 2 logger initialized");
      * }</pre>
      *
@@ -82,7 +84,7 @@ class Log4Jv2Logger extends AbstractLogger {
      *
      * <p>Delegates to Log4j 2's level checking mechanism.</p>
      *
-     * @return {@code true} if TRACE level is enabled, {@code false} otherwise
+     * @return {@code true} if this Logger is enabled for the TRACE level, {@code false} otherwise
      */
     @Override
     public boolean isTraceEnabled() {
@@ -118,7 +120,7 @@ class Log4Jv2Logger extends AbstractLogger {
      * }</pre>
      *
      * @param msg the message to log
-     * @param t the exception to log
+     * @param t the exception or error to log
      */
     @Override
     public void trace(final String msg, final Throwable t) {
@@ -130,7 +132,7 @@ class Log4Jv2Logger extends AbstractLogger {
      *
      * <p>Delegates to Log4j 2's level checking mechanism.</p>
      *
-     * @return {@code true} if DEBUG level is enabled, {@code false} otherwise
+     * @return {@code true} if this Logger is enabled for the DEBUG level, {@code false} otherwise
      */
     @Override
     public boolean isDebugEnabled() {
@@ -166,7 +168,7 @@ class Log4Jv2Logger extends AbstractLogger {
      * }</pre>
      *
      * @param msg the message to log
-     * @param t the exception to log
+     * @param t the exception or error to log
      */
     @Override
     public void debug(final String msg, final Throwable t) {
@@ -178,7 +180,7 @@ class Log4Jv2Logger extends AbstractLogger {
      *
      * <p>Delegates to Log4j 2's level checking mechanism.</p>
      *
-     * @return {@code true} if INFO level is enabled, {@code false} otherwise
+     * @return {@code true} if this Logger is enabled for the INFO level, {@code false} otherwise
      */
     @Override
     public boolean isInfoEnabled() {
@@ -214,7 +216,7 @@ class Log4Jv2Logger extends AbstractLogger {
      * }</pre>
      *
      * @param msg the message to log
-     * @param t the exception to log
+     * @param t the exception or error to log
      */
     @Override
     public void info(final String msg, final Throwable t) {
@@ -226,7 +228,7 @@ class Log4Jv2Logger extends AbstractLogger {
      *
      * <p>Delegates to Log4j 2's level checking mechanism.</p>
      *
-     * @return {@code true} if WARN level is enabled, {@code false} otherwise
+     * @return {@code true} if this Logger is enabled for the WARN level, {@code false} otherwise
      */
     @Override
     public boolean isWarnEnabled() {
@@ -262,7 +264,7 @@ class Log4Jv2Logger extends AbstractLogger {
      * }</pre>
      *
      * @param msg the message to log
-     * @param t the exception to log
+     * @param t the exception or error to log
      */
     @Override
     public void warn(final String msg, final Throwable t) {
@@ -274,7 +276,7 @@ class Log4Jv2Logger extends AbstractLogger {
      *
      * <p>Delegates to Log4j 2's level checking mechanism.</p>
      *
-     * @return {@code true} if ERROR level is enabled, {@code false} otherwise
+     * @return {@code true} if this Logger is enabled for the ERROR level, {@code false} otherwise
      */
     @Override
     public boolean isErrorEnabled() {
@@ -313,7 +315,7 @@ class Log4Jv2Logger extends AbstractLogger {
      * }</pre>
      *
      * @param msg the message to log
-     * @param t the exception to log
+     * @param t the exception or error to log
      */
     @Override
     public void error(final String msg, final Throwable t) {

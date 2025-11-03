@@ -23,7 +23,6 @@ import com.google.common.collect.HashMultiset;
 import com.google.common.collect.LinkedHashMultiset;
 import com.google.common.collect.Multiset;
 import com.google.common.collect.TreeMultiset;
-import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.parser.JSONDeserializationConfig;
 import com.landawn.abacus.parser.JSONDeserializationConfig.JDC;
 import com.landawn.abacus.util.ClassUtil;
@@ -41,7 +40,7 @@ import com.landawn.abacus.util.WD;
  * @param <T> the multiset type (must extend Multiset&lt;E&gt;)
  */
 @SuppressWarnings("java:S2160")
-public class GuavaMultisetType<E, T extends Multiset<E>> extends AbstractType<T> {
+class GuavaMultisetType<E, T extends Multiset<E>> extends AbstractType<T> {
 
     private final String declaringName;
 
@@ -76,7 +75,6 @@ public class GuavaMultisetType<E, T extends Multiset<E>> extends AbstractType<T>
      * @return the declaring name of this type (e.g., "com.google.common.collect.Multiset&lt;String&gt;")
      */
     @Override
-    @MayReturnNull
     public String declaringName() {
         return declaringName;
     }
@@ -137,7 +135,6 @@ public class GuavaMultisetType<E, T extends Multiset<E>> extends AbstractType<T>
      * @return the JSON string representation of the multiset as a map of elements to counts, or {@code null} if the input is null
      */
     @Override
-    @MayReturnNull
     public String stringOf(final T x) {
         if (x == null) {
             return null;
@@ -160,9 +157,7 @@ public class GuavaMultisetType<E, T extends Multiset<E>> extends AbstractType<T>
      * @param str the JSON string to parse
      * @return a new multiset instance containing the parsed elements with their counts, or {@code null} if the input is {@code null} or empty
      */
-    @MayReturnNull
     @Override
-
     public T valueOf(final String str) {
         if (Strings.isEmpty(str)) {
             return null; // NOSONAR

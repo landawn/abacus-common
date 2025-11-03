@@ -45,7 +45,6 @@ import java.io.Serial;
  * }
  * }</pre>
  * 
- * @since 1.0
  * @see RuntimeException
  * @see java.text.ParseException
  */
@@ -54,10 +53,7 @@ public class ParseException extends RuntimeException {
     @Serial
     private static final long serialVersionUID = 7678894353902496315L;
 
-    /**
-     * The position or token index where the parse error occurred.
-     * A value of -2 indicates the token position is not set or unknown.
-     */
+    /** The token value associated with this parse exception. Default value is -2. */
     private int token = -2; //NOSONAR
 
     /**

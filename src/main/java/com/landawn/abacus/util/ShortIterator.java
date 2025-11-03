@@ -75,16 +75,20 @@ public abstract class ShortIterator extends ImmutableIterator<Short> {
     };
 
     /**
-     * Returns an empty ShortIterator instance.
-     * This method returns the same singleton instance as {@link #EMPTY}.
-     * 
+     * Returns an empty {@code ShortIterator} with no elements.
+     *
+     * <p>The returned iterator's {@code hasNext()} will always return {@code false},
+     * and calling {@code nextShort()} will always throw a {@code NoSuchElementException}.</p>
+     *
+     * <p>This method always returns the same singleton instance for efficiency.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ShortIterator empty = ShortIterator.empty();
      * assert !empty.hasNext();
      * }</pre>
      *
-     * @return an empty ShortIterator
+     * @return an empty {@code ShortIterator}
      */
     @SuppressWarnings("SameReturnValue")
     public static ShortIterator empty() {//NOSONAR
@@ -92,36 +96,41 @@ public abstract class ShortIterator extends ImmutableIterator<Short> {
     }
 
     /**
-     * Creates a ShortIterator from a short array.
-     * If the array is {@code null} or empty, returns an empty iterator.
-     * 
+     * Creates a {@code ShortIterator} from the specified short array.
+     *
+     * <p>If the array is {@code null} or empty, returns an empty iterator.
+     * The iterator will iterate over all elements in the array from start to end.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * short[] values = {1, 2, 3};
      * ShortIterator iter = ShortIterator.of(values);
      * }</pre>
      *
-     * @param a the short array to create an iterator from
-     * @return a ShortIterator over the array elements
+     * @param a the short array (may be {@code null})
+     * @return a new {@code ShortIterator} over the array elements, or an empty iterator if the array is {@code null} or empty
      */
     public static ShortIterator of(final short... a) {
         return N.isEmpty(a) ? EMPTY : of(a, 0, a.length);
     }
 
     /**
-     * Creates a ShortIterator from a portion of a short array.
-     * Iterates over elements from fromIndex (inclusive) to toIndex (exclusive).
-     * 
+     * Creates a {@code ShortIterator} from a subsequence of the specified short array.
+     *
+     * <p>The iterator will iterate over elements from {@code fromIndex} (inclusive) to
+     * {@code toIndex} (exclusive). If {@code fromIndex} equals {@code toIndex}, an empty
+     * iterator is returned.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * short[] values = {1, 2, 3, 4, 5};
      * ShortIterator iter = ShortIterator.of(values, 1, 4); // iterates over 2, 3, 4
      * }</pre>
      *
-     * @param a the short array to create an iterator from
+     * @param a the short array (may be {@code null})
      * @param fromIndex the starting index (inclusive)
      * @param toIndex the ending index (exclusive)
-     * @return a ShortIterator over the specified range of array elements
+     * @return a new {@code ShortIterator} over the specified range, or an empty iterator if the array is {@code null} or fromIndex equals toIndex
      * @throws IndexOutOfBoundsException if fromIndex or toIndex is out of bounds
      */
     public static ShortIterator of(final short[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {

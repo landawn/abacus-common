@@ -24,7 +24,6 @@ import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.time.format.DateTimeParseException;
 
-import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.parser.JSONXMLSerializationConfig;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.DateTimeFormat;
@@ -36,7 +35,7 @@ import com.landawn.abacus.util.Numbers;
  * and database interaction capabilities for date-time values with timezone offset information.
  * This handler supports multiple date-time formats including ISO-8601 and epoch milliseconds.
  */
-public class OffsetDateTimeType extends AbstractTemporalType<OffsetDateTime> {
+class OffsetDateTimeType extends AbstractTemporalType<OffsetDateTime> {
 
     public static final String OFFSET_DATE_TIME = OffsetDateTime.class.getSimpleName();
 
@@ -62,7 +61,6 @@ public class OffsetDateTimeType extends AbstractTemporalType<OffsetDateTime> {
      * @return the ISO-8601 formatted string, or {@code null} if the input is null
      */
     @Override
-    @MayReturnNull
     public String stringOf(final OffsetDateTime x) {
         return (x == null) ? null : iso8601TimestampDTF.format(x);
     }
@@ -76,7 +74,6 @@ public class OffsetDateTimeType extends AbstractTemporalType<OffsetDateTime> {
      * @return the OffsetDateTime value, or {@code null} if the input is null
      */
     @Override
-    @MayReturnNull
     public OffsetDateTime valueOf(final Object obj) {
         if (obj instanceof Number) {
             return OffsetDateTime.ofInstant(Instant.ofEpochMilli(((Number) obj).longValue()), DEFAULT_ZONE_ID);
@@ -98,9 +95,7 @@ public class OffsetDateTimeType extends AbstractTemporalType<OffsetDateTime> {
      * @return the parsed OffsetDateTime, or {@code null} if the input is {@code null} or represents a {@code null} date-time
      * @throws DateTimeParseException if the string cannot be parsed as an OffsetDateTime
      */
-    @MayReturnNull
     @Override
-
     public OffsetDateTime valueOf(final String str) {
         if (isNullDateTime(str)) {
             return null; // NOSONAR
@@ -133,9 +128,7 @@ public class OffsetDateTimeType extends AbstractTemporalType<OffsetDateTime> {
      * @param len the length of the date-time string
      * @return the parsed OffsetDateTime, or {@code null} if the input is {@code null} or empty
      */
-    @MayReturnNull
     @Override
-
     public OffsetDateTime valueOf(final char[] cbuf, final int offset, final int len) {
         if ((cbuf == null) || (len == 0)) {
             return null; // NOSONAR
@@ -162,7 +155,6 @@ public class OffsetDateTimeType extends AbstractTemporalType<OffsetDateTime> {
      * @throws SQLException if a database access error occurs or the columnIndex is invalid
      */
     @Override
-    @MayReturnNull
     public OffsetDateTime get(final ResultSet rs, final int columnIndex) throws SQLException {
         final Timestamp ts = rs.getTimestamp(columnIndex);
 
@@ -170,18 +162,17 @@ public class OffsetDateTimeType extends AbstractTemporalType<OffsetDateTime> {
     }
 
     /**
-     * Retrieves an {@link OffsetDateTime} value from a ResultSet using the specified column name.
+     * Retrieves an {@link OffsetDateTime} value from a ResultSet using the specified column label.
      * The timestamp from the database is converted to OffsetDateTime using the default zone ID.
      *
      * @param rs the ResultSet to read from
-     * @param columnName the name of the column to retrieve the value from
+     * @param columnLabel the label for the column specified with the SQL AS clause
      * @return an OffsetDateTime representing the timestamp, or {@code null} if the column value is SQL NULL
-     * @throws SQLException if a database access error occurs or the columnName is invalid
+     * @throws SQLException if a database access error occurs or the columnLabel is invalid
      */
     @Override
-    @MayReturnNull
-    public OffsetDateTime get(final ResultSet rs, final String columnName) throws SQLException {
-        final Timestamp ts = rs.getTimestamp(columnName);
+    public OffsetDateTime get(final ResultSet rs, final String columnLabel) throws SQLException {
+        final Timestamp ts = rs.getTimestamp(columnLabel);
 
         return ts == null ? null : OffsetDateTime.ofInstant(ts.toInstant(), DEFAULT_ZONE_ID);
     }
@@ -205,13 +196,13 @@ public class OffsetDateTimeType extends AbstractTemporalType<OffsetDateTime> {
      * The OffsetDateTime is converted to a Timestamp for database storage.
      *
      * @param stmt the CallableStatement to set the parameter on
-     * @param columnName the name of the parameter to set
+     * @param parameterName the name of the parameter to set
      * @param x the OffsetDateTime value to set, or {@code null} to set SQL NULL
-     * @throws SQLException if a database access error occurs or the columnName is invalid
+     * @throws SQLException if a database access error occurs or the parameterName is invalid
      */
     @Override
-    public void set(final CallableStatement stmt, final String columnName, final OffsetDateTime x) throws SQLException {
-        stmt.setTimestamp(columnName, x == null ? null : Timestamp.from(x.toInstant()));
+    public void set(final CallableStatement stmt, final String parameterName, final OffsetDateTime x) throws SQLException {
+        stmt.setTimestamp(parameterName, x == null ? null : Timestamp.from(x.toInstant()));
     }
 
     /**

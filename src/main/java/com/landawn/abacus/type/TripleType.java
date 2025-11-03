@@ -18,7 +18,6 @@ import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.Writer;
 
-import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.exception.UncheckedIOException;
 import com.landawn.abacus.parser.JSONXMLSerializationConfig;
 import com.landawn.abacus.util.CharacterWriter;
@@ -40,7 +39,7 @@ import com.landawn.abacus.util.WD;
  * @param <R> the type of the right element
  */
 @SuppressWarnings("java:S2160")
-public class TripleType<L, M, R> extends AbstractType<Triple<L, M, R>> {
+class TripleType<L, M, R> extends AbstractType<Triple<L, M, R>> {
 
     private final String declaringName;
 
@@ -110,7 +109,6 @@ public class TripleType<L, M, R> extends AbstractType<Triple<L, M, R>> {
      * @return the JSON string representation, or {@code null} if x is null
      */
     @Override
-    @MayReturnNull
     public String stringOf(final Triple<L, M, R> x) {
         return (x == null) ? null : Utils.jsonParser.serialize(N.asArray(x.left(), x.middle(), x.right()), Utils.jsc);
     }
@@ -122,7 +120,6 @@ public class TripleType<L, M, R> extends AbstractType<Triple<L, M, R>> {
      * @param str the string to parse
      * @return a Triple object containing the parsed values, or {@code null} if str is empty
      */
-    @MayReturnNull
     @SuppressWarnings("unchecked")
     @Override
     public Triple<L, M, R> valueOf(final String str) {

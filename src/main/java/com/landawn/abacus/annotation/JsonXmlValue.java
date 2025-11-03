@@ -37,17 +37,19 @@ import java.lang.annotation.Target;
  * 
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
+ * import java.math.BigDecimal;
+ *
  * public class Amount {
  *     @JsonXmlValue
  *     private BigDecimal value;
- *     
+ *
  *     private String currency; // This won't be serialized as the main value
- *     
+ *
  *     public Amount(BigDecimal value, String currency) {
  *         this.value = value;
  *         this.currency = currency;
  *     }
- *     
+ *
  *     // When serialized to JSON, only the 'value' field will be used
  *     // Instead of: {"value": 100.50, "currency": "USD"}
  *     // Result will be: 100.50

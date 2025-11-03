@@ -11,7 +11,6 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-
 package com.landawn.abacus.util.function;
 
 import com.landawn.abacus.util.Throwables;
@@ -25,12 +24,24 @@ import com.landawn.abacus.util.Throwables;
  *
  * @see java.util.function.Consumer
  * @see IntConsumer
+ *
+ * <p>Refer to JDK API documentation at: <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html">https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a></p>
  */
 @FunctionalInterface
 public interface IntBiConsumer extends Throwables.IntBiConsumer<RuntimeException> { //NOSONAR
-
     /**
      * Performs this operation on the given arguments.
+     * This method is expected to operate via side-effects.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * IntBiConsumer adder = (a, b) -> System.out.println("Sum: " + (a + b));
+     * adder.accept(5, 10); // Prints: Sum: 15
+     *
+     * Map<Integer, Integer> map = new HashMap<>();
+     * IntBiConsumer mapPutter = (key, value) -> map.put(key, value);
+     * mapPutter.accept(1, 100);
+     * }</pre>
      *
      * @param t the first {@code int} argument
      * @param u the second {@code int} argument
@@ -44,7 +55,15 @@ public interface IntBiConsumer extends Throwables.IntBiConsumer<RuntimeException
      * to the caller of the composed operation. If performing this operation throws an exception,
      * the {@code after} operation will not be performed.
      *
-     * @param after the operation to perform after this operation
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * IntBiConsumer logger = (x, y) -> System.out.println("Processing: " + x + ", " + y);
+     * IntBiConsumer validator = (x, y) -> { if (x < 0 || y < 0) throw new IllegalArgumentException(); };
+     * IntBiConsumer combined = logger.andThen(validator);
+     * combined.accept(10, 20); // Logs then validates
+     * }</pre>
+     *
+     * @param after the operation to perform after this operation. Must not be {@code null}.
      * @return a composed {@code IntBiConsumer} that performs in sequence this operation followed by
      *         the {@code after} operation
      */

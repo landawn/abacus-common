@@ -11,7 +11,6 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-
 package com.landawn.abacus.util.function;
 
 import com.landawn.abacus.util.Throwables;
@@ -20,15 +19,23 @@ import com.landawn.abacus.util.Throwables;
  * Represents an operation that accepts three {@code boolean}-valued arguments and returns no result.
  * This is the three-arity specialization of {@link BooleanConsumer}.
  * Unlike most other functional interfaces, {@code BooleanTriConsumer} is expected to operate via side-effects.
- * 
+ *
  * <p>This is a functional interface whose functional method is {@link #accept(boolean, boolean, boolean)}.
  *
+ * <p>Refer to JDK API documentation at: <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html">https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a></p>
  */
 @FunctionalInterface
 public interface BooleanTriConsumer extends Throwables.BooleanTriConsumer<RuntimeException> { //NOSONAR
-
     /**
      * Performs this operation on the given arguments.
+     * This method is expected to operate via side-effects.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * BooleanTriConsumer logicalOps = (a, b, c) ->
+     *     System.out.println("AND: " + (a && b && c) + ", OR: " + (a || b || c));
+     * logicalOps.accept(true, false, true); // Prints: AND: false, OR: true
+     * }</pre>
      *
      * @param a the first input argument
      * @param b the second input argument
@@ -41,6 +48,14 @@ public interface BooleanTriConsumer extends Throwables.BooleanTriConsumer<Runtim
      * Returns a composed {@code BooleanTriConsumer} that performs, in sequence, this operation followed by the {@code after} operation.
      * If performing either operation throws an exception, it is relayed to the caller of the composed operation.
      * If performing this operation throws an exception, the {@code after} operation will not be performed.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * BooleanTriConsumer logger = (a, b, c) -> System.out.println("Values: " + a + ", " + b + ", " + c);
+     * BooleanTriConsumer andPrinter = (a, b, c) -> System.out.println("AND result: " + (a && b && c));
+     * BooleanTriConsumer combined = logger.andThen(andPrinter);
+     * combined.accept(true, true, false); // Logs then calculates AND
+     * }</pre>
      *
      * @param after the operation to perform after this operation. Must not be {@code null}.
      * @return a composed {@code BooleanTriConsumer} that performs in sequence this operation followed by the {@code after} operation

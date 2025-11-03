@@ -11,7 +11,6 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-
 package com.landawn.abacus.util.function;
 
 import com.landawn.abacus.util.Throwables;
@@ -23,7 +22,7 @@ import com.landawn.abacus.util.Throwables;
  * {@code LongObjConsumer} is expected to operate via side-effects.
  *
  * <p>This interface extends {@link Throwables.LongObjConsumer} with
- * {@link RuntimeException}, providing compatibility with the Abacus framework's
+ * {@link RuntimeException}, providing compatibility with the abacus-common framework's
  * exception handling capabilities.
  *
  * <p>This is a functional interface whose functional method is
@@ -37,11 +36,9 @@ import com.landawn.abacus.util.Throwables;
  *
  * @see java.util.function.BiConsumer
  * @see java.util.function.ObjLongConsumer
- * @since 1.8
  */
 @FunctionalInterface
 public interface LongObjConsumer<T> extends Throwables.LongObjConsumer<T, RuntimeException> { // NOSONAR
-
     /**
      * Performs this operation on the given arguments.
      *
@@ -62,7 +59,7 @@ public interface LongObjConsumer<T> extends Throwables.LongObjConsumer<T, Runtim
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * LongObjConsumer<String> logger = (timestamp, message) -> 
+     * LongObjConsumer<String> logger = (timestamp, message) ->
      *     System.out.println("[" + timestamp + "] " + message);
      * logger.accept(System.currentTimeMillis(), "Application started");
      * }</pre>
@@ -86,11 +83,11 @@ public interface LongObjConsumer<T> extends Throwables.LongObjConsumer<T, Runtim
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * LongObjConsumer<User> updateTimestamp = (timestamp, user) -> 
+     * LongObjConsumer<User> updateTimestamp = (timestamp, user) ->
      *     user.setLastModified(timestamp);
-     * LongObjConsumer<User> logUpdate = (timestamp, user) -> 
+     * LongObjConsumer<User> logUpdate = (timestamp, user) ->
      *     System.out.println("User " + user.getName() + " updated at " + timestamp);
-     * 
+     *
      * LongObjConsumer<User> combined = updateTimestamp.andThen(logUpdate);
      * combined.accept(System.currentTimeMillis(), user);
      * // First updates the user's timestamp, then logs the update

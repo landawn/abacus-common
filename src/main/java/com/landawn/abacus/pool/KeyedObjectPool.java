@@ -22,7 +22,7 @@ import com.landawn.abacus.annotation.MayReturnNull;
 /**
  * A pool that manages objects associated with keys, similar to a Map but with pooling capabilities.
  * This interface extends Pool to provide key-based storage and retrieval of poolable objects.
- * 
+ *
  * <p>KeyedObjectPool is useful when you need to pool objects by category or type, such as:
  * <ul>
  *   <li>Database connections per schema or server</li>
@@ -30,7 +30,7 @@ import com.landawn.abacus.annotation.MayReturnNull;
  *   <li>Cached computations by input parameters</li>
  *   <li>Resources grouped by tenant or user</li>
  * </ul>
- * 
+ *
  * <p>Key features:
  * <ul>
  *   <li>Map-like interface for key-based access</li>
@@ -38,15 +38,15 @@ import com.landawn.abacus.annotation.MayReturnNull;
  *   <li>Memory-based capacity constraints</li>
  *   <li>Thread-safe operations</li>
  * </ul>
- * 
+ *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * KeyedObjectPool<String, DBConnection> pool = PoolFactory.createKeyedObjectPool(100);
- * 
+ *
  * // Store connection by database name
  * DBConnection conn = new DBConnection("server1");
  * pool.put("database1", conn);
- * 
+ *
  * // Retrieve connection
  * DBConnection borrowed = pool.get("database1");
  * if (borrowed != null) {
@@ -57,7 +57,7 @@ import com.landawn.abacus.annotation.MayReturnNull;
  *     }
  * }
  * }</pre>
- * 
+ *
  * @param <K> the type of keys maintained by this pool
  * @param <E> the type of pooled values, must implement Poolable
  * @see Pool
@@ -68,17 +68,17 @@ public interface KeyedObjectPool<K, E extends Poolable> extends Pool {
 
     /**
      * Associates the specified poolable element with the specified key in this pool.
-     * If the pool previously contained a value for the key, the old value is destroyed.
-     * 
-     * <p>The put operation will fail if:
+     * If the pool previously contained an element for the key, the old element is destroyed.
+     *
+     * <p>The put operation will fail if:</p>
      * <ul>
      *   <li>The pool is at capacity and auto-balancing is disabled</li>
      *   <li>The element has already expired</li>
-     *   <li>The element would exceed memory constraints</li>
+     *   <li>The operation will fail if the element would exceed memory constraints</li>
      * </ul>
-     * 
-     * @param key the key with which the specified element is to be associated, must not be null
-     * @param e the element to be associated with the specified key, must not be null
+     *
+     * @param key the key with which the specified element is to be associated, must not be {@code null}
+     * @param e the element to be associated with the specified key, must not be {@code null}
      * @return {@code true} if the element was successfully added, {@code false} otherwise
      * @throws IllegalArgumentException if the key or element is null
      * @throws IllegalStateException if the pool has been closed
@@ -88,18 +88,19 @@ public interface KeyedObjectPool<K, E extends Poolable> extends Pool {
     /**
      * Associates the specified element with the specified key in this pool,
      * with optional automatic destruction on failure.
-     * 
+     *
      * <p>This is a convenience method that ensures proper cleanup if the object cannot be pooled.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Connection conn = createConnection();
-     * // Connection will be closed if it can't be added to pool
+     * // Assume DBConnection extends AbstractPoolable and implements close logic in destroy()
+     * DBConnection conn = new DBConnection("server1");
+     * // Connection will be destroyed if it can't be added to pool
      * pool.put("db1", conn, true);
      * }</pre>
-     * 
-     * @param key the key with which the specified element is to be associated, must not be null
-     * @param e the element to be associated with the specified key, must not be null
+     *
+     * @param key the key with which the specified element is to be associated, must not be {@code null}
+     * @param e the element to be associated with the specified key, must not be {@code null}
      * @param autoDestroyOnFailedToPut if {@code true}, calls e.destroy(PUT_ADD_FAILURE) if put fails
      * @return {@code true} if the element was successfully added, {@code false} otherwise
      * @throws IllegalArgumentException if the key or element is null
@@ -110,9 +111,9 @@ public interface KeyedObjectPool<K, E extends Poolable> extends Pool {
     /**
      * Returns the element associated with the specified key, or {@code null} if no mapping exists.
      * The element's activity print is updated to reflect this access.
-     * 
+     *
      * <p>If the retrieved element has expired, it will be destroyed and {@code null} will be returned.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * E cached = pool.get("myKey");
@@ -124,9 +125,9 @@ public interface KeyedObjectPool<K, E extends Poolable> extends Pool {
      *     pool.put("myKey", newObj);
      * }
      * }</pre>
-     * 
+     *
      * @param key the key whose associated element is to be returned
-     * @return the element associated with the key, or {@code null} if no mapping exists or element expired
+     * @return the element associated with the key, or {@code null} if no mapping exists or the element has expired
      * @throws IllegalStateException if the pool has been closed
      */
     @MayReturnNull
@@ -135,12 +136,12 @@ public interface KeyedObjectPool<K, E extends Poolable> extends Pool {
     /**
      * Removes and returns the element associated with the specified key.
      * The element's activity print is updated to reflect this access.
-     * 
+     *
      * <p>Unlike {@link #get(Object)}, this method removes the element from the pool,
      * so it will not be available for future requests unless re-added.
-     * 
+     *
      * @param key the key whose mapping is to be removed from the pool
-     * @return the element previously associated with the key, or {@code null} if no mapping existed
+     * @return the element previously associated with the key, or {@code null} if no mapping exists
      * @throws IllegalStateException if the pool has been closed
      */
     E remove(K key);
@@ -200,7 +201,7 @@ public interface KeyedObjectPool<K, E extends Poolable> extends Pool {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * MemoryMeasure<String, CachedData> measure = (key, data) ->
-     *     key.length() * 2 + data.getBytes().length; // * 2 for UTF-16 encoding (2 bytes per char)
+     *     key.length() * 2 + data.getDataSize(); // * 2 for UTF-16 encoding (2 bytes per char)
      *
      * KeyedObjectPool<String, CachedData> pool = PoolFactory.createKeyedObjectPool(
      *     1000, 3000, EvictionPolicy.LAST_ACCESS_TIME,

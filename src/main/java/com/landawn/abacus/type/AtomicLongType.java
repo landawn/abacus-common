@@ -31,7 +31,7 @@ import com.landawn.abacus.util.Strings;
  * This class provides serialization/deserialization and database operations
  * for java.util.concurrent.atomic.AtomicLong instances.
  */
-public class AtomicLongType extends AbstractAtomicType<AtomicLong> {
+class AtomicLongType extends AbstractAtomicType<AtomicLong> {
 
     /**
      * The type name constant for AtomicLong type identification.
@@ -60,7 +60,6 @@ public class AtomicLongType extends AbstractAtomicType<AtomicLong> {
      * @param columnIndex the column index (1-based) of the long value
      * @return a new AtomicLong containing the retrieved value (0L if SQL NULL)
      * @throws SQLException if a database access error occurs or the columnIndex is invalid
-     @MayReturnNull
      */
     @Override
     public AtomicLong get(final ResultSet rs, final int columnIndex) throws SQLException {
@@ -76,7 +75,6 @@ public class AtomicLongType extends AbstractAtomicType<AtomicLong> {
      *                    or the column name if no AS clause was specified
      * @return a new AtomicLong containing the retrieved value (0L if SQL NULL)
      * @throws SQLException if a database access error occurs or the columnLabel is invalid
-     @MayReturnNull
      */
     @Override
     public AtomicLong get(final ResultSet rs, final String columnLabel) throws SQLException {
@@ -135,7 +133,6 @@ public class AtomicLongType extends AbstractAtomicType<AtomicLong> {
      *
      * @param x the AtomicLong value to convert
      * @return the string representation of the long value, or {@code null} if input is null
-     @MayReturnNull
      */
     @Override
     public String stringOf(final AtomicLong x) {
@@ -166,7 +163,6 @@ public class AtomicLongType extends AbstractAtomicType<AtomicLong> {
      * @param str the string to parse as a long
      * @return a new AtomicLong containing the parsed value, or {@code null} if str is {@code null} or empty
      * @throws NumberFormatException if the string cannot be parsed as a long
-     @MayReturnNull
      */
     @Override
     public AtomicLong valueOf(final String str) {

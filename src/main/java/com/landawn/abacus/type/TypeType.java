@@ -14,12 +14,11 @@
 
 package com.landawn.abacus.type;
 
-import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.util.Strings;
 
 /**
  * Type handler for {@link Type} objects themselves, allowing Type instances to be serialized,
- * deserialized, and converted within the Abacus type system.
+ * deserialized, and converted within the abacus-common type system.
  *
  * <p>This class provides the ability to treat Type objects as first-class values that can be:</p>
  * <ul>
@@ -58,7 +57,7 @@ import com.landawn.abacus.util.Strings;
  * @see AbstractType
  */
 @SuppressWarnings("rawtypes")
-public class TypeType extends AbstractType<Type> {
+class TypeType extends AbstractType<Type> {
 
     public static final String TYPE = "Type";
 
@@ -108,9 +107,7 @@ public class TypeType extends AbstractType<Type> {
      * @param x the Type instance to convert to string
      * @return the name of the Type, or {@code null} if the input is null
      */
-    @MayReturnNull
     @Override
-
     public String stringOf(final Type x) {
         return (x == null) ? null : x.name();
     }
@@ -130,9 +127,7 @@ public class TypeType extends AbstractType<Type> {
      * @return the Type instance corresponding to the type name, or {@code null} if the string is empty
      * @throws IllegalArgumentException if the type name is not recognized by TypeFactory
      */
-    @MayReturnNull
     @Override
-
     public Type valueOf(final String str) {
         return (Strings.isEmpty(str)) ? null : TypeFactory.getType(str);
     }

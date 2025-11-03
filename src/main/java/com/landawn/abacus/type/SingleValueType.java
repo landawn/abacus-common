@@ -29,7 +29,6 @@ import java.util.function.Function;
 
 import com.landawn.abacus.annotation.JsonXmlCreator;
 import com.landawn.abacus.annotation.JsonXmlValue;
-import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.annotation.SuppressFBWarnings;
 import com.landawn.abacus.parser.JSONXMLSerializationConfig;
 import com.landawn.abacus.util.CharacterWriter;
@@ -246,9 +245,7 @@ abstract class SingleValueType<T> extends AbstractType<T> { //NOSONAR
      * @param x the object to convert
      * @return the string representation, or {@code null} if x is null
      */
-    @MayReturnNull
     @Override
-
     public String stringOf(final T x) {
         if (x == null) {
             return null; // NOSONAR
@@ -281,7 +278,6 @@ abstract class SingleValueType<T> extends AbstractType<T> { //NOSONAR
      * @return an instance of type T, or the string itself if no converter is available
      */
     @Override
-    @MayReturnNull
     public T valueOf(final String str) {
         // throw new UnsupportedOperationException();
 
@@ -308,7 +304,6 @@ abstract class SingleValueType<T> extends AbstractType<T> { //NOSONAR
      * @throws SQLException if a database access error occurs
      */
     @Override
-    @MayReturnNull
     public T get(final ResultSet rs, final int columnIndex) throws SQLException {
         if (jsonValueType != null) {
             try {
@@ -335,7 +330,6 @@ abstract class SingleValueType<T> extends AbstractType<T> { //NOSONAR
      * @throws SQLException if a database access error occurs
      */
     @Override
-    @MayReturnNull
     public T get(final ResultSet rs, final String columnLabel) throws SQLException {
         if (jsonValueType != null) {
             try {

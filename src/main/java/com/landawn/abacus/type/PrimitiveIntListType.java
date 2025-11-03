@@ -23,7 +23,7 @@ import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Strings;
 
 @SuppressWarnings("java:S2160")
-public final class PrimitiveIntListType extends AbstractPrimitiveListType<IntList> {
+final class PrimitiveIntListType extends AbstractPrimitiveListType<IntList> {
 
     public static final String INT_LIST = IntList.class.getSimpleName();
 
@@ -40,7 +40,8 @@ public final class PrimitiveIntListType extends AbstractPrimitiveListType<IntLis
      * Returns the Class object representing the IntList type.
      *
      * <p><b>Usage Examples:</b></p>
-     * PrimitiveIntListType type = new PrimitiveIntListType();
+     * <pre>{@code
+     * Type<IntList> type = TypeFactory.getType(IntList.class);
      * Class&lt;IntList&gt; clazz = type.clazz();
      * // clazz equals IntList.class
      * }</pre>
@@ -57,7 +58,8 @@ public final class PrimitiveIntListType extends AbstractPrimitiveListType<IntLis
      * This method provides access to the Type representation of individual list elements.
      *
      * <p><b>Usage Examples:</b></p>
-     * PrimitiveIntListType type = new PrimitiveIntListType();
+     * <pre>{@code
+     * Type<IntList> type = TypeFactory.getType(IntList.class);
      * Type&lt;Integer&gt; elemType = type.getElementType();
      * // elemType can be used for element-level operations
      * }</pre>
@@ -73,7 +75,8 @@ public final class PrimitiveIntListType extends AbstractPrimitiveListType<IntLis
      * Returns the parameter types associated with this list type.
      *
      * <p><b>Usage Examples:</b></p>
-     * PrimitiveIntListType type = new PrimitiveIntListType();
+     * <pre>{@code
+     * Type<IntList> type = TypeFactory.getType(IntList.class);
      * Type&lt;Integer&gt;[] paramTypes = type.getParameterTypes();
      * // paramTypes[0] represents the element type
      * }</pre>
@@ -93,7 +96,8 @@ public final class PrimitiveIntListType extends AbstractPrimitiveListType<IntLis
      * becomes "[1, 2, 3]".
      *
      * <p><b>Usage Examples:</b></p>
-     * PrimitiveIntListType type = new PrimitiveIntListType();
+     * <pre>{@code
+     * Type<IntList> type = TypeFactory.getType(IntList.class);
      * IntList list = IntList.of(1, 2, 3);
      * String str = type.stringOf(list);
      * // str equals "[1, 2, 3]"
@@ -104,7 +108,6 @@ public final class PrimitiveIntListType extends AbstractPrimitiveListType<IntLis
      *
      * @param x the IntList to convert to string
      * @return the string representation of the list, or {@code null} if the input list is null
-     @MayReturnNull
      */
     @Override
     public String stringOf(final IntList x) {
@@ -117,7 +120,8 @@ public final class PrimitiveIntListType extends AbstractPrimitiveListType<IntLis
      * For example, "[1, 2, 3]" will be parsed to an IntList containing {1, 2, 3}.
      *
      * <p><b>Usage Examples:</b></p>
-     * PrimitiveIntListType type = new PrimitiveIntListType();
+     * <pre>{@code
+     * Type<IntList> type = TypeFactory.getType(IntList.class);
      * IntList list = type.valueOf("[1, 2, 3]");
      * // list contains {1, 2, 3}
      *
@@ -131,7 +135,6 @@ public final class PrimitiveIntListType extends AbstractPrimitiveListType<IntLis
      * @param str the string to parse, expected format is "[value1, value2, ...]"
      * @return the parsed IntList, or {@code null} if the input string is {@code null} or empty
      * @throws NumberFormatException if any element in the string cannot be parsed as an integer
-     @MayReturnNull
      */
     @Override
     public IntList valueOf(final String str) {
@@ -144,7 +147,8 @@ public final class PrimitiveIntListType extends AbstractPrimitiveListType<IntLis
      * If the list is {@code null}, appends "null".
      *
      * <p><b>Usage Examples:</b></p>
-     * PrimitiveIntListType type = new PrimitiveIntListType();
+     * <pre>{@code
+     * Type<IntList> type = TypeFactory.getType(IntList.class);
      * StringBuilder sb = new StringBuilder();
      * IntList list = IntList.of(10, 20, 30);
      * type.appendTo(sb, list);
@@ -175,7 +179,8 @@ public final class PrimitiveIntListType extends AbstractPrimitiveListType<IntLis
      * enclosed in square brackets.
      *
      * <p><b>Usage Examples:</b></p>
-     * PrimitiveIntListType type = new PrimitiveIntListType();
+     * <pre>{@code
+     * Type<IntList> type = TypeFactory.getType(IntList.class);
      * CharacterWriter writer = new CharacterWriter();
      * IntList list = IntList.of(5, 10, 15);
      * type.writeCharacter(writer, list, null);

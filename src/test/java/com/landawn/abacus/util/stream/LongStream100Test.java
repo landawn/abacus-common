@@ -812,7 +812,7 @@ public class LongStream100Test extends TestBase {
     }
 
     @Test
-    @DisplayName("flatten() should flatten 2D array")
+    @DisplayName("flatten() should flatten two-dimensional array")
     public void testFlatten2D_2() {
         long[][] array = { { 1, 2 }, { 3, 4 } };
         long[] result = LongStream.flatten(array, false).toArray();
@@ -823,7 +823,7 @@ public class LongStream100Test extends TestBase {
     }
 
     @Test
-    @DisplayName("flatten() should flatten 2D array")
+    @DisplayName("flatten() should flatten two-dimensional array")
     public void testFlatten2D_3() {
         long[][] array = { { 1, 2 }, { 3, 4, 5 } };
         long[] result = LongStream.flatten(array, 0, false).toArray();

@@ -11,7 +11,6 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-
 package com.landawn.abacus.util.function;
 
 import com.landawn.abacus.util.Throwables;
@@ -20,9 +19,9 @@ import com.landawn.abacus.util.Throwables;
  * Represents an operation that accepts a single float-valued argument and returns no result.
  * This is the primitive type specialization of {@link java.util.function.Consumer} for {@code float}.
  * Unlike most other functional interfaces, {@code FloatConsumer} is expected to operate via side-effects.
- * 
+ *
  * <p>This is a functional interface whose functional method is {@link #accept(float)}.</p>
- * 
+ *
  * <p>This interface extends {@link Throwables.FloatConsumer} with {@link RuntimeException},
  * providing exception handling capabilities while maintaining compatibility with standard functional programming patterns.</p>
  *
@@ -30,16 +29,17 @@ import com.landawn.abacus.util.Throwables;
  * @see java.util.function.DoubleConsumer
  * @see java.util.function.IntConsumer
  * @see java.util.function.LongConsumer
+ *
+ * <p>Refer to JDK API documentation at: <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html">https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a></p>
  */
 @FunctionalInterface
 public interface FloatConsumer extends Throwables.FloatConsumer<RuntimeException> { //NOSONAR
-
     /**
      * Performs this operation on the given float argument.
-     * 
+     *
      * <p>This method is expected to operate via side-effects, such as modifying external state,
      * printing output, or updating data structures. The specific behavior depends on the implementation.</p>
-     * 
+     *
      * <p>Common use cases include:</p>
      * <ul>
      *   <li>Accumulating float values (e.g., sum, product, statistics)</li>
@@ -48,14 +48,14 @@ public interface FloatConsumer extends Throwables.FloatConsumer<RuntimeException
      *   <li>Collecting float values in a data structure</li>
      *   <li>Triggering actions based on float value thresholds</li>
      * </ul>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * FloatConsumer printer = value -> System.out.println("Value: " + value);
      * printer.accept(3.14f); // Prints: Value: 3.14
      * }</pre>
      *
-     * @param t the float value to be processed if the operation encounters an error during execution
+     * @param t the float value to be processed
      */
     @Override
     void accept(float t);
@@ -65,19 +65,19 @@ public interface FloatConsumer extends Throwables.FloatConsumer<RuntimeException
      * followed by the {@code after} operation. If performing either operation throws an exception,
      * it is relayed to the caller of the composed operation. If performing this operation throws
      * an exception, the {@code after} operation will not be performed.
-     * 
+     *
      * <p>This method allows for chaining multiple consumer operations. The composed consumer will:</p>
      * <ol>
      *   <li>First execute this consumer's {@code accept} method with the given argument</li>
      *   <li>Then execute the {@code after} consumer's {@code accept} method with the same argument</li>
      * </ol>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * List<Float> values = new ArrayList<>();
      * FloatConsumer addToList = values::add;
      * FloatConsumer printValue = v -> System.out.println("Processing: " + v);
-     * 
+     *
      * // This will first add to list, then print the value
      * FloatConsumer combined = addToList.andThen(printValue);
      * combined.accept(42.5f);

@@ -25,7 +25,7 @@ import com.landawn.abacus.util.WD;
  * @param <T> the type of value that may be present in the Optional
  */
 @SuppressWarnings("java:S2160")
-public class JdkOptionalType<T> extends AbstractOptionalType<Optional<T>> {
+class JdkOptionalType<T> extends AbstractOptionalType<Optional<T>> {
 
     public static final String OPTIONAL = "JdkOptional";
 
@@ -48,7 +48,6 @@ public class JdkOptionalType<T> extends AbstractOptionalType<Optional<T>> {
      * The declaring name represents the type in a simplified format suitable for type declarations.
      *
      * @return the declaring name of this type (e.g., "JdkOptional&lt;String&gt;")
-     @MayReturnNull
      */
     @Override
     public String declaringName() {
@@ -110,7 +109,6 @@ public class JdkOptionalType<T> extends AbstractOptionalType<Optional<T>> {
      *
      * @param x the Optional to convert to string
      * @return the string representation of the contained value, or {@code null} if empty or null
-     @MayReturnNull
      */
     @Override
     public String stringOf(final Optional<T> x) {

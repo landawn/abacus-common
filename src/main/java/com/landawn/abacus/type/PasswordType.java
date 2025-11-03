@@ -19,7 +19,6 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.util.Password;
 
 /**
@@ -27,9 +26,27 @@ import com.landawn.abacus.util.Password;
  * This type extends AbstractStringType and uses SHA-256 as the default encryption algorithm.
  * When setting password values in prepared statements or callable statements, the password is automatically
  * encrypted using the configured algorithm before being stored.
+ *
+ * <p><b>Usage Examples:</b></p>
+ * <pre>{@code
+ * // Storing a password (automatically encrypted)
+ * String plainPassword = "mySecretPassword";
+ * PreparedStatement stmt = conn.prepareStatement("INSERT INTO users (username, password) VALUES (?, ?)");
+ * stmt.setString(1, "john");
+ *
+ * Type<String> passwordType = TypeFactory.getType("Password");
+ * passwordType.set(stmt, 2, plainPassword); // Password is encrypted before storage
+ * stmt.executeUpdate();
+ *
+ * // Retrieving a password (returns encrypted form)
+ * ResultSet rs = stmt.executeQuery("SELECT password FROM users WHERE username = 'john'");
+ * if (rs.next()) {
+ *     String encryptedPassword = passwordType.get(rs, 1); // Returns encrypted password
+ * }
+ * }</pre>
  */
 @SuppressWarnings("java:S2160")
-public class PasswordType extends AbstractStringType {
+class PasswordType extends AbstractStringType {
 
     public static final String PASSWORD = "Password";
 
@@ -55,7 +72,6 @@ public class PasswordType extends AbstractStringType {
      * @return the password string from the database
      * @throws SQLException if a database access error occurs
      */
-    @MayReturnNull
     @Override
     public String get(final ResultSet rs, final int columnIndex) throws SQLException {
         return rs.getString(columnIndex);
@@ -70,7 +86,6 @@ public class PasswordType extends AbstractStringType {
      * @return the password string from the database
      * @throws SQLException if a database access error occurs
      */
-    @MayReturnNull
     @Override
     public String get(final ResultSet rs, final String columnLabel) throws SQLException {
         return rs.getString(columnLabel);

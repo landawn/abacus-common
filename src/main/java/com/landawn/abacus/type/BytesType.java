@@ -26,7 +26,7 @@ import com.landawn.abacus.util.Strings;
  * This class provides serialization, deserialization, and database operations for byte arrays.
  * Byte arrays are encoded/decoded using Base64 encoding for string representation.
  */
-public class BytesType extends AbstractType<byte[]> {
+class BytesType extends AbstractType<byte[]> {
 
     public static final String BYTES = "Bytes";
 
@@ -50,7 +50,6 @@ public class BytesType extends AbstractType<byte[]> {
      *
      * @param x the byte array to convert. Can be {@code null}.
      * @return A Base64 encoded string representation of the byte array, or {@code null} if the input is null
-     @MayReturnNull
      */
     @Override
     public String stringOf(final byte[] x) {

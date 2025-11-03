@@ -11,7 +11,6 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-
 package com.landawn.abacus.util.function;
 
 import com.landawn.abacus.util.Throwables;
@@ -19,18 +18,17 @@ import com.landawn.abacus.util.Throwables;
 /**
  * Represents a predicate (boolean-valued function) of three {@code boolean}-valued arguments.
  * This is the three-arity specialization of {@link BooleanPredicate}.
- * 
+ *
  * <p>This is a functional interface whose functional method is {@link #test(boolean, boolean, boolean)}.
  *
+ * <p>Refer to JDK API documentation at: <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html">https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a></p>
  */
 @FunctionalInterface
 public interface BooleanTriPredicate extends Throwables.BooleanTriPredicate<RuntimeException> { //NOSONAR
-
     /**
      * A predicate that always returns {@code true} regardless of the input arguments.
      */
     BooleanTriPredicate ALWAYS_TRUE = (a, b, c) -> true;
-
     /**
      * A predicate that always returns {@code false} regardless of the input arguments.
      */
@@ -38,6 +36,12 @@ public interface BooleanTriPredicate extends Throwables.BooleanTriPredicate<Runt
 
     /**
      * Evaluates this predicate on the given arguments.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * BooleanTriPredicate allTrue = (a, b, c) -> a && b && c;
+     * boolean result = allTrue.test(true, true, false); // Returns false
+     * }</pre>
      *
      * @param a the first input argument
      * @param b the second input argument

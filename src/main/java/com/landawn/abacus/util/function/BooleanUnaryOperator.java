@@ -11,7 +11,6 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-
 package com.landawn.abacus.util.function;
 
 import com.landawn.abacus.util.Throwables;
@@ -19,13 +18,13 @@ import com.landawn.abacus.util.Throwables;
 /**
  * Represents an operation on a single {@code boolean}-valued operand that produces a {@code boolean}-valued result.
  * This is the primitive type specialization of {@link UnaryOperator} for {@code boolean}.
- * 
+ *
  * <p>This is a functional interface whose functional method is {@link #applyAsBoolean(boolean)}.
  *
+ * <p>Refer to JDK API documentation at: <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html">https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a></p>
  */
 @FunctionalInterface
 public interface BooleanUnaryOperator extends Throwables.BooleanUnaryOperator<RuntimeException> { //NOSONAR
-
     /**
      * Applies this operator to the given operand.
      *

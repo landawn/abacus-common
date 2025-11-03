@@ -11,7 +11,6 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-
 package com.landawn.abacus.util.function;
 
 import com.landawn.abacus.util.Throwables;
@@ -19,7 +18,7 @@ import com.landawn.abacus.util.Throwables;
 /**
  * Represents a predicate (boolean-valued function) of a double-valued argument and an object-valued argument.
  * This is the (double, reference) specialization of {@link java.util.function.BiPredicate}.
- * 
+ *
  * <p>This is a functional interface whose functional method is {@link #test(double, Object)}.
  *
  * <p>Refer to JDK API documentation at: <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html">https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a></p>
@@ -32,6 +31,15 @@ import com.landawn.abacus.util.Throwables;
 public interface DoubleObjPredicate<T> extends Throwables.DoubleObjPredicate<T, RuntimeException> { // NOSONAR
     /**
      * Evaluates this predicate on the given arguments.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * DoubleObjPredicate<String> hasLength = (val, str) -> str.length() == (int)val;
+     * boolean result = hasLength.test(5.0, "hello"); // Returns true
+     *
+     * DoubleObjPredicate<List<Double>> contains = (val, list) -> list.contains(val);
+     * boolean result2 = contains.test(3.14, Arrays.asList(1.0, 2.0, 3.14)); // Returns true
+     * }</pre>
      *
      * @param t the double input argument
      * @param u the object input argument

@@ -22,7 +22,7 @@ import java.sql.Time;
 
 import com.landawn.abacus.util.Dates;
 
-public class MillisTimeType extends TimeType {
+class MillisTimeType extends TimeType {
 
     public static final String MILLIS_TIME = "MillisTime";
 
@@ -37,7 +37,7 @@ public class MillisTimeType extends TimeType {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * MillisTimeType type = new MillisTimeType();
+     * Type<Time> type = TypeFactory.getType(Time.class);
      * ResultSet rs = ...; // obtained from database query
      *
      * // Column contains milliseconds value 3600000 (01:00:00)
@@ -53,7 +53,6 @@ public class MillisTimeType extends TimeType {
      * @param columnIndex The column index (1-based) to retrieve the value from
      * @return A Time object created from the milliseconds value, or {@code null} if the value is 0
      * @throws SQLException if a database access error occurs or the column index is invalid
-     @MayReturnNull
      */
     @Override
     public Time get(final ResultSet rs, final int columnIndex) throws SQLException {
@@ -69,7 +68,7 @@ public class MillisTimeType extends TimeType {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * MillisTimeType type = new MillisTimeType();
+     * Type<Time> type = TypeFactory.getType(Time.class);
      * ResultSet rs = ...; // obtained from database query
      *
      * // Column "start_time" contains milliseconds value 3600000 (01:00:00)
@@ -85,7 +84,6 @@ public class MillisTimeType extends TimeType {
      * @param columnLabel The label of the column to retrieve the value from
      * @return A Time object created from the milliseconds value, or {@code null} if the value is 0
      * @throws SQLException if a database access error occurs or the column label is not found
-     @MayReturnNull
      */
     @Override
     public Time get(final ResultSet rs, final String columnLabel) throws SQLException {
@@ -101,7 +99,7 @@ public class MillisTimeType extends TimeType {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * MillisTimeType type = new MillisTimeType();
+     * Type<Time> type = TypeFactory.getType(Time.class);
      * PreparedStatement stmt = connection.prepareStatement(
      *     "INSERT INTO schedule (id, start_time) VALUES (?, ?)");
      *
@@ -130,7 +128,7 @@ public class MillisTimeType extends TimeType {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * MillisTimeType type = new MillisTimeType();
+     * Type<Time> type = TypeFactory.getType(Time.class);
      * CallableStatement stmt = connection.prepareCall("{call set_schedule(?, ?)}");
      *
      * Time time = new Time(3600000L); // 01:00:00

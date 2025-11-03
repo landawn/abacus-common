@@ -11,7 +11,6 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-
 package com.landawn.abacus.util.function;
 
 import com.landawn.abacus.util.Throwables;
@@ -20,36 +19,37 @@ import com.landawn.abacus.util.Throwables;
  * Represents an operation that accepts two float-valued arguments and returns no result.
  * This is the two-arity specialization of {@link java.util.function.Consumer} for {@code float} values.
  * Unlike most other functional interfaces, {@code FloatBiConsumer} is expected to operate via side-effects.
- * 
+ *
  * <p>This is a functional interface whose functional method is {@link #accept(float, float)}.</p>
- * 
+ *
  * <p>This interface extends {@link Throwables.FloatBiConsumer} with {@link RuntimeException},
  * providing exception handling capabilities while maintaining compatibility with standard functional programming patterns.</p>
  *
  * @see java.util.function.Consumer
  * @see java.util.function.BiConsumer
  * @see FloatConsumer
+ *
+ * <p>Refer to JDK API documentation at: <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html">https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a></p>
  */
 @FunctionalInterface
 public interface FloatBiConsumer extends Throwables.FloatBiConsumer<RuntimeException> { //NOSONAR
-
     /**
      * Performs this operation on the given two float arguments.
-     * 
-     * <p>This method is expected to operate via side-effects, such as modifying external state,
-     * printing output, or updating data structures. The specific behavior depends on the implementation.</p>
-     * 
-     * <p>Common use cases include:</p>
-     * <ul>
-     *   <li>Processing 2D coordinates (x, y)</li>
-     *   <li>Handling pairs of measurements or values</li>
-     *   <li>Updating state based on two float inputs</li>
-     *   <li>Logging or recording two related float values</li>
-     *   <li>Performing calculations with results stored externally</li>
-     * </ul>
+     * This method is expected to operate via side-effects.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * FloatBiConsumer pointPrinter = (x, y) ->
+     *     System.out.printf("Point: (%.2f, %.2f)%n", x, y);
+     * pointPrinter.accept(3.5f, 7.2f); // Prints: Point: (3.50, 7.20)
+     *
+     * Map<Float, Float> coords = new HashMap<>();
+     * FloatBiConsumer coordRecorder = (lat, lon) -> coords.put(lat, lon);
+     * coordRecorder.accept(40.71f, -74.01f);
+     * }</pre>
      *
      * @param t the first float argument
-     * @param u the second float argument if the operation encounters an error during execution
+     * @param u the second float argument
      */
     @Override
     void accept(float t, float u);
@@ -59,13 +59,13 @@ public interface FloatBiConsumer extends Throwables.FloatBiConsumer<RuntimeExcep
      * followed by the {@code after} operation. If performing either operation throws an exception,
      * it is relayed to the caller of the composed operation. If performing this operation throws
      * an exception, the {@code after} operation will not be performed.
-     * 
+     *
      * <p>This method allows for chaining multiple consumer operations. The composed consumer will:</p>
      * <ol>
      *   <li>First execute this consumer's {@code accept} method with the given arguments</li>
      *   <li>Then execute the {@code after} consumer's {@code accept} method with the same arguments</li>
      * </ol>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * FloatBiConsumer logValues = (x, y) -> System.out.printf("Point: (%.2f, %.2f)%n", x, y);
@@ -73,7 +73,7 @@ public interface FloatBiConsumer extends Throwables.FloatBiConsumer<RuntimeExcep
      *     float distance = (float) Math.sqrt(x * x + y * y);
      *     System.out.printf("Distance from origin: %.2f%n", distance);
      * };
-     * 
+     *
      * // This will first log the coordinates, then calculate and print the distance
      * FloatBiConsumer combined = logValues.andThen(calculateDistance);
      * combined.accept(3.0f, 4.0f);
@@ -82,7 +82,7 @@ public interface FloatBiConsumer extends Throwables.FloatBiConsumer<RuntimeExcep
      * // Distance from origin: 5.00
      * }</pre>
      *
-     * @param after the operation to perform after this operation
+     * @param after the operation to perform after this operation. Must not be {@code null}.
      * @return a composed {@code FloatBiConsumer} that performs in sequence this operation followed by the {@code after} operation
      */
     default FloatBiConsumer andThen(final FloatBiConsumer after) {

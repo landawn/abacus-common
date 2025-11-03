@@ -45,29 +45,31 @@ import java.lang.annotation.Target;
  * 
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
+ * import java.math.BigDecimal;
+ * import java.util.List;
+ *
  * @Entity
  * public class Product {
  *     @Id
  *     private Long id;
- *     
+ *
  *     @Column
  *     private String name;
- *     
+ *
  *     @Column
  *     private BigDecimal price;
- *     
+ *
  *     @Transient
  *     private BigDecimal priceWithTax;  // Calculated field
- *     
+ *
  *     @Transient
  *     private boolean modified;          // Runtime state
- *     
+ *
  *     @Transient
  *     private List<Review> reviews;      // Loaded separately
  * }
  * }</pre>
  * 
- * @since 2018
  * @see Column
  * @see Entity
  */

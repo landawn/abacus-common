@@ -11,7 +11,6 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-
 package com.landawn.abacus.util.function;
 
 import com.landawn.abacus.util.Throwables;
@@ -31,10 +30,11 @@ import com.landawn.abacus.util.Throwables;
  * @see IntBiConsumer
  * @see LongBiConsumer
  * @see DoubleBiConsumer
+ *
+ * <p>Refer to JDK API documentation at: <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html">https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a></p>
  */
 @FunctionalInterface
 public interface ShortBiConsumer extends Throwables.ShortBiConsumer<RuntimeException> { //NOSONAR
-
     /**
      * Performs this operation on the given short arguments.
      *
@@ -50,18 +50,18 @@ public interface ShortBiConsumer extends Throwables.ShortBiConsumer<RuntimeExcep
      *     short max = (short) Math.max(a, b);
      *     System.out.println("Maximum: " + max);
      * };
-     * 
+     *
      * ShortBiConsumer coordinateProcessor = (x, y) -> {
      *     processPoint(x, y);
      *     updateDisplay(x, y);
      * };
-     * 
+     *
      * maxTracker.accept((short) 100, (short) 200); // Prints "Maximum: 200"
      * coordinateProcessor.accept((short) 10, (short) 20);
      * }</pre>
      *
      * @param t the first input argument
-     * @param u the second input argument if the operation cannot be completed
+     * @param u the second input argument
      */
     @Override
     void accept(short t, short u);
@@ -79,11 +79,11 @@ public interface ShortBiConsumer extends Throwables.ShortBiConsumer<RuntimeExcep
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * ShortBiConsumer printSum = (a, b) -> 
+     * ShortBiConsumer printSum = (a, b) ->
      *     System.out.println("Sum: " + (a + b));
-     * ShortBiConsumer printProduct = (a, b) -> 
+     * ShortBiConsumer printProduct = (a, b) ->
      *     System.out.println("Product: " + (a * b));
-     * 
+     *
      * ShortBiConsumer combined = printSum.andThen(printProduct);
      * combined.accept((short) 5, (short) 3);
      * // Output:
@@ -91,7 +91,7 @@ public interface ShortBiConsumer extends Throwables.ShortBiConsumer<RuntimeExcep
      * // Product: 15
      * }</pre>
      *
-     * @param after the operation to perform after this operation
+     * @param after the operation to perform after this operation. Must not be {@code null}.
      * @return a composed {@code ShortBiConsumer} that performs in sequence this
      *         operation followed by the {@code after} operation
      */

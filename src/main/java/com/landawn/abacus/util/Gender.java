@@ -59,7 +59,7 @@ public enum Gender {
     /** Represents male gender (integer value: 2) */
     MALE(2),
 
-    /** Represents male gender (integer value: 3) */
+    /** Represents X gender (integer value: 3) */
     X(3);
 
     private final int intValue;

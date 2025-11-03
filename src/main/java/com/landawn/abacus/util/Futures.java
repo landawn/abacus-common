@@ -38,43 +38,304 @@ import com.landawn.abacus.util.Tuple.Tuple6;
 import com.landawn.abacus.util.Tuple.Tuple7;
 
 /**
- * The Futures utility class provides comprehensive methods for working with Future objects in concurrent programming.
- * It offers functionality for composing, combining, and managing multiple Future objects, including:
+ * A comprehensive utility class providing powerful methods for composing, combining, and managing multiple
+ * {@link Future} objects in concurrent programming scenarios. This class offers sophisticated functionality
+ * for orchestrating asynchronous operations, including parallel execution coordination, result aggregation,
+ * and sequential processing of completed futures in a thread-safe and efficient manner.
+ *
+ * <p>The {@code Futures} utility addresses common challenges in concurrent programming by providing intuitive
+ * methods for handling multiple asynchronous operations simultaneously. It bridges the gap between individual
+ * Future objects and complex multi-future workflows, offering both simple combination operations and advanced
+ * composition patterns that maintain type safety and provide comprehensive error handling.</p>
+ *
+ * <p><b>Key Features and Capabilities:</b>
  * <ul>
- *   <li>Composing multiple futures with custom zip functions</li>
- *   <li>Combining futures into Tuples for easy access to multiple results</li>
- *   <li>Creating futures that complete when all input futures complete (allOf)</li>
- *   <li>Creating futures that complete when any input future completes (anyOf)</li>
- *   <li>Iterating over futures as they complete (first-finished, first-out)</li>
+ *   <li><b>Future Composition:</b> Combine multiple futures using custom zip functions for flexible result processing</li>
+ *   <li><b>Tuple Integration:</b> Seamless conversion of multiple futures into strongly-typed Tuple objects</li>
+ *   <li><b>Parallel Coordination:</b> {@code allOf()} methods for waiting until all futures complete successfully</li>
+ *   <li><b>Race Conditions:</b> {@code anyOf()} methods for processing the first completed future result</li>
+ *   <li><b>Completion Iteration:</b> Iterator-based access to futures as they complete (first-finished, first-out)</li>
+ *   <li><b>Timeout Management:</b> Built-in timeout support for preventing indefinite blocking operations</li>
+ *   <li><b>Error Aggregation:</b> Comprehensive exception handling and propagation across multiple operations</li>
+ *   <li><b>Type Safety:</b> Strong generic typing maintained throughout all composition operations</li>
  * </ul>
- * 
- * <p>This class is particularly useful when dealing with concurrent operations where you need to:
+ *
+ * <p><b>Design Philosophy:</b>
  * <ul>
- *   <li>Wait for multiple asynchronous operations to complete</li>
- *   <li>Process results as soon as any operation completes</li>
- *   <li>Transform or combine results from multiple futures</li>
- *   <li>Handle timeouts and cancellations across multiple futures</li>
+ *   <li><b>Simplicity Over Complexity:</b> Intuitive API that handles complex concurrency patterns transparently</li>
+ *   <li><b>Type Safety First:</b> Strong generic typing prevents runtime errors and improves code clarity</li>
+ *   <li><b>Performance Optimized:</b> Efficient algorithms minimizing overhead in multi-future operations</li>
+ *   <li><b>Error Resilience:</b> Robust exception handling with proper propagation and aggregation</li>
+ *   <li><b>Memory Efficient:</b> Optimized internal structures for large-scale concurrent operations</li>
  * </ul>
- * 
- * <p><b>Usage Examples:</b></p>
+ *
+ * <p><b>Primary Use Cases:</b>
+ * <ul>
+ *   <li><b>Microservice Integration:</b> Orchestrating multiple API calls in distributed systems</li>
+ *   <li><b>Database Operations:</b> Coordinating parallel database queries and transactions</li>
+ *   <li><b>File Processing:</b> Managing concurrent file I/O operations with result aggregation</li>
+ *   <li><b>Web Service Composition:</b> Combining results from multiple web service endpoints</li>
+ *   <li><b>Batch Processing:</b> Coordinating parallel processing of large datasets</li>
+ *   <li><b>Real-time Analytics:</b> Processing streaming data from multiple concurrent sources</li>
+ * </ul>
+ *
+ * <p><b>Method Categories:</b>
+ * <ul>
+ *   <li><b>Composition Methods:</b> {@code combine()} - Custom zip functions for flexible future combination</li>
+ *   <li><b>Coordination Methods:</b> {@code allOf()}, {@code anyOf()} - Standard parallel execution patterns</li>
+ *   <li><b>Iteration Methods:</b> {@code iterate()} - Process futures as they complete with optional timeouts</li>
+ *   <li><b>Tuple Methods:</b> Direct combination into Tuple2 through Tuple7 for structured results</li>
+ * </ul>
+ *
+ * <p><b>Common Usage Patterns:</b>
  * <pre>{@code
- * // Combine two futures into a tuple
- * Future<Integer> future1 = CompletableFuture.completedFuture(10);
- * Future<String> future2 = CompletableFuture.completedFuture("Hello");
- * ContinuableFuture<Tuple2<Integer, String>> combined = Futures.combine(future1, future2);
- * Tuple2<Integer, String> result = combined.get(); // (10, "Hello")
- * 
- * // Wait for all futures to complete
- * List<Future<Integer>> futures = Arrays.asList(future1, future2, future3);
- * ContinuableFuture<List<Integer>> allResults = Futures.allOf(futures);
- * 
- * // Get the first completed result
- * ContinuableFuture<Integer> firstCompleted = Futures.anyOf(future1, future2, future3);
+ * // Basic parallel execution - wait for all results
+ * Future<User> userFuture = userService.fetchUser(userId);
+ * Future<List<Order>> ordersFuture = orderService.fetchOrders(userId);
+ * Future<Profile> profileFuture = profileService.fetchProfile(userId);
+ *
+ * ContinuableFuture<List<Object>> allResults = Futures.allOf(userFuture, ordersFuture, profileFuture);
+ * List<Object> results = allResults.get(); // [User, List<Order>, Profile]
+ *
+ * // Structured result combination using Tuples
+ * ContinuableFuture<Tuple3<User, List<Order>, Profile>> structuredResult =
+ *     Futures.combine(userFuture, ordersFuture, profileFuture, Tuple::of);
+ * Tuple3<User, List<Order>, Profile> data = structuredResult.get();
+ *
+ * // Race condition - process first completed result
+ * Future<String> primaryAPI = callPrimaryService();
+ * Future<String> backupAPI = callBackupService();
+ * ContinuableFuture<String> firstResponse = Futures.anyOf(primaryAPI, backupAPI);
+ *
+ * // Process results as they complete
+ * List<Future<ProcessingResult>> processingFutures = createProcessingTasks();
+ * ObjIterator<ProcessingResult> completionIterator = Futures.iterate(processingFutures);
+ * while (completionIterator.hasNext()) {
+ *     ProcessingResult result = completionIterator.next();
+ *     handleCompletedResult(result);
+ * }
  * }</pre>
+ *
+ * <p><b>Advanced Composition Examples:</b>
+ * <pre>{@code
+ * // Complex data aggregation workflow
+ * public class DataAggregationService {
+ *     public ContinuableFuture<AnalyticsReport> generateReport(String reportId) {
+ *         Future<MetricsData> metricsFuture = metricsService.fetchMetrics(reportId);
+ *         Future<UserData> userDataFuture = userService.fetchUserData(reportId);
+ *         Future<EventData> eventDataFuture = eventService.fetchEvents(reportId);
+ *
+ *         return Futures.combine(metricsFuture, userDataFuture, eventDataFuture,
+ *             (metrics, userData, events) -> {
+ *                 return analyticsEngine.createReport(metrics, userData, events);
+ *             });
+ *     }
+ * }
+ *
+ * // Timeout-aware batch processing
+ * public class BatchProcessor {
+ *     public List<ProcessingResult> processBatch(List<Task> tasks, long timeoutSeconds) {
+ *         List<Future<ProcessingResult>> futures = tasks.stream()
+ *             .map(task -> executor.submit(() -> processTask(task)))
+ *             .collect(Collectors.toList());
+ *
+ *         List<ProcessingResult> results = new ArrayList<>();
+ *         ObjIterator<ProcessingResult> iterator = Futures.iterate(futures,
+ *             timeoutSeconds, TimeUnit.SECONDS);
+ *
+ *         while (iterator.hasNext()) {
+ *             try {
+ *                 results.add(iterator.next());
+ *             } catch (RuntimeException e) {
+ *                 logger.warn("Task failed", e);
+ *                 results.add(ProcessingResult.failed(e.getMessage()));
+ *             }
+ *         }
+ *
+ *         return results;
+ *     }
+ * }
+ *
+ * // Custom transformation with error handling
+ * public ContinuableFuture<CustomerDashboard> buildDashboard(String customerId) {
+ *     Future<Customer> customerFuture = fetchCustomer(customerId);
+ *     Future<List<Transaction>> transactionsFuture = fetchTransactions(customerId);
+ *     Future<AccountSummary> summaryFuture = fetchAccountSummary(customerId);
+ *
+ *     return Futures.combine(Arrays.asList(customerFuture, transactionsFuture, summaryFuture),
+ *         results -> {
+ *             Customer customer = (Customer) results.get(0);
+ *             List<Transaction> transactions = (List<Transaction>) results.get(1);
+ *             AccountSummary summary = (AccountSummary) results.get(2);
+ *
+ *             return new CustomerDashboard(customer, transactions, summary);
+ *         });
+ * }
+ * }</pre>
+ *
+ * <p><b>Tuple Integration Patterns:</b>
+ * <ul>
+ *   <li><b>Tuple2:</b> Combine two futures into a pair for simple dual-result operations</li>
+ *   <li><b>Tuple3:</b> Three-way combination for triple-result scenarios (common in database operations)</li>
+ *   <li><b>Tuple4-7:</b> Higher-arity combinations for complex multi-service orchestration</li>
+ *   <li><b>Type Safety:</b> Maintain compile-time type checking across all tuple operations</li>
+ * </ul>
+ *
+ * <p><b>Completion Iteration Features:</b>
+ * <ul>
+ *   <li><b>First-Finished Processing:</b> Handle results as soon as individual futures complete</li>
+ *   <li><b>Timeout Support:</b> Prevent indefinite blocking with configurable timeout values</li>
+ *   <li><b>Exception Isolation:</b> Continue processing remaining futures even if some fail</li>
+ *   <li><b>Memory Efficiency:</b> Stream-like processing without storing all results in memory</li>
+ *   <li><b>Custom Transformation:</b> Apply functions to results during iteration</li>
+ * </ul>
+ *
+ * <p><b>Error Handling and Exception Management:</b>
+ * <ul>
+ *   <li><b>Exception Propagation:</b> Automatic propagation of exceptions from constituent futures</li>
+ *   <li><b>Aggregated Failures:</b> Collect and report multiple failure scenarios appropriately</li>
+ *   <li><b>Timeout Exceptions:</b> Clear timeout handling with TimeoutException propagation</li>
+ *   <li><b>Cancellation Support:</b> Proper handling of cancelled futures in combination operations</li>
+ *   <li><b>Recovery Strategies:</b> Support for partial success scenarios and fallback values</li>
+ * </ul>
+ *
+ * <p><b>Performance Characteristics:</b>
+ * <ul>
+ *   <li><b>Combination Overhead:</b> O(1) for tuple combinations, O(n) for collection-based operations</li>
+ *   <li><b>Memory Usage:</b> Efficient internal structures with minimal additional allocation</li>
+ *   <li><b>Thread Safety:</b> All operations are thread-safe without synchronization overhead</li>
+ *   <li><b>Completion Detection:</b> Optimized algorithms for detecting future completion states</li>
+ *   <li><b>Iterator Efficiency:</b> Lazy evaluation in iteration methods for large future collections</li>
+ * </ul>
+ *
+ * <p><b>Thread Safety and Concurrency:</b>
+ * <ul>
+ *   <li><b>Static Methods:</b> All utility methods are static and inherently thread-safe</li>
+ *   <li><b>Immutable Results:</b> Returned ContinuableFuture instances are safely publishable</li>
+ *   <li><b>Concurrent Access:</b> Multiple threads can safely call methods simultaneously</li>
+ *   <li><b>No Shared State:</b> No mutable static variables that could cause race conditions</li>
+ *   <li><b>Executor Independence:</b> Works with any Executor implementation for flexible threading</li>
+ * </ul>
+ *
+ * <p><b>Integration with Future Types:</b>
+ * <ul>
+ *   <li><b>CompletableFuture:</b> Full compatibility with Java 8+ CompletableFuture instances</li>
+ *   <li><b>ContinuableFuture:</b> Native support for enhanced ContinuableFuture functionality</li>
+ *   <li><b>ForkJoinTask:</b> Compatible with ForkJoinPool-based asynchronous operations</li>
+ *   <li><b>ExecutorService Futures:</b> Works with any Future implementation from Executor submissions</li>
+ *   <li><b>Custom Futures:</b> Accepts any object implementing the Future interface</li>
+ * </ul>
+ *
+ * <p><b>Best Practices and Recommendations:</b>
+ * <ul>
+ *   <li>Use {@code allOf()} when you need all results before proceeding with computation</li>
+ *   <li>Use {@code anyOf()} for race conditions where first completion is sufficient</li>
+ *   <li>Use {@code iterate()} for processing results as they become available (stream-like processing)</li>
+ *   <li>Prefer Tuple combinations for small, fixed numbers of futures (2-7 futures)</li>
+ *   <li>Use collection-based methods for dynamic numbers of futures</li>
+ *   <li>Always specify timeouts for iterate() methods to prevent indefinite blocking</li>
+ *   <li>Handle exceptions appropriately - some futures may fail while others succeed</li>
+ *   <li>Consider memory implications when dealing with large numbers of futures</li>
+ * </ul>
+ *
+ * <p><b>Common Anti-Patterns to Avoid:</b>
+ * <ul>
+ *   <li>Calling {@code get()} on individual futures instead of using combination methods</li>
+ *   <li>Creating deeply nested future chains instead of using parallel composition</li>
+ *   <li>Ignoring timeout settings in long-running operations</li>
+ *   <li>Not handling partial failure scenarios in multi-future operations</li>
+ *   <li>Using inefficient sequential processing when parallel execution is possible</li>
+ *   <li>Creating memory leaks by holding references to completed futures unnecessarily</li>
+ * </ul>
+ *
+ * <p><b>Timeout and Cancellation Behavior:</b>
+ * <ul>
+ *   <li><b>Timeout Propagation:</b> Timeout exceptions are properly propagated through composition chains</li>
+ *   <li><b>Partial Timeouts:</b> Iterator methods support timeouts with partial result processing</li>
+ *   <li><b>Cancellation Handling:</b> Cancelled futures are handled gracefully in combination operations</li>
+ *   <li><b>Resource Cleanup:</b> Proper cleanup of resources when operations timeout or are cancelled</li>
+ * </ul>
+ *
+ * <p><b>Example: Microservice Orchestration</b>
+ * <pre>{@code
+ * public class OrderProcessingOrchestrator {
+ *     private final UserService userService;
+ *     private final InventoryService inventoryService;
+ *     private final PaymentService paymentService;
+ *     private final ShippingService shippingService;
+ *
+ *     public ContinuableFuture<OrderResult> processOrder(OrderRequest request) {
+ *         // Step 1: Parallel validation
+ *         Future<User> userValidation = userService.validateUser(request.getUserId());
+ *         Future<Boolean> inventoryCheck = inventoryService.checkAvailability(request.getItems());
+ *         Future<PaymentMethod> paymentValidation = paymentService.validatePayment(request.getPaymentInfo());
+ *
+ *         // Step 2: Wait for all validations to complete
+ *         ContinuableFuture<Tuple3<User, Boolean, PaymentMethod>> validations =
+ *             Futures.combine(userValidation, inventoryCheck, paymentValidation, Tuple::of);
+ *
+ *         // Step 3: Process order if all validations pass
+ *         return validations.thenCompose(result -> {
+ *             if (!result._2) { // inventory not available
+ *                 throw new OrderProcessingException("Insufficient inventory");
+ *             }
+ *
+ *             // Parallel processing
+ *             Future<Payment> paymentProcessing = paymentService.processPayment(result._3, request.getAmount());
+ *             Future<Shipment> shippingArrangement = shippingService.arrangeShipping(request.getShippingAddress());
+ *
+ *             return Futures.combine(paymentProcessing, shippingArrangement,
+ *                 (payment, shipment) -> new OrderResult(request.getOrderId(), payment.getId(), shipment.getTrackingNumber()));
+ *         });
+ *     }
+ *
+ *     public List<OrderStatus> checkMultipleOrders(List<String> orderIds, int timeoutSeconds) {
+ *         List<Future<OrderStatus>> statusFutures = orderIds.stream()
+ *             .map(id -> executor.submit(() -> checkOrderStatus(id)))
+ *             .collect(Collectors.toList());
+ *
+ *         List<OrderStatus> results = new ArrayList<>();
+ *         ObjIterator<OrderStatus> iterator = Futures.iterate(statusFutures, timeoutSeconds, TimeUnit.SECONDS);
+ *
+ *         while (iterator.hasNext()) {
+ *             try {
+ *                 results.add(iterator.next());
+ *             } catch (Exception e) {
+ *                 results.add(OrderStatus.unknown("Status check failed: " + e.getMessage()));
+ *             }
+ *         }
+ *
+ *         return results;
+ *     }
+ * }
+ * }</pre>
+ *
+ * <p><b>Comparison with Alternative Approaches:</b>
+ * <ul>
+ *   <li><b>vs. CompletableFuture.allOf():</b> Type-safe results vs. Object array returns</li>
+ *   <li><b>vs. Manual Future.get() calls:</b> Parallel execution vs. sequential blocking</li>
+ *   <li><b>vs. ExecutorCompletionService:</b> Simplified API vs. lower-level completion service management</li>
+ *   <li><b>vs. Custom Thread Management:</b> Built-in error handling vs. manual exception aggregation</li>
+ * </ul>
+ *
+ * <p><b>Integration with Concurrent Collections:</b>
+ * <ul>
+ *   <li><b>ConcurrentHashMap:</b> Thread-safe result caching and memoization</li>
+ *   <li><b>BlockingQueue:</b> Producer-consumer patterns with future-based coordination</li>
+ *   <li><b>CountDownLatch:</b> Coordination with traditional synchronization primitives</li>
+ *   <li><b>Semaphore:</b> Resource management in conjunction with future-based operations</li>
+ * </ul>
  *
  * @see ContinuableFuture
  * @see CompletableFuture
+ * @see Future
  * @see ExecutorCompletionService
+ * @see java.util.concurrent.Executor
+ * @see com.landawn.abacus.util.Tuple
+ * @see com.landawn.abacus.util.ObjIterator
+ * @see com.landawn.abacus.util.function.Function
+ * @see <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/concurrent/Future.html">Future Documentation</a>
+ * @see <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/concurrent/CompletableFuture.html">CompletableFuture Documentation</a>
  */
 public final class Futures {
 

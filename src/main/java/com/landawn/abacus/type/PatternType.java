@@ -16,15 +16,27 @@ package com.landawn.abacus.type;
 
 import java.util.regex.Pattern;
 
-import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.util.Strings;
 
 /**
  * Type handler for java.util.regex.Pattern objects, providing conversion between Pattern instances
  * and their string representations. This type allows for seamless serialization and deserialization
  * of regular expression patterns.
+ *
+ * <p><b>Usage Examples:</b></p>
+ * <pre>{@code
+ * Type<Pattern> patternType = TypeFactory.getType("Pattern");
+ *
+ * // Convert Pattern to string
+ * Pattern emailPattern = Pattern.compile("^[A-Za-z0-9+_.-]+@(.+)$");
+ * String patternStr = patternType.stringOf(emailPattern); // Returns "^[A-Za-z0-9+_.-]+@(.+)$"
+ *
+ * // Convert string to Pattern
+ * Pattern restored = patternType.valueOf("^[A-Za-z0-9+_.-]+@(.+)$");
+ * boolean matches = restored.matcher("test@example.com").matches(); // true
+ * }</pre>
  */
-public class PatternType extends AbstractType<Pattern> {
+class PatternType extends AbstractType<Pattern> {
 
     public static final String PATTERN = "Pattern";
 
@@ -50,24 +62,20 @@ public class PatternType extends AbstractType<Pattern> {
      * @param t the Pattern object to convert
      * @return the pattern string, or {@code null} if the input is null
      */
-    @MayReturnNull
     @Override
-
     public String stringOf(final Pattern t) {
         return (t == null) ? null : t.toString();
     }
 
     /**
-     * Creates a Pattern object from a string representation.
+     * Parses a string representation to create a Pattern instance.
      * Compiles the string into a Pattern using Pattern.compile().
      * Returns {@code null} if the input string is {@code null} or empty.
      *
      * @param str the regular expression string to compile
      * @return a compiled Pattern object, or {@code null} if the input is {@code null} or empty
      */
-    @MayReturnNull
     @Override
-
     public Pattern valueOf(final String str) {
         return (Strings.isEmpty(str)) ? null : Pattern.compile(str);
     }

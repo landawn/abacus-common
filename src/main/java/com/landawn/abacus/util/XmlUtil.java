@@ -109,7 +109,6 @@ import jakarta.xml.bind.Unmarshaller;
  * String attr = XmlUtil.getAttribute(elem, "id");
  * }</pre>
  *
- * @since 0.8
  */
 public final class XmlUtil {
 

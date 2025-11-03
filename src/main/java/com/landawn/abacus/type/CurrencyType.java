@@ -23,7 +23,7 @@ import com.landawn.abacus.util.Strings;
  * This class provides serialization and deserialization for java.util.Currency objects.
  * Currencies are represented by their ISO 4217 currency codes (e.g., "USD", "EUR", "JPY").
  */
-public class CurrencyType extends AbstractType<Currency> {
+class CurrencyType extends AbstractType<Currency> {
 
     public static final String CURRENCY = Currency.class.getSimpleName();
 
@@ -58,7 +58,6 @@ public class CurrencyType extends AbstractType<Currency> {
      *
      * @param x the Currency object to convert. Can be {@code null}.
      * @return The ISO 4217 currency code (e.g., "USD"), or {@code null} if input is null
-     @MayReturnNull
      */
     @Override
     public String stringOf(final Currency x) {
@@ -66,13 +65,12 @@ public class CurrencyType extends AbstractType<Currency> {
     }
 
     /**
-     * Converts a string representation back to a Currency object.
+     * Parses a string representation to create a Currency instance.
      * The string should be a valid ISO 4217 currency code.
      *
      * @param str the ISO 4217 currency code. Can be {@code null} or empty.
      * @return The Currency instance for the specified code, or {@code null} if input is null/empty
      * @throws IllegalArgumentException if the currency code is not a supported ISO 4217 code
-     @MayReturnNull
      */
     @Override
     public Currency valueOf(final String str) {

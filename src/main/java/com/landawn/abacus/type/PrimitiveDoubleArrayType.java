@@ -17,7 +17,6 @@ package com.landawn.abacus.type;
 import java.io.IOException;
 import java.util.Collection;
 
-import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.parser.JSONXMLSerializationConfig;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.N;
@@ -30,7 +29,7 @@ import com.landawn.abacus.util.WD;
  * double arrays and their string representations or collections.
  */
 @SuppressWarnings("java:S2160")
-public final class PrimitiveDoubleArrayType extends AbstractPrimitiveArrayType<double[]> {
+final class PrimitiveDoubleArrayType extends AbstractPrimitiveArrayType<double[]> {
 
     public static final String DOUBLE_ARRAY = double[].class.getSimpleName();
 
@@ -83,9 +82,7 @@ public final class PrimitiveDoubleArrayType extends AbstractPrimitiveArrayType<d
      * @param x the double array to convert
      * @return the string representation of the array, or {@code null} if input is null
      */
-    @MayReturnNull
     @Override
-
     public String stringOf(final double[] x) {
         if (x == null) {
             return null; // NOSONAR
@@ -104,7 +101,6 @@ public final class PrimitiveDoubleArrayType extends AbstractPrimitiveArrayType<d
      * @param str the string to parse
      * @return the parsed double array, or {@code null} if input is null
      */
-    @MayReturnNull
     @Override
     public double[] valueOf(final String str) {
         if (Strings.isEmpty(str) || Strings.isBlank(str)) {
@@ -191,7 +187,6 @@ public final class PrimitiveDoubleArrayType extends AbstractPrimitiveArrayType<d
      * @param c the Collection of Double objects to convert
      * @return a double array containing the unboxed values, or {@code null} if input is null
      */
-    @MayReturnNull
     @Override
     public double[] collection2Array(final Collection<?> c) {
         if (c == null) {

@@ -25,7 +25,7 @@ import java.sql.SQLException;
  * database interaction capabilities for handling Unicode character streams in SQL operations.
  * This type is specifically designed for databases that support national character sets.
  */
-public class NCharacterStreamType extends ReaderType {
+class NCharacterStreamType extends ReaderType {
 
     public static final String N_CHARACTER_STREAM = "NCharacterStream";
 

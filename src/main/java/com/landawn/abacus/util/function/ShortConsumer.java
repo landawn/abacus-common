@@ -11,7 +11,6 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-
 package com.landawn.abacus.util.function;
 
 import com.landawn.abacus.util.Throwables;
@@ -20,14 +19,15 @@ import com.landawn.abacus.util.Throwables;
  * Represents an operation that accepts a single short-valued argument and returns no result.
  * This is the primitive type specialization of {@link java.util.function.Consumer} for {@code short}.
  * Unlike most other functional interfaces, {@code ShortConsumer} is expected to operate via side-effects.
- * 
+ *
  * <p>This is a functional interface whose functional method is {@link #accept(short)}.
- * 
+ *
  * @see java.util.function.Consumer
+ *
+ * <p>Refer to JDK API documentation at: <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html">https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a></p>
  */
 @FunctionalInterface
 public interface ShortConsumer extends Throwables.ShortConsumer<RuntimeException> { //NOSONAR
-
     /**
      * Performs this operation on the given argument.
      *
@@ -46,7 +46,7 @@ public interface ShortConsumer extends Throwables.ShortConsumer<RuntimeException
      * collector.accept((short) 20); // results now contains [10, 20]
      * }</pre>
      *
-     * @param t the input argument if the operation cannot be completed
+     * @param t the input argument
      */
     @Override
     void accept(short t);

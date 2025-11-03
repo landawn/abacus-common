@@ -16,7 +16,6 @@ package com.landawn.abacus.type;
 
 import java.io.IOException;
 
-import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.parser.JSONXMLSerializationConfig;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.N;
@@ -28,7 +27,7 @@ import com.landawn.abacus.util.WD;
  * This class provides serialization/deserialization and I/O operations
  * for Boolean[] arrays, handling {@code null} elements and array formatting.
  */
-public final class BooleanArrayType extends ObjectArrayType<Boolean> {
+final class BooleanArrayType extends ObjectArrayType<Boolean> {
 
     BooleanArrayType() {
         super(Boolean[].class);
@@ -43,9 +42,7 @@ public final class BooleanArrayType extends ObjectArrayType<Boolean> {
      * @return a string representation like "[true, false, null]", or {@code null} if input is {@code null},
      *         or "[]" if the array is empty
      */
-    @MayReturnNull
     @Override
-
     public String stringOf(final Boolean[] x) {
         if (x == null) {
             return null; // NOSONAR
@@ -65,9 +62,7 @@ public final class BooleanArrayType extends ObjectArrayType<Boolean> {
      * @return a Boolean array parsed from the string, or {@code null} if str is {@code null},
      *         or an empty array if str is empty or equals "[]"
      */
-    @MayReturnNull
     @Override
-
     public Boolean[] valueOf(final String str) {
         if (Strings.isEmpty(str) || Strings.isBlank(str)) {
             return null; // NOSONAR

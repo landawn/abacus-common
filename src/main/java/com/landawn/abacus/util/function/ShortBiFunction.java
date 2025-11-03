@@ -11,10 +11,8 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-
 package com.landawn.abacus.util.function;
 
-import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.util.Throwables;
 
 /**
@@ -33,10 +31,11 @@ import com.landawn.abacus.util.Throwables;
  * @see IntBiFunction
  * @see LongBiFunction
  * @see DoubleBiFunction
+ *
+ * <p>Refer to JDK API documentation at: <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html">https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a></p>
  */
 @FunctionalInterface
 public interface ShortBiFunction<R> extends Throwables.ShortBiFunction<R, RuntimeException> { //NOSONAR
-
     /**
      * Applies this function to the given short arguments.
      *
@@ -47,11 +46,11 @@ public interface ShortBiFunction<R> extends Throwables.ShortBiFunction<R, Runtim
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ShortBiFunction<Integer> sum = (a, b) -> (int) (a + b);
-     * ShortBiFunction<String> formatter = (x, y) -> 
+     * ShortBiFunction<String> formatter = (x, y) ->
      *     String.format("Point(%d, %d)", x, y);
-     * ShortBiFunction<Boolean> inRange = (value, max) -> 
+     * ShortBiFunction<Boolean> inRange = (value, max) ->
      *     value >= 0 && value <= max;
-     * 
+     *
      * Integer total = sum.apply((short) 100, (short) 200); // Returns 300
      * String point = formatter.apply((short) 10, (short) 20); // Returns "Point(10, 20)"
      * Boolean valid = inRange.apply((short) 50, (short) 100); // Returns true
@@ -62,7 +61,6 @@ public interface ShortBiFunction<R> extends Throwables.ShortBiFunction<R, Runtim
      * @return the function result
      */
     @Override
-    @MayReturnNull
     R apply(short t, short u);
 
     /**
@@ -78,24 +76,24 @@ public interface ShortBiFunction<R> extends Throwables.ShortBiFunction<R, Runtim
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ShortBiFunction<Integer> multiply = (a, b) -> (int) (a * b);
-     * Function<Integer, String> addPrefix = result -> 
+     * Function<Integer, String> addPrefix = result ->
      *     "Result: " + result;
-     * 
-     * ShortBiFunction<String> multiplyAndFormat = 
+     *
+     * ShortBiFunction<String> multiplyAndFormat =
      *     multiply.andThen(addPrefix);
-     * 
-     * String result = multiplyAndFormat.apply((short) 5, (short) 6); 
+     *
+     * String result = multiplyAndFormat.apply((short) 5, (short) 6);
      * // Returns "Result: 30"
-     * 
+     *
      * // More complex example
      * ShortBiFunction<Point> createPoint = (x, y) -> new Point(x, y);
-     * Function<Point, Double> calculateDistance = point -> 
+     * Function<Point, Double> calculateDistance = point ->
      *     Math.sqrt(point.x * point.x + point.y * point.y);
-     * 
-     * ShortBiFunction<Double> distanceFromOrigin = 
+     *
+     * ShortBiFunction<Double> distanceFromOrigin =
      *     createPoint.andThen(calculateDistance);
-     * 
-     * Double distance = distanceFromOrigin.apply((short) 3, (short) 4); 
+     *
+     * Double distance = distanceFromOrigin.apply((short) 3, (short) 4);
      * // Returns 5.0
      * }</pre>
      *

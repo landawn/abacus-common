@@ -11,10 +11,8 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-
 package com.landawn.abacus.util.function;
 
-import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.util.Throwables;
 
 /**
@@ -46,13 +44,14 @@ public interface ObjLongFunction<T, R> extends Throwables.ObjLongFunction<T, R, 
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * ObjLongFunction<DateFormat, String> formatTimestamp = (formatter, timestamp) -> 
-     *     formatter.format(new Date(timestamp));
-     * ObjLongFunction<Map<Long, String>, String> getById = (map, id) -> 
+     * ObjLongFunction<String, String> formatTimestamp = (format, timestamp) ->
+     *     String.format(format, timestamp);
+     * ObjLongFunction<Map<Long, String>, String> getById = (map, id) ->
      *     map.getOrDefault(id, "Not Found");
-     * 
-     * String formatted = formatTimestamp.apply(myDateFormat, System.currentTimeMillis());
-     * String value = getById.apply(myMap, 12345L);
+     *
+     * String formatted = formatTimestamp.apply("Timestamp: %d", System.currentTimeMillis());
+     * Map<Long, String> dataMap = Map.of(12345L, "Value1", 67890L, "Value2");
+     * String value = getById.apply(dataMap, 12345L); // Returns "Value1"
      * }</pre>
      *
      * @param t the first function argument of type T
@@ -60,7 +59,6 @@ public interface ObjLongFunction<T, R> extends Throwables.ObjLongFunction<T, R, 
      * @return the function result of type R
      */
     @Override
-    @MayReturnNull
     R apply(T t, long u);
 
     /**
@@ -80,13 +78,13 @@ public interface ObjLongFunction<T, R> extends Throwables.ObjLongFunction<T, R, 
      *     cal.setTimeInMillis(millis);
      *     return cal.getTime();
      * };
-     * Function<Date, String> formatDate = date -> 
+     * Function<Date, String> formatDate = date ->
      *     new SimpleDateFormat("yyyy-MM-dd").format(date);
-     * 
-     * ObjLongFunction<TimeZone, String> timestampToString = 
+     *
+     * ObjLongFunction<TimeZone, String> timestampToString =
      *     createDate.andThen(formatDate);
-     * 
-     * String result = timestampToString.apply(TimeZone.getDefault(), 
+     *
+     * String result = timestampToString.apply(TimeZone.getDefault(),
      *     System.currentTimeMillis());
      * }</pre>
      *

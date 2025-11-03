@@ -35,7 +35,6 @@ package com.landawn.abacus.util;
  * @param <T> the type of the value
  * @see Keyed
  * @see Wrapper
- * @since 1.0
  */
 @com.landawn.abacus.annotation.Immutable
 public final class IndexedKeyed<K, T> extends Keyed<K, T> {

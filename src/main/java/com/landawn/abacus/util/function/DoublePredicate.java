@@ -11,7 +11,6 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-
 package com.landawn.abacus.util.function;
 
 import com.landawn.abacus.util.N;
@@ -20,7 +19,7 @@ import com.landawn.abacus.util.Throwables;
 /**
  * Represents a predicate (boolean-valued function) of one double-valued argument.
  * This is the double-consuming primitive type specialization of {@link java.util.function.Predicate}.
- * 
+ *
  * <p>This is a functional interface whose functional method is {@link #test(double)}.
  *
  * <p>Refer to JDK API documentation at: <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html">https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a></p>
@@ -34,42 +33,35 @@ public interface DoublePredicate extends Throwables.DoublePredicate<RuntimeExcep
      * A predicate that always evaluates to {@code true}, regardless of the input value.
      */
     DoublePredicate ALWAYS_TRUE = value -> true;
-
     /**
      * A predicate that always evaluates to {@code false}, regardless of the input value.
      */
     DoublePredicate ALWAYS_FALSE = value -> false;
-
     /**
      * A predicate that tests if a double value is zero using {@link N#equals(double, double)}.
      * Returns {@code true} if the value equals 0.
      */
     DoublePredicate IS_ZERO = value -> N.equals(value, 0);
-
     /**
      * A predicate that tests if a double value is not zero using {@link N#compare(double, double)}.
      * Returns {@code true} if the value does not equal 0.
      */
     DoublePredicate NOT_ZERO = value -> N.compare(value, 0) != 0;
-
     /**
      * A predicate that tests if a double value is positive using {@link N#compare(double, double)}.
      * Returns {@code true} if the value is greater than 0.
      */
     DoublePredicate IS_POSITIVE = value -> N.compare(value, 0) > 0;
-
     /**
      * A predicate that tests if a double value is not positive using {@link N#compare(double, double)}.
      * Returns {@code true} if the value is less than or equal to 0.
      */
     DoublePredicate NOT_POSITIVE = value -> N.compare(value, 0) <= 0;
-
     /**
      * A predicate that tests if a double value is negative using {@link N#compare(double, double)}.
      * Returns {@code true} if the value is less than 0.
      */
     DoublePredicate IS_NEGATIVE = value -> N.compare(value, 0) < 0;
-
     /**
      * A predicate that tests if a double value is not negative using {@link N#compare(double, double)}.
      * Returns {@code true} if the value is greater than or equal to 0.
@@ -79,8 +71,14 @@ public interface DoublePredicate extends Throwables.DoublePredicate<RuntimeExcep
     /**
      * Evaluates this predicate on the given argument.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * DoublePredicate isPositive = value -> value > 0.0;
+     * boolean result = isPositive.test(3.14); // Returns true
+     * }</pre>
+     *
      * @param value the double input argument
-     * @return {@code true} if the input argument matches the predicate, otherwise {@code false}
+     * @return {@code true} if the input argument matches the predicate, {@code false} otherwise
      */
     @Override
     boolean test(double value);

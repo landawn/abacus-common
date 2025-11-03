@@ -22,7 +22,7 @@ import com.landawn.abacus.util.Strings;
  * This class provides serialization and deserialization capabilities for Fraction instances,
  * which represent rational numbers as a ratio of two integers.
  */
-public class FractionType extends AbstractType<Fraction> {
+class FractionType extends AbstractType<Fraction> {
 
     public static final String FRACTION = Fraction.class.getSimpleName();
 
@@ -91,7 +91,6 @@ public class FractionType extends AbstractType<Fraction> {
      *
      * @param x the Fraction to convert to string
      * @return the string representation of the fraction, or {@code null} if the input is null
-     @MayReturnNull
      */
     @Override
     public String stringOf(final Fraction x) {
@@ -105,7 +104,6 @@ public class FractionType extends AbstractType<Fraction> {
      *
      * @param str the string to parse into a Fraction
      * @return the parsed Fraction object, or {@code null} if the input string is {@code null} or empty
-     @MayReturnNull
      */
     @Override
     public Fraction valueOf(final String str) {

@@ -47,25 +47,197 @@ import com.landawn.abacus.util.stream.Stream;
 
 /**
  * A fluent wrapper class that provides a builder pattern for manipulating objects of type {@code T}.
- * This class allows method chaining operations on the wrapped value, providing specialized builders
- * for collections, maps, and primitive list types.
- * 
- * <p>The Builder pattern enables fluent manipulation of mutable objects by returning the builder instance
- * after each operation, allowing for method chaining. Specialized builders are provided for different
- * data structures with type-specific operations.</p>
- * 
+ * This class enables method chaining operations on wrapped values, offering specialized builders
+ * for collections, maps, primitive lists, and other data structures commonly used in data processing
+ * and manipulation scenarios.
+ *
+ * <p>The Builder pattern facilitates fluent manipulation of mutable objects by returning the builder
+ * instance after each operation, allowing for elegant method chaining. The class provides both generic
+ * building capabilities and specialized builders optimized for specific data structure types with
+ * type-specific operations and performance characteristics.</p>
+ *
+ * <p><b>Key Features:</b>
+ * <ul>
+ *   <li><b>Fluent Interface:</b> Method chaining for readable and concise object manipulation</li>
+ *   <li><b>Type Safety:</b> Strongly typed generic wrapper with compile-time type checking</li>
+ *   <li><b>Specialized Builders:</b> Optimized builders for collections, maps, primitive lists, and datasets</li>
+ *   <li><b>Automatic Detection:</b> Smart factory method that automatically selects appropriate builder type</li>
+ *   <li><b>Null Safety:</b> Built-in null checking to prevent null pointer exceptions</li>
+ *   <li><b>Functional Integration:</b> Support for lambda expressions and functional programming patterns</li>
+ *   <li><b>Comparison Utilities:</b> Built-in comparison and equality builders for complex comparisons</li>
+ * </ul>
+ *
+ * <p><b>⚠️ IMPORTANT - Design Decisions:</b>
+ * <ul>
+ *   <li>Builder instances hold references to mutable objects - modifications affect the original</li>
+ *   <li>Null values are not permitted in constructor - throws {@link IllegalArgumentException}</li>
+ *   <li>Specialized builders provide type-specific optimizations and additional operations</li>
+ *   <li>Not thread-safe - external synchronization required for concurrent access</li>
+ * </ul>
+ *
+ * <p><b>Specialized Builder Types:</b>
+ * <ul>
+ *   <li><b>Primitive List Builders:</b> {@link BooleanListBuilder}, {@link IntListBuilder}, etc.</li>
+ *   <li><b>Collection Builders:</b> {@link ListBuilder}, {@link CollectionBuilder}</li>
+ *   <li><b>Map Builders:</b> {@link MapBuilder} for key-value collections</li>
+ *   <li><b>Multimap Builders:</b> {@link MultimapBuilder} for one-to-many mappings</li>
+ *   <li><b>Dataset Builders:</b> {@link DatasetBuilder} for tabular data manipulation</li>
+ *   <li><b>Multiset Builders:</b> {@link MultisetBuilder} for counting collections</li>
+ * </ul>
+ *
+ * <p><b>Common Use Cases:</b>
+ * <ul>
+ *   <li><b>Collection Building:</b> Fluent construction and manipulation of lists, sets, and maps</li>
+ *   <li><b>Data Processing:</b> Chain operations on datasets and primitive collections</li>
+ *   <li><b>Object Manipulation:</b> Method chaining for complex object modifications</li>
+ *   <li><b>Functional Programming:</b> Integration with streams and functional operations</li>
+ *   <li><b>Testing and Mocking:</b> Fluent setup of test data and mock objects</li>
+ *   <li><b>Configuration Building:</b> Structured configuration object construction</li>
+ * </ul>
+ *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
- * List<String> result = Builder.of(new ArrayList<String>())
- *     .add("Hello")
- *     .add("World")
+ * // Basic collection building
+ * List<String> names = Builder.of(new ArrayList<String>())
+ *     .add("Alice")
+ *     .add("Bob")
+ *     .add("Charlie")
+ *     .val();
+ *
+ * // Map building with specialized builder
+ * Map<String, Integer> scores = Builder.of(new HashMap<String, Integer>())
+ *     .put("Alice", 95)
+ *     .put("Bob", 87)
+ *     .put("Charlie", 92)
+ *     .val();
+ *
+ * // Primitive list building
+ * IntList numbers = Builder.of(IntList.of())
+ *     .add(1, 2, 3)
+ *     .addAll(Arrays.asList(4, 5, 6))
+ *     .sort()
+ *     .val();
+ *
+ * // Functional operations
+ * List<String> processed = Builder.of(new ArrayList<String>())
+ *     .accept(list -> list.addAll(Arrays.asList("a", "b", "c")))
+ *     .apply(list -> list.stream().map(String::toUpperCase).collect(Collectors.toList()));
+ *
+ * // Dataset manipulation
+ * Dataset result = Builder.of(Dataset.empty())
+ *     .addColumn("name", Arrays.asList("Alice", "Bob"))
+ *     .addColumn("age", Arrays.asList(25, 30))
  *     .val();
  * }</pre>
  *
- * @param <T> the type of the value this Builder holds
+ * <p><b>Factory Methods:</b>
+ * <ul>
+ *   <li>{@link #of(BooleanList)} - BooleanListBuilder for primitive boolean collections</li>
+ *   <li>{@link #of(List)} - ListBuilder for generic list operations</li>
+ *   <li>{@link #of(Collection)} - CollectionBuilder for generic collections</li>
+ *   <li>{@link #of(Map)} - MapBuilder for key-value maps</li>
+ *   <li>{@link #of(Multimap)} - MultimapBuilder for one-to-many mappings</li>
+ *   <li>{@link #of(Dataset)} - DatasetBuilder for tabular data</li>
+ *   <li>{@link #of(Object)} - Generic builder with automatic type detection</li>
+ * </ul>
  *
- * @see ImmutableList#builder()
- * @see ImmutableSet#builder()
+ * <p><b>Automatic Type Detection:</b>
+ * The generic {@link #of(Object)} method automatically detects the input type and returns
+ * the most appropriate specialized builder:
+ * <pre>{@code
+ * // Automatically returns IntListBuilder
+ * var intBuilder = Builder.of(IntList.of());
+ *
+ * // Automatically returns ListBuilder
+ * var listBuilder = Builder.of(new ArrayList<String>());
+ *
+ * // Automatically returns MapBuilder
+ * var mapBuilder = Builder.of(new HashMap<String, Integer>());
+ * }</pre>
+ *
+ * <p><b>Utility Builders:</b>
+ * <ul>
+ *   <li><b>{@link ComparisonBuilder}:</b> Chained comparisons with short-circuiting</li>
+ *   <li><b>{@link EquivalenceBuilder}:</b> Chained equality checks with short-circuiting</li>
+ *   <li><b>{@link HashCodeBuilder}:</b> Fluent hash code computation following Java conventions</li>
+ * </ul>
+ *
+ * <p><b>Performance Characteristics:</b>
+ * <ul>
+ *   <li>Builder creation: O(1) constant time</li>
+ *   <li>Method chaining: O(1) per operation (depends on underlying data structure)</li>
+ *   <li>Value extraction: O(1) constant time</li>
+ *   <li>Memory overhead: Minimal - single reference to wrapped object</li>
+ * </ul>
+ *
+ * <p><b>Thread Safety:</b>
+ * Builder instances are <b>not thread-safe</b>:
+ * <ul>
+ *   <li>Each builder instance should be used by a single thread</li>
+ *   <li>Underlying objects may be modified during building operations</li>
+ *   <li>Use external synchronization if concurrent access is required</li>
+ *   <li>Specialized builders inherit thread safety from their underlying collections</li>
+ * </ul>
+ *
+ * <p><b>Integration Points:</b>
+ * <ul>
+ *   <li><b>{@link Stream}:</b> Convert builder values to streams for functional processing</li>
+ *   <li><b>{@link N}:</b> Utility class factory methods for creating collections</li>
+ *   <li><b>Collections Framework:</b> Full compatibility with Java Collections API</li>
+ *   <li><b>Functional Interfaces:</b> Support for Consumer, Function, and Predicate operations</li>
+ * </ul>
+ *
+ * <p><b>Best Practices:</b>
+ * <ul>
+ *   <li>Use appropriate specialized builders for better performance and type safety</li>
+ *   <li>Extract the final value using {@link #val()} when building is complete</li>
+ *   <li>Prefer method chaining over intermediate variable assignments</li>
+ *   <li>Use functional operations ({@link #accept}, {@link #apply}) for complex transformations</li>
+ *   <li>Consider immutable alternatives for thread-safe scenarios</li>
+ * </ul>
+ *
+ * <p><b>Error Handling:</b>
+ * <ul>
+ *   <li>Constructor throws {@link IllegalArgumentException} for null inputs</li>
+ *   <li>Individual operations may throw exceptions based on underlying object behavior</li>
+ *   <li>Null safety is enforced at builder creation time</li>
+ *   <li>Type safety is enforced at compile time through generics</li>
+ * </ul>
+ *
+ * <p><b>Comparison Utilities:</b>
+ * Builder also provides static utility methods for creating comparison and hash code builders:
+ * <pre>{@code
+ * // Chained comparisons
+ * int result = Builder.compare(person1.getLastName(), person2.getLastName())
+ *                    .compare(person1.getFirstName(), person2.getFirstName())
+ *                    .compare(person1.getAge(), person2.getAge())
+ *                    .result();
+ *
+ * // Chained equality checks
+ * boolean equal = Builder.equals(obj1.getField1(), obj2.getField1())
+ *                       .equals(obj1.getField2(), obj2.getField2())
+ *                       .result();
+ *
+ * // Fluent hash code building
+ * int hashCode = Builder.hash(firstName)
+ *                      .hash(lastName)
+ *                      .hash(age)
+ *                      .result();
+ * }</pre>
+ *
+ * @param <T> the type of the value this Builder wraps and manipulates
+ *
+ * @see BooleanListBuilder
+ * @see ListBuilder
+ * @see CollectionBuilder
+ * @see MapBuilder
+ * @see MultimapBuilder
+ * @see DatasetBuilder
+ * @see ComparisonBuilder
+ * @see EquivalenceBuilder
+ * @see HashCodeBuilder
+ * @see Stream
+ * @see N
  */
 @SuppressWarnings({ "java:S6539" })
 public class Builder<T> {
@@ -1729,7 +1901,7 @@ public class Builder<T> {
     }
 
     /**
-     * Builder for {@link Multimap} that provides fluent methods for adding, removing, and manipulating
+     * Specialized builder for {@link Multimap} that provides fluent methods for adding, removing, and manipulating
      * key-value mappings in a multimap structure.
      *
      * @param <K> the key type
@@ -1963,7 +2135,7 @@ public class Builder<T> {
     }
 
     /**
-     * Builder for {@link Dataset} that provides fluent methods for data manipulation operations
+     * Specialized builder for {@link Dataset} that provides fluent methods for data manipulation operations
      * such as renaming columns, adding/removing columns, transforming data, and combining datasets.
      * 
      * @see Dataset
@@ -3403,9 +3575,6 @@ public class Builder<T> {
      *     .compare(person1.getAge(), person2.getAge())
      *     .result();
      * }</pre>
-     * 
-     * @author HaiYang Li
-     * @since 0.8
      */
     public static final class ComparisonBuilder {
 
@@ -3942,9 +4111,6 @@ public class Builder<T> {
      *     .equals(person1.getAge(), person2.getAge())
      *     .result();
      * }</pre>
-     * 
-     * @author HaiYang Li
-     * @since 0.8
      */
     public static final class EquivalenceBuilder {
 
@@ -4388,9 +4554,6 @@ public class Builder<T> {
      *     .hash(age)
      *     .result();
      * }</pre>
-     * 
-     * @author HaiYang Li
-     * @since 0.8
      */
     public static final class HashCodeBuilder {
 

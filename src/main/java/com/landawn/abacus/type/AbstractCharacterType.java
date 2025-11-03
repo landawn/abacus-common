@@ -21,7 +21,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
 
-import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.parser.JSONXMLSerializationConfig;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.N;
@@ -46,9 +45,7 @@ public abstract class AbstractCharacterType extends AbstractPrimaryType<Characte
      * @param x the Character value to convert
      * @return the string representation of the character, or {@code null} if input is {@code null}
      */
-    @MayReturnNull
     @Override
-
     public String stringOf(Character x) {
         return (x == null) ? null : N.stringOf(x.charValue());
     }
@@ -65,9 +62,7 @@ public abstract class AbstractCharacterType extends AbstractPrimaryType<Characte
      * @param str the string to convert
      * @return the Character value, or default value if input is empty or {@code null}
      */
-    @MayReturnNull
     @Override
-
     public Character valueOf(String str) {
         // NullPointerException Here
         // return N.isEmpty(st) ? defaultValue()
@@ -89,9 +84,7 @@ public abstract class AbstractCharacterType extends AbstractPrimaryType<Characte
      * @param len the number of characters to read
      * @return the Character value, or default value if input is {@code null} or empty
      */
-    @MayReturnNull
     @Override
-
     public Character valueOf(char[] cbuf, int offset, int len) {
         // NullPointerException Here
         // return ((cbuf == null) || (len == 0)) ? defaultValue()
@@ -103,6 +96,12 @@ public abstract class AbstractCharacterType extends AbstractPrimaryType<Characte
         return (len == 1) ? cbuf[offset] : (char) parseInt(cbuf, offset, len);
     }
 
+    /**
+     * Checks if this type represents a Character type.
+     * This method always returns {@code true} for Character types.
+     *
+     * @return {@code true}, indicating this is a Character type
+     */
     @Override
     public boolean isCharacter() {
         return true;
@@ -140,7 +139,6 @@ public abstract class AbstractCharacterType extends AbstractPrimaryType<Characte
      * @throws SQLException if a database access error occurs
      */
     @Override
-    @MayReturnNull
     public Character get(ResultSet rs, String columnLabel) throws SQLException {
         final String ret = rs.getString(columnLabel);
 

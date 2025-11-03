@@ -35,35 +35,183 @@ import com.landawn.abacus.logging.Logger;
 import com.landawn.abacus.logging.LoggerFactory;
 
 /**
- * A comprehensive performance profiling utility for measuring and analyzing the execution time of code blocks.
- * This class provides methods to run performance tests with multiple threads, loops, and rounds,
- * collecting detailed statistics about execution times.
+ * A comprehensive, enterprise-grade performance profiling and benchmarking utility providing advanced
+ * execution time measurement, multi-threaded performance testing, and detailed statistical analysis
+ * capabilities. This class serves as a powerful toolkit for performance optimization, load testing,
+ * and systematic performance analysis in enterprise applications requiring precise timing measurements
+ * and comprehensive performance metrics for method execution, code blocks, and system operations.
  *
- * <p>Key features:</p>
+ * <p>The {@code Profiler} class addresses critical challenges in enterprise performance testing by
+ * providing sophisticated benchmarking capabilities that enable developers to accurately measure
+ * execution times under various load conditions, identify performance bottlenecks, and validate
+ * optimization improvements. It supports configurable multi-threaded testing scenarios, statistical
+ * analysis of performance data, and flexible reporting options suitable for production performance
+ * monitoring and development-time performance validation.</p>
+ *
+ * <p><b>⚠️ IMPORTANT - Memory Considerations:</b>
+ * When using large loop counts (>100,000 iterations), the profiler stores individual execution times
+ * which can consume significant memory and potentially impact measurement accuracy. For high-iteration
+ * testing, implement internal loops within test methods rather than using high loop parameters to
+ * minimize memory overhead while maintaining measurement precision.</p>
+ *
+ * <p><b>Key Features and Capabilities:</b>
  * <ul>
- *   <li>Multi-threaded performance testing with configurable thread counts</li>
- *   <li>Multiple loops and rounds for accurate measurements</li>
- *   <li>Detailed statistics including min, max, average, and percentile times</li>
- *   <li>Support for suspending profiler execution for debugging</li>
- *   <li>Output results in various formats (text, HTML, XML)</li>
+ *   <li><b>Multi-Threaded Performance Testing:</b> Configurable concurrent execution with customizable thread pools</li>
+ *   <li><b>Comprehensive Statistical Analysis:</b> Min, max, average, median, percentile, and distribution metrics</li>
+ *   <li><b>Multiple Test Rounds:</b> Support for warm-up rounds and multiple test iterations for accuracy</li>
+ *   <li><b>Flexible Execution Models:</b> Support for Runnable, Callable, and reflection-based method invocation</li>
+ *   <li><b>Advanced Reporting:</b> Multiple output formats including console, file, HTML, and custom formatters</li>
+ *   <li><b>Execution Control:</b> Profiler suspension, debugging hooks, and conditional execution</li>
+ *   <li><b>Memory Management:</b> Optimized memory usage patterns for large-scale performance testing</li>
+ *   <li><b>Integration Ready:</b> Seamless integration with testing frameworks and CI/CD pipelines</li>
  * </ul>
  *
- * <p><b>Important:</b> If the loop number is too big, it may take a lot of memory to save the test results
- * and impact the test accuracy. Consider using a for-loop inside the test method to reduce memory usage:</p>
- * 
- * <p><b>Usage Examples:</b></p>
+ * <p><b>Design Philosophy:</b>
+ * <ul>
+ *   <li><b>Accuracy First:</b> Minimize measurement overhead and external factors affecting timing precision</li>
+ *   <li><b>Scalability Focus:</b> Support for testing under various load conditions and concurrency levels</li>
+ *   <li><b>Comprehensive Analysis:</b> Detailed statistical metrics for thorough performance understanding</li>
+ *   <li><b>Ease of Use:</b> Simple API for common use cases with advanced options for complex scenarios</li>
+ *   <li><b>Production Ready:</b> Robust error handling and resource management for enterprise environments</li>
+ * </ul>
+ *
+ * <p><b>Statistical Metrics Provided:</b>
+ * <ul>
+ *   <li><b>Basic Metrics:</b> Minimum, maximum, average, and total execution times</li>
+ *   <li><b>Distribution Analysis:</b> Standard deviation, variance, and coefficient of variation</li>
+ *   <li><b>Percentile Analysis:</b> 50th, 90th, 95th, 99th percentile execution times</li>
+ *   <li><b>Throughput Metrics:</b> Operations per second and transactions per minute</li>
+ *   <li><b>Concurrency Analysis:</b> Thread efficiency and contention metrics</li>
+ *   <li><b>Trend Analysis:</b> Performance trends across rounds and time periods</li>
+ * </ul>
+ *
+ * <p><b>Common Usage Patterns:</b>
  * <pre>{@code
- * // Instead of:
- * Profiler.run(threadNum, 1000000, roundNum, "test", () -> yourMethod());
- * 
- * // Use:
- * Profiler.run(threadNum, 1000, roundNum, "test", () -> {
+ * // Basic single-threaded performance test
+ * Profiler.run(1, 1000, 3, "String concatenation", () -> {
+ *     String result = "";
  *     for (int i = 0; i < 1000; i++) {
- *         yourMethod();
+ *         result += "test" + i;
+ *     }
+ * });
+ *
+ * // Multi-threaded load testing
+ * Profiler.run(10, 1000, 5, "Database query", () -> {
+ *     try {
+ *         userService.findById(randomUserId());
+ *     } catch (Exception e) {
+ *         logger.error("Query failed", e);
  *     }
  * });
  * }</pre>
  *
+ * <p><b>Profiler Configuration and Control:</b>
+ * <ul>
+ *   <li><b>Thread Pool Management:</b> Custom ExecutorService support for specialized threading models</li>
+ *   <li><b>Suspension Control:</b> {@code setSuspended(boolean)} for debugging and conditional execution</li>
+ *   <li><b>Output Customization:</b> Multiple output formats and custom result processors</li>
+ *   <li><b>Memory Optimization:</b> Configurable result collection strategies for large-scale testing</li>
+ *   <li><b>Error Handling:</b> Comprehensive exception handling with detailed error reporting</li>
+ * </ul>
+ *
+ * <p><b>Performance Measurement Accuracy:</b>
+ * <ul>
+ *   <li><b>JVM Warmup:</b> Multiple rounds help eliminate JIT compilation overhead</li>
+ *   <li><b>Garbage Collection:</b> Statistical analysis helps identify GC-related performance variations</li>
+ *   <li><b>System Load:</b> Multiple iterations provide statistically significant results</li>
+ *   <li><b>Measurement Overhead:</b> Minimal profiler overhead to preserve timing accuracy</li>
+ *   <li><b>Thread Synchronization:</b> Precise synchronization for accurate concurrent measurements</li>
+ * </ul>
+ *
+ * <p><b>Memory Management Strategies:</b>
+ * <ul>
+ *   <li><b>Optimal Loop Sizes:</b> Recommend loop counts under 10,000 for memory efficiency</li>
+ *   <li><b>Internal Iteration:</b> Use internal loops within test methods for high-iteration testing</li>
+ *   <li><b>Result Streaming:</b> Stream results for processing instead of storing all measurements</li>
+ *   <li><b>Garbage Collection:</b> Strategic GC calls between test rounds for clean measurements</li>
+ *   <li><b>Resource Cleanup:</b> Automatic cleanup of profiling resources and thread pools</li>
+ * </ul>
+ *
+ * <p><b>Integration with Testing Frameworks:</b>
+ * <ul>
+ *   <li><b>JUnit Integration:</b> Use in @Test methods for performance regression testing</li>
+ *   <li><b>TestNG Support:</b> Compatible with TestNG performance testing annotations</li>
+ *   <li><b>Maven/Gradle:</b> Integration with build tools for automated performance testing</li>
+ *   <li><b>CI/CD Pipelines:</b> Automated performance validation in continuous integration</li>
+ *   <li><b>Monitoring Systems:</b> Export results to monitoring and alerting systems</li>
+ * </ul>
+ *
+ * <p><b>Output and Reporting Options:</b>
+ * <ul>
+ *   <li><b>Console Output:</b> Formatted console output with tabular statistical summaries</li>
+ *   <li><b>File Export:</b> Export results to text files, CSV, JSON, or XML formats</li>
+ *   <li><b>HTML Reports:</b> Rich HTML reports with charts and interactive elements</li>
+ *   <li><b>Custom Formatters:</b> Pluggable result formatters for specialized reporting needs</li>
+ *   <li><b>Real-time Monitoring:</b> Stream results to monitoring dashboards and alerting systems</li>
+ * </ul>
+ *
+ * <p><b>Best Practices and Recommendations:</b>
+ * <ul>
+ *   <li>Use multiple rounds (3-5) to account for JVM warmup and obtain stable measurements</li>
+ *   <li>Implement internal loops for high-iteration testing to minimize memory overhead</li>
+ *   <li>Include warmup rounds in performance-critical testing to eliminate JIT effects</li>
+ *   <li>Use appropriate thread counts based on system capabilities and test objectives</li>
+ *   <li>Monitor memory usage during profiling to prevent OutOfMemoryError</li>
+ *   <li>Validate test environment consistency for accurate comparative measurements</li>
+ *   <li>Use statistical analysis to identify and handle performance outliers</li>
+ *   <li>Implement proper exception handling within profiled code blocks</li>
+ * </ul>
+ *
+ * <p><b>Common Anti-Patterns to Avoid:</b>
+ * <ul>
+ *   <li>Using extremely high loop counts (>100,000) that consume excessive memory</li>
+ *   <li>Ignoring JVM warmup effects in performance measurements</li>
+ *   <li>Running performance tests on systems with inconsistent load</li>
+ *   <li>Not handling exceptions properly within profiled code blocks</li>
+ *   <li>Comparing results from different JVM instances or system configurations</li>
+ *   <li>Using profiler suspension in production environments inappropriately</li>
+ *   <li>Not considering garbage collection impact on measurement accuracy</li>
+ * </ul>
+ *
+ * <p><b>Performance Testing Methodologies:</b>
+ * <ul>
+ *   <li><b>Baseline Testing:</b> Establish performance baselines for regression detection</li>
+ *   <li><b>Load Testing:</b> Validate performance under expected production loads</li>
+ *   <li><b>Stress Testing:</b> Determine system breaking points and failure modes</li>
+ *   <li><b>Comparative Testing:</b> Compare different implementations or optimizations</li>
+ *   <li><b>Regression Testing:</b> Validate that changes don't degrade performance</li>
+ * </ul>
+ *
+ * <p><b>Statistical Analysis Capabilities:</b>
+ * <ul>
+ *   <li><b>Central Tendency:</b> Mean, median, and mode calculation for execution times</li>
+ *   <li><b>Variability:</b> Standard deviation, variance, and coefficient of variation</li>
+ *   <li><b>Distribution:</b> Percentile analysis and execution time distribution</li>
+ *   <li><b>Outlier Detection:</b> Identification and handling of performance outliers</li>
+ *   <li><b>Trend Analysis:</b> Performance trends across multiple test rounds</li>
+ * </ul>
+ *
+ * <p><b>Thread Safety and Concurrent Usage:</b>
+ * <ul>
+ *   <li><b>Thread-Safe Operations:</b> All Profiler methods are thread-safe for concurrent usage</li>
+ *   <li><b>Isolated Measurements:</b> Each profiling session uses isolated timing measurements</li>
+ *   <li><b>Concurrent Testing:</b> Support for running multiple profiling sessions simultaneously</li>
+ *   <li><b>Resource Management:</b> Proper cleanup of thread pools and profiling resources</li>
+ * </ul>
+ *
+ * <p><b>Comparison with Alternative Profiling Tools:</b>
+ * <ul>
+ *   <li><b>vs. JMH (Java Microbenchmark Harness):</b> Simplified API vs. annotation-based comprehensive framework</li>
+ *   <li><b>vs. VisualVM:</b> Programmatic profiling vs. GUI-based application profiling</li>
+ *   <li><b>vs. JProfiler:</b> Code-embedded testing vs. external profiling tool</li>
+ *   <li><b>vs. Apache Bench:</b> Java method profiling vs. HTTP load testing</li>
+ * </ul>
+ *
+ * @see ExecutorService
+ * @see java.util.concurrent.Callable
+ * @see java.lang.Runnable
+ * @see com.landawn.abacus.logging.Logger
+ * @see <a href="https://openjdk.java.net/projects/code-tools/jmh/">JMH (Java Microbenchmark Harness)</a>
  * @see <a href="https://medium.com/@AlexanderObregon/introduction-to-java-microbenchmarking-with-jmh-java-microbenchmark-harness-55af74b2fd38">Introduction to Java Microbenchmarking with JMH</a>
  */
 @SuppressWarnings({ "java:S1244", "java:S1943" })

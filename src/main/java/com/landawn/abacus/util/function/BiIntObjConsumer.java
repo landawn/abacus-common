@@ -11,7 +11,6 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-
 package com.landawn.abacus.util.function;
 
 import com.landawn.abacus.util.Throwables;
@@ -20,16 +19,15 @@ import com.landawn.abacus.util.Throwables;
  * Represents an operation that accepts two {@code int}-valued arguments and a single object-valued
  * argument, and returns no result. This is a specialization of consumer for two primitive {@code int}
  * values and one reference type.
- * 
+ *
  * <p>This is a functional interface whose functional method is {@link #accept(int, int, Object)}.
- * 
+ *
  * <p>Refer to JDK API documentation at: <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html">https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a></p>
  *
  * @param <T> the type of the object argument to the operation
  */
 @FunctionalInterface
 public interface BiIntObjConsumer<T> extends Throwables.BiIntObjConsumer<T, RuntimeException> { // NOSONAR
-
     /**
      * Performs this operation on the given arguments.
      *

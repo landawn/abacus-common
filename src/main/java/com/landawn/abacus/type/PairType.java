@@ -18,7 +18,6 @@ import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.Writer;
 
-import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.exception.UncheckedIOException;
 import com.landawn.abacus.parser.JSONXMLSerializationConfig;
 import com.landawn.abacus.util.CharacterWriter;
@@ -35,11 +34,24 @@ import com.landawn.abacus.util.WD;
  * This type handler manages the conversion between Pair objects and their string representations,
  * supporting both JSON serialization and custom formatted output.
  *
+ * <p><b>Usage Examples:</b></p>
+ * <pre>{@code
+ * // Create a PairType for String and Integer
+ * Type<Pair<String, Integer>> type = TypeFactory.getType("Pair<String, Integer>");
+ *
+ * // Serialize a Pair to string
+ * Pair<String, Integer> pair = Pair.of("age", 25);
+ * String json = type.stringOf(pair); // Returns ["age", 25]
+ *
+ * // Deserialize a string to Pair
+ * Pair<String, Integer> restored = type.valueOf("[\"age\", 25]");
+ * }</pre>
+ *
  * @param <L> the type of the left element in the pair
  * @param <R> the type of the right element in the pair
  */
 @SuppressWarnings("java:S2160")
-public class PairType<L, R> extends AbstractType<Pair<L, R>> {
+class PairType<L, R> extends AbstractType<Pair<L, R>> {
 
     private final String declaringName;
 
@@ -112,7 +124,6 @@ public class PairType<L, R> extends AbstractType<Pair<L, R>> {
      * @return a JSON string representation of the pair, or {@code null} if the input is null
      */
     @Override
-    @MayReturnNull
     public String stringOf(final Pair<L, R> x) {
         return (x == null) ? null : Utils.jsonParser.serialize(N.asArray(x.left(), x.right()), Utils.jsc);
     }
@@ -125,7 +136,6 @@ public class PairType<L, R> extends AbstractType<Pair<L, R>> {
      * @param str the string to parse, expected to be a JSON array with two elements
      * @return a Pair object created from the parsed values, or {@code null} if the input is {@code null} or empty
      */
-    @MayReturnNull
     @SuppressWarnings("unchecked")
     @Override
     public Pair<L, R> valueOf(final String str) {

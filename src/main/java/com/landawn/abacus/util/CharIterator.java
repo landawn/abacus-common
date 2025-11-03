@@ -46,7 +46,6 @@ import com.landawn.abacus.util.stream.CharStream;
  * @see TriIterator
  * @see com.landawn.abacus.util.Iterators
  * @see com.landawn.abacus.util.Enumerations
- * @since 1.0
  */
 @SuppressWarnings({ "java:S6548" })
 public abstract class CharIterator extends ImmutableIterator<Character> {

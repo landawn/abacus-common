@@ -11,7 +11,6 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-
 package com.landawn.abacus.util.function;
 
 /**
@@ -30,11 +29,11 @@ package com.landawn.abacus.util.function;
  * @see java.util.function.Consumer
  * @see LongConsumer
  * @see LongBiConsumer
- * @since 1.8
+ *
+ * <p>Refer to JDK API documentation at: <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html">https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a></p>
  */
 @FunctionalInterface
 public interface LongNConsumer {
-
     /**
      * Performs this operation on the given arguments.
      *
@@ -88,7 +87,7 @@ public interface LongNConsumer {
      * combined.accept(10L, 20L, 30L); // First processes, then logs
      * }</pre>
      *
-     * @param after the operation to perform after this operation. Must not be null
+     * @param after the operation to perform after this operation. Must not be {@code null}.
      * @return a composed {@code LongNConsumer} that performs in sequence this
      *         operation followed by the {@code after} operation
      */

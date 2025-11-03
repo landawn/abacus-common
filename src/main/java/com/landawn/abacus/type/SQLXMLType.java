@@ -20,7 +20,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.SQLXML;
 
-public class SQLXMLType extends AbstractType<SQLXML> {
+class SQLXMLType extends AbstractType<SQLXML> {
 
     public static final String SQL_XML = SQLXML.class.getSimpleName();
 
@@ -33,7 +33,7 @@ public class SQLXMLType extends AbstractType<SQLXML> {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * SQLXMLType type = new SQLXMLType();
+     * Type<SQLXML> type = TypeFactory.getType(SQLXML.class);
      * Class<SQLXML> clazz = type.clazz(); // Returns SQLXML.class
      * }</pre>
      *
@@ -50,7 +50,7 @@ public class SQLXMLType extends AbstractType<SQLXML> {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * SQLXMLType type = new SQLXMLType();
+     * Type<SQLXML> type = TypeFactory.getType(SQLXML.class);
      * boolean serializable = type.isSerializable(); // Returns false
      * }</pre>
      *
@@ -68,7 +68,7 @@ public class SQLXMLType extends AbstractType<SQLXML> {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * SQLXMLType type = new SQLXMLType();
+     * Type<SQLXML> type = TypeFactory.getType(SQLXML.class);
      * // This will throw UnsupportedOperationException
      * String str = type.stringOf(sqlXml);
      * }</pre>
@@ -76,7 +76,6 @@ public class SQLXMLType extends AbstractType<SQLXML> {
      * @param x the SQLXML object to convert
      * @return never returns normally
      * @throws UnsupportedOperationException always thrown as SQLXML cannot be directly converted to string
-     @MayReturnNull
      */
     @Override
     public String stringOf(final SQLXML x) throws UnsupportedOperationException {
@@ -90,7 +89,7 @@ public class SQLXMLType extends AbstractType<SQLXML> {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * SQLXMLType type = new SQLXMLType();
+     * Type<SQLXML> type = TypeFactory.getType(SQLXML.class);
      * // This will throw UnsupportedOperationException
      * SQLXML xml = type.valueOf("<root>data</root>");
      * }</pre>
@@ -98,7 +97,6 @@ public class SQLXMLType extends AbstractType<SQLXML> {
      * @param str the string to convert
      * @return never returns normally
      * @throws UnsupportedOperationException always thrown as SQLXML cannot be created from string
-     @MayReturnNull
      */
     @Override
     public SQLXML valueOf(final String str) throws UnsupportedOperationException {
@@ -111,7 +109,7 @@ public class SQLXMLType extends AbstractType<SQLXML> {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * SQLXMLType type = new SQLXMLType();
+     * Type<SQLXML> type = TypeFactory.getType(SQLXML.class);
      * ResultSet rs = statement.executeQuery("SELECT config_xml FROM settings");
      * SQLXML xml = type.get(rs, 1); // Get XML from first column
      * }</pre>
@@ -120,7 +118,6 @@ public class SQLXMLType extends AbstractType<SQLXML> {
      * @param columnIndex the 1-based index of the column to retrieve
      * @return the SQLXML value from the specified column, or {@code null} if the column value is SQL NULL
      * @throws SQLException if a database access error occurs or the column index is invalid
-     @MayReturnNull
      */
     @Override
     public SQLXML get(final ResultSet rs, final int columnIndex) throws SQLException {
@@ -133,7 +130,7 @@ public class SQLXMLType extends AbstractType<SQLXML> {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * SQLXMLType type = new SQLXMLType();
+     * Type<SQLXML> type = TypeFactory.getType(SQLXML.class);
      * ResultSet rs = statement.executeQuery("SELECT config_xml FROM settings");
      * SQLXML xml = type.get(rs, "config_xml"); // Get XML by column name
      * }</pre>
@@ -154,7 +151,7 @@ public class SQLXMLType extends AbstractType<SQLXML> {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * SQLXMLType type = new SQLXMLType();
+     * Type<SQLXML> type = TypeFactory.getType(SQLXML.class);
      * PreparedStatement stmt = conn.prepareStatement("INSERT INTO settings (config_xml) VALUES (?)");
      * type.set(stmt, 1, xmlData); // Set XML at parameter index 1
      * }</pre>
@@ -175,7 +172,7 @@ public class SQLXMLType extends AbstractType<SQLXML> {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * SQLXMLType type = new SQLXMLType();
+     * Type<SQLXML> type = TypeFactory.getType(SQLXML.class);
      * CallableStatement stmt = conn.prepareCall("{call update_config(?)}");
      * type.set(stmt, "xml_param", xmlData); // Set XML by parameter name
      * }</pre>

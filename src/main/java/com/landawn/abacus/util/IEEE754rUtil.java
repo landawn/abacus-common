@@ -44,8 +44,11 @@ package com.landawn.abacus.util;
  * float[] values = {3.0f, Float.NaN, 1.0f, 2.0f};
  * float min = IEEE754rUtil.min(values); // returns 1.0f
  * }</pre>
- * 
- * <p>Note: This class is copied from Apache Commons Lang and may have been modified.</p>
+ *
+ * <p><b>Attribution:</b>
+ * This class includes code adapted from Apache Commons Lang, Google Guava, and other
+ * open source projects under the Apache License 2.0. Methods from these libraries may have been
+ * modified for consistency, performance optimization, and null-safety enhancement.
  *
  * @see Math#min(double, double)
  * @see Math#max(double, double)

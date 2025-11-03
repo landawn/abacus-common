@@ -36,7 +36,7 @@ import com.landawn.abacus.util.Objectory;
  * as ASCII input streams. It extends InputStreamType to handle CLOB data specifically
  * through ASCII stream representations.
  */
-public class ClobAsciiStreamType extends InputStreamType {
+class ClobAsciiStreamType extends InputStreamType {
 
     public static final String CLOB_ASCII_STREAM = "ClobAsciiStream";
 

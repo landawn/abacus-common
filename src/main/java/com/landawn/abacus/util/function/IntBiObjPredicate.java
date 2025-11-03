@@ -11,7 +11,6 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-
 package com.landawn.abacus.util.function;
 
 import com.landawn.abacus.util.Throwables;
@@ -26,10 +25,11 @@ import com.landawn.abacus.util.Throwables;
  * @param <U> the type of the second object argument to the predicate
  * @see java.util.function.Predicate
  * @see IntObjPredicate
+ *
+ * <p>Refer to JDK API documentation at: <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html">https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a></p>
  */
 @FunctionalInterface
 public interface IntBiObjPredicate<T, U> extends Throwables.IntBiObjPredicate<T, U, RuntimeException> { //NOSONAR
-
     /**
      * Evaluates this predicate on the given arguments.
      *

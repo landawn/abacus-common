@@ -28,7 +28,7 @@ import com.landawn.abacus.util.Strings;
  * by delegating to the underlying boolean array type handler.
  */
 @SuppressWarnings("java:S2160")
-public final class PrimitiveBooleanListType extends AbstractPrimitiveListType<BooleanList> {
+final class PrimitiveBooleanListType extends AbstractPrimitiveListType<BooleanList> {
 
     public static final String BOOLEAN_LIST = BooleanList.class.getSimpleName();
 
@@ -79,7 +79,6 @@ public final class PrimitiveBooleanListType extends AbstractPrimitiveListType<Bo
      *
      * @param x the BooleanList to convert
      * @return the string representation of the list, or {@code null} if input is null
-     @MayReturnNull
      */
     @Override
     public String stringOf(final BooleanList x) {
@@ -93,7 +92,6 @@ public final class PrimitiveBooleanListType extends AbstractPrimitiveListType<Bo
      *
      * @param str the string to parse
      * @return a BooleanList created from the parsed values, or {@code null} if input is {@code null} or empty
-     @MayReturnNull
      */
     @Override
     public BooleanList valueOf(final String str) {

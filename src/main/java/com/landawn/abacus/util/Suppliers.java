@@ -66,7 +66,7 @@ import com.landawn.abacus.util.function.Supplier;
  * UUIDs and exceptions.</p>
  *
  * <p>The class supports both built-in Java collections and custom collection implementations from
- * the Abacus library. It also provides registration mechanisms for custom suppliers when working
+ * the abacus-common library. It also provides registration mechanisms for custom suppliers when working
  * with non-standard collection or map implementations.</p>
  *
  * <p>Key features:</p>
@@ -106,7 +106,6 @@ import com.landawn.abacus.util.function.Supplier;
  * otherwise specified. The class uses internal caching to optimize supplier creation for
  * frequently requested types.</p>
  *
- * @since 1.0
  * @see java.util.function.Supplier
  * @see java.util.Collection
  * @see java.util.Map

@@ -11,24 +11,24 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-
 package com.landawn.abacus.util.function;
 
 /**
  * Represents a function that accepts two arguments and produces a boolean-valued result.
  * This is the {@code boolean}-producing primitive specialization for {@link java.util.function.BiFunction}.
- * 
+ *
  * <p>This is a functional interface whose functional method is {@link #applyAsBoolean(Object, Object)}.
- * 
+ *
  * @param <T> the type of the first argument to the function
  * @param <U> the type of the second argument to the function
- * 
+ *
  * @see java.util.function.BiFunction
  * @see ToBooleanFunction
+ *
+ * <p>Refer to JDK API documentation at: <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html">https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a></p>
  */
 @FunctionalInterface
 public interface ToBooleanBiFunction<T, U> {
-
     /**
      * Applies this function to the given arguments.
      *

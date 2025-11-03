@@ -11,27 +11,26 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-
 package com.landawn.abacus.util.function;
 
-import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.util.Throwables;
 
 /**
  * Represents a function that accepts three short-valued arguments and produces a result.
  * This is the three-arity specialization of {@link ShortFunction}.
- * 
+ *
  * <p>This is a functional interface whose functional method is {@link #apply(short, short, short)}.
- * 
+ *
  * @param <R> the type of the result of the function
- * 
+ *
  * @see ShortFunction
  * @see ShortBiFunction
  * @see java.util.function.Function
+ *
+ * <p>Refer to JDK API documentation at: <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html">https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a></p>
  */
 @FunctionalInterface
 public interface ShortTriFunction<R> extends Throwables.ShortTriFunction<R, RuntimeException> { //NOSONAR
-
     /**
      * Applies this function to the given arguments.
      *
@@ -56,7 +55,6 @@ public interface ShortTriFunction<R> extends Throwables.ShortTriFunction<R, Runt
      * @return the function result
      */
     @Override
-    @MayReturnNull
     R apply(short a, short b, short c);
 
     /**

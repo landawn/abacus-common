@@ -11,7 +11,6 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-
 package com.landawn.abacus.util.function;
 
 import com.landawn.abacus.util.Throwables;
@@ -21,7 +20,7 @@ import com.landawn.abacus.util.Throwables;
  * This is the double-producing primitive specialization for a three-argument function.
  *
  * <p>This interface extends the Throwables.ToDoubleTriFunction, providing compatibility
- * with the Abacus framework's error handling mechanisms while limiting thrown exceptions
+ * with the abacus-common framework's error handling mechanisms while limiting thrown exceptions
  * to RuntimeException.
  *
  * <p>This is a functional interface whose functional method is {@link #applyAsDouble(Object, Object, Object)}.
@@ -29,20 +28,21 @@ import com.landawn.abacus.util.Throwables;
  * @param <A> the type of the first argument to the function
  * @param <B> the type of the second argument to the function
  * @param <C> the type of the third argument to the function
+ *
+ * <p>Refer to JDK API documentation at: <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html">https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a></p>
  */
 @FunctionalInterface
 public interface ToDoubleTriFunction<A, B, C> extends Throwables.ToDoubleTriFunction<A, B, C, RuntimeException> { //NOSONAR
-
     /**
      * Applies this function to the given arguments and returns a double result.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * ToDoubleTriFunction<Integer, Integer, Integer> volumeCalculator = 
+     * ToDoubleTriFunction<Integer, Integer, Integer> volumeCalculator =
      *     (length, width, height) -> (double) length * width * height;
      * double volume = volumeCalculator.applyAsDouble(2, 3, 4); // returns 24.0
-     * 
-     * ToDoubleTriFunction<String, Integer, Double> weightedLength = 
+     *
+     * ToDoubleTriFunction<String, Integer, Double> weightedLength =
      *     (str, weight, factor) -> str.length() * weight * factor;
      * double result = weightedLength.applyAsDouble("Hello", 2, 1.5); // returns 15.0
      * }</pre>
@@ -50,7 +50,7 @@ public interface ToDoubleTriFunction<A, B, C> extends Throwables.ToDoubleTriFunc
      * @param a the first function argument
      * @param b the second function argument
      * @param c the third function argument
-     * @return the function result as a primitive double if any error occurs during function execution
+     * @return the function result as a primitive double
      */
     @Override
     double applyAsDouble(A a, B b, C c);

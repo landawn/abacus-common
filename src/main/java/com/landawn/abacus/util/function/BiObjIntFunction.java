@@ -11,26 +11,25 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-
 package com.landawn.abacus.util.function;
 
-import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.util.Throwables;
 
 /**
  * Represents a function that accepts two object-valued arguments and a single {@code int}-valued
  * argument, and produces a result. This is a specialization of function for two reference types
  * and one primitive {@code int} value.
- * 
+ *
  * <p>This is a functional interface whose functional method is {@link #apply(Object, Object, int)}.
  *
  * @param <T> the type of the first object argument to the function
  * @param <U> the type of the second object argument to the function
  * @param <R> the type of the result of the function
+ *
+ * <p>Refer to JDK API documentation at: <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html">https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a></p>
  */
 @FunctionalInterface
 public interface BiObjIntFunction<T, U, R> extends Throwables.BiObjIntFunction<T, U, R, RuntimeException> { //NOSONAR
-
     /**
      * Applies this function to the given arguments.
      *
@@ -46,7 +45,6 @@ public interface BiObjIntFunction<T, U, R> extends Throwables.BiObjIntFunction<T
      * @return the function result
      */
     @Override
-    @MayReturnNull
     R apply(T t, U u, int i);
 
     /**

@@ -187,7 +187,7 @@ public class FloatStream100Test extends TestBase {
         }
 
         @Test
-        @DisplayName("flatten() should flatten 2D array")
+        @DisplayName("flatten() should flatten two-dimensional array")
         public void testFlatten2D() {
             float[][] array = { { 1.0f, 2.0f }, { 3.0f, 4.0f } };
             FloatStream stream = FloatStream.flatten(array);
@@ -196,7 +196,7 @@ public class FloatStream100Test extends TestBase {
         }
 
         @Test
-        @DisplayName("flatten() should flatten 2D array")
+        @DisplayName("flatten() should flatten two-dimensional array")
         public void testFlatten2D_2() {
             float[][] array = { { 1.0f, 2.0f }, { 3.0f, 4.0f } };
             float[] result = FloatStream.flatten(array, false).toArray();
@@ -207,7 +207,7 @@ public class FloatStream100Test extends TestBase {
         }
 
         @Test
-        @DisplayName("flatten() should flatten 2D array")
+        @DisplayName("flatten() should flatten two-dimensional array")
         public void testFlatten2D_3() {
             float[][] array = { { 1.0f, 2.0f }, { 3.0f, 4.0f, 5.f } };
             float[] result = FloatStream.flatten(array, 0.0f, false).toArray();

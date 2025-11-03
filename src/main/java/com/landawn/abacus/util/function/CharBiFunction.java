@@ -11,36 +11,43 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-
 package com.landawn.abacus.util.function;
 
-import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.util.Throwables;
 
 /**
  * Represents a function that accepts two char-valued arguments and produces a result.
  * This is the two-arity specialization of {@link CharFunction}.
- * 
+ *
  * <p>This is a functional interface whose functional method is {@link #apply(char, char)}.
- * 
+ *
+ * <p>Refer to JDK API documentation at: <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html">https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a></p>
+ *
  * @param <R> the type of the result of the function
- * 
+ *
  * @see java.util.function.BiFunction
  * @see CharFunction
  */
 @FunctionalInterface
 public interface CharBiFunction<R> extends Throwables.CharBiFunction<R, RuntimeException> { //NOSONAR
-
     /**
      * Applies this function to the given char arguments.
      * This method takes two char values as input and produces a result of type R.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * CharBiFunction<String> concat = (c1, c2) -> "" + c1 + c2;
+     * String result = concat.apply('H', 'i'); // Returns "Hi"
+     *
+     * CharBiFunction<Integer> sumCodes = (c1, c2) -> (int)c1 + (int)c2;
+     * int sum = sumCodes.apply('A', 'B'); // Returns sum of char codes
+     * }</pre>
      *
      * @param t the first char function argument
      * @param u the second char function argument
      * @return the function result of type R
      */
     @Override
-    @MayReturnNull
     R apply(char t, char u);
 
     /**

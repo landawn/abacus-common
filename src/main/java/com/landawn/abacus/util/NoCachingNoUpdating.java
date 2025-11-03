@@ -40,7 +40,6 @@ import com.landawn.abacus.annotation.SuppressFBWarnings;
  * <p>This pattern is useful for objects that wrap temporary resources or provide read-only views
  * of data that should not be retained in memory.</p>
  *
- * @since 1.0
  */
 @Beta
 @SequentialOnly

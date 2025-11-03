@@ -17,7 +17,7 @@ import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Numbers;
 import com.landawn.abacus.util.Strings;
 
-public class MutableIntType extends NumberType<MutableInt> {
+class MutableIntType extends NumberType<MutableInt> {
 
     public static final String MUTABLE_INT = MutableInt.class.getSimpleName();
 
@@ -29,8 +29,9 @@ public class MutableIntType extends NumberType<MutableInt> {
      * Returns the Class object representing the MutableInt type.
      *
      * <p><b>Usage Examples:</b></p>
-     * MutableIntType type = new MutableIntType();
-     * Class&lt;MutableInt&gt; clazz = type.clazz();
+     * <pre>{@code
+     * Type<MutableInt> type = TypeFactory.getType(MutableInt.class);
+     * Class<MutableInt> clazz = type.clazz();
      * // clazz equals MutableInt.class
      * }</pre>
      *
@@ -46,7 +47,8 @@ public class MutableIntType extends NumberType<MutableInt> {
      * The integer value is converted to a decimal string representation.
      *
      * <p><b>Usage Examples:</b></p>
-     * MutableIntType type = new MutableIntType();
+     * <pre>{@code
+     * Type<MutableInt> type = TypeFactory.getType(MutableInt.class);
      * MutableInt mi = MutableInt.of(42);
      * String str = type.stringOf(mi);
      * // str equals "42"
@@ -57,7 +59,6 @@ public class MutableIntType extends NumberType<MutableInt> {
      *
      * @param x The MutableInt object to convert
      * @return The string representation of the integer value, or {@code null} if the input is null
-     @MayReturnNull
      */
     @Override
     public String stringOf(final MutableInt x) {
@@ -69,7 +70,8 @@ public class MutableIntType extends NumberType<MutableInt> {
      * The string is parsed as an integer value.
      *
      * <p><b>Usage Examples:</b></p>
-     * MutableIntType type = new MutableIntType();
+     * <pre>{@code
+     * Type<MutableInt> type = TypeFactory.getType(MutableInt.class);
      * MutableInt mi = type.valueOf("123");
      * // mi.value() equals 123
      *
@@ -83,7 +85,6 @@ public class MutableIntType extends NumberType<MutableInt> {
      * @param str The string to parse
      * @return A MutableInt containing the parsed value, or {@code null} if the input is {@code null} or empty
      * @throws NumberFormatException if the string cannot be parsed as an integer
-     @MayReturnNull
      */
     @Override
     public MutableInt valueOf(final String str) {
@@ -95,7 +96,8 @@ public class MutableIntType extends NumberType<MutableInt> {
      * The database integer value is wrapped in a MutableInt object.
      *
      * <p><b>Usage Examples:</b></p>
-     * MutableIntType type = new MutableIntType();
+     * <pre>{@code
+     * Type<MutableInt> type = TypeFactory.getType(MutableInt.class);
      * ResultSet rs = statement.executeQuery("SELECT age FROM users");
      * if (rs.next()) {
      *     MutableInt age = type.get(rs, 1);
@@ -118,7 +120,8 @@ public class MutableIntType extends NumberType<MutableInt> {
      * The database integer value is wrapped in a MutableInt object.
      *
      * <p><b>Usage Examples:</b></p>
-     * MutableIntType type = new MutableIntType();
+     * <pre>{@code
+     * Type<MutableInt> type = TypeFactory.getType(MutableInt.class);
      * ResultSet rs = statement.executeQuery("SELECT age FROM users");
      * if (rs.next()) {
      *     MutableInt age = type.get(rs, "age");
@@ -141,13 +144,14 @@ public class MutableIntType extends NumberType<MutableInt> {
      * If the MutableInt is {@code null}, 0 is stored. Otherwise, the wrapped integer value is stored.
      *
      * <p><b>Usage Examples:</b></p>
-     * MutableIntType type = new MutableIntType();
+     * <pre>{@code
+     * Type<MutableInt> type = TypeFactory.getType(MutableInt.class);
      * PreparedStatement stmt = conn.prepareStatement("INSERT INTO users (age) VALUES (?)");
      * MutableInt age = MutableInt.of(25);
      * type.set(stmt, 1, age);
      * stmt.executeUpdate();
      *
-     * // For {@code null} value
+     * // For null value
      * type.set(stmt, 1, null);
      * // This sets the parameter to 0
      * }</pre>
@@ -167,13 +171,14 @@ public class MutableIntType extends NumberType<MutableInt> {
      * If the MutableInt is {@code null}, 0 is stored. Otherwise, the wrapped integer value is stored.
      *
      * <p><b>Usage Examples:</b></p>
-     * MutableIntType type = new MutableIntType();
+     * <pre>{@code
+     * Type<MutableInt> type = TypeFactory.getType(MutableInt.class);
      * CallableStatement stmt = conn.prepareCall("{call update_counter(?)}");
      * MutableInt counter = MutableInt.of(100);
      * type.set(stmt, "counter", counter);
      * stmt.execute();
      *
-     * // For {@code null} value
+     * // For null value
      * type.set(stmt, "counter", null);
      * // This sets the parameter to 0
      * }</pre>
@@ -193,7 +198,8 @@ public class MutableIntType extends NumberType<MutableInt> {
      * The value is written as a decimal string or "null".
      *
      * <p><b>Usage Examples:</b></p>
-     * MutableIntType type = new MutableIntType();
+     * <pre>{@code
+     * Type<MutableInt> type = TypeFactory.getType(MutableInt.class);
      * StringBuilder sb = new StringBuilder();
      * MutableInt mi = MutableInt.of(42);
      * type.appendTo(sb, mi);
@@ -223,13 +229,14 @@ public class MutableIntType extends NumberType<MutableInt> {
      * This method is optimized for character-based writing and uses a specialized writeInt method.
      *
      * <p><b>Usage Examples:</b></p>
-     * MutableIntType type = new MutableIntType();
+     * <pre>{@code
+     * Type<MutableInt> type = TypeFactory.getType(MutableInt.class);
      * CharacterWriter writer = new CharacterWriter();
      * MutableInt mi = MutableInt.of(12345);
      * type.writeCharacter(writer, mi, null);
      * // Writes: 12345
      *
-     * type.writeCharacter(writer, {@code null}, null);
+     * type.writeCharacter(writer, null, null);
      * // Writes: null
      * }</pre>
      *

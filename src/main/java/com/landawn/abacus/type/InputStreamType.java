@@ -27,7 +27,6 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.annotation.SuppressFBWarnings;
 import com.landawn.abacus.exception.UncheckedSQLException;
 import com.landawn.abacus.parser.JSONXMLSerializationConfig;
@@ -43,7 +42,7 @@ import com.landawn.abacus.util.N;
  * Note that the InputStream content is consumed during serialization.
  */
 @SuppressWarnings("java:S2160")
-public class InputStreamType extends AbstractType<InputStream> {
+class InputStreamType extends AbstractType<InputStream> {
 
     public static final String INPUT_STREAM = InputStream.class.getSimpleName();
 
@@ -104,7 +103,6 @@ public class InputStreamType extends AbstractType<InputStream> {
      * @return the base64-encoded string representation of the stream contents, or {@code null} if the input is null
      */
     @Override
-    @MayReturnNull
     public String stringOf(final InputStream x) {
         // return x == null ? null : Strings.base64Encode(IOUtil.readAllBytes(x));
 
@@ -119,9 +117,7 @@ public class InputStreamType extends AbstractType<InputStream> {
      * @param str the base64-encoded string to decode
      * @return a new InputStream containing the decoded bytes, or {@code null} if the input is null
      */
-    @MayReturnNull
     @Override
-
     public InputStream valueOf(final String str) {
         if (str == null) {
             return null; // NOSONAR
@@ -146,7 +142,6 @@ public class InputStreamType extends AbstractType<InputStream> {
      * @return an InputStream representation of the object, or {@code null} if the input is null
      * @throws UncheckedSQLException if a SQLException occurs while reading from a Blob
      */
-    @MayReturnNull
     @SuppressFBWarnings
     @Override
     public InputStream valueOf(final Object obj) {

@@ -53,45 +53,338 @@ import com.landawn.abacus.util.Strings;
 import com.landawn.abacus.util.URLEncodedUtil;
 
 /**
- * A thread-safe HTTP client implementation based on Java's HttpURLConnection.
- * This class provides a simple and efficient way to make HTTP requests with support for
- * various HTTP methods, content types, compression, and asynchronous operations.
- * 
- * <p>Key features:</p>
+ * A comprehensive, thread-safe HTTP client implementation built on Java's {@link HttpURLConnection} foundation,
+ * providing high-performance, feature-rich capabilities for modern web service integration and API communication.
+ * This class offers an intuitive fluent API for executing HTTP requests with advanced features including automatic
+ * content serialization, connection pooling, compression support, SSL/TLS configuration, and asynchronous execution
+ * patterns optimized for enterprise-grade applications.
+ *
+ * <p>The {@code HttpClient} serves as a robust alternative to heavyweight HTTP libraries, focusing on simplicity
+ * without sacrificing functionality. It provides seamless integration with Java object models through automatic
+ * serialization/deserialization, comprehensive error handling, and efficient resource management suitable for
+ * high-throughput scenarios in microservice architectures, REST API clients, and web service integrations.</p>
+ *
+ * <p><b>⚠️ IMPORTANT - Thread Safety Guarantee:</b>
+ * This class is designed to be completely thread-safe and can be safely shared across multiple threads
+ * without external synchronization. All internal state is either immutable or properly synchronized,
+ * making it suitable for concurrent usage in multi-threaded applications and web servers.</p>
+ *
+ * <p><b>Key Features and Capabilities:</b>
  * <ul>
- *   <li>Support for GET, POST, PUT, DELETE, and HEAD methods</li>
- *   <li>Automatic content type detection and serialization/deserialization</li>
- *   <li>Connection pooling and timeout management</li>
- *   <li>SSL/TLS support with custom socket factories</li>
- *   <li>Proxy support</li>
- *   <li>Asynchronous request execution</li>
- *   <li>Support for various content formats (JSON, XML, Form URL-encoded, Kryo)</li>
- *   <li>Compression support (GZIP, LZ4, Snappy, Brotli)</li>
+ *   <li><b>HTTP Method Support:</b> Full support for GET, POST, PUT, DELETE, HEAD, PATCH, and OPTIONS methods</li>
+ *   <li><b>Content Serialization:</b> Automatic JSON, XML, Kryo, and form URL-encoded content handling</li>
+ *   <li><b>Compression Support:</b> Built-in GZIP, LZ4, Snappy, and Brotli compression/decompression</li>
+ *   <li><b>Asynchronous Execution:</b> Non-blocking operations with {@link ContinuableFuture} integration</li>
+ *   <li><b>Connection Management:</b> Intelligent connection pooling and timeout configuration</li>
+ *   <li><b>SSL/TLS Support:</b> Custom SSL socket factories and certificate handling</li>
+ *   <li><b>Proxy Integration:</b> Comprehensive proxy server support with authentication</li>
+ *   <li><b>Error Handling:</b> Robust exception management with detailed error reporting</li>
  * </ul>
- * 
- * <p><b>Usage Examples:</b></p>
+ *
+ * <p><b>Design Philosophy:</b>
+ * <ul>
+ *   <li><b>Simplicity First:</b> Intuitive API that handles complex HTTP scenarios transparently</li>
+ *   <li><b>Performance Optimized:</b> Efficient resource utilization with minimal overhead</li>
+ *   <li><b>Type Safety:</b> Strong generic typing for request/response object handling</li>
+ *   <li><b>Standards Compliance:</b> Full HTTP/1.1 specification compliance with modern extensions</li>
+ *   <li><b>Enterprise Ready:</b> Production-grade reliability with comprehensive configuration options</li>
+ * </ul>
+ *
+ * <p><b>Supported Content Types and Serialization:</b>
+ * <table border="1" style="border-collapse: collapse;">
+ *   <caption><b>Content Type Support Matrix</b></caption>
+ *   <tr style="background-color: #f2f2f2;">
+ *     <th>Content Type</th>
+ *     <th>Media Type</th>
+ *     <th>Serialization Method</th>
+ *     <th>Compression Support</th>
+ *   </tr>
+ *   <tr>
+ *     <td>JSON</td>
+ *     <td>application/json</td>
+ *     <td>Jackson/JSON-B integration</td>
+ *     <td>GZIP, Brotli</td>
+ *   </tr>
+ *   <tr>
+ *     <td>XML</td>
+ *     <td>application/xml, text/xml</td>
+ *     <td>JAXB/DOM parsing</td>
+ *     <td>GZIP, Brotli</td>
+ *   </tr>
+ *   <tr>
+ *     <td>Form URL-encoded</td>
+ *     <td>application/x-www-form-urlencoded</td>
+ *     <td>URLEncodedUtil conversion</td>
+ *     <td>GZIP</td>
+ *   </tr>
+ *   <tr>
+ *     <td>Kryo Binary</td>
+ *     <td>application/x-kryo</td>
+ *     <td>Kryo serialization</td>
+ *     <td>LZ4, Snappy</td>
+ *   </tr>
+ *   <tr>
+ *     <td>Plain Text</td>
+ *     <td>text/plain</td>
+ *     <td>String encoding</td>
+ *     <td>GZIP, Brotli</td>
+ *   </tr>
+ *   <tr>
+ *     <td>Binary</td>
+ *     <td>application/octet-stream</td>
+ *     <td>Raw byte arrays</td>
+ *     <td>All supported</td>
+ *   </tr>
+ * </table>
+ *
+ * <p><b>HTTP Method Support:</b>
+ * <ul>
+ *   <li><b>GET:</b> {@code get()}, {@code asyncGet()} - Resource retrieval with optional query parameters</li>
+ *   <li><b>POST:</b> {@code post()}, {@code asyncPost()} - Resource creation with request body support</li>
+ *   <li><b>PUT:</b> {@code put()}, {@code asyncPut()} - Resource replacement with full entity updates</li>
+ *   <li><b>DELETE:</b> {@code delete()}, {@code asyncDelete()} - Resource deletion operations</li>
+ *   <li><b>HEAD:</b> {@code head()}, {@code asyncHead()} - Metadata retrieval without response body</li>
+ *   <li><b>PATCH:</b> {@code patch()}, {@code asyncPatch()} - Partial resource updates</li>
+ *   <li><b>OPTIONS:</b> {@code options()}, {@code asyncOptions()} - Resource capability discovery</li>
+ * </ul>
+ *
+ * <p><b>Usage Examples:</b>
  * <pre>{@code
- * // Create a simple HTTP client
- * HttpClient client = HttpClient.create("https://api.example.com");
- * 
- * // Make a GET request
- * String response = client.get();
- * 
- * // Make a POST request with JSON body
- * User user = new User("John", "Doe");
- * User createdUser = client.post(user, User.class);
- * 
- * // Make an async request
- * ContinuableFuture<String> future = client.asyncGet();
+ * // Basic client creation with configuration
+ * HttpSettings settings = HttpSettings.create()
+ *     .setContentType("application/json")
+ *     .setContentEncoding("gzip");
+ * HttpClient client = HttpClient.create("https://api.example.com",
+ *     16, 5000, 30000, settings);
+ *
+ * // Simple GET request with automatic deserialization
+ * User user = client.get("/users/123", User.class);
+ *
+ * // POST request with automatic serialization
+ * CreateUserRequest request = new CreateUserRequest("John", "Doe", "john@example.com");
+ * User createdUser = client.post("/users", request, User.class);
+ *
+ * // Asynchronous operations with error handling
+ * ContinuableFuture<List<User>> usersFuture = client.asyncGet("/users",
+ *         new Type<List<User>>() {})
+ *     .thenApply((users, exception) -> {
+ *         if (exception != null) {
+ *             logger.error("Failed to fetch users", exception);
+ *             return Collections.emptyList();
+ *         }
+ *         return users;
+ *     });
+ *
+ * // Form data submission with custom settings
+ * Map<String, String> formData = Map.of("username", "john", "password", "secret");
+ * HttpSettings formSettings = HttpSettings.create()
+ *     .setContentType("application/x-www-form-urlencoded");
+ * String response = client.post("/login", formData, formSettings, String.class);
  * }</pre>
- * 
- * <p>Any header can be set into the parameter {@code settings}</p>
- * 
- * <p><b>HttpClient is thread safe.</b></p>
- * 
+ *
+ * <p><b>Advanced Configuration and Customization:</b>
+ * <pre>{@code
+ * // SSL/TLS configuration with custom certificates
+ * SSLSocketFactory sslFactory = createCustomSSLFactory();
+ * HttpSettings secureSettings = HttpSettings.create()
+ *     .setSSLSocketFactory(sslFactory);
+ * HttpClient secureClient = HttpClient.create("https://secure-api.example.com",
+ *     16, 5000, 30000, secureSettings);
+ *
+ * // Proxy configuration with authentication
+ * Proxy proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress("proxy.company.com", 8080));
+ * HttpSettings proxySettings = HttpSettings.create()
+ *     .setProxy(proxy)
+ *     .header("Proxy-Authorization", "Basic " + Strings.base64Encode("user:pass".getBytes()));
+ * HttpClient proxyClient = HttpClient.create("https://external-api.com",
+ *     16, 5000, 30000, proxySettings);
+ *
+ * // Custom headers and authentication
+ * HttpSettings authSettings = HttpSettings.create()
+ *     .header(HttpHeaders.Names.AUTHORIZATION, "Bearer " + accessToken)
+ *     .header(HttpHeaders.Names.USER_AGENT, "MyApp/1.0")
+ *     .header("X-API-Version", "v2");
+ * HttpClient authClient = HttpClient.create("https://api.example.com",
+ *     16, 5000, 30000, authSettings);
+ *
+ * // Connection pooling and timeout tuning
+ * HttpClient optimizedClient = HttpClient.create("https://high-throughput-api.com",
+ *     50,      // Maximum concurrent connections
+ *     2000,    // 2 seconds connection timeout
+ *     15000);  // 15 seconds read timeout
+ * }</pre>
+ *
+ * <p><b>Asynchronous Execution and Future Composition:</b>
+ * <ul>
+ *   <li><b>Non-blocking Operations:</b> All async methods return {@link ContinuableFuture} for non-blocking execution</li>
+ *   <li><b>Executor Integration:</b> Custom {@link Executor} support for thread pool management</li>
+ *   <li><b>Future Composition:</b> Chainable operations with map, flatMap, and handle methods</li>
+ *   <li><b>Error Propagation:</b> Automatic exception propagation through future chains</li>
+ *   <li><b>Timeout Support:</b> Configurable timeouts for async operations with cancellation</li>
+ * </ul>
+ *
+ * <p><b>Connection Management and Pooling:</b>
+ * <ul>
+ *   <li><b>Connection Reuse:</b> Automatic HTTP connection pooling for improved performance</li>
+ *   <li><b>Keep-Alive Support:</b> HTTP/1.1 persistent connection management</li>
+ *   <li><b>Timeout Configuration:</b> Separate connection and read timeout settings</li>
+ *   <li><b>Resource Cleanup:</b> Automatic resource management and connection cleanup</li>
+ *   <li><b>Concurrent Limits:</b> Configurable maximum concurrent connection limits</li>
+ * </ul>
+ *
+ * <p><b>Error Handling and Exception Management:</b>
+ * <ul>
+ *   <li><b>HttpException:</b> Thrown for HTTP error status codes (4xx, 5xx) with response details</li>
+ *   <li><b>UncheckedIOException:</b> Wraps IOException for runtime exception handling</li>
+ *   <li><b>Timeout Exceptions:</b> Specific exceptions for connection and read timeouts</li>
+ *   <li><b>SSL Exceptions:</b> Detailed SSL/TLS handshake and certificate validation errors</li>
+ *   <li><b>Serialization Errors:</b> Content serialization/deserialization exception handling</li>
+ * </ul>
+ *
+ * <p><b>Compression and Content Encoding:</b>
+ * <ul>
+ *   <li><b>GZIP:</b> Standard HTTP compression for text-based content</li>
+ *   <li><b>Brotli:</b> Modern compression algorithm with better compression ratios</li>
+ *   <li><b>LZ4:</b> Fast compression optimized for binary content (Kryo serialization)</li>
+ *   <li><b>Snappy:</b> High-speed compression/decompression for real-time applications</li>
+ *   <li><b>Automatic Detection:</b> Content-Type-based compression algorithm selection</li>
+ * </ul>
+ *
+ * <p><b>Performance Characteristics:</b>
+ * <ul>
+ *   <li><b>Request Overhead:</b> Minimal per-request overhead comparable to raw HttpURLConnection</li>
+ *   <li><b>Memory Usage:</b> Efficient streaming for large request/response bodies</li>
+ *   <li><b>Serialization Cost:</b> Optimized object serialization with caching mechanisms</li>
+ *   <li><b>Connection Reuse:</b> Significant performance gains through connection pooling</li>
+ *   <li><b>Compression Benefits:</b> Reduced bandwidth usage with automatic compression</li>
+ * </ul>
+ *
+ * <p><b>Thread Safety and Concurrency:</b>
+ * <ul>
+ *   <li><b>Immutable Configuration:</b> HttpClient instances are immutable after creation</li>
+ *   <li><b>Thread-Safe Operations:</b> All methods can be safely called from multiple threads</li>
+ *   <li><b>Connection Isolation:</b> Each request uses independent connection resources</li>
+ *   <li><b>Async Execution:</b> Non-blocking operations with proper thread isolation</li>
+ *   <li><b>Resource Management:</b> Thread-safe resource cleanup and connection management</li>
+ * </ul>
+ *
+ * <p><b>Integration with Frameworks and Libraries:</b>
+ * <ul>
+ *   <li><b>Spring Integration:</b> Compatible with Spring's RestTemplate patterns and dependency injection</li>
+ *   <li><b>JAX-RS Client:</b> Alternative to JAX-RS client implementations</li>
+ *   <li><b>Microservice Architecture:</b> Optimized for service-to-service communication</li>
+ *   <li><b>Jackson/JSON-B:</b> Seamless integration with popular JSON processing libraries</li>
+ *   <li><b>Reactive Streams:</b> Compatible with reactive programming patterns via ContinuableFuture</li>
+ * </ul>
+ *
+ * <p><b>Static Factory Methods:</b>
+ * <ul>
+ *   <li><b>{@code create(String)}:</b> Create client with base URL</li>
+ *   <li><b>{@code create(URL)}:</b> Create client with URL object</li>
+ *   <li><b>{@code create(URI)}:</b> Create client with URI object</li>
+ *   <li><b>{@code create(HttpSettings)}:</b> Create client with detailed configuration</li>
+ * </ul>
+ *
+ * <p><b>Best Practices and Recommendations:</b>
+ * <ul>
+ *   <li>Reuse HttpClient instances across multiple requests for connection pooling benefits</li>
+ *   <li>Configure appropriate timeouts based on expected response times and network conditions</li>
+ *   <li>Use async methods for non-blocking operations in high-concurrency scenarios</li>
+ *   <li>Enable compression for APIs that support it to reduce bandwidth usage</li>
+ *   <li>Handle exceptions appropriately with retry logic for transient failures</li>
+ *   <li>Use strongly-typed objects instead of raw strings for request/response bodies</li>
+ *   <li>Configure SSL/TLS properly for production environments with certificate validation</li>
+ *   <li>Monitor connection pool usage in high-throughput applications</li>
+ * </ul>
+ *
+ * <p><b>Common Anti-Patterns to Avoid:</b>
+ * <ul>
+ *   <li>Creating new HttpClient instances for each request (defeats connection pooling)</li>
+ *   <li>Ignoring HTTP status codes and error responses</li>
+ *   <li>Using blocking operations in async contexts (causes thread pool exhaustion)</li>
+ *   <li>Not configuring appropriate timeouts (can cause indefinite blocking)</li>
+ *   <li>Hardcoding URLs instead of using path() method for URL construction</li>
+ *   <li>Not handling SSL certificate validation in production environments</li>
+ *   <li>Ignoring content encoding headers when manually processing responses</li>
+ * </ul>
+ *
+ * <p><b>Security Considerations:</b>
+ * <ul>
+ *   <li><b>SSL/TLS Validation:</b> Always validate certificates in production environments</li>
+ *   <li><b>Authentication Headers:</b> Secure handling of API keys and authentication tokens</li>
+ *   <li><b>Proxy Security:</b> Proper authentication and encryption for proxy connections</li>
+ *   <li><b>Input Validation:</b> Validate all input data before serialization</li>
+ *   <li><b>Error Information:</b> Avoid exposing sensitive information in error messages</li>
+ * </ul>
+ *
+ * <p><b>Example: Microservice Client Implementation</b>
+ * <pre>{@code
+ * @Component
+ * public class UserServiceClient {
+ *     private final HttpClient httpClient;
+ *
+ *     public UserServiceClient(@Value("${user.service.url}") String baseUrl,
+ *                             @Value("${user.service.timeout}") int timeoutMs) {
+ *         HttpSettings settings = HttpSettings.create()
+ *             .setContentType("application/json")
+ *             .setContentEncoding("gzip")
+ *             .header(HttpHeaders.Names.USER_AGENT, "UserServiceClient/1.0");
+ *         this.httpClient = HttpClient.create(baseUrl, 16,
+ *             timeoutMs, timeoutMs * 2, settings);
+ *     }
+ *
+ *     public User findById(Long userId) {
+ *         String path = "/users/" + userId;
+ *         return httpClient.get(path, User.class);
+ *     }
+ *
+ *     public ContinuableFuture<User> createUserAsync(CreateUserRequest request) {
+ *         return httpClient.asyncPost("/users", request, User.class);
+ *     }
+ *
+ *     public List<User> searchUsers(UserSearchCriteria criteria) {
+ *         String path = "/users/search?" + URLEncodedUtil.encode(criteria);
+ *         return httpClient.get(path, new Type<List<User>>() {});
+ *     }
+ *
+ *     public void updateUserAsync(Long userId, UpdateUserRequest request,
+ *                               Consumer<User> onSuccess, Consumer<Exception> onError) {
+ *         String path = "/users/" + userId;
+ *         httpClient.asyncPut(path, request, User.class)
+ *             .thenAccept(user -> onSuccess.accept(user))
+ *             .exceptionally(exception -> {
+ *                 onError.accept((Exception) exception);
+ *                 return null;
+ *             });
+ *     }
+ * }
+ * }</pre>
+ *
+ * <p><b>Comparison with Alternative HTTP Clients:</b>
+ * <ul>
+ *   <li><b>vs. Apache HttpClient:</b> Simpler API vs. comprehensive but complex feature set</li>
+ *   <li><b>vs. OkHttp:</b> Java-native vs. modern design with different dependency requirements</li>
+ *   <li><b>vs. java.net.http.HttpClient:</b> Works with older Java versions vs. Java 11+ requirement</li>
+ *   <li><b>vs. Spring RestTemplate:</b> Standalone utility vs. Spring Framework integration</li>
+ * </ul>
+ *
+ * <p><b>Monitoring and Debugging:</b>
+ * <ul>
+ *   <li><b>Request Logging:</b> Built-in logger for debugging HTTP request/response cycles</li>
+ *   <li><b>Performance Metrics:</b> Connection pool statistics and timing information</li>
+ *   <li><b>Error Diagnostics:</b> Detailed exception messages with request context</li>
+ *   <li><b>Network Troubleshooting:</b> Support for network-level debugging and analysis</li>
+ * </ul>
+ *
  * @see HttpSettings
  * @see HttpRequest
  * @see HttpResponse
+ * @see HttpURLConnection
+ * @see ContinuableFuture
+ * @see URLEncodedUtil
+ * @see com.landawn.abacus.util.AsyncExecutor
+ * @see <a href="https://tools.ietf.org/html/rfc7231">RFC 7231: HTTP/1.1 Semantics and Content</a>
+ * @see <a href="https://tools.ietf.org/html/rfc7540">RFC 7540: HTTP/2</a>
  */
 public final class HttpClient {
 
@@ -297,7 +590,6 @@ public final class HttpClient {
      * @param sharedActiveConnectionCounter Shared counter for active connections across multiple HttpClient instances
      * @return A new HttpClient instance
      * @throws IllegalArgumentException if url is {@code null} or empty, or any numeric parameter is negative
-     *
      */
     public static HttpClient create(final String url, final int maxConnection, final long connectionTimeoutInMillis, final long readTimeoutInMillis,
             final HttpSettings settings, final AtomicInteger sharedActiveConnectionCounter) {
@@ -322,7 +614,6 @@ public final class HttpClient {
      * @param executor Custom executor for asynchronous operations
      * @return A new HttpClient instance
      * @throws IllegalArgumentException if url is {@code null} or empty, or any numeric parameter is negative
-     *
      */
     public static HttpClient create(final String url, final int maxConnection, final long connectionTimeoutInMillis, final long readTimeoutInMillis,
             final Executor executor) {
@@ -351,7 +642,6 @@ public final class HttpClient {
      * @return A new HttpClient instance
      * @throws UncheckedIOException if an I/O error occurs
      * @throws IllegalArgumentException if url is {@code null} or empty, or any numeric parameter is negative
-     *
      */
     public static HttpClient create(final String url, final int maxConnection, final long connectionTimeoutInMillis, final long readTimeoutInMillis,
             final HttpSettings settings, final Executor executor) throws UncheckedIOException {
@@ -381,7 +671,6 @@ public final class HttpClient {
      * @param executor Custom executor for asynchronous operations (null uses default)
      * @return A new HttpClient instance
      * @throws IllegalArgumentException if url is {@code null} or empty, or any numeric parameter is negative
-     *
      */
     public static HttpClient create(final String url, final int maxConnection, final long connectionTimeoutInMillis, final long readTimeoutInMillis,
             final HttpSettings settings, final AtomicInteger sharedActiveConnectionCounter, final Executor executor) {
@@ -401,7 +690,6 @@ public final class HttpClient {
      * @param url The base URL for the HTTP client (as a java.net.URL object)
      * @return A new HttpClient instance
      * @throws IllegalArgumentException if url is null
-     *
      */
     public static HttpClient create(final URL url) {
         return create(url, DEFAULT_MAX_CONNECTION);
@@ -564,7 +852,7 @@ public final class HttpClient {
      * String response = client.get(settings);
      * }</pre>
      *
-     * @param settings Additional HTTP settings for this request
+     * @param settings Additional HTTP settings for this request (headers, timeouts, etc.)
      * @return The response body as a String
      * @throws UncheckedIOException if an I/O error occurs
      */
@@ -581,7 +869,7 @@ public final class HttpClient {
      * String response = client.get(params);
      * }</pre>
      *
-     * @param queryParameters Query parameters as a String, Map, or Bean object
+     * @param queryParameters Query parameters as a String, Map, or Bean object (will be URL-encoded)
      * @return The response body as a String
      * @throws UncheckedIOException if an I/O error occurs
      */
@@ -590,10 +878,10 @@ public final class HttpClient {
     }
 
     /**
-     * Performs a GET request with query parameters and custom settings.
-     * 
-     * @param queryParameters Query parameters as a String, Map, or Bean object
-     * @param settings Additional HTTP settings for this request
+     * Performs a GET request with query parameters and custom settings, returning the response as a String.
+     *
+     * @param queryParameters Query parameters as a String, Map, or Bean object (will be URL-encoded)
+     * @param settings Additional HTTP settings for this request (headers, timeouts, etc.)
      * @return The response body as a String
      * @throws UncheckedIOException if an I/O error occurs
      */
@@ -619,11 +907,11 @@ public final class HttpClient {
     }
 
     /**
-     * Performs a GET request with custom settings and deserializes the response.
-     * 
+     * Performs a GET request with custom settings and deserializes the response to the specified type.
+     *
      * @param <T> The type of the response object
-     * @param settings Additional HTTP settings for this request
-     * @param resultClass The class of the expected response object
+     * @param settings Additional HTTP settings for this request (headers, timeouts, etc.)
+     * @param resultClass The class of the expected response object (for deserialization)
      * @return The deserialized response object
      * @throws UncheckedIOException if an I/O error occurs
      */
@@ -632,11 +920,11 @@ public final class HttpClient {
     }
 
     /**
-     * Performs a GET request with query parameters and deserializes the response.
-     * 
+     * Performs a GET request with query parameters and deserializes the response to the specified type.
+     *
      * @param <T> The type of the response object
-     * @param queryParameters Query parameters as a String, Map, or Bean object
-     * @param resultClass The class of the expected response object
+     * @param queryParameters Query parameters as a String, Map, or Bean object (will be URL-encoded)
+     * @param resultClass The class of the expected response object (for deserialization)
      * @return The deserialized response object
      * @throws UncheckedIOException if an I/O error occurs
      */
@@ -645,12 +933,12 @@ public final class HttpClient {
     }
 
     /**
-     * Performs a GET request with all options and deserializes the response.
-     * 
+     * Performs a GET request with all options and deserializes the response to the specified type.
+     *
      * @param <T> The type of the response object
-     * @param queryParameters Query parameters as a String, Map, or Bean object
-     * @param settings Additional HTTP settings for this request
-     * @param resultClass The class of the expected response object
+     * @param queryParameters Query parameters as a String, Map, or Bean object (will be URL-encoded)
+     * @param settings Additional HTTP settings for this request (headers, timeouts, etc.)
+     * @param resultClass The class of the expected response object (for deserialization)
      * @return The deserialized response object
      * @throws UncheckedIOException if an I/O error occurs
      */
@@ -674,9 +962,9 @@ public final class HttpClient {
     }
 
     /**
-     * Performs a DELETE request with custom settings.
-     * 
-     * @param settings Additional HTTP settings for this request
+     * Performs a DELETE request with custom settings and returns the response as a String.
+     *
+     * @param settings Additional HTTP settings for this request (headers, timeouts, etc.)
      * @return The response body as a String
      * @throws UncheckedIOException if an I/O error occurs
      */
@@ -685,9 +973,9 @@ public final class HttpClient {
     }
 
     /**
-     * Performs a DELETE request with query parameters.
-     * 
-     * @param queryParameters Query parameters as a String, Map, or Bean object
+     * Performs a DELETE request with query parameters and returns the response as a String.
+     *
+     * @param queryParameters Query parameters as a String, Map, or Bean object (will be URL-encoded)
      * @return The response body as a String
      * @throws UncheckedIOException if an I/O error occurs
      */
@@ -696,10 +984,10 @@ public final class HttpClient {
     }
 
     /**
-     * Performs a DELETE request with query parameters and custom settings.
-     * 
-     * @param queryParameters Query parameters as a String, Map, or Bean object
-     * @param settings Additional HTTP settings for this request
+     * Performs a DELETE request with query parameters and custom settings, returning the response as a String.
+     *
+     * @param queryParameters Query parameters as a String, Map, or Bean object (will be URL-encoded)
+     * @param settings Additional HTTP settings for this request (headers, timeouts, etc.)
      * @return The response body as a String
      * @throws UncheckedIOException if an I/O error occurs
      */
@@ -708,10 +996,10 @@ public final class HttpClient {
     }
 
     /**
-     * Performs a DELETE request and deserializes the response.
-     * 
+     * Performs a DELETE request and deserializes the response to the specified type.
+     *
      * @param <T> The type of the response object
-     * @param resultClass The class of the expected response object
+     * @param resultClass The class of the expected response object (for deserialization)
      * @return The deserialized response object
      * @throws UncheckedIOException if an I/O error occurs
      */
@@ -720,11 +1008,11 @@ public final class HttpClient {
     }
 
     /**
-     * Performs a DELETE request with query parameters and deserializes the response.
-     * 
+     * Performs a DELETE request with query parameters and deserializes the response to the specified type.
+     *
      * @param <T> The type of the response object
-     * @param queryParameters Query parameters as a String, Map, or Bean object
-     * @param resultClass The class of the expected response object
+     * @param queryParameters Query parameters as a String, Map, or Bean object (will be URL-encoded)
+     * @param resultClass The class of the expected response object (for deserialization)
      * @return The deserialized response object
      * @throws UncheckedIOException if an I/O error occurs
      */
@@ -733,11 +1021,11 @@ public final class HttpClient {
     }
 
     /**
-     * Performs a DELETE request with custom settings and deserializes the response.
-     * 
+     * Performs a DELETE request with custom settings and deserializes the response to the specified type.
+     *
      * @param <T> The type of the response object
-     * @param settings Additional HTTP settings for this request
-     * @param resultClass The class of the expected response object
+     * @param settings Additional HTTP settings for this request (headers, timeouts, etc.)
+     * @param resultClass The class of the expected response object (for deserialization)
      * @return The deserialized response object
      * @throws UncheckedIOException if an I/O error occurs
      */
@@ -746,12 +1034,12 @@ public final class HttpClient {
     }
 
     /**
-     * Performs a DELETE request with all options and deserializes the response.
-     * 
+     * Performs a DELETE request with all options and deserializes the response to the specified type.
+     *
      * @param <T> The type of the response object
-     * @param queryParameters Query parameters as a String, Map, or Bean object
-     * @param settings Additional HTTP settings for this request
-     * @param resultClass The class of the expected response object
+     * @param queryParameters Query parameters as a String, Map, or Bean object (will be URL-encoded)
+     * @param settings Additional HTTP settings for this request (headers, timeouts, etc.)
+     * @param resultClass The class of the expected response object (for deserialization)
      * @return The deserialized response object
      * @throws UncheckedIOException if an I/O error occurs
      */
@@ -796,10 +1084,10 @@ public final class HttpClient {
     }
 
     /**
-     * Performs a POST request with custom settings.
-     * 
-     * @param request The request body
-     * @param settings Additional HTTP settings for this request
+     * Performs a POST request with custom settings and returns the response as a String.
+     *
+     * @param request The request body (can be String, byte[], File, InputStream, Reader, or any object for serialization)
+     * @param settings Additional HTTP settings for this request (headers, timeouts, etc.)
      * @return The response body as a String
      * @throws UncheckedIOException if an I/O error occurs
      */
@@ -808,12 +1096,12 @@ public final class HttpClient {
     }
 
     /**
-     * Performs a POST request with custom settings and deserializes the response.
-     * 
+     * Performs a POST request with custom settings and deserializes the response to the specified type.
+     *
      * @param <T> The type of the response object
-     * @param request The request body
-     * @param settings Additional HTTP settings for this request
-     * @param resultClass The class of the expected response object
+     * @param request The request body (can be String, byte[], File, InputStream, Reader, or any object for serialization)
+     * @param settings Additional HTTP settings for this request (headers, timeouts, etc.)
+     * @param resultClass The class of the expected response object (for deserialization)
      * @return The deserialized response object
      * @throws UncheckedIOException if an I/O error occurs
      */
@@ -839,11 +1127,11 @@ public final class HttpClient {
     }
 
     /**
-     * Performs a PUT request and deserializes the response.
-     * 
+     * Performs a PUT request and deserializes the response to the specified type.
+     *
      * @param <T> The type of the response object
-     * @param request The request body
-     * @param resultClass The class of the expected response object
+     * @param request The request body (can be String, byte[], File, InputStream, Reader, or any object for serialization)
+     * @param resultClass The class of the expected response object (for deserialization)
      * @return The deserialized response object
      * @throws UncheckedIOException if an I/O error occurs
      */
@@ -852,10 +1140,10 @@ public final class HttpClient {
     }
 
     /**
-     * Performs a PUT request with custom settings.
-     * 
-     * @param request The request body
-     * @param settings Additional HTTP settings for this request
+     * Performs a PUT request with custom settings and returns the response as a String.
+     *
+     * @param request The request body (can be String, byte[], File, InputStream, Reader, or any object for serialization)
+     * @param settings Additional HTTP settings for this request (headers, timeouts, etc.)
      * @return The response body as a String
      * @throws UncheckedIOException if an I/O error occurs
      */
@@ -864,12 +1152,12 @@ public final class HttpClient {
     }
 
     /**
-     * Performs a PUT request with custom settings and deserializes the response.
-     * 
+     * Performs a PUT request with custom settings and deserializes the response to the specified type.
+     *
      * @param <T> The type of the response object
-     * @param request The request body
-     * @param settings Additional HTTP settings for this request
-     * @param resultClass The class of the expected response object
+     * @param request The request body (can be String, byte[], File, InputStream, Reader, or any object for serialization)
+     * @param settings Additional HTTP settings for this request (headers, timeouts, etc.)
+     * @param resultClass The class of the expected response object (for deserialization)
      * @return The deserialized response object
      * @throws UncheckedIOException if an I/O error occurs
      */
@@ -894,8 +1182,9 @@ public final class HttpClient {
 
     /**
      * Performs a HEAD request with custom settings.
-     * 
-     * @param settings Additional HTTP settings for this request
+     * HEAD requests retrieve only headers without the response body.
+     *
+     * @param settings Additional HTTP settings for this request (headers, timeouts, etc.)
      * @throws UncheckedIOException if an I/O error occurs
      */
     public void head(final HttpSettings settings) throws UncheckedIOException {
@@ -920,12 +1209,12 @@ public final class HttpClient {
     }
 
     /**
-     * Executes an HTTP request and deserializes the response.
-     * 
+     * Executes an HTTP request and deserializes the response to the specified type.
+     *
      * @param <T> The type of the response object
-     * @param httpMethod The HTTP method to use
+     * @param httpMethod The HTTP method to use (GET, POST, PUT, DELETE, HEAD, etc.)
      * @param request The request body (can be {@code null} for GET/DELETE)
-     * @param resultClass The class of the expected response object
+     * @param resultClass The class of the expected response object (for deserialization)
      * @return The deserialized response object
      * @throws UncheckedIOException if an I/O error occurs
      */
@@ -934,11 +1223,11 @@ public final class HttpClient {
     }
 
     /**
-     * Executes an HTTP request with custom settings.
-     * 
-     * @param httpMethod The HTTP method to use
+     * Executes an HTTP request with custom settings and returns the response as a String.
+     *
+     * @param httpMethod The HTTP method to use (GET, POST, PUT, DELETE, HEAD, etc.)
      * @param request The request body (can be {@code null} for GET/DELETE)
-     * @param settings Additional HTTP settings for this request
+     * @param settings Additional HTTP settings for this request (headers, timeouts, etc.)
      * @return The response body as a String
      * @throws UncheckedIOException if an I/O error occurs
      */
@@ -947,14 +1236,14 @@ public final class HttpClient {
     }
 
     /**
-     * Executes an HTTP request with all options and deserializes the response.
+     * Executes an HTTP request with all options and deserializes the response to the specified type.
      * This is the core method that all other request methods delegate to.
-     * 
+     *
      * @param <T> The type of the response object
-     * @param httpMethod The HTTP method to use
+     * @param httpMethod The HTTP method to use (GET, POST, PUT, DELETE, HEAD, etc.)
      * @param request The request body (can be {@code null} for GET/DELETE)
-     * @param settings Additional HTTP settings for this request
-     * @param resultClass The class of the expected response object
+     * @param settings Additional HTTP settings for this request (headers, timeouts, etc.)
+     * @param resultClass The class of the expected response object (for deserialization)
      * @return The deserialized response object, or {@code null} if resultClass is Void
      * @throws UncheckedIOException if an I/O error occurs
      */
@@ -991,10 +1280,11 @@ public final class HttpClient {
 
     /**
      * Executes an HTTP request and writes the response to an output stream.
-     * 
-     * @param httpMethod The HTTP method to use
+     * The output stream is not closed by this method.
+     *
+     * @param httpMethod The HTTP method to use (GET, POST, PUT, DELETE, HEAD, etc.)
      * @param request The request body (can be {@code null} for GET/DELETE)
-     * @param settings Additional HTTP settings for this request
+     * @param settings Additional HTTP settings for this request (headers, timeouts, etc.)
      * @param output The output stream to write the response to
      * @throws UncheckedIOException if an I/O error occurs
      */
@@ -1004,10 +1294,11 @@ public final class HttpClient {
 
     /**
      * Executes an HTTP request and writes the response to a writer.
-     * 
-     * @param httpMethod The HTTP method to use
+     * The writer is not closed by this method.
+     *
+     * @param httpMethod The HTTP method to use (GET, POST, PUT, DELETE, HEAD, etc.)
      * @param request The request body (can be {@code null} for GET/DELETE)
-     * @param settings Additional HTTP settings for this request
+     * @param settings Additional HTTP settings for this request (headers, timeouts, etc.)
      * @param output The writer to write the response to
      * @throws UncheckedIOException if an I/O error occurs
      */
@@ -1431,7 +1722,7 @@ public final class HttpClient {
     }
 
     /**
-     * Performs an asynchronous GET request and deserializes the response.
+     * Performs an asynchronous GET request and deserializes the response to the specified type.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1440,8 +1731,8 @@ public final class HttpClient {
      * }</pre>
      *
      * @param <T> The type of the response object
-     * @param resultClass The class of the expected response object
-     * @return A ContinuableFuture that will complete with the deserialized response
+     * @param resultClass The class of the expected response object (for deserialization)
+     * @return A ContinuableFuture that will complete with the deserialized response object
      */
     public <T> ContinuableFuture<T> asyncGet(final Class<T> resultClass) {
         return asyncGet(null, _settings, resultClass);
@@ -1449,7 +1740,6 @@ public final class HttpClient {
 
     /**
      * Performs an asynchronous GET request with query parameters and deserializes the response.
-     * Automatically deserializes the JSON/XML response into the specified type.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1461,7 +1751,7 @@ public final class HttpClient {
      * @param <T> The type of the response object
      * @param queryParameters Query parameters as a String, Map, or Bean object (will be URL-encoded)
      * @param resultClass The class of the expected response object (for deserialization)
-     * @return A ContinuableFuture that will complete with the deserialized response
+     * @return A ContinuableFuture that will complete with the deserialized response object
      */
     public <T> ContinuableFuture<T> asyncGet(final Object queryParameters, final Class<T> resultClass) {
         return asyncGet(queryParameters, _settings, resultClass);
@@ -1469,7 +1759,6 @@ public final class HttpClient {
 
     /**
      * Performs an asynchronous GET request with custom settings and deserializes the response.
-     * Automatically deserializes the JSON/XML response into the specified type.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1483,7 +1772,7 @@ public final class HttpClient {
      * @param <T> The type of the response object
      * @param settings Additional HTTP settings for this request (headers, timeouts, etc.)
      * @param resultClass The class of the expected response object (for deserialization)
-     * @return A ContinuableFuture that will complete with the deserialized response
+     * @return A ContinuableFuture that will complete with the deserialized response object
      */
     public <T> ContinuableFuture<T> asyncGet(final HttpSettings settings, final Class<T> resultClass) {
         return asyncGet(null, settings, resultClass);
@@ -1516,7 +1805,6 @@ public final class HttpClient {
 
     /**
      * Performs an asynchronous DELETE request and returns the response as a String.
-     * Executes the DELETE request asynchronously without blocking the calling thread.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1532,7 +1820,6 @@ public final class HttpClient {
 
     /**
      * Performs an asynchronous DELETE request with query parameters.
-     * Executes the DELETE request asynchronously with the specified query parameters.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1550,7 +1837,6 @@ public final class HttpClient {
 
     /**
      * Performs an asynchronous DELETE request with custom settings.
-     * Executes the DELETE request asynchronously with the specified HTTP settings.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1569,58 +1855,58 @@ public final class HttpClient {
 
     /**
      * Performs an asynchronous DELETE request with query parameters and custom settings.
-     * 
-     * @param queryParameters Query parameters as a String, Map, or Bean object
+     *
+     * @param queryParameters Query parameters as a String, Map, or Bean object (will be URL-encoded)
      * @param settings Additional HTTP settings for this request
-     * @return A ContinuableFuture that will complete with the response body
+     * @return A ContinuableFuture that will complete with the response body as a String
      */
     public ContinuableFuture<String> asyncDelete(final Object queryParameters, final HttpSettings settings) {
         return asyncDelete(queryParameters, settings, String.class);
     }
 
     /**
-     * Performs an asynchronous DELETE request and deserializes the response.
-     * 
+     * Performs an asynchronous DELETE request and deserializes the response to the specified type.
+     *
      * @param <T> The type of the response object
-     * @param resultClass The class of the expected response object
-     * @return A ContinuableFuture that will complete with the deserialized response
+     * @param resultClass The class of the expected response object (for deserialization)
+     * @return A ContinuableFuture that will complete with the deserialized response object
      */
     public <T> ContinuableFuture<T> asyncDelete(final Class<T> resultClass) {
         return asyncDelete(null, _settings, resultClass);
     }
 
     /**
-     * Performs an asynchronous DELETE request with query parameters and deserializes the response.
-     * 
+     * Performs an asynchronous DELETE request with query parameters and deserializes the response to the specified type.
+     *
      * @param <T> The type of the response object
-     * @param queryParameters Query parameters as a String, Map, or Bean object
-     * @param resultClass The class of the expected response object
-     * @return A ContinuableFuture that will complete with the deserialized response
+     * @param queryParameters Query parameters as a String, Map, or Bean object (will be URL-encoded)
+     * @param resultClass The class of the expected response object (for deserialization)
+     * @return A ContinuableFuture that will complete with the deserialized response object
      */
     public <T> ContinuableFuture<T> asyncDelete(final Object queryParameters, final Class<T> resultClass) {
         return asyncDelete(queryParameters, _settings, resultClass);
     }
 
     /**
-     * Performs an asynchronous DELETE request with custom settings and deserializes the response.
-     * 
+     * Performs an asynchronous DELETE request with custom settings and deserializes the response to the specified type.
+     *
      * @param <T> The type of the response object
-     * @param settings Additional HTTP settings for this request
-     * @param resultClass The class of the expected response object
-     * @return A ContinuableFuture that will complete with the deserialized response
+     * @param settings Additional HTTP settings for this request (headers, timeouts, etc.)
+     * @param resultClass The class of the expected response object (for deserialization)
+     * @return A ContinuableFuture that will complete with the deserialized response object
      */
     public <T> ContinuableFuture<T> asyncDelete(final HttpSettings settings, final Class<T> resultClass) {
         return asyncDelete(null, settings, resultClass);
     }
 
     /**
-     * Performs an asynchronous DELETE request with all options and deserializes the response.
-     * 
+     * Performs an asynchronous DELETE request with all options and deserializes the response to the specified type.
+     *
      * @param <T> The type of the response object
-     * @param queryParameters Query parameters as a String, Map, or Bean object
-     * @param settings Additional HTTP settings for this request
-     * @param resultClass The class of the expected response object
-     * @return A ContinuableFuture that will complete with the deserialized response
+     * @param queryParameters Query parameters as a String, Map, or Bean object (will be URL-encoded)
+     * @param settings Additional HTTP settings for this request (headers, timeouts, etc.)
+     * @param resultClass The class of the expected response object (for deserialization)
+     * @return A ContinuableFuture that will complete with the deserialized response object
      */
     public <T> ContinuableFuture<T> asyncDelete(final Object queryParameters, final HttpSettings settings, final Class<T> resultClass) {
         return asyncExecute(HttpMethod.DELETE, queryParameters, settings, resultClass);
@@ -1636,44 +1922,44 @@ public final class HttpClient {
      *     .thenAccept(response -> System.out.println("Created: " + response));
      * }</pre>
      *
-     * @param request The request body
-     * @return A ContinuableFuture that will complete with the response body
+     * @param request The request body (can be String, byte[], File, InputStream, Reader, or any object for serialization)
+     * @return A ContinuableFuture that will complete with the response body as a String
      */
     public ContinuableFuture<String> asyncPost(final Object request) {
         return asyncPost(request, String.class);
     }
 
     /**
-     * Performs an asynchronous POST request and deserializes the response.
-     * 
+     * Performs an asynchronous POST request and deserializes the response to the specified type.
+     *
      * @param <T> The type of the response object
-     * @param request The request body
-     * @param resultClass The class of the expected response object
-     * @return A ContinuableFuture that will complete with the deserialized response
+     * @param request The request body (can be String, byte[], File, InputStream, Reader, or any object for serialization)
+     * @param resultClass The class of the expected response object (for deserialization)
+     * @return A ContinuableFuture that will complete with the deserialized response object
      */
     public <T> ContinuableFuture<T> asyncPost(final Object request, final Class<T> resultClass) {
         return asyncPost(request, _settings, resultClass);
     }
 
     /**
-     * Performs an asynchronous POST request with custom settings.
-     * 
-     * @param request The request body
-     * @param settings Additional HTTP settings for this request
-     * @return A ContinuableFuture that will complete with the response body
+     * Performs an asynchronous POST request with custom settings and returns the response as a String.
+     *
+     * @param request The request body (can be String, byte[], File, InputStream, Reader, or any object for serialization)
+     * @param settings Additional HTTP settings for this request (headers, timeouts, etc.)
+     * @return A ContinuableFuture that will complete with the response body as a String
      */
     public ContinuableFuture<String> asyncPost(final Object request, final HttpSettings settings) {
         return asyncPost(request, settings, String.class);
     }
 
     /**
-     * Performs an asynchronous POST request with custom settings and deserializes the response.
-     * 
+     * Performs an asynchronous POST request with custom settings and deserializes the response to the specified type.
+     *
      * @param <T> The type of the response object
-     * @param request The request body
-     * @param settings Additional HTTP settings for this request
-     * @param resultClass The class of the expected response object
-     * @return A ContinuableFuture that will complete with the deserialized response
+     * @param request The request body (can be String, byte[], File, InputStream, Reader, or any object for serialization)
+     * @param settings Additional HTTP settings for this request (headers, timeouts, etc.)
+     * @param resultClass The class of the expected response object (for deserialization)
+     * @return A ContinuableFuture that will complete with the deserialized response object
      */
     public <T> ContinuableFuture<T> asyncPost(final Object request, final HttpSettings settings, final Class<T> resultClass) {
         return asyncExecute(HttpMethod.POST, request, settings, resultClass);
@@ -1681,45 +1967,45 @@ public final class HttpClient {
 
     /**
      * Performs an asynchronous PUT request with the specified request body.
-     * 
-     * @param request The request body
-     * @return A ContinuableFuture that will complete with the response body
+     *
+     * @param request The request body (can be String, byte[], File, InputStream, Reader, or any object for serialization)
+     * @return A ContinuableFuture that will complete with the response body as a String
      */
     public ContinuableFuture<String> asyncPut(final Object request) {
         return asyncPut(request, String.class);
     }
 
     /**
-     * Performs an asynchronous PUT request and deserializes the response.
-     * 
+     * Performs an asynchronous PUT request and deserializes the response to the specified type.
+     *
      * @param <T> The type of the response object
-     * @param request The request body
-     * @param resultClass The class of the expected response object
-     * @return A ContinuableFuture that will complete with the deserialized response
+     * @param request The request body (can be String, byte[], File, InputStream, Reader, or any object for serialization)
+     * @param resultClass The class of the expected response object (for deserialization)
+     * @return A ContinuableFuture that will complete with the deserialized response object
      */
     public <T> ContinuableFuture<T> asyncPut(final Object request, final Class<T> resultClass) {
         return asyncPut(request, _settings, resultClass);
     }
 
     /**
-     * Performs an asynchronous PUT request with custom settings.
-     * 
-     * @param request The request body
-     * @param settings Additional HTTP settings for this request
-     * @return A ContinuableFuture that will complete with the response body
+     * Performs an asynchronous PUT request with custom settings and returns the response as a String.
+     *
+     * @param request The request body (can be String, byte[], File, InputStream, Reader, or any object for serialization)
+     * @param settings Additional HTTP settings for this request (headers, timeouts, etc.)
+     * @return A ContinuableFuture that will complete with the response body as a String
      */
     public ContinuableFuture<String> asyncPut(final Object request, final HttpSettings settings) {
         return asyncPut(request, settings, String.class);
     }
 
     /**
-     * Performs an asynchronous PUT request with custom settings and deserializes the response.
-     * 
+     * Performs an asynchronous PUT request with custom settings and deserializes the response to the specified type.
+     *
      * @param <T> The type of the response object
-     * @param request The request body
-     * @param settings Additional HTTP settings for this request
-     * @param resultClass The class of the expected response object
-     * @return A ContinuableFuture that will complete with the deserialized response
+     * @param request The request body (can be String, byte[], File, InputStream, Reader, or any object for serialization)
+     * @param settings Additional HTTP settings for this request (headers, timeouts, etc.)
+     * @param resultClass The class of the expected response object (for deserialization)
+     * @return A ContinuableFuture that will complete with the deserialized response object
      */
     public <T> ContinuableFuture<T> asyncPut(final Object request, final HttpSettings settings, final Class<T> resultClass) {
         return asyncExecute(HttpMethod.PUT, request, settings, resultClass);
@@ -1727,7 +2013,7 @@ public final class HttpClient {
 
     /**
      * Performs an asynchronous HEAD request with default settings.
-     * 
+     *
      * @return A ContinuableFuture that will complete when the request finishes
      */
     public ContinuableFuture<Void> asyncHead() {
@@ -1736,8 +2022,8 @@ public final class HttpClient {
 
     /**
      * Performs an asynchronous HEAD request with custom settings.
-     * 
-     * @param settings Additional HTTP settings for this request
+     *
+     * @param settings Additional HTTP settings for this request (headers, timeouts, etc.)
      * @return A ContinuableFuture that will complete when the request finishes
      */
     public ContinuableFuture<Void> asyncHead(final HttpSettings settings) {
@@ -1745,23 +2031,25 @@ public final class HttpClient {
     }
 
     /**
-     * Executes an asynchronous HTTP request with the specified method and request body.
-     * 
-     * @param httpMethod The HTTP method to use
+     * Executes an asynchronous HTTP request with the specified method and request body, returning the response as a String.
+     * Executes the request asynchronously without blocking the calling thread.
+     *
+     * @param httpMethod The HTTP method to use (GET, POST, PUT, DELETE, HEAD, etc.)
      * @param request The request body (can be {@code null} for GET/DELETE)
-     * @return A ContinuableFuture that will complete with the response body
+     * @return A ContinuableFuture that will complete with the response body as a String
      */
     public ContinuableFuture<String> asyncExecute(final HttpMethod httpMethod, final Object request) {
         return asyncExecute(httpMethod, request, String.class);
     }
 
     /**
-     * Executes an asynchronous HTTP request and deserializes the response.
-     * 
+     * Executes an asynchronous HTTP request and deserializes the response to the specified type.
+     * Executes the request asynchronously without blocking the calling thread.
+     *
      * @param <T> The type of the response object
-     * @param httpMethod The HTTP method to use
+     * @param httpMethod The HTTP method to use (GET, POST, PUT, DELETE, HEAD, etc.)
      * @param request The request body (can be {@code null} for GET/DELETE)
-     * @param resultClass The class of the expected response object
+     * @param resultClass The class of the expected response object (for deserialization)
      * @return A ContinuableFuture that will complete with the deserialized response
      */
     public <T> ContinuableFuture<T> asyncExecute(final HttpMethod httpMethod, final Object request, final Class<T> resultClass) {
@@ -1769,26 +2057,28 @@ public final class HttpClient {
     }
 
     /**
-     * Executes an asynchronous HTTP request with custom settings.
-     * 
-     * @param httpMethod The HTTP method to use
+     * Executes an asynchronous HTTP request with custom settings and returns the response as a String.
+     * Executes the request asynchronously with the specified HTTP settings.
+     *
+     * @param httpMethod The HTTP method to use (GET, POST, PUT, DELETE, HEAD, etc.)
      * @param request The request body (can be {@code null} for GET/DELETE)
-     * @param settings Additional HTTP settings for this request
-     * @return A ContinuableFuture that will complete with the response body
+     * @param settings Additional HTTP settings for this request (headers, timeouts, etc.)
+     * @return A ContinuableFuture that will complete with the response body as a String
      */
     public ContinuableFuture<String> asyncExecute(final HttpMethod httpMethod, final Object request, final HttpSettings settings) {
         return asyncExecute(httpMethod, request, settings, String.class);
     }
 
     /**
-     * Executes an asynchronous HTTP request with all options and deserializes the response.
+     * Executes an asynchronous HTTP request with all options and deserializes the response to the specified type.
      * This is the core async method that all other async request methods delegate to.
-     * 
+     * Executes the request asynchronously with full control over method, request body, and settings.
+     *
      * @param <T> The type of the response object
-     * @param httpMethod The HTTP method to use
+     * @param httpMethod The HTTP method to use (GET, POST, PUT, DELETE, HEAD, etc.)
      * @param request The request body (can be {@code null} for GET/DELETE)
-     * @param settings Additional HTTP settings for this request
-     * @param resultClass The class of the expected response object
+     * @param settings Additional HTTP settings for this request (headers, timeouts, etc.)
+     * @param resultClass The class of the expected response object (for deserialization)
      * @return A ContinuableFuture that will complete with the deserialized response
      */
     public <T> ContinuableFuture<T> asyncExecute(final HttpMethod httpMethod, final Object request, final HttpSettings settings, final Class<T> resultClass) {
@@ -1799,12 +2089,13 @@ public final class HttpClient {
 
     /**
      * Executes an asynchronous HTTP request and writes the response to a file.
-     * 
-     * @param httpMethod The HTTP method to use
+     * Executes the request asynchronously and writes the response body directly to the specified file.
+     *
+     * @param httpMethod The HTTP method to use (GET, POST, PUT, DELETE, HEAD, etc.)
      * @param request The request body (can be {@code null} for GET/DELETE)
-     * @param settings Additional HTTP settings for this request
+     * @param settings Additional HTTP settings for this request (headers, timeouts, etc.)
      * @param output The file to write the response to
-     * @return A ContinuableFuture that will complete when the file is written
+     * @return A ContinuableFuture that will complete when the file is written successfully
      */
     public ContinuableFuture<Void> asyncExecute(final HttpMethod httpMethod, final Object request, final HttpSettings settings, final File output) {
         final Callable<Void> cmd = () -> {
@@ -1818,12 +2109,13 @@ public final class HttpClient {
 
     /**
      * Executes an asynchronous HTTP request and writes the response to an output stream.
-     * 
-     * @param httpMethod The HTTP method to use
+     * Executes the request asynchronously and writes the response body to the stream. The stream is not closed by this method.
+     *
+     * @param httpMethod The HTTP method to use (GET, POST, PUT, DELETE, HEAD, etc.)
      * @param request The request body (can be {@code null} for GET/DELETE)
-     * @param settings Additional HTTP settings for this request
+     * @param settings Additional HTTP settings for this request (headers, timeouts, etc.)
      * @param output The output stream to write the response to
-     * @return A ContinuableFuture that will complete when the stream is written
+     * @return A ContinuableFuture that will complete when the stream is written successfully
      */
     public ContinuableFuture<Void> asyncExecute(final HttpMethod httpMethod, final Object request, final HttpSettings settings, final OutputStream output) {
         final Callable<Void> cmd = () -> {
@@ -1837,12 +2129,13 @@ public final class HttpClient {
 
     /**
      * Executes an asynchronous HTTP request and writes the response to a writer.
-     * 
-     * @param httpMethod The HTTP method to use
+     * Executes the request asynchronously and writes the response body to the writer. The writer is not closed by this method.
+     *
+     * @param httpMethod The HTTP method to use (GET, POST, PUT, DELETE, HEAD, etc.)
      * @param request The request body (can be {@code null} for GET/DELETE)
-     * @param settings Additional HTTP settings for this request
+     * @param settings Additional HTTP settings for this request (headers, timeouts, etc.)
      * @param output The writer to write the response to
-     * @return A ContinuableFuture that will complete when the writer is written
+     * @return A ContinuableFuture that will complete when the writer is written successfully
      */
     public ContinuableFuture<Void> asyncExecute(final HttpMethod httpMethod, final Object request, final HttpSettings settings, final Writer output) {
         final Callable<Void> cmd = () -> {

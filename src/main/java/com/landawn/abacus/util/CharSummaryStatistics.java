@@ -38,7 +38,6 @@ import com.landawn.abacus.util.function.CharConsumer;
  * }</pre>
  * 
  * @see CharConsumer
- * @since 1.0
  */
 public class CharSummaryStatistics implements CharConsumer {
 

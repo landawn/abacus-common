@@ -11,7 +11,6 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-
 package com.landawn.abacus.util.function;
 
 import com.landawn.abacus.util.Throwables;
@@ -19,29 +18,26 @@ import com.landawn.abacus.util.Throwables;
 /**
  * Represents a predicate (boolean-valued function) of one {@code boolean}-valued argument.
  * This is the {@code boolean}-consuming primitive type specialization of {@link java.util.function.Predicate}.
- * 
+ *
  * <p>This is a functional interface whose functional method is {@link #test(boolean)}.
  *
+ * <p>Refer to JDK API documentation at: <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html">https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a></p>
  */
 @FunctionalInterface
 public interface BooleanPredicate extends Throwables.BooleanPredicate<RuntimeException> { //NOSONAR
-
     /**
      * A predicate that always returns {@code true} regardless of the input value.
      */
     BooleanPredicate ALWAYS_TRUE = value -> true;
-
     /**
      * A predicate that always returns {@code false} regardless of the input value.
      */
     BooleanPredicate ALWAYS_FALSE = value -> false;
-
     /**
      * A predicate that returns the input value itself.
      * Returns {@code true} if the input is {@code true}, {@code false} if the input is {@code false}.
      */
     BooleanPredicate IS_TRUE = value -> value;
-
     /**
      * A predicate that returns the negation of the input value.
      * Returns {@code true} if the input is {@code false}, {@code false} if the input is {@code true}.

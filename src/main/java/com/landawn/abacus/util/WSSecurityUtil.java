@@ -55,7 +55,6 @@ import java.security.SecureRandom;
  * under the Apache License 2.0. The methods may have been modified from their original implementation.</p>
  *
  * @author Davanum Srinivas (dims@yahoo.com)
- * @since 0.8
  */
 public final class WSSecurityUtil {
 

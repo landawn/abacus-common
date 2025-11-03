@@ -11,7 +11,6 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-
 package com.landawn.abacus.util.function;
 
 import com.landawn.abacus.util.Throwables;
@@ -26,7 +25,7 @@ import com.landawn.abacus.util.Throwables;
  * <p>This interface extends both {@link Throwables.LongConsumer} with
  * {@link RuntimeException} and {@link java.util.function.LongConsumer},
  * providing compatibility with the Java standard library while supporting the
- * Abacus framework's exception handling capabilities.
+ * abacus-common framework's exception handling capabilities.
  *
  * <p>This is a functional interface whose functional method is
  * {@link #accept(long)}.
@@ -37,11 +36,9 @@ import com.landawn.abacus.util.Throwables;
  *
  * @see java.util.function.Consumer
  * @see java.util.function.LongConsumer
- * @since 1.8
  */
 @FunctionalInterface
 public interface LongConsumer extends Throwables.LongConsumer<RuntimeException>, java.util.function.LongConsumer { //NOSONAR
-
     /**
      * Performs this operation on the given argument.
      *
@@ -82,13 +79,13 @@ public interface LongConsumer extends Throwables.LongConsumer<RuntimeException>,
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * LongConsumer saveToDatabase = value -> database.save(value);
-     * LongConsumer logValue = value -> logger.info("Processed: " + value);
+     * LongConsumer saveToDatabase = value -> System.out.println("Saving: " + value);
+     * LongConsumer logValue = value -> System.out.println("Processed: " + value);
      * LongConsumer combined = saveToDatabase.andThen(logValue);
      * combined.accept(12345L); // First saves to database, then logs
      * }</pre>
      *
-     * @param after the operation to perform after this operation. Must not be null
+     * @param after the operation to perform after this operation. Must not be {@code null}.
      * @return a composed {@code LongConsumer} that performs in sequence this
      *         operation followed by the {@code after} operation
      */

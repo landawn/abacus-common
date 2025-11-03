@@ -21,7 +21,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
 
-import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.parser.JSONXMLSerializationConfig;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.N;
@@ -49,9 +48,7 @@ public abstract class AbstractShortType extends NumberType<Number> {
      * @param x the Number value to convert
      * @return the string representation of the short value, or {@code null} if input is {@code null}
      */
-    @MayReturnNull
     @Override
-
     public String stringOf(final Number x) {
         if (x == null) {
             return null; // NOSONAR
@@ -69,13 +66,20 @@ public abstract class AbstractShortType extends NumberType<Number> {
      *   <li>Valid numeric strings are parsed to short values</li>
      * </ul>
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * AbstractShortType type = TypeFactory.getType(Short.class);
+     * Short value1 = type.valueOf("32767");   // returns 32767 (max short value)
+     * Short value2 = type.valueOf("100");     // returns 100
+     * Short value3 = type.valueOf("42L");     // returns 42 (suffix stripped)
+     * Short value4 = type.valueOf("");        // returns default value
+     * }</pre>
+     *
      * @param str the string to convert
      * @return the Short value
      * @throws NumberFormatException if the string cannot be parsed as a short
      */
-    @MayReturnNull
     @Override
-
     public Short valueOf(final String str) {
         if (Strings.isEmpty(str)) {
             return (Short) defaultValue();
@@ -101,15 +105,20 @@ public abstract class AbstractShortType extends NumberType<Number> {
      * Parses the character array as an integer and checks if it's within short range
      * (Short.MIN_VALUE to Short.MAX_VALUE).
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * AbstractShortType type = TypeFactory.getType(Short.class);
+     * char[] buffer = "1000".toCharArray();
+     * Short value = type.valueOf(buffer, 0, 4); // returns 1000
+     * }</pre>
+     *
      * @param cbuf the character array to convert
      * @param offset the starting position in the array
      * @param len the number of characters to read
      * @return the Short value, or default value if input is {@code null} or empty
      * @throws NumberFormatException if the value is out of short range or not a valid number
      */
-    @MayReturnNull
     @Override
-
     public Short valueOf(final char[] cbuf, final int offset, final int len) {
         if ((cbuf == null) || (len == 0)) {
             return (Short) defaultValue();
@@ -124,6 +133,21 @@ public abstract class AbstractShortType extends NumberType<Number> {
         return (short) i;
     }
 
+    /**
+     * Checks if this type represents a short type.
+     * This method always returns {@code true} for short types.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * AbstractShortType type = TypeFactory.getType(Short.class);
+     * if (type.isShort()) {
+     *     // Handle short type specific logic
+     *     System.out.println("This is a short type");
+     * }
+     * }</pre>
+     *
+     * @return {@code true}, indicating this is a short type
+     */
     @Override
     public boolean isShort() {
         return true;
@@ -151,7 +175,6 @@ public abstract class AbstractShortType extends NumberType<Number> {
      * @throws SQLException if a database access error occurs or the columnIndex is invalid
      */
     @Override
-    @MayReturnNull
     public Short get(final ResultSet rs, final int columnIndex) throws SQLException {
         return rs.getShort(columnIndex);
     }
@@ -178,7 +201,6 @@ public abstract class AbstractShortType extends NumberType<Number> {
      * @throws SQLException if a database access error occurs or the columnLabel is not found
      */
     @Override
-    @MayReturnNull
     public Short get(final ResultSet rs, final String columnLabel) throws SQLException {
         return rs.getShort(columnLabel);
     }

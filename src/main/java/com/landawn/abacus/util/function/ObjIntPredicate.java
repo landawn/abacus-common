@@ -11,7 +11,6 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-
 package com.landawn.abacus.util.function;
 
 import com.landawn.abacus.util.Throwables;
@@ -44,19 +43,19 @@ public interface ObjIntPredicate<T> extends Throwables.ObjIntPredicate<T, Runtim
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * ObjIntPredicate<List<String>> hasElementAt = (list, index) -> 
+     * ObjIntPredicate<List<String>> hasElementAt = (list, index) ->
      *     index >= 0 && index < list.size();
-     * ObjIntPredicate<String> hasMinLength = (str, minLen) -> 
+     * ObjIntPredicate<String> hasMinLength = (str, minLen) ->
      *     str.length() >= minLen;
-     * 
-     * boolean valid = hasElementAt.test(myList, 5);
+     *
+     * List<String> items = List.of("a", "b", "c");
+     * boolean valid = hasElementAt.test(items, 5); // Returns false
      * boolean longEnough = hasMinLength.test("Hello", 3); // Returns true
      * }</pre>
      *
      * @param t the first input argument of type T
      * @param u the second input argument, a primitive int value
-     * @return {@code true} if the input arguments match the predicate,
-     *         otherwise {@code false} if the predicate evaluation fails
+     * @return {@code true} if the input arguments match the predicate, {@code false} otherwise
      */
     @Override
     boolean test(T t, int u);
@@ -70,7 +69,7 @@ public interface ObjIntPredicate<T> extends Throwables.ObjIntPredicate<T, Runtim
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * ObjIntPredicate<String> hasMinLength = (str, minLen) -> 
+     * ObjIntPredicate<String> hasMinLength = (str, minLen) ->
      *     str.length() >= minLen;
      * ObjIntPredicate<String> tooShort = hasMinLength.negate();
      * // tooShort tests if string length < minLen
@@ -94,12 +93,12 @@ public interface ObjIntPredicate<T> extends Throwables.ObjIntPredicate<T, Runtim
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * ObjIntPredicate<List<String>> validIndex = (list, index) -> 
+     * ObjIntPredicate<List<String>> validIndex = (list, index) ->
      *     index >= 0 && index < list.size();
-     * ObjIntPredicate<List<String>> nonEmptyAt = (list, index) -> 
+     * ObjIntPredicate<List<String>> nonEmptyAt = (list, index) ->
      *     !list.get(index).isEmpty();
-     * 
-     * ObjIntPredicate<List<String>> hasNonEmptyAt = 
+     *
+     * ObjIntPredicate<List<String>> hasNonEmptyAt =
      *     validIndex.and(nonEmptyAt);
      * }</pre>
      *
@@ -123,12 +122,12 @@ public interface ObjIntPredicate<T> extends Throwables.ObjIntPredicate<T, Runtim
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * ObjIntPredicate<String> isEmpty = (str, ignored) -> 
+     * ObjIntPredicate<String> isEmpty = (str, ignored) ->
      *     str.isEmpty();
-     * ObjIntPredicate<String> tooLong = (str, maxLen) -> 
+     * ObjIntPredicate<String> tooLong = (str, maxLen) ->
      *     str.length() > maxLen;
-     * 
-     * ObjIntPredicate<String> invalid = 
+     *
+     * ObjIntPredicate<String> invalid =
      *     isEmpty.or(tooLong);
      * }</pre>
      *

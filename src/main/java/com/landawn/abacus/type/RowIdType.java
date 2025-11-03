@@ -21,11 +21,10 @@ import java.sql.ResultSet;
 import java.sql.RowId;
 import java.sql.SQLException;
 
-import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.parser.JSONXMLSerializationConfig;
 import com.landawn.abacus.util.CharacterWriter;
 
-public class RowIdType extends AbstractType<RowId> {
+class RowIdType extends AbstractType<RowId> {
 
     public static final String ROW_ID = RowId.class.getSimpleName();
 
@@ -38,7 +37,7 @@ public class RowIdType extends AbstractType<RowId> {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * RowIdType type = new RowIdType();
+     * Type<RowId> type = TypeFactory.getType(RowId.class);
      * Class<RowId> clazz = type.clazz(); // Returns RowId.class
      * }</pre>
      *
@@ -55,7 +54,7 @@ public class RowIdType extends AbstractType<RowId> {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * RowIdType type = new RowIdType();
+     * Type<RowId> type = TypeFactory.getType(RowId.class);
      * boolean serializable = type.isSerializable(); // Returns false
      * }</pre>
      *
@@ -72,7 +71,7 @@ public class RowIdType extends AbstractType<RowId> {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * RowIdType type = new RowIdType();
+     * Type<RowId> type = TypeFactory.getType(RowId.class);
      * RowId rowId = resultSet.getRowId(1);
      * String str = type.stringOf(rowId); // Converts RowId to String
      * }</pre>
@@ -80,9 +79,7 @@ public class RowIdType extends AbstractType<RowId> {
      * @param x the RowId object to convert
      * @return the string representation of the RowId, or {@code null} if the input is null
      */
-    @MayReturnNull
     @Override
-
     public String stringOf(final RowId x) {
         return x == null ? null : x.toString();
     }
@@ -94,7 +91,7 @@ public class RowIdType extends AbstractType<RowId> {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * RowIdType type = new RowIdType();
+     * Type<RowId> type = TypeFactory.getType(RowId.class);
      * // This will throw UnsupportedOperationException
      * RowId rowId = type.valueOf("some-string");
      * }</pre>
@@ -104,7 +101,6 @@ public class RowIdType extends AbstractType<RowId> {
      * @throws UnsupportedOperationException always thrown as RowId cannot be created from string
      */
     @Override
-    @MayReturnNull
     public RowId valueOf(final String str) throws UnsupportedOperationException {
         throw new UnsupportedOperationException();
     }
@@ -115,7 +111,7 @@ public class RowIdType extends AbstractType<RowId> {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * RowIdType type = new RowIdType();
+     * Type<RowId> type = TypeFactory.getType(RowId.class);
      * ResultSet rs = statement.executeQuery("SELECT ROWID, name FROM users");
      * RowId rowId = type.get(rs, 1); // Get RowId from first column
      * }</pre>
@@ -125,9 +121,7 @@ public class RowIdType extends AbstractType<RowId> {
      * @return the RowId value from the specified column, or {@code null} if the column value is SQL NULL
      * @throws SQLException if a database access error occurs or the column index is invalid
      */
-    @MayReturnNull
     @Override
-
     public RowId get(final ResultSet rs, final int columnIndex) throws SQLException {
         return rs.getRowId(columnIndex);
     }
@@ -138,7 +132,7 @@ public class RowIdType extends AbstractType<RowId> {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * RowIdType type = new RowIdType();
+     * Type<RowId> type = TypeFactory.getType(RowId.class);
      * ResultSet rs = statement.executeQuery("SELECT ROWID as row_id, name FROM users");
      * RowId rowId = type.get(rs, "row_id"); // Get RowId by column name
      * }</pre>
@@ -148,9 +142,7 @@ public class RowIdType extends AbstractType<RowId> {
      * @return the RowId value from the specified column, or {@code null} if the column value is SQL NULL
      * @throws SQLException if a database access error occurs or the column label is not found
      */
-    @MayReturnNull
     @Override
-
     public RowId get(final ResultSet rs, final String columnLabel) throws SQLException {
         return rs.getRowId(columnLabel);
     }
@@ -161,7 +153,7 @@ public class RowIdType extends AbstractType<RowId> {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * RowIdType type = new RowIdType();
+     * Type<RowId> type = TypeFactory.getType(RowId.class);
      * PreparedStatement stmt = conn.prepareStatement("UPDATE users SET status = ? WHERE ROWID = ?");
      * type.set(stmt, 2, rowId); // Set RowId at parameter index 2
      * }</pre>
@@ -182,7 +174,7 @@ public class RowIdType extends AbstractType<RowId> {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * RowIdType type = new RowIdType();
+     * Type<RowId> type = TypeFactory.getType(RowId.class);
      * CallableStatement stmt = conn.prepareCall("{call update_user_status(?, ?)}");
      * type.set(stmt, "user_rowid", rowId); // Set RowId by parameter name
      * }</pre>
@@ -204,7 +196,7 @@ public class RowIdType extends AbstractType<RowId> {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * RowIdType type = new RowIdType();
+     * Type<RowId> type = TypeFactory.getType(RowId.class);
      * CharacterWriter writer = new CharacterWriter();
      * type.writeCharacter(writer, rowId, config); // Writes RowId to character stream
      * }</pre>

@@ -20,7 +20,7 @@ package com.landawn.abacus.type;
  * in database operations and serialization contexts.
  * It serves as a semantic alias for ReaderType with a distinct type name.
  */
-public class CharacterStreamType extends ReaderType {
+class CharacterStreamType extends ReaderType {
 
     public static final String CHARACTER_STREAM = "CharacterStream";
 

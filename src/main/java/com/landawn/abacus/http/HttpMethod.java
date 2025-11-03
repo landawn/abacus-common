@@ -16,11 +16,11 @@ package com.landawn.abacus.http;
 
 /**
  * Enum representing standard HTTP request methods.
- * 
+ *
  * <p>This enum defines the common HTTP methods used in RESTful web services
  * and HTTP communication. Each method has specific semantics defined by the
  * HTTP specification.</p>
- * 
+ *
  * <p>Common HTTP methods:</p>
  * <ul>
  *   <li>{@link #GET} - Retrieve a resource</li>
@@ -33,7 +33,7 @@ package com.landawn.abacus.http;
  *   <li>{@link #TRACE} - Echo the request for debugging</li>
  *   <li>{@link #CONNECT} - Establish a tunnel (typically for HTTPS through proxy)</li>
  * </ul>
- * 
+ *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * HttpMethod method = HttpMethod.GET;
@@ -41,10 +41,10 @@ package com.landawn.abacus.http;
  *
  * // Using with HTTP clients
  * String response = HttpRequest.url("https://api.example.com/users")
- *     .body("{\"name\":\"John\"}")
- *     .execute(HttpMethod.POST, String.class);
+ *     .jsonBody("{\"name\":\"John\"}")
+ *     .post(String.class);
  * }</pre>
- * 
+ *
  * <p>Note: The PATCH method is not supported by {@link java.net.HttpURLConnection}
  * in the standard Java HTTP client implementation.</p>
  */

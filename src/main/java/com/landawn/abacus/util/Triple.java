@@ -78,9 +78,13 @@ public final class Triple<L, M, R> implements Mutable {
     }
 
     /**
-     * Creates a new Triple instance with the specified left, middle, and right values.
-     * This is the preferred way to create a Triple instance.
-     * 
+     * Creates a new Triple instance containing the specified left, middle, and right elements.
+     *
+     * <p>This is a static factory method that provides a convenient and type-safe way to create
+     * a Triple instance. The method allows for type inference, making the code more concise.
+     * All elements can be {@code null}. The returned triple is mutable, allowing
+     * modification of its elements after creation.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Triple<String, Integer, Boolean> triple = Triple.of("text", 100, false);
@@ -89,10 +93,10 @@ public final class Triple<L, M, R> implements Mutable {
      * @param <L> the type of the left element
      * @param <M> the type of the middle element
      * @param <R> the type of the right element
-     * @param l the left element value (can be null)
-     * @param m the middle element value (can be null)
-     * @param r the right element value (can be null)
-     * @return a new Triple instance containing the specified values
+     * @param l the left element, may be {@code null}
+     * @param m the middle element, may be {@code null}
+     * @param r the right element, may be {@code null}
+     * @return a new Triple instance containing the specified elements
      */
     public static <L, M, R> Triple<L, M, R> of(final L l, final M m, final R r) {
         return new Triple<>(l, m, r);
@@ -101,10 +105,12 @@ public final class Triple<L, M, R> implements Mutable {
     private static final Triple<?, ?, ?>[] EMPTY_ARRAY = new Triple[0];
 
     /**
-     * Returns an empty array of Triple. This method is useful when you need to
-     * return an empty array of Triple instances without creating a new array each time.
-     * The returned array is immutable and shared across all calls.
-     * 
+     * Returns a type-safe empty array of Triple instances.
+     *
+     * <p>This method provides a reusable empty array, avoiding the need to create
+     * a new empty array each time. The returned array is immutable and shared across
+     * all calls to this method.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Triple<String, Integer, Boolean>[] emptyTriples = Triple.emptyArray();
@@ -114,7 +120,7 @@ public final class Triple<L, M, R> implements Mutable {
      * @param <L> the type of the left element
      * @param <M> the type of the middle element
      * @param <R> the type of the right element
-     * @return an empty, immutable array of Triple
+     * @return an empty, immutable array of Triple instances
      */
     @SuppressWarnings("unchecked")
     public static <L, M, R> Triple<L, M, R>[] emptyArray() {
@@ -122,30 +128,36 @@ public final class Triple<L, M, R> implements Mutable {
     }
 
     /**
-     * Returns the left element of this Triple.
-     * This is the preferred method for accessing the left element.
+     * Returns the left element of this triple.
      *
-     * @return the left element, which may be null
+     * <p>This is the preferred method for accessing the left element,
+     * providing a more concise alternative to {@link #getLeft()}.</p>
+     *
+     * @return the left element of this triple, may be {@code null}
      */
     public L left() {
         return left;
     }
 
     /**
-     * Returns the middle element of this Triple.
-     * This is the preferred method for accessing the middle element.
+     * Returns the middle element of this triple.
      *
-     * @return the middle element, which may be null
+     * <p>This is the preferred method for accessing the middle element,
+     * providing a more concise alternative to {@link #getMiddle()}.</p>
+     *
+     * @return the middle element of this triple, may be {@code null}
      */
     public M middle() {
         return middle;
     }
 
     /**
-     * Returns the right element of this Triple.
-     * This is the preferred method for accessing the right element.
+     * Returns the right element of this triple.
      *
-     * @return the right element, which may be null
+     * <p>This is the preferred method for accessing the right element,
+     * providing a more concise alternative to {@link #getRight()}.</p>
+     *
+     * @return the right element of this triple, may be {@code null}
      */
     public R right() {
         return right;
@@ -165,9 +177,10 @@ public final class Triple<L, M, R> implements Mutable {
     }
 
     /**
-     * Sets the left element of this Triple to the specified value.
-     * This method allows modification of the left element after the Triple has been created.
-     * 
+     * Sets the left element of this triple to the specified value.
+     *
+     * <p>This method modifies the triple in place. The value may be {@code null}.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Triple<String, Integer, Boolean> triple = Triple.of("old", 42, true);
@@ -175,7 +188,7 @@ public final class Triple<L, M, R> implements Mutable {
      * // triple.left() now returns "new"
      * }</pre>
      *
-     * @param left the new value for the left element (can be null)
+     * @param left the new value for the left element, may be {@code null}
      */
     public void setLeft(final L left) {
         this.left = left;
@@ -195,9 +208,10 @@ public final class Triple<L, M, R> implements Mutable {
     }
 
     /**
-     * Sets the middle element of this Triple to the specified value.
-     * This method allows modification of the middle element after the Triple has been created.
-     * 
+     * Sets the middle element of this triple to the specified value.
+     *
+     * <p>This method modifies the triple in place. The value may be {@code null}.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Triple<String, Integer, Boolean> triple = Triple.of("text", 42, true);
@@ -205,7 +219,7 @@ public final class Triple<L, M, R> implements Mutable {
      * // triple.middle() now returns 100
      * }</pre>
      *
-     * @param middle the new value for the middle element (can be null)
+     * @param middle the new value for the middle element, may be {@code null}
      */
     public void setMiddle(final M middle) {
         this.middle = middle;
@@ -225,9 +239,10 @@ public final class Triple<L, M, R> implements Mutable {
     }
 
     /**
-     * Sets the right element of this Triple to the specified value.
-     * This method allows modification of the right element after the Triple has been created.
-     * 
+     * Sets the right element of this triple to the specified value.
+     *
+     * <p>This method modifies the triple in place. The value may be {@code null}.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Triple<String, Integer, Boolean> triple = Triple.of("text", 42, true);
@@ -235,7 +250,7 @@ public final class Triple<L, M, R> implements Mutable {
      * // triple.right() now returns false
      * }</pre>
      *
-     * @param right the new value for the right element (can be null)
+     * @param right the new value for the right element, may be {@code null}
      */
     public void setRight(final R right) {
         this.right = right;

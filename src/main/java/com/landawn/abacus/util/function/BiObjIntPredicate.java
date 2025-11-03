@@ -11,7 +11,6 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-
 package com.landawn.abacus.util.function;
 
 import com.landawn.abacus.util.Throwables;
@@ -20,15 +19,16 @@ import com.landawn.abacus.util.Throwables;
  * Represents a predicate (boolean-valued function) of two object-valued arguments and a single
  * {@code int}-valued argument. This is a specialization of predicate for two reference types
  * and one primitive {@code int} value.
- * 
+ *
  * <p>This is a functional interface whose functional method is {@link #test(Object, Object, int)}.
  *
  * @param <T> the type of the first object argument to the predicate
  * @param <U> the type of the second object argument to the predicate
+ *
+ * <p>Refer to JDK API documentation at: <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html">https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a></p>
  */
 @FunctionalInterface
 public interface BiObjIntPredicate<T, U> extends Throwables.BiObjIntPredicate<T, U, RuntimeException> { //NOSONAR
-
     /**
      * Evaluates this predicate on the given arguments.
      *

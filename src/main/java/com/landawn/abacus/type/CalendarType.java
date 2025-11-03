@@ -19,7 +19,6 @@ import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.Calendar;
 
-import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.util.Dates;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Strings;
@@ -29,7 +28,7 @@ import com.landawn.abacus.util.Strings;
  * This class provides serialization, deserialization, and database operations for Calendar objects.
  * It supports conversion from various formats including timestamps, date strings, and the special "sysTime" value.
  */
-public class CalendarType extends AbstractCalendarType<Calendar> {
+class CalendarType extends AbstractCalendarType<Calendar> {
 
     public static final String CALENDAR = Calendar.class.getSimpleName();
 
@@ -64,7 +63,6 @@ public class CalendarType extends AbstractCalendarType<Calendar> {
      * @return A Calendar instance representing the input value, or {@code null} if input is null
      */
     @Override
-    @MayReturnNull
     public Calendar valueOf(final Object obj) {
         if (obj instanceof Number) {
             return Dates.createCalendar(((Number) obj).longValue());
@@ -88,7 +86,6 @@ public class CalendarType extends AbstractCalendarType<Calendar> {
      * @return A Calendar instance parsed from the string, or {@code null} if input is null/empty
      */
     @Override
-    @MayReturnNull
     public Calendar valueOf(final String str) {
         return Strings.isEmpty(str) ? null : (N.equals(str, SYS_TIME) ? Dates.currentCalendar() : Dates.parseCalendar(str));
     }
@@ -104,9 +101,7 @@ public class CalendarType extends AbstractCalendarType<Calendar> {
      * @param len the number of characters to use
      * @return A Calendar instance parsed from the character array, or {@code null} if input is {@code null} or empty
      */
-    @MayReturnNull
     @Override
-
     public Calendar valueOf(final char[] cbuf, final int offset, final int len) {
         if ((cbuf == null) || (len == 0)) {
             return null; // NOSONAR
@@ -133,7 +128,6 @@ public class CalendarType extends AbstractCalendarType<Calendar> {
      * @throws SQLException if a database access error occurs or the column index is invalid
      */
     @Override
-    @MayReturnNull
     public Calendar get(final ResultSet rs, final int columnIndex) throws SQLException {
         final Timestamp ts = rs.getTimestamp(columnIndex);
 
@@ -150,7 +144,6 @@ public class CalendarType extends AbstractCalendarType<Calendar> {
      * @throws SQLException if a database access error occurs or the column label is not found
      */
     @Override
-    @MayReturnNull
     public Calendar get(final ResultSet rs, final String columnLabel) throws SQLException {
         final Timestamp ts = rs.getTimestamp(columnLabel);
 

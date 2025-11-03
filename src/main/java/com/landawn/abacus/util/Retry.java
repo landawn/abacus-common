@@ -61,7 +61,7 @@ public final class Retry<T> {
      * <p>Between retry attempts, the thread will sleep for the specified interval. If {@code retryIntervalInMillis} is 0,
      * retries will be executed immediately without delay.</p>
      *
-     * <p><b>Usage Example:</b></p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Retry<Void> retry = Retry.of(3, 1000, e -> e instanceof IOException || e instanceof TimeoutException);
      * retry.run(() -> sendNotification());
@@ -96,7 +96,7 @@ public final class Retry<T> {
      * <p>Between retry attempts, the thread will sleep for the specified interval. If {@code retryIntervalInMillis} is 0,
      * retries will be executed immediately without delay.</p>
      *
-     * <p><b>Usage Example:</b></p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Retry<Response> retry = Retry.of(3, 500, (result, ex) ->
      *     (result != null && result.getStatusCode() == 503) || ex instanceof SocketTimeoutException);
@@ -134,7 +134,7 @@ public final class Retry<T> {
      *   <li>If {@code retryCondition2} is set, the operation is retried when the bi-predicate returns {@code true} for {@code null} result and the thrown exception.</li>
      * </ul>
      *
-     * <p><b>Usage Example:</b></p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Retry<Void> retry = Retry.of(3, 1000, e -> e instanceof IOException);
      * retry.run(() -> performNetworkOperation());
@@ -198,7 +198,7 @@ public final class Retry<T> {
      *   <li>If {@code retryCondition2} is set, the operation is retried when the bi-predicate returns {@code true} for the result and/or exception.</li>
      * </ul>
      *
-     * <p><b>Usage Example:</b></p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Retry<String> retry = Retry.of(3, 1000, (result, ex) -> result == null || ex instanceof TimeoutException);
      * String result = retry.call(() -> fetchDataFromServer());

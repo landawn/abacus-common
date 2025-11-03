@@ -14,8 +14,6 @@
 
 package com.landawn.abacus.parser;
 
-import com.landawn.abacus.annotation.MayReturnNull;
-
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
@@ -104,7 +102,6 @@ import com.landawn.abacus.util.XmlUtil;
  * @see XMLParser
  * @see XMLSerializationConfig
  * @see XMLDeserializationConfig
- * @since 1.0
  */
 final class XMLParserImpl extends AbstractXMLParser {
 
@@ -130,8 +127,6 @@ final class XMLParserImpl extends AbstractXMLParser {
         super(xsc, xdc);
         this.parserType = parserType;
     }
-
-    @MayReturnNull
 
     @Override
     public String serialize(final Object obj, final XMLSerializationConfig config) {

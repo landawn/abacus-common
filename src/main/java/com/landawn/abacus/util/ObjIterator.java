@@ -74,7 +74,6 @@ import com.landawn.abacus.util.stream.Stream;
  * @see com.landawn.abacus.util.Iterators
  * @see com.landawn.abacus.util.Enumerations
  * @see Throwables.Iterator
- * @since 1.0
  */
 @SuppressWarnings({ "java:S6548" })
 public abstract class ObjIterator<T> extends ImmutableIterator<T> {

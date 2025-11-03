@@ -20,9 +20,7 @@ import java.sql.Ref;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-import com.landawn.abacus.annotation.MayReturnNull;
-
-public class RefType extends AbstractType<Ref> {
+class RefType extends AbstractType<Ref> {
 
     public static final String REF = Ref.class.getSimpleName();
 
@@ -35,7 +33,7 @@ public class RefType extends AbstractType<Ref> {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * RefType type = new RefType();
+     * Type<Ref> type = TypeFactory.getType(Ref.class);
      * Class<Ref> clazz = type.clazz();
      * System.out.println(clazz.getName()); // Output: java.sql.Ref
      * }</pre>
@@ -53,7 +51,7 @@ public class RefType extends AbstractType<Ref> {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * RefType type = new RefType();
+     * Type<Ref> type = TypeFactory.getType(Ref.class);
      * boolean serializable = type.isSerializable();
      * System.out.println(serializable); // Output: false
      * }</pre>
@@ -72,7 +70,7 @@ public class RefType extends AbstractType<Ref> {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * RefType type = new RefType();
+     * Type<Ref> type = TypeFactory.getType(Ref.class);
      * Ref ref = ...; // some SQL Ref from database
      * try {
      *     String str = type.stringOf(ref);
@@ -86,7 +84,6 @@ public class RefType extends AbstractType<Ref> {
      * @throws UnsupportedOperationException always thrown as Ref cannot be converted to string
      */
     @Override
-    @MayReturnNull
     public String stringOf(final Ref x) throws UnsupportedOperationException {
         throw new UnsupportedOperationException();
     }
@@ -98,7 +95,7 @@ public class RefType extends AbstractType<Ref> {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * RefType type = new RefType();
+     * Type<Ref> type = TypeFactory.getType(Ref.class);
      * try {
      *     Ref ref = type.valueOf("some_string");
      * } catch (UnsupportedOperationException e) {
@@ -111,7 +108,6 @@ public class RefType extends AbstractType<Ref> {
      * @throws UnsupportedOperationException always thrown as Ref cannot be created from string
      */
     @Override
-    @MayReturnNull
     public Ref valueOf(final String str) throws UnsupportedOperationException {
         throw new UnsupportedOperationException();
     }
@@ -122,7 +118,7 @@ public class RefType extends AbstractType<Ref> {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * RefType type = new RefType();
+     * Type<Ref> type = TypeFactory.getType(Ref.class);
      * // Assuming rs is a ResultSet with a REF value in column 1
      * Ref ref = type.get(rs, 1);
      * if (ref != null) {
@@ -136,9 +132,7 @@ public class RefType extends AbstractType<Ref> {
      * @return the Ref value from the specified column, or {@code null} if the column value is SQL NULL
      * @throws SQLException if a database access error occurs or the column index is invalid
      */
-    @MayReturnNull
     @Override
-
     public Ref get(final ResultSet rs, final int columnIndex) throws SQLException {
         return rs.getRef(columnIndex);
     }
@@ -149,7 +143,7 @@ public class RefType extends AbstractType<Ref> {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * RefType type = new RefType();
+     * Type<Ref> type = TypeFactory.getType(Ref.class);
      * // Assuming rs is a ResultSet with a REF value in column "object_ref"
      * Ref ref = type.get(rs, "object_ref");
      * if (ref != null) {
@@ -163,7 +157,6 @@ public class RefType extends AbstractType<Ref> {
      * @return the Ref value from the specified column, or {@code null} if the column value is SQL NULL
      * @throws SQLException if a database access error occurs or the column label is not found
      */
-    @MayReturnNull
     @Override
     public Ref get(final ResultSet rs, final String columnLabel) throws SQLException {
         return rs.getRef(columnLabel);
@@ -175,7 +168,7 @@ public class RefType extends AbstractType<Ref> {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * RefType type = new RefType();
+     * Type<Ref> type = TypeFactory.getType(Ref.class);
      * PreparedStatement stmt = connection.prepareStatement("UPDATE table SET object_ref = ? WHERE id = ?");
      * Ref ref = ...; // obtained from database or created
      * type.set(stmt, 1, ref);
@@ -200,7 +193,7 @@ public class RefType extends AbstractType<Ref> {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * RefType type = new RefType();
+     * Type<Ref> type = TypeFactory.getType(Ref.class);
      * CallableStatement stmt = connection.prepareCall("{call update_ref(?, ?)}");
      * Ref ref = ...; // obtained from database or created
      * type.set(stmt, "ref_param", ref);

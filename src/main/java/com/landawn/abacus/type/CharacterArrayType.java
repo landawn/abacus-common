@@ -16,7 +16,6 @@ package com.landawn.abacus.type;
 
 import java.io.IOException;
 
-import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.parser.JSONXMLSerializationConfig;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.N;
@@ -29,7 +28,7 @@ import com.landawn.abacus.util.WD;
  * This class provides serialization, deserialization, and output operations for Character arrays.
  * It handles proper formatting with brackets, separators, and {@code null} value representation.
  */
-public final class CharacterArrayType extends ObjectArrayType<Character> {
+final class CharacterArrayType extends ObjectArrayType<Character> {
 
     CharacterArrayType() {
         super(Character[].class);
@@ -45,9 +44,7 @@ public final class CharacterArrayType extends ObjectArrayType<Character> {
      * @param x the Character array to convert. Can be {@code null}.
      * @return A string representation of the array with quoted characters, or {@code null} if input is null
      */
-    @MayReturnNull
     @Override
-
     public String stringOf(final Character[] x) {
         if (x == null) {
             return null; // NOSONAR
@@ -91,9 +88,7 @@ public final class CharacterArrayType extends ObjectArrayType<Character> {
      * @param str the string to parse. Can be {@code null}.
      * @return A Character array parsed from the string, or {@code null} if input is null
      */
-    @MayReturnNull
     @Override
-
     public Character[] valueOf(final String str) {
         if (Strings.isEmpty(str) || Strings.isBlank(str)) {
             return null; // NOSONAR
@@ -229,7 +224,6 @@ public final class CharacterArrayType extends ObjectArrayType<Character> {
      * @return A string representation of the array, or {@code null} if input is null
      */
     @Override
-    @MayReturnNull
     public String toString(final Character[] x) {
         if (x == null) {
             return null; // NOSONAR

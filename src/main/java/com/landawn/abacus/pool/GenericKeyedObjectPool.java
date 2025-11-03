@@ -103,9 +103,9 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
     /**
      * Constructs a new GenericKeyedObjectPool with basic configuration.
      * Uses default auto-balancing and balance factor settings.
-     * 
-     * @param capacity the maximum number of key-value pairs the pool can hold
-     * @param evictDelay the delay in milliseconds between eviction runs, or 0 to disable
+     *
+     * @param capacity the maximum number of elements the pool can hold (must be non-negative)
+     * @param evictDelay the delay in milliseconds between eviction runs, or 0 to disable eviction (must be non-negative)
      * @param evictionPolicy the policy to use for selecting entries to evict
      */
     protected GenericKeyedObjectPool(final int capacity, final long evictDelay, final EvictionPolicy evictionPolicy) {
@@ -115,12 +115,12 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
     /**
      * Constructs a new GenericKeyedObjectPool with memory-based constraints.
      * Uses default auto-balancing and balance factor settings.
-     * 
-     * @param capacity the maximum number of key-value pairs the pool can hold
-     * @param evictDelay the delay in milliseconds between eviction runs, or 0 to disable
+     *
+     * @param capacity the maximum number of elements the pool can hold (must be non-negative)
+     * @param evictDelay the delay in milliseconds between eviction runs, or 0 to disable eviction (must be non-negative)
      * @param evictionPolicy the policy to use for selecting entries to evict
-     * @param maxMemorySize the maximum total memory in bytes, or 0 for no limit
-     * @param memoryMeasure the function to calculate key-value pair memory size, or {@code null} if not using memory limits
+     * @param maxMemorySize the maximum total memory in bytes, or 0 for no limit (must be non-negative)
+     * @param memoryMeasure the function to calculate element memory size, or {@code null} if not using memory limits
      */
     protected GenericKeyedObjectPool(final int capacity, final long evictDelay, final EvictionPolicy evictionPolicy, final long maxMemorySize,
             final KeyedObjectPool.MemoryMeasure<K, E> memoryMeasure) {
@@ -130,12 +130,12 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
     /**
      * Constructs a new GenericKeyedObjectPool with auto-balancing configuration.
      * Does not use memory-based constraints.
-     * 
-     * @param capacity the maximum number of key-value pairs the pool can hold
-     * @param evictDelay the delay in milliseconds between eviction runs, or 0 to disable
+     *
+     * @param capacity the maximum number of elements the pool can hold (must be non-negative)
+     * @param evictDelay the delay in milliseconds between eviction runs, or 0 to disable eviction (must be non-negative)
      * @param evictionPolicy the policy to use for selecting entries to evict
      * @param autoBalance whether to automatically remove entries when the pool is full
-     * @param balanceFactor the proportion of entries to remove during balancing (0-1)
+     * @param balanceFactor the proportion of entries to remove during balancing, typically 0.1 to 0.5 (must be non-negative)
      */
     protected GenericKeyedObjectPool(final int capacity, final long evictDelay, final EvictionPolicy evictionPolicy, final boolean autoBalance,
             final float balanceFactor) {
@@ -144,14 +144,14 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
 
     /**
      * Constructs a new GenericKeyedObjectPool with full configuration options.
-     * 
-     * @param capacity the maximum number of key-value pairs the pool can hold
-     * @param evictDelay the delay in milliseconds between eviction runs, or 0 to disable
+     *
+     * @param capacity the maximum number of elements the pool can hold (must be non-negative)
+     * @param evictDelay the delay in milliseconds between eviction runs, or 0 to disable eviction (must be non-negative)
      * @param evictionPolicy the policy to use for selecting entries to evict
      * @param autoBalance whether to automatically remove entries when the pool is full
-     * @param balanceFactor the proportion of entries to remove during balancing (0-1)
-     * @param maxMemorySize the maximum total memory in bytes, or 0 for no limit
-     * @param memoryMeasure the function to calculate key-value pair memory size, or {@code null} if not using memory limits
+     * @param balanceFactor the proportion of entries to remove during balancing, typically 0.1 to 0.5 (must be non-negative)
+     * @param maxMemorySize the maximum total memory in bytes, or 0 for no limit (must be non-negative)
+     * @param memoryMeasure the function to calculate element memory size, or {@code null} if not using memory limits
      */
     protected GenericKeyedObjectPool(final int capacity, final long evictDelay, final EvictionPolicy evictionPolicy, final boolean autoBalance,
             final float balanceFactor, final long maxMemorySize, final KeyedObjectPool.MemoryMeasure<K, E> memoryMeasure) {
@@ -199,21 +199,21 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
     }
 
     /**
-     * Associates the specified value with the specified key in this pool.
-     * If the pool previously contained a mapping for the key, the old value is replaced and destroyed.
-     * 
-     * <p>The put operation will fail if:
+     * Associates the specified element with the specified key in this pool.
+     * If the pool previously contained a mapping for the key, the old element is replaced and destroyed.
+     *
+     * <p>The put operation will fail if:</p>
      * <ul>
-     *   <li>Either key or value is null</li>
-     *   <li>The value has already expired</li>
+     *   <li>Either key or element is null</li>
+     *   <li>The element has already expired</li>
      *   <li>The pool is at capacity and auto-balancing is disabled</li>
-     *   <li>The key-value pair would exceed memory constraints</li>
+     *   <li>The operation will fail if the element would exceed memory constraints</li>
      * </ul>
-     * 
-     * @param key the key with which the specified value is to be associated
-     * @param e the value to be associated with the specified key
+     *
+     * @param key the key with which the specified element is to be associated
+     * @param e the element to be associated with the specified key
      * @return {@code true} if the mapping was successfully added, {@code false} otherwise
-     * @throws IllegalArgumentException if the key or value is null
+     * @throws IllegalArgumentException if the key or element is null
      * @throws IllegalStateException if the pool has been closed
      */
     @Override
@@ -268,11 +268,11 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
     }
 
     /**
-     * Associates the specified value with the specified key in this pool,
+     * Associates the specified element with the specified key in this pool,
      * with optional automatic destruction on failure.
-     * 
-     * @param key the key with which the specified value is to be associated
-     * @param e the value to be associated with the specified key
+     *
+     * @param key the key with which the specified element is to be associated
+     * @param e the element to be associated with the specified key
      * @param autoDestroyOnFailedToPut if {@code true}, calls e.destroy(PUT_ADD_FAILURE) if put fails
      * @return {@code true} if the mapping was successfully added, {@code false} otherwise
      */
@@ -292,17 +292,16 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
     }
 
     /**
-     * Returns the value associated with the specified key, or {@code null} if no mapping exists.
-     * If the value has expired, it is removed and destroyed, and {@code null} is returned.
-     * The value's activity print is updated on successful retrieval.
+     * Returns the element associated with the specified key, or {@code null} if no mapping exists.
+     * If the element has expired, it is removed and destroyed, and {@code null} is returned.
+     * The element's activity print is updated to reflect this access.
      *
-     * @param key the key whose associated value is to be returned
-     * @return the value associated with the key, or {@code null} if no mapping exists or value expired
+     * @param key the key whose associated element is to be returned
+     * @return the element associated with the key, or {@code null} if no mapping exists or element expired
      * @throws IllegalStateException if the pool has been closed
      */
     @MayReturnNull
     @Override
-
     public E get(final K key) throws IllegalStateException {
         assertNotClosed();
 
@@ -339,16 +338,15 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
     }
 
     /**
-     * Removes and returns the value associated with the specified key.
-     * The value's activity print is updated before removal.
+     * Removes and returns the element associated with the specified key.
+     * The element's activity print is updated to reflect this access.
      *
      * @param key the key whose mapping is to be removed
-     * @return the value previously associated with the key, or {@code null} if no mapping existed
+     * @return the element previously associated with the key, or {@code null} if no mapping exists
      * @throws IllegalStateException if the pool has been closed
      */
     @MayReturnNull
     @Override
-
     public E remove(final K key) throws IllegalStateException {
         assertNotClosed();
 
@@ -378,16 +376,15 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
     }
 
     /**
-     * Returns the value associated with the specified key without updating access statistics.
-     * If the value has expired, it is removed and destroyed, and {@code null} is returned.
+     * Returns the element associated with the specified key without updating access statistics.
+     * If the element has expired, it is removed and destroyed, and {@code null} is returned.
      *
-     * @param key the key whose associated value is to be returned
-     * @return the value associated with the key, or {@code null} if no mapping exists or value expired
+     * @param key the key whose associated element is to be returned
+     * @return the element associated with the key, or {@code null} if no mapping exists or element expired
      * @throws IllegalStateException if the pool has been closed
      */
     @MayReturnNull
     @Override
-
     public E peek(final K key) throws IllegalStateException {
         assertNotClosed();
 
@@ -454,10 +451,10 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
     }
 
     /**
-     * Returns a snapshot of the values contained in this pool.
+     * Returns a snapshot of the elements contained in this pool.
      * The returned collection is a copy and will not reflect subsequent changes to the pool.
-     * 
-     * @return a collection containing all values currently in the pool
+     *
+     * @return a collection containing all elements currently in the pool
      * @throws IllegalStateException if the pool has been closed
      */
     @Override
@@ -475,8 +472,8 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
 
     /**
      * Removes all mappings from this pool.
-     * All removed values are destroyed with the REMOVE_REPLACE_CLEAR reason.
-     * 
+     * All removed elements are destroyed with the REMOVE_REPLACE_CLEAR reason.
+     *
      * @throws IllegalStateException if the pool has been closed
      */
     @Override
@@ -488,7 +485,7 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
 
     /**
      * Closes this pool and releases all resources.
-     * Cancels the eviction task if scheduled and destroys all pooled values.
+     * Cancels the eviction task if scheduled and destroys all pooled elements.
      * This method is idempotent.
      */
     @Override
@@ -614,7 +611,7 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
     }
 
     /**
-     * Scans the pool for expired values and removes them.
+     * Scans the pool for expired elements and removes them.
      * This method is called periodically by the scheduled eviction task.
      */
     @SuppressWarnings({ "null", "deprecation" })
@@ -651,11 +648,12 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
     }
 
     /**
-     * Destroys a single key-value pair and updates statistics.
-     * 
-     * @param key the key part of the pair
-     * @param value the value to destroy
-     * @param caller the reason for destruction
+     * Destroys a single element and updates statistics.
+     * Updates memory tracking and eviction counts as appropriate, and handles exceptions gracefully.
+     *
+     * @param key the key part of the pair (used for memory calculation if memoryMeasure is configured)
+     * @param value the element to destroy
+     * @param caller the reason for destruction (determines whether eviction count is incremented)
      */
     protected void destroy(final K key, final E value, final Caller caller) {
         if (caller == Caller.EVICT || caller == Caller.VACATE) {
@@ -681,6 +679,13 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
         }
     }
 
+    /**
+     * Destroys all elements in the provided map.
+     * This is a convenience method that calls {@link #destroy(Object, Poolable, Caller)} for each entry.
+     *
+     * @param map the map of elements to destroy
+     * @param caller the reason for destruction
+     */
     protected void destroyAll(final Map<K, E> map, final Caller caller) {
         if (N.notEmpty(map)) {
             for (final Map.Entry<K, E> entry : map.entrySet()) {

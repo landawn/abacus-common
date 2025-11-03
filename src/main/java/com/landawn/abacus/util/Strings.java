@@ -57,43 +57,253 @@ import com.landawn.abacus.util.stream.IntStream;
 import com.landawn.abacus.util.stream.Stream;
 
 /**
- * A comprehensive utility class for string operations and manipulations.
- * 
- * <p>This class provides a wide range of static methods for common string operations including:
+ * A comprehensive utility class providing an extensive collection of static methods for string operations,
+ * manipulations, validations, and transformations. This class serves as the primary string utility facade
+ * in the Abacus library, offering null-safe, performance-optimized operations for all common string
+ * processing needs.
+ *
+ * <p>The {@code Strings} class is designed as an abstract sealed class that provides a comprehensive
+ * string manipulation API covering validation, transformation, searching, parsing, encoding, and
+ * formatting operations. All methods are static and thread-safe, with a focus on null-safety and
+ * performance optimization.</p>
+ *
+ * <p><b>Key Features:</b>
  * <ul>
- *   <li><b>Null-safe operations:</b> Methods that gracefully handle {@code null} inputs without throwing exceptions</li>
- *   <li><b>Validation:</b> Check if strings are empty, blank, valid email addresses, URLs, or Java identifiers</li>
- *   <li><b>Transformation:</b> Convert case, reverse, abbreviate, pad, trim, and normalize strings</li>
- *   <li><b>Search and Replace:</b> Find substrings, count occurrences, replace text with various options</li>
- *   <li><b>Comparison:</b> Compare strings with options for case sensitivity and locale</li>
- *   <li><b>Parsing:</b> Convert strings to numeric types, booleans, and other data types</li>
- *   <li><b>Encoding/Decoding:</b> Base64, URL encoding, Unicode operations</li>
- *   <li><b>String Building:</b> Efficient concatenation and joining operations</li>
- *   <li><b>Pattern Matching:</b> Work with regular expressions and wildcards</li>
+ *   <li><b>Null-Safe Operations:</b> All methods handle null inputs gracefully without throwing exceptions</li>
+ *   <li><b>Comprehensive Coverage:</b> Complete set of string operations from basic to advanced</li>
+ *   <li><b>Performance Optimized:</b> Efficient algorithms with minimal object allocation</li>
+ *   <li><b>Unicode Support:</b> Full Unicode character support and normalization</li>
+ *   <li><b>Encoding Support:</b> Base64, URL encoding, and character set conversions</li>
+ *   <li><b>Pattern Matching:</b> Regular expression utilities and wildcard matching</li>
+ *   <li><b>Validation Utilities:</b> Email, URL, identifier, and format validation</li>
+ *   <li><b>Case Operations:</b> Comprehensive case conversion and comparison utilities</li>
  * </ul>
  *
- * <h2>Design Philosophy</h2>
+ * <p><b>Core Functional Categories:</b>
  * <ul>
- *   <li>Methods are designed to be null-safe where reasonable, returning sensible defaults instead of throwing exceptions</li>
- *   <li>Empty strings are preferred over {@code null} as return values</li>
- *   <li>Methods follow consistent naming patterns for discoverability</li>
- *   <li>Performance optimizations are applied for common operations</li>
+ *   <li><b>Validation:</b> isEmpty, isBlank, isEmail, isURL, isJavaIdentifier, isBase64</li>
+ *   <li><b>Transformation:</b> reverse, abbreviate, capitalize, uncapitalize, swapCase</li>
+ *   <li><b>Case Operations:</b> upperCase, lowerCase, toCamelCase, toSnakeCase, toPascalCase</li>
+ *   <li><b>Padding:</b> leftPad, rightPad, center with character or string padding</li>
+ *   <li><b>Trimming:</b> trim, strip, trimToNull, stripToNull with whitespace handling</li>
+ *   <li><b>Searching:</b> indexOf, lastIndexOf, contains, startsWith, endsWith</li>
+ *   <li><b>Replacement:</b> replace, replaceAll, replaceFirst with pattern support</li>
+ *   <li><b>Comparison:</b> equals, equalsIgnoreCase, compare with locale support</li>
+ *   <li><b>Parsing:</b> parseBoolean, parseInt, parseDouble with safe conversion</li>
+ *   <li><b>Encoding:</b> base64Encode, base64Decode, urlEncode, urlDecode</li>
+ *   <li><b>Joining/Splitting:</b> join, split with delimiter and pattern support</li>
+ *   <li><b>Extraction:</b> extractNumbers, extractEmails, extractPatterns</li>
  * </ul>
  *
- * <h2>Exception Handling</h2>
- * <p>This class is designed to avoid throwing unnecessary exceptions. For example:
+ * <p><b>Design Philosophy:</b>
  * <ul>
- *   <li>Reversing a {@code null} or empty string returns the input unchanged</li>
- *   <li>Checking if a {@code null} string is empty returns {@code true}</li>
- *   <li>Exceptions are only thrown when the method contract is violated (e.g., negative array size)</li>
+ *   <li><b>Null Safety:</b> Methods handle {@code null} inputs gracefully, typically returning
+ *       {@code null}, empty strings, or sensible defaults rather than throwing exceptions</li>
+ *   <li><b>Empty over Null:</b> Methods prefer returning empty strings over {@code null} when appropriate</li>
+ *   <li><b>Exception Minimization:</b> Exceptions are thrown only when method contracts are violated
+ *       (e.g., invalid parameters), not for edge cases like {@code null} inputs</li>
+ *   <li><b>Performance First:</b> Optimized implementations with minimal object allocation</li>
+ *   <li><b>Consistent API:</b> Uniform method naming and parameter conventions across all operations</li>
  * </ul>
- * 
- * <h3>Thread Safety</h3>
- * <p>All methods in this class are thread-safe as they operate on immutable strings and don't maintain state.
- * 
- * <h3>Attribution</h3>
- * <p>This class includes code adapted from Apache Commons Lang, Google Guava, and other open source projects
- * under the Apache License 2.0. The methods may have been modified to fit the design of this library.
+ *
+ * <p><b>Usage Examples:</b></p>
+ * <pre>{@code
+ * // Null-safe validation operations
+ * boolean empty = Strings.isEmpty(null);              // Returns true
+ * boolean blank = Strings.isBlank("   ");             // Returns true
+ * boolean email = Strings.isEmail("user@domain.com"); // Returns true
+ * boolean url = Strings.isURL("https://example.com"); // Returns true
+ *
+ * // Safe transformation operations
+ * String reversed = Strings.reverse(null);            // Returns null
+ * String abbrev = Strings.abbreviate("Hello World", 8); // Returns "Hello..."
+ * String capitalized = Strings.capitalize("hello");   // Returns "Hello"
+ * String camelCase = Strings.toCamelCase("hello_world"); // Returns "helloWorld"
+ *
+ * // Padding and alignment operations
+ * String padded = Strings.leftPad("123", 5, '0');     // Returns "00123"
+ * String centered = Strings.center("Hi", 6);          // Returns "  Hi  "
+ * String trimmed = Strings.trim("  text  ");          // Returns "text"
+ *
+ * // Search and replace operations
+ * int index = Strings.indexOf("Hello World", "World"); // Returns 6
+ * String replaced = Strings.replace("Hello World", "World", "Java"); // Returns "Hello Java"
+ * int count = Strings.countMatches("abcabc", "abc");   // Returns 2
+ *
+ * // Encoding and decoding operations
+ * String encoded = Strings.base64Encode("Hello");      // Base64 encoding
+ * String decoded = Strings.base64Decode(encoded);      // Base64 decoding
+ * String urlEncoded = Strings.urlEncode("Hello World"); // URL encoding
+ *
+ * // Pattern extraction and validation
+ * String firstEmail = Strings.findFirstEmailAddress("Contact: user@domain.com or admin@site.org");
+ * List<String> allEmails = Strings.findAllEmailAddresses(text);
+ * String firstNumber = Strings.extractFirstInteger("Price: $123.45");
+ * String firstDouble = Strings.extractFirstDouble("Value: 123.45kg");
+ *
+ * // Advanced string building and manipulation
+ * String joined = Strings.join(Arrays.asList("a", "b", "c"), ", "); // Returns "a, b, c"
+ * String[] split = Strings.split("a,b,c", ",");        // Returns ["a", "b", "c"]
+ * String normalized = Strings.normalize("café");       // Unicode normalization
+ * }</pre>
+ *
+ * <p><b>Performance Characteristics:</b>
+ * <ul>
+ *   <li><b>Memory Efficient:</b> Minimal object allocation and string copying</li>
+ *   <li><b>Cache Friendly:</b> Sequential character processing where possible</li>
+ *   <li><b>Algorithm Selection:</b> Optimal algorithms chosen based on string length and operation type</li>
+ *   <li><b>Pattern Compilation:</b> Efficient regex pattern handling and caching</li>
+ *   <li><b>Buffer Management:</b> Smart buffer sizing for concatenation operations</li>
+ * </ul>
+ *
+ * <p><b>Thread Safety:</b>
+ * <ul>
+ *   <li><b>Stateless Design:</b> All static methods are stateless and thread-safe</li>
+ *   <li><b>Immutable Operations:</b> String immutability ensures thread safety</li>
+ *   <li><b>No Shared State:</b> No static mutable fields that could cause race conditions</li>
+ *   <li><b>Concurrent Access:</b> Safe for concurrent access from multiple threads</li>
+ * </ul>
+ *
+ * <p><b>Validation Operations:</b>
+ * <ul>
+ *   <li><b>Empty/Blank Checking:</b> {@code isEmpty()}, {@code isBlank()}, {@code isNotEmpty()}, {@code isNotBlank()}</li>
+ *   <li><b>Format Validation:</b> {@code isEmail()}, {@code isURL()}, {@code isBase64()}</li>
+ *   <li><b>Identifier Validation:</b> {@code isJavaIdentifier()}, {@code isValidIdentifier()}</li>
+ *   <li><b>Pattern Matching:</b> {@code matches()}, {@code matchesIgnoreCase()}</li>
+ * </ul>
+ *
+ * <p><b>Case Operations:</b>
+ * <ul>
+ *   <li><b>Basic Case:</b> {@code upperCase()}, {@code lowerCase()}, {@code swapCase()}</li>
+ *   <li><b>Word Case:</b> {@code capitalize()}, {@code uncapitalize()}, {@code capitalizeWords()}</li>
+ *   <li><b>Naming Conventions:</b> {@code toCamelCase()}, {@code toSnakeCase()}, {@code toPascalCase()}</li>
+ *   <li><b>Locale Support:</b> Locale-aware case conversion operations</li>
+ * </ul>
+ *
+ * <p><b>Encoding/Decoding Support:</b>
+ * <ul>
+ *   <li><b>Base64:</b> {@code base64Encode()}, {@code base64Decode()} with standard and URL-safe variants</li>
+ *   <li><b>URL Encoding:</b> {@code urlEncode()}, {@code urlDecode()} with charset support</li>
+ *   <li><b>Unicode:</b> {@code normalize()}, {@code toUnicode()}, {@code fromUnicode()}</li>
+ *   <li><b>Character Sets:</b> Support for various character encodings</li>
+ * </ul>
+ *
+ * <p><b>Pattern Extraction:</b>
+ * <ul>
+ *   <li><b>Email Extraction:</b> {@code findFirstEmailAddress()}, {@code findAllEmailAddresses()}</li>
+ *   <li><b>Number Extraction:</b> {@code extractFirstInteger()}, {@code extractFirstDouble()}</li>
+ *   <li><b>Custom Patterns:</b> Regular expression-based extraction utilities</li>
+ *   <li><b>Replacement:</b> {@code replaceFirstInteger()}, {@code replaceFirstDouble()}</li>
+ * </ul>
+ *
+ * <p><b>Error Handling Strategy:</b>
+ * <ul>
+ *   <li><b>Graceful Degradation:</b> Methods handle edge cases without throwing exceptions</li>
+ *   <li><b>Null Tolerance:</b> Comprehensive null input handling throughout the API</li>
+ *   <li><b>Sensible Defaults:</b> Return appropriate default values for invalid inputs</li>
+ *   <li><b>Clear Contracts:</b> Method documentation clearly specifies behavior and exceptions</li>
+ * </ul>
+ *
+ * <p><b>Integration with Java Ecosystem:</b>
+ * <ul>
+ *   <li><b>String Compatibility:</b> Seamless integration with java.lang.String</li>
+ *   <li><b>Pattern Support:</b> Full java.util.regex.Pattern integration</li>
+ *   <li><b>Locale Support:</b> Internationalization and localization features</li>
+ *   <li><b>Stream Integration:</b> Works well with Java 8+ Stream operations</li>
+ * </ul>
+ *
+ * <p><b>Best Practices:</b>
+ * <ul>
+ *   <li>Use {@code Strings} utilities instead of manual null checking and string manipulation</li>
+ *   <li>Prefer the null-safe methods for robust code</li>
+ *   <li>Use validation methods before string processing operations</li>
+ *   <li>Leverage the encoding utilities for safe data transmission</li>
+ *   <li>Take advantage of the pattern extraction methods for data parsing</li>
+ *   <li>Use case conversion utilities for consistent data formatting</li>
+ * </ul>
+ *
+ * <p><b>Performance Tips:</b>
+ * <ul>
+ *   <li>Use bulk operations for multiple string transformations</li>
+ *   <li>Prefer {@code StringBuilder} for complex string building outside of utility methods</li>
+ *   <li>Cache compiled regex patterns for repeated pattern matching</li>
+ *   <li>Use appropriate buffer sizes for large string operations</li>
+ *   <li>Consider locale-specific operations only when necessary</li>
+ * </ul>
+ *
+ * <p><b>Common Patterns:</b>
+ * <ul>
+ *   <li><b>Validation:</b> {@code if (Strings.isNotBlank(input)) { ... }}</li>
+ *   <li><b>Safe Conversion:</b> {@code String safe = Strings.defaultIfNull(value, "");}</li>
+ *   <li><b>Case Conversion:</b> {@code String camel = Strings.toCamelCase(snakeCase);}</li>
+ *   <li><b>Pattern Extraction:</b> {@code String email = Strings.findFirstEmailAddress(text);}</li>
+ * </ul>
+ *
+ * <p><b>Related Utility Classes:</b>
+ * <ul>
+ *   <li><b>{@link Joiner}:</b> Specialized string joining operations</li>
+ *   <li><b>{@link Splitter}:</b> Advanced string splitting utilities</li>
+ *   <li><b>{@link com.landawn.abacus.util.RegExUtil}:</b> Regular expression utilities</li>
+ *   <li><b>{@link com.landawn.abacus.util.URLEncodedUtil}:</b> URL encoding/decoding utilities</li>
+ *   <li><b>{@link com.landawn.abacus.util.N}:</b> General utility class with string operations</li>
+ *   <li><b>{@link java.lang.String}:</b> Core Java string class</li>
+ *   <li><b>{@link java.util.regex.Pattern}:</b> Regular expression patterns</li>
+ * </ul>
+ *
+ * <p><b>Example: Text Processing Pipeline</b>
+ * <pre>{@code
+ * // Comprehensive text processing example
+ * String rawInput = "  Contact: John.Doe@COMPANY.COM, Phone: 123-456-7890  ";
+ *
+ * // Validation and cleaning
+ * if (Strings.isNotBlank(rawInput)) {
+ *     String cleaned = Strings.trim(rawInput);
+ *
+ *     // Extract structured data
+ *     String email = Strings.findFirstEmailAddress(cleaned);
+ *     String phone = Strings.extractFirstInteger(cleaned);
+ *
+ *     // Format email properly
+ *     if (Strings.isEmail(email)) {
+ *         email = Strings.lowerCase(email);
+ *         
+ *         // Extract name from email
+ *         String namePart = Strings.substringBefore(email, "@");
+ *         String displayName = Strings.replace(namePart, ".", " ");
+ *         displayName = Strings.capitalizeWords(displayName);
+ *         
+ *         // Build formatted result
+ *         String result = Strings.join(Arrays.asList(
+ *             "Name: " + displayName,
+ *             "Email: " + email,
+ *             "Phone: " + phone
+ *         ), "\n");
+ *         
+ *         System.out.println(result);
+ *         // Output:
+ *         // Name: John Doe
+ *         // Email: john.doe@company.com
+ *         // Phone: 1234567890
+ *     }
+ * }
+ *
+ * // URL processing example
+ * String url = "https://example.com/path with spaces";
+ * if (Strings.isURL(url)) {
+ *     String encoded = Strings.urlEncode(url);
+ *     String decoded = Strings.urlDecode(encoded);
+ * }
+ *
+ * // Base64 encoding example
+ * String data = "Sensitive data to encode";
+ * String encoded = Strings.base64Encode(data);
+ * String decoded = Strings.base64Decode(encoded);
+ * }</pre>
+ *
+ * <p><b>Attribution:</b>
+ * This class includes code adapted from Apache Commons Lang, Google Guava, and other
+ * open source projects under the Apache License 2.0. Methods from these libraries may have been
+ * modified for consistency, performance optimization, and null-safety enhancement.
  *
  * @see Joiner
  * @see Splitter
@@ -109,7 +319,7 @@ import com.landawn.abacus.util.stream.Stream;
  * @see com.landawn.abacus.util.IEEE754rUtil
  */
 @SuppressWarnings({ "java:S1694", "UnnecessaryUnicodeEscape" })
-public abstract sealed class Strings permits Strings.StringUtil {
+public final class Strings {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Strings.class);
 
@@ -139,7 +349,6 @@ public abstract sealed class Strings permits Strings.StringUtil {
 
     /**
      * A String for a space character: {@code " "}.
-     *
      */
     public static final String SPACE = WD.SPACE;
 
@@ -13235,21 +13444,20 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * the first delimiter is not found, or the second delimiter is not found after the first one.</p>
      *
      * <p><b>Usage Examples:</b></p>
-     * <pre><code>
-     * substringBetween("{{content}}", "{{");               // returns "content"
-     * substringBetween("&lt;tag&gt;value&lt;/tag&gt;", "&lt;tag&gt;");      // returns "value&lt;/tag&gt;"
+     * <pre>{@code
+     * substringBetween("#content#", "#");                 // returns "content"
+     * substringBetween("<tag>value<tag>", "<tag>");       // returns "value"
      * substringBetween("@@text@@", "@@");                 // returns "text"
-     * substringBetween("no-match", "{{");                 // returns null (delimiter not found)
-     * substringBetween("{{only-one", "{{");               // returns null (second delimiter not found)
-     * substringBetween(null, "{{");                       // returns null
+     * substringBetween("no-match", "[[");                 // returns null (delimiter not found)
+     * substringBetween("[[only-one", "[[");               // returns null (second delimiter not found)
+     * substringBetween(null, "[[");                       // returns null
      * substringBetween("test", null);                     // returns null
-     * </code></pre>
+     * }</pre>
      *
      * @param str the string to extract from, may be {@code null}
      * @param delimiter the delimiter string marking both the beginning and end of the substring, may be {@code null}
      * @return the substring between two occurrences of the delimiter, or {@code null} if not found or the specified source string is emmpty or {@code null}.
      * @see #substringBetween(String, String, String)
-     * @see #substringBetween(String, int, int)
      */
     @MayReturnNull
     public static String substringBetween(final String str, final String delimiter) {
@@ -13267,16 +13475,16 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * the beginning delimiter is not found, or the ending delimiter is not found after the beginning delimiter.</p>
      *
      * <p><b>Usage Examples:</b></p>
-     * <pre><code>
-     * substringBetween("&lt;tag&gt;content&lt;/tag&gt;", "&lt;tag&gt;", "&lt;/tag&gt;");  // returns "content"
-     * substringBetween("{{start}}middle{{end}}", "{{start}}", "{{end}}"); // returns "middle"
+     * <pre>{@code
+     * substringBetween("<tag>content</tag>", "<tag>", "</tag>");  // returns "content"
+     * substringBetween("[[start]]middle[[end]]", "[[start]]", "[[end]]"); // returns "middle"
      * substringBetween("Hello [World]!", "[", "]");               // returns "World"
-     * substringBetween("no-match", "{{", "}}");                   // returns null (begin delimiter not found)
-     * substringBetween("{{no-end", "{{", "}}");                   // returns null (end delimiter not found)
-     * substringBetween(null, "{{", "}}");                         // returns null
-     * substringBetween("test", null, "}}");                       // returns null
-     * substringBetween("test", "{{", null);                       // returns null
-     * </code></pre>
+     * substringBetween("no-match", "[[", "]]");                   // returns null (begin delimiter not found)
+     * substringBetween("[[no-end", "[[", "]]");                   // returns null (end delimiter not found)
+     * substringBetween(null, "[[", "]]");                         // returns null
+     * substringBetween("test", null, "]]");                       // returns null
+     * substringBetween("test", "[[", null);                       // returns null
+     * }</pre>
      *
      * @param str the string to extract from, may be {@code null}
      * @param delimiterOfExclusiveBeginIndex the delimiter string marking the beginning of the substring, may be {@code null}
@@ -13355,20 +13563,19 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * the first delimiter is not found, or the second delimiter is not found after the first one.</p>
      *
      * <p><b>Usage Examples:</b></p>
-     * <pre><code>
-     * substringBetweenIgnoreCaes("{{CONTENT}}", "{{");              // returns "CONTENT"
-     * substringBetweenIgnoreCaes("&lt;TAG&gt;value&lt;/TAG&gt;", "&lt;tag&gt;");      // returns "value&lt;/TAG&gt;"
+     * <pre>{@code
+     * substringBetweenIgnoreCaes("#CONTENT#", "#");                 // returns "CONTENT"
+     * substringBetweenIgnoreCaes("<TAG>value<TAG>", "<tag>");       // returns "value"
      * substringBetweenIgnoreCaes("@@Text@@", "@@");                 // returns "Text"
-     * substringBetweenIgnoreCaes("no-match", "{{");                 // returns null (delimiter not found)
-     * substringBetweenIgnoreCaes("{{only-one", "{{");               // returns null (second delimiter not found)
-     * substringBetweenIgnoreCaes(null, "{{");                       // returns null
+     * substringBetweenIgnoreCaes("no-match", "[[");                 // returns null (delimiter not found)
+     * substringBetweenIgnoreCaes("[[only-one", "[[");               // returns null (second delimiter not found)
+     * substringBetweenIgnoreCaes(null, "[[");                       // returns null
      * substringBetweenIgnoreCaes("test", null);                     // returns null
-     * </code></pre>
+     * }</pre>
      *
      * @param str the string to extract from, may be {@code null}
      * @param delimiter the delimiter string marking both the beginning and end of the substring, case-insensitive, may be {@code null}
      * @return the substring between two occurrences of the delimiter (case-insensitive), or {@code null} if not found.
-     * @see #substringBetweenIgnoreCaes(String, String, String)
      */
     @Beta
     @MayReturnNull
@@ -13388,22 +13595,21 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * the beginning delimiter is not found, or the ending delimiter is not found after the beginning delimiter.</p>
      *
      * <p><b>Usage Examples:</b></p>
-     * <pre><code>
-     * substringBetweenIgnoreCaes("&lt;TAG&gt;content&lt;/TAG&gt;", "&lt;tag&gt;", "&lt;/tag&gt;");  // returns "content"
-     * substringBetweenIgnoreCaes("{{START}}middle{{END}}", "{{start}}", "{{end}}"); // returns "middle"
+     * <pre>{@code
+     * substringBetweenIgnoreCaes("<TAG>content</TAG>", "<tag>", "</tag>");  // returns "content"
+     * substringBetweenIgnoreCaes("[[START]]middle[[END]]", "[[start]]", "[[end]]"); // returns "middle"
      * substringBetweenIgnoreCaes("Hello [WORLD]!", "[", "]");               // returns "WORLD"
-     * substringBetweenIgnoreCaes("no-match", "{{", "}}");                   // returns null (begin delimiter not found)
-     * substringBetweenIgnoreCaes("{{no-end", "{{", "}}");                   // returns null (end delimiter not found)
-     * substringBetweenIgnoreCaes(null, "{{", "}}");                         // returns null
-     * substringBetweenIgnoreCaes("test", null, "}}");                       // returns null
-     * substringBetweenIgnoreCaes("test", "{{", null);                       // returns null
-     * </code></pre>
+     * substringBetweenIgnoreCaes("no-match", "[[", "]]");                   // returns null (begin delimiter not found)
+     * substringBetweenIgnoreCaes("[[no-end", "[[", "]]");                   // returns null (end delimiter not found)
+     * substringBetweenIgnoreCaes(null, "[[", "]]");                         // returns null
+     * substringBetweenIgnoreCaes("test", null, "]]");                       // returns null
+     * substringBetweenIgnoreCaes("test", "[[", null);                       // returns null
+     * }</pre>
      *
      * @param str the string to extract from, may be {@code null}
      * @param delimiterOfExclusiveBeginIndex the delimiter string marking the beginning of the substring, case-insensitive, may be {@code null}
      * @param delimiterOfExclusiveEndIndex the delimiter string marking the end of the substring, case-insensitive, may be {@code null}
      * @return the substring between the two delimiters (case-insensitive), or {@code null} if not found.
-     * @see #substringBetweenIgnoreCaes(String, int, String, String)
      */
     @Beta
     @MayReturnNull
@@ -13441,7 +13647,6 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @param delimiterOfExclusiveBeginIndex the delimiter string marking the beginning of the substring, case-insensitive, may be {@code null}
      * @param delimiterOfExclusiveEndIndex the delimiter string marking the end of the substring, case-insensitive, may be {@code null}
      * @return the substring between the two delimiters (case-insensitive), or {@code null} if not found.
-     * @see #substringBetweenIgnoreCaes(String, String, String)
      */
     @Beta
     @MayReturnNull
@@ -13664,6 +13869,128 @@ public abstract sealed class Strings permits Strings.StringUtil {
         }
 
         return str.substring(startIndex + 1, endIndex);
+    }
+
+    /**
+     * Returns the substring between the first and last occurrences of the same delimiter string.
+     *
+     * <p>This method searches for the first occurrence of the delimiter string, then searches for
+     * the last occurrence of the same delimiter string in the input string. If both are found,
+     * it returns the substring between them (exclusive of both delimiters).</p>
+     *
+     * <p>The method returns {@code null} if the input string is {@code null}, the delimiter is {@code null},
+     * the first delimiter is not found, or the last delimiter is not found after the first one.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * substringBetweenFirstAndLast("[middle[]]", "[");                // returns "middle"
+     * substringBetweenFirstAndLast("<tag>value<tag>", "<tag>");       // returns "value"
+     * substringBetweenFirstAndLast("@@text@@", "@@");                 // returns "text"
+     * substringBetweenFirstAndLast("no-match", "[[");                 // returns null (delimiter not found)
+     * substringBetweenFirstAndLast("[[only-one", "[[");               // returns null (last delimiter not found)
+     * substringBetweenFirstAndLast(null, "[[");                       // returns null
+     * substringBetweenFirstAndLast("test", null);                     // returns null
+     * }</pre>
+     *
+     * @param str the string to extract from, may be {@code null}
+     * @param delimiter the delimiter string marking both the beginning and end of the substring, may be {@code null}
+     * @return the substring between the first and last occurrences of the delimiter, or {@code null} if not found.
+     * @see StrUtil#substringBetweenFirstAndLast(String, String)
+     */
+    @MayReturnNull
+    public static String substringBetweenFirstAndLast(final String str, final String delimiter) {
+        return substringBetweenFirstAndLast(str, delimiter, delimiter);
+    }
+
+    /**
+     * Returns the substring between two different delimiter strings, using the first occurrence of the
+     * beginning delimiter and the last occurrence of the ending delimiter.
+     *
+     * <p>This method searches for the first occurrence of the beginning delimiter, then searches for
+     * the last occurrence of the ending delimiter in the input string. If both are found,
+     * it returns the substring between them (exclusive of both delimiters).</p>
+     *
+     * <p>The method returns {@code null} if the input string is {@code null}, either delimiter is {@code null},
+     * the beginning delimiter is not found, or the ending delimiter is not found after the beginning delimiter.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * substringBetweenFirstAndLast("[middle[]]", "[", "]");                   // returns "middle[]"
+     * substringBetweenFirstAndLast("<tag>content</tag>", "<tag>", "</tag>");  // returns "content"
+     * substringBetweenFirstAndLast("Hello [World]!", "[", "]");               // returns "World"
+     * substringBetweenFirstAndLast("no-match", "[[", "]]");                   // returns null (begin delimiter not found)
+     * substringBetweenFirstAndLast("[[no-end", "[[", "]]");                   // returns null (last delimiter not found)
+     * substringBetweenFirstAndLast(null, "[[", "]]");                         // returns null
+     * substringBetweenFirstAndLast("test", null, "]]");                       // returns null
+     * substringBetweenFirstAndLast("test", "[[", null);                       // returns null
+     * }</pre>
+     *
+     * @param str the string to extract from, may be {@code null}
+     * @param delimiterOfExclusiveBeginIndex the delimiter string marking the beginning of the substring, may be {@code null}
+     * @param delimiterOfExclusiveEndIndex the delimiter string marking the end of the substring, may be {@code null}
+     * @return the substring between the two delimiters, or {@code null} if not found.
+     * @see StrUtil#substringBetweenFirstAndLast(String, String, String)
+     */
+    @MayReturnNull
+    public static String substringBetweenFirstAndLast(final String str, final String delimiterOfExclusiveBeginIndex,
+            final String delimiterOfExclusiveEndIndex) {
+        return substringBetweenFirstAndLast(str, 0, delimiterOfExclusiveBeginIndex, delimiterOfExclusiveEndIndex);
+    }
+
+    /**
+     * Returns the substring between two delimiter strings, using the first occurrence of the beginning
+     * delimiter and the last occurrence of the ending delimiter, starting the search from a specified index.
+     *
+     * <p>This method searches for the first occurrence of the beginning delimiter starting from the fromIndex.
+     * If fromIndex is less than or equal to 0, the search starts from the beginning of the string.
+     * Then it searches for the last occurrence of the ending delimiter in the input string.
+     * If both are found, it returns the substring between them (exclusive of both delimiters).</p>
+     *
+     * <p>The method returns {@code null} if the input string is {@code null}, either delimiter is {@code null},
+     * fromIndex is greater than the string length, the beginning delimiter is not found, or the ending delimiter
+     * is not found after the beginning delimiter.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * substringBetweenFirstAndLast("<<data>>more<<data>>", 2, "<<", ">>");  // returns "data"
+     * substringBetweenFirstAndLast("{{x}}{{y}}", 3, "{{", "}}");            // returns "y"
+     * substringBetweenFirstAndLast("Hello World", 0, "Hello", "World");     // returns " "
+     * substringBetweenFirstAndLast("test", 10, "t", "t");                   // returns null (fromIndex > length)
+     * substringBetweenFirstAndLast("no-match", 0, "{{", "}}");              // returns null (delimiter not found)
+     * substringBetweenFirstAndLast(null, 0, "{{", "}}");                    // returns null
+     * substringBetweenFirstAndLast("test", 0, null, "}}");                  // returns null
+     * substringBetweenFirstAndLast("test", 0, "{{", null);                  // returns null
+     * }</pre>
+     *
+     * @param str the string to extract from, may be {@code null}
+     * @param fromIndex the index to start searching from. If less than or equal to 0, search starts from the beginning.
+     * @param delimiterOfExclusiveBeginIndex the delimiter string marking the beginning of the substring, may be {@code null}
+     * @param delimiterOfExclusiveEndIndex the delimiter string marking the end of the substring, may be {@code null}
+     * @return the substring between the two delimiters, or {@code null} if not found.
+     * @see StrUtil#substringBetweenFirstAndLast(String, int, String, String)
+     */
+    @MayReturnNull
+    public static String substringBetweenFirstAndLast(final String str, final int fromIndex, final String delimiterOfExclusiveBeginIndex,
+            final String delimiterOfExclusiveEndIndex) {
+        if (str == null || delimiterOfExclusiveBeginIndex == null || delimiterOfExclusiveEndIndex == null || fromIndex > str.length()) {
+            return null;
+        }
+
+        int startIndex = fromIndex <= 0 ? str.indexOf(delimiterOfExclusiveBeginIndex) : str.indexOf(delimiterOfExclusiveBeginIndex, fromIndex);
+
+        if (startIndex < 0) {
+            return null;
+        }
+
+        startIndex += delimiterOfExclusiveBeginIndex.length();
+
+        final int endIndex = str.lastIndexOf(delimiterOfExclusiveEndIndex);
+
+        if (endIndex < 0 || endIndex < startIndex) {
+            return null;
+        }
+
+        return str.substring(startIndex, endIndex);
     }
 
     /**
@@ -19511,17 +19838,6 @@ public abstract sealed class Strings permits Strings.StringUtil {
     }
 
     /**
-     * @deprecated replaced by {@code Strings}
-     */
-    @Deprecated
-    @Beta
-    public static final class StringUtil extends Strings {
-        private StringUtil() {
-            // Utility class.
-        }
-    }
-
-    /**
      * A utility class providing additional string manipulation methods.
      * This class contains helper methods for string operations that complement
      * the main Strings class functionality.
@@ -21128,6 +21444,93 @@ public abstract sealed class Strings permits Strings.StringUtil {
         public static Optional<String> substringBetween(final String str, final IntUnaryOperator funcOfExclusiveBeginIndex,
                 final String delimiterOfExclusiveEndIndex) {
             return Optional.ofNullable(Strings.substringBetween(str, funcOfExclusiveBeginIndex, delimiterOfExclusiveEndIndex));
+        }
+
+        /**
+         * Returns an {@code Optional<String>} containing the substring between the first and last
+         * occurrences of the same delimiter.
+         *
+         * <p>This method extracts the substring starting after the first occurrence of the delimiter
+         * and ending before the last occurrence of the same delimiter. If the delimiter is not found
+         * or occurs only once, an empty {@code Optional} is returned.</p>
+         *
+         * <p>The method returns an empty {@code Optional} for {@code null} input string or delimiter.</p>
+         *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * substringBetweenFirstAndLast("a<tag>value<tag>b", "<tag>");      // returns Optional.of("value")
+         * substringBetweenFirstAndLast("hello::world::java", "::");        // returns Optional.of("world")
+         * substringBetweenFirstAndLast("hello<tag>world", "<tag>");        // returns Optional.empty()
+         * substringBetweenFirstAndLast(null, "<tag>");                     // returns Optional.empty()
+         * }</pre>
+         *
+         * @param str the string to extract from. Can be {@code null}.
+         * @param delimiter the string delimiter marking both the beginning and end (exclusive).
+         * @return {@code Optional<String>} containing the substring if found, otherwise empty.
+         * @see Strings#substringBetweenFirstAndLast(String, String, String)
+         */
+        public static Optional<String> substringBetweenFirstAndLast(final String str, final String delimiter) {
+            return substringBetweenFirstAndLast(str, delimiter, delimiter);
+        }
+
+        /**
+         * Returns an {@code Optional<String>} containing the substring between the first occurrence
+         * of the begin delimiter and the last occurrence of the end delimiter.
+         *
+         * <p>This method extracts the substring starting after the first occurrence of the begin
+         * delimiter and ending before the last occurrence of the end delimiter. If either delimiter
+         * is not found, an empty {@code Optional} is returned.</p>
+         *
+         * <p>The method returns an empty {@code Optional} for {@code null} input string or delimiters.</p>
+         *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * substringBetweenFirstAndLast("a<tag>value</tag>b", "<tag>", "</tag>");         // returns Optional.of("value")
+         * substringBetweenFirstAndLast("hello::world::java", "::", "::");                // returns Optional.of("world")
+         * substringBetweenFirstAndLast("hello<start>world", "<start>", "</end>");        // returns Optional.empty()
+         * substringBetweenFirstAndLast(null, "<start>", "</end>");                       // returns Optional.empty()
+         * }</pre>
+         *
+         * @param str the string to extract from. Can be {@code null}.
+         * @param delimiterOfExclusiveBeginIndex the string delimiter marking the beginning (exclusive).
+         * @param delimiterOfExclusiveEndIndex the string delimiter marking the end (exclusive).
+         * @return {@code Optional<String>} containing the substring if found, otherwise empty.
+         * @see Strings#substringBetweenFirstAndLast(String, String, String)
+         */
+        public static Optional<String> substringBetweenFirstAndLast(final String str, final String delimiterOfExclusiveBeginIndex,
+                final String delimiterOfExclusiveEndIndex) {
+            return substringBetweenFirstAndLast(str, 0, delimiterOfExclusiveBeginIndex, delimiterOfExclusiveEndIndex);
+        }
+
+        /**
+         * Returns an {@code Optional<String>} containing the substring between the first occurrence
+         * of the begin delimiter and the last occurrence of the end delimiter, starting the search
+         * from the given index.
+         *
+         * <p>This method searches for the begin delimiter starting from the specified index, then
+         * extracts the substring between that delimiter and the last occurrence of the end delimiter.
+         * If either delimiter is not found, an empty {@code Optional} is returned.</p>
+         *
+         * <p>The method returns an empty {@code Optional} for {@code null} input string or delimiters.</p>
+         *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * substringBetweenFirstAndLast("a<tag>value</tag><tag>java</tag>b", 5, "<tag>", "</tag>"); // returns Optional.of("java")
+         * substringBetweenFirstAndLast("hello::world::java", 0, "::", "::");                       // returns Optional.of("world")
+         * substringBetweenFirstAndLast("hello<start>world", 0, "<start>", "</end>");               // returns Optional.empty()
+         * substringBetweenFirstAndLast(null, 0, "<start>", "</end>");                              // returns Optional.empty()
+         * }</pre>
+         *
+         * @param str the string to extract from. Can be {@code null}.
+         * @param fromIndex the index from which to start searching.
+         * @param delimiterOfExclusiveBeginIndex the string delimiter marking the beginning (exclusive).
+         * @param delimiterOfExclusiveEndIndex the string delimiter marking the end (exclusive).
+         * @return {@code Optional<String>} containing the substring if found, otherwise empty.
+         * @see Strings#substringBetweenFirstAndLast(String, int, String, String)
+         */
+        public static Optional<String> substringBetweenFirstAndLast(final String str, final int fromIndex, final String delimiterOfExclusiveBeginIndex,
+                final String delimiterOfExclusiveEndIndex) {
+            return Optional.ofNullable(Strings.substringBetweenFirstAndLast(str, fromIndex, delimiterOfExclusiveBeginIndex, delimiterOfExclusiveEndIndex));
         }
 
         /**

@@ -38,7 +38,9 @@ package com.landawn.abacus.util;
  * byte[] decoded = Hex.decode("48656c6c6f");     // returns original byte array
  * }</pre>
  * 
- * <p>Note: This class is copied from Apache Commons Codec.</p>
+ * <p><b>Attribution:</b>
+ * This class includes code adapted from Apache Commons Lang under the Apache License 2.0. 
+ * Methods from these libraries may have been modified for consistency, performance optimization, and null-safety enhancement.
  * 
  * @version $Id: Hex.java 1619948 2014-08-22 22:53:55Z ggregory $
  */

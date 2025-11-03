@@ -43,8 +43,240 @@ import com.landawn.abacus.util.stream.ShortStream;
 import com.landawn.abacus.util.stream.Stream;
 
 /**
- * A utility class containing various Optional and {@code Nullable} implementations for primitive types and objects.
- * This class provides container objects which may or may not contain a {@code non-null} value.
+ * A comprehensive utility class providing Optional and Nullable container implementations for all primitive
+ * types and objects. This final class serves as the central hub for optional value handling in functional
+ * programming contexts, offering type-safe containers that may or may not contain non-null values with
+ * extensive functional programming operations, stream integration, and null-safe transformations.
+ *
+ * <p>The class name "u" follows the pattern of short, memorable utility class names (similar to Arrays, Collections)
+ * and provides a complete set of Optional implementations that extend beyond Java's standard Optional to include
+ * all primitive types (boolean, char, byte, short, int, long, float, double) with consistent APIs and enhanced
+ * functionality for functional programming patterns and stream processing.</p>
+ *
+ * <p><b>Key Features:</b>
+ * <ul>
+ *   <li><b>Complete Primitive Coverage:</b> Optional implementations for all primitive types avoiding boxing overhead</li>
+ *   <li><b>Functional Programming Support:</b> map, flatMap, filter, and other functional operations for all types</li>
+ *   <li><b>Stream Integration:</b> Seamless conversion to streams for pipeline processing</li>
+ *   <li><b>Type-Safe Transformations:</b> Cross-type mapping between different primitive types and objects</li>
+ *   <li><b>Exception-Safe Operations:</b> Support for exception-throwing functional interfaces</li>
+ *   <li><b>Immutable Design:</b> All Optional implementations are immutable and thread-safe</li>
+ *   <li><b>Null Safety:</b> Comprehensive null handling with explicit empty state representation</li>
+ *   <li><b>Collection Conversion:</b> Direct conversion to various collection types with proper handling</li>
+ * </ul>
+ *
+ * <p><b>Core Problem Solved:</b>
+ * Java's standard Optional only handles object types, requiring boxing for primitive values which:
+ * <ul>
+ *   <li>Creates unnecessary object allocation overhead</li>
+ *   <li>Reduces performance in primitive-heavy computations</li>
+ *   <li>Lacks type-specific operations for primitive types</li>
+ *   <li>Forces developers to use nullable primitives or wrapper types</li>
+ * </ul>
+ * This class solves these issues by providing dedicated Optional implementations for each primitive type
+ * with optimized performance and type-specific operations.
+ *
+ * <p><b>Available Optional Types:</b>
+ * <ul>
+ *   <li><b>{@code OptionalBoolean}:</b> Container for boolean values with logical operations</li>
+ *   <li><b>{@code OptionalChar}:</b> Container for character values with character-specific operations</li>
+ *   <li><b>{@code OptionalByte}:</b> Container for byte values with numeric operations</li>
+ *   <li><b>{@code OptionalShort}:</b> Container for short values with numeric operations</li>
+ *   <li><b>{@code OptionalInt}:</b> Container for int values with enhanced numeric operations</li>
+ *   <li><b>{@code OptionalLong}:</b> Container for long values with enhanced numeric operations</li>
+ *   <li><b>{@code OptionalFloat}:</b> Container for float values with floating-point operations</li>
+ *   <li><b>{@code OptionalDouble}:</b> Container for double values with enhanced floating-point operations</li>
+ *   <li><b>{@code Optional<T>}:</b> Enhanced object container with additional functional operations</li>
+ *   <li><b>{@code Nullable<T>}:</b> Specialized container allowing explicit null value storage</li>
+ * </ul>
+ *
+ * <p><b>Common Use Cases:</b>
+ * <ul>
+ *   <li><b>Safe Primitive Operations:</b> Handling potentially absent primitive values without boxing</li>
+ *   <li><b>Stream Processing:</b> Optional values in stream pipelines with type safety</li>
+ *   <li><b>Configuration Values:</b> Optional configuration parameters with default fallbacks</li>
+ *   <li><b>Database Operations:</b> Handling nullable database fields with type safety</li>
+ *   <li><b>API Responses:</b> Optional fields in API responses with proper null handling</li>
+ *   <li><b>Mathematical Computations:</b> Safe division, square root, and other operations that may fail</li>
+ *   <li><b>Resource Management:</b> Optional resource availability with safe access patterns</li>
+ * </ul>
+ *
+ * <p><b>Usage Examples:</b></p>
+ * <pre>{@code
+ * // Boolean optional operations
+ * OptionalBoolean maybeFlag = OptionalBoolean.of(true);
+ * OptionalBoolean result = maybeFlag
+ *     .filter(b -> b == true)
+ *     .map(b -> !b);  // false
+ *
+ * // Integer optional with mathematical operations
+ * OptionalInt score = OptionalInt.of(85);
+ * OptionalDouble percentage = score
+ *     .filter(s -> s >= 0 && s <= 100)
+ *     .mapToDouble(s -> s / 100.0);
+ *
+ * // Chaining optional operations
+ * OptionalDouble safeDivision = OptionalDouble.of(10.0)
+ *     .flatMap(dividend -> OptionalDouble.of(2.0)
+ *         .filter(divisor -> divisor != 0.0)
+ *         .map(divisor -> dividend / divisor));
+ *
+ * // Stream integration
+ * Stream<Integer> values = OptionalInt.of(42).stream()
+ *     .map(i -> i * 2);
+ *
+ * // Cross-type transformations
+ * OptionalChar letter = OptionalInt.of(65)
+ *     .mapToChar(i -> (char) i);  // 'A'
+ *
+ * // Exception-safe operations
+ * OptionalInt parsed = OptionalInt.empty()
+ *     .or(() -> {
+ *         try {
+ *             return OptionalInt.of(Integer.parseInt("123"));
+ *         } catch (NumberFormatException e) {
+ *             return OptionalInt.empty();
+ *         }
+ *     });
+ *
+ * // Collection conversion
+ * List<Integer> list = OptionalInt.of(42).toList(); // [42]
+ * Set<Boolean> set = OptionalBoolean.of(true).toSet(); // {true}
+ * }</pre>
+ *
+ * <p><b>Performance Characteristics:</b>
+ * <ul>
+ *   <li>Primitive optionals: No boxing/unboxing overhead compared to Optional&lt;Wrapper&gt;</li>
+ *   <li>Memory footprint: Minimal - typically one boolean flag and one primitive value</li>
+ *   <li>Operation costs: O(1) for all basic operations (get, isPresent, map, filter)</li>
+ *   <li>Stream conversion: O(1) for single-element or empty stream creation</li>
+ * </ul>
+ *
+ * <p><b>Thread Safety:</b>
+ * <ul>
+ *   <li><b>Immutable Design:</b> All Optional implementations are immutable and thread-safe</li>
+ *   <li><b>No Shared State:</b> Each Optional instance contains only final fields</li>
+ *   <li><b>Safe Sharing:</b> Optional instances can be safely shared between threads</li>
+ *   <li><b>Concurrent Access:</b> All operations are safe for concurrent access without synchronization</li>
+ * </ul>
+ *
+ * <p><b>Functional Programming Support:</b>
+ * Each Optional type provides comprehensive functional programming operations:
+ * <ul>
+ *   <li><b>Filtering:</b> {@code filter()} with type-specific predicates</li>
+ *   <li><b>Mapping:</b> {@code map()} for same-type transformations</li>
+ *   <li><b>Cross-Type Mapping:</b> {@code mapToInt()}, {@code mapToDouble()}, {@code mapToObj()}, etc.</li>
+ *   <li><b>Flat Mapping:</b> {@code flatMap()} for optional-returning transformations</li>
+ *   <li><b>Conditional Actions:</b> {@code ifPresent()}, {@code ifPresentOrElse()}</li>
+ *   <li><b>Alternative Values:</b> {@code or()}, {@code orElse()}, {@code orElseGet()}, {@code orElseThrow()}</li>
+ * </ul>
+ *
+ * <p><b>Exception Handling Integration:</b>
+ * <ul>
+ *   <li><b>Throwables Support:</b> All functional operations accept exception-throwing interfaces</li>
+ *   <li><b>Type-Safe Exceptions:</b> Generic exception types provide compile-time safety</li>
+ *   <li><b>Exception Propagation:</b> Exceptions are properly propagated through functional chains</li>
+ *   <li><b>Safe Execution:</b> Exception-safe variants of common operations</li>
+ * </ul>
+ *
+ * <p><b>Stream Integration:</b>
+ * <ul>
+ *   <li><b>Direct Conversion:</b> {@code stream()} method for immediate stream creation</li>
+ *   <li><b>Type-Specific Streams:</b> Returns appropriate stream type (IntStream, DoubleStream, etc.)</li>
+ *   <li><b>Empty Handling:</b> Empty optionals produce empty streams</li>
+ *   <li><b>Pipeline Compatibility:</b> Seamless integration with stream processing pipelines</li>
+ * </ul>
+ *
+ * <p><b>Collection Conversion:</b>
+ * <ul>
+ *   <li><b>Standard Collections:</b> {@code toList()}, {@code toSet()} for mutable collections</li>
+ *   <li><b>Immutable Collections:</b> {@code toImmutableList()}, {@code toImmutableSet()} for immutable variants</li>
+ *   <li><b>Proper Sizing:</b> Collections are properly sized (empty or single-element)</li>
+ *   <li><b>Type Safety:</b> Collections maintain proper generic types</li>
+ * </ul>
+ *
+ * <p><b>Cross-Type Transformations:</b>
+ * Comprehensive mapping between different primitive types and objects:
+ * <ul>
+ *   <li><b>Numeric Conversions:</b> Between byte, short, int, long, float, double with proper casting</li>
+ *   <li><b>Character Conversions:</b> Between char and numeric types for ASCII/Unicode operations</li>
+ *   <li><b>Boolean Conversions:</b> To numeric types using standard boolean-to-number mappings</li>
+ *   <li><b>Object Mapping:</b> From primitives to objects and vice versa with null safety</li>
+ * </ul>
+ *
+ * <p><b>Null Safety Features:</b>
+ * <ul>
+ *   <li><b>Explicit Empty State:</b> Clear distinction between empty and null</li>
+ *   <li><b>Null-Safe Factories:</b> {@code ofNullable()} methods handle null inputs gracefully</li>
+ *   <li><b>Safe Unwrapping:</b> {@code orElse()} and related methods provide safe value extraction</li>
+ *   <li><b>Nullable Variant:</b> Separate Nullable type for cases where null values are meaningful</li>
+ * </ul>
+ *
+ * <p><b>Comparison and Equality:</b>
+ * <ul>
+ *   <li><b>Value-Based Equality:</b> Equality based on presence and value comparison</li>
+ *   <li><b>Consistent Hashing:</b> Hash codes consistent with equals() implementation</li>
+ *   <li><b>Natural Ordering:</b> Comparable implementation with empty-last ordering</li>
+ *   <li><b>Type Safety:</b> Comparison only between same Optional types</li>
+ * </ul>
+ *
+ * <p><b>Best Practices:</b>
+ * <ul>
+ *   <li>Use primitive optionals instead of Optional&lt;Wrapper&gt; for better performance</li>
+ *   <li>Prefer functional operations (map, filter) over imperative isPresent() checks</li>
+ *   <li>Use appropriate orElse methods to provide meaningful default values</li>
+ *   <li>Chain operations functionally rather than nested isPresent() calls</li>
+ *   <li>Consider using Nullable when null is a meaningful value rather than absence</li>
+ * </ul>
+ *
+ * <p><b>Error Handling:</b>
+ * <ul>
+ *   <li>Throws {@link NoSuchElementException} when accessing absent values via {@code get()}</li>
+ *   <li>Throws {@link IllegalArgumentException} for null functional interface parameters</li>
+ *   <li>Provides safe alternatives to exception-throwing operations</li>
+ *   <li>Clear error messages for debugging absent value access</li>
+ * </ul>
+ *
+ * <p><b>Memory Management:</b>
+ * <ul>
+ *   <li>Minimal memory footprint - typically 16-24 bytes per instance</li>
+ *   <li>No memory leaks - all references are either primitive values or immutable objects</li>
+ *   <li>Efficient garbage collection - small, short-lived objects</li>
+ *   <li>No hidden references or caches that could cause memory issues</li>
+ * </ul>
+ *
+ * <p><b>Integration with Standard APIs:</b>
+ * <ul>
+ *   <li><b>Java Optional:</b> Conversion methods to/from standard Optional where appropriate</li>
+ *   <li><b>Stream API:</b> Native integration with all stream types</li>
+ *   <li><b>Collection Framework:</b> Direct conversion to standard collection types</li>
+ *   <li><b>CompletableFuture:</b> Compatible with async operations requiring optional values</li>
+ * </ul>
+ *
+ * <p><b>Specialized Features by Type:</b>
+ * <ul>
+ *   <li><b>Numeric Types:</b> Mathematical operations, range checks, and numeric transformations</li>
+ *   <li><b>Character Type:</b> Character classification, case conversion, and Unicode operations</li>
+ *   <li><b>Boolean Type:</b> Logical operations, conditional execution, and boolean algebra</li>
+ *   <li><b>Object Types:</b> Reference equality, type checking, and polymorphic operations</li>
+ * </ul>
+ *
+ * <p><b>Comparison with Standard Optional:</b>
+ * <ul>
+ *   <li><b>Performance:</b> No boxing overhead for primitive types</li>
+ *   <li><b>Type Safety:</b> Compile-time type checking for primitive operations</li>
+ *   <li><b>Functionality:</b> Enhanced operations specific to each primitive type</li>
+ *   <li><b>Integration:</b> Better integration with primitive streams and collections</li>
+ * </ul>
+ *
+ * @see java.util.Optional
+ * @see java.util.OptionalInt
+ * @see java.util.OptionalLong
+ * @see java.util.OptionalDouble
+ * @see java.util.stream.Stream
+ * @see java.util.stream.IntStream
+ * @see java.util.stream.LongStream
+ * @see java.util.stream.DoubleStream
  */
 public class u { // NOSONAR
 

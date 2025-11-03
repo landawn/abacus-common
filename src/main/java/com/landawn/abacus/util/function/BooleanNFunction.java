@@ -11,32 +11,36 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-
 package com.landawn.abacus.util.function;
 
-import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.util.Throwables;
 
 /**
  * Represents a function that accepts a variable number of {@code boolean}-valued arguments and produces a result.
  * This is the N-arity specialization of {@link BooleanFunction}.
- * 
+ *
  * <p>This is a functional interface whose functional method is {@link #apply(boolean...)}.
  *
  * @param <R> the type of the result of the function
+ *
+ * <p>Refer to JDK API documentation at: <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html">https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a></p>
  */
 @FunctionalInterface
 public interface BooleanNFunction<R> extends Throwables.BooleanNFunction<R, RuntimeException> { //NOSONAR
-
     /**
      * Applies this function to the given arguments.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * BooleanNFunction<String> formatter = values -> Arrays.toString(values);
+     * String result = formatter.apply(true, false); // Returns "[true, false]"
+     * }</pre>
      *
      * @param args the function arguments as a variable-length array of {@code boolean} values.
      *             May be empty but must not be {@code null}.
      * @return the function result
      */
     @Override
-    @MayReturnNull
     R apply(boolean... args);
 
     /**

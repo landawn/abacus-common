@@ -34,10 +34,11 @@ import com.landawn.abacus.util.Throwables;
  * @see java.util.function.Predicate
  * @see java.util.function.BiPredicate
  * @see TriPredicate
+ *
+ * <p>Refer to JDK API documentation at: <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html">https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a></p>
  */
 @FunctionalInterface
 public interface QuadPredicate<A, B, C, D> extends Throwables.QuadPredicate<A, B, C, D, RuntimeException> { //NOSONAR
-
     /**
      * Evaluates this predicate on the given arguments.
      *
@@ -47,19 +48,19 @@ public interface QuadPredicate<A, B, C, D> extends Throwables.QuadPredicate<A, B
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * QuadPredicate<Integer, Integer, Integer, Integer> allPositive = 
+     * QuadPredicate<Integer, Integer, Integer, Integer> allPositive =
      *     (a, b, c, d) -> a > 0 && b > 0 && c > 0 && d > 0;
-     * 
-     * QuadPredicate<String, String, String, String> allEqual = 
+     *
+     * QuadPredicate<String, String, String, String> allEqual =
      *     (a, b, c, d) -> a.equals(b) && b.equals(c) && c.equals(d);
-     * 
-     * QuadPredicate<User, Product, Integer, Double> canPurchase = 
-     *     (user, product, quantity, discount) -> 
+     *
+     * QuadPredicate<User, Product, Integer, Double> canPurchase =
+     *     (user, product, quantity, discount) ->
      *         user.getBalance() >= product.getPrice() * quantity * (1 - discount) &&
      *         product.getStock() >= quantity &&
      *         user.isVerified() &&
      *         discount <= user.getMaxDiscount();
-     * 
+     *
      * boolean result1 = allPositive.test(1, 2, 3, 4); // Returns true
      * boolean result2 = allEqual.test("A", "A", "A", "B"); // Returns false
      * }</pre>
@@ -68,8 +69,7 @@ public interface QuadPredicate<A, B, C, D> extends Throwables.QuadPredicate<A, B
      * @param b the second input argument
      * @param c the third input argument
      * @param d the fourth input argument
-     * @return {@code true} if the input arguments match the predicate,
-     *         otherwise {@code false} if the predicate evaluation fails
+     * @return {@code true} if the input arguments match the predicate, {@code false} otherwise
      */
     @Override
     boolean test(A a, B b, C c, D d);
@@ -83,11 +83,11 @@ public interface QuadPredicate<A, B, C, D> extends Throwables.QuadPredicate<A, B
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * QuadPredicate<Integer, Integer, Integer, Integer> allPositive = 
+     * QuadPredicate<Integer, Integer, Integer, Integer> allPositive =
      *     (a, b, c, d) -> a > 0 && b > 0 && c > 0 && d > 0;
-     * QuadPredicate<Integer, Integer, Integer, Integer> hasNegative = 
+     * QuadPredicate<Integer, Integer, Integer, Integer> hasNegative =
      *     allPositive.negate();
-     * 
+     *
      * boolean result = hasNegative.test(1, -2, 3, 4); // Returns true
      * }</pre>
      *
@@ -109,15 +109,15 @@ public interface QuadPredicate<A, B, C, D> extends Throwables.QuadPredicate<A, B
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * QuadPredicate<User, Product, Integer, Double> hasBalance = 
-     *     (user, product, quantity, discount) -> 
+     * QuadPredicate<User, Product, Integer, Double> hasBalance =
+     *     (user, product, quantity, discount) ->
      *         user.getBalance() >= product.getPrice() * quantity * (1 - discount);
-     * 
-     * QuadPredicate<User, Product, Integer, Double> hasStock = 
-     *     (user, product, quantity, discount) -> 
+     *
+     * QuadPredicate<User, Product, Integer, Double> hasStock =
+     *     (user, product, quantity, discount) ->
      *         product.getStock() >= quantity;
-     * 
-     * QuadPredicate<User, Product, Integer, Double> canPurchase = 
+     *
+     * QuadPredicate<User, Product, Integer, Double> canPurchase =
      *     hasBalance.and(hasStock);
      * }</pre>
      *
@@ -141,14 +141,14 @@ public interface QuadPredicate<A, B, C, D> extends Throwables.QuadPredicate<A, B
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * QuadPredicate<User, Product, Integer, Double> isPremiumUser = 
+     * QuadPredicate<User, Product, Integer, Double> isPremiumUser =
      *     (user, product, quantity, discount) -> user.isPremium();
-     * 
-     * QuadPredicate<User, Product, Integer, Double> hasLoyaltyPoints = 
-     *     (user, product, quantity, discount) -> 
+     *
+     * QuadPredicate<User, Product, Integer, Double> hasLoyaltyPoints =
+     *     (user, product, quantity, discount) ->
      *         user.getLoyaltyPoints() >= 1000;
-     * 
-     * QuadPredicate<User, Product, Integer, Double> getsFreeShipping = 
+     *
+     * QuadPredicate<User, Product, Integer, Double> getsFreeShipping =
      *     isPremiumUser.or(hasLoyaltyPoints);
      * }</pre>
      *

@@ -41,7 +41,6 @@ import java.util.List;
  *   <li>IPv6 addresses with colons: "::1:11211"</li>
  * </ul>
  * 
- * @since 1.0
  */
 public final class AddrUtil {
 

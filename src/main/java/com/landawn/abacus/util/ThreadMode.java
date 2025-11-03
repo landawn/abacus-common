@@ -30,7 +30,6 @@ package com.landawn.abacus.util;
  * processor.execute(task, ThreadMode.THREAD_POOL_EXECUTOR);
  * }</pre>
  * 
- * @since 1.0
  */
 public enum ThreadMode {
 

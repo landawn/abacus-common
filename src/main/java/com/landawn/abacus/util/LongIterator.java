@@ -44,7 +44,6 @@ import com.landawn.abacus.util.stream.LongStream;
  * @see TriIterator
  * @see com.landawn.abacus.util.Iterators
  * @see com.landawn.abacus.util.Enumerations
- *
  */
 @SuppressWarnings({ "java:S6548" })
 public abstract class LongIterator extends ImmutableIterator<Long> {
@@ -73,10 +72,20 @@ public abstract class LongIterator extends ImmutableIterator<Long> {
     };
 
     /**
-     * Returns an empty LongIterator instance. This method provides a type-safe way to obtain
-     * an empty iterator, which can be useful for returning from methods when no elements are available.
+     * Returns an empty {@code LongIterator} with no elements.
      *
-     * @return an empty LongIterator that has no elements
+     * <p>The returned iterator's {@code hasNext()} will always return {@code false},
+     * and calling {@code nextLong()} will always throw a {@code NoSuchElementException}.</p>
+     *
+     * <p>This method always returns the same singleton instance for efficiency.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * LongIterator iter = LongIterator.empty();
+     * System.out.println(iter.hasNext()); // false
+     * }</pre>
+     *
+     * @return an empty {@code LongIterator}
      */
     @SuppressWarnings("SameReturnValue")
     public static LongIterator empty() {//NOSONAR
@@ -84,8 +93,10 @@ public abstract class LongIterator extends ImmutableIterator<Long> {
     }
 
     /**
-     * Creates a LongIterator from the specified long array. The iterator will iterate over
-     * all elements in the array in order.
+     * Creates a {@code LongIterator} from the specified long array.
+     *
+     * <p>If the array is {@code null} or empty, returns an empty iterator.
+     * The iterator will iterate over all elements in the array from start to end.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -93,16 +104,19 @@ public abstract class LongIterator extends ImmutableIterator<Long> {
      * // Will iterate over: 10, 20, 30
      * }</pre>
      *
-     * @param a the array of long values to iterate over
-     * @return a new LongIterator over the specified array, or an empty iterator if the array is {@code null} or empty
+     * @param a the long array (may be {@code null})
+     * @return a new {@code LongIterator} over the array elements, or an empty iterator if the array is {@code null} or empty
      */
     public static LongIterator of(final long... a) {
         return N.isEmpty(a) ? EMPTY : of(a, 0, a.length);
     }
 
     /**
-     * Creates a LongIterator from a portion of the specified long array. The iterator will iterate
-     * over elements from the fromIndex (inclusive) to the toIndex (exclusive).
+     * Creates a {@code LongIterator} from a subsequence of the specified long array.
+     *
+     * <p>The iterator will iterate over elements from {@code fromIndex} (inclusive) to
+     * {@code toIndex} (exclusive). If {@code fromIndex} equals {@code toIndex}, an empty
+     * iterator is returned.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -111,10 +125,10 @@ public abstract class LongIterator extends ImmutableIterator<Long> {
      * // Will iterate over: 2, 3, 4
      * }</pre>
      *
-     * @param a the array of long values to iterate over
+     * @param a the long array (may be {@code null})
      * @param fromIndex the starting index (inclusive)
      * @param toIndex the ending index (exclusive)
-     * @return a new LongIterator over the specified range of the array
+     * @return a new {@code LongIterator} over the specified range, or an empty iterator if the array is {@code null} or fromIndex equals toIndex
      * @throws IndexOutOfBoundsException if fromIndex is negative, toIndex is greater than the array length,
      *         or fromIndex is greater than toIndex
      */

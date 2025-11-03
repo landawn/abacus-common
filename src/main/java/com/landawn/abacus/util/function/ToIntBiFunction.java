@@ -11,7 +11,6 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-
 package com.landawn.abacus.util.function;
 
 import com.landawn.abacus.util.Throwables;
@@ -21,7 +20,7 @@ import com.landawn.abacus.util.Throwables;
  * This is the int-producing primitive specialization for {@link java.util.function.BiFunction}.
  *
  * <p>This interface extends both the Throwables.ToIntBiFunction and the standard Java
- * ToIntBiFunction, providing compatibility with both the Abacus framework's error handling
+ * ToIntBiFunction, providing compatibility with both the abacus-common framework's error handling
  * mechanisms and the standard Java functional interfaces.
  *
  * <p>This is a functional interface whose functional method is {@link #applyAsInt(Object, Object)}.
@@ -33,22 +32,21 @@ import com.landawn.abacus.util.Throwables;
  */
 @FunctionalInterface
 public interface ToIntBiFunction<T, U> extends Throwables.ToIntBiFunction<T, U, RuntimeException>, java.util.function.ToIntBiFunction<T, U> { //NOSONAR
-
     /**
      * Applies this function to the given arguments and returns an int result.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ToIntBiFunction<String, String> combinedLength = (s1, s2) -> s1.length() + s2.length();
      * int total = combinedLength.applyAsInt("Hello", "World"); // returns 10
-     * 
+     *
      * ToIntBiFunction<Integer, Integer> multiplier = (a, b) -> a * b;
      * int product = multiplier.applyAsInt(5, 6); // returns 30
      * }</pre>
      *
      * @param t the first function argument
      * @param u the second function argument
-     * @return the function result as a primitive int if any error occurs during function execution
+     * @return the function result as a primitive int
      */
     @Override
     int applyAsInt(T t, U u);

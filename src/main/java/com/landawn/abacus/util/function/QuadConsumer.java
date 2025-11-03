@@ -34,10 +34,11 @@ import com.landawn.abacus.util.Throwables;
  * @see java.util.function.Consumer
  * @see java.util.function.BiConsumer
  * @see TriConsumer
+ *
+ * <p>Refer to JDK API documentation at: <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html">https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a></p>
  */
 @FunctionalInterface
 public interface QuadConsumer<A, B, C, D> extends Throwables.QuadConsumer<A, B, C, D, RuntimeException> { //NOSONAR
-
     /**
      * Performs this operation on the given arguments.
      *
@@ -48,13 +49,13 @@ public interface QuadConsumer<A, B, C, D> extends Throwables.QuadConsumer<A, B, 
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * QuadConsumer<String, Integer, Boolean, Date> logger = 
+     * QuadConsumer<String, Integer, Boolean, Date> logger =
      *     (message, level, isError, timestamp) -> {
-     *         System.out.printf("[%s] Level %d %s: %s%n", 
+     *         System.out.printf("[%s] Level %d %s: %s%n",
      *             timestamp, level, isError ? "ERROR" : "INFO", message);
      *     };
-     * 
-     * QuadConsumer<User, Product, Integer, Double> processOrder = 
+     *
+     * QuadConsumer<User, Product, Integer, Double> processOrder =
      *     (user, product, quantity, discount) -> {
      *         Order order = new Order(user, product, quantity);
      *         order.applyDiscount(discount);
@@ -65,7 +66,7 @@ public interface QuadConsumer<A, B, C, D> extends Throwables.QuadConsumer<A, B, 
      * @param a the first input argument
      * @param b the second input argument
      * @param c the third input argument
-     * @param d the fourth input argument if the operation cannot be completed
+     * @param d the fourth input argument
      */
     @Override
     void accept(A a, B b, C c, D d);
@@ -83,22 +84,22 @@ public interface QuadConsumer<A, B, C, D> extends Throwables.QuadConsumer<A, B, 
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * QuadConsumer<Order, Customer, Product, Integer> saveOrder = 
-     *     (order, customer, product, quantity) -> 
+     * QuadConsumer<Order, Customer, Product, Integer> saveOrder =
+     *     (order, customer, product, quantity) ->
      *         orderRepository.save(order);
-     * 
-     * QuadConsumer<Order, Customer, Product, Integer> sendNotification = 
-     *     (order, customer, product, quantity) -> 
+     *
+     * QuadConsumer<Order, Customer, Product, Integer> sendNotification =
+     *     (order, customer, product, quantity) ->
      *         emailService.sendOrderConfirmation(customer, order);
-     * 
-     * QuadConsumer<Order, Customer, Product, Integer> processAndNotify = 
+     *
+     * QuadConsumer<Order, Customer, Product, Integer> processAndNotify =
      *     saveOrder.andThen(sendNotification);
-     * 
+     *
      * // This will both save the order and send notification
      * processAndNotify.accept(newOrder, customer, product, 5);
      * }</pre>
      *
-     * @param after the operation to perform after this operation
+     * @param after the operation to perform after this operation. Must not be {@code null}.
      * @return a composed {@code QuadConsumer} that performs in sequence this
      *         operation followed by the {@code after} operation
      */

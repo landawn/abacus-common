@@ -26,10 +26,230 @@ import com.landawn.abacus.annotation.Internal;
 import com.landawn.abacus.util.u.Nullable;
 
 /**
- * The Throwables class is a utility class that provides methods for handling exceptions.
- * It includes methods for running commands that may throw exceptions, calling methods that may throw exceptions, and more.
- * It also provides a variety of functional interfaces that can throw exceptions.
+ * A comprehensive utility class providing exception-handling functional interfaces and utilities
+ * for working with checked exceptions in functional programming contexts. This final class serves
+ * as the central hub for all exception-throwing functional operations, offering a complete set of
+ * throwable variants of standard Java functional interfaces, along with utilities for safe execution
+ * and exception management in functional pipelines and stream processing.
  *
+ * <p>Throwables bridges the fundamental gap between Java's checked exception system and modern
+ * functional programming paradigms. It provides exception-safe versions of all standard functional
+ * interfaces, enabling elegant composition of exception-prone operations within stream pipelines,
+ * Optional chains, and CompletableFuture compositions without the verbosity of traditional
+ * try-catch blocks or the loss of type safety that comes with exception wrapping.</p>
+ *
+ * <p><b>Key Features:</b>
+ * <ul>
+ *   <li><b>Complete Functional Interface Coverage:</b> Exception-throwing variants of all standard Java functional interfaces</li>
+ *   <li><b>Primitive Type Support:</b> Specialized interfaces for all primitive types (boolean, char, byte, short, int, long, float, double)</li>
+ *   <li><b>Multi-Arity Operations:</b> Support for unary, binary, ternary, and n-ary functional operations</li>
+ *   <li><b>Type-Safe Exception Handling:</b> Generic exception types provide compile-time safety and documentation</li>
+ *   <li><b>Lazy Initialization:</b> Built-in support for lazy initialization with exception handling</li>
+ *   <li><b>Utility Execution Methods:</b> Safe execution wrappers for exception-throwing operations</li>
+ *   <li><b>Stream Integration:</b> Seamless integration with Java Streams and functional pipelines</li>
+ *   <li><b>Performance Optimization:</b> Primitive specializations avoid boxing/unboxing overhead</li>
+ * </ul>
+ *
+ * <p><b>Core Problem Solved:</b>
+ * Java's functional interfaces (Function, Consumer, Predicate, etc.) cannot throw checked exceptions,
+ * forcing developers to either:
+ * <ul>
+ *   <li>Wrap checked exceptions in RuntimeException (losing type safety)</li>
+ *   <li>Use verbose try-catch blocks within lambda expressions</li>
+ *   <li>Avoid functional programming patterns when checked exceptions are involved</li>
+ * </ul>
+ * Throwables solves this by providing exception-throwing variants that maintain type safety
+ * and enable clean functional composition.
+ *
+ * <p><b>Common Use Cases:</b>
+ * <ul>
+ *   <li><b>File I/O Operations:</b> Processing files in streams with IOException handling</li>
+ *   <li><b>Database Operations:</b> JDBC operations in functional pipelines with SQLException handling</li>
+ *   <li><b>Network Operations:</b> HTTP requests and API calls with various checked exceptions</li>
+ *   <li><b>Serialization:</b> Object serialization/deserialization with ClassNotFoundException handling</li>
+ *   <li><b>Reflection:</b> Dynamic method invocation with reflection exceptions</li>
+ *   <li><b>External API Integration:</b> Third-party library calls that throw checked exceptions</li>
+ *   <li><b>Resource Management:</b> Safe resource operations with exception propagation</li>
+ * </ul>
+ *
+ * <p><b>Usage Examples:</b></p>
+ * <pre>{@code
+ * // File processing with IOException handling
+ * List<String> fileContents = filePaths.stream()
+ *     .map((Throwables.Function<Path, String, IOException>) Files::readString)
+ *     .collect(Collectors.toList());
+ *
+ * // Database operations with SQLException handling
+ * List<User> users = userIds.stream()
+ *     .map((Throwables.Function<Integer, User, SQLException>) this::findUserById)
+ *     .collect(Collectors.toList());
+ *
+ * // Safe execution with exception handling
+ * Throwables.run(() -> {
+ *     // Code that may throw checked exceptions
+ *     Files.delete(tempFile);
+ *     connection.close();
+ * });
+ *
+ * // Optional with exception-throwing operations
+ * Optional<String> content = Optional.of(filePath)
+ *     .map((Throwables.Function<Path, String, IOException>) Files::readString);
+ *
+ * // Lazy initialization with exception handling
+ * Throwables.Supplier<DatabaseConnection, SQLException> connectionSupplier =
+ *     Throwables.LazyInitializer.of(() -> createDatabaseConnection());
+ *
+ * // Primitive operations with exceptions
+ * IntStream.range(0, 100)
+ *     .filter((Throwables.IntPredicate<IOException>) this::isValidIndex)
+ *     .forEach((Throwables.IntConsumer<IOException>) this::processIndex);
+ * }</pre>
+ *
+ * <p><b>Functional Interface Categories:</b>
+ * <ul>
+ *   <li><b>Core Interfaces:</b> {@code Supplier<T, E>}, {@code Consumer<T, E>}, {@code Function<T, R, E>}, {@code Predicate<T, E>}</li>
+ *   <li><b>Binary Operations:</b> {@code BiFunction<T, U, R, E>}, {@code BiConsumer<T, U, E>}, {@code BiPredicate<T, U, E>}</li>
+ *   <li><b>Operators:</b> {@code UnaryOperator<T, E>}, {@code BinaryOperator<T, E>}, {@code TernaryOperator<T, E>}</li>
+ *   <li><b>Primitive Suppliers:</b> {@code BooleanSupplier<E>}, {@code IntSupplier<E>}, {@code LongSupplier<E>}, etc.</li>
+ *   <li><b>Primitive Consumers:</b> {@code BooleanConsumer<E>}, {@code IntConsumer<E>}, {@code LongConsumer<E>}, etc.</li>
+ *   <li><b>Primitive Functions:</b> {@code ToIntFunction<T, E>}, {@code IntFunction<R, E>}, {@code IntToLongFunction<E>}, etc.</li>
+ *   <li><b>Primitive Predicates:</b> {@code IntPredicate<E>}, {@code LongPredicate<E>}, {@code DoublePredicate<E>}, etc.</li>
+ *   <li><b>Mixed Type Operations:</b> {@code ObjIntConsumer<T, E>}, {@code IntObjFunction<T, R, E>}, etc.</li>
+ * </ul>
+ *
+ * <p><b>Exception Type Safety:</b>
+ * <ul>
+ *   <li><b>Generic Exception Types:</b> All interfaces are parameterized with exception type {@code <E extends Throwable>}</li>
+ *   <li><b>Compile-Time Safety:</b> Exception types are checked at compilation time</li>
+ *   <li><b>Documentation:</b> Exception types serve as documentation of possible failure modes</li>
+ *   <li><b>Multiple Exceptions:</b> Use union types or common superclass for multiple exception types</li>
+ * </ul>
+ *
+ * <p><b>Primitive Type Support:</b>
+ * Complete coverage for all primitive types with optimized performance:
+ * <ul>
+ *   <li><b>Boolean:</b> {@code BooleanSupplier}, {@code BooleanConsumer}, {@code BooleanPredicate}, etc.</li>
+ *   <li><b>Character:</b> {@code CharSupplier}, {@code CharConsumer}, {@code CharFunction}, etc.</li>
+ *   <li><b>Numeric Types:</b> byte, short, int, long, float, double with full interface coverage</li>
+ *   <li><b>Performance Benefit:</b> Avoid boxing/unboxing overhead compared to object variants</li>
+ * </ul>
+ *
+ * <p><b>Multi-Arity Operations:</b>
+ * <ul>
+ *   <li><b>Unary:</b> Single parameter operations (standard Function, Consumer, Predicate)</li>
+ *   <li><b>Binary:</b> Two parameter operations (BiFunction, BiConsumer, BiPredicate)</li>
+ *   <li><b>Ternary:</b> Three parameter operations (TriFunction, TriConsumer, TriPredicate)</li>
+ *   <li><b>N-Ary:</b> Variable parameter operations (NFunction for flexible parameter counts)</li>
+ * </ul>
+ *
+ * <p><b>Lazy Initialization Support:</b>
+ * <ul>
+ *   <li><b>LazyInitializer:</b> Thread-safe lazy initialization with exception handling</li>
+ *   <li><b>Single Computation:</b> Ensures supplier is called exactly once</li>
+ *   <li><b>Exception Caching:</b> Caches both successful results and thrown exceptions</li>
+ *   <li><b>Memory Efficiency:</b> Minimal overhead until first access</li>
+ * </ul>
+ *
+ * <p><b>Utility Execution Methods:</b>
+ * <ul>
+ *   <li><b>{@code run()}:</b> Execute exception-throwing Runnable with RuntimeException wrapping</li>
+ *   <li><b>{@code call()}:</b> Execute exception-throwing Callable with RuntimeException wrapping</li>
+ *   <li><b>Safe Execution:</b> Automatic exception handling and wrapping for functional contexts</li>
+ *   <li><b>Error Propagation:</b> Preserve original exception information in wrapped exceptions</li>
+ * </ul>
+ *
+ * <p><b>Performance Characteristics:</b>
+ * <ul>
+ *   <li>Interface creation: O(1) - minimal object creation overhead</li>
+ *   <li>Primitive operations: No boxing/unboxing overhead compared to object variants</li>
+ *   <li>Exception handling: Minimal overhead when no exceptions are thrown</li>
+ *   <li>Lazy initialization: O(1) access after first computation, thread-safe</li>
+ * </ul>
+ *
+ * <p><b>Thread Safety:</b>
+ * <ul>
+ *   <li><b>Functional Interfaces:</b> All throwable functional interfaces are thread-safe by design</li>
+ *   <li><b>Lazy Initialization:</b> LazyInitializer provides thread-safe lazy computation</li>
+ *   <li><b>Utility Methods:</b> All static utility methods are thread-safe</li>
+ *   <li><b>Exception Handling:</b> Safe exception propagation in concurrent environments</li>
+ * </ul>
+ *
+ * <p><b>Integration with Standard APIs:</b>
+ * <ul>
+ *   <li><b>Stream API:</b> Full compatibility with stream operations using method references</li>
+ *   <li><b>Optional:</b> Works seamlessly with Optional transformations and filtering</li>
+ *   <li><b>CompletableFuture:</b> Exception-safe async operations with proper exception propagation</li>
+ *   <li><b>Collections:</b> Safe collection operations with exception-throwing predicates and functions</li>
+ * </ul>
+ *
+ * <p><b>Exception Handling Philosophy:</b>
+ * <ul>
+ *   <li><b>Preserve Type Information:</b> Generic exception types maintain compile-time safety</li>
+ *   <li><b>Fail Fast:</b> Exceptions are propagated immediately rather than being silently ignored</li>
+ *   <li><b>Composability:</b> Exception-throwing operations can be composed like standard functional interfaces</li>
+ *   <li><b>Interoperability:</b> Seamless conversion between standard and throwable variants</li>
+ * </ul>
+ *
+ * <p><b>Best Practices:</b>
+ * <ul>
+ *   <li>Use specific exception types rather than generic Exception for better error handling</li>
+ *   <li>Prefer primitive specializations when working with primitive data for better performance</li>
+ *   <li>Use LazyInitializer for expensive computations that may throw exceptions</li>
+ *   <li>Combine with {@link Fnn} utility methods for enhanced functional programming capabilities</li>
+ *   <li>Consider exception handling strategy at the application boundary rather than within streams</li>
+ * </ul>
+ *
+ * <p><b>Error Handling:</b>
+ * <ul>
+ *   <li>Throws {@link IllegalArgumentException} for null parameters in utility methods</li>
+ *   <li>Preserves original exception types and stack traces through functional chains</li>
+ *   <li>Provides automatic RuntimeException wrapping for checked exceptions in utility methods</li>
+ *   <li>Maintains exception causality for debugging and error analysis</li>
+ * </ul>
+ *
+ * <p><b>Memory Management:</b>
+ * <ul>
+ *   <li>Functional interfaces are lightweight with minimal memory footprint</li>
+ *   <li>LazyInitializer retains reference to computed value - consider weak references for large objects</li>
+ *   <li>Primitive specializations reduce memory pressure compared to boxed variants</li>
+ *   <li>No static state maintained - suitable for high-throughput applications</li>
+ * </ul>
+ *
+ * <p><b>Nested Utility Classes:</b>
+ * <ul>
+ *   <li><b>{@link EE}:</b> Utility class for handling multiple exception types simultaneously</li>
+ *   <li><b>{@link EEE}:</b> Utility class for handling three different exception types in operations</li>
+ *   <li><b>{@link LazyInitializer}:</b> Thread-safe lazy initialization with exception handling</li>
+ * </ul>
+ *
+ * <p><b>Comparison with Standard Functional Interfaces:</b>
+ * <ul>
+ *   <li><b>Exception Handling:</b> Can throw checked exceptions unlike standard interfaces</li>
+ *   <li><b>Type Safety:</b> Compile-time exception type checking and documentation</li>
+ *   <li><b>Completeness:</b> Full coverage including primitive types and multi-arity operations</li>
+ *   <li><b>Interoperability:</b> Can be converted to/from standard interfaces as needed</li>
+ * </ul>
+ *
+ * <p><b>Integration with Fnn:</b>
+ * This class works seamlessly with {@link Fnn} which provides factory methods and utilities
+ * for creating and manipulating throwable functional interfaces:
+ * <ul>
+ *   <li>Fnn provides factory methods for creating Throwables functional interfaces</li>
+ *   <li>Throwables provides the interface definitions and utility execution methods</li>
+ *   <li>Together they form a complete functional programming toolkit with exception handling</li>
+ * </ul>
+ *
+ *
+ * @see Seq
+ * @see Fnn
+ * @see java.util.function
+ * @see java.util.stream.Stream
+ * @see java.util.Optional
+ * @see java.util.concurrent.CompletableFuture
+ * @see Supplier
+ * @see Consumer
+ * @see Function
+ * @see Predicate
  */
 @SuppressWarnings({ "java:S6539" })
 public final class Throwables {

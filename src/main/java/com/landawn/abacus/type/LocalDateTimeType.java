@@ -22,12 +22,11 @@ import java.sql.Timestamp;
 import java.time.Instant;
 import java.time.LocalDateTime;
 
-import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Numbers;
 import com.landawn.abacus.util.Strings;
 
-public class LocalDateTimeType extends AbstractTemporalType<LocalDateTime> {
+class LocalDateTimeType extends AbstractTemporalType<LocalDateTime> {
 
     public static final String LOCAL_DATE_TIME = LocalDateTime.class.getSimpleName();
 
@@ -41,7 +40,7 @@ public class LocalDateTimeType extends AbstractTemporalType<LocalDateTime> {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * LocalDateTimeType type = new LocalDateTimeType();
+     * Type<LocalDateTime> type = TypeFactory.getType(LocalDateTime.class);
      * Class<LocalDateTime> clazz = type.clazz();
      * System.out.println(clazz.getName()); // Outputs: java.time.LocalDateTime
      * }</pre>
@@ -59,7 +58,7 @@ public class LocalDateTimeType extends AbstractTemporalType<LocalDateTime> {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * LocalDateTimeType type = new LocalDateTimeType();
+     * Type<LocalDateTime> type = TypeFactory.getType(LocalDateTime.class);
      * LocalDateTime dateTime = LocalDateTime.of(2021, 1, 1, 10, 30, 0);
      * String str = type.stringOf(dateTime);
      * System.out.println(str); // Outputs: 2021-01-01T10:30:00
@@ -69,7 +68,6 @@ public class LocalDateTimeType extends AbstractTemporalType<LocalDateTime> {
      * @return The string representation of the LocalDateTime, or {@code null} if the input is null
      */
     @Override
-    @MayReturnNull
     public String stringOf(final LocalDateTime x) {
         return (x == null) ? null : x.toString();
     }
@@ -84,7 +82,7 @@ public class LocalDateTimeType extends AbstractTemporalType<LocalDateTime> {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * LocalDateTimeType type = new LocalDateTimeType();
+     * Type<LocalDateTime> type = TypeFactory.getType(LocalDateTime.class);
      *
      * // From Number (milliseconds since epoch)
      * LocalDateTime dt1 = type.valueOf(1609459200000L);
@@ -97,7 +95,6 @@ public class LocalDateTimeType extends AbstractTemporalType<LocalDateTime> {
      * @return The LocalDateTime representation of the object, or {@code null} if the input is null
      */
     @Override
-    @MayReturnNull
     public LocalDateTime valueOf(final Object obj) {
         if (obj instanceof Number) {
             return LocalDateTime.ofInstant(Instant.ofEpochMilli(((Number) obj).longValue()), DEFAULT_ZONE_ID);
@@ -118,7 +115,7 @@ public class LocalDateTimeType extends AbstractTemporalType<LocalDateTime> {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * LocalDateTimeType type = new LocalDateTimeType();
+     * Type<LocalDateTime> type = TypeFactory.getType(LocalDateTime.class);
      *
      * // Parse ISO-8601 format
      * LocalDateTime dt1 = type.valueOf("2021-01-01T10:30:00");
@@ -134,9 +131,7 @@ public class LocalDateTimeType extends AbstractTemporalType<LocalDateTime> {
      * @return The parsed LocalDateTime object, or {@code null} if the input is {@code null} or empty
      * @throws java.time.format.DateTimeParseException if the string cannot be parsed as a LocalDateTime
      */
-    @MayReturnNull
     @Override
-
     public LocalDateTime valueOf(final String str) {
         if (Strings.isEmpty(str)) {
             return null; // NOSONAR
@@ -165,7 +160,7 @@ public class LocalDateTimeType extends AbstractTemporalType<LocalDateTime> {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * LocalDateTimeType type = new LocalDateTimeType();
+     * Type<LocalDateTime> type = TypeFactory.getType(LocalDateTime.class);
      *
      * char[] chars = "2021-01-01T10:30:00".toCharArray();
      * LocalDateTime dt = type.valueOf(chars, 0, chars.length);
@@ -176,9 +171,7 @@ public class LocalDateTimeType extends AbstractTemporalType<LocalDateTime> {
      * @param len The number of characters to use
      * @return The parsed LocalDateTime object, or {@code null} if the input is {@code null} or empty
      */
-    @MayReturnNull
     @Override
-
     public LocalDateTime valueOf(final char[] cbuf, final int offset, final int len) {
         if ((cbuf == null) || (len == 0)) {
             return null; // NOSONAR
@@ -197,7 +190,7 @@ public class LocalDateTimeType extends AbstractTemporalType<LocalDateTime> {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * LocalDateTimeType type = new LocalDateTimeType();
+     * Type<LocalDateTime> type = TypeFactory.getType(LocalDateTime.class);
      * try (ResultSet rs = stmt.executeQuery()) {
      *     if (rs.next()) {
      *         LocalDateTime dt = type.get(rs, 1);
@@ -211,7 +204,6 @@ public class LocalDateTimeType extends AbstractTemporalType<LocalDateTime> {
      * @throws SQLException if a database access error occurs or the column index is invalid
      */
     @Override
-    @MayReturnNull
     public LocalDateTime get(final ResultSet rs, final int columnIndex) throws SQLException {
         try {
             return rs.getObject(columnIndex, LocalDateTime.class);
@@ -231,7 +223,7 @@ public class LocalDateTimeType extends AbstractTemporalType<LocalDateTime> {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * LocalDateTimeType type = new LocalDateTimeType();
+     * Type<LocalDateTime> type = TypeFactory.getType(LocalDateTime.class);
      * try (ResultSet rs = stmt.executeQuery()) {
      *     if (rs.next()) {
      *         LocalDateTime dt = type.get(rs, "created_at");
@@ -245,7 +237,6 @@ public class LocalDateTimeType extends AbstractTemporalType<LocalDateTime> {
      * @throws SQLException if a database access error occurs or the column name is not found
      */
     @Override
-    @MayReturnNull
     public LocalDateTime get(final ResultSet rs, final String columnName) throws SQLException {
         try {
             return rs.getObject(columnName, LocalDateTime.class);
@@ -266,7 +257,7 @@ public class LocalDateTimeType extends AbstractTemporalType<LocalDateTime> {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * LocalDateTimeType type = new LocalDateTimeType();
+     * Type<LocalDateTime> type = TypeFactory.getType(LocalDateTime.class);
      * LocalDateTime dt = LocalDateTime.now();
      * try (PreparedStatement stmt = conn.prepareStatement("INSERT INTO events (timestamp) VALUES (?)")) {
      *     type.set(stmt, 1, dt);
@@ -298,7 +289,7 @@ public class LocalDateTimeType extends AbstractTemporalType<LocalDateTime> {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * LocalDateTimeType type = new LocalDateTimeType();
+     * Type<LocalDateTime> type = TypeFactory.getType(LocalDateTime.class);
      * LocalDateTime dt = LocalDateTime.now();
      * try (CallableStatement stmt = conn.prepareCall("{call log_event(?)}")) {
      *     type.set(stmt, "event_time", dt);

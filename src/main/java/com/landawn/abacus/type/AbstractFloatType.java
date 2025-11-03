@@ -22,7 +22,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
 
-import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.parser.JSONXMLSerializationConfig;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.IOUtil;
@@ -50,9 +49,7 @@ public abstract class AbstractFloatType extends NumberType<Number> {
      * @param x the Number value to convert
      * @return the string representation of the float value, or {@code null} if input is {@code null}
      */
-    @MayReturnNull
     @Override
-
     public String stringOf(final Number x) {
         if (x == null) {
             return null; // NOSONAR
@@ -70,13 +67,20 @@ public abstract class AbstractFloatType extends NumberType<Number> {
      *   <li>Valid numeric strings are parsed to float values</li>
      * </ul>
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * AbstractFloatType type = TypeFactory.getType(Float.class);
+     * Float value1 = type.valueOf("3.14");     // returns 3.14f
+     * Float value2 = type.valueOf("100.5f");   // returns 100.5f (suffix stripped)
+     * Float value3 = type.valueOf("42.0F");    // returns 42.0f (suffix stripped)
+     * Float value4 = type.valueOf("");         // returns default value
+     * }</pre>
+     *
      * @param str the string to convert
      * @return the Float value
      * @throws NumberFormatException if the string cannot be parsed as a float
      */
-    @MayReturnNull
     @Override
-
     public Float valueOf(final String str) {
         try {
             return Strings.isEmpty(str) ? ((Float) defaultValue()) : Float.valueOf(str);
@@ -93,6 +97,21 @@ public abstract class AbstractFloatType extends NumberType<Number> {
         }
     }
 
+    /**
+     * Checks if this type represents a float type.
+     * This method always returns {@code true} for float types.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * AbstractFloatType type = TypeFactory.getType(Float.class);
+     * if (type.isFloat()) {
+     *     // Handle float type specific logic
+     *     System.out.println("This is a float type");
+     * }
+     * }</pre>
+     *
+     * @return {@code true}, indicating this is a float type
+     */
     @Override
     public boolean isFloat() {
         return true;
@@ -120,7 +139,6 @@ public abstract class AbstractFloatType extends NumberType<Number> {
      * @throws SQLException if a database access error occurs or the columnIndex is invalid
      */
     @Override
-    @MayReturnNull
     public Float get(final ResultSet rs, final int columnIndex) throws SQLException {
         return rs.getFloat(columnIndex);
     }
@@ -147,7 +165,6 @@ public abstract class AbstractFloatType extends NumberType<Number> {
      * @throws SQLException if a database access error occurs or the columnLabel is not found
      */
     @Override
-    @MayReturnNull
     public Float get(final ResultSet rs, final String columnLabel) throws SQLException {
         return rs.getFloat(columnLabel);
     }

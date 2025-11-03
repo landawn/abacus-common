@@ -21,13 +21,12 @@ import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.Date;
 
-import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.util.Dates;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Strings;
 
 @SuppressWarnings({ "java:S1942", "java:S2143", "java:S2160" })
-public class JUDateType extends AbstractDateType<Date> {
+class JUDateType extends AbstractDateType<Date> {
 
     public static final String JU_DATE = "JUDate";
 
@@ -48,7 +47,7 @@ public class JUDateType extends AbstractDateType<Date> {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * JUDateType type = new JUDateType();
+     * Type<java.util.Date> type = TypeFactory.getType(java.util.Date.class);
      * String name = type.declaringName();
      * System.out.println(name); // Outputs: java.util.Date
      * }</pre>
@@ -67,7 +66,7 @@ public class JUDateType extends AbstractDateType<Date> {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * JUDateType type = new JUDateType();
+     * Type<java.util.Date> type = TypeFactory.getType(java.util.Date.class);
      * Class<Date> clazz = type.clazz();
      * System.out.println(clazz.getName()); // Outputs: java.util.Date
      * }</pre>
@@ -93,7 +92,7 @@ public class JUDateType extends AbstractDateType<Date> {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * JUDateType type = new JUDateType();
+     * Type<java.util.Date> type = TypeFactory.getType(java.util.Date.class);
      *
      * // From Number (milliseconds since epoch)
      * Date date1 = type.valueOf(1609459200000L);
@@ -110,7 +109,6 @@ public class JUDateType extends AbstractDateType<Date> {
      * @return a Date instance, or {@code null} if the input is null
      */
     @Override
-    @MayReturnNull
     public Date valueOf(final Object obj) {
         if (obj instanceof Number) {
             return new Date(((Number) obj).longValue());
@@ -133,7 +131,7 @@ public class JUDateType extends AbstractDateType<Date> {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * JUDateType type = new JUDateType();
+     * Type<java.util.Date> type = TypeFactory.getType(java.util.Date.class);
      *
      * // Parse ISO 8601 date
      * Date date1 = type.valueOf("2021-01-01");
@@ -151,7 +149,6 @@ public class JUDateType extends AbstractDateType<Date> {
      * @throws IllegalArgumentException if the string format is invalid
      */
     @Override
-    @MayReturnNull
     public Date valueOf(final String str) {
         return Strings.isEmpty(str) ? null : (N.equals(str, SYS_TIME) ? Dates.currentJUDate() : Dates.parseJUDate(str));
     }
@@ -166,7 +163,7 @@ public class JUDateType extends AbstractDateType<Date> {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * JUDateType type = new JUDateType();
+     * Type<java.util.Date> type = TypeFactory.getType(java.util.Date.class);
      *
      * // Parse from character array containing milliseconds
      * char[] millisChars = "1609459200000".toCharArray();
@@ -182,9 +179,7 @@ public class JUDateType extends AbstractDateType<Date> {
      * @param len the number of characters to parse
      * @return a Date instance, or {@code null} if the character buffer is {@code null} or length is 0
      */
-    @MayReturnNull
     @Override
-
     public Date valueOf(final char[] cbuf, final int offset, final int len) {
         if ((cbuf == null) || (len == 0)) {
             return null; // NOSONAR
@@ -207,7 +202,7 @@ public class JUDateType extends AbstractDateType<Date> {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * JUDateType type = new JUDateType();
+     * Type<java.util.Date> type = TypeFactory.getType(java.util.Date.class);
      * try (ResultSet rs = stmt.executeQuery()) {
      *     if (rs.next()) {
      *         Date date = type.get(rs, 1);
@@ -221,7 +216,6 @@ public class JUDateType extends AbstractDateType<Date> {
      * @throws SQLException if a database access error occurs or the column index is invalid
      */
     @Override
-    @MayReturnNull
     public Date get(final ResultSet rs, final int columnIndex) throws SQLException {
         final Timestamp ts = rs.getTimestamp(columnIndex);
 
@@ -234,7 +228,7 @@ public class JUDateType extends AbstractDateType<Date> {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * JUDateType type = new JUDateType();
+     * Type<java.util.Date> type = TypeFactory.getType(java.util.Date.class);
      * try (ResultSet rs = stmt.executeQuery()) {
      *     if (rs.next()) {
      *         Date date = type.get(rs, "created_at");
@@ -248,7 +242,6 @@ public class JUDateType extends AbstractDateType<Date> {
      * @throws SQLException if a database access error occurs or the column label is invalid
      */
     @Override
-    @MayReturnNull
     public Date get(final ResultSet rs, final String columnLabel) throws SQLException {
         final Timestamp ts = rs.getTimestamp(columnLabel);
 
@@ -266,7 +259,7 @@ public class JUDateType extends AbstractDateType<Date> {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * JUDateType type = new JUDateType();
+     * Type<java.util.Date> type = TypeFactory.getType(java.util.Date.class);
      * Date date = new Date();
      * try (PreparedStatement stmt = conn.prepareStatement("INSERT INTO events (timestamp) VALUES (?)")) {
      *     type.set(stmt, 1, date);
@@ -295,7 +288,7 @@ public class JUDateType extends AbstractDateType<Date> {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * JUDateType type = new JUDateType();
+     * Type<java.util.Date> type = TypeFactory.getType(java.util.Date.class);
      * Date date = new Date();
      * try (CallableStatement stmt = conn.prepareCall("{call log_event(?)}")) {
      *     type.set(stmt, "event_time", date);

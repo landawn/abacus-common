@@ -11,24 +11,34 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-
 package com.landawn.abacus.util.function;
 
 /**
  * Represents an operation that accepts a variable number of double-valued arguments and returns no result.
  * This is the N-arity specialization of {@link DoubleConsumer}.
  * Unlike most other functional interfaces, {@code DoubleNConsumer} is expected to operate via side-effects.
- * 
+ *
  * <p>This is a functional interface whose functional method is {@link #accept(double...)}.
  *
  * @see DoubleConsumer
  * @see DoubleBiConsumer
+ *
+ * <p>Refer to JDK API documentation at: <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html">https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a></p>
  */
 @FunctionalInterface
 public interface DoubleNConsumer {
-
     /**
      * Performs this operation on the given arguments.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * DoubleNConsumer averager = values -> {
+     *     double sum = 0;
+     *     for (double v : values) sum += v;
+     *     System.out.println("Average: " + (sum / values.length));
+     * };
+     * averager.accept(1.0, 2.0, 3.0); // Prints: Average: 2.0
+     * }</pre>
      *
      * @param args the double input arguments as a varargs array
      */

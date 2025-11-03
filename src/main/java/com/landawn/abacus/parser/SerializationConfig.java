@@ -14,7 +14,6 @@
 
 package com.landawn.abacus.parser;
 
-import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.util.DateTimeFormat;
 import com.landawn.abacus.util.N;
 
@@ -63,21 +62,21 @@ public abstract class SerializationConfig<C extends SerializationConfig<C>> exte
      * @return the current {@link Exclusion} strategy, or {@code null} if no exclusion is set
      * @see Exclusion
      */
-    @MayReturnNull
     public Exclusion getExclusion() {
         return exclusion;
     }
 
     /**
      * Sets the exclusion strategy for field serialization in beans.
-     * 
+     *
      * <p>The exclusion strategy allows you to control which fields are included
      * or excluded during serialization based on their values or other criteria.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * config.setExclusion(Exclusion.NULL); // Exclude null fields
-     * config.setExclusion(Exclusion.EMPTY); // Exclude empty collections/strings
+     * config.setExclusion(Exclusion.DEFAULT); // Exclude fields with default values
+     * config.setExclusion(Exclusion.NONE); // Include all fields
      * }</pre>
      *
      * @param exclusion the exclusion strategy to use, or {@code null} for no exclusion

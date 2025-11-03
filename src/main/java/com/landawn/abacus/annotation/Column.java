@@ -56,7 +56,6 @@ import java.lang.annotation.Target;
  * }
  * }</pre>
  * 
- * @since 2018
  * @see Entity
  * @see Table
  * @see Id

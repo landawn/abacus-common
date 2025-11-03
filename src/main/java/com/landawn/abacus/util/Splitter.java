@@ -33,30 +33,226 @@ import com.landawn.abacus.util.stream.ObjIteratorEx;
 import com.landawn.abacus.util.stream.Stream;
 
 /**
- * A utility class for splitting strings based on various delimiters and patterns.
- * This class provides a fluent API for configuring and executing string splitting operations
- * with support for different delimiter types (character, string, pattern) and various
- * configuration options such as trimming, stripping whitespace, omitting empty strings,
- * and limiting the number of resulting substrings.
- * 
+ * A flexible string splitting utility that divides strings into parts based on configurable delimiters
+ * and patterns. This final class provides a fluent builder-pattern API for parsing text with extensive
+ * customization options including whitespace handling, empty string management, result limiting, and
+ * type conversion. Splitter excels at structured text parsing, data extraction, and format conversion
+ * scenarios with optimal performance and memory efficiency.
+ *
+ * <p>Splitter supports multiple delimiter types including single characters, multi-character strings,
+ * and regular expression patterns. It provides sophisticated preprocessing options such as trimming
+ * whitespace, stripping Unicode whitespace, omitting empty results, and limiting the number of splits.
+ * The class integrates seamlessly with the Stream API and Collections Framework for functional
+ * programming patterns and efficient data processing pipelines.</p>
+ *
+ * <p><b>Key Features:</b>
+ * <ul>
+ *   <li><b>Multiple Delimiter Types:</b> Characters, strings, and regex patterns for flexible parsing</li>
+ *   <li><b>Whitespace Handling:</b> Built-in trimming and Unicode-aware whitespace stripping</li>
+ *   <li><b>Empty String Management:</b> Option to omit empty results from split operations</li>
+ *   <li><b>Result Limiting:</b> Control maximum number of splits with configurable limits</li>
+ *   <li><b>Type Conversion:</b> Direct conversion to target types with Type/Class support</li>
+ *   <li><b>Stream Integration:</b> Lazy evaluation with Stream API for memory-efficient processing</li>
+ *   <li><b>Collection Flexibility:</b> Output to any Collection type with custom suppliers</li>
+ *   <li><b>Map Parsing:</b> Specialized MapSplitter for key-value pair extraction</li>
+ * </ul>
+ *
+ * <p><b>Common Use Cases:</b>
+ * <ul>
+ *   <li><b>CSV/TSV Parsing:</b> Structured data file processing with delimiter-based formats</li>
+ *   <li><b>Configuration Parsing:</b> Property files, command-line arguments, and settings</li>
+ *   <li><b>Log Analysis:</b> Extracting fields from structured log entries</li>
+ *   <li><b>Data Import/Export:</b> Converting between string formats and structured data</li>
+ *   <li><b>Text Processing:</b> Natural language processing and document analysis</li>
+ *   <li><b>Protocol Parsing:</b> Network protocols and structured message formats</li>
+ *   <li><b>Template Processing:</b> Extracting components from templated strings</li>
+ * </ul>
+ *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
- * // Split by comma
- * List<String> parts = Splitter.with(",").split("a,b,c");
- * 
- * // Split with trimming and omitting empty strings
- * List<String> parts = Splitter.with(",")
+ * // Basic string splitting
+ * List<String> parts = Splitter.with(",").split("apple,banana,cherry");
+ * // Result: ["apple", "banana", "cherry"]
+ *
+ * // Advanced configuration with preprocessing
+ * List<String> cleaned = Splitter.with(",")
  *     .trimResults()
  *     .omitEmptyStrings()
- *     .split("a, ,b, c");
- * 
- * // Split with limit
- * List<String> parts = Splitter.with(",")
- *     .limit(2)
- *     .split("a,b,c"); // Returns ["a", "b,c"]
+ *     .split("  apple,  , banana , cherry  ");
+ * // Result: ["apple", "banana", "cherry"]
+ *
+ * // Limited splitting with pattern delimiter
+ * List<String> limited = Splitter.pattern("\\s+")
+ *     .limit(3)
+ *     .split("one two three four five");
+ * // Result: ["one", "two", "three four five"]
+ *
+ * // Type conversion with target classes
+ * List<Integer> numbers = Splitter.with(";")
+ *     .split("1;2;3;4", Integer.class);
+ * // Result: [1, 2, 3, 4]
+ *
+ * // Stream processing for large datasets
+ * long count = Splitter.with("\n")
+ *     .splitToStream(largeTextFile)
+ *     .filter(line -> !line.isEmpty())
+ *     .map(String::trim)
+ *     .filter(line -> line.startsWith("ERROR"))
+ *     .count();
+ *
+ * // Map parsing with key-value pairs
+ * Map<String, Integer> config = Splitter.MapSplitter
+ *     .with(";", "=")
+ *     .trimResults()
+ *     .split("timeout=30; retries=3; buffer=1024", String.class, Integer.class);
+ * // Result: {timeout=30, retries=3, buffer=1024}
  * }</pre>
  *
+ * <p><b>Factory Methods:</b>
+ * <ul>
+ *   <li>{@link #defauLt()} - Default whitespace-based splitting</li>
+ *   <li>{@link #forLines()} - Line-based splitting for text processing</li>
+ *   <li>{@link #with(char)} - Single character delimiter</li>
+ *   <li>{@link #with(CharSequence)} - Multi-character string delimiter</li>
+ *   <li>{@link #with(Pattern)} - Regular expression pattern delimiter</li>
+ *   <li>{@link #pattern(CharSequence)} - Create pattern from regex string</li>
+ * </ul>
+ *
+ * <p><b>Configuration Options:</b>
+ * <ul>
+ *   <li>{@link #omitEmptyStrings()} - Skip empty results in output</li>
+ *   <li>{@link #trimResults()} - Remove leading/trailing ASCII whitespace</li>
+ *   <li>{@link #stripResults()} - Remove leading/trailing Unicode whitespace</li>
+ *   <li>{@link #limit(int)} - Limit maximum number of splits performed</li>
+ * </ul>
+ *
+ * <p><b>Output Methods:</b>
+ * <ul>
+ *   <li><b>Lists:</b> {@code split()}, {@code splitToImmutableList()}</li>
+ *   <li><b>Arrays:</b> {@code splitToArray()}, with type conversion support</li>
+ *   <li><b>Custom Collections:</b> {@code split(source, supplier)} with Collection suppliers</li>
+ *   <li><b>Streams:</b> {@code splitToStream()} for lazy evaluation and functional processing</li>
+ *   <li><b>Type Conversion:</b> {@code split(source, targetType)} with Class or Type parameters</li>
+ * </ul>
+ *
+ * <p><b>Advanced Operations:</b>
+ * <ul>
+ *   <li>{@link #splitThenApply(CharSequence, Function)} - Split and transform in one operation</li>
+ *   <li>{@link #splitThenAccept(CharSequence, Consumer)} - Split and process with side effects</li>
+ *   <li>{@link #splitAndForEach(CharSequence, Consumer)} - Lazy per-element processing</li>
+ * </ul>
+ *
+ * <p><b>Delimiter Types and Behavior:</b>
+ * <ul>
+ *   <li><b>Character Delimiter:</b> Fast single-character splitting with O(n) performance</li>
+ *   <li><b>String Delimiter:</b> Multi-character literal string matching</li>
+ *   <li><b>Pattern Delimiter:</b> Full regex support with capturing groups and lookarounds</li>
+ *   <li><b>Whitespace Splitting:</b> Unicode-aware whitespace handling with {@link #WHITE_SPACE_PATTERN}</li>
+ * </ul>
+ *
+ * <p><b>Performance Characteristics:</b>
+ * <ul>
+ *   <li>Character splitting: O(n) time, O(k) space where n is input length, k is result count</li>
+ *   <li>String splitting: O(n*m) time where m is delimiter length</li>
+ *   <li>Pattern splitting: O(n) to O(n*p) depending on regex complexity</li>
+ *   <li>Memory usage: Lazy evaluation reduces memory footprint for stream operations</li>
+ * </ul>
+ *
+ * <p><b>Thread Safety:</b>
+ * Splitter instances are <b>thread-safe</b> after configuration:
+ * <ul>
+ *   <li>Configuration is immutable once created</li>
+ *   <li>Can be safely shared between multiple threads</li>
+ *   <li>No mutable state during splitting operations</li>
+ *   <li>Ideal for caching and reuse in concurrent environments</li>
+ * </ul>
+ *
+ * <p><b>Whitespace Handling Details:</b>
+ * <ul>
+ *   <li><b>trimResults():</b> Removes ASCII whitespace (space, tab, newline, carriage return)</li>
+ *   <li><b>stripResults():</b> Removes all Unicode whitespace characters</li>
+ *   <li><b>Both methods:</b> Applied after splitting but before empty string filtering</li>
+ *   <li><b>Unicode Support:</b> {@link #WHITE_SPACE_PATTERN} provides full Unicode whitespace matching</li>
+ * </ul>
+ *
+ * <p><b>Type Conversion Support:</b>
+ * <ul>
+ *   <li>Automatic conversion using {@link com.landawn.abacus.type.Type} system</li>
+ *   <li>Support for primitives, wrapper types, collections, and custom types</li>
+ *   <li>Error handling for invalid conversions with descriptive exceptions</li>
+ *   <li>Null handling according to target type nullability</li>
+ * </ul>
+ *
+ * <p><b>MapSplitter Integration:</b>
+ * The nested {@link MapSplitter} class provides specialized functionality for parsing
+ * key-value pair strings:
+ * <pre>{@code
+ * Map<String, String> properties = Splitter.MapSplitter
+ *     .with(",", "=")
+ *     .split("name=John,age=30,city=NYC");
+ * }</pre>
+ *
+ * <p><b>Stream Integration Patterns:</b>
+ * <ul>
+ *   <li><b>Lazy Evaluation:</b> {@code splitToStream()} for memory-efficient processing</li>
+ *   <li><b>Parallel Processing:</b> Convert to parallel streams for CPU-intensive operations</li>
+ *   <li><b>Pipeline Composition:</b> Chain with other stream operations for complex transformations</li>
+ *   <li><b>Collector Integration:</b> Use with custom collectors for specialized aggregations</li>
+ * </ul>
+ *
+ * <p><b>Error Handling:</b>
+ * <ul>
+ *   <li>Throws {@link IllegalArgumentException} for invalid configuration parameters</li>
+ *   <li>Throws {@link IllegalArgumentException} for null required parameters</li>
+ *   <li>Handles null input strings gracefully (returns empty results)</li>
+ *   <li>Type conversion errors propagate with descriptive messages</li>
+ * </ul>
+ *
+ * <p><b>Best Practices:</b>
+ * <ul>
+ *   <li>Cache configured Splitter instances for repeated use</li>
+ *   <li>Use {@code splitToStream()} for large inputs to minimize memory usage</li>
+ *   <li>Configure whitespace handling before other options for optimal performance</li>
+ *   <li>Use appropriate delimiter types based on parsing requirements</li>
+ *   <li>Consider {@code limit()} for performance when only first few splits are needed</li>
+ * </ul>
+ *
+ * <p><b>Integration Points:</b>
+ * <ul>
+ *   <li><b>{@link Joiner}:</b> Complementary class for string joining operations</li>
+ *   <li><b>{@link Stream}:</b> Functional programming and lazy evaluation support</li>
+ *   <li><b>{@link Type}:</b> Type system integration for automatic conversions</li>
+ *   <li><b>Collections Framework:</b> Full compatibility with all collection types</li>
+ * </ul>
+ *
+ * <p><b>Memory Management:</b>
+ * <ul>
+ *   <li>Streaming operations minimize memory footprint</li>
+ *   <li>Immutable configuration prevents memory leaks</li>
+ *   <li>Lazy evaluation defers allocation until needed</li>
+ *   <li>Consider streaming for very large input texts</li>
+ * </ul>
+ *
+ * <p><b>Comparison with Alternatives:</b>
+ * <ul>
+ *   <li><b>vs String.split():</b> More configuration options and type safety</li>
+ *   <li><b>vs Pattern.split():</b> Fluent API and additional preprocessing options</li>
+ *   <li><b>vs StringTokenizer:</b> Modern API with functional programming support</li>
+ *   <li><b>vs Google Guava Splitter:</b> Similar API with additional type conversion features</li>
+ * </ul>
+ *
+ * <p><b>Constants:</b>
+ * <ul>
+ *   <li>{@link #WHITE_SPACE_PATTERN} - Compiled regex for Unicode whitespace matching</li>
+ * </ul>
+ *
  * @see Joiner
+ * @see MapSplitter
+ * @see Pattern
+ * @see Stream
+ * @see Type
+ * @see String#split(String)
+ * @see java.util.StringTokenizer
  */
 @SuppressWarnings("java:S1192")
 public final class Splitter {

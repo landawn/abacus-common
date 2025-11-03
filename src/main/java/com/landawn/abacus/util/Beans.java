@@ -55,49 +55,322 @@ import com.landawn.abacus.util.Tuple.Tuple3;
 import com.landawn.abacus.util.stream.Stream;
 
 /**
- * Comprehensive utility class for Java bean manipulation, providing methods for introspection,
- * property access, type conversion, and object transformation.
+ * A comprehensive utility class providing an extensive collection of static methods for JavaBean operations,
+ * introspection, property manipulation, and object transformation. This class serves as the primary bean
+ * utility facade in the Abacus library, offering null-safe, performance-optimized operations for JavaBean
+ * patterns with extensive support for reflection, type conversion, and object lifecycle management.
  *
- * <p>This class offers a wide range of functionality for working with JavaBeans including:</p>
+ * <p>The {@code Beans} class is designed as a final utility class that provides a complete toolkit
+ * for JavaBean processing including property access, bean-to-map conversion, map-to-bean conversion,
+ * object cloning, merging, validation, and introspection. All methods are static, thread-safe, and
+ * designed to handle complex object hierarchies while maintaining optimal performance through caching.</p>
+ *
+ * <p><b>Key Features:</b>
  * <ul>
- *   <li>Bean introspection and property discovery</li>
- *   <li>Property getter/setter access</li>
- *   <li>Bean to Map conversions (flat, deep, and hierarchical)</li>
- *   <li>Map to Bean conversions</li>
- *   <li>Bean cloning and copying</li>
- *   <li>Bean merging with customizable merge functions</li>
- *   <li>Property name transformations (camelCase, snake_case, etc.)</li>
- *   <li>Support for JAXB annotations and XML binding</li>
- *   <li>Builder pattern support detection</li>
- *   <li>Test data generation</li>
+ *   <li><b>Bean Introspection:</b> Complete property discovery and analysis using reflection</li>
+ *   <li><b>Property Access:</b> Dynamic getter/setter invocation with type safety</li>
+ *   <li><b>Object Conversion:</b> Bean-to-Map and Map-to-Bean transformations</li>
+ *   <li><b>Deep Cloning:</b> Recursive object copying with configurable depth control</li>
+ *   <li><b>Bean Merging:</b> Intelligent object merging with customizable merge strategies</li>
+ *   <li><b>Type Conversion:</b> Automatic type conversion between compatible types</li>
+ *   <li><b>Performance Caching:</b> Extensive caching of reflection metadata for optimal performance</li>
+ *   <li><b>Annotation Support:</b> Full support for JAXB, validation, and custom annotations</li>
  * </ul>
  *
- * <p>The class maintains internal caches for performance optimization and supports
- * customization through registration methods for special cases.</p>
+ * <p><b>Core Functional Categories:</b>
+ * <ul>
+ *   <li><b>Bean Validation:</b> isBeanClass, isBuilderClass, hasBuilder for type checking</li>
+ *   <li><b>Property Discovery:</b> getPropNameList, getPropList, getFieldList for introspection</li>
+ *   <li><b>Property Access:</b> getProperty, setProperty with type-safe operations</li>
+ *   <li><b>Object Conversion:</b> bean2Map, map2Bean with deep and shallow conversion options</li>
+ *   <li><b>Object Lifecycle:</b> newInstance, copy, clone, merge for object management</li>
+ *   <li><b>Comparison Operations:</b> equals, deepEquals, compare with configurable comparators</li>
+ *   <li><b>Transformation:</b> transform, convert, fill for object manipulation</li>
+ *   <li><b>Utility Operations:</b> toString, hashCode, register for helper functions</li>
+ * </ul>
+ *
+ * <p><b>Design Philosophy:</b>
+ * <ul>
+ *   <li><b>JavaBean Standards:</b> Full compliance with JavaBean conventions including getter/setter
+ *       patterns, no-arg constructors, and serialization support</li>
+ *   <li><b>Null Safety:</b> Methods handle {@code null} inputs gracefully, returning sensible
+ *       defaults or empty results rather than throwing exceptions</li>
+ *   <li><b>Performance First:</b> Extensive caching of reflection metadata to minimize runtime overhead</li>
+ *   <li><b>Type Safety:</b> Generic methods with compile-time type checking and runtime validation</li>
+ *   <li><b>Flexibility:</b> Support for various object patterns including builders, records, and entities</li>
+ * </ul>
  *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
- * // Check if a class is a bean
- * boolean isBean = Beans.isBeanClass(User.class);
+ * // Bean validation and introspection
+ * boolean isBean = Beans.isBeanClass(User.class);              // Check if class follows bean pattern
+ * List<String> properties = Beans.getPropNameList(User.class); // Get all property names
+ * boolean hasBuilder = Beans.hasBuilder(User.class);           // Check for builder pattern support
  *
- * // Get property names
- * List<String> props = Beans.getPropNameList(User.class);
+ * // Property access operations
+ * User user = new User();
+ * Beans.setProperty(user, "name", "John Doe");                 // Set property value
+ * String name = Beans.getProperty(user, "name");               // Get property value
+ * Class<?> nameType = Beans.getPropType(User.class, "name");   // Get property type
  *
- * // Convert bean to map
- * User user = new User("John", 25);
- * Map<String, Object> map = Beans.bean2Map(user);
+ * // Object creation and instantiation
+ * User newUser = Beans.newInstance(User.class);                // Create new instance
+ * User copied = Beans.copy(user, User.class);                  // Create copy with type conversion
+ * User cloned = Beans.clone(user);                             // Deep clone existing object
  *
- * // Convert map to bean
- * Map<String, Object> data = Map.of("name", "Jane", "age", 30);
- * User newUser = Beans.map2Bean(data, User.class);
+ * // Bean to Map conversion (various formats)
+ * Map<String, Object> flatMap = Beans.bean2Map(user);                    // Flat map conversion
+ * Map<String, Object> deepMap = Beans.bean2Map(user, true);              // Deep map conversion
+ * Map<String, Object> filteredMap = Beans.bean2Map(user, propName -> !propName.startsWith("_"));
+ *
+ * // Map to Bean conversion
+ * Map<String, Object> userData = Map.of("name", "Jane", "age", 25, "email", "jane@example.com");
+ * User userFromMap = Beans.map2Bean(userData, User.class);               // Convert map to bean
+ * User userFromMapIgnoreUnknown = Beans.map2Bean(userData, User.class, true); // Ignore unknown properties
+ *
+ * // Object merging with strategies
+ * User source = new User("John", 30, "john@example.com");
+ * User target = new User("Jane", 25, null);
+ * Beans.merge(source, target);                                          // Merge source into target
+ * Beans.merge(source, target, Beans.IGNORE_NULL);                       // Merge ignoring null values
+ * Beans.merge(source, target, (sourceVal, targetVal) -> sourceVal);     // Custom merge function
+ *
+ * // Object comparison operations
+ * boolean isEqual = Beans.equals(user1, user2);                         // Standard equality
+ * boolean isDeepEqual = Beans.deepEquals(user1, user2);                 // Deep equality check
+ * int comparison = Beans.compare(user1, user2, "name", "age");          // Compare by specific properties
+ *
+ * // Null-safe operations
+ * Map<String, Object> nullSafeMap = Beans.bean2Map(null);               // Returns empty map
+ * User nullSafeUser = Beans.map2Bean(null, User.class);                 // Returns null
+ * boolean nullClassCheck = Beans.isBeanClass(null);                     // Returns false
  * }</pre>
  *
- * @see ParserUtil
- * @see BeanInfo
- * @see PropInfo
+ * <p><b>Bean-to-Map Conversion Options:</b>
+ * <ul>
+ *   <li><b>Flat Conversion:</b> {@code bean2FlatMap()} - Single-level property mapping</li>
+ *   <li><b>Deep Conversion:</b> {@code bean2Map(bean, true)} - Recursive nested object conversion</li>
+ *   <li><b>Filtered Conversion:</b> {@code bean2Map(bean, propFilter)} - Property-based filtering</li>
+ *   <li><b>Named Conversion:</b> {@code bean2Map(bean, propNames)} - Specific property selection</li>
+ * </ul>
+ *
+ * <p><b>Map-to-Bean Conversion Features:</b>
+ * <ul>
+ *   <li><b>Type Conversion:</b> Automatic conversion between compatible types</li>
+ *   <li><b>Unknown Property Handling:</b> Option to ignore or throw exceptions for unknown properties</li>
+ *   <li><b>Nested Object Support:</b> Recursive conversion of nested maps to nested beans</li>
+ *   <li><b>Collection Support:</b> Conversion of map collections to bean collections</li>
+ * </ul>
+ *
+ * <p><b>Object Merging Strategies:</b>
+ * <ul>
+ *   <li><b>Default Merge:</b> Source values overwrite target values unconditionally</li>
+ *   <li><b>Ignore Null:</b> {@code IGNORE_NULL} - Skip null values during merge</li>
+ *   <li><b>Ignore Default:</b> {@code IGNORE_DEFAULT} - Skip default values during merge</li>
+ *   <li><b>Custom Functions:</b> User-defined merge logic with BiFunction parameters</li>
+ * </ul>
+ *
+ * <p><b>Performance Characteristics:</b>
+ * <ul>
+ *   <li><b>Reflection Caching:</b> Extensive caching of Method, Field, and Constructor objects</li>
+ *   <li><b>BeanInfo Caching:</b> Cached property metadata for repeated operations</li>
+ *   <li><b>Type Conversion Caching:</b> Cached conversion functions for performance</li>
+ *   <li><b>Lazy Initialization:</b> On-demand initialization of expensive reflection operations</li>
+ *   <li><b>Memory Efficient:</b> Optimized object allocation and garbage collection friendly</li>
+ * </ul>
+ *
+ * <p><b>Thread Safety:</b>
+ * <ul>
+ *   <li><b>Stateless Design:</b> All static methods are stateless and thread-safe</li>
+ *   <li><b>Concurrent Caching:</b> Thread-safe caching using ConcurrentHashMap</li>
+ *   <li><b>Immutable Operations:</b> Methods create new objects rather than modifying inputs</li>
+ *   <li><b>No Shared State:</b> No mutable static fields that could cause race conditions</li>
+ * </ul>
+ *
+ * <p><b>Annotation Support:</b>
+ * <ul>
+ *   <li><b>JAXB Annotations:</b> Full support for XML binding annotations</li>
+ *   <li><b>Validation Annotations:</b> Integration with bean validation frameworks</li>
+ *   <li><b>Custom Annotations:</b> Support for {@code @Entity}, {@code @Record}, {@code @DiffIgnore}</li>
+ *   <li><b>Reflection Metadata:</b> Annotation-based property filtering and transformation</li>
+ * </ul>
+ *
+ * <p><b>Builder Pattern Support:</b>
+ * <ul>
+ *   <li><b>Builder Detection:</b> Automatic detection of builder pattern implementations</li>
+ *   <li><b>Builder Creation:</b> Factory methods for creating builder instances</li>
+ *   <li><b>Builder Integration:</b> Seamless integration with bean conversion operations</li>
+ *   <li><b>Custom Builders:</b> Support for registration of custom builder patterns</li>
+ * </ul>
+ *
+ * <p><b>Error Handling Strategy:</b>
+ * <ul>
+ *   <li><b>Graceful Degradation:</b> Methods handle edge cases without throwing exceptions</li>
+ *   <li><b>Null Tolerance:</b> Comprehensive null input handling throughout the API</li>
+ *   <li><b>Type Safety:</b> Runtime type validation with clear error messages</li>
+ *   <li><b>Exception Wrapping:</b> Reflection exceptions wrapped in clear, actionable messages</li>
+ * </ul>
+ *
+ * <p><b>Integration with Abacus Framework:</b>
+ * <ul>
+ *   <li><b>Type System:</b> Full integration with Abacus type conversion system</li>
+ *   <li><b>Parser Utilities:</b> Integration with ParserUtil for advanced parsing</li>
+ *   <li><b>Stream API:</b> Compatible with Abacus Stream operations</li>
+ *   <li><b>Collection Utilities:</b> Integration with Maps, Iterables, and other utilities</li>
+ * </ul>
+ *
+ * <p><b>Best Practices:</b>
+ * <ul>
+ *   <li>Use cached property access methods for better performance in loops</li>
+ *   <li>Prefer specific property selection over full bean conversion when possible</li>
+ *   <li>Use appropriate merge strategies based on your use case requirements</li>
+ *   <li>Leverage builder pattern support for immutable object creation</li>
+ *   <li>Use null-safe operations to build robust applications</li>
+ *   <li>Cache BeanInfo objects for repeated operations on the same class</li>
+ * </ul>
+ *
+ * <p><b>Performance Tips:</b>
+ * <ul>
+ *   <li>Use property name constants instead of string literals for better performance</li>
+ *   <li>Batch multiple property operations when working with the same object</li>
+ *   <li>Consider using flat maps instead of deep conversion for simple use cases</li>
+ *   <li>Leverage the caching mechanisms by reusing the same classes</li>
+ *   <li>Use appropriate collection types for optimal conversion performance</li>
+ * </ul>
+ *
+ * <p><b>Common Patterns:</b>
+ * <ul>
+ *   <li><b>Bean Validation:</b> {@code if (Beans.isBeanClass(clazz)) { ... }}</li>
+ *   <li><b>Safe Property Access:</b> {@code Object value = Beans.getProperty(bean, propName);}</li>
+ *   <li><b>DTO Conversion:</b> {@code DTO dto = Beans.copy(entity, DTO.class);}</li>
+ *   <li><b>Configuration Mapping:</b> {@code Config config = Beans.map2Bean(properties, Config.class);}</li>
+ * </ul>
+ *
+ * <p><b>Related Utility Classes:</b>
+ * <ul>
+ *   <li><b>{@link com.landawn.abacus.parser.ParserUtil}:</b> Parser utilities and BeanInfo management</li>
+ *   <li><b>{@link com.landawn.abacus.util.Maps}:</b> Map utilities for bean-map conversion</li>
+ *   <li><b>{@link com.landawn.abacus.util.N}:</b> General utility class with object operations</li>
+ *   <li><b>{@link com.landawn.abacus.util.CommonUtil}:</b> Base utility operations</li>
+ *   <li><b>{@link com.landawn.abacus.util.Strings}:</b> String utilities for property name transformation</li>
+ *   <li><b>{@link com.landawn.abacus.util.TypeReference}:</b> Type utilities for conversion operations</li>
+ *   <li><b>{@link com.landawn.abacus.util.Clazz}:</b> Class utilities and reflection helpers</li>
+ *   <li><b>{@link java.beans.BeanInfo}:</b> Standard Java bean introspection</li>
+ * </ul>
+ *
+ * <p><b>Example: Complex Object Processing</b>
+ * <pre>{@code
+ * // Complex bean processing example
+ * @Entity
+ * public class User {
+ *     private String name;
+ *     private int age;
+ *     private Address address;
+ *     private List<String> roles;
+ *     // getters and setters...
+ * }
+ *
+ * // Comprehensive bean operations
+ * User user = new User();
+ * user.setName("John Doe");
+ * user.setAge(30);
+ * user.setAddress(new Address("123 Main St", "Anytown", "12345"));
+ * user.setRoles(Arrays.asList("admin", "user"));
+ *
+ * // Deep introspection
+ * List<String> allProps = Beans.getPropNameList(User.class);           // [name, age, address, roles]
+ * List<String> readableProps = Beans.getReadablePropNameList(User.class);
+ * List<String> writableProps = Beans.getWritablePropNameList(User.class);
+ *
+ * // Complex conversion operations
+ * Map<String, Object> deepMap = Beans.bean2Map(user, true);            // Deep nested conversion
+ * Map<String, Object> flatMap = Beans.bean2FlatMap(user, "address");   // Flatten address properties
+ * Map<String, Object> filteredMap = Beans.bean2Map(user, 
+ *     propName -> !propName.equals("roles"));                          // Exclude roles
+ *
+ * // Advanced copying with transformations
+ * UserDTO dto = Beans.copy(user, UserDTO.class);                       // Convert to DTO
+ * User cloned = Beans.clone(user);                                     // Deep clone
+ * User partial = Beans.copy(user, User.class, N.asList("name", "age")); // Partial copy
+ *
+ * // Merging with different strategies
+ * User updates = new User();
+ * updates.setName("Jane Doe");
+ * updates.setAge(0);  // Default value
+ *
+ * Beans.merge(updates, user, Beans.IGNORE_DEFAULT);                    // Skip default values
+ * Beans.merge(updates, user, (source, target) -> 
+ *     source != null && !source.equals("") ? source : target);         // Custom merge logic
+ *
+ * // Validation and comparison
+ * boolean isValid = Beans.isBeanClass(User.class);
+ * boolean isEqual = Beans.deepEquals(user, cloned);
+ * int comparison = Beans.compare(user, dto, "name", "age");
+ * }</pre>
+ *
+ * <p><b>Example: Configuration Management</b>
+ * <pre>{@code
+ * // Configuration bean processing
+ * public class DatabaseConfig {
+ *     private String host = "localhost";
+ *     private int port = 5432;
+ *     private String database;
+ *     private String username;
+ *     private String password;
+ *     private boolean ssl = false;
+ *     // getters and setters...
+ * }
+ *
+ * // Load configuration from multiple sources
+ * Map<String, Object> envVars = System.getenv().entrySet().stream()
+ *     .filter(entry -> entry.getKey().startsWith("DB_"))
+ *     .collect(Collectors.toMap(
+ *         entry -> Strings.toCamelCase(entry.getKey().substring(3).toLowerCase()),
+ *         Map.Entry::getValue
+ *     ));
+ *
+ * Map<String, Object> properties = loadPropertiesFile("database.properties");
+ * Map<String, Object> defaults = Beans.bean2Map(new DatabaseConfig()); // Get defaults
+ *
+ * // Merge configurations with precedence: env vars > properties > defaults
+ * Map<String, Object> finalConfig = new HashMap<>(defaults);
+ * finalConfig.putAll(properties);
+ * finalConfig.putAll(envVars);
+ *
+ * // Convert to configuration bean
+ * DatabaseConfig config = Beans.map2Bean(finalConfig, DatabaseConfig.class);
+ *
+ * // Validate configuration
+ * boolean isValidBean = Beans.isBeanClass(DatabaseConfig.class);
+ * List<String> requiredProps = Arrays.asList("host", "port", "database", "username");
+ * boolean hasAllRequired = requiredProps.stream()
+ *     .allMatch(prop -> Beans.getProperty(config, prop) != null);
+ *
+ * // Generate configuration summary
+ * Map<String, Object> summary = Beans.bean2Map(config, prop -> !prop.equals("password"));
+ * String configString = Beans.toString(config, "host", "port", "database", "ssl");
+ * }</pre>
+ *
+ * <p><b>Attribution:</b>
+ * This class includes code adapted from Apache Commons BeanUtils, Spring Framework, and other open
+ * source projects under the Apache License 2.0. Methods from these libraries may have been modified
+ * for consistency, performance optimization, and enhanced functionality within the Abacus framework.</p>
+ *
+ * @see com.landawn.abacus.parser.ParserUtil
+ * @see com.landawn.abacus.parser.ParserUtil.BeanInfo
+ * @see com.landawn.abacus.parser.ParserUtil.PropInfo
  * @see com.landawn.abacus.util.Maps
- * @see com.landawn.abacus.util.CommonUtil
  * @see com.landawn.abacus.util.N
+ * @see com.landawn.abacus.util.CommonUtil
+ * @see com.landawn.abacus.util.Strings
+ * @see com.landawn.abacus.util.TypeReference
+ * @see com.landawn.abacus.util.Clazz
+ * @see com.landawn.abacus.util.stream.Stream
+ * @see com.landawn.abacus.annotation.Entity
+ * @see com.landawn.abacus.annotation.Record
+ * @see java.beans.BeanInfo
+ * @see java.lang.reflect.Method
+ * @see java.lang.reflect.Field
  */
 public final class Beans {
 

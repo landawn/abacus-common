@@ -30,28 +30,136 @@ import com.landawn.abacus.annotation.Beta;
 import com.landawn.abacus.annotation.Internal;
 
 /**
- * A {@link Multimap} implementation that uses {@link List} to store values for each key.
- * This means that duplicate values are allowed for each key, and the insertion order
- * of values is preserved.
+ * A specialized {@link Multimap} implementation that uses {@link List} collections to store multiple values
+ * for each key, preserving insertion order and allowing duplicate values. This final class extends the base
+ * Multimap to provide list-specific functionality optimized for scenarios where value ordering and duplicates
+ * are important.
  *
- * <p>Key characteristics of ListMultimap:</p>
+ * <p>ListMultimap is ideal for use cases where you need to maintain the order in which values were added
+ * to each key and allow the same value to be associated with a key multiple times. The underlying list
+ * structure provides efficient random access and iteration while preserving temporal relationships.</p>
+ *
+ * <p><b>Key Characteristics:</b>
  * <ul>
- * <li>Allows duplicate values for each key</li>
- * <li>Maintains insertion order of values</li>
- * <li>Values for a key are stored in a {@link List}</li>
+ *   <li><b>Duplicate Values:</b> Allows the same value to be added multiple times for the same key</li>
+ *   <li><b>Insertion Order:</b> Maintains the order in which values were added to each key</li>
+ *   <li><b>List Semantics:</b> Each key maps to a {@link List} of values with index-based access</li>
+ *   <li><b>Efficient Access:</b> O(1) access to first/last elements, O(n) for arbitrary positions</li>
+ *   <li><b>Memory Efficient:</b> Only creates lists when values are actually added to keys</li>
+ * </ul>
+ *
+ * <p><b>⚠️ IMPORTANT - Design Decisions:</b>
+ * <ul>
+ *   <li>This is a <b>final class</b> that cannot be extended for API stability</li>
+ *   <li>Extends {@link Multimap} to inherit common multimap operations</li>
+ *   <li>Uses {@link ArrayList} as the default list implementation for optimal performance</li>
+ *   <li>Thread safety depends on the backing Map and List implementations chosen</li>
+ * </ul>
+ *
+ * <p><b>Common Use Cases:</b>
+ * <ul>
+ *   <li><b>Event Processing:</b> Maintaining chronological order of events per entity</li>
+ *   <li><b>Log Aggregation:</b> Collecting log entries grouped by source with temporal ordering</li>
+ *   <li><b>Task Queuing:</b> Managing task lists per worker or category</li>
+ *   <li><b>Data Collection:</b> Gathering survey responses or measurements over time</li>
+ *   <li><b>Relationship Modeling:</b> Representing one-to-many relationships with order significance</li>
+ *   <li><b>Configuration Management:</b> Storing ordered lists of configuration values per key</li>
  * </ul>
  *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
- * ListMultimap<String, Integer> multimap = N.newListMultimap();
- * multimap.put("a", 1);
- * multimap.put("a", 2);
- * multimap.put("a", 1); // duplicate allowed
- * // Result: "a" -> [1, 2, 1]
+ * // Basic operations with duplicates and ordering
+ * ListMultimap<String, Integer> scores = N.newListMultimap();
+ * scores.put("Alice", 85);
+ * scores.put("Alice", 92);
+ * scores.put("Alice", 85);  // duplicate allowed
+ * List<Integer> aliceScores = scores.get("Alice");  // [85, 92, 85]
+ *
+ * // Creating from collections with grouping
+ * List<String> words = Arrays.asList("apple", "apricot", "banana", "blueberry");
+ * ListMultimap<Character, String> byFirstLetter = 
+ *     ListMultimap.create(words, word -> word.charAt(0));
+ * // Result: {'a': ["apple", "apricot"], 'b': ["banana", "blueberry"]}
+ *
+ * // Maintaining chronological order
+ * ListMultimap<String, LocalDateTime> userLogins = N.newListMultimap();
+ * userLogins.put("john", LocalDateTime.now());
+ * userLogins.put("jane", LocalDateTime.now().plusMinutes(5));
+ * userLogins.put("john", LocalDateTime.now().plusMinutes(10));
+ * // Each user's login times are preserved in chronological order
+ *
+ * // Filtering and transformations
+ * ListMultimap<String, Integer> filtered = scores.filter((key, values) -> values.size() > 2);
+ * ListMultimap<String, Integer> transformed = scores.filterByKey(key -> key.startsWith("A"));
+ *
+ * // Conversion to immutable structures
+ * ImmutableMap<String, ImmutableList<Integer>> immutable = scores.toImmutableMap();
  * }</pre>
  *
- * @param <K> the key type
- * @param <E> the element type stored in the value collections
+ * <p><b>Factory Methods:</b>
+ * <ul>
+ *   <li>{@link #of(Object, Object)} - Single key-value pair</li>
+ *   <li>{@link #create(Map)} - From existing Map</li>
+ *   <li>{@link #create(Collection, Function)} - Grouping by key extractor</li>
+ *   <li>{@link #create(Collection, Function, Function)} - Key and value extractors</li>
+ *   <li>{@link #concat(Map, Map)} - Concatenating multiple maps</li>
+ *   <li>{@link #wrap(Map)} - Wrapping existing Map&lt;K, List&lt;E&gt;&gt;</li>
+ *   <li>{@link N#newListMultimap()} - Empty instance with default backing</li>
+ * </ul>
+ *
+ * <p><b>List-Specific Operations:</b>
+ * <ul>
+ *   <li>{@link #getFirst(Object)} - Get the first value for a key</li>
+ *   <li>{@link #getFirstOrDefault(Object, Object)} - Get first value or default</li>
+ *   <li>{@link #inverse()} - Invert keys and values while preserving order</li>
+ *   <li>{@link #toImmutableMap()} - Convert to immutable representation</li>
+ * </ul>
+ *
+ * <p><b>Performance Characteristics:</b>
+ * <ul>
+ *   <li>Key lookup: O(1) average time with HashMap backing</li>
+ *   <li>Value addition: O(1) amortized time for ArrayList</li>
+ *   <li>First value access: O(1) constant time</li>
+ *   <li>Iteration: O(n) where n is total number of values</li>
+ *   <li>Memory usage: O(k + v) where k is keys and v is total values</li>
+ * </ul>
+ *
+ * <p><b>Thread Safety:</b>
+ * ListMultimap is <b>not thread-safe</b> by default. For concurrent access:
+ * <ul>
+ *   <li>Use {@code N.newListMultimap(ConcurrentHashMap::new, ArrayList::new)} for concurrent maps</li>
+ *   <li>Wrap individual lists with {@code Collections.synchronizedList()}</li>
+ *   <li>Use external synchronization for write operations</li>
+ *   <li>Consider using copy-on-write patterns for read-heavy scenarios</li>
+ * </ul>
+ *
+ * <p><b>Comparison with Alternatives:</b>
+ * <ul>
+ *   <li><b>vs {@link SetMultimap}:</b> Allows duplicates and preserves order vs. unique values</li>
+ *   <li><b>vs {@code Map<K, List<E>>}:</b> Automatic list creation and multimap-specific operations</li>
+ *   <li><b>vs Google Guava ListMultimap:</b> Similar API with additional utility methods</li>
+ *   <li><b>vs {@link Multiset}:</b> Key-value structure vs. counting structure</li>
+ * </ul>
+ *
+ * <p><b>Best Practices:</b>
+ * <ul>
+ *   <li>Use appropriate backing implementations based on access patterns</li>
+ *   <li>Consider using {@link #toImmutableMap()} for read-only snapshots</li>
+ *   <li>Filter operations create new instances - chain operations efficiently</li>
+ *   <li>Use {@link #wrap(Map)} when you already have a suitable Map structure</li>
+ *   <li>For large datasets, consider using {@code LinkedList} if insertion performance is critical</li>
+ * </ul>
+ *
+ * <p><b>Memory Considerations:</b>
+ * <ul>
+ *   <li>Empty keys don't consume memory for value collections</li>
+ *   <li>ArrayList backing provides good memory locality for small lists</li>
+ *   <li>Use {@code trimToSize()} on value lists if they become large and stable</li>
+ *   <li>Consider using primitive collections for numeric values to reduce boxing overhead</li>
+ * </ul>
+ *
+ * @param <K> the type of keys maintained by this ListMultimap
+ * @param <E> the type of values maintained in the lists associated with each key
  * @see N#newListMultimap()
  * @see N#newListMultimap(Class, Class)
  * @see N#newListMultimap(Supplier, Supplier)
@@ -59,7 +167,6 @@ import com.landawn.abacus.annotation.Internal;
 public final class ListMultimap<K, E> extends Multimap<K, E, List<E>> {
     /**
      * Constructs a new instance of ListMultimap with the default initial capacity.
-     *
      */
     ListMultimap() {
         this(HashMap.class, ArrayList.class);

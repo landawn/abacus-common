@@ -44,24 +44,279 @@ import java.util.regex.Pattern;
 import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.annotation.SuppressFBWarnings;
 import com.landawn.abacus.type.Type;
+import com.landawn.abacus.util.Strings.StrUtil;
 
 /**
- * <p>Note: A lot of codes in this classed are copied from Google Guava, Apache Commons Math and Apache Commons Lang under the Apache License, Version 2.0 and may be modified</p>
- * <p>The purpose of copying the code is to re-organize the APIs.</p>
+ * A comprehensive utility class providing an extensive collection of static methods for numerical operations,
+ * mathematical computations, rounding, comparisons, and number manipulations. This class serves as the primary
+ * numerical utility facade in the Abacus library, offering performance-optimized operations for all primitive
+ * numeric types and their corresponding wrapper classes.
  *
- * When to throw exception? It's designed to avoid throwing any unnecessary
- * exception if the contract defined by method is not broken. For example, if
- * user tries to reverse a {@code null} or empty String. The input String will be
- * returned. But exception will be thrown if try to add an element to a {@code null} Object array or collection.
- * <br />
- * <br />
- * An empty String/Array/Collection/Map/Iterator/Iterable/InputStream/Reader will always be a preferred choice than a {@code null} for the return value of a method.
- * <br />
+ * <p>The {@code Numbers} class provides a complete mathematical toolkit covering basic arithmetic operations,
+ * advanced mathematical functions, statistical calculations, precision handling, number formatting, and
+ * validation operations. All methods are static, thread-safe, and designed with null-safety and performance
+ * optimization as primary concerns.</p>
  *
- * @see DecimalFormat
+ * <p><b>Key Features:</b>
+ * <ul>
+ *   <li><b>Comprehensive Math Operations:</b> factorial, binomial, mean, statistical functions</li>
+ *   <li><b>Precision Control:</b> Multiple rounding modes with scale and format specifications</li>
+ *   <li><b>Fuzzy Comparisons:</b> Tolerance-based equality and comparison for floating-point numbers</li>
+ *   <li><b>Number Validation:</b> Range checking, finite validation, mathematical integer detection</li>
+ *   <li><b>Type Conversions:</b> Safe conversions between numeric types with overflow detection</li>
+ *   <li><b>BigInteger/BigDecimal Support:</b> Arbitrary precision arithmetic operations</li>
+ *   <li><b>Hyperbolic Functions:</b> asinh, acosh, atanh mathematical functions</li>
+ *   <li><b>Performance Optimized:</b> Efficient algorithms with minimal object allocation</li>
+ * </ul>
+ *
+ * <p><b>Core Functional Categories:</b>
+ * <ul>
+ *   <li><b>Mathematical Functions:</b> factorial, binomial coefficients, mean calculations</li>
+ *   <li><b>Rounding Operations:</b> scale-based rounding, format-based rounding, mode-specific rounding</li>
+ *   <li><b>Comparison Operations:</b> fuzzy equality, tolerance-based comparisons</li>
+ *   <li><b>Validation Operations:</b> finite checking, mathematical integer detection</li>
+ *   <li><b>Conversion Operations:</b> safe type conversions with overflow handling</li>
+ *   <li><b>Hyperbolic Functions:</b> inverse hyperbolic sine, cosine, and tangent</li>
+ *   <li><b>Statistical Operations:</b> mean calculations for arrays and varargs</li>
+ *   <li><b>Precision Arithmetic:</b> arbitrary precision operations with BigInteger/BigDecimal</li>
+ * </ul>
+ *
+ * <p><b>Design Philosophy:</b>
+ * <ul>
+ *   <li><b>Exception Minimization:</b> Methods avoid throwing unnecessary exceptions when contracts
+ *       are not violated. For example, operations on edge cases return sensible defaults rather
+ *       than throwing exceptions where mathematically appropriate.</li>
+ *   <li><b>Accuracy First:</b> Numerical accuracy and precision are prioritized over performance
+ *       when trade-offs are necessary</li>
+ *   <li><b>Consistent API:</b> Uniform method naming and parameter conventions across all operations</li>
+ *   <li><b>Performance Optimization:</b> Efficient algorithms with threshold-based optimizations</li>
+ *   <li><b>Type Safety:</b> Comprehensive overflow detection and safe type conversions</li>
+ * </ul>
+ *
+ * <p><b>Constant Values:</b>
+ * <ul>
+ *   <li><b>Zero Constants:</b> {@code BYTE_ZERO}, {@code SHORT_ZERO}, {@code INTEGER_ZERO}, etc.</li>
+ *   <li><b>One Constants:</b> {@code BYTE_ONE}, {@code SHORT_ONE}, {@code INTEGER_ONE}, etc.</li>
+ *   <li><b>Minus One Constants:</b> {@code BYTE_MINUS_ONE}, {@code SHORT_MINUS_ONE}, etc.</li>
+ *   <li><b>Mathematical Constants:</b> Pre-computed values for common mathematical operations</li>
+ * </ul>
+ *
+ * <p><b>Usage Examples:</b></p>
+ * <pre>{@code
+ * // Mathematical operations
+ * long factorial = Numbers.factorialToLong(10);           // Returns 3,628,800
+ * BigInteger bigFactorial = Numbers.factorialToBigInteger(50); // Large factorial
+ * int binomial = Numbers.binomial(10, 3);                 // Returns 120 (10 choose 3)
+ * double mean = Numbers.mean(1, 2, 3, 4, 5);             // Returns 3.0
+ *
+ * // Rounding operations with various modes
+ * double rounded = Numbers.round(3.14159, 2);             // Returns 3.14
+ * double roundedUp = Numbers.round(3.14159, 2, RoundingMode.CEILING); // Returns 3.15
+ * float formatted = Numbers.round(3.14159f, "##.##");     // Format-based rounding
+ *
+ * // Type conversions with overflow detection
+ * int roundedInt = Numbers.roundToInt(3.7, RoundingMode.HALF_UP); // Returns 4
+ * long roundedLong = Numbers.roundToLong(3.7, RoundingMode.HALF_UP); // Returns 4L
+ * BigInteger bigInt = Numbers.roundToBigInteger(3.7, RoundingMode.HALF_UP);
+ *
+ * // Fuzzy comparisons for floating-point numbers
+ * boolean equal = Numbers.fuzzyEquals(3.14159, 3.14160, 0.001); // Returns true
+ * int comparison = Numbers.fuzzyCompare(3.14159, 3.14160, 0.001); // Returns 0
+ *
+ * // Number validation and checking
+ * boolean isInteger = Numbers.isMathematicalInteger(3.0); // Returns true
+ * boolean isFinite = Numbers.isFinite(3.14159);           // Returns true
+ * boolean isNormal = Numbers.isNormal(3.14159);           // Returns true
+ *
+ * // Hyperbolic functions
+ * double asinh = Numbers.asinh(1.0);                      // Inverse hyperbolic sine
+ * double acosh = Numbers.acosh(2.0);                      // Inverse hyperbolic cosine
+ * double atanh = Numbers.atanh(0.5);                      // Inverse hyperbolic tangent
+ *
+ * // Working with different number types
+ * double doubleMean = Numbers.mean(1.5, 2.5, 3.5);       // Returns 2.5
+ * long longMean = Numbers.mean(1L, 2L, 3L);               // Returns 2L
+ * int intMean = Numbers.mean(1, 2, 3);                    // Returns 2
+ * }</pre>
+ *
+ * <p><b>Rounding Operations:</b>
+ * <ul>
+ *   <li><b>Scale-Based:</b> {@code round(double, int)} with decimal places specification</li>
+ *   <li><b>Mode-Based:</b> {@code round(double, int, RoundingMode)} with specific rounding behavior</li>
+ *   <li><b>Format-Based:</b> {@code round(double, String)} using DecimalFormat patterns</li>
+ *   <li><b>Type Conversion:</b> {@code roundToInt()}, {@code roundToLong()}, {@code roundToBigInteger()}</li>
+ * </ul>
+ *
+ * <p><b>Mathematical Functions:</b>
+ * <ul>
+ *   <li><b>Factorial:</b> {@code factorialToLong()}, {@code factorialToDouble()}, {@code factorialToBigInteger()}</li>
+ *   <li><b>Binomial:</b> {@code binomial()}, {@code binomialToLong()}, {@code binomialToBigInteger()}</li>
+ *   <li><b>Mean:</b> {@code mean()} for various numeric types and arrays</li>
+ *   <li><b>Hyperbolic:</b> {@code asinh()}, {@code acosh()}, {@code atanh()}</li>
+ * </ul>
+ *
+ * <p><b>Comparison and Validation:</b>
+ * <ul>
+ *   <li><b>Fuzzy Equality:</b> {@code fuzzyEquals()} with tolerance-based comparison</li>
+ *   <li><b>Fuzzy Comparison:</b> {@code fuzzyCompare()} returning comparison result</li>
+ *   <li><b>Mathematical Validation:</b> {@code isMathematicalInteger()}, {@code isFinite()}, {@code isNormal()}</li>
+ *   <li><b>Range Checking:</b> Internal validation for parameter bounds and overflow conditions</li>
+ * </ul>
+ *
+ * <p><b>Performance Characteristics:</b>
+ * <ul>
+ *   <li><b>Optimized Algorithms:</b> Efficient implementations for all mathematical operations</li>
+ *   <li><b>Minimal Allocation:</b> Reduced object creation for better performance</li>
+ *   <li><b>Cache-Friendly:</b> Pre-computed constants and lookup tables where appropriate</li>
+ *   <li><b>Threshold Optimization:</b> Algorithm selection based on input size and precision requirements</li>
+ *   <li><b>Precision Control:</b> Balanced approach between speed and numerical accuracy</li>
+ * </ul>
+ *
+ * <p><b>Thread Safety:</b>
+ * <ul>
+ *   <li><b>Stateless Design:</b> All static methods are stateless and thread-safe</li>
+ *   <li><b>Immutable Operations:</b> Methods return new values rather than modifying inputs</li>
+ *   <li><b>No Shared State:</b> No static mutable fields that could cause race conditions</li>
+ *   <li><b>Concurrent Access:</b> Safe for concurrent access from multiple threads</li>
+ * </ul>
+ *
+ * <p><b>Precision and Accuracy:</b>
+ * <ul>
+ *   <li><b>Floating-Point Safety:</b> Proper handling of NaN, infinity, and precision loss</li>
+ *   <li><b>Overflow Detection:</b> Comprehensive overflow and underflow checking</li>
+ *   <li><b>BigDecimal Integration:</b> Arbitrary precision arithmetic when needed</li>
+ *   <li><b>Rounding Mode Support:</b> All standard Java rounding modes supported</li>
+ * </ul>
+ *
+ * <p><b>Error Handling Strategy:</b>
+ * <ul>
+ *   <li><b>Parameter Validation:</b> Comprehensive input validation with clear error messages</li>
+ *   <li><b>Overflow Protection:</b> Detection and handling of arithmetic overflow conditions</li>
+ *   <li><b>Domain Checking:</b> Validation of function domains (e.g., sqrt of negative numbers)</li>
+ *   <li><b>Clear Contracts:</b> Method documentation clearly specifies valid input ranges</li>
+ * </ul>
+ *
+ * <p><b>Integration with Java Math:</b>
+ * <ul>
+ *   <li><b>Math Class Extension:</b> Extends java.lang.Math functionality</li>
+ *   <li><b>BigDecimal/BigInteger:</b> Full integration with arbitrary precision types</li>
+ *   <li><b>RoundingMode Support:</b> Uses standard Java rounding modes</li>
+ *   <li><b>DecimalFormat Integration:</b> Format-based rounding using standard formatters</li>
+ * </ul>
+ *
+ * <p><b>Best Practices:</b>
+ * <ul>
+ *   <li>Use fuzzy comparison methods for floating-point equality checks</li>
+ *   <li>Prefer BigInteger/BigDecimal for operations requiring arbitrary precision</li>
+ *   <li>Specify appropriate rounding modes for financial calculations</li>
+ *   <li>Validate input ranges before mathematical operations</li>
+ *   <li>Use the appropriate return type methods to avoid unnecessary conversions</li>
+ *   <li>Consider tolerance values carefully for fuzzy comparisons</li>
+ * </ul>
+ *
+ * <p><b>Performance Tips:</b>
+ * <ul>
+ *   <li>Use primitive-specific methods (int, long, double) when precision allows</li>
+ *   <li>Cache DecimalFormat instances for repeated format-based rounding</li>
+ *   <li>Consider overflow implications when choosing return types</li>
+ *   <li>Use appropriate tolerance values for fuzzy comparisons to balance accuracy and performance</li>
+ *   <li>Prefer built-in constants over recreating common values</li>
+ * </ul>
+ *
+ * <p><b>Common Patterns:</b>
+ * <ul>
+ *   <li><b>Safe Rounding:</b> {@code double result = Numbers.round(value, 2, RoundingMode.HALF_UP);}</li>
+ *   <li><b>Fuzzy Equality:</b> {@code if (Numbers.fuzzyEquals(a, b, 0.001)) { ... }}</li>
+ *   <li><b>Statistical Analysis:</b> {@code double average = Numbers.mean(dataArray);}</li>
+ *   <li><b>Mathematical Operations:</b> {@code long fact = Numbers.factorialToLong(n);}</li>
+ * </ul>
+ *
+ * <p><b>Related Utility Classes:</b>
+ * <ul>
+ *   <li><b>{@link com.landawn.abacus.util.N}:</b> General utility class with number operations</li>
+ *   <li><b>{@link com.landawn.abacus.util.IEEE754rUtil}:</b> IEEE 754 floating-point utilities</li>
+ *   <li><b>{@link com.landawn.abacus.util.Strings}:</b> String utilities including number parsing</li>
+ *   <li><b>{@link java.lang.Math}:</b> Core Java mathematical functions</li>
+ *   <li><b>{@link java.math.BigDecimal}:</b> Arbitrary precision decimal arithmetic</li>
+ *   <li><b>{@link java.math.BigInteger}:</b> Arbitrary precision integer arithmetic</li>
+ *   <li><b>{@link java.text.DecimalFormat}:</b> Number formatting utilities</li>
+ *   <li><b>{@link java.math.RoundingMode}:</b> Standard rounding mode enumeration</li>
+ * </ul>
+ *
+ * <p><b>Example: Financial Calculations</b>
+ * <pre>{@code
+ * // Financial calculation with proper rounding
+ * double principal = 10000.0;
+ * double rate = 0.05;
+ * int years = 10;
+ *
+ * // Calculate compound interest with precise rounding
+ * double amount = principal * Math.pow(1 + rate, years);
+ * double roundedAmount = Numbers.round(amount, 2, RoundingMode.HALF_UP);
+ *
+ * // Calculate monthly payment components
+ * double monthlyRate = rate / 12;
+ * int months = years * 12;
+ * double payment = (principal * monthlyRate) / (1 - Math.pow(1 + monthlyRate, -months));
+ * double precisePayment = Numbers.round(payment, 2, RoundingMode.HALF_UP);
+ *
+ * // Statistical analysis of payment schedule
+ * double[] payments = new double[months];
+ * Arrays.fill(payments, precisePayment);
+ * double totalPayments = Numbers.mean(payments) * months;
+ * double totalInterest = totalPayments - principal;
+ *
+ * // Format for display
+ * String formattedAmount = String.format("$%.2f", roundedAmount);
+ * String formattedPayment = String.format("$%.2f", precisePayment);
+ * String formattedInterest = String.format("$%.2f", totalInterest);
+ * }</pre>
+ *
+ * <p><b>Example: Scientific Calculations</b>
+ * <pre>{@code
+ * // Hyperbolic function calculations
+ * double x = 2.0;
+ * double sinhInverse = Numbers.asinh(x);    // Inverse hyperbolic sine
+ * double coshInverse = Numbers.acosh(x);    // Inverse hyperbolic cosine
+ * double tanhInverse = Numbers.atanh(0.5);  // Inverse hyperbolic tangent
+ *
+ * // Statistical analysis
+ * double[] dataset = {1.2, 2.3, 3.1, 4.7, 5.2, 6.1, 7.3, 8.4, 9.1, 10.2};
+ * double mean = Numbers.mean(dataset);
+ *
+ * // Combinatorial calculations
+ * int n = 20;
+ * int k = 5;
+ * long combinations = Numbers.binomialToLong(n, k);  // 20 choose 5
+ * BigInteger largeCombinations = Numbers.binomialToBigInteger(100, 50);
+ *
+ * // Fuzzy comparisons for experimental data
+ * double experimental = 9.81;
+ * double theoretical = 9.8;
+ * double tolerance = 0.1;
+ * boolean withinTolerance = Numbers.fuzzyEquals(experimental, theoretical, tolerance);
+ * }</pre>
+ *
+ * <p><b>Nested Classes:</b>
+ * <ul>
+ *   <li><b>{@link UnsignedLongs}:</b> Utilities for unsigned long operations</li>
+ *   <li><b>{@link MillerRabinTester}:</b> Enumeration for primality testing algorithms</li>
+ * </ul>
+ *
+ * <p><b>Attribution:</b>
+ * This class includes code adapted from Apache Commons Lang, Google Guava, and other
+ * open source projects under the Apache License 2.0. Methods from these libraries may have been
+ * modified for consistency, performance optimization, and null-safety enhancement.
+ *
+ * @see com.landawn.abacus.util.N
  * @see com.landawn.abacus.util.IEEE754rUtil
  * @see com.landawn.abacus.util.Strings
  * @see com.landawn.abacus.util.RegExUtil
+ * @see java.lang.Math
+ * @see java.math.BigDecimal
+ * @see java.math.BigInteger
+ * @see java.text.DecimalFormat
+ * @see java.math.RoundingMode
  */
 @SuppressWarnings({ "java:S1192", "java:S2148" })
 public final class Numbers {
@@ -2486,6 +2741,7 @@ public final class Numbers {
      * @throws NumberFormatException if the string is empty or cannot be parsed as a valid integer
      * @see #isCreatable(String)
      * @see Integer#decode(String)
+     * @see StrUtil#createInteger(String)
      */
     @MayReturnNull
     public static Integer createInteger(final String str) throws NumberFormatException {
@@ -2528,6 +2784,7 @@ public final class Numbers {
      * @throws NumberFormatException if the string is empty or cannot be parsed as a valid long
      * @see #isCreatable(String)
      * @see Long#decode(String)
+     * @see StrUtil#createLong(String)
      */
     @MayReturnNull
     public static Long createLong(final String str) throws NumberFormatException {
@@ -2571,6 +2828,8 @@ public final class Numbers {
      * @throws NumberFormatException if the string is empty or cannot be parsed as a valid float
      * @see #isCreatable(String)
      * @see Float#valueOf(String)
+     * @see Long#decode(String)
+     * @see StrUtil#createFloat(String)
      */
     @MayReturnNull
     public static Float createFloat(final String str) throws NumberFormatException {
@@ -2604,6 +2863,8 @@ public final class Numbers {
      * @throws NumberFormatException if the string is empty or cannot be parsed as a valid double
      * @see #isCreatable(String)
      * @see Double#valueOf(String)
+     * @see Long#decode(String)
+     * @see StrUtil#createDouble(String)
      */
     @MayReturnNull
     public static Double createDouble(final String str) throws NumberFormatException {
@@ -2644,6 +2905,8 @@ public final class Numbers {
      * @throws NumberFormatException if the string is empty or not a valid BigInteger representation
      * @see #isCreatable(String)
      * @see BigInteger#BigInteger(String, int)
+     * @see Long#decode(String)
+     * @see StrUtil#createBigInteger(String)
      */
     @MayReturnNull
     public static BigInteger createBigInteger(final String str) throws NumberFormatException {
@@ -2711,6 +2974,8 @@ public final class Numbers {
      * @throws NumberFormatException if the string is empty or not a valid BigDecimal representation
      * @see #isCreatable(String)
      * @see BigDecimal#BigDecimal(String)
+     * @see Long#decode(String)
+     * @see StrUtil#createBigDecimal(String)
      */
     @MayReturnNull
     public static BigDecimal createBigDecimal(final String str) throws NumberFormatException {
@@ -2770,6 +3035,8 @@ public final class Numbers {
      * @see #createDouble(String)
      * @see #createBigInteger(String)
      * @see #createBigDecimal(String)
+     * @see Long#decode(String)
+     * @see StrUtil#createNumber(String)
      */
     @SuppressFBWarnings({ "SF_SWITCH_FALLTHROUGH", "SF_SWITCH_NO_DEFAULT" })
     @MayReturnNull

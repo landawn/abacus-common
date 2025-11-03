@@ -63,7 +63,6 @@ import com.landawn.abacus.logging.LoggerFactory;
  * }
  * }</pre>
  * 
- * @since 1.0
  * @see BufferedWriter
  * @see BufferedReader
  */

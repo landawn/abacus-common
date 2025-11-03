@@ -86,9 +86,20 @@ public abstract class DoubleIterator extends ImmutableIterator<Double> {
     };
 
     /**
-     * Returns an empty DoubleIterator instance.
+     * Returns an empty {@code DoubleIterator} with no elements.
      *
-     * @return an empty DoubleIterator
+     * <p>The returned iterator's {@code hasNext()} will always return {@code false},
+     * and calling {@code nextDouble()} will always throw a {@code NoSuchElementException}.</p>
+     *
+     * <p>This method always returns the same singleton instance for efficiency.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * DoubleIterator iter = DoubleIterator.empty();
+     * System.out.println(iter.hasNext()); // false
+     * }</pre>
+     *
+     * @return an empty {@code DoubleIterator}
      */
     @SuppressWarnings("SameReturnValue")
     public static DoubleIterator empty() {//NOSONAR
@@ -96,7 +107,10 @@ public abstract class DoubleIterator extends ImmutableIterator<Double> {
     }
 
     /**
-     * Creates a DoubleIterator from a double array.
+     * Creates a {@code DoubleIterator} from the specified double array.
+     *
+     * <p>If the array is {@code null} or empty, returns an empty iterator.
+     * The iterator will iterate over all elements in the array from start to end.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -104,15 +118,19 @@ public abstract class DoubleIterator extends ImmutableIterator<Double> {
      * DoubleIterator iter = DoubleIterator.of(values);
      * }</pre>
      *
-     * @param a the double array to create an iterator from
-     * @return a new DoubleIterator over the array elements
+     * @param a the double array (may be {@code null})
+     * @return a new {@code DoubleIterator} over the array elements, or an empty iterator if the array is {@code null} or empty
      */
     public static DoubleIterator of(final double... a) {
         return N.isEmpty(a) ? EMPTY : of(a, 0, a.length);
     }
 
     /**
-     * Creates a DoubleIterator from a portion of a double array.
+     * Creates a {@code DoubleIterator} from a subsequence of the specified double array.
+     *
+     * <p>The iterator will iterate over elements from {@code fromIndex} (inclusive) to
+     * {@code toIndex} (exclusive). If {@code fromIndex} equals {@code toIndex}, an empty
+     * iterator is returned.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -120,10 +138,10 @@ public abstract class DoubleIterator extends ImmutableIterator<Double> {
      * DoubleIterator iter = DoubleIterator.of(values, 1, 4); // iterates over 2.0, 3.0, 4.0
      * }</pre>
      *
-     * @param a the double array
+     * @param a the double array (may be {@code null})
      * @param fromIndex the start index (inclusive)
      * @param toIndex the end index (exclusive)
-     * @return a new DoubleIterator over the specified range
+     * @return a new {@code DoubleIterator} over the specified range, or an empty iterator if the array is {@code null} or fromIndex equals toIndex
      * @throws IndexOutOfBoundsException if fromIndex or toIndex is out of bounds
      */
     public static DoubleIterator of(final double[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {

@@ -38,7 +38,6 @@ import java.io.Serial;
  * }
  * }</pre>
  * 
- * @since 2.0
  * @see IllegalStateException
  */
 public class ObjectNotFoundException extends IllegalStateException {

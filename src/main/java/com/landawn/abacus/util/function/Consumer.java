@@ -11,7 +11,6 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-
 package com.landawn.abacus.util.function;
 
 import com.landawn.abacus.annotation.SuppressFBWarnings;
@@ -20,24 +19,23 @@ import com.landawn.abacus.util.Throwables;
 /**
  * Represents an operation that accepts a single input argument and returns no result.
  * Unlike most other functional interfaces, {@code Consumer} is expected to operate via side-effects.
- * 
+ *
  * <p>This interface extends both {@link java.util.function.Consumer} and {@link Throwables.Consumer},
  * providing compatibility with the standard Java Consumer while restricting thrown exceptions to RuntimeException.
- * 
+ *
  * <p>This is a functional interface whose functional method is {@link #accept(Object)}.
- * 
+ *
  * <p>For more information about functional interfaces, refer to the JDK API documentation at:
  * <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html">
  * https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a></p>
- * 
+ *
  * @param <T> the type of the input to the operation
- * 
+ *
  * @see java.util.function.Consumer
  */
 @SuppressFBWarnings("NM_SAME_SIMPLE_NAME_AS_INTERFACE")
 @FunctionalInterface
 public interface Consumer<T> extends Throwables.Consumer<T, RuntimeException>, java.util.function.Consumer<T> { //NOSONAR
-
     /**
      * Performs this operation on the given argument.
      * This method is expected to operate via side-effects.
@@ -89,7 +87,7 @@ public interface Consumer<T> extends Throwables.Consumer<T, RuntimeException>, j
      * Converts this Consumer to a Throwables.Consumer with a specified exception type.
      * This method performs an unchecked cast and is useful when you need to adapt this Consumer
      * to a context that expects a different exception type.
-     * 
+     *
      * <p>Note: Since this is an unchecked cast, ensure that the actual implementation
      * only throws RuntimeException or its subclasses.
      *

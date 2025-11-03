@@ -28,7 +28,7 @@ import com.landawn.abacus.util.Strings;
  * by delegating to the underlying double array type handler.
  */
 @SuppressWarnings("java:S2160")
-public final class PrimitiveDoubleListType extends AbstractPrimitiveListType<DoubleList> {
+final class PrimitiveDoubleListType extends AbstractPrimitiveListType<DoubleList> {
 
     public static final String DOUBLE_LIST = DoubleList.class.getSimpleName();
 
@@ -79,7 +79,6 @@ public final class PrimitiveDoubleListType extends AbstractPrimitiveListType<Dou
      *
      * @param x the DoubleList to convert
      * @return the string representation of the list, or {@code null} if input is null
-     @MayReturnNull
      */
     @Override
     public String stringOf(final DoubleList x) {
@@ -93,7 +92,6 @@ public final class PrimitiveDoubleListType extends AbstractPrimitiveListType<Dou
      *
      * @param str the string to parse
      * @return a DoubleList created from the parsed values, or {@code null} if input is {@code null} or empty
-     @MayReturnNull
      */
     @Override
     public DoubleList valueOf(final String str) {

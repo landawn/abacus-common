@@ -11,40 +11,50 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-
 package com.landawn.abacus.util.function;
 
 import com.landawn.abacus.util.Throwables;
 
 /**
- * Represents a function that produces a char-valued result. This is the
- * char-producing primitive specialization for {@link java.util.function.Function}.
+ * Represents a function that produces a char-valued result.
+ * This is the {@code char}-producing primitive specialization for {@link java.util.function.Function}.
  *
  * <p>This is a functional interface whose functional method is {@link #applyAsChar(Object)}.
  *
  * @param <T> the type of the input to the function
+ *
+ * @see java.util.function.Function
+ * @see java.util.function.ToIntFunction
+ *
+ * <p>Refer to JDK API documentation at: <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html">https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a></p>
  */
 @FunctionalInterface
 public interface ToCharFunction<T> extends Throwables.ToCharFunction<T, RuntimeException> { //NOSONAR
-
     /**
-     * A predefined ToCharFunction instance that unboxes a Character object to a primitive char.
-     * Returns 0 if the input is {@code null}, otherwise returns the char value of the Character object.
-     * 
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * Character boxed = 'A';
-     * char primitive = ToCharFunction.UNBOX.applyAsChar(boxed); // returns 'A'
-     * char defaultValue = ToCharFunction.UNBOX.applyAsChar(null); // returns '\0' (0)
-     * }</pre>
+     * A function that safely unboxes a Character object to a primitive char value.
+     * Returns 0 ('\0') for {@code null} inputs and the char value for {@code non-null} inputs.
+     * This provides null-safe unboxing behavior.
      */
     ToCharFunction<Character> UNBOX = value -> value == null ? 0 : value;
 
     /**
-     * Applies this function to the given argument and returns a char result.
+     * Applies this function to the given argument.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * ToCharFunction<Character> unbox = ToCharFunction.UNBOX;
+     * char result1 = unbox.applyAsChar('A'); // returns 'A'
+     * char result2 = unbox.applyAsChar(null); // returns '\0' (0)
+     *
+     * ToCharFunction<String> firstChar = str -> str.charAt(0);
+     * char result3 = firstChar.applyAsChar("Hello"); // returns 'H'
+     *
+     * ToCharFunction<Integer> digitToChar = n -> Character.forDigit(n, 10);
+     * char result4 = digitToChar.applyAsChar(5); // returns '5'
+     * }</pre>
      *
      * @param value the function argument
-     * @return the function result as a primitive char if any error occurs during function execution
+     * @return the function result as a char value
      */
     @Override
     char applyAsChar(T value);

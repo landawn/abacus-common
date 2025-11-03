@@ -11,7 +11,6 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-
 package com.landawn.abacus.util.function;
 
 import com.landawn.abacus.util.Throwables;
@@ -19,38 +18,33 @@ import com.landawn.abacus.util.Throwables;
 /**
  * Represents a predicate (boolean-valued function) of two {@code boolean}-valued arguments.
  * This is the primitive type specialization of {@link BiPredicate} for {@code boolean}.
- * 
+ *
  * <p>This is a functional interface whose functional method is {@link #test(boolean, boolean)}.
  *
+ * <p>Refer to JDK API documentation at: <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html">https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a></p>
  */
 @FunctionalInterface
 public interface BooleanBiPredicate extends Throwables.BooleanBiPredicate<RuntimeException> { //NOSONAR
-
     /**
      * A predicate that always returns {@code true} regardless of the input arguments.
      */
     BooleanBiPredicate ALWAYS_TRUE = (t, u) -> true;
-
     /**
      * A predicate that always returns {@code false} regardless of the input arguments.
      */
     BooleanBiPredicate ALWAYS_FALSE = (t, u) -> false;
-
     /**
      * A predicate that returns {@code true} if both arguments are {@code true}.
      */
     BooleanBiPredicate BOTH_TRUE = (t, u) -> t && u;
-
     /**
      * A predicate that returns {@code true} if both arguments are {@code false}.
      */
     BooleanBiPredicate BOTH_FALSE = (t, u) -> !t && !u;
-
     /**
      * A predicate that returns {@code true} if both arguments are equal.
      */
     BooleanBiPredicate EQUAL = (t, u) -> t == u;
-
     /**
      * A predicate that returns {@code true} if the arguments are not equal.
      */

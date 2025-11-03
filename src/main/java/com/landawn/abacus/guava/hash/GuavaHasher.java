@@ -26,7 +26,7 @@ import com.landawn.abacus.util.N;
 /**
  * Package-private implementation of {@link Hasher} that wraps a Google Guava
  * {@link com.google.common.hash.Hasher}. This class serves as an adapter between
- * the Abacus hashing API and the underlying Guava implementation.
+ * the abacus-common hashing API and the underlying Guava implementation.
  * 
  * <p>This class is stateful and not thread-safe, following the same contract as
  * the {@link Hasher} interface. Each instance should be used by only one thread
@@ -59,13 +59,10 @@ final class GuavaHasher implements Hasher {
      * Static factory method that creates a new GuavaHasher wrapping the given
      * Guava hasher. This method provides a more convenient way to create
      * instances compared to using the constructor directly.
-     * 
-     * <p><b>Usage Examples (internal):</b></p>
-     * <pre>{@code
-     * com.google.common.hash.Hasher guavaHasher = guavaHashFunction.newHasher();
-     * Hasher wrapped = GuavaHasher.wrap(guavaHasher);
-     * }</pre>
-     * 
+     *
+     * <p><b>Note:</b> This is an internal method. Client code should obtain Hasher
+     * instances through {@link HashFunction#newHasher()} instead.
+     *
      * @param gHasher the Guava hasher to wrap
      * @return a new GuavaHasher instance wrapping the given hasher
      */

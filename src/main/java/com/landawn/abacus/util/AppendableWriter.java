@@ -37,7 +37,6 @@ import java.nio.CharBuffer;
  * }</pre>
  * 
  * @see StringWriter
- * @since 1.0
  */
 public sealed class AppendableWriter extends Writer permits StringWriter {
 
@@ -54,8 +53,8 @@ public sealed class AppendableWriter extends Writer permits StringWriter {
      * AppendableWriter writer = new AppendableWriter(sb);
      * }</pre>
      *
-     * @param appendable the Appendable to wrap, must not be null
-     * @throws IllegalArgumentException if appendable is null
+     * @param appendable the Appendable to wrap, must not be {@code null}
+     * @throws IllegalArgumentException if {@code appendable} is {@code null}
      */
     public AppendableWriter(final Appendable appendable) throws IllegalArgumentException {
         N.checkArgNotNull(appendable, cs.appendable);

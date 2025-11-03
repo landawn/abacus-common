@@ -44,30 +44,33 @@ import java.lang.annotation.Target;
  * 
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
+ * import java.sql.Timestamp;
+ * import com.landawn.abacus.util.Difference;
+ *
  * public class User {
  *     private Long id;
  *     private String username;
  *     private String email;
- *     
+ *
  *     @DiffIgnore
  *     private Timestamp lastModified;  // Changes on every update
- *     
+ *
  *     @DiffIgnore
  *     private Integer version;         // Optimistic locking field
- *     
+ *
  *     @DiffIgnore
  *     private String sessionToken;     // Temporary runtime data
  * }
- * 
- * // Usage:
+ *
+ * // Usage with Difference.BeanDifference:
  * User user1 = getUserFromDatabase();
  * User user2 = getUserAfterUpdate();
- * 
+ *
  * // Comparison will ignore lastModified, version, and sessionToken
- * BeanDifference diff = BeanDifference.of(user1, user2);
+ * // Fields annotated with @DiffIgnore are excluded from comparison
+ * Difference.BeanDifference<?, ?, ?> diff = Difference.BeanDifference.of(user1, user2);
  * }</pre>
  * 
- * @since 2025
  * @see com.landawn.abacus.util.Difference.BeanDifference
  * @see com.landawn.abacus.util.Difference.BeanDifference#of(Object, Object)
  */

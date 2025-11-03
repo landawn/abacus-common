@@ -44,26 +44,149 @@ import com.landawn.abacus.util.function.IntBiObjPredicate;
 import com.landawn.abacus.util.function.IntObjFunction;
 import com.landawn.abacus.util.function.TriFunction;
 import com.landawn.abacus.util.function.TriPredicate;
+import com.landawn.abacus.util.stream.EntryStream;
 import com.landawn.abacus.util.stream.Stream;
 
 /**
- * The Dataset interface represents a data structure that holds a collection of data in a tabular format.
- * It provides a variety of methods for manipulating and accessing the data, such as sorting, filtering, joining, and grouping.
- * It also supports operations like union, intersection, and difference between two Datasets.
- * The data in a Dataset is organized into rows and columns, similar to a table in a relational database.
- * Each column in a Dataset has a name(case-sensitive), and the data within a column is of a specific type.
- * <br />
- * @see com.landawn.abacus.util.Builder.DatasetBuilder
- * @see com.landawn.abacus.util.Sheet
- * @see com.landawn.abacus.util.CSVUtil
- * @see com.landawn.abacus.util.IntFunctions
- * @see com.landawn.abacus.util.Clazz
+ * A interface representing a tabular data structure that provides comprehensive operations
+ * for data manipulation, analysis, and transformation. Dataset serves as the core abstraction
+ * for working with structured data in a table format, similar to a database table or spreadsheet,
+ * with strongly-typed columns and efficient row-based operations.
+ *
+ * <p>Dataset combines the power of relational database operations with the flexibility of
+ * in-memory data processing, providing a rich API for filtering, sorting, joining, grouping,
+ * and transforming data. It supports both functional and imperative programming styles,
+ * making it suitable for various data processing scenarios from simple data manipulation
+ * to complex analytical operations.</p>
+ *
+ * <p><b>Key Features:</b>
+ * <ul>
+ *   <li><b>Tabular Structure:</b> Organized data in rows and columns with named, typed columns</li>
+ *   <li><b>Rich Operations:</b> Comprehensive set of data manipulation operations (filter, sort, join, group)</li>
+ *   <li><b>Type Safety:</b> Strong typing for columns with automatic type conversion and validation</li>
+ *   <li><b>Stream Integration:</b> Full compatibility with Java Stream API for functional programming</li>
+ *   <li><b>Multiple Formats:</b> Support for JSON, XML, CSV import/export with configurable options</li>
+ *   <li><b>Database-like Operations:</b> SQL-inspired operations like joins, unions, intersections</li>
+ *   <li><b>Statistical Analysis:</b> Built-in support for grouping, aggregation, and pivot operations</li>
+ *   <li><b>Memory Efficient:</b> Optimized internal storage and lazy evaluation where possible</li>
+ * </ul>
+ *
+ * <p><b>Common Use Cases:</b>
+ * <ul>
+ *   <li><b>Data Analysis:</b> Statistical analysis, data exploration, and reporting</li>
+ *   <li><b>Data Transformation:</b> ETL operations, data cleaning, and format conversion</li>
+ *   <li><b>Report Generation:</b> Creating formatted reports in various output formats</li>
+ *   <li><b>Database Operations:</b> In-memory database-like operations without SQL overhead</li>
+ *   <li><b>Configuration Management:</b> Structured configuration data processing</li>
+ *   <li><b>Test Data Management:</b> Creating and manipulating test datasets</li>
+ *   <li><b>API Data Processing:</b> Processing JSON/XML responses in structured format</li>
+ * </ul>
+ *
+ * <p><b>Usage Examples:</b>
+ * <pre>{@code
+ * // Creating datasets
+ * Dataset empty = Dataset.empty();
+ * Dataset fromMap = N.newDataset(Map.of("name", List.of("Alice", "Bob"), "age", List.of(25, 30)));
+ * Dataset fromCsv = Dataset.from(csvFile);
+ *
+ * // Basic operations
+ * Dataset filtered = dataset.filter("age", age -> (Integer) age > 25);
+ * Dataset sorted = dataset.copy().sortBy("name");
+ * Dataset projected = dataset.slice(Arrays.asList("name", "email"));
+ *
+ * // Aggregation and grouping
+ * Dataset grouped = dataset.groupBy("department", "salary", "avgSalary", Collectors.averagingDouble(Double::valueOf));
+ * Dataset pivot = dataset.pivot("year", "department", "revenue", Collectors.summingDouble(Double::valueOf));
+ *
+ * // Joins and set operations
+ * Dataset joined = leftDataset.innerJoin(rightDataset, "id", "userId");
+ * Dataset union = dataset1.union(dataset2);
+ * Dataset intersection = dataset1.intersect(dataset2, Arrays.asList("key1", "key2"));
+ *
+ * // Export operations
+ * String json = dataset.toJson();
+ * dataset.toCsv(outputFile);
+ * dataset.toXml("record", xmlWriter);
+ *
+ * // Stream integration
+ * List<Person> people = dataset.stream(Person.class).collect(Collectors.toList());
+ * Map<String, Integer> nameToAge = dataset.stream("name", "age", (name, age) -> 
+ *     Pair.of((String) name, (Integer) age))
+ *     .collect(Collectors.toMap(Pair::left, Pair::right));
+ * }</pre>
+ *
+ * <p><b>Data Types and Columns:</b>
+ * <ul>
+ *   <li><b>Column Names:</b> Case-sensitive string identifiers for columns</li>
+ *   <li><b>Supported Types:</b> All Java types including primitives, collections, and custom objects</li>
+ *   <li><b>Type Conversion:</b> Automatic conversion between compatible types using {@link com.landawn.abacus.type.TypeFactory}</li>
+ *   <li><b>Null Handling:</b> Explicit null value support with type-safe operations</li>
+ * </ul>
+ *
+ * <p><b>Performance Characteristics:</b>
+ * <ul>
+ *   <li>Columnar storage for memory efficiency and cache locality</li>
+ *   <li>Lazy evaluation for chained operations where possible</li>
+ *   <li>Parallel operations support for large datasets</li>
+ *   <li>Optimized internal data structures for frequent operations</li>
+ *   <li>Memory usage scales linearly with data size</li>
+ * </ul>
+ *
+ * <p><b>Thread Safety:</b>
+ * Dataset instances are <b>not thread-safe</b> by default. For concurrent access:
+ * <ul>
+ *   <li>Use external synchronization for write operations</li>
+ *   <li>Read operations can be safely performed concurrently</li>
+ *   <li>Use {@link #freeze()} to create immutable datasets for safe sharing</li>
+ *   <li>Consider using {@link #copy()} for thread-local instances</li>
+ * </ul>
+ *
+ * <p><b>Memory Management:</b>
+ * <ul>
+ *   <li>Use {@link #trimToSize()} to reduce memory footprint after bulk operations</li>
+ *   <li>Use {@link #clear()} to release all data when dataset is no longer needed</li>
+ *   <li>Consider slicing large datasets for processing in chunks</li>
+ *   <li>Frozen datasets share underlying data structures for memory efficiency</li>
+ * </ul>
+ *
+ * <p><b>Factory Methods:</b>
+ * Use the {@link N} utility class for creating Dataset instances:
+ * <ul>
+ *   <li>{@link N#newEmptyDataset()} - Empty dataset with no columns</li>
+ *   <li>{@link N#newEmptyDataset(Collection)} - Empty dataset with specified columns</li>
+ *   <li>{@link N#newDataset(Map)} - Dataset from Map of column names to values</li>
+ *   <li>{@link N#newDataset(Collection)} - Dataset from collection of objects</li>
+ * </ul>
+ *
+ * <p><b>Integration Points:</b>
+ * <ul>
+ *   <li><b>{@link Builder.DatasetBuilder}:</b> Fluent API for constructing datasets</li>
+ *   <li><b>{@link Sheet}:</b> 2D grid operations and pivot table functionality</li>
+ *   <li><b>{@link CSVUtil}:</b> CSV import/export utilities</li>
+ *   <li><b>{@link Stream}:</b> Functional programming operations</li>
+ *   <li><b>{@link Multimap}/{@link Multiset}:</b> Collection-based aggregation results</li>
+ * </ul>
+ *
+ * <p><b>Best Practices:</b>
+ * <ul>
+ *   <li>Use method chaining for complex transformations</li>
+ *   <li>Freeze datasets when sharing between components</li>
+ *   <li>Use appropriate column types for better performance and type safety</li>
+ *   <li>Consider pagination for large datasets to manage memory usage</li>
+ *   <li>Use bulk operations instead of row-by-row modifications</li>
+ * </ul>
+ *
  * @see com.landawn.abacus.util.N#newEmptyDataset()
  * @see com.landawn.abacus.util.N#newEmptyDataset(Collection)
  * @see com.landawn.abacus.util.N#newDataset(Map)
  * @see com.landawn.abacus.util.N#newDataset(Collection)
  * @see com.landawn.abacus.util.N#newDataset(Collection, Collection)
  * @see com.landawn.abacus.util.N#newDataset(String, String, Map)
+ * @see Builder.DatasetBuilder
+ * @see Sheet
+ * @see CSVUtil
+ * @see Stream
+ * @see EntryStream
  */
 public sealed interface Dataset permits RowDataset {
 
@@ -97,7 +220,7 @@ public sealed interface Dataset permits RowDataset {
      * <br />
      * The Dataset is a data structure that stores data in a tabular format, similar to a table in a database.
      * Each item in the <i>columnNames</i> collection represents a column in the Dataset.
-     * The <i>rows</i> parameter is a 2D array where each subarray represents a row in the Dataset.
+     * The <i>rows</i> parameter is a two-dimensional array where each subarray represents a row in the Dataset.
      * The order of elements in each row should correspond to the order of column names.
      *
      * <p><b>Usage Examples:</b></p>
@@ -109,7 +232,7 @@ public sealed interface Dataset permits RowDataset {
      * }</pre>
      *
      * @param columnNames a collection of strings representing the names of the columns in the Dataset.
-     * @param rows a 2D array representing the data in the Dataset. Each subarray is a row. If there is no row, it can be {@code null} or empty array.
+     * @param rows a two-dimensional array representing the data in the Dataset. Each subarray is a row. If there is no row, it can be {@code null} or empty array.
      * @return a new Dataset with the specified column names and rows.
      * @throws IllegalArgumentException if the provided columnNames and rows do not align properly.
      * @see N#newDataset(Collection, Object[][])
@@ -149,7 +272,7 @@ public sealed interface Dataset permits RowDataset {
      * <br />
      * The Dataset is a data structure that stores data in a tabular format, similar to a table in a database.
      * Each item in the <i>columnNames</i> collection represents a column in the Dataset.
-     * The <i>columns</i> parameter is a 2D array where each subarray represents a column in the Dataset.
+     * The <i>columns</i> parameter is a two-dimensional array where each subarray represents a column in the Dataset.
      * The order of elements in each column should correspond to the order of column names.
      *
      * <p><b>Usage Examples:</b></p>
@@ -161,7 +284,7 @@ public sealed interface Dataset permits RowDataset {
      * }</pre>
      *
      * @param columnNames a collection of strings representing the names of the columns in the Dataset.
-     * @param columns a 2D array representing the data in the Dataset. Each subarray is a column. If there is no column, it can be {@code null} or empty array.
+     * @param columns a two-dimensional array representing the data in the Dataset. Each subarray is a column. If there is no column, it can be {@code null} or empty array.
      * @return a new Dataset with the specified column names and columns.
      * @throws IllegalArgumentException if the length of <i>columnNames</i> is not equal to the length of <i>columns</i> or the size of the sub-collection in <i>columns</i> is not equal.
      */

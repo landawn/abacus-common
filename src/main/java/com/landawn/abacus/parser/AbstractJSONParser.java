@@ -25,6 +25,28 @@ import com.landawn.abacus.type.TypeFactory;
 import com.landawn.abacus.util.WD;
 import com.landawn.abacus.util.stream.Stream;
 
+/**
+ * Abstract base class providing common functionality for JSON parser implementations.
+ * This class extends {@link AbstractParser} and implements the {@link JSONParser} interface,
+ * serving as the foundation for concrete JSON parsing implementations.
+ *
+ * <p>This class provides:</p>
+ * <ul>
+ *   <li>Common constants for JSON syntax characters (braces, brackets, quotation marks)</li>
+ *   <li>Default type definitions for objects, strings, and booleans</li>
+ *   <li>Character replacement mappings for JSON escaping</li>
+ *   <li>Default serialization and deserialization configurations</li>
+ *   <li>Implementation of {@link JSONParser} methods with configuration support</li>
+ * </ul>
+ *
+ * <p>Subclasses should focus on the specific parsing algorithms while leveraging
+ * these common utilities and configurations for consistent JSON processing behavior.</p>
+ *
+ * @see JSONParser
+ * @see AbstractParser
+ * @see JSONSerializationConfig
+ * @see JSONDeserializationConfig
+ */
 abstract class AbstractJSONParser extends AbstractParser<JSONSerializationConfig, JSONDeserializationConfig> implements JSONParser {
 
     protected static final char _BRACE_L = WD._BRACE_L;

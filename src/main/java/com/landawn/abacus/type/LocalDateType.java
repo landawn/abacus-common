@@ -22,12 +22,11 @@ import java.sql.SQLException;
 import java.time.Instant;
 import java.time.LocalDate;
 
-import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Numbers;
 import com.landawn.abacus.util.Strings;
 
-public class LocalDateType extends AbstractTemporalType<LocalDate> {
+class LocalDateType extends AbstractTemporalType<LocalDate> {
 
     public static final String LOCAL_DATE = LocalDate.class.getSimpleName();
 
@@ -40,7 +39,7 @@ public class LocalDateType extends AbstractTemporalType<LocalDate> {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * LocalDateType type = new LocalDateType();
+     * Type<LocalDate> type = TypeFactory.getType(LocalDate.class);
      * Class<LocalDate> clazz = type.clazz();
      * }</pre>
      *
@@ -57,7 +56,7 @@ public class LocalDateType extends AbstractTemporalType<LocalDate> {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * LocalDateType type = new LocalDateType();
+     * Type<LocalDate> type = TypeFactory.getType(LocalDate.class);
      * LocalDate date = LocalDate.of(2021, 1, 1);
      * String str = type.stringOf(date); // "2021-01-01"
      * }</pre>
@@ -66,7 +65,6 @@ public class LocalDateType extends AbstractTemporalType<LocalDate> {
      * @return The string representation of the LocalDate, or {@code null} if the input is null
      */
     @Override
-    @MayReturnNull
     public String stringOf(final LocalDate x) {
         return (x == null) ? null : x.toString();
     }
@@ -78,7 +76,7 @@ public class LocalDateType extends AbstractTemporalType<LocalDate> {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * LocalDateType type = new LocalDateType();
+     * Type<LocalDate> type = TypeFactory.getType(LocalDate.class);
      * LocalDate date1 = type.valueOf(1609459200000L);
      * LocalDate date2 = type.valueOf("2021-01-01");
      * }</pre>
@@ -87,7 +85,6 @@ public class LocalDateType extends AbstractTemporalType<LocalDate> {
      * @return The LocalDate representation of the object, or {@code null} if the input is null
      */
     @Override
-    @MayReturnNull
     public LocalDate valueOf(final Object obj) {
         if (obj instanceof Number) {
             return LocalDate.ofInstant(Instant.ofEpochMilli(((Number) obj).longValue()), DEFAULT_ZONE_ID);
@@ -106,7 +103,7 @@ public class LocalDateType extends AbstractTemporalType<LocalDate> {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * LocalDateType type = new LocalDateType();
+     * Type<LocalDate> type = TypeFactory.getType(LocalDate.class);
      * LocalDate date1 = type.valueOf("2021-01-01");
      * LocalDate date2 = type.valueOf("SYS_TIME");
      * LocalDate date3 = type.valueOf("1609459200000");
@@ -116,9 +113,7 @@ public class LocalDateType extends AbstractTemporalType<LocalDate> {
      * @return The parsed LocalDate object, or {@code null} if the input is {@code null} or empty
      * @throws java.time.format.DateTimeParseException if the string cannot be parsed as a LocalDate
      */
-    @MayReturnNull
     @Override
-
     public LocalDate valueOf(final String str) {
         if (Strings.isEmpty(str)) {
             return null; // NOSONAR
@@ -145,7 +140,7 @@ public class LocalDateType extends AbstractTemporalType<LocalDate> {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * LocalDateType type = new LocalDateType();
+     * Type<LocalDate> type = TypeFactory.getType(LocalDate.class);
      * char[] chars = "2021-01-01".toCharArray();
      * LocalDate date = type.valueOf(chars, 0, chars.length);
      * }</pre>
@@ -155,9 +150,7 @@ public class LocalDateType extends AbstractTemporalType<LocalDate> {
      * @param len The number of characters to use
      * @return The parsed LocalDate object, or {@code null} if the input is {@code null} or empty
      */
-    @MayReturnNull
     @Override
-
     public LocalDate valueOf(final char[] cbuf, final int offset, final int len) {
         if ((cbuf == null) || (len == 0)) {
             return null; // NOSONAR
@@ -173,7 +166,7 @@ public class LocalDateType extends AbstractTemporalType<LocalDate> {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * LocalDateType type = new LocalDateType();
+     * Type<LocalDate> type = TypeFactory.getType(LocalDate.class);
      * try (ResultSet rs = stmt.executeQuery()) {
      *     if (rs.next()) {
      *         LocalDate date = type.get(rs, 1);
@@ -187,7 +180,6 @@ public class LocalDateType extends AbstractTemporalType<LocalDate> {
      * @throws SQLException if a database access error occurs or the column index is invalid
      */
     @Override
-    @MayReturnNull
     public LocalDate get(final ResultSet rs, final int columnIndex) throws SQLException {
         try {
             return rs.getObject(columnIndex, LocalDate.class);
@@ -205,7 +197,7 @@ public class LocalDateType extends AbstractTemporalType<LocalDate> {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * LocalDateType type = new LocalDateType();
+     * Type<LocalDate> type = TypeFactory.getType(LocalDate.class);
      * try (ResultSet rs = stmt.executeQuery()) {
      *     if (rs.next()) {
      *         LocalDate date = type.get(rs, "birth_date");
@@ -219,7 +211,6 @@ public class LocalDateType extends AbstractTemporalType<LocalDate> {
      * @throws SQLException if a database access error occurs or the column name is not found
      */
     @Override
-    @MayReturnNull
     public LocalDate get(final ResultSet rs, final String columnName) throws SQLException {
         try {
             return rs.getObject(columnName, LocalDate.class);
@@ -237,7 +228,7 @@ public class LocalDateType extends AbstractTemporalType<LocalDate> {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * LocalDateType type = new LocalDateType();
+     * Type<LocalDate> type = TypeFactory.getType(LocalDate.class);
      * LocalDate date = LocalDate.of(2021, 1, 1);
      * try (PreparedStatement stmt = conn.prepareStatement("INSERT INTO users (birth_date) VALUES (?)")) {
      *     type.set(stmt, 1, date);
@@ -266,7 +257,7 @@ public class LocalDateType extends AbstractTemporalType<LocalDate> {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * LocalDateType type = new LocalDateType();
+     * Type<LocalDate> type = TypeFactory.getType(LocalDate.class);
      * LocalDate date = LocalDate.of(2021, 1, 1);
      * try (CallableStatement stmt = conn.prepareCall("{call update_birth_date(?)}")) {
      *     type.set(stmt, "birth_date", date);

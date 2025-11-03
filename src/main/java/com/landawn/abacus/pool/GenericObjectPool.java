@@ -39,7 +39,7 @@ import com.landawn.abacus.util.Objectory;
 /**
  * A generic implementation of ObjectPool that stores poolable objects in a LIFO (Last-In-First-Out) structure.
  * This implementation uses an ArrayDeque internally for efficient add/remove operations at the head.
- * 
+ *
  * <p>Features:
  * <ul>
  *   <li>Thread-safe operations using ReentrantLock</li>
@@ -48,24 +48,24 @@ import com.landawn.abacus.util.Objectory;
  *   <li>Auto-balancing to maintain optimal pool size</li>
  *   <li>Comprehensive statistics tracking</li>
  * </ul>
- * 
+ *
  * <p>The pool can be configured with different eviction policies:
  * <ul>
  *   <li>LAST_ACCESS_TIME - Evicts least recently accessed objects</li>
  *   <li>ACCESS_COUNT - Evicts least frequently accessed objects</li>
  *   <li>EXPIRATION_TIME - Evicts objects closest to expiration</li>
  * </ul>
- * 
+ *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * // Create a pool with capacity 50, 5-minute eviction delay
  * GenericObjectPool<MyResource> pool = new GenericObjectPool<>(
  *     50, 300000, EvictionPolicy.LAST_ACCESS_TIME
  * );
- * 
+ *
  * // Add resources
  * pool.add(new MyResource());
- * 
+ *
  * // Take and use resources
  * MyResource resource = pool.take();
  * try {
@@ -74,7 +74,7 @@ import com.landawn.abacus.util.Objectory;
  *     pool.add(resource); // return to pool
  * }
  * }</pre>
- * 
+ *
  * @param <E> the type of elements in this pool, must implement Poolable
  * @see ObjectPool
  * @see AbstractPool
@@ -108,9 +108,9 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
     /**
      * Constructs a new GenericObjectPool with basic configuration.
      * Uses default auto-balancing and balance factor settings.
-     * 
-     * @param capacity the maximum number of objects the pool can hold
-     * @param evictDelay the delay in milliseconds between eviction runs, or 0 to disable
+     *
+     * @param capacity the maximum number of objects the pool can hold (must be non-negative)
+     * @param evictDelay the interval in milliseconds between eviction runs, or 0 to disable eviction (must be non-negative)
      * @param evictionPolicy the policy to use for selecting objects to evict
      */
     protected GenericObjectPool(final int capacity, final long evictDelay, final EvictionPolicy evictionPolicy) {
@@ -120,11 +120,11 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
     /**
      * Constructs a new GenericObjectPool with memory-based constraints.
      * Uses default auto-balancing and balance factor settings.
-     * 
-     * @param capacity the maximum number of objects the pool can hold
-     * @param evictDelay the delay in milliseconds between eviction runs, or 0 to disable
+     *
+     * @param capacity the maximum number of objects the pool can hold (must be non-negative)
+     * @param evictDelay the interval in milliseconds between eviction runs, or 0 to disable eviction (must be non-negative)
      * @param evictionPolicy the policy to use for selecting objects to evict
-     * @param maxMemorySize the maximum total memory in bytes, or 0 for no limit
+     * @param maxMemorySize the maximum total memory in bytes, or 0 for no limit (must be non-negative)
      * @param memoryMeasure the function to calculate object memory size, or {@code null} if not using memory limits
      */
     protected GenericObjectPool(final int capacity, final long evictDelay, final EvictionPolicy evictionPolicy, final long maxMemorySize,
@@ -135,12 +135,12 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
     /**
      * Constructs a new GenericObjectPool with auto-balancing configuration.
      * Does not use memory-based constraints.
-     * 
-     * @param capacity the maximum number of objects the pool can hold
-     * @param evictDelay the delay in milliseconds between eviction runs, or 0 to disable
+     *
+     * @param capacity the maximum number of objects the pool can hold (must be non-negative)
+     * @param evictDelay the interval in milliseconds between eviction runs, or 0 to disable eviction (must be non-negative)
      * @param evictionPolicy the policy to use for selecting objects to evict
      * @param autoBalance whether to automatically remove objects when the pool is full
-     * @param balanceFactor the proportion of objects to remove during balancing (0-1)
+     * @param balanceFactor the proportion of objects to remove during balancing, typically 0.1 to 0.5 (must be non-negative)
      */
     protected GenericObjectPool(final int capacity, final long evictDelay, final EvictionPolicy evictionPolicy, final boolean autoBalance,
             final float balanceFactor) {
@@ -149,13 +149,13 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
 
     /**
      * Constructs a new GenericObjectPool with full configuration options.
-     * 
-     * @param capacity the maximum number of objects the pool can hold
-     * @param evictDelay the delay in milliseconds between eviction runs, or 0 to disable
+     *
+     * @param capacity the maximum number of objects the pool can hold (must be non-negative)
+     * @param evictDelay the interval in milliseconds between eviction runs, or 0 to disable eviction (must be non-negative)
      * @param evictionPolicy the policy to use for selecting objects to evict
      * @param autoBalance whether to automatically remove objects when the pool is full
-     * @param balanceFactor the proportion of objects to remove during balancing (0-1)
-     * @param maxMemorySize the maximum total memory in bytes, or 0 for no limit
+     * @param balanceFactor the proportion of objects to remove during balancing, typically 0.1 to 0.5 (must be non-negative)
+     * @param maxMemorySize the maximum total memory in bytes, or 0 for no limit (must be non-negative)
      * @param memoryMeasure the function to calculate object memory size, or {@code null} if not using memory limits
      */
     protected GenericObjectPool(final int capacity, final long evictDelay, final EvictionPolicy evictionPolicy, final boolean autoBalance,
@@ -205,20 +205,20 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
     }
 
     /**
-     * Adds an element to the pool.
-     * The element is added to the head of the internal deque for LIFO ordering.
-     * 
-     * <p>The add operation will fail if:
+     * Adds an object to the pool.
+     * The object is added to the head of the internal deque for LIFO ordering.
+     *
+     * <p>The add operation will fail if:</p>
      * <ul>
-     *   <li>The element is null</li>
-     *   <li>The element has already expired</li>
+     *   <li>The object is null</li>
+     *   <li>The object has already expired</li>
      *   <li>The pool is at capacity and auto-balancing is disabled</li>
-     *   <li>The element would exceed memory constraints</li>
+     *   <li>The operation will fail if the object would exceed memory constraints</li>
      * </ul>
-     * 
-     * @param e the element to add, must not be null
-     * @return {@code true} if the element was successfully added, {@code false} otherwise
-     * @throws IllegalArgumentException if the element is null
+     *
+     * @param e the object to add, must not be null
+     * @return {@code true} if the object was successfully added, {@code false} otherwise
+     * @throws IllegalArgumentException if the object is null
      * @throws IllegalStateException if the pool has been closed
      */
     @Override
@@ -279,12 +279,12 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
     }
 
     /**
-     * Adds an element to the pool with optional automatic destruction on failure.
-     * This method ensures proper cleanup of resources if the element cannot be added.
-     * 
-     * @param e the element to add, must not be null
+     * Adds an object to the pool with optional automatic destruction on failure.
+     * This method ensures proper cleanup of resources if the object cannot be added.
+     *
+     * @param e the object to add, must not be null
      * @param autoDestroyOnFailedToAdd if {@code true}, calls e.destroy(PUT_ADD_FAILURE) if add fails
-     * @return {@code true} if the element was successfully added, {@code false} otherwise
+     * @return {@code true} if the object was successfully added, {@code false} otherwise
      */
     @Override
     public boolean add(final E e, final boolean autoDestroyOnFailedToAdd) {
@@ -302,14 +302,14 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
     }
 
     /**
-     * Attempts to add an element to the pool within the specified timeout period.
+     * Attempts to add an object to the pool within the specified timeout period.
      * This method blocks until space becomes available, the timeout expires, or the thread is interrupted.
-     * 
-     * @param e the element to add, must not be null
+     *
+     * @param e the object to add, must not be null
      * @param timeout the maximum time to wait
      * @param unit the time unit of the timeout argument
      * @return {@code true} if successful, {@code false} if the timeout elapsed before space was available
-     * @throws IllegalArgumentException if the element is null
+     * @throws IllegalArgumentException if the object is null
      * @throws IllegalStateException if the pool has been closed
      * @throws InterruptedException if interrupted while waiting
      */
@@ -369,10 +369,10 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
     }
 
     /**
-     * Attempts to add an element to the pool with timeout and automatic destruction on failure.
+     * Attempts to add an object to the pool with timeout and automatic destruction on failure.
      * Combines timeout waiting with automatic resource cleanup.
-     * 
-     * @param e the element to add, must not be null
+     *
+     * @param e the object to add, must not be null
      * @param timeout the maximum time to wait
      * @param unit the time unit of the timeout argument
      * @param autoDestroyOnFailedToAdd if {@code true}, calls e.destroy(PUT_ADD_FAILURE) if add fails
@@ -395,18 +395,17 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
     }
 
     /**
-     * Retrieves and removes an element from the pool.
-     * Elements are taken from the head of the deque (LIFO order).
+     * Retrieves and removes an object from the pool.
+     * Objects are taken from the head of the deque (LIFO order).
      *
-     * <p>If the retrieved element has expired, it will be destroyed and the method
-     * will return {@code null}. The element's activity print is updated on successful retrieval.
+     * <p>If the retrieved object has expired, it will be destroyed and the method
+     * will return {@code null}. The object's activity print is updated to reflect this access.
      *
-     * @return an element from the pool, or {@code null} if the pool is empty
+     * @return an object from the pool, or {@code null} if the pool is empty
      * @throws IllegalStateException if the pool has been closed
      */
     @MayReturnNull
     @Override
-
     public E take() throws IllegalStateException {
         assertNotClosed();
 
@@ -448,21 +447,20 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
     }
 
     /**
-     * Retrieves and removes an element from the pool within the specified timeout period.
-     * This method blocks until an element becomes available, the timeout expires, or the thread is interrupted.
+     * Retrieves and removes an object from the pool within the specified timeout period.
+     * This method blocks until an object becomes available, the timeout expires, or the thread is interrupted.
      *
-     * <p>Expired elements are automatically destroyed and the method continues waiting
-     * for a valid element until the timeout expires.
+     * <p>Expired objects are automatically destroyed and the method continues waiting
+     * for a valid object until the timeout expires. The object's activity print is updated to reflect this access.
      *
      * @param timeout the maximum time to wait
      * @param unit the time unit of the timeout argument
-     * @return an element from the pool, or {@code null} if the timeout elapsed before an element was available
+     * @return an object from the pool, or {@code null} if the timeout elapsed before an object was available
      * @throws IllegalStateException if the pool has been closed
      * @throws InterruptedException if interrupted while waiting
      */
     @MayReturnNull
     @Override
-
     public E take(final long timeout, final TimeUnit unit) throws IllegalStateException, InterruptedException {
         assertNotClosed();
 
@@ -515,11 +513,11 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
     }
 
     /**
-     * Checks if the pool contains the specified element.
+     * Checks if the pool contains the specified object.
      * This method uses the equals method for comparison.
-     * 
-     * @param valueToFind the element to search for
-     * @return {@code true} if the pool contains the element, {@code false} otherwise
+     *
+     * @param valueToFind the object to search for
+     * @return {@code true} if the pool contains the object, {@code false} otherwise
      * @throws IllegalStateException if the pool has been closed
      */
     @Override
@@ -536,9 +534,9 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
     }
 
     /**
-     * Removes a portion of elements from the pool based on the configured balance factor.
-     * Elements are selected for removal according to the eviction policy.
-     * 
+     * Removes a portion of objects from the pool based on the configured balance factor.
+     * Objects are selected for removal according to the eviction policy.
+     *
      * @throws IllegalStateException if the pool has been closed
      */
     @Override
@@ -557,9 +555,9 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
     }
 
     /**
-     * Removes all elements from the pool.
-     * All removed elements are destroyed with the REMOVE_REPLACE_CLEAR reason.
-     * 
+     * Removes all objects from the pool.
+     * All removed objects are destroyed with the REMOVE_REPLACE_CLEAR reason.
+     *
      * @throws IllegalStateException if the pool has been closed
      */
     @Override
@@ -571,7 +569,7 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
 
     /**
      * Closes this pool and releases all resources.
-     * Cancels the eviction task if scheduled and destroys all pooled elements.
+     * Cancels the eviction task if scheduled and destroys all pooled objects.
      * This method is idempotent.
      */
     @Override
@@ -592,9 +590,9 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
     }
 
     /**
-     * Returns the current number of elements in the pool.
-     * 
-     * @return the number of elements currently in the pool
+     * Returns the current number of objects in the pool.
+     *
+     * @return the number of objects currently in the pool
      */
     @Override
     public int size() throws IllegalStateException {
@@ -616,8 +614,8 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
 
     /**
      * Compares this pool to the specified object for equality.
-     * Two pools are equal if they contain the same elements in the same order.
-     * 
+     * Two pools are equal if they contain the same objects in the same order.
+     *
      * @param obj the object to compare with
      * @return {@code true} if the pools are equal, {@code false} otherwise
      */
@@ -641,10 +639,10 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
     }
 
     /**
-     * Removes the specified number of elements from the pool based on the eviction policy.
+     * Removes the specified number of objects from the pool based on the eviction policy.
      * This method is called internally during vacate operations.
-     * 
-     * @param vacationNumber the number of elements to remove
+     *
+     * @param vacationNumber the number of objects to remove
      */
     protected void vacate(final int vacationNumber) {
         final int size = pool.size();
@@ -673,7 +671,7 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
     }
 
     /**
-     * Scans the pool for expired elements and removes them.
+     * Scans the pool for expired objects and removes them.
      * This method is called periodically by the scheduled eviction task.
      */
     @SuppressWarnings("deprecation")
@@ -708,10 +706,11 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
     }
 
     /**
-     * Destroys a single pooled element and updates statistics.
-     * 
-     * @param value the element to destroy
-     * @param caller the reason for destruction
+     * Destroys a single pooled object and updates statistics.
+     * Updates memory tracking and eviction counts as appropriate, and handles exceptions gracefully.
+     *
+     * @param value the object to destroy
+     * @param caller the reason for destruction (determines whether eviction count is incremented)
      */
     protected void destroy(final E value, final Caller caller) {
         if (caller == Caller.EVICT || caller == Caller.VACATE) {
@@ -737,6 +736,13 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
         }
     }
 
+    /**
+     * Destroys all objects in the provided collection.
+     * This is a convenience method that calls {@link #destroy(Poolable, Caller)} for each object.
+     *
+     * @param c the collection of objects to destroy
+     * @param caller the reason for destruction
+     */
     protected void destroyAll(final Collection<E> c, final Caller caller) {
         if (N.notEmpty(c)) {
             for (final E e : c) {

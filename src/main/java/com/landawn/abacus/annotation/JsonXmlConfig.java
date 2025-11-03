@@ -39,7 +39,6 @@ import com.landawn.abacus.util.NamingPolicy;
  * public class User { }
  * }</pre>
  *
- * @since 2020
  * @see NamingPolicy
  * @see Exclusion
  */

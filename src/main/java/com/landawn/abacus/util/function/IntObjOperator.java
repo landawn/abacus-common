@@ -11,7 +11,6 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-
 package com.landawn.abacus.util.function;
 
 import com.landawn.abacus.annotation.Beta;
@@ -33,7 +32,6 @@ import com.landawn.abacus.util.Throwables;
 @Beta
 @FunctionalInterface
 public interface IntObjOperator<T> extends Throwables.IntObjOperator<T, RuntimeException> { //NOSONAR
-
     /**
      * Applies this operator to the given operands.
      *

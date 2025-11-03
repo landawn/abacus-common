@@ -31,7 +31,7 @@ import com.landawn.abacus.util.WD;
  * @param <E> the element type of the immutable list
  */
 @SuppressWarnings("java:S2160")
-public class ImmutableListType<E> extends AbstractType<ImmutableList<E>> {
+class ImmutableListType<E> extends AbstractType<ImmutableList<E>> {
 
     private final String declaringName;
 
@@ -60,7 +60,6 @@ public class ImmutableListType<E> extends AbstractType<ImmutableList<E>> {
      * using simple class names rather than fully qualified names.
      *
      * @return the declaring name of this type (e.g., "ImmutableList&lt;String&gt;")
-     @MayReturnNull
      */
     @Override
     public String declaringName() {
@@ -141,7 +140,6 @@ public class ImmutableListType<E> extends AbstractType<ImmutableList<E>> {
      * Delegates to the underlying list type for serialization categorization.
      *
      * @return SerializationType.SERIALIZABLE if elements are serializable, SerializationType.COLLECTION otherwise
-     @MayReturnNull
      */
     @Override
     public SerializationType getSerializationType() {

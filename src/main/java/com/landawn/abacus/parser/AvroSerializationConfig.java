@@ -19,7 +19,6 @@ import java.util.Set;
 
 import org.apache.avro.Schema;
 
-import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.annotation.SuppressFBWarnings;
 import com.landawn.abacus.util.N;
 
@@ -36,7 +35,6 @@ import com.landawn.abacus.util.N;
  *     .setExclusion(Exclusion.NULL);
  * }</pre>
  * 
- * @since 0.8
  */
 public class AvroSerializationConfig extends SerializationConfig<AvroSerializationConfig> {
 
@@ -54,7 +52,6 @@ public class AvroSerializationConfig extends SerializationConfig<AvroSerializati
      *
      * @return the Avro schema, or {@code null} if not set
      */
-    @MayReturnNull
     public Schema getSchema() {
         return schema;
     }

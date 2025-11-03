@@ -20,7 +20,6 @@ import java.sql.Clob;
 import java.sql.SQLException;
 import java.util.Collection;
 
-import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.annotation.SuppressFBWarnings;
 import com.landawn.abacus.exception.UncheckedSQLException;
 import com.landawn.abacus.parser.JSONXMLSerializationConfig;
@@ -38,7 +37,7 @@ import com.landawn.abacus.util.WD;
  * Character elements are quoted in string representations to handle special characters properly.
  */
 @SuppressWarnings("java:S2160")
-public final class PrimitiveCharArrayType extends AbstractPrimitiveArrayType<char[]> {
+final class PrimitiveCharArrayType extends AbstractPrimitiveArrayType<char[]> {
 
     public static final String CHAR_ARRAY = char[].class.getSimpleName();
 
@@ -91,9 +90,7 @@ public final class PrimitiveCharArrayType extends AbstractPrimitiveArrayType<cha
      * @param x the char array to convert
      * @return the string representation of the array, or {@code null} if input is null
      */
-    @MayReturnNull
     @Override
-
     public String stringOf(final char[] x) {
         if (x == null) {
             return null; // NOSONAR
@@ -133,7 +130,6 @@ public final class PrimitiveCharArrayType extends AbstractPrimitiveArrayType<cha
      * @param str the string to parse
      * @return the parsed char array, or {@code null} if input is null
      */
-    @MayReturnNull
     @Override
     public char[] valueOf(final String str) {
         if (Strings.isEmpty(str) || Strings.isBlank(str)) {
@@ -172,7 +168,6 @@ public final class PrimitiveCharArrayType extends AbstractPrimitiveArrayType<cha
      * @param obj the object to convert (can be a Clob or other type)
      * @return the char array representation of the object, or {@code null} if input is null
      */
-    @MayReturnNull
     @SuppressFBWarnings
     @Override
     public char[] valueOf(final Object obj) {
@@ -282,7 +277,6 @@ public final class PrimitiveCharArrayType extends AbstractPrimitiveArrayType<cha
      * @param c the Collection of Character objects to convert
      * @return a char array containing the unboxed values, or {@code null} if input is null
      */
-    @MayReturnNull
     @Override
     public char[] collection2Array(final Collection<?> c) {
         if (c == null) {

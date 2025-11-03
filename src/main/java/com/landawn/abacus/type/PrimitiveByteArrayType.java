@@ -23,7 +23,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Collection;
 
-import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.annotation.SuppressFBWarnings;
 import com.landawn.abacus.exception.UncheckedSQLException;
 import com.landawn.abacus.parser.JSONXMLSerializationConfig;
@@ -39,7 +38,7 @@ import com.landawn.abacus.util.WD;
  * and conversion between byte arrays and their various representations including Blob objects.
  */
 @SuppressWarnings("java:S2160")
-public final class PrimitiveByteArrayType extends AbstractPrimitiveArrayType<byte[]> {
+final class PrimitiveByteArrayType extends AbstractPrimitiveArrayType<byte[]> {
 
     public static final String BYTE_ARRAY = byte[].class.getSimpleName();
 
@@ -103,9 +102,7 @@ public final class PrimitiveByteArrayType extends AbstractPrimitiveArrayType<byt
      * @param x the byte array to convert
      * @return the string representation of the array, or {@code null} if input is null
      */
-    @MayReturnNull
     @Override
-
     public String stringOf(final byte[] x) {
         if (x == null) {
             return null; // NOSONAR
@@ -124,7 +121,6 @@ public final class PrimitiveByteArrayType extends AbstractPrimitiveArrayType<byt
      * @param str the string to parse
      * @return the parsed byte array, or {@code null} if input is null
      */
-    @MayReturnNull
     @Override
     public byte[] valueOf(final String str) {
         if (Strings.isEmpty(str) || Strings.isBlank(str)) {
@@ -155,7 +151,6 @@ public final class PrimitiveByteArrayType extends AbstractPrimitiveArrayType<byt
      * @param obj the object to convert (can be a Blob or other type)
      * @return the byte array representation of the object, or {@code null} if input is null
      */
-    @MayReturnNull
     @SuppressFBWarnings
     @Override
     public byte[] valueOf(final Object obj) {
@@ -327,7 +322,6 @@ public final class PrimitiveByteArrayType extends AbstractPrimitiveArrayType<byt
      * @param c the Collection of Byte objects to convert
      * @return a byte array containing the unboxed values, or {@code null} if input is null
      */
-    @MayReturnNull
     @Override
     public byte[] collection2Array(final Collection<?> c) {
         if (c == null) {

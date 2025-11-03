@@ -43,7 +43,6 @@ import com.landawn.abacus.annotation.MayReturnNull;
  * @param <T> the type of the value
  * @see IndexedKeyed
  * @see Wrapper
- * @since 1.0
  */
 @com.landawn.abacus.annotation.Immutable
 public sealed class Keyed<K, T> implements Immutable permits IndexedKeyed {

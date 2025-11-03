@@ -35,25 +35,22 @@ import com.landawn.abacus.util.ThreadMode;
  * 
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
- * {@code
  * public class EventHandler {
  *     @Subscribe
  *     public void onStringEvent(String event) {
  *         System.out.println("Received: " + event);
  *     }
- *     
+ *
  *     @Subscribe(threadMode = ThreadMode.THREAD_POOL_EXECUTOR)
  *     public void onUserEvent(UserEvent event) {
  *         // Handle user event on background thread
  *         processUser(event.getUser());
  *     }
  * }
- * }
  * }</pre>
  * 
  * <p><b>Usage Examples with all parameters:</b></p>
  * <pre>{@code
- * {@code
  * public class AdvancedHandler {
  *     @Subscribe(
  *         threadMode = ThreadMode.THREAD_POOL_EXECUTOR,
@@ -73,13 +70,11 @@ import com.landawn.abacus.util.ThreadMode;
  *         // - Ignore duplicate consecutive events
  *     }
  * }
- * }
  * }</pre>
  * 
  * @see EventBus
  * @see Subscriber
  * @see ThreadMode
- * @since 1.0
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.METHOD)
@@ -97,12 +92,10 @@ public @interface Subscribe {
      * 
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * {@code
      * @Subscribe(threadMode = ThreadMode.THREAD_POOL_EXECUTOR)
      * public void onHeavyEvent(DataEvent event) {
      *     // This will run on a background thread
      *     performExpensiveOperation(event.getData());
-     * }
      * }
      * }</pre>
      * 
@@ -118,18 +111,16 @@ public @interface Subscribe {
      * 
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * {@code
      * // With strictEventType = false (default)
      * @Subscribe
      * public void onAnimal(Animal event) {
      *     // Receives Animal, Dog, Cat, etc.
      * }
-     * 
+     *
      * // With strictEventType = true
      * @Subscribe(strictEventType = true)
      * public void onAnimalOnly(Animal event) {
      *     // Receives only Animal, not Dog or Cat
-     * }
      * }
      * }</pre>
      * 
@@ -145,10 +136,9 @@ public @interface Subscribe {
      * 
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * {@code
      * // Post a sticky configuration
      * eventBus.postSticky(new AppConfig("production"));
-     * 
+     *
      * // Later, register a subscriber
      * public class ConfigHandler {
      *     @Subscribe(sticky = true)
@@ -156,7 +146,6 @@ public @interface Subscribe {
      *         // This will be called immediately with the sticky config
      *         applyConfiguration(config);
      *     }
-     * }
      * }
      * }</pre>
      * 
@@ -173,16 +162,14 @@ public @interface Subscribe {
      * 
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * {@code
      * @Subscribe(eventId = "userUpdates")
      * public void onUserUpdate(User user) {
      *     // Only receives User events posted with "userUpdates" ID
      * }
-     * 
+     *
      * @Subscribe(eventId = "adminUpdates")
      * public void onAdminUpdate(User user) {
      *     // Only receives User events posted with "adminUpdates" ID
-     * }
      * }
      * }</pre>
      * 
@@ -198,16 +185,14 @@ public @interface Subscribe {
      * 
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * {@code
      * @Subscribe(interval = 1000)  // Maximum one event per second
      * public void onSensorData(SensorEvent event) {
      *     updateDisplay(event.getValue());
      * }
-     * 
+     *
      * @Subscribe(interval = 5000)  // Maximum one event per 5 seconds
      * public void onLocationUpdate(Location location) {
      *     saveLocationToServer(location);
-     * }
      * }
      * }</pre>
      * 
@@ -225,18 +210,16 @@ public @interface Subscribe {
      * 
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * {@code
      * @Subscribe(deduplicate = true)
      * public void onTemperature(Temperature temp) {
      *     // If temperature hasn't changed, event is ignored
      *     updateThermostat(temp.getValue());
      * }
-     * 
+     *
      * @Subscribe(deduplicate = true)
      * public void onConfigChange(Config config) {
      *     // Only processes when configuration actually changes
      *     applyNewConfiguration(config);
-     * }
      * }
      * }</pre>
      * 

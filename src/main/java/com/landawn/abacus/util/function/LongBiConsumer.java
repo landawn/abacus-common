@@ -11,7 +11,6 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-
 package com.landawn.abacus.util.function;
 
 import com.landawn.abacus.util.Throwables;
@@ -24,7 +23,7 @@ import com.landawn.abacus.util.Throwables;
  * side-effects.
  *
  * <p>This interface extends {@link Throwables.LongBiConsumer} with
- * {@link RuntimeException}, providing compatibility with the Abacus framework's
+ * {@link RuntimeException}, providing compatibility with the abacus-common framework's
  * exception handling capabilities.
  *
  * <p>This is a functional interface whose functional method is
@@ -32,23 +31,25 @@ import com.landawn.abacus.util.Throwables;
  *
  * @see java.util.function.BiConsumer
  * @see java.util.function.LongConsumer
- * @since 1.8
+ *
+ * <p>Refer to JDK API documentation at: <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html">https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a></p>
  */
 @FunctionalInterface
 public interface LongBiConsumer extends Throwables.LongBiConsumer<RuntimeException> { //NOSONAR
-
     /**
      * Performs this operation on the given arguments.
+     * This method is expected to operate via side-effects.
      *
-     * <p>The consumer processes two long values and performs some side-effect
-     * operation. Common use cases include:
-     * <ul>
-     *   <li>Accumulating or aggregating two long values</li>
-     *   <li>Updating state based on two long parameters</li>
-     *   <li>Processing pairs of timestamps or IDs</li>
-     *   <li>Recording statistics or metrics from two long values</li>
-     *   <li>Performing range-based operations with start and end values</li>
-     * </ul>
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * LongBiConsumer rangePrinter = (start, end) ->
+     *     System.out.println("Range: [" + start + ", " + end + "]");
+     * rangePrinter.accept(100L, 200L); // Prints: Range: [100, 200]
+     *
+     * Map<Long, Long> timestamps = new HashMap<>();
+     * LongBiConsumer recorder = (key, value) -> timestamps.put(key, value);
+     * recorder.accept(1234567890L, System.currentTimeMillis());
+     * }</pre>
      *
      * @param t the first input argument
      * @param u the second input argument
@@ -75,7 +76,7 @@ public interface LongBiConsumer extends Throwables.LongBiConsumer<RuntimeExcepti
      * combined.accept(100L, 200L); // First processes, then logs
      * }</pre>
      *
-     * @param after the operation to perform after this operation. Must not be null
+     * @param after the operation to perform after this operation. Must not be {@code null}.
      * @return a composed {@code LongBiConsumer} that performs in sequence this
      *         operation followed by the {@code after} operation
      */

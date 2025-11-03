@@ -17,7 +17,6 @@ package com.landawn.abacus.parser;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.parser.ParserUtil.BeanInfo;
 import com.landawn.abacus.parser.ParserUtil.PropInfo;
 import com.landawn.abacus.type.Type;
@@ -49,7 +48,6 @@ import com.landawn.abacus.util.N;
  * </ul>
  *
  * @param <C> the concrete configuration type for method chaining
- * @since 0.8
  * @see JSONDeserializationConfig
  * @see XMLDeserializationConfig
  */
@@ -78,8 +76,8 @@ public abstract class DeserializationConfig<C extends DeserializationConfig<C>> 
      * Checks if unmatched properties should be ignored during deserialization.
      * When set to {@code true} (default), properties in the source data that don't match
      * any property in the target class will be silently ignored. When {@code false},
-     * unmatched properties will cause an error.
-     * 
+     * unmatched properties will cause an exception to be thrown.
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * if (config.ignoreUnmatchedProperty()) {
@@ -97,16 +95,20 @@ public abstract class DeserializationConfig<C extends DeserializationConfig<C>> 
      * Sets whether unmatched properties should be ignored during deserialization.
      * This is useful when deserializing data that may contain extra fields not
      * present in the target class.
-     * 
+     *
+     * <p>When set to {@code false}, the parser will throw an exception (typically
+     * {@code IllegalArgumentException} or a parser-specific exception) when encountering
+     * properties in the source data that don't have corresponding fields in the target class.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // JSON: {"name": "John", "age": 30, "unknownField": "value"}
      * // Target class only has name and age properties
      * config.ignoreUnmatchedProperty(true);  // unknownField will be ignored
-     * config.ignoreUnmatchedProperty(false); // unknownField will cause an error
+     * config.ignoreUnmatchedProperty(false); // unknownField will cause an exception
      * }</pre>
      *
-     * @param ignoreUnmatchedProperty {@code true} to ignore unmatched properties, {@code false} to throw errors
+     * @param ignoreUnmatchedProperty {@code true} to ignore unmatched properties, {@code false} to throw an exception
      * @return this instance for method chaining
      */
     public C ignoreUnmatchedProperty(final boolean ignoreUnmatchedProperty) {
@@ -123,7 +125,6 @@ public abstract class DeserializationConfig<C extends DeserializationConfig<C>> 
      * @param <T> the element type
      * @return the configured element type, or {@code null} if not set
      */
-    @MayReturnNull
     public <T> Type<T> getElementType() {
         return (Type<T>) elementType;
     }
@@ -193,7 +194,6 @@ public abstract class DeserializationConfig<C extends DeserializationConfig<C>> 
      * @param <T> the key type
      * @return the configured map key type, or {@code null} if not set
      */
-    @MayReturnNull
     public <T> Type<T> getMapKeyType() {
         return (Type<T>) mapKeyType;
     }
@@ -254,7 +254,6 @@ public abstract class DeserializationConfig<C extends DeserializationConfig<C>> 
      * @param <T> the value type
      * @return the configured map value type, or {@code null} if not set
      */
-    @MayReturnNull
     public <T> Type<T> getMapValueType() {
         return (Type<T>) mapValueType;
     }
@@ -336,7 +335,6 @@ public abstract class DeserializationConfig<C extends DeserializationConfig<C>> 
      * @param keyName the property name, supporting nested properties (e.g., "account.devices.model")
      * @return the type for the specified property, or {@code null} if not configured
      */
-    @MayReturnNull
     public <T> Type<T> getValueType(final String keyName) {
         return getValueType(keyName, null);
     }
@@ -357,7 +355,6 @@ public abstract class DeserializationConfig<C extends DeserializationConfig<C>> 
      * @param defaultType the type to return if no type is configured for the property
      * @return the type for the specified property, or defaultType if not configured
      */
-    @MayReturnNull
     public <T> Type<T> getValueType(final String keyName, final Type<T> defaultType) {
         Type<T> ret = null;
 
@@ -390,7 +387,6 @@ public abstract class DeserializationConfig<C extends DeserializationConfig<C>> 
      * @param keyName the property name, supporting nested properties (e.g., "account.devices.model")
      * @return the class for the specified property, or {@code null} if not configured
      */
-    @MayReturnNull
     public <T> Class<T> getValueTypeClass(final String keyName) {
         return getValueTypeClass(keyName, null);
     }
@@ -410,7 +406,6 @@ public abstract class DeserializationConfig<C extends DeserializationConfig<C>> 
      * @param defaultTypeClass the class to return if no type is configured for the property
      * @return the class for the specified property, or defaultTypeClass if not configured
      */
-    @MayReturnNull
     public <T> Class<T> getValueTypeClass(final String keyName, final Class<T> defaultTypeClass) {
         final Type<T> ret = getValueType(keyName);
 
@@ -432,7 +427,6 @@ public abstract class DeserializationConfig<C extends DeserializationConfig<C>> 
      * @param typeClass the class to use for deserializing this property
      * @return this instance for method chaining
      */
-    @MayReturnNull
     public C setValueType(final String keyName, final Class<?> typeClass) {
         return setValueType(keyName, N.typeOf(typeClass));
     }
@@ -451,7 +445,6 @@ public abstract class DeserializationConfig<C extends DeserializationConfig<C>> 
      * @param type the type to use for deserializing this property
      * @return this instance for method chaining
      */
-    @MayReturnNull
     public C setValueType(final String keyName, final Type<?> type) {
         if (valueTypeMap == null) {
             valueTypeMap = new HashMap<>();
@@ -504,7 +497,7 @@ public abstract class DeserializationConfig<C extends DeserializationConfig<C>> 
      * Sets value types by analyzing a bean class.
      * This method extracts type information from all properties of the specified
      * bean class and uses it for deserialization type resolution.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // If Person class has properties: name (String), age (int), address (Address)
@@ -512,7 +505,7 @@ public abstract class DeserializationConfig<C extends DeserializationConfig<C>> 
      * // Now "name", "age", and "address" properties will use their declared types
      * }</pre>
      *
-     * @param beanClass the bean class to extract type information from
+     * @param beanClass the bean class to extract type information from (may be {@code null} to clear)
      * @return this instance for method chaining
      * @throws IllegalArgumentException if the specified class is not a valid bean class
      */

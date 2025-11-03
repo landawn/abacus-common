@@ -11,7 +11,6 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-
 package com.landawn.abacus.util.function;
 
 import com.landawn.abacus.util.Throwables;
@@ -19,17 +18,19 @@ import com.landawn.abacus.util.Throwables;
 /**
  * Represents a predicate (boolean-valued function) of three double-valued arguments.
  * This is the three-arity specialization of {@link java.util.function.Predicate}.
- * 
+ *
  * <p>This is a functional interface whose functional method is {@link #test(double, double, double)}.</p>
- * 
+ *
  * <p>This interface extends {@link Throwables.DoubleTriPredicate} with {@link RuntimeException},
  * providing exception handling capabilities while maintaining compatibility with standard functional programming patterns.</p>
- * 
+ *
  * <p>The interface provides two predefined constants:</p>
  * <ul>
  *   <li>{@link #ALWAYS_TRUE} - A predicate that always returns {@code true}</li>
  *   <li>{@link #ALWAYS_FALSE} - A predicate that always returns {@code false}</li>
  * </ul>
+ *
+ * <p>Refer to JDK API documentation at: <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html">https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a></p>
  *
  * @see java.util.function.Predicate
  * @see java.util.function.DoublePredicate
@@ -37,13 +38,11 @@ import com.landawn.abacus.util.Throwables;
  */
 @FunctionalInterface
 public interface DoubleTriPredicate extends Throwables.DoubleTriPredicate<RuntimeException> { //NOSONAR
-
     /**
      * A predicate that always evaluates to {@code true} regardless of the input values.
      * This constant is useful as a default predicate or in scenarios where all values should pass.
      */
     DoubleTriPredicate ALWAYS_TRUE = (a, b, c) -> true;
-
     /**
      * A predicate that always evaluates to {@code false} regardless of the input values.
      * This constant is useful as a default predicate or in scenarios where all values should fail.
@@ -52,13 +51,13 @@ public interface DoubleTriPredicate extends Throwables.DoubleTriPredicate<Runtim
 
     /**
      * Evaluates this predicate on the given three double arguments.
-     * 
+     *
      * <p>This method tests whether the three double values satisfy the condition
      * implemented by this predicate.</p>
-     * 
+     *
      * <p>Common use cases include:</p>
      * <ul>
-     *   <li>Validating 3D coordinates (e.g., checking if a point is within bounds)</li>
+     *   <li>Validating three-dimensional coordinates (e.g., checking if a point is within bounds)</li>
      *   <li>Testing mathematical relationships (e.g., triangle inequality: a + b &gt; c)</li>
      *   <li>Checking color values (e.g., RGB values within valid range)</li>
      *   <li>Validating measurement constraints</li>
@@ -67,23 +66,23 @@ public interface DoubleTriPredicate extends Throwables.DoubleTriPredicate<Runtim
      * @param a the first double argument to test
      * @param b the second double argument to test
      * @param c the third double argument to test
-     * @return {@code true} if the input arguments match the predicate, otherwise {@code false} if the predicate evaluation encounters an error
+     * @return {@code true} if the input arguments match the predicate, otherwise {@code false}
      */
     @Override
     boolean test(double a, double b, double c);
 
     /**
      * Returns a predicate that represents the logical negation of this predicate.
-     * 
+     *
      * <p>The returned predicate will return {@code true} when this predicate returns {@code false},
      * and {@code false} when this predicate returns {@code true}.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * DoubleTriPredicate isValidTriangle = (a, b, c) -> a + b > c && b + c > a && a + c > b;
      * DoubleTriPredicate isInvalidTriangle = isValidTriangle.negate();
      * }</pre>
-     * 
+     *
      * @return a predicate that represents the logical negation of this predicate
      */
     default DoubleTriPredicate negate() {
@@ -94,15 +93,15 @@ public interface DoubleTriPredicate extends Throwables.DoubleTriPredicate<Runtim
      * Returns a composed predicate that represents a short-circuiting logical AND of this predicate
      * and another. When evaluating the composed predicate, if this predicate is {@code false},
      * then the {@code other} predicate is not evaluated.
-     * 
+     *
      * <p>Any exceptions thrown during evaluation of either predicate are relayed to the caller;
      * if evaluation of this predicate throws an exception, the {@code other} predicate will not be evaluated.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * DoubleTriPredicate isPositive = (a, b, c) -> a > 0 && b > 0 && c > 0;
      * DoubleTriPredicate sumLessThan100 = (a, b, c) -> a + b + c < 100;
-     * 
+     *
      * // Combined predicate: all positive AND sum less than 100
      * DoubleTriPredicate combined = isPositive.and(sumLessThan100);
      * }</pre>
@@ -118,15 +117,15 @@ public interface DoubleTriPredicate extends Throwables.DoubleTriPredicate<Runtim
      * Returns a composed predicate that represents a short-circuiting logical OR of this predicate
      * and another. When evaluating the composed predicate, if this predicate is {@code true},
      * then the {@code other} predicate is not evaluated.
-     * 
+     *
      * <p>Any exceptions thrown during evaluation of either predicate are relayed to the caller;
      * if evaluation of this predicate throws an exception, the {@code other} predicate will not be evaluated.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * DoubleTriPredicate allZero = (a, b, c) -> a == 0 && b == 0 && c == 0;
      * DoubleTriPredicate allOne = (a, b, c) -> a == 1 && b == 1 && c == 1;
-     * 
+     *
      * // Combined predicate: all zeros OR all ones
      * DoubleTriPredicate specialCase = allZero.or(allOne);
      * }</pre>

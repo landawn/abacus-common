@@ -37,34 +37,158 @@ import com.landawn.abacus.util.function.TriPredicate;
 
 /**
  * A utility class for comparing two collections, arrays, maps, or beans to identify their differences.
- * <p>
- * The {@code Difference} class provides methods to find:
+ * This sealed class provides a comprehensive framework for analyzing data structure differences with
+ * strongly-typed results and flexible comparison capabilities.
+ *
+ * <p>The {@code Difference} class provides methods to find:
  * <ul>
- *   <li>Common elements present in both collections</li>
- *   <li>Elements only present in the first collection (left)</li>
- *   <li>Elements only present in the second collection (right)</li>
+ *   <li><b>Common elements:</b> Elements present in both structures</li>
+ *   <li><b>Left-only elements:</b> Elements only present in the first structure</li>
+ *   <li><b>Right-only elements:</b> Elements only present in the second structure</li>
  * </ul>
- * 
+ *
  * <p>When comparing collections, the comparison takes occurrences into account. This means that if an element
- * appears multiple times in either collection, each occurrence is considered separately.
- * 
- * <p><b>Usage Examples:</b></p>
+ * appears multiple times in either collection, each occurrence is considered separately, providing accurate
+ * frequency-based difference analysis.</p>
+ *
+ * <p><b>⚠️ IMPORTANT - Sealed Class:</b>
+ * <ul>
+ *   <li>This is a <b>sealed class</b> that only permits {@link KeyValueDifference} subclasses</li>
+ *   <li>Specialized implementations include {@link MapDifference} and {@link BeanDifference}</li>
+ *   <li>Cannot be extended by classes outside this hierarchy for API stability</li>
+ *   <li>Provides controlled inheritance for type safety and specialized comparison logic</li>
+ * </ul>
+ *
+ * <p><b>Key Features:</b>
+ * <ul>
+ *   <li><b>Type Safety:</b> Strongly typed with separate left and right collection types</li>
+ *   <li><b>Flexible Comparison:</b> Supports arrays, collections, maps, and Java beans</li>
+ *   <li><b>Occurrence-Aware:</b> Considers element frequency in collections for accurate differences</li>
+ *   <li><b>Null Handling:</b> Proper handling of null inputs and null elements</li>
+ *   <li><b>Equality Testing:</b> Built-in equality comparison based on difference results</li>
+ *   <li><b>Rich Factory Methods:</b> Multiple factory methods for different data structure types</li>
+ * </ul>
+ *
+ * <p><b>Common Use Cases:</b>
+ * <ul>
+ *   <li><b>Data Synchronization:</b> Identifying changes between data sets for sync operations</li>
+ *   <li><b>Configuration Management:</b> Comparing configuration states and identifying changes</li>
+ *   <li><b>Testing and Validation:</b> Verifying expected vs actual results in unit tests</li>
+ *   <li><b>Version Control:</b> Analyzing differences between data structure versions</li>
+ *   <li><b>Data Migration:</b> Identifying missing or extra data during migration processes</li>
+ *   <li><b>Audit Trails:</b> Tracking changes and modifications to data structures</li>
+ * </ul>
+ *
+ * <p><b>Usage Examples:</b>
  * <pre>{@code
+ * // Basic collection comparison
  * List<String> list1 = Arrays.asList("a", "b", "c", "b");
  * List<String> list2 = Arrays.asList("b", "c", "d", "c");
  * Difference<List<String>, List<String>> diff = Difference.of(list1, list2);
- * 
- * // diff.inCommon() returns ["b", "c"]
- * // diff.onLeftOnly() returns ["a", "b"]
- * // diff.onRightOnly() returns ["d", "c"]
- * }</pre>
- * 
- * <p>For maps and beans, additional comparison capabilities are provided through the {@link MapDifference} 
- * and {@link BeanDifference} subclasses, which can also identify entries/properties with different values.
  *
- * @param <L> the type of the collection containing elements from the left (first) collection
- * @param <R> the type of the collection containing elements from the right (second) collection
- * @see com.landawn.abacus.annotation.DiffIgnore
+ * List<String> common = diff.inCommon();      // ["b", "c"]
+ * List<String> leftOnly = diff.onLeftOnly();  // ["a", "b"]
+ * List<String> rightOnly = diff.onRightOnly(); // ["d", "c"]
+ * boolean equal = diff.areEqual();             // false
+ *
+ * // Array comparison with primitive types
+ * int[] array1 = {1, 2, 3, 2};
+ * int[] array2 = {2, 3, 4, 3};
+ * Difference<IntList, IntList> intDiff = Difference.of(array1, array2);
+ *
+ * // Map comparison (using specialized MapDifference)
+ * Map<String, Integer> map1 = Map.of("a", 1, "b", 2, "c", 3);
+ * Map<String, Integer> map2 = Map.of("b", 2, "c", 4, "d", 5);
+ * MapDifference<...> mapDiff = MapDifference.of(map1, map2);
+ *
+ * // Bean comparison (using specialized BeanDifference)
+ * Person person1 = new Person("John", 30);
+ * Person person2 = new Person("John", 31);
+ * BeanDifference<...> beanDiff = BeanDifference.of(person1, person2);
+ * }</pre>
+ *
+ * <p><b>Supported Data Types:</b>
+ * <ul>
+ *   <li><b>Primitive Arrays:</b> boolean[], char[], byte[], short[], int[], long[], float[], double[]</li>
+ *   <li><b>Object Arrays:</b> T[] with automatic List conversion</li>
+ *   <li><b>Collections:</b> Any Collection implementations with flexible type compatibility</li>
+ *   <li><b>Primitive Lists:</b> BooleanList, CharList, ByteList, ShortList, IntList, LongList, FloatList, DoubleList</li>
+ *   <li><b>Maps:</b> Through specialized {@link MapDifference} subclass</li>
+ *   <li><b>Java Beans:</b> Through specialized {@link BeanDifference} subclass</li>
+ * </ul>
+ *
+ * <p><b>Factory Methods:</b>
+ * <ul>
+ *   <li>{@link #of(boolean[], boolean[])} - Boolean array comparison</li>
+ *   <li>{@link #of(Object[], Object[])} - Generic object array comparison</li>
+ *   <li>{@link #of(Collection, Collection)} - Collection comparison with type flexibility</li>
+ *   <li>{@link #of(IntList, IntList)} - Primitive list comparison (and similar for other primitives)</li>
+ *   <li>{@link MapDifference#of(Map, Map)} - Map comparison with value difference detection</li>
+ *   <li>{@link BeanDifference#of(Object, Object)} - Bean property comparison</li>
+ * </ul>
+ *
+ * <p><b>Comparison Algorithm:</b>
+ * <ul>
+ *   <li>Creates frequency maps of elements in both structures</li>
+ *   <li>Identifies minimum common occurrences for shared elements</li>
+ *   <li>Calculates remaining elements after removing common occurrences</li>
+ *   <li>Preserves original collection types in results where possible</li>
+ * </ul>
+ *
+ * <p><b>Performance Characteristics:</b>
+ * <ul>
+ *   <li>Time complexity: O(n + m) where n and m are the sizes of input structures</li>
+ *   <li>Space complexity: O(n + m) for storing difference results</li>
+ *   <li>Memory efficient: Uses primitive collections for primitive types</li>
+ *   <li>Optimized: Special handling for different data structure types</li>
+ * </ul>
+ *
+ * <p><b>Thread Safety:</b>
+ * Difference instances are <b>immutable</b> and thread-safe:
+ * <ul>
+ *   <li>All fields are final and set during construction</li>
+ *   <li>Result collections are independent copies, not views</li>
+ *   <li>Safe to share between threads without synchronization</li>
+ *   <li>Factory methods can be called concurrently</li>
+ * </ul>
+ *
+ * <p><b>Specialized Subclasses:</b>
+ * <ul>
+ *   <li><b>{@link MapDifference}:</b> Extends functionality for Map comparison with value difference detection</li>
+ *   <li><b>{@link BeanDifference}:</b> Extends functionality for Java bean property comparison</li>
+ *   <li><b>{@link KeyValueDifference}:</b> Abstract base for key-value structure comparisons</li>
+ * </ul>
+ *
+ * <p><b>Integration Points:</b>
+ * <ul>
+ *   <li><b>{@link N}:</b> Utility methods for set operations and collection differences</li>
+ *   <li><b>{@link Maps}:</b> Map-specific difference and comparison utilities</li>
+ *   <li><b>Collection Framework:</b> Full compatibility with Java Collections</li>
+ *   <li><b>Stream API:</b> Results can be processed with streams for further analysis</li>
+ * </ul>
+ *
+ * <p><b>Best Practices:</b>
+ * <ul>
+ *   <li>Use appropriate factory methods based on your data structure type</li>
+ *   <li>Check {@link #areEqual()} for quick equality testing before accessing difference details</li>
+ *   <li>Use specialized subclasses (MapDifference, BeanDifference) for advanced comparison needs</li>
+ *   <li>Consider element ordering requirements when interpreting results</li>
+ *   <li>Cache Difference instances for repeated equality checks</li>
+ * </ul>
+ *
+ * <p><b>Null Handling:</b>
+ * <ul>
+ *   <li>Null inputs are treated as empty collections</li>
+ *   <li>Null elements within collections are handled according to element type</li>
+ *   <li>Results maintain null safety with proper type checking</li>
+ * </ul>
+ *
+ * @param <L> the type of the collection containing elements from the left (first) structure
+ * @param <R> the type of the collection containing elements from the right (second) structure
+ *
+ * @see KeyValueDifference
+ * @see MapDifference
+ * @see BeanDifference
  * @see N#difference(Collection, Collection)
  * @see N#symmetricDifference(Collection, Collection)
  * @see N#excludeAll(Collection, Collection)
@@ -72,6 +196,8 @@ import com.landawn.abacus.util.function.TriPredicate;
  * @see N#removeAll(Collection, Iterable)
  * @see N#intersection(Collection, Collection)
  * @see N#commonSet(Collection, Collection)
+ * @see Maps#difference(Map, Map)
+ * @see com.landawn.abacus.annotation.DiffIgnore
  */
 public sealed class Difference<L, R> permits KeyValueDifference {
 

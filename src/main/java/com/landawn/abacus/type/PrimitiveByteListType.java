@@ -32,7 +32,7 @@ import com.landawn.abacus.util.Strings;
  * for ByteList instances by delegating to the underlying byte array type handler.
  */
 @SuppressWarnings("java:S2160")
-public final class PrimitiveByteListType extends AbstractPrimitiveListType<ByteList> {
+final class PrimitiveByteListType extends AbstractPrimitiveListType<ByteList> {
 
     public static final String BYTE_LIST = ByteList.class.getSimpleName();
 
@@ -83,7 +83,6 @@ public final class PrimitiveByteListType extends AbstractPrimitiveListType<ByteL
      *
      * @param x the ByteList to convert
      * @return the string representation of the list, or {@code null} if input is null
-     @MayReturnNull
      */
     @Override
     public String stringOf(final ByteList x) {
@@ -97,7 +96,6 @@ public final class PrimitiveByteListType extends AbstractPrimitiveListType<ByteL
      *
      * @param str the string to parse
      * @return a ByteList created from the parsed values, or {@code null} if input is {@code null} or empty
-     @MayReturnNull
      */
     @Override
     public ByteList valueOf(final String str) {
@@ -112,7 +110,6 @@ public final class PrimitiveByteListType extends AbstractPrimitiveListType<ByteL
      * @param columnIndex the column index (1-based)
      * @return a ByteList containing the bytes from the database, or {@code null} if the column value is null
      * @throws SQLException if a database access error occurs
-     @MayReturnNull
      */
     @Override
     public ByteList get(final ResultSet rs, final int columnIndex) throws SQLException {
@@ -128,7 +125,6 @@ public final class PrimitiveByteListType extends AbstractPrimitiveListType<ByteL
      * @param columnLabel the column label/name
      * @return a ByteList containing the bytes from the database, or {@code null} if the column value is null
      * @throws SQLException if a database access error occurs
-     @MayReturnNull
      */
     @Override
     public ByteList get(final ResultSet rs, final String columnLabel) throws SQLException {

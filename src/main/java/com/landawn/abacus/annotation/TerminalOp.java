@@ -55,6 +55,12 @@ import java.lang.annotation.Target;
  *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
+ * import java.util.ArrayList;
+ * import java.util.Iterator;
+ * import java.util.List;
+ * import java.util.Optional;
+ * import java.util.function.Consumer;
+ *
  * public class StreamProcessor<T> {
  *     @TerminalOp
  *     public List<T> collect() {
@@ -90,7 +96,6 @@ import java.lang.annotation.Target;
  * @see IntermediateOp
  * @see TerminalOpTriggered
  * @see <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/stream/Stream.html">java.util.Stream</a>
- * @since 2018
  */
 @Documented
 @Retention(value = RetentionPolicy.CLASS)

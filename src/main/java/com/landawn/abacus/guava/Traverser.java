@@ -25,7 +25,7 @@ import com.landawn.abacus.util.stream.Stream;
  * 
  * Provides methods for traversing a graph or tree structure in various orders.
  * This class wraps Google Guava's Traverser functionality and adapts it to work with
- * Abacus Stream API for more convenient iteration.
+ * abacus-common Stream API for more convenient iteration.
  * 
  * <p>This class supports two main types of graph structures:
  * <ul>
@@ -49,8 +49,12 @@ import com.landawn.abacus.util.stream.Stream;
  * fileTraverser.breadthFirst(new File("/home"))
  *     .filter(File::isFile)
  *     .forEach(System.out::println);
- * 
+ *
  * // Create a custom tree traverser
+ * class TreeNode {
+ *     List<TreeNode> getChildren() { return null; }
+ * }
+ * TreeNode root = new TreeNode();
  * Traverser<TreeNode> treeTraverser = Traverser.forTree(node -> node.getChildren());
  * Stream<TreeNode> allNodes = treeTraverser.depthFirstPreOrder(root);
  * }</pre>
@@ -128,10 +132,9 @@ public final class Traverser<T> {
      *       of nodes that have been seen but not yet visited, that is, the "horizon").</li>
      * </ul>
      *
-     * <p><b>Examples</b>
+     * <p><b>Examples of valid and invalid tree structures:</b>
      *
      * <p>This is a valid input graph (all edges are directed facing downwards):
-     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      *    a     b      c
      *   / \   / \     |
@@ -143,7 +146,6 @@ public final class Traverser<T> {
      * }</pre>
      *
      * <p>This is <b>not</b> a valid input graph (all edges are directed facing downwards):
-     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      *    a     b
      *   / \   / \
@@ -157,23 +159,26 @@ public final class Traverser<T> {
      * <p>because there are two paths from {@code b} to {@code f} ({@code b->d->f} and {@code
      * b-&gt;e-&gt;f}).
      *
-     * <p><b>Note on binary trees</b>
+     * <p><b>Note on binary trees:</b>
      *
      * <p>This method can be used to traverse over a binary tree. Given methods {@code
-     * leftChild(node)} and {@code rightChild(node)}, this method can be called as
+     * leftChild(node)} and {@code rightChild(node)}, this method can be called as:
      *
-     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Traverser.forTree(node -> ImmutableList.of(leftChild(node), rightChild(node)));
+     * Traverser.forTree(node -> Arrays.asList(leftChild(node), rightChild(node)));
      * }</pre>
      * 
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Traverse an organizational hierarchy
      * class Employee {
-     *     List<Employee> getDirectReports() { ... }
+     *     String name;
+     *     List<Employee> directReports;
+     *     List<Employee> getDirectReports() { return directReports; }
+     *     String getName() { return name; }
      * }
-     * 
+     *
+     * Employee ceo = new Employee();
      * Traverser<Employee> orgTraverser = Traverser.forTree(Employee::getDirectReports);
      * orgTraverser.breadthFirst(ceo)
      *     .forEach(employee -> System.out.println(employee.getName()));
@@ -213,11 +218,13 @@ public final class Traverser<T> {
      * <pre>{@code
      * // Traverse a social network graph (which may have cycles)
      * class Person {
-     *     List<Person> getFriends() { ... }
+     *     List<Person> friends;
+     *     List<Person> getFriends() { return friends; }
      * }
-     * 
+     *
+     * Person person = new Person();
      * Traverser<Person> socialTraverser = Traverser.forGraph(Person::getFriends);
-     * 
+     *
      * // Find all people within 3 degrees of separation
      * Set<Person> network = socialTraverser.breadthFirst(person)
      *     .limit(1000)  // Limit traversal
@@ -261,9 +268,11 @@ public final class Traverser<T> {
      *
      * <pre>{@code
      * // Only traverse the first 100 nodes
+     * // Assuming: TreeNode startNode; void processNode(TreeNode node);
+     * Traverser<TreeNode> traverser = Traverser.forTree(TreeNode::getChildren);
      * traverser.breadthFirst(startNode)
      *     .limit(100)
-     *     .forEach(this::processNode);
+     *     .forEach(node -> processNode(node));
      * }</pre>
      *
      * <p>See <a href="https://en.wikipedia.org/wiki/Breadth-first_search">Wikipedia</a> for more
@@ -305,7 +314,9 @@ public final class Traverser<T> {
      *
      * <pre>{@code
      * // Find the first node matching a condition
-     * Optional<T> found = traverser.depthFirstPreOrder(root)
+     * // Assuming: TreeNode root; boolean meetsCondition(TreeNode node);
+     * Traverser<TreeNode> traverser = Traverser.forTree(TreeNode::getChildren);
+     * Optional<TreeNode> found = traverser.depthFirstPreOrder(root)
      *     .filter(node -> meetsCondition(node))
      *     .findFirst();
      * }</pre>
@@ -348,13 +359,16 @@ public final class Traverser<T> {
      *
      * <pre>{@code
      * // Calculate sizes of all subtrees
-     * Map<T, Integer> sizes = traverser.depthFirstPostOrder(root)
-     *     .collect(Collectors.toMap(
-     *         node -> node,
-     *         node -> 1 + getChildren(node).stream()
+     * // Assuming: TreeNode root; List<TreeNode> getChildren(TreeNode node);
+     * Traverser<TreeNode> traverser = Traverser.forTree(TreeNode::getChildren);
+     * Map<TreeNode, Integer> sizes = new HashMap<>();
+     * traverser.depthFirstPostOrder(root)
+     *     .forEach(node -> {
+     *         int size = 1 + getChildren(node).stream()
      *             .mapToInt(sizes::get)
-     *             .sum()
-     *     ));
+     *             .sum();
+     *         sizes.put(node, size);
+     *     });
      * }</pre>
      *
      * <p>See <a href="https://en.wikipedia.org/wiki/Depth-first_search">Wikipedia</a> for more info.

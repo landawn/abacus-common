@@ -62,9 +62,23 @@ public abstract class AbstractPoolable implements Poolable {
 
     /**
      * Constructs a new AbstractPoolable with the specified lifetime and idle time limits.
-     * 
-     * @param liveTime the maximum lifetime in milliseconds before this object expires
-     * @param maxIdleTime the maximum idle time in milliseconds before this object expires
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * public class MyPooledResource extends AbstractPoolable {
+     *     public MyPooledResource() {
+     *         super(3600000, 300000); // 1 hour lifetime, 5 minutes max idle
+     *     }
+     *
+     *     @Override
+     *     public void destroy(Caller caller) {
+     *         // cleanup logic
+     *     }
+     * }
+     * }</pre>
+     *
+     * @param liveTime the maximum lifetime in milliseconds before this object expires (must be positive)
+     * @param maxIdleTime the maximum idle time in milliseconds before this object expires (must be positive)
      * @throws IllegalArgumentException if liveTime or maxIdleTime is not positive
      */
     protected AbstractPoolable(final long liveTime, final long maxIdleTime) {

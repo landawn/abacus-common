@@ -18,7 +18,6 @@ import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.Writer;
 
-import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.exception.UncheckedIOException;
 import com.landawn.abacus.parser.JSONXMLSerializationConfig;
 import com.landawn.abacus.util.CharacterWriter;
@@ -42,7 +41,7 @@ import com.landawn.abacus.util.WD;
  * @param <T4> the type of the fourth element in the tuple
  */
 @SuppressWarnings("java:S2160")
-public class Tuple4Type<T1, T2, T3, T4> extends AbstractType<Tuple4<T1, T2, T3, T4>> {
+class Tuple4Type<T1, T2, T3, T4> extends AbstractType<Tuple4<T1, T2, T3, T4>> {
 
     private final String declaringName;
 
@@ -122,7 +121,6 @@ public class Tuple4Type<T1, T2, T3, T4> extends AbstractType<Tuple4<T1, T2, T3, 
      * @return a JSON string representation of the tuple, or {@code null} if x is null
      */
     @Override
-    @MayReturnNull
     public String stringOf(final Tuple4<T1, T2, T3, T4> x) {
         return (x == null) ? null : Utils.jsonParser.serialize(N.asArray(x._1, x._2, x._3, x._4), Utils.jsc);
     }
@@ -135,7 +133,6 @@ public class Tuple4Type<T1, T2, T3, T4> extends AbstractType<Tuple4<T1, T2, T3, 
      * @param str the JSON string to parse
      * @return a Tuple4 object parsed from the string, or {@code null} if str is empty
      */
-    @MayReturnNull
     @SuppressWarnings("unchecked")
     @Override
     public Tuple4<T1, T2, T3, T4> valueOf(final String str) {

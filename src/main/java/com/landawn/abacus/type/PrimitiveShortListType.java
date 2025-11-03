@@ -23,7 +23,7 @@ import com.landawn.abacus.util.ShortList;
 import com.landawn.abacus.util.Strings;
 
 @SuppressWarnings("java:S2160")
-public final class PrimitiveShortListType extends AbstractPrimitiveListType<ShortList> {
+final class PrimitiveShortListType extends AbstractPrimitiveListType<ShortList> {
 
     public static final String SHORT_LIST = ShortList.class.getSimpleName();
 
@@ -41,7 +41,7 @@ public final class PrimitiveShortListType extends AbstractPrimitiveListType<Shor
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * PrimitiveShortListType type = new PrimitiveShortListType();
+     * Type<ShortList> type = TypeFactory.getType(ShortList.class);
      * Class<ShortList> clazz = type.clazz();
      * System.out.println(clazz.getName()); // Output: com.landawn.abacus.util.ShortList
      * }</pre>
@@ -59,7 +59,7 @@ public final class PrimitiveShortListType extends AbstractPrimitiveListType<Shor
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * PrimitiveShortListType type = new PrimitiveShortListType();
+     * Type<ShortList> type = TypeFactory.getType(ShortList.class);
      * Type<Short> elementType = type.getElementType();
      * System.out.println(elementType.name()); // Output: short
      * }</pre>
@@ -76,7 +76,7 @@ public final class PrimitiveShortListType extends AbstractPrimitiveListType<Shor
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * PrimitiveShortListType type = new PrimitiveShortListType();
+     * Type<ShortList> type = TypeFactory.getType(ShortList.class);
      * Type<Short>[] paramTypes = type.getParameterTypes();
      * System.out.println(paramTypes.length); // Output: 1
      * System.out.println(paramTypes[0].name()); // Output: short
@@ -97,7 +97,7 @@ public final class PrimitiveShortListType extends AbstractPrimitiveListType<Shor
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * PrimitiveShortListType type = new PrimitiveShortListType();
+     * Type<ShortList> type = TypeFactory.getType(ShortList.class);
      * ShortList list = ShortList.of((short) 1, (short) 2, (short) 3);
      * String str = type.stringOf(list);
      * System.out.println(str); // Output: [1, 2, 3]
@@ -108,7 +108,6 @@ public final class PrimitiveShortListType extends AbstractPrimitiveListType<Shor
      *
      * @param x the ShortList to convert to string
      * @return the string representation of the list, or {@code null} if the input list is null
-     @MayReturnNull
      */
     @Override
     public String stringOf(final ShortList x) {
@@ -121,7 +120,7 @@ public final class PrimitiveShortListType extends AbstractPrimitiveListType<Shor
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * PrimitiveShortListType type = new PrimitiveShortListType();
+     * Type<ShortList> type = TypeFactory.getType(ShortList.class);
      * ShortList list = type.valueOf("[1, 2, 3]");
      * System.out.println(list.size()); // Output: 3
      * System.out.println(list.get(0)); // Output: 1
@@ -136,7 +135,6 @@ public final class PrimitiveShortListType extends AbstractPrimitiveListType<Shor
      * @param str the string to parse, expected format is "[value1, value2, ...]"
      * @return the parsed ShortList, or {@code null} if the input string is {@code null} or empty
      * @throws NumberFormatException if any element in the string cannot be parsed as a short
-     @MayReturnNull
      */
     @Override
     public ShortList valueOf(final String str) {
@@ -150,7 +148,7 @@ public final class PrimitiveShortListType extends AbstractPrimitiveListType<Shor
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * PrimitiveShortListType type = new PrimitiveShortListType();
+     * Type<ShortList> type = TypeFactory.getType(ShortList.class);
      * ShortList list = ShortList.of((short) 10, (short) 20, (short) 30);
      * StringBuilder sb = new StringBuilder("Values: ");
      * type.appendTo(sb, list);
@@ -182,7 +180,7 @@ public final class PrimitiveShortListType extends AbstractPrimitiveListType<Shor
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * PrimitiveShortListType type = new PrimitiveShortListType();
+     * Type<ShortList> type = TypeFactory.getType(ShortList.class);
      * ShortList list = ShortList.of((short) 100, (short) 200, (short) 300);
      * CharacterWriter writer = new CharacterWriter();
      * JSONXMLSerializationConfig<?> config = new JSONXMLSerializationConfig<>();

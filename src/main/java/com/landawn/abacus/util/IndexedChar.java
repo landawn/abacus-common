@@ -30,7 +30,6 @@ package com.landawn.abacus.util;
  * System.out.println(ic.index()); // prints: 0
  * }</pre>
  * 
- * @since 1.0
  */
 public final class IndexedChar extends AbstractIndexed {
 

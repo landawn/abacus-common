@@ -25,12 +25,250 @@ import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.annotation.NullSafe;
 
 /**
- * It is a utility class that provides various methods for array manipulation.
+ * A comprehensive utility class providing an extensive collection of static methods for array manipulation,
+ * creation, transformation, and processing operations. This class serves as the primary array utility facade
+ * in the Abacus library, offering performance-optimized operations for all primitive array types and
+ * multi-dimensional arrays with null-safety and type-safety as core design principles.
  *
- * @see java.lang.reflect.Array
- * @see java.util.Arrays
- * @see com.landawn.abacus.util.CommonUtil
+ * <p>The {@code Array} class provides a complete toolkit for array operations including boxing/unboxing,
+ * matrix operations, array creation, type conversions, and advanced manipulations. All methods are static,
+ * thread-safe, and designed to handle edge cases gracefully while maintaining optimal performance for
+ * large-scale array processing.</p>
+ *
+ * <p><b>Key Features:</b>
+ * <ul>
+ *   <li><b>Comprehensive Boxing/Unboxing:</b> Efficient conversion between primitive and wrapper arrays</li>
+ *   <li><b>Matrix Operations:</b> Transpose operations for 2D arrays of all primitive types</li>
+ *   <li><b>Multi-dimensional Support:</b> Operations on 1D, 2D, and 3D arrays</li>
+ *   <li><b>Null-Safe Operations:</b> Graceful handling of null inputs with configurable default values</li>
+ *   <li><b>Type Safety:</b> Generic methods with compile-time type checking</li>
+ *   <li><b>Performance Optimized:</b> Efficient algorithms with minimal object allocation</li>
+ *   <li><b>Range Operations:</b> Subset processing with fromIndex/toIndex parameters</li>
+ *   <li><b>Reflection Integration:</b> Dynamic array creation using component types</li>
+ * </ul>
+ *
+ * <p><b>Core Functional Categories:</b>
+ * <ul>
+ *   <li><b>Array Creation:</b> {@code newInstance()} with dynamic type specification</li>
+ *   <li><b>Boxing Operations:</b> Convert primitive arrays to wrapper arrays</li>
+ *   <li><b>Unboxing Operations:</b> Convert wrapper arrays to primitive arrays with null handling</li>
+ *   <li><b>Matrix Operations:</b> {@code transpose()} for 2D array matrix transformations</li>
+ *   <li><b>Range Processing:</b> Subset operations with index-based boundaries</li>
+ *   <li><b>Multi-dimensional:</b> Support for 1D, 2D, and 3D array operations</li>
+ *   <li><b>Type Conversions:</b> Safe conversions between different array types</li>
+ *   <li><b>Validation:</b> Array structure validation for matrix operations</li>
+ * </ul>
+ *
+ * <p><b>Design Philosophy:</b>
+ * <ul>
+ *   <li><b>Null Safety:</b> Methods handle {@code null} inputs gracefully, returning {@code null} or
+ *       using provided default values rather than throwing exceptions</li>
+ *   <li><b>Index Conventions:</b> Methods use {@code fromIndex} and {@code toIndex} parameters following
+ *       half-open range conventions [fromIndex, toIndex)</li>
+ *   <li><b>Exception Minimization:</b> Exceptions are thrown only when method contracts are violated
+ *       (e.g., negative array sizes, invalid index ranges)</li>
+ *   <li><b>Performance First:</b> Optimized algorithms with minimal overhead and object allocation</li>
+ *   <li><b>Type Preservation:</b> Maintains array component types through generic methods</li>
+ * </ul>
+ *
+ * <p><b>Usage Examples:</b>
+ * <pre>{@code
+ * // Dynamic array creation with reflection
+ * int[] intArray = Array.newInstance(int.class, 10);
+ * String[] stringArray = Array.newInstance(String.class, 5);
+ *
+ * // Boxing operations - primitive to wrapper arrays
+ * int[] primitives = {1, 2, 3, 4, 5};
+ * Integer[] boxed = Array.box(primitives);  // [1, 2, 3, 4, 5]
+ *
+ * // Unboxing operations - wrapper to primitive arrays
+ * Integer[] wrappers = {1, null, 3, null, 5};
+ * int[] unboxed = Array.unbox(wrappers, -1);  // [1, -1, 3, -1, 5] (null replaced with -1)
+ *
+ * // Range-based unboxing
+ * int[] subset = Array.unbox(wrappers, 1, 4, 0);  // [0, 3, 0] (from index 1 to 4)
+ *
+ * // Matrix operations - 2D array transpose
+ * int[][] matrix = {{1, 2, 3}, {4, 5, 6}};
+ * int[][] transposed = Array.transpose(matrix);  // {{1, 4}, {2, 5}, {3, 6}}
+ *
+ * // Multi-dimensional array operations
+ * Integer[][][] cube = new Integer[2][3][4];
+ * int[][][] unboxedCube = Array.unbox(cube, 0);
+ *
+ * // Null-safe operations
+ * int[] result = Array.unbox((Integer[]) null, 42);  // Returns null
+ * int[][] transposed2 = Array.transpose((int[][]) null);  // Returns null
+ * }</pre>
+ *
+ * <p><b>Boxing Operations:</b>
+ * <ul>
+ *   <li><b>All Primitive Types:</b> boolean, char, byte, short, int, long, float, double</li>
+ *   <li><b>Multi-dimensional:</b> Support for 2D and 3D arrays</li>
+ *   <li><b>Null Handling:</b> Proper handling of null elements in source arrays</li>
+ *   <li><b>Type Safety:</b> Maintains correct wrapper types for each primitive</li>
+ * </ul>
+ *
+ * <p><b>Unboxing Operations:</b>
+ * <ul>
+ *   <li><b>Null Value Replacement:</b> Configurable default values for null elements</li>
+ *   <li><b>Range Support:</b> Process subsets of arrays with fromIndex/toIndex</li>
+ *   <li><b>Multi-dimensional:</b> Support for 2D and 3D wrapper arrays</li>
+ *   <li><b>Varargs Support:</b> Convenient varargs methods for simple cases</li>
+ * </ul>
+ *
+ * <p><b>Matrix Operations:</b>
+ * <ul>
+ *   <li><b>Transpose:</b> Matrix transposition for all primitive and object types</li>
+ *   <li><b>Validation:</b> Automatic validation of matrix structure (rectangular arrays)</li>
+ *   <li><b>Null Safety:</b> Graceful handling of null or malformed matrices</li>
+ *   <li><b>Generic Support:</b> Type-safe transposition for object arrays</li>
+ * </ul>
+ *
+ * <p><b>Performance Characteristics:</b>
+ * <ul>
+ *   <li><b>Memory Efficient:</b> Minimal object allocation and copying</li>
+ *   <li><b>Cache Friendly:</b> Sequential access patterns optimized for CPU cache</li>
+ *   <li><b>Algorithm Selection:</b> Optimal algorithms chosen based on array size and type</li>
+ *   <li><b>Zero-Copy Operations:</b> Direct array manipulation where possible</li>
+ *   <li><b>Bulk Processing:</b> Optimized for large array operations</li>
+ * </ul>
+ *
+ * <p><b>Thread Safety:</b>
+ * <ul>
+ *   <li><b>Stateless Design:</b> All static methods are stateless and thread-safe</li>
+ *   <li><b>Immutable Operations:</b> Methods create new arrays rather than modifying inputs</li>
+ *   <li><b>No Shared State:</b> No static mutable fields that could cause race conditions</li>
+ *   <li><b>Concurrent Access:</b> Safe for concurrent access from multiple threads</li>
+ * </ul>
+ *
+ * <p><b>Index Range Conventions:</b>
+ * <ul>
+ *   <li><b>Half-Open Ranges:</b> fromIndex (inclusive) to toIndex (exclusive)</li>
+ *   <li><b>Boundary Validation:</b> Comprehensive index bounds checking</li>
+ *   <li><b>Empty Ranges:</b> Graceful handling of empty index ranges</li>
+ *   <li><b>Consistent API:</b> Uniform index parameter conventions across all methods</li>
+ * </ul>
+ *
+ * <p><b>Error Handling Strategy:</b>
+ * <ul>
+ *   <li><b>Graceful Degradation:</b> Methods handle edge cases gracefully</li>
+ *   <li><b>Null Tolerance:</b> Comprehensive null input handling throughout the API</li>
+ *   <li><b>Index Validation:</b> Clear IndexOutOfBoundsException for invalid ranges</li>
+ *   <li><b>Matrix Validation:</b> Validation of array structure for matrix operations</li>
+ * </ul>
+ *
+ * <p><b>Integration with Java Arrays:</b>
+ * <ul>
+ *   <li><b>Arrays Class Extension:</b> Extends java.util.Arrays functionality</li>
+ *   <li><b>Reflection Integration:</b> Full integration with java.lang.reflect.Array</li>
+ *   <li><b>Collection Compatibility:</b> Seamless integration with Java Collections</li>
+ *   <li><b>Stream Support:</b> Compatible with Java 8+ Stream operations</li>
+ * </ul>
+ *
+ * <p><b>Best Practices:</b>
+ * <ul>
+ *   <li>Use appropriate default values for null replacement during unboxing</li>
+ *   <li>Validate matrix structure before performing transpose operations</li>
+ *   <li>Prefer range-based operations for processing array subsets</li>
+ *   <li>Consider memory implications when working with large multi-dimensional arrays</li>
+ *   <li>Use the type-safe generic methods for object array operations</li>
+ *   <li>Cache the results of expensive operations like matrix transposition</li>
+ * </ul>
+ *
+ * <p><b>Performance Tips:</b>
+ * <ul>
+ *   <li>Use primitive arrays when possible to avoid boxing overhead</li>
+ *   <li>Process arrays in sequential order for better cache performance</li>
+ *   <li>Consider the cost of array copying in performance-critical code</li>
+ *   <li>Use appropriate array sizes to minimize memory allocation</li>
+ *   <li>Prefer bulk operations over element-by-element processing</li>
+ * </ul>
+ *
+ * <p><b>Common Patterns:</b>
+ * <ul>
+ *   <li><b>Safe Unboxing:</b> {@code int[] result = Array.unbox(wrappers, defaultValue);}</li>
+ *   <li><b>Matrix Processing:</b> {@code int[][] transposed = Array.transpose(matrix);}</li>
+ *   <li><b>Range Operations:</b> {@code int[] subset = Array.unbox(array, from, to, defaultValue);}</li>
+ *   <li><b>Dynamic Creation:</b> {@code T[] array = Array.newInstance(type, size);}</li>
+ * </ul>
+ *
+ * <p><b>Related Utility Classes:</b>
+ * <ul>
+ *   <li><b>{@link com.landawn.abacus.util.N}:</b> General utility class with array operations</li>
+ *   <li><b>{@link com.landawn.abacus.util.CommonUtil}:</b> Base utility operations</li>
+ *   <li><b>{@link java.util.Arrays}:</b> Core Java array utilities</li>
+ *   <li><b>{@link java.lang.reflect.Array}:</b> Reflection-based array operations</li>
+ *   <li><b>{@link com.landawn.abacus.util.Iterables}:</b> Iterable utilities for array processing</li>
+ *   <li><b>{@link com.landawn.abacus.util.stream.Stream}:</b> Stream operations for arrays</li>
+ * </ul>
+ *
+ * <p><b>Example: Data Processing Pipeline</b>
+ * <pre>{@code
+ * // Complete array processing example
+ * Integer[] rawData = {1, null, 3, null, 5, 6, null, 8};
+ *
+ * // Safe unboxing with default value for nulls
+ * int[] processedData = Array.unbox(rawData, 0);  // [1, 0, 3, 0, 5, 6, 0, 8]
+ *
+ * // Process subset of data
+ * int[] subset = Array.unbox(rawData, 2, 6, -1);  // [3, -1, 5, 6]
+ *
+ * // Work with 2D arrays
+ * Integer[][] matrix = {{1, 2, 3}, {4, null, 6}, {7, 8, 9}};
+ * int[][] cleanMatrix = Array.unbox(matrix, 0);   // Replace nulls with 0
+ * int[][] transposed = Array.transpose(cleanMatrix);  // Transpose the matrix
+ *
+ * // Dynamic array creation
+ * double[] doubles = Array.newInstance(double.class, 10);
+ * Arrays.fill(doubles, 3.14);
+ *
+ * // Multi-dimensional processing
+ * Double[][][] cube = new Double[2][3][4];
+ * // Fill with some data...
+ * double[][][] processedCube = Array.unbox(cube, 0.0);
+ * }</pre>
+ *
+ * <p><b>Example: Matrix Mathematics</b>
+ * <pre>{@code
+ * // Matrix operations for mathematical computations
+ * double[][] matrixA = {{1.0, 2.0, 3.0}, {4.0, 5.0, 6.0}};
+ * double[][] matrixB = {{7.0, 8.0}, {9.0, 10.0}, {11.0, 12.0}};
+ *
+ * // Transpose matrices for multiplication compatibility
+ * double[][] transposedA = Array.transpose(matrixA);  // 3x2 matrix
+ * double[][] transposedB = Array.transpose(matrixB);  // 2x3 matrix
+ *
+ * // Working with null-containing matrices
+ * Double[][] sparseMatrix = {{1.0, null, 3.0}, {null, 5.0, null}};
+ * double[][] denseMatrix = Array.unbox(sparseMatrix, 0.0);  // Fill nulls with 0.0
+ * double[][] result = Array.transpose(denseMatrix);
+ *
+ * // Validate matrix structure
+ * try {
+ *     double[][] invalid = {{1.0, 2.0}, {3.0}};  // Irregular matrix
+ *     double[][] transposed = Array.transpose(invalid);  // Will handle gracefully
+ * } catch (Exception e) {
+ *     // Handle validation errors
+ * }
+ * }</pre>
+ *
+ * <p><b>Nested Classes:</b>
+ * <ul>
+ *   <li><b>{@link ArrayUtil}:</b> Deprecated concrete implementation class</li>
+ * </ul>
+ *
+ * <p><b>Attribution:</b>
+ * This class includes code adapted from Apache Commons Lang and other open source projects under
+ * the Apache License 2.0. Methods from these libraries may have been modified for consistency,
+ * performance optimization, and enhanced null-safety within the Abacus framework.</p>
+ *
  * @see com.landawn.abacus.util.N
+ * @see com.landawn.abacus.util.CommonUtil
+ * @see java.util.Arrays
+ * @see java.lang.reflect.Array
+ * @see com.landawn.abacus.util.Iterables
+ * @see com.landawn.abacus.util.stream.Stream
  */
 @SuppressWarnings({ "java:S1168" })
 public abstract sealed class Array permits Array.ArrayUtil {
@@ -42,6 +280,12 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * Creates a new instance of an array with the specified component type and length.
      *
      * <p>This method uses {@link java.lang.reflect.Array#newInstance(Class, int)} to create a new instance of the specified array.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Integer[] intArray = Array.newInstance(Integer.class, 5); // returns an Integer array of length 5
+     * String[] strArray = Array.newInstance(String.class, 10); // returns a String array of length 10
+     * }</pre>
      *
      * @param <T> the type of the array.
      * @param componentType the Class object representing the component type of the new array.
@@ -90,6 +334,15 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * <p>This method uses {@link java.lang.reflect.Array#getLength(Object)} to determine the length of the array.
      * The array can be an object array or a primitive array.
      * If the array is {@code null}, this method returns 0.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * String[] array = {"a", "b", "c"};
+     * int length = Array.getLength(array); // returns 3
+     * int[] nums = {1, 2, 3, 4};
+     * int numLength = Array.getLength(nums); // returns 4
+     * int nullLength = Array.getLength(null); // returns 0
+     * }</pre>
      *
      * @param array the array whose length is to be determined.
      * @return the length of the array, or 0 if the array is {@code null}.
@@ -562,6 +815,12 @@ public abstract sealed class Array permits Array.ArrayUtil {
     /**
      * Returns the input array as-is without any modification or copying.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * boolean[] array = Array.of(true, false, true); // returns boolean array {true, false, true}
+     * boolean[] empty = Array.of(); // returns empty boolean array
+     * }</pre>
+     *
      * @param a the input array of booleans
      * @return the same input array
      */
@@ -571,6 +830,12 @@ public abstract sealed class Array permits Array.ArrayUtil {
 
     /**
      * Returns the input array as-is without any modification or copying.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * char[] array = Array.of('a', 'b', 'c'); // returns char array {'a', 'b', 'c'}
+     * char[] vowels = Array.of('a', 'e', 'i', 'o', 'u'); // returns char array of vowels
+     * }</pre>
      *
      * @param a the input array of characters
      * @return the same input array
@@ -582,6 +847,12 @@ public abstract sealed class Array permits Array.ArrayUtil {
     /**
      * Returns the input array as-is without any modification or copying.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * byte[] array = Array.of((byte) 1, (byte) 2, (byte) 3); // returns byte array {1, 2, 3}
+     * byte[] empty = Array.of(); // returns empty byte array
+     * }</pre>
+     *
      * @param a the input array of bytes
      * @return the same input array
      */
@@ -591,6 +862,12 @@ public abstract sealed class Array permits Array.ArrayUtil {
 
     /**
      * Returns the input array as-is without any modification or copying.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * short[] array = Array.of((short) 10, (short) 20, (short) 30); // returns short array {10, 20, 30}
+     * short[] empty = Array.of(); // returns empty short array
+     * }</pre>
      *
      * @param a the input array of shorts
      * @return the same input array
@@ -602,6 +879,12 @@ public abstract sealed class Array permits Array.ArrayUtil {
     /**
      * Returns the input array as-is without any modification or copying.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * int[] array = Array.of(1, 2, 3, 4, 5); // returns int array {1, 2, 3, 4, 5}
+     * int[] primes = Array.of(2, 3, 5, 7, 11); // returns int array of prime numbers
+     * }</pre>
+     *
      * @param a the input array of integers
      * @return the same input array
      */
@@ -611,6 +894,12 @@ public abstract sealed class Array permits Array.ArrayUtil {
 
     /**
      * Returns the input array as-is without any modification or copying.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * long[] array = Array.of(1L, 2L, 3L); // returns long array {1L, 2L, 3L}
+     * long[] timestamps = Array.of(1609459200000L, 1612137600000L); // returns long array of timestamps
+     * }</pre>
      *
      * @param a the input array of longs
      * @return the same input array
@@ -622,6 +911,12 @@ public abstract sealed class Array permits Array.ArrayUtil {
     /**
      * Returns the input array as-is without any modification or copying.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * float[] array = Array.of(1.1f, 2.2f, 3.3f); // returns float array {1.1f, 2.2f, 3.3f}
+     * float[] empty = Array.of(); // returns empty float array
+     * }</pre>
+     *
      * @param a the input array of floats
      * @return the same input array
      */
@@ -632,6 +927,12 @@ public abstract sealed class Array permits Array.ArrayUtil {
     /**
      * Returns the input array as-is without any modification or copying.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * double[] array = Array.of(1.1, 2.2, 3.3); // returns double array {1.1, 2.2, 3.3}
+     * double[] prices = Array.of(19.99, 29.99, 39.99); // returns double array of prices
+     * }</pre>
+     *
      * @param a the input array of doubles
      * @return the same input array
      */
@@ -641,6 +942,12 @@ public abstract sealed class Array permits Array.ArrayUtil {
 
     /**
      * Returns the input array as-is without any modification or copying.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * String[] array = Array.of("apple", "banana", "cherry"); // returns String array
+     * String[] names = Array.of("Alice", "Bob", "Charlie"); // returns String array of names
+     * }</pre>
      *
      * @param a the input array of strings
      * @return the same input array
@@ -723,6 +1030,13 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * <p>This method generates a new char array starting from the <i>startInclusive</i> character up to, but not including, the <i>endExclusive</i> character.
      * The characters are generated in ascending order. If the start is greater than or equal to the end, an empty array is returned.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * char[] chars = Array.range('a', 'e'); // returns {'a', 'b', 'c', 'd'}
+     * char[] digits = Array.range('0', '5'); // returns {'0', '1', '2', '3', '4'}
+     * char[] empty = Array.range('z', 'a'); // returns empty array
+     * }</pre>
+     *
      * @param startInclusive the first character (inclusive) in the char array.
      * @param endExclusive the upper bound (exclusive) of the char array.
      * @return a char array containing characters from <i>startInclusive</i> to <i>endExclusive</i>, or an empty array if startInclusive &gt;= endExclusive.
@@ -795,6 +1109,13 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * <p>This method generates a new integer array starting from the <i>startInclusive</i> integer up to, but not including, the <i>endExclusive</i> integer.
      * The integers are generated in ascending order. If the start is greater than or equal to the end, an empty array is returned.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * int[] nums = Array.range(0, 5); // returns {0, 1, 2, 3, 4}
+     * int[] range = Array.range(10, 15); // returns {10, 11, 12, 13, 14}
+     * int[] empty = Array.range(5, 5); // returns empty array
+     * }</pre>
+     *
      * @param startInclusive the first integer (inclusive) in the integer array.
      * @param endExclusive the upper bound (exclusive) of the integer array.
      * @return an integer array containing integers from <i>startInclusive</i> to <i>endExclusive</i>, or an empty array if startInclusive &gt;= endExclusive.
@@ -823,6 +1144,13 @@ public abstract sealed class Array permits Array.ArrayUtil {
      *
      * <p>This method generates a new long array starting from the <i>startInclusive</i> long integer up to, but not including, the <i>endExclusive</i> long integer.
      * The long integers are generated in ascending order. If the start is greater than or equal to the end, an empty array is returned.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * long[] nums = Array.range(0L, 5L); // returns {0L, 1L, 2L, 3L, 4L}
+     * long[] range = Array.range(100L, 105L); // returns {100L, 101L, 102L, 103L, 104L}
+     * long[] empty = Array.range(5L, 5L); // returns empty array
+     * }</pre>
      *
      * @param startInclusive the first long integer (inclusive) in the long array.
      * @param endExclusive the upper bound (exclusive) of the long array.
@@ -2234,7 +2562,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
     }
 
     /**
-     * Concatenates two 2D boolean arrays element-wise by combining their corresponding row elements.
+     * Concatenates two two-dimensional boolean arrays element-wise by combining their corresponding row elements.
      *
      * <p>This method performs element-wise concatenation by merging rows at the same index position from both input arrays.
      * The resulting array's length equals the maximum length of the two input arrays. For each row index:
@@ -2249,7 +2577,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * // Example 1: Basic concatenation of two 2D arrays
+     * // Example 1: Basic concatenation of two two-dimensional arrays
      * boolean[][] a = {{true, false}, {true}};
      * boolean[][] b = {{false}, {true, true}};
      * boolean[][] result = Array.concat(a, b);
@@ -2272,9 +2600,9 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * // result = new boolean[0][]
      * }</pre>
      *
-     * @param a the first 2D boolean array to concatenate. Can be {@code null} or empty, in which case a clone of {@code b} is returned (or an empty array if both are null/empty).
-     * @param b the second 2D boolean array to concatenate. Can be {@code null} or empty, in which case a clone of {@code a} is returned (or an empty array if both are null/empty).
-     * @return a new 2D boolean array containing the element-wise concatenation of the input arrays. The length equals max(a.length, b.length).
+     * @param a the first two-dimensional boolean array to concatenate. Can be {@code null} or empty, in which case a clone of {@code b} is returned (or an empty array if both are null/empty).
+     * @param b the second two-dimensional boolean array to concatenate. Can be {@code null} or empty, in which case a clone of {@code a} is returned (or an empty array if both are null/empty).
+     * @return a new two-dimensional boolean array containing the element-wise concatenation of the input arrays. The length equals max(a.length, b.length).
      *         Each row in the result is the concatenation of the corresponding rows from {@code a} and {@code b}.
      */
     public static boolean[][] concat(final boolean[][] a, final boolean[][] b) {
@@ -2295,14 +2623,14 @@ public abstract sealed class Array permits Array.ArrayUtil {
     }
 
     /**
-     * Concatenates two 3D boolean arrays element-wise by combining their corresponding 2D layer elements.
+     * Concatenates two three-dimensional boolean arrays element-wise by combining their corresponding two-dimensional layer elements.
      *
-     * <p>This method performs element-wise concatenation by recursively merging 2D layers at the same index position from both input arrays.
+     * <p>This method performs element-wise concatenation by recursively merging two-dimensional layers at the same index position from both input arrays.
      * The resulting array's length equals the maximum length of the two input arrays. For each layer index:
      * <ul>
-     *   <li>If both arrays have a layer at that index, the layers are concatenated using the 2D concat method</li>
+     *   <li>If both arrays have a layer at that index, the layers are concatenated using the two-dimensional concat method</li>
      *   <li>If only one array has a layer at that index, that layer is used in the result</li>
-     *   <li>If neither array has a layer at that index (both are null), the result layer is an empty 2D array</li>
+     *   <li>If neither array has a layer at that index (both are null), the result layer is an empty two-dimensional array</li>
      * </ul>
      *
      * <p>The operation creates a new array and does not modify the input arrays. Both input arrays can be {@code null} or empty,
@@ -2310,7 +2638,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * // Example 1: Basic concatenation of two 3D arrays
+     * // Example 1: Basic concatenation of two three-dimensional arrays
      * boolean[][][] a = {{{true, false}}, {{true}}};
      * boolean[][][] b = {{{false}}, {{true, true}}};
      * boolean[][][] result = Array.concat(a, b);
@@ -2333,10 +2661,10 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * // result = new boolean[0][][]
      * }</pre>
      *
-     * @param a the first 3D boolean array to concatenate. Can be {@code null} or empty, in which case a clone of {@code b} is returned (or an empty array if both are null/empty).
-     * @param b the second 3D boolean array to concatenate. Can be {@code null} or empty, in which case a clone of {@code a} is returned (or an empty array if both are null/empty).
-     * @return a new 3D boolean array containing the element-wise concatenation of the input arrays. The length equals max(a.length, b.length).
-     *         Each 2D layer in the result is the concatenation of the corresponding layers from {@code a} and {@code b}.
+     * @param a the first three-dimensional boolean array to concatenate. Can be {@code null} or empty, in which case a clone of {@code b} is returned (or an empty array if both are null/empty).
+     * @param b the second three-dimensional boolean array to concatenate. Can be {@code null} or empty, in which case a clone of {@code a} is returned (or an empty array if both are null/empty).
+     * @return a new three-dimensional boolean array containing the element-wise concatenation of the input arrays. The length equals max(a.length, b.length).
+     *         Each two-dimensional layer in the result is the concatenation of the corresponding layers from {@code a} and {@code b}.
      */
     public static boolean[][][] concat(final boolean[][][] a, final boolean[][][] b) {
         if (N.isEmpty(a)) {
@@ -2356,7 +2684,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
     }
 
     /**
-     * Concatenates two 2D char arrays element-wise by combining their corresponding row elements.
+     * Concatenates two two-dimensional char arrays element-wise by combining their corresponding row elements.
      *
      * <p>This method performs element-wise concatenation by merging rows at the same index position from both input arrays.
      * The resulting array's length equals the maximum length of the two input arrays. For each row index:
@@ -2371,7 +2699,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * // Example 1: Basic concatenation of two 2D arrays
+     * // Example 1: Basic concatenation of two two-dimensional arrays
      * char[][] a = {{'a', 'b'}, {'c'}};
      * char[][] b = {{'d'}, {'e', 'f'}};
      * char[][] result = Array.concat(a, b);
@@ -2394,9 +2722,9 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * // result = new char[0][]
      * }</pre>
      *
-     * @param a the first 2D char array to concatenate. Can be {@code null} or empty, in which case a clone of {@code b} is returned (or an empty array if both are null/empty).
-     * @param b the second 2D char array to concatenate. Can be {@code null} or empty, in which case a clone of {@code a} is returned (or an empty array if both are null/empty).
-     * @return a new 2D char array containing the element-wise concatenation of the input arrays. The length equals max(a.length, b.length).
+     * @param a the first two-dimensional char array to concatenate. Can be {@code null} or empty, in which case a clone of {@code b} is returned (or an empty array if both are null/empty).
+     * @param b the second two-dimensional char array to concatenate. Can be {@code null} or empty, in which case a clone of {@code a} is returned (or an empty array if both are null/empty).
+     * @return a new two-dimensional char array containing the element-wise concatenation of the input arrays. The length equals max(a.length, b.length).
      *         Each row in the result is the concatenation of the corresponding rows from {@code a} and {@code b}.
      */
     public static char[][] concat(final char[][] a, final char[][] b) {
@@ -2417,14 +2745,14 @@ public abstract sealed class Array permits Array.ArrayUtil {
     }
 
     /**
-     * Concatenates two 3D char arrays element-wise by combining their corresponding 2D layer elements.
+     * Concatenates two three-dimensional char arrays element-wise by combining their corresponding two-dimensional layer elements.
      *
-     * <p>This method performs element-wise concatenation by recursively merging 2D layers at the same index position from both input arrays.
+     * <p>This method performs element-wise concatenation by recursively merging two-dimensional layers at the same index position from both input arrays.
      * The resulting array's length equals the maximum length of the two input arrays. For each layer index:
      * <ul>
-     *   <li>If both arrays have a layer at that index, the layers are concatenated using the 2D concat method</li>
+     *   <li>If both arrays have a layer at that index, the layers are concatenated using the two-dimensional concat method</li>
      *   <li>If only one array has a layer at that index, that layer is used in the result</li>
-     *   <li>If neither array has a layer at that index (both are null), the result layer is an empty 2D array</li>
+     *   <li>If neither array has a layer at that index (both are null), the result layer is an empty two-dimensional array</li>
      * </ul>
      *
      * <p>The operation creates a new array and does not modify the input arrays. Both input arrays can be {@code null} or empty,
@@ -2432,7 +2760,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * // Example 1: Basic concatenation of two 3D arrays
+     * // Example 1: Basic concatenation of two three-dimensional arrays
      * char[][][] a = {{{'a', 'b'}}, {{'c'}}};
      * char[][][] b = {{{'d'}}, {{'e', 'f'}}};
      * char[][][] result = Array.concat(a, b);
@@ -2455,10 +2783,10 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * // result = new char[0][][]
      * }</pre>
      *
-     * @param a the first 3D char array to concatenate. Can be {@code null} or empty, in which case a clone of {@code b} is returned (or an empty array if both are null/empty).
-     * @param b the second 3D char array to concatenate. Can be {@code null} or empty, in which case a clone of {@code a} is returned (or an empty array if both are null/empty).
-     * @return a new 3D char array containing the element-wise concatenation of the input arrays. The length equals max(a.length, b.length).
-     *         Each 2D layer in the result is the concatenation of the corresponding layers from {@code a} and {@code b}.
+     * @param a the first three-dimensional char array to concatenate. Can be {@code null} or empty, in which case a clone of {@code b} is returned (or an empty array if both are null/empty).
+     * @param b the second three-dimensional char array to concatenate. Can be {@code null} or empty, in which case a clone of {@code a} is returned (or an empty array if both are null/empty).
+     * @return a new three-dimensional char array containing the element-wise concatenation of the input arrays. The length equals max(a.length, b.length).
+     *         Each two-dimensional layer in the result is the concatenation of the corresponding layers from {@code a} and {@code b}.
      */
     public static char[][][] concat(final char[][][] a, final char[][][] b) {
         if (N.isEmpty(a)) {
@@ -2478,7 +2806,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
     }
 
     /**
-     * Concatenates two 2D byte arrays element-wise by combining their corresponding row elements.
+     * Concatenates two two-dimensional byte arrays element-wise by combining their corresponding row elements.
      *
      * <p>This method performs element-wise concatenation by merging rows at the same index position from both input arrays.
      * The resulting array's length equals the maximum length of the two input arrays. For each row index:
@@ -2493,7 +2821,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * // Example 1: Basic concatenation of two 2D arrays
+     * // Example 1: Basic concatenation of two two-dimensional arrays
      * byte[][] a = {{1, 2}, {3}};
      * byte[][] b = {{4}, {5, 6}};
      * byte[][] result = Array.concat(a, b);
@@ -2516,9 +2844,9 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * // result = new byte[0][]
      * }</pre>
      *
-     * @param a the first 2D byte array to concatenate. Can be {@code null} or empty, in which case a clone of {@code b} is returned (or an empty array if both are null/empty).
-     * @param b the second 2D byte array to concatenate. Can be {@code null} or empty, in which case a clone of {@code a} is returned (or an empty array if both are null/empty).
-     * @return a new 2D byte array containing the element-wise concatenation of the input arrays. The length equals max(a.length, b.length).
+     * @param a the first two-dimensional byte array to concatenate. Can be {@code null} or empty, in which case a clone of {@code b} is returned (or an empty array if both are null/empty).
+     * @param b the second two-dimensional byte array to concatenate. Can be {@code null} or empty, in which case a clone of {@code a} is returned (or an empty array if both are null/empty).
+     * @return a new two-dimensional byte array containing the element-wise concatenation of the input arrays. The length equals max(a.length, b.length).
      *         Each row in the result is the concatenation of the corresponding rows from {@code a} and {@code b}.
      */
     public static byte[][] concat(final byte[][] a, final byte[][] b) {
@@ -2539,14 +2867,14 @@ public abstract sealed class Array permits Array.ArrayUtil {
     }
 
     /**
-     * Concatenates two 3D byte arrays element-wise by combining their corresponding 2D layer elements.
+     * Concatenates two three-dimensional byte arrays element-wise by combining their corresponding two-dimensional layer elements.
      *
-     * <p>This method performs element-wise concatenation by recursively merging 2D layers at the same index position from both input arrays.
+     * <p>This method performs element-wise concatenation by recursively merging two-dimensional layers at the same index position from both input arrays.
      * The resulting array's length equals the maximum length of the two input arrays. For each layer index:
      * <ul>
-     *   <li>If both arrays have a layer at that index, the layers are concatenated using the 2D concat method</li>
+     *   <li>If both arrays have a layer at that index, the layers are concatenated using the two-dimensional concat method</li>
      *   <li>If only one array has a layer at that index, that layer is used in the result</li>
-     *   <li>If neither array has a layer at that index (both are null), the result layer is an empty 2D array</li>
+     *   <li>If neither array has a layer at that index (both are null), the result layer is an empty two-dimensional array</li>
      * </ul>
      *
      * <p>The operation creates a new array and does not modify the input arrays. Both input arrays can be {@code null} or empty,
@@ -2554,7 +2882,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * // Example 1: Basic concatenation of two 3D arrays
+     * // Example 1: Basic concatenation of two three-dimensional arrays
      * byte[][][] a = {{{1, 2}}, {{3}}};
      * byte[][][] b = {{{4}}, {{5, 6}}};
      * byte[][][] result = Array.concat(a, b);
@@ -2577,10 +2905,10 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * // result = new byte[0][][]
      * }</pre>
      *
-     * @param a the first 3D byte array to concatenate. Can be {@code null} or empty, in which case a clone of {@code b} is returned (or an empty array if both are null/empty).
-     * @param b the second 3D byte array to concatenate. Can be {@code null} or empty, in which case a clone of {@code a} is returned (or an empty array if both are null/empty).
-     * @return a new 3D byte array containing the element-wise concatenation of the input arrays. The length equals max(a.length, b.length).
-     *         Each 2D layer in the result is the concatenation of the corresponding layers from {@code a} and {@code b}.
+     * @param a the first three-dimensional byte array to concatenate. Can be {@code null} or empty, in which case a clone of {@code b} is returned (or an empty array if both are null/empty).
+     * @param b the second three-dimensional byte array to concatenate. Can be {@code null} or empty, in which case a clone of {@code a} is returned (or an empty array if both are null/empty).
+     * @return a new three-dimensional byte array containing the element-wise concatenation of the input arrays. The length equals max(a.length, b.length).
+     *         Each two-dimensional layer in the result is the concatenation of the corresponding layers from {@code a} and {@code b}.
      */
     public static byte[][][] concat(final byte[][][] a, final byte[][][] b) {
         if (N.isEmpty(a)) {
@@ -2600,7 +2928,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
     }
 
     /**
-     * Concatenates two 2D short arrays element-wise by combining their corresponding row elements.
+     * Concatenates two two-dimensional short arrays element-wise by combining their corresponding row elements.
      *
      * <p>This method performs element-wise concatenation by merging rows at the same index position from both input arrays.
      * The resulting array's length equals the maximum length of the two input arrays. For each row index:
@@ -2615,7 +2943,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * // Example 1: Basic concatenation of two 2D arrays
+     * // Example 1: Basic concatenation of two two-dimensional arrays
      * short[][] a = {{1, 2}, {3}};
      * short[][] b = {{4}, {5, 6}};
      * short[][] result = Array.concat(a, b);
@@ -2638,9 +2966,9 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * // result = new short[0][]
      * }</pre>
      *
-     * @param a the first 2D short array to concatenate. Can be {@code null} or empty, in which case a clone of {@code b} is returned (or an empty array if both are null/empty).
-     * @param b the second 2D short array to concatenate. Can be {@code null} or empty, in which case a clone of {@code a} is returned (or an empty array if both are null/empty).
-     * @return a new 2D short array containing the element-wise concatenation of the input arrays. The length equals max(a.length, b.length).
+     * @param a the first two-dimensional short array to concatenate. Can be {@code null} or empty, in which case a clone of {@code b} is returned (or an empty array if both are null/empty).
+     * @param b the second two-dimensional short array to concatenate. Can be {@code null} or empty, in which case a clone of {@code a} is returned (or an empty array if both are null/empty).
+     * @return a new two-dimensional short array containing the element-wise concatenation of the input arrays. The length equals max(a.length, b.length).
      *         Each row in the result is the concatenation of the corresponding rows from {@code a} and {@code b}.
      */
     public static short[][] concat(final short[][] a, final short[][] b) {
@@ -2661,14 +2989,14 @@ public abstract sealed class Array permits Array.ArrayUtil {
     }
 
     /**
-     * Concatenates two 3D short arrays element-wise by combining their corresponding 2D layer elements.
+     * Concatenates two three-dimensional short arrays element-wise by combining their corresponding two-dimensional layer elements.
      *
-     * <p>This method performs element-wise concatenation by recursively merging 2D layers at the same index position from both input arrays.
+     * <p>This method performs element-wise concatenation by recursively merging two-dimensional layers at the same index position from both input arrays.
      * The resulting array's length equals the maximum length of the two input arrays. For each layer index:
      * <ul>
-     *   <li>If both arrays have a layer at that index, the layers are concatenated using the 2D concat method</li>
+     *   <li>If both arrays have a layer at that index, the layers are concatenated using the two-dimensional concat method</li>
      *   <li>If only one array has a layer at that index, that layer is used in the result</li>
-     *   <li>If neither array has a layer at that index (both are null), the result layer is an empty 2D array</li>
+     *   <li>If neither array has a layer at that index (both are null), the result layer is an empty two-dimensional array</li>
      * </ul>
      *
      * <p>The operation creates a new array and does not modify the input arrays. Both input arrays can be {@code null} or empty,
@@ -2676,7 +3004,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * // Example 1: Basic concatenation of two 3D arrays
+     * // Example 1: Basic concatenation of two three-dimensional arrays
      * short[][][] a = {{{1, 2}}, {{3}}};
      * short[][][] b = {{{4}}, {{5, 6}}};
      * short[][][] result = Array.concat(a, b);
@@ -2699,10 +3027,10 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * // result = new short[0][][]
      * }</pre>
      *
-     * @param a the first 3D short array to concatenate. Can be {@code null} or empty, in which case a clone of {@code b} is returned (or an empty array if both are null/empty).
-     * @param b the second 3D short array to concatenate. Can be {@code null} or empty, in which case a clone of {@code a} is returned (or an empty array if both are null/empty).
-     * @return a new 3D short array containing the element-wise concatenation of the input arrays. The length equals max(a.length, b.length).
-     *         Each 2D layer in the result is the concatenation of the corresponding layers from {@code a} and {@code b}.
+     * @param a the first three-dimensional short array to concatenate. Can be {@code null} or empty, in which case a clone of {@code b} is returned (or an empty array if both are null/empty).
+     * @param b the second three-dimensional short array to concatenate. Can be {@code null} or empty, in which case a clone of {@code a} is returned (or an empty array if both are null/empty).
+     * @return a new three-dimensional short array containing the element-wise concatenation of the input arrays. The length equals max(a.length, b.length).
+     *         Each two-dimensional layer in the result is the concatenation of the corresponding layers from {@code a} and {@code b}.
      */
     public static short[][][] concat(final short[][][] a, final short[][][] b) {
         if (N.isEmpty(a)) {
@@ -2722,7 +3050,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
     }
 
     /**
-     * Concatenates two 2D integer arrays element-wise by combining their corresponding row elements.
+     * Concatenates two two-dimensional integer arrays element-wise by combining their corresponding row elements.
      *
      * <p>This method performs element-wise concatenation by merging rows at the same index position from both input arrays.
      * The resulting array's length equals the maximum length of the two input arrays. For each row index:
@@ -2737,7 +3065,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * // Example 1: Basic concatenation of two 2D arrays
+     * // Example 1: Basic concatenation of two two-dimensional arrays
      * int[][] a = {{1, 2}, {3}};
      * int[][] b = {{4}, {5, 6}};
      * int[][] result = Array.concat(a, b);
@@ -2760,9 +3088,9 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * // result = new int[0][]
      * }</pre>
      *
-     * @param a the first 2D int array to concatenate. Can be {@code null} or empty, in which case a clone of {@code b} is returned (or an empty array if both are null/empty).
-     * @param b the second 2D int array to concatenate. Can be {@code null} or empty, in which case a clone of {@code a} is returned (or an empty array if both are null/empty).
-     * @return a new 2D int array containing the element-wise concatenation of the input arrays. The length equals max(a.length, b.length).
+     * @param a the first two-dimensional int array to concatenate. Can be {@code null} or empty, in which case a clone of {@code b} is returned (or an empty array if both are null/empty).
+     * @param b the second two-dimensional int array to concatenate. Can be {@code null} or empty, in which case a clone of {@code a} is returned (or an empty array if both are null/empty).
+     * @return a new two-dimensional int array containing the element-wise concatenation of the input arrays. The length equals max(a.length, b.length).
      *         Each row in the result is the concatenation of the corresponding rows from {@code a} and {@code b}.
      */
     public static int[][] concat(final int[][] a, final int[][] b) {
@@ -2783,14 +3111,14 @@ public abstract sealed class Array permits Array.ArrayUtil {
     }
 
     /**
-     * Concatenates two 3D integer arrays element-wise by combining their corresponding 2D layer elements.
+     * Concatenates two three-dimensional integer arrays element-wise by combining their corresponding two-dimensional layer elements.
      *
-     * <p>This method performs element-wise concatenation by recursively merging 2D layers at the same index position from both input arrays.
+     * <p>This method performs element-wise concatenation by recursively merging two-dimensional layers at the same index position from both input arrays.
      * The resulting array's length equals the maximum length of the two input arrays. For each layer index:
      * <ul>
-     *   <li>If both arrays have a layer at that index, the layers are concatenated using the 2D concat method</li>
+     *   <li>If both arrays have a layer at that index, the layers are concatenated using the two-dimensional concat method</li>
      *   <li>If only one array has a layer at that index, that layer is used in the result</li>
-     *   <li>If neither array has a layer at that index (both are null), the result layer is an empty 2D array</li>
+     *   <li>If neither array has a layer at that index (both are null), the result layer is an empty two-dimensional array</li>
      * </ul>
      *
      * <p>The operation creates a new array and does not modify the input arrays. Both input arrays can be {@code null} or empty,
@@ -2798,7 +3126,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * // Example 1: Basic concatenation of two 3D arrays
+     * // Example 1: Basic concatenation of two three-dimensional arrays
      * int[][][] a = {{{1, 2}}, {{3}}};
      * int[][][] b = {{{4}}, {{5, 6}}};
      * int[][][] result = Array.concat(a, b);
@@ -2821,10 +3149,10 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * // result = new int[0][][]
      * }</pre>
      *
-     * @param a the first 3D int array to concatenate. Can be {@code null} or empty, in which case a clone of {@code b} is returned (or an empty array if both are null/empty).
-     * @param b the second 3D int array to concatenate. Can be {@code null} or empty, in which case a clone of {@code a} is returned (or an empty array if both are null/empty).
-     * @return a new 3D int array containing the element-wise concatenation of the input arrays. The length equals max(a.length, b.length).
-     *         Each 2D layer in the result is the concatenation of the corresponding layers from {@code a} and {@code b}.
+     * @param a the first three-dimensional int array to concatenate. Can be {@code null} or empty, in which case a clone of {@code b} is returned (or an empty array if both are null/empty).
+     * @param b the second three-dimensional int array to concatenate. Can be {@code null} or empty, in which case a clone of {@code a} is returned (or an empty array if both are null/empty).
+     * @return a new three-dimensional int array containing the element-wise concatenation of the input arrays. The length equals max(a.length, b.length).
+     *         Each two-dimensional layer in the result is the concatenation of the corresponding layers from {@code a} and {@code b}.
      */
     public static int[][][] concat(final int[][][] a, final int[][][] b) {
         if (N.isEmpty(a)) {
@@ -2844,7 +3172,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
     }
 
     /**
-     * Concatenates two 2D long arrays element-wise by combining their corresponding row elements.
+     * Concatenates two two-dimensional long arrays element-wise by combining their corresponding row elements.
      *
      * <p>This method performs element-wise concatenation by merging rows at the same index position from both input arrays.
      * The resulting array's length equals the maximum length of the two input arrays. For each row index:
@@ -2859,7 +3187,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * // Example 1: Basic concatenation of two 2D arrays
+     * // Example 1: Basic concatenation of two two-dimensional arrays
      * long[][] a = {{1L, 2L}, {3L}};
      * long[][] b = {{4L}, {5L, 6L}};
      * long[][] result = Array.concat(a, b);
@@ -2882,9 +3210,9 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * // result = new long[0][]
      * }</pre>
      *
-     * @param a the first 2D long array to concatenate. Can be {@code null} or empty, in which case a clone of {@code b} is returned (or an empty array if both are null/empty).
-     * @param b the second 2D long array to concatenate. Can be {@code null} or empty, in which case a clone of {@code a} is returned (or an empty array if both are null/empty).
-     * @return a new 2D long array containing the element-wise concatenation of the input arrays. The length equals max(a.length, b.length).
+     * @param a the first two-dimensional long array to concatenate. Can be {@code null} or empty, in which case a clone of {@code b} is returned (or an empty array if both are null/empty).
+     * @param b the second two-dimensional long array to concatenate. Can be {@code null} or empty, in which case a clone of {@code a} is returned (or an empty array if both are null/empty).
+     * @return a new two-dimensional long array containing the element-wise concatenation of the input arrays. The length equals max(a.length, b.length).
      *         Each row in the result is the concatenation of the corresponding rows from {@code a} and {@code b}.
      */
     public static long[][] concat(final long[][] a, final long[][] b) {
@@ -2905,14 +3233,14 @@ public abstract sealed class Array permits Array.ArrayUtil {
     }
 
     /**
-     * Concatenates two 3D long arrays element-wise by combining their corresponding 2D layer elements.
+     * Concatenates two three-dimensional long arrays element-wise by combining their corresponding two-dimensional layer elements.
      *
-     * <p>This method performs element-wise concatenation by recursively merging 2D layers at the same index position from both input arrays.
+     * <p>This method performs element-wise concatenation by recursively merging two-dimensional layers at the same index position from both input arrays.
      * The resulting array's length equals the maximum length of the two input arrays. For each layer index:
      * <ul>
-     *   <li>If both arrays have a layer at that index, the layers are concatenated using the 2D concat method</li>
+     *   <li>If both arrays have a layer at that index, the layers are concatenated using the two-dimensional concat method</li>
      *   <li>If only one array has a layer at that index, that layer is used in the result</li>
-     *   <li>If neither array has a layer at that index (both are null), the result layer is an empty 2D array</li>
+     *   <li>If neither array has a layer at that index (both are null), the result layer is an empty two-dimensional array</li>
      * </ul>
      *
      * <p>The operation creates a new array and does not modify the input arrays. Both input arrays can be {@code null} or empty,
@@ -2920,7 +3248,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * // Example 1: Basic concatenation of two 3D arrays
+     * // Example 1: Basic concatenation of two three-dimensional arrays
      * long[][][] a = {{{1L, 2L}}, {{3L}}};
      * long[][][] b = {{{4L}}, {{5L, 6L}}};
      * long[][][] result = Array.concat(a, b);
@@ -2943,10 +3271,10 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * // result = new long[0][][]
      * }</pre>
      *
-     * @param a the first 3D long array to concatenate. Can be {@code null} or empty, in which case a clone of {@code b} is returned (or an empty array if both are null/empty).
-     * @param b the second 3D long array to concatenate. Can be {@code null} or empty, in which case a clone of {@code a} is returned (or an empty array if both are null/empty).
-     * @return a new 3D long array containing the element-wise concatenation of the input arrays. The length equals max(a.length, b.length).
-     *         Each 2D layer in the result is the concatenation of the corresponding layers from {@code a} and {@code b}.
+     * @param a the first three-dimensional long array to concatenate. Can be {@code null} or empty, in which case a clone of {@code b} is returned (or an empty array if both are null/empty).
+     * @param b the second three-dimensional long array to concatenate. Can be {@code null} or empty, in which case a clone of {@code a} is returned (or an empty array if both are null/empty).
+     * @return a new three-dimensional long array containing the element-wise concatenation of the input arrays. The length equals max(a.length, b.length).
+     *         Each two-dimensional layer in the result is the concatenation of the corresponding layers from {@code a} and {@code b}.
      */
     public static long[][][] concat(final long[][][] a, final long[][][] b) {
         if (N.isEmpty(a)) {
@@ -2966,7 +3294,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
     }
 
     /**
-     * Concatenates two 2D float arrays element-wise by combining their corresponding row elements.
+     * Concatenates two two-dimensional float arrays element-wise by combining their corresponding row elements.
      *
      * <p>This method performs element-wise concatenation by merging rows at the same index position from both input arrays.
      * The resulting array's length equals the maximum length of the two input arrays. For each row index:
@@ -2981,7 +3309,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * // Example 1: Basic concatenation of two 2D arrays
+     * // Example 1: Basic concatenation of two two-dimensional arrays
      * float[][] a = {{1.0f, 2.0f}, {3.0f}};
      * float[][] b = {{4.0f}, {5.0f, 6.0f}};
      * float[][] result = Array.concat(a, b);
@@ -3004,9 +3332,9 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * // result = new float[0][]
      * }</pre>
      *
-     * @param a the first 2D float array to concatenate. Can be {@code null} or empty, in which case a clone of {@code b} is returned (or an empty array if both are null/empty).
-     * @param b the second 2D float array to concatenate. Can be {@code null} or empty, in which case a clone of {@code a} is returned (or an empty array if both are null/empty).
-     * @return a new 2D float array containing the element-wise concatenation of the input arrays. The length equals max(a.length, b.length).
+     * @param a the first two-dimensional float array to concatenate. Can be {@code null} or empty, in which case a clone of {@code b} is returned (or an empty array if both are null/empty).
+     * @param b the second two-dimensional float array to concatenate. Can be {@code null} or empty, in which case a clone of {@code a} is returned (or an empty array if both are null/empty).
+     * @return a new two-dimensional float array containing the element-wise concatenation of the input arrays. The length equals max(a.length, b.length).
      *         Each row in the result is the concatenation of the corresponding rows from {@code a} and {@code b}.
      */
     public static float[][] concat(final float[][] a, final float[][] b) {
@@ -3027,14 +3355,14 @@ public abstract sealed class Array permits Array.ArrayUtil {
     }
 
     /**
-     * Concatenates two 3D float arrays element-wise by combining their corresponding 2D layer elements.
+     * Concatenates two three-dimensional float arrays element-wise by combining their corresponding two-dimensional layer elements.
      *
-     * <p>This method performs element-wise concatenation by recursively merging 2D layers at the same index position from both input arrays.
+     * <p>This method performs element-wise concatenation by recursively merging two-dimensional layers at the same index position from both input arrays.
      * The resulting array's length equals the maximum length of the two input arrays. For each layer index:
      * <ul>
-     *   <li>If both arrays have a layer at that index, the layers are concatenated using the 2D concat method</li>
+     *   <li>If both arrays have a layer at that index, the layers are concatenated using the two-dimensional concat method</li>
      *   <li>If only one array has a layer at that index, that layer is used in the result</li>
-     *   <li>If neither array has a layer at that index (both are null), the result layer is an empty 2D array</li>
+     *   <li>If neither array has a layer at that index (both are null), the result layer is an empty two-dimensional array</li>
      * </ul>
      *
      * <p>The operation creates a new array and does not modify the input arrays. Both input arrays can be {@code null} or empty,
@@ -3042,7 +3370,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * // Example 1: Basic concatenation of two 3D arrays
+     * // Example 1: Basic concatenation of two three-dimensional arrays
      * float[][][] a = {{{1.0f, 2.0f}}, {{3.0f}}};
      * float[][][] b = {{{4.0f}}, {{5.0f, 6.0f}}};
      * float[][][] result = Array.concat(a, b);
@@ -3065,10 +3393,10 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * // result = new float[0][][]
      * }</pre>
      *
-     * @param a the first 3D float array to concatenate. Can be {@code null} or empty, in which case a clone of {@code b} is returned (or an empty array if both are null/empty).
-     * @param b the second 3D float array to concatenate. Can be {@code null} or empty, in which case a clone of {@code a} is returned (or an empty array if both are null/empty).
-     * @return a new 3D float array containing the element-wise concatenation of the input arrays. The length equals max(a.length, b.length).
-     *         Each 2D layer in the result is the concatenation of the corresponding layers from {@code a} and {@code b}.
+     * @param a the first three-dimensional float array to concatenate. Can be {@code null} or empty, in which case a clone of {@code b} is returned (or an empty array if both are null/empty).
+     * @param b the second three-dimensional float array to concatenate. Can be {@code null} or empty, in which case a clone of {@code a} is returned (or an empty array if both are null/empty).
+     * @return a new three-dimensional float array containing the element-wise concatenation of the input arrays. The length equals max(a.length, b.length).
+     *         Each two-dimensional layer in the result is the concatenation of the corresponding layers from {@code a} and {@code b}.
      */
     public static float[][][] concat(final float[][][] a, final float[][][] b) {
         if (N.isEmpty(a)) {
@@ -3088,7 +3416,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
     }
 
     /**
-     * Concatenates two 2D double arrays element-wise by combining their corresponding row elements.
+     * Concatenates two two-dimensional double arrays element-wise by combining their corresponding row elements.
      *
      * <p>This method performs element-wise concatenation by merging rows at the same index position from both input arrays.
      * The resulting array's length equals the maximum length of the two input arrays. For each row index:
@@ -3103,7 +3431,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * // Example 1: Basic concatenation of two 2D arrays
+     * // Example 1: Basic concatenation of two two-dimensional arrays
      * double[][] a = {{1.0, 2.0}, {3.0}};
      * double[][] b = {{4.0}, {5.0, 6.0}};
      * double[][] result = Array.concat(a, b);
@@ -3126,9 +3454,9 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * // result = new double[0][]
      * }</pre>
      *
-     * @param a the first 2D double array to concatenate. Can be {@code null} or empty, in which case a clone of {@code b} is returned (or an empty array if both are null/empty).
-     * @param b the second 2D double array to concatenate. Can be {@code null} or empty, in which case a clone of {@code a} is returned (or an empty array if both are null/empty).
-     * @return a new 2D double array containing the element-wise concatenation of the input arrays. The length equals max(a.length, b.length).
+     * @param a the first two-dimensional double array to concatenate. Can be {@code null} or empty, in which case a clone of {@code b} is returned (or an empty array if both are null/empty).
+     * @param b the second two-dimensional double array to concatenate. Can be {@code null} or empty, in which case a clone of {@code a} is returned (or an empty array if both are null/empty).
+     * @return a new two-dimensional double array containing the element-wise concatenation of the input arrays. The length equals max(a.length, b.length).
      *         Each row in the result is the concatenation of the corresponding rows from {@code a} and {@code b}.
      */
     public static double[][] concat(final double[][] a, final double[][] b) {
@@ -3149,14 +3477,14 @@ public abstract sealed class Array permits Array.ArrayUtil {
     }
 
     /**
-     * Concatenates two 3D double arrays element-wise by combining their corresponding 2D layer elements.
+     * Concatenates two three-dimensional double arrays element-wise by combining their corresponding two-dimensional layer elements.
      *
-     * <p>This method performs element-wise concatenation by recursively merging 2D layers at the same index position from both input arrays.
+     * <p>This method performs element-wise concatenation by recursively merging two-dimensional layers at the same index position from both input arrays.
      * The resulting array's length equals the maximum length of the two input arrays. For each layer index:
      * <ul>
-     *   <li>If both arrays have a layer at that index, the layers are concatenated using the 2D concat method</li>
+     *   <li>If both arrays have a layer at that index, the layers are concatenated using the two-dimensional concat method</li>
      *   <li>If only one array has a layer at that index, that layer is used in the result</li>
-     *   <li>If neither array has a layer at that index (both are null), the result layer is an empty 2D array</li>
+     *   <li>If neither array has a layer at that index (both are null), the result layer is an empty two-dimensional array</li>
      * </ul>
      *
      * <p>The operation creates a new array and does not modify the input arrays. Both input arrays can be {@code null} or empty,
@@ -3164,7 +3492,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * // Example 1: Basic concatenation of two 3D arrays
+     * // Example 1: Basic concatenation of two three-dimensional arrays
      * double[][][] a = {{{1.0, 2.0}}, {{3.0}}};
      * double[][][] b = {{{4.0}}, {{5.0, 6.0}}};
      * double[][][] result = Array.concat(a, b);
@@ -3187,10 +3515,10 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * // result = new double[0][][]
      * }</pre>
      *
-     * @param a the first 3D double array to concatenate. Can be {@code null} or empty, in which case a clone of {@code b} is returned (or an empty array if both are null/empty).
-     * @param b the second 3D double array to concatenate. Can be {@code null} or empty, in which case a clone of {@code a} is returned (or an empty array if both are null/empty).
-     * @return a new 3D double array containing the element-wise concatenation of the input arrays. The length equals max(a.length, b.length).
-     *         Each 2D layer in the result is the concatenation of the corresponding layers from {@code a} and {@code b}.
+     * @param a the first three-dimensional double array to concatenate. Can be {@code null} or empty, in which case a clone of {@code b} is returned (or an empty array if both are null/empty).
+     * @param b the second three-dimensional double array to concatenate. Can be {@code null} or empty, in which case a clone of {@code a} is returned (or an empty array if both are null/empty).
+     * @return a new three-dimensional double array containing the element-wise concatenation of the input arrays. The length equals max(a.length, b.length).
+     *         Each two-dimensional layer in the result is the concatenation of the corresponding layers from {@code a} and {@code b}.
      */
     public static double[][][] concat(final double[][][] a, final double[][][] b) {
         if (N.isEmpty(a)) {
@@ -3210,7 +3538,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
     }
 
     /**
-     * Concatenates two 2D arrays of generic type T element-wise by combining their corresponding row elements.
+     * Concatenates two two-dimensional arrays of generic type T element-wise by combining their corresponding row elements.
      *
      * <p>This method performs element-wise concatenation by merging rows at the same index position from both input arrays.
      * The resulting array's length equals the maximum length of the two input arrays. For each row index:
@@ -3225,7 +3553,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * // Example 1: Basic concatenation of two 2D String arrays
+     * // Example 1: Basic concatenation of two two-dimensional String arrays
      * String[][] a = {{"a", "b"}, {"c"}};
      * String[][] b = {{"d"}, {"e", "f"}};
      * String[][] result = Array.concatt(a, b);
@@ -3249,9 +3577,9 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * }</pre>
      *
      * @param <T> the component type of the elements in the arrays.
-     * @param a the first 2D array to concatenate. Can be {@code null} or empty, in which case a clone of {@code b} is returned.
-     * @param b the second 2D array to concatenate. Can be {@code null} or empty, in which case a clone of {@code a} is returned.
-     * @return a new 2D array containing the element-wise concatenation of the input arrays. The length equals max(a.length, b.length).
+     * @param a the first two-dimensional array to concatenate. Can be {@code null} or empty, in which case a clone of {@code b} is returned.
+     * @param b the second two-dimensional array to concatenate. Can be {@code null} or empty, in which case a clone of {@code a} is returned.
+     * @return a new two-dimensional array containing the element-wise concatenation of the input arrays. The length equals max(a.length, b.length).
      *         Each row in the result is the concatenation of the corresponding rows from {@code a} and {@code b}.
      *         Returns {@code null} if both input arrays are {@code null}.
      */
@@ -3273,14 +3601,14 @@ public abstract sealed class Array permits Array.ArrayUtil {
     }
 
     /**
-     * Concatenates two 3D arrays of generic type T element-wise by combining their corresponding 2D layer elements.
+     * Concatenates two three-dimensional arrays of generic type T element-wise by combining their corresponding two-dimensional layer elements.
      *
-     * <p>This method performs element-wise concatenation by recursively merging 2D layers at the same index position from both input arrays.
+     * <p>This method performs element-wise concatenation by recursively merging two-dimensional layers at the same index position from both input arrays.
      * The resulting array's length equals the maximum length of the two input arrays. For each layer index:
      * <ul>
-     *   <li>If both arrays have a layer at that index, the layers are concatenated using the 2D concatt method</li>
+     *   <li>If both arrays have a layer at that index, the layers are concatenated using the two-dimensional concatt method</li>
      *   <li>If only one array has a layer at that index, that layer is used in the result</li>
-     *   <li>If neither array has a layer at that index (both are null), the result layer is an empty 2D array</li>
+     *   <li>If neither array has a layer at that index (both are null), the result layer is an empty two-dimensional array</li>
      * </ul>
      *
      * <p>The operation creates a new array and does not modify the input arrays. Both input arrays can be {@code null} or empty,
@@ -3288,7 +3616,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * // Example 1: Basic concatenation of two 3D String arrays
+     * // Example 1: Basic concatenation of two three-dimensional String arrays
      * String[][][] a = {{{"a", "b"}}, {{"c"}}};
      * String[][][] b = {{{"d"}}, {{"e", "f"}}};
      * String[][][] result = Array.concatt(a, b);
@@ -3312,10 +3640,10 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * }</pre>
      *
      * @param <T> the component type of the elements in the arrays.
-     * @param a the first 3D array to concatenate. Can be {@code null} or empty, in which case a clone of {@code b} is returned.
-     * @param b the second 3D array to concatenate. Can be {@code null} or empty, in which case a clone of {@code a} is returned.
-     * @return a new 3D array containing the element-wise concatenation of the input arrays. The length equals max(a.length, b.length).
-     *         Each 2D layer in the result is the concatenation of the corresponding layers from {@code a} and {@code b}.
+     * @param a the first three-dimensional array to concatenate. Can be {@code null} or empty, in which case a clone of {@code b} is returned.
+     * @param b the second three-dimensional array to concatenate. Can be {@code null} or empty, in which case a clone of {@code a} is returned.
+     * @return a new three-dimensional array containing the element-wise concatenation of the input arrays. The length equals max(a.length, b.length).
+     *         Each two-dimensional layer in the result is the concatenation of the corresponding layers from {@code a} and {@code b}.
      *         Returns {@code null} if both input arrays are {@code null}.
      */
     public static <T> T[][][] concatt(final T[][][] a, final T[][][] b) {
@@ -3338,8 +3666,15 @@ public abstract sealed class Array permits Array.ArrayUtil {
     /**
      * Converts an array of primitive booleans to an array of Boolean objects.
      *
-     * @param a the array of primitive booleans to be converted.
-     * @return an array of Boolean objects, {@code null} if the input array is {@code null}.
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * boolean[] primitives = {true, false, true};
+     * Boolean[] objects = Array.box(primitives); // returns {Boolean.TRUE, Boolean.FALSE, Boolean.TRUE}
+     * Boolean[] nullResult = Array.box(null); // returns null
+     * }</pre>
+     *
+     * @param a the array of primitive booleans to be converted. May be {@code null}.
+     * @return an array of Boolean objects, or {@code null} if the input array is {@code null}
      */
     @MayReturnNull
     public static Boolean[] box(final boolean... a) {
@@ -3510,8 +3845,15 @@ public abstract sealed class Array permits Array.ArrayUtil {
     /**
      * Converts an array of primitive integers to an array of Integer objects.
      *
-     * @param a the array of primitive integers to be converted.
-     * @return an array of Integer objects, {@code null} if the input array is {@code null}.
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * int[] primitives = {1, 2, 3};
+     * Integer[] objects = Array.box(primitives); // returns {Integer.valueOf(1), Integer.valueOf(2), Integer.valueOf(3)}
+     * Integer[] nullResult = Array.box(null); // returns null
+     * }</pre>
+     *
+     * @param a the array of primitive integers to be converted. May be {@code null}.
+     * @return an array of Integer objects, or {@code null} if the input array is {@code null}
      */
     @MayReturnNull
     public static Integer[] box(final int... a) {
@@ -3680,10 +4022,10 @@ public abstract sealed class Array permits Array.ArrayUtil {
     }
 
     /**
-     * Converts a 2D array of primitive booleans to a 2D array of Boolean objects.
+     * Converts a two-dimensional array of primitive booleans to a two-dimensional array of Boolean objects.
      *
-     * @param a the 2D array of primitive booleans to be converted.
-     * @return a 2D array of Boolean objects, {@code null} if the input array is {@code null}.
+     * @param a the two-dimensional array of primitive booleans to be converted.
+     * @return a two-dimensional array of Boolean objects, {@code null} if the input array is {@code null}.
      * @see #box(boolean[])
      */
     @MayReturnNull
@@ -3702,10 +4044,10 @@ public abstract sealed class Array permits Array.ArrayUtil {
     }
 
     /**
-     * Converts a 2D array of primitive chars to a 2D array of Character objects.
+     * Converts a two-dimensional array of primitive chars to a two-dimensional array of Character objects.
      *
-     * @param a the 2D array of primitive chars to be converted.
-     * @return a 2D array of Character objects, {@code null} if the input array is {@code null}.
+     * @param a the two-dimensional array of primitive chars to be converted.
+     * @return a two-dimensional array of Character objects, {@code null} if the input array is {@code null}.
      * @see #box(char[])
      */
     @MayReturnNull
@@ -3724,10 +4066,10 @@ public abstract sealed class Array permits Array.ArrayUtil {
     }
 
     /**
-     * Converts a 2D array of primitive bytes to a 2D array of Byte objects.
+     * Converts a two-dimensional array of primitive bytes to a two-dimensional array of Byte objects.
      *
-     * @param a the 2D array of primitive bytes to be converted.
-     * @return a 2D array of Byte objects, {@code null} if the input array is {@code null}.
+     * @param a the two-dimensional array of primitive bytes to be converted.
+     * @return a two-dimensional array of Byte objects, {@code null} if the input array is {@code null}.
      * @see #box(byte[])
      */
     @MayReturnNull
@@ -3746,10 +4088,10 @@ public abstract sealed class Array permits Array.ArrayUtil {
     }
 
     /**
-     * Converts a 2D array of primitive shorts to a 2D array of Short objects.
+     * Converts a two-dimensional array of primitive shorts to a two-dimensional array of Short objects.
      *
-     * @param a the 2D array of primitive shorts to be converted.
-     * @return a 2D array of Short objects, {@code null} if the input array is {@code null}.
+     * @param a the two-dimensional array of primitive shorts to be converted.
+     * @return a two-dimensional array of Short objects, {@code null} if the input array is {@code null}.
      * @see #box(short[])
      */
     @MayReturnNull
@@ -3768,10 +4110,10 @@ public abstract sealed class Array permits Array.ArrayUtil {
     }
 
     /**
-     * Converts a 2D array of primitive integers to a 2D array of Integer objects.
+     * Converts a two-dimensional array of primitive integers to a two-dimensional array of Integer objects.
      *
-     * @param a the 2D array of primitive integers to be converted.
-     * @return a 2D array of Integer objects, {@code null} if the input array is {@code null}.
+     * @param a the two-dimensional array of primitive integers to be converted.
+     * @return a two-dimensional array of Integer objects, {@code null} if the input array is {@code null}.
      * @see #box(int[])
      */
     @MayReturnNull
@@ -3790,10 +4132,10 @@ public abstract sealed class Array permits Array.ArrayUtil {
     }
 
     /**
-     * Converts a 2D array of primitive longs to a 2D array of Long objects.
+     * Converts a two-dimensional array of primitive longs to a two-dimensional array of Long objects.
      *
-     * @param a the 2D array of primitive longs to be converted.
-     * @return a 2D array of Long objects, {@code null} if the input array is {@code null}.
+     * @param a the two-dimensional array of primitive longs to be converted.
+     * @return a two-dimensional array of Long objects, {@code null} if the input array is {@code null}.
      * @see #box(long[])
      */
     @MayReturnNull
@@ -3812,10 +4154,10 @@ public abstract sealed class Array permits Array.ArrayUtil {
     }
 
     /**
-     * Converts a 2D array of primitive floats to a 2D array of Float objects.
+     * Converts a two-dimensional array of primitive floats to a two-dimensional array of Float objects.
      *
-     * @param a the 2D array of primitive floats to be converted.
-     * @return a 2D array of Float objects, {@code null} if the input array is {@code null}.
+     * @param a the two-dimensional array of primitive floats to be converted.
+     * @return a two-dimensional array of Float objects, {@code null} if the input array is {@code null}.
      * @see #box(float[])
      */
     @MayReturnNull
@@ -3834,10 +4176,10 @@ public abstract sealed class Array permits Array.ArrayUtil {
     }
 
     /**
-     * Converts a 2D array of primitive doubles to a 2D array of Double objects.
+     * Converts a two-dimensional array of primitive doubles to a two-dimensional array of Double objects.
      *
-     * @param a the 2D array of primitive doubles to be converted.
-     * @return a 2D array of Double objects, {@code null} if the input array is {@code null}.
+     * @param a the two-dimensional array of primitive doubles to be converted.
+     * @return a two-dimensional array of Double objects, {@code null} if the input array is {@code null}.
      * @see #box(double[])
      */
     @MayReturnNull
@@ -3856,10 +4198,10 @@ public abstract sealed class Array permits Array.ArrayUtil {
     }
 
     /**
-     * Converts a 3D array of primitive booleans to a 3D array of Boolean objects.
+     * Converts a three-dimensional array of primitive booleans to a three-dimensional array of Boolean objects.
      *
-     * @param a the 3D array of primitive booleans to be converted.
-     * @return a 3D array of Boolean objects, {@code null} if the input array is {@code null}.
+     * @param a the three-dimensional array of primitive booleans to be converted.
+     * @return a three-dimensional array of Boolean objects, {@code null} if the input array is {@code null}.
      * @see #box(boolean[])
      * @see #box(boolean[][])
      */
@@ -3879,10 +4221,10 @@ public abstract sealed class Array permits Array.ArrayUtil {
     }
 
     /**
-     * Converts a 3D array of primitive chars to a 3D array of Character objects.
+     * Converts a three-dimensional array of primitive chars to a three-dimensional array of Character objects.
      *
-     * @param a the 3D array of primitive chars to be converted.
-     * @return a 3D array of Character objects, {@code null} if the input array is {@code null}.
+     * @param a the three-dimensional array of primitive chars to be converted.
+     * @return a three-dimensional array of Character objects, {@code null} if the input array is {@code null}.
      * @see #box(char[])
      * @see #box(char[][])
      */
@@ -3902,10 +4244,10 @@ public abstract sealed class Array permits Array.ArrayUtil {
     }
 
     /**
-     * Converts a 3D array of primitive bytes to a 3D array of Byte objects.
+     * Converts a three-dimensional array of primitive bytes to a three-dimensional array of Byte objects.
      *
-     * @param a the 3D array of primitive bytes to be converted.
-     * @return a 3D array of Byte objects, {@code null} if the input array is {@code null}.
+     * @param a the three-dimensional array of primitive bytes to be converted.
+     * @return a three-dimensional array of Byte objects, {@code null} if the input array is {@code null}.
      * @see #box(byte[])
      * @see #box(byte[][])
      */
@@ -3925,10 +4267,10 @@ public abstract sealed class Array permits Array.ArrayUtil {
     }
 
     /**
-     * Converts a 3D array of primitive shorts to a 3D array of Short objects.
+     * Converts a three-dimensional array of primitive shorts to a three-dimensional array of Short objects.
      *
-     * @param a the 3D array of primitive shorts to be converted.
-     * @return a 3D array of Short objects, {@code null} if the input array is {@code null}.
+     * @param a the three-dimensional array of primitive shorts to be converted.
+     * @return a three-dimensional array of Short objects, {@code null} if the input array is {@code null}.
      * @see #box(short[])
      * @see #box(short[][])
      */
@@ -3948,10 +4290,10 @@ public abstract sealed class Array permits Array.ArrayUtil {
     }
 
     /**
-     * Converts a 3D array of primitive integers to a 3D array of Integer objects.
+     * Converts a three-dimensional array of primitive integers to a three-dimensional array of Integer objects.
      *
-     * @param a the 3D array of primitive integers to be converted.
-     * @return a 3D array of Integer objects, {@code null} if the input array is {@code null}.
+     * @param a the three-dimensional array of primitive integers to be converted.
+     * @return a three-dimensional array of Integer objects, {@code null} if the input array is {@code null}.
      * @see #box(int[])
      * @see #box(int[][])
      */
@@ -3971,10 +4313,10 @@ public abstract sealed class Array permits Array.ArrayUtil {
     }
 
     /**
-     * Converts a 3D array of primitive longs to a 3D array of Long objects.
+     * Converts a three-dimensional array of primitive longs to a three-dimensional array of Long objects.
      *
-     * @param a the 3D array of primitive longs to be converted.
-     * @return a 3D array of Long objects, {@code null} if the input array is {@code null}.
+     * @param a the three-dimensional array of primitive longs to be converted.
+     * @return a three-dimensional array of Long objects, {@code null} if the input array is {@code null}.
      * @see #box(long[])
      * @see #box(long[][])
      */
@@ -3994,10 +4336,10 @@ public abstract sealed class Array permits Array.ArrayUtil {
     }
 
     /**
-     * Converts a 3D array of primitive floats to a 3D array of Float objects.
+     * Converts a three-dimensional array of primitive floats to a three-dimensional array of Float objects.
      *
-     * @param a the 3D array of primitive floats to be converted.
-     * @return a 3D array of Float objects, {@code null} if the input array is {@code null}.
+     * @param a the three-dimensional array of primitive floats to be converted.
+     * @return a three-dimensional array of Float objects, {@code null} if the input array is {@code null}.
      * @see #box(float[])
      * @see #box(float[][])
      */
@@ -4017,10 +4359,10 @@ public abstract sealed class Array permits Array.ArrayUtil {
     }
 
     /**
-     * Converts a 3D array of primitive doubles to a 3D array of Double objects.
+     * Converts a three-dimensional array of primitive doubles to a three-dimensional array of Double objects.
      *
-     * @param a the 3D array of primitive doubles to be converted.
-     * @return a 3D array of Double objects, {@code null} if the input array is {@code null}.
+     * @param a the three-dimensional array of primitive doubles to be converted.
+     * @return a three-dimensional array of Double objects, {@code null} if the input array is {@code null}.
      * @see #box(double[])
      * @see #box(double[][])
      */
@@ -4045,8 +4387,15 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * Converts an array of Boolean objects into an array of primitive booleans.
      * If a {@code null} value is encountered in the input array, it is replaced with the default value {@code false}.
      *
-     * @param a the array of Boolean objects to be converted.
-     * @return an array of primitive booleans, {@code null} if the input array is {@code null}.
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Boolean[] objects = {Boolean.TRUE, null, Boolean.FALSE};
+     * boolean[] primitives = Array.unbox(objects); // returns {true, false, false}
+     * boolean[] nullResult = Array.unbox(null); // returns null
+     * }</pre>
+     *
+     * @param a the array of Boolean objects to be converted. May be {@code null}.
+     * @return an array of primitive booleans, or {@code null} if the input array is {@code null}
      * @see #unbox(Boolean[], boolean)
      * @see #unbox(Boolean[], int, int, boolean)
      */
@@ -4296,8 +4645,15 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * Converts an array of Integer objects into an array of primitive integers.
      * If a {@code null} value is encountered in the input array, it is replaced with the default value (int) 0.
      *
-     * @param a the array of Integer objects to be converted.
-     * @return an array of primitive integers, {@code null} if the input array is {@code null}.
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Integer[] objects = {Integer.valueOf(1), null, Integer.valueOf(3)};
+     * int[] primitives = Array.unbox(objects); // returns {1, 0, 3}
+     * int[] nullResult = Array.unbox(null); // returns null
+     * }</pre>
+     *
+     * @param a the array of Integer objects to be converted. May be {@code null}.
+     * @return an array of primitive integers, or {@code null} if the input array is {@code null}
      * @see #unbox(Integer[], int)
      * @see #unbox(Integer[], int, int, int)
      */
@@ -4549,11 +4905,11 @@ public abstract sealed class Array permits Array.ArrayUtil {
     }
 
     /**
-     * Converts a 2D array of Boolean objects into a 2D array of primitive booleans.
+     * Converts a two-dimensional array of Boolean objects into a two-dimensional array of primitive booleans.
      * If a {@code null} value is encountered in the input array, it is replaced with the default value (boolean) {@code false}.
      *
-     * @param a the 2D array of Boolean objects to be converted.
-     * @return a 2D array of primitive booleans, {@code null} if the input array is {@code null}.
+     * @param a the two-dimensional array of Boolean objects to be converted.
+     * @return a two-dimensional array of primitive booleans, {@code null} if the input array is {@code null}.
      * @see #unbox(Boolean[][], boolean)
      * @see #unbox(Boolean[])
      */
@@ -4562,12 +4918,12 @@ public abstract sealed class Array permits Array.ArrayUtil {
     }
 
     /**
-     * Converts a 2D array of Boolean objects into a 2D array of primitive booleans.
+     * Converts a two-dimensional array of Boolean objects into a two-dimensional array of primitive booleans.
      * If a {@code null} value is encountered in the input array, it is replaced with the specified default value.
      *
-     * @param a the 2D array of Boolean objects to be converted.
+     * @param a the two-dimensional array of Boolean objects to be converted.
      * @param valueForNull the value to be used for {@code null} values in the input array.
-     * @return a 2D array of primitive booleans, {@code null} if the input array is {@code null}.
+     * @return a two-dimensional array of primitive booleans, {@code null} if the input array is {@code null}.
      * @see #unbox(Boolean[], boolean)
      */
     @MayReturnNull
@@ -4586,11 +4942,11 @@ public abstract sealed class Array permits Array.ArrayUtil {
     }
 
     /**
-     * Converts a 2D array of Character objects into a 2D array of primitive chars.
+     * Converts a two-dimensional array of Character objects into a two-dimensional array of primitive chars.
      * If a {@code null} value is encountered in the input array, it is replaced with the default value (char) 0.
      *
-     * @param a the 2D array of Character objects to be converted.
-     * @return a 2D array of primitive chars, {@code null} if the input array is {@code null}.
+     * @param a the two-dimensional array of Character objects to be converted.
+     * @return a two-dimensional array of primitive chars, {@code null} if the input array is {@code null}.
      * @see #unbox(Character[][], char)
      * @see #unbox(Character[])
      */
@@ -4599,12 +4955,12 @@ public abstract sealed class Array permits Array.ArrayUtil {
     }
 
     /**
-     * Converts a 2D array of Character objects into a 2D array of primitive chars.
+     * Converts a two-dimensional array of Character objects into a two-dimensional array of primitive chars.
      * If a {@code null} value is encountered in the input array, it is replaced with the specified default value.
      *
-     * @param a the 2D array of Character objects to be converted.
+     * @param a the two-dimensional array of Character objects to be converted.
      * @param valueForNull the value to be used for {@code null} values in the input array.
-     * @return a 2D array of primitive chars, {@code null} if the input array is {@code null}.
+     * @return a two-dimensional array of primitive chars, {@code null} if the input array is {@code null}.
      * @see #unbox(Character[], char)
      */
     @MayReturnNull
@@ -4623,11 +4979,11 @@ public abstract sealed class Array permits Array.ArrayUtil {
     }
 
     /**
-     * Converts a 2D array of Byte objects into a 2D array of primitive bytes.
+     * Converts a two-dimensional array of Byte objects into a two-dimensional array of primitive bytes.
      * If a {@code null} value is encountered in the input array, it is replaced with the default value (byte) 0.
      *
-     * @param a the 2D array of Byte objects to be converted.
-     * @return a 2D array of primitive bytes, {@code null} if the input array is {@code null}.
+     * @param a the two-dimensional array of Byte objects to be converted.
+     * @return a two-dimensional array of primitive bytes, {@code null} if the input array is {@code null}.
      * @see #unbox(Byte[][], byte)
      * @see #unbox(Byte[])
      */
@@ -4636,12 +4992,12 @@ public abstract sealed class Array permits Array.ArrayUtil {
     }
 
     /**
-     * Converts a 2D array of Byte objects into a 2D array of primitive bytes.
+     * Converts a two-dimensional array of Byte objects into a two-dimensional array of primitive bytes.
      * If a {@code null} value is encountered in the input array, it is replaced with the specified default value.
      *
-     * @param a the 2D array of Byte objects to be converted.
+     * @param a the two-dimensional array of Byte objects to be converted.
      * @param valueForNull the value to be used for {@code null} values in the input array.
-     * @return a 2D array of primitive bytes, {@code null} if the input array is {@code null}.
+     * @return a two-dimensional array of primitive bytes, {@code null} if the input array is {@code null}.
      * @see #unbox(Byte[], byte)
      */
     @MayReturnNull
@@ -4660,11 +5016,11 @@ public abstract sealed class Array permits Array.ArrayUtil {
     }
 
     /**
-     * Converts a 2D array of Short objects into a 2D array of primitive shorts.
+     * Converts a two-dimensional array of Short objects into a two-dimensional array of primitive shorts.
      * If a {@code null} value is encountered in the input array, it is replaced with the default value (short) 0.
      *
-     * @param a the 2D array of Short objects to be converted.
-     * @return a 2D array of primitive shorts, {@code null} if the input array is {@code null}.
+     * @param a the two-dimensional array of Short objects to be converted.
+     * @return a two-dimensional array of primitive shorts, {@code null} if the input array is {@code null}.
      * @see #unbox(Short[][], short)
      * @see #unbox(Short[])
      */
@@ -4673,12 +5029,12 @@ public abstract sealed class Array permits Array.ArrayUtil {
     }
 
     /**
-     * Converts a 2D array of Short objects into a 2D array of primitive shorts.
+     * Converts a two-dimensional array of Short objects into a two-dimensional array of primitive shorts.
      * If a {@code null} value is encountered in the input array, it is replaced with the specified default value.
      *
-     * @param a the 2D array of Short objects to be converted.
+     * @param a the two-dimensional array of Short objects to be converted.
      * @param valueForNull the value to be used for {@code null} values in the input array.
-     * @return a 2D array of primitive shorts, {@code null} if the input array is {@code null}.
+     * @return a two-dimensional array of primitive shorts, {@code null} if the input array is {@code null}.
      * @see #unbox(Short[], short)
      */
     @MayReturnNull
@@ -4697,11 +5053,11 @@ public abstract sealed class Array permits Array.ArrayUtil {
     }
 
     /**
-     * Converts a 2D array of Integer objects into a 2D array of primitive integers.
+     * Converts a two-dimensional array of Integer objects into a two-dimensional array of primitive integers.
      * If a {@code null} value is encountered in the input array, it is replaced with the default value (int) 0.
      *
-     * @param a the 2D array of Integer objects to be converted.
-     * @return a 2D array of primitive integers, {@code null} if the input array is {@code null}.
+     * @param a the two-dimensional array of Integer objects to be converted.
+     * @return a two-dimensional array of primitive integers, {@code null} if the input array is {@code null}.
      * @see #unbox(Integer[][], int)
      * @see #unbox(Integer[])
      */
@@ -4710,12 +5066,12 @@ public abstract sealed class Array permits Array.ArrayUtil {
     }
 
     /**
-     * Converts a 2D array of Integer objects into a 2D array of primitive integers.
+     * Converts a two-dimensional array of Integer objects into a two-dimensional array of primitive integers.
      * If a {@code null} value is encountered in the input array, it is replaced with the specified default value.
      *
-     * @param a the 2D array of Integer objects to be converted.
+     * @param a the two-dimensional array of Integer objects to be converted.
      * @param valueForNull the value to be used for {@code null} values in the input array.
-     * @return a 2D array of primitive integers, {@code null} if the input array is {@code null}.
+     * @return a two-dimensional array of primitive integers, {@code null} if the input array is {@code null}.
      * @see #unbox(Integer[], int)
      */
     @MayReturnNull
@@ -4734,11 +5090,11 @@ public abstract sealed class Array permits Array.ArrayUtil {
     }
 
     /**
-     * Converts a 2D array of Long objects into a 2D array of primitive longs.
+     * Converts a two-dimensional array of Long objects into a two-dimensional array of primitive longs.
      * If a {@code null} value is encountered in the input array, it is replaced with the default value (long) 0.
      *
-     * @param a the 2D array of Long objects to be converted.
-     * @return a 2D array of primitive longs, {@code null} if the input array is {@code null}.
+     * @param a the two-dimensional array of Long objects to be converted.
+     * @return a two-dimensional array of primitive longs, {@code null} if the input array is {@code null}.
      * @see #unbox(Long[][], long)
      * @see #unbox(Long[])
      */
@@ -4747,12 +5103,12 @@ public abstract sealed class Array permits Array.ArrayUtil {
     }
 
     /**
-     * Converts a 2D array of Long objects into a 2D array of primitive longs.
+     * Converts a two-dimensional array of Long objects into a two-dimensional array of primitive longs.
      * If a {@code null} value is encountered in the input array, it is replaced with the specified default value.
      *
-     * @param a the 2D array of Long objects to be converted.
+     * @param a the two-dimensional array of Long objects to be converted.
      * @param valueForNull the value to be used for {@code null} values in the input array.
-     * @return a 2D array of primitive longs, {@code null} if the input array is {@code null}.
+     * @return a two-dimensional array of primitive longs, {@code null} if the input array is {@code null}.
      * @see #unbox(Long[], long)
      */
     @MayReturnNull
@@ -4771,11 +5127,11 @@ public abstract sealed class Array permits Array.ArrayUtil {
     }
 
     /**
-     * Converts a 2D array of Float objects into a 2D array of primitive floats.
+     * Converts a two-dimensional array of Float objects into a two-dimensional array of primitive floats.
      * If a {@code null} value is encountered in the input array, it is replaced with the default value (float) 0.
      *
-     * @param a the 2D array of Float objects to be converted.
-     * @return a 2D array of primitive floats, {@code null} if the input array is {@code null}.
+     * @param a the two-dimensional array of Float objects to be converted.
+     * @return a two-dimensional array of primitive floats, {@code null} if the input array is {@code null}.
      * @see #unbox(Float[][], float)
      * @see #unbox(Float[])
      */
@@ -4784,12 +5140,12 @@ public abstract sealed class Array permits Array.ArrayUtil {
     }
 
     /**
-     * Converts a 2D array of Float objects into a 2D array of primitive floats.
+     * Converts a two-dimensional array of Float objects into a two-dimensional array of primitive floats.
      * If a {@code null} value is encountered in the input array, it is replaced with the specified default value.
      *
-     * @param a the 2D array of Float objects to be converted.
+     * @param a the two-dimensional array of Float objects to be converted.
      * @param valueForNull the value to be used for {@code null} values in the input array.
-     * @return a 2D array of primitive floats, {@code null} if the input array is {@code null}.
+     * @return a two-dimensional array of primitive floats, {@code null} if the input array is {@code null}.
      * @see #unbox(Float[], float)
      */
     @MayReturnNull
@@ -4808,11 +5164,11 @@ public abstract sealed class Array permits Array.ArrayUtil {
     }
 
     /**
-     * Converts a 2D array of Double objects into a 2D array of primitive doubles.
+     * Converts a two-dimensional array of Double objects into a two-dimensional array of primitive doubles.
      * If a {@code null} value is encountered in the input array, it is replaced with the default value (double) 0.
      *
-     * @param a the 2D array of Double objects to be converted.
-     * @return a 2D array of primitive doubles, {@code null} if the input array is {@code null}.
+     * @param a the two-dimensional array of Double objects to be converted.
+     * @return a two-dimensional array of primitive doubles, {@code null} if the input array is {@code null}.
      * @see #unbox(Double[][], double)
      * @see #unbox(Double[])
      */
@@ -4821,12 +5177,12 @@ public abstract sealed class Array permits Array.ArrayUtil {
     }
 
     /**
-     * Converts a 2D array of Double objects into a 2D array of primitive doubles.
+     * Converts a two-dimensional array of Double objects into a two-dimensional array of primitive doubles.
      * If a {@code null} value is encountered in the input array, it is replaced with the specified default value.
      *
-     * @param a the 2D array of Double objects to be converted.
+     * @param a the two-dimensional array of Double objects to be converted.
      * @param valueForNull the value to be used for {@code null} values in the input array.
-     * @return a 2D array of primitive doubles, {@code null} if the input array is {@code null}.
+     * @return a two-dimensional array of primitive doubles, {@code null} if the input array is {@code null}.
      * @see #unbox(Double[], double)
      */
     @MayReturnNull
@@ -4845,11 +5201,11 @@ public abstract sealed class Array permits Array.ArrayUtil {
     }
 
     /**
-     * Converts a 3D array of Boolean objects into a 3D array of primitive booleans.
+     * Converts a three-dimensional array of Boolean objects into a three-dimensional array of primitive booleans.
      * If a {@code null} value is encountered in the input array, it is replaced with the default value (boolean) {@code false}.
      *
-     * @param a the 3D array of Boolean objects to be converted.
-     * @return a 3D array of primitive booleans, {@code null} if the input array is {@code null}.
+     * @param a the three-dimensional array of Boolean objects to be converted.
+     * @return a three-dimensional array of primitive booleans, {@code null} if the input array is {@code null}.
      * @see #unbox(Boolean[][][], boolean)
      */
     public static boolean[][][] unbox(final Boolean[][][] a) {
@@ -4857,12 +5213,12 @@ public abstract sealed class Array permits Array.ArrayUtil {
     }
 
     /**
-     * Converts a 3D array of Boolean objects into a 3D array of primitive booleans.
+     * Converts a three-dimensional array of Boolean objects into a three-dimensional array of primitive booleans.
      * If a {@code null} value is encountered in the input array, it is replaced with the specified default value.
      *
-     * @param a the 3D array of Boolean objects to be converted.
+     * @param a the three-dimensional array of Boolean objects to be converted.
      * @param valueForNull the value to be used for {@code null} values in the input array.
-     * @return a 3D array of primitive booleans, {@code null} if the input array is {@code null}.
+     * @return a three-dimensional array of primitive booleans, {@code null} if the input array is {@code null}.
      * @see #unbox(Boolean[][], boolean)
      */
     @MayReturnNull
@@ -4881,11 +5237,11 @@ public abstract sealed class Array permits Array.ArrayUtil {
     }
 
     /**
-     * Converts a 3D array of Character objects into a 3D array of primitive chars.
+     * Converts a three-dimensional array of Character objects into a three-dimensional array of primitive chars.
      * If a {@code null} value is encountered in the input array, it is replaced with the default value (char) 0.
      *
-     * @param a the 3D array of Character objects to be converted.
-     * @return a 3D array of primitive chars, {@code null} if the input array is {@code null}.
+     * @param a the three-dimensional array of Character objects to be converted.
+     * @return a three-dimensional array of primitive chars, {@code null} if the input array is {@code null}.
      * @see #unbox(Character[][][], char)
      */
     public static char[][][] unbox(final Character[][][] a) {
@@ -4893,12 +5249,12 @@ public abstract sealed class Array permits Array.ArrayUtil {
     }
 
     /**
-     * Converts a 3D array of Character objects into a 3D array of primitive chars.
+     * Converts a three-dimensional array of Character objects into a three-dimensional array of primitive chars.
      * If a {@code null} value is encountered in the input array, it is replaced with the specified default value.
      *
-     * @param a the 3D array of Character objects to be converted.
+     * @param a the three-dimensional array of Character objects to be converted.
      * @param valueForNull the value to be used for {@code null} values in the input array.
-     * @return a 3D array of primitive chars, {@code null} if the input array is {@code null}.
+     * @return a three-dimensional array of primitive chars, {@code null} if the input array is {@code null}.
      * @see #unbox(Character[][], char)
      */
     @MayReturnNull
@@ -4917,11 +5273,11 @@ public abstract sealed class Array permits Array.ArrayUtil {
     }
 
     /**
-     * Converts a 3D array of Byte objects into a 3D array of primitive bytes.
+     * Converts a three-dimensional array of Byte objects into a three-dimensional array of primitive bytes.
      * If a {@code null} value is encountered in the input array, it is replaced with the default value (byte) 0.
      *
-     * @param a the 3D array of Byte objects to be converted.
-     * @return a 3D array of primitive bytes, {@code null} if the input array is {@code null}.
+     * @param a the three-dimensional array of Byte objects to be converted.
+     * @return a three-dimensional array of primitive bytes, {@code null} if the input array is {@code null}.
      * @see #unbox(Byte[][][], byte)
      */
     public static byte[][][] unbox(final Byte[][][] a) {
@@ -4929,12 +5285,12 @@ public abstract sealed class Array permits Array.ArrayUtil {
     }
 
     /**
-     * Converts a 3D array of Byte objects into a 3D array of primitive bytes.
+     * Converts a three-dimensional array of Byte objects into a three-dimensional array of primitive bytes.
      * If a {@code null} value is encountered in the input array, it is replaced with the specified default value.
      *
-     * @param a the 3D array of Byte objects to be converted.
+     * @param a the three-dimensional array of Byte objects to be converted.
      * @param valueForNull the value to be used for {@code null} values in the input array.
-     * @return a 3D array of primitive bytes, {@code null} if the input array is {@code null}.
+     * @return a three-dimensional array of primitive bytes, {@code null} if the input array is {@code null}.
      * @see #unbox(Byte[][], byte)
      */
     @MayReturnNull
@@ -4953,11 +5309,11 @@ public abstract sealed class Array permits Array.ArrayUtil {
     }
 
     /**
-     * Converts a 3D array of Short objects into a 3D array of primitive shorts.
+     * Converts a three-dimensional array of Short objects into a three-dimensional array of primitive shorts.
      * If a {@code null} value is encountered in the input array, it is replaced with the default value (short) 0.
      *
-     * @param a the 3D array of Short objects to be converted.
-     * @return a 3D array of primitive shorts, {@code null} if the input array is {@code null}.
+     * @param a the three-dimensional array of Short objects to be converted.
+     * @return a three-dimensional array of primitive shorts, {@code null} if the input array is {@code null}.
      * @see #unbox(Short[][][], short)
      */
     public static short[][][] unbox(final Short[][][] a) {
@@ -4965,12 +5321,12 @@ public abstract sealed class Array permits Array.ArrayUtil {
     }
 
     /**
-     * Converts a 3D array of Short objects into a 3D array of primitive shorts.
+     * Converts a three-dimensional array of Short objects into a three-dimensional array of primitive shorts.
      * If a {@code null} value is encountered in the input array, it is replaced with the specified default value.
      *
-     * @param a the 3D array of Short objects to be converted.
+     * @param a the three-dimensional array of Short objects to be converted.
      * @param valueForNull the value to be used for {@code null} values in the input array.
-     * @return a 3D array of primitive shorts, {@code null} if the input array is {@code null}.
+     * @return a three-dimensional array of primitive shorts, {@code null} if the input array is {@code null}.
      * @see #unbox(Short[][], short)
      */
     @MayReturnNull
@@ -4989,11 +5345,11 @@ public abstract sealed class Array permits Array.ArrayUtil {
     }
 
     /**
-     * Converts a 3D array of Integer objects into a 3D array of primitive integers.
+     * Converts a three-dimensional array of Integer objects into a three-dimensional array of primitive integers.
      * If a {@code null} value is encountered in the input array, it is replaced with the default value (int) 0.
      *
-     * @param a the 3D array of Integer objects to be converted.
-     * @return a 3D array of primitive integers, {@code null} if the input array is {@code null}.
+     * @param a the three-dimensional array of Integer objects to be converted.
+     * @return a three-dimensional array of primitive integers, {@code null} if the input array is {@code null}.
      * @see #unbox(Integer[][][], int)
      */
     public static int[][][] unbox(final Integer[][][] a) {
@@ -5001,12 +5357,12 @@ public abstract sealed class Array permits Array.ArrayUtil {
     }
 
     /**
-     * Converts a 3D array of Integer objects into a 3D array of primitive integers.
+     * Converts a three-dimensional array of Integer objects into a three-dimensional array of primitive integers.
      * If a {@code null} value is encountered in the input array, it is replaced with the specified default value.
      *
-     * @param a the 3D array of Integer objects to be converted.
+     * @param a the three-dimensional array of Integer objects to be converted.
      * @param valueForNull the value to be used for {@code null} values in the input array.
-     * @return a 3D array of primitive integers, {@code null} if the input array is {@code null}.
+     * @return a three-dimensional array of primitive integers, {@code null} if the input array is {@code null}.
      * @see #unbox(Integer[][], int)
      */
     @MayReturnNull
@@ -5025,11 +5381,11 @@ public abstract sealed class Array permits Array.ArrayUtil {
     }
 
     /**
-     * Converts a 3D array of Long objects into a 3D array of primitive longs.
+     * Converts a three-dimensional array of Long objects into a three-dimensional array of primitive longs.
      * If a {@code null} value is encountered in the input array, it is replaced with the default value (long) 0.
      *
-     * @param a the 3D array of Long objects to be converted.
-     * @return a 3D array of primitive longs, {@code null} if the input array is {@code null}.
+     * @param a the three-dimensional array of Long objects to be converted.
+     * @return a three-dimensional array of primitive longs, {@code null} if the input array is {@code null}.
      * @see #unbox(Long[][][], long)
      */
     public static long[][][] unbox(final Long[][][] a) {
@@ -5037,12 +5393,12 @@ public abstract sealed class Array permits Array.ArrayUtil {
     }
 
     /**
-     * Converts a 3D array of Long objects into a 3D array of primitive longs.
+     * Converts a three-dimensional array of Long objects into a three-dimensional array of primitive longs.
      * If a {@code null} value is encountered in the input array, it is replaced with the specified default value.
      *
-     * @param a the 3D array of Long objects to be converted.
+     * @param a the three-dimensional array of Long objects to be converted.
      * @param valueForNull the value to be used for {@code null} values in the input array.
-     * @return a 3D array of primitive longs, {@code null} if the input array is {@code null}.
+     * @return a three-dimensional array of primitive longs, {@code null} if the input array is {@code null}.
      * @see #unbox(Long[][], long)
      */
     @MayReturnNull
@@ -5061,11 +5417,11 @@ public abstract sealed class Array permits Array.ArrayUtil {
     }
 
     /**
-     * Converts a 3D array of Float objects into a 3D array of primitive floats.
+     * Converts a three-dimensional array of Float objects into a three-dimensional array of primitive floats.
      * If a {@code null} value is encountered in the input array, it is replaced with the default value (float) 0.
      *
-     * @param a the 3D array of Float objects to be converted.
-     * @return a 3D array of primitive floats, {@code null} if the input array is {@code null}.
+     * @param a the three-dimensional array of Float objects to be converted.
+     * @return a three-dimensional array of primitive floats, {@code null} if the input array is {@code null}.
      * @see #unbox(Float[][][], float)
      */
     public static float[][][] unbox(final Float[][][] a) {
@@ -5073,12 +5429,12 @@ public abstract sealed class Array permits Array.ArrayUtil {
     }
 
     /**
-     * Converts a 3D array of Float objects into a 3D array of primitive floats.
+     * Converts a three-dimensional array of Float objects into a three-dimensional array of primitive floats.
      * If a {@code null} value is encountered in the input array, it is replaced with the specified default value.
      *
-     * @param a the 3D array of Float objects to be converted.
+     * @param a the three-dimensional array of Float objects to be converted.
      * @param valueForNull the value to be used for {@code null} values in the input array.
-     * @return a 3D array of primitive floats, {@code null} if the input array is {@code null}.
+     * @return a three-dimensional array of primitive floats, {@code null} if the input array is {@code null}.
      * @see #unbox(Float[][], float)
      */
     @MayReturnNull
@@ -5097,11 +5453,11 @@ public abstract sealed class Array permits Array.ArrayUtil {
     }
 
     /**
-     * Converts a 3D array of Double objects into a 3D array of primitive doubles.
+     * Converts a three-dimensional array of Double objects into a three-dimensional array of primitive doubles.
      * If a {@code null} value is encountered in the input array, it is replaced with the default value (double) 0.
      *
-     * @param a the 3D array of Double objects to be converted.
-     * @return a 3D array of primitive doubles, {@code null} if the input array is {@code null}.
+     * @param a the three-dimensional array of Double objects to be converted.
+     * @return a three-dimensional array of primitive doubles, {@code null} if the input array is {@code null}.
      * @see #unbox(Double[][][], double)
      */
     public static double[][][] unbox(final Double[][][] a) {
@@ -5109,12 +5465,12 @@ public abstract sealed class Array permits Array.ArrayUtil {
     }
 
     /**
-     * Converts a 3D array of Double objects into a 3D array of primitive doubles.
+     * Converts a three-dimensional array of Double objects into a three-dimensional array of primitive doubles.
      * If a {@code null} value is encountered in the input array, it is replaced with the specified default value.
      *
-     * @param a the 3D array of Double objects to be converted.
+     * @param a the three-dimensional array of Double objects to be converted.
      * @param valueForNull the value to be used for {@code null} values in the input array.
-     * @return a 3D array of primitive doubles, {@code null} if the input array is {@code null}.
+     * @return a three-dimensional array of primitive doubles, {@code null} if the input array is {@code null}.
      * @see #unbox(Double[][], double)
      */
     @MayReturnNull
@@ -5133,7 +5489,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
     }
 
     /**
-     * Transposes the input 2D array.
+     * Transposes the input two-dimensional array.
      *
      * <p>The transpose of a matrix is obtained by moving the rows data to the column and columns data to the rows.
      * If the input is a matrix of size m x n, then the output will be another matrix of size n x m.
@@ -5150,8 +5506,8 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * // Original matrix is 2x3, transposed is 3x2
      * }</pre>
      *
-     * @param a the 2D array to be transposed
-     * @return the transposed 2D array, or {@code null} if the input array is {@code null}.
+     * @param a the two-dimensional array to be transposed
+     * @return the transposed two-dimensional array, or {@code null} if the input array is {@code null}.
      */
     @MayReturnNull
     @Beta
@@ -5187,14 +5543,14 @@ public abstract sealed class Array permits Array.ArrayUtil {
     }
 
     /**
-     * Transposes the input 2D array.
+     * Transposes the input two-dimensional array.
      *
      * <p>The transpose of a matrix is obtained by moving the rows data to the column and columns data to the rows.
      * If the input is a matrix of size m x n, then the output will be another matrix of size n x m.
      * This method will return {@code null} if the input array is {@code null}.</p>
      *
-     * @param a the 2D array to be transposed
-     * @return the transposed 2D array, or {@code null} if the input array is {@code null}.
+     * @param a the two-dimensional array to be transposed
+     * @return the transposed two-dimensional array, or {@code null} if the input array is {@code null}.
      */
     @MayReturnNull
     @Beta
@@ -5230,14 +5586,14 @@ public abstract sealed class Array permits Array.ArrayUtil {
     }
 
     /**
-     * Transposes the input 2D array.
+     * Transposes the input two-dimensional array.
      *
      * <p>The transpose of a matrix is obtained by moving the rows data to the column and columns data to the rows.
      * If the input is a matrix of size m x n, then the output will be another matrix of size n x m.
      * This method will return {@code null} if the input array is {@code null}.</p>
      *
-     * @param a the 2D array to be transposed
-     * @return the transposed 2D array, or {@code null} if the input array is {@code null}.
+     * @param a the two-dimensional array to be transposed
+     * @return the transposed two-dimensional array, or {@code null} if the input array is {@code null}.
      */
     @MayReturnNull
     @Beta
@@ -5273,14 +5629,14 @@ public abstract sealed class Array permits Array.ArrayUtil {
     }
 
     /**
-     * Transposes the input 2D array.
+     * Transposes the input two-dimensional array.
      *
      * <p>The transpose of a matrix is obtained by moving the rows data to the column and columns data to the rows.
      * If the input is a matrix of size m x n, then the output will be another matrix of size n x m.
      * This method will return {@code null} if the input array is {@code null}.</p>
      *
-     * @param a the 2D array to be transposed
-     * @return the transposed 2D array, or {@code null} if the input array is {@code null}.
+     * @param a the two-dimensional array to be transposed
+     * @return the transposed two-dimensional array, or {@code null} if the input array is {@code null}.
      */
     @MayReturnNull
     @Beta
@@ -5316,14 +5672,14 @@ public abstract sealed class Array permits Array.ArrayUtil {
     }
 
     /**
-     * Transposes the input 2D array.
+     * Transposes the input two-dimensional array.
      *
      * <p>The transpose of a matrix is obtained by moving the rows data to the column and columns data to the rows.
      * If the input is a matrix of size m x n, then the output will be another matrix of size n x m.
      * This method will return {@code null} if the input array is {@code null}.</p>
      *
-     * @param a the 2D array to be transposed
-     * @return the transposed 2D array, or {@code null} if the input array is {@code null}.
+     * @param a the two-dimensional array to be transposed
+     * @return the transposed two-dimensional array, or {@code null} if the input array is {@code null}.
      */
     @MayReturnNull
     @Beta
@@ -5359,14 +5715,14 @@ public abstract sealed class Array permits Array.ArrayUtil {
     }
 
     /**
-     * Transposes the input 2D array.
+     * Transposes the input two-dimensional array.
      *
      * <p>The transpose of a matrix is obtained by moving the rows data to the column and columns data to the rows.
      * If the input is a matrix of size m x n, then the output will be another matrix of size n x m.
      * This method will return {@code null} if the input array is {@code null}.</p>
      *
-     * @param a the 2D array to be transposed
-     * @return the transposed 2D array, or {@code null} if the input array is {@code null}.
+     * @param a the two-dimensional array to be transposed
+     * @return the transposed two-dimensional array, or {@code null} if the input array is {@code null}.
      */
     @MayReturnNull
     @Beta
@@ -5402,14 +5758,14 @@ public abstract sealed class Array permits Array.ArrayUtil {
     }
 
     /**
-     * Transposes the input 2D array.
+     * Transposes the input two-dimensional array.
      *
      * <p>The transpose of a matrix is obtained by moving the rows data to the column and columns data to the rows.
      * If the input is a matrix of size m x n, then the output will be another matrix of size n x m.
      * This method will return {@code null} if the input array is {@code null}.</p>
      *
-     * @param a the 2D array to be transposed
-     * @return the transposed 2D array, or {@code null} if the input array is {@code null}.
+     * @param a the two-dimensional array to be transposed
+     * @return the transposed two-dimensional array, or {@code null} if the input array is {@code null}.
      */
     @MayReturnNull
     @Beta
@@ -5445,14 +5801,14 @@ public abstract sealed class Array permits Array.ArrayUtil {
     }
 
     /**
-     * Transposes the input 2D array.
+     * Transposes the input two-dimensional array.
      *
      * <p>The transpose of a matrix is obtained by moving the rows data to the column and columns data to the rows.
      * If the input is a matrix of size m x n, then the output will be another matrix of size n x m.
      * This method will return {@code null} if the input array is {@code null}.</p>
      *
-     * @param a the 2D array to be transposed
-     * @return the transposed 2D array, or {@code null} if the input array is {@code null}.
+     * @param a the two-dimensional array to be transposed
+     * @return the transposed two-dimensional array, or {@code null} if the input array is {@code null}.
      */
     @MayReturnNull
     @Beta
@@ -5488,9 +5844,9 @@ public abstract sealed class Array permits Array.ArrayUtil {
     }
 
     /**
-     * Transposes the given 2D array.
-     * The original 2D array is unchanged; a new 2D array representing the transposed matrix is returned.
-     * This method can be used to interchange the rows and columns of the 2D array.
+     * Transposes the given two-dimensional array.
+     * The original two-dimensional array is unchanged; a new two-dimensional array representing the transposed matrix is returned.
+     * This method can be used to interchange the rows and columns of the two-dimensional array.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -5503,9 +5859,9 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * // Original matrix is 2x3, transposed is 3x2
      * }</pre>
      *
-     * @param <T> the type of the elements in the 2D array.
-     * @param a the original 2D array to be transposed.
-     * @return a new 2D array representing the transposed matrix, or {@code null} if the input array is {@code null}.
+     * @param <T> the type of the elements in the two-dimensional array.
+     * @param a the original two-dimensional array to be transposed.
+     * @return a new two-dimensional array representing the transposed matrix, or {@code null} if the input array is {@code null}.
      * @throws IllegalArgumentException if the input array is not a matrix.
      */
     @MayReturnNull

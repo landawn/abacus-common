@@ -11,7 +11,6 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-
 package com.landawn.abacus.util.function;
 
 import com.landawn.abacus.util.Throwables;
@@ -19,54 +18,48 @@ import com.landawn.abacus.util.Throwables;
 /**
  * Represents a predicate (boolean-valued function) of two short-valued arguments.
  * This is the two-arity specialization of predicate for short values.
- * 
+ *
  * <p>This is a functional interface whose functional method is {@link #test(short, short)}.
- * 
+ *
  * @see java.util.function.BiPredicate
+ *
+ * <p>Refer to JDK API documentation at: <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html">https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a></p>
  */
 @FunctionalInterface
 public interface ShortBiPredicate extends Throwables.ShortBiPredicate<RuntimeException> { //NOSONAR
-
     /**
      * A predicate that always returns {@code true} regardless of the input values.
      */
     ShortBiPredicate ALWAYS_TRUE = (t, u) -> true;
-
     /**
      * A predicate that always returns {@code false} regardless of the input values.
      */
     ShortBiPredicate ALWAYS_FALSE = (t, u) -> false;
-
     /**
      * A predicate that tests if two short values are equal.
      * Returns {@code true} if and only if the first argument equals the second argument.
      */
     ShortBiPredicate EQUAL = (t, u) -> t == u;
-
     /**
      * A predicate that tests if two short values are not equal.
      * Returns {@code true} if and only if the first argument does not equal the second argument.
      */
     ShortBiPredicate NOT_EQUAL = (t, u) -> t != u;
-
     /**
      * A predicate that tests if the first short value is greater than the second.
      * Returns {@code true} if and only if the first argument is strictly greater than the second argument.
      */
     ShortBiPredicate GREATER_THAN = (t, u) -> t > u;
-
     /**
      * A predicate that tests if the first short value is greater than or equal to the second.
      * Returns {@code true} if and only if the first argument is greater than or equal to the second argument.
      */
     ShortBiPredicate GREATER_EQUAL = (t, u) -> t >= u;
-
     /**
      * A predicate that tests if the first short value is less than the second.
      * Returns {@code true} if and only if the first argument is strictly less than the second argument.
      */
     ShortBiPredicate LESS_THAN = (t, u) -> t < u;
-
     /**
      * A predicate that tests if the first short value is less than or equal to the second.
      * Returns {@code true} if and only if the first argument is less than or equal to the second argument.

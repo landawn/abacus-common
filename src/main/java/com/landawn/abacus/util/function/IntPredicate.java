@@ -11,7 +11,6 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-
 package com.landawn.abacus.util.function;
 
 import com.landawn.abacus.util.Throwables;
@@ -32,42 +31,34 @@ import com.landawn.abacus.util.Throwables;
  */
 @FunctionalInterface
 public interface IntPredicate extends Throwables.IntPredicate<RuntimeException>, java.util.function.IntPredicate { //NOSONAR
-
     /**
      * A predicate that always evaluates to {@code true}.
      */
     IntPredicate ALWAYS_TRUE = value -> true;
-
     /**
      * A predicate that always evaluates to {@code false}.
      */
     IntPredicate ALWAYS_FALSE = value -> false;
-
     /**
      * A predicate that tests if an {@code int} value is zero.
      */
     IntPredicate IS_ZERO = value -> value == 0;
-
     /**
      * A predicate that tests if an {@code int} value is not zero.
      */
     IntPredicate NOT_ZERO = value -> value != 0;
-
     /**
      * A predicate that tests if an {@code int} value is positive (greater than zero).
      */
     IntPredicate IS_POSITIVE = value -> value > 0;
-
     /**
      * A predicate that tests if an {@code int} value is not positive (less than or equal to zero).
      */
     IntPredicate NOT_POSITIVE = value -> value <= 0;
-
     /**
      * A predicate that tests if an {@code int} value is negative (less than zero).
      */
     IntPredicate IS_NEGATIVE = value -> value < 0;
-
     /**
      * A predicate that tests if an {@code int} value is not negative (greater than or equal to zero).
      */
@@ -86,7 +77,7 @@ public interface IntPredicate extends Throwables.IntPredicate<RuntimeException>,
      * }</pre>
      *
      * @param value the input argument
-     * @return {@code true} if the input argument matches the predicate, otherwise {@code false} if the predicate evaluation fails
+     * @return {@code true} if the input argument matches the predicate, {@code false} otherwise
      */
     @Override
     boolean test(int value);
@@ -261,7 +252,6 @@ public interface IntPredicate extends Throwables.IntPredicate<RuntimeException>,
      * @param minValue the lower bound (exclusive)
      * @param maxValue the upper bound (exclusive)
      * @return a predicate that tests if an {@code int} value is between {@code minValue} and {@code maxValue}
-     * @throws IllegalArgumentException if {@code minValue} is greater than or equal to {@code maxValue}
      */
     static IntPredicate between(final int minValue, final int maxValue) {
         return value -> value > minValue && value < maxValue;

@@ -123,21 +123,40 @@ import com.landawn.abacus.util.stream.Stream;
 /**
  * A comprehensive utility class providing commonly used operations for primitive types, Objects, Strings,
  * Arrays, Collections, Maps, and JavaBeans. This class serves as the primary entry point for the Abacus
- * utility library.
+ * utility library, extending {@link CommonUtil} with additional specialized operations.
  *
- * <h2>Core Functional Areas</h2>
+ * <p>The {@code N} class (short for "Null-safe") is designed as the main facade for all utility operations
+ * in the Abacus library, providing a single point of access to thousands of utility methods optimized for
+ * performance, null-safety, and ease of use. It combines functionality from multiple specialized utility
+ * classes while maintaining a consistent and intuitive API.</p>
+ *
+ * <p><b>Key Features:</b>
+ * <ul>
+ *   <li><b>Comprehensive Coverage:</b> Over 1000+ utility methods covering all common programming tasks</li>
+ *   <li><b>Null-Safe Design:</b> All operations handle null inputs gracefully without throwing exceptions</li>
+ *   <li><b>Performance Optimized:</b> Highly optimized algorithms with minimal object allocation</li>
+ *   <li><b>Exception-Safe:</b> Checked exception handling in functional operations</li>
+ *   <li><b>Type Safety:</b> Extensive use of generics for compile-time type checking</li>
+ *   <li><b>Async Support:</b> Built-in asynchronous execution capabilities</li>
+ *   <li><b>Stream Integration:</b> Seamless integration with Java Stream API</li>
+ *   <li><b>Cross-Platform:</b> Compatible across different Java versions and platforms</li>
+ * </ul>
+ *
+ * <p><b>Core Functional Areas:</b>
  * <ul>
  *   <li><b>Array Operations:</b> occurrencesOf, contains, indexOf, concat, split, add, remove, reverse, rotate, shuffle, sort, etc.</li>
  *   <li><b>Collection Operations:</b> groupBy, partition, toMap, intersection, union, difference, etc.</li>
- *   <li><b>String Operations:</b> String manipulation, parsing, and formatting utilities</li>
+ *   <li><b>String Operations:</b> String manipulation, parsing, formatting, and validation utilities</li>
  *   <li><b>Math Operations:</b> min, max, sum, average, median, percentiles for arrays and collections</li>
  *   <li><b>Functional Operations:</b> forEach, map, filter, reduce operations with exception handling support</li>
  *   <li><b>Null-Safe Operations:</b> Comprehensive null-safe methods for common operations</li>
  *   <li><b>Type Conversion:</b> Safe conversion between primitive types and objects</li>
- *   <li><b>Async Operations:</b> sleep, async execution utilities</li>
+ *   <li><b>Async Operations:</b> sleep, async execution utilities with built-in executor services</li>
+ *   <li><b>IO Operations:</b> File, stream, and resource management utilities</li>
+ *   <li><b>Bean Operations:</b> JavaBean property access and manipulation</li>
  * </ul>
  *
- * <h2>Design Philosophy</h2>
+ * <p><b>Design Philosophy:</b>
  * <ul>
  *   <li><b>Null Safety:</b> Methods are designed to handle {@code null} inputs gracefully. Operations on
  *       {@code null} or empty inputs typically return {@code null}, empty collections, or default values
@@ -149,59 +168,176 @@ import com.landawn.abacus.util.stream.Stream;
  *       return the input unchanged.</li>
  *   <li><b>Index Conventions:</b> Methods use {@code fromIndex/startIndex} and {@code toIndex/endIndex}
  *       parameters (half-open ranges [fromIndex, toIndex)), NOT {@code offset/count} parameters.</li>
+ *   <li><b>Performance First:</b> Optimized for performance with minimal overhead and object allocation.</li>
  * </ul>
  *
- * <h2>Thread Safety</h2>
- * All static methods in this class are thread-safe unless explicitly documented otherwise. However,
- * mutable objects passed to methods must be handled carefully in concurrent contexts.
- *
- * <h2>Usage Examples</h2>
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
- * // Array operations
- * int[] numbers = {1, 2, 3, 4, 5};
- * int count = N.occurrencesOf(numbers, 3);  // Returns 1
- * boolean hasThree = N.contains(numbers, 3); // Returns true
+ * // Array operations - null-safe and efficient
+ * int[] numbers = {1, 2, 3, 4, 5, 3, 2};
+ * int count = N.occurrencesOf(numbers, 3);           // Returns 2
+ * boolean hasThree = N.contains(numbers, 3);         // Returns true
+ * int index = N.indexOf(numbers, 3);                 // Returns 2
+ * int[] sorted = N.sort(numbers);                    // Returns sorted copy
+ * int[] reversed = N.reverse(numbers);               // Returns reversed copy
  *
- * // Collection operations
- * List<String> list = Arrays.asList("apple", "banana", "apple");
- * Map<String, Integer> freq = N.occurrencesMap(list); // {apple=2, banana=1}
+ * // Collection operations with null safety
+ * List<String> list = Arrays.asList("apple", "banana", "apple", null);
+ * Map<String, Long> freq = N.occurrencesMap(list);   // {apple=2, banana=1, null=1}
+ * List<String> unique = N.distinct(list);            // [apple, banana, null]
+ * List<String> filtered = N.filter(list, N::isNotNull); // [apple, banana, apple]
  *
- * // Null-safe operations
- * String result = N.reverse(null); // Returns null, not exception
+ * // Null-safe operations - no exceptions thrown
+ * String result = N.reverse(null);                   // Returns null
+ * List<String> empty = N.filter(null, x -> true);    // Returns empty list
+ * boolean isEmpty = N.isEmpty(null);                 // Returns true
  *
  * // Functional operations with exception handling
- * N.forEach(list, item -> processItem(item)); // Supports checked exceptions
+ * List<String> items = Arrays.asList("file1.txt", "file2.txt");
+ * N.forEach(items, N::processFile);                  // Supports checked exceptions
+ * List<Integer> lengths = N.map(items, String::length); // Transform with mapping
+ *
+ * // Mathematical operations
+ * OptionalDouble avg = N.average(numbers);           // Calculate average
+ * OptionalInt max = N.maxInt(numbers);               // Find maximum
+ * double median = N.median(numbers);                 // Calculate median
+ *
+ * // Async operations with built-in executor
+ * N.sleep(1000);                                     // Thread sleep utility
+ * N.asyncRun(() -> doBackgroundTask());              // Async execution
+ *
+ * // Type conversions and parsing
+ * OptionalInt parsed = N.tryParseInt("123");         // Safe parsing
+ * List<Integer> converted = N.toList(numbers);       // Array to list conversion
+ *
+ * // String operations
+ * boolean isValid = N.isNotBlank("  text  ");        // String validation
+ * String trimmed = N.trim("  text  ");               // Safe trimming
  * }</pre>
  *
- * <h2>Related Classes</h2>
+ * <p><b>Performance Characteristics:</b>
  * <ul>
- *   <li>{@link Array} - Advanced array manipulation operations</li>
- *   <li>{@link Strings} - String-specific utilities</li>
- *   <li>{@link Numbers} - Number-specific operations and conversions</li>
- *   <li>{@link Maps} - Map-specific utilities</li>
- *   <li>{@link Iterables} - Iterable utilities</li>
- *   <li>{@link Iterators} - Iterator utilities</li>
- *   <li>{@link Stream} - Stream processing utilities</li>
+ *   <li><b>Memory Efficient:</b> Minimal object allocation and memory footprint</li>
+ *   <li><b>Cache Friendly:</b> Sequential access patterns optimized for CPU cache</li>
+ *   <li><b>Algorithm Selection:</b> Automatic selection of optimal algorithms based on data size</li>
+ *   <li><b>Parallel Processing:</b> Built-in support for parallel operations on large datasets</li>
+ *   <li><b>Lazy Evaluation:</b> Deferred computation where applicable for better performance</li>
  * </ul>
  *
- * <p><b>Note:</b> This class includes code copied from Apache Commons Lang, Google Guava, and other
- * open source projects under the Apache License 2.0. Methods from these libraries may have been
- * modified for consistency with this API.</p>
+ * <p><b>Thread Safety:</b>
+ * <ul>
+ *   <li><b>Stateless Design:</b> All static methods are stateless and thread-safe</li>
+ *   <li><b>Immutable Results:</b> Methods typically return new objects rather than modifying inputs</li>
+ *   <li><b>Concurrent Executor:</b> Built-in thread-safe executor services for async operations</li>
+ *   <li><b>No Shared State:</b> No static mutable fields that could cause race conditions</li>
+ * </ul>
  *
- * @see com.landawn.abacus.util.Comparators
- * @see com.landawn.abacus.util.Fn
- * @see com.landawn.abacus.util.Fnn
- * @see com.landawn.abacus.util.Array
+ * <p><b>Async Execution Support:</b>
+ * <ul>
+ *   <li><b>Built-in Executor:</b> Pre-configured {@code AsyncExecutor} with optimized thread pool</li>
+ *   <li><b>Scheduled Executor:</b> {@code ScheduledExecutorService} for time-based operations</li>
+ *   <li><b>Thread Pool Configuration:</b> Automatic sizing based on CPU cores</li>
+ *   <li><b>Resource Management:</b> Automatic cleanup and resource management</li>
+ * </ul>
+ *
+ * <p><b>Integration with Java Ecosystem:</b>
+ * <ul>
+ *   <li><b>Collections Framework:</b> Seamless integration with Java Collections</li>
+ *   <li><b>Stream API:</b> Full compatibility with Java 8+ Stream operations</li>
+ *   <li><b>Optional Support:</b> Extensive use of Optional for null-safe operations</li>
+ *   <li><b>Functional Interfaces:</b> Support for all standard and custom functional interfaces</li>
+ *   <li><b>Reflection API:</b> Advanced reflection-based bean operations</li>
+ * </ul>
+ *
+ * <p><b>Error Handling Strategy:</b>
+ * <ul>
+ *   <li><b>Graceful Degradation:</b> Methods handle edge cases gracefully without throwing exceptions</li>
+ *   <li><b>Null Tolerance:</b> Comprehensive null input handling throughout the API</li>
+ *   <li><b>Exception Wrapping:</b> Checked exceptions wrapped in runtime exceptions where appropriate</li>
+ *   <li><b>Clear Contracts:</b> Method documentation clearly specifies behavior and exception conditions</li>
+ * </ul>
+ *
+ * <p><b>Best Practices:</b>
+ * <ul>
+ *   <li>Prefer {@code N} class methods over manual null checking and exception handling</li>
+ *   <li>Use the provided async utilities for background operations</li>
+ *   <li>Leverage the null-safe design to write cleaner, more robust code</li>
+ *   <li>Take advantage of the optimized algorithms for large dataset operations</li>
+ *   <li>Use the functional operations with exception handling for cleaner code</li>
+ *   <li>Prefer the specialized collection utilities over manual implementations</li>
+ * </ul>
+ *
+ * <p><b>Performance Tips:</b>
+ * <ul>
+ *   <li>Use bulk operations for large collections to leverage optimized algorithms</li>
+ *   <li>Take advantage of parallel processing for CPU-intensive operations</li>
+ *   <li>Use the built-in async utilities instead of creating custom thread management</li>
+ *   <li>Prefer primitive-specific operations for better performance</li>
+ *   <li>Leverage the lazy evaluation features where applicable</li>
+ * </ul>
+ *
+ * <p><b>Related Utility Classes:</b>
+ * <ul>
+ *   <li><b>{@link CommonUtil}:</b> Base class providing foundational utility methods</li>
+ *   <li><b>{@link Array}:</b> Advanced array manipulation operations</li>
+ *   <li><b>{@link Strings}:</b> Comprehensive string manipulation utilities</li>
+ *   <li><b>{@link Numbers}:</b> Number-specific operations and conversions</li>
+ *   <li><b>{@link Maps}:</b> Map-specific utilities and operations</li>
+ *   <li><b>{@link Iterables}:</b> Iterable manipulation and processing utilities</li>
+ *   <li><b>{@link Iterators}:</b> Iterator utilities and operations</li>
+ *   <li><b>{@link IOUtil}:</b> Input/output and file system utilities</li>
+ *   <li><b>{@link Beans}:</b> JavaBean property access and manipulation</li>
+ *   <li><b>{@link Fn}:</b> Functional interface utilities and operations</li>
+ * </ul>
+ *
+ * <p><b>Example: Data Processing Pipeline</b>
+ * <pre>{@code
+ * // Complete data processing example
+ * List<String> rawData = Arrays.asList("  1  ", "2", null, "invalid", "3", "  ");
+ *
+ * // Process data with null-safe operations
+ * List<Integer> processedNumbers = N.filter(rawData, N::isNotBlank)    // Remove nulls and blanks
+ *     .stream()
+ *     .map(String::trim)                                                // Trim whitespace
+ *     .map(N::tryParseInt)                                              // Safe parsing
+ *     .filter(Optional::isPresent)                                      // Keep valid numbers
+ *     .map(Optional::get)                                               // Extract values
+ *     .collect(N.toList());                                             // Collect to list
+ *
+ * // Mathematical analysis
+ * OptionalDouble average = N.average(processedNumbers);                 // Calculate average
+ * OptionalInt maximum = N.maxInt(processedNumbers);                     // Find maximum
+ * Map<Integer, Long> frequencies = N.occurrencesMap(processedNumbers);  // Count frequencies
+ *
+ * // Async processing
+ * N.asyncRun(() -> {
+ *     N.forEach(processedNumbers, number -> processNumber(number));     // Process asynchronously
+ * });
+ *
+ * // Group and analyze
+ * Map<Boolean, List<Integer>> partitioned = N.partition(processedNumbers, n -> n > 2);
+ * List<Integer> large = partitioned.get(true);                         // Numbers > 2
+ * List<Integer> small = partitioned.get(false);                        // Numbers <= 2
+ * }</pre>
+ *
+ * <p><b>Attribution:</b>
+ * This class includes code adapted from Apache Commons Lang, Google Guava, and other
+ * open source projects under the Apache License 2.0. Methods from these libraries may have been
+ * modified for consistency, performance optimization, and null-safety enhancement.
+ *
  * @see com.landawn.abacus.util.CommonUtil
+ * @see com.landawn.abacus.util.Array
  * @see com.landawn.abacus.util.Iterables
  * @see com.landawn.abacus.util.Iterators
- * @see com.landawn.abacus.util.Index
- * @see com.landawn.abacus.util.Median
  * @see com.landawn.abacus.util.Strings
  * @see com.landawn.abacus.util.Numbers
  * @see com.landawn.abacus.util.Maps
  * @see com.landawn.abacus.util.Beans
+ * @see com.landawn.abacus.util.Comparators
+ * @see com.landawn.abacus.util.Index
+ * @see com.landawn.abacus.util.Median
+ * @see com.landawn.abacus.util.Fn
+ * @see com.landawn.abacus.util.Fnn
  * @see com.landawn.abacus.util.IOUtil
  * @see java.lang.reflect.Array
  * @see java.util.Arrays
@@ -3515,7 +3651,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
     /**
      * Flattens a two-dimensional boolean array into a one-dimensional boolean array.
-     * Converts a 2D array into a 1D array by concatenating all rows in order.
+     * Converts a two-dimensional array into a one-dimensional array by concatenating all rows in order.
      * Null rows within the input array are skipped. The original array is not modified.
      * Returns an empty array if the input array is {@code null} or empty.
      *
@@ -3561,7 +3697,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     /**
      * Flattens a two-dimensional char array into a one-dimensional char array.
      *
-     * <p>This method converts a 2D array into a 1D array by concatenating all rows in order.
+     * <p>This method converts a two-dimensional array into a one-dimensional array by concatenating all rows in order.
      * Null rows within the input array are skipped. The original array is not modified.</p>
      *
      * <p><b>Usage Examples:</b></p>
@@ -3613,7 +3749,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     /**
      * Flattens a two-dimensional byte array into a one-dimensional byte array.
      *
-     * <p>This method converts a 2D array into a 1D array by concatenating all rows in order.
+     * <p>This method converts a two-dimensional array into a one-dimensional array by concatenating all rows in order.
      * Null rows within the input array are skipped. The original array is not modified.</p>
      *
      * <p><b>Usage Examples:</b></p>
@@ -3662,7 +3798,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     /**
      * Flattens a two-dimensional short array into a one-dimensional short array.
      *
-     * <p>This method converts a 2D array into a 1D array by concatenating all rows in order.
+     * <p>This method converts a two-dimensional array into a one-dimensional array by concatenating all rows in order.
      * Null rows within the input array are skipped. The original array is not modified.</p>
      *
      * <p><b>Usage Examples:</b></p>
@@ -3703,7 +3839,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     /**
      * Flattens a two-dimensional int array into a one-dimensional int array.
      *
-     * <p>This method converts a 2D array into a 1D array by concatenating all rows in order.
+     * <p>This method converts a two-dimensional array into a one-dimensional array by concatenating all rows in order.
      * Null rows within the input array are skipped. The original array is not modified.</p>
      *
      * <p><b>Usage Examples:</b></p>
@@ -3744,7 +3880,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     /**
      * Flattens a two-dimensional long array into a one-dimensional long array.
      *
-     * <p>This method converts a 2D array into a 1D array by concatenating all rows in order.
+     * <p>This method converts a two-dimensional array into a one-dimensional array by concatenating all rows in order.
      * Null rows within the input array are skipped. The original array is not modified.</p>
      *
      * <p><b>Usage Examples:</b></p>
@@ -3785,7 +3921,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     /**
      * Flattens a two-dimensional float array into a one-dimensional float array.
      *
-     * <p>This method converts a 2D array into a 1D array by concatenating all rows in order.
+     * <p>This method converts a two-dimensional array into a one-dimensional array by concatenating all rows in order.
      * Null rows within the input array are skipped. The original array is not modified.</p>
      *
      * <p><b>Usage Examples:</b></p>
@@ -3826,7 +3962,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     /**
      * Flattens a two-dimensional double array into a one-dimensional double array.
      *
-     * <p>This method converts a 2D array into a 1D array by concatenating all rows in order.
+     * <p>This method converts a two-dimensional array into a one-dimensional array by concatenating all rows in order.
      * Null rows within the input array are skipped. The original array is not modified.</p>
      *
      * <p><b>Usage Examples:</b></p>

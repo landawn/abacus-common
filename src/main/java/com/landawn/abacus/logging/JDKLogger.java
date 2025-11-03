@@ -41,7 +41,6 @@ import java.util.logging.LogRecord;
  * logger.error("Failed to connect", exception);
  * }</pre>
  * 
- * @since 1.0
  */
 class JDKLogger extends AbstractLogger {
 
@@ -56,10 +55,13 @@ class JDKLogger extends AbstractLogger {
      *
      * <p>The name is passed directly to the underlying java.util.logging.Logger.</p>
      *
+     * <p><b>Note:</b> This constructor is package-private and should not be called directly.
+     * Use {@link LoggerFactory#getLogger(Class)} or {@link LoggerFactory#getLogger(String)} instead.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * // Typically instantiated by LoggerFactory, not directly
-     * JDKLogger logger = new JDKLogger("com.example.MyClass");
+     * // Correct way to obtain a logger
+     * Logger logger = LoggerFactory.getLogger(MyClass.class);
      * logger.info("Logger initialized");
      * }</pre>
      *
@@ -72,10 +74,10 @@ class JDKLogger extends AbstractLogger {
 
     /**
      * Checks if TRACE level logging is enabled.
-     * 
+     *
      * <p>In JDK logging, TRACE is mapped to FINEST level.</p>
      *
-     * @return {@code true} if TRACE level logging is enabled, {@code false} otherwise
+     * @return {@code true} if this Logger is enabled for the TRACE level, {@code false} otherwise
      */
     @Override
     public boolean isTraceEnabled() {
@@ -100,7 +102,7 @@ class JDKLogger extends AbstractLogger {
      * <p>The message and exception are logged at FINEST level in JDK logging.</p>
      *
      * @param msg the message to log
-     * @param t the exception to log
+     * @param t the exception or error to log
      */
     @Override
     public void trace(final String msg, final Throwable t) {
@@ -109,10 +111,10 @@ class JDKLogger extends AbstractLogger {
 
     /**
      * Checks if DEBUG level logging is enabled.
-     * 
+     *
      * <p>In JDK logging, DEBUG is mapped to FINE level.</p>
      *
-     * @return {@code true} if DEBUG level logging is enabled, {@code false} otherwise
+     * @return {@code true} if this Logger is enabled for the DEBUG level, {@code false} otherwise
      */
     @Override
     public boolean isDebugEnabled() {
@@ -137,7 +139,7 @@ class JDKLogger extends AbstractLogger {
      * <p>The message and exception are logged at FINE level in JDK logging.</p>
      *
      * @param msg the message to log
-     * @param t the exception to log
+     * @param t the exception or error to log
      */
     @Override
     public void debug(final String msg, final Throwable t) {
@@ -149,7 +151,7 @@ class JDKLogger extends AbstractLogger {
      *
      * <p>In JDK logging, INFO level corresponds directly to Level.INFO.</p>
      *
-     * @return {@code true} if INFO level logging is enabled, {@code false} otherwise
+     * @return {@code true} if this Logger is enabled for the INFO level, {@code false} otherwise
      */
     @Override
     public boolean isInfoEnabled() {
@@ -174,7 +176,7 @@ class JDKLogger extends AbstractLogger {
      * <p>The message and exception are logged at INFO level in JDK logging.</p>
      *
      * @param msg the message to log
-     * @param t the exception to log
+     * @param t the exception or error to log
      */
     @Override
     public void info(final String msg, final Throwable t) {
@@ -183,10 +185,10 @@ class JDKLogger extends AbstractLogger {
 
     /**
      * Checks if WARN level logging is enabled.
-     * 
+     *
      * <p>In JDK logging, WARN is mapped to WARNING level.</p>
      *
-     * @return {@code true} if WARN level logging is enabled, {@code false} otherwise
+     * @return {@code true} if this Logger is enabled for the WARN level, {@code false} otherwise
      */
     @Override
     public boolean isWarnEnabled() {
@@ -211,7 +213,7 @@ class JDKLogger extends AbstractLogger {
      * <p>The message and exception are logged at WARNING level in JDK logging.</p>
      *
      * @param msg the message to log
-     * @param t the exception to log
+     * @param t the exception or error to log
      */
     @Override
     public void warn(final String msg, final Throwable t) {
@@ -220,10 +222,10 @@ class JDKLogger extends AbstractLogger {
 
     /**
      * Checks if ERROR level logging is enabled.
-     * 
+     *
      * <p>In JDK logging, ERROR is mapped to SEVERE level.</p>
      *
-     * @return {@code true} if ERROR level logging is enabled, {@code false} otherwise
+     * @return {@code true} if this Logger is enabled for the ERROR level, {@code false} otherwise
      */
     @Override
     public boolean isErrorEnabled() {
@@ -248,7 +250,7 @@ class JDKLogger extends AbstractLogger {
      * <p>The message and exception are logged at SEVERE level in JDK logging.</p>
      *
      * @param msg the message to log
-     * @param t the exception to log
+     * @param t the exception or error to log
      */
     @Override
     public void error(final String msg, final Throwable t) {
@@ -288,7 +290,7 @@ class JDKLogger extends AbstractLogger {
      *
      * @param level the logging level
      * @param msg the message to log
-     * @param t the exception to log
+     * @param t the exception or error to log
      */
     private void log(final Level level, final String msg, final Throwable t) {
         log(SELF, level, msg, t);
@@ -313,7 +315,7 @@ class JDKLogger extends AbstractLogger {
      * @param callerFQCN the fully qualified class name of the caller
      * @param level the logging level
      * @param msg the message to log
-     * @param t the exception to log
+     * @param t the exception or error to log
      */
     private void log(final String callerFQCN, final Level level, final String msg, final Throwable t) {
         // millis and thread are filled by the constructor

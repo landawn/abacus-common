@@ -18,7 +18,6 @@ import java.io.IOException;
 import java.io.Writer;
 import java.util.Map;
 
-import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.parser.JSONDeserializationConfig;
 import com.landawn.abacus.parser.JSONDeserializationConfig.JDC;
 import com.landawn.abacus.util.ClassUtil;
@@ -36,7 +35,7 @@ import com.landawn.abacus.util.WD;
  * @param <T> the specific Map implementation type
  */
 @SuppressWarnings("java:S2160")
-public class MapType<K, V, T extends Map<K, V>> extends AbstractType<T> {
+class MapType<K, V, T extends Map<K, V>> extends AbstractType<T> {
 
     private final String declaringName;
 
@@ -74,6 +73,13 @@ public class MapType<K, V, T extends Map<K, V>> extends AbstractType<T> {
      * Returns the declaring name of this Map type.
      * The declaring name includes the fully qualified class names of the key and value types.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Type<Map<String, Integer>> type = TypeFactory.getType("Map<String, Integer>");
+     * String name = type.declaringName();
+     * // Returns: "Map<String, Integer>"
+     * }</pre>
+     *
      * @return The declaring name in format "MapClass&lt;KeyDeclaringName, ValueDeclaringName&gt;"
      */
     @Override
@@ -83,6 +89,13 @@ public class MapType<K, V, T extends Map<K, V>> extends AbstractType<T> {
 
     /**
      * Returns the Class object representing the specific Map implementation type.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Type<Map<String, Integer>> type = TypeFactory.getType("Map<String, Integer>");
+     * Class<?> clazz = type.clazz();
+     * // Returns: HashMap.class (or other Map implementation)
+     * }</pre>
      *
      * @return The Class object for the Map implementation
      */
@@ -96,6 +109,15 @@ public class MapType<K, V, T extends Map<K, V>> extends AbstractType<T> {
      * The array contains two elements: the key type at index 0 and the value type at index 1.
      * For Spring MultiValueMap, the value type will be List&lt;V&gt; instead of V.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Type<Map<String, Integer>> type = TypeFactory.getType("Map<String, Integer>");
+     * Type<?>[] paramTypes = type.getParameterTypes();
+     * // Returns: [StringType, IntegerType]
+     * // paramTypes[0] is the key type (String)
+     * // paramTypes[1] is the value type (Integer)
+     * }</pre>
+     *
      * @return An array containing the key type and value type
      */
     @Override
@@ -106,6 +128,13 @@ public class MapType<K, V, T extends Map<K, V>> extends AbstractType<T> {
     /**
      * Indicates whether this type represents a Map.
      * For MapType, this always returns {@code true}.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Type<Map<String, Integer>> type = TypeFactory.getType("Map<String, Integer>");
+     * boolean isMap = type.isMap();
+     * // Returns: true
+     * }</pre>
      *
      * @return {@code true}, indicating that this type represents a Map
      */
@@ -118,6 +147,13 @@ public class MapType<K, V, T extends Map<K, V>> extends AbstractType<T> {
      * Indicates whether this is a generic type.
      * For MapType, this always returns {@code true} since Map is parameterized with key and value types.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Type<Map<String, Integer>> type = TypeFactory.getType("Map<String, Integer>");
+     * boolean isGeneric = type.isGenericType();
+     * // Returns: true
+     * }</pre>
+     *
      * @return {@code true}, indicating that Map is a generic type
      */
     @Override
@@ -128,6 +164,13 @@ public class MapType<K, V, T extends Map<K, V>> extends AbstractType<T> {
     /**
      * Indicates whether instances of this type can be serialized.
      * Map objects are not directly serializable through this type handler.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Type<Map<String, Integer>> type = TypeFactory.getType("Map<String, Integer>");
+     * boolean serializable = type.isSerializable();
+     * // Returns: false
+     * }</pre>
      *
      * @return {@code false}, indicating that Map is not serializable through this type
      */
@@ -140,6 +183,13 @@ public class MapType<K, V, T extends Map<K, V>> extends AbstractType<T> {
      * Gets the serialization type category for Map.
      * This indicates how the Map should be treated during serialization processes.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Type<Map<String, Integer>> type = TypeFactory.getType("Map<String, Integer>");
+     * SerializationType serType = type.getSerializationType();
+     * // Returns: SerializationType.MAP
+     * }</pre>
+     *
      * @return SerializationType.MAP
      */
     @Override
@@ -151,12 +201,27 @@ public class MapType<K, V, T extends Map<K, V>> extends AbstractType<T> {
      * Converts a Map object to its JSON string representation.
      * Empty maps are represented as "{}".
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Type<Map<String, Integer>> type = TypeFactory.getType("Map<String, Integer>");
+     * Map<String, Integer> map = new HashMap<>();
+     * map.put("age", 25);
+     * map.put("count", 10);
+     *
+     * String json = type.stringOf(map);
+     * // Returns: "{\"age\":25,\"count\":10}"
+     *
+     * json = type.stringOf(new HashMap<>());
+     * // Returns: "{}"
+     *
+     * json = type.stringOf(null);
+     * // Returns: null
+     * }</pre>
+     *
      * @param x The Map object to convert
      * @return The JSON string representation of the Map, or {@code null} if the input is null
      */
-    @MayReturnNull
     @Override
-
     public String stringOf(final T x) {
         if (x == null) {
             return null; // NOSONAR
@@ -174,12 +239,24 @@ public class MapType<K, V, T extends Map<K, V>> extends AbstractType<T> {
      * - Empty string or "{}" returns an empty Map of the appropriate type
      * - Valid JSON object strings are deserialized into the Map
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Type<Map<String, Integer>> type = TypeFactory.getType("Map<String, Integer>");
+     *
+     * Map<String, Integer> map = type.valueOf("{\"age\":25,\"count\":10}");
+     * // Returns: Map with entries: age=25, count=10
+     *
+     * map = type.valueOf("{}");
+     * // Returns: Empty Map
+     *
+     * map = type.valueOf(null);
+     * // Returns: null
+     * }</pre>
+     *
      * @param str The JSON string to parse
      * @return The parsed Map object, or {@code null} if the input is null
      */
-    @MayReturnNull
     @Override
-
     public T valueOf(final String str) {
         if (Strings.isEmpty(str) || Strings.isBlank(str)) {
             return null; // NOSONAR
@@ -194,6 +271,20 @@ public class MapType<K, V, T extends Map<K, V>> extends AbstractType<T> {
      * Appends the string representation of a Map to an Appendable.
      * The Map is serialized as a JSON object. If the Appendable is a Writer,
      * the serialization is performed directly to the Writer for better performance.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Type<Map<String, Integer>> type = TypeFactory.getType("Map<String, Integer>");
+     * Map<String, Integer> map = new HashMap<>();
+     * map.put("age", 25);
+     * StringBuilder sb = new StringBuilder();
+     *
+     * type.appendTo(sb, map);
+     * // sb now contains: {"age":25}
+     *
+     * type.appendTo(sb, null);
+     * // sb now contains: {"age":25}null
+     * }</pre>
      *
      * @param appendable The Appendable to write to
      * @param x The Map to append
@@ -216,6 +307,15 @@ public class MapType<K, V, T extends Map<K, V>> extends AbstractType<T> {
 
     /**
      * Generates the type name for a Map with the specified implementation class, key and value types.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * String typeName = MapType.getTypeName(HashMap.class, "String", "Integer", false);
+     * // Returns: "java.util.HashMap<String, Integer>"
+     *
+     * typeName = MapType.getTypeName(Map.class, "String", "Integer", true);
+     * // Returns: "Map<String, Integer>" (using declaring names)
+     * }</pre>
      *
      * @param typeClass The Map implementation class
      * @param keyTypeName The name of the key type

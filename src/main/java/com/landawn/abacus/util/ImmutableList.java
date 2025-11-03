@@ -164,7 +164,7 @@ public sealed class ImmutableList<E> extends ImmutableCollection<E> implements L
      * Returns an ImmutableList containing exactly two elements in the order provided.
      * The returned list is immutable and will have a size of 2.
      *
-     * @param <E> the type of the elements
+     * @param <E> the type of elements
      * @param e1 the first element
      * @param e2 the second element
      * @return an ImmutableList containing the specified elements in order
@@ -177,7 +177,7 @@ public sealed class ImmutableList<E> extends ImmutableCollection<E> implements L
      * Returns an ImmutableList containing exactly three elements in the order provided.
      * The returned list is immutable and will have a size of 3.
      *
-     * @param <E> the type of the elements
+     * @param <E> the type of elements
      * @param e1 the first element
      * @param e2 the second element
      * @param e3 the third element
@@ -191,7 +191,7 @@ public sealed class ImmutableList<E> extends ImmutableCollection<E> implements L
      * Returns an ImmutableList containing exactly four elements in the order provided.
      * The returned list is immutable and will have a size of 4.
      *
-     * @param <E> the type of the elements
+     * @param <E> the type of elements
      * @param e1 the first element
      * @param e2 the second element
      * @param e3 the third element
@@ -206,7 +206,7 @@ public sealed class ImmutableList<E> extends ImmutableCollection<E> implements L
      * Returns an ImmutableList containing exactly five elements in the order provided.
      * The returned list is immutable and will have a size of 5.
      *
-     * @param <E> the type of the elements
+     * @param <E> the type of elements
      * @param e1 the first element
      * @param e2 the second element
      * @param e3 the third element
@@ -222,7 +222,7 @@ public sealed class ImmutableList<E> extends ImmutableCollection<E> implements L
      * Returns an ImmutableList containing exactly six elements in the order provided.
      * The returned list is immutable and will have a size of 6.
      *
-     * @param <E> the type of the elements
+     * @param <E> the type of elements
      * @param e1 the first element
      * @param e2 the second element
      * @param e3 the third element

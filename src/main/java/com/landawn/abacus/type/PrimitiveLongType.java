@@ -26,7 +26,7 @@ package com.landawn.abacus.type;
  * }</pre>
  */
 @SuppressWarnings("java:S2160")
-public final class PrimitiveLongType extends AbstractLongType {
+final class PrimitiveLongType extends AbstractLongType {
 
     public static final String LONG = long.class.getSimpleName();
 
@@ -41,7 +41,7 @@ public final class PrimitiveLongType extends AbstractLongType {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * PrimitiveLongType type = new PrimitiveLongType();
+     * Type<Long> type = TypeFactory.getType(long.class);
      * Class clazz = type.clazz();
      * System.out.println(clazz.getName()); // Output: long
      * System.out.println(clazz.isPrimitive()); // Output: true
@@ -61,7 +61,7 @@ public final class PrimitiveLongType extends AbstractLongType {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * PrimitiveLongType type = new PrimitiveLongType();
+     * Type<Long> type = TypeFactory.getType(long.class);
      * boolean isPrimitive = type.isPrimitiveType();
      * System.out.println(isPrimitive); // Output: true
      * }</pre>
@@ -79,7 +79,7 @@ public final class PrimitiveLongType extends AbstractLongType {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * PrimitiveLongType type = new PrimitiveLongType();
+     * Type<Long> type = TypeFactory.getType(long.class);
      * Long defaultVal = type.defaultValue();
      * System.out.println(defaultVal); // Output: 0
      * }</pre>

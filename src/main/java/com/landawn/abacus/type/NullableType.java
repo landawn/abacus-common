@@ -25,7 +25,7 @@ import com.landawn.abacus.util.u.Nullable;
  * @param <T> the type of value wrapped by the Nullable
  */
 @SuppressWarnings("java:S2160")
-public class NullableType<T> extends AbstractOptionalType<Nullable<T>> {
+class NullableType<T> extends AbstractOptionalType<Nullable<T>> {
 
     public static final String NULLABLE = Nullable.class.getSimpleName();
 
@@ -108,7 +108,6 @@ public class NullableType<T> extends AbstractOptionalType<Nullable<T>> {
      *
      * @param x the {@code Nullable} object to convert
      * @return the string representation of the contained value, or {@code null} if empty
-     @MayReturnNull
      */
     @Override
     public String stringOf(final Nullable<T> x) {

@@ -11,34 +11,42 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-
 package com.landawn.abacus.util.function;
 
-import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.util.Throwables;
 
 /**
  * Represents a function that accepts a variable number of byte-valued arguments and produces a result.
  * This is a functional interface designed to process byte arrays of any length and return a value.
- * 
+ *
  * <p>This is a functional interface whose functional method is {@link #apply(byte...)}.
- * 
+ *
  * @param <R> the type of the result of the function
- * 
+ *
  * @see java.util.function.Function
+ *
+ * <p>Refer to JDK API documentation at: <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html">https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a></p>
  */
 @FunctionalInterface
 public interface ByteNFunction<R> extends Throwables.ByteNFunction<R, RuntimeException> { //NOSONAR
-
     /**
      * Applies this function to the given byte array arguments.
      * The array can be of any length, including zero.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * ByteNFunction<Integer> summer = values -> {
+     *     int sum = 0;
+     *     for (byte v : values) sum += v;
+     *     return sum;
+     * };
+     * Integer result = summer.apply((byte) 1, (byte) 2, (byte) 3); // Returns 6
+     * }</pre>
      *
      * @param args the byte array input arguments. Can be empty but not {@code null}.
      * @return the function result of type R
      */
     @Override
-    @MayReturnNull
     R apply(byte... args);
 
     /**

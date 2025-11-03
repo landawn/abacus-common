@@ -41,7 +41,6 @@ import lombok.Data;
  * }
  * }</pre>
  * 
- * @since 0.8
  */
 final class ASMUtil {
     private static final Logger logger = LoggerFactory.getLogger(ASMUtil.class);

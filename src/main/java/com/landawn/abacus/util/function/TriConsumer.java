@@ -11,7 +11,6 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-
 package com.landawn.abacus.util.function;
 
 import com.landawn.abacus.util.Throwables;
@@ -22,7 +21,7 @@ import com.landawn.abacus.util.Throwables;
  * Unlike most other functional interfaces, TriConsumer is expected to operate via side-effects.
  *
  * <p>This interface extends the Throwables.TriConsumer, providing compatibility
- * with the Abacus framework's error handling mechanisms while limiting thrown exceptions
+ * with the abacus-common framework's error handling mechanisms while limiting thrown exceptions
  * to RuntimeException.
  *
  * <p>This is a functional interface whose functional method is {@link #accept(Object, Object, Object)}.
@@ -30,20 +29,21 @@ import com.landawn.abacus.util.Throwables;
  * @param <A> the type of the first argument to the operation
  * @param <B> the type of the second argument to the operation
  * @param <C> the type of the third argument to the operation
+ *
+ * <p>Refer to JDK API documentation at: <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html">https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a></p>
  */
 @FunctionalInterface
 public interface TriConsumer<A, B, C> extends Throwables.TriConsumer<A, B, C, RuntimeException> { //NOSONAR
-
     /**
      * Performs this operation on the given arguments.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * TriConsumer<String, Integer, Boolean> logger = 
+     * TriConsumer<String, Integer, Boolean> logger =
      *     (msg, level, timestamp) -> System.out.println("[" + level + "] " + msg + " @ " + timestamp);
      * logger.accept("Application started", 1, true);
-     * 
-     * TriConsumer<List<String>, String, Integer> listInserter = 
+     *
+     * TriConsumer<List<String>, String, Integer> listInserter =
      *     (list, element, index) -> list.add(index, element);
      * List<String> myList = new ArrayList<>(Arrays.asList("a", "b", "c"));
      * listInserter.accept(myList, "x", 1); // list becomes ["a", "x", "b", "c"]
@@ -57,18 +57,18 @@ public interface TriConsumer<A, B, C> extends Throwables.TriConsumer<A, B, C, Ru
     void accept(A a, B b, C c);
 
     /**
-     * Returns a composed TriConsumer that performs, in sequence, this operation followed
-     * by the after operation. If performing either operation throws an exception, it is
+     * Returns a composed {@code TriConsumer} that performs, in sequence, this operation followed
+     * by the {@code after} operation. If performing either operation throws an exception, it is
      * relayed to the caller of the composed operation. If performing this operation throws
-     * an exception, the after operation will not be performed.
-     * 
+     * an exception, the {@code after} operation will not be performed.
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * TriConsumer<String, Integer, Boolean> logger = 
+     * TriConsumer<String, Integer, Boolean> logger =
      *     (msg, level, flag) -> System.out.println("Log: " + msg);
-     * TriConsumer<String, Integer, Boolean> notifier = 
+     * TriConsumer<String, Integer, Boolean> notifier =
      *     (msg, level, flag) -> System.out.println("Notify: " + msg);
-     * 
+     *
      * TriConsumer<String, Integer, Boolean> combined = logger.andThen(notifier);
      * combined.accept("Error occurred", 3, false);
      * // Output:
@@ -76,8 +76,8 @@ public interface TriConsumer<A, B, C> extends Throwables.TriConsumer<A, B, C, Ru
      * // Notify: Error occurred
      * }</pre>
      *
-     * @param after the operation to perform after this operation
-     * @return a composed TriConsumer that performs in sequence this operation followed by the after operation
+     * @param after the operation to perform after this operation. Must not be {@code null}.
+     * @return a composed {@code TriConsumer} that performs in sequence this operation followed by the {@code after} operation
      */
     default TriConsumer<A, B, C> andThen(final TriConsumer<? super A, ? super B, ? super C> after) {
         return (a, b, c) -> {
@@ -90,11 +90,11 @@ public interface TriConsumer<A, B, C> extends Throwables.TriConsumer<A, B, C, Ru
      * Converts this TriConsumer to a Throwables.TriConsumer that can throw checked exceptions.
      * This method is useful when you need to use this consumer in a context that expects
      * a Throwables.TriConsumer with a specific exception type.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * TriConsumer<String, Integer, Boolean> consumer = (s, i, b) -> { ... };
-     * var throwableConsumer = 
+     * var throwableConsumer =
      *     consumer.toThrowable();
      * }</pre>
      *

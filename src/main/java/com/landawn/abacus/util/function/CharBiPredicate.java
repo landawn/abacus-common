@@ -11,7 +11,6 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-
 package com.landawn.abacus.util.function;
 
 import com.landawn.abacus.util.Throwables;
@@ -19,50 +18,44 @@ import com.landawn.abacus.util.Throwables;
 /**
  * Represents a predicate (boolean-valued function) of two char-valued arguments.
  * This is the two-arity specialization of {@link CharPredicate}.
- * 
+ *
  * <p>This is a functional interface whose functional method is {@link #test(char, char)}.
- * 
+ *
  * @see java.util.function.BiPredicate
  * @see CharPredicate
+ *
+ * <p>Refer to JDK API documentation at: <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html">https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a></p>
  */
 @FunctionalInterface
 public interface CharBiPredicate extends Throwables.CharBiPredicate<RuntimeException> { //NOSONAR
-
     /**
      * A predicate that always evaluates to {@code true}, regardless of the two char input values.
      */
     CharBiPredicate ALWAYS_TRUE = (t, u) -> true;
-
     /**
      * A predicate that always evaluates to {@code false}, regardless of the two char input values.
      */
     CharBiPredicate ALWAYS_FALSE = (t, u) -> false;
-
     /**
      * A predicate that tests if the two char values are equal.
      */
     CharBiPredicate EQUAL = (t, u) -> t == u;
-
     /**
      * A predicate that tests if the two char values are not equal.
      */
     CharBiPredicate NOT_EQUAL = (t, u) -> t != u;
-
     /**
      * A predicate that tests if the first char value is greater than the second.
      */
     CharBiPredicate GREATER_THAN = (t, u) -> t > u;
-
     /**
      * A predicate that tests if the first char value is greater than or equal to the second.
      */
     CharBiPredicate GREATER_EQUAL = (t, u) -> t >= u;
-
     /**
      * A predicate that tests if the first char value is less than the second.
      */
     CharBiPredicate LESS_THAN = (t, u) -> t < u;
-
     /**
      * A predicate that tests if the first char value is less than or equal to the second.
      */
@@ -70,6 +63,15 @@ public interface CharBiPredicate extends Throwables.CharBiPredicate<RuntimeExcep
 
     /**
      * Evaluates this predicate on the given char arguments.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * CharBiPredicate areEqual = (c1, c2) -> c1 == c2;
+     * boolean result = areEqual.test('a', 'a'); // Returns true
+     *
+     * CharBiPredicate areBothLetters = (c1, c2) -> Character.isLetter(c1) && Character.isLetter(c2);
+     * boolean result2 = areBothLetters.test('a', 'b'); // Returns true
+     * }</pre>
      *
      * @param t the first char input argument
      * @param u the second char input argument
@@ -83,6 +85,13 @@ public interface CharBiPredicate extends Throwables.CharBiPredicate<RuntimeExcep
      * The returned predicate will return {@code true} when this predicate returns {@code false},
      * and vice versa.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * CharBiPredicate areEqual = (c1, c2) -> c1 == c2;
+     * CharBiPredicate areNotEqual = areEqual.negate();
+     * boolean result = areNotEqual.test('a', 'b'); // Returns true
+     * }</pre>
+     *
      * @return a predicate that represents the logical negation of this predicate
      */
     default CharBiPredicate negate() {
@@ -93,8 +102,16 @@ public interface CharBiPredicate extends Throwables.CharBiPredicate<RuntimeExcep
      * Returns a composed predicate that represents a short-circuiting logical AND of this predicate and another.
      * When evaluating the composed predicate, if this predicate is {@code false}, then the {@code other}
      * predicate is not evaluated.
-     * 
+     *
      * <p>Any exceptions thrown during evaluation of either predicate are relayed to the caller.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * CharBiPredicate bothLetters = (c1, c2) -> Character.isLetter(c1) && Character.isLetter(c2);
+     * CharBiPredicate bothUpperCase = (c1, c2) -> Character.isUpperCase(c1) && Character.isUpperCase(c2);
+     * CharBiPredicate combined = bothLetters.and(bothUpperCase);
+     * boolean result = combined.test('A', 'B'); // Returns true
+     * }</pre>
      *
      * @param other a predicate that will be logically-ANDed with this predicate. Must not be {@code null}.
      * @return a composed predicate that represents the short-circuiting logical AND of this predicate
@@ -108,8 +125,16 @@ public interface CharBiPredicate extends Throwables.CharBiPredicate<RuntimeExcep
      * Returns a composed predicate that represents a short-circuiting logical OR of this predicate and another.
      * When evaluating the composed predicate, if this predicate is {@code true}, then the {@code other}
      * predicate is not evaluated.
-     * 
+     *
      * <p>Any exceptions thrown during evaluation of either predicate are relayed to the caller.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * CharBiPredicate areEqual = (c1, c2) -> c1 == c2;
+     * CharBiPredicate bothDigits = (c1, c2) -> Character.isDigit(c1) && Character.isDigit(c2);
+     * CharBiPredicate combined = areEqual.or(bothDigits);
+     * boolean result = combined.test('1', '2'); // Returns true (both are digits)
+     * }</pre>
      *
      * @param other a predicate that will be logically-ORed with this predicate. Must not be {@code null}.
      * @return a composed predicate that represents the short-circuiting logical OR of this predicate

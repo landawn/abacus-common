@@ -22,11 +22,10 @@ import java.sql.Timestamp;
 
 import org.joda.time.MutableDateTime;
 
-import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Strings;
 
-public class JodaMutableDateTimeType extends AbstractJodaDateTimeType<MutableDateTime> {
+class JodaMutableDateTimeType extends AbstractJodaDateTimeType<MutableDateTime> {
 
     public static final String JODA_MUTABLE_DATE_TIME = "JodaMutableDateTime";
 
@@ -45,7 +44,7 @@ public class JodaMutableDateTimeType extends AbstractJodaDateTimeType<MutableDat
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * JodaMutableDateTimeType type = new JodaMutableDateTimeType();
+     * Type<MutableDateTime> type = TypeFactory.getType(MutableDateTime.class);
      * Class<MutableDateTime> clazz = type.clazz();
      * System.out.println(clazz.getName()); // Outputs: org.joda.time.MutableDateTime
      * }</pre>
@@ -71,7 +70,7 @@ public class JodaMutableDateTimeType extends AbstractJodaDateTimeType<MutableDat
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * JodaMutableDateTimeType type = new JodaMutableDateTimeType();
+     * Type<MutableDateTime> type = TypeFactory.getType(MutableDateTime.class);
      *
      * // From Number (milliseconds since epoch)
      * MutableDateTime dt1 = type.valueOf(1609459200000L);
@@ -91,7 +90,6 @@ public class JodaMutableDateTimeType extends AbstractJodaDateTimeType<MutableDat
      * @return a MutableDateTime instance, or {@code null} if the input is null
      */
     @Override
-    @MayReturnNull
     public MutableDateTime valueOf(final Object obj) {
         if (obj instanceof Number) {
             return new MutableDateTime(((Number) obj).longValue());
@@ -115,7 +113,7 @@ public class JodaMutableDateTimeType extends AbstractJodaDateTimeType<MutableDat
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * JodaMutableDateTimeType type = new JodaMutableDateTimeType();
+     * Type<MutableDateTime> type = TypeFactory.getType(MutableDateTime.class);
      *
      * // Parse ISO 8601 date-time format
      * MutableDateTime dt1 = type.valueOf("2021-01-01T10:30:00");
@@ -134,9 +132,7 @@ public class JodaMutableDateTimeType extends AbstractJodaDateTimeType<MutableDat
      * @return a MutableDateTime instance, or {@code null} if the string is empty or null
      * @throws IllegalArgumentException if the string format is invalid
      */
-    @MayReturnNull
     @Override
-
     public MutableDateTime valueOf(final String str) {
         if (Strings.isEmpty(str)) {
             return null; // NOSONAR
@@ -159,7 +155,7 @@ public class JodaMutableDateTimeType extends AbstractJodaDateTimeType<MutableDat
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * JodaMutableDateTimeType type = new JodaMutableDateTimeType();
+     * Type<MutableDateTime> type = TypeFactory.getType(MutableDateTime.class);
      *
      * // Parse from character array containing milliseconds
      * char[] millisChars = "1609459200000".toCharArray();
@@ -175,9 +171,7 @@ public class JodaMutableDateTimeType extends AbstractJodaDateTimeType<MutableDat
      * @param len the number of characters to parse
      * @return a MutableDateTime instance, or {@code null} if the character buffer is {@code null} or length is 0
      */
-    @MayReturnNull
     @Override
-
     public MutableDateTime valueOf(final char[] cbuf, final int offset, final int len) {
         if ((cbuf == null) || (len == 0)) {
             return null; // NOSONAR
@@ -200,7 +194,7 @@ public class JodaMutableDateTimeType extends AbstractJodaDateTimeType<MutableDat
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * JodaMutableDateTimeType type = new JodaMutableDateTimeType();
+     * Type<MutableDateTime> type = TypeFactory.getType(MutableDateTime.class);
      * try (ResultSet rs = stmt.executeQuery()) {
      *     if (rs.next()) {
      *         MutableDateTime dt = type.get(rs, 1);
@@ -215,7 +209,6 @@ public class JodaMutableDateTimeType extends AbstractJodaDateTimeType<MutableDat
      * @throws SQLException if a database access error occurs or the column index is invalid
      */
     @Override
-    @MayReturnNull
     public MutableDateTime get(final ResultSet rs, final int columnIndex) throws SQLException {
         final Timestamp ts = rs.getTimestamp(columnIndex);
 
@@ -228,7 +221,7 @@ public class JodaMutableDateTimeType extends AbstractJodaDateTimeType<MutableDat
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * JodaMutableDateTimeType type = new JodaMutableDateTimeType();
+     * Type<MutableDateTime> type = TypeFactory.getType(MutableDateTime.class);
      * try (ResultSet rs = stmt.executeQuery()) {
      *     if (rs.next()) {
      *         MutableDateTime dt = type.get(rs, "created_at");
@@ -242,7 +235,6 @@ public class JodaMutableDateTimeType extends AbstractJodaDateTimeType<MutableDat
      * @throws SQLException if a database access error occurs or the column label is invalid
      */
     @Override
-    @MayReturnNull
     public MutableDateTime get(final ResultSet rs, final String columnLabel) throws SQLException {
         final Timestamp ts = rs.getTimestamp(columnLabel);
 
@@ -255,7 +247,7 @@ public class JodaMutableDateTimeType extends AbstractJodaDateTimeType<MutableDat
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * JodaMutableDateTimeType type = new JodaMutableDateTimeType();
+     * Type<MutableDateTime> type = TypeFactory.getType(MutableDateTime.class);
      * MutableDateTime dt = new MutableDateTime();
      * try (PreparedStatement stmt = conn.prepareStatement("INSERT INTO events (timestamp) VALUES (?)")) {
      *     type.set(stmt, 1, dt);
@@ -280,7 +272,7 @@ public class JodaMutableDateTimeType extends AbstractJodaDateTimeType<MutableDat
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * JodaMutableDateTimeType type = new JodaMutableDateTimeType();
+     * Type<MutableDateTime> type = TypeFactory.getType(MutableDateTime.class);
      * MutableDateTime dt = new MutableDateTime();
      * try (CallableStatement stmt = conn.prepareCall("{call log_event(?)}")) {
      *     type.set(stmt, "event_time", dt);

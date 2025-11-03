@@ -18,9 +18,28 @@ package com.landawn.abacus.type;
  * Type handler for primitive float values.
  * This class handles the primitive float type specifically, as opposed to the Float wrapper class.
  * It provides type information and default value handling for float primitives.
+ *
+ * <p><b>Usage Examples:</b></p>
+ * <pre>{@code
+ * Type<Float> type = TypeFactory.getType(float.class);
+ *
+ * // Convert string to float
+ * Float value = type.valueOf("3.14"); // Returns 3.14f
+ * Float value2 = type.valueOf("-0.5"); // Returns -0.5f
+ *
+ * // Get default value
+ * Float defaultVal = type.defaultValue(); // Returns 0.0f
+ *
+ * // Read from database
+ * try (ResultSet rs = stmt.executeQuery("SELECT price FROM products")) {
+ *     if (rs.next()) {
+ *         Float price = type.get(rs, 1);
+ *     }
+ * }
+ * }</pre>
  */
 @SuppressWarnings("java:S2160")
-public final class PrimitiveFloatType extends AbstractFloatType {
+final class PrimitiveFloatType extends AbstractFloatType {
 
     public static final String FLOAT = float.class.getSimpleName();
 

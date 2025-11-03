@@ -22,7 +22,7 @@ import com.landawn.abacus.annotation.MayReturnNull;
  * A pool of reusable objects that extends the base Pool interface with object-specific operations.
  * This interface provides methods for adding and retrieving objects from the pool with various
  * timeout and cleanup options.
- * 
+ *
  * <p>ObjectPool is designed for scenarios where you need to reuse expensive objects like:
  * <ul>
  *   <li>Database connections</li>
@@ -30,7 +30,7 @@ import com.landawn.abacus.annotation.MayReturnNull;
  *   <li>Large buffers or arrays</li>
  *   <li>Complex initialized objects</li>
  * </ul>
- * 
+ *
  * <p>Key features:
  * <ul>
  *   <li>Thread-safe add and take operations</li>
@@ -38,17 +38,17 @@ import com.landawn.abacus.annotation.MayReturnNull;
  *   <li>Automatic destruction of objects that fail to be added</li>
  *   <li>Memory-based capacity constraints via MemoryMeasure</li>
  * </ul>
- * 
+ *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * ObjectPool<MyPoolable> pool = PoolFactory.createObjectPool(10);
- * 
+ *
  * // Add object to pool
  * MyPoolable obj = new MyPoolable();
  * if (!pool.add(obj)) {
  *     obj.destroy(Caller.PUT_ADD_FAILURE);
  * }
- * 
+ *
  * // Take object from pool
  * MyPoolable borrowed = pool.take();
  * try {
@@ -57,7 +57,7 @@ import com.landawn.abacus.annotation.MayReturnNull;
  *     pool.add(borrowed); // return to pool
  * }
  * }</pre>
- * 
+ *
  * @param <E> the type of objects in this pool, must implement Poolable
  * @see Pool
  * @see Poolable
@@ -66,46 +66,46 @@ import com.landawn.abacus.annotation.MayReturnNull;
 public interface ObjectPool<E extends Poolable> extends Pool {
 
     /**
-     * Adds a new element to the pool.
+     * Adds a new object to the pool.
      * The object will only be added if the pool has capacity and the object has not expired.
-     * 
-     * <p>This method will fail if:
+     *
+     * <p>This method will fail if:</p>
      * <ul>
      *   <li>The pool is at capacity and auto-balancing is disabled</li>
      *   <li>The object has already expired</li>
-     *   <li>The object would exceed memory constraints</li>
+     *   <li>The operation will fail if the object would exceed memory constraints</li>
      * </ul>
-     * 
-     * @param e the element to be added to the pool, must not be null
-     * @return {@code true} if the element was successfully added, {@code false} otherwise
-     * @throws IllegalArgumentException if the element is null
+     *
+     * @param e the object to be added to the pool, must not be {@code null}
+     * @return {@code true} if the object was successfully added, {@code false} otherwise
+     * @throws IllegalArgumentException if the object is null
      * @throws IllegalStateException if the pool has been closed
      */
     boolean add(E e);
 
     /**
-     * Adds a new element to the pool with optional automatic destruction on failure.
+     * Adds a new object to the pool with optional automatic destruction on failure.
      * This is a convenience method that ensures proper cleanup if the object cannot be pooled.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * MyPoolable obj = createExpensiveObject();
      * // Object will be automatically destroyed if it can't be added
      * pool.add(obj, true);
      * }</pre>
-     * 
-     * @param e the element to be added to the pool, must not be null
+     *
+     * @param e the object to be added to the pool, must not be {@code null}
      * @param autoDestroyOnFailedToAdd if {@code true}, calls e.destroy(PUT_ADD_FAILURE) if add fails
-     * @return {@code true} if the element was successfully added, {@code false} otherwise
-     * @throws IllegalArgumentException if the element is null
+     * @return {@code true} if the object was successfully added, {@code false} otherwise
+     * @throws IllegalArgumentException if the object is null
      * @throws IllegalStateException if the pool has been closed
      */
     boolean add(E e, boolean autoDestroyOnFailedToAdd);
 
     /**
-     * Attempts to add an element to the pool, waiting if necessary for space to become available.
+     * Attempts to add an object to the pool, waiting if necessary for space to become available.
      * This method blocks until space is available, the timeout expires, or the thread is interrupted.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * MyPoolable obj = new MyPoolable();
@@ -116,28 +116,28 @@ public interface ObjectPool<E extends Poolable> extends Pool {
      *     obj.destroy(Caller.PUT_ADD_FAILURE);
      * }
      * }</pre>
-     * 
-     * @param e the element to be added to the pool, must not be null
+     *
+     * @param e the object to be added to the pool, must not be {@code null}
      * @param timeout the maximum time to wait for space to become available
      * @param unit the time unit of the timeout argument
      * @return {@code true} if successful, {@code false} if timeout elapsed before space was available
      * @throws InterruptedException if interrupted while waiting
-     * @throws IllegalArgumentException if the element is null
+     * @throws IllegalArgumentException if the object is null
      * @throws IllegalStateException if the pool has been closed
      */
     boolean add(E e, long timeout, TimeUnit unit) throws InterruptedException;
 
     /**
-     * Attempts to add an element to the pool with timeout and automatic destruction on failure.
+     * Attempts to add an object to the pool with timeout and automatic destruction on failure.
      * Combines the timeout and auto-destroy features for maximum convenience.
-     * 
-     * @param e the element to be added to the pool, must not be null
+     *
+     * @param e the object to be added to the pool, must not be {@code null}
      * @param timeout the maximum time to wait for space to become available
      * @param unit the time unit of the timeout argument
      * @param autoDestroyOnFailedToAdd if {@code true}, calls e.destroy(PUT_ADD_FAILURE) if add fails
      * @return {@code true} if successful, {@code false} if timeout elapsed or add failed
      * @throws InterruptedException if interrupted while waiting
-     * @throws IllegalArgumentException if the element is null
+     * @throws IllegalArgumentException if the object is null
      * @throws IllegalStateException if the pool has been closed
      */
     boolean add(E e, long timeout, TimeUnit unit, boolean autoDestroyOnFailedToAdd) throws InterruptedException;
@@ -145,9 +145,9 @@ public interface ObjectPool<E extends Poolable> extends Pool {
     /**
      * Retrieves and removes an object from the pool, or returns {@code null} if the pool is empty.
      * The object's activity print is updated to reflect the access.
-     * 
+     *
      * <p>If the retrieved object has expired, it will be destroyed and {@code null} will be returned.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * E obj = pool.take();
@@ -159,8 +159,8 @@ public interface ObjectPool<E extends Poolable> extends Pool {
      *     }
      * }
      * }</pre>
-     * 
-     * @return the head of the pool, or {@code null} if the pool is empty
+     *
+     * @return an object from the pool, or {@code null} if the pool is empty
      * @throws IllegalStateException if the pool has been closed
      */
     @MayReturnNull
@@ -169,10 +169,10 @@ public interface ObjectPool<E extends Poolable> extends Pool {
     /**
      * Retrieves and removes an object from the pool, waiting if necessary for an object to become available.
      * This method blocks until an object is available, the timeout expires, or the thread is interrupted.
-     * 
+     *
      * <p>The object's activity print is updated to reflect the access.
      * Expired objects are automatically destroyed and the method continues waiting.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * E obj = pool.take(10, TimeUnit.SECONDS);
@@ -186,21 +186,21 @@ public interface ObjectPool<E extends Poolable> extends Pool {
      *     // timeout - pool was empty
      * }
      * }</pre>
-     * 
+     *
      * @param timeout the maximum time to wait for an object to become available
      * @param unit the time unit of the timeout argument
-     * @return an object from the pool, or {@code null} if timeout elapsed before an object was available
+     * @return an object from the pool, or {@code null} if the timeout elapsed before an object was available
      * @throws InterruptedException if interrupted while waiting
      * @throws IllegalStateException if the pool has been closed
      */
     E take(long timeout, TimeUnit unit) throws InterruptedException;
 
     /**
-     * Checks if the specified element is currently in the pool.
+     * Checks if the specified object is currently in the pool.
      * This method uses object equality (equals method) for comparison.
-     * 
-     * @param valueToFind the element to search for in the pool
-     * @return {@code true} if the pool contains the specified element, {@code false} otherwise
+     *
+     * @param valueToFind the object to search for in the pool
+     * @return {@code true} if the pool contains the specified object, {@code false} otherwise
      * @throws IllegalStateException if the pool has been closed
      */
     boolean contains(E valueToFind);
@@ -211,9 +211,16 @@ public interface ObjectPool<E extends Poolable> extends Pool {
      * 
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * MemoryMeasure<ByteBuffer> measure = buffer -> buffer.capacity();
+     * // Example with ByteBuffer wrapper
+     * class PooledBuffer extends AbstractPoolable {
+     *     private final ByteBuffer buffer;
+     *     public PooledBuffer(int capacity) { this.buffer = ByteBuffer.allocate(capacity); }
+     *     public int capacity() { return buffer.capacity(); }
+     * }
+     *
+     * MemoryMeasure<PooledBuffer> measure = buffer -> buffer.capacity();
      * ObjectPool<PooledBuffer> pool = PoolFactory.createObjectPool(
-     *     100, 3000, EvictionPolicy.LAST_ACCESS_TIME, 
+     *     100, 3000, EvictionPolicy.LAST_ACCESS_TIME,
      *     1024 * 1024 * 100, // 100MB max
      *     measure
      * );

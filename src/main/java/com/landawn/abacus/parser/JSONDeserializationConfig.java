@@ -20,7 +20,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.function.BiConsumer;
 
-import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.annotation.SuppressFBWarnings;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.cs;
@@ -51,7 +50,6 @@ import com.landawn.abacus.util.cs;
  * Person person = parser.deserialize(jsonString, config, Person.class);
  * }</pre>
  * 
- * @since 0.8
  * @see DeserializationConfig
  * @see JSONSerializationConfig
  */
@@ -109,7 +107,6 @@ public class JSONDeserializationConfig extends DeserializationConfig<JSONDeseria
      * @param ignoreNullOrEmpty {@code true} to ignore {@code null} or empty values, {@code false} otherwise
      * @return this instance for method chaining
      */
-    @MayReturnNull
     public JSONDeserializationConfig ignoreNullOrEmpty(final boolean ignoreNullOrEmpty) {
         this.ignoreNullOrEmpty = ignoreNullOrEmpty;
 
@@ -154,7 +151,6 @@ public class JSONDeserializationConfig extends DeserializationConfig<JSONDeseria
      * @param readNullToEmpty {@code true} to read {@code null} as empty, {@code false} otherwise
      * @return this instance for method chaining
      */
-    @MayReturnNull
     public JSONDeserializationConfig readNullToEmpty(final boolean readNullToEmpty) {
         this.readNullToEmpty = readNullToEmpty;
 
@@ -177,7 +173,7 @@ public class JSONDeserializationConfig extends DeserializationConfig<JSONDeseria
 
     /**
      * Sets the Map implementation class to use when deserializing to Map instances.
-     * 
+     *
      * <p>This allows control over the concrete Map type created during deserialization.
      * The specified class must be a concrete implementation of Map with a no-argument
      * constructor. Common use cases include:</p>
@@ -186,7 +182,7 @@ public class JSONDeserializationConfig extends DeserializationConfig<JSONDeseria
      *   <li>Using {@link java.util.TreeMap} for sorted keys</li>
      *   <li>Using {@link java.util.concurrent.ConcurrentHashMap} for thread-safe operations</li>
      * </ul>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * config.setMapInstanceType(LinkedHashMap.class);
@@ -196,12 +192,11 @@ public class JSONDeserializationConfig extends DeserializationConfig<JSONDeseria
      * // Maps will be created as TreeMap for sorted keys
      * }</pre>
      *
-     * @param mapInstanceType the Map implementation class to use
+     * @param mapInstanceType the Map implementation class to use (must not be {@code null})
      * @return this instance for method chaining
-     * @throws IllegalArgumentException if mapInstanceType is null
+     * @throws IllegalArgumentException if mapInstanceType is {@code null}
      */
     @SuppressWarnings("rawtypes")
-    @MayReturnNull
     public JSONDeserializationConfig setMapInstanceType(final Class<? extends Map> mapInstanceType) throws IllegalArgumentException {
         N.checkArgNotNull(mapInstanceType, cs.mapInstanceType);
 
@@ -212,7 +207,7 @@ public class JSONDeserializationConfig extends DeserializationConfig<JSONDeseria
 
     /**
      * Sets a custom handler for processing collection property values during deserialization.
-     * 
+     *
      * <p>This method allows you to register a custom handler that will be invoked for each
      * element being added to a collection property during deserialization. This is particularly
      * useful for:</p>
@@ -222,15 +217,15 @@ public class JSONDeserializationConfig extends DeserializationConfig<JSONDeseria
      *   <li>Filtering elements before adding them to the collection</li>
      *   <li>Implementing custom collection population strategies</li>
      * </ul>
-     * 
+     *
      * <p>The handler receives two parameters:</p>
      * <ol>
      *   <li>The collection (or Map) being populated</li>
      *   <li>The current element (or Map.Entry) to be added</li>
      * </ol>
-     * 
+     *
      * <p>Property names support dot notation for nested properties.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * config.setPropHandler("items", (collection, element) -> {
@@ -249,9 +244,8 @@ public class JSONDeserializationConfig extends DeserializationConfig<JSONDeseria
      * @param propName the property name (supports nested properties like "account.devices.model")
      * @param handler the handler to process collection values (first parameter is Collection or Map, second is current element/entry)
      * @return this instance for method chaining
-     * @throws IllegalArgumentException if propName is empty or handler is null
+     * @throws IllegalArgumentException if propName is empty or handler is {@code null}
      */
-    @MayReturnNull
     public JSONDeserializationConfig setPropHandler(final String propName, final BiConsumer<? super Collection<Object>, ?> handler)
             throws IllegalArgumentException {
         N.checkArgNotEmpty(propName, cs.propName);
@@ -268,17 +262,16 @@ public class JSONDeserializationConfig extends DeserializationConfig<JSONDeseria
 
     /**
      * Gets the property handler for the specified property name.
-     * 
+     *
      * <p>Returns the custom handler that was previously registered for the given property name
      * using {@link #setPropHandler(String, BiConsumer)}. If no handler has been registered
      * for the property, this method returns {@code null}.</p>
      *
-     * @param propName the property name
+     * @param propName the property name (must not be empty)
      * @return the handler for the property, or {@code null} if not set
      * @throws IllegalArgumentException if propName is empty
      * @see #setPropHandler(String, BiConsumer)
      */
-    @MayReturnNull
     public BiConsumer<? super Collection<Object>, ?> getPropHandler(final String propName) { //NOSONAR
         N.checkArgNotEmpty(propName, cs.propName);
 
@@ -399,16 +392,16 @@ public class JSONDeserializationConfig extends DeserializationConfig<JSONDeseria
 
         /**
          * Creates a new instance of JSONDeserializationConfig with default settings.
-         * 
+         *
          * <p>This is the recommended way to create a new configuration. The returned
          * configuration can be further customized using method chaining.</p>
-         * 
+         *
          * <p>Default settings:</p>
          * <ul>
          *   <li>ignoreNullOrEmpty: false</li>
          *   <li>readNullToEmpty: false</li>
          *   <li>mapInstanceType: HashMap.class</li>
-         *   <li>ignoreUnmatchedProperty: false</li>
+         *   <li>ignoreUnmatchedProperty: true</li>
          * </ul>
          *
          * @return a new JSONDeserializationConfig instance

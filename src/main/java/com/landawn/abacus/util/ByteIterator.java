@@ -47,7 +47,6 @@ import com.landawn.abacus.util.stream.ByteStream;
  * @see TriIterator
  * @see com.landawn.abacus.util.Iterators
  * @see com.landawn.abacus.util.Enumerations
- * @since 1.0
  */
 @SuppressWarnings({ "java:S6548" })
 public abstract class ByteIterator extends ImmutableIterator<Byte> {
@@ -77,14 +76,19 @@ public abstract class ByteIterator extends ImmutableIterator<Byte> {
     };
 
     /**
-     * Returns an empty {@code ByteIterator}.
-     * 
+     * Returns an empty {@code ByteIterator} with no elements.
+     *
+     * <p>The returned iterator's {@code hasNext()} will always return {@code false},
+     * and calling {@code nextByte()} will always throw a {@code NoSuchElementException}.</p>
+     *
+     * <p>This method always returns the same singleton instance for efficiency.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ByteIterator iter = ByteIterator.empty();
      * System.out.println(iter.hasNext()); // false
      * }</pre>
-     * 
+     *
      * @return an empty {@code ByteIterator}
      */
     @SuppressWarnings("SameReturnValue")
@@ -94,15 +98,18 @@ public abstract class ByteIterator extends ImmutableIterator<Byte> {
 
     /**
      * Creates a {@code ByteIterator} from the specified byte array.
-     * 
+     *
+     * <p>If the array is {@code null} or empty, returns an empty iterator.
+     * The iterator will iterate over all elements in the array from start to end.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ByteIterator iter = ByteIterator.of((byte)1, (byte)2, (byte)3);
      * byte first = iter.nextByte(); // 1
      * }</pre>
      *
-     * @param a the byte array
-     * @return a new {@code ByteIterator} over the array elements
+     * @param a the byte array (may be {@code null})
+     * @return a new {@code ByteIterator} over the array elements, or an empty iterator if the array is {@code null} or empty
      */
     public static ByteIterator of(final byte... a) {
         return N.isEmpty(a) ? EMPTY : of(a, 0, a.length);
@@ -110,7 +117,11 @@ public abstract class ByteIterator extends ImmutableIterator<Byte> {
 
     /**
      * Creates a {@code ByteIterator} from a subsequence of the specified byte array.
-     * 
+     *
+     * <p>The iterator will iterate over elements from {@code fromIndex} (inclusive) to
+     * {@code toIndex} (exclusive). If {@code fromIndex} equals {@code toIndex}, an empty
+     * iterator is returned.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * byte[] bytes = {1, 2, 3, 4, 5};
@@ -118,10 +129,10 @@ public abstract class ByteIterator extends ImmutableIterator<Byte> {
      * // Iterates over 2, 3, 4
      * }</pre>
      *
-     * @param a the byte array
+     * @param a the byte array (may be {@code null})
      * @param fromIndex the starting index (inclusive)
      * @param toIndex the ending index (exclusive)
-     * @return a new {@code ByteIterator} over the specified range
+     * @return a new {@code ByteIterator} over the specified range, or an empty iterator if the array is {@code null} or fromIndex equals toIndex
      * @throws IndexOutOfBoundsException if the indices are out of range
      */
     public static ByteIterator of(final byte[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {

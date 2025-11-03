@@ -19,7 +19,7 @@ package com.landawn.abacus.type;
  * implementation for String type handling in the type system. It extends
  * AbstractStringType which provides the core functionality for string operations.
  */
-public class StringType extends AbstractStringType {
+class StringType extends AbstractStringType {
 
     /**
      * The type name identifier for String type.

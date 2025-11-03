@@ -14,7 +14,6 @@
 
 package com.landawn.abacus.type;
 
-import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.util.ClassUtil;
 import com.landawn.abacus.util.HBaseColumn;
 import com.landawn.abacus.util.Strings;
@@ -28,7 +27,7 @@ import com.landawn.abacus.util.WD;
  * @param <T> the type of value stored in the HBaseColumn
  */
 @SuppressWarnings("java:S2160")
-public class HBaseColumnType<T> extends AbstractType<HBaseColumn<T>> {
+class HBaseColumnType<T> extends AbstractType<HBaseColumn<T>> {
 
     private static final String SEPARATOR = ":";
 
@@ -62,7 +61,6 @@ public class HBaseColumnType<T> extends AbstractType<HBaseColumn<T>> {
      * @return the declaring name of this type (e.g., "HBaseColumn&lt;String&gt;")
      */
     @Override
-    @MayReturnNull
     public String declaringName() {
         return declaringName;
     }
@@ -113,7 +111,6 @@ public class HBaseColumnType<T> extends AbstractType<HBaseColumn<T>> {
      * @return the string representation in format "version:value", or {@code null} if the input is null
      */
     @Override
-    @MayReturnNull
     public String stringOf(final HBaseColumn<T> x) {
         return x == null ? null : x.version() + SEPARATOR + elementType.stringOf(x.value());
     }
@@ -126,7 +123,6 @@ public class HBaseColumnType<T> extends AbstractType<HBaseColumn<T>> {
      * @param str the string to parse in format "version:value"
      * @return a new HBaseColumn instance with the parsed version and value, or {@code null} if the input is {@code null} or empty
      */
-    @MayReturnNull
     @Override
     public HBaseColumn<T> valueOf(final String str) {
         if (Strings.isEmpty(str)) {

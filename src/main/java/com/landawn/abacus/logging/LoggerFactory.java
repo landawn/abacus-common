@@ -36,11 +36,18 @@ import com.landawn.abacus.annotation.SuppressFBWarnings;
  * 
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
+ * // Get logger by class
  * Logger logger = LoggerFactory.getLogger(MyClass.class);
  * logger.info("Application started");
+ *
+ * // Get logger by name
+ * Logger customLogger = LoggerFactory.getLogger("com.myapp.CustomLogger");
+ * customLogger.debug("Debug message");
+ *
+ * // Get root logger
+ * Logger rootLogger = LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME);
  * }</pre>
  * 
- * @since 1.0
  */
 public final class LoggerFactory {
 
@@ -64,15 +71,15 @@ public final class LoggerFactory {
 
     /**
      * Gets a logger instance for the specified class.
-     * 
+     *
      * <p>This method creates a logger with the fully qualified class name. If a logger
      * with the same name already exists, the cached instance is returned.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * public class MyService {
      *     private static final Logger logger = LoggerFactory.getLogger(MyService.class);
-     *     
+     *
      *     public void doSomething() {
      *         logger.debug("Starting operation");
      *     }
@@ -80,7 +87,7 @@ public final class LoggerFactory {
      * }</pre>
      *
      * @param clazz the class for which to get the logger
-          * @return a Logger instance for the specified class
+     * @return a Logger instance for the specified class
      */
     public static synchronized Logger getLogger(final Class<?> clazz) {
         return getLogger(clazz.getName());

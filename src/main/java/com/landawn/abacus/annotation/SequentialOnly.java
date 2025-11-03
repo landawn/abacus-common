@@ -47,6 +47,13 @@ import java.lang.annotation.Target;
  *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
+ * import java.io.BufferedWriter;
+ * import java.io.IOException;
+ * import java.nio.file.Files;
+ * import java.nio.file.Path;
+ * import java.util.ArrayList;
+ * import java.util.List;
+ *
  * public class DataProcessor {
  *     private int counter = 0;
  *
@@ -58,7 +65,7 @@ import java.lang.annotation.Target;
  *     }
  *
  *     @SequentialOnly
- *     public void writeToFile(List<String> lines, Path outputFile) {
+ *     public void writeToFile(List<String> lines, Path outputFile) throws IOException {
  *         // Must maintain order when writing to file
  *         try (BufferedWriter writer = Files.newBufferedWriter(outputFile)) {
  *             for (String line : lines) {
@@ -83,7 +90,6 @@ import java.lang.annotation.Target;
  *
  * @see ParallelSupported
  * @see Stateful
- * @since 2018
  */
 @Documented
 @Retention(value = RetentionPolicy.CLASS)

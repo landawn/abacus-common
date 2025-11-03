@@ -16,8 +16,10 @@
 
 package com.landawn.abacus.util;
 
+import java.util.Arrays;
 import java.util.BitSet;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.RandomAccess;
@@ -26,63 +28,266 @@ import java.util.function.Predicate;
 import com.landawn.abacus.util.u.OptionalInt;
 
 /**
- * Utility class for finding indices of elements in arrays, collections, and strings.
+ * A comprehensive utility class providing index-finding operations for arrays, collections, and strings with
+ * a fluent API design. This class serves as a modern alternative to traditional index-finding methods by
+ * returning {@link OptionalInt} instead of primitive {@code -1} for "not found" cases, making the API more
+ * null-safe, expressive, and aligned with modern Java practices.
  *
- * <p>This class provides a fluent API that returns {@link OptionalInt} instead of
- * primitive {@code -1} for "not found" cases, making the API more null-safe and expressive.
- * All methods are static and the class cannot be instantiated.</p>
+ * <p>This class provides extensive support for finding first occurrence, last occurrence, and all occurrences
+ * of elements in various data structures including primitive arrays, object arrays, collections, and strings.
+ * Advanced features include subarray/sublist searching, case-insensitive string searching, and predicate-based
+ * filtering with high-performance implementations optimized for different data types.</p>
  *
- * <p><b>Method Families:</b></p>
+ * <p><b>Key Features:</b>
  * <ul>
- *   <li>{@link #of} - Find the index of the first occurrence of an element or subarray</li>
- *   <li>{@link #last} - Find the index of the last occurrence of an element or subarray</li>
- *   <li>{@link #ofSubArray}/{@link #lastOfSubArray} - Find indices of subarrays within arrays</li>
- *   <li>{@link #ofSubList}/{@link #lastOfSubList} - Find indices of sublists within lists</li>
- *   <li>{@link #allOf} - Find all indices where an element or predicate matches</li>
+ *   <li><b>Modern API Design:</b> Returns {@code OptionalInt} instead of {@code -1} for better null safety</li>
+ *   <li><b>Comprehensive Type Support:</b> All primitive types, objects, collections, and strings</li>
+ *   <li><b>Advanced Search Operations:</b> Subarray, sublist, and predicate-based searching</li>
+ *   <li><b>High Performance:</b> Optimized algorithms with minimal overhead for different data structures</li>
+ *   <li><b>Fluent API:</b> Method chaining and expressive operation names for better readability</li>
+ *   <li><b>Thread Safety:</b> Stateless design ensuring safe concurrent access</li>
+ *   <li><b>Range-Based Operations:</b> Support for custom start indices and search ranges</li>
+ *   <li><b>Tolerance Support:</b> Floating-point comparisons with configurable tolerance values</li>
  * </ul>
  *
- * <p><b>Supported Types:</b></p>
+ * <p><b>Design Philosophy:</b>
  * <ul>
- *   <li>All primitive types: boolean, char, byte, short, int, long, float, double</li>
- *   <li>Object arrays and collections</li>
- *   <li>CharSequence (String, StringBuilder, etc.)</li>
+ *   <li><b>Null Safety:</b> {@code OptionalInt} return type eliminates magic number {@code -1}</li>
+ *   <li><b>Type Safety:</b> Overloaded methods for all primitive types avoid boxing overhead</li>
+ *   <li><b>Performance Focus:</b> Optimized implementations for different data structure characteristics</li>
+ *   <li><b>Consistency:</b> Uniform method naming and parameter conventions across all operations</li>
+ *   <li><b>Expressiveness:</b> Clear method names that describe the operation being performed</li>
  * </ul>
  *
- * <p><b>Usage Examples:</b></p>
+ * <p><b>Core Method Families:</b>
+ * <ul>
+ *   <li><b>{@code of} Methods:</b> Find the index of the first occurrence of an element or pattern</li>
+ *   <li><b>{@code last} Methods:</b> Find the index of the last occurrence of an element or pattern</li>
+ *   <li><b>{@code ofSubArray} Methods:</b> Find the starting index of a subarray within a larger array</li>
+ *   <li><b>{@code lastOfSubArray} Methods:</b> Find the last starting index of a subarray within a larger array</li>
+ *   <li><b>{@code ofSubList} Methods:</b> Find the starting index of a sublist within a larger list</li>
+ *   <li><b>{@code lastOfSubList} Methods:</b> Find the last starting index of a sublist within a larger list</li>
+ *   <li><b>{@code allOf} Methods:</b> Find all indices where an element or predicate matches</li>
+ * </ul>
+ *
+ * <p><b>Supported Data Types:</b>
+ * <ul>
+ *   <li><b>Primitive Arrays:</b> {@code boolean[]}, {@code char[]}, {@code byte[]}, {@code short[]}, {@code int[]}, {@code long[]}, {@code float[]}, {@code double[]}</li>
+ *   <li><b>Object Arrays:</b> {@code Object[]} and all typed arrays with null-safe comparisons</li>
+ *   <li><b>Collections:</b> {@code Collection<?>}, {@code List<?>} with optimized {@code RandomAccess} handling</li>
+ *   <li><b>Iterators:</b> {@code Iterator<?>} for streaming and lazy evaluation scenarios</li>
+ *   <li><b>Strings:</b> {@code String} and {@code CharSequence} with character and substring operations</li>
+ * </ul>
+ *
+ * <p><b>Return Type Philosophy:</b>
+ * <ul>
+ *   <li><b>{@code OptionalInt}:</b> For single index operations, provides null-safe "not found" handling</li>
+ *   <li><b>{@code BitSet}:</b> For multiple index operations, efficient storage of all matching positions</li>
+ *   <li><b>Performance Benefits:</b> Avoids autoboxing and provides efficient bit manipulation operations</li>
+ *   <li><b>Fluent API:</b> Enables method chaining and expressive conditional logic</li>
+ * </ul>
+ *
+ * <p><b>Common Usage Patterns:</b>
  * <pre>{@code
- * // Basic usage
- * int[] numbers = {1, 2, 3, 4, 5};
- * OptionalInt index = Index.of(numbers, 3);  // returns OptionalInt[2]
+ * // Basic element searching
+ * int[] numbers = {1, 2, 3, 4, 5, 3, 2, 1};
+ * OptionalInt firstIndex = Index.of(numbers, 3);        // Returns OptionalInt[2]
+ * OptionalInt lastIndex = Index.last(numbers, 3);       // Returns OptionalInt[5]
  *
- * // Handle not found case
+ * // Handle "not found" cases gracefully
  * Index.of(numbers, 10).ifPresent(i -> System.out.println("Found at: " + i));
- * int idx = Index.of(numbers, 10).orElse(-1);  // returns -1 if not found
+ * int index = Index.of(numbers, 10).orElse(-1);         // Traditional fallback
+ * boolean exists = Index.of(numbers, 3).isPresent();    // Existence check
  *
- * // Find last occurrence
- * int[] duplicates = {1, 2, 3, 2, 1};
- * Index.last(duplicates, 2).get();  // returns 3
+ * // Range-based searching
+ * OptionalInt fromIndex = Index.of(numbers, 2, 3);      // Start search from index 3
+ * OptionalInt backIndex = Index.last(numbers, 1, 6);    // Search backward from index 6
  *
- * // Find subarray
- * Index.ofSubArray(new int[] {1, 2, 3, 4, 5}, new int[] {3, 4}).get();  // returns 2
+ * // String operations
+ * OptionalInt charIndex = Index.of("Hello World", 'o'); // Returns OptionalInt[4]
+ * OptionalInt subIndex = Index.of("Hello World", "World"); // Returns OptionalInt[6]
+ * OptionalInt ignoreCase = Index.ofIgnoreCase("Hello World", "WORLD"); // Returns OptionalInt[6]
+ *
+ * // Collection searching
+ * List<String> words = Arrays.asList("apple", "banana", "cherry", "apple");
+ * OptionalInt wordIndex = Index.of(words, "banana");     // Returns OptionalInt[1]
+ * OptionalInt lastApple = Index.last(words, "apple");    // Returns OptionalInt[3]
  *
  * // Find all occurrences
- * List<Integer> allIndices = Index.allOf(new int[] {1, 2, 1, 2, 1}, 1);  // returns [0, 2, 4]
+ * BitSet allOccurrences = Index.allOf(numbers, 1);       // Returns BitSet with bits 0 and 7 set
+ * List<Integer> indices = allOccurrences.stream().boxed().collect(Collectors.toList());
  * }</pre>
  *
- * <p><b>Relationship to Other Classes:</b></p>
+ * <p><b>Advanced Subarray/Sublist Operations:</b>
+ * <pre>{@code
+ * // Subarray searching
+ * int[] source = {1, 2, 3, 4, 5, 6, 7};
+ * int[] pattern = {3, 4, 5};
+ * OptionalInt subArrayIndex = Index.ofSubArray(source, pattern); // Returns OptionalInt[2]
+ *
+ * // Partial subarray matching
+ * OptionalInt partialMatch = Index.ofSubArray(source, 1, pattern, 0, 2); // Match {3, 4} starting from index 1
+ *
+ * // Sublist operations with custom objects
+ * List<String> document = Arrays.asList("The", "quick", "brown", "fox", "jumps");
+ * List<String> phrase = Arrays.asList("quick", "brown");
+ * OptionalInt phraseIndex = Index.ofSubList(document, phrase); // Returns OptionalInt[1]
+ *
+ * // Complex pattern searching
+ * boolean[] flags = {true, false, true, true, false, true, true, false};
+ * boolean[] pattern = {true, true, false};
+ * OptionalInt lastPattern = Index.lastOfSubArray(flags, pattern); // Returns OptionalInt[5]
+ * }</pre>
+ *
+ * <p><b>Predicate-Based Searching:</b>
+ * <pre>{@code
+ * // Custom predicate matching
+ * String[] words = {"apple", "apricot", "banana", "avocado"};
+ * Predicate<String> startsWithA = s -> s.startsWith("a");
+ * BitSet aWords = Index.allOf(words, startsWithA); // Returns BitSet with bits 0, 1, 3 set
+ *
+ * // Complex predicate combinations
+ * Integer[] numbers = {1, 4, 9, 16, 25, 36, 49};
+ * Predicate<Integer> isPerfectSquare = n -> {
+ *     int sqrt = (int) Math.sqrt(n);
+ *     return sqrt * sqrt == n;
+ * };
+ * BitSet perfectSquares = Index.allOf(numbers, isPerfectSquare); // All indices
+ *
+ * // Range-based predicate searching
+ * BitSet fromIndex = Index.allOf(words, startsWithA, 1); // Start searching from index 1
+ * }</pre>
+ *
+ * <p><b>Floating-Point Operations with Tolerance:</b>
+ * <pre>{@code
+ * // Tolerance-based searching for floating-point values
+ * double[] measurements = {1.0, 2.001, 3.0, 2.002, 4.0};
+ * double target = 2.0;
+ * double tolerance = 0.01;
+ *
+ * OptionalInt closeMatch = Index.of(measurements, target, tolerance); // Returns OptionalInt[1]
+ * OptionalInt lastMatch = Index.last(measurements, target, tolerance); // Returns OptionalInt[3]
+ * BitSet allMatches = Index.allOf(measurements, target, tolerance); // BitSet with bits 1, 3 set
+ *
+ * // High precision requirements
+ * double strictTolerance = 0.001;
+ * BitSet strictMatches = Index.allOf(measurements, target, strictTolerance); // May return empty BitSet
+ * }</pre>
+ *
+ * <p><b>Performance Characteristics:</b>
  * <ul>
- *   <li>This class complements {@link N#indexOf} methods by providing a more fluent API</li>
- *   <li>Similar in spirit to {@link String#indexOf(String)} but for all array and collection types</li>
- *   <li>Returns {@link OptionalInt} for better null-safety compared to returning -1</li>
+ *   <li><b>Linear Search:</b> O(n) for most single-element operations</li>
+ *   <li><b>Subarray Search:</b> O(n*m) worst case, optimized for common patterns</li>
+ *   <li><b>All Occurrences:</b> O(n) with efficient BitSet population</li>
+ *   <li><b>RandomAccess Lists:</b> O(1) element access, O(n) overall search</li>
+ *   <li><b>Sequential Lists:</b> O(n) with iterator-based traversal</li>
+ *   <li><b>Memory Usage:</b> O(1) for single searches, O(n) for BitSet results</li>
  * </ul>
  *
- * <p><b>Thread Safety:</b></p>
- * All methods in this class are stateless and thread-safe. However, callers must ensure
- * that arrays and collections passed to these methods are not modified concurrently.
+ * <p><b>Thread Safety:</b>
+ * <ul>
+ *   <li><b>Stateless Operations:</b> All methods are stateless and thread-safe</li>
+ *   <li><b>Concurrent Access:</b> Safe for concurrent access from multiple threads</li>
+ *   <li><b>Input Immutability:</b> Methods do not modify input arrays or collections</li>
+ *   <li><b>No Shared State:</b> No static mutable fields or shared resources</li>
+ * </ul>
  *
+ * <p><b>Error Handling and Edge Cases:</b>
+ * <ul>
+ *   <li><b>Null Inputs:</b> Graceful handling of null arrays and collections</li>
+ *   <li><b>Empty Inputs:</b> Returns {@code OptionalInt.empty()} for empty arrays/collections</li>
+ *   <li><b>Invalid Ranges:</b> Validates index parameters and throws {@code IndexOutOfBoundsException}</li>
+ *   <li><b>Null Elements:</b> Proper null-safe comparison using {@code Objects.equals()}</li>
+ * </ul>
+ *
+ * <p><b>Optimization Strategies:</b>
+ * <ul>
+ *   <li><b>Primitive Specialization:</b> Avoids boxing overhead with dedicated primitive methods</li>
+ *   <li><b>RandomAccess Detection:</b> Optimized algorithms for {@code RandomAccess} collections</li>
+ *   <li><b>Early Termination:</b> Breaks loops as soon as result is determined</li>
+ *   <li><b>Memory Efficiency:</b> Reuses {@code OptionalInt.empty()} instance for all "not found" cases</li>
+ * </ul>
+ *
+ * <p><b>Comparison with Alternative APIs:</b>
+ * <ul>
+ *   <li><b>vs. Arrays.binarySearch():</b> Works with unsorted data and provides richer API</li>
+ *   <li><b>vs. Collections.indexOfSubList():</b> Enhanced with range support and null safety</li>
+ *   <li><b>vs. String.indexOf():</b> Consistent API across all data types with additional features</li>
+ *   <li><b>vs. Stream.findFirst():</b> More efficient for simple searches without stream overhead</li>
+ * </ul>
+ *
+ * <p><b>Best Practices:</b>
+ * <ul>
+ *   <li>Use {@code OptionalInt.ifPresent()} for conditional logic instead of checking for {@code -1}</li>
+ *   <li>Leverage {@code OptionalInt.orElse()} for providing default values</li>
+ *   <li>Use appropriate tolerance values for floating-point comparisons</li>
+ *   <li>Consider {@code BitSet} operations for efficient multiple-index manipulation</li>
+ *   <li>Validate input parameters before calling methods to avoid exceptions</li>
+ *   <li>Use predicate-based methods for complex matching logic</li>
+ * </ul>
+ *
+ * <p><b>Integration with Other Utilities:</b>
+ * <ul>
+ *   <li><b>Relationship to {@link N}:</b> Complements N.indexOf methods with modern API design</li>
+ *   <li><b>Stream Integration:</b> BitSet results can be converted to IntStream for further processing</li>
+ *   <li><b>Optional Pattern:</b> Follows Java 8+ Optional pattern for null-safe operations</li>
+ *   <li><b>Collection Utilities:</b> Works seamlessly with other collection utility classes</li>
+ * </ul>
+ *
+ * <p><b>Common Anti-Patterns to Avoid:</b>
+ * <ul>
+ *   <li>Converting {@code OptionalInt} to {@code int} unnecessarily with {@code .orElse(-1)}</li>
+ *   <li>Using {@code .get()} without checking {@code .isPresent()} first</li>
+ *   <li>Ignoring the null-safety benefits by falling back to traditional {@code -1} patterns</li>
+ *   <li>Using inappropriate tolerance values for floating-point comparisons</li>
+ * </ul>
+ *
+ * <p><b>Example: Complex Search Pipeline</b>
+ * <pre>{@code
+ * // Advanced search combining multiple techniques
+ * public class DocumentSearcher {
+ *     public List<SearchResult> findComplexPatterns(String[] document, String[] patterns) {
+ *         List<SearchResult> results = new ArrayList<>();
+ *
+ *         for (String pattern : patterns) {
+ *             // Find all occurrences of each pattern
+ *             BitSet occurrences = Index.allOf(document, pattern);
+ *
+ *             // Convert BitSet to list of indices
+ *             List<Integer> indices = occurrences.stream()
+ *                 .boxed()
+ *                 .collect(Collectors.toList());
+ *
+ *             if (!indices.isEmpty()) {
+ *                 // Find first and last occurrence
+ *                 OptionalInt first = Index.of(document, pattern);
+ *                 OptionalInt last = Index.last(document, pattern);
+ *
+ *                 SearchResult result = new SearchResult(
+ *                     pattern,
+ *                     indices,
+ *                     first.orElse(-1),
+ *                     last.orElse(-1),
+ *                     indices.size()
+ *                 );
+ *                 results.add(result);
+ *             }
+ *         }
+ *
+ *         return results;
+ *     }
+ * }
+ * }</pre>
+ *
+ * @see OptionalInt
+ * @see BitSet
  * @see N#indexOf
  * @see String#indexOf(String)
- * @see OptionalInt
+ * @see Collections#indexOfSubList
+ * @see Arrays#binarySearch
+ * @see java.util.stream.Stream
+ * @see RandomAccess
+ * @see Predicate
  */
 public final class Index {
 

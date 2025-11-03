@@ -35,21 +35,251 @@ import com.landawn.abacus.util.function.ToFloatFunction;
 import com.landawn.abacus.util.function.ToShortFunction;
 
 /**
- * Factory utility class for creating and combining Comparator instances.
- * This class provides a comprehensive set of static methods for creating comparators
- * that handle various data types, {@code null} values, and complex comparison scenarios.
+ * A comprehensive factory utility class providing static methods for creating and combining
+ * {@link Comparator} instances with sophisticated null handling, type-specific optimizations,
+ * and complex comparison scenarios. This final class serves as a central hub for all comparison
+ * operations, offering pre-built comparators for common data types and flexible builder patterns
+ * for custom comparison logic.
  *
- * <p>The comparators created by this class follow these general principles:</p>
+ * <p>Comparators addresses the limitations of the standard Java {@link Comparator} interface by
+ * providing consistent null handling semantics, specialized comparators for primitive arrays and
+ * collections, and advanced features like case-insensitive string comparison, length-based
+ * comparisons, and bean property comparisons. All comparators follow predictable null handling
+ * rules and provide both natural and reversed ordering variants.</p>
+ *
+ * <p><b>Key Features:</b>
  * <ul>
- *   <li>Null handling: Methods with "nullsFirst" treat {@code null} as the minimum value,
- *       while "nullsLast" treats {@code null} as the maximum value</li>
- *   <li>Natural ordering: Comparable objects are compared using their natural order</li>
- *   <li>Extraction: Methods with key extractors compare objects based on extracted values</li>
- *   <li>Reversal: Methods prefixed with "reversed" invert the comparison order</li>
+ *   <li><b>Comprehensive Null Handling:</b> Consistent null-first and null-last semantics across all comparators</li>
+ *   <li><b>Type-Specific Optimizations:</b> Specialized comparators for primitives, arrays, and collections</li>
+ *   <li><b>Functional Integration:</b> Key extractor support with lambda expressions and method references</li>
+ *   <li><b>Flexible Ordering:</b> Natural and reversed ordering variants for all comparison types</li>
+ *   <li><b>Advanced String Handling:</b> Case-insensitive and length-based string comparisons</li>
+ *   <li><b>Collection Support:</b> Size-based and element-wise comparisons for collections and maps</li>
+ *   <li><b>Bean Integration:</b> Property-based comparison for Java beans and POJOs</li>
+ *   <li><b>Optional Handling:</b> Specialized comparators for Optional values with empty-first/last semantics</li>
  * </ul>
  *
- * @see java.util.Comparator
- * @see java.lang.Comparable
+ * <p><b>IMPORTANT - Final Class &amp; Design:</b>
+ * <ul>
+ *   <li>This is a <b>final class</b> that cannot be extended for API stability</li>
+ *   <li>All methods are static - no instance creation needed or allowed</li>
+ *   <li>All comparators are thread-safe and can be safely shared between threads</li>
+ *   <li>Null handling behavior is consistent and well-defined across all methods</li>
+ * </ul>
+ *
+ * <p><b>Null Handling Semantics:</b>
+ * <ul>
+ *   <li><b>nullsFirst():</b> Treats null as the minimum value (null &lt; any non-null value)</li>
+ *   <li><b>nullsLast():</b> Treats null as the maximum value (null &gt; any non-null value)</li>
+ *   <li><b>Default Behavior:</b> Most comparators use nullsFirst semantics by default</li>
+ *   <li><b>Consistency:</b> Both nulls compare as equal (null == null returns 0)</li>
+ * </ul>
+ *
+ * <p><b>Common Use Cases:</b>
+ * <ul>
+ *   <li><b>Sorting Collections:</b> Providing comparators for Collections.sort() and Stream.sorted()</li>
+ *   <li><b>Data Processing:</b> Complex sorting logic for business objects and data structures</li>
+ *   <li><b>Search Operations:</b> Binary search with consistent ordering in sorted collections</li>
+ *   <li><b>Priority Queues:</b> Custom ordering for priority-based data structures</li>
+ *   <li><b>Database Ordering:</b> Mimicking SQL ORDER BY behavior in application code</li>
+ *   <li><b>Report Generation:</b> Sorting data for presentation and reporting purposes</li>
+ *   <li><b>Algorithm Implementation:</b> Providing ordering for sorting algorithms and tree structures</li>
+ * </ul>
+ *
+ * <p><b>Usage Examples:</b></p>
+ * <pre>{@code
+ * // Basic null-safe natural ordering
+ * List<String> names = Arrays.asList("Alice", null, "Bob", "Charlie");
+ * names.sort(Comparators.nullsFirst());
+ * // Result: [null, "Alice", "Bob", "Charlie"]
+ *
+ * // Key extractor with null handling
+ * List<Person> people = Arrays.asList(
+ *     new Person("Alice", 30),
+ *     new Person(null, 25),
+ *     new Person("Bob", 35)
+ * );
+ * people.sort(Comparators.nullsFirstBy(Person::getName));
+ *
+ * // Primitive-optimized comparisons
+ * List<Person> byAge = people.stream()
+ *     .sorted(Comparators.comparingInt(Person::getAge))
+ *     .collect(Collectors.toList());
+ *
+ * // Case-insensitive string comparison
+ * List<String> words = Arrays.asList("apple", "BANANA", "Cherry");
+ * words.sort(Comparators.comparingIgnoreCase());
+ * // Result: ["apple", "BANANA", "Cherry"]
+ *
+ * // Collection size comparison
+ * List<List<String>> lists = Arrays.asList(
+ *     Arrays.asList("a", "b"),
+ *     Arrays.asList("x"),
+ *     Arrays.asList("p", "q", "r")
+ * );
+ * lists.sort(Comparators.comparingBySize());
+ * // Sorted by: [1], [2], [3] elements
+ *
+ * // Map entry comparisons
+ * Map<String, Integer> scores = Map.of("Alice", 95, "Bob", 87, "Charlie", 92);
+ * List<Map.Entry<String, Integer>> sortedEntries = scores.entrySet().stream()
+ *     .sorted(Comparators.comparingByValue())
+ *     .collect(Collectors.toList());
+ *
+ * // Array comparisons with element-wise logic
+ * List<int[]> arrays = Arrays.asList(
+ *     new int[]{1, 2, 3},
+ *     new int[]{1, 2},
+ *     new int[]{1, 2, 4}
+ * );
+ * arrays.sort(Comparators.INT_ARRAY_COMPARATOR);
+ *
+ * // Reversed ordering variants
+ * people.sort(Comparators.reversedComparingInt(Person::getAge));
+ *
+ * // Optional value handling
+ * List<Optional<String>> optionals = Arrays.asList(
+ *     Optional.of("Alice"),
+ *     Optional.empty(),
+ *     Optional.of("Bob")
+ * );
+ * optionals.sort(Comparators.emptiesFirst());
+ * // Result: [empty, "Alice", "Bob"]
+ * }</pre>
+ *
+ * <p><b>Predefined Comparators:</b>
+ * <ul>
+ *   <li><b>Array Comparators:</b> Element-wise comparison for all primitive array types</li>
+ *   <li><b>Collection Comparators:</b> Size-based and element-wise comparison for collections</li>
+ *   <li><b>String Comparators:</b> Case-insensitive and length-based string comparison</li>
+ *   <li><b>Natural Order:</b> Null-safe natural ordering for Comparable types</li>
+ *   <li><b>Reversed Order:</b> Inverted natural ordering with consistent null handling</li>
+ * </ul>
+ *
+ * <p><b>Factory Method Categories:</b>
+ * <ul>
+ *   <li><b>Basic Ordering:</b> {@code naturalOrder()}, {@code reverseOrder()}, {@code nullsFirst()}, {@code nullsLast()}</li>
+ *   <li><b>Key Extraction:</b> {@code comparingBy()}, {@code comparingInt()}, {@code comparingLong()}, etc.</li>
+ *   <li><b>String Comparison:</b> {@code comparingIgnoreCase()}, {@code comparingByLength()}</li>
+ *   <li><b>Collection Comparison:</b> {@code comparingBySize()}, {@code comparingCollection()}</li>
+ *   <li><b>Array Comparison:</b> {@code comparingArray()}, {@code comparingByArrayLength()}</li>
+ *   <li><b>Map Comparison:</b> {@code comparingByKey()}, {@code comparingByValue()}, {@code comparingMapByKey()}</li>
+ *   <li><b>Optional Handling:</b> {@code emptiesFirst()}, {@code emptiesLast()}</li>
+ * </ul>
+ *
+ * <p><b>Key Extractor Patterns:</b>
+ * All key extractor methods follow consistent naming and behavior patterns:
+ * <ul>
+ *   <li><b>Primitive Extractors:</b> {@code comparingInt()}, {@code comparingLong()}, {@code comparingDouble()}, etc.</li>
+ *   <li><b>Object Extractors:</b> {@code comparingBy()} for Comparable objects</li>
+ *   <li><b>Null-Safe Variants:</b> {@code comparingByIfNotNullOrElseNullsFirst/Last()}</li>
+ *   <li><b>Reversed Variants:</b> {@code reversedComparingInt()}, {@code reversedComparingBy()}, etc.</li>
+ * </ul>
+ *
+ * <p><b>Performance Characteristics:</b>
+ * <ul>
+ *   <li>Primitive comparators: O(1) time with no boxing overhead</li>
+ *   <li>Array comparators: O(min(m,n)) where m,n are array lengths</li>
+ *   <li>Collection comparators: O(min(m,n)) for element-wise, O(1) for size-based</li>
+ *   <li>String comparators: O(min(m,n)) for content comparison, O(1) for length</li>
+ *   <li>Memory usage: No additional allocations for most operations</li>
+ * </ul>
+ *
+ * <p><b>Thread Safety:</b>
+ * All comparators created by this class are <b>thread-safe</b>:
+ * <ul>
+ *   <li>Comparator instances are stateless and immutable</li>
+ *   <li>Can be safely shared between multiple threads</li>
+ *   <li>No synchronization required for concurrent use</li>
+ *   <li>Ideal for static final fields and shared constants</li>
+ * </ul>
+ *
+ * <p><b>Array Comparison Details:</b>
+ * <ul>
+ *   <li><b>Element-wise:</b> Compares arrays lexicographically element by element</li>
+ *   <li><b>Length Handling:</b> Shorter arrays are considered "less than" longer arrays when all compared elements are equal</li>
+ *   <li><b>Null Arrays:</b> Handled according to the chosen null semantics</li>
+ *   <li><b>Type Safety:</b> Separate comparators for each primitive array type</li>
+ * </ul>
+ *
+ * <p><b>Collection Comparison Strategies:</b>
+ * <ul>
+ *   <li><b>Size-based:</b> Compare collections by their size only</li>
+ *   <li><b>Element-wise:</b> Lexicographic comparison of collection elements</li>
+ *   <li><b>Iterator-based:</b> Works with any Iterable, including custom implementations</li>
+ *   <li><b>Type Flexibility:</b> Generic typing supports various collection types</li>
+ * </ul>
+ *
+ * <p><b>Integration with Java Streams:</b>
+ * <ul>
+ *   <li>Perfect integration with {@code Stream.sorted()} operations</li>
+ *   <li>Chainable with {@code Comparator.thenComparing()} for multi-level sorting</li>
+ *   <li>Compatible with parallel streams for high-performance sorting</li>
+ *   <li>Works seamlessly with collectors and terminal operations</li>
+ * </ul>
+ *
+ * <p><b>Advanced Features:</b>
+ * <ul>
+ *   <li><b>Conditional Null Handling:</b> Different null strategies based on context</li>
+ *   <li><b>Multi-level Sorting:</b> Chain comparators for complex sort orders</li>
+ *   <li><b>Type-specific Optimization:</b> Avoid boxing for primitive comparisons</li>
+ *   <li><b>Functional Composition:</b> Combine with method references and lambdas</li>
+ * </ul>
+ *
+ * <p><b>Best Practices:</b>
+ * <ul>
+ *   <li>Use primitive-specific methods (comparingInt vs comparingBy) for better performance</li>
+ *   <li>Cache frequently used comparators in static final fields</li>
+ *   <li>Choose appropriate null handling strategy based on domain requirements</li>
+ *   <li>Use method references with key extractors for readable and efficient code</li>
+ *   <li>Combine comparators with thenComparing() for multi-level sorting</li>
+ * </ul>
+ *
+ * <p><b>Error Handling:</b>
+ * <ul>
+ *   <li>Throws {@link IllegalArgumentException} for null key extractors</li>
+ *   <li>Handles null inputs gracefully according to configured null semantics</li>
+ *   <li>Preserves natural ordering contracts for Comparable types</li>
+ *   <li>Provides consistent behavior across all comparison operations</li>
+ * </ul>
+ *
+ * <p><b>Comparison with JDK Comparator:</b>
+ * <ul>
+ *   <li><b>Enhanced Null Handling:</b> More sophisticated and consistent null strategies</li>
+ *   <li><b>Additional Types:</b> Built-in support for arrays, collections, and complex types</li>
+ *   <li><b>Performance Optimizations:</b> Primitive-specific comparators avoid boxing</li>
+ *   <li><b>Convenience Methods:</b> More factory methods for common comparison scenarios</li>
+ * </ul>
+ *
+ * <p><b>Constants:</b>
+ * <ul>
+ *   <li>{@code NATURAL_ORDER} - Default natural ordering with nulls first</li>
+ *   <li>{@code REVERSED_ORDER} - Reversed natural ordering with nulls last</li>
+ *   <li>{@code *_ARRAY_COMPARATOR} - Predefined comparators for each primitive array type</li>
+ *   <li>{@code COLLECTION_COMPARATOR} - Element-wise collection comparison</li>
+ * </ul>
+ *
+ * <p><b>Integration Points:</b>
+ * <ul>
+ *   <li><b>{@link ComparisonBuilder}:</b> Fluent chained comparisons</li>
+ *   <li><b>{@link Comparator}:</b> Full compatibility with standard Java Comparator interface</li>
+ *   <li><b>{@link Collections}:</b> Works with Collections.sort() and related methods</li>
+ *   <li><b>{@link com.landawn.abacus.util.stream.Stream}:</b> Seamless integration with stream sorting operations</li>
+ * </ul>
+ *
+ * <p><b>Memory Efficiency:</b>
+ * <ul>
+ *   <li>Reuse predefined static comparators when possible</li>
+ *   <li>Primitive comparators avoid autoboxing overhead</li>
+ *   <li>Lambda-based implementations minimize object allocation</li>
+ *   <li>Consider caching for frequently used custom comparators</li>
+ * </ul>
+ *
+ * @see Comparator
+ * @see Comparable
+ * @see Collections#sort(java.util.List, Comparator)
+ * @see java.util.stream.Stream#sorted(Comparator)
+ * @see ComparisonBuilder
  */
 public final class Comparators {
 

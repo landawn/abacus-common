@@ -59,7 +59,6 @@ import java.lang.annotation.Target;
  * }
  * }</pre>
  * 
- * @since 2016
  */
 @Documented
 @Target({ FIELD, METHOD })

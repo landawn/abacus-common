@@ -42,7 +42,6 @@ import com.landawn.abacus.util.stream.Stream;
  *
  * @see com.landawn.abacus.util.Iterators
  * @see com.landawn.abacus.util.Enumerations
- *
  */
 @SuppressWarnings({ "java:S6548" })
 public abstract class BiIterator<A, B> extends ImmutableIterator<Pair<A, B>> {

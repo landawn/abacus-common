@@ -11,7 +11,6 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-
 package com.landawn.abacus.util.function;
 
 import com.landawn.abacus.util.Throwables;
@@ -19,48 +18,41 @@ import com.landawn.abacus.util.Throwables;
 /**
  * Represents a predicate (boolean-valued function) of two {@code byte}-valued arguments.
  * This is the primitive type specialization of {@link BiPredicate} for {@code byte}.
- * 
+ *
  * <p>This is a functional interface whose functional method is {@link #test(byte, byte)}.
  *
+ * <p>Refer to JDK API documentation at: <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html">https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a></p>
  */
 @FunctionalInterface
 public interface ByteBiPredicate extends Throwables.ByteBiPredicate<RuntimeException> { //NOSONAR
-
     /**
      * A predicate that always returns {@code true} regardless of the input arguments.
      */
     ByteBiPredicate ALWAYS_TRUE = (t, u) -> true;
-
     /**
      * A predicate that always returns {@code false} regardless of the input arguments.
      */
     ByteBiPredicate ALWAYS_FALSE = (t, u) -> false;
-
     /**
      * A predicate that returns {@code true} if both arguments are equal.
      */
     ByteBiPredicate EQUAL = (t, u) -> t == u;
-
     /**
      * A predicate that returns {@code true} if the arguments are not equal.
      */
     ByteBiPredicate NOT_EQUAL = (t, u) -> t != u;
-
     /**
      * A predicate that returns {@code true} if the first argument is greater than the second.
      */
     ByteBiPredicate GREATER_THAN = (t, u) -> t > u;
-
     /**
      * A predicate that returns {@code true} if the first argument is greater than or equal to the second.
      */
     ByteBiPredicate GREATER_EQUAL = (t, u) -> t >= u;
-
     /**
      * A predicate that returns {@code true} if the first argument is less than the second.
      */
     ByteBiPredicate LESS_THAN = (t, u) -> t < u;
-
     /**
      * A predicate that returns {@code true} if the first argument is less than or equal to the second.
      */
@@ -68,6 +60,12 @@ public interface ByteBiPredicate extends Throwables.ByteBiPredicate<RuntimeExcep
 
     /**
      * Evaluates this predicate on the given arguments.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * ByteBiPredicate sumGreaterThan10 = (a, b) -> (a + b) > 10;
+     * boolean result = sumGreaterThan10.test((byte)5, (byte)7); // Returns true
+     * }</pre>
      *
      * @param t the first input argument
      * @param u the second input argument

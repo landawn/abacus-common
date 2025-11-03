@@ -25,7 +25,6 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.Attributes;
 
-import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.exception.ParseException;
 import com.landawn.abacus.logging.Logger;
 import com.landawn.abacus.logging.LoggerFactory;
@@ -37,6 +36,32 @@ import com.landawn.abacus.util.Strings;
 import com.landawn.abacus.util.WD;
 import com.landawn.abacus.util.XmlUtil;
 
+/**
+ * Abstract base class providing common functionality for XML parser implementations.
+ * This class extends {@link AbstractParser} and implements the {@link XMLParser} interface,
+ * serving as the foundation for concrete XML parsing implementations.
+ *
+ * <p>This class provides:</p>
+ * <ul>
+ *   <li>Integration with JSON parser for hybrid JSON/XML processing</li>
+ *   <li>Pre-configured JSON serialization configs for XML formatting (no quotation marks)</li>
+ *   <li>Support for circular reference detection in XML serialization</li>
+ *   <li>Default type definitions for XML key-value processing</li>
+ *   <li>Default XML serialization and deserialization configurations</li>
+ * </ul>
+ *
+ * <p>The class maintains several JSON serialization configurations that are adapted for
+ * XML output by removing quotation marks. These configurations support various scenarios
+ * including empty beans and circular references.</p>
+ *
+ * <p>Subclasses should implement the specific XML parsing and serialization logic while
+ * leveraging these common utilities for consistent XML processing behavior.</p>
+ *
+ * @see XMLParser
+ * @see AbstractParser
+ * @see XMLSerializationConfig
+ * @see XMLDeserializationConfig
+ */
 abstract class AbstractXMLParser extends AbstractParser<XMLSerializationConfig, XMLDeserializationConfig> implements XMLParser {
 
     private static final Logger logger = LoggerFactory.getLogger(AbstractXMLParser.class);
@@ -226,7 +251,6 @@ abstract class AbstractXMLParser extends AbstractParser<XMLSerializationConfig, 
      * @param attrName the name of the attribute to retrieve
      * @return the attribute value, or {@code null} if the attribute is not found
      */
-    @MayReturnNull
     protected static String getAttribute(final XMLStreamReader xmlReader, final String attrName) {
         final int attrCount = xmlReader.getAttributeCount();
         //noinspection StatementWithEmptyBody
@@ -263,7 +287,6 @@ abstract class AbstractXMLParser extends AbstractParser<XMLSerializationConfig, 
      * @param node the XML node to examine for type attribute
      * @return the Class corresponding to the type attribute, or {@code null} if no type attribute exists
      */
-    @MayReturnNull
     protected static Class<?> getAttributeTypeClass(final Node node) {
         final String typeAttr = XmlUtil.getAttribute(node, XMLConstants.TYPE);
 
@@ -287,7 +310,6 @@ abstract class AbstractXMLParser extends AbstractParser<XMLSerializationConfig, 
      * @param attrs the XML attributes to examine for type information
      * @return the Class corresponding to the type attribute, or {@code null} if no type attribute exists
      */
-    @MayReturnNull
     protected static Class<?> getAttributeTypeClass(final Attributes attrs) {
         if (attrs == null) {
             return null;
@@ -315,7 +337,6 @@ abstract class AbstractXMLParser extends AbstractParser<XMLSerializationConfig, 
      * @param xmlReader the XML stream reader positioned at an element with attributes
      * @return the Class corresponding to the type attribute, or {@code null} if no type attribute exists
      */
-    @MayReturnNull
     protected static Class<?> getAttributeTypeClass(final XMLStreamReader xmlReader) {
         if (xmlReader.getAttributeCount() == 0) {
             return null;

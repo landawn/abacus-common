@@ -22,7 +22,6 @@ import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.time.Instant;
 
-import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.parser.JSONXMLSerializationConfig;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.DateTimeFormat;
@@ -35,7 +34,7 @@ import com.landawn.abacus.util.Numbers;
  * This class provides serialization, deserialization, and database access capabilities for Instant instances.
  * Instant represents a point on the time-line in UTC timezone. The default string format is ISO-8601 timestamp.
  */
-public class InstantType extends AbstractTemporalType<Instant> {
+class InstantType extends AbstractTemporalType<Instant> {
 
     public static final String INSTANT = Instant.class.getSimpleName();
 
@@ -61,7 +60,6 @@ public class InstantType extends AbstractTemporalType<Instant> {
      * @return the ISO-8601 timestamp string representation, or {@code null} if the input is null
      */
     @Override
-    @MayReturnNull
     public String stringOf(final Instant x) {
         return (x == null) ? null : iso8601TimestampDTF.format(x.atZone(Dates.UTC_ZONE_ID));
     }
@@ -76,7 +74,6 @@ public class InstantType extends AbstractTemporalType<Instant> {
      * @return an Instant instance, or {@code null} if the input is null
      */
     @Override
-    @MayReturnNull
     public Instant valueOf(final Object obj) {
         if (obj instanceof Number) {
             return Instant.ofEpochMilli(((Number) obj).longValue());
@@ -97,9 +94,7 @@ public class InstantType extends AbstractTemporalType<Instant> {
      * @param str the string to parse into an Instant
      * @return the parsed Instant instance, or {@code null} if the input is {@code null} or represents a {@code null} datetime
      */
-    @MayReturnNull
     @Override
-
     public Instant valueOf(final String str) {
         if (isNullDateTime(str)) {
             return null; // NOSONAR
@@ -134,9 +129,7 @@ public class InstantType extends AbstractTemporalType<Instant> {
      * @param len the number of characters to parse
      * @return the parsed Instant instance, or {@code null} if the input is {@code null} or empty
      */
-    @MayReturnNull
     @Override
-
     public Instant valueOf(final char[] cbuf, final int offset, final int len) {
         if ((cbuf == null) || (len == 0)) {
             return null; // NOSONAR
@@ -163,7 +156,6 @@ public class InstantType extends AbstractTemporalType<Instant> {
      * @throws SQLException if a database access error occurs or the columnIndex is invalid
      */
     @Override
-    @MayReturnNull
     public Instant get(final ResultSet rs, final int columnIndex) throws SQLException {
         final Timestamp ts = rs.getTimestamp(columnIndex);
 
@@ -180,7 +172,6 @@ public class InstantType extends AbstractTemporalType<Instant> {
      * @throws SQLException if a database access error occurs or the columnName is not found
      */
     @Override
-    @MayReturnNull
     public Instant get(final ResultSet rs, final String columnName) throws SQLException {
         final Timestamp ts = rs.getTimestamp(columnName);
 

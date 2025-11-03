@@ -108,43 +108,196 @@ import com.landawn.abacus.util.u.OptionalInt;
 import com.landawn.abacus.util.function.ToFloatFunction;
 
 /**
- * <p>
- * Note: This class includes codes copied from Apache Commons Lang, Google Guava and other open source projects under the Apache License 2.0.
- * The methods copied from other libraries/frameworks/projects may be modified in this class.
- * </p>
+ * A comprehensive Java utility class providing commonly used operations for Object/primitive types,
+ * String, Array, Collection, Map, Bean manipulation and more. This class serves as the foundation
+ * for the {@code N} class which extends it with additional utility methods.
  *
- * <p>
- * {@code CommonUtil} is a comprehensive Java utility class providing commonly used operations for
- * Object/primitive types/String/Array/Collection/Map/Bean and more. This class serves as the foundation
- * for the {@code N} class which extends it.
- * </p>
- *
- * <h2>Design Philosophy:</h2>
+ * <p><b>Key Features:</b>
  * <ul>
- * <li><b>Exception Handling:</b> Designed to avoid throwing unnecessary exceptions if the contract defined
- * by a method is not broken. For example, reversing a {@code null} or empty String returns the input String.
- * However, exceptions are thrown when attempting invalid operations like adding elements to a {@code null} array or collection.</li>
- *
- * <li><b>Return Values:</b> An empty String/Array/Collection/Map/Iterator/Iterable/InputStream/Reader is always
- * preferred over {@code null} for method return values.</li>
- *
- * <li><b>Index Parameters:</b> Methods use {@code fromIndex/startIndex} and {@code toIndex/endIndex} parameters
- * (not {@code offset/count} parameters) for consistency.</li>
+ *   <li><b>Null-Safe Operations:</b> Most methods handle null inputs gracefully without throwing exceptions</li>
+ *   <li><b>Type Safety:</b> Extensive use of generics for compile-time type checking</li>
+ *   <li><b>Performance Optimized:</b> Efficient algorithms with threshold-based optimizations</li>
+ *   <li><b>Comprehensive Coverage:</b> Wide range of utilities for common programming tasks</li>
+ *   <li><b>Consistent API:</b> Uniform method naming and parameter conventions</li>
+ *   <li><b>Exception Minimization:</b> Designed to avoid unnecessary exceptions when contracts are not broken</li>
  * </ul>
  *
- * @see com.landawn.abacus.util.Comparators
- * @see com.landawn.abacus.util.Fn
- * @see com.landawn.abacus.util.Fnn
+ * <p><b>⚠️ IMPORTANT - Sealed Class:</b>
+ * <ul>
+ *   <li>This is a <b>sealed class</b> that can only be extended by the {@code N} class</li>
+ *   <li>Design ensures controlled inheritance and maintains API stability</li>
+ *   <li>All utility methods are designed to be inherited by the {@code N} class</li>
+ *   <li>Use the {@code N} class for public API access to these utilities</li>
+ * </ul>
+ *
+ * <p><b>Design Philosophy:</b>
+ * <ul>
+ *   <li><b>Exception Handling:</b> Designed to avoid throwing unnecessary exceptions if the contract defined
+ *       by a method is not broken. For example, reversing a {@code null} or empty String returns the input String.
+ *       However, exceptions are thrown when attempting invalid operations like adding elements to a {@code null} array or collection.</li>
+ *   <li><b>Return Values:</b> An empty String/Array/Collection/Map/Iterator/Iterable/InputStream/Reader is always
+ *       preferred over {@code null} for method return values.</li>
+ *   <li><b>Index Parameters:</b> Methods use {@code fromIndex/startIndex} and {@code toIndex/endIndex} parameters
+ *       (not {@code offset/count} parameters) for consistency.</li>
+ * </ul>
+ *
+ * <p><b>Core Utility Categories:</b>
+ * <ul>
+ *   <li><b>Object Utilities:</b> Null checking, equality comparison, hash code generation</li>
+ *   <li><b>String Utilities:</b> String manipulation, validation, formatting operations</li>
+ *   <li><b>Array Utilities:</b> Array creation, manipulation, searching, sorting operations</li>
+ *   <li><b>Collection Utilities:</b> Collection manipulation, filtering, transformation operations</li>
+ *   <li><b>Map Utilities:</b> Map creation, manipulation, key-value operations</li>
+ *   <li><b>Bean Utilities:</b> Bean property access, reflection-based operations</li>
+ *   <li><b>Type Conversion:</b> Safe type casting and conversion operations</li>
+ *   <li><b>Primitive Operations:</b> Specialized operations for primitive types</li>
+ * </ul>
+ *
+ * <p><b>Performance Characteristics:</b>
+ * <ul>
+ *   <li><b>Binary Search Threshold:</b> Uses {@code BINARY_SEARCH_THRESHOLD = 64} for algorithm selection</li>
+ *   <li><b>Optimized Algorithms:</b> Threshold-based selection between linear and binary search</li>
+ *   <li><b>Memory Efficient:</b> Minimal object allocation in utility operations</li>
+ *   <li><b>Cache Friendly:</b> Sequential access patterns where possible</li>
+ * </ul>
+ *
+ * <p><b>Common Usage Patterns:</b>
+ * <pre>{@code
+ * // Null-safe operations
+ * boolean isEmpty = CommonUtil.isEmpty(collection);
+ * String safe = CommonUtil.defaultIfNull(value, "default");
+ * 
+ * // Array operations
+ * int[] sorted = CommonUtil.sort(array);
+ * boolean contains = CommonUtil.contains(array, element);
+ * 
+ * // Collection operations
+ * List<String> filtered = CommonUtil.filter(list, predicate);
+ * Map<String, Integer> grouped = CommonUtil.groupBy(list, classifier);
+ * 
+ * // String operations
+ * boolean valid = CommonUtil.isNotBlank(text);
+ * String trimmed = CommonUtil.trim(text);
+ * 
+ * // Type conversions
+ * Optional<Integer> parsed = CommonUtil.tryParseInt(value);
+ * List<String> converted = CommonUtil.map(list, converter);
+ * }</pre>
+ *
+ * <p><b>Thread Safety:</b>
+ * <ul>
+ *   <li><b>Stateless Design:</b> All utility methods are stateless and thread-safe</li>
+ *   <li><b>Immutable Results:</b> Methods typically return new objects rather than modifying inputs</li>
+ *   <li><b>No Shared State:</b> No static mutable fields that could cause race conditions</li>
+ *   <li><b>Concurrent Access:</b> Safe for concurrent access from multiple threads</li>
+ * </ul>
+ *
+ * <p><b>Error Handling Strategy:</b>
+ * <ul>
+ *   <li><b>Graceful Degradation:</b> Methods handle edge cases gracefully</li>
+ *   <li><b>Null Tolerance:</b> Most methods accept null inputs without throwing exceptions</li>
+ *   <li><b>Empty Defaults:</b> Return empty collections/arrays instead of null when possible</li>
+ *   <li><b>Clear Contracts:</b> Method documentation clearly specifies when exceptions are thrown</li>
+ * </ul>
+ *
+ * <p><b>Integration with Java Collections Framework:</b>
+ * <ul>
+ *   <li><b>Collection Compatibility:</b> Seamless integration with standard Java collections</li>
+ *   <li><b>Stream API Support:</b> Works well with Java 8+ Stream operations</li>
+ *   <li><b>Functional Interface Support:</b> Extensive use of predicates, functions, and suppliers</li>
+ *   <li><b>Optional Integration:</b> Support for Optional types for null-safe operations</li>
+ * </ul>
+ *
+ * <p><b>Memory Management:</b>
+ * <ul>
+ *   <li><b>Minimal Allocation:</b> Designed to minimize object creation</li>
+ *   <li><b>Reuse Strategies:</b> Reuses existing collections and arrays where possible</li>
+ *   <li><b>Defensive Copying:</b> Creates defensive copies when necessary for safety</li>
+ *   <li><b>Large Dataset Handling:</b> Optimized for both small and large datasets</li>
+ * </ul>
+ *
+ * <p><b>Best Practices:</b>
+ * <ul>
+ *   <li>Use the {@code N} class for public API access rather than accessing this class directly</li>
+ *   <li>Prefer these utilities over manual null checking and exception handling</li>
+ *   <li>Use the provided conversion methods for safe type casting</li>
+ *   <li>Leverage the collection utilities for complex data transformations</li>
+ *   <li>Take advantage of the null-safe design for cleaner code</li>
+ * </ul>
+ *
+ * <p><b>Performance Tips:</b>
+ * <ul>
+ *   <li>Binary search is automatically used for large datasets (>64 elements)</li>
+ *   <li>Use bulk operations when working with large collections</li>
+ *   <li>Prefer the specialized primitive utilities for numeric operations</li>
+ *   <li>Consider the overhead of defensive copying in performance-critical code</li>
+ * </ul>
+ *
+ * <p><b>Common Anti-Patterns to Avoid:</b>
+ * <ul>
+ *   <li>Manual null checking when null-safe utilities are available</li>
+ *   <li>Throwing exceptions for edge cases that utilities handle gracefully</li>
+ *   <li>Reinventing common operations that are already provided</li>
+ *   <li>Direct instantiation - use static methods instead</li>
+ * </ul>
+ *
+ * <p><b>Related Utility Classes:</b>
+ * <ul>
+ *   <li><b>{@link com.landawn.abacus.util.N}:</b> Main public utility class extending CommonUtil</li>
+ *   <li><b>{@link com.landawn.abacus.util.Comparators}:</b> Specialized comparator utilities</li>
+ *   <li><b>{@link com.landawn.abacus.util.Fn}:</b> Functional interface utilities</li>
+ *   <li><b>{@link com.landawn.abacus.util.Array}:</b> Advanced array manipulation utilities</li>
+ *   <li><b>{@link com.landawn.abacus.util.Strings}:</b> Comprehensive string utilities</li>
+ *   <li><b>{@link com.landawn.abacus.util.Maps}:</b> Map-specific utility operations</li>
+ *   <li><b>{@link com.landawn.abacus.util.Iterables}:</b> Iterable manipulation utilities</li>
+ *   <li><b>{@link com.landawn.abacus.util.IOUtil}:</b> Input/output stream utilities</li>
+ * </ul>
+ *
+ * <p><b>Example: Comprehensive Usage</b>
+ * <pre>{@code
+ * // Working with collections safely
+ * List<String> names = Arrays.asList("Alice", null, "Bob", "", "Charlie");
+ * 
+ * // Filter out null and empty strings
+ * List<String> validNames = CommonUtil.filter(names, CommonUtil::isNotBlank);
+ * 
+ * // Safe conversion and transformation
+ * List<Integer> lengths = CommonUtil.map(validNames, String::length);
+ * 
+ * // Group by length
+ * Map<Integer, List<String>> grouped = CommonUtil.groupBy(validNames, String::length);
+ * 
+ * // Find maximum length safely
+ * OptionalInt maxLength = CommonUtil.maxInt(lengths);
+ * 
+ * // Array operations
+ * String[] array = validNames.toArray(new String[0]);
+ * boolean contains = CommonUtil.contains(array, "Alice");
+ * String[] sorted = CommonUtil.sort(array);
+ * 
+ * // Null-safe operations
+ * String result = CommonUtil.defaultIfNull(CommonUtil.firstOrNull(validNames), "No names");
+ * boolean isEmpty = CommonUtil.isEmpty(validNames);
+ * }</pre>
+ *
+ * <p><b>Attribution:</b>
+ * This class includes code adapted from Apache Commons Lang, Google Guava, and other
+ * open source projects under the Apache License 2.0. Methods from these libraries may have been
+ * modified for consistency, performance optimization, and null-safety enhancement.
+ *
+ * @see com.landawn.abacus.util.N
  * @see com.landawn.abacus.util.Array
- * @see com.landawn.abacus.util.CommonUtil
  * @see com.landawn.abacus.util.Iterables
  * @see com.landawn.abacus.util.Iterators
- * @see com.landawn.abacus.util.Index
- * @see com.landawn.abacus.util.Median
  * @see com.landawn.abacus.util.Strings
  * @see com.landawn.abacus.util.Numbers
  * @see com.landawn.abacus.util.Maps
  * @see com.landawn.abacus.util.Beans
+ * @see com.landawn.abacus.util.Comparators
+ * @see com.landawn.abacus.util.Index
+ * @see com.landawn.abacus.util.Median
+ * @see com.landawn.abacus.util.Fn
+ * @see com.landawn.abacus.util.Fnn
  * @see com.landawn.abacus.util.IOUtil
  * @see java.lang.reflect.Array
  * @see java.util.Arrays
@@ -6177,7 +6330,6 @@ sealed class CommonUtil permits N {
     /**
      * Checks if it's not {@code null} or default. {@code null} is default value for all reference types, {@code false} is default value for primitive boolean, {@code 0} is the default value for primitive number type.
      *
-     *
      * @param value the value to check
      * @return {@code true}, if it's not {@code null} or default
      * @deprecated DO NOT call the methods defined in this class. it's for internal use only.
@@ -9939,11 +10091,11 @@ sealed class CommonUtil permits N {
      *
      * The Dataset is a data structure that stores data in a tabular format, similar to a table in a database.
      * Each item in the <i>columnNames</i> collection represents a column in the Dataset.
-     * The <i>rowList</i> parameter is a 2D array where each subarray represents a row in the Dataset.
+     * The <i>rowList</i> parameter is a two-dimensional array where each subarray represents a row in the Dataset.
      * The order of elements in each row should correspond to the order of column names.
      *
      * @param columnNames a collection of strings representing the names of the columns in the Dataset.
-     * @param rows a 2D array of objects representing the data in the Dataset. Each subarray is a row.
+     * @param rows a two-dimensional array of objects representing the data in the Dataset. Each subarray is a row.
      * @return a new Dataset with the specified column names and rows.
      * @throws IllegalArgumentException if the length of <i>columnNames</i> is zero or not equal to the length of the subarrays in <i>rowList</i>.
      * @see Dataset#rows(Collection, Object[][])
@@ -22948,8 +23100,8 @@ sealed class CommonUtil permits N {
     /**
      * Clone the original array and its sub arrays. {@code null} is returned if the input array is {@code null}.
      *
-     * @param original the 2D array to be cloned
-     * @return a clone of the original 2D array, or {@code null} if the original array is null
+     * @param original the two-dimensional array to be cloned
+     * @return a clone of the original two-dimensional array, or {@code null} if the original array is null
      * @see #clone(boolean[])
      */
     @MayReturnNull
@@ -22970,8 +23122,8 @@ sealed class CommonUtil permits N {
     /**
      * Clone the original array and its sub arrays. {@code null} is returned if the input array is {@code null}.
      *
-     * @param original the 2D array to be cloned
-     * @return a clone of the original 2D array, or {@code null} if the original array is null
+     * @param original the two-dimensional array to be cloned
+     * @return a clone of the original two-dimensional array, or {@code null} if the original array is null
      * @see #clone(char[])
      */
     @MayReturnNull
@@ -22992,8 +23144,8 @@ sealed class CommonUtil permits N {
     /**
      * Clone the original array and its sub arrays. {@code null} is returned if the input array is {@code null}.
      *
-     * @param original the 2D array to be cloned
-     * @return a clone of the original 2D array, or {@code null} if the original array is null
+     * @param original the two-dimensional array to be cloned
+     * @return a clone of the original two-dimensional array, or {@code null} if the original array is null
      * @see #clone(byte[])
      */
     @MayReturnNull
@@ -23014,8 +23166,8 @@ sealed class CommonUtil permits N {
     /**
      * Clone the original array and its sub arrays. {@code null} is returned if the input array is {@code null}.
      *
-     * @param original the 2D array to be cloned
-     * @return a clone of the original 2D array, or {@code null} if the original array is null
+     * @param original the two-dimensional array to be cloned
+     * @return a clone of the original two-dimensional array, or {@code null} if the original array is null
      * @see #clone(short[])
      */
     @MayReturnNull
@@ -23036,8 +23188,8 @@ sealed class CommonUtil permits N {
     /**
      * Clone the original array and its sub arrays. {@code null} is returned if the input array is {@code null}.
      *
-     * @param original the 2D array to be cloned
-     * @return a clone of the original 2D array, or {@code null} if the original array is null
+     * @param original the two-dimensional array to be cloned
+     * @return a clone of the original two-dimensional array, or {@code null} if the original array is null
      * @see #clone(int[])
      */
     @MayReturnNull
@@ -23058,8 +23210,8 @@ sealed class CommonUtil permits N {
     /**
      * Clone the original array and its sub arrays. {@code null} is returned if the input array is {@code null}.
      *
-     * @param original the 2D array to be cloned
-     * @return a clone of the original 2D array, or {@code null} if the original array is null
+     * @param original the two-dimensional array to be cloned
+     * @return a clone of the original two-dimensional array, or {@code null} if the original array is null
      * @see #clone(long[])
      */
     @MayReturnNull
@@ -23080,8 +23232,8 @@ sealed class CommonUtil permits N {
     /**
      * Clone the original array and its sub arrays. {@code null} is returned if the input array is {@code null}.
      *
-     * @param original the 2D array to be cloned
-     * @return a clone of the original 2D array, or {@code null} if the original array is null
+     * @param original the two-dimensional array to be cloned
+     * @return a clone of the original two-dimensional array, or {@code null} if the original array is null
      * @see #clone(float[])
      */
     @MayReturnNull
@@ -23102,8 +23254,8 @@ sealed class CommonUtil permits N {
     /**
      * Clone the original array and its sub arrays. {@code null} is returned if the input array is {@code null}.
      *
-     * @param original the 2D array to be cloned
-     * @return a clone of the original 2D array, or {@code null} if the original array is null
+     * @param original the two-dimensional array to be cloned
+     * @return a clone of the original two-dimensional array, or {@code null} if the original array is null
      * @see #clone(double[])
      */
     @MayReturnNull
@@ -23125,8 +23277,8 @@ sealed class CommonUtil permits N {
      * Clone the original array and its sub arrays. {@code null} is returned if the input array is {@code null}.
      *
      * @param <T> the type of the array elements
-     * @param original the 2D array to be cloned
-     * @return a clone of the original 2D array, or {@code null} if the original array is null
+     * @param original the two-dimensional array to be cloned
+     * @return a clone of the original two-dimensional array, or {@code null} if the original array is null
      * @see #clone(Object[])
      */
     @MayReturnNull
@@ -23147,8 +23299,8 @@ sealed class CommonUtil permits N {
     /**
      * Clone the original array and its sub arrays. {@code null} is returned if the input array is {@code null}.
      *
-     * @param original the 3D array to be cloned
-     * @return a clone of the original 3D array, or {@code null} if the original array is null
+     * @param original the three-dimensional array to be cloned
+     * @return a clone of the original three-dimensional array, or {@code null} if the original array is null
      * @see #clone(boolean[])
      * @see #clone(boolean[][])
      */
@@ -23170,8 +23322,8 @@ sealed class CommonUtil permits N {
     /**
      * Clone the original array and its sub arrays. {@code null} is returned if the input array is {@code null}.
      *
-     * @param original the 3D array to be cloned
-     * @return a clone of the original 3D array, or {@code null} if the original array is null
+     * @param original the three-dimensional array to be cloned
+     * @return a clone of the original three-dimensional array, or {@code null} if the original array is null
      * @see #clone(char[])
      * @see #clone(char[][])
      */
@@ -23193,8 +23345,8 @@ sealed class CommonUtil permits N {
     /**
      * Clone the original array and its sub arrays. {@code null} is returned if the input array is {@code null}.
      *
-     * @param original the 3D array to be cloned
-     * @return a clone of the original 3D array, or {@code null} if the original array is null
+     * @param original the three-dimensional array to be cloned
+     * @return a clone of the original three-dimensional array, or {@code null} if the original array is null
      * @see #clone(byte[])
      * @see #clone(byte[][])
      */
@@ -23216,8 +23368,8 @@ sealed class CommonUtil permits N {
     /**
      * Clone the original array and its sub arrays. {@code null} is returned if the input array is {@code null}.
      *
-     * @param original the 3D array to be cloned
-     * @return a clone of the original 3D array, or {@code null} if the original array is null
+     * @param original the three-dimensional array to be cloned
+     * @return a clone of the original three-dimensional array, or {@code null} if the original array is null
      * @see #clone(short[])
      * @see #clone(short[][])
      */
@@ -23239,8 +23391,8 @@ sealed class CommonUtil permits N {
     /**
      * Clone the original array and its sub arrays. {@code null} is returned if the input array is {@code null}.
      *
-     * @param original the 3D array to be cloned
-     * @return a clone of the original 3D array, or {@code null} if the original array is null
+     * @param original the three-dimensional array to be cloned
+     * @return a clone of the original three-dimensional array, or {@code null} if the original array is null
      * @see #clone(int[])
      * @see #clone(int[][])
      */
@@ -23262,8 +23414,8 @@ sealed class CommonUtil permits N {
     /**
      * Clone the original array and its sub arrays. {@code null} is returned if the input array is {@code null}.
      *
-     * @param original the 3D array to be cloned
-     * @return a clone of the original 3D array, or {@code null} if the original array is null
+     * @param original the three-dimensional array to be cloned
+     * @return a clone of the original three-dimensional array, or {@code null} if the original array is null
      * @see #clone(long[])
      * @see #clone(long[][])
      */
@@ -23285,8 +23437,8 @@ sealed class CommonUtil permits N {
     /**
      * Clone the original array and its sub arrays. {@code null} is returned if the input array is {@code null}.
      *
-     * @param original the 3D array to be cloned
-     * @return a clone of the original 3D array, or {@code null} if the original array is null
+     * @param original the three-dimensional array to be cloned
+     * @return a clone of the original three-dimensional array, or {@code null} if the original array is null
      * @see #clone(float[])
      * @see #clone(float[][])
      */
@@ -23308,8 +23460,8 @@ sealed class CommonUtil permits N {
     /**
      * Clone the original array and its sub arrays. {@code null} is returned if the input array is {@code null}.
      *
-     * @param original the 3D array to be cloned
-     * @return a clone of the original 3D array, or {@code null} if the original array is null
+     * @param original the three-dimensional array to be cloned
+     * @return a clone of the original three-dimensional array, or {@code null} if the original array is null
      * @see #clone(double[])
      * @see #clone(double[][])
      */
@@ -23332,8 +23484,8 @@ sealed class CommonUtil permits N {
      * Clone the original array and its sub arrays. {@code null} is returned if the input array is {@code null}.
      *
      * @param <T> the type of the array elements
-     * @param original the 3D array to be cloned
-     * @return a clone of the original 3D array, or {@code null} if the original array is null
+     * @param original the three-dimensional array to be cloned
+     * @return a clone of the original three-dimensional array, or {@code null} if the original array is null
      * @see #clone(Object[])
      * @see #clone(Object[][])
      */

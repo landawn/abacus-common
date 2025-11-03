@@ -32,7 +32,6 @@ import com.google.common.collect.Multimap;
 import com.google.common.collect.SetMultimap;
 import com.google.common.collect.SortedSetMultimap;
 import com.google.common.collect.TreeMultimap;
-import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.parser.JSONDeserializationConfig;
 import com.landawn.abacus.parser.JSONDeserializationConfig.JDC;
 import com.landawn.abacus.util.ClassUtil;
@@ -50,7 +49,7 @@ import com.landawn.abacus.util.WD;
  * @param <T> the multimap type (must extend Multimap&lt;K, V&gt;)
  */
 @SuppressWarnings("java:S2160")
-public class GuavaMultimapType<K, V, T extends Multimap<K, V>> extends AbstractType<T> {
+class GuavaMultimapType<K, V, T extends Multimap<K, V>> extends AbstractType<T> {
 
     private final String declaringName;
 
@@ -84,7 +83,6 @@ public class GuavaMultimapType<K, V, T extends Multimap<K, V>> extends AbstractT
      * @return the declaring name of this type (e.g., "com.google.common.collect.Multimap&lt;String, Integer&gt;")
      */
     @Override
-    @MayReturnNull
     public String declaringName() {
         return declaringName;
     }
@@ -136,7 +134,6 @@ public class GuavaMultimapType<K, V, T extends Multimap<K, V>> extends AbstractT
      * @return the JSON string representation of the multimap, or {@code null} if the input is null
      */
     @Override
-    @MayReturnNull
     public String stringOf(final T x) {
         if (x == null) {
             return null;
@@ -156,9 +153,7 @@ public class GuavaMultimapType<K, V, T extends Multimap<K, V>> extends AbstractT
      * @param str the JSON string to parse
      * @return a new multimap instance containing the parsed data, or {@code null} if the input is {@code null} or empty
      */
-    @MayReturnNull
     @Override
-
     public T valueOf(final String str) {
         if (Strings.isEmpty(str)) {
             return null; // NOSONAR

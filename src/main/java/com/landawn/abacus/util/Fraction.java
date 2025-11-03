@@ -17,28 +17,276 @@
 package com.landawn.abacus.util;
 
 import java.io.Serial;
+import java.io.Serializable;
 import java.math.BigInteger;
 
 /**
- * <p>
- * Note: it's copied from Apache Commons Lang developed at <a href="http://www.apache.org/">The Apache Software Foundation</a>, or
- * under the Apache License 2.0. The methods copied from other products/frameworks may be modified in this class.
- * </p>
+ * An immutable, high-precision representation of rational numbers stored as integer fractions,
+ * providing exact arithmetic operations without the precision loss inherent in floating-point
+ * representations. This class is designed for applications requiring precise fractional calculations
+ * such as financial computations, mathematical operations, and any scenario where decimal precision
+ * is critical and rounding errors are unacceptable.
  *
- * <p>
- * {@code Fraction} is a {@code Number} implementation that stores fractions accurately.
- * </p>
+ * <p>Unlike floating-point numbers ({@code float}, {@code double}) which use binary approximations
+ * that can introduce rounding errors, {@code Fraction} maintains exact precision by storing the
+ * numerator and denominator as separate integers. This approach ensures that operations like
+ * 1/3 + 1/3 + 1/3 = 1 are computed exactly, without accumulating floating-point errors.</p>
  *
- * <p>
- * This class is immutable, and interoperable with most methods that accept a {@code Number}.
- * </p>
+ * <p><b>Key Features:</b>
+ * <ul>
+ *   <li><b>Exact Precision:</b> No rounding errors or precision loss in fractional arithmetic</li>
+ *   <li><b>Immutable Design:</b> All instances are immutable, ensuring thread safety and preventing accidental modification</li>
+ *   <li><b>Integer-Based Storage:</b> Uses {@code int} numerator and denominator for optimal performance</li>
+ *   <li><b>Automatic Reduction:</b> Fractions are automatically reduced to lowest terms for canonical representation</li>
+ *   <li><b>Number Integration:</b> Extends {@code Number} for seamless integration with Java's numeric hierarchy</li>
+ *   <li><b>Comprehensive Arithmetic:</b> Full support for addition, subtraction, multiplication, and division</li>
+ *   <li><b>Multiple Representations:</b> Support for proper fractions, improper fractions, and mixed numbers</li>
+ *   <li><b>String Parsing:</b> Flexible parsing of various fraction string formats</li>
+ * </ul>
  *
- * <p>
- * Note that this class is intended for common use cases, it is <i>int</i> based and thus suffers from various overflow
- * issues. For a BigInteger based equivalent, please see the Commons Math BigFraction class.
- * </p>
+ * <p><b>⚠️ IMPORTANT - Immutable Design:</b>
+ * <ul>
+ *   <li>This class implements {@link Immutable}, guaranteeing that instances cannot be modified after creation</li>
+ *   <li>Both {@code numerator} and {@code denominator} fields are final and set only during construction</li>
+ *   <li>All arithmetic operations return new Fraction instances rather than modifying existing ones</li>
+ *   <li>Thread-safe by design due to immutability and lack of mutable state</li>
+ * </ul>
  *
- * @version $Id: Fraction.java 1583482 2014-03-31 22:54:57Z niallp $
+ * <p><b>⚠️ IMPORTANT - Integer Range Limitations:</b>
+ * <ul>
+ *   <li>This implementation uses {@code int} primitives, limiting values to approximately ±2 billion</li>
+ *   <li>Arithmetic operations may cause integer overflow for very large numerators or denominators</li>
+ *   <li>For unlimited precision, consider using Apache Commons Math's {@code BigFraction} class</li>
+ *   <li>Overflow detection is built into arithmetic operations and will throw {@code ArithmeticException}</li>
+ * </ul>
+ *
+ * <p><b>Design Philosophy:</b>
+ * <ul>
+ *   <li><b>Precision Over Performance:</b> Exact fractional representation prioritized over floating-point speed</li>
+ *   <li><b>Simplicity Over Complexity:</b> Integer-based implementation for optimal performance in common cases</li>
+ *   <li><b>Immutability Over Mutability:</b> Ensures predictable behavior and thread safety</li>
+ *   <li><b>Canonical Form:</b> Automatic reduction ensures unique representation for equivalent fractions</li>
+ *   <li><b>Interoperability:</b> Seamless integration with existing Java numeric APIs</li>
+ * </ul>
+ *
+ * <p><b>Internal Representation:</b>
+ * <ul>
+ *   <li><b>Numerator:</b> {@code int} representing the fraction's numerator (top number)</li>
+ *   <li><b>Denominator:</b> {@code int} representing the fraction's denominator (bottom number), always positive</li>
+ *   <li><b>Canonical Form:</b> Fractions are automatically reduced to lowest terms using GCD</li>
+ *   <li><b>Sign Convention:</b> Negative fractions have negative numerator, positive denominator</li>
+ * </ul>
+ *
+ * <p><b>Common Fraction Constants:</b>
+ * <ul>
+ *   <li><b>{@link #ZERO}:</b> 0/1 - Represents zero</li>
+ *   <li><b>{@link #ONE}:</b> 1/1 - Represents unity</li>
+ *   <li><b>{@link #ONE_HALF}:</b> 1/2 - One half</li>
+ *   <li><b>{@link #ONE_THIRD}, {@link #TWO_THIRDS}:</b> Common thirds</li>
+ *   <li><b>{@link #ONE_QUARTER}, {@link #THREE_QUARTERS}:</b> Common quarters</li>
+ *   <li><b>{@link #ONE_FIFTH} through {@link #FOUR_FIFTHS}:</b> Common fifths</li>
+ * </ul>
+ *
+ * <p><b>Common Usage Patterns:</b>
+ * <pre>{@code
+ * // Creating fractions using static factory methods
+ * Fraction half = Fraction.of(1, 2);                    // 1/2
+ * Fraction twoThirds = Fraction.of(2, 3);               // 2/3
+ * Fraction mixedNumber = Fraction.of(2, 1, 4);          // 2 1/4 = 9/4
+ *
+ * // Creating from decimal values
+ * Fraction fromDecimal = Fraction.of(0.75);             // 3/4
+ * Fraction fromString = Fraction.of("3/4");             // 3/4
+ * Fraction mixedFromString = Fraction.of("2 1/4");      // 9/4
+ *
+ * // Accessing fraction components
+ * int num = half.numerator();                           // 1
+ * int denom = half.denominator();                       // 2
+ * int whole = mixedNumber.properWhole();                // 2
+ * int properNum = mixedNumber.properNumerator();        // 1
+ *
+ * // Arithmetic operations
+ * Fraction sum = half.add(twoThirds);                   // 7/6
+ * Fraction difference = twoThirds.subtract(half);       // 1/6
+ * Fraction product = half.multipliedBy(twoThirds);      // 1/3
+ * Fraction quotient = twoThirds.dividedBy(half);        // 4/3
+ * }</pre>
+ *
+ * <p><b>Advanced Usage Examples:</b></p>
+ * <pre>{@code
+ * // Complex fraction arithmetic
+ * Fraction recipe = Fraction.of(2, 3);                  // 2/3 cup flour
+ * Fraction scalingFactor = Fraction.of(3, 2);           // 1.5x recipe
+ * Fraction scaledAmount = recipe.multipliedBy(scalingFactor); // 1 cup flour
+ *
+ * // Financial calculations (avoiding floating-point errors)
+ * Fraction interestRate = Fraction.of(3, 100);          // 3% as exact fraction
+ * Fraction principal = Fraction.of(1000);               // $1000
+ * Fraction interest = principal.multipliedBy(interestRate); // Exact $30
+ *
+ * // Mathematical operations
+ * Fraction negative = half.negate();                    // -1/2
+ * Fraction reciprocal = twoThirds.invert();             // 3/2
+ * Fraction absolute = negative.abs();                   // 1/2
+ * Fraction reduced = Fraction.of(6, 8, false).reduce(); // 3/4
+ * Fraction squared = half.pow(2);                       // 1/4
+ *
+ * // Comparisons and ordering
+ * int comparison = half.compareTo(twoThirds);           // negative (1/2 < 2/3)
+ * List<Fraction> fractions = Arrays.asList(half, twoThirds, Fraction.ONE_QUARTER);
+ * Collections.sort(fractions);                          // [1/4, 1/2, 2/3]
+ *
+ * // String representations
+ * String simple = half.toString();                      // "1/2"
+ * String proper = mixedNumber.toProperString();         // "2 1/4"
+ * }</pre>
+ *
+ * <p><b>Fraction Creation Methods:</b>
+ * <ul>
+ *   <li><b>{@code of(int, int)}:</b> Creates fraction from numerator and denominator with automatic reduction</li>
+ *   <li><b>{@code of(int, int, boolean)}:</b> Creates fraction with optional reduction control</li>
+ *   <li><b>{@code of(int, int, int)}:</b> Creates fraction from whole number, numerator, and denominator</li>
+ *   <li><b>{@code of(double)}:</b> Converts decimal value to closest fraction representation</li>
+ *   <li><b>{@code of(String)}:</b> Parses fraction from string in various formats</li>
+ * </ul>
+ *
+ * <p><b>Supported String Formats:</b>
+ * <ul>
+ *   <li><b>Simple Fractions:</b> {@code "3/4"}, {@code "-2/5"}, {@code "7/8"}</li>
+ *   <li><b>Whole Numbers:</b> {@code "5"}, {@code "-3"}, {@code "0"}</li>
+ *   <li><b>Mixed Numbers:</b> {@code "2 1/4"}, {@code "-1 2/3"}, {@code "5 7/8"}</li>
+ *   <li><b>Decimal Conversion:</b> Automatic conversion via {@code of(double)} internally</li>
+ * </ul>
+ *
+ * <p><b>Arithmetic Operations and Overflow Protection:</b>
+ * <ul>
+ *   <li><b>Addition/Subtraction:</b> Uses common denominator approach with overflow checking</li>
+ *   <li><b>Multiplication:</b> Direct numerator/denominator multiplication with reduction</li>
+ *   <li><b>Division:</b> Multiplication by reciprocal with zero-denominator protection</li>
+ *   <li><b>Overflow Detection:</b> Built-in checks throw {@code ArithmeticException} on overflow</li>
+ * </ul>
+ *
+ * <p><b>Performance Characteristics:</b>
+ * <ul>
+ *   <li><b>Creation Cost:</b> O(log min(n,d)) due to GCD calculation for reduction</li>
+ *   <li><b>Arithmetic Cost:</b> O(log min(n,d)) for operations requiring reduction</li>
+ *   <li><b>Comparison Cost:</b> O(1) - Cross multiplication for ordering</li>
+ *   <li><b>Memory Overhead:</b> Two {@code int} fields plus object header, cached string representations</li>
+ *   <li><b>String Caching:</b> {@code toString()} and {@code toProperString()} results are cached</li>
+ * </ul>
+ *
+ * <p><b>Thread Safety:</b>
+ * <ul>
+ *   <li><b>Immutable Fields:</b> Numerator and denominator are final and never modified</li>
+ *   <li><b>Concurrent Access:</b> Safe for concurrent read access from multiple threads</li>
+ *   <li><b>Cached Values:</b> String representations use lazy initialization with proper visibility</li>
+ *   <li><b>No Synchronization:</b> No locks needed due to immutable design</li>
+ * </ul>
+ *
+ * <p><b>Number Interface Implementation:</b>
+ * <ul>
+ *   <li><b>{@code intValue()}:</b> Returns truncated integer value (numerator / denominator)</li>
+ *   <li><b>{@code longValue()}:</b> Returns truncated long value with wider range</li>
+ *   <li><b>{@code floatValue()}:</b> Returns floating-point approximation</li>
+ *   <li><b>{@code doubleValue()}:</b> Returns double-precision approximation</li>
+ * </ul>
+ *
+ * <p><b>Canonical Representation:</b>
+ * <ul>
+ *   <li><b>Automatic Reduction:</b> All fractions are reduced to lowest terms using GCD</li>
+ *   <li><b>Positive Denominator:</b> Negative sign is always carried by the numerator</li>
+ *   <li><b>Unique Representation:</b> Equivalent fractions have identical internal representation</li>
+ *   <li><b>Efficient Comparison:</b> Canonical form enables fast equality testing</li>
+ * </ul>
+ *
+ * <p><b>Error Handling:</b>
+ * <ul>
+ *   <li><b>ArithmeticException:</b> Thrown for division by zero or integer overflow</li>
+ *   <li><b>NumberFormatException:</b> Thrown for invalid string formats in parsing</li>
+ *   <li><b>IllegalArgumentException:</b> Thrown for invalid construction parameters</li>
+ *   <li><b>Null Safety:</b> Appropriate null checks with {@code NullPointerException}</li>
+ * </ul>
+ *
+ * <p><b>Best Practices:</b>
+ * <ul>
+ *   <li>Use static factory methods ({@code of()}) rather than constructors for fraction creation</li>
+ *   <li>Prefer {@code Fraction} over {@code double} for exact decimal arithmetic</li>
+ *   <li>Use predefined constants ({@code ONE_HALF}, {@code ONE_THIRD}) for common fractions</li>
+ *   <li>Cache frequently used fraction instances to reduce object allocation</li>
+ *   <li>Use {@code reduce()} explicitly only when working with unreduced fractions</li>
+ *   <li>Consider overflow potential when working with large numerators or denominators</li>
+ *   <li>Use {@code compareTo()} for ordering rather than converting to decimal values</li>
+ * </ul>
+ *
+ * <p><b>Common Anti-Patterns to Avoid:</b>
+ * <ul>
+ *   <li>Converting to {@code double} for arithmetic and back to {@code Fraction} (loses precision)</li>
+ *   <li>Using {@code new Fraction()} constructor directly instead of static factory methods</li>
+ *   <li>Ignoring potential overflow in arithmetic operations with large values</li>
+ *   <li>Creating multiple fraction instances for the same logical value</li>
+ *   <li>Using {@code Fraction} for very large numbers without considering integer limits</li>
+ *   <li>Assuming all arithmetic operations will succeed without handling {@code ArithmeticException}</li>
+ * </ul>
+ *
+ * <p><b>Comparison with Alternative Approaches:</b>
+ * <ul>
+ *   <li><b>vs. double/float:</b> Fraction provides exact precision vs. floating-point approximations</li>
+ *   <li><b>vs. BigDecimal:</b> Fraction represents true fractions vs. decimal approximations</li>
+ *   <li><b>vs. BigFraction:</b> This class is faster but limited to int range vs. unlimited precision</li>
+ *   <li><b>vs. Rational Libraries:</b> Optimized for common use cases vs. comprehensive mathematical features</li>
+ * </ul>
+ *
+ * <p><b>Integration with Java Ecosystem:</b>
+ * <ul>
+ *   <li><b>{@link Number}:</b> Direct integration with Java's numeric hierarchy</li>
+ *   <li><b>{@link Comparable}:</b> Natural ordering support for sorting and searching</li>
+ *   <li><b>{@link Serializable}:</b> Support for serialization and persistence</li>
+ *   <li><b>Collections Framework:</b> Can be used in collections with proper ordering</li>
+ * </ul>
+ *
+ * <p><b>Use Cases and Applications:</b>
+ * <ul>
+ *   <li><b>Financial Calculations:</b> Exact monetary computations without rounding errors</li>
+ *   <li><b>Recipe Scaling:</b> Precise scaling of ingredient proportions</li>
+ *   <li><b>Mathematical Education:</b> Teaching exact fractional arithmetic</li>
+ *   <li><b>Engineering Calculations:</b> Precise ratios and proportional calculations</li>
+ *   <li><b>Music Theory:</b> Representing musical intervals and frequency ratios</li>
+ *   <li><b>Scientific Computing:</b> Exact rational number arithmetic in algorithms</li>
+ * </ul>
+ *
+ * <p><b>Example: Financial Interest Calculation</b>
+ * <pre>{@code
+ * public class FinancialCalculator {
+ *     public static Fraction calculateCompoundInterest(
+ *             Fraction principal, Fraction rate, int periods) {
+ *         Fraction onePlusRate = Fraction.ONE.add(rate);
+ *         Fraction compoundFactor = onePlusRate.pow(periods);
+ *         return principal.multipliedBy(compoundFactor);
+ *     }
+ *
+ *     public static void main(String[] args) {
+ *         Fraction principal = Fraction.of(1000);           // $1000
+ *         Fraction rate = Fraction.of(5, 100);              // 5% as exact fraction
+ *         int years = 3;
+ *
+ *         Fraction finalAmount = calculateCompoundInterest(principal, rate, years);
+ *         System.out.println("Final amount: $" + finalAmount.doubleValue());
+ *         // Result is mathematically exact, no floating-point errors
+ *     }
+ * }
+ * }</pre>
+ *
+ * <p><b>Attribution:</b>
+ * This class includes code adapted from Apache Commons Lang, Google Guava, and other
+ * open source projects under the Apache License 2.0. Methods from these libraries may have been
+ * modified for consistency, performance optimization, and null-safety enhancement.
+ *
+ * @see Number
+ * @see Comparable
+ * @see Immutable
+ * @see BigInteger
+ * @see java.math.BigDecimal
+ * @see java.math.MathContext
  */
 @com.landawn.abacus.annotation.Immutable
 public final class Fraction extends Number implements Comparable<Fraction>, Immutable {

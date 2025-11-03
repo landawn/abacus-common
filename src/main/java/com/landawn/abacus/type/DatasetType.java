@@ -14,7 +14,6 @@
 
 package com.landawn.abacus.type;
 
-import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.util.Dataset;
 import com.landawn.abacus.util.Strings;
 
@@ -23,9 +22,32 @@ import com.landawn.abacus.util.Strings;
  * This class provides serialization and deserialization for Dataset objects,
  * which are tabular data structures used for data manipulation and analysis.
  * Datasets are serialized to and from JSON format.
+ *
+ * <p>DatasetType instances are obtained through TypeFactory and handle the conversion between
+ * Dataset objects and their JSON string representations. The serialization preserves all columns,
+ * rows, and the tabular structure of the Dataset.</p>
+ *
+ * <p><b>Usage Examples:</b></p>
+ * <pre>{@code
+ * // Get DatasetType through TypeFactory
+ * Type<Dataset> datasetType = TypeFactory.getType(Dataset.class);
+ *
+ * // Create a dataset
+ * Dataset dataset = Dataset.builder()
+ *     .columnNames(Arrays.asList("id", "name", "age"))
+ *     .addRow(1, "Alice", 30)
+ *     .addRow(2, "Bob", 25)
+ *     .build();
+ *
+ * // Serialize dataset to JSON string
+ * String json = datasetType.stringOf(dataset);
+ *
+ * // Deserialize JSON string back to dataset
+ * Dataset parsedDataset = datasetType.valueOf(json);
+ * }</pre>
  */
 @SuppressWarnings("java:S2160")
-public class DatasetType extends AbstractType<Dataset> {
+class DatasetType extends AbstractType<Dataset> {
 
     public static final String DATA_SET = Dataset.class.getSimpleName();
 
@@ -86,9 +108,7 @@ public class DatasetType extends AbstractType<Dataset> {
      * @param x the Dataset to convert. Can be {@code null}.
      * @return A JSON string representation of the Dataset, or {@code null} if input is null
      */
-    @MayReturnNull
     @Override
-
     public String stringOf(final Dataset x) {
         return (x == null) ? null : Utils.jsonParser.serialize(x, Utils.jsc);
     }
@@ -101,9 +121,7 @@ public class DatasetType extends AbstractType<Dataset> {
      * @param str the JSON string to parse. Can be {@code null} or empty.
      * @return A Dataset parsed from the JSON string, or {@code null} if input is null/empty
      */
-    @MayReturnNull
     @Override
-
     public Dataset valueOf(final String str) {
         return (Strings.isEmpty(str)) ? null : Utils.jsonParser.deserialize(str, typeClass);
     }

@@ -20,7 +20,6 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.parser.JSONXMLSerializationConfig;
 import com.landawn.abacus.util.CharacterWriter;
 
@@ -31,7 +30,7 @@ import com.landawn.abacus.util.CharacterWriter;
  * as character fields.
  */
 @SuppressWarnings("java:S2160")
-public final class BooleanCharType extends AbstractType<Boolean> {
+final class BooleanCharType extends AbstractType<Boolean> {
 
     private static final String typeName = "BooleanChar";
     private static final String Y = "Y";
@@ -50,8 +49,6 @@ public final class BooleanCharType extends AbstractType<Boolean> {
     public Class<Boolean> clazz() {
         return Boolean.class;
     }
-
-    @MayReturnNull
 
     @Override
     public Boolean defaultValue() {
@@ -73,9 +70,16 @@ public final class BooleanCharType extends AbstractType<Boolean> {
      * Converts a Boolean value to its character string representation.
      * Maps {@code true} to "Y" and false/null to "N".
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Type<Boolean> type = TypeFactory.getType("BooleanChar");
+     * String result = type.stringOf(true); // returns "Y"
+     * String falseResult = type.stringOf(false); // returns "N"
+     * String nullResult = type.stringOf(null); // returns "N"
+     * }</pre>
+     *
      * @param b the Boolean value to convert
      * @return "Y" if b is {@code true}, "N" if b is {@code false} or null
-     @MayReturnNull
      */
     @Override
     public String stringOf(final Boolean b) {
@@ -88,7 +92,6 @@ public final class BooleanCharType extends AbstractType<Boolean> {
      *
      * @param str the string to parse (typically "Y" or "N")
      * @return Boolean.TRUE if str equals "Y" (case-insensitive), Boolean.FALSE otherwise
-     @MayReturnNull
      */
     @Override
     public Boolean valueOf(final String str) {
@@ -103,7 +106,6 @@ public final class BooleanCharType extends AbstractType<Boolean> {
      * @param offset the starting position in the character array
      * @param len the number of characters to examine (should be 1)
      * @return Boolean.TRUE if the single character is 'Y' or 'y', Boolean.FALSE otherwise
-     @MayReturnNull
      */
     @Override
     public Boolean valueOf(final char[] cbuf, final int offset, final int len) {
@@ -114,11 +116,17 @@ public final class BooleanCharType extends AbstractType<Boolean> {
      * Retrieves a Boolean value from a ResultSet at the specified column index.
      * Reads a string value and converts it using the Y/N mapping.
      *
-     * @param rs the ResultSet to retrieve the value from
-     * @param columnIndex the column index (1-based) of the character value
-     * @return Boolean.TRUE if the value is "Y" (case-insensitive), Boolean.FALSE otherwise
-     * @throws SQLException if a database access error occurs or the columnIndex is invalid
-     @MayReturnNull
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Type<Boolean> type = TypeFactory.getType("BooleanChar");
+     * ResultSet rs = ...; // from SQL query
+     * Boolean isActive = type.get(rs, 1); // retrieves Boolean from column 1 ('Y' -> true, 'N' -> false)
+     * }</pre>
+     *
+     * @param rs the ResultSet containing the data, must not be {@code null}
+     * @param columnIndex the column index (1-based) to retrieve the value from
+     * @return the Boolean value at the specified column, or {@code null} if the column value is SQL NULL
+     * @throws SQLException if a database access error occurs or the column index is invalid
      */
     @Override
     public Boolean get(final ResultSet rs, final int columnIndex) throws SQLException {
@@ -129,12 +137,17 @@ public final class BooleanCharType extends AbstractType<Boolean> {
      * Retrieves a Boolean value from a ResultSet using the specified column label.
      * Reads a string value and converts it using the Y/N mapping.
      *
-     * @param rs the ResultSet to retrieve the value from
-     * @param columnLabel the label for the column specified with the SQL AS clause,
-     *                    or the column name if no AS clause was specified
-     * @return Boolean.TRUE if the value is "Y" (case-insensitive), Boolean.FALSE otherwise
-     * @throws SQLException if a database access error occurs or the columnLabel is invalid
-     @MayReturnNull
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Type<Boolean> type = TypeFactory.getType("BooleanChar");
+     * ResultSet rs = ...; // from SQL query
+     * Boolean isActive = type.get(rs, "is_active"); // retrieves Boolean from "is_active" column
+     * }</pre>
+     *
+     * @param rs the ResultSet containing the data, must not be {@code null}
+     * @param columnLabel the label of the column to retrieve the value from, must not be {@code null}
+     * @return the Boolean value at the specified column, or {@code null} if the column value is SQL NULL
+     * @throws SQLException if a database access error occurs or the column index is invalid
      */
     @Override
     public Boolean get(final ResultSet rs, final String columnLabel) throws SQLException {
@@ -146,10 +159,18 @@ public final class BooleanCharType extends AbstractType<Boolean> {
      * Converts the Boolean to "Y" (true) or "N" (false) before setting.
      * Null values are set as SQL NULL with BOOLEAN type.
      *
-     * @param stmt the PreparedStatement to set the parameter on
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Type<Boolean> type = TypeFactory.getType("BooleanChar");
+     * PreparedStatement stmt = conn.prepareStatement("UPDATE users SET is_active = ? WHERE id = ?");
+     * type.set(stmt, 1, true); // sets parameter 1 to 'Y'
+     * stmt.executeUpdate();
+     * }</pre>
+     *
+     * @param stmt the PreparedStatement to set the parameter on, must not be {@code null}
      * @param columnIndex the parameter index (1-based) to set
-     * @param x the Boolean value to set, may be null
-     * @throws SQLException if a database access error occurs or the columnIndex is invalid
+     * @param x the Boolean value to set, may be {@code null}
+     * @throws SQLException if a database access error occurs or the column index is invalid
      */
     @Override
     public void set(final PreparedStatement stmt, final int columnIndex, final Boolean x) throws SQLException {

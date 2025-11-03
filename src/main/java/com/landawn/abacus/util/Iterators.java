@@ -45,51 +45,281 @@ import com.landawn.abacus.util.function.TriFunction;
 import com.landawn.abacus.util.stream.Stream;
 
 /**
- * <p>
- * Note: This class includes codes copied from Apache Commons Lang, Google Guava and other open source projects under the Apache License 2.0.
- * The methods copied from other libraries/frameworks/projects may be modified in this class.
- * </p>
+ * A comprehensive utility class providing an extensive collection of static methods for Iterator operations,
+ * transformations, aggregations, and manipulations. This class serves as the primary iterator utility facade
+ * in the Abacus library, offering performance-optimized, iterator-focused operations with null-safety and
+ * functional programming patterns as core design principles.
  *
- * <p>
- * When to throw exception? It's designed to avoid throwing any unnecessary
- * exception if the contract defined by method is not broken. For example, if
- * user tries to reverse a {@code null} or empty String. The input String will be
- * returned. But exception will be thrown if try to add an element to a {@code null} Object array or collection.
+ * <p>The {@code Iterators} class is designed as a final utility class that provides a complete toolkit
+ * for iterator processing including filtering, mapping, reducing, searching, sorting, and parallel
+ * operations. Unlike collection-based utilities, this class focuses specifically on Iterator patterns
+ * for memory-efficient, lazy evaluation of large datasets.</p>
  *
- * <br />
- * An empty String/Array/Collection/Map/Iterator/Iterable/InputStream/Reader will always be a preferred choice than a {@code null} for the return value of a method.
+ * <p><b>Key Features:</b>
+ * <ul>
+ *   <li><b>Iterator-Centric Design:</b> Optimized specifically for Iterator patterns and lazy evaluation</li>
+ *   <li><b>Memory Efficient:</b> Minimal memory footprint with streaming operations</li>
+ *   <li><b>Parallel Processing:</b> Support for concurrent iterator operations with ExecutorService</li>
+ *   <li><b>Null-Safe Operations:</b> Graceful handling of null inputs and empty iterators</li>
+ *   <li><b>Functional Programming:</b> Comprehensive support for map, filter, reduce, and functional patterns</li>
+ *   <li><b>Type Safety:</b> Generic methods with compile-time type checking</li>
+ *   <li><b>Performance Optimized:</b> Efficient algorithms with minimal object allocation</li>
+ *   <li><b>Stream Integration:</b> Seamless integration with Java Stream API and Abacus Stream utilities</li>
+ * </ul>
  *
- * <br />
- * The methods in this class should only read the input {@code Collection/Array/Iterator} parameters, not modify them.
+ * <p><b>Core Functional Categories:</b>
+ * <ul>
+ *   <li><b>Access Operations:</b> get, getFirst, getLast, elementAt with safe index handling</li>
+ *   <li><b>Search Operations:</b> find, findFirst, findLast, indexOf, contains with predicate support</li>
+ *   <li><b>Transformation Operations:</b> map, flatMap, filter, distinct, reverse, shuffle</li>
+ *   <li><b>Aggregation Operations:</b> reduce, fold, sum, average, min, max for various types</li>
+ *   <li><b>Parallel Operations:</b> forEach, map, filter with ExecutorService support</li>
+ *   <li><b>Validation Operations:</b> isEmpty, allMatch, anyMatch, noneMatch with short-circuit evaluation</li>
+ *   <li><b>Conversion Operations:</b> toArray, toList, toSet, toMap with type preservation</li>
+ *   <li><b>Combination Operations:</b> concat, merge, zip, cartesianProduct for iterator composition</li>
+ * </ul>
  *
- * <br />
- * The input parameters of most methods in this class should be {@code Iterator/Iterable}, instead of {@code Collection/Array}.
- * The returned type of most methods in this class should be a type of {@code Iterator}, instead of {@code Collection/Array}.
- * Comparing to methods defined in {code CommonUtil/N} classes, where the input parameters are mostly {@code Array/Collection}, and the returned type is mostly {@code Array/Collection}.
- * </p>
+ * <p><b>Design Philosophy:</b>
+ * <ul>
+ *   <li><b>Iterator First:</b> Methods are designed to work with Iterator types as primary input,
+ *       promoting memory-efficient streaming operations over collection materialization</li>
+ *   <li><b>Lazy Evaluation:</b> Operations are performed lazily when possible, allowing for efficient
+ *       processing of large datasets without excessive memory consumption</li>
+ *   <li><b>Read-Only Operations:</b> Methods only read input iterators without modifying source data</li>
+ *   <li><b>Exception Avoidance:</b> Methods avoid throwing unnecessary exceptions when contracts
+ *       are not violated, preferring empty results over exceptions for edge cases</li>
+ *   <li><b>Nullable Returns:</b> Many methods return {@code Nullable} types for null-safe value handling</li>
+ * </ul>
  *
- * <p>
- * This is a utility class mostly for {@code Iterator}.
- * </p>
+ * <p><b>Usage Examples:</b></p>
+ * <pre>{@code
+ * // Basic iterator access operations
+ * Iterator<String> iter = Arrays.asList("A", "B", "C", "D").iterator();
+ * Nullable<String> element = Iterators.get(iter, 2);         // Nullable["C"]
+ * Nullable<String> first = Iterators.getFirst(iter);         // Nullable["A"]
+ * Nullable<String> notFound = Iterators.get(iter, 10);       // Nullable.empty()
  *
- * @see com.landawn.abacus.util.ObjIterator
- * @see com.landawn.abacus.util.Enumerations
- * @see com.landawn.abacus.util.Comparators
- * @see com.landawn.abacus.util.Fn
- * @see com.landawn.abacus.util.Fnn
- * @see com.landawn.abacus.util.Array
- * @see com.landawn.abacus.util.CommonUtil
- * @see com.landawn.abacus.util.N
+ * // Search operations with predicates
+ * Iterator<Integer> numbers = Arrays.asList(1, 2, 3, 4, 5).iterator();
+ * Nullable<Integer> found = Iterators.findFirst(numbers, n -> n > 3);     // Nullable[4]
+ * int index = Iterators.indexOf(numbers.iterator(), 3);                   // Returns 2
+ *
+ * // Transformation operations
+ * Iterator<String> words = Arrays.asList("hello", "world", "java").iterator();
+ * Iterator<Integer> lengths = Iterators.map(words, String::length);       // [5, 5, 4]
+ * Iterator<String> filtered = Iterators.filter(words, s -> s.length() > 4); // [hello, world]
+ *
+ * // Aggregation operations
+ * Iterator<Double> values = Arrays.asList(1.0, 2.0, 3.0, 4.0).iterator();
+ * double sum = Iterators.sum(values);                        // 10.0
+ * double average = Iterators.average(values);                // 2.5
+ * Nullable<Double> max = Iterators.max(values);              // Nullable[4.0]
+ *
+ * // Parallel processing operations
+ * ExecutorService executor = Executors.newFixedThreadPool(4);
+ * Iterator<String> data = largeDataSet.iterator();
+ * 
+ * // Parallel forEach processing
+ * Iterators.forEach(data, executor, item -> processItem(item));
+ * 
+ * // Parallel map transformation
+ * Iterator<String> processed = Iterators.map(data, executor, this::expensiveTransform);
+ *
+ * // Validation operations with short-circuit
+ * Iterator<Integer> nums = Arrays.asList(2, 4, 6, 8).iterator();
+ * boolean allEven = Iterators.allMatch(nums, n -> n % 2 == 0);    // true
+ * boolean anyOdd = Iterators.anyMatch(nums, n -> n % 2 == 1);     // false
+ *
+ * // Conversion operations
+ * Iterator<String> stringIter = Arrays.asList("a", "b", "c").iterator();
+ * String[] array = Iterators.toArray(stringIter, String.class);
+ * List<String> list = Iterators.toList(stringIter);
+ * Set<String> set = Iterators.toSet(stringIter);
+ * }</pre>
+ *
+ * <p><b>Iterator Access Patterns:</b>
+ * <ul>
+ *   <li><b>Safe Access:</b> {@code get()}, {@code getFirst()}, {@code getLast()} with Nullable returns</li>
+ *   <li><b>Index-Based:</b> {@code elementAt()} with bounds checking and default values</li>
+ *   <li><b>Position Finding:</b> {@code indexOf()}, {@code lastIndexOf()} with predicate support</li>
+ *   <li><b>Existence Checking:</b> {@code contains()}, {@code containsAny()}, {@code containsAll()}</li>
+ * </ul>
+ *
+ * <p><b>Functional Transformations:</b>
+ * <ul>
+ *   <li><b>Mapping:</b> {@code map()}, {@code flatMap()}, {@code mapToInt()}, {@code mapToLong()}</li>
+ *   <li><b>Filtering:</b> {@code filter()}, {@code filterNot()}, {@code distinct()}, {@code limit()}</li>
+ *   <li><b>Reduction:</b> {@code reduce()}, {@code fold()}, {@code scan()} with accumulator functions</li>
+ *   <li><b>Partitioning:</b> {@code partition()}, {@code groupBy()}, {@code split()} with predicate logic</li>
+ * </ul>
+ *
+ * <p><b>Parallel Processing Support:</b>
+ * <ul>
+ *   <li><b>Concurrent Operations:</b> ExecutorService-based parallel processing</li>
+ *   <li><b>Thread-Safe Design:</b> Safe concurrent access to iterator operations</li>
+ *   <li><b>Load Balancing:</b> Automatic work distribution across available threads</li>
+ *   <li><b>Exception Handling:</b> Proper exception propagation in parallel contexts</li>
+ * </ul>
+ *
+ * <p><b>Performance Characteristics:</b>
+ * <ul>
+ *   <li><b>Memory Efficient:</b> Streaming operations with minimal memory footprint</li>
+ *   <li><b>Lazy Evaluation:</b> Operations performed only when results are consumed</li>
+ *   <li><b>Short-Circuit Operations:</b> Early termination for operations like findFirst, anyMatch</li>
+ *   <li><b>Cache-Friendly:</b> Sequential access patterns optimized for CPU cache performance</li>
+ *   <li><b>Scalable Parallel Processing:</b> Efficient utilization of multi-core systems</li>
+ * </ul>
+ *
+ * <p><b>Thread Safety:</b>
+ * <ul>
+ *   <li><b>Stateless Design:</b> All static methods are stateless and thread-safe</li>
+ *   <li><b>Immutable Operations:</b> Methods create new iterators rather than modifying inputs</li>
+ *   <li><b>Parallel Support:</b> Built-in support for concurrent processing with ExecutorService</li>
+ *   <li><b>No Shared State:</b> No static mutable fields that could cause race conditions</li>
+ * </ul>
+ *
+ * <p><b>Integration with Java Iterators:</b>
+ * <ul>
+ *   <li><b>Standard Iterator:</b> Full compatibility with java.util.Iterator</li>
+ *   <li><b>Enhanced Iterators:</b> Integration with ObjIterator and specialized iterator types</li>
+ *   <li><b>Stream Conversion:</b> Seamless conversion to/from Java 8+ Streams</li>
+ *   <li><b>Collection Compatibility:</b> Works with iterators from all Java Collection types</li>
+ * </ul>
+ *
+ * <p><b>Error Handling Strategy:</b>
+ * <ul>
+ *   <li><b>Graceful Degradation:</b> Methods handle edge cases without throwing exceptions</li>
+ *   <li><b>Null Safety:</b> Comprehensive null input handling throughout the API</li>
+ *   <li><b>Boundary Checking:</b> Safe index access with bounds validation</li>
+ *   <li><b>Nullable Returns:</b> Use of Nullable types to avoid null return values</li>
+ * </ul>
+ *
+ * <p><b>Memory Management:</b>
+ * <ul>
+ *   <li><b>Streaming Operations:</b> Process data without loading entire datasets into memory</li>
+ *   <li><b>Iterator Chaining:</b> Compose operations without intermediate collection creation</li>
+ *   <li><b>Resource Cleanup:</b> Proper handling of iterator lifecycle and resource management</li>
+ *   <li><b>Garbage Collection Friendly:</b> Minimal object allocation and retention</li>
+ * </ul>
+ *
+ * <p><b>Best Practices:</b>
+ * <ul>
+ *   <li>Use iterator-based operations for memory-efficient processing of large datasets</li>
+ *   <li>Leverage parallel processing for CPU-intensive transformations</li>
+ *   <li>Prefer lazy evaluation patterns for improved performance</li>
+ *   <li>Use Nullable return types to avoid null pointer exceptions</li>
+ *   <li>Chain operations efficiently to minimize intermediate collection creation</li>
+ *   <li>Consider iterator consumption patterns (single-use vs. reusable)</li>
+ * </ul>
+ *
+ * <p><b>Performance Tips:</b>
+ * <ul>
+ *   <li>Use streaming operations for large datasets to avoid memory overhead</li>
+ *   <li>Leverage short-circuit operations for better performance</li>
+ *   <li>Consider parallel processing for CPU-intensive operations</li>
+ *   <li>Minimize iterator materialization until results are needed</li>
+ *   <li>Use appropriate ExecutorService configurations for parallel operations</li>
+ * </ul>
+ *
+ * <p><b>Common Patterns:</b>
+ * <ul>
+ *   <li><b>Safe Access:</b> {@code Nullable<T> result = Iterators.get(iterator, index);}</li>
+ *   <li><b>Parallel Processing:</b> {@code Iterators.forEach(iterator, executor, processor);}</li>
+ *   <li><b>Stream Conversion:</b> {@code Stream<T> stream = Iterators.stream(iterator);}</li>
+ *   <li><b>Functional Pipeline:</b> {@code Iterator<R> result = Iterators.map(Iterators.filter(iter, pred), mapper);}</li>
+ * </ul>
+ *
+ * <p><b>Related Utility Classes:</b>
+ * <ul>
+ *   <li><b>{@link com.landawn.abacus.util.Iterables}:</b> Iterable-focused utility operations</li>
+ *   <li><b>{@link com.landawn.abacus.util.ObjIterator}:</b> Enhanced iterator implementations</li>
+ *   <li><b>{@link com.landawn.abacus.util.N}:</b> General utility class with collection operations</li>
+ *   <li><b>{@link com.landawn.abacus.util.stream.Stream}:</b> Stream-based processing utilities</li>
+ *   <li><b>{@link com.landawn.abacus.util.Enumerations}:</b> Enumeration utilities</li>
+ *   <li><b>{@link com.landawn.abacus.util.Array}:</b> Array manipulation utilities</li>
+ *   <li><b>{@link java.util.Iterator}:</b> Core Java iterator interface</li>
+ *   <li><b>{@link java.util.stream.Stream}:</b> Java 8+ Stream API</li>
+ * </ul>
+ *
+ * <p><b>Example: Large Dataset Processing</b>
+ * <pre>{@code
+ * // Processing large datasets with memory efficiency
+ * Iterator<String> largeDataset = getMillionRecordIterator();
+ * ExecutorService executor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
+ *
+ * try {
+ *     // Parallel processing with memory-efficient streaming
+ *     Iterator<ProcessedRecord> processed = Iterators.map(largeDataset, executor, this::expensiveTransform);
+ *     
+ *     // Filter and aggregate without loading all data into memory
+ *     Iterator<ProcessedRecord> filtered = Iterators.filter(processed, record -> record.isValid());
+ *     
+ *     // Collect results efficiently
+ *     List<ProcessedRecord> results = Iterators.toList(filtered);
+ *     
+ *     // Statistical analysis
+ *     double averageScore = Iterators.average(
+ *         Iterators.map(results.iterator(), ProcessedRecord::getScore)
+ *     );
+ *     
+ *     // Find best performing records
+ *     Nullable<ProcessedRecord> best = Iterators.max(results.iterator(), 
+ *         Comparator.comparing(ProcessedRecord::getScore));
+ *         
+ * } finally {
+ *     executor.shutdown();
+ * }
+ * }</pre>
+ *
+ * <p><b>Example: Data Pipeline with Functional Operations</b>
+ * <pre>{@code
+ * // Building a data processing pipeline
+ * Iterator<RawData> source = dataSource.iterator();
+ *
+ * // Multi-stage transformation pipeline
+ * Iterator<String> stage1 = Iterators.map(source, this::extractText);
+ * Iterator<String> stage2 = Iterators.filter(stage1, text -> !text.isEmpty());
+ * Iterator<String> stage3 = Iterators.map(stage2, String::trim);
+ * Iterator<String> stage4 = Iterators.distinct(stage3);
+ *
+ * // Validation and aggregation
+ * boolean hasValidData = Iterators.anyMatch(stage4, this::isValidFormat);
+ * long totalCount = Iterators.count(stage4);
+ *
+ * // Parallel processing for CPU-intensive operations
+ * ExecutorService executor = Executors.newCachedThreadPool();
+ * Iterator<AnalyzedData> analyzed = Iterators.map(stage4, executor, this::performAnalysis);
+ *
+ * // Grouping and final processing
+ * Map<String, List<AnalyzedData>> grouped = Iterators.groupBy(analyzed, AnalyzedData::getCategory);
+ * 
+ * // Convert to final result format
+ * Map<String, Summary> summaries = grouped.entrySet().stream()
+ *     .collect(Collectors.toMap(
+ *         Map.Entry::getKey,
+ *         entry -> createSummary(entry.getValue())
+ *     ));
+ * }</pre>
+ *
+ * <p><b>Attribution:</b>
+ * This class includes code adapted from Apache Commons Lang, Google Guava, and other open source
+ * projects under the Apache License 2.0. Methods from these libraries may have been modified for
+ * consistency, performance optimization, and enhanced iterator-specific functionality within the
+ * Abacus framework.</p>
+ *
  * @see com.landawn.abacus.util.Iterables
- * @see com.landawn.abacus.util.Index
- * @see com.landawn.abacus.util.Median
+ * @see com.landawn.abacus.util.ObjIterator
+ * @see com.landawn.abacus.util.N
+ * @see com.landawn.abacus.util.stream.Stream
+ * @see com.landawn.abacus.util.Enumerations
+ * @see com.landawn.abacus.util.Array
  * @see com.landawn.abacus.util.Maps
  * @see com.landawn.abacus.util.Strings
  * @see com.landawn.abacus.util.Numbers
- * @see com.landawn.abacus.util.IOUtil
- * @see java.lang.reflect.Array
- * @see java.util.Arrays
- * @see java.util.Collections
+ * @see com.landawn.abacus.util.u.Nullable
+ * @see java.util.Iterator
+ * @see java.util.stream.Stream
+ * @see java.lang.Iterable
  */
 public final class Iterators {
 
@@ -103,6 +333,17 @@ public final class Iterators {
      * Retrieves the element at the specified position in the given iterator.
      * The method will advance the iterator to the specified index and return the element at that position wrapped in a {@code Nullable}.
      * If the index is out of bounds (greater than the number of elements in the iterator), a {@code Nullable}.empty() is returned.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Iterator<String> iter = Arrays.asList("A", "B", "C", "D").iterator();
+     * Nullable<String> result = Iterators.get(iter, 2);
+     * // result.get() => "C"
+     *
+     * Iterator<Integer> iter2 = Arrays.asList(1, 2, 3).iterator();
+     * Nullable<Integer> result2 = Iterators.get(iter2, 10);
+     * // result2.isPresent() => false
+     * }</pre>
      *
      * @param <T> the type of elements in the iterator.
      * @param iter the iterator from which to retrieve the element, or {@code null} to return {@code {@code Nullable}.empty()}.
@@ -132,6 +373,17 @@ public final class Iterators {
     /**
      * Counts the occurrences of a specific value in the given iterator.
      * This method can be used to find the frequency of a particular value in the iterator.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Iterator<String> iter = Arrays.asList("A", "B", "A", "C", "A").iterator();
+     * long count = Iterators.occurrencesOf(iter, "A");
+     * // count => 3
+     *
+     * Iterator<Integer> iter2 = Arrays.asList(1, null, 2, null, 3).iterator();
+     * long nullCount = Iterators.occurrencesOf(iter2, null);
+     * // nullCount => 2
+     * }</pre>
      *
      * @param iter the iterator to be searched, or {@code null} to return {@code 0}.
      * @param valueToFind the value to count occurrences of, or {@code null} to count {@code null} occurrences.
@@ -165,6 +417,17 @@ public final class Iterators {
     /**
      * Counts the number of elements in the given iterator.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Iterator<String> iter = Arrays.asList("A", "B", "C", "D").iterator();
+     * long count = Iterators.count(iter);
+     * // count => 4
+     *
+     * Iterator<Integer> emptyIter = Collections.emptyIterator();
+     * long emptyCount = Iterators.count(emptyIter);
+     * // emptyCount => 0
+     * }</pre>
+     *
      * @param iter the iterator to be counted, or {@code null} to return {@code 0}.
      * @return the number of elements in the iterator, or {@code 0} if {@code iter} is {@code null}.
      * @see N#count(Iterator)
@@ -187,6 +450,17 @@ public final class Iterators {
 
     /**
      * Counts the number of elements in the given iterator that match the provided predicate.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Iterator<Integer> iter = Arrays.asList(1, 2, 3, 4, 5, 6).iterator();
+     * long evenCount = Iterators.count(iter, n -> n % 2 == 0);
+     * // evenCount => 3
+     *
+     * Iterator<String> iter2 = Arrays.asList("apple", "apricot", "banana", "avocado").iterator();
+     * long aCount = Iterators.count(iter2, s -> s.startsWith("a"));
+     * // aCount => 3
+     * }</pre>
      *
      * @param <T> the type of elements in the iterator.
      * @param iter the iterator to be searched, or {@code null} to return {@code 0}.
@@ -217,6 +491,17 @@ public final class Iterators {
      * Returns the index of the first occurrence of the specified value in the given iterator.
      * This method starts searching from the beginning of the iterator.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Iterator<String> iter = Arrays.asList("A", "B", "C", "B", "D").iterator();
+     * long index = Iterators.indexOf(iter, "B");
+     * // index => 1
+     *
+     * Iterator<String> iter2 = Arrays.asList("A", "B", "C").iterator();
+     * long notFound = Iterators.indexOf(iter2, "Z");
+     * // notFound => -1
+     * }</pre>
+     *
      * @param iter the iterator to be searched, or {@code null} to return {@code -1}.
      * @param valueToFind the value to find in the iterator, or {@code null} to find {@code null} values.
      * @return the index of the first occurrence of the specified value in the iterator, or {@code -1} if the value is not found or {@code iter} is {@code null}.
@@ -228,6 +513,17 @@ public final class Iterators {
     /**
      * Returns the index of the first occurrence of the specified value in the given iterator,
      * starting the search from the specified index.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Iterator<String> iter = Arrays.asList("A", "B", "C", "B", "D").iterator();
+     * long index = Iterators.indexOf(iter, "B", 2);
+     * // index => 3 (finds second occurrence of "B")
+     *
+     * Iterator<String> iter2 = Arrays.asList("A", "B", "C").iterator();
+     * long notFound = Iterators.indexOf(iter2, "A", 1);
+     * // notFound => -1 (skips first element)
+     * }</pre>
      *
      * @param iter the iterator to be searched, or {@code null} to return {@code -1}.
      * @param valueToFind the value to find in the iterator, or {@code null} to find {@code null} values.
@@ -270,6 +566,19 @@ public final class Iterators {
      * <p>Note that this will modify the supplied iterators, since they will have been advanced some
      * number of elements forward.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Iterator<String> iter1 = Arrays.asList("A", "B", "C").iterator();
+     * Iterator<String> iter2 = Arrays.asList("A", "B", "C").iterator();
+     * boolean equal = Iterators.elementsEqual(iter1, iter2);
+     * // equal => true
+     *
+     * Iterator<Integer> iter3 = Arrays.asList(1, 2, 3).iterator();
+     * Iterator<Integer> iter4 = Arrays.asList(1, 2, 4).iterator();
+     * boolean notEqual = Iterators.elementsEqual(iter3, iter4);
+     * // notEqual => false
+     * }</pre>
+     *
      * @param iterator1 the first iterator to compare
      * @param iterator2 the second iterator to compare
      * @return {@code true} if the iterators contain equal elements in the same order, {@code false} otherwise
@@ -299,7 +608,14 @@ public final class Iterators {
      * Creates an iterator that returns the same element a specified number of times.
      * This method is useful for generating a sequence of identical elements.
      *
-     * <p><b>Usage Examples:</b></p> {@code Iterators.repeat("Hello", 3)} returns an iterator that yields "Hello" three times.
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * ObjIterator<String> iter = Iterators.repeat("Hello", 3);
+     * // Yields: "Hello", "Hello", "Hello"
+     *
+     * ObjIterator<Integer> numbers = Iterators.repeat(5, 0);
+     * // numbers.hasNext() => false (empty iterator)
+     * }</pre>
      *
      * @param <T> the type of the element to repeat.
      * @param e the element to repeat (can be {@code null}).
@@ -338,7 +654,14 @@ public final class Iterators {
      * Creates an iterator that returns the same element a specified number of times (long version).
      * This method is similar to {@link #repeat(Object, int)} but supports a larger number of repetitions using {@code long}.
      *
-     * <p><b>Usage Examples:</b></p> {@code Iterators.repeat("Hello", 1000000L)} returns an iterator that yields "Hello" one million times.
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * ObjIterator<String> iter = Iterators.repeat("Hello", 1000000L);
+     * // Yields "Hello" one million times
+     *
+     * ObjIterator<Integer> iter2 = Iterators.repeat(42, 5L);
+     * // Yields: 42, 42, 42, 42, 42
+     * }</pre>
      *
      * @param <T> the type of the element to repeat.
      * @param e the element to repeat (can be {@code null}).
@@ -375,6 +698,17 @@ public final class Iterators {
 
     /**
      * Repeats each element in the specified collection {@code n} times.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * List<String> list = Arrays.asList("A", "B", "C");
+     * ObjIterator<String> iter = Iterators.repeatElements(list, 2);
+     * // Yields: "A", "A", "B", "B", "C", "C"
+     *
+     * List<Integer> numbers = Arrays.asList(1, 2);
+     * ObjIterator<Integer> iter2 = Iterators.repeatElements(numbers, 3);
+     * // Yields: 1, 1, 1, 2, 2, 2
+     * }</pre>
      *
      * @param <T> the type of elements in the collection.
      * @param c the collection whose elements are to be repeated; must not be empty if {@code n} > 0.
@@ -489,8 +823,17 @@ public final class Iterators {
      * Repeats each element in the specified Collection a calculated number of times until the specified total size is reached.
      * Elements are repeated in order, with some elements potentially repeated more times than others to reach exactly the target size.
      *
-     * <p><b>Usage Examples:</b></p> {@code Iterators.repeatElementsToSize(Arrays.asList("A", "B", "C"), 7)}
-     * yields an iterator with elements: A, A, A, B, B, C, C (each element is repeated at least twice, with "A" repeated three times)
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * List<String> list = Arrays.asList("A", "B", "C");
+     * ObjIterator<String> iter = Iterators.repeatElementsToSize(list, 7);
+     * // Yields: "A", "A", "A", "B", "B", "C", "C"
+     * // Each element repeated at least twice, with "A" repeated three times
+     *
+     * List<Integer> numbers = Arrays.asList(1, 2);
+     * ObjIterator<Integer> iter2 = Iterators.repeatElementsToSize(numbers, 5);
+     * // Yields: 1, 1, 1, 2, 2
+     * }</pre>
      *
      * @param <T> the type of elements in the collection.
      * @param c the collection whose elements are to be repeated. Must not be empty or {@code null} if {@code size > 0}.
@@ -545,8 +888,16 @@ public final class Iterators {
      * Repeats the entire specified Collection cyclically until the specified total size is reached.
      * The collection is repeated as a whole, cycling through it multiple times if necessary.
      *
-     * <p><b>Usage Examples:</b></p> {@code Iterators.repeatCollectionToSize(Arrays.asList("A", "B"), 5)}
-     * yields an iterator with elements: A, B, A, B, A
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * List<String> list = Arrays.asList("A", "B");
+     * ObjIterator<String> iter = Iterators.repeatCollectionToSize(list, 5);
+     * // Yields: "A", "B", "A", "B", "A"
+     *
+     * List<Integer> numbers = Arrays.asList(1, 2, 3);
+     * ObjIterator<Integer> iter2 = Iterators.repeatCollectionToSize(numbers, 7);
+     * // Yields: 1, 2, 3, 1, 2, 3, 1
+     * }</pre>
      *
      * @param <T> the type of elements in the collection.
      * @param c the collection to be repeated. Must not be empty or {@code null} if {@code size > 0}.
@@ -593,6 +944,15 @@ public final class Iterators {
      * Returns an infinite iterator cycling over the provided elements.
      * However, if the provided elements are empty, an empty iterator will be returned.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * ObjIterator<String> iter = Iterators.cycle("A", "B", "C");
+     * // Yields: "A", "B", "C", "A", "B", "C", "A", "B", "C", ... (infinitely)
+     *
+     * ObjIterator<Integer> numbers = Iterators.cycle(1, 2);
+     * // Yields: 1, 2, 1, 2, 1, 2, ... (infinitely)
+     * }</pre>
+     *
      * @param <T> the type of elements in the array.
      * @param elements the array whose elements are to be cycled over.
      * @return an iterator cycling over the elements of the array.
@@ -629,6 +989,17 @@ public final class Iterators {
     /**
      * Returns an infinite iterator cycling over the elements of the provided iterable.
      * However, if the provided elements are empty, an empty iterator will be returned.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * List<String> list = Arrays.asList("A", "B", "C");
+     * ObjIterator<String> iter = Iterators.cycle(list);
+     * // Yields: "A", "B", "C", "A", "B", "C", ... (infinitely)
+     *
+     * Set<Integer> set = new HashSet<>(Arrays.asList(1, 2, 3));
+     * ObjIterator<Integer> numbers = Iterators.cycle(set);
+     * // Yields: 1, 2, 3, 1, 2, 3, ... (infinitely, in set iteration order)
+     * }</pre>
      *
      * @param <T> the type of elements in the iterable.
      * @param iterable the iterable whose elements are to be cycled over.
@@ -684,6 +1055,17 @@ public final class Iterators {
      * Returns an iterator that cycles over the elements of the provided iterable for a specified number of rounds.
      * If the provided iterable is empty, an empty iterator will be returned.
      * If the number of rounds is zero, an empty iterator will be returned.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * List<String> list = Arrays.asList("A", "B", "C");
+     * ObjIterator<String> iter = Iterators.cycle(list, 2);
+     * // Yields: "A", "B", "C", "A", "B", "C"
+     *
+     * Set<Integer> set = new HashSet<>(Arrays.asList(1, 2));
+     * ObjIterator<Integer> numbers = Iterators.cycle(set, 3);
+     * // Yields: 1, 2, 1, 2, 1, 2
+     * }</pre>
      *
      * @param <T> the type of elements in the iterable.
      * @param iterable the iterable whose elements are to be cycled over.
@@ -1366,6 +1748,20 @@ public final class Iterators {
 
     /**
      * Concatenates multiple Iterable objects into a single ObjIterator.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * List<String> list1 = Arrays.asList("A", "B");
+     * List<String> list2 = Arrays.asList("C", "D");
+     * Set<String> set = new HashSet<>(Arrays.asList("E", "F"));
+     * ObjIterator<String> iter = Iterators.concat(list1, list2, set);
+     * // Yields: "A", "B", "C", "D", "E", "F"
+     *
+     * List<Integer> nums1 = Arrays.asList(1, 2);
+     * List<Integer> nums2 = Arrays.asList(3, 4);
+     * ObjIterator<Integer> numbers = Iterators.concat(nums1, nums2);
+     * // Yields: 1, 2, 3, 4
+     * }</pre>
      *
      * @param <T> the type of elements in the Iterable objects.
      * @param a the Iterable objects to be concatenated.
@@ -2342,7 +2738,16 @@ public final class Iterators {
      *
      * <p>This is a lazy evaluation operation. The {@code skip} action is only triggered when {@code Iterator.hasNext()} or {@code Iterator.next()} is called.
      *
-     * <p><b>Usage Examples:</b></p> {@code Iterators.skipAndLimit(Arrays.asList(1, 2, 3, 4, 5).iterator(), 1, 3)} yields an iterator with elements: 2, 3, 4
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Iterator<Integer> iter = Arrays.asList(1, 2, 3, 4, 5).iterator();
+     * ObjIterator<Integer> result = Iterators.skipAndLimit(iter, 1, 3);
+     * // Yields: 2, 3, 4 (skips first element, then takes next 3)
+     *
+     * Iterator<String> iter2 = Arrays.asList("A", "B", "C", "D", "E", "F").iterator();
+     * ObjIterator<String> result2 = Iterators.skipAndLimit(iter2, 2, 2);
+     * // Yields: "C", "D"
+     * }</pre>
      *
      * @param <T> the type of elements in the iterator.
      * @param iter the iterator to be skipped and limited.
@@ -2421,7 +2826,16 @@ public final class Iterators {
      * Returns a new {@code ObjIterator} with {@code null} elements removed from the specified Iterable.
      * All {@code null} elements will be filtered out, returning only {@code non-null} elements.
      *
-     * <p><b>Usage Examples:</b></p> {@code Iterators.skipNulls(Arrays.asList("A", {@code null}, "B", {@code null}, "C"))} yields an iterator with elements: "A", "B", "C"
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * List<String> list = Arrays.asList("A", null, "B", null, "C");
+     * ObjIterator<String> iter = Iterators.skipNulls(list);
+     * // Yields: "A", "B", "C"
+     *
+     * List<Integer> numbers = Arrays.asList(1, null, 2, 3, null);
+     * ObjIterator<Integer> iter2 = Iterators.skipNulls(numbers);
+     * // Yields: 1, 2, 3
+     * }</pre>
      *
      * @param <T> the type of elements in the iterable.
      * @param c the iterable whose {@code null} elements should be skipped.
@@ -2436,7 +2850,16 @@ public final class Iterators {
      * Returns a new {@code ObjIterator} with {@code null} elements removed from the specified Iterator.
      * All {@code null} elements will be filtered out, returning only {@code non-null} elements.
      *
-     * <p><b>Usage Examples:</b></p> {@code Iterators.skipNulls(Arrays.asList("A", {@code null}, "B", {@code null}, "C").iterator())} yields an iterator with elements: "A", "B", "C"
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Iterator<String> iter = Arrays.asList("A", null, "B", null, "C").iterator();
+     * ObjIterator<String> result = Iterators.skipNulls(iter);
+     * // Yields: "A", "B", "C"
+     *
+     * Iterator<Integer> iter2 = Arrays.asList(1, null, 2, 3, null).iterator();
+     * ObjIterator<Integer> result2 = Iterators.skipNulls(iter2);
+     * // Yields: 1, 2, 3
+     * }</pre>
      *
      * @param <T> the type of elements in the iterator.
      * @param iter the iterator whose {@code null} elements should be skipped.
@@ -2464,6 +2887,17 @@ public final class Iterators {
 
     /**
      * Returns a new ObjIterator with distinct elements from the original Iterator.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Iterator<String> iter = Arrays.asList("A", "B", "A", "C", "B", "D").iterator();
+     * ObjIterator<String> distinct = Iterators.distinct(iter);
+     * // Yields: "A", "B", "C", "D"
+     *
+     * Iterator<Integer> iter2 = Arrays.asList(1, 2, 2, 3, 1, 4).iterator();
+     * ObjIterator<Integer> distinct2 = Iterators.distinct(iter2);
+     * // Yields: 1, 2, 3, 4
+     * }</pre>
      *
      * @param <T> the type of elements in the original Iterator.
      * @param iter the original Iterator to be processed for distinct elements.

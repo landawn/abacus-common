@@ -19,7 +19,6 @@ import java.util.Map;
 
 import javax.net.ssl.SSLSocketFactory;
 
-import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.util.Charsets;
 import com.landawn.abacus.util.Strings;
 
@@ -27,10 +26,10 @@ import com.landawn.abacus.util.Strings;
  * Configuration settings for HTTP requests.
  * This class provides a fluent interface for configuring various HTTP request parameters
  * including timeouts, headers, SSL settings, proxy configuration, and content format.
- * 
+ *
  * <p>HttpSettings can be used with both HttpClient and HttpRequest to customize request behavior.
  * Settings can be applied globally to an HttpClient instance or per-request.</p>
- * 
+ *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * HttpSettings settings = HttpSettings.create()
@@ -40,15 +39,15 @@ import com.landawn.abacus.util.Strings;
  *     .header("Accept", "application/json")
  *     .setContentType("application/json")
  *     .setUseCaches(false);
- * 
+ *
  * // Use with HttpClient
- * HttpClient client = HttpClient.create("https://api.example.com", 
+ * HttpClient client = HttpClient.create("https://api.example.com",
  *     16, 5000, 10000, settings);
- * 
+ *
  * // Or use with individual requests
  * String response = client.get(settings);
  * }</pre>
- * 
+ *
  * @see HttpClient
  * @see HttpRequest
  * @see HttpHeaders
@@ -165,7 +164,6 @@ public final class HttpSettings {
      *
      * @return The SSL socket factory, or {@code null} if not set
      */
-    @MayReturnNull
     public SSLSocketFactory getSSLSocketFactory() {
         return sslSocketFactory;
     }
@@ -195,7 +193,6 @@ public final class HttpSettings {
      *
      * @return The proxy, or {@code null} if not set
      */
-    @MayReturnNull
     public Proxy getProxy() {
         return proxy;
     }
@@ -328,7 +325,6 @@ public final class HttpSettings {
      *
      * @return The content format, or {@code null} if not set
      */
-    @MayReturnNull
     public ContentFormat getContentFormat() {
         if ((contentFormat == null || contentFormat == ContentFormat.NONE) && headers != null) {
             contentFormat = HttpUtil.getContentFormat(HttpUtil.getContentType(headers), HttpUtil.getContentEncoding(headers));
@@ -364,7 +360,6 @@ public final class HttpSettings {
      *
      * @return The Content-Type header value, or {@code null} if not set
      */
-    @MayReturnNull
     public String getContentType() {
         String contentType = HttpUtil.getContentType(headers);
 
@@ -411,7 +406,6 @@ public final class HttpSettings {
      *
      * @return The Content-Encoding header value, or {@code null} if not set
      */
-    @MayReturnNull
     public String getContentEncoding() {
         String contentEncoding = HttpUtil.getContentEncoding(headers);
 

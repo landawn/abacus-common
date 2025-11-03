@@ -26,7 +26,7 @@ package com.landawn.abacus.type;
  * }</pre>
  */
 @SuppressWarnings("java:S2160")
-public final class PrimitiveIntType extends AbstractIntegerType {
+final class PrimitiveIntType extends AbstractIntegerType {
 
     public static final String INT = int.class.getSimpleName();
 
@@ -41,7 +41,7 @@ public final class PrimitiveIntType extends AbstractIntegerType {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * PrimitiveIntType type = new PrimitiveIntType();
+     * Type<Integer> type = TypeFactory.getType(int.class);
      * Class<?> clazz = type.clazz();
      * // clazz equals int.class
      * }</pre>
@@ -60,7 +60,7 @@ public final class PrimitiveIntType extends AbstractIntegerType {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * PrimitiveIntType type = new PrimitiveIntType();
+     * Type<Integer> type = TypeFactory.getType(int.class);
      * boolean isPrimitive = type.isPrimitiveType();
      * // isPrimitive is true
      * }</pre>
@@ -77,7 +77,8 @@ public final class PrimitiveIntType extends AbstractIntegerType {
      * The default value for primitive int is 0.
      *
      * <p><b>Usage Examples:</b></p>
-     * PrimitiveIntType type = new PrimitiveIntType();
+     * <pre>{@code
+     * Type<Integer> type = TypeFactory.getType(int.class);
      * Integer defaultVal = type.defaultValue();
      * // defaultVal equals 0
      * }</pre>

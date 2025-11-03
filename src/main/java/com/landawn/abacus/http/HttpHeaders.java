@@ -25,7 +25,6 @@ import java.util.SortedMap;
 import java.util.function.BiConsumer;
 
 import com.landawn.abacus.annotation.Beta;
-import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.http.HttpUtil.HttpDate;
 import com.landawn.abacus.util.Charsets;
 import com.landawn.abacus.util.N;
@@ -34,14 +33,14 @@ import com.landawn.abacus.util.cs;
 
 /**
  * <p>Note: It's copied from Google Guava under Apache License 2.0 and may be modified.</p>
- * 
+ *
  * A container for HTTP headers with a fluent API for setting and retrieving header values.
  * This class provides convenient methods for working with common HTTP headers and supports
  * all standard HTTP header fields as defined in various RFCs.
- * 
+ *
  * <p>Headers can be set individually or in bulk, and the class provides type-safe conversion
  * for various value types including strings, dates, collections, and numbers.</p>
- * 
+ *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * HttpHeaders headers = HttpHeaders.create()
@@ -54,7 +53,7 @@ import com.landawn.abacus.util.cs;
  * HttpHeaders headers2 = HttpHeaders.of("Content-Type", "application/json",
  *                                       "Accept", "application/json");
  * }</pre>
- * 
+ *
  * @see HttpClient
  * @see HttpSettings
  */
@@ -139,7 +138,6 @@ public final class HttpHeaders {
         /**
          * The HTTP <a href="https://tools.ietf.org/html/rfc8470">{@code Early-Data}</a> header field
          * name.
-         *
          */
         public static final String EARLY_DATA = "Early-Data";
         /** The HTTP {@code Expect} header field name. */
@@ -148,12 +146,10 @@ public final class HttpHeaders {
         public static final String FROM = "From";
         /**
          * The HTTP <a href="https://tools.ietf.org/html/rfc7239">{@code Forwarded}</a> header field name.
-         *
          */
         public static final String FORWARDED = "Forwarded";
         /**
          * The HTTP {@code Follow-Only-When-Prerender-Shown} header field name.
-         *
          */
         @Beta
         public static final String FOLLOW_ONLY_WHEN_PRERENDER_SHOWN = "Follow-Only-When-Prerender-Shown";
@@ -162,7 +158,6 @@ public final class HttpHeaders {
         /**
          * The HTTP <a href="https://tools.ietf.org/html/rfc7540#section-3.2.1">{@code HTTP2-Settings}
          * </a> header field name.
-         *
          */
         public static final String HTTP2_SETTINGS = "HTTP2-Settings";
         /** The HTTP {@code If-Match} header field name. */
@@ -190,7 +185,6 @@ public final class HttpHeaders {
         /**
          * The HTTP <a href="https://www.w3.org/TR/referrer-policy/">{@code Referrer-Policy}</a> header
          * field name.
-         *
          */
         public static final String REFERRER_POLICY = "Referrer-Policy";
 
@@ -239,13 +233,11 @@ public final class HttpHeaders {
         /**
          * The HTTP <a href="http://w3.org/TR/CSP/#content-security-policy-header-field">{@code
          * Content-Security-Policy}</a> header field name.
-         *
          */
         public static final String CONTENT_SECURITY_POLICY = "Content-Security-Policy";
         /**
          * The HTTP <a href="http://w3.org/TR/CSP/#content-security-policy-report-only-header-field">
          * {@code Content-Security-Policy-Report-Only}</a> header field name.
-         *
          */
         public static final String CONTENT_SECURITY_POLICY_REPORT_ONLY = "Content-Security-Policy-Report-Only";
         /**
@@ -253,7 +245,6 @@ public final class HttpHeaders {
          * <a href="https://www.w3.org/TR/2011/WD-CSP-20111129/">CSP v.1</a> and used by the Firefox until
          * version 23 and the Internet Explorer version 10. Please, use {@link #CONTENT_SECURITY_POLICY}
          * to pass the CSP.
-         *
          */
         public static final String X_CONTENT_SECURITY_POLICY = "X-Content-Security-Policy";
         /**
@@ -261,21 +252,18 @@ public final class HttpHeaders {
          * introduced in <a href="https://www.w3.org/TR/2011/WD-CSP-20111129/">CSP v.1</a> and used by the
          * Firefox until version 23 and the Internet Explorer version 10. Please, use {@link
          * #CONTENT_SECURITY_POLICY_REPORT_ONLY} to pass the CSP.
-         *
          */
         public static final String X_CONTENT_SECURITY_POLICY_REPORT_ONLY = "X-Content-Security-Policy-Report-Only";
         /**
          * The HTTP nonstandard {@code X-WebKit-CSP} header field name. It was introduced in <a
          * href="https://www.w3.org/TR/2011/WD-CSP-20111129/">CSP v.1</a> and used by the Chrome until
          * version 25. Please, use {@link #CONTENT_SECURITY_POLICY} to pass the CSP.
-         *
          */
         public static final String X_WEBKIT_CSP = "X-WebKit-CSP";
         /**
          * The HTTP nonstandard {@code X-WebKit-CSP-Report-Only} header field name. It was introduced in
          * <a href="https://www.w3.org/TR/2011/WD-CSP-20111129/">CSP v.1</a> and used by the Chrome until
          * version 25. Please, use {@link #CONTENT_SECURITY_POLICY_REPORT_ONLY} to pass the CSP.
-         *
          */
         public static final String X_WEBKIT_CSP_REPORT_ONLY = "X-WebKit-CSP-Report-Only";
         /** The HTTP {@code ETag} header field name. */
@@ -301,13 +289,11 @@ public final class HttpHeaders {
         /**
          * The HTTP <a href="https://www.w3.org/TR/server-timing/">{@code Server-Timing}</a> header field
          * name.
-         *
          */
         public static final String SERVER_TIMING = "Server-Timing";
         /**
          * The HTTP <a href="https://www.w3.org/TR/service-workers/#update-algorithm">{@code
          * Service-Worker-Allowed}</a> header field name.
-         *
          */
         public static final String SERVICE_WORKER_ALLOWED = "Service-Worker-Allowed";
         /** The HTTP {@code Set-Cookie} header field name. */
@@ -317,13 +303,11 @@ public final class HttpHeaders {
         /**
          * The HTTP <a href="http://tools.ietf.org/html/rfc6797#section-6.1">{@code
          * Strict-Transport-Security}</a> header field name.
-         *
          */
         public static final String STRICT_TRANSPORT_SECURITY = "Strict-Transport-Security";
         /**
          * The HTTP <a href="http://www.w3.org/TR/resource-timing/#cross-origin-resources">{@code
          * Timing-Allow-Origin}</a> header field name.
-         *
          */
         public static final String TIMING_ALLOW_ORIGIN = "Timing-Allow-Origin";
         /** The HTTP {@code Trailer} header field name. */
@@ -349,12 +333,10 @@ public final class HttpHeaders {
         public static final String X_FORWARDED_PROTO = "X-Forwarded-Proto";
         /**
          * The HTTP <a href="http://goo.gl/lQirAH">{@code X-Forwarded-Host}</a> header field name.
-         *
          */
         public static final String X_FORWARDED_HOST = "X-Forwarded-Host";
         /**
          * The HTTP <a href="http://goo.gl/YtV2at">{@code X-Forwarded-Port}</a> header field name.
-         *
          */
         public static final String X_FORWARDED_PORT = "X-Forwarded-Port";
         /** The HTTP {@code X-Frame-Options} header field name. */
@@ -364,14 +346,12 @@ public final class HttpHeaders {
         /**
          * The HTTP <a href="http://tools.ietf.org/html/draft-evans-palmer-key-pinning">{@code
          * Public-Key-Pins}</a> header field name.
-         *
          */
         @Beta
         public static final String PUBLIC_KEY_PINS = "Public-Key-Pins";
         /**
          * The HTTP <a href="http://tools.ietf.org/html/draft-evans-palmer-key-pinning">{@code
          * Public-Key-Pins-Report-Only}</a> header field name.
-         *
          */
         @Beta
         public static final String PUBLIC_KEY_PINS_REPORT_ONLY = "Public-Key-Pins-Report-Only";
@@ -385,7 +365,6 @@ public final class HttpHeaders {
          * <p>When the new X-Download-Options header is present with the value {@code noopen}, the user is
          * prevented from opening a file download directly; instead, they must first save the file
          * locally.
-         *
          */
         @Beta
         public static final String X_DOWNLOAD_OPTIONS = "X-Download-Options";
@@ -401,38 +380,32 @@ public final class HttpHeaders {
         /**
          * The HTTP <a href="http://html.spec.whatwg.org/multipage/semantics.html#hyperlink-auditing">
          * {@code Ping-From}</a> header field name.
-         *
          */
         public static final String PING_FROM = "Ping-From";
         /**
          * The HTTP <a href="http://html.spec.whatwg.org/multipage/semantics.html#hyperlink-auditing">
          * {@code Ping-To}</a> header field name.
-         *
          */
         public static final String PING_TO = "Ping-To";
 
         /**
          * The HTTP <a href="https://github.com/mikewest/sec-metadata">{@code Sec-Metadata}</a> header
          * field name.
-         *
          */
         public static final String SEC_METADATA = "Sec-Metadata";
         /**
          * The HTTP <a href="https://tools.ietf.org/html/draft-ietf-tokbind-https">{@code
          * Sec-Token-Binding}</a> header field name.
-         *
          */
         public static final String SEC_TOKEN_BINDING = "Sec-Token-Binding";
         /**
          * The HTTP <a href="https://tools.ietf.org/html/draft-ietf-tokbind-ttrp">{@code
          * Sec-Provided-Token-Binding-ID}</a> header field name.
-         *
          */
         public static final String SEC_PROVIDED_TOKEN_BINDING_ID = "Sec-Provided-Token-Binding-ID";
         /**
          * The HTTP <a href="https://tools.ietf.org/html/draft-ietf-tokbind-ttrp">{@code
          * Sec-Referred-Token-Binding-ID}</a> header field name.
-         *
          */
         public static final String SEC_REFERRED_TOKEN_BINDING_ID = "Sec-Referred-Token-Binding-ID";
 
@@ -492,7 +465,6 @@ public final class HttpHeaders {
      *
      * Values for the <a href="https://www.w3.org/TR/referrer-policy/">{@code Referrer-Policy}</a>
      * header.
-     *
      */
     public static final class ReferrerPolicyValues {
 
@@ -710,11 +682,11 @@ public final class HttpHeaders {
      * headers.setContentEncoding("gzip");
      * }</pre>
      *
-     * @param acceptEncoding The content encoding value (e.g., "gzip", "deflate", "br")
+     * @param contentEncoding The content encoding value (e.g., "gzip", "deflate", "br")
      * @return This HttpHeaders instance for method chaining
      */
-    public HttpHeaders setContentEncoding(final String acceptEncoding) {
-        set(Names.CONTENT_ENCODING, acceptEncoding);
+    public HttpHeaders setContentEncoding(final String contentEncoding) {
+        set(Names.CONTENT_ENCODING, contentEncoding);
 
         return this;
     }
@@ -730,11 +702,11 @@ public final class HttpHeaders {
      * headers.setContentLanguage("en-US, en-GB");
      * }</pre>
      *
-     * @param acceptLanguage The content language value (e.g., "en-US", "fr-FR")
+     * @param contentLanguage The content language value (e.g., "en-US", "fr-FR")
      * @return This HttpHeaders instance for method chaining
      */
-    public HttpHeaders setContentLanguage(final String acceptLanguage) {
-        set(Names.CONTENT_LANGUAGE, acceptLanguage);
+    public HttpHeaders setContentLanguage(final String contentLanguage) {
+        set(Names.CONTENT_LANGUAGE, contentLanguage);
 
         return this;
     }
@@ -945,11 +917,11 @@ public final class HttpHeaders {
      * headers.setAcceptEncoding("gzip, deflate, br");
      * }</pre>
      *
-     * @param acceptEncoding The acceptable encodings (e.g., "gzip, deflate")
+     * @param contentEncoding The acceptable encodings (e.g., "gzip, deflate")
      * @return This HttpHeaders instance for method chaining
      */
-    public HttpHeaders setAcceptEncoding(final String acceptEncoding) {
-        set(Names.ACCEPT_ENCODING, acceptEncoding);
+    public HttpHeaders setAcceptEncoding(final String contentEncoding) {
+        set(Names.ACCEPT_ENCODING, contentEncoding);
 
         return this;
     }
@@ -1066,7 +1038,6 @@ public final class HttpHeaders {
      * @param headerName The name of the header to retrieve
      * @return The header value, or {@code null} if not present
      */
-    @MayReturnNull
     public Object get(final String headerName) {
         return map.get(headerName);
     }
@@ -1083,7 +1054,6 @@ public final class HttpHeaders {
      * @param headerName The name of the header to remove
      * @return The previous value associated with the header, or {@code null} if there was no mapping
      */
-    @MayReturnNull
     public Object remove(final String headerName) {
         return map.remove(headerName);
     }

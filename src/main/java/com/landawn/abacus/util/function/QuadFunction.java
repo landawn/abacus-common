@@ -15,7 +15,6 @@
  */
 package com.landawn.abacus.util.function;
 
-import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.util.Throwables;
 
 /**
@@ -36,10 +35,11 @@ import com.landawn.abacus.util.Throwables;
  * @see java.util.function.Function
  * @see java.util.function.BiFunction
  * @see TriFunction
+ *
+ * <p>Refer to JDK API documentation at: <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html">https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a></p>
  */
 @FunctionalInterface
 public interface QuadFunction<A, B, C, D, R> extends Throwables.QuadFunction<A, B, C, D, R, RuntimeException> { //NOSONAR
-
     /**
      * Applies this function to the given arguments.
      *
@@ -49,15 +49,15 @@ public interface QuadFunction<A, B, C, D, R> extends Throwables.QuadFunction<A, 
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * QuadFunction<Integer, Integer, Integer, Integer, Integer> sum4 = 
+     * QuadFunction<Integer, Integer, Integer, Integer, Integer> sum4 =
      *     (a, b, c, d) -> a + b + c + d;
-     * 
-     * QuadFunction<String, String, String, String, Address> createAddress = 
+     *
+     * QuadFunction<String, String, String, String, Address> createAddress =
      *     (street, city, state, zip) -> new Address(street, city, state, zip);
-     * 
-     * QuadFunction<Double, Double, Double, Double, Double> calculateAverage = 
+     *
+     * QuadFunction<Double, Double, Double, Double, Double> calculateAverage =
      *     (a, b, c, d) -> (a + b + c + d) / 4.0;
-     * 
+     *
      * Integer total = sum4.apply(10, 20, 30, 40); // Returns 100
      * Address addr = createAddress.apply("123 Main St", "Springfield", "IL", "62701");
      * }</pre>
@@ -69,7 +69,6 @@ public interface QuadFunction<A, B, C, D, R> extends Throwables.QuadFunction<A, 
      * @return the function result
      */
     @Override
-    @MayReturnNull
     R apply(A a, B b, C c, D d);
 
     /**
@@ -84,24 +83,24 @@ public interface QuadFunction<A, B, C, D, R> extends Throwables.QuadFunction<A, 
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * QuadFunction<Integer, Integer, Integer, Integer, Integer> sum4 = 
+     * QuadFunction<Integer, Integer, Integer, Integer, Integer> sum4 =
      *     (a, b, c, d) -> a + b + c + d;
-     * Function<Integer, String> intToString = 
+     * Function<Integer, String> intToString =
      *     num -> "Total: " + num;
-     * 
-     * QuadFunction<Integer, Integer, Integer, Integer, String> sumAndFormat = 
+     *
+     * QuadFunction<Integer, Integer, Integer, Integer, String> sumAndFormat =
      *     sum4.andThen(intToString);
-     * 
+     *
      * String result = sumAndFormat.apply(10, 20, 30, 40); // Returns "Total: 100"
-     * 
+     *
      * // More complex example
-     * QuadFunction<User, Product, Integer, Double, Order> createOrder = 
-     *     (user, product, quantity, discount) -> 
+     * QuadFunction<User, Product, Integer, Double, Order> createOrder =
+     *     (user, product, quantity, discount) ->
      *         new Order(user, product, quantity, discount);
-     * Function<Order, OrderConfirmation> processOrder = 
+     * Function<Order, OrderConfirmation> processOrder =
      *     order -> orderService.process(order);
-     * 
-     * QuadFunction<User, Product, Integer, Double, OrderConfirmation> placeOrder = 
+     *
+     * QuadFunction<User, Product, Integer, Double, OrderConfirmation> placeOrder =
      *     createOrder.andThen(processOrder);
      * }</pre>
      *

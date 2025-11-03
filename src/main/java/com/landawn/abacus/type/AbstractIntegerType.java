@@ -21,7 +21,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
 
-import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.parser.JSONXMLSerializationConfig;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.N;
@@ -49,9 +48,7 @@ public abstract class AbstractIntegerType extends NumberType<Number> {
      * @param x the Number value to convert
      * @return the string representation of the integer value, or {@code null} if input is {@code null}
      */
-    @MayReturnNull
     @Override
-
     public String stringOf(final Number x) {
         if (x == null) {
             return null; // NOSONAR
@@ -69,13 +66,20 @@ public abstract class AbstractIntegerType extends NumberType<Number> {
      *   <li>Valid numeric strings are parsed to integer values</li>
      * </ul>
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * AbstractIntegerType type = TypeFactory.getType(Integer.class);
+     * Integer value1 = type.valueOf("42");      // returns 42
+     * Integer value2 = type.valueOf("1000");    // returns 1000
+     * Integer value3 = type.valueOf("100L");    // returns 100 (suffix stripped)
+     * Integer value4 = type.valueOf("");        // returns default value
+     * }</pre>
+     *
      * @param str the string to convert
      * @return the Integer value
      * @throws NumberFormatException if the string cannot be parsed as an integer
      */
-    @MayReturnNull
     @Override
-
     public Integer valueOf(final String str) {
         if (Strings.isEmpty(str)) {
             return (Integer) defaultValue();
@@ -100,18 +104,38 @@ public abstract class AbstractIntegerType extends NumberType<Number> {
      * Converts a character array to an Integer value.
      * Delegates to the {@link #parseInt(char[], int, int)} method for parsing.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * AbstractIntegerType type = TypeFactory.getType(Integer.class);
+     * char[] buffer = "12345".toCharArray();
+     * Integer value = type.valueOf(buffer, 0, 5); // returns 12345
+     * }</pre>
+     *
      * @param cbuf the character array to convert
      * @param offset the starting position in the array
      * @param len the number of characters to read
      * @return the Integer value, or default value if input is {@code null} or empty
      */
-    @MayReturnNull
     @Override
-
     public Integer valueOf(final char[] cbuf, final int offset, final int len) {
         return ((cbuf == null) || (len == 0)) ? ((Integer) defaultValue()) : (Integer) parseInt(cbuf, offset, len);
     }
 
+    /**
+     * Checks if this type represents an integer type.
+     * This method always returns {@code true} for integer types.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * AbstractIntegerType type = TypeFactory.getType(Integer.class);
+     * if (type.isInteger()) {
+     *     // Handle integer type specific logic
+     *     System.out.println("This is an integer type");
+     * }
+     * }</pre>
+     *
+     * @return {@code true}, indicating this is an integer type
+     */
     @Override
     public boolean isInteger() {
         return true;
@@ -139,7 +163,6 @@ public abstract class AbstractIntegerType extends NumberType<Number> {
      * @throws SQLException if a database access error occurs or the columnIndex is invalid
      */
     @Override
-    @MayReturnNull
     public Integer get(final ResultSet rs, final int columnIndex) throws SQLException {
         return rs.getInt(columnIndex);
     }
@@ -166,7 +189,6 @@ public abstract class AbstractIntegerType extends NumberType<Number> {
      * @throws SQLException if a database access error occurs or the columnLabel is not found
      */
     @Override
-    @MayReturnNull
     public Integer get(final ResultSet rs, final String columnLabel) throws SQLException {
         return rs.getInt(columnLabel);
     }

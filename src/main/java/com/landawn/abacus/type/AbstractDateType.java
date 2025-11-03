@@ -17,7 +17,6 @@ package com.landawn.abacus.type;
 import java.io.IOException;
 import java.util.Date;
 
-import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.parser.JSONXMLSerializationConfig;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.DateTimeFormat;
@@ -76,9 +75,7 @@ public abstract class AbstractDateType<T extends Date> extends AbstractType<T> {
      * @param x the Date value to convert
      * @return the formatted string representation of the date, or {@code null} if input is {@code null}
      */
-    @MayReturnNull
     @Override
-
     public String stringOf(final T x) {
         return (x == null) ? null : Dates.format(x);
     }

@@ -17,7 +17,6 @@ package com.landawn.abacus.type;
 import java.lang.reflect.Array;
 import java.util.Collection;
 
-import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.WD;
 
@@ -65,12 +64,12 @@ public abstract class AbstractArrayType<T> extends AbstractType<T> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String[] array = {"apple", "banana", "cherry"};
-     * ArrayType<String[]> type = TypeFactory.getType(String[].class);
+     * Type<String[]> type = TypeFactory.getType(String[].class);
      * List<String> list = type.array2Collection(array, ArrayList.class);
      * // list contains: ["apple", "banana", "cherry"]
      *
      * Integer[] numbers = {1, 2, 3, 4, 5};
-     * ArrayType<Integer[]> intType = TypeFactory.getType(Integer[].class);
+     * Type<Integer[]> intType = TypeFactory.getType(Integer[].class);
      * Set<Integer> set = intType.array2Collection(numbers, HashSet.class);
      * // set contains: [1, 2, 3, 4, 5]
      *
@@ -85,7 +84,6 @@ public abstract class AbstractArrayType<T> extends AbstractType<T> {
      * @return a new collection containing all elements from the array, or {@code null} if the input array is {@code null}
      * @throws IllegalArgumentException if the collection class cannot be instantiated
      */
-    @MayReturnNull
     @Override
     public <E> Collection<E> array2Collection(final T array, final Class<?> collClass) {
         if (array == null) {

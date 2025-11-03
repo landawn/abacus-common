@@ -26,7 +26,6 @@ import java.util.Map;
 import java.util.Objects;
 
 import com.landawn.abacus.annotation.JsonXmlField;
-import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.annotation.SuppressFBWarnings;
 import com.landawn.abacus.annotation.Type.EnumBy;
 import com.landawn.abacus.parser.JSONXMLSerializationConfig;
@@ -42,10 +41,35 @@ import com.landawn.abacus.util.Strings;
  * It supports both ordinal (numeric) and name (string) representations of enums,
  * and handles custom JSON/XML field names through annotations.
  *
+ * <p>EnumType instances are typically obtained through the TypeFactory and support conversion
+ * between enum values and their string/numeric representations. The type handler can be configured
+ * to use either the enum's ordinal value or its name for serialization.</p>
+ *
+ * <p><b>Usage Examples:</b></p>
+ * <pre>{@code
+ * // Define an enum
+ * enum Status { PENDING, ACTIVE, COMPLETED }
+ *
+ * // Get EnumType through TypeFactory
+ * Type<Status> statusType = TypeFactory.getType(Status.class);
+ *
+ * // Convert enum to string (by name)
+ * String str = statusType.stringOf(Status.ACTIVE);
+ * // Result: "ACTIVE"
+ *
+ * // Convert string to enum
+ * Status status = statusType.valueOf("COMPLETED");
+ * // Result: Status.COMPLETED
+ *
+ * // Get enum by ordinal
+ * Status firstStatus = statusType.valueOf("0");
+ * // Result: Status.PENDING
+ * }</pre>
+ *
  * @param <T> the enum type, must extend Enum&lt;T&gt;
  */
 @SuppressWarnings("java:S2160")
-public final class EnumType<T extends Enum<T>> extends SingleValueType<T> {
+final class EnumType<T extends Enum<T>> extends SingleValueType<T> {
     public static final String ENUM = Enum.class.getSimpleName();
 
     private static final String NULL = "null";
@@ -126,9 +150,7 @@ public final class EnumType<T extends Enum<T>> extends SingleValueType<T> {
      * @param x the enum value to convert. Can be {@code null}.
      * @return The string representation of the enum, or {@code null} if input is null
      */
-    @MayReturnNull
     @Override
-
     public String stringOf(final T x) {
         return (jsonValueType == null) ? (x == null ? null : x.name()) : super.stringOf(x);
     }
@@ -146,9 +168,7 @@ public final class EnumType<T extends Enum<T>> extends SingleValueType<T> {
      * @return The enum value corresponding to the string, or {@code null} if input is null/empty
      * @throws IllegalArgumentException if the string doesn't match any enum value
      */
-    @MayReturnNull
     @Override
-
     public T valueOf(final String str) {
         if (jsonValueType == null) {
             if (Strings.isEmpty(str) || (!hasNull && NULL.equals(str))) {
@@ -175,7 +195,6 @@ public final class EnumType<T extends Enum<T>> extends SingleValueType<T> {
      * @return The enum constant with the specified ordinal, or {@code null} if value is 0 and no enum has ordinal 0
      * @throws IllegalArgumentException if no enum constant exists with the given ordinal (except for 0)
      */
-    @MayReturnNull
     public T valueOf(final int value) {
         final T result = numberEnum.get(value);
 
@@ -197,9 +216,7 @@ public final class EnumType<T extends Enum<T>> extends SingleValueType<T> {
      * @return The enum value at the specified column, or {@code null} if the column value is SQL NULL
      * @throws SQLException if a database access error occurs or the column index is invalid
      */
-    @MayReturnNull
     @Override
-
     public T get(final ResultSet rs, final int columnIndex) throws SQLException {
         if (jsonValueType == null) {
             if (enumBy == EnumBy.ORDINAL) {
@@ -223,9 +240,7 @@ public final class EnumType<T extends Enum<T>> extends SingleValueType<T> {
      * @return The enum value in the specified column, or {@code null} if the column value is SQL NULL
      * @throws SQLException if a database access error occurs or the column label is not found
      */
-    @MayReturnNull
     @Override
-
     public T get(final ResultSet rs, final String columnLabel) throws SQLException {
         if (jsonValueType == null) {
             if (enumBy == EnumBy.ORDINAL) {

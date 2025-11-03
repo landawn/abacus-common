@@ -16,7 +16,6 @@ package com.landawn.abacus.type;
 
 import java.util.Map;
 
-import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.parser.JSONDeserializationConfig;
 import com.landawn.abacus.parser.JSONDeserializationConfig.JDC;
 import com.landawn.abacus.util.ClassUtil;
@@ -33,7 +32,7 @@ import com.landawn.abacus.util.WD;
  * @param <E> the element type
  */
 @SuppressWarnings("java:S2160")
-public class MultisetType<E> extends AbstractType<Multiset<E>> {
+class MultisetType<E> extends AbstractType<Multiset<E>> {
 
     private final String declaringName;
 
@@ -60,6 +59,13 @@ public class MultisetType<E> extends AbstractType<Multiset<E>> {
      * Returns the declaring name of this Multiset type.
      * The declaring name includes the fully qualified class name of the element type.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * MultisetType<String> type = new MultisetType<>("String");
+     * String name = type.declaringName();
+     * // Returns: "Multiset<String>"
+     * }</pre>
+     *
      * @return The declaring name in format "Multiset&lt;ElementDeclaringName&gt;"
      */
     @Override
@@ -70,6 +76,13 @@ public class MultisetType<E> extends AbstractType<Multiset<E>> {
     /**
      * Returns the Class object representing the Multiset type.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * MultisetType<String> type = new MultisetType<>("String");
+     * Class<Multiset<String>> clazz = type.clazz();
+     * // Returns: Multiset.class
+     * }</pre>
+     *
      * @return The Class object for Multiset
      */
     @Override
@@ -77,6 +90,18 @@ public class MultisetType<E> extends AbstractType<Multiset<E>> {
         return (Class<Multiset<E>>) typeClass;
     }
 
+    /**
+     * Returns the type handler for the elements contained in this multiset.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * MultisetType<String> type = new MultisetType<>("String");
+     * Type<String> elemType = type.getElementType();
+     * // Returns: StringType instance
+     * }</pre>
+     *
+     * @return the Type instance representing the element type of this multiset
+     */
     @Override
     public Type<E> getElementType() {
         return elementType;
@@ -85,6 +110,14 @@ public class MultisetType<E> extends AbstractType<Multiset<E>> {
     /**
      * Gets the parameter types for this generic Multiset type.
      * The array contains a single element: the element type.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * MultisetType<String> type = new MultisetType<>("String");
+     * Type<?>[] paramTypes = type.getParameterTypes();
+     * // Returns: [StringType]
+     * // paramTypes[0] is the element type (String)
+     * }</pre>
      *
      * @return An array containing the element type
      */
@@ -120,11 +153,25 @@ public class MultisetType<E> extends AbstractType<Multiset<E>> {
      * The Multiset is first converted to a Map where each element maps to its count,
      * then serialized as JSON.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * MultisetType<String> type = new MultisetType<>("String");
+     * Multiset<String> multiset = N.newMultiset();
+     * multiset.add("apple", 3);
+     * multiset.add("orange", 2);
+     * multiset.add("banana", 1);
+     *
+     * String json = type.stringOf(multiset);
+     * // Returns: {"apple":3,"orange":2,"banana":1}
+     *
+     * json = type.stringOf(null);
+     * // Returns: null
+     * }</pre>
+     *
      * @param x The Multiset object to convert
      * @return The JSON string representation of the Multiset as a map of element to count, or {@code null} if the input is null
      */
     @Override
-    @MayReturnNull
     public String stringOf(final Multiset<E> x) {
         return (x == null) ? null : Utils.jsonParser.serialize(x.toMap(), Utils.jsc);
     }
@@ -133,10 +180,24 @@ public class MultisetType<E> extends AbstractType<Multiset<E>> {
      * Parses a JSON string to create a Multiset object.
      * The string should represent a JSON object where each key is an element and the value is its count.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * MultisetType<String> type = new MultisetType<>("String");
+     *
+     * Multiset<String> multiset = type.valueOf("{\"apple\":3,\"orange\":2,\"banana\":1}");
+     * // Returns: Multiset with "apple" having count 3, "orange" count 2, "banana" count 1
+     * // multiset.count("apple") returns 3
+     *
+     * multiset = type.valueOf(null);
+     * // Returns: null
+     *
+     * multiset = type.valueOf("{}");
+     * // Returns: empty Multiset
+     * }</pre>
+     *
      * @param str The JSON string to parse
      * @return The parsed Multiset object, or {@code null} if the input is {@code null} or empty
      */
-    @MayReturnNull
     @Override
     public Multiset<E> valueOf(final String str) {
         if (Strings.isEmpty(str) || Strings.isBlank(str)) {

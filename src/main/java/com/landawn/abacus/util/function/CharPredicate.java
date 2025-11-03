@@ -11,7 +11,6 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-
 package com.landawn.abacus.util.function;
 
 import com.landawn.abacus.util.Throwables;
@@ -19,29 +18,27 @@ import com.landawn.abacus.util.Throwables;
 /**
  * Represents a predicate (boolean-valued function) of one char-valued argument.
  * This is the char-consuming primitive type specialization of {@link java.util.function.Predicate}.
- * 
+ *
  * <p>This is a functional interface whose functional method is {@link #test(char)}.
- * 
+ *
  * @see java.util.function.Predicate
+ *
+ * <p>Refer to JDK API documentation at: <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html">https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a></p>
  */
 @FunctionalInterface
 public interface CharPredicate extends Throwables.CharPredicate<RuntimeException> { //NOSONAR
-
     /**
      * A predicate that always evaluates to {@code true}, regardless of the input char value.
      */
     CharPredicate ALWAYS_TRUE = value -> true;
-
     /**
      * A predicate that always evaluates to {@code false}, regardless of the input char value.
      */
     CharPredicate ALWAYS_FALSE = value -> false;
-
     /**
      * A predicate that tests if the char value is equal to the {@code null} character ('\0').
      */
     CharPredicate IS_ZERO = value -> value == 0;
-
     /**
      * A predicate that tests if the char value is not equal to the {@code null} character ('\0').
      */
@@ -50,8 +47,14 @@ public interface CharPredicate extends Throwables.CharPredicate<RuntimeException
     /**
      * Evaluates this predicate on the given char argument.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * CharPredicate isDigit = Character::isDigit;
+     * boolean result = isDigit.test('5'); // Returns true
+     * }</pre>
+     *
      * @param value the char input argument
-     * @return {@code true} if the input argument matches the predicate, otherwise {@code false}
+     * @return {@code true} if the input argument matches the predicate, {@code false} otherwise
      */
     @Override
     boolean test(char value);
@@ -171,7 +174,6 @@ public interface CharPredicate extends Throwables.CharPredicate<RuntimeException
      * @param minValue the exclusive lower bound
      * @param maxValue the exclusive upper bound
      * @return a predicate that tests if the input is between {@code minValue} and {@code maxValue} (exclusive)
-     * @throws IllegalArgumentException if {@code minValue} is greater than or equal to {@code maxValue}
      */
     static CharPredicate between(final char minValue, final char maxValue) {
         return value -> value > minValue && value < maxValue;

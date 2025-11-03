@@ -42,7 +42,6 @@ import com.landawn.abacus.parser.XMLParser;
  *   <li>Default JSON serialization configuration</li>
  *   <li>Default JSON deserialization configuration</li>
  * </ul>
- *
  */
 final class Utils {
 

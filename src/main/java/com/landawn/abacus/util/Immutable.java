@@ -15,7 +15,7 @@
 package com.landawn.abacus.util;
 
 /**
- * A marker interface for immutable data structures in the Abacus framework.
+ * A marker interface for immutable data structures in the abacus-common framework.
  * Classes implementing this interface indicate that their instances are immutable
  * and cannot be modified after creation.
  * 
@@ -52,7 +52,6 @@ package com.landawn.abacus.util;
  * @see ImmutableList
  * @see ImmutableSet
  * @see ImmutableMap
- * @since 1.0
  */
 @com.landawn.abacus.annotation.Immutable
 public interface Immutable {

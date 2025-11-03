@@ -38,25 +38,26 @@ import com.landawn.abacus.annotation.Type.EnumBy;
  * 
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
+ * import java.util.Date;
+ *
  * public class User {
  *     @JsonXmlField(name = "user_id")
  *     private Long id;
- *     
+ *
  *     @JsonXmlField(name = "full_name", alias = {"name", "userName"})
  *     private String fullName;
- *     
+ *
  *     @JsonXmlField(dateFormat = "yyyy-MM-dd", timeZone = "UTC")
  *     private Date birthDate;
- *     
+ *
  *     @JsonXmlField(numberFormat = "#.##")
  *     private Double salary;
- *     
+ *
  *     @JsonXmlField(ignore = true)
  *     private String password;
  * }
  * }</pre>
  * 
- * @since 2019
  * @see JsonXmlConfig
  * @see JsonXmlCreator
  * @see JsonXmlValue

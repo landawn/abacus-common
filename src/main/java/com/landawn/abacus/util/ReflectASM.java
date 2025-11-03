@@ -81,7 +81,6 @@ import com.esotericsoftware.reflectasm.MethodAccess;
  * @see FieldAccess
  * @see MethodAccess
  * @see ConstructorAccess
- * @since 1.0
  */
 final class ReflectASM<T> {
 

@@ -20,7 +20,6 @@ import java.util.concurrent.TimeUnit;
 
 /**
  * <p>Note: It's copied from Google Guava under Apache License 2.0 and may be modified.</p>
- *
  */
 abstract class SmoothRateLimiter extends RateLimiter {
     /*

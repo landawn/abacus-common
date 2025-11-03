@@ -17,7 +17,6 @@ package com.landawn.abacus.type;
 import java.io.IOException;
 import java.util.Collection;
 
-import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.parser.JSONXMLSerializationConfig;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.N;
@@ -25,7 +24,7 @@ import com.landawn.abacus.util.Strings;
 import com.landawn.abacus.util.WD;
 
 @SuppressWarnings("java:S2160")
-public final class PrimitiveShortArrayType extends AbstractPrimitiveArrayType<short[]> {
+final class PrimitiveShortArrayType extends AbstractPrimitiveArrayType<short[]> {
 
     public static final String SHORT_ARRAY = short[].class.getSimpleName();
 
@@ -44,7 +43,7 @@ public final class PrimitiveShortArrayType extends AbstractPrimitiveArrayType<sh
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * PrimitiveShortArrayType type = new PrimitiveShortArrayType();
+     * Type<short[]> type = TypeFactory.getType(short[].class);
      * Class clazz = type.clazz();
      * System.out.println(clazz.getName()); // Output: [S
      * System.out.println(clazz.isArray()); // Output: true
@@ -54,7 +53,6 @@ public final class PrimitiveShortArrayType extends AbstractPrimitiveArrayType<sh
      */
     @SuppressWarnings({ "rawtypes", "unchecked" })
     @Override
-    @MayReturnNull
     public Class clazz() {
         return short[].class;
     }
@@ -65,7 +63,7 @@ public final class PrimitiveShortArrayType extends AbstractPrimitiveArrayType<sh
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * PrimitiveShortArrayType type = new PrimitiveShortArrayType();
+     * Type<short[]> type = TypeFactory.getType(short[].class);
      * Type<Short> elementType = type.getElementType();
      * System.out.println(elementType.name()); // Output: short
      * }</pre>
@@ -82,7 +80,7 @@ public final class PrimitiveShortArrayType extends AbstractPrimitiveArrayType<sh
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * PrimitiveShortArrayType type = new PrimitiveShortArrayType();
+     * Type<short[]> type = TypeFactory.getType(short[].class);
      * Type<Short>[] paramTypes = type.getParameterTypes();
      * System.out.println(paramTypes.length); // Output: 1
      * System.out.println(paramTypes[0].name()); // Output: short
@@ -102,7 +100,7 @@ public final class PrimitiveShortArrayType extends AbstractPrimitiveArrayType<sh
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * PrimitiveShortArrayType type = new PrimitiveShortArrayType();
+     * Type<short[]> type = TypeFactory.getType(short[].class);
      * short[] array = {1, 2, 3};
      * String str = type.stringOf(array);
      * System.out.println(str); // Output: [1, 2, 3]
@@ -117,9 +115,7 @@ public final class PrimitiveShortArrayType extends AbstractPrimitiveArrayType<sh
      * @return the string representation of the array, or {@code null} if the input array is {@code null}.
      *         Returns "[]" for empty arrays.
      */
-    @MayReturnNull
     @Override
-
     public String stringOf(final short[] x) {
         if (x == null) {
             return null; // NOSONAR
@@ -136,7 +132,7 @@ public final class PrimitiveShortArrayType extends AbstractPrimitiveArrayType<sh
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * PrimitiveShortArrayType type = new PrimitiveShortArrayType();
+     * Type<short[]> type = TypeFactory.getType(short[].class);
      * short[] array = type.valueOf("[1, 2, 3]");
      * System.out.println(array.length); // Output: 3
      * System.out.println(array[0]); // Output: 1
@@ -153,7 +149,6 @@ public final class PrimitiveShortArrayType extends AbstractPrimitiveArrayType<sh
      *         Returns an empty array for empty string or "[]".
      * @throws NumberFormatException if any element in the string cannot be parsed as a short
      */
-    @MayReturnNull
     @Override
     public short[] valueOf(final String str) {
         if (Strings.isEmpty(str) || Strings.isBlank(str)) {
@@ -182,7 +177,7 @@ public final class PrimitiveShortArrayType extends AbstractPrimitiveArrayType<sh
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * PrimitiveShortArrayType type = new PrimitiveShortArrayType();
+     * Type<short[]> type = TypeFactory.getType(short[].class);
      * short[] array = {10, 20, 30};
      * StringBuilder sb = new StringBuilder("Values: ");
      * type.appendTo(sb, array);
@@ -223,7 +218,7 @@ public final class PrimitiveShortArrayType extends AbstractPrimitiveArrayType<sh
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * PrimitiveShortArrayType type = new PrimitiveShortArrayType();
+     * Type<short[]> type = TypeFactory.getType(short[].class);
      * short[] array = {100, 200, 300};
      * CharacterWriter writer = new CharacterWriter();
      * JSONXMLSerializationConfig<?> config = new JSONXMLSerializationConfig<>();
@@ -265,7 +260,7 @@ public final class PrimitiveShortArrayType extends AbstractPrimitiveArrayType<sh
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * PrimitiveShortArrayType type = new PrimitiveShortArrayType();
+     * Type<short[]> type = TypeFactory.getType(short[].class);
      * List<Short> list = Arrays.asList((short) 5, (short) 10, (short) 15);
      * short[] array = type.collection2Array(list);
      * System.out.println(Arrays.toString(array)); // Output: [5, 10, 15]
@@ -279,7 +274,6 @@ public final class PrimitiveShortArrayType extends AbstractPrimitiveArrayType<sh
      *         or {@code null} if the input collection is null
      * @throws ClassCastException if any element in the collection is not a Short
      */
-    @MayReturnNull
     @Override
     public short[] collection2Array(final Collection<?> c) {
         if (c == null) {
@@ -303,7 +297,7 @@ public final class PrimitiveShortArrayType extends AbstractPrimitiveArrayType<sh
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * PrimitiveShortArrayType type = new PrimitiveShortArrayType();
+     * Type<short[]> type = TypeFactory.getType(short[].class);
      * short[] array = {1, 2, 3};
      * List<Short> list = new ArrayList<>();
      * type.array2Collection(array, list);
@@ -337,7 +331,7 @@ public final class PrimitiveShortArrayType extends AbstractPrimitiveArrayType<sh
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * PrimitiveShortArrayType type = new PrimitiveShortArrayType();
+     * Type<short[]> type = TypeFactory.getType(short[].class);
      * short[] array1 = {1, 2, 3};
      * short[] array2 = {1, 2, 3};
      * int hash1 = type.hashCode(array1);
@@ -363,7 +357,7 @@ public final class PrimitiveShortArrayType extends AbstractPrimitiveArrayType<sh
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * PrimitiveShortArrayType type = new PrimitiveShortArrayType();
+     * Type<short[]> type = TypeFactory.getType(short[].class);
      * short[] array1 = {1, 2, 3};
      * short[] array2 = {1, 2, 3};
      * short[] array3 = {1, 2, 4};

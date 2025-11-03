@@ -50,47 +50,177 @@ import com.landawn.abacus.util.stream.ObjIteratorEx;
 import com.landawn.abacus.util.stream.Stream;
 
 /**
- * A two-dimensional table data structure that stores data in cells identified by row and column keys.
- * <p>
- * This class provides a flexible way to work with tabular data where each cell is uniquely identified
- * by a row key and column key combination. The Sheet supports various operations including:
- * </p>
+ * A two-dimensional tabular data structure that stores values in cells identified by row and column keys,
+ * providing a flexible and powerful API for working with structured data. This final class combines the
+ * functionality of spreadsheets and database tables, enabling efficient manipulation, transformation,
+ * and analysis of tabular data with strongly-typed row keys, column keys, and cell values.
+ *
+ * <p>Sheet provides a rich set of operations for data manipulation including cell-level access, bulk
+ * row/column operations, sorting, filtering, transposition, and export capabilities. It serves as a
+ * bridge between raw data structures and higher-level data processing frameworks, making it ideal
+ * for data analysis, reporting, and transformation scenarios.</p>
+ *
+ * <p><b>Key Features:</b>
  * <ul>
- *   <li>Cell-level operations: get, put, remove values</li>
- *   <li>Row/Column operations: add, remove, rename, sort rows and columns</li>
- *   <li>Data transformation: transpose, merge, update values</li>
- *   <li>Export capabilities: to arrays, datasets, and formatted output</li>
- *   <li>Stream operations for functional-style data processing</li>
+ *   <li><b>Two-Dimensional Structure:</b> Organizes data in a grid with row and column identifiers</li>
+ *   <li><b>Strongly Typed:</b> Separate type parameters for row keys, column keys, and cell values</li>
+ *   <li><b>Flexible Access:</b> Access cells by keys or indices with efficient lookup operations</li>
+ *   <li><b>Rich Operations:</b> Comprehensive API for sorting, filtering, merging, and transforming data</li>
+ *   <li><b>Stream Integration:</b> Full support for functional programming with Stream operations</li>
+ *   <li><b>Export Capabilities:</b> Convert to arrays, datasets, and formatted output</li>
+ *   <li><b>Immutability Support:</b> Freeze functionality for creating immutable snapshots</li>
+ *   <li><b>Memory Efficient:</b> Optimized internal storage with column-wise organization</li>
  * </ul>
- * 
- * <p>The Sheet can be frozen to prevent modifications, making it immutable.</p>
- * 
- * <p><b>Note:</b> This implementation is not thread-safe. If multiple threads access a sheet concurrently, and at least one of the threads modifies the sheet, it must be synchronized externally.</p>
- * 
- * <p>Notation: {@code R} = Row, {@code C} = Column, {@code H} = Horizontal, {@code V} = Vertical</p>
+ *
+ * <p><b>Common Use Cases:</b>
+ * <ul>
+ *   <li><b>Data Analysis:</b> Statistical analysis and data exploration with tabular structures</li>
+ *   <li><b>Report Generation:</b> Creating formatted reports and pivot tables</li>
+ *   <li><b>Data Transformation:</b> ETL operations, data cleaning, and format conversion</li>
+ *   <li><b>Configuration Management:</b> Structured configuration data with key-value mappings</li>
+ *   <li><b>Matrix Operations:</b> Mathematical operations on two-dimensional data</li>
+ *   <li><b>Spreadsheet-like Operations:</b> Programmatic spreadsheet functionality</li>
+ *   <li><b>Database Result Processing:</b> In-memory manipulation of query results</li>
+ * </ul>
  *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
- * // Create a sheet with integer values
- * Sheet<String, String, Integer> sheet = Sheet.rows(
- *     List.of("row1", "row2"),
- *     List.of("col1", "col2", "col3"),
+ * // Creating sheets with different data types
+ * Sheet<String, String, Integer> scores = Sheet.rows(
+ *     Arrays.asList("Student1", "Student2", "Student3"),
+ *     Arrays.asList("Math", "Science", "English"),
  *     new Integer[][] {
- *         {1, 2, 3},
- *         {4, 5, 6}
+ *         {85, 90, 88},
+ *         {92, 87, 91},
+ *         {78, 85, 89}
  *     }
  * );
- * 
- * // Access and modify values
- * Integer value = sheet.get("row1", "col2"); // returns 2
- * sheet.put("row2", "col3", 10);
+ *
+ * // Cell operations
+ * Integer mathScore = scores.get("Student1", "Math");  // 85
+ * scores.put("Student2", "Science", 95);               // Update cell
+ * boolean hasScore = scores.contains("Student3", "English");
+ *
+ * // Row and column operations
+ * List<Integer> student1Scores = scores.getRow("Student1");
+ * scores.addRow("Student4", Arrays.asList(88, 92, 87));
+ * scores.removeColumn("English");
+ * scores.sortByColumn("Math", Comparator.reverseOrder());
+ *
+ * // Bulk operations and transformations
+ * scores.updateAll(score -> score + 5);  // Add 5 to all scores
+ * scores.replaceIf(score -> score < 80, 80);  // Set minimum score
+ * Sheet<String, String, Integer> transposed = scores.transpose();
+ *
+ * // Stream operations for functional programming
+ * double averageScore = scores.streamH()
+ *     .filter(Objects::nonNull)
+ *     .mapToInt(Integer::intValue)
+ *     .average()
+ *     .orElse(0.0);
+ *
+ * // Export and conversion
+ * Dataset dataset = scores.toDatasetH();
+ * Object[][] array = scores.toArrayH();
+ * scores.println();  // Pretty-print to console
+ *
+ * // Creating immutable snapshots
+ * Sheet<String, String, Integer> frozen = scores.clone(true);
+ * frozen.freeze();  // Prevents further modifications
  * }</pre>
  *
- * @param <R> the type of the row keys
- * @param <C> the type of the column keys
- * @param <V> the type of the values stored in the cells
+ * <p><b>Data Organization:</b>
+ * <ul>
+ *   <li><b>Row Keys (R):</b> Unique identifiers for rows, can be any type</li>
+ *   <li><b>Column Keys (C):</b> Unique identifiers for columns, can be any type</li>
+ *   <li><b>Cell Values (V):</b> Data stored in cells, can be any type including null</li>
+ *   <li><b>Internal Storage:</b> Column-wise organization for memory efficiency</li>
+ * </ul>
  *
- * @see com.landawn.abacus.util.Dataset
+ * <p><b>Factory Methods:</b>
+ * <ul>
+ *   <li>{@link #empty()} - Create an empty sheet</li>
+ *   <li>{@link #rows(Collection, Collection, Object[][])} - Create from row-wise data</li>
+ *   <li>{@link #columns(Collection, Collection, Object[][])} - Create from column-wise data</li>
+ *   <li>Constructors for various initialization scenarios</li>
+ * </ul>
+ *
+ * <p><b>Access Patterns:</b>
+ * <ul>
+ *   <li><b>By Keys:</b> {@code get(rowKey, columnKey)}, {@code put(rowKey, columnKey, value)}</li>
+ *   <li><b>By Indices:</b> {@code get(rowIndex, columnIndex)}, {@code put(rowIndex, columnIndex, value)}</li>
+ *   <li><b>By Point:</b> {@code get(point)}, {@code put(point, value)} for coordinate-based access</li>
+ *   <li><b>Bulk Access:</b> {@code getRow()}, {@code getColumn()}, {@code setRow()}, {@code setColumn()}</li>
+ * </ul>
+ *
+ * <p><b>Stream Operations:</b>
+ * <ul>
+ *   <li><b>Horizontal Streaming:</b> {@code streamH()}, {@code cellsH()} - Row-by-row processing</li>
+ *   <li><b>Vertical Streaming:</b> {@code streamV()}, {@code cellsV()} - Column-by-column processing</li>
+ *   <li><b>Row Streaming:</b> {@code streamR()}, {@code rows()} - Stream of rows</li>
+ *   <li><b>Column Streaming:</b> {@code streamC()}, {@code columns()} - Stream of columns</li>
+ * </ul>
+ *
+ * <p><b>Performance Characteristics:</b>
+ * <ul>
+ *   <li>Cell access: O(1) average time with hash-based key lookup</li>
+ *   <li>Row/column operations: O(n) where n is the number of cells in row/column</li>
+ *   <li>Sorting: O(n log n) where n depends on the sort dimension</li>
+ *   <li>Memory usage: O(r × c) where r is rows and c is columns</li>
+ *   <li>Column-wise storage provides cache-friendly access patterns</li>
+ * </ul>
+ *
+ * <p><b>Thread Safety:</b>
+ * Sheet instances are <b>not thread-safe</b>. For concurrent access:
+ * <ul>
+ *   <li>Use external synchronization for write operations</li>
+ *   <li>Read operations can be safely performed concurrently if no writes occur</li>
+ *   <li>Use {@link #freeze()} to create immutable instances for safe sharing</li>
+ *   <li>Consider creating thread-local copies using {@link #clone()}</li>
+ * </ul>
+ *
+ * <p><b>Memory Management:</b>
+ * <ul>
+ *   <li>Use {@link #trimToSize()} to reduce memory footprint after bulk operations</li>
+ *   <li>Use {@link #clear()} to release all data when sheet is no longer needed</li>
+ *   <li>Frozen sheets can share underlying data structures for memory efficiency</li>
+ *   <li>Consider using primitive types for values to reduce object overhead</li>
+ * </ul>
+ *
+ * <p><b>Integration Points:</b>
+ * <ul>
+ *   <li><b>{@link Dataset}:</b> Convert to/from Dataset for advanced data processing</li>
+ *   <li><b>{@link Stream}:</b> Functional programming operations on sheet data</li>
+ *   <li><b>Arrays:</b> Export to 2D arrays for mathematical operations</li>
+ *   <li><b>Collections Framework:</b> Maps and lists for row/column access</li>
+ * </ul>
+ *
+ * <p><b>Best Practices:</b>
+ * <ul>
+ *   <li>Use meaningful row and column key types for better code readability</li>
+ *   <li>Freeze sheets when sharing between components to prevent accidental modifications</li>
+ *   <li>Use appropriate value types for better memory efficiency and type safety</li>
+ *   <li>Consider using streaming operations for large datasets to manage memory</li>
+ *   <li>Use bulk operations instead of cell-by-cell modifications for better performance</li>
+ * </ul>
+ *
+ * <p><b>Notation Guide:</b>
+ * <ul>
+ *   <li><b>R</b> = Row operations (horizontal direction)</li>
+ *   <li><b>C</b> = Column operations (vertical direction)</li>
+ *   <li><b>H</b> = Horizontal processing (row-by-row)</li>
+ *   <li><b>V</b> = Vertical processing (column-by-column)</li>
+ * </ul>
+ *
+ * @param <R> the type of row keys used to identify rows in the sheet
+ * @param <C> the type of column keys used to identify columns in the sheet  
+ * @param <V> the type of values stored in the cells of the sheet
+ *
+ * @see Dataset
+ * @see Stream
+ * @see Cloneable
+ * @see Point
+ * @see Cell
  */
 public final class Sheet<R, C, V> implements Cloneable {
 
@@ -183,7 +313,7 @@ public final class Sheet<R, C, V> implements Cloneable {
      *
      * @param rowKeySet the collection of row keys for the Sheet; must not contain {@code null} or duplicate values
      * @param columnKeySet the collection of column keys for the Sheet; must not contain {@code null} or duplicate values
-     * @param rows the initial data as a 2D array where rows[i][j] is the value at row i, column j;
+     * @param rows the initial data as a two-dimensional array where rows[i][j] is the value at row i, column j;
      *             must have length equal to rowKeySet size, and each inner array must have length equal to columnKeySet size
      * @throws IllegalArgumentException if any row/column keys are {@code null} or duplicated, or if array dimensions don't match the key sets
      */
@@ -272,7 +402,7 @@ public final class Sheet<R, C, V> implements Cloneable {
      * @param <V> the type of the values stored in the cells
      * @param rowKeySet the collection of row keys for the Sheet; must not contain {@code null} or duplicate values
      * @param columnKeySet the collection of column keys for the Sheet; must not contain {@code null} or duplicate values
-     * @param rows the data as a 2D array where each inner array represents a row
+     * @param rows the data as a two-dimensional array where each inner array represents a row
      * @return a new Sheet with the specified keys and data
      * @throws IllegalArgumentException if any keys are {@code null} or duplicated, or dimensions don't match
      */
@@ -370,7 +500,7 @@ public final class Sheet<R, C, V> implements Cloneable {
      * @param <V> the type of the values stored in the cells
      * @param rowKeySet the collection of row keys for the Sheet; must not contain {@code null} or duplicate values
      * @param columnKeySet the collection of column keys for the Sheet; must not contain {@code null} or duplicate values
-     * @param columns the data as a 2D array where each inner array represents a column
+     * @param columns the data as a two-dimensional array where each inner array represents a column
      * @return a new Sheet with the specified keys and data
      * @throws IllegalArgumentException if any keys are {@code null} or duplicated, or dimensions don't match
      */

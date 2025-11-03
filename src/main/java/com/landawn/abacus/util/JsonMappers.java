@@ -78,7 +78,6 @@ import com.fasterxml.jackson.databind.json.JsonMapper;
  * @see TypeReference
  * @see SerializationFeature
  * @see DeserializationFeature
- * @since 1.0
  */
 public final class JsonMappers {
     private static final int POOL_SIZE = 128;

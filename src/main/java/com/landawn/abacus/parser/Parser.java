@@ -92,7 +92,7 @@ public interface Parser<SC extends SerializationConfig<?>, DC extends Deserializ
      * }</pre>
      *
      * @param obj the object to serialize (may be {@code null} depending on implementation)
-     * @param config the serialization configuration to use (must not be null)
+     * @param config the serialization configuration to use (may be {@code null} for default behavior)
      * @return the serialized string representation
      */
     String serialize(Object obj, SC config);
@@ -110,7 +110,7 @@ public interface Parser<SC extends SerializationConfig<?>, DC extends Deserializ
      * }</pre>
      *
      * @param obj the object to serialize (may be {@code null} depending on implementation)
-     * @param output the output file to write to (must not be null)
+     * @param output the output file to write to (must not be {@code null})
      * @throws UncheckedIOException if an I/O error occurs during file writing
      */
     void serialize(Object obj, File output) throws UncheckedIOException;
@@ -129,8 +129,8 @@ public interface Parser<SC extends SerializationConfig<?>, DC extends Deserializ
      * }</pre>
      *
      * @param obj the object to serialize (may be {@code null} depending on implementation)
-     * @param config the serialization configuration to use (must not be null)
-     * @param output the output file to write to (must not be null)
+     * @param config the serialization configuration to use (may be {@code null} for default behavior)
+     * @param output the output file to write to (must not be {@code null})
      * @throws UncheckedIOException if an I/O error occurs during file writing
      */
     void serialize(Object obj, SC config, File output) throws UncheckedIOException;
@@ -150,7 +150,7 @@ public interface Parser<SC extends SerializationConfig<?>, DC extends Deserializ
      * }</pre>
      *
      * @param obj the object to serialize (may be {@code null} depending on implementation)
-     * @param output the output stream to write to (must not be null)
+     * @param output the output stream to write to (must not be {@code null})
      * @throws UncheckedIOException if an I/O error occurs during stream writing
      */
     void serialize(Object obj, OutputStream output) throws UncheckedIOException;
@@ -172,8 +172,8 @@ public interface Parser<SC extends SerializationConfig<?>, DC extends Deserializ
      * }</pre>
      *
      * @param obj the object to serialize (may be {@code null} depending on implementation)
-     * @param config the serialization configuration to use (must not be null)
-     * @param output the output stream to write to (must not be null)
+     * @param config the serialization configuration to use (may be {@code null} for default behavior)
+     * @param output the output stream to write to (must not be {@code null})
      * @throws UncheckedIOException if an I/O error occurs during stream writing
      */
     void serialize(Object obj, SC config, OutputStream output) throws UncheckedIOException;
@@ -193,7 +193,7 @@ public interface Parser<SC extends SerializationConfig<?>, DC extends Deserializ
      * }</pre>
      *
      * @param obj the object to serialize (may be {@code null} depending on implementation)
-     * @param output the writer to write to (must not be null)
+     * @param output the writer to write to (must not be {@code null})
      * @throws UncheckedIOException if an I/O error occurs during writing
      */
     void serialize(Object obj, Writer output) throws UncheckedIOException;
@@ -215,8 +215,8 @@ public interface Parser<SC extends SerializationConfig<?>, DC extends Deserializ
      * }</pre>
      *
      * @param obj the object to serialize (may be {@code null} depending on implementation)
-     * @param config the serialization configuration to use (must not be null)
-     * @param output the writer to write to (must not be null)
+     * @param config the serialization configuration to use (may be {@code null} for default behavior)
+     * @param output the writer to write to (must not be {@code null})
      * @throws UncheckedIOException if an I/O error occurs during writing
      */
     void serialize(Object obj, SC config, Writer output) throws UncheckedIOException;
@@ -235,8 +235,8 @@ public interface Parser<SC extends SerializationConfig<?>, DC extends Deserializ
      * }</pre>
      *
      * @param <T> the target type
-     * @param source the source string to deserialize from (must not be null)
-     * @param targetClass the class of the object to create (must not be null)
+     * @param source the source string to deserialize from (must not be {@code null})
+     * @param targetClass the class of the object to create (must not be {@code null})
      * @return the deserialized object instance
      */
     <T> T deserialize(String source, Class<? extends T> targetClass);
@@ -257,9 +257,9 @@ public interface Parser<SC extends SerializationConfig<?>, DC extends Deserializ
      * }</pre>
      *
      * @param <T> the target type
-     * @param source the source string to deserialize from (must not be null)
-     * @param config the deserialization configuration to use (must not be null)
-     * @param targetClass the class of the object to create (must not be null)
+     * @param source the source string to deserialize from (must not be {@code null})
+     * @param config the deserialization configuration to use (may be {@code null} for default behavior)
+     * @param targetClass the class of the object to create (must not be {@code null})
      * @return the deserialized object instance
      */
     <T> T deserialize(String source, DC config, Class<? extends T> targetClass);
@@ -278,7 +278,7 @@ public interface Parser<SC extends SerializationConfig<?>, DC extends Deserializ
      *
      * @param <T> the target type
      * @param source the source file to read from (must not be {@code null} and must exist)
-     * @param targetClass the class of the object to create (must not be null)
+     * @param targetClass the class of the object to create (must not be {@code null})
      * @return the deserialized object instance
      * @throws UncheckedIOException if an I/O error occurs or the file doesn't exist
      */
@@ -300,8 +300,8 @@ public interface Parser<SC extends SerializationConfig<?>, DC extends Deserializ
      *
      * @param <T> the target type
      * @param source the source file to read from (must not be {@code null} and must exist)
-     * @param config the deserialization configuration to use (must not be null)
-     * @param targetClass the class of the object to create (must not be null)
+     * @param config the deserialization configuration to use (may be {@code null} for default behavior)
+     * @param targetClass the class of the object to create (must not be {@code null})
      * @return the deserialized object instance
      * @throws UncheckedIOException if an I/O error occurs or the file doesn't exist
      */
@@ -322,8 +322,8 @@ public interface Parser<SC extends SerializationConfig<?>, DC extends Deserializ
      * }</pre>
      *
      * @param <T> the target type
-     * @param source the input stream to read from (must not be null)
-     * @param targetClass the class of the object to create (must not be null)
+     * @param source the input stream to read from (must not be {@code null})
+     * @param targetClass the class of the object to create (must not be {@code null})
      * @return the deserialized object instance
      * @throws UncheckedIOException if an I/O error occurs during stream reading
      */
@@ -345,9 +345,9 @@ public interface Parser<SC extends SerializationConfig<?>, DC extends Deserializ
      * }</pre>
      *
      * @param <T> the target type
-     * @param source the input stream to read from (must not be null)
-     * @param config the deserialization configuration to use (must not be null)
-     * @param targetClass the class of the object to create (must not be null)
+     * @param source the input stream to read from (must not be {@code null})
+     * @param config the deserialization configuration to use (may be {@code null} for default behavior)
+     * @param targetClass the class of the object to create (must not be {@code null})
      * @return the deserialized object instance
      * @throws UncheckedIOException if an I/O error occurs during stream reading
      */
@@ -368,8 +368,8 @@ public interface Parser<SC extends SerializationConfig<?>, DC extends Deserializ
      * }</pre>
      *
      * @param <T> the target type
-     * @param source the reader to read from (must not be null)
-     * @param targetClass the class of the object to create (must not be null)
+     * @param source the reader to read from (must not be {@code null})
+     * @param targetClass the class of the object to create (must not be {@code null})
      * @return the deserialized object instance
      * @throws UncheckedIOException if an I/O error occurs during reading
      */
@@ -394,9 +394,9 @@ public interface Parser<SC extends SerializationConfig<?>, DC extends Deserializ
      * }</pre>
      *
      * @param <T> the target type
-     * @param source the reader to read from (must not be null)
-     * @param config the deserialization configuration to use (must not be null)
-     * @param targetClass the class of the object to create (must not be null)
+     * @param source the reader to read from (must not be {@code null})
+     * @param config the deserialization configuration to use (may be {@code null} for default behavior)
+     * @param targetClass the class of the object to create (must not be {@code null})
      * @return the deserialized object instance
      * @throws UncheckedIOException if an I/O error occurs during reading
      */

@@ -11,22 +11,22 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-
 package com.landawn.abacus.util.function;
 
 /**
- * Represents an operation that accepts a double-valued argument and a DoubleConsumer, 
+ * Represents an operation that accepts a double-valued argument and a DoubleConsumer,
  * and returns no result. This functional interface is used to implement a one-to-many
- * transformation operation, similar to flatMap. The DoubleConsumer parameter can be 
+ * transformation operation, similar to flatMap. The DoubleConsumer parameter can be
  * invoked multiple times to pass multiple values downstream.
- * 
+ *
  * <p>This is a functional interface whose functional method is {@link #accept(double, java.util.function.DoubleConsumer)}.
  *
  * @see java.util.stream.DoubleStream.DoubleMapMultiConsumer
+ *
+ * <p>Refer to JDK API documentation at: <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html">https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a></p>
  */
 @FunctionalInterface
 public interface DoubleMapMultiConsumer extends java.util.stream.DoubleStream.DoubleMapMultiConsumer { //NOSONAR
-
     /**
      * Performs a one-to-many transformation on the given double value.
      *

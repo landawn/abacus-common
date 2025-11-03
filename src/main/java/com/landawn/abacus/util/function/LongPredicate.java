@@ -11,29 +11,29 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-
 package com.landawn.abacus.util.function;
 
 import com.landawn.abacus.util.Throwables;
 
 /**
  * Represents a predicate (boolean-valued function) of one long-valued argument.
- * 
+ *
  * <p>This is a functional interface whose functional method is {@link #test(long)}.
- * 
- * <p>The interface extends both {@code Throwables.LongPredicate} with {@code RuntimeException} 
+ *
+ * <p>The interface extends both {@code Throwables.LongPredicate} with {@code RuntimeException}
  * and {@code java.util.function.LongPredicate}, providing compatibility with the Java standard library
  * while adding additional utility methods and predefined predicates.
- * 
+ *
  * @see java.util.function.LongPredicate
  * @see java.util.function.Predicate
+ *
+ * <p>Refer to JDK API documentation at: <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html">https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a></p>
  */
 @FunctionalInterface
 public interface LongPredicate extends Throwables.LongPredicate<RuntimeException>, java.util.function.LongPredicate { //NOSONAR
-
     /**
      * A predicate that always returns {@code true} regardless of the input value.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * LongPredicate alwaysPass = LongPredicate.ALWAYS_TRUE;
@@ -42,10 +42,9 @@ public interface LongPredicate extends Throwables.LongPredicate<RuntimeException
      * }</pre>
      */
     LongPredicate ALWAYS_TRUE = value -> true;
-
     /**
      * A predicate that always returns {@code false} regardless of the input value.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * LongPredicate alwaysFail = LongPredicate.ALWAYS_FALSE;
@@ -54,45 +53,39 @@ public interface LongPredicate extends Throwables.LongPredicate<RuntimeException
      * }</pre>
      */
     LongPredicate ALWAYS_FALSE = value -> false;
-
     /**
      * A predicate that tests if the input value is zero.
-     * 
+     *
      * <p>Returns {@code true} if and only if the input value equals 0L.
      */
     LongPredicate IS_ZERO = value -> value == 0;
-
     /**
      * A predicate that tests if the input value is not zero.
-     * 
+     *
      * <p>Returns {@code true} if the input value is any value other than 0L.
      */
     LongPredicate NOT_ZERO = value -> value != 0;
-
     /**
      * A predicate that tests if the input value is positive.
-     * 
+     *
      * <p>Returns {@code true} if the input value is greater than 0L.
      */
     LongPredicate IS_POSITIVE = value -> value > 0;
-
     /**
      * A predicate that tests if the input value is not positive.
-     * 
+     *
      * <p>Returns {@code true} if the input value is less than or equal to 0L.
      */
     LongPredicate NOT_POSITIVE = value -> value <= 0;
-
     /**
      * A predicate that tests if the input value is negative.
-     * 
+     *
      * <p>Returns {@code true} if the input value is less than 0L.
      */
     LongPredicate IS_NEGATIVE = value -> value < 0;
-
     /**
      * A predicate that tests if the input value is not negative.
-     * 
+     *
      * <p>Returns {@code true} if the input value is greater than or equal to 0L.
      */
     LongPredicate NOT_NEGATIVE = value -> value >= 0;
@@ -100,18 +93,24 @@ public interface LongPredicate extends Throwables.LongPredicate<RuntimeException
     /**
      * Evaluates this predicate on the given argument.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * LongPredicate isEven = value -> value % 2 == 0;
+     * boolean result = isEven.test(4L); // Returns true
+     * }</pre>
+     *
      * @param value the input argument
-     * @return {@code true} if the input argument matches the predicate, otherwise {@code false} if any error occurs during predicate evaluation
+     * @return {@code true} if the input argument matches the predicate, {@code false} otherwise
      */
     @Override
     boolean test(long value);
 
     /**
      * Returns a predicate that represents the logical negation of this predicate.
-     * 
+     *
      * <p>The returned predicate will return {@code true} when this predicate returns {@code false},
      * and {@code false} when this predicate returns {@code true}.
-     * 
+     *
      * @return a predicate that represents the logical negation of this predicate
      */
     @Override
@@ -153,7 +152,7 @@ public interface LongPredicate extends Throwables.LongPredicate<RuntimeException
 
     /**
      * Returns the specified predicate instance.
-     * 
+     *
      * <p>This is a utility method that simply returns the input predicate,
      * useful for method chaining or type conversion contexts.
      *
@@ -166,7 +165,7 @@ public interface LongPredicate extends Throwables.LongPredicate<RuntimeException
 
     /**
      * Returns a predicate that tests if the input value is equal to the specified target value.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * LongPredicate isFortyTwo = LongPredicate.equal(42L);
@@ -183,7 +182,7 @@ public interface LongPredicate extends Throwables.LongPredicate<RuntimeException
 
     /**
      * Returns a predicate that tests if the input value is not equal to the specified target value.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * LongPredicate notFortyTwo = LongPredicate.notEqual(42L);
@@ -200,7 +199,7 @@ public interface LongPredicate extends Throwables.LongPredicate<RuntimeException
 
     /**
      * Returns a predicate that tests if the input value is greater than the specified target value.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * LongPredicate greaterThanTen = LongPredicate.greaterThan(10L);
@@ -217,7 +216,7 @@ public interface LongPredicate extends Throwables.LongPredicate<RuntimeException
 
     /**
      * Returns a predicate that tests if the input value is greater than or equal to the specified target value.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * LongPredicate atLeastTen = LongPredicate.greaterEqual(10L);
@@ -234,7 +233,7 @@ public interface LongPredicate extends Throwables.LongPredicate<RuntimeException
 
     /**
      * Returns a predicate that tests if the input value is less than the specified target value.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * LongPredicate lessThanTen = LongPredicate.lessThan(10L);
@@ -251,7 +250,7 @@ public interface LongPredicate extends Throwables.LongPredicate<RuntimeException
 
     /**
      * Returns a predicate that tests if the input value is less than or equal to the specified target value.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * LongPredicate atMostTen = LongPredicate.lessEqual(10L);
@@ -268,10 +267,10 @@ public interface LongPredicate extends Throwables.LongPredicate<RuntimeException
 
     /**
      * Returns a predicate that tests if the input value is between the specified minimum and maximum values (exclusive).
-     * 
+     *
      * <p>The predicate returns {@code true} if the input value is strictly greater than {@code minValue}
      * and strictly less than {@code maxValue}.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * LongPredicate inRange = LongPredicate.between(10L, 20L);

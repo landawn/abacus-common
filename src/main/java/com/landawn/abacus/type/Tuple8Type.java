@@ -18,7 +18,6 @@ import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.Writer;
 
-import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.exception.UncheckedIOException;
 import com.landawn.abacus.parser.JSONXMLSerializationConfig;
 import com.landawn.abacus.util.CharacterWriter;
@@ -46,7 +45,7 @@ import com.landawn.abacus.util.WD;
  * @param <T8> the type of the eighth element in the tuple
  */
 @SuppressWarnings("java:S2160")
-public class Tuple8Type<T1, T2, T3, T4, T5, T6, T7, T8> extends AbstractType<Tuple8<T1, T2, T3, T4, T5, T6, T7, T8>> {
+class Tuple8Type<T1, T2, T3, T4, T5, T6, T7, T8> extends AbstractType<Tuple8<T1, T2, T3, T4, T5, T6, T7, T8>> {
 
     private final String declaringName;
 
@@ -140,7 +139,6 @@ public class Tuple8Type<T1, T2, T3, T4, T5, T6, T7, T8> extends AbstractType<Tup
      * @return a JSON string representation of the tuple, or {@code null} if x is null
      */
     @Override
-    @MayReturnNull
     public String stringOf(final Tuple8<T1, T2, T3, T4, T5, T6, T7, T8> x) {
         return (x == null) ? null : Utils.jsonParser.serialize(N.asArray(x._1, x._2, x._3, x._4, x._5, x._6, x._7, x._8), Utils.jsc);
     }
@@ -153,7 +151,6 @@ public class Tuple8Type<T1, T2, T3, T4, T5, T6, T7, T8> extends AbstractType<Tup
      * @param str the JSON string to parse
      * @return a Tuple8 object parsed from the string, or {@code null} if str is empty
      */
-    @MayReturnNull
     @SuppressWarnings({ "unchecked", "deprecation" })
     @Override
     public Tuple8<T1, T2, T3, T4, T5, T6, T7, T8> valueOf(final String str) {

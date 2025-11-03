@@ -11,38 +11,62 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-
 package com.landawn.abacus.util.function;
 
-import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.util.Throwables;
 
 /**
  * Represents a function that accepts a char-valued argument and produces a result.
  * This is the char-consuming primitive specialization for {@link java.util.function.Function}.
- * 
+ *
  * <p>This is a functional interface whose functional method is {@link #apply(char)}.
- * 
+ *
  * @param <R> the type of the result of the function
- * 
+ *
  * @see java.util.function.Function
+ *
+ * <p>Refer to JDK API documentation at: <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html">https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a></p>
  */
 @FunctionalInterface
 public interface CharFunction<R> extends Throwables.CharFunction<R, RuntimeException> { //NOSONAR
     /**
-     * A function that boxes a primitive char value into a Character object.
-     * This is useful when you need to convert primitive chars to their wrapper type.
+     * A predefined function that boxes a primitive {@code char} value into a {@link Character} object.
+     * This is equivalent to {@code Character::valueOf} and provides a convenient way to convert
+     * primitive chars to their wrapper type.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * CharFunction<Character> boxer = CharFunction.BOX;
+     * Character boxed = boxer.apply('A'); // Returns Character.valueOf('A')
+     * }</pre>
      */
     CharFunction<Character> BOX = value -> value;
 
     /**
-     * Applies this function to the given char argument.
+     * Applies this function to the given char-valued argument and produces a result.
+     *
+     * <p>This method transforms a {@code char} value into a result of type {@code R}.
+     * Common use cases include:
+     * <ul>
+     *   <li>Converting characters to their numeric code points or other representations</li>
+     *   <li>Categorizing characters (e.g., determining if uppercase, lowercase, digit)</li>
+     *   <li>Mapping characters to lookup tables or configuration objects</li>
+     *   <li>Creating strings or formatted output from characters</li>
+     * </ul>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * CharFunction<String> toString = c -> String.valueOf(c);
+     * String result = toString.apply('x'); // Returns "x"
+     *
+     * CharFunction<Boolean> isDigit = Character::isDigit;
+     * Boolean digit = isDigit.apply('5'); // Returns true
+     * }</pre>
      *
      * @param value the char input argument
      * @return the function result of type R
      */
     @Override
-    @MayReturnNull
     R apply(char value);
 
     /**
@@ -50,6 +74,14 @@ public interface CharFunction<R> extends Throwables.CharFunction<R, RuntimeExcep
      * and then applies the {@code after} function to the result.
      * If evaluation of either function throws an exception, it is relayed to the caller
      * of the composed function.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * CharFunction<String> charToString = c -> String.valueOf(c);
+     * Function<String, Integer> stringLength = String::length;
+     * CharFunction<Integer> combined = charToString.andThen(stringLength);
+     * Integer length = combined.apply('A'); // Returns 1
+     * }</pre>
      *
      * @param <V> the type of output of the {@code after} function, and of the composed function
      * @param after the function to apply after this function is applied. Must not be {@code null}.
@@ -61,8 +93,17 @@ public interface CharFunction<R> extends Throwables.CharFunction<R, RuntimeExcep
     }
 
     /**
-     * Returns a function that always returns its char input argument as a Character object.
-     * This is an identity function for char values that performs boxing.
+     * Returns a function that always returns its input argument unchanged as a {@link Character} object.
+     *
+     * <p>This is the identity function for char values, performing boxing from primitive {@code char}
+     * to {@link Character}. It is useful when a {@code CharFunction<Character>} is required but no
+     * transformation is needed.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * CharFunction<Character> identity = CharFunction.identity();
+     * Character result = identity.apply('A'); // Returns 'A' (boxed)
+     * }</pre>
      *
      * @return a function that always returns its input argument as a Character
      */

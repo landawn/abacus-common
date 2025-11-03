@@ -18,9 +18,28 @@ package com.landawn.abacus.type;
  * Type handler for primitive double values.
  * This class handles the primitive double type specifically, as opposed to the Double wrapper class.
  * It provides type information and default value handling for double primitives.
+ *
+ * <p><b>Usage Examples:</b></p>
+ * <pre>{@code
+ * Type<Double> type = TypeFactory.getType(double.class);
+ *
+ * // Convert string to double
+ * Double value = type.valueOf("3.14159"); // Returns 3.14159
+ * Double value2 = type.valueOf("-2.718"); // Returns -2.718
+ *
+ * // Get default value
+ * Double defaultVal = type.defaultValue(); // Returns 0.0
+ *
+ * // Read from database
+ * try (ResultSet rs = stmt.executeQuery("SELECT amount FROM transactions")) {
+ *     if (rs.next()) {
+ *         Double amount = type.get(rs, 1);
+ *     }
+ * }
+ * }</pre>
  */
 @SuppressWarnings("java:S2160")
-public final class PrimitiveDoubleType extends AbstractDoubleType {
+final class PrimitiveDoubleType extends AbstractDoubleType {
 
     public static final String DOUBLE = double.class.getSimpleName();
 

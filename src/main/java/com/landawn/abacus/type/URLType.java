@@ -22,11 +22,10 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.util.ExceptionUtil;
 import com.landawn.abacus.util.Strings;
 
-public class URLType extends AbstractType<URL> {
+class URLType extends AbstractType<URL> {
 
     public static final String URL = URL.class.getSimpleName();
 
@@ -43,7 +42,7 @@ public class URLType extends AbstractType<URL> {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * URLType type = new URLType();
+     * Type<URL> type = TypeFactory.getType(URL.class);
      * Class<URL> clazz = type.clazz(); // Returns URL.class
      * }</pre>
      *
@@ -64,7 +63,7 @@ public class URLType extends AbstractType<URL> {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * URLType type = new URLType();
+     * Type<URL> type = TypeFactory.getType(URL.class);
      * URL url = new URL("https://example.com/path");
      * String str = type.stringOf(url); // Returns "https://example.com/path"
      * }</pre>
@@ -73,13 +72,12 @@ public class URLType extends AbstractType<URL> {
      * @return the external string representation of the URL, or {@code null} if the input is null
      */
     @Override
-    @MayReturnNull
     public String stringOf(final URL x) {
         return (x == null) ? null : x.toExternalForm();
     }
 
     /**
-     * Converts a string to a URL instance.
+     * Parses a string representation to create a URL instance.
      * <p>
      * This method creates a URL instance from the provided string by first creating a URI
      * and then converting it to a URL. If the string is {@code null} or empty, this method returns {@code null}.
@@ -87,7 +85,7 @@ public class URLType extends AbstractType<URL> {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * URLType type = new URLType();
+     * Type<URL> type = TypeFactory.getType(URL.class);
      * URL url = type.valueOf("https://example.com/path"); // Creates a URL
      * }</pre>
      *
@@ -95,9 +93,7 @@ public class URLType extends AbstractType<URL> {
      * @return a URL instance created from the string, or {@code null} if the string is empty
      * @throws RuntimeException if the string is not a valid URL format (wraps MalformedURLException)
      */
-    @MayReturnNull
     @Override
-
     public URL valueOf(final String str) {
         if (Strings.isEmpty(str)) {
             return null; // NOSONAR
@@ -119,7 +115,7 @@ public class URLType extends AbstractType<URL> {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * URLType type = new URLType();
+     * Type<URL> type = TypeFactory.getType(URL.class);
      * ResultSet rs = statement.executeQuery("SELECT website FROM companies");
      * URL website = type.get(rs, 1); // Get URL from first column
      * }</pre>
@@ -130,7 +126,6 @@ public class URLType extends AbstractType<URL> {
      * @throws SQLException if a database access error occurs or the column index is invalid
      */
     @Override
-    @MayReturnNull
     public URL get(final ResultSet rs, final int columnIndex) throws SQLException {
         return rs.getURL(columnIndex);
     }
@@ -144,7 +139,7 @@ public class URLType extends AbstractType<URL> {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * URLType type = new URLType();
+     * Type<URL> type = TypeFactory.getType(URL.class);
      * ResultSet rs = statement.executeQuery("SELECT website FROM companies");
      * URL website = type.get(rs, "website"); // Get URL by column name
      * }</pre>
@@ -155,7 +150,6 @@ public class URLType extends AbstractType<URL> {
      * @throws SQLException if a database access error occurs or the column label is invalid
      */
     @Override
-    @MayReturnNull
     public URL get(final ResultSet rs, final String columnLabel) throws SQLException {
         return rs.getURL(columnLabel);
     }
@@ -169,7 +163,7 @@ public class URLType extends AbstractType<URL> {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * URLType type = new URLType();
+     * Type<URL> type = TypeFactory.getType(URL.class);
      * PreparedStatement stmt = conn.prepareStatement("INSERT INTO companies (website) VALUES (?)");
      * type.set(stmt, 1, new URL("https://example.com")); // Set URL at parameter index 1
      * }</pre>
@@ -193,7 +187,7 @@ public class URLType extends AbstractType<URL> {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * URLType type = new URLType();
+     * Type<URL> type = TypeFactory.getType(URL.class);
      * CallableStatement stmt = conn.prepareCall("{call update_company(?)}");
      * type.set(stmt, "website", new URL("https://example.com")); // Set URL by parameter name
      * }</pre>

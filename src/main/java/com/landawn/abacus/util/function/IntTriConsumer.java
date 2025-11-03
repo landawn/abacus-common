@@ -11,7 +11,6 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-
 package com.landawn.abacus.util.function;
 
 import com.landawn.abacus.util.Throwables;
@@ -23,7 +22,7 @@ import com.landawn.abacus.util.Throwables;
  * {@code IntTriConsumer} is expected to operate via side-effects.
  *
  * <p>This interface extends {@link Throwables.IntTriConsumer} with
- * {@link RuntimeException}, providing compatibility with the Abacus framework's
+ * {@link RuntimeException}, providing compatibility with the abacus-common framework's
  * exception handling capabilities.
  *
  * <p>This is a functional interface whose functional method is
@@ -31,23 +30,25 @@ import com.landawn.abacus.util.Throwables;
  *
  * @see java.util.function.Consumer
  * @see java.util.function.BiConsumer
- * @since 1.8
+ *
+ * <p>Refer to JDK API documentation at: <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html">https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a></p>
  */
 @FunctionalInterface
 public interface IntTriConsumer extends Throwables.IntTriConsumer<RuntimeException> { //NOSONAR
-
     /**
      * Performs this operation on the given arguments.
+     * This method is expected to operate via side-effects.
      *
-     * <p>The consumer processes three int values and performs some side-effect
-     * operation. Common use cases include:
-     * <ul>
-     *   <li>Processing 3D coordinates (x, y, z)</li>
-     *   <li>Handling RGB color values</li>
-     *   <li>Managing three related indices or counters</li>
-     *   <li>Accumulating or aggregating three int values</li>
-     *   <li>Updating state based on three int parameters</li>
-     * </ul>
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * IntTriConsumer coordinate3D = (x, y, z) ->
+     *     System.out.println("Coordinate: (" + x + ", " + y + ", " + z + ")");
+     * coordinate3D.accept(10, 20, 30); // Prints: Coordinate: (10, 20, 30)
+     *
+     * IntTriConsumer rgbPrinter = (r, g, b) ->
+     *     System.out.printf("RGB Color: rgb(%d, %d, %d)%n", r, g, b);
+     * rgbPrinter.accept(255, 128, 0);
+     * }</pre>
      *
      * @param a the first input argument
      * @param b the second input argument
@@ -67,7 +68,15 @@ public interface IntTriConsumer extends Throwables.IntTriConsumer<RuntimeExcepti
      * of operations that will be executed sequentially on the same three input
      * values.
      *
-     * @param after the operation to perform after this operation. Must not be null
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * IntTriConsumer logger = (a, b, c) -> System.out.println("Values: " + a + ", " + b + ", " + c);
+     * IntTriConsumer sum = (a, b, c) -> System.out.println("Sum: " + (a + b + c));
+     * IntTriConsumer combined = logger.andThen(sum);
+     * combined.accept(5, 10, 15); // Logs then calculates sum
+     * }</pre>
+     *
+     * @param after the operation to perform after this operation. Must not be {@code null}.
      * @return a composed {@code IntTriConsumer} that performs in sequence this
      *         operation followed by the {@code after} operation
      */

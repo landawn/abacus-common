@@ -36,21 +36,241 @@ import com.landawn.abacus.util.function.ByteUnaryOperator;
 import com.landawn.abacus.util.stream.ByteStream;
 
 /**
- * A resizable array implementation for primitive byte values, providing similar functionality to ArrayList
- * but specifically optimized for byte primitives. This class offers better performance and memory efficiency
- * compared to {@code ArrayList<Byte>} by avoiding the overhead of boxing and unboxing.
- * 
- * <p>This implementation is not thread-safe. If multiple threads access a ByteList instance concurrently,
- * and at least one of the threads modifies the list structurally, it must be synchronized externally.
- * 
- * <p>The class provides various utility methods for common operations such as sorting, searching, 
- * reversing, and mathematical operations, making it suitable for numerical computations and data processing.
+ * A high-performance, resizable array implementation for primitive byte values that provides
+ * specialized operations optimized for byte data types. This class extends {@link PrimitiveList}
+ * to offer memory-efficient storage and operations that avoid the boxing overhead associated with
+ * {@code List<Byte>}, making it ideal for applications requiring intensive byte array
+ * manipulation with optimal performance characteristics.
  *
+ * <p>ByteList is specifically designed for scenarios involving large collections of byte
+ * values such as binary data processing, byte buffers, network protocols, image processing,
+ * and cryptographic operations. The implementation uses a compact byte array as the underlying
+ * storage mechanism, providing direct primitive access without wrapper object allocation.</p>
+ *
+ * <p><b>Key Features:</b>
+ * <ul>
+ *   <li><b>Zero-Boxing Overhead:</b> Direct byte primitive storage without Byte wrapper allocation</li>
+ *   <li><b>Memory Efficiency:</b> Compact byte array storage with minimal memory overhead</li>
+ *   <li><b>High Performance:</b> Optimized algorithms for byte-specific operations</li>
+ *   <li><b>Rich Byte API:</b> Specialized methods for byte manipulation and binary operations</li>
+ *   <li><b>Set Operations:</b> Efficient intersection, union, and difference operations</li>
+ *   <li><b>Statistical Operations:</b> Min, max, median calculations on byte ranges</li>
+ *   <li><b>Random Access:</b> O(1) element access and modification by index</li>
+ *   <li><b>Dynamic Sizing:</b> Automatic capacity management with intelligent growth</li>
+ * </ul>
+ *
+ * <p><b>Common Use Cases:</b>
+ * <ul>
+ *   <li><b>Binary Data Processing:</b> Handling raw binary data and byte streams</li>
+ *   <li><b>Network Programming:</b> Protocol implementation and packet processing</li>
+ *   <li><b>Image Processing:</b> Pixel data manipulation and image transformations</li>
+ *   <li><b>Cryptography:</b> Key management, hash computations, and encryption operations</li>
+ *   <li><b>File I/O:</b> Efficient reading and writing of binary file formats</li>
+ *   <li><b>Compression:</b> Data compression and decompression algorithms</li>
+ *   <li><b>Audio Processing:</b> Digital signal processing and audio data manipulation</li>
+ *   <li><b>Embedded Systems:</b> Memory-constrained environments requiring compact storage</li>
+ * </ul>
+ *
+ * <p><b>Usage Examples:</b></p>
+ * <pre>{@code
+ * // Creating and initializing byte lists
+ * ByteList data = ByteList.of((byte)1, (byte)2, (byte)3, (byte)255);
+ * ByteList buffer = new ByteList(1024);  // Pre-sized for network buffer
+ * ByteList range = ByteList.range((byte)0, (byte)256);  // All byte values
+ *
+ * // Basic operations
+ * data.add((byte)42);                     // Append byte value
+ * byte first = data.get(0);               // Access by index: 1
+ * data.set(1, (byte)100);                 // Modify existing value
+ *
+ * // Binary data processing
+ * byte[] bytes = {0x48, 0x65, 0x6C, 0x6C, 0x6F};  // "Hello" in ASCII
+ * ByteList message = ByteList.copyOf(bytes);
+ * message.addAll(new byte[]{0x20, 0x57, 0x6F, 0x72, 0x6C, 0x64}); // " World"
+ *
+ * // Statistical operations
+ * OptionalByte min = data.min();          // Find minimum value
+ * OptionalByte max = data.max();          // Find maximum value
+ * OptionalByte median = data.median();    // Calculate median
+ *
+ * // Set operations for data analysis
+ * ByteList set1 = ByteList.of((byte)1, (byte)2, (byte)3);
+ * ByteList set2 = ByteList.of((byte)2, (byte)3, (byte)4);
+ * ByteList intersection = set1.intersection(set2);  // [2, 3]
+ * ByteList difference = set1.difference(set2);      // [1]
+ *
+ * // Conversion operations
+ * byte[] primitiveArray = data.toArray();           // To primitive array
+ * IntList intData = data.toIntList();               // Convert to int values
+ * List<Byte> boxedList = data.boxed();              // To boxed collection
+ * }</pre>
+ *
+ * <p><b>Performance Characteristics:</b>
+ * <ul>
+ *   <li><b>Element Access:</b> O(1) for get/set operations by index</li>
+ *   <li><b>Insertion:</b> O(1) amortized for append, O(n) for middle insertion</li>
+ *   <li><b>Deletion:</b> O(1) for last element, O(n) for arbitrary position</li>
+ *   <li><b>Search:</b> O(n) for contains/indexOf, O(log n) for binary search on sorted data</li>
+ *   <li><b>Sorting:</b> O(n log n) using optimized primitive sorting algorithms</li>
+ *   <li><b>Set Operations:</b> O(n) to O(n²) depending on algorithm selection</li>
+ * </ul>
+ *
+ * <p><b>Memory Efficiency:</b>
+ * <ul>
+ *   <li><b>Storage:</b> 1 byte per element (8 bits) with no object overhead</li>
+ *   <li><b>vs List&lt;Byte&gt;:</b> ~16x less memory usage (no Byte wrapper objects)</li>
+ *   <li><b>Capacity Management:</b> 1.75x growth factor balances memory and performance</li>
+ *   <li><b>Maximum Size:</b> Limited by {@code MAX_ARRAY_SIZE} (typically Integer.MAX_VALUE - 8)</li>
+ * </ul>
+ *
+ * <p><b>Byte-Specific Operations:</b>
+ * <ul>
+ *   <li><b>Range Generation:</b> {@code range()} and {@code rangeClosed()} for byte sequences</li>
+ *   <li><b>Value Conversion:</b> {@code toIntList()} for promotion to int values</li>
+ *   <li><b>Binary Search:</b> Optimized binary search on sorted byte arrays</li>
+ *   <li><b>Statistical Analysis:</b> Min, max, median operations for numeric analysis</li>
+ * </ul>
+ *
+ * <p><b>Factory Methods:</b>
+ * <ul>
+ *   <li><b>{@code of(byte...)}:</b> Create from varargs array</li>
+ *   <li><b>{@code copyOf(byte[])}:</b> Create defensive copy of array</li>
+ *   <li><b>{@code range(byte, byte)}:</b> Create sequence of consecutive bytes</li>
+ *   <li><b>{@code repeat(byte, int)}:</b> Create with repeated values</li>
+ *   <li><b>{@code random(int)}:</b> Create with random byte values</li>
+ * </ul>
+ *
+ * <p><b>Conversion Methods:</b>
+ * <ul>
+ *   <li><b>{@code toArray()}:</b> Convert to primitive byte array</li>
+ *   <li><b>{@code toIntList()}:</b> Convert to IntList with promoted values</li>
+ *   <li><b>{@code boxed()}:</b> Convert to {@code List<Byte>}</li>
+ *   <li><b>{@code stream()}:</b> Convert to ByteStream for functional processing</li>
+ * </ul>
+ *
+ * <p><b>Deque-like Operations:</b>
+ * <ul>
+ *   <li><b>{@code addFirst(byte)}:</b> Insert at beginning (O(n) operation)</li>
+ *   <li><b>{@code addLast(byte)}:</b> Insert at end (O(1) amortized)</li>
+ *   <li><b>{@code removeFirst()}:</b> Remove from beginning (O(n) operation)</li>
+ *   <li><b>{@code removeLast()}:</b> Remove from end (O(1) operation)</li>
+ * </ul>
+ *
+ * <p><b>Thread Safety:</b>
+ * <ul>
+ *   <li><b>Not Thread-Safe:</b> This implementation is not synchronized</li>
+ *   <li><b>External Synchronization:</b> Required for concurrent access</li>
+ *   <li><b>Fail-Fast Iterators:</b> Detect concurrent modifications</li>
+ *   <li><b>Read-Only Access:</b> Multiple threads can safely read simultaneously</li>
+ * </ul>
+ *
+ * <p><b>Capacity Management:</b>
+ * <ul>
+ *   <li><b>Initial Capacity:</b> Default capacity of 10 elements</li>
+ *   <li><b>Growth Strategy:</b> 1.75x expansion when capacity exceeded</li>
+ *   <li><b>Manual Control:</b> {@code ensureCapacity()} for performance optimization</li>
+ *   <li><b>Trimming:</b> {@code trimToSize()} to reduce memory footprint</li>
+ * </ul>
+ *
+ * <p><b>Error Handling:</b>
+ * <ul>
+ *   <li><b>IndexOutOfBoundsException:</b> For invalid index access</li>
+ *   <li><b>NoSuchElementException:</b> For operations on empty lists</li>
+ *   <li><b>IllegalArgumentException:</b> For invalid method parameters</li>
+ *   <li><b>OutOfMemoryError:</b> When capacity exceeds available memory</li>
+ * </ul>
+ *
+ * <p><b>Serialization Support:</b>
+ * <ul>
+ *   <li><b>Serializable:</b> Implements {@link java.io.Serializable}</li>
+ *   <li><b>Version Compatibility:</b> Stable serialVersionUID for version compatibility</li>
+ *   <li><b>Efficient Format:</b> Optimized serialization of byte arrays</li>
+ *   <li><b>Cross-Platform:</b> Platform-independent serialized format</li>
+ * </ul>
+ *
+ * <p><b>Integration with Collections Framework:</b>
+ * <ul>
+ *   <li><b>RandomAccess:</b> Indicates efficient random access capabilities</li>
+ *   <li><b>Collection Compatibility:</b> Seamless conversion to standard collections</li>
+ *   <li><b>Utility Integration:</b> Works with Collections utility methods via boxed()</li>
+ *   <li><b>Stream API:</b> Full integration with ByteStream for functional processing</li>
+ * </ul>
+ *
+ * <p><b>Comparison with Alternatives:</b>
+ * <ul>
+ *   <li><b>vs List&lt;Byte&gt;:</b> 16x less memory, significantly faster operations</li>
+ *   <li><b>vs byte[]:</b> Dynamic sizing, rich API, set operations, statistical functions</li>
+ *   <li><b>vs ByteBuffer:</b> Simpler API, better for list operations, no position tracking</li>
+ *   <li><b>vs ByteArrayOutputStream:</b> Random access, better for non-sequential operations</li>
+ * </ul>
+ *
+ * <p><b>Best Practices:</b>
+ * <ul>
+ *   <li>Use {@code ByteList} when working primarily with byte primitives</li>
+ *   <li>Specify initial capacity for known data sizes to avoid resizing</li>
+ *   <li>Use bulk operations ({@code addAll}, {@code removeAll}) instead of loops</li>
+ *   <li>Convert to boxed collections only when required for API compatibility</li>
+ *   <li>Consider {@code ByteBuffer} for sequential I/O operations</li>
+ * </ul>
+ *
+ * <p><b>Performance Tips:</b>
+ * <ul>
+ *   <li>Pre-size lists with known capacity using constructor or {@code ensureCapacity()}</li>
+ *   <li>Use {@code toArray()} for bulk operations requiring primitive arrays</li>
+ *   <li>Prefer {@code addLast()} over {@code addFirst()} for better performance</li>
+ *   <li>Use binary search on sorted data for O(log n) lookups</li>
+ * </ul>
+ *
+ * <p><b>Common Patterns:</b>
+ * <ul>
+ *   <li><b>Network Buffer:</b> {@code ByteList buffer = new ByteList(packetSize);}</li>
+ *   <li><b>Binary Protocol:</b> {@code buffer.addAll(header); buffer.addAll(payload);}</li>
+ *   <li><b>Image Data:</b> {@code ByteList pixels = ByteList.copyOf(imageBytes);}</li>
+ *   <li><b>Crypto Keys:</b> {@code ByteList key = ByteList.random(keyLength);}</li>
+ * </ul>
+ *
+ * <p><b>Related Classes:</b>
+ * <ul>
+ *   <li><b>{@link PrimitiveList}:</b> Abstract base class for all primitive list types</li>
+ *   <li><b>{@link IntList}:</b> Similar implementation for int primitives</li>
+ *   <li><b>{@link ByteIterator}:</b> Specialized iterator for byte primitives</li>
+ *   <li><b>{@link java.nio.ByteBuffer}:</b> Alternative for sequential byte operations</li>
+ * </ul>
+ *
+ * <p><b>Example: Binary Protocol Processing</b>
+ * <pre>{@code
+ * // Process a network packet with header and payload
+ * ByteList packet = new ByteList(1024);
+ * 
+ * // Add packet header
+ * packet.addAll(new byte[]{0x01, 0x02});  // Protocol version
+ * packet.addAll(intToBytes(payloadLength)); // Payload length
+ * 
+ * // Add payload data
+ * packet.addAll(payloadData);
+ * 
+ * // Extract header information
+ * byte version = packet.get(0);
+ * int length = bytesToInt(packet.toArray(), 2);
+ * 
+ * // Validate and process
+ * if (packet.size() >= length + headerSize) {
+ *     ByteList payload = packet.copy(headerSize, headerSize + length);
+ *     processPayload(payload.toArray());
+ * }
+ * }</pre>
+ *
+ * @see PrimitiveList
+ * @see ByteIterator
+ * @see IntList
  * @see com.landawn.abacus.util.N
  * @see com.landawn.abacus.util.Array
  * @see com.landawn.abacus.util.Iterables
  * @see com.landawn.abacus.util.Iterators
- *
+ * @see java.util.List
+ * @see java.util.RandomAccess
+ * @see java.io.Serializable
+ * @see java.nio.ByteBuffer
  */
 public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
 
@@ -629,7 +849,6 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      *
      * @param p the predicate which returns {@code true} for elements to be removed. Must not be {@code null}.
      * @return {@code true} if any elements were removed; {@code false} if the list was unchanged
-     *
      */
     public boolean removeIf(final BytePredicate p) {
         final ByteList tmp = new ByteList(size());
@@ -808,7 +1027,6 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      *
      * @param indices the indices of elements to remove. Can be {@code null} or empty.
      *                Invalid indices (negative or &gt;= size) are ignored.
-     *
      */
     @Override
     public void deleteAllByIndices(final int... indices) {
@@ -1016,7 +1234,6 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      * }</pre>
      *
      * @param operator the operator to apply to each element. Must not be {@code null}.
-     *
      */
     public void replaceAll(final ByteUnaryOperator operator) {
         for (int i = 0, len = size(); i < len; i++) {
@@ -1042,7 +1259,6 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      * @param predicate the predicate to test each element. Must not be {@code null}.
      * @param newValue the value to replace matching elements with
      * @return {@code true} if at least one element was replaced; {@code false} if no elements matched
-     *
      */
     public boolean replaceIf(final BytePredicate predicate, final byte newValue) {
         boolean result = false;
@@ -1472,7 +1688,6 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      *
      * @param valueToFind the value to count occurrences of
      * @return the number of times the specified value appears in this list; 0 if the value is not found
-     *
      */
     public int occurrencesOf(final byte valueToFind) {
         if (size == 0) {

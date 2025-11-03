@@ -78,7 +78,12 @@ public abstract class FloatIterator extends ImmutableIterator<Float> {
     };
 
     /**
-     * Returns an empty FloatIterator singleton instance.
+     * Returns an empty {@code FloatIterator} with no elements.
+     *
+     * <p>The returned iterator's {@code hasNext()} will always return {@code false},
+     * and calling {@code nextFloat()} will always throw a {@code NoSuchElementException}.</p>
+     *
+     * <p>This method always returns the same singleton instance for efficiency.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -86,7 +91,7 @@ public abstract class FloatIterator extends ImmutableIterator<Float> {
      * empty.hasNext(); // false
      * }</pre>
      *
-     * @return an empty FloatIterator
+     * @return an empty {@code FloatIterator}
      */
     @SuppressWarnings("SameReturnValue")
     public static FloatIterator empty() { //NOSONAR
@@ -94,8 +99,10 @@ public abstract class FloatIterator extends ImmutableIterator<Float> {
     }
 
     /**
-     * Creates a FloatIterator from a float array.
-     * The entire array will be used for iteration.
+     * Creates a {@code FloatIterator} from the specified float array.
+     *
+     * <p>If the array is {@code null} or empty, returns an empty iterator.
+     * The iterator will iterate over all elements in the array from start to end.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -106,16 +113,19 @@ public abstract class FloatIterator extends ImmutableIterator<Float> {
      * }
      * }</pre>
      *
-     * @param a the array to create an iterator from, may be {@code null} or empty
-     * @return a new FloatIterator over the array elements, or empty iterator if array is null/empty
+     * @param a the float array (may be {@code null})
+     * @return a new {@code FloatIterator} over the array elements, or an empty iterator if the array is {@code null} or empty
      */
     public static FloatIterator of(final float... a) {
         return N.isEmpty(a) ? EMPTY : of(a, 0, a.length);
     }
 
     /**
-     * Creates a FloatIterator from a portion of a float array.
-     * Only elements from fromIndex (inclusive) to toIndex (exclusive) will be iterated.
+     * Creates a {@code FloatIterator} from a subsequence of the specified float array.
+     *
+     * <p>The iterator will iterate over elements from {@code fromIndex} (inclusive) to
+     * {@code toIndex} (exclusive). If {@code fromIndex} equals {@code toIndex}, an empty
+     * iterator is returned.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -124,10 +134,10 @@ public abstract class FloatIterator extends ImmutableIterator<Float> {
      * // Will iterate over: 2.0f, 3.0f, 4.0f
      * }</pre>
      *
-     * @param a the array to create an iterator from
+     * @param a the float array (may be {@code null})
      * @param fromIndex the start index (inclusive)
      * @param toIndex the end index (exclusive)
-     * @return a new FloatIterator over the specified array elements
+     * @return a new {@code FloatIterator} over the specified range, or an empty iterator if the array is {@code null} or fromIndex equals toIndex
      * @throws IndexOutOfBoundsException if the indices are out of range
      */
     public static FloatIterator of(final float[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
@@ -313,7 +323,6 @@ public abstract class FloatIterator extends ImmutableIterator<Float> {
      * @return the next element as a Float object
      * @throws NoSuchElementException if no more elements are available
      * @deprecated use {@link #nextFloat()} instead to avoid boxing overhead
-     *
      */
     @Deprecated
     @Override
@@ -680,7 +689,6 @@ public abstract class FloatIterator extends ImmutableIterator<Float> {
      *
      * @param action the action to be performed for each element, must not be null
      * @deprecated use {@link #foreachRemaining(Throwables.FloatConsumer)} instead to avoid boxing
-     *
      */
     @Deprecated
     @Override
@@ -705,7 +713,6 @@ public abstract class FloatIterator extends ImmutableIterator<Float> {
      * @param action the action to be performed for each element, must not be null
      * @throws IllegalArgumentException if action is null
      * @throws E if the action throws an exception
-     *
      */
     public <E extends Exception> void foreachRemaining(final Throwables.FloatConsumer<E> action) throws E { //NOSONAR
         N.checkArgNotNull(action);
@@ -736,7 +743,6 @@ public abstract class FloatIterator extends ImmutableIterator<Float> {
      * @param action the action to be performed for each element with its index, must not be null
      * @throws IllegalArgumentException if action is null
      * @throws E if the action throws an exception
-     *
      */
     public <E extends Exception> void foreachIndexed(final Throwables.IntFloatConsumer<E> action) throws IllegalArgumentException, E {
         N.checkArgNotNull(action);

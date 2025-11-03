@@ -11,7 +11,6 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-
 package com.landawn.abacus.util.function;
 
 /**
@@ -26,21 +25,22 @@ package com.landawn.abacus.util.function;
  *
  * @param <T> the type of the first argument to the function
  * @param <U> the type of the second argument to the function
+ *
+ * <p>Refer to JDK API documentation at: <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html">https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a></p>
  */
 @FunctionalInterface
 public interface ToShortBiFunction<T, U> {
-
     /**
      * Applies this function to the given arguments and returns a short result.
-     * 
+     *
      * <p>Note: Care should be taken to ensure the result fits within the short range
      * (-32,768 to 32,767) to avoid overflow.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ToShortBiFunction<Integer, Integer> adder = (a, b) -> (short)(a + b);
      * short sum = adder.applyAsShort(100, 200); // returns 300
-     * 
+     *
      * ToShortBiFunction<String, Integer> charCodeAt = (str, index) -> (short) str.charAt(index);
      * short charCode = charCodeAt.applyAsShort("Hello", 0); // returns 72 (ASCII code for 'H')
      * }</pre>

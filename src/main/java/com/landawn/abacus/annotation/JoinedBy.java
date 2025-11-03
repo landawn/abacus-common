@@ -65,6 +65,8 @@ import java.lang.annotation.Target;
  *
  * <h3>One-to-Many Join Example:</h3>
  * <pre>{@code
+ * import java.util.List;
+ *
  * @Entity
  * public class Account {
  *     @Id
@@ -85,6 +87,9 @@ import java.lang.annotation.Target;
  *
  * <h3>Many-to-Many Join Example:</h3>
  * <pre>{@code
+ * import java.util.Date;
+ * import java.util.List;
+ *
  * @Entity
  * public class Employee {
  *     @Id
@@ -110,7 +115,6 @@ import java.lang.annotation.Target;
  * }
  * }</pre>
  * 
- * @since 2019
  * @see Entity
  * @see Column
  * @see Id

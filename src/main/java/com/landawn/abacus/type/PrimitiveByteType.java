@@ -18,9 +18,28 @@ package com.landawn.abacus.type;
  * Type handler for primitive byte values.
  * This class handles the primitive byte type specifically, as opposed to the Byte wrapper class.
  * It provides type information and default value handling for byte primitives.
+ *
+ * <p><b>Usage Examples:</b></p>
+ * <pre>{@code
+ * Type<Byte> type = TypeFactory.getType(byte.class);
+ *
+ * // Convert string to byte
+ * Byte value = type.valueOf("42"); // Returns 42
+ * Byte value2 = type.valueOf("-128"); // Returns -128
+ *
+ * // Get default value
+ * Byte defaultVal = type.defaultValue(); // Returns 0
+ *
+ * // Read from database
+ * try (ResultSet rs = stmt.executeQuery("SELECT status_code FROM statuses")) {
+ *     if (rs.next()) {
+ *         Byte statusCode = type.get(rs, 1);
+ *     }
+ * }
+ * }</pre>
  */
 @SuppressWarnings("java:S2160")
-public final class PrimitiveByteType extends AbstractByteType {
+final class PrimitiveByteType extends AbstractByteType {
 
     public static final String BYTE = byte.class.getSimpleName();
 

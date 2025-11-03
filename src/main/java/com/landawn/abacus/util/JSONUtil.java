@@ -32,71 +32,327 @@ import com.landawn.abacus.parser.ParserUtil.PropInfo;
 import com.landawn.abacus.type.Type;
 
 /**
- * A utility class providing comprehensive JSON manipulation capabilities.
- * <p>
- * The JSONUtil class serves as a bridge between Java objects and JSON representations,
- * offering bidirectional conversion between various Java data structures and their JSON equivalents.
- * It leverages the org.json library for JSON processing while providing a more intuitive API
- * for common conversion scenarios.
- * </p>
- * 
- * <h2>Key Features:</h2>
+ * A comprehensive utility class providing high-performance, thread-safe methods for bidirectional conversion
+ * between Java objects and JSON representations using the org.json library. This class serves as a robust
+ * bridge between Java's strongly-typed object model and JSON's flexible document structure, offering
+ * intuitive APIs for complex data transformation scenarios while maintaining type safety and performance.
+ *
+ * <p>The {@code JSONUtil} class addresses common challenges in JSON processing by providing seamless
+ * conversion capabilities for diverse Java data structures including Maps, JavaBeans, Collections, and
+ * primitive arrays. It leverages the proven org.json library foundation while offering enhanced
+ * functionality for deep object graph traversal, type preservation, and automatic nested structure handling.</p>
+ *
+ * <p><b>⚠️ IMPORTANT - JSON Library Integration:</b>
+ * This class provides a high-level abstraction over the org.json library, enhancing its
+ * capabilities with automatic type detection, recursive conversion handling, and improved
+ * error management while maintaining full compatibility with standard JSON specifications.</p>
+ *
+ * <p><b>Key Features and Capabilities:</b>
  * <ul>
- *   <li><b>Object Wrapping:</b> Convert Java objects (Maps, Beans, Arrays, Collections) to JSON format</li>
- *   <li><b>JSON Unwrapping:</b> Convert JSON structures back to Java objects with type safety</li>
- *   <li><b>Primitive Array Support:</b> Handle all Java primitive array types</li>
- *   <li><b>Deep Conversion:</b> Automatically handle nested structures and complex object graphs</li>
- *   <li><b>Type Preservation:</b> Maintain type information during conversion processes</li>
+ *   <li><b>Bidirectional Conversion:</b> Seamless transformation between Java objects and JSON structures</li>
+ *   <li><b>Type Safety:</b> Maintains type information and provides compile-time safety for conversions</li>
+ *   <li><b>Deep Conversion:</b> Automatic handling of nested objects, collections, and complex object graphs</li>
+ *   <li><b>Primitive Array Support:</b> Native support for all Java primitive array types with optimal performance</li>
+ *   <li><b>JavaBean Integration:</b> Automatic property discovery and conversion for POJO objects</li>
+ *   <li><b>Collection Handling:</b> Comprehensive support for Java Collections framework types</li>
+ *   <li><b>Map Integration:</b> Direct conversion between Map instances and JSON objects</li>
+ *   <li><b>Performance Optimized:</b> Efficient algorithms minimizing object allocation and memory usage</li>
  * </ul>
- * 
- * <h2>Supported Conversions:</h2>
- * <table border="1">
- *   <caption>Supported type conversions between Java and JSON</caption>
- *   <tr><th>Java Type</th><th>JSON Type</th><th>Method</th></tr>
- *   <tr><td>Map&lt;String, ?&gt;</td><td>JSONObject</td><td>wrap(Map) / unwrap(JSONObject)</td></tr>
- *   <tr><td>JavaBean</td><td>JSONObject</td><td>wrap(Object) / unwrap(JSONObject, Class)</td></tr>
- *   <tr><td>Collection&lt;?&gt;</td><td>JSONArray</td><td>wrap(Collection) / unwrap(JSONArray)</td></tr>
- *   <tr><td>Arrays (all types)</td><td>JSONArray</td><td>wrap(array) / unwrap(JSONArray, Class)</td></tr>
+ *
+ * <p><b>Design Philosophy:</b>
+ * <ul>
+ *   <li><b>Simplicity Over Complexity:</b> Intuitive API that handles complex conversion scenarios transparently</li>
+ *   <li><b>Type Safety First:</b> Strong typing prevents runtime errors and improves code reliability</li>
+ *   <li><b>Performance Oriented:</b> Optimized for high-throughput JSON processing scenarios</li>
+ *   <li><b>Standard Compliance:</b> Full adherence to JSON specification and Java object model</li>
+ *   <li><b>Error Resilience:</b> Comprehensive error handling with meaningful exception messages</li>
+ * </ul>
+ *
+ * <p><b>Supported Type Conversions:</b>
+ * <table border="1" style="border-collapse: collapse;">
+ *   <caption><b>Comprehensive Type Mapping Between Java and JSON</b></caption>
+ *   <tr style="background-color: #f2f2f2;">
+ *     <th>Java Type</th>
+ *     <th>JSON Type</th>
+ *     <th>Conversion Method</th>
+ *     <th>Notes</th>
+ *   </tr>
+ *   <tr>
+ *     <td>Map&lt;String, Object&gt;</td>
+ *     <td>JSONObject</td>
+ *     <td>wrap(Map) / unwrap(JSONObject)</td>
+ *     <td>Direct key-value mapping</td>
+ *   </tr>
+ *   <tr>
+ *     <td>JavaBean/POJO</td>
+ *     <td>JSONObject</td>
+ *     <td>wrap(Object) / unwrap(JSONObject, Class)</td>
+ *     <td>Automatic property discovery</td>
+ *   </tr>
+ *   <tr>
+ *     <td>Collection&lt;?&gt;</td>
+ *     <td>JSONArray</td>
+ *     <td>wrap(Collection) / unwrap(JSONArray)</td>
+ *     <td>List, Set, Queue support</td>
+ *   </tr>
+ *   <tr>
+ *     <td>Object[]</td>
+ *     <td>JSONArray</td>
+ *     <td>wrap(Object[]) / unwrap(JSONArray, Class)</td>
+ *     <td>Generic object arrays</td>
+ *   </tr>
+ *   <tr>
+ *     <td>Primitive Arrays</td>
+ *     <td>JSONArray</td>
+ *     <td>wrap(primitiveArray) / unwrap(JSONArray, primitiveClass)</td>
+ *     <td>int[], double[], boolean[], etc.</td>
+ *   </tr>
+ *   <tr>
+ *     <td>String, Number, Boolean</td>
+ *     <td>JSON Primitives</td>
+ *     <td>Direct conversion</td>
+ *     <td>No wrapping needed</td>
+ *   </tr>
  * </table>
- * 
- * <p><b>Usage Examples:</b></p>
+ *
+ * <p><b>Core Conversion Methods:</b>
+ * <ul>
+ *   <li><b>{@code wrap(Object)}:</b> Convert Java objects to appropriate JSON representations</li>
+ *   <li><b>{@code unwrap(JSONObject)}:</b> Convert JSON objects back to Java Map structures</li>
+ *   <li><b>{@code unwrap(JSONArray)}:</b> Convert JSON arrays back to Java Collection or array types</li>
+ *   <li><b>{@code unwrap(JSONObject, Class)}:</b> Convert JSON objects to specific Java bean types</li>
+ *   <li><b>{@code unwrap(JSONArray, Class)}:</b> Convert JSON arrays to specific Java array or collection types</li>
+ * </ul>
+ *
+ * <p><b>Common Usage Patterns:</b>
  * <pre>{@code
- * // Converting a Map to JSON
- * Map<String, Object> data = new HashMap<>();
- * data.put("name", "John Doe");
- * data.put("age", 30);
- * JSONObject json = JSONUtil.wrap(data);
- * 
- * // Converting a Bean to JSON
- * User user = new User("Jane", 25);
+ * // Basic Map to JSON conversion
+ * Map<String, Object> userMap = new HashMap<>();
+ * userMap.put("name", "John Doe");
+ * userMap.put("age", 30);
+ * userMap.put("active", true);
+ * JSONObject jsonUser = JSONUtil.wrap(userMap);
+ * // Result: {"name":"John Doe","age":30,"active":true}
+ *
+ * // JavaBean to JSON conversion
+ * User user = new User("Jane Smith", 25, "jane@example.com");
  * JSONObject userJson = JSONUtil.wrap(user);
- * 
- * // Converting JSON back to Java objects
- * Map<String, Object> map = JSONUtil.unwrap(json);
+ * // Automatically converts all public properties
+ *
+ * // JSON back to Java objects
+ * Map<String, Object> restoredMap = JSONUtil.unwrap(jsonUser);
  * User restoredUser = JSONUtil.unwrap(userJson, User.class);
- * 
- * // Working with arrays
+ *
+ * // Array conversions
  * int[] numbers = {1, 2, 3, 4, 5};
- * JSONArray jsonArray = JSONUtil.wrap(numbers);
- * int[] restoredNumbers = JSONUtil.unwrap(jsonArray, int[].class);
+ * JSONArray numberArray = JSONUtil.wrap(numbers);
+ * int[] restoredNumbers = JSONUtil.unwrap(numberArray, int[].class);
+ *
+ * // Collection handling
+ * List<String> tags = Arrays.asList("java", "json", "utility");
+ * JSONArray tagArray = JSONUtil.wrap(tags);
+ * List<String> restoredTags = JSONUtil.unwrap(tagArray);
  * }</pre>
- * 
- * <h2>Thread Safety:</h2>
- * <p>
- * All methods in this class are stateless and thread-safe. The class uses a private constructor
- * to prevent instantiation, following the utility class pattern.
- * </p>
- * 
- * <h2>Exception Handling:</h2>
- * <p>
- * Methods may throw {@link JSONException} when JSON parsing or construction fails,
- * and {@link IllegalArgumentException} when type conversions are not supported.
- * </p>
+ *
+ * <p><b>Advanced Usage Examples:</b></p>
+ * <pre>{@code
+ * // Complex object graph conversion
+ * public class OrderProcessor {
+ *     public JSONObject convertOrder(Order order) {
+ *         // Automatically handles nested objects, collections, and relationships
+ *         return JSONUtil.wrap(order);
+ *         // Converts Order with Customer, LineItems, Addresses, etc.
+ *     }
+ *
+ *     public Order restoreOrder(JSONObject orderJson) {
+ *         // Type-safe restoration with full object graph reconstruction
+ *         return JSONUtil.unwrap(orderJson, Order.class);
+ *     }
+ * }
+ *
+ * // Multi-dimensional array handling
+ * public class MatrixProcessor {
+ *     public JSONArray serializeMatrix(double[][] matrix) {
+ *         return JSONUtil.wrap(matrix);
+ *         // Handles nested arrays automatically
+ *     }
+ *
+ *     public double[][] deserializeMatrix(JSONArray matrixJson) {
+ *         return JSONUtil.unwrap(matrixJson, double[][].class);
+ *     }
+ * }
+ *
+ * // Generic collection processing
+ * public class DataTransformer {
+ *     public <T> JSONArray convertList(List<T> items) {
+ *         return JSONUtil.wrap(items);
+ *         // Works with any object type in the collection
+ *     }
+ *
+ *     public List<Map<String, Object>> extractMaps(JSONArray jsonArray) {
+ *         return JSONUtil.unwrap(jsonArray);
+ *         // Returns List of Maps for flexible data access
+ *     }
+ * }
+ * }</pre>
+ *
+ * <p><b>JavaBean Property Handling:</b>
+ * <ul>
+ *   <li><b>Automatic Discovery:</b> Uses reflection to discover bean properties via getters/setters</li>
+ *   <li><b>Field Access:</b> Supports direct field access for objects without standard bean patterns</li>
+ *   <li><b>Type Conversion:</b> Automatic conversion between compatible types during restoration</li>
+ *   <li><b>Nested Objects:</b> Recursive processing of nested bean properties</li>
+ *   <li><b>Collection Properties:</b> Special handling for collection and array properties</li>
+ *   <li><b>Null Handling:</b> Graceful handling of null values in object properties</li>
+ * </ul>
+ *
+ * <p><b>Array and Collection Processing:</b>
+ * <ul>
+ *   <li><b>Primitive Arrays:</b> Optimized handling for int[], double[], boolean[], etc.</li>
+ *   <li><b>Object Arrays:</b> Generic object array support with type preservation</li>
+ *   <li><b>Multi-dimensional Arrays:</b> Recursive processing of nested array structures</li>
+ *   <li><b>Collection Types:</b> Support for List, Set, Queue, and custom Collection implementations</li>
+ *   <li><b>Generic Types:</b> Maintains generic type information where possible</li>
+ *   <li><b>Empty Collections:</b> Proper handling of empty arrays and collections</li>
+ * </ul>
+ *
+ * <p><b>Performance Characteristics:</b>
+ * <ul>
+ *   <li><b>Conversion Speed:</b> Optimized algorithms for high-throughput JSON processing</li>
+ *   <li><b>Memory Efficiency:</b> Minimal object allocation during conversion processes</li>
+ *   <li><b>Reflection Caching:</b> Cached property information for repeated bean conversions</li>
+ *   <li><b>Stream Processing:</b> Efficient iteration over large collections and arrays</li>
+ *   <li><b>Type Resolution:</b> Fast type checking and conversion path selection</li>
+ * </ul>
+ *
+ * <p><b>Thread Safety and Concurrency:</b>
+ * <ul>
+ *   <li><b>Static Methods:</b> All utility methods are static and inherently thread-safe</li>
+ *   <li><b>Immutable Processing:</b> No shared mutable state between conversion operations</li>
+ *   <li><b>Concurrent Access:</b> Multiple threads can safely perform conversions simultaneously</li>
+ *   <li><b>Reflection Safety:</b> Thread-safe use of reflection APIs for property access</li>
+ *   <li><b>JSON Library Safety:</b> Leverages thread-safe org.json library implementations</li>
+ * </ul>
+ *
+ * <p><b>Error Handling and Exception Management:</b>
+ * <ul>
+ *   <li><b>JSONException:</b> Thrown when JSON parsing or construction fails</li>
+ *   <li><b>IllegalArgumentException:</b> Thrown for unsupported type conversions</li>
+ *   <li><b>ClassCastException:</b> May occur during type-unsafe unwrapping operations</li>
+ *   <li><b>NullPointerException:</b> Appropriate null checks with descriptive error messages</li>
+ *   <li><b>ReflectionException:</b> Wrapped and re-thrown as RuntimeException for bean access issues</li>
+ * </ul>
+ *
+ * <p><b>Integration with Frameworks:</b>
+ * <ul>
+ *   <li><b>Spring Framework:</b> Compatible with Spring's JSON processing and REST controllers</li>
+ *   <li><b>JAX-RS:</b> Suitable for REST API request/response body conversion</li>
+ *   <li><b>Servlet API:</b> Integration with HTTP request/response processing</li>
+ *   <li><b>JSON-B:</b> Complementary functionality to standard JSON-B implementations</li>
+ *   <li><b>Jackson Alternative:</b> Lightweight alternative for simple JSON processing needs</li>
+ * </ul>
+ *
+ * <p><b>Type Conversion Details:</b>
+ * <ul>
+ *   <li><b>Number Conversion:</b> Automatic conversion between Integer, Long, Double, BigDecimal</li>
+ *   <li><b>String Handling:</b> UTF-8 string processing with proper escaping</li>
+ *   <li><b>Boolean Conversion:</b> Standard true/false mapping with string conversion support</li>
+ *   <li><b>Date Handling:</b> Depends on underlying Date.toString() and parsing mechanisms</li>
+ *   <li><b>Enum Support:</b> Automatic enum to string conversion and reverse parsing</li>
+ * </ul>
+ *
+ * <p><b>Best Practices and Recommendations:</b>
+ * <ul>
+ *   <li>Use specific type parameters in unwrap() methods for type safety</li>
+ *   <li>Handle JSONException appropriately in production code</li>
+ *   <li>Consider object structure complexity when designing APIs</li>
+ *   <li>Use Map-based unwrapping for flexible data access patterns</li>
+ *   <li>Validate input data before conversion to prevent malformed JSON</li>
+ *   <li>Cache Type objects for repeated conversions of the same class</li>
+ *   <li>Use specific collection types in unwrap operations when type safety is critical</li>
+ * </ul>
+ *
+ * <p><b>Common Anti-Patterns to Avoid:</b>
+ * <ul>
+ *   <li>Manual JSON string construction instead of using object conversion</li>
+ *   <li>Ignoring type safety in unwrap operations</li>
+ *   <li>Not handling exceptions appropriately in conversion code</li>
+ *   <li>Using raw types instead of generic types in method parameters</li>
+ *   <li>Repeated conversion of the same object without caching</li>
+ *   <li>Mixing different JSON libraries in the same application</li>
+ * </ul>
+ *
+ * <p><b>Memory and Performance Considerations:</b>
+ * <ul>
+ *   <li><b>Large Objects:</b> Consider streaming approaches for very large object graphs</li>
+ *   <li><b>Circular References:</b> Be aware of potential infinite recursion in object graphs</li>
+ *   <li><b>Deep Nesting:</b> Monitor stack depth for deeply nested structures</li>
+ *   <li><b>Collection Size:</b> Large collections may require memory management considerations</li>
+ *   <li><b>String Pooling:</b> Benefit from JVM string pooling for repeated property names</li>
+ * </ul>
+ *
+ * <p><b>Example: REST API Integration</b>
+ * <pre>{@code
+ * @RestController
+ * public class UserController {
+ *     
+ *     @PostMapping("/users")
+ *     public ResponseEntity<String> createUser(@RequestBody String jsonRequest) {
+ *         try {
+ *             // Parse JSON request
+ *             JSONObject requestJson = new JSONObject(jsonRequest);
+ *             User user = JSONUtil.unwrap(requestJson, User.class);
+ *             
+ *             // Process user creation
+ *             User createdUser = userService.createUser(user);
+ *             
+ *             // Convert response to JSON
+ *             JSONObject responseJson = JSONUtil.wrap(createdUser);
+ *             return ResponseEntity.ok(responseJson.toString());
+ *             
+ *         } catch (JSONException e) {
+ *             return ResponseEntity.badRequest().body("Invalid JSON format");
+ *         }
+ *     }
+ *     
+ *     @GetMapping("/users/{id}")
+ *     public ResponseEntity<String> getUser(@PathVariable Long id) {
+ *         User user = userService.findById(id);
+ *         if (user != null) {
+ *             JSONObject userJson = JSONUtil.wrap(user);
+ *             return ResponseEntity.ok(userJson.toString());
+ *         }
+ *         return ResponseEntity.notFound().build();
+ *     }
+ * }
+ * }</pre>
+ *
+ * <p><b>Comparison with Alternative JSON Libraries:</b>
+ * <ul>
+ *   <li><b>vs. Jackson:</b> Simpler API vs. comprehensive feature set and annotations</li>
+ *   <li><b>vs. Gson:</b> Based on org.json vs. Google's implementation with different design philosophy</li>
+ *   <li><b>vs. JSON-B:</b> Utility class approach vs. standard API with configuration options</li>
+ *   <li><b>vs. Manual org.json:</b> Higher-level abstraction vs. direct library usage</li>
+ * </ul>
+ *
+ * <p><b>Future Extensibility:</b>
+ * <ul>
+ *   <li><b>Custom Converters:</b> Potential for adding custom type conversion handlers</li>
+ *   <li><b>Configuration Options:</b> Possible future support for conversion configuration</li>
+ *   <li><b>Performance Optimizations:</b> Ongoing improvements to conversion algorithms</li>
+ *   <li><b>Additional JSON Libraries:</b> Potential support for alternative JSON implementations</li>
+ * </ul>
  *
  * @see org.json.JSONObject
  * @see org.json.JSONArray
+ * @see org.json.JSONException
+ * @see com.landawn.abacus.parser.ParserUtil
  * @see com.landawn.abacus.type.Type
- * @since 1.0
+ * @see java.lang.reflect.Array
+ * @see java.util.Map
+ * @see java.util.Collection
+ * @see <a href="https://www.json.org/json-en.html">JSON Specification</a>
+ * @see <a href="https://github.com/stleary/JSON-java">org.json Library Documentation</a>
  */
 public final class JSONUtil {
 

@@ -14,7 +14,6 @@
 
 package com.landawn.abacus.type;
 
-import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.util.ClassUtil;
 import com.landawn.abacus.util.Strings;
 
@@ -25,7 +24,7 @@ import com.landawn.abacus.util.Strings;
  * Note: Uses raw types for compatibility with generic Class handling.
  */
 @SuppressWarnings({ "rawtypes", "java:S2160" })
-public class ClazzType extends AbstractType<Class> {
+class ClazzType extends AbstractType<Class> {
 
     public static final String CLAZZ = "Clazz"; //NOSONAR
 
@@ -66,9 +65,7 @@ public class ClazzType extends AbstractType<Class> {
      * @param x the Class object to convert. Can be {@code null}.
      * @return The canonical name of the class, or {@code null} if input is null
      */
-    @MayReturnNull
     @Override
-
     public String stringOf(final Class x) {
         return x == null ? null : ClassUtil.getCanonicalClassName(x);
     }
@@ -83,9 +80,7 @@ public class ClazzType extends AbstractType<Class> {
      * @return The Class object for the specified name, or {@code null} if input is null/empty
      * @throws RuntimeException if the class cannot be found or loaded
      */
-    @MayReturnNull
     @Override
-
     public Class valueOf(final String str) {
         return Strings.isEmpty(str) ? null : ClassUtil.forClass(str);
     }

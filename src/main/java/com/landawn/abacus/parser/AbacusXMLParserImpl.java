@@ -14,8 +14,6 @@
 
 package com.landawn.abacus.parser;
 
-import com.landawn.abacus.annotation.MayReturnNull;
-
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
@@ -72,7 +70,7 @@ import com.landawn.abacus.util.XmlUtil;
  * Abacus-specific implementation of XML parser supporting SAX, DOM, and StAX parsing modes.
  *
  * <p>This implementation extends {@link AbstractXMLParser} and provides optimized XML serialization
- * and deserialization capabilities tailored for the Abacus framework. It supports multiple XML
+ * and deserialization capabilities tailored for the abacus-common framework. It supports multiple XML
  * parsing strategies including SAX (Simple API for XML), DOM (Document Object Model), and StAX
  * (Streaming API for XML).</p>
  *
@@ -167,8 +165,6 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
         super(xsc, xdc);
         this.parserType = parserType;
     }
-
-    @MayReturnNull
 
     @Override
     public String serialize(final Object obj, final XMLSerializationConfig config) {
@@ -1021,7 +1017,7 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
      * @throws XMLStreamException the XML stream exception
      */
     @SuppressFBWarnings("RCN_REDUNDANT_NULLCHECK_OF_NULL_VALUE")
-    @SuppressWarnings({ "null", "fallthrough", "unused", "deprecation", "DataFlowIssue" })
+    @SuppressWarnings({ "null", "unused", "deprecation", "DataFlowIssue" })
     <T> T readByStreamParser(final XMLStreamReader xmlReader, final XMLDeserializationConfig config, Type<?> propType, PropInfo propInfo, boolean checkedAttr,
             boolean isTagByPropertyName, boolean ignoreTypeInfo, final boolean isFirstCall, final Class<?> inputClass, Class<?> targetClass)
             throws XMLStreamException {
@@ -1459,6 +1455,8 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
                             // continue;
                     }
                 }
+
+                throw new ParseException("Unknown parser error");
             }
 
             case ARRAY: {

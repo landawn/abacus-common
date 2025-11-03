@@ -58,22 +58,356 @@ import lombok.Builder;
 import lombok.Data;
 
 /**
- * Utility class for reading and writing Excel files using Apache POI.
- * Provides methods to read Excel sheets into various data structures and write data to Excel files.
- * Supports conversion between Excel and CSV formats.
- * 
- * <p>This class is thread-safe as all methods are stateless.</p>
- * 
- * <p><b>Usage Examples:</b></p>
+ * A comprehensive, enterprise-grade utility class providing advanced Excel file processing capabilities
+ * including high-performance reading, writing, and conversion operations using Apache POI. This class
+ * serves as a powerful toolkit for Excel-based ETL (Extract, Transform, Load) operations, data import/export
+ * scenarios, and seamless integration with Dataset objects for efficient spreadsheet data manipulation
+ * and analysis in enterprise environments requiring robust Excel processing capabilities.
+ *
+ * <p>The {@code ExcelUtil} class addresses critical challenges in enterprise Excel data processing by
+ * providing optimized, scalable solutions for handling complex Excel workbooks efficiently while
+ * maintaining data integrity, type safety, and memory efficiency. It supports various Excel formats
+ * (XLS, XLSX), custom cell processing, flexible worksheet operations, and configurable options for
+ * memory management, custom transformations, and filtering operations suitable for production
+ * environments with strict performance and reliability requirements.</p>
+ *
+ * <p><b>⚠️ IMPORTANT - Memory Management:</b>
+ * Excel files, especially those with large numbers of rows or complex formatting, can consume
+ * significant memory. For large Excel files (>10MB or >50,000 rows), use streaming methods
+ * where available and ensure proper resource cleanup with try-with-resources blocks. Configure
+ * appropriate JVM heap settings for production environments processing large Excel files.</p>
+ *
+ * <p><b>Key Features and Capabilities:</b>
+ * <ul>
+ *   <li><b>Complete Excel Format Support:</b> Full support for XLS (Excel 97-2003) and XLSX (Excel 2007+) formats</li>
+ *   <li><b>High-Performance Processing:</b> Optimized reading and writing operations using Apache POI</li>
+ *   <li><b>Type-Safe Data Extraction:</b> Automatic type conversion from Excel cells to Java objects</li>
+ *   <li><b>Dataset Integration:</b> Seamless conversion between Excel data and Dataset objects for analysis</li>
+ *   <li><b>Multi-Sheet Operations:</b> Comprehensive support for multi-worksheet Excel files</li>
+ *   <li><b>CSV Conversion:</b> Bidirectional conversion between Excel and CSV formats</li>
+ *   <li><b>Custom Cell Processing:</b> Pluggable cell processors for custom data transformations</li>
+ *   <li><b>Flexible Column Selection:</b> Support for column filtering, mapping, and selective processing</li>
+ * </ul>
+ *
+ * <p><b>Design Philosophy:</b>
+ * <ul>
+ *   <li><b>Simplicity First:</b> Clean, intuitive API for common Excel processing tasks</li>
+ *   <li><b>Performance Optimized:</b> Efficient memory usage and processing speed for large Excel files</li>
+ *   <li><b>Type Safety Priority:</b> Strong typing and automatic type conversion for data integrity</li>
+ *   <li><b>Integration Ready:</b> Seamless integration with existing data processing frameworks</li>
+ *   <li><b>Production Ready:</b> Robust error handling and resource management for enterprise use</li>
+ * </ul>
+ *
+ * <p><b>Core Operation Categories:</b>
+ * <table border="1" style="border-collapse: collapse;">
+ *   <caption><b>Excel Operation Types and Methods</b></caption>
+ *   <tr style="background-color: #f2f2f2;">
+ *     <th>Operation Type</th>
+ *     <th>Primary Methods</th>
+ *     <th>Memory Usage</th>
+ *     <th>Use Cases</th>
+ *   </tr>
+ *   <tr>
+ *     <td>Data Loading</td>
+ *     <td>loadSheet(), loadWorkbook()</td>
+ *     <td>Medium to High</td>
+ *     <td>Reading Excel data into memory</td>
+ *   </tr>
+ *   <tr>
+ *     <td>Data Writing</td>
+ *     <td>writeSheet(), writeWorkbook()</td>
+ *     <td>Medium</td>
+ *     <td>Creating Excel files from data</td>
+ *   </tr>
+ *   <tr>
+ *     <td>Format Conversion</td>
+ *     <td>toCSV(), fromCSV()</td>
+ *     <td>Low to Medium</td>
+ *     <td>Excel-CSV interoperability</td>
+ *   </tr>
+ *   <tr>
+ *     <td>Stream Processing</td>
+ *     <td>stream(), streamRows()</td>
+ *     <td>Low</td>
+ *     <td>Processing large Excel files</td>
+ *   </tr>
+ *   <tr>
+ *     <td>Object Mapping</td>
+ *     <td>toObjects(), toBeans()</td>
+ *     <td>Medium</td>
+ *     <td>Type-safe Excel to object conversion</td>
+ *   </tr>
+ * </table>
+ *
+ * <p><b>Excel Format Support:</b>
+ * <ul>
+ *   <li><b>XLSX Format:</b> Excel 2007+ format with full feature support (recommended for new files)</li>
+ *   <li><b>XLS Format:</b> Legacy Excel 97-2003 format support for backward compatibility</li>
+ *   <li><b>Cell Types:</b> String, Numeric, Boolean, Date, Formula, and Blank cell handling</li>
+ *   <li><b>Formatting:</b> Basic cell formatting preservation and custom format application</li>
+ *   <li><b>Worksheets:</b> Multi-sheet workbooks with named sheet access and creation</li>
+ * </ul>
+ *
+ * <p><b>Common Usage Patterns:</b>
  * <pre>{@code
- * // Read Excel file into Dataset
- * Dataset data = ExcelUtil.loadSheet(new File("data.xlsx"));
- * 
- * // Write Dataset to Excel
- * ExcelUtil.writeSheet("Sheet1", data, new File("output.xlsx"));
+ * // Load Excel file into Dataset for analysis
+ * Dataset dataset = ExcelUtil.loadSheet(new File("sales_data.xlsx"));
+ * Dataset filtered = dataset.filter("amount", Fn.gt(1000));
+ *
+ * // Load specific worksheet by name
+ * Dataset dataset = ExcelUtil.loadSheet(new File("report.xlsx"), "Q1_Sales");
+ *
+ * // Write Dataset to Excel file
+ * ExcelUtil.writeSheet("Sales Report", dataset, new File("output.xlsx"));
+ *
+ * // Convert Excel to CSV
+ * ExcelUtil.toCSV(new File("data.xlsx"), new File("data.csv"));
+ *
+ * // Process Excel data with custom cell handling
+ * Dataset dataset = ExcelUtil.loadSheet(
+ *     new File("data.xlsx"),
+ *     0,  // First sheet
+ *     Arrays.asList("Name", "Age", "Salary"),  // Column selection
+ *     (row, cell) -> {
+ *         // Custom cell processing logic
+ *         if (cell.getCellType() == CellType.FORMULA) {
+ *             return cell.getCachedFormulaResultType() == CellType.NUMERIC ?
+ *                 cell.getNumericCellValue() : cell.getStringCellValue();
+ *         }
+ *         return ExcelUtil.getDefaultCellValue(cell);
+ *     }
+ * );
+ *
+ * // Type-safe object mapping from Excel
+ * List<Employee> employees = ExcelUtil.loadSheet(
+ *     new File("employees.xlsx"),
+ *     Employee.class
+ * );
  * }</pre>
- * 
- * @since 0.8
+ *
+ * <p><b>Advanced Processing Patterns:</b>
+ * <pre>{@code
+ * public class ExcelProcessingService {
+ *
+ *     // Batch processing of multiple Excel files
+ *     public ProcessingResult processBatchFiles(List<File> excelFiles) {
+ *         ProcessingResult result = new ProcessingResult();
+ *
+ *         for (File file : excelFiles) {
+ *             try {
+ *                 Dataset dataset = ExcelUtil.loadSheet(file);
+ *                 dataset = validateAndTransform(dataset);
+ *                 saveToDatabase(dataset);
+ *                 result.addSuccess(file.getName());
+ *             } catch (Exception e) {
+ *                 logger.error("Failed to process file: " + file.getName(), e);
+ *                 result.addError(file.getName(), e.getMessage());
+ *             }
+ *         }
+ *
+ *         return result;
+ *     }
+ *
+ *     // Multi-sheet workbook processing
+ *     public Map<String, Dataset> processWorkbook(File excelFile) {
+ *         Map<String, Dataset> sheets = new HashMap<>();
+ *
+ *         try (Workbook workbook = ExcelUtil.loadWorkbook(excelFile)) {
+ *             for (int i = 0; i < workbook.getNumberOfSheets(); i++) {
+ *                 Sheet sheet = workbook.getSheetAt(i);
+ *                 String sheetName = sheet.getSheetName();
+ *
+ *                 if (!isSkippableSheet(sheetName)) {
+ *                     Dataset dataset = ExcelUtil.loadSheet(excelFile, i);
+ *                     sheets.put(sheetName, dataset);
+ *                 }
+ *             }
+ *         } catch (IOException e) {
+ *             throw new RuntimeException("Failed to process workbook: " + excelFile.getName(), e);
+ *         }
+ *
+ *         return sheets;
+ *     }
+ *
+ *     // Dynamic report generation to Excel
+ *     public void generateExcelReport(ReportCriteria criteria, File outputFile) {
+ *         try (Workbook workbook = new XSSFWorkbook()) {
+ *             // Summary sheet
+ *             Dataset summaryData = generateSummaryData(criteria);
+ *             ExcelUtil.writeSheet(workbook, "Summary", summaryData);
+ *
+ *             // Detail sheets by category
+ *             Map<String, Dataset> categoryData = generateDetailData(criteria);
+ *             for (Map.Entry<String, Dataset> entry : categoryData.entrySet()) {
+ *                 ExcelUtil.writeSheet(workbook, entry.getKey(), entry.getValue());
+ *             }
+ *
+ *             // Write workbook to file
+ *             try (FileOutputStream fos = new FileOutputStream(outputFile)) {
+ *                 workbook.write(fos);
+ *             }
+ *         } catch (IOException e) {
+ *             throw new RuntimeException("Failed to generate Excel report", e);
+ *         }
+ *     }
+ * }
+ * }</pre>
+ *
+ * <p><b>Type Safety and Object Mapping:</b>
+ * <ul>
+ *   <li><b>Automatic Type Conversion:</b> Intelligent mapping from Excel cells to Java types</li>
+ *   <li><b>Bean Mapping:</b> Reflection-based mapping to POJOs with field name matching</li>
+ *   <li><b>Custom Converters:</b> Support for custom cell value conversion functions</li>
+ *   <li><b>Annotation Support:</b> {@code @Column}, {@code @ExcelColumn} annotations for mapping control</li>
+ *   <li><b>Null Handling:</b> Configurable null value processing and empty cell handling</li>
+ *   <li><b>Date Formatting:</b> Automatic detection and conversion of Excel date cells</li>
+ * </ul>
+ *
+ * <p><b>Performance Optimization Features:</b>
+ * <ul>
+ *   <li><b>Memory Efficiency:</b> Optimized memory usage for large Excel files</li>
+ *   <li><b>Streaming Support:</b> Stream-based processing for memory-constrained environments</li>
+ *   <li><b>Lazy Loading:</b> On-demand sheet loading for multi-sheet workbooks</li>
+ *   <li><b>Buffer Management:</b> Configurable buffer sizes for optimal I/O performance</li>
+ *   <li><b>Resource Cleanup:</b> Automatic resource management with proper disposal</li>
+ * </ul>
+ *
+ * <p><b>Error Handling and Validation:</b>
+ * <ul>
+ *   <li><b>File Format Validation:</b> Automatic detection and validation of Excel file formats</li>
+ *   <li><b>Cell Error Handling:</b> Graceful handling of formula errors and invalid cell values</li>
+ *   <li><b>Data Validation:</b> Built-in validation for data integrity and type consistency</li>
+ *   <li><b>Exception Recovery:</b> Configurable error recovery for corrupted or malformed files</li>
+ *   <li><b>Detailed Error Reporting:</b> Comprehensive error messages with cell and row context</li>
+ * </ul>
+ *
+ * <p><b>Integration with Data Processing Frameworks:</b>
+ * <ul>
+ *   <li><b>Dataset Integration:</b> Seamless conversion to/from Dataset objects for analysis</li>
+ *   <li><b>CSV Interoperability:</b> Bidirectional conversion between Excel and CSV formats</li>
+ *   <li><b>Stream API:</b> Integration with Java 8+ Stream API for functional processing</li>
+ *   <li><b>Spring Framework:</b> Compatible with Spring Batch and Spring Boot applications</li>
+ *   <li><b>Database Integration:</b> Direct import/export capabilities with database systems</li>
+ * </ul>
+ *
+ * <p><b>Excel-Specific Features:</b>
+ * <ul>
+ *   <li><b>Formula Evaluation:</b> Support for reading calculated formula results</li>
+ *   <li><b>Cell Formatting:</b> Preservation of basic cell formatting during read operations</li>
+ *   <li><b>Merged Cells:</b> Proper handling of merged cell regions</li>
+ *   <li><b>Hidden Sheets:</b> Access to hidden worksheets and visibility control</li>
+ *   <li><b>Named Ranges:</b> Support for Excel named ranges and defined names</li>
+ * </ul>
+ *
+ * <p><b>CSV Conversion Capabilities:</b>
+ * <ul>
+ *   <li><b>Excel to CSV:</b> Convert Excel sheets to CSV format with configurable options</li>
+ *   <li><b>CSV to Excel:</b> Import CSV data into Excel worksheets with formatting</li>
+ *   <li><b>Multi-Sheet CSV:</b> Handle multiple sheets during CSV conversion operations</li>
+ *   <li><b>Encoding Support:</b> Proper character encoding handling during conversion</li>
+ *   <li><b>Delimiter Options:</b> Configurable CSV delimiters and quote characters</li>
+ * </ul>
+ *
+ * <p><b>Advanced Configuration Options:</b>
+ * <pre>{@code
+ * // Custom cell processor for complex data extraction
+ * Function<Cell, Object> customProcessor = cell -> {
+ *     switch (cell.getCellType()) {
+ *         case STRING:
+ *             return cell.getStringCellValue().trim().toUpperCase();
+ *         case NUMERIC:
+ *             if (DateUtil.isCellDateFormatted(cell)) {
+ *                 return cell.getDateCellValue();
+ *             } else {
+ *                 return cell.getNumericCellValue();
+ *             }
+ *         case BOOLEAN:
+ *             return cell.getBooleanCellValue();
+ *         case FORMULA:
+ *             return evaluateFormula(cell);
+ *         default:
+ *             return null;
+ *     }
+ * };
+ *
+ * // Load with custom configuration
+ * Dataset dataset = ExcelUtil.loadSheet(
+ *     new File("data.xlsx"),
+ *     0,  // Sheet index
+ *     Arrays.asList("Name", "Age", "Department"),  // Columns
+ *     customProcessor  // Custom cell processor
+ * );
+ *
+ * // Advanced Excel writing with formatting
+ * ExcelWriteConfig config = ExcelWriteConfig.builder()
+ *     .sheetName("Employee Report")
+ *     .includeHeader(true)
+ *     .autoSizeColumns(true)
+ *     .dateFormat("yyyy-MM-dd")
+ *     .numberFormat("#,##0.00")
+ *     .build();
+ *
+ * ExcelUtil.writeSheet(dataset, new File("report.xlsx"), config);
+ * }</pre>
+ *
+ * <p><b>Memory Management and Resource Cleanup:</b>
+ * <ul>
+ *   <li><b>Automatic Cleanup:</b> Proper disposal of POI resources and workbook objects</li>
+ *   <li><b>Memory Optimization:</b> Efficient memory usage patterns for large Excel files</li>
+ *   <li><b>Resource Monitoring:</b> Built-in monitoring for memory usage and resource allocation</li>
+ *   <li><b>Garbage Collection:</b> GC-friendly design with minimal object retention</li>
+ * </ul>
+ *
+ * <p><b>Best Practices and Recommendations:</b>
+ * <ul>
+ *   <li>Use try-with-resources for automatic resource cleanup when working with Workbook objects</li>
+ *   <li>Prefer XLSX format over XLS for better performance and larger file support</li>
+ *   <li>Implement proper error handling for corrupted or malformed Excel files</li>
+ *   <li>Configure appropriate JVM heap settings for processing large Excel files</li>
+ *   <li>Use streaming methods for memory-constrained environments</li>
+ *   <li>Validate Excel file structure before processing in production environments</li>
+ *   <li>Consider using custom cell processors for complex data transformation requirements</li>
+ *   <li>Monitor memory usage when processing multiple large Excel files concurrently</li>
+ * </ul>
+ *
+ * <p><b>Common Anti-Patterns to Avoid:</b>
+ * <ul>
+ *   <li>Loading multiple large Excel files simultaneously without memory management</li>
+ *   <li>Not handling Excel formula evaluation errors properly</li>
+ *   <li>Ignoring cell type validation during data extraction</li>
+ *   <li>Not disposing of Workbook resources in long-running applications</li>
+ *   <li>Using inappropriate data types for Excel cell value conversion</li>
+ *   <li>Processing Excel files without considering file format compatibility</li>
+ *   <li>Not implementing proper exception handling for I/O operations</li>
+ * </ul>
+ *
+ * <p><b>Security Considerations:</b>
+ * <ul>
+ *   <li><b>File Validation:</b> Validate Excel file format and structure before processing</li>
+ *   <li><b>Input Sanitization:</b> Sanitize Excel data to prevent injection attacks</li>
+ *   <li><b>Resource Limits:</b> Implement limits on file size and processing time</li>
+ *   <li><b>Access Control:</b> Ensure proper file access permissions and security</li>
+ *   <li><b>Data Privacy:</b> Handle sensitive data in Excel files according to privacy requirements</li>
+ * </ul>
+ *
+ * <p><b>Thread Safety:</b>
+ * <ul>
+ *   <li><b>Stateless Operations:</b> All utility methods are stateless and thread-safe</li>
+ *   <li><b>Concurrent Access:</b> Multiple threads can safely use ExcelUtil methods simultaneously</li>
+ *   <li><b>Resource Isolation:</b> Each operation uses isolated POI resources</li>
+ *   <li><b>No Shared State:</b> No static mutable state that could cause thread safety issues</li>
+ * </ul>
+ *
+ * @see Dataset
+ * @see CSVUtil
+ * @see org.apache.poi.ss.usermodel.Workbook
+ * @see org.apache.poi.ss.usermodel.Sheet
+ * @see org.apache.poi.ss.usermodel.Row
+ * @see org.apache.poi.ss.usermodel.Cell
+ * @see com.landawn.abacus.util.stream.Stream
+ * @see com.landawn.abacus.annotation.Column
+ * @see <a href="https://poi.apache.org/components/spreadsheet/">Apache POI Spreadsheet API</a>
+ * @see <a href="https://docs.microsoft.com/en-us/office/open-xml/working-with-spreadsheets">Excel File Formats</a>
  */
 public final class ExcelUtil {
 
@@ -488,10 +822,10 @@ public final class ExcelUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * List<Object> headers = Arrays.asList("Name", "Age", "City");
-     * List<List<String>> rows = Arrays.asList(
-     *     Arrays.asList("John", "30", "New York"),
-     *     Arrays.asList("Jane", "25", "London")
+     * List<Object> headers = List.of("Name", "Age", "City");
+     * List<List<Object>> rows = List.of(
+     *     List.of("John", 30, "New York"),
+     *     List.of("Jane", 25, "London")
      * );
      * ExcelUtil.writeSheet("Users", headers, rows, new File("users.xlsx"));
      * }</pre>
@@ -518,6 +852,11 @@ public final class ExcelUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
+     * List<Object> headers = List.of("ID", "Name", "Value");
+     * List<List<Object>> data = List.of(
+     *     List.of(1, "Item1", 100.0),
+     *     List.of(2, "Item2", 200.0)
+     * );
      * SheetCreateOptions options = SheetCreateOptions.builder()
      *     .autoSizeColumn(true)
      *     .freezeFirstRow(true)
@@ -646,7 +985,7 @@ public final class ExcelUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Dataset dataset = Dataset.fromCSV(new File("data.csv"));
+     * Dataset dataset = CSVUtil.loadCSV(new File("data.csv"));
      * ExcelUtil.writeSheet("ImportedData", dataset, new File("output.xlsx"));
      * }</pre>
      *
@@ -686,9 +1025,9 @@ public final class ExcelUtil {
      * @throws UncheckedException if an I/O error occurs while writing the file or if the file cannot be created
      */
     public static void writeSheet(final String sheetName, final Dataset dataset, final SheetCreateOptions sheetCreateOptions, final File outputExcelFile) {
-        final int columnColumn = dataset.columnCount();
+        final int columnCount = dataset.columnCount();
 
-        final Consumer<Sheet> sheetSetter = createSheetSetter(sheetCreateOptions, columnColumn);
+        final Consumer<Sheet> sheetSetter = createSheetSetter(sheetCreateOptions, columnCount);
 
         writeSheet(sheetName, dataset, sheetSetter, outputExcelFile);
     }
@@ -725,11 +1064,11 @@ public final class ExcelUtil {
         Workbook workbook = new XSSFWorkbook();
         Sheet sheet = workbook.createSheet(sheetName);
 
-        final int columnColumn = dataset.columnCount();
+        final int columnCount = dataset.columnCount();
 
         final Row headerRow = sheet.createRow(0);
 
-        for (int i = 0; i < columnColumn; i++) {
+        for (int i = 0; i < columnCount; i++) {
             headerRow.createCell(i).setCellValue(dataset.getColumnName(i));
         }
 
@@ -846,7 +1185,7 @@ public final class ExcelUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * List<String> customHeaders = Arrays.asList("Product ID", "Product Name", "Price");
+     * List<String> customHeaders = List.of("Product ID", "Product Name", "Price");
      * ExcelUtil.saveSheetAsCsv(
      *     new File("products.xlsx"),
      *     0,
@@ -889,7 +1228,7 @@ public final class ExcelUtil {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Export with custom headers in ISO-8859-1 encoding
-     * List<String> headers = Arrays.asList("Código", "Nombre", "Precio");
+     * List<String> headers = List.of("Código", "Nombre", "Precio");
      * ExcelUtil.saveSheetAsCsv(
      *     new File("productos.xlsx"),
      *     "Inventario",

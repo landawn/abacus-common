@@ -20,7 +20,7 @@ package com.landawn.abacus.type;
  * It inherits all database and I/O operations from InputStreamType while identifying
  * itself specifically as a binary stream type.
  */
-public class BinaryStreamType extends InputStreamType {
+class BinaryStreamType extends InputStreamType {
 
     /**
      * The type name constant for binary stream type identification.

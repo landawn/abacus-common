@@ -23,7 +23,7 @@ import com.landawn.abacus.util.Strings;
  * OptionalDouble is a container that may or may not contain a double value.
  * Empty optionals are represented as {@code null} in serialized form.
  */
-public class JdkOptionalDoubleType extends AbstractOptionalType<OptionalDouble> {
+class JdkOptionalDoubleType extends AbstractOptionalType<OptionalDouble> {
 
     public static final String OPTIONAL_DOUBLE = "JdkOptionalDouble";
 
@@ -80,7 +80,6 @@ public class JdkOptionalDoubleType extends AbstractOptionalType<OptionalDouble> 
      *
      * @param x the OptionalDouble to convert to string
      * @return the string representation of the double value, or {@code null} if empty or null
-     @MayReturnNull
      */
     @Override
     public String stringOf(final OptionalDouble x) {
@@ -94,7 +93,6 @@ public class JdkOptionalDoubleType extends AbstractOptionalType<OptionalDouble> 
      *
      * @param str the string to parse
      * @return OptionalDouble.empty() if the string is {@code null} or empty, otherwise OptionalDouble containing the parsed value
-     @MayReturnNull
      */
     @Override
     public OptionalDouble valueOf(final String str) {
@@ -110,7 +108,6 @@ public class JdkOptionalDoubleType extends AbstractOptionalType<OptionalDouble> 
      * @param columnIndex the index of the column to read (1-based)
      * @return OptionalDouble.empty() if the column is {@code null}, otherwise OptionalDouble containing the value
      * @throws SQLException if a database access error occurs or the columnIndex is invalid
-     @MayReturnNull
      */
     @Override
     public OptionalDouble get(final ResultSet rs, final int columnIndex) throws SQLException {
@@ -128,7 +125,6 @@ public class JdkOptionalDoubleType extends AbstractOptionalType<OptionalDouble> 
      * @param columnLabel the label of the column to read
      * @return OptionalDouble.empty() if the column is {@code null}, otherwise OptionalDouble containing the value
      * @throws SQLException if a database access error occurs or the columnLabel is not found
-     @MayReturnNull
      */
     @Override
     public OptionalDouble get(final ResultSet rs, final String columnLabel) throws SQLException {

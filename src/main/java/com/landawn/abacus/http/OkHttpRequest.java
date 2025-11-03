@@ -751,19 +751,19 @@ public final class OkHttpRequest {
 
     /**
      * Executes a GET request and returns the response.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Response response = OkHttpRequest.url("https://api.example.com/users")
      *     .header("Accept", "application/json")
      *     .get();
-     * 
+     *
      * if (response.isSuccessful()) {
      *     String body = response.body().string();
      * }
      * }</pre>
      *
-     * @return the HTTP response
+     * @return The HTTP response
      * @throws IOException if the request could not be executed
      */
     public Response get() throws IOException {
@@ -771,17 +771,17 @@ public final class OkHttpRequest {
     }
 
     /**
-     * Executes a GET request and returns the response body deserialized to the specified type.
-     * 
+     * Executes a GET request and deserializes the response to the specified type.
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * List<User> users = OkHttpRequest.url("https://api.example.com/users")
      *     .get(new TypeToken<List<User>>(){}.getType());
      * }</pre>
      *
-     * @param <T> the type of the result
-     * @param resultClass the class of the result type
-     * @return the deserialized response body
+     * @param <T> The type of the response object
+     * @param resultClass The class of the expected response object
+     * @return The deserialized response body
      * @throws IOException if the request could not be executed or the response indicates an error
      */
     public <T> T get(final Class<T> resultClass) throws IOException {
@@ -790,7 +790,8 @@ public final class OkHttpRequest {
 
     /**
      * Executes a POST request and returns the response.
-     * 
+     * POST requests typically send data to the server to create or update a resource.
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * User newUser = new User("John", "Doe");
@@ -799,7 +800,7 @@ public final class OkHttpRequest {
      *     .post();
      * }</pre>
      *
-     * @return the HTTP response
+     * @return The HTTP response
      * @throws IOException if the request could not be executed
      */
     public Response post() throws IOException {
@@ -807,8 +808,9 @@ public final class OkHttpRequest {
     }
 
     /**
-     * Executes a POST request and returns the response body deserialized to the specified type.
-     * 
+     * Executes a POST request and deserializes the response to the specified type.
+     * POST requests typically send data to the server to create or update a resource.
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * User newUser = new User("John", "Doe");
@@ -817,9 +819,9 @@ public final class OkHttpRequest {
      *     .post(User.class);
      * }</pre>
      *
-     * @param <T> the type of the result
-     * @param resultClass the class of the result type
-     * @return the deserialized response body
+     * @param <T> The type of the response object
+     * @param resultClass The class of the expected response object
+     * @return The deserialized response body
      * @throws IOException if the request could not be executed or the response indicates an error
      */
     public <T> T post(final Class<T> resultClass) throws IOException {
@@ -828,8 +830,17 @@ public final class OkHttpRequest {
 
     /**
      * Executes a PUT request and returns the response.
+     * PUT requests typically send data to the server to create or fully replace a resource.
      *
-     * @return the HTTP response
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * User updatedUser = new User("John", "Smith");
+     * Response response = OkHttpRequest.url("https://api.example.com/users/123")
+     *     .jsonBody(updatedUser)
+     *     .put();
+     * }</pre>
+     *
+     * @return The HTTP response
      * @throws IOException if the request could not be executed
      */
     public Response put() throws IOException {
@@ -837,11 +848,20 @@ public final class OkHttpRequest {
     }
 
     /**
-     * Executes a PUT request and returns the response body deserialized to the specified type.
+     * Executes a PUT request and deserializes the response to the specified type.
+     * PUT requests typically send data to the server to create or fully replace a resource.
      *
-     * @param <T> the type of the result
-     * @param resultClass the class of the result type
-     * @return the deserialized response body
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * User updatedUser = new User("John", "Smith");
+     * User result = OkHttpRequest.url("https://api.example.com/users/123")
+     *     .jsonBody(updatedUser)
+     *     .put(User.class);
+     * }</pre>
+     *
+     * @param <T> The type of the response object
+     * @param resultClass The class of the expected response object
+     * @return The deserialized response body
      * @throws IOException if the request could not be executed or the response indicates an error
      */
     public <T> T put(final Class<T> resultClass) throws IOException {
@@ -850,8 +870,17 @@ public final class OkHttpRequest {
 
     /**
      * Executes a PATCH request and returns the response.
+     * PATCH requests typically send data to the server to partially update a resource.
      *
-     * @return the HTTP response
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Map<String, Object> updates = Map.of("status", "active");
+     * Response response = OkHttpRequest.url("https://api.example.com/users/123")
+     *     .jsonBody(updates)
+     *     .patch();
+     * }</pre>
+     *
+     * @return The HTTP response
      * @throws IOException if the request could not be executed
      */
     public Response patch() throws IOException {
@@ -859,11 +888,20 @@ public final class OkHttpRequest {
     }
 
     /**
-     * Executes a PATCH request and returns the response body deserialized to the specified type.
+     * Executes a PATCH request and deserializes the response to the specified type.
+     * PATCH requests typically send data to the server to partially update a resource.
      *
-     * @param <T> the type of the result
-     * @param resultClass the class of the result type
-     * @return the deserialized response body
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Map<String, Object> updates = Map.of("status", "active");
+     * User result = OkHttpRequest.url("https://api.example.com/users/123")
+     *     .jsonBody(updates)
+     *     .patch(User.class);
+     * }</pre>
+     *
+     * @param <T> The type of the response object
+     * @param resultClass The class of the expected response object
+     * @return The deserialized response body
      * @throws IOException if the request could not be executed or the response indicates an error
      */
     public <T> T patch(final Class<T> resultClass) throws IOException {
@@ -872,14 +910,15 @@ public final class OkHttpRequest {
 
     /**
      * Executes a DELETE request and returns the response.
-     * 
+     * DELETE requests typically remove a resource from the server.
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Response response = OkHttpRequest.url("https://api.example.com/users/123")
      *     .delete();
      * }</pre>
      *
-     * @return the HTTP response
+     * @return The HTTP response
      * @throws IOException if the request could not be executed
      */
     public Response delete() throws IOException {
@@ -887,11 +926,18 @@ public final class OkHttpRequest {
     }
 
     /**
-     * Executes a DELETE request and returns the response body deserialized to the specified type.
+     * Executes a DELETE request and deserializes the response to the specified type.
+     * DELETE requests typically remove a resource from the server.
      *
-     * @param <T> the type of the result
-     * @param resultClass the class of the result type
-     * @return the deserialized response body
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * DeleteResponse result = OkHttpRequest.url("https://api.example.com/users/123")
+     *     .delete(DeleteResponse.class);
+     * }</pre>
+     *
+     * @param <T> The type of the response object
+     * @param resultClass The class of the expected response object
+     * @return The deserialized response body
      * @throws IOException if the request could not be executed or the response indicates an error
      */
     public <T> T delete(final Class<T> resultClass) throws IOException {
@@ -901,8 +947,17 @@ public final class OkHttpRequest {
     /**
      * Executes a HEAD request and returns the response.
      * HEAD requests are used to retrieve headers without the response body.
+     * This is useful for checking if a resource exists or getting metadata without downloading the full content.
      *
-     * @return the HTTP response (with no body)
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Response response = OkHttpRequest.url("https://api.example.com/large-file")
+     *     .head();
+     * // Check headers without downloading the entire file
+     * String contentLength = response.header("Content-Length");
+     * }</pre>
+     *
+     * @return The HTTP response (with no body)
      * @throws IOException if the request could not be executed
      */
     public Response head() throws IOException {
@@ -911,9 +966,16 @@ public final class OkHttpRequest {
 
     /**
      * Executes an HTTP request with the specified method and returns the response.
+     * This is a low-level method that allows executing any HTTP method.
      *
-     * @param httpMethod the HTTP method to use (GET, POST, PUT, PATCH, DELETE, HEAD)
-     * @return the HTTP response
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Response response = OkHttpRequest.url("https://api.example.com/resource")
+     *     .execute(HttpMethod.GET);
+     * }</pre>
+     *
+     * @param httpMethod The HTTP method to use (GET, POST, PUT, PATCH, DELETE, HEAD)
+     * @return The HTTP response
      * @throws IOException if the request could not be executed
      */
     @Beta
@@ -925,12 +987,19 @@ public final class OkHttpRequest {
     }
 
     /**
-     * Executes an HTTP request with the specified method and returns the response body deserialized to the specified type.
+     * Executes an HTTP request with the specified method and deserializes the response to the specified type.
+     * This is a low-level method that allows executing any HTTP method with automatic response deserialization.
      *
-     * @param <T> the type of the result
-     * @param httpMethod the HTTP method to use (GET, POST, PUT, PATCH, DELETE, HEAD)
-     * @param resultClass the class of the result type
-     * @return the deserialized response body
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * User user = OkHttpRequest.url("https://api.example.com/users/123")
+     *     .execute(HttpMethod.GET, User.class);
+     * }</pre>
+     *
+     * @param <T> The type of the response object
+     * @param httpMethod The HTTP method to use (GET, POST, PUT, PATCH, DELETE, HEAD)
+     * @param resultClass The class of the expected response object
+     * @return The deserialized response body
      * @throws IllegalArgumentException if resultClass is HttpResponse
      * @throws IOException if the request could not be executed or the response indicates an error
      */
@@ -1055,34 +1124,34 @@ public final class OkHttpRequest {
     }
 
     /**
-     * Executes a GET request asynchronously and returns the response body deserialized to the specified type.
+     * Executes a GET request asynchronously and deserializes the response to the specified type.
      * Uses the default executor.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ContinuableFuture<List<User>> future = OkHttpRequest.url("https://api.example.com/users")
      *     .asyncGet(new TypeToken<List<User>>(){}.getType());
-     * 
+     *
      * future.getThenAccept(users -> {
      *     // Process users
      * });
      * }</pre>
      *
-     * @param <T> the type of the result
-     * @param resultClass the class of the result type
-     * @return a ContinuableFuture that will complete with the deserialized response body
+     * @param <T> The type of the response object
+     * @param resultClass The class of the expected response object
+     * @return A ContinuableFuture that will complete with the deserialized response body
      */
     public <T> ContinuableFuture<T> asyncGet(final Class<T> resultClass) {
         return asyncGet(resultClass, HttpUtil.DEFAULT_EXECUTOR);
     }
 
     /**
-     * Executes a GET request asynchronously using the specified executor and returns the response body deserialized to the specified type.
+     * Executes a GET request asynchronously using the specified executor and deserializes the response to the specified type.
      *
-     * @param <T> the type of the result
-     * @param resultClass the class of the result type
-     * @param executor the executor to use for the asynchronous operation
-     * @return a ContinuableFuture that will complete with the deserialized response body
+     * @param <T> The type of the response object
+     * @param resultClass The class of the expected response object
+     * @param executor The executor to use for the asynchronous operation
+     * @return A ContinuableFuture that will complete with the deserialized response body
      */
     public <T> ContinuableFuture<T> asyncGet(final Class<T> resultClass, final Executor executor) {
         return ContinuableFuture.call(() -> get(resultClass), executor);
@@ -1100,32 +1169,32 @@ public final class OkHttpRequest {
     /**
      * Executes a POST request asynchronously using the specified executor.
      *
-     * @param executor the executor to use for the asynchronous operation
-     * @return a ContinuableFuture that will complete with the HTTP response
+     * @param executor The executor to use for the asynchronous operation
+     * @return A ContinuableFuture that will complete with the HTTP response
      */
     public ContinuableFuture<Response> asyncPost(final Executor executor) {
         return ContinuableFuture.call(this::post, executor);
     }
 
     /**
-     * Executes a POST request asynchronously and returns the response body deserialized to the specified type.
+     * Executes a POST request asynchronously and deserializes the response to the specified type.
      * Uses the default executor.
      *
-     * @param <T> the type of the result
-     * @param resultClass the class of the result type
-     * @return a ContinuableFuture that will complete with the deserialized response body
+     * @param <T> The type of the response object
+     * @param resultClass The class of the expected response object
+     * @return A ContinuableFuture that will complete with the deserialized response body
      */
     public <T> ContinuableFuture<T> asyncPost(final Class<T> resultClass) {
         return asyncPost(resultClass, HttpUtil.DEFAULT_EXECUTOR);
     }
 
     /**
-     * Executes a POST request asynchronously using the specified executor and returns the response body deserialized to the specified type.
+     * Executes a POST request asynchronously using the specified executor and deserializes the response to the specified type.
      *
-     * @param <T> the type of the result
-     * @param resultClass the class of the result type
-     * @param executor the executor to use for the asynchronous operation
-     * @return a ContinuableFuture that will complete with the deserialized response body
+     * @param <T> The type of the response object
+     * @param resultClass The class of the expected response object
+     * @param executor The executor to use for the asynchronous operation
+     * @return A ContinuableFuture that will complete with the deserialized response body
      */
     public <T> ContinuableFuture<T> asyncPost(final Class<T> resultClass, final Executor executor) {
         return ContinuableFuture.call(() -> post(resultClass), executor);
@@ -1143,32 +1212,32 @@ public final class OkHttpRequest {
     /**
      * Executes a PUT request asynchronously using the specified executor.
      *
-     * @param executor the executor to use for the asynchronous operation
-     * @return a ContinuableFuture that will complete with the HTTP response
+     * @param executor The executor to use for the asynchronous operation
+     * @return A ContinuableFuture that will complete with the HTTP response
      */
     public ContinuableFuture<Response> asyncPut(final Executor executor) {
         return ContinuableFuture.call(this::put, executor);
     }
 
     /**
-     * Executes a PUT request asynchronously and returns the response body deserialized to the specified type.
+     * Executes a PUT request asynchronously and deserializes the response to the specified type.
      * Uses the default executor.
      *
-     * @param <T> the type of the result
-     * @param resultClass the class of the result type
-     * @return a ContinuableFuture that will complete with the deserialized response body
+     * @param <T> The type of the response object
+     * @param resultClass The class of the expected response object
+     * @return A ContinuableFuture that will complete with the deserialized response body
      */
     public <T> ContinuableFuture<T> asyncPut(final Class<T> resultClass) {
         return asyncPut(resultClass, HttpUtil.DEFAULT_EXECUTOR);
     }
 
     /**
-     * Executes a PUT request asynchronously using the specified executor and returns the response body deserialized to the specified type.
+     * Executes a PUT request asynchronously using the specified executor and deserializes the response to the specified type.
      *
-     * @param <T> the type of the result
-     * @param resultClass the class of the result type
-     * @param executor the executor to use for the asynchronous operation
-     * @return a ContinuableFuture that will complete with the deserialized response body
+     * @param <T> The type of the response object
+     * @param resultClass The class of the expected response object
+     * @param executor The executor to use for the asynchronous operation
+     * @return A ContinuableFuture that will complete with the deserialized response body
      */
     public <T> ContinuableFuture<T> asyncPut(final Class<T> resultClass, final Executor executor) {
         return ContinuableFuture.call(() -> put(resultClass), executor);
@@ -1186,32 +1255,32 @@ public final class OkHttpRequest {
     /**
      * Executes a PATCH request asynchronously using the specified executor.
      *
-     * @param executor the executor to use for the asynchronous operation
-     * @return a ContinuableFuture that will complete with the HTTP response
+     * @param executor The executor to use for the asynchronous operation
+     * @return A ContinuableFuture that will complete with the HTTP response
      */
     public ContinuableFuture<Response> asyncPatch(final Executor executor) {
         return ContinuableFuture.call(this::patch, executor);
     }
 
     /**
-     * Executes a PATCH request asynchronously and returns the response body deserialized to the specified type.
+     * Executes a PATCH request asynchronously and deserializes the response to the specified type.
      * Uses the default executor.
      *
-     * @param <T> the type of the result
-     * @param resultClass the class of the result type
-     * @return a ContinuableFuture that will complete with the deserialized response body
+     * @param <T> The type of the response object
+     * @param resultClass The class of the expected response object
+     * @return A ContinuableFuture that will complete with the deserialized response body
      */
     public <T> ContinuableFuture<T> asyncPatch(final Class<T> resultClass) {
         return asyncPatch(resultClass, HttpUtil.DEFAULT_EXECUTOR);
     }
 
     /**
-     * Executes a PATCH request asynchronously using the specified executor and returns the response body deserialized to the specified type.
+     * Executes a PATCH request asynchronously using the specified executor and deserializes the response to the specified type.
      *
-     * @param <T> the type of the result
-     * @param resultClass the class of the result type
-     * @param executor the executor to use for the asynchronous operation
-     * @return a ContinuableFuture that will complete with the deserialized response body
+     * @param <T> The type of the response object
+     * @param resultClass The class of the expected response object
+     * @param executor The executor to use for the asynchronous operation
+     * @return A ContinuableFuture that will complete with the deserialized response body
      */
     public <T> ContinuableFuture<T> asyncPatch(final Class<T> resultClass, final Executor executor) {
         return ContinuableFuture.call(() -> patch(resultClass), executor);
@@ -1229,32 +1298,32 @@ public final class OkHttpRequest {
     /**
      * Executes a DELETE request asynchronously using the specified executor.
      *
-     * @param executor the executor to use for the asynchronous operation
-     * @return a ContinuableFuture that will complete with the HTTP response
+     * @param executor The executor to use for the asynchronous operation
+     * @return A ContinuableFuture that will complete with the HTTP response
      */
     public ContinuableFuture<Response> asyncDelete(final Executor executor) {
         return ContinuableFuture.call(this::delete, executor);
     }
 
     /**
-     * Executes a DELETE request asynchronously and returns the response body deserialized to the specified type.
+     * Executes a DELETE request asynchronously and deserializes the response to the specified type.
      * Uses the default executor.
      *
-     * @param <T> the type of the result
-     * @param resultClass the class of the result type
-     * @return a ContinuableFuture that will complete with the deserialized response body
+     * @param <T> The type of the response object
+     * @param resultClass The class of the expected response object
+     * @return A ContinuableFuture that will complete with the deserialized response body
      */
     public <T> ContinuableFuture<T> asyncDelete(final Class<T> resultClass) {
         return asyncDelete(resultClass, HttpUtil.DEFAULT_EXECUTOR);
     }
 
     /**
-     * Executes a DELETE request asynchronously using the specified executor and returns the response body deserialized to the specified type.
+     * Executes a DELETE request asynchronously using the specified executor and deserializes the response to the specified type.
      *
-     * @param <T> the type of the result
-     * @param resultClass the class of the result type
-     * @param executor the executor to use for the asynchronous operation
-     * @return a ContinuableFuture that will complete with the deserialized response body
+     * @param <T> The type of the response object
+     * @param resultClass The class of the expected response object
+     * @param executor The executor to use for the asynchronous operation
+     * @return A ContinuableFuture that will complete with the deserialized response body
      */
     public <T> ContinuableFuture<T> asyncDelete(final Class<T> resultClass, final Executor executor) {
         return ContinuableFuture.call(() -> delete(resultClass), executor);
@@ -1272,8 +1341,8 @@ public final class OkHttpRequest {
     /**
      * Executes a HEAD request asynchronously using the specified executor.
      *
-     * @param executor the executor to use for the asynchronous operation
-     * @return a ContinuableFuture that will complete with the HTTP response
+     * @param executor The executor to use for the asynchronous operation
+     * @return A ContinuableFuture that will complete with the HTTP response
      */
     public ContinuableFuture<Response> asyncHead(final Executor executor) {
         return ContinuableFuture.call(this::head, executor);
@@ -1282,8 +1351,8 @@ public final class OkHttpRequest {
     /**
      * Executes an HTTP request asynchronously with the specified method using the default executor.
      *
-     * @param httpMethod the HTTP method to use (GET, POST, PUT, PATCH, DELETE, HEAD)
-     * @return a ContinuableFuture that will complete with the HTTP response
+     * @param httpMethod The HTTP method to use (GET, POST, PUT, PATCH, DELETE, HEAD)
+     * @return A ContinuableFuture that will complete with the HTTP response
      */
     @Beta
     public ContinuableFuture<Response> asyncExecute(final HttpMethod httpMethod) {
@@ -1293,9 +1362,9 @@ public final class OkHttpRequest {
     /**
      * Executes an HTTP request asynchronously with the specified method using the specified executor.
      *
-     * @param httpMethod the HTTP method to use (GET, POST, PUT, PATCH, DELETE, HEAD)
-     * @param executor the executor to use for the asynchronous operation
-     * @return a ContinuableFuture that will complete with the HTTP response
+     * @param httpMethod The HTTP method to use (GET, POST, PUT, PATCH, DELETE, HEAD)
+     * @param executor The executor to use for the asynchronous operation
+     * @return A ContinuableFuture that will complete with the HTTP response
      */
     @Beta
     public ContinuableFuture<Response> asyncExecute(final HttpMethod httpMethod, final Executor executor) {
@@ -1303,13 +1372,13 @@ public final class OkHttpRequest {
     }
 
     /**
-     * Executes an HTTP request asynchronously with the specified method and returns the response body deserialized to the specified type.
+     * Executes an HTTP request asynchronously with the specified method and deserializes the response to the specified type.
      * Uses the default executor.
      *
-     * @param <T> the type of the result
-     * @param httpMethod the HTTP method to use (GET, POST, PUT, PATCH, DELETE, HEAD)
-     * @param resultClass the class of the result type
-     * @return a ContinuableFuture that will complete with the deserialized response body
+     * @param <T> The type of the response object
+     * @param httpMethod The HTTP method to use (GET, POST, PUT, PATCH, DELETE, HEAD)
+     * @param resultClass The class of the expected response object
+     * @return A ContinuableFuture that will complete with the deserialized response body
      */
     @Beta
     public <T> ContinuableFuture<T> asyncExecute(final HttpMethod httpMethod, final Class<T> resultClass) {
@@ -1317,13 +1386,13 @@ public final class OkHttpRequest {
     }
 
     /**
-     * Executes an HTTP request asynchronously with the specified method using the specified executor and returns the response body deserialized to the specified type.
+     * Executes an HTTP request asynchronously with the specified method using the specified executor and deserializes the response to the specified type.
      *
-     * @param <T> the type of the result
-     * @param httpMethod the HTTP method to use (GET, POST, PUT, PATCH, DELETE, HEAD)
-     * @param resultClass the class of the result type
-     * @param executor the executor to use for the asynchronous operation
-     * @return a ContinuableFuture that will complete with the deserialized response body
+     * @param <T> The type of the response object
+     * @param httpMethod The HTTP method to use (GET, POST, PUT, PATCH, DELETE, HEAD)
+     * @param resultClass The class of the expected response object
+     * @param executor The executor to use for the asynchronous operation
+     * @return A ContinuableFuture that will complete with the deserialized response body
      */
     @Beta
     public <T> ContinuableFuture<T> asyncExecute(final HttpMethod httpMethod, final Class<T> resultClass, final Executor executor) {

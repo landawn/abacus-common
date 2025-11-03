@@ -11,16 +11,14 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-
 package com.landawn.abacus.util.function;
 
-import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.util.Throwables;
 
 /**
  * Represents a function that accepts a double-valued argument and an object-valued argument,
  * and produces a result. This is the (double, reference) specialization of {@link java.util.function.BiFunction}.
- * 
+ *
  * <p>This is a functional interface whose functional method is {@link #apply(double, Object)}.
  *
  * <p>Refer to JDK API documentation at: <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html">https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a></p>
@@ -35,17 +33,35 @@ public interface DoubleObjFunction<T, R> extends Throwables.DoubleObjFunction<T,
     /**
      * Applies this function to the given arguments.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * DoubleObjFunction<String, String> formatter = (val, unit) -> val + " " + unit;
+     * String result = formatter.apply(3.14, "meters"); // Returns "3.14 meters"
+     *
+     * DoubleObjFunction<List<Double>, List<Double>> adder = (val, list) -> {
+     *     list.add(val);
+     *     return list;
+     * };
+     * }</pre>
+     *
      * @param t the double input argument
      * @param u the object input argument
      * @return the function result
      */
     @Override
-    @MayReturnNull
     R apply(double t, T u);
 
     /**
      * Returns a composed function that first applies this function to its input, and then applies the {@code after} function to the result.
      * If evaluation of either function throws an exception, it is relayed to the caller of the composed function.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * DoubleObjFunction<String, String> formatter = (val, unit) -> val + " " + unit;
+     * Function<String, Integer> length = String::length;
+     * DoubleObjFunction<String, Integer> composed = formatter.andThen(length);
+     * Integer result = composed.apply(3.14, "meters"); // Returns 10
+     * }</pre>
      *
      * @param <V> the type of output of the {@code after} function, and of the composed function
      * @param after the function to apply after this function is applied

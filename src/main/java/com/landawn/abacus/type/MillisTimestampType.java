@@ -22,7 +22,7 @@ import java.sql.Timestamp;
 
 import com.landawn.abacus.util.Dates;
 
-public class MillisTimestampType extends TimestampType {
+class MillisTimestampType extends TimestampType {
 
     public static final String MILLIS_TIMESTAMP = "MillisTimestamp";
 
@@ -37,7 +37,7 @@ public class MillisTimestampType extends TimestampType {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * MillisTimestampType type = new MillisTimestampType();
+     * Type<Timestamp> type = TypeFactory.getType(Timestamp.class);
      * ResultSet rs = ...; // obtained from database query
      *
      * // Column contains milliseconds value 1609459200000 (Jan 1, 2021 00:00:00)
@@ -53,7 +53,6 @@ public class MillisTimestampType extends TimestampType {
      * @param columnIndex The column index (1-based) to retrieve the value from
      * @return A Timestamp object created from the milliseconds value, or {@code null} if the value is 0
      * @throws SQLException if a database access error occurs or the column index is invalid
-     @MayReturnNull
      */
     @Override
     public Timestamp get(final ResultSet rs, final int columnIndex) throws SQLException {
@@ -69,7 +68,7 @@ public class MillisTimestampType extends TimestampType {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * MillisTimestampType type = new MillisTimestampType();
+     * Type<Timestamp> type = TypeFactory.getType(Timestamp.class);
      * ResultSet rs = ...; // obtained from database query
      *
      * // Column "created_at" contains milliseconds value 1609459200000
@@ -85,7 +84,6 @@ public class MillisTimestampType extends TimestampType {
      * @param columnLabel The label of the column to retrieve the value from
      * @return A Timestamp object created from the milliseconds value, or {@code null} if the value is 0
      * @throws SQLException if a database access error occurs or the column label is not found
-     @MayReturnNull
      */
     @Override
     public Timestamp get(final ResultSet rs, final String columnLabel) throws SQLException {
@@ -101,7 +99,7 @@ public class MillisTimestampType extends TimestampType {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * MillisTimestampType type = new MillisTimestampType();
+     * Type<Timestamp> type = TypeFactory.getType(Timestamp.class);
      * PreparedStatement stmt = connection.prepareStatement(
      *     "INSERT INTO events (id, created_at) VALUES (?, ?)");
      *
@@ -130,7 +128,7 @@ public class MillisTimestampType extends TimestampType {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * MillisTimestampType type = new MillisTimestampType();
+     * Type<Timestamp> type = TypeFactory.getType(Timestamp.class);
      * CallableStatement stmt = connection.prepareCall("{call log_event(?, ?)}");
      *
      * Timestamp ts = new Timestamp(1609459200000L); // Jan 1, 2021 00:00:00

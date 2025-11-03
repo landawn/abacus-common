@@ -157,8 +157,8 @@ public class XMLSerializationConfig extends JSONXMLSerializationConfig<XMLSerial
     }
 
     /**
-     * Sets whether to include type information during XML serialization.
-     * 
+     * Checks whether type information should be included during XML serialization.
+     *
      * <p>Type information includes class names and type hints that help with
      * accurate deserialization. When enabled, the XML output will contain type
      * attributes that specify the Java class types of objects.</p>
@@ -169,7 +169,7 @@ public class XMLSerializationConfig extends JSONXMLSerializationConfig<XMLSerial
      *   <item>...</item>
      * </items>
      * }</pre>
-     * 
+     *
      * <p>Example with writeTypeInfo=true (type information included):</p>
      * <pre>{@code
      * <property name="items" type="java.util.ArrayList">
@@ -177,8 +177,8 @@ public class XMLSerializationConfig extends JSONXMLSerializationConfig<XMLSerial
      * </property>
      * }</pre>
      *
-     * @return this configuration instance for method chaining
-     * @see #writeTypeInfo()
+     * @return {@code true} if type information should be written, {@code false} otherwise
+     * @see #writeTypeInfo(boolean)
      */
     public boolean writeTypeInfo() {
         return writeTypeInfo;

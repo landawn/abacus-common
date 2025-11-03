@@ -17,7 +17,6 @@ package com.landawn.abacus.type;
 import java.io.IOException;
 import java.util.Collection;
 
-import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.parser.JSONXMLSerializationConfig;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.N;
@@ -25,7 +24,7 @@ import com.landawn.abacus.util.Strings;
 import com.landawn.abacus.util.WD;
 
 @SuppressWarnings("java:S2160")
-public final class PrimitiveLongArrayType extends AbstractPrimitiveArrayType<long[]> {
+final class PrimitiveLongArrayType extends AbstractPrimitiveArrayType<long[]> {
 
     public static final String LONG_ARRAY = long[].class.getSimpleName();
 
@@ -43,8 +42,9 @@ public final class PrimitiveLongArrayType extends AbstractPrimitiveArrayType<lon
      * Returns the Class object representing the primitive long array type (long[].class).
      *
      * <p><b>Usage Examples:</b></p>
-     * PrimitiveLongArrayType type = new PrimitiveLongArrayType();
-     * Class&lt;?&gt; clazz = type.clazz();
+     * <pre>{@code
+     * Type<long[]> type = TypeFactory.getType(long[].class);
+     * Class<?> clazz = type.clazz();
      * // clazz equals long[].class
      * }</pre>
      *
@@ -52,7 +52,6 @@ public final class PrimitiveLongArrayType extends AbstractPrimitiveArrayType<lon
      */
     @SuppressWarnings({ "rawtypes", "unchecked" })
     @Override
-    @MayReturnNull
     public Class clazz() {
         return long[].class;
     }
@@ -63,7 +62,7 @@ public final class PrimitiveLongArrayType extends AbstractPrimitiveArrayType<lon
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * PrimitiveLongArrayType type = new PrimitiveLongArrayType();
+     * Type<long[]> type = TypeFactory.getType(long[].class);
      * Type<Long> elemType = type.getElementType();
      * // elemType can be used for element-level operations
      * }</pre>
@@ -79,8 +78,9 @@ public final class PrimitiveLongArrayType extends AbstractPrimitiveArrayType<lon
      * Returns the parameter types associated with this array type.
      *
      * <p><b>Usage Examples:</b></p>
-     * PrimitiveLongArrayType type = new PrimitiveLongArrayType();
-     * Type&lt;Long&gt;[] paramTypes = type.getParameterTypes();
+     * <pre>{@code
+     * Type<long[]> type = TypeFactory.getType(long[].class);
+     * Type<Long>[] paramTypes = type.getParameterTypes();
      * // paramTypes[0] represents the element type
      * }</pre>
      *
@@ -98,7 +98,8 @@ public final class PrimitiveLongArrayType extends AbstractPrimitiveArrayType<lon
      * For example, an array {1L, 2L, 3L} becomes "[1, 2, 3]".
      *
      * <p><b>Usage Examples:</b></p>
-     * PrimitiveLongArrayType type = new PrimitiveLongArrayType();
+     * <pre>{@code
+     * Type<long[]> type = TypeFactory.getType(long[].class);
      * long[] arr = {1L, 2L, 3L};
      * String str = type.stringOf(arr);
      * // str equals "[1, 2, 3]"
@@ -114,9 +115,7 @@ public final class PrimitiveLongArrayType extends AbstractPrimitiveArrayType<lon
      * @return the string representation of the array, or {@code null} if the input array is {@code null}.
      *         Returns "[]" for empty arrays.
      */
-    @MayReturnNull
     @Override
-
     public String stringOf(final long[] x) {
         if (x == null) {
             return null; // NOSONAR
@@ -133,7 +132,8 @@ public final class PrimitiveLongArrayType extends AbstractPrimitiveArrayType<lon
      * For example, "[1, 2, 3]" will be parsed to a long array {1L, 2L, 3L}.
      *
      * <p><b>Usage Examples:</b></p>
-     * PrimitiveLongArrayType type = new PrimitiveLongArrayType();
+     * <pre>{@code
+     * Type<long[]> type = TypeFactory.getType(long[].class);
      * long[] arr = type.valueOf("[1, 2, 3]");
      * // arr equals {1L, 2L, 3L}
      *
@@ -149,7 +149,6 @@ public final class PrimitiveLongArrayType extends AbstractPrimitiveArrayType<lon
      *         Returns an empty array for empty string or "[]".
      * @throws NumberFormatException if any element in the string cannot be parsed as a long
      */
-    @MayReturnNull
     @Override
     public long[] valueOf(final String str) {
         if (Strings.isEmpty(str) || Strings.isBlank(str)) {
@@ -177,7 +176,8 @@ public final class PrimitiveLongArrayType extends AbstractPrimitiveArrayType<lon
      * If the array is {@code null}, appends "null".
      *
      * <p><b>Usage Examples:</b></p>
-     * PrimitiveLongArrayType type = new PrimitiveLongArrayType();
+     * <pre>{@code
+     * Type<long[]> type = TypeFactory.getType(long[].class);
      * StringBuilder sb = new StringBuilder();
      * long[] arr = {10L, 20L, 30L};
      * type.appendTo(sb, arr);
@@ -217,7 +217,8 @@ public final class PrimitiveLongArrayType extends AbstractPrimitiveArrayType<lon
      * The array is formatted as comma-separated values enclosed in square brackets.
      *
      * <p><b>Usage Examples:</b></p>
-     * PrimitiveLongArrayType type = new PrimitiveLongArrayType();
+     * <pre>{@code
+     * Type<long[]> type = TypeFactory.getType(long[].class);
      * CharacterWriter writer = new CharacterWriter();
      * long[] arr = {5L, 10L, 15L};
      * type.writeCharacter(writer, arr, null);
@@ -256,7 +257,8 @@ public final class PrimitiveLongArrayType extends AbstractPrimitiveArrayType<lon
      * Each element in the collection is unboxed to its primitive long value.
      *
      * <p><b>Usage Examples:</b></p>
-     * PrimitiveLongArrayType type = new PrimitiveLongArrayType();
+     * <pre>{@code
+     * Type<long[]> type = TypeFactory.getType(long[].class);
      * List&lt;Long&gt; list = Arrays.asList(1L, 2L, 3L, 4L);
      * long[] arr = type.collection2Array(list);
      * // arr equals {1L, 2L, 3L, 4L}
@@ -270,7 +272,6 @@ public final class PrimitiveLongArrayType extends AbstractPrimitiveArrayType<lon
      *         or {@code null} if the input collection is null
      * @throws ClassCastException if any element in the collection is not a Long
      */
-    @MayReturnNull
     @Override
     public long[] collection2Array(final Collection<?> c) {
         if (c == null) {
@@ -293,7 +294,8 @@ public final class PrimitiveLongArrayType extends AbstractPrimitiveArrayType<lon
      * Each primitive long value is autoboxed to a Long object before being added.
      *
      * <p><b>Usage Examples:</b></p>
-     * PrimitiveLongArrayType type = new PrimitiveLongArrayType();
+     * <pre>{@code
+     * Type<long[]> type = TypeFactory.getType(long[].class);
      * long[] arr = {1L, 2L, 3L};
      * List&lt;Long&gt; list = new ArrayList&lt;&gt;();
      * type.array2Collection(arr, list);
@@ -325,7 +327,8 @@ public final class PrimitiveLongArrayType extends AbstractPrimitiveArrayType<lon
      * array hash code algorithm, which considers all elements in the array.
      *
      * <p><b>Usage Examples:</b></p>
-     * PrimitiveLongArrayType type = new PrimitiveLongArrayType();
+     * <pre>{@code
+     * Type<long[]> type = TypeFactory.getType(long[].class);
      * long[] arr1 = {1L, 2L, 3L};
      * long[] arr2 = {1L, 2L, 3L};
      * int hash1 = type.hashCode(arr1);
@@ -350,7 +353,8 @@ public final class PrimitiveLongArrayType extends AbstractPrimitiveArrayType<lon
      * elements in the same order. Two {@code null} references are considered equal.
      *
      * <p><b>Usage Examples:</b></p>
-     * PrimitiveLongArrayType type = new PrimitiveLongArrayType();
+     * <pre>{@code
+     * Type<long[]> type = TypeFactory.getType(long[].class);
      * long[] arr1 = {1L, 2L, 3L};
      * long[] arr2 = {1L, 2L, 3L};
      * long[] arr3 = {3L, 2L, 1L};

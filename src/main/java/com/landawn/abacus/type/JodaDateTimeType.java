@@ -22,11 +22,10 @@ import java.sql.Timestamp;
 
 import org.joda.time.DateTime;
 
-import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Strings;
 
-public class JodaDateTimeType extends AbstractJodaDateTimeType<DateTime> {
+class JodaDateTimeType extends AbstractJodaDateTimeType<DateTime> {
 
     public static final String JODA_DATE_TIME = "JodaDateTime";
 
@@ -45,7 +44,7 @@ public class JodaDateTimeType extends AbstractJodaDateTimeType<DateTime> {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * JodaDateTimeType type = new JodaDateTimeType();
+     * Type<DateTime> type = TypeFactory.getType(DateTime.class);
      * Class<DateTime> clazz = type.clazz();
      * System.out.println(clazz.getName()); // Outputs: org.joda.time.DateTime
      * }</pre>
@@ -72,7 +71,7 @@ public class JodaDateTimeType extends AbstractJodaDateTimeType<DateTime> {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * JodaDateTimeType type = new JodaDateTimeType();
+     * Type<DateTime> type = TypeFactory.getType(DateTime.class);
      *
      * // From Number (milliseconds since epoch)
      * DateTime dt1 = type.valueOf(1609459200000L);
@@ -92,7 +91,6 @@ public class JodaDateTimeType extends AbstractJodaDateTimeType<DateTime> {
      * @return a DateTime instance, or {@code null} if the input is null
      */
     @Override
-    @MayReturnNull
     public DateTime valueOf(final Object obj) {
         if (obj instanceof Number) {
             return new DateTime(((Number) obj).longValue());
@@ -117,7 +115,7 @@ public class JodaDateTimeType extends AbstractJodaDateTimeType<DateTime> {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * JodaDateTimeType type = new JodaDateTimeType();
+     * Type<DateTime> type = TypeFactory.getType(DateTime.class);
      *
      * // Parse ISO 8601 date-time format
      * DateTime dt1 = type.valueOf("2021-01-01T10:30:00");
@@ -137,9 +135,7 @@ public class JodaDateTimeType extends AbstractJodaDateTimeType<DateTime> {
      * @return a DateTime instance, or {@code null} if the string is empty or null
      * @throws IllegalArgumentException if the string format is invalid
      */
-    @MayReturnNull
     @Override
-
     public DateTime valueOf(final String str) {
         if (Strings.isEmpty(str)) {
             return null; // NOSONAR
@@ -163,7 +159,7 @@ public class JodaDateTimeType extends AbstractJodaDateTimeType<DateTime> {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * JodaDateTimeType type = new JodaDateTimeType();
+     * Type<DateTime> type = TypeFactory.getType(DateTime.class);
      *
      * // Parse from character array containing milliseconds
      * char[] millisChars = "1609459200000".toCharArray();
@@ -186,9 +182,7 @@ public class JodaDateTimeType extends AbstractJodaDateTimeType<DateTime> {
      * @param len the number of characters to parse
      * @return a DateTime instance, or {@code null} if the character buffer is {@code null} or length is 0
      */
-    @MayReturnNull
     @Override
-
     public DateTime valueOf(final char[] cbuf, final int offset, final int len) {
         if ((cbuf == null) || (len == 0)) {
             return null; // NOSONAR
@@ -215,7 +209,7 @@ public class JodaDateTimeType extends AbstractJodaDateTimeType<DateTime> {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * JodaDateTimeType type = new JodaDateTimeType();
+     * Type<DateTime> type = TypeFactory.getType(DateTime.class);
      *
      * try (Connection conn = dataSource.getConnection();
      *      PreparedStatement stmt = conn.prepareStatement("SELECT created_at FROM events WHERE id = ?")) {
@@ -235,7 +229,6 @@ public class JodaDateTimeType extends AbstractJodaDateTimeType<DateTime> {
      * @throws SQLException if a database access error occurs or the column index is invalid
      */
     @Override
-    @MayReturnNull
     public DateTime get(final ResultSet rs, final int columnIndex) throws SQLException {
         final Timestamp ts = rs.getTimestamp(columnIndex);
 
@@ -252,7 +245,7 @@ public class JodaDateTimeType extends AbstractJodaDateTimeType<DateTime> {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * JodaDateTimeType type = new JodaDateTimeType();
+     * Type<DateTime> type = TypeFactory.getType(DateTime.class);
      *
      * try (Connection conn = dataSource.getConnection();
      *      PreparedStatement stmt = conn.prepareStatement("SELECT created_at, updated_at FROM events WHERE id = ?")) {
@@ -273,7 +266,6 @@ public class JodaDateTimeType extends AbstractJodaDateTimeType<DateTime> {
      * @throws SQLException if a database access error occurs or the column label is invalid
      */
     @Override
-    @MayReturnNull
     public DateTime get(final ResultSet rs, final String columnLabel) throws SQLException {
         final Timestamp ts = rs.getTimestamp(columnLabel);
 
@@ -290,7 +282,7 @@ public class JodaDateTimeType extends AbstractJodaDateTimeType<DateTime> {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * JodaDateTimeType type = new JodaDateTimeType();
+     * Type<DateTime> type = TypeFactory.getType(DateTime.class);
      * DateTime eventTime = new DateTime(2021, 1, 1, 10, 30, 0);
      *
      * try (Connection conn = dataSource.getConnection();
@@ -324,7 +316,7 @@ public class JodaDateTimeType extends AbstractJodaDateTimeType<DateTime> {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * JodaDateTimeType type = new JodaDateTimeType();
+     * Type<DateTime> type = TypeFactory.getType(DateTime.class);
      * DateTime eventTime = new DateTime(2021, 1, 1, 10, 30, 0);
      *
      * try (Connection conn = dataSource.getConnection();

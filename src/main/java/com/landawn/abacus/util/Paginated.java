@@ -63,7 +63,6 @@ import com.landawn.abacus.util.stream.Stream;
  * @see Optional
  * @see Stream
  * @see Iterable
- * @since 1.0
  */
 public interface Paginated<T> extends Iterable<T> {
 

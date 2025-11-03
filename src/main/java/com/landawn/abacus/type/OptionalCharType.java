@@ -21,7 +21,7 @@ import com.landawn.abacus.util.u.OptionalChar;
  * and database interaction capabilities for optional character values. This handler manages
  * the conversion between database character/integer values and OptionalChar wrapper objects.
  */
-public class OptionalCharType extends AbstractOptionalType<OptionalChar> {
+class OptionalCharType extends AbstractOptionalType<OptionalChar> {
 
     public static final String OPTIONAL_CHAR = OptionalChar.class.getSimpleName();
 
@@ -65,7 +65,6 @@ public class OptionalCharType extends AbstractOptionalType<OptionalChar> {
      *
      * @param x the OptionalChar object to convert
      * @return a single-character string, or {@code null} if empty or null
-     @MayReturnNull
      */
     @Override
     public String stringOf(final OptionalChar x) {
@@ -79,7 +78,6 @@ public class OptionalCharType extends AbstractOptionalType<OptionalChar> {
      * @param str the string to convert
      * @return an OptionalChar containing the parsed character value, or empty if the input is empty or null
      * @throws IllegalArgumentException if the string cannot be parsed as a single character
-     @MayReturnNull
      */
     @Override
     public OptionalChar valueOf(final String str) {
@@ -94,7 +92,6 @@ public class OptionalCharType extends AbstractOptionalType<OptionalChar> {
      * @param columnIndex the column index (1-based) to retrieve the value from
      * @return an OptionalChar containing the character value, or empty if the column value is SQL NULL
      * @throws SQLException if a database access error occurs or the columnIndex is invalid
-     @MayReturnNull
      */
     @Override
     public OptionalChar get(final ResultSet rs, final int columnIndex) throws SQLException {
@@ -117,7 +114,6 @@ public class OptionalCharType extends AbstractOptionalType<OptionalChar> {
      * @param columnLabel the label for the column specified with the SQL AS clause
      * @return an OptionalChar containing the character value, or empty if the column value is SQL NULL
      * @throws SQLException if a database access error occurs or the columnLabel is invalid
-     @MayReturnNull
      */
     @Override
     public OptionalChar get(final ResultSet rs, final String columnLabel) throws SQLException {

@@ -11,7 +11,6 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-
 package com.landawn.abacus.util.function;
 
 import com.landawn.abacus.util.Throwables;
@@ -19,18 +18,29 @@ import com.landawn.abacus.util.Throwables;
 /**
  * Represents an operation upon three char-valued operands and producing a char-valued result.
  * This is the primitive type specialization of {@link TriFunction} for char.
- * 
+ *
  * <p>This is a functional interface whose functional method is {@link #applyAsChar(char, char, char)}.
- * 
+ *
  * @see CharBinaryOperator
  * @see CharUnaryOperator
+ *
+ * <p>Refer to JDK API documentation at: <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html">https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a></p>
  */
 @FunctionalInterface
 public interface CharTernaryOperator extends Throwables.CharTernaryOperator<RuntimeException> { //NOSONAR
-
     /**
      * Applies this operator to the given char operands.
      * This method performs a ternary operation on three char values and returns a char result.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * CharTernaryOperator firstIfUpperElseSecond = (a, b, c) ->
+     *     Character.isUpperCase(a) ? a : b;
+     * char result = firstIfUpperElseSecond.applyAsChar('A', 'b', 'c'); // Returns 'A'
+     *
+     * CharTernaryOperator maxOfThree = (a, b, c) -> (char) Math.max(a, Math.max(b, c));
+     * char max = maxOfThree.applyAsChar('A', 'Z', 'M'); // Returns 'Z'
+     * }</pre>
      *
      * @param a the first char operand
      * @param b the second char operand

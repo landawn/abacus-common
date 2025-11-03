@@ -17,7 +17,7 @@ import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Numbers;
 import com.landawn.abacus.util.Strings;
 
-public class MutableDoubleType extends NumberType<MutableDouble> {
+class MutableDoubleType extends NumberType<MutableDouble> {
 
     public static final String MUTABLE_DOUBLE = MutableDouble.class.getSimpleName();
 
@@ -29,7 +29,8 @@ public class MutableDoubleType extends NumberType<MutableDouble> {
      * Returns the Class object representing the MutableDouble type.
      *
      * <p><b>Usage Examples:</b></p>
-     * MutableDoubleType type = new MutableDoubleType();
+     * <pre>{@code
+     * Type<MutableDouble> type = TypeFactory.getType(MutableDouble.class);
      * Class&lt;MutableDouble&gt; clazz = type.clazz();
      * // clazz equals MutableDouble.class
      * }</pre>
@@ -46,7 +47,8 @@ public class MutableDoubleType extends NumberType<MutableDouble> {
      * The double value is converted to a decimal string representation.
      *
      * <p><b>Usage Examples:</b></p>
-     * MutableDoubleType type = new MutableDoubleType();
+     * <pre>{@code
+     * Type<MutableDouble> type = TypeFactory.getType(MutableDouble.class);
      * MutableDouble md = MutableDouble.of(3.14);
      * String str = type.stringOf(md);
      * // str equals "3.14"
@@ -57,7 +59,6 @@ public class MutableDoubleType extends NumberType<MutableDouble> {
      *
      * @param x The MutableDouble object to convert
      * @return The string representation of the double value, or {@code null} if the input is null
-     @MayReturnNull
      */
     @Override
     public String stringOf(final MutableDouble x) {
@@ -69,7 +70,8 @@ public class MutableDoubleType extends NumberType<MutableDouble> {
      * The string is parsed as a double value.
      *
      * <p><b>Usage Examples:</b></p>
-     * MutableDoubleType type = new MutableDoubleType();
+     * <pre>{@code
+     * Type<MutableDouble> type = TypeFactory.getType(MutableDouble.class);
      * MutableDouble md = type.valueOf("123.45");
      * // md.value() equals 123.45
      *
@@ -83,7 +85,6 @@ public class MutableDoubleType extends NumberType<MutableDouble> {
      * @param str The string to parse
      * @return A MutableDouble containing the parsed value, or {@code null} if the input is {@code null} or empty
      * @throws NumberFormatException if the string cannot be parsed as a double
-     @MayReturnNull
      */
     @Override
     public MutableDouble valueOf(final String str) {
@@ -95,7 +96,8 @@ public class MutableDoubleType extends NumberType<MutableDouble> {
      * The database double value is wrapped in a MutableDouble object.
      *
      * <p><b>Usage Examples:</b></p>
-     * MutableDoubleType type = new MutableDoubleType();
+     * <pre>{@code
+     * Type<MutableDouble> type = TypeFactory.getType(MutableDouble.class);
      * ResultSet rs = statement.executeQuery("SELECT price FROM products");
      * if (rs.next()) {
      *     MutableDouble price = type.get(rs, 1);
@@ -118,7 +120,8 @@ public class MutableDoubleType extends NumberType<MutableDouble> {
      * The database double value is wrapped in a MutableDouble object.
      *
      * <p><b>Usage Examples:</b></p>
-     * MutableDoubleType type = new MutableDoubleType();
+     * <pre>{@code
+     * Type<MutableDouble> type = TypeFactory.getType(MutableDouble.class);
      * ResultSet rs = statement.executeQuery("SELECT price FROM products");
      * if (rs.next()) {
      *     MutableDouble price = type.get(rs, "price");
@@ -141,7 +144,8 @@ public class MutableDoubleType extends NumberType<MutableDouble> {
      * If the MutableDouble is {@code null}, 0.0 is stored. Otherwise, the wrapped double value is stored.
      *
      * <p><b>Usage Examples:</b></p>
-     * MutableDoubleType type = new MutableDoubleType();
+     * <pre>{@code
+     * Type<MutableDouble> type = TypeFactory.getType(MutableDouble.class);
      * PreparedStatement stmt = conn.prepareStatement("INSERT INTO products (price) VALUES (?)");
      * MutableDouble price = MutableDouble.of(99.99);
      * type.set(stmt, 1, price);
@@ -167,7 +171,8 @@ public class MutableDoubleType extends NumberType<MutableDouble> {
      * If the MutableDouble is {@code null}, 0.0 is stored. Otherwise, the wrapped double value is stored.
      *
      * <p><b>Usage Examples:</b></p>
-     * MutableDoubleType type = new MutableDoubleType();
+     * <pre>{@code
+     * Type<MutableDouble> type = TypeFactory.getType(MutableDouble.class);
      * CallableStatement stmt = conn.prepareCall("{call calculate_total(?)}");
      * MutableDouble amount = MutableDouble.of(250.75);
      * type.set(stmt, "amount", amount);
@@ -193,7 +198,8 @@ public class MutableDoubleType extends NumberType<MutableDouble> {
      * The value is written as a decimal string or "null".
      *
      * <p><b>Usage Examples:</b></p>
-     * MutableDoubleType type = new MutableDoubleType();
+     * <pre>{@code
+     * Type<MutableDouble> type = TypeFactory.getType(MutableDouble.class);
      * StringBuilder sb = new StringBuilder();
      * MutableDouble md = MutableDouble.of(42.5);
      * type.appendTo(sb, md);
@@ -223,7 +229,8 @@ public class MutableDoubleType extends NumberType<MutableDouble> {
      * This method is optimized for character-based writing.
      *
      * <p><b>Usage Examples:</b></p>
-     * MutableDoubleType type = new MutableDoubleType();
+     * <pre>{@code
+     * Type<MutableDouble> type = TypeFactory.getType(MutableDouble.class);
      * CharacterWriter writer = new CharacterWriter();
      * MutableDouble md = MutableDouble.of(3.14159);
      * type.writeCharacter(writer, md, null);

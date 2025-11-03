@@ -36,29 +36,266 @@ import com.landawn.abacus.util.u.OptionalInt;
 import com.landawn.abacus.util.stream.IntStream;
 
 /**
- * A resizable, primitive int array implementation of List interface. This class provides
- * methods to manipulate the size of the array that is used internally to store the list.
- * 
- * <p>This implementation provides constant time performance for basic operations (get and set),
- * and amortized constant time for add operations. The size, isEmpty, iterator, and stream
- * operations run in constant time. All other operations run in linear time (roughly speaking).
- * 
- * <p>Each IntList instance has a capacity. The capacity is the size of the array used to store
- * the elements in the list. It is always at least as large as the list size. As elements are
- * added to an IntList, its capacity grows automatically.
- * 
- * <p>An application can increase the capacity of an IntList instance before adding a large
- * number of elements using the ensureCapacity operation. This may reduce the amount of
- * incremental reallocation.
- * 
- * <p><strong>Note that this implementation is not synchronized.</strong> If multiple threads
- * access an IntList instance concurrently, and at least one of the threads modifies the list
- * structurally, it must be synchronized externally.
+ * A high-performance, resizable array implementation for primitive int values that provides
+ * specialized operations optimized for integer data types. This class extends {@link PrimitiveList}
+ * to offer memory-efficient storage and operations that avoid the boxing overhead associated with
+ * {@code List<Integer>}, making it ideal for applications requiring intensive integer array
+ * manipulation with optimal performance characteristics.
  *
+ * <p>IntList is specifically designed for scenarios involving large collections of integer
+ * values such as numerical computations, indexing operations, mathematical algorithms,
+ * data analysis, and performance-critical applications. The implementation uses a compact
+ * int array as the underlying storage mechanism, providing direct primitive access without
+ * wrapper object allocation.</p>
+ *
+ * <p><b>Key Features:</b>
+ * <ul>
+ *   <li><b>Zero-Boxing Overhead:</b> Direct int primitive storage without Integer wrapper allocation</li>
+ *   <li><b>Memory Efficiency:</b> Compact int array storage with minimal memory overhead</li>
+ *   <li><b>High Performance:</b> Optimized algorithms for integer-specific operations</li>
+ *   <li><b>Rich Mathematical API:</b> Statistical operations like min, max, median, sum</li>
+ *   <li><b>Set Operations:</b> Efficient intersection, union, and difference operations</li>
+ *   <li><b>Range Generation:</b> Built-in support for arithmetic progressions and sequences</li>
+ *   <li><b>Random Access:</b> O(1) element access and modification by index</li>
+ *   <li><b>Dynamic Sizing:</b> Automatic capacity management with intelligent growth</li>
+ *   <li><b>Type Conversions:</b> Seamless conversion to other numeric primitive lists</li>
+ * </ul>
+ *
+ * <p><b>Common Use Cases:</b>
+ * <ul>
+ *   <li><b>Numerical Computing:</b> Mathematical calculations and algorithms</li>
+ *   <li><b>Data Analysis:</b> Statistical computations on large integer datasets</li>
+ *   <li><b>Index Collections:</b> Storing array indices, database keys, and identifiers</li>
+ *   <li><b>Game Development:</b> Coordinates, scores, player IDs, and game state data</li>
+ *   <li><b>Financial Systems:</b> Quantities, counts, and discrete financial data</li>
+ *   <li><b>Algorithm Implementation:</b> Dynamic programming, graph algorithms, sorting</li>
+ *   <li><b>Scientific Computing:</b> Discrete data points, experimental measurements</li>
+ *   <li><b>Performance Optimization:</b> High-frequency operations requiring minimal overhead</li>
+ * </ul>
+ *
+ * <p><b>Usage Examples:</b></p>
+ * <pre>{@code
+ * // Creating and initializing integer lists
+ * IntList numbers = IntList.of(1, 2, 3, 4, 5);
+ * IntList range = IntList.range(1, 100);          // [1, 2, 3, ..., 99]
+ * IntList even = IntList.range(0, 100, 2);        // [0, 2, 4, ..., 98]
+ * IntList random = IntList.random(1, 100, 50);    // 50 random ints [1, 100)
+ *
+ * // Basic operations
+ * numbers.add(42);                                // Append integer value
+ * int first = numbers.get(0);                     // Access by index: 1
+ * numbers.set(1, 100);                            // Modify existing value
+ *
+ * // Mathematical operations
+ * OptionalInt min = numbers.min();                // Find minimum value
+ * OptionalInt max = numbers.max();                // Find maximum value
+ * OptionalInt median = numbers.median();          // Calculate median
+ * long sum = numbers.stream().sum();              // Calculate sum
+ *
+ * // Set operations for data analysis
+ * IntList set1 = IntList.of(1, 2, 3, 4);
+ * IntList set2 = IntList.of(3, 4, 5, 6);
+ * IntList intersection = set1.intersection(set2); // [3, 4]
+ * IntList difference = set1.difference(set2);     // [1, 2]
+ * IntList union = set1.copy().addAll(set2).distinct(); // [1, 2, 3, 4, 5, 6]
+ *
+ * // Sorting and searching
+ * numbers.sort();                                 // Sort in ascending order
+ * numbers.reverseSort();                          // Sort in descending order
+ * int index = numbers.binarySearch(42);           // Binary search on sorted data
+ *
+ * // Type conversions
+ * LongList longNumbers = numbers.toLongList();    // Convert to long values
+ * DoubleList doubleNumbers = numbers.toDoubleList(); // Convert to double values
+ * int[] primitiveArray = numbers.toArray();       // To primitive array
+ * List<Integer> boxedList = numbers.boxed();      // To boxed collection
+ * }</pre>
+ *
+ * <p><b>Performance Characteristics:</b>
+ * <ul>
+ *   <li><b>Element Access:</b> O(1) for get/set operations by index</li>
+ *   <li><b>Insertion:</b> O(1) amortized for append, O(n) for middle insertion</li>
+ *   <li><b>Deletion:</b> O(1) for last element, O(n) for arbitrary position</li>
+ *   <li><b>Search:</b> O(n) for contains/indexOf, O(log n) for binary search on sorted data</li>
+ *   <li><b>Sorting:</b> O(n log n) using optimized primitive sorting algorithms</li>
+ *   <li><b>Set Operations:</b> O(n) to O(n²) depending on algorithm selection and data size</li>
+ *   <li><b>Mathematical Operations:</b> O(n) for statistical calculations</li>
+ * </ul>
+ *
+ * <p><b>Memory Efficiency:</b>
+ * <ul>
+ *   <li><b>Storage:</b> 4 bytes per element (32 bits) with no object overhead</li>
+ *   <li><b>vs List&lt;Integer&gt;:</b> ~4x less memory usage (no Integer wrapper objects)</li>
+ *   <li><b>Capacity Management:</b> 1.75x growth factor balances memory and performance</li>
+ *   <li><b>Maximum Size:</b> Limited by {@code MAX_ARRAY_SIZE} (typically Integer.MAX_VALUE - 8)</li>
+ * </ul>
+ *
+ * <p><b>Integer-Specific Operations:</b>
+ * <ul>
+ *   <li><b>Range Generation:</b> {@code range()}, {@code rangeClosed()} for arithmetic sequences</li>
+ *   <li><b>Mathematical Functions:</b> {@code min()}, {@code max()}, {@code median()}</li>
+ *   <li><b>Type Conversions:</b> {@code toLongList()}, {@code toFloatList()}, {@code toDoubleList()}</li>
+ *   <li><b>Random Generation:</b> {@code random()} methods for test data and simulations</li>
+ *   <li><b>Bulk Updates:</b> {@code replaceAll()}, {@code replaceIf()} for value transformations</li>
+ * </ul>
+ *
+ * <p><b>Factory Methods:</b>
+ * <ul>
+ *   <li><b>{@code of(int...)}:</b> Create from varargs array</li>
+ *   <li><b>{@code copyOf(int[])}:</b> Create defensive copy of array</li>
+ *   <li><b>{@code range(int, int)}:</b> Create arithmetic sequence [start, end)</li>
+ *   <li><b>{@code rangeClosed(int, int)}:</b> Create arithmetic sequence [start, end]</li>
+ *   <li><b>{@code repeat(int, int)}:</b> Create with repeated values</li>
+ *   <li><b>{@code random(int)}:</b> Create with random integer values</li>
+ * </ul>
+ *
+ * <p><b>Conversion Methods:</b>
+ * <ul>
+ *   <li><b>{@code toArray()}:</b> Convert to primitive int array</li>
+ *   <li><b>{@code toLongList()}:</b> Convert to LongList with promoted values</li>
+ *   <li><b>{@code toFloatList()}:</b> Convert to FloatList with promoted values</li>
+ *   <li><b>{@code toDoubleList()}:</b> Convert to DoubleList with promoted values</li>
+ *   <li><b>{@code boxed()}:</b> Convert to {@code List<Integer>}</li>
+ *   <li><b>{@code stream()}:</b> Convert to IntStream for functional processing</li>
+ * </ul>
+ *
+ * <p><b>Deque-like Operations:</b>
+ * <ul>
+ *   <li><b>{@code addFirst(int)}:</b> Insert at beginning (O(n) operation)</li>
+ *   <li><b>{@code addLast(int)}:</b> Insert at end (O(1) amortized)</li>
+ *   <li><b>{@code removeFirst()}:</b> Remove from beginning (O(n) operation)</li>
+ *   <li><b>{@code removeLast()}:</b> Remove from end (O(1) operation)</li>
+ *   <li><b>{@code getFirst()}:</b> Access first element (O(1) operation)</li>
+ *   <li><b>{@code getLast()}:</b> Access last element (O(1) operation)</li>
+ * </ul>
+ *
+ * <p><b>Thread Safety:</b>
+ * <ul>
+ *   <li><b>Not Thread-Safe:</b> This implementation is not synchronized</li>
+ *   <li><b>External Synchronization:</b> Required for concurrent access</li>
+ *   <li><b>Fail-Fast Iterators:</b> Detect concurrent modifications</li>
+ *   <li><b>Read-Only Access:</b> Multiple threads can safely read simultaneously</li>
+ * </ul>
+ *
+ * <p><b>Capacity Management:</b>
+ * <ul>
+ *   <li><b>Initial Capacity:</b> Default capacity of 10 elements</li>
+ *   <li><b>Growth Strategy:</b> 1.75x expansion when capacity exceeded</li>
+ *   <li><b>Manual Control:</b> {@code ensureCapacity()} for performance optimization</li>
+ *   <li><b>Trimming:</b> {@code trimToSize()} to reduce memory footprint</li>
+ * </ul>
+ *
+ * <p><b>Error Handling:</b>
+ * <ul>
+ *   <li><b>IndexOutOfBoundsException:</b> For invalid index access</li>
+ *   <li><b>NoSuchElementException:</b> For operations on empty lists</li>
+ *   <li><b>IllegalArgumentException:</b> For invalid method parameters</li>
+ *   <li><b>OutOfMemoryError:</b> When capacity exceeds available memory</li>
+ * </ul>
+ *
+ * <p><b>Serialization Support:</b>
+ * <ul>
+ *   <li><b>Serializable:</b> Implements {@link java.io.Serializable}</li>
+ *   <li><b>Version Compatibility:</b> Stable serialVersionUID for version compatibility</li>
+ *   <li><b>Efficient Format:</b> Optimized serialization of int arrays</li>
+ *   <li><b>Cross-Platform:</b> Platform-independent serialized format</li>
+ * </ul>
+ *
+ * <p><b>Integration with Collections Framework:</b>
+ * <ul>
+ *   <li><b>RandomAccess:</b> Indicates efficient random access capabilities</li>
+ *   <li><b>Collection Compatibility:</b> Seamless conversion to standard collections</li>
+ *   <li><b>Utility Integration:</b> Works with Collections utility methods via boxed()</li>
+ *   <li><b>Stream API:</b> Full integration with IntStream for functional processing</li>
+ * </ul>
+ *
+ * <p><b>Mathematical and Statistical Operations:</b>
+ * <ul>
+ *   <li><b>Aggregation:</b> Sum, min, max operations via stream API</li>
+ *   <li><b>Central Tendency:</b> Median calculation with efficient sorting</li>
+ *   <li><b>Occurrence Counting:</b> {@code occurrencesOf()} for frequency analysis</li>
+ *   <li><b>Duplicate Detection:</b> {@code hasDuplicates()}, {@code removeDuplicates()}</li>
+ * </ul>
+ *
+ * <p><b>Comparison with Alternatives:</b>
+ * <ul>
+ *   <li><b>vs List&lt;Integer&gt;:</b> 4x less memory, significantly faster operations</li>
+ *   <li><b>vs int[]:</b> Dynamic sizing, rich API, set operations, statistical functions</li>
+ *   <li><b>vs ArrayList&lt;Integer&gt;:</b> No boxing overhead, primitive-specific methods</li>
+ *   <li><b>vs Vector&lt;Integer&gt;:</b> Not synchronized, better performance, modern API</li>
+ * </ul>
+ *
+ * <p><b>Best Practices:</b>
+ * <ul>
+ *   <li>Use {@code IntList} when working primarily with int primitives</li>
+ *   <li>Specify initial capacity for known data sizes to avoid resizing</li>
+ *   <li>Use bulk operations ({@code addAll}, {@code removeAll}) instead of loops</li>
+ *   <li>Convert to boxed collections only when required for API compatibility</li>
+ *   <li>Leverage sorting for improved binary search performance</li>
+ *   <li>Use set operations instead of manual intersection/difference calculations</li>
+ * </ul>
+ *
+ * <p><b>Performance Tips:</b>
+ * <ul>
+ *   <li>Pre-size lists with known capacity using constructor or {@code ensureCapacity()}</li>
+ *   <li>Use {@code addLast()} instead of {@code addFirst()} for better performance</li>
+ *   <li>Sort data before using {@code binarySearch()} for O(log n) lookups</li>
+ *   <li>Use {@code stream()} API for complex transformations and filtering</li>
+ *   <li>Consider {@code parallelSort()} for large datasets</li>
+ * </ul>
+ *
+ * <p><b>Common Patterns:</b>
+ * <ul>
+ *   <li><b>Index Collections:</b> {@code IntList indices = IntList.range(0, array.length);}</li>
+ *   <li><b>Random Sampling:</b> {@code IntList sample = IntList.random(0, population, sampleSize);}</li>
+ *   <li><b>Mathematical Sequences:</b> {@code IntList fibonacci = IntList.of(1, 1, 2, 3, 5, 8, 13);}</li>
+ *   <li><b>Data Transformation:</b> {@code IntList doubled = numbers.stream().map(x -> x * 2).collect(...);}</li>
+ * </ul>
+ *
+ * <p><b>Related Classes:</b>
+ * <ul>
+ *   <li><b>{@link PrimitiveList}:</b> Abstract base class for all primitive list types</li>
+ *   <li><b>{@link LongList}:</b> Similar implementation for long primitives</li>
+ *   <li><b>{@link DoubleList}:</b> Similar implementation for double primitives</li>
+ *   <li><b>{@link IntIterator}:</b> Specialized iterator for int primitives</li>
+ *   <li><b>{@link IntStream}:</b> Functional processing of int sequences</li>
+ * </ul>
+ *
+ * <p><b>Example: Mathematical Computation</b>
+ * <pre>{@code
+ * // Generate and analyze a dataset
+ * IntList dataset = IntList.random(1, 1000, 10000);  // 10K random numbers
+ * 
+ * // Statistical analysis
+ * dataset.sort();                                     // Sort for median calculation
+ * OptionalInt min = dataset.min();                   // Minimum value
+ * OptionalInt max = dataset.max();                   // Maximum value
+ * OptionalInt median = dataset.median();             // Median value
+ * 
+ * // Functional processing
+ * long sum = dataset.stream().sum();                 // Total sum
+ * double average = dataset.stream().average().orElse(0.0); // Average
+ * IntList filtered = dataset.stream()                // Values > 500
+ *     .filter(x -> x > 500)
+ *     .collect(IntList::new, IntList::add, IntList::addAll);
+ *     
+ * // Performance-optimized operations
+ * boolean hasEven = dataset.stream().anyMatch(x -> x % 2 == 0);
+ * IntList squares = dataset.stream().map(x -> x * x).collect(...);
+ * }</pre>
+ *
+ * @see PrimitiveList
+ * @see IntIterator
+ * @see IntStream
+ * @see LongList
+ * @see DoubleList
  * @see com.landawn.abacus.util.N
  * @see com.landawn.abacus.util.Array
  * @see com.landawn.abacus.util.Iterables
  * @see com.landawn.abacus.util.Iterators
+ * @see java.util.List
+ * @see java.util.RandomAccess
+ * @see java.io.Serializable
  */
 public final class IntList extends PrimitiveList<Integer, int[], IntList> {
 

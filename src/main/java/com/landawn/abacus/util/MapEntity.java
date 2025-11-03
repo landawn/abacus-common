@@ -49,7 +49,6 @@ import com.landawn.abacus.annotation.SuppressFBWarnings;
  * int age = user.get("age", Integer.class); // returns 30
  * }</pre>
  * 
- * @since 1.0
  */
 @Internal
 public final class MapEntity implements Serializable {

@@ -113,7 +113,6 @@ import com.landawn.abacus.util.function.IntFunction;
  * <p><b>Thread Safety:</b> All methods and returned functions are thread-safe unless explicitly
  * marked otherwise (e.g., stateful functions marked with {@code @Stateful}).</p>
  *
- * @since 1.0
  * @see java.util.function.IntFunction
  * @see java.util.Collection
  * @see java.util.Map

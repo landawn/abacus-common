@@ -37,7 +37,6 @@ package com.landawn.abacus.util;
  * }
  * }</pre>
  * 
- * @since 1.0
  * @see java.util.zip.GZIPOutputStream
  * @see java.util.zip.GZIPInputStream
  */

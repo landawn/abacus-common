@@ -52,7 +52,6 @@ import com.landawn.abacus.util.function.Consumer;
  * @see BigDecimalSummaryStatistics
  * @see java.util.IntSummaryStatistics
  * @see java.util.LongSummaryStatistics
- * @since 1.0
  */
 public class BigIntegerSummaryStatistics implements Consumer<BigInteger> {
 

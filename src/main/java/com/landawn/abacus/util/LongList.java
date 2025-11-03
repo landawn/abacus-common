@@ -36,21 +36,268 @@ import com.landawn.abacus.util.u.OptionalLong;
 import com.landawn.abacus.util.stream.LongStream;
 
 /**
- * A resizable array implementation for primitive long values.
- * This class provides a List-like interface for primitive long elements, avoiding the overhead
- * of boxing/unboxing that would occur with {@code List<Long>}.
- * 
- * <p>This class is not thread-safe. If multiple threads access a LongList instance concurrently,
- * and at least one of the threads modifies the list structurally, it must be synchronized externally.
- * 
- * <p>The iterators returned by this class's iterator methods are fail-fast if the list is 
- * structurally modified after the iterator is created.
+ * A high-performance, resizable array implementation for primitive long values that provides
+ * specialized operations optimized for 64-bit integer data types. This class extends {@link PrimitiveList}
+ * to offer memory-efficient storage and operations that avoid the boxing overhead associated with
+ * {@code List<Long>}, making it ideal for applications requiring intensive long integer array
+ * manipulation with optimal performance characteristics.
  *
+ * <p>LongList is specifically designed for scenarios involving large collections of long
+ * values such as high-precision numerical computations, timestamp management, unique identifier
+ * storage, large-scale data processing, and performance-critical applications requiring 64-bit
+ * integer precision. The implementation uses a compact long array as the underlying storage
+ * mechanism, providing direct primitive access without wrapper object allocation.</p>
+ *
+ * <p><b>Key Features:</b>
+ * <ul>
+ *   <li><b>Zero-Boxing Overhead:</b> Direct long primitive storage without Long wrapper allocation</li>
+ *   <li><b>Memory Efficiency:</b> Compact long array storage with minimal memory overhead</li>
+ *   <li><b>64-bit Precision:</b> Full support for long integer range (-2^63 to 2^63-1)</li>
+ *   <li><b>High Performance:</b> Optimized algorithms for long-specific operations</li>
+ *   <li><b>Rich Mathematical API:</b> Statistical operations like min, max, median</li>
+ *   <li><b>Set Operations:</b> Efficient intersection, union, and difference operations</li>
+ *   <li><b>Range Generation:</b> Built-in support for arithmetic progressions and sequences</li>
+ *   <li><b>Random Access:</b> O(1) element access and modification by index</li>
+ *   <li><b>Dynamic Sizing:</b> Automatic capacity management with intelligent growth</li>
+ *   <li><b>Type Conversions:</b> Seamless conversion to other numeric primitive lists</li>
+ * </ul>
+ *
+ * <p><b>Common Use Cases:</b>
+ * <ul>
+ *   <li><b>Timestamp Management:</b> Storing millisecond timestamps, epoch times, duration values</li>
+ *   <li><b>Unique Identifiers:</b> Database IDs, user IDs, transaction IDs, and other large identifiers</li>
+ *   <li><b>High-Precision Computing:</b> Mathematical calculations requiring 64-bit integer precision</li>
+ *   <li><b>Financial Systems:</b> Currency amounts in smallest units (e.g., cents, satoshis)</li>
+ *   <li><b>Big Data Processing:</b> Large-scale data analysis with 64-bit counters and measurements</li>
+ *   <li><b>Cryptography:</b> Large integer operations, hash values, and cryptographic keys</li>
+ *   <li><b>Scientific Computing:</b> Large numerical datasets, simulation data, measurement values</li>
+ *   <li><b>Performance Monitoring:</b> Nanosecond timestamps, memory usage, performance counters</li>
+ * </ul>
+ *
+ * <p><b>Usage Examples:</b></p>
+ * <pre>{@code
+ * // Creating and initializing long lists
+ * LongList timestamps = LongList.of(1640995200000L, 1640995260000L, 1640995320000L);
+ * LongList range = LongList.range(1L, 1000000L);      // [1, 2, 3, ..., 999999]
+ * LongList sequence = LongList.range(0L, 100L, 5L);   // [0, 5, 10, 15, ..., 95]
+ * LongList userIds = new LongList(10000);             // Pre-sized for performance
+ *
+ * // Basic operations
+ * timestamps.add(System.currentTimeMillis());         // Add current timestamp
+ * long firstTime = timestamps.get(0);                 // Access by index
+ * timestamps.set(1, System.nanoTime());               // Modify with nanosecond precision
+ *
+ * // Mathematical operations for large numbers
+ * OptionalLong min = timestamps.min();                // Find earliest timestamp
+ * OptionalLong max = timestamps.max();                // Find latest timestamp
+ * OptionalLong median = timestamps.median();          // Calculate median timestamp
+ *
+ * // Set operations for data analysis
+ * LongList set1 = LongList.of(100L, 200L, 300L, 400L);
+ * LongList set2 = LongList.of(300L, 400L, 500L, 600L);
+ * LongList intersection = set1.intersection(set2);    // [300, 400]
+ * LongList difference = set1.difference(set2);        // [100, 200]
+ *
+ * // High-performance sorting and searching
+ * timestamps.sort();                                  // Sort chronologically
+ * timestamps.parallelSort();                          // Parallel sort for large datasets
+ * int index = timestamps.binarySearch(1640995200000L); // Fast lookup
+ *
+ * // Type conversions for different precision needs
+ * DoubleList doubleValues = timestamps.toDoubleList(); // Convert to double precision
+ * FloatList floatValues = timestamps.toFloatList();    // Convert to float (with precision loss)
+ * long[] primitiveArray = timestamps.toArray();        // To primitive array
+ * List<Long> boxedList = timestamps.boxed();           // To boxed collection
+ * }</pre>
+ *
+ * <p><b>Performance Characteristics:</b>
+ * <ul>
+ *   <li><b>Element Access:</b> O(1) for get/set operations by index</li>
+ *   <li><b>Insertion:</b> O(1) amortized for append, O(n) for middle insertion</li>
+ *   <li><b>Deletion:</b> O(1) for last element, O(n) for arbitrary position</li>
+ *   <li><b>Search:</b> O(n) for contains/indexOf, O(log n) for binary search on sorted data</li>
+ *   <li><b>Sorting:</b> O(n log n) using optimized primitive sorting algorithms</li>
+ *   <li><b>Parallel Sorting:</b> O(n log n) with improved constants on multi-core systems</li>
+ *   <li><b>Set Operations:</b> O(n) to O(n²) depending on algorithm selection and data size</li>
+ *   <li><b>Mathematical Operations:</b> O(n) for statistical calculations</li>
+ * </ul>
+ *
+ * <p><b>Memory Efficiency:</b>
+ * <ul>
+ *   <li><b>Storage:</b> 8 bytes per element (64 bits) with no object overhead</li>
+ *   <li><b>vs List&lt;Long&gt;:</b> ~3x less memory usage (no Long wrapper objects)</li>
+ *   <li><b>Capacity Management:</b> 1.75x growth factor balances memory and performance</li>
+ *   <li><b>Maximum Size:</b> Limited by {@code MAX_ARRAY_SIZE} (typically Integer.MAX_VALUE - 8)</li>
+ * </ul>
+ *
+ * <p><b>Long-Specific Operations:</b>
+ * <ul>
+ *   <li><b>Range Generation:</b> {@code range()}, {@code rangeClosed()} for arithmetic sequences</li>
+ *   <li><b>Mathematical Functions:</b> {@code min()}, {@code max()}, {@code median()}</li>
+ *   <li><b>Type Conversions:</b> {@code toFloatList()}, {@code toDoubleList()}</li>
+ *   <li><b>Random Generation:</b> {@code random()} methods for test data and simulations</li>
+ *   <li><b>Parallel Operations:</b> {@code parallelSort()} for large dataset optimization</li>
+ * </ul>
+ *
+ * <p><b>Factory Methods:</b>
+ * <ul>
+ *   <li><b>{@code of(long...)}:</b> Create from varargs array</li>
+ *   <li><b>{@code copyOf(long[])}:</b> Create defensive copy of array</li>
+ *   <li><b>{@code range(long, long)}:</b> Create arithmetic sequence [start, end)</li>
+ *   <li><b>{@code rangeClosed(long, long)}:</b> Create arithmetic sequence [start, end]</li>
+ *   <li><b>{@code repeat(long, int)}:</b> Create with repeated values</li>
+ *   <li><b>{@code random(int)}:</b> Create with random long values</li>
+ * </ul>
+ *
+ * <p><b>Conversion Methods:</b>
+ * <ul>
+ *   <li><b>{@code toArray()}:</b> Convert to primitive long array</li>
+ *   <li><b>{@code toFloatList()}:</b> Convert to FloatList (potential precision loss)</li>
+ *   <li><b>{@code toDoubleList()}:</b> Convert to DoubleList with floating-point precision</li>
+ *   <li><b>{@code boxed()}:</b> Convert to {@code List<Long>}</li>
+ *   <li><b>{@code stream()}:</b> Convert to LongStream for functional processing</li>
+ * </ul>
+ *
+ * <p><b>Deque-like Operations:</b>
+ * <ul>
+ *   <li><b>{@code addFirst(long)}:</b> Insert at beginning (O(n) operation)</li>
+ *   <li><b>{@code addLast(long)}:</b> Insert at end (O(1) amortized)</li>
+ *   <li><b>{@code removeFirst()}:</b> Remove from beginning (O(n) operation)</li>
+ *   <li><b>{@code removeLast()}:</b> Remove from end (O(1) operation)</li>
+ *   <li><b>{@code getFirst()}:</b> Access first element (O(1) operation)</li>
+ *   <li><b>{@code getLast()}:</b> Access last element (O(1) operation)</li>
+ * </ul>
+ *
+ * <p><b>Thread Safety:</b>
+ * <ul>
+ *   <li><b>Not Thread-Safe:</b> This implementation is not synchronized</li>
+ *   <li><b>External Synchronization:</b> Required for concurrent access</li>
+ *   <li><b>Fail-Fast Iterators:</b> Detect concurrent modifications</li>
+ *   <li><b>Read-Only Access:</b> Multiple threads can safely read simultaneously</li>
+ * </ul>
+ *
+ * <p><b>Capacity Management:</b>
+ * <ul>
+ *   <li><b>Initial Capacity:</b> Default capacity of 10 elements</li>
+ *   <li><b>Growth Strategy:</b> 1.75x expansion when capacity exceeded</li>
+ *   <li><b>Manual Control:</b> {@code ensureCapacity()} for performance optimization</li>
+ *   <li><b>Trimming:</b> {@code trimToSize()} to reduce memory footprint</li>
+ * </ul>
+ *
+ * <p><b>Error Handling:</b>
+ * <ul>
+ *   <li><b>IndexOutOfBoundsException:</b> For invalid index access</li>
+ *   <li><b>NoSuchElementException:</b> For operations on empty lists</li>
+ *   <li><b>IllegalArgumentException:</b> For invalid method parameters</li>
+ *   <li><b>OutOfMemoryError:</b> When capacity exceeds available memory</li>
+ * </ul>
+ *
+ * <p><b>Serialization Support:</b>
+ * <ul>
+ *   <li><b>Serializable:</b> Implements {@link java.io.Serializable}</li>
+ *   <li><b>Version Compatibility:</b> Stable serialVersionUID for version compatibility</li>
+ *   <li><b>Efficient Format:</b> Optimized serialization of long arrays</li>
+ *   <li><b>Cross-Platform:</b> Platform-independent serialized format</li>
+ * </ul>
+ *
+ * <p><b>Integration with Collections Framework:</b>
+ * <ul>
+ *   <li><b>RandomAccess:</b> Indicates efficient random access capabilities</li>
+ *   <li><b>Collection Compatibility:</b> Seamless conversion to standard collections</li>
+ *   <li><b>Utility Integration:</b> Works with Collections utility methods via boxed()</li>
+ *   <li><b>Stream API:</b> Full integration with LongStream for functional processing</li>
+ * </ul>
+ *
+ * <p><b>Mathematical and Statistical Operations:</b>
+ * <ul>
+ *   <li><b>Aggregation:</b> Sum, min, max operations via stream API</li>
+ *   <li><b>Central Tendency:</b> Median calculation with efficient sorting</li>
+ *   <li><b>Occurrence Counting:</b> {@code occurrencesOf()} for frequency analysis</li>
+ *   <li><b>Duplicate Detection:</b> {@code hasDuplicates()}, {@code removeDuplicates()}</li>
+ * </ul>
+ *
+ * <p><b>Comparison with Alternatives:</b>
+ * <ul>
+ *   <li><b>vs List&lt;Long&gt;:</b> 3x less memory, significantly faster operations</li>
+ *   <li><b>vs long[]:</b> Dynamic sizing, rich API, set operations, statistical functions</li>
+ *   <li><b>vs ArrayList&lt;Long&gt;:</b> No boxing overhead, primitive-specific methods</li>
+ *   <li><b>vs IntList:</b> Double the range, suitable for large identifiers and timestamps</li>
+ * </ul>
+ *
+ * <p><b>Best Practices:</b>
+ * <ul>
+ *   <li>Use {@code LongList} when working primarily with long primitives</li>
+ *   <li>Specify initial capacity for known data sizes to avoid resizing</li>
+ *   <li>Use bulk operations ({@code addAll}, {@code removeAll}) instead of loops</li>
+ *   <li>Convert to boxed collections only when required for API compatibility</li>
+ *   <li>Leverage parallel sorting for large datasets (>10,000 elements)</li>
+ *   <li>Use set operations instead of manual intersection/difference calculations</li>
+ * </ul>
+ *
+ * <p><b>Performance Tips:</b>
+ * <ul>
+ *   <li>Pre-size lists with known capacity using constructor or {@code ensureCapacity()}</li>
+ *   <li>Use {@code addLast()} instead of {@code addFirst()} for better performance</li>
+ *   <li>Sort data before using {@code binarySearch()} for O(log n) lookups</li>
+ *   <li>Use {@code parallelSort()} for large datasets to leverage multi-core processors</li>
+ *   <li>Consider {@code stream()} API for complex transformations and filtering</li>
+ * </ul>
+ *
+ * <p><b>Common Patterns:</b>
+ * <ul>
+ *   <li><b>Timestamp Collections:</b> {@code LongList timestamps = new LongList(expectedEvents);}</li>
+ *   <li><b>ID Management:</b> {@code LongList userIds = LongList.range(1L, maxUsers + 1L);}</li>
+ *   <li><b>Financial Data:</b> {@code LongList amounts = prices.stream().mapToLong(p -> p * 100).collect(...);}</li>
+ *   <li><b>Performance Monitoring:</b> {@code LongList timings = LongList.of(System.nanoTime());}</li>
+ * </ul>
+ *
+ * <p><b>Related Classes:</b>
+ * <ul>
+ *   <li><b>{@link PrimitiveList}:</b> Abstract base class for all primitive list types</li>
+ *   <li><b>{@link IntList}:</b> Similar implementation for int primitives</li>
+ *   <li><b>{@link DoubleList}:</b> Similar implementation for double primitives</li>
+ *   <li><b>{@link LongIterator}:</b> Specialized iterator for long primitives</li>
+ *   <li><b>{@link LongStream}:</b> Functional processing of long sequences</li>
+ * </ul>
+ *
+ * <p><b>Example: Timestamp Analysis</b>
+ * <pre>{@code
+ * // Collect and analyze system timestamps
+ * LongList systemEvents = new LongList(1000);
+ *
+ * // Record events with nanosecond precision
+ * systemEvents.add(System.nanoTime());
+ * // ... record more events
+ *
+ * // Analyze timing data
+ * systemEvents.sort();                           // Sort chronologically
+ * OptionalLong firstEvent = systemEvents.first(); // Earliest event
+ * OptionalLong lastEvent = systemEvents.last();   // Latest event
+ * OptionalLong medianTime = systemEvents.median(); // Median timestamp
+ *
+ * // Calculate duration and intervals
+ * long totalDuration = lastEvent.orElse(0L) - firstEvent.orElse(0L);
+ * LongStream intervals = systemEvents.stream()
+ *     .skip(1)
+ *     .map(current -> current - systemEvents.get(systemEvents.indexOf(current) - 1));
+ *
+ * // Performance analysis
+ * double avgInterval = intervals.average().orElse(0.0);
+ * long maxInterval = intervals.max().orElse(0L);
+ * }</pre>
+ *
+ * @see PrimitiveList
+ * @see LongIterator
+ * @see LongStream
+ * @see IntList
+ * @see DoubleList
  * @see com.landawn.abacus.util.N
  * @see com.landawn.abacus.util.Array
  * @see com.landawn.abacus.util.Iterables
  * @see com.landawn.abacus.util.Iterators
- *
+ * @see java.util.List
+ * @see java.util.RandomAccess
+ * @see java.io.Serializable
  */
 public final class LongList extends PrimitiveList<Long, long[], LongList> {
 

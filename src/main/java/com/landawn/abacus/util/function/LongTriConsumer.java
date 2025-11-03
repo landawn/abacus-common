@@ -11,7 +11,6 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-
 package com.landawn.abacus.util.function;
 
 import com.landawn.abacus.util.Throwables;
@@ -20,40 +19,41 @@ import com.landawn.abacus.util.Throwables;
  * Represents an operation that accepts three long-valued arguments and returns no result.
  * This is the three-arity primitive specialization of {@code Consumer} for long values.
  * Unlike most other functional interfaces, {@code LongTriConsumer} is expected to operate via side-effects.
- * 
+ *
  * <p>This is a functional interface whose functional method is {@link #accept(long, long, long)}.
- * 
+ *
  * <p>The interface extends {@code Throwables.LongTriConsumer} with {@code RuntimeException} as the exception type,
  * making it suitable for use in contexts where checked exceptions are not required.
- * 
+ *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * LongTriConsumer printSum = (a, b, c) -> System.out.println("Sum: " + (a + b + c));
  * printSum.accept(10L, 20L, 30L); // prints "Sum: 60"
- * 
+ *
  * LongTriConsumer storeValues = (x, y, z) -> {
- *     database.store("x", x);
- *     database.store("y", y);
- *     database.store("z", z);
+ *     System.out.println("x: " + x);
+ *     System.out.println("y: " + y);
+ *     System.out.println("z: " + z);
  * };
  * }</pre>
- * 
+ *
  * @see java.util.function.LongConsumer
  * @see java.util.function.Consumer
+ *
+ * <p>Refer to JDK API documentation at: <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html">https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a></p>
  */
 @FunctionalInterface
 public interface LongTriConsumer extends Throwables.LongTriConsumer<RuntimeException> { //NOSONAR
-
     /**
      * Performs this operation on the given arguments.
-     * 
+     *
      * <p>This method processes three long values, typically producing side effects
      * such as writing to output, modifying state, or storing values.
-     * 
+     *
      * <p>Common use cases include:
      * <ul>
      *   <li>Logging or printing three related values</li>
-     *   <li>Storing coordinates (x, y, z) in 3D space</li>
+     *   <li>Storing coordinates (x, y, z) in three-dimensional space</li>
      *   <li>Updating multiple related fields in an object</li>
      *   <li>Performing batch operations with three parameters</li>
      * </ul>
@@ -68,28 +68,28 @@ public interface LongTriConsumer extends Throwables.LongTriConsumer<RuntimeExcep
     /**
      * Returns a composed {@code LongTriConsumer} that performs, in sequence, this
      * operation followed by the {@code after} operation.
-     * 
+     *
      * <p>If performing either operation throws an exception, it is relayed to the
      * caller of the composed operation. If performing this operation throws an exception,
      * the {@code after} operation will not be performed.
-     * 
+     *
      * <p>This method is useful for chaining multiple operations that need to process
      * the same three long values in sequence.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * LongTriConsumer logValues = (a, b, c) -> 
+     * LongTriConsumer logValues = (a, b, c) ->
      *     System.out.println("Processing: " + a + ", " + b + ", " + c);
-     * LongTriConsumer storeSum = (a, b, c) -> 
-     *     database.store("sum", a + b + c);
-     * 
+     * LongTriConsumer storeSum = (a, b, c) ->
+     *     System.out.println("Sum: " + (a + b + c));
+     *
      * LongTriConsumer combined = logValues.andThen(storeSum);
-     * combined.accept(10L, 20L, 30L); 
+     * combined.accept(10L, 20L, 30L);
      * // First logs: "Processing: 10, 20, 30"
-     * // Then stores: sum = 60
+     * // Then logs: "Sum: 60"
      * }</pre>
      *
-     * @param after the operation to perform after this operation
+     * @param after the operation to perform after this operation. Must not be {@code null}.
      * @return a composed {@code LongTriConsumer} that performs in sequence this
      *         operation followed by the {@code after} operation
      */

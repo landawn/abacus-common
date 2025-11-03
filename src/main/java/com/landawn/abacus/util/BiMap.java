@@ -25,11 +25,216 @@ import java.util.function.Supplier;
 import com.landawn.abacus.annotation.Internal;
 
 /**
- * A BiMap (or "bidirectional map") is a map that preserves the uniqueness of its values as well as that of its keys.
- * This constraint enables BiMaps to support an "inverse view", which is another BiMap containing the same entries as this BiMap but with reversed keys and values.
+ * A bidirectional map that preserves the uniqueness of both keys and values, enabling efficient
+ * forward and reverse lookups. This final class maintains two underlying maps to provide O(1)
+ * access in both directions while enforcing bijective constraints that ensure each key maps to
+ * exactly one value and each value maps to exactly one key.
  *
- * @param <K> the key type
- * @param <V> the value type
+ * <p>BiMap extends the traditional Map interface with additional operations for value-based
+ * lookups and inverse mapping functionality. The bijective constraint means that both keys
+ * and values must be unique across the entire map, making BiMap ideal for scenarios requiring
+ * two-way associations such as identifier mappings, code-name relationships, and reversible
+ * transformations.</p>
+ *
+ * <p><b>Key Features:</b>
+ * <ul>
+ *   <li><b>Bidirectional Access:</b> O(1) lookup by key or value with efficient reverse operations</li>
+ *   <li><b>Bijective Constraint:</b> Enforces uniqueness of both keys and values</li>
+ *   <li><b>Inverse View:</b> Provides reversed BiMap with swapped keys and values</li>
+ *   <li><b>Flexible Construction:</b> Multiple constructors and factory methods for different use cases</li>
+ *   <li><b>Force Operations:</b> Override uniqueness constraints when necessary</li>
+ *   <li><b>Map Compatibility:</b> Full implementation of Map interface for seamless integration</li>
+ *   <li><b>Immutable Views:</b> Key, value, and entry sets as immutable collections</li>
+ *   <li><b>Builder Pattern:</b> Fluent construction with validation and error handling</li>
+ * </ul>
+ *
+ * <p><b>Common Use Cases:</b>
+ * <ul>
+ *   <li><b>Identifier Mapping:</b> Database ID to entity name associations</li>
+ *   <li><b>Code Translation:</b> Error codes to human-readable messages</li>
+ *   <li><b>Protocol Mapping:</b> Network protocol constants and string representations</li>
+ *   <li><b>Language Translation:</b> Bidirectional language code mappings</li>
+ *   <li><b>Enum Mapping:</b> Enum values to external representations</li>
+ *   <li><b>Configuration Management:</b> Property keys to values with reverse lookup needs</li>
+ *   <li><b>Data Transformation:</b> Reversible data format conversions</li>
+ * </ul>
+ *
+ * <p><b>Usage Examples:</b></p>
+ * <pre>{@code
+ * // Basic BiMap creation and operations
+ * BiMap<String, Integer> userIdMap = BiMap.of(
+ *     "alice", 1001,
+ *     "bob", 1002,
+ *     "charlie", 1003
+ * );
+ *
+ * // Forward lookup (key to value)
+ * Integer aliceId = userIdMap.get("alice");        // 1001
+ * 
+ * // Reverse lookup (value to key)
+ * String userName = userIdMap.getByValue(1002);    // "bob"
+ *
+ * // Inverse view with swapped keys and values
+ * BiMap<Integer, String> idUserMap = userIdMap.inversed();
+ * String user = idUserMap.get(1003);               // "charlie"
+ *
+ * // Bijective constraint enforcement
+ * userIdMap.put("david", 1001);                    // Removes "alice" -> 1001 mapping
+ * userIdMap.forcePut("eve", 1002);                 // Forces mapping, removes conflicting entries
+ *
+ * // Builder pattern for complex construction
+ * BiMap<String, String> countryMap = BiMap.<String, String>builder()
+ *     .put("US", "United States")
+ *     .put("UK", "United Kingdom")
+ *     .put("DE", "Germany")
+ *     .build();
+ *
+ * // Custom underlying map types
+ * BiMap<String, Integer> linkedMap = new BiMap<>(
+ *     LinkedHashMap::new,  // Preserves insertion order
+ *     LinkedHashMap::new
+ * );
+ * }</pre>
+ *
+ * <p><b>Bijective Constraint Details:</b>
+ * <ul>
+ *   <li><b>Key Uniqueness:</b> Standard Map behavior - each key maps to at most one value</li>
+ *   <li><b>Value Uniqueness:</b> BiMap constraint - each value maps to at most one key</li>
+ *   <li><b>Constraint Violation:</b> {@code put()} operations remove conflicting mappings</li>
+ *   <li><b>Force Operations:</b> {@code forcePut()} explicitly handles conflicts</li>
+ * </ul>
+ *
+ * <p><b>Factory Methods:</b>
+ * <ul>
+ *   <li>{@link #of(Object, Object)} - Single key-value pair</li>
+ *   <li>{@link #of(Object, Object, Object, Object)} - Two pairs (up to 10 pairs)</li>
+ *   <li>{@link #copyOf(Map)} - Create from existing Map with validation</li>
+ *   <li>{@link #builder()} - Start builder pattern construction</li>
+ *   <li>{@link #builder(Map)} - Builder initialized with existing Map</li>
+ * </ul>
+ *
+ * <p><b>Constructor Options:</b>
+ * <ul>
+ *   <li>{@link #BiMap()} - Default HashMap-backed BiMap</li>
+ *   <li>{@link #BiMap(int)} - Specify initial capacity</li>
+ *   <li>{@link #BiMap(int, float)} - Specify capacity and load factor</li>
+ *   <li>{@link #BiMap(Class, Class)} - Custom map implementation types</li>
+ *   <li>{@link #BiMap(Supplier, Supplier)} - Custom map suppliers for flexibility</li>
+ * </ul>
+ *
+ * <p><b>Bidirectional Operations:</b>
+ * <ul>
+ *   <li><b>Forward Lookup:</b> {@code get(key)} - Standard Map operation</li>
+ *   <li><b>Reverse Lookup:</b> {@code getByValue(value)} - Value-to-key lookup</li>
+ *   <li><b>Safe Reverse Lookup:</b> {@code getByValueOrDefault(value, defaultKey)}</li>
+ *   <li><b>Reverse Removal:</b> {@code removeByValue(value)} - Remove by value</li>
+ *   <li><b>Inverse View:</b> {@code inversed()} - Swapped key-value BiMap</li>
+ * </ul>
+ *
+ * <p><b>Advanced Operations:</b>
+ * <ul>
+ *   <li>{@link #forcePut(Object, Object)} - Override bijective constraint</li>
+ *   <li>{@link #copy()} - Create independent copy with same data</li>
+ *   <li>{@link #inversed()} - Get inverse view (cached for efficiency)</li>
+ * </ul>
+ *
+ * <p><b>Collection Views:</b>
+ * All collection views are immutable to maintain bijective integrity:
+ * <ul>
+ *   <li>{@code keySet()} - Returns {@link ImmutableSet} of keys</li>
+ *   <li>{@code values()} - Returns {@link ImmutableSet} of values</li>
+ *   <li>{@code entrySet()} - Returns {@link ImmutableSet} of entries</li>
+ * </ul>
+ *
+ * <p><b>Performance Characteristics:</b>
+ * <ul>
+ *   <li>Forward lookup: O(1) average time - delegates to underlying map</li>
+ *   <li>Reverse lookup: O(1) average time - maintains separate reverse map</li>
+ *   <li>Put operations: O(1) average time with potential conflict resolution</li>
+ *   <li>Space complexity: O(2n) - maintains two underlying maps</li>
+ *   <li>Inverse view creation: O(1) - cached after first access</li>
+ * </ul>
+ *
+ * <p><b>Thread Safety:</b>
+ * BiMap instances are <b>not thread-safe</b>:
+ * <ul>
+ *   <li>Concurrent modifications require external synchronization</li>
+ *   <li>Multiple readers can access safely if no writers are present</li>
+ *   <li>Inverse views share underlying data - synchronize on original BiMap</li>
+ *   <li>Consider using {@code Collections.synchronizedMap()} wrapper if needed</li>
+ * </ul>
+ *
+ * <p><b>Null Handling:</b>
+ * <ul>
+ *   <li>Null key/value support depends on underlying map implementation</li>
+ *   <li>HashMap-backed BiMaps support one null key and one null value</li>
+ *   <li>Null keys and values must still maintain bijective constraints</li>
+ *   <li>Builder pattern rejects null keys and values by default</li>
+ * </ul>
+ *
+ * <p><b>Error Conditions:</b>
+ * <ul>
+ *   <li><b>Duplicate Values:</b> {@code put()} removes existing mapping for the value</li>
+ *   <li><b>Builder Validation:</b> Builder throws {@code IllegalArgumentException} for duplicates</li>
+ *   <li><b>Null Arguments:</b> Factory methods validate non-null arguments</li>
+ * </ul>
+ *
+ * <p><b>Inverse View Behavior:</b>
+ * <ul>
+ *   <li>Inverse view is a live view - reflects changes in original BiMap</li>
+ *   <li>Modifications to inverse view affect the original BiMap</li>
+ *   <li>Inverse of inverse returns the original BiMap (not a new instance)</li>
+ *   <li>Inverse view is cached for performance - created only once</li>
+ * </ul>
+ *
+ * <p><b>Builder Pattern Features:</b>
+ * <ul>
+ *   <li>{@code put(key, value)} - Add entry with duplicate validation</li>
+ *   <li>{@code forcePut(key, value)} - Add entry overriding conflicts</li>
+ *   <li>{@code putAll(map)} - Bulk addition with validation</li>
+ *   <li>{@code build()} - Create immutable snapshot of current state</li>
+ * </ul>
+ *
+ * <p><b>Integration Points:</b>
+ * <ul>
+ *   <li><b>{@link Map}:</b> Full Map interface compatibility</li>
+ *   <li><b>{@link ImmutableSet}:</b> Immutable collection views</li>
+ *   <li><b>{@link HashMap}:</b> Default underlying implementation</li>
+ *   <li><b>Collections Framework:</b> Standard iteration and stream support</li>
+ * </ul>
+ *
+ * <p><b>Best Practices:</b>
+ * <ul>
+ *   <li>Use appropriate underlying map types based on ordering requirements</li>
+ *   <li>Consider using Builder pattern for compile-time validation</li>
+ *   <li>Cache inverse views when frequent reverse lookups are needed</li>
+ *   <li>Use {@code forcePut()} when conflict resolution behavior is clear</li>
+ *   <li>Prefer immutable snapshots via {@code copy()} for sharing between components</li>
+ * </ul>
+ *
+ * <p><b>Memory Management:</b>
+ * <ul>
+ *   <li>BiMap maintains two complete maps - consider memory implications</li>
+ *   <li>Inverse views share underlying data - no additional memory overhead</li>
+ *   <li>Use {@code clear()} to release all mappings and enable garbage collection</li>
+ *   <li>Consider capacity and load factor for large datasets</li>
+ * </ul>
+ *
+ * <p><b>Comparison with Alternatives:</b>
+ * <ul>
+ *   <li><b>vs Two separate Maps:</b> Automatic consistency and inverse view convenience</li>
+ *   <li><b>vs Google Guava BiMap:</b> Similar API with builder pattern and force operations</li>
+ *   <li><b>vs Apache Commons BidiMap:</b> Type-safe generics and modern Java features</li>
+ * </ul>
+ *
+ * @param <K> the type of keys maintained by this BiMap
+ * @param <V> the type of mapped values
+ *
+ * @see Map
+ * @see ImmutableSet
+ * @see HashMap
+ * @see Builder
+ * @see java.util.Collections#synchronizedMap(Map)
  */
 public final class BiMap<K, V> implements Map<K, V> {
     /**
@@ -60,6 +265,13 @@ public final class BiMap<K, V> implements Map<K, V> {
 
     /**
      * Constructs a BiMap with the default initial capacity.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * BiMap<String, Integer> map = new BiMap<>();
+     * map.put("one", 1);
+     * map.put("two", 2);
+     * }</pre>
      */
     public BiMap() {
         this(DEFAULT_INITIAL_CAPACITY);
@@ -68,7 +280,12 @@ public final class BiMap<K, V> implements Map<K, V> {
     /**
      * Constructs a BiMap with the specified initial capacity.
      *
-     * @param initialCapacity The initial capacity of the BiMap.
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * BiMap<String, Integer> map = new BiMap<>(100); // Pre-size for 100 entries
+     * }</pre>
+     *
+     * @param initialCapacity the initial capacity of the BiMap
      */
     public BiMap(final int initialCapacity) {
         this(initialCapacity, DEFAULT_LOAD_FACTOR);
@@ -77,8 +294,13 @@ public final class BiMap<K, V> implements Map<K, V> {
     /**
      * Constructs a BiMap with the specified initial capacity and load factor.
      *
-     * @param initialCapacity The initial capacity of the BiMap.
-     * @param loadFactor The load factor for the BiMap.
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * BiMap<String, Integer> map = new BiMap<>(100, 0.9f); // Custom capacity and load factor
+     * }</pre>
+     *
+     * @param initialCapacity the initial capacity of the BiMap
+     * @param loadFactor the load factor for the BiMap
      */
     @SuppressWarnings("deprecation")
     public BiMap(final int initialCapacity, final float loadFactor) {
@@ -89,8 +311,14 @@ public final class BiMap<K, V> implements Map<K, V> {
      * Constructs a BiMap with the specified types of maps for keys and values.
      * This constructor allows the user to specify the types of the underlying maps used to store keys and values.
      *
-     * @param keyMapType The Class object representing the type of the Map to be used for storing keys.
-     * @param valueMapType The Class object representing the type of the Map to be used for storing values.
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * BiMap<String, Integer> map = new BiMap<>(LinkedHashMap.class, TreeMap.class);
+     * // Uses LinkedHashMap for keys and TreeMap for values
+     * }</pre>
+     *
+     * @param keyMapType the Class object representing the type of the Map to be used for storing keys
+     * @param valueMapType the Class object representing the type of the Map to be used for storing values
      */
     @SuppressWarnings("rawtypes")
     public BiMap(final Class<? extends Map> keyMapType, final Class<? extends Map> valueMapType) {
@@ -101,8 +329,14 @@ public final class BiMap<K, V> implements Map<K, V> {
      * Constructs a BiMap with the specified suppliers for key and value maps.
      * This constructor allows the user to specify the suppliers of the underlying maps used to store keys and values.
      *
-     * @param keyMapSupplier The Supplier object providing the Map to be used for storing keys.
-     * @param valueMapSupplier The Supplier object providing the Map to be used for storing values.
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * BiMap<String, Integer> map = new BiMap<>(LinkedHashMap::new, TreeMap::new);
+     * // Uses custom suppliers for both maps
+     * }</pre>
+     *
+     * @param keyMapSupplier the Supplier object providing the Map to be used for storing keys. Must not be {@code null}.
+     * @param valueMapSupplier the Supplier object providing the Map to be used for storing values. Must not be {@code null}.
      */
     public BiMap(final Supplier<? extends Map<K, V>> keyMapSupplier, final Supplier<? extends Map<V, K>> valueMapSupplier) {
         this.keyMapSupplier = keyMapSupplier;
@@ -896,7 +1130,6 @@ public final class BiMap<K, V> implements Map<K, V> {
 
     /**
      * Checks if this BiMap is empty.
-     * Returns {@code true} if this BiMap contains no key-value mappings.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -904,7 +1137,7 @@ public final class BiMap<K, V> implements Map<K, V> {
      * boolean empty = map.isEmpty(); // returns true
      * }</pre>
      *
-     * @return {@code true} if this BiMap contains no entries, {@code false} otherwise.
+     * @return {@code true} if this BiMap contains no entries, {@code false} otherwise
      */
     @Override
     public boolean isEmpty() {
@@ -921,7 +1154,7 @@ public final class BiMap<K, V> implements Map<K, V> {
      * int count = map.size(); // returns 2
      * }</pre>
      *
-     * @return The number of key-value mappings in this BiMap.
+     * @return the number of key-value mappings in this BiMap
      */
     @Override
     public int size() {

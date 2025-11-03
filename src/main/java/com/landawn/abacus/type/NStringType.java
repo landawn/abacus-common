@@ -19,15 +19,13 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-import com.landawn.abacus.annotation.MayReturnNull;
-
 /**
  * Type handler for National String (NString) values, providing database interaction
  * capabilities for handling Unicode string data using national character sets.
  * This type is specifically designed for databases that distinguish between
  * regular strings and national character strings.
  */
-public class NStringType extends AbstractStringType {
+class NStringType extends AbstractStringType {
 
     public static final String NSTRING = "NString";
 
@@ -44,7 +42,6 @@ public class NStringType extends AbstractStringType {
      * @return the national string value from the ResultSet, or {@code null} if the column value is SQL NULL
      * @throws SQLException if a database access error occurs or the columnIndex is invalid
      */
-    @MayReturnNull
     @Override
     public String get(final ResultSet rs, final int columnIndex) throws SQLException {
         return rs.getNString(columnIndex);
@@ -59,7 +56,6 @@ public class NStringType extends AbstractStringType {
      * @return the national string value from the ResultSet, or {@code null} if the column value is SQL NULL
      * @throws SQLException if a database access error occurs or the columnLabel is invalid
      */
-    @MayReturnNull
     @Override
     public String get(final ResultSet rs, final String columnLabel) throws SQLException {
         return rs.getNString(columnLabel);

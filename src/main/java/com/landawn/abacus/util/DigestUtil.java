@@ -17,8 +17,6 @@
 
 package com.landawn.abacus.util;
 
-import com.landawn.abacus.annotation.MayReturnNull;
-
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -33,6 +31,8 @@ import java.nio.file.Path;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
+import com.landawn.abacus.annotation.MayReturnNull;
+
 /**
  * Utility class for generating cryptographic message digests (hashes) using various algorithms.
  * This class provides convenient static methods for computing digests of byte arrays, files, 
@@ -40,8 +40,6 @@ import java.security.NoSuchAlgorithmException;
  * 
  * <p>This class is immutable and thread-safe. However, the MessageDigest instances it creates 
  * generally won't be thread-safe.</p>
- * 
- * <p>Note: This implementation is based on Apache Commons Codec.</p>
  * 
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
@@ -51,6 +49,10 @@ import java.security.NoSuchAlgorithmException;
  * // Generate SHA-256 hash of a file
  * byte[] digest = DigestUtil.sha256(new File("document.pdf"));
  * }</pre>
+ *
+ * <p><b>Attribution:</b>
+ * This class includes code adapted from Apache Commons Codec under the Apache License 2.0. 
+ * Methods from these libraries may have been modified for consistency, performance optimization, and null-safety enhancement.
  * 
  * @see MessageDigestAlgorithms
  */
@@ -78,7 +80,6 @@ public class DigestUtil {
      * @param data The byte array to digest (must not be {@code null})
      * @return The computed digest as a byte array, length depends on the algorithm used
      *
-     *
      * @since 1.11
      */
     public static byte[] digest(final MessageDigest messageDigest, final byte[] data) {
@@ -100,7 +101,6 @@ public class DigestUtil {
      * @param messageDigest The MessageDigest algorithm to use (must not be {@code null})
      * @param data The ByteBuffer containing data to digest (must not be {@code null})
      * @return The computed digest as a byte array, length depends on the algorithm used
-     *
      *
      * @since 1.11
      */
@@ -127,7 +127,6 @@ public class DigestUtil {
      * @throws IOException If an I/O error occurs while reading the file
      * @throws java.io.FileNotFoundException if the file does not exist or cannot be opened
      *
-     *
      * @since 1.11
      */
     public static byte[] digest(final MessageDigest messageDigest, final File data) throws IOException {
@@ -151,7 +150,6 @@ public class DigestUtil {
      * @param data The InputStream to read and digest (must not be {@code null})
      * @return The computed digest as a byte array, length depends on the algorithm used
      * @throws IOException If an I/O error occurs while reading from the stream
-     *
      *
      * @since 1.11
      */
@@ -179,7 +177,6 @@ public class DigestUtil {
      * @return The computed digest as a byte array, length depends on the algorithm used
      * @throws IOException If an I/O error occurs while reading the file
      *
-     *
      * @since 1.14
      */
     public static byte[] digest(final MessageDigest messageDigest, final Path data, final OpenOption... options) throws IOException {
@@ -204,7 +201,6 @@ public class DigestUtil {
      * @return The computed digest as a byte array, length depends on the algorithm used
      * @throws IOException If an I/O error occurs while reading the file
      *
-     *
      * @since 1.14
      */
     public static byte[] digest(final MessageDigest messageDigest, final RandomAccessFile data) throws IOException {
@@ -227,7 +223,6 @@ public class DigestUtil {
      *                  Must not be {@code null}.
      * @return A new MessageDigest instance for the specified algorithm
      * @throws IllegalArgumentException If the algorithm is not available in the current JVM
-     *
      *
      * @see MessageDigest#getInstance(String)
      * @see MessageDigestAlgorithms
@@ -258,7 +253,6 @@ public class DigestUtil {
      *                            Can be {@code null}.
      * @return A MessageDigest instance for the algorithm if available, otherwise returns
      *         defaultMessageDigest (which may be {@code null})
-     *
      *
      * @since 1.11
      */
@@ -299,7 +293,6 @@ public class DigestUtil {
      * @throws IllegalArgumentException If MD2 is not available (may occur in modern JVMs
      *                                  where MD2 support has been removed)
      *
-     *
      * @see MessageDigestAlgorithms#MD2
      * @since 1.7
      */
@@ -325,7 +318,6 @@ public class DigestUtil {
      * @return A new MD5 MessageDigest instance
      * @throws IllegalArgumentException If MD5 is not available (should not happen with standard JRE)
      *
-     *
      * @see MessageDigestAlgorithms#MD5
      */
     public static MessageDigest getMd5Digest() {
@@ -348,7 +340,6 @@ public class DigestUtil {
      *
      * @return A new SHA-1 MessageDigest instance (produces 20-byte/160-bit hashes)
      * @throws IllegalArgumentException If SHA-1 is not available (should not happen with standard JRE)
-     *
      *
      * @see MessageDigestAlgorithms#SHA_1
      * @since 1.7
@@ -373,7 +364,6 @@ public class DigestUtil {
      * @return A new SHA-256 MessageDigest instance (produces 32-byte/256-bit hashes)
      * @throws IllegalArgumentException If SHA-256 is not available (should not happen with standard JRE)
      *
-     *
      * @see MessageDigestAlgorithms#SHA_256
      */
     public static MessageDigest getSha256Digest() {
@@ -395,7 +385,6 @@ public class DigestUtil {
      *
      * @return A new SHA3-224 MessageDigest instance (produces 28-byte/224-bit hashes)
      * @throws IllegalArgumentException If SHA3-224 is not available (requires Java 9 or later)
-     *
      *
      * @see MessageDigestAlgorithms#SHA3_224
      * @since 1.12
@@ -421,7 +410,6 @@ public class DigestUtil {
      * @return A new SHA3-256 MessageDigest instance (produces 32-byte/256-bit hashes)
      * @throws IllegalArgumentException If SHA3-256 is not available (requires Java 9 or later)
      *
-     *
      * @see MessageDigestAlgorithms#SHA3_256
      * @since 1.12
      */
@@ -443,7 +431,6 @@ public class DigestUtil {
      *
      * @return A new SHA3-384 MessageDigest instance (produces 48-byte/384-bit hashes)
      * @throws IllegalArgumentException If SHA3-384 is not available (requires Java 9 or later)
-     *
      *
      * @see MessageDigestAlgorithms#SHA3_384
      * @since 1.12
@@ -467,7 +454,6 @@ public class DigestUtil {
      *
      * @return A new SHA3-512 MessageDigest instance (produces 64-byte/512-bit hashes)
      * @throws IllegalArgumentException If SHA3-512 is not available (requires Java 9 or later)
-     *
      *
      * @see MessageDigestAlgorithms#SHA3_512
      * @since 1.12
@@ -493,7 +479,6 @@ public class DigestUtil {
      * @return A new SHA-384 MessageDigest instance (produces 48-byte/384-bit hashes)
      * @throws IllegalArgumentException If SHA-384 is not available (should not happen with standard JRE)
      *
-     *
      * @see MessageDigestAlgorithms#SHA_384
      */
     public static MessageDigest getSha384Digest() {
@@ -516,7 +501,6 @@ public class DigestUtil {
      *
      * @return A new SHA-512/224 MessageDigest instance (produces 28-byte/224-bit hashes)
      * @throws IllegalArgumentException If SHA-512/224 is not available (requires Java 9 or later)
-     *
      *
      * @see MessageDigestAlgorithms#SHA_512_224
      */
@@ -541,7 +525,6 @@ public class DigestUtil {
      * @return A new SHA-512/256 MessageDigest instance (produces 32-byte/256-bit hashes)
      * @throws IllegalArgumentException If SHA-512/256 is not available (requires Java 9 or later)
      *
-     *
      * @see MessageDigestAlgorithms#SHA_512_256
      */
     public static MessageDigest getSha512_256Digest() {
@@ -564,7 +547,6 @@ public class DigestUtil {
      *
      * @return A new SHA-512 MessageDigest instance (produces 64-byte/512-bit hashes)
      * @throws IllegalArgumentException If SHA-512 is not available (should not happen with standard JRE)
-     *
      *
      * @see MessageDigestAlgorithms#SHA_512
      */
@@ -604,7 +586,6 @@ public class DigestUtil {
      *                               Can be {@code null}, which will return {@code false}.
      * @return {@code true} if the algorithm is available and can be used, {@code false} otherwise
      *
-     *
      * @since 1.11
      */
     public static boolean isAvailable(final String messageDigestAlgorithm) {
@@ -623,7 +604,6 @@ public class DigestUtil {
      *
      * @param data The data to digest (must not be {@code null})
      * @return MD2 digest as a 16-byte array
-     *
      *
      * @since 1.7
      */
@@ -675,7 +655,6 @@ public class DigestUtil {
      * @param data The data to digest (must not be {@code null})
      * @return MD2 digest as a 32-character lowercase hexadecimal string
      *
-     *
      * @since 1.7
      */
     public static String md2Hex(final byte[] data) {
@@ -725,7 +704,6 @@ public class DigestUtil {
      *
      * @param data The data to digest (must not be {@code null})
      * @return MD5 digest as a 16-byte array
-     *
      */
     public static byte[] md5(final byte[] data) {
         return getMd5Digest().digest(data);
@@ -773,7 +751,6 @@ public class DigestUtil {
      *
      * @param data The data to digest (must not be {@code null})
      * @return MD5 digest as a 32-character lowercase hexadecimal string
-     *
      */
     public static String md5Hex(final byte[] data) {
         return Hex.encodeToString(md5(data));
@@ -807,7 +784,6 @@ public class DigestUtil {
      *
      * @param data The string to digest (must not be {@code null})
      * @return MD5 digest as a 32-character lowercase hexadecimal string
-     *
      */
     public static String md5Hex(final String data) {
         return Hex.encodeToString(md5(data));

@@ -18,7 +18,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
-import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.util.ListMultimap;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Strings;
@@ -31,7 +30,7 @@ import com.landawn.abacus.util.Strings;
  * @param <E> the element type stored in the lists of the multimap
  */
 @SuppressWarnings("java:S2160")
-public class ListMultimapType<K, E> extends MultimapType<K, E, List<E>, ListMultimap<K, E>> {
+class ListMultimapType<K, E> extends MultimapType<K, E, List<E>, ListMultimap<K, E>> {
 
     ListMultimapType(final Class<?> typeClass, final String keyTypeName, final String valueElementTypeName) {
         super(typeClass, keyTypeName, valueElementTypeName, null);
@@ -43,11 +42,26 @@ public class ListMultimapType<K, E> extends MultimapType<K, E, List<E>, ListMult
      * The multimap is first converted to a Map&lt;K, List&lt;E&gt;&gt; structure,
      * then serialized to JSON using the default JSON parser.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * ListMultimapType<String, Integer> type = new ListMultimapType<>(ListMultimap.class, "String", "Integer");
+     * ListMultimap<String, Integer> multimap = N.newLinkedListMultimap();
+     * multimap.put("scores", 85);
+     * multimap.put("scores", 90);
+     * multimap.put("scores", 78);
+     * multimap.put("grades", 95);
+     *
+     * String json = type.stringOf(multimap);
+     * // Returns: {"scores":[85,90,78],"grades":[95]}
+     *
+     * json = type.stringOf(null);
+     * // Returns: null
+     * }</pre>
+     *
      * @param x the ListMultimap to convert to JSON string
      * @return the JSON string representation of the multimap, or {@code null} if the input is null
      */
     @Override
-    @MayReturnNull
     public String stringOf(final ListMultimap<K, E> x) {
         return (x == null) ? null : Utils.jsonParser.serialize(x.toMap(), Utils.jsc);
     }
@@ -59,11 +73,25 @@ public class ListMultimapType<K, E> extends MultimapType<K, E, List<E>, ListMult
      * then populates a new LinkedListMultimap with the entries.
      * The resulting multimap preserves insertion order for both keys and values.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * ListMultimapType<String, Integer> type = new ListMultimapType<>(ListMultimap.class, "String", "Integer");
+     *
+     * ListMultimap<String, Integer> multimap = type.valueOf("{\"scores\":[85,90,78],\"grades\":[95]}");
+     * // Returns: ListMultimap with "scores" -> [85, 90, 78] and "grades" -> [95]
+     * // multimap.get("scores") returns [85, 90, 78]
+     *
+     * multimap = type.valueOf(null);
+     * // Returns: null
+     *
+     * multimap = type.valueOf("{}");
+     * // Returns: empty ListMultimap
+     * }</pre>
+     *
      * @param str the JSON string to parse
      * @return a ListMultimap instance populated with the parsed data, or {@code null} if the string is empty or null
      * @throws IllegalArgumentException if the JSON string is malformed
      */
-    @MayReturnNull
     @SuppressWarnings("unchecked")
     @Override
     public ListMultimap<K, E> valueOf(final String str) {

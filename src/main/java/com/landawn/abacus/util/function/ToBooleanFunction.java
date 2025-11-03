@@ -11,7 +11,6 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-
 package com.landawn.abacus.util.function;
 
 import com.landawn.abacus.util.Throwables;
@@ -19,17 +18,18 @@ import com.landawn.abacus.util.Throwables;
 /**
  * Represents a function that produces a boolean-valued result.
  * This is the {@code boolean}-producing primitive specialization for {@link java.util.function.Function}.
- * 
+ *
  * <p>This is a functional interface whose functional method is {@link #applyAsBoolean(Object)}.
- * 
+ *
  * @param <T> the type of the input to the function
- * 
+ *
  * @see java.util.function.Function
  * @see java.util.function.Predicate
+ *
+ * <p>Refer to JDK API documentation at: <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html">https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a></p>
  */
 @FunctionalInterface
 public interface ToBooleanFunction<T> extends Throwables.ToBooleanFunction<T, RuntimeException> { //NOSONAR
-
     /**
      * A function that safely unboxes a Boolean object to a primitive boolean value.
      * Returns {@code false} for {@code null} inputs and the boolean value for {@code non-null} inputs.

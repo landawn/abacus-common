@@ -11,7 +11,6 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-
 package com.landawn.abacus.util.function;
 
 import com.landawn.abacus.util.Fn;
@@ -32,10 +31,11 @@ import com.landawn.abacus.util.Throwables;
  * @see java.lang.Runnable
  * @see Callable
  * @see java.util.concurrent.Executor
+ *
+ * <p>Refer to JDK API documentation at: <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html">https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a></p>
  */
 @FunctionalInterface
 public interface Runnable extends java.lang.Runnable, Throwables.Runnable<RuntimeException> { //NOSONAR
-
     /**
      * Executes this runnable task.
      *
@@ -55,18 +55,18 @@ public interface Runnable extends java.lang.Runnable, Throwables.Runnable<Runtim
      *     performComplexOperation();
      *     System.out.println("Task completed!");
      * };
-     * 
+     *
      * // Execute directly
      * printTask.run();
-     * 
+     *
      * // Execute in a thread
      * new Thread(complexTask).start();
-     * 
+     *
      * // Execute with an executor
      * ExecutorService executor = Executors.newSingleThreadExecutor();
      * executor.execute(printTask);
      * }</pre>
-     * if the task cannot be executed
+     *
      * @see java.lang.Thread#run()
      */
     @Override
@@ -85,10 +85,10 @@ public interface Runnable extends java.lang.Runnable, Throwables.Runnable<Runtim
      * <pre>{@code
      * Runnable task = () -> System.out.println("Executing task");
      * Callable<Void> callable = task.toCallable();
-     * 
+     *
      * ExecutorService executor = Executors.newSingleThreadExecutor();
      * Future<Void> future = executor.submit(callable);
-     * 
+     *
      * // Wait for completion
      * future.get(); // Returns null when task completes
      * }</pre>
@@ -114,7 +114,7 @@ public interface Runnable extends java.lang.Runnable, Throwables.Runnable<Runtim
      * <pre>{@code
      * Runnable task = () -> System.out.println("Task executed");
      * var throwableTask = task.toThrowable();
-     * 
+     *
      * // Can now be used in contexts that handle IOException
      * try {
      *     throwableTask.run();

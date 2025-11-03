@@ -24,43 +24,257 @@ import java.util.Map;
 import com.landawn.abacus.annotation.Beta;
 import com.landawn.abacus.util.u.Optional;
 
-/** 
- * Represents a fixed-size, immutable tuple that can contain between 0 and 9 elements of potentially different types.
- * 
- * <p>Tuples are useful for:</p>
+/**
+ * A comprehensive utility class for creating and managing immutable, fixed-size tuples that can contain
+ * between 0 and 9 elements of potentially different types. This class provides a type-safe alternative
+ * to arrays or collections when you need to group a fixed number of heterogeneous values together,
+ * particularly useful for returning multiple values from methods without creating dedicated classes.
+ *
+ * <p>Tuples represent ordered collections of elements where each position has a specific type and meaning.
+ * Unlike arrays or lists, tuples have compile-time known sizes and can contain elements of different types
+ * at each position. This makes them ideal for scenarios where you need structured data without the
+ * overhead of creating custom classes or records.</p>
+ *
+ * <p><b>Key Features:</b>
  * <ul>
- *   <li>Returning multiple values from a method without creating a dedicated class</li>
- *   <li>Grouping related values together temporarily</li>
- *   <li>Representing fixed-size heterogeneous collections</li>
+ *   <li><b>Type Safety:</b> Each tuple position has a specific generic type, preventing type errors at compile time</li>
+ *   <li><b>Immutability:</b> All tuple instances are immutable, ensuring thread safety and preventing accidental modification</li>
+ *   <li><b>Fixed Size:</b> Compile-time known arity from 0 to 9 elements with specialized implementations</li>
+ *   <li><b>Heterogeneous Elements:</b> Each position can contain a different type, unlike homogeneous collections</li>
+ *   <li><b>Memory Efficient:</b> Optimized implementations for each arity with minimal overhead</li>
+ *   <li><b>Null Safe:</b> Elements can be null, with proper null handling throughout the API</li>
+ *   <li><b>Functional Programming:</b> Integration with functional programming patterns and lambda expressions</li>
+ *   <li><b>Conversion Support:</b> Easy conversion to/from collections, arrays, and other data structures</li>
  * </ul>
- * 
- * <p>For tuples with 8 or more elements, consider using a dedicated class or record with meaningful property names
- * for better code readability and maintainability.</p>
- * 
- * <p>All tuple implementations are immutable and thread-safe.</p>
- * 
- * <p><b>Usage Examples:</b></p>
+ *
+ * <p><b>⚠️ IMPORTANT - Immutable Design:</b>
+ * <ul>
+ *   <li>This class implements {@link Immutable}, guaranteeing that instances cannot be modified after creation</li>
+ *   <li>All tuple elements are final fields set only during construction</li>
+ *   <li>Thread-safe by design due to immutability and lack of mutable state</li>
+ *   <li>All operations return new instances rather than modifying existing ones</li>
+ * </ul>
+ *
+ * <p><b>Design Philosophy:</b>
+ * <ul>
+ *   <li><b>Simplicity Over Complexity:</b> Provides simple, straightforward access to tuple elements</li>
+ *   <li><b>Type Safety Over Flexibility:</b> Compile-time type checking prevents runtime errors</li>
+ *   <li><b>Performance Over Convenience:</b> Optimized implementations for each tuple size</li>
+ *   <li><b>Immutability Over Mutability:</b> Ensures predictable behavior and thread safety</li>
+ *   <li><b>Explicitness Over Magic:</b> Clear, numbered field access rather than reflection-based access</li>
+ * </ul>
+ *
+ * <p><b>Tuple Hierarchy and Specializations:</b>
+ * <ul>
+ *   <li><b>{@link Tuple0}:</b> Empty tuple with no elements (unit type)</li>
+ *   <li><b>{@link Tuple1}:</b> Single element tuple, equivalent to a typed container</li>
+ *   <li><b>{@link Tuple2}:</b> Two-element tuple, similar to {@link Pair} but with numbered access</li>
+ *   <li><b>{@link Tuple3}:</b> Three-element tuple, similar to {@link Triple} but with numbered access</li>
+ *   <li><b>{@link Tuple4} - {@link Tuple7}:</b> Standard multi-element tuples for common use cases</li>
+ *   <li><b>{@link Tuple8} - {@link Tuple9}:</b> Large tuples marked as deprecated, consider using custom classes</li>
+ * </ul>
+ *
+ * <p><b>Generic Type Parameter:</b>
+ * <ul>
+ *   <li><b>{@code TP}:</b> Self-type parameter representing the concrete tuple type (CRTP pattern)</li>
+ *   <li><b>Purpose:</b> Enables type-safe method chaining and inheritance while maintaining specific tuple types</li>
+ *   <li><b>Pattern:</b> Each concrete tuple class extends {@code Tuple<ConcreteType>} (e.g., {@code Tuple3<T1,T2,T3> extends Tuple<Tuple3<T1,T2,T3>>})</li>
+ * </ul>
+ *
+ * <p><b>Element Access Pattern:</b>
+ * <ul>
+ *   <li><b>Numbered Fields:</b> Elements accessed via public final fields {@code _1, _2, _3, ...}</li>
+ *   <li><b>1-Based Indexing:</b> Field names start from {@code _1} for the first element</li>
+ *   <li><b>Direct Access:</b> No getter methods needed, fields are directly accessible</li>
+ *   <li><b>Type Safety:</b> Each field has the exact type specified in the generic parameters</li>
+ * </ul>
+ *
+ * <p><b>Common Usage Patterns:</b>
  * <pre>{@code
- * // Creating a tuple with 3 elements
- * Tuple3<String, Integer, Boolean> person = Tuple.of("John", 30, true);
- * 
- * // Accessing elements
- * String name = person._1;  // "John"
- * Integer age = person._2;   // 30
- * Boolean active = person._3; // true
- * 
- * // Using forEach
- * person.forEach(System.out::println);
+ * // Creating tuples of different sizes
+ * Tuple1<String> single = Tuple.of("value");
+ * Tuple2<String, Integer> pair = Tuple.of("name", 42);
+ * Tuple3<String, Integer, Boolean> triple = Tuple.of("name", 42, true);
+ *
+ * // Accessing elements directly
+ * String name = pair._1;      // Type-safe access to first element
+ * Integer age = pair._2;      // Type-safe access to second element
+ * Boolean active = triple._3; // Type-safe access to third element
+ *
+ * // Using tuples for multiple return values
+ * public Tuple3<String, Integer, Boolean> getUserInfo(long userId) {
+ *     User user = findUser(userId);
+ *     return Tuple.of(user.getName(), user.getAge(), user.isActive());
+ * }
+ *
+ * // Destructuring in calling code
+ * Tuple3<String, Integer, Boolean> userInfo = getUserInfo(123L);
+ * String userName = userInfo._1;
+ * Integer userAge = userInfo._2;
+ * Boolean isUserActive = userInfo._3;
  * }</pre>
  *
- * @param <TP> the self-type of the tuple, typically extending Tuple&lt;TP&gt;
- * 
+ * <p><b>Advanced Usage Examples:</b></p>
+ * <pre>{@code
+ * // Functional programming with tuples
+ * List<Tuple2<String, Integer>> nameAgePairs = users.stream()
+ *     .map(user -> Tuple.of(user.getName(), user.getAge()))
+ *     .collect(Collectors.toList());
+ *
+ * // Using forEach for processing all elements
+ * Tuple3<String, Integer, Double> data = Tuple.of("test", 42, 3.14);
+ * data.forEach(System.out::println); // Prints each element
+ *
+ * // Converting to collections
+ * Tuple3<String, String, String> words = Tuple.of("apple", "banana", "cherry");
+ * List<String> wordList = Tuple.toList(words); // Creates ["apple", "banana", "cherry"]
+ *
+ * // Working with collections and maps
+ * Map<String, Integer> map = Map.of("key1", 1, "key2", 2);
+ * List<Tuple2<String, Integer>> entries = map.entrySet().stream()
+ *     .map(Tuple::create)
+ *     .collect(Collectors.toList());
+ *
+ * // Beta feature: Creating from arrays
+ * Object[] array = {"hello", 42, true};
+ * Tuple3<String, Integer, Boolean> fromArray = Tuple.create(array);
+ * }</pre>
+ *
+ * <p><b>Nested Tuple Operations (Beta):</b>
+ * <pre>{@code
+ * // Flattening nested tuples
+ * Tuple2<String, Integer> inner = Tuple.of("name", 25);
+ * Tuple2<Tuple2<String, Integer>, Boolean> nested = Tuple.of(inner, true);
+ * Tuple3<String, Integer, Boolean> flattened = Tuple.flatten(nested);
+ * // Result: flattened._1 = "name", flattened._2 = 25, flattened._3 = true
+ *
+ * // Complex nested structures
+ * Tuple3<String, Integer, Boolean> base = Tuple.of("data", 100, false);
+ * Tuple3<Tuple3<String, Integer, Boolean>, String, Double> complex = Tuple.of(base, "extra", 2.71);
+ * Tuple5<String, Integer, Boolean, String, Double> expanded = Tuple.flatten(complex);
+ * }</pre>
+ *
+ * <p><b>Performance Characteristics:</b>
+ * <ul>
+ *   <li><b>Creation Cost:</b> O(1) - Simple object allocation with field assignments</li>
+ *   <li><b>Access Time:</b> O(1) - Direct field access without method call overhead</li>
+ *   <li><b>Memory Overhead:</b> Minimal - Only standard object header plus final field references</li>
+ *   <li><b>Iteration Cost:</b> O(n) where n is the arity, using reflection for {@code forEach}</li>
+ *   <li><b>Comparison Cost:</b> O(n) for {@code equals()}, compares all elements</li>
+ * </ul>
+ *
+ * <p><b>Thread Safety:</b>
+ * <ul>
+ *   <li><b>Immutable Fields:</b> All element fields are final and set only during construction</li>
+ *   <li><b>Concurrent Access:</b> Safe for concurrent read access from multiple threads</li>
+ *   <li><b>No Synchronization:</b> No locks or synchronization needed due to immutability</li>
+ *   <li><b>Safe Publication:</b> Can be safely published between threads without additional synchronization</li>
+ * </ul>
+ *
+ * <p><b>Memory Management:</b>
+ * <ul>
+ *   <li><b>Efficient Allocation:</b> Small object size with minimal memory footprint</li>
+ *   <li><b>No Memory Leaks:</b> Immutable design prevents accidental reference retention</li>
+ *   <li><b>GC Friendly:</b> Immutable objects are optimized for garbage collection</li>
+ *   <li><b>Reference Equality:</b> Can be cached and reused safely due to immutability</li>
+ * </ul>
+ *
+ * <p><b>Comparison with Alternative Approaches:</b>
+ * <ul>
+ *   <li><b>vs. Custom Classes:</b> Tuples avoid boilerplate but sacrifice named fields and domain meaning</li>
+ *   <li><b>vs. Arrays:</b> Tuples provide type safety and heterogeneous elements vs. homogeneous arrays</li>
+ *   <li><b>vs. Collections:</b> Tuples have fixed size and direct access vs. dynamic collections</li>
+ *   <li><b>vs. Records (Java 14+):</b> Records provide named fields but tuples offer positional access patterns</li>
+ *   <li><b>vs. Pair/Triple:</b> Tuples use numbered access vs. named fields, supporting larger arities</li>
+ * </ul>
+ *
+ * <p><b>Best Practices:</b>
+ * <ul>
+ *   <li>Use tuples for temporary grouping of 2-7 related values</li>
+ *   <li>Prefer custom classes or records for domain objects with meaningful field names</li>
+ *   <li>Use {@link Pair} or {@link Triple} when semantic meaning is more important than arity flexibility</li>
+ *   <li>Document the meaning of each tuple position when not obvious from context</li>
+ *   <li>Consider using records for Java 14+ projects when you need named fields</li>
+ *   <li>Use tuple conversion methods ({@code toList()}) when you need to process elements uniformly</li>
+ *   <li>Leverage the type system to prevent mixing up tuple element order</li>
+ * </ul>
+ *
+ * <p><b>Common Anti-Patterns to Avoid:</b>
+ * <ul>
+ *   <li>Using large tuples (8+ elements) instead of proper domain classes</li>
+ *   <li>Creating tuples with unclear or undocumented element meanings</li>
+ *   <li>Using tuples for long-term data storage instead of proper domain modeling</li>
+ *   <li>Mixing up element order when creating or accessing tuple elements</li>
+ *   <li>Using tuples when a simple array or collection would be more appropriate</li>
+ *   <li>Ignoring type safety by using Object types instead of specific generics</li>
+ * </ul>
+ *
+ * <p><b>Integration with Other Utilities:</b>
+ * <ul>
+ *   <li><b>{@link Pair}:</b> Specialized two-element container with named fields (left/right)</li>
+ *   <li><b>{@link Triple}:</b> Specialized three-element container with named fields (left/middle/right)</li>
+ *   <li><b>{@link Result}:</b> Can be converted to tuple for success/failure handling</li>
+ *   <li><b>{@link Optional}:</b> Individual tuple elements can be wrapped in Optional for null safety</li>
+ *   <li><b>Collections API:</b> Seamless conversion to/from lists and other collections</li>
+ * </ul>
+ *
+ * <p><b>Design Patterns and Use Cases:</b>
+ * <ul>
+ *   <li><b>Multiple Return Values:</b> Returning multiple values from methods without custom classes</li>
+ *   <li><b>Functional Programming:</b> Intermediate values in functional transformation pipelines</li>
+ *   <li><b>Data Processing:</b> Grouping related values during stream processing operations</li>
+ *   <li><b>Configuration Bundles:</b> Grouping related configuration parameters temporarily</li>
+ *   <li><b>Coordinate Systems:</b> Representing points, vectors, or geometric data</li>
+ *   <li><b>Database Results:</b> Representing query results with multiple columns</li>
+ * </ul>
+ *
+ * <p><b>Arity Considerations:</b>
+ * <ul>
+ *   <li><b>Tuples 0-3:</b> Generally acceptable for most use cases</li>
+ *   <li><b>Tuples 4-7:</b> Consider whether a custom class would be more appropriate</li>
+ *   <li><b>Tuples 8-9:</b> Deprecated - strongly consider using custom classes or records</li>
+ *   <li><b>Large Tuples:</b> Become difficult to understand and maintain without field names</li>
+ * </ul>
+ *
+ * <p><b>Example: Data Processing Pipeline</b>
+ * <pre>{@code
+ * public class DataProcessor {
+ *     // Using tuples for intermediate processing results
+ *     public List<Tuple3<String, Double, Integer>> processData(List<RawData> rawData) {
+ *         return rawData.stream()
+ *             .map(this::parseAndValidate)
+ *             .filter(tuple -> tuple._3 > 0) // Filter by count
+ *             .sorted((t1, t2) -> Double.compare(t2._2, t1._2)) // Sort by score descending
+ *             .collect(Collectors.toList());
+ *     }
+ *
+ *     private Tuple3<String, Double, Integer> parseAndValidate(RawData data) {
+ *         String processedName = sanitizeName(data.getName());
+ *         Double calculatedScore = computeScore(data);
+ *         Integer validCount = countValidEntries(data);
+ *         return Tuple.of(processedName, calculatedScore, validCount);
+ *     }
+ *
+ *     // Converting results back to domain objects
+ *     public List<ProcessedData> convertToResults(List<Tuple3<String, Double, Integer>> tuples) {
+ *         return tuples.stream()
+ *             .map(tuple -> new ProcessedData(tuple._1, tuple._2, tuple._3))
+ *             .collect(Collectors.toList());
+ *     }
+ * }
+ * }</pre>
+ *
+ * @param <TP> the self-type of the tuple, enabling type-safe method chaining and inheritance
+ * @see Immutable
+ * @see Pair
+ * @see Triple
+ * @see Result
+ * @see Optional
+ * @see Collection
+ * @see Map.Entry
+ * @see List
  * @see com.landawn.abacus.util.u.Nullable
- * @see com.landawn.abacus.util.u.Optional
  * @see com.landawn.abacus.util.Holder
- * @see com.landawn.abacus.util.Result
- * @see com.landawn.abacus.util.Pair
- * @see com.landawn.abacus.util.Triple 
  */
 @com.landawn.abacus.annotation.Immutable
 @SuppressWarnings({ "java:S116", "java:S117" })
@@ -71,9 +285,9 @@ public abstract class Tuple<TP> implements Immutable {
 
     /**
      * Returns the number of elements in this tuple.
-     * 
+     *
      * <p>The arity represents the fixed size of the tuple, which ranges from 0 to 9.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Tuple3<String, Integer, Boolean> t = Tuple.of("a", 1, true);
@@ -86,15 +300,15 @@ public abstract class Tuple<TP> implements Immutable {
 
     /**
      * Checks if any element in this tuple is {@code null}.
-     * 
+     *
      * <p>This method performs a logical OR operation across all elements,
      * returning {@code true} as soon as any {@code null} element is found.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Tuple3<String, Integer, Boolean> t1 = Tuple.of("a", null, true);
      * boolean hasNull = t1.anyNull(); // Returns true
-     * 
+     *
      * Tuple3<String, Integer, Boolean> t2 = Tuple.of("a", 1, true);
      * boolean hasNull2 = t2.anyNull(); // Returns false
      * }</pre>
@@ -105,15 +319,15 @@ public abstract class Tuple<TP> implements Immutable {
 
     /**
      * Checks if all elements in this tuple are {@code null}.
-     * 
+     *
      * <p>This method performs a logical AND operation across all elements,
      * returning {@code true} only if every element is {@code null}.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Tuple3<String, Integer, Boolean> t1 = Tuple.of(null, null, null);
      * boolean allNull = t1.allNull(); // Returns true
-     * 
+     *
      * Tuple3<String, Integer, Boolean> t2 = Tuple.of("a", null, null);
      * boolean allNull2 = t2.allNull(); // Returns false
      * }</pre>
@@ -124,10 +338,10 @@ public abstract class Tuple<TP> implements Immutable {
 
     /**
      * Checks if this tuple contains the specified value.
-     * 
+     *
      * <p>The comparison is performed using object equality (via N.equals() which handles {@code null} values).
      * The method checks each element in order and returns {@code true} as soon as a match is found.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Tuple3<String, Integer, Boolean> t = Tuple.of("hello", 42, true);
@@ -136,17 +350,17 @@ public abstract class Tuple<TP> implements Immutable {
      * boolean found3 = t.contains(null);    // Returns false
      * }</pre>
      *
-     * @param valueToFind the value to search for in this tuple, may be null
+     * @param valueToFind the value to search for in this tuple, may be {@code null}
      * @return {@code true} if this tuple contains an element equal to the specified value, {@code false} otherwise
      */
     public abstract boolean contains(final Object valueToFind);
 
     /**
      * Returns an array containing all elements of this tuple in their positional order.
-     * 
+     *
      * <p>The returned array is a new instance and modifications to it do not affect the tuple.
      * The array length equals the arity of this tuple.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Tuple3<String, Integer, Boolean> t = Tuple.of("a", 1, true);
@@ -159,16 +373,16 @@ public abstract class Tuple<TP> implements Immutable {
 
     /**
      * Returns an array containing all elements of this tuple, using the specified array type.
-     * 
+     *
      * <p>If the provided array is large enough to hold all elements, it is used directly and
      * the element following the last tuple element (if any) is set to {@code null}. Otherwise, a new
      * array of the same runtime type is created with the exact size needed.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Tuple2<String, String> t = Tuple.of("hello", "world");
      * String[] array = t.toArray(new String[0]); // Returns ["hello", "world"]
-     * 
+     *
      * // Using pre-sized array
      * String[] existing = new String[5];
      * String[] result = t.toArray(existing); // Uses existing array, sets existing[2] to null
@@ -185,33 +399,32 @@ public abstract class Tuple<TP> implements Immutable {
 
     /**
      * Performs the given action for each element of this tuple in order.
-     * 
+     *
      * <p>Elements are passed to the consumer one by one from first to last position.
      * The consumer receives each element as an Object, regardless of its actual type.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Tuple3<String, Integer, Boolean> t = Tuple.of("hello", 42, true);
      * t.forEach(System.out::println); // Prints each element on a new line
-     * 
+     *
      * // Collecting elements
      * List<Object> list = new ArrayList<>();
      * t.forEach(list::add);
      * }</pre>
      *
      * @param <E> the type of exception that the consumer may throw
-     * @param consumer the action to be performed for each element, must not be null
+     * @param consumer the action to be performed for each element, must not be {@code null}
      * @throws E if the consumer throws an exception
-     * @throws IllegalArgumentException if consumer is null
      */
     public abstract <E extends Exception> void forEach(Throwables.Consumer<?, E> consumer) throws E;
 
     /**
      * Performs the given action on this tuple as a whole.
-     * 
+     *
      * <p>The entire tuple is passed to the consumer as a single argument, allowing
      * type-safe access to all elements at once.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Tuple2<String, Integer> t = Tuple.of("age", 25);
@@ -220,7 +433,7 @@ public abstract class Tuple<TP> implements Immutable {
      * }</pre>
      *
      * @param <E> the type of exception that the action may throw
-     * @param action the action to be performed on this tuple, must not be null
+     * @param action the action to be performed on this tuple, must not be {@code null}
      * @throws E if the action throws an exception
      */
     public <E extends Exception> void accept(final Throwables.Consumer<? super TP, E> action) throws E {
@@ -229,23 +442,23 @@ public abstract class Tuple<TP> implements Immutable {
 
     /**
      * Applies the given mapping function to this tuple and returns the result.
-     * 
+     *
      * <p>The entire tuple is passed to the mapper as a single argument, allowing
      * transformation of the tuple into any other type.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Tuple2<String, Integer> t = Tuple.of("John", 30);
      * String description = t.map(tuple -> tuple._1 + " is " + tuple._2 + " years old");
      * // Returns: "John is 30 years old"
-     * 
+     *
      * // Converting to a custom object
      * Person person = t.map(tuple -> new Person(tuple._1, tuple._2));
      * }</pre>
      *
      * @param <R> the type of the result of the mapping function
      * @param <E> the type of exception that the mapper may throw
-     * @param mapper the mapping function to apply to this tuple, must not be null
+     * @param mapper the mapping function to apply to this tuple, must not be {@code null}
      * @return the result of applying the mapping function to this tuple
      * @throws E if the mapper throws an exception
      */
@@ -256,24 +469,24 @@ public abstract class Tuple<TP> implements Immutable {
     /**
      * Returns an Optional containing this tuple if it matches the given predicate,
      * otherwise returns an empty Optional.
-     * 
+     *
      * <p>This method is useful for conditional processing of tuples in a functional style.</p>
-     * 
+     *
+     * <p><b>Note:</b> This method is marked as {@link Beta} and may be subject to change.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Tuple2<String, Integer> t = Tuple.of("John", 30);
      * Optional<Tuple2<String, Integer>> adult = t.filter(tuple -> tuple._2 >= 18);
      * // Returns Optional containing the tuple
-     * 
+     *
      * Optional<Tuple2<String, Integer>> senior = t.filter(tuple -> tuple._2 >= 65);
      * // Returns empty Optional
      * }</pre>
-     * 
-     * <p><b>Note:</b> This method is marked as {@link Beta} and may be subject to change.</p>
      *
      * @param <E> the type of exception that the predicate may throw
-     * @param predicate the predicate to test this tuple against, must not be null
-     * @return an Optional containing this tuple if the predicate returns {@code true}, empty Optional otherwise
+     * @param predicate the predicate to test this tuple against, must not be {@code null}
+     * @return an Optional containing this tuple if the predicate returns {@code true}, otherwise an empty Optional
      * @throws E if the predicate throws an exception
      */
     @Beta
@@ -282,8 +495,12 @@ public abstract class Tuple<TP> implements Immutable {
     }
 
     /**
-     * Creates a Tuple1 containing the specified element.
-     * 
+     * Creates a new Tuple1 instance containing the specified element.
+     *
+     * <p>This is a static factory method that provides a convenient and type-safe way to create
+     * a Tuple1 instance. The method allows for type inference, making the code more concise.
+     * The element may be {@code null}.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Tuple1<String> single = Tuple.of("hello");
@@ -291,19 +508,21 @@ public abstract class Tuple<TP> implements Immutable {
      * }</pre>
      *
      * @param <T1> the type of the first element
-     * @param _1 the first element to be contained in the tuple
-     * @return a new Tuple1 containing the specified element
+     * @param _1 the first element, may be {@code null}
+     * @return a new Tuple1 instance containing the specified element
      */
     public static <T1> Tuple1<T1> of(final T1 _1) {
         return new Tuple1<>(_1);
     }
 
     /**
-     * Creates a Tuple2 containing the specified elements in order.
-     * 
-     * <p>This is commonly used for returning two values from a method or
+     * Creates a new Tuple2 instance containing the specified elements in order.
+     *
+     * <p>This is a static factory method that provides a convenient and type-safe way to create
+     * a Tuple2 instance. The method allows for type inference, making the code more concise.
+     * All elements may be {@code null}. This is commonly used for returning two values from a method or
      * grouping two related values together.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Tuple2<String, Integer> nameAge = Tuple.of("Alice", 25);
@@ -312,17 +531,21 @@ public abstract class Tuple<TP> implements Immutable {
      *
      * @param <T1> the type of the first element
      * @param <T2> the type of the second element
-     * @param _1 the first element to be contained in the tuple
-     * @param _2 the second element to be contained in the tuple
-     * @return a new Tuple2 containing the specified elements
+     * @param _1 the first element, may be {@code null}
+     * @param _2 the second element, may be {@code null}
+     * @return a new Tuple2 instance containing the specified elements
      */
     public static <T1, T2> Tuple2<T1, T2> of(final T1 _1, final T2 _2) {
         return new Tuple2<>(_1, _2);
     }
 
     /**
-     * Creates a Tuple3 containing the specified elements in order.
-     * 
+     * Creates a new Tuple3 instance containing the specified elements in order.
+     *
+     * <p>This is a static factory method that provides a convenient and type-safe way to create
+     * a Tuple3 instance. The method allows for type inference, making the code more concise.
+     * All elements may be {@code null}.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Tuple3<String, Integer, Boolean> user = Tuple.of("Bob", 30, true);
@@ -332,10 +555,10 @@ public abstract class Tuple<TP> implements Immutable {
      * @param <T1> the type of the first element
      * @param <T2> the type of the second element
      * @param <T3> the type of the third element
-     * @param _1 the first element to be contained in the tuple
-     * @param _2 the second element to be contained in the tuple
-     * @param _3 the third element to be contained in the tuple
-     * @return a new Tuple3 containing the specified elements
+     * @param _1 the first element, may be {@code null}
+     * @param _2 the second element, may be {@code null}
+     * @param _3 the third element, may be {@code null}
+     * @return a new Tuple3 instance containing the specified elements
      */
     public static <T1, T2, T3> Tuple3<T1, T2, T3> of(final T1 _1, final T2 _2, final T3 _3) {
         return new Tuple3<>(_1, _2, _3);
@@ -1551,7 +1774,7 @@ public abstract class Tuple<TP> implements Immutable {
      * 
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * // 3D coordinates
+     * // three-dimensional coordinates
      * Tuple3<Double, Double, Double> point = Tuple.of(1.0, 2.0, 3.0);
      * 
      * // RGB color

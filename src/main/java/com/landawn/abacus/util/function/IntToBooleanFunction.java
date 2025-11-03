@@ -11,7 +11,6 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-
 package com.landawn.abacus.util.function;
 
 /**
@@ -23,10 +22,11 @@ package com.landawn.abacus.util.function;
  * @see java.util.function.Function
  * @see IntFunction
  * @see IntPredicate
+ *
+ * <p>Refer to JDK API documentation at: <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html">https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a></p>
  */
 @FunctionalInterface
 public interface IntToBooleanFunction {
-
     /**
      * Default function that converts an {@code int} value to a {@code boolean}.
      * Returns {@code true} if the value is greater than 0, otherwise {@code false}.
@@ -35,6 +35,15 @@ public interface IntToBooleanFunction {
 
     /**
      * Applies this function to the given argument.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * IntToBooleanFunction isEven = value -> value % 2 == 0;
+     * boolean result = isEven.applyAsBoolean(4); // Returns true
+     *
+     * // Using DEFAULT
+     * boolean defaultResult = IntToBooleanFunction.DEFAULT.applyAsBoolean(1); // Returns true
+     * }</pre>
      *
      * @param value the function argument
      * @return the {@code boolean} result

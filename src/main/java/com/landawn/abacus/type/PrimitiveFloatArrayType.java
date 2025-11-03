@@ -17,7 +17,6 @@ package com.landawn.abacus.type;
 import java.io.IOException;
 import java.util.Collection;
 
-import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.parser.JSONXMLSerializationConfig;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.N;
@@ -30,7 +29,7 @@ import com.landawn.abacus.util.WD;
  * float arrays and their string representations or collections.
  */
 @SuppressWarnings("java:S2160")
-public final class PrimitiveFloatArrayType extends AbstractPrimitiveArrayType<float[]> {
+final class PrimitiveFloatArrayType extends AbstractPrimitiveArrayType<float[]> {
 
     public static final String FLOAT_ARRAY = float[].class.getSimpleName();
 
@@ -83,9 +82,7 @@ public final class PrimitiveFloatArrayType extends AbstractPrimitiveArrayType<fl
      * @param x the float array to convert
      * @return the string representation of the array, or {@code null} if input is null
      */
-    @MayReturnNull
     @Override
-
     public String stringOf(final float[] x) {
         if (x == null) {
             return null; // NOSONAR
@@ -104,7 +101,6 @@ public final class PrimitiveFloatArrayType extends AbstractPrimitiveArrayType<fl
      * @param str the string to parse
      * @return the parsed float array, or {@code null} if input is null
      */
-    @MayReturnNull
     @Override
     public float[] valueOf(final String str) {
         if (Strings.isEmpty(str) || Strings.isBlank(str)) {
@@ -191,7 +187,6 @@ public final class PrimitiveFloatArrayType extends AbstractPrimitiveArrayType<fl
      * @param c the Collection of Float objects to convert
      * @return a float array containing the unboxed values, or {@code null} if input is null
      */
-    @MayReturnNull
     @Override
     public float[] collection2Array(final Collection<?> c) {
         if (c == null) {

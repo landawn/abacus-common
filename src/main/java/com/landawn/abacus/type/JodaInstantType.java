@@ -23,7 +23,6 @@ import java.sql.Timestamp;
 
 import org.joda.time.Instant;
 
-import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.parser.JSONXMLSerializationConfig;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.DateTimeFormat;
@@ -32,7 +31,7 @@ import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Numbers;
 import com.landawn.abacus.util.Strings;
 
-public class JodaInstantType extends AbstractJodaDateTimeType<Instant> {
+class JodaInstantType extends AbstractJodaDateTimeType<Instant> {
 
     public static final String INSTANT = "JodaInstant";
 
@@ -47,7 +46,7 @@ public class JodaInstantType extends AbstractJodaDateTimeType<Instant> {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * JodaInstantType type = new JodaInstantType();
+     * Type<Instant> type = TypeFactory.getType(Instant.class);
      * Class<Instant> clazz = type.clazz();
      * System.out.println(clazz.getName()); // Outputs: org.joda.time.Instant
      * }</pre>
@@ -68,7 +67,7 @@ public class JodaInstantType extends AbstractJodaDateTimeType<Instant> {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * JodaInstantType type = new JodaInstantType();
+     * Type<Instant> type = TypeFactory.getType(Instant.class);
      * Instant instant = Instant.now();
      * String str = type.stringOf(instant);
      * System.out.println(str); // Example output: 2021-01-01T10:30:00.123
@@ -81,7 +80,6 @@ public class JodaInstantType extends AbstractJodaDateTimeType<Instant> {
      * @return the string representation of the Instant, or {@code null} if the input is null
      */
     @Override
-    @MayReturnNull
     public String stringOf(final Instant x) {
         return (x == null) ? null : x.toString(jodaISO8601TimestampFT);
     }
@@ -102,7 +100,7 @@ public class JodaInstantType extends AbstractJodaDateTimeType<Instant> {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * JodaInstantType type = new JodaInstantType();
+     * Type<Instant> type = TypeFactory.getType(Instant.class);
      *
      * // Parse milliseconds since epoch
      * Instant instant1 = type.valueOf("1609459200000");
@@ -124,9 +122,7 @@ public class JodaInstantType extends AbstractJodaDateTimeType<Instant> {
      * @return an Instant instance, or {@code null} if the string is empty or null
      * @throws IllegalArgumentException if the string format is invalid
      */
-    @MayReturnNull
     @Override
-
     public Instant valueOf(final String str) {
         if (Strings.isEmpty(str)) {
             return null; // NOSONAR
@@ -159,7 +155,7 @@ public class JodaInstantType extends AbstractJodaDateTimeType<Instant> {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * JodaInstantType type = new JodaInstantType();
+     * Type<Instant> type = TypeFactory.getType(Instant.class);
      *
      * // Parse from character array containing milliseconds
      * char[] millisChars = "1609459200000".toCharArray();
@@ -182,9 +178,7 @@ public class JodaInstantType extends AbstractJodaDateTimeType<Instant> {
      * @param len the number of characters to parse
      * @return an Instant instance, or {@code null} if the character buffer is {@code null} or length is 0
      */
-    @MayReturnNull
     @Override
-
     public Instant valueOf(final char[] cbuf, final int offset, final int len) {
         if ((cbuf == null) || (len == 0)) {
             return null; // NOSONAR
@@ -208,7 +202,7 @@ public class JodaInstantType extends AbstractJodaDateTimeType<Instant> {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * JodaInstantType type = new JodaInstantType();
+     * Type<Instant> type = TypeFactory.getType(Instant.class);
      * try (ResultSet rs = stmt.executeQuery()) {
      *     if (rs.next()) {
      *         Instant timestamp = type.get(rs, 1);
@@ -222,7 +216,6 @@ public class JodaInstantType extends AbstractJodaDateTimeType<Instant> {
      * @throws SQLException if a database access error occurs or the column index is invalid
      */
     @Override
-    @MayReturnNull
     public Instant get(final ResultSet rs, final int columnIndex) throws SQLException {
         final Timestamp ts = rs.getTimestamp(columnIndex);
 
@@ -235,7 +228,7 @@ public class JodaInstantType extends AbstractJodaDateTimeType<Instant> {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * JodaInstantType type = new JodaInstantType();
+     * Type<Instant> type = TypeFactory.getType(Instant.class);
      * try (ResultSet rs = stmt.executeQuery()) {
      *     if (rs.next()) {
      *         Instant timestamp = type.get(rs, "created_at");
@@ -249,7 +242,6 @@ public class JodaInstantType extends AbstractJodaDateTimeType<Instant> {
      * @throws SQLException if a database access error occurs or the column name is invalid
      */
     @Override
-    @MayReturnNull
     public Instant get(final ResultSet rs, final String columnName) throws SQLException {
         final Timestamp ts = rs.getTimestamp(columnName);
 
@@ -263,7 +255,7 @@ public class JodaInstantType extends AbstractJodaDateTimeType<Instant> {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * JodaInstantType type = new JodaInstantType();
+     * Type<Instant> type = TypeFactory.getType(Instant.class);
      * Instant now = Instant.now();
      * try (PreparedStatement stmt = conn.prepareStatement("INSERT INTO events (timestamp) VALUES (?)")) {
      *     type.set(stmt, 1, now);
@@ -288,7 +280,7 @@ public class JodaInstantType extends AbstractJodaDateTimeType<Instant> {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * JodaInstantType type = new JodaInstantType();
+     * Type<Instant> type = TypeFactory.getType(Instant.class);
      * Instant now = Instant.now();
      * try (CallableStatement stmt = conn.prepareCall("{call log_event(?)}")) {
      *     type.set(stmt, "event_time", now);
@@ -313,7 +305,7 @@ public class JodaInstantType extends AbstractJodaDateTimeType<Instant> {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * JodaInstantType type = new JodaInstantType();
+     * Type<Instant> type = TypeFactory.getType(Instant.class);
      * Instant instant = Instant.now();
      * StringBuilder sb = new StringBuilder("Timestamp: ");
      * type.appendTo(sb, instant);
@@ -352,7 +344,7 @@ public class JodaInstantType extends AbstractJodaDateTimeType<Instant> {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * JodaInstantType type = new JodaInstantType();
+     * Type<Instant> type = TypeFactory.getType(Instant.class);
      * Instant instant = Instant.now();
      * CharacterWriter writer = new CharacterWriter();
      *

@@ -11,7 +11,6 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-
 package com.landawn.abacus.util.function;
 
 import com.landawn.abacus.util.Throwables;
@@ -24,45 +23,39 @@ import com.landawn.abacus.util.Throwables;
  *
  * @see java.util.function.Predicate
  * @see IntPredicate
+ *
+ * <p>Refer to JDK API documentation at: <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html">https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a></p>
  */
 @FunctionalInterface
 public interface IntBiPredicate extends Throwables.IntBiPredicate<RuntimeException> { //NOSONAR
-
     /**
      * A predicate that always evaluates to {@code true}.
      */
     IntBiPredicate ALWAYS_TRUE = (t, u) -> true;
-
     /**
      * A predicate that always evaluates to {@code false}.
      */
     IntBiPredicate ALWAYS_FALSE = (t, u) -> false;
-
     /**
      * A predicate that tests if two {@code int} values are equal.
      */
     IntBiPredicate EQUAL = (t, u) -> t == u;
-
     /**
      * A predicate that tests if two {@code int} values are not equal.
      */
     IntBiPredicate NOT_EQUAL = (t, u) -> t != u;
-
     /**
      * A predicate that tests if the first {@code int} value is greater than the second.
      */
     IntBiPredicate GREATER_THAN = (t, u) -> t > u;
-
     /**
      * A predicate that tests if the first {@code int} value is greater than or equal to the second.
      */
     IntBiPredicate GREATER_EQUAL = (t, u) -> t >= u;
-
     /**
      * A predicate that tests if the first {@code int} value is less than the second.
      */
     IntBiPredicate LESS_THAN = (t, u) -> t < u;
-
     /**
      * A predicate that tests if the first {@code int} value is less than or equal to the second.
      */
@@ -71,9 +64,15 @@ public interface IntBiPredicate extends Throwables.IntBiPredicate<RuntimeExcepti
     /**
      * Evaluates this predicate on the given arguments.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * IntBiPredicate sumGreaterThan10 = (a, b) -> a + b > 10;
+     * boolean result = sumGreaterThan10.test(5, 6); // Returns true
+     * }</pre>
+     *
      * @param t the first {@code int} argument
      * @param u the second {@code int} argument
-     * @return {@code true} if the input arguments match the predicate, otherwise {@code false}
+     * @return {@code true} if the input arguments match the predicate, {@code false} otherwise
      */
     @Override
     boolean test(int t, int u);

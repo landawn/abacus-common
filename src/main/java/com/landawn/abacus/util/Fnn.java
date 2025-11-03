@@ -47,71 +47,205 @@ import com.landawn.abacus.util.function.TriPredicate;
 import com.landawn.abacus.util.stream.Stream;
 
 /**
- * Utility class for exceptional Predicate/Function/Consumer operations.
- * 
- * <p>This class provides static methods for creating and manipulating {@code Throwables} functional interfaces
- * that can throw checked exceptions. It serves as a comprehensive toolkit for working with exception-throwing
- * functional programming constructs, offering utilities for memorization, conversion, synchronization, and
- * common functional operations.</p>
+ * A comprehensive utility class providing static factory methods for creating and manipulating
+ * {@link Throwables} functional interfaces that can throw checked exceptions. This final class
+ * serves as the primary toolkit for exception-throwing functional programming constructs, offering
+ * extensive utilities for memoization, conversion, synchronization, rate limiting, and common
+ * functional operations with robust error handling capabilities.
  *
- * <p>The class extends the functionality of standard Java functional interfaces by providing versions that
- * can throw checked exceptions, along with utilities to convert between standard and throwable variants.
- * It also includes specialized functions for common operations like {@code null} checking, string conversion,
- * map entry manipulation, and rate limiting.</p>
+ * <p>Fnn extends the functionality of standard Java functional interfaces by providing versions
+ * that can throw checked exceptions, along with sophisticated utilities to convert between standard
+ * and throwable variants. The class bridges the gap between traditional exception handling and
+ * modern functional programming paradigms, enabling elegant composition of exception-prone operations
+ * within functional pipelines and stream processing.</p>
  *
- * <p>Key features:</p>
+ * <p><b>Key Features:</b>
  * <ul>
- *   <li>Memorization utilities for caching supplier results with optional expiration</li>
- *   <li>Standard functional interfaces (identity, always true/false predicates)</li>
- *   <li>Conversion utilities between different functional interface types</li>
- *   <li>Synchronization wrappers for thread-safe functional operations</li>
- *   <li>Specialized predicates for null/empty checking</li>
- *   <li>Map entry manipulation functions (key, value, inverse)</li>
- *   <li>Tuple and pair creation utilities</li>
- *   <li>Rate limiting and sleep utilities</li>
- *   <li>Exception throwing utilities</li>
- *   <li>Conversion between standard Java and {@code Throwables} functional interfaces</li>
+ *   <li><b>Exception-Safe Functional Interfaces:</b> Complete set of throwable versions of standard functional interfaces</li>
+ *   <li><b>Memoization Support:</b> Advanced caching with expiration, size limits, and thread-safe access</li>
+ *   <li><b>Conversion Utilities:</b> Seamless conversion between standard Java and Throwables interfaces</li>
+ *   <li><b>Synchronization Wrappers:</b> Thread-safe variants of all functional interface types</li>
+ *   <li><b>Rate Limiting:</b> Built-in rate limiting for consumer and function operations</li>
+ *   <li><b>Null Safety:</b> Comprehensive null checking predicates and functions</li>
+ *   <li><b>Map Entry Operations:</b> Specialized functions for key-value pair manipulation</li>
+ *   <li><b>Tuple Creation:</b> Factory methods for creating pairs and tuples from function results</li>
+ * </ul>
+ *
+ * <p><b>Common Use Cases:</b>
+ * <ul>
+ *   <li><b>Exception Handling:</b> Wrapping checked exceptions in functional programming contexts</li>
+ *   <li><b>Stream Processing:</b> Using exception-throwing functions in stream operations</li>
+ *   <li><b>Resource Management:</b> Safe resource operations with automatic cleanup and error handling</li>
+ *   <li><b>API Integration:</b> Calling external APIs that throw checked exceptions from functional pipelines</li>
+ *   <li><b>Data Validation:</b> Complex validation logic with exception reporting</li>
+ *   <li><b>Performance Optimization:</b> Memoized expensive operations with configurable caching strategies</li>
+ *   <li><b>Concurrent Programming:</b> Thread-safe functional operations with synchronization</li>
  * </ul>
  *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
- * // Memoized supplier with expiration
- * Throwables.Supplier<String, IOException> supplier = Fnn.memoizeWithExpiration(
- *     () -> expensiveOperation(), 5, TimeUnit.MINUTES);
+ * // Memoized supplier with expiration for expensive operations
+ * Throwables.Supplier<DatabaseConnection, SQLException> dbSupplier = 
+ *     Fnn.memoizeWithExpiration(() -> createConnection(), 5, TimeUnit.MINUTES);
  *
- * // Synchronized function
+ * // Synchronized function for thread-safe operations
  * Object mutex = new Object();
- * Throwables.Function<String, String, Exception> syncFunc = 
- *     Fnn.sf(mutex, str -> processString(str));
+ * Throwables.Function<String, String, IOException> safeProcessor = 
+ *     Fnn.sf(mutex, data -> processFile(data));
  *
- * // Convert consumer to function
- * Throwables.Function<String, Void, Exception> func = 
- *     Fnn.c2f(str -> System.out.println(str));
+ * // Convert consumer to function for pipeline compatibility
+ * Throwables.Function<String, Void, Exception> logFunction = 
+ *     Fnn.c2f(message -> logger.info(message));
  *
- * // Null-safe predicate
- * Throwables.Predicate<String, Exception> notNull = Fnn.notNull();
+ * // Exception-safe predicates for filtering
+ * Stream<String> validData = dataStream
+ *     .filter(Fnn.notNull())
+ *     .filter(Fnn.pp(data -> validateData(data)));
  *
- * // Rate-limited consumer
- * Throwables.Consumer<String, Exception> rateLimited = 
- *     Fnn.rateLimiter(10.0); // 10 permits per second
+ * // Rate-limited operations
+ * Throwables.Consumer<ApiRequest, IOException> rateLimitedApi = 
+ *     Fnn.rateLimiter(10.0); // 10 requests per second
  *
- * // Map entry utilities
- * Throwables.Function<Map.Entry<String, Integer>, String, Exception> keyExtractor = 
- *     Fnn.key();
+ * // Map entry manipulation
+ * Map<String, Integer> scores = data.stream()
+ *     .collect(Collectors.toMap(Fnn.key(), Fnn.value()));
  * }</pre>
  *
- * <p>The class uses the "Fn" abbreviation followed by "n" to indicate it works with functions that can throw
- * exceptions (nullable/throwable functions). Many methods are marked with {@code @Beta} to indicate they
- * are experimental or subject to change.</p>
+ * <p><b>Naming Convention:</b>
+ * The class name "Fnn" follows the pattern:
+ * <ul>
+ *   <li><b>"F":</b> Functions (functional interfaces)</li>
+ *   <li><b>"n":</b> Nullable/throwable (can handle null values and throw exceptions)</li>
+ *   <li><b>"n":</b> Second "n" emphasizes the exception-throwing capability</li>
+ * </ul>
+ * This distinguishes it from {@link Fn} which works with standard non-throwing functional interfaces.
  *
- * <p><b>Thread Safety:</b> All static methods in this class are thread-safe. Individual returned functional
- * interfaces may or may not be thread-safe depending on their implementation and whether they are wrapped
- * with synchronization utilities.</p>
+ * <p><b>Method Categories:</b>
+ * <ul>
+ *   <li><b>Memoization:</b> {@code memoize()}, {@code memoizeWithExpiration()}, {@code memoizeByKey()}</li>
+ *   <li><b>Standard Functional:</b> {@code identity()}, {@code alwaysTrue()}, {@code alwaysFalse()}</li>
+ *   <li><b>Interface Conversion:</b> {@code pp()}, {@code cc()}, {@code ff()} for Predicate/Consumer/Function</li>
+ *   <li><b>Synchronization:</b> {@code sp()}, {@code sc()}, {@code sf()} for synchronized variants</li>
+ *   <li><b>Type Conversion:</b> {@code c2f()}, {@code f2c()}, {@code r2c()}, {@code c2r()}</li>
+ *   <li><b>Java Interop:</b> {@code jr2r()}, {@code r2jr()}, {@code jc2c()}, {@code c2jc()}</li>
+ *   <li><b>Null Safety:</b> {@code isNull()}, {@code notNull()}, {@code isNullOrEmpty()}</li>
+ *   <li><b>Map Operations:</b> {@code key()}, {@code value()}, {@code inverse()}</li>
+ *   <li><b>Utility Functions:</b> {@code length()}, {@code size()}, {@code pair()}, {@code triple()}</li>
+ * </ul>
  *
- * @since 1.0
+ * <p><b>Memoization Features:</b>
+ * <ul>
+ *   <li><b>Simple Memoization:</b> Cache single result with lazy initialization</li>
+ *   <li><b>Expiration Support:</b> Time-based cache invalidation with configurable duration</li>
+ *   <li><b>Key-Based Caching:</b> Function result caching based on input parameters</li>
+ *   <li><b>Size Limits:</b> LRU eviction for memory-bounded caches</li>
+ *   <li><b>Thread Safety:</b> Concurrent access protection for memoized operations</li>
+ * </ul>
+ *
+ * <p><b>Exception Handling Strategy:</b>
+ * <ul>
+ *   <li><b>Checked Exception Propagation:</b> All Throwables interfaces can throw checked exceptions</li>
+ *   <li><b>Type Safety:</b> Generic exception types provide compile-time safety</li>
+ *   <li><b>Exception Wrapping:</b> Utilities to wrap standard interfaces in exception-safe variants</li>
+ *   <li><b>Error Context:</b> Preserve original exception information through functional chains</li>
+ * </ul>
+ *
+ * <p><b>Performance Characteristics:</b>
+ * <ul>
+ *   <li>Memoization: O(1) lookup after initial computation, configurable cache overhead</li>
+ *   <li>Synchronization: Minimal overhead using efficient locking strategies</li>
+ *   <li>Conversion operations: O(1) wrapper creation with no additional runtime cost</li>
+ *   <li>Rate limiting: O(1) permit acquisition with configurable backpressure</li>
+ * </ul>
+ *
+ * <p><b>Thread Safety:</b>
+ * All methods in this class are <b>thread-safe</b>:
+ * <ul>
+ *   <li>Static methods have no shared mutable state</li>
+ *   <li>Returned functional interfaces include thread-safety guarantees where applicable</li>
+ *   <li>Memoized functions use concurrent data structures for safe caching</li>
+ *   <li>Synchronized wrappers provide explicit thread-safety for functional operations</li>
+ * </ul>
+ *
+ * <p><b>Integration with Standard APIs:</b>
+ * <ul>
+ *   <li><b>Stream API:</b> Throwables functional interfaces work seamlessly with stream operations</li>
+ *   <li><b>CompletableFuture:</b> Exception-handling support for asynchronous operations</li>
+ *   <li><b>Collections:</b> Safe operations on collections with exception-throwing predicates</li>
+ *   <li><b>Optional:</b> Exception-safe optional operations and transformations</li>
+ * </ul>
+ *
+ * <p><b>Rate Limiting Implementation:</b>
+ * <ul>
+ *   <li><b>Token Bucket Algorithm:</b> Smooth rate limiting with burst capacity</li>
+ *   <li><b>Configurable Rates:</b> Support for various time units and permit rates</li>
+ *   <li><b>Backpressure Handling:</b> Blocking or non-blocking rate limiting strategies</li>
+ *   <li><b>Thread Safety:</b> Concurrent rate limiting across multiple threads</li>
+ * </ul>
+ *
+ * <p><b>Null Safety Utilities:</b>
+ * <ul>
+ *   <li><b>Comprehensive Checking:</b> Null, empty, and blank string detection</li>
+ *   <li><b>Collection Support:</b> Empty collection and array checking</li>
+ *   <li><b>Type Safety:</b> Generic null checking with type preservation</li>
+ *   <li><b>Predicate Chaining:</b> Composable null-safe predicates for complex conditions</li>
+ * </ul>
+ *
+ * <p><b>Map Entry Operations:</b>
+ * <ul>
+ *   <li><b>Key/Value Extraction:</b> Safe extraction of map entry components</li>
+ *   <li><b>Entry Transformation:</b> Convert between different map entry types</li>
+ *   <li><b>Inverse Operations:</b> Swap keys and values in map entries</li>
+ *   <li><b>Null Handling:</b> Safe operations on potentially null map entries</li>
+ * </ul>
+ *
+ * <p><b>Functional Interface Conversions:</b>
+ * The class provides comprehensive conversion utilities:
+ * <ul>
+ *   <li><b>Consumer ↔ Function:</b> Convert consumers to functions returning void or specific values</li>
+ *   <li><b>Runnable ↔ Callable:</b> Convert between runnable and callable interfaces</li>
+ *   <li><b>Standard ↔ Throwables:</b> Wrap standard Java interfaces in exception-safe variants</li>
+ *   <li><b>Arity Conversion:</b> Convert between different parameter counts (unary, binary, ternary)</li>
+ * </ul>
+ *
+ * <p><b>Error Handling:</b>
+ * <ul>
+ *   <li>Throws {@link IllegalArgumentException} for null required parameters</li>
+ *   <li>Preserves original exception types and stack traces through functional chains</li>
+ *   <li>Provides clear error messages for invalid usage patterns</li>
+ *   <li>Handles edge cases gracefully with documented behavior</li>
+ * </ul>
+ *
+ * <p><b>Best Practices:</b>
+ * <ul>
+ *   <li>Use appropriate memoization strategies based on access patterns and memory constraints</li>
+ *   <li>Prefer specific exception types over generic Exception for better error handling</li>
+ *   <li>Use synchronization wrappers only when necessary to avoid unnecessary overhead</li>
+ *   <li>Cache frequently used functional interfaces to reduce object allocation</li>
+ *   <li>Choose appropriate rate limiting strategies based on throughput requirements</li>
+ * </ul>
+ *
+ * <p><b>Memory Management:</b>
+ * <ul>
+ *   <li>Memoized functions may retain references to cached results - consider weak references for large objects</li>
+ *   <li>Rate limiters maintain internal state - clean up unused limiters to prevent memory leaks</li>
+ *   <li>Synchronized wrappers add minimal overhead but may prevent some JVM optimizations</li>
+ *   <li>Use expiration-based memoization for memory-sensitive applications</li>
+ * </ul>
+ *
+ * <p><b>Comparison with Related Classes:</b>
+ * <ul>
+ *   <li><b>vs {@link Fn}:</b> Fnn handles checked exceptions while Fn works with standard interfaces</li>
+ *   <li><b>vs {@link Throwables}:</b> Fnn provides factory methods while Throwables defines interface types</li>
+ *   <li><b>vs Standard Functional:</b> Enhanced with exception handling, memoization, and synchronization</li>
+ * </ul>
+ *
  * @see Throwables
- * @see java.util.function
  * @see Fn
+ * @see java.util.function
+ * @see java.util.concurrent
+ * @see Stream
+ * @see java.util.Optional
  */
 public final class Fnn {
     private Fnn() {
@@ -147,7 +281,6 @@ public final class Fnn {
      *
      * <p>When the underlying delegate throws an exception, then this memorizing supplier will keep
      * delegating calls until it returns valid data.
-     *
      *
      * @param <T> the type of results supplied by this supplier
      * @param <E> the type of exception that may be thrown

@@ -11,7 +11,6 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-
 package com.landawn.abacus.util.function;
 
 import com.landawn.abacus.util.Throwables;
@@ -19,22 +18,22 @@ import com.landawn.abacus.util.Throwables;
 /**
  * Represents an operation on three float-valued operands that produces a float-valued result.
  * This is a functional interface whose functional method is {@link #applyAsFloat(float, float, float)}.
- * 
+ *
  * <p>This is a primitive type specialization of ternary operator for {@code float}.</p>
- * 
+ *
  * <p>This interface is similar to {@link java.util.function.BinaryOperator} but accepts three arguments
  * instead of two.</p>
- * 
- * @since 1.0
+ *
  * @see java.util.function.BinaryOperator
  * @see java.util.function.DoubleBinaryOperator
+ *
+ * <p>Refer to JDK API documentation at: <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html">https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a></p>
  */
 @FunctionalInterface
 public interface FloatTernaryOperator extends Throwables.FloatTernaryOperator<RuntimeException> { //NOSONAR
-
     /**
      * Applies this operator to the given float operands.
-     * 
+     *
      * <p>The implementation defines how the three float values are combined to produce
      * the result. Common uses include mathematical operations like fused multiply-add
      * (a * b + c) or conditional operations.</p>

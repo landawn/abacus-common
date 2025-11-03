@@ -19,7 +19,6 @@ import java.io.IOException;
 import java.io.Writer;
 import java.util.AbstractMap;
 
-import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.exception.UncheckedIOException;
 import com.landawn.abacus.parser.JSONDeserializationConfig;
 import com.landawn.abacus.parser.JSONDeserializationConfig.JDC;
@@ -42,7 +41,7 @@ import com.landawn.abacus.util.WD;
  * @param <V> the value type
  */
 @SuppressWarnings("java:S2160")
-public class ImmutableMapEntryType<K, V> extends AbstractType<AbstractMap.SimpleImmutableEntry<K, V>> {
+class ImmutableMapEntryType<K, V> extends AbstractType<AbstractMap.SimpleImmutableEntry<K, V>> {
 
     static final String MAP_IMMUTABLE_ENTRY = "Map.ImmutableEntry";
 
@@ -76,7 +75,6 @@ public class ImmutableMapEntryType<K, V> extends AbstractType<AbstractMap.Simple
      * @return the declaring name of this type (e.g., "Map.ImmutableEntry&lt;String, Integer&gt;")
      */
     @Override
-    @MayReturnNull
     public String declaringName() {
         return declaringName;
     }
@@ -115,7 +113,6 @@ public class ImmutableMapEntryType<K, V> extends AbstractType<AbstractMap.Simple
      * @return the JSON string representation of the entry (e.g., "{\"key\":\"value\"}"), or {@code null} if the input is null
      */
     @Override
-    @MayReturnNull
     public String stringOf(final AbstractMap.SimpleImmutableEntry<K, V> x) {
         return (x == null) ? null : Utils.jsonParser.serialize(N.asMap(x.getKey(), x.getValue()));
     }
@@ -128,7 +125,6 @@ public class ImmutableMapEntryType<K, V> extends AbstractType<AbstractMap.Simple
      * @param str the JSON string to parse (e.g., "{\"key\":\"value\"}")
      * @return a new immutable map entry instance, or {@code null} if the input is {@code null}, empty, or "{}"
      */
-    @MayReturnNull
     @Override
     public AbstractMap.SimpleImmutableEntry<K, V> valueOf(final String str) {
         if (Strings.isEmpty(str) || Strings.isBlank(str) || "{}".equals(str)) {

@@ -11,7 +11,6 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-
 package com.landawn.abacus.util.function;
 
 import com.landawn.abacus.util.Throwables;
@@ -21,7 +20,7 @@ import com.landawn.abacus.util.Throwables;
  * and a double-valued argument, and returns no result. This is a specialization of BiConsumer
  * for the case where the second argument is a primitive double.
  *
- * <p>This interface extends both {@link Throwables.ObjDoubleConsumer} and 
+ * <p>This interface extends both {@link Throwables.ObjDoubleConsumer} and
  * {@link java.util.function.ObjDoubleConsumer}, providing compatibility with the standard
  * Java functional interfaces while adding exception handling capabilities.
  *
@@ -35,7 +34,6 @@ import com.landawn.abacus.util.Throwables;
  */
 @FunctionalInterface
 public interface ObjDoubleConsumer<T> extends Throwables.ObjDoubleConsumer<T, RuntimeException>, java.util.function.ObjDoubleConsumer<T> { //NOSONAR
-
     /**
      * Performs this operation on the given arguments.
      *
@@ -67,7 +65,8 @@ public interface ObjDoubleConsumer<T> extends Throwables.ObjDoubleConsumer<T, Ru
      * ObjDoubleConsumer<List<Double>> printValue = (list, value) -> System.out.println(value);
      * ObjDoubleConsumer<List<Double>> combined = addToList.andThen(printValue);
      * // This will both add the value to the list and print it
-     * combined.accept(myList, 3.14);
+     * List<Double> numbers = new ArrayList<>();
+     * combined.accept(numbers, 3.14);
      * }</pre>
      *
      * @param after the operation to perform after this operation

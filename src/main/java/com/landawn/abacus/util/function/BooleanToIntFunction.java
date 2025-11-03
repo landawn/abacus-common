@@ -11,20 +11,19 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-
 package com.landawn.abacus.util.function;
 
 /**
  * Represents a function that accepts a {@code boolean}-valued argument and produces an
  * {@code int}-valued result. This is the {@code boolean}-to-{@code int} primitive specialization
  * for {@link java.util.function.Function}.
- * 
+ *
  * <p>This is a functional interface whose functional method is {@link #applyAsInt(boolean)}.
  *
+ * <p>Refer to JDK API documentation at: <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html">https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a></p>
  */
 @FunctionalInterface
 public interface BooleanToIntFunction {
-
     /**
      * A default function that converts a boolean value to an integer: {@code true} to {@code 1} and {@code false} to {@code 0}.
      * This follows the common convention of representing boolean values as integers in many programming contexts.

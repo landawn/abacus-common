@@ -14,8 +14,6 @@
 
 package com.landawn.abacus.parser;
 
-import com.landawn.abacus.annotation.MayReturnNull;
-
 import java.io.IOException;
 import java.io.Reader;
 import java.util.HashMap;
@@ -57,7 +55,6 @@ import com.landawn.abacus.util.u.OptionalShort;
  * 
  * <p>This is an internal class and should not be used directly by application code.</p>
  * 
- * @since 0.8
  */
 class JSONStringReader extends AbstractJSONReader {
     private static final Logger logger = LoggerFactory.getLogger(JSONStringReader.class);
@@ -519,8 +516,6 @@ class JSONStringReader extends AbstractJSONReader {
                         : String.valueOf(strValue, strBeginIndex - 1, N.min(32, strEndIndex - strBeginIndex + 1))));
     }
 
-    @MayReturnNull
-
     @Override
     public String getText() {
         if (text != null) {
@@ -595,8 +590,6 @@ class JSONStringReader extends AbstractJSONReader {
             return type.valueOf(strValue, startIndexForText, endIndexForText - startIndexForText);
         }
     }
-
-    @MayReturnNull
 
     @Override
     public PropInfo readPropInfo(final SymbolReader symbolReader) {

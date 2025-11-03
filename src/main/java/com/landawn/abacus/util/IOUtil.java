@@ -89,19 +89,269 @@ import com.landawn.abacus.util.Fn.BiPredicates;
 import com.landawn.abacus.util.stream.Stream;
 
 /**
- * <p>
- * Note: This class includes codes copied from Apache Commons Lang, Apache Commons IO, Google Guava and other open source projects under the Apache License 2.0.
- * The methods copied from other libraries/frameworks/projects may be modified in this class.
- * </p>
- * <br />
- * There are only {@code offset/count/len} parameters in the methods defined in class {@code IOUtil}, no {@code fromIndex/startIndex} and {@code toIndex/endIndex} parameters.
+ * A comprehensive utility class providing high-performance I/O operations, file manipulation, and stream processing
+ * capabilities for Java applications. This class serves as a central hub for all input/output operations in the
+ * Abacus framework, offering optimized implementations for file handling, stream operations, compression,
+ * and directory management with extensive null-safety and error handling.
  *
- * @version $Revision: 0.8 $
+ * <p><b>Key Features:</b>
+ * <ul>
+ *   <li><b>High-Performance I/O:</b> Optimized stream operations with efficient buffer management</li>
+ *   <li><b>Comprehensive File Operations:</b> Complete file and directory manipulation capabilities</li>
+ *   <li><b>Stream Processing:</b> Advanced stream utilities with automatic resource management</li>
+ *   <li><b>Compression Support:</b> Built-in support for ZIP, GZIP, Snappy, and Brotli compression</li>
+ *   <li><b>NIO Integration:</b> Modern NIO.2 operations with Path and Channel support</li>
+ *   <li><b>Charset Handling:</b> Intelligent charset detection and conversion utilities</li>
+ *   <li><b>Memory Mapping:</b> Support for memory-mapped files for large file operations</li>
+ *   <li><b>Parallel Processing:</b> Multi-threaded file processing with configurable thread pools</li>
+ * </ul>
+ *
+ * <p><b>Design Philosophy:</b>
+ * <ul>
+ *   <li><b>Resource Management:</b> Automatic resource cleanup with try-with-resources patterns</li>
+ *   <li><b>Error Tolerance:</b> Graceful handling of common I/O scenarios without throwing exceptions</li>
+ *   <li><b>Performance First:</b> Optimized algorithms with minimal object allocation</li>
+ *   <li><b>Null Safety:</b> Comprehensive null checking and defensive programming</li>
+ *   <li><b>Cross-Platform:</b> Platform-independent file operations and path handling</li>
+ *   <li><b>Memory Efficient:</b> Streaming operations for large files to minimize memory usage</li>
+ * </ul>
+ *
+ * <p><b>Parameter Conventions:</b>
+ * <ul>
+ *   <li><b>Offset Parameters:</b> Uses {@code offset/count/len} instead of {@code fromIndex/toIndex}</li>
+ *   <li><b>Charset Handling:</b> Defaults to {@code Charsets.DEFAULT} for consistent encoding</li>
+ *   <li><b>Buffer Sizes:</b> Intelligent default buffer sizes with customization options</li>
+ *   <li><b>Exception Handling:</b> {@code UncheckedIOException} wrapping for cleaner API usage</li>
+ * </ul>
+ *
+ * <p><b>Core Operation Categories:</b>
+ * <ul>
+ *   <li><b>Stream Creation:</b> Factory methods for various stream types with automatic buffering</li>
+ *   <li><b>File Operations:</b> Copy, move, delete, create operations with advanced options</li>
+ *   <li><b>Directory Management:</b> Recursive operations, listing, traversal, and cleanup</li>
+ *   <li><b>Compression/Decompression:</b> ZIP, GZIP, Snappy, Brotli format support</li>
+ *   <li><b>Content Processing:</b> Line-by-line processing with parallel execution support</li>
+ *   <li><b>File Splitting/Merging:</b> Large file handling with size-based and count-based splitting</li>
+ *   <li><b>Content Comparison:</b> Byte-level and content-aware file comparison utilities</li>
+ *   <li><b>URL/File Conversion:</b> Bidirectional conversion between URLs and File objects</li>
+ * </ul>
+ *
+ * <p><b>Compression Formats Supported:</b>
+ * <ul>
+ *   <li><b>ZIP:</b> Standard ZIP compression with custom charset support</li>
+ *   <li><b>GZIP:</b> GNU ZIP compression with configurable buffer sizes</li>
+ *   <li><b>Snappy:</b> High-speed compression optimized for performance</li>
+ *   <li><b>Brotli:</b> Modern compression algorithm with excellent compression ratios</li>
+ * </ul>
+ *
+ * <p><b>Common Usage Patterns:</b>
+ * <pre>{@code
+ * // Basic file operations
+ * IOUtil.copyFile(sourceFile, targetFile);
+ * IOUtil.moveFile(sourceFile, targetDirectory);
+ * boolean success = IOUtil.deleteIfExists(file);
+ *
+ * // Stream operations with automatic resource management
+ * try (InputStream is = IOUtil.newFileInputStream(file);
+ *      OutputStream os = IOUtil.newFileOutputStream(targetFile)) {
+ *     IOUtil.copy(is, os);
+ * }
+ *
+ * // Compression operations
+ * IOUtil.zip(sourceFiles, targetZipFile);
+ * IOUtil.unzip(zipFile, extractDirectory);
+ *
+ * // Directory operations
+ * List<File> files = IOUtil.listFiles(directory, true, false);
+ * IOUtil.cleanDirectory(tempDirectory);
+ *
+ * // Large file processing
+ * IOUtil.forLines(largeFile, line -> {
+ *     // Process each line efficiently
+ *     processLine(line);
+ * });
+ *
+ * // File splitting for large files
+ * IOUtil.splitBySize(largeFile, 1024 * 1024); // 1MB parts
+ * IOUtil.split(file, 10); // Split into 10 equal parts
+ *
+ * // Content comparison
+ * boolean identical = IOUtil.contentEquals(file1, file2);
+ * boolean sameIgnoreEOL = IOUtil.contentEqualsIgnoreEOL(file1, file2, "UTF-8");
+ * }</pre>
+ *
+ * <p><b>Advanced Stream Operations:</b>
+ * <pre>{@code
+ * // Memory-mapped file operations for large files
+ * try (FileChannel channel = IOUtil.newFileChannel(file, "r")) {
+ *     MappedByteBuffer buffer = channel.map(MapMode.READ_ONLY, 0, file.length());
+ *     // Process mapped buffer efficiently
+ * }
+ *
+ * // Parallel line processing with custom thread pool
+ * IOUtil.forLines(files, 0, Long.MAX_VALUE, 4, 8, 1000,
+ *     line -> processLine(line),
+ *     ex -> handleException(ex));
+ *
+ * // Buffered stream creation with optimal sizes
+ * try (BufferedReader reader = IOUtil.newBufferedReader(file, "UTF-8");
+ *      BufferedWriter writer = IOUtil.newBufferedWriter(outputFile, "UTF-8")) {
+ *     String line;
+ *     while ((line = reader.readLine()) != null) {
+ *         writer.write(processLine(line));
+ *         writer.newLine();
+ *     }
+ * }
+ * }</pre>
+ *
+ * <p><b>Performance Characteristics:</b>
+ * <ul>
+ *   <li><b>File Copy:</b> O(n) with optimized buffer sizes and NIO channels</li>
+ *   <li><b>Directory Traversal:</b> O(n) with efficient file system walking</li>
+ *   <li><b>Line Processing:</b> O(n) with streaming approach, memory usage O(1)</li>
+ *   <li><b>Compression:</b> Algorithm-dependent, optimized for speed vs. ratio trade-offs</li>
+ *   <li><b>File Splitting:</b> O(n) with minimal memory overhead</li>
+ * </ul>
+ *
+ * <p><b>Thread Safety:</b>
+ * <ul>
+ *   <li><b>Stateless Design:</b> All utility methods are stateless and thread-safe</li>
+ *   <li><b>Concurrent Access:</b> Safe for concurrent access from multiple threads</li>
+ *   <li><b>Resource Pools:</b> Internal object pools are thread-safe and lock-free where possible</li>
+ *   <li><b>Parallel Operations:</b> Built-in support for parallel processing with configurable thread pools</li>
+ * </ul>
+ *
+ * <p><b>Error Handling Strategy:</b>
+ * <ul>
+ *   <li><b>UncheckedIOException:</b> Wraps checked {@code IOException} for cleaner API usage</li>
+ *   <li><b>Graceful Degradation:</b> Operations continue where possible despite partial failures</li>
+ *   <li><b>Resource Cleanup:</b> Automatic cleanup even in error scenarios</li>
+ *   <li><b>Detailed Logging:</b> Comprehensive logging for debugging and monitoring</li>
+ * </ul>
+ *
+ * <p><b>Memory Management:</b>
+ * <ul>
+ *   <li><b>Streaming Operations:</b> Process large files without loading into memory</li>
+ *   <li><b>Buffer Optimization:</b> Intelligent buffer sizing based on operation type</li>
+ *   <li><b>Memory Mapping:</b> Use OS-level memory mapping for very large files</li>
+ *   <li><b>Object Pooling:</b> Reuse of expensive objects like channels and buffers</li>
+ * </ul>
+ *
+ * <p><b>Platform Compatibility:</b>
+ * <ul>
+ *   <li><b>Cross-Platform Paths:</b> Handles platform-specific path separators automatically</li>
+ *   <li><b>File System Features:</b> Adapts to file system capabilities (symlinks, permissions)</li>
+ *   <li><b>Charset Handling:</b> Robust charset detection and conversion across platforms</li>
+ *   <li><b>NIO.2 Integration:</b> Modern file system operations with fallback support</li>
+ * </ul>
+ *
+ * <p><b>Integration with Java NIO:</b>
+ * <ul>
+ *   <li><b>Path Support:</b> Seamless integration with {@code java.nio.file.Path}</li>
+ *   <li><b>Channel Operations:</b> Direct support for NIO channels for high-performance I/O</li>
+ *   <li><b>File Attributes:</b> Advanced file attribute handling and manipulation</li>
+ *   <li><b>Watch Service:</b> Integration points for file system monitoring</li>
+ * </ul>
+ *
+ * <p><b>Compression Performance:</b>
+ * <ul>
+ *   <li><b>Snappy:</b> Fastest compression, moderate compression ratio</li>
+ *   <li><b>GZIP:</b> Good balance of speed and compression ratio</li>
+ *   <li><b>Brotli:</b> Excellent compression ratio, higher CPU usage</li>
+ *   <li><b>ZIP:</b> Standard format with good compression and wide compatibility</li>
+ * </ul>
+ *
+ * <p><b>Best Practices:</b>
+ * <ul>
+ *   <li>Use try-with-resources for automatic stream closure</li>
+ *   <li>Specify explicit charsets to avoid platform dependencies</li>
+ *   <li>Use streaming operations for large files to minimize memory usage</li>
+ *   <li>Leverage parallel processing for CPU-intensive file operations</li>
+ *   <li>Use appropriate compression format based on speed vs. size requirements</li>
+ *   <li>Validate file existence and permissions before operations</li>
+ * </ul>
+ *
+ * <p><b>Common Anti-Patterns to Avoid:</b>
+ * <ul>
+ *   <li>Loading entire large files into memory unnecessarily</li>
+ *   <li>Not properly closing streams and channels</li>
+ *   <li>Using blocking I/O for high-concurrency applications</li>
+ *   <li>Ignoring charset specifications leading to encoding issues</li>
+ *   <li>Not handling interruption in long-running operations</li>
+ * </ul>
+ *
+ * <p><b>Extension Points:</b>
+ * <ul>
+ *   <li><b>Custom Stream Types:</b> Integration with custom InputStream/OutputStream implementations</li>
+ *   <li><b>Filter Functions:</b> Custom predicates for file filtering and selection</li>
+ *   <li><b>Progress Callbacks:</b> Monitoring long-running operations</li>
+ *   <li><b>Custom Charsets:</b> Support for application-specific character encodings</li>
+ * </ul>
+ *
+ * <p><b>Related Utility Classes:</b>
+ * <ul>
+ *   <li><b>{@link java.nio.file.Files}:</b> Standard Java NIO.2 file operations</li>
+ *   <li><b>{@link com.landawn.abacus.guava.Files}:</b> Guava-style file utilities</li>
+ *   <li><b>{@link com.landawn.abacus.util.Strings}:</b> String manipulation utilities</li>
+ *   <li><b>{@link com.landawn.abacus.util.Iterators}:</b> Iterator and collection utilities</li>
+ *   <li><b>{@link com.landawn.abacus.util.FilenameUtil}:</b> Filename and path manipulation</li>
+ *   <li><b>{@link com.landawn.abacus.util.stream.Stream}:</b> Enhanced stream processing</li>
+ * </ul>
+ *
+ * <p><b>Example: Complete File Processing Pipeline</b>
+ * <pre>{@code
+ * // Process large log files with parallel processing
+ * File logDirectory = new File("/var/logs");
+ * File outputDirectory = new File("/processed");
+ *
+ * // List all log files recursively
+ * List<File> logFiles = IOUtil.listFiles(logDirectory, true, false)
+ *     .stream()
+ *     .filter(f -> f.getName().endsWith(".log"))
+ *     .collect(Collectors.toList());
+ *
+ * // Process each file in parallel
+ * logFiles.parallelStream().forEach(logFile -> {
+ *     File outputFile = new File(outputDirectory, logFile.getName() + ".processed");
+ *     
+ *     try {
+ *         IOUtil.forLines(logFile, 0, Long.MAX_VALUE, 4,
+ *             line -> {
+ *                 // Process each line
+ *                 String processed = processLogLine(line);
+ *                 if (processed != null) {
+ *                     synchronized (outputFile) {
+ *                         IOUtil.write(outputFile, processed + "\n", true);
+ *                     }
+ *                 }
+ *             },
+ *             ex -> logger.error("Error processing line", ex));
+ *     } catch (Exception e) {
+ *         logger.error("Error processing file: " + logFile, e);
+ *     }
+ * });
+ *
+ * // Compress processed files
+ * IOUtil.zip(IOUtil.listFiles(outputDirectory), new File("processed_logs.zip"));
+ * }</pre>
+ *
+ * <p><b>Attribution:</b>
+ * This class includes code adapted from Apache Commons Lang, Google Guava, and other
+ * open source projects under the Apache License 2.0. Methods from these libraries may have been
+ * modified for consistency, performance optimization, and null-safety enhancement.
+ *
  * @see java.nio.file.Files
  * @see com.landawn.abacus.guava.Files
  * @see com.landawn.abacus.util.Strings
  * @see com.landawn.abacus.util.Iterators
  * @see com.landawn.abacus.util.FilenameUtil
+ * @see com.landawn.abacus.util.stream.Stream
+ * @see java.io.InputStream
+ * @see java.io.OutputStream
+ * @see java.nio.channels.FileChannel
+ * @see java.nio.file.Path
+ * @see java.util.zip.ZipInputStream
+ * @see java.util.zip.GZIPInputStream
  */
 public final class IOUtil {
 

@@ -24,7 +24,7 @@ import com.landawn.abacus.util.N;
 /**
  * Package-private implementation of {@link HashFunction} that wraps a Google Guava
  * {@link com.google.common.hash.HashFunction}. This class serves as an adapter between
- * the Abacus hashing API and the underlying Guava implementation.
+ * the abacus-common hashing API and the underlying Guava implementation.
  * 
  * <p>This class is immutable and thread-safe, as it delegates all operations to the
  * wrapped Guava hash function which maintains these properties.
@@ -57,13 +57,10 @@ final class GuavaHashFunction implements HashFunction {
      * Static factory method that creates a new GuavaHashFunction wrapping the given
      * Guava hash function. This method provides a more convenient way to create
      * instances compared to using the constructor directly.
-     * 
-     * <p><b>Usage Examples (internal):</b></p>
-     * <pre>{@code
-     * com.google.common.hash.HashFunction guavaFunc = com.google.common.hash.Hashing.sha256();
-     * HashFunction wrapped = GuavaHashFunction.wrap(guavaFunc);
-     * }</pre>
-     * 
+     *
+     * <p><b>Note:</b> This is an internal method. Client code should obtain HashFunction
+     * instances through the factory methods in {@link Hashing} instead.
+     *
      * @param gHashFunction the Guava hash function to wrap
      * @return a new GuavaHashFunction instance wrapping the given function
      */
@@ -76,7 +73,7 @@ final class GuavaHashFunction implements HashFunction {
      * 
      * <p>Creates a new hasher by delegating to the wrapped Guava hash function's
      * {@code newHasher()} method. The returned hasher is wrapped in a {@link GuavaHasher}
-     * to adapt it to the Abacus API.
+     * to adapt it to the abacus-common API.
      */
     @Override
     public Hasher newHasher() {

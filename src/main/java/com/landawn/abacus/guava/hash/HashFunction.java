@@ -54,21 +54,31 @@ import com.google.common.hash.HashCode;
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * HashFunction hf = Hashing.murmur3_128();
+ * long userId = 12345L;
+ * String userName = "alice";
+ * int timestamp = 1609459200;
  * HashCode hash = hf.newHasher()
- *     .putLong(userId)
- *     .putString(userName, StandardCharsets.UTF_8)
- *     .putInt(timestamp)
+ *     .put(userId)
+ *     .put(userName, StandardCharsets.UTF_8)
+ *     .put(timestamp)
  *     .hash();
  * }</pre>
  * 
  * <p><b>Hashing complex objects with Funnel:</b>
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
+ * class Person {
+ *     String firstName;
+ *     String lastName;
+ *     int age;
+ * }
+ *
  * Funnel<Person> personFunnel = (person, hasher) -> {
- *     hasher.putString(person.firstName, Charsets.UTF_8)
- *           .putString(person.lastName, Charsets.UTF_8)
+ *     hasher.putString(person.firstName, StandardCharsets.UTF_8)
+ *           .putString(person.lastName, StandardCharsets.UTF_8)
  *           .putInt(person.age);
  * };
+ * Person person = new Person();
  * HashCode hash = hf.hash(person, personFunnel);
  * }</pre>
  *
@@ -97,10 +107,13 @@ public interface HashFunction {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * HashFunction hf = Hashing.md5();
+     * long id = 12345L;
+     * boolean isActive = true;
+     * String name = "example";
      * HashCode hc = hf.newHasher()
-     *     .putLong(id)
-     *     .putBoolean(isActive)
-     *     .putString(name, StandardCharsets.UTF_8)
+     *     .put(id)
+     *     .put(isActive)
+     *     .put(name, StandardCharsets.UTF_8)
      *     .hash();
      * }</pre>
      *
@@ -112,22 +125,21 @@ public interface HashFunction {
      * Creates a new {@link Hasher} instance with a hint about the expected input size.
      * This can improve performance for non-streaming hash functions that need to buffer
      * their entire input before processing.
-     * 
+     *
      * <p>The hint is only an optimization; providing an incorrect value will not affect
      * correctness, only performance. If unsure, use {@link #newHasher()} instead.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * byte[] largeData = new byte[1024 * 1024]; // 1MB
      * HashCode hash = hashFunction.newHasher(largeData.length)
-     *     .putBytes(largeData)
+     *     .put(largeData)
      *     .hash();
      * }</pre>
      *
-     * @param expectedInputSize a hint about the expected total size of input in bytes
-     *                          (must be non-negative)
+     * @param expectedInputSize a hint about the expected total size of input in bytes (must be non-negative)
      * @return a new hasher instance optimized for the expected input size
-     * @throws IllegalArgumentException if expectedInputSize is negative
+     * @throws IllegalArgumentException if {@code expectedInputSize} is negative
      */
     Hasher newHasher(int expectedInputSize);
 
@@ -187,11 +199,11 @@ public interface HashFunction {
     /**
      * Computes the hash code for a portion of a byte array. This is a convenience method
      * equivalent to {@code newHasher().putBytes(input, off, len).hash()}.
-     * 
+     *
      * <p>Only the bytes from {@code input[off]} through {@code input[off + len - 1]}
      * are hashed. This is useful when working with buffers or when only part of an
      * array contains valid data.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * byte[] buffer = new byte[1024];
@@ -200,11 +212,10 @@ public interface HashFunction {
      * }</pre>
      *
      * @param input the byte array containing data to hash
-     * @param off the starting offset in the array
-     * @param len the number of bytes to hash
+     * @param off the starting offset in the array (zero-based, inclusive)
+     * @param len the number of bytes to hash from the array
      * @return the hash code for the specified bytes
-     * @throws IndexOutOfBoundsException if {@code off < 0} or {@code off + len > input.length}
-     *                                   or {@code len < 0}
+     * @throws IndexOutOfBoundsException if {@code off < 0} or {@code len < 0} or {@code off + len > input.length}
      */
     HashCode hash(byte[] input, int off, int len);
 
@@ -277,8 +288,8 @@ public interface HashFunction {
      *
      * @param <T> the type of object to hash
      * @param instance the object instance to hash
-     * @param funnel the funnel to decompose the object with
-     * @return the hash code for the funneled object data
+     * @param funnel the funnel used to decompose the object into primitive values
+     * @return the hash code for the object
      */
     <T> HashCode hash(T instance, Funnel<? super T> funnel);
 

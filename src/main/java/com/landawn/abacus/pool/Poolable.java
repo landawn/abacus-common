@@ -18,33 +18,33 @@ package com.landawn.abacus.pool;
  * Interface for objects that can be managed by a pool.
  * Objects implementing this interface can track their activity and lifecycle within a pool,
  * and provide cleanup logic when removed from the pool.
- * 
+ *
  * <p>Poolable objects maintain an {@link ActivityPrint} that tracks:
  * <ul>
  *   <li>Creation time and maximum lifetime</li>
  *   <li>Last access time and maximum idle time</li>
  *   <li>Access count</li>
  * </ul>
- * 
+ *
  * <p>The {@link #destroy(Caller)} method is called when an object is removed from the pool,
  * allowing for proper cleanup of resources.
- * 
+ *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * public class PooledConnection implements Poolable {
  *     private final Connection connection;
  *     private final ActivityPrint activityPrint;
- *     
+ *
  *     public PooledConnection(Connection conn) {
  *         this.connection = conn;
  *         this.activityPrint = new ActivityPrint(3600000, 600000); // 1hr live, 10min idle
  *     }
- *     
+ *
  *     @Override
  *     public ActivityPrint activityPrint() {
  *         return activityPrint;
  *     }
- *     
+ *
  *     @Override
  *     public void destroy(Caller caller) {
  *         try {
@@ -55,7 +55,7 @@ package com.landawn.abacus.pool;
  *     }
  * }
  * }</pre>
- * 
+ *
  * @see ActivityPrint
  * @see ObjectPool
  * @see KeyedObjectPool

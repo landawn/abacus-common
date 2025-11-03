@@ -11,7 +11,6 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-
 package com.landawn.abacus.util.function;
 
 import com.landawn.abacus.util.Throwables;
@@ -19,17 +18,27 @@ import com.landawn.abacus.util.Throwables;
 /**
  * Represents an operation on a single char-valued operand that produces a char-valued result.
  * This is the primitive type specialization of {@link java.util.function.UnaryOperator} for {@code char}.
- * 
+ *
  * <p>This is a functional interface whose functional method is {@link #applyAsChar(char)}.
- * 
+ *
  * @see java.util.function.UnaryOperator
  * @see CharBinaryOperator
+ *
+ * <p>Refer to JDK API documentation at: <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html">https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a></p>
  */
 @FunctionalInterface
 public interface CharUnaryOperator extends Throwables.CharUnaryOperator<RuntimeException> { //NOSONAR
-
     /**
      * Applies this operator to the given char operand.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * CharUnaryOperator toUpperCase = c -> Character.toUpperCase(c);
+     * char result = toUpperCase.applyAsChar('a'); // Returns 'A'
+     *
+     * CharUnaryOperator nextChar = c -> (char) (c + 1);
+     * char next = nextChar.applyAsChar('A'); // Returns 'B'
+     * }</pre>
      *
      * @param operand the char operand
      * @return the char result of applying this operator to the operand
@@ -42,10 +51,18 @@ public interface CharUnaryOperator extends Throwables.CharUnaryOperator<RuntimeE
      * and then applies this operator to the result. If evaluation of either operator throws
      * an exception, it is relayed to the caller of the composed operator.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * CharUnaryOperator toLowerCase = c -> Character.toLowerCase(c);
+     * CharUnaryOperator rotateByOne = c -> (char) (c + 1);
+     * CharUnaryOperator composed = rotateByOne.compose(toLowerCase);
+     * char result = composed.applyAsChar('A'); // Returns 'b' (toLower then rotate)
+     * }</pre>
+     *
      * @param before the operator to apply before this operator is applied. Must not be {@code null}.
      * @return a composed operator that first applies the {@code before} operator and then
      *         applies this operator
-     * 
+     *
      * @see #andThen(CharUnaryOperator)
      */
     default CharUnaryOperator compose(final CharUnaryOperator before) {
@@ -57,10 +74,18 @@ public interface CharUnaryOperator extends Throwables.CharUnaryOperator<RuntimeE
      * applies the {@code after} operator to the result. If evaluation of either operator
      * throws an exception, it is relayed to the caller of the composed operator.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * CharUnaryOperator toUpperCase = c -> Character.toUpperCase(c);
+     * CharUnaryOperator rotateByOne = c -> (char) (c + 1);
+     * CharUnaryOperator combined = toUpperCase.andThen(rotateByOne);
+     * char result = combined.applyAsChar('a'); // Returns 'B' (toUpper then rotate)
+     * }</pre>
+     *
      * @param after the operator to apply after this operator is applied. Must not be {@code null}.
      * @return a composed operator that first applies this operator and then applies the
      *         {@code after} operator
-     * 
+     *
      * @see #compose(CharUnaryOperator)
      */
     default CharUnaryOperator andThen(final CharUnaryOperator after) {
@@ -70,6 +95,12 @@ public interface CharUnaryOperator extends Throwables.CharUnaryOperator<RuntimeE
     /**
      * Returns a unary operator that always returns its input argument.
      * This is the identity function for char values.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * CharUnaryOperator identity = CharUnaryOperator.identity();
+     * char result = identity.applyAsChar('X'); // Returns 'X'
+     * }</pre>
      *
      * @return a unary operator that always returns its input argument
      */

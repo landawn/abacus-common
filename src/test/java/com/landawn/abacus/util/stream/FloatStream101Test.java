@@ -198,7 +198,7 @@ public class FloatStream101Test extends TestBase {
         }
 
         @Test
-        @DisplayName("flatten() should flatten 2D array")
+        @DisplayName("flatten() should flatten two-dimensional array")
         public void testFlatten2D() {
             float[][] array = { { 1.0f, 2.0f }, { 3.0f, 4.0f } };
             FloatStream stream = FloatStream.flatten(array);

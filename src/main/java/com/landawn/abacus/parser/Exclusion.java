@@ -31,7 +31,6 @@ package com.landawn.abacus.parser;
  * config.setExclusion(Exclusion.NONE);
  * }</pre>
  * 
- * @since 0.8
  */
 public enum Exclusion {
     /**

@@ -39,30 +39,30 @@ import com.landawn.abacus.util.cs;
  * A fluent API for building and executing HTTP requests using HttpClient.
  * This class provides a builder-style interface for configuring HTTP requests with various options
  * such as headers, authentication, timeouts, and request bodies.
- * 
+ *
  * <p>HttpRequest is designed for single-use scenarios where you want to create an HttpClient,
  * execute a request, and then dispose of the client. For multiple requests to the same endpoint,
  * consider using HttpClient directly.</p>
- * 
+ *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * // Simple GET request
  * String response = HttpRequest.url("https://api.example.com/users")
  *     .get();
- * 
+ *
  * // POST request with JSON body and headers
  * User createdUser = HttpRequest.url("https://api.example.com/users")
  *     .header("Authorization", "Bearer token123")
  *     .jsonBody(new User("John", "Doe"))
  *     .post(User.class);
- * 
+ *
  * // Async request with custom timeout
  * ContinuableFuture<String> future = HttpRequest.url("https://api.example.com/data")
  *     .connectionTimeout(5000)
  *     .readTimeout(10000)
  *     .asyncGet();
  * }</pre>
- * 
+ *
  * @see URLEncodedUtil
  * @see HttpHeaders
  * @see com.landawn.abacus.http.v2.HttpRequest

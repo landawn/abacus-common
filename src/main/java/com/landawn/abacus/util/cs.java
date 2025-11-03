@@ -313,7 +313,7 @@ public final class cs { // NOSONAR
 
     public static final String lenOrSize = "lenOrSize";
 
-    public static final String checkedException = "checkedException";
+    public static final String cause = "cause";
 
     public static final String maxThreadNumForZipFunction = "maxThreadNumForZipFunction";
 

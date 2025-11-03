@@ -18,7 +18,7 @@ import com.landawn.abacus.util.MapEntity;
 import com.landawn.abacus.util.Strings;
 
 @SuppressWarnings("java:S2160")
-public class MapEntityType extends AbstractType<MapEntity> {
+class MapEntityType extends AbstractType<MapEntity> {
 
     public static final String MAP_ENTITY = MapEntity.class.getSimpleName();
 
@@ -35,7 +35,7 @@ public class MapEntityType extends AbstractType<MapEntity> {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * MapEntityType type = new MapEntityType();
+     * Type<MapEntity> type = TypeFactory.getType(MapEntity.class);
      * Class<MapEntity> clazz = type.clazz();
      * // Returns: MapEntity.class
      * }</pre>
@@ -53,7 +53,7 @@ public class MapEntityType extends AbstractType<MapEntity> {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * MapEntityType type = new MapEntityType();
+     * Type<MapEntity> type = TypeFactory.getType(MapEntity.class);
      * boolean isMapEntity = type.isMapEntity();
      * // Returns: true
      * }</pre>
@@ -71,7 +71,7 @@ public class MapEntityType extends AbstractType<MapEntity> {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * MapEntityType type = new MapEntityType();
+     * Type<MapEntity> type = TypeFactory.getType(MapEntity.class);
      * boolean serializable = type.isSerializable();
      * // Returns: false
      * }</pre>
@@ -89,7 +89,7 @@ public class MapEntityType extends AbstractType<MapEntity> {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * MapEntityType type = new MapEntityType();
+     * Type<MapEntity> type = TypeFactory.getType(MapEntity.class);
      * SerializationType serType = type.getSerializationType();
      * // Returns: SerializationType.MAP_ENTITY
      * }</pre>
@@ -107,7 +107,7 @@ public class MapEntityType extends AbstractType<MapEntity> {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * MapEntityType type = new MapEntityType();
+     * Type<MapEntity> type = TypeFactory.getType(MapEntity.class);
      * MapEntity entity = MapEntity.of("name", "John", "age", 30);
      *
      * String json = type.stringOf(entity);
@@ -119,7 +119,6 @@ public class MapEntityType extends AbstractType<MapEntity> {
      *
      * @param x The MapEntity object to convert
      * @return The JSON string representation of the MapEntity, or {@code null} if the input is null
-     @MayReturnNull
      */
     @Override
     public String stringOf(final MapEntity x) {
@@ -132,7 +131,7 @@ public class MapEntityType extends AbstractType<MapEntity> {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * MapEntityType type = new MapEntityType();
+     * Type<MapEntity> type = TypeFactory.getType(MapEntity.class);
      *
      * MapEntity entity = type.valueOf("{\"name\":\"John\",\"age\":30}");
      * // Returns: MapEntity with name="John" and age=30
@@ -146,7 +145,6 @@ public class MapEntityType extends AbstractType<MapEntity> {
      *
      * @param str The JSON string to parse
      * @return The parsed MapEntity object, or {@code null} if the input is {@code null} or empty
-     @MayReturnNull
      */
     @Override
     public MapEntity valueOf(final String str) {

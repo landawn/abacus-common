@@ -69,7 +69,6 @@ import java.lang.annotation.Target;
  * to verify mutability contracts and detect potential issues with concurrent access
  * or inappropriate usage patterns.</p>
  * 
- * @since 2020
  * @see Immutable
  */
 @Documented

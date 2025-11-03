@@ -25,7 +25,7 @@ import com.landawn.abacus.type.TypeFactory;
 import com.landawn.abacus.util.N;
 
 /**
- * Spring HTTP message converter for JSON serialization and deserialization using Abacus JSON utilities.
+ * Spring HTTP message converter for JSON serialization and deserialization using abacus-common JSON utilities.
  * This converter integrates Abacus's JSON processing capabilities with Spring's HTTP message conversion framework,
  * allowing seamless conversion between Java objects and JSON in Spring MVC/WebFlux applications.
  * 
@@ -41,7 +41,7 @@ import com.landawn.abacus.util.N;
  * @Configuration
  * @EnableWebMvc
  * public class WebConfig implements WebMvcConfigurer {
- *     
+ *
  *     @Override
  *     public void configureMessageConverters(List<HttpMessageConverter<?>> converters) {
  *         converters.add(new JSONHttpMessageConverter());
@@ -54,20 +54,19 @@ import com.landawn.abacus.util.N;
  * RestTemplate restTemplate = new RestTemplate();
  * restTemplate.getMessageConverters().add(0, new JSONHttpMessageConverter());
  * 
- * // Now the RestTemplate will use Abacus for JSON processing
+ * // Now the RestTemplate will use abacus-common for JSON processing
  * MyObject result = restTemplate.getForObject("https://api.example.com/data", MyObject.class);
  * }</pre>
  * 
  * <p><b>Key Features:</b></p>
  * <ul>
- *   <li>High-performance JSON processing using Abacus utilities</li>
+ *   <li>High-performance JSON processing using abacus-common utilities</li>
  *   <li>Support for complex generic types through TypeFactory</li>
  *   <li>Seamless integration with Spring MVC and WebFlux</li>
  *   <li>Automatic content type handling for JSON media types</li>
  *   <li>Thread-safe implementation suitable for singleton usage</li>
  * </ul>
  * 
- * @since 1.0
  * @see AbstractJsonHttpMessageConverter
  * @see N#fromJson(Reader, com.landawn.abacus.type.Type)
  * @see N#toJson(Object, Writer)
@@ -168,7 +167,7 @@ public class JSONHttpMessageConverter extends AbstractJsonHttpMessageConverter {
      * <p>The method uses Abacus's JSON serialization capabilities through {@link N#toJson(Object, Writer)}
      * to convert Java objects into JSON format. The serialization process automatically handles circular
      * references, custom date formats, and complex nested object graphs. The type parameter is available
-     * for potential future use but is currently not utilized as Abacus can infer types from the object itself.</p>
+     * for potential future use but is currently not utilized as abacus-common can infer types from the object itself.</p>
      *
      * <p><b>Serialization Features:</b></p>
      * <ul>
@@ -196,7 +195,7 @@ public class JSONHttpMessageConverter extends AbstractJsonHttpMessageConverter {
      *     .name("John Doe")
      *     .email("john@example.com")
      *     .active(true)
-     *     .roles(Arrays.asList("admin", "user"))
+     *     .roles(List.of("admin", "user"))
      *     .build();
      * }</pre>
      *

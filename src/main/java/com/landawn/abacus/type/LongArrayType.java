@@ -16,14 +16,13 @@ package com.landawn.abacus.type;
 
 import java.io.IOException;
 
-import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.parser.JSONXMLSerializationConfig;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Strings;
 import com.landawn.abacus.util.WD;
 
-public final class LongArrayType extends ObjectArrayType<Long> {
+final class LongArrayType extends ObjectArrayType<Long> {
 
     LongArrayType() {
         super(Long[].class);
@@ -36,7 +35,7 @@ public final class LongArrayType extends ObjectArrayType<Long> {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * LongArrayType type = new LongArrayType();
+     * Type<Long[]> type = TypeFactory.getType(Long[].class);
      *
      * Long[] array = {1L, 2L, 3L};
      * String result = type.stringOf(array);
@@ -58,9 +57,7 @@ public final class LongArrayType extends ObjectArrayType<Long> {
      * @return The string representation of the array in format "[value1, value2, ...]",
      *         or {@code null} if the input array is {@code null}, or "[]" if the array is empty
      */
-    @MayReturnNull
     @Override
-
     public String stringOf(final Long[] x) {
         if (x == null) {
             return null; // NOSONAR
@@ -82,7 +79,7 @@ public final class LongArrayType extends ObjectArrayType<Long> {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * LongArrayType type = new LongArrayType();
+     * Type<Long[]> type = TypeFactory.getType(Long[].class);
      *
      * Long[] result = type.valueOf("[1, 2, 3]");
      * // Returns: Long[] {1L, 2L, 3L}
@@ -104,9 +101,7 @@ public final class LongArrayType extends ObjectArrayType<Long> {
      * @return The parsed Long array, or {@code null} if the input is null
      * @throws NumberFormatException if any {@code non-null} value cannot be parsed as a Long
      */
-    @MayReturnNull
     @Override
-
     public Long[] valueOf(final String str) {
         if (Strings.isEmpty(str) || Strings.isBlank(str)) {
             return null; // NOSONAR
@@ -138,7 +133,7 @@ public final class LongArrayType extends ObjectArrayType<Long> {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * LongArrayType type = new LongArrayType();
+     * Type<Long[]> type = TypeFactory.getType(Long[].class);
      * StringBuilder sb = new StringBuilder();
      *
      * Long[] array = {1L, 2L, 3L};
@@ -190,7 +185,7 @@ public final class LongArrayType extends ObjectArrayType<Long> {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * LongArrayType type = new LongArrayType();
+     * Type<Long[]> type = TypeFactory.getType(Long[].class);
      * CharacterWriter writer = new CharacterWriter();
      * JSONXMLSerializationConfig config = JSONXMLSerializationConfig.of();
      *

@@ -11,7 +11,6 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-
 package com.landawn.abacus.util.function;
 
 /**
@@ -26,18 +25,19 @@ package com.landawn.abacus.util.function;
  *
  * @param <T> the type of the first argument to the function
  * @param <U> the type of the second argument to the function
+ *
+ * <p>Refer to JDK API documentation at: <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html">https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a></p>
  */
 @FunctionalInterface
 public interface ToFloatBiFunction<T, U> {
-
     /**
      * Applies this function to the given arguments and returns a float result.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ToFloatBiFunction<Integer, Integer> divider = (a, b) -> (float) a / b;
      * float result = divider.applyAsFloat(10, 3); // returns 3.3333333
-     * 
+     *
      * ToFloatBiFunction<String, Float> multiplier = (str, factor) -> str.length() * factor;
      * float weighted = multiplier.applyAsFloat("Hello", 1.5f); // returns 7.5
      * }</pre>

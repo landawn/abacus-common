@@ -17,7 +17,6 @@ package com.landawn.abacus.type;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.util.Numbers;
 
 /**
@@ -25,7 +24,7 @@ import com.landawn.abacus.util.Numbers;
  * This class provides functionality to handle Float objects in database operations and type conversions.
  * It extends AbstractFloatType to inherit common float type handling behavior.
  */
-public final class FloatType extends AbstractFloatType {
+final class FloatType extends AbstractFloatType {
 
     public static final String FLOAT = Float.class.getSimpleName();
 
@@ -34,9 +33,9 @@ public final class FloatType extends AbstractFloatType {
     }
 
     /**
-     * Returns the Class object representing the Float wrapper type.
+     * Returns the Class object representing the Float class.
      *
-     * @return Float.class
+     * @return the Class object for Float.class
      */
     @SuppressWarnings({ "rawtypes", "unchecked" })
     @Override
@@ -46,7 +45,7 @@ public final class FloatType extends AbstractFloatType {
 
     /**
      * Indicates whether this type represents a primitive wrapper class.
-     * For FloatType, this always returns {@code true} as Float is the wrapper class for the primitive float type.
+     * Float is the wrapper class for the primitive float type.
      *
      * @return {@code true}, indicating Float is a primitive wrapper
      */
@@ -56,20 +55,22 @@ public final class FloatType extends AbstractFloatType {
     }
 
     /**
-     * Retrieves a Float value from the specified column in a ResultSet.
-     * This method handles {@code null} values and type conversions from the database.
-     * If the column value is {@code null}, returns {@code null}.
-     * If the value is already a Float, returns it directly.
-     * Otherwise, converts the value to Float using appropriate conversion logic.
+     * Retrieves a Float value from a ResultSet at the specified column index.
+     * This method handles various numeric types in the database and converts them to Float.
      *
-     * @param rs the ResultSet to read from
-     * @param columnIndex the index of the column to read (1-based)
-     * @return the Float value from the column, or {@code null} if the column value is SQL NULL
-     * @throws SQLException if a database access error occurs or the columnIndex is invalid
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Type<Float> type = TypeFactory.getType(Float.class);
+     * ResultSet rs = ...; // from SQL query
+     * Float temperature = type.get(rs, 1); // retrieves Float from column 1
+     * }</pre>
+     *
+     * @param rs the ResultSet containing the data, must not be {@code null}
+     * @param columnIndex the column index (1-based) to retrieve the value from
+     * @return the Float value at the specified column, or {@code null} if the column value is SQL NULL
+     * @throws SQLException if a database access error occurs
      */
-    @MayReturnNull
     @Override
-
     public Float get(final ResultSet rs, final int columnIndex) throws SQLException {
         final Object ret = rs.getObject(columnIndex);
 
@@ -83,20 +84,22 @@ public final class FloatType extends AbstractFloatType {
     }
 
     /**
-     * Retrieves a Float value from the specified column in a ResultSet using the column label.
-     * This method handles {@code null} values and type conversions from the database.
-     * If the column value is {@code null}, returns {@code null}.
-     * If the value is already a Float, returns it directly.
-     * Otherwise, converts the value to Float using appropriate conversion logic.
+     * Retrieves a Float value from a ResultSet using the specified column label.
+     * This method handles various numeric types in the database and converts them to Float.
      *
-     * @param rs the ResultSet to read from
-     * @param columnLabel the label of the column to read
-     * @return the Float value from the column, or {@code null} if the column value is SQL NULL
-     * @throws SQLException if a database access error occurs or the columnLabel is not found
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Type<Float> type = TypeFactory.getType(Float.class);
+     * ResultSet rs = ...; // from SQL query
+     * Float temperature = type.get(rs, "temperature"); // retrieves Float from "temperature" column
+     * }</pre>
+     *
+     * @param rs the ResultSet containing the data, must not be {@code null}
+     * @param columnLabel the label of the column to retrieve the value from, must not be {@code null}
+     * @return the Float value in the specified column, or {@code null} if the column value is SQL NULL
+     * @throws SQLException if a database access error occurs
      */
-    @MayReturnNull
     @Override
-
     public Float get(final ResultSet rs, final String columnLabel) throws SQLException {
         final Object ret = rs.getObject(columnLabel);
 

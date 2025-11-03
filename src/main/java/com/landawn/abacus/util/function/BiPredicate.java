@@ -11,7 +11,6 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-
 package com.landawn.abacus.util.function;
 
 import com.landawn.abacus.annotation.SuppressFBWarnings;
@@ -20,9 +19,9 @@ import com.landawn.abacus.util.Throwables;
 /**
  * Represents a predicate (boolean-valued function) of two arguments.
  * This is the two-arity specialization of {@link java.util.function.Predicate}.
- * 
+ *
  * <p>This is a functional interface whose functional method is {@link #test(Object, Object)}.
- * 
+ *
  * <p>Refer to JDK API documentation at: <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html">https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a></p>
  *
  * @param <T> the type of the first argument to the predicate
@@ -31,7 +30,6 @@ import com.landawn.abacus.util.Throwables;
 @SuppressFBWarnings("NM_SAME_SIMPLE_NAME_AS_INTERFACE")
 @FunctionalInterface
 public interface BiPredicate<T, U> extends Throwables.BiPredicate<T, U, RuntimeException>, java.util.function.BiPredicate<T, U> { //NOSONAR
-
     /**
      * Evaluates this predicate on the given arguments.
      *
@@ -80,7 +78,8 @@ public interface BiPredicate<T, U> extends Throwables.BiPredicate<T, U, RuntimeE
      * }</pre>
      *
      * @param other a predicate that will be logically-ANDed with this predicate. Must not be {@code null}.
-     * @return a composed predicate that represents the short-circuiting logical AND of this predicate and the {@code other} predicate
+     * @return a composed {@code BiPredicate} that represents the short-circuiting logical AND of this predicate and the {@code other} predicate
+     * @throws NullPointerException if {@code other} is null
      */
     @Override
     default BiPredicate<T, U> and(final java.util.function.BiPredicate<? super T, ? super U> other) {
@@ -103,7 +102,8 @@ public interface BiPredicate<T, U> extends Throwables.BiPredicate<T, U, RuntimeE
      * }</pre>
      *
      * @param other a predicate that will be logically-ORed with this predicate. Must not be {@code null}.
-     * @return a composed predicate that represents the short-circuiting logical OR of this predicate and the {@code other} predicate
+     * @return a composed {@code BiPredicate} that represents the short-circuiting logical OR of this predicate and the {@code other} predicate
+     * @throws NullPointerException if {@code other} is null
      */
     @Override
     default BiPredicate<T, U> or(final java.util.function.BiPredicate<? super T, ? super U> other) {

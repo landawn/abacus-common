@@ -30,7 +30,6 @@ package com.landawn.abacus.util;
  * WeekDay sunday = WeekDay.valueOf(0); // Returns WeekDay.SUNDAY
  * }</pre>
  *
- * @since 0.8
  */
 public enum WeekDay {
 

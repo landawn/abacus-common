@@ -11,7 +11,6 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-
 package com.landawn.abacus.util.function;
 
 import com.landawn.abacus.util.Throwables;
@@ -44,13 +43,14 @@ public interface ObjLongPredicate<T> extends Throwables.ObjLongPredicate<T, Runt
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * ObjLongPredicate<Event> isAfter = (event, timestamp) -> 
-     *     event.getTimestamp() > timestamp;
-     * ObjLongPredicate<File> hasMinSize = (file, minSize) -> 
-     *     file.length() >= minSize;
-     * 
-     * boolean recent = isAfter.test(myEvent, System.currentTimeMillis() - 3600000L);
-     * boolean bigEnough = hasMinSize.test(myFile, 1024L * 1024L); // 1MB
+     * ObjLongPredicate<String> isLengthAbove = (str, minLength) ->
+     *     str.length() > minLength;
+     * ObjLongPredicate<List<Integer>> hasSizeAbove = (list, minSize) ->
+     *     list.size() >= minSize;
+     *
+     * boolean isLong = isLengthAbove.test("Hello World", 5L); // Returns true
+     * List<Integer> numbers = List.of(1, 2, 3);
+     * boolean isBig = hasSizeAbove.test(numbers, 2L); // Returns true
      * }</pre>
      *
      * @param t the first input argument of type T
@@ -70,7 +70,7 @@ public interface ObjLongPredicate<T> extends Throwables.ObjLongPredicate<T, Runt
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * ObjLongPredicate<Event> isAfter = (event, timestamp) -> 
+     * ObjLongPredicate<Event> isAfter = (event, timestamp) ->
      *     event.getTimestamp() > timestamp;
      * ObjLongPredicate<Event> isNotAfter = isAfter.negate();
      * // isNotAfter tests if event timestamp <= timestamp
@@ -94,12 +94,12 @@ public interface ObjLongPredicate<T> extends Throwables.ObjLongPredicate<T, Runt
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * ObjLongPredicate<User> hasId = (user, id) -> 
+     * ObjLongPredicate<User> hasId = (user, id) ->
      *     user.getId() == id;
-     * ObjLongPredicate<User> isActive = (user, ignored) -> 
+     * ObjLongPredicate<User> isActive = (user, ignored) ->
      *     user.isActive();
-     * 
-     * ObjLongPredicate<User> isActiveWithId = 
+     *
+     * ObjLongPredicate<User> isActiveWithId =
      *     hasId.and(isActive);
      * }</pre>
      *
@@ -123,12 +123,12 @@ public interface ObjLongPredicate<T> extends Throwables.ObjLongPredicate<T, Runt
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * ObjLongPredicate<Session> isExpired = (session, currentTime) -> 
+     * ObjLongPredicate<Session> isExpired = (session, currentTime) ->
      *     session.getExpiryTime() < currentTime;
-     * ObjLongPredicate<Session> isInvalid = (session, ignored) -> 
+     * ObjLongPredicate<Session> isInvalid = (session, ignored) ->
      *     !session.isValid();
-     * 
-     * ObjLongPredicate<Session> shouldRemove = 
+     *
+     * ObjLongPredicate<Session> shouldRemove =
      *     isExpired.or(isInvalid);
      * }</pre>
      *

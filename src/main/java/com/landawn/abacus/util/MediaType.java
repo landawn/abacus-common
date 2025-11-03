@@ -58,7 +58,6 @@ package com.landawn.abacus.util;
  * }
  * }</pre>
  * 
- * @since 1.0
  */
 public enum MediaType {
 

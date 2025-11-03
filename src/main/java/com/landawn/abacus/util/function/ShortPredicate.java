@@ -11,7 +11,6 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-
 package com.landawn.abacus.util.function;
 
 import com.landawn.abacus.util.Throwables;
@@ -19,54 +18,48 @@ import com.landawn.abacus.util.Throwables;
 /**
  * Represents a predicate (boolean-valued function) of one short-valued argument.
  * This is the short-consuming primitive type specialization of {@link java.util.function.Predicate}.
- * 
+ *
  * <p>This is a functional interface whose functional method is {@link #test(short)}.
- * 
+ *
  * @see java.util.function.Predicate
+ *
+ * <p>Refer to JDK API documentation at: <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html">https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a></p>
  */
 @FunctionalInterface
 public interface ShortPredicate extends Throwables.ShortPredicate<RuntimeException> { //NOSONAR
-
     /**
      * A predicate that always returns {@code true} regardless of the input value.
      */
     ShortPredicate ALWAYS_TRUE = value -> true;
-
     /**
      * A predicate that always returns {@code false} regardless of the input value.
      */
     ShortPredicate ALWAYS_FALSE = value -> false;
-
     /**
      * A predicate that tests if a short value is zero.
      * Returns {@code true} if and only if the input value is 0.
      */
     ShortPredicate IS_ZERO = value -> value == 0;
-
     /**
      * A predicate that tests if a short value is not zero.
      * Returns {@code true} if and only if the input value is not 0.
      */
     ShortPredicate NOT_ZERO = value -> value != 0;
-
     /**
      * A predicate that tests if a short value is positive.
      * Returns {@code true} if and only if the input value is greater than 0.
      */
     ShortPredicate IS_POSITIVE = value -> value > 0;
-
     /**
      * A predicate that tests if a short value is not positive.
      * Returns {@code true} if and only if the input value is less than or equal to 0.
      */
     ShortPredicate NOT_POSITIVE = value -> value <= 0;
-
     /**
      * A predicate that tests if a short value is negative.
      * Returns {@code true} if and only if the input value is less than 0.
      */
     ShortPredicate IS_NEGATIVE = value -> value < 0;
-
     /**
      * A predicate that tests if a short value is not negative.
      * Returns {@code true} if and only if the input value is greater than or equal to 0.
@@ -91,7 +84,7 @@ public interface ShortPredicate extends Throwables.ShortPredicate<RuntimeExcepti
      * }</pre>
      *
      * @param value the input argument
-     * @return {@code true} if the input argument matches the predicate, otherwise {@code false} if the predicate evaluation fails
+     * @return {@code true} if the input argument matches the predicate, {@code false} otherwise
      */
     @Override
     boolean test(short value);
@@ -109,7 +102,7 @@ public interface ShortPredicate extends Throwables.ShortPredicate<RuntimeExcepti
 
     /**
      * Returns a predicate that represents the logical negation of this predicate.
-     * 
+     *
      * @return a predicate that represents the logical negation of this predicate
      */
     default ShortPredicate negate() {

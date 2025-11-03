@@ -20,7 +20,6 @@ import java.sql.Timestamp;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 
-import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.util.Dates;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Strings;
@@ -31,7 +30,7 @@ import com.landawn.abacus.util.Strings;
  * It extends AbstractCalendarType to inherit common calendar handling functionality.
  */
 @SuppressWarnings("java:S2160")
-public class GregorianCalendarType extends AbstractCalendarType<GregorianCalendar> {
+class GregorianCalendarType extends AbstractCalendarType<GregorianCalendar> {
 
     public static final String GREGORIAN_CALENDAR = GregorianCalendar.class.getSimpleName();
 
@@ -61,7 +60,6 @@ public class GregorianCalendarType extends AbstractCalendarType<GregorianCalenda
      * @return a GregorianCalendar instance, or {@code null} if the input is null
      */
     @Override
-    @MayReturnNull
     public GregorianCalendar valueOf(final Object obj) {
         if (obj instanceof Number) {
             return Dates.createGregorianCalendar(((Number) obj).longValue());
@@ -86,7 +84,6 @@ public class GregorianCalendarType extends AbstractCalendarType<GregorianCalenda
      * @return the parsed GregorianCalendar instance, or {@code null} if the input is {@code null} or empty
      */
     @Override
-    @MayReturnNull
     public GregorianCalendar valueOf(final String str) {
         return Strings.isEmpty(str) ? null : (N.equals(str, SYS_TIME) ? Dates.currentGregorianCalendar() : Dates.parseGregorianCalendar(str));
     }
@@ -102,9 +99,7 @@ public class GregorianCalendarType extends AbstractCalendarType<GregorianCalenda
      * @param len the number of characters to parse
      * @return the parsed GregorianCalendar instance, or {@code null} if the input is {@code null} or empty
      */
-    @MayReturnNull
     @Override
-
     public GregorianCalendar valueOf(final char[] cbuf, final int offset, final int len) {
         if ((cbuf == null) || (len == 0)) {
             return null; // NOSONAR
@@ -132,7 +127,6 @@ public class GregorianCalendarType extends AbstractCalendarType<GregorianCalenda
      * @throws SQLException if a database access error occurs or the columnIndex is invalid
      */
     @Override
-    @MayReturnNull
     public GregorianCalendar get(final ResultSet rs, final int columnIndex) throws SQLException {
         final Timestamp ts = rs.getTimestamp(columnIndex);
         return ts == null ? null : asGregorianCalendar(ts);
@@ -149,7 +143,6 @@ public class GregorianCalendarType extends AbstractCalendarType<GregorianCalenda
      * @throws SQLException if a database access error occurs or the columnLabel is not found
      */
     @Override
-    @MayReturnNull
     public GregorianCalendar get(final ResultSet rs, final String columnLabel) throws SQLException {
         final Timestamp ts = rs.getTimestamp(columnLabel);
         return ts == null ? null : asGregorianCalendar(ts);

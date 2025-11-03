@@ -22,7 +22,7 @@ import com.landawn.abacus.util.Strings;
  * deserialization, and database operations for MutableFloat instances, which are
  * mutable wrappers around primitive float values.
  */
-public class MutableFloatType extends NumberType<MutableFloat> {
+class MutableFloatType extends NumberType<MutableFloat> {
 
     /**
      * The type name identifier for MutableFloat type.
@@ -49,7 +49,6 @@ public class MutableFloatType extends NumberType<MutableFloat> {
      *
      * @param x the MutableFloat object to convert
      * @return the string representation of the float value, or {@code null} if x is null
-     @MayReturnNull
      */
     @Override
     public String stringOf(final MutableFloat x) {
@@ -62,7 +61,6 @@ public class MutableFloatType extends NumberType<MutableFloat> {
      *
      * @param str the string to parse
      * @return a MutableFloat containing the parsed value, or {@code null} if str is empty
-     @MayReturnNull
      */
     @Override
     public MutableFloat valueOf(final String str) {

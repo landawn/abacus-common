@@ -39,7 +39,6 @@ import java.util.Map;
  * }</pre>
  * 
  * @see java.util.Calendar
- * @since 1.0
  */
 public enum CalendarField {
     /**
@@ -188,7 +187,7 @@ public enum CalendarField {
      *   <li>{@link Calendar#YEAR} (1) - maps to {@link #YEAR}</li>
      * </ul>
      *
-     * <p><b>Usage Example:</b></p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Convert Calendar constant to CalendarField
      * CalendarField field = CalendarField.of(Calendar.MONTH);
@@ -230,7 +229,7 @@ public enum CalendarField {
      * the standard factory method naming convention. The behavior is identical
      * to {@code of(int)}.</p>
      *
-     * <p><b>Usage Example:</b></p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Deprecated way
      * CalendarField field = CalendarField.valueOf(Calendar.MONTH);
@@ -269,7 +268,7 @@ public enum CalendarField {
      *   <li>{@link #YEAR}.value() returns {@link Calendar#YEAR} (1)</li>
      * </ul>
      *
-     * <p><b>Usage Example:</b></p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Calendar cal = Calendar.getInstance();
      * CalendarField monthField = CalendarField.MONTH;

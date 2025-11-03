@@ -16,7 +16,6 @@ package com.landawn.abacus.type;
 
 import java.nio.ByteBuffer;
 
-import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.util.ClassUtil;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Strings;
@@ -27,7 +26,7 @@ import com.landawn.abacus.util.Strings;
  * and their Base64-encoded string representations, enabling storage and
  * transmission of binary buffer data in text formats.
  */
-public class ByteBufferType extends AbstractType<ByteBuffer> {
+class ByteBufferType extends AbstractType<ByteBuffer> {
 
     /**
      * The type name constant for ByteBuffer type identification.
@@ -72,7 +71,6 @@ public class ByteBufferType extends AbstractType<ByteBuffer> {
      *         or {@code null} if the input is null
      */
     @Override
-    @MayReturnNull
     public String stringOf(final ByteBuffer x) {
         return x == null ? null : Strings.base64Encode(byteArrayOf(x));
     }
@@ -87,9 +85,7 @@ public class ByteBufferType extends AbstractType<ByteBuffer> {
      *         or an empty buffer if str is empty
      * @throws IllegalArgumentException if the input string is not valid Base64
      */
-    @MayReturnNull
     @Override
-
     public ByteBuffer valueOf(final String str) {
         if (str == null) {
             return null; // NOSONAR

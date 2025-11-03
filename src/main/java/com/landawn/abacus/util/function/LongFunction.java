@@ -11,10 +11,8 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-
 package com.landawn.abacus.util.function;
 
-import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.util.Throwables;
 
 /**
@@ -25,7 +23,7 @@ import com.landawn.abacus.util.Throwables;
  * <p>This interface extends both {@link Throwables.LongFunction} with
  * {@link RuntimeException} and {@link java.util.function.LongFunction},
  * providing compatibility with the Java standard library while supporting the
- * Abacus framework's exception handling capabilities.
+ * abacus-common framework's exception handling capabilities.
  *
  * <p>This is a functional interface whose functional method is
  * {@link #apply(long)}.
@@ -38,11 +36,9 @@ import com.landawn.abacus.util.Throwables;
  *
  * @see java.util.function.Function
  * @see java.util.function.LongFunction
- * @since 1.8
  */
 @FunctionalInterface
 public interface LongFunction<R> extends Throwables.LongFunction<R, RuntimeException>, java.util.function.LongFunction<R> { //NOSONAR
-
     /**
      * A function that boxes a primitive long value into a Long object.
      * This is useful when you need to convert primitive long values to their
@@ -74,7 +70,6 @@ public interface LongFunction<R> extends Throwables.LongFunction<R, RuntimeExcep
      * @return the function result of type R
      */
     @Override
-    @MayReturnNull
     R apply(long value);
 
     /**
@@ -99,7 +94,7 @@ public interface LongFunction<R> extends Throwables.LongFunction<R, RuntimeExcep
      * @param <V> the type of output of the {@code after} function, and of the
      *           composed function
      * @param after the function to apply after this function is applied.
-     *              Must not be null
+     *              Must not be {@code null}.
      * @return a composed function that first applies this function and then
      *         applies the {@code after} function
      */

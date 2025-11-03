@@ -59,7 +59,6 @@ import lombok.experimental.Accessors;
  * String code = CodeGenerationUtil.generatePropNameTableClasses(entities, "s");
  * }</pre>
  * 
- * @since 3.8.0
  */
 public final class CodeGenerationUtil {
     /**
@@ -909,10 +908,6 @@ public final class CodeGenerationUtil {
      *     .propFunctions(N.asLinkedHashMap("min", CodeGenerationUtil.MIN_FUNC, "max", CodeGenerationUtil.MAX_FUNC))
      *     .build();
      * }</pre>
-     */
-    /**
-     * Configuration class for property name table code generation.
-     * Contains settings for customizing the generated property name table class.
      */
     @Builder
     @Data

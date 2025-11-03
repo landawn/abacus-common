@@ -11,10 +11,8 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-
 package com.landawn.abacus.util.function;
 
-import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.util.Throwables;
 
 /**
@@ -40,7 +38,6 @@ public interface IntObjFunction<T, R> extends Throwables.IntObjFunction<T, R, Ru
      * @return the function result
      */
     @Override
-    @MayReturnNull
     R apply(int t, T u);
 
     /**

@@ -51,32 +51,34 @@ import java.lang.annotation.Target;
  * 
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
+ * import java.math.BigDecimal;
+ * import java.util.Date;
+ *
  * @Entity
  * public class Order {
  *     @Id
  *     private Long id;
- *     
+ *
  *     @NonUpdatable
  *     @Column(name = "order_number")
  *     private String orderNumber;      // Set once at creation
- *     
+ *
  *     @NonUpdatable
  *     @Column(name = "customer_id")
  *     private Long customerId;         // Cannot change customer after creation
- *     
+ *
  *     @NonUpdatable
  *     @Column(name = "created_date")
  *     private Date createdDate;        // Immutable creation timestamp
- *     
+ *
  *     @Column(name = "status")
  *     private String status;           // Can be updated
- *     
+ *
  *     @Column(name = "total_amount")
  *     private BigDecimal totalAmount;  // Can be updated
  * }
  * }</pre>
  * 
- * @since 2018
  * @see ReadOnly
  * @see Transient
  * @see Column

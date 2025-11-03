@@ -11,7 +11,6 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-
 package com.landawn.abacus.util.function;
 
 import com.landawn.abacus.util.Throwables;
@@ -22,7 +21,7 @@ import com.landawn.abacus.util.Throwables;
  * {@link java.util.function.Predicate}.
  *
  * <p>This interface extends {@link Throwables.LongBiPredicate} with
- * {@link RuntimeException}, providing compatibility with the Abacus framework's
+ * {@link RuntimeException}, providing compatibility with the abacus-common framework's
  * exception handling capabilities.
  *
  * <p>This is a functional interface whose functional method is
@@ -30,53 +29,46 @@ import com.landawn.abacus.util.Throwables;
  *
  * @see java.util.function.Predicate
  * @see java.util.function.BiPredicate
- * @since 1.8
+ *
+ * <p>Refer to JDK API documentation at: <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html">https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a></p>
  */
 @FunctionalInterface
 public interface LongBiPredicate extends Throwables.LongBiPredicate<RuntimeException> { //NOSONAR
-
     /**
      * A predicate that always evaluates to {@code true} regardless of the input values.
      * This can be useful as a default predicate or in testing scenarios.
      */
     LongBiPredicate ALWAYS_TRUE = (t, u) -> true;
-
     /**
      * A predicate that always evaluates to {@code false} regardless of the input values.
      * This can be useful as a default predicate or in testing scenarios.
      */
     LongBiPredicate ALWAYS_FALSE = (t, u) -> false;
-
     /**
      * A predicate that tests if two long values are equal.
      * Returns {@code true} if {@code t == u}, {@code false} otherwise.
      */
     LongBiPredicate EQUAL = (t, u) -> t == u;
-
     /**
      * A predicate that tests if two long values are not equal.
      * Returns {@code true} if {@code t != u}, {@code false} otherwise.
      */
     LongBiPredicate NOT_EQUAL = (t, u) -> t != u;
-
     /**
      * A predicate that tests if the first long value is greater than the second.
      * Returns {@code true} if {@code t > u}, {@code false} otherwise.
      */
     LongBiPredicate GREATER_THAN = (t, u) -> t > u;
-
     /**
      * A predicate that tests if the first long value is greater than or equal to the second.
      * Returns {@code true} if {@code t >= u}, {@code false} otherwise.
      */
     LongBiPredicate GREATER_EQUAL = (t, u) -> t >= u;
-
     /**
      * A predicate that tests if the first long value is less than the second.
      * Returns {@code true} if {@code t < u}, {@code false} otherwise.
      */
     LongBiPredicate LESS_THAN = (t, u) -> t < u;
-
     /**
      * A predicate that tests if the first long value is less than or equal to the second.
      * Returns {@code true} if {@code t <= u}, {@code false} otherwise.
@@ -96,10 +88,15 @@ public interface LongBiPredicate extends Throwables.LongBiPredicate<RuntimeExcep
      *   <li>Implementing custom comparison logic for long pairs</li>
      * </ul>
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * LongBiPredicate sumGreaterThan100 = (a, b) -> a + b > 100;
+     * boolean result = sumGreaterThan100.test(50L, 60L); // Returns true
+     * }</pre>
+     *
      * @param t the first input argument
      * @param u the second input argument
-     * @return {@code true} if the input arguments match the predicate,
-     *         otherwise {@code false}
+     * @return {@code true} if the input arguments match the predicate, {@code false} otherwise
      */
     @Override
     boolean test(long t, long u);
@@ -135,7 +132,7 @@ public interface LongBiPredicate extends Throwables.LongBiPredicate<RuntimeExcep
      * }</pre>
      *
      * @param other a predicate that will be logically-ANDed with this predicate.
-     *              Must not be null
+     *              Must not be {@code null}.
      * @return a composed predicate that represents the short-circuiting logical
      *         AND of this predicate and the {@code other} predicate
      */
@@ -162,7 +159,7 @@ public interface LongBiPredicate extends Throwables.LongBiPredicate<RuntimeExcep
      * }</pre>
      *
      * @param other a predicate that will be logically-ORed with this predicate.
-     *              Must not be null
+     *              Must not be {@code null}.
      * @return a composed predicate that represents the short-circuiting logical
      *         OR of this predicate and the {@code other} predicate
      */

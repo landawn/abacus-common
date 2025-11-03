@@ -23,7 +23,6 @@ package com.landawn.abacus.util;
  * <p>The class is marked as final to prevent extension and uses NOSONAR to suppress
  * SonarQube warnings about the empty class definition.
  * 
- * @since 1.0
  * @see N
  */
 // TODO Design to be done.

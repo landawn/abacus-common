@@ -16,7 +16,7 @@ import com.landawn.abacus.util.MutableChar;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Strings;
 
-public class MutableCharType extends AbstractType<MutableChar> {
+class MutableCharType extends AbstractType<MutableChar> {
 
     public static final String MUTABLE_CHAR = MutableChar.class.getSimpleName();
 
@@ -28,8 +28,9 @@ public class MutableCharType extends AbstractType<MutableChar> {
      * Returns the Class object representing the MutableChar type.
      *
      * <p><b>Usage Examples:</b></p>
-     * MutableCharType type = new MutableCharType();
-     * Class&lt;MutableChar&gt; clazz = type.clazz();
+     * <pre>{@code
+     * Type<MutableChar> type = TypeFactory.getType(MutableChar.class);
+     * Class<MutableChar> clazz = type.clazz();
      * // clazz equals MutableChar.class
      * }</pre>
      *
@@ -45,7 +46,8 @@ public class MutableCharType extends AbstractType<MutableChar> {
      * The character value is converted to a single-character string.
      *
      * <p><b>Usage Examples:</b></p>
-     * MutableCharType type = new MutableCharType();
+     * <pre>{@code
+     * Type<MutableChar> type = TypeFactory.getType(MutableChar.class);
      * MutableChar mc = MutableChar.of('A');
      * String str = type.stringOf(mc);
      * // str equals "A"
@@ -56,7 +58,6 @@ public class MutableCharType extends AbstractType<MutableChar> {
      *
      * @param x The MutableChar object to convert
      * @return The string representation of the character, or {@code null} if the input is null
-     @MayReturnNull
      */
     @Override
     public String stringOf(final MutableChar x) {
@@ -68,7 +69,8 @@ public class MutableCharType extends AbstractType<MutableChar> {
      * The string is parsed to extract the first character.
      *
      * <p><b>Usage Examples:</b></p>
-     * MutableCharType type = new MutableCharType();
+     * <pre>{@code
+     * Type<MutableChar> type = TypeFactory.getType(MutableChar.class);
      * MutableChar mc = type.valueOf("A");
      * // mc.value() equals 'A'
      *
@@ -81,7 +83,6 @@ public class MutableCharType extends AbstractType<MutableChar> {
      *
      * @param str The string to parse
      * @return A MutableChar containing the parsed character, or {@code null} if the input is {@code null} or empty
-     @MayReturnNull
      */
     @Override
     public MutableChar valueOf(final String str) {
@@ -93,7 +94,8 @@ public class MutableCharType extends AbstractType<MutableChar> {
      * The database integer value is cast to char and wrapped in a MutableChar object.
      *
      * <p><b>Usage Examples:</b></p>
-     * MutableCharType type = new MutableCharType();
+     * <pre>{@code
+     * Type<MutableChar> type = TypeFactory.getType(MutableChar.class);
      * ResultSet rs = statement.executeQuery("SELECT char_column FROM table");
      * if (rs.next()) {
      *     MutableChar mc = type.get(rs, 1);
@@ -116,7 +118,8 @@ public class MutableCharType extends AbstractType<MutableChar> {
      * The database integer value is cast to char and wrapped in a MutableChar object.
      *
      * <p><b>Usage Examples:</b></p>
-     * MutableCharType type = new MutableCharType();
+     * <pre>{@code
+     * Type<MutableChar> type = TypeFactory.getType(MutableChar.class);
      * ResultSet rs = statement.executeQuery("SELECT char_col FROM table");
      * if (rs.next()) {
      *     MutableChar mc = type.get(rs, "char_col");
@@ -139,7 +142,8 @@ public class MutableCharType extends AbstractType<MutableChar> {
      * The character is stored as an integer value. If the MutableChar is {@code null}, 0 is stored.
      *
      * <p><b>Usage Examples:</b></p>
-     * MutableCharType type = new MutableCharType();
+     * <pre>{@code
+     * Type<MutableChar> type = TypeFactory.getType(MutableChar.class);
      * PreparedStatement stmt = conn.prepareStatement("INSERT INTO table (char_col) VALUES (?)");
      * MutableChar mc = MutableChar.of('A');
      * type.set(stmt, 1, mc);
@@ -165,7 +169,8 @@ public class MutableCharType extends AbstractType<MutableChar> {
      * The character is stored as an integer value. If the MutableChar is {@code null}, 0 is stored.
      *
      * <p><b>Usage Examples:</b></p>
-     * MutableCharType type = new MutableCharType();
+     * <pre>{@code
+     * Type<MutableChar> type = TypeFactory.getType(MutableChar.class);
      * CallableStatement stmt = conn.prepareCall("{call proc_name(?, ?)}");
      * MutableChar mc = MutableChar.of('B');
      * type.set(stmt, "charParam", mc);
@@ -191,7 +196,8 @@ public class MutableCharType extends AbstractType<MutableChar> {
      * The character is written directly or "null" if the value is {@code null}.
      *
      * <p><b>Usage Examples:</b></p>
-     * MutableCharType type = new MutableCharType();
+     * <pre>{@code
+     * Type<MutableChar> type = TypeFactory.getType(MutableChar.class);
      * StringBuilder sb = new StringBuilder();
      * MutableChar mc = MutableChar.of('C');
      * type.appendTo(sb, mc);
@@ -220,7 +226,8 @@ public class MutableCharType extends AbstractType<MutableChar> {
      * The character may be quoted based on the configuration. If {@code null}, writes the {@code null} character array.
      *
      * <p><b>Usage Examples:</b></p>
-     * MutableCharType type = new MutableCharType();
+     * <pre>{@code
+     * Type<MutableChar> type = TypeFactory.getType(MutableChar.class);
      * CharacterWriter writer = new CharacterWriter();
      * MutableChar mc = MutableChar.of('D');
      *

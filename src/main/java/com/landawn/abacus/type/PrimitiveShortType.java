@@ -17,11 +17,10 @@ package com.landawn.abacus.type;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.util.Numbers;
 
 @SuppressWarnings("java:S2160")
-public final class PrimitiveShortType extends AbstractShortType {
+final class PrimitiveShortType extends AbstractShortType {
 
     public static final String SHORT = short.class.getSimpleName();
 
@@ -36,7 +35,7 @@ public final class PrimitiveShortType extends AbstractShortType {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * PrimitiveShortType type = new PrimitiveShortType();
+     * Type<Short> type = TypeFactory.getType(short.class);
      * Class clazz = type.clazz();
      * System.out.println(clazz.getName()); // Output: short
      * System.out.println(clazz.isPrimitive()); // Output: true
@@ -56,7 +55,7 @@ public final class PrimitiveShortType extends AbstractShortType {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * PrimitiveShortType type = new PrimitiveShortType();
+     * Type<Short> type = TypeFactory.getType(short.class);
      * boolean isPrimitive = type.isPrimitiveType();
      * System.out.println(isPrimitive); // Output: true
      * }</pre>
@@ -74,7 +73,7 @@ public final class PrimitiveShortType extends AbstractShortType {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * PrimitiveShortType type = new PrimitiveShortType();
+     * Type<Short> type = TypeFactory.getType(short.class);
      * Short defaultVal = type.defaultValue();
      * System.out.println(defaultVal); // Output: 0
      * }</pre>
@@ -93,7 +92,7 @@ public final class PrimitiveShortType extends AbstractShortType {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * PrimitiveShortType type = new PrimitiveShortType();
+     * Type<Short> type = TypeFactory.getType(short.class);
      * // Assuming rs is a ResultSet with a short value in column 1
      * Short value = type.get(rs, 1);
      * System.out.println(value); // Output: the short value from the database
@@ -109,9 +108,7 @@ public final class PrimitiveShortType extends AbstractShortType {
      * @throws SQLException if a database access error occurs or the column index is invalid
      * @throws NumberFormatException if the column value is a string that cannot be parsed as a short
      */
-    @MayReturnNull
     @Override
-
     public Short get(final ResultSet rs, final int columnIndex) throws SQLException {
         final Object ret = rs.getObject(columnIndex);
 
@@ -133,7 +130,7 @@ public final class PrimitiveShortType extends AbstractShortType {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * PrimitiveShortType type = new PrimitiveShortType();
+     * Type<Short> type = TypeFactory.getType(short.class);
      * // Assuming rs is a ResultSet with a short value in column "age"
      * Short age = type.get(rs, "age");
      * System.out.println(age); // Output: the short value from the database
@@ -149,9 +146,7 @@ public final class PrimitiveShortType extends AbstractShortType {
      * @throws SQLException if a database access error occurs or the column label is not found
      * @throws NumberFormatException if the column value is a string that cannot be parsed as a short
      */
-    @MayReturnNull
     @Override
-
     public Short get(final ResultSet rs, final String columnLabel) throws SQLException {
         final Object ret = rs.getObject(columnLabel);
 

@@ -11,7 +11,6 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-
 package com.landawn.abacus.util.function;
 
 import com.landawn.abacus.annotation.SuppressFBWarnings;
@@ -22,9 +21,9 @@ import com.landawn.abacus.util.Throwables;
  * This is the two-arity specialization of {@link java.util.function.Consumer}.
  * Unlike most other functional interfaces, {@code BiConsumer} is expected
  * to operate via side-effects.
- * 
+ *
  * <p>This is a functional interface whose functional method is {@link #accept(Object, Object)}.
- * 
+ *
  * <p>Refer to JDK API documentation at: <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html">https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a></p>
  *
  * @param <T> the type of the first argument to the operation
@@ -33,7 +32,6 @@ import com.landawn.abacus.util.Throwables;
 @SuppressFBWarnings("NM_SAME_SIMPLE_NAME_AS_INTERFACE")
 @FunctionalInterface
 public interface BiConsumer<T, U> extends Throwables.BiConsumer<T, U, RuntimeException>, java.util.function.BiConsumer<T, U> { //NOSONAR
-
     /**
      * Performs this operation on the given arguments.
      * This method is expected to operate via side-effects, modifying the state of the arguments

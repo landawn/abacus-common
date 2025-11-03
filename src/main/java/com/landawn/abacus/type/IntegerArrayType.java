@@ -16,7 +16,6 @@ package com.landawn.abacus.type;
 
 import java.io.IOException;
 
-import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.parser.JSONXMLSerializationConfig;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.N;
@@ -28,7 +27,7 @@ import com.landawn.abacus.util.WD;
  * This class provides optimized serialization and deserialization for arrays of Integer objects,
  * including proper handling of {@code null} elements within the array.
  */
-public final class IntegerArrayType extends ObjectArrayType<Integer> {
+final class IntegerArrayType extends ObjectArrayType<Integer> {
 
     IntegerArrayType() {
         super(Integer[].class);
@@ -43,9 +42,7 @@ public final class IntegerArrayType extends ObjectArrayType<Integer> {
      * @param x the Integer array to convert to string
      * @return the JSON array string representation (e.g., "[1,null,3]"), or {@code null} if the input array is null
      */
-    @MayReturnNull
     @Override
-
     public String stringOf(final Integer[] x) {
         if (x == null) {
             return null; // NOSONAR
@@ -66,9 +63,7 @@ public final class IntegerArrayType extends ObjectArrayType<Integer> {
      * @param str the JSON array string to parse (e.g., "[1,null,3]")
      * @return the parsed Integer array, or {@code null} if the input is null
      */
-    @MayReturnNull
     @Override
-
     public Integer[] valueOf(final String str) {
         if (Strings.isEmpty(str) || Strings.isBlank(str)) {
             return null; // NOSONAR

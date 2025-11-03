@@ -55,7 +55,6 @@ import com.landawn.abacus.util.stream.Stream;
  * }
  * }</pre>
  * 
- * @since 0.8
  * @see JSONSerializationConfig
  * @see JSONDeserializationConfig
  * @see ParserFactory
@@ -102,7 +101,7 @@ public interface JSONParser extends Parser<JSONSerializationConfig, JSONDeserial
      *
      * @param <T> the target type parameter
      * @param source the JSON string to parse, must be valid JSON format
-     * @param config the deserialization configuration to control parsing behavior, may be {@code null} for default behavior
+     * @param config the deserialization configuration to use (may be {@code null} for default behavior)
      * @param targetClass the class of the target object to deserialize into
      * @return the parsed object of type T, never null
      * @throws IllegalArgumentException if the source string is {@code null} or invalid JSON
@@ -143,7 +142,7 @@ public interface JSONParser extends Parser<JSONSerializationConfig, JSONDeserial
      * }</pre>
      *
      * @param source the JSON string to parse, must contain a JSON array
-     * @param config the deserialization configuration to control parsing behavior, may be {@code null} for default behavior
+     * @param config the deserialization configuration to use (may be {@code null} for default behavior)
      * @param output the pre-allocated array to populate with parsed values, must not be null
      * @throws IllegalArgumentException if the source is {@code null}, invalid JSON, or array size doesn't match
      */
@@ -182,7 +181,7 @@ public interface JSONParser extends Parser<JSONSerializationConfig, JSONDeserial
      * }</pre>
      *
      * @param source the JSON string to parse, must contain a JSON array
-     * @param config the deserialization configuration to control parsing behavior, may be {@code null} for default behavior
+     * @param config the deserialization configuration to use (may be {@code null} for default behavior)
      * @param output the Collection to populate with parsed values, must not be {@code null} and will be cleared first
      * @throws IllegalArgumentException if the source is {@code null} or invalid JSON
      * @throws UnsupportedOperationException if the collection is unmodifiable
@@ -222,7 +221,7 @@ public interface JSONParser extends Parser<JSONSerializationConfig, JSONDeserial
      * }</pre>
      *
      * @param source the JSON string to parse, must contain a JSON object
-     * @param config the deserialization configuration to control parsing behavior, may be {@code null} for default behavior
+     * @param config the deserialization configuration to use (may be {@code null} for default behavior)
      * @param output the Map to populate with parsed key-value pairs, must not be {@code null} and will be cleared first
      * @throws IllegalArgumentException if the source is {@code null} or invalid JSON
      * @throws UnsupportedOperationException if the map is unmodifiable
@@ -315,7 +314,7 @@ public interface JSONParser extends Parser<JSONSerializationConfig, JSONDeserial
      *
      * @param <T> the element type parameter
      * @param source the JSON string containing a JSON array
-     * @param config the deserialization configuration to control parsing behavior, may be {@code null} for default behavior
+     * @param config the deserialization configuration to use (may be {@code null} for default behavior)
      * @param elementType the type of array elements. Only Bean/Map/Collection/Array/Dataset element types are supported.
      * @return a Stream of parsed elements that must be closed after use
      * @throws IllegalArgumentException if the source is {@code null}, invalid JSON, or not a JSON array
@@ -362,7 +361,7 @@ public interface JSONParser extends Parser<JSONSerializationConfig, JSONDeserial
      *
      * @param <T> the element type parameter
      * @param source the JSON file containing a JSON array, must exist and be readable
-     * @param config the deserialization configuration to control parsing behavior, may be {@code null} for default behavior
+     * @param config the deserialization configuration to use (may be {@code null} for default behavior)
      * @param elementType the type of array elements. Only Bean/Map/Collection/Array/Dataset element types are supported.
      * @return a Stream of parsed elements that must be closed after use
      * @throws IllegalArgumentException if the source is {@code null} or the file contains invalid JSON
@@ -410,7 +409,7 @@ public interface JSONParser extends Parser<JSONSerializationConfig, JSONDeserial
      *
      * @param <T> the element type parameter
      * @param source the input stream containing a JSON array, must not be null
-     * @param config the deserialization configuration to control parsing behavior, may be {@code null} for default behavior
+     * @param config the deserialization configuration to use (may be {@code null} for default behavior)
      * @param closeInputStreamWhenStreamIsClosed if {@code true}, the input stream will be closed when the returned stream is closed
      * @param elementType the type of array elements. Only Bean/Map/Collection/Array/Dataset element types are supported.
      * @return a Stream of parsed elements that must be closed after use
@@ -459,7 +458,7 @@ public interface JSONParser extends Parser<JSONSerializationConfig, JSONDeserial
      *
      * @param <T> the element type parameter
      * @param source the reader containing a JSON array, must not be null
-     * @param config the deserialization configuration to control parsing behavior, may be {@code null} for default behavior
+     * @param config the deserialization configuration to use (may be {@code null} for default behavior)
      * @param closeReaderWhenStreamIsClosed if {@code true}, the reader will be closed when the returned stream is closed
      * @param elementType the type of array elements. Only Bean/Map/Collection/Array/Dataset element types are supported.
      * @return a Stream of parsed elements that must be closed after use

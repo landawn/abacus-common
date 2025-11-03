@@ -48,7 +48,6 @@ import com.landawn.abacus.util.stream.IntStream;
  * @see TriIterator
  * @see com.landawn.abacus.util.Iterators
  * @see com.landawn.abacus.util.Enumerations
- * @since 0.8
  */
 @SuppressWarnings({ "java:S6548" })
 public abstract class IntIterator extends ImmutableIterator<Integer> {
@@ -75,15 +74,20 @@ public abstract class IntIterator extends ImmutableIterator<Integer> {
     };
 
     /**
-     * Returns an empty IntIterator instance.
-     * 
+     * Returns an empty {@code IntIterator} with no elements.
+     *
+     * <p>The returned iterator's {@code hasNext()} will always return {@code false},
+     * and calling {@code nextInt()} will always throw a {@code NoSuchElementException}.</p>
+     *
+     * <p>This method always returns the same singleton instance for efficiency.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * IntIterator empty = IntIterator.empty();
      * empty.hasNext(); // returns false
      * }</pre>
-     * 
-     * @return an empty IntIterator
+     *
+     * @return an empty {@code IntIterator}
      */
     @SuppressWarnings("SameReturnValue")
     public static IntIterator empty() {//NOSONAR
@@ -91,34 +95,41 @@ public abstract class IntIterator extends ImmutableIterator<Integer> {
     }
 
     /**
-     * Creates an IntIterator from an int array.
-     * 
+     * Creates an {@code IntIterator} from the specified int array.
+     *
+     * <p>If the array is {@code null} or empty, returns an empty iterator.
+     * The iterator will iterate over all elements in the array from start to end.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * IntIterator iter = IntIterator.of(1, 2, 3, 4, 5);
      * IntList list = iter.toList(); // [1, 2, 3, 4, 5]
      * }</pre>
      *
-     * @param a the int array to create the iterator from
-     * @return an IntIterator over the array elements
+     * @param a the int array (may be {@code null})
+     * @return a new {@code IntIterator} over the array elements, or an empty iterator if the array is {@code null} or empty
      */
     public static IntIterator of(final int... a) {
         return N.isEmpty(a) ? EMPTY : of(a, 0, a.length);
     }
 
     /**
-     * Creates an IntIterator from a specified range of an int array.
-     * 
+     * Creates an {@code IntIterator} from a subsequence of the specified int array.
+     *
+     * <p>The iterator will iterate over elements from {@code fromIndex} (inclusive) to
+     * {@code toIndex} (exclusive). If {@code fromIndex} equals {@code toIndex}, an empty
+     * iterator is returned.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * int[] array = {1, 2, 3, 4, 5};
      * IntIterator iter = IntIterator.of(array, 1, 4); // iterates over 2, 3, 4
      * }</pre>
      *
-     * @param a the int array
+     * @param a the int array (may be {@code null})
      * @param fromIndex the starting index (inclusive)
      * @param toIndex the ending index (exclusive)
-     * @return an IntIterator over the specified range
+     * @return a new {@code IntIterator} over the specified range, or an empty iterator if the array is {@code null} or fromIndex equals toIndex
      * @throws IndexOutOfBoundsException if fromIndex or toIndex is out of bounds
      */
     public static IntIterator of(final int[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {

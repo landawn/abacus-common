@@ -11,7 +11,6 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-
 package com.landawn.abacus.util.function;
 
 import com.landawn.abacus.util.Throwables;
@@ -24,7 +23,7 @@ import com.landawn.abacus.util.Throwables;
  * <p>This interface extends both {@link Throwables.IntUnaryOperator} with
  * {@link RuntimeException} and {@link java.util.function.IntUnaryOperator},
  * providing compatibility with the Java standard library while supporting the
- * Abacus framework's exception handling capabilities.
+ * abacus-common framework's exception handling capabilities.
  *
  * <p>This is a functional interface whose functional method is
  * {@link #applyAsInt(int)}.
@@ -35,11 +34,9 @@ import com.landawn.abacus.util.Throwables;
  *
  * @see java.util.function.UnaryOperator
  * @see java.util.function.IntUnaryOperator
- * @since 1.8
  */
 @FunctionalInterface
 public interface IntUnaryOperator extends Throwables.IntUnaryOperator<RuntimeException>, java.util.function.IntUnaryOperator { //NOSONAR
-
     /**
      * Applies this operator to the given operand.
      *
@@ -76,7 +73,7 @@ public interface IntUnaryOperator extends Throwables.IntUnaryOperator<RuntimeExc
      * }</pre>
      *
      * @param before the operator to apply before this operator is applied.
-     *               Must not be null
+     *               Must not be {@code null}.
      * @return a composed operator that first applies the {@code before}
      *         operator and then applies this operator
      *
@@ -105,7 +102,7 @@ public interface IntUnaryOperator extends Throwables.IntUnaryOperator<RuntimeExc
      * }</pre>
      *
      * @param after the operator to apply after this operator is applied.
-     *              Must not be null
+     *              Must not be {@code null}.
      * @return a composed operator that first applies this operator and then
      *         applies the {@code after} operator
      *
