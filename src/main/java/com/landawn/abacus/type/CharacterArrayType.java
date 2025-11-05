@@ -41,6 +41,17 @@ public final class CharacterArrayType extends ObjectArrayType<Character> {
      * - Non-null characters are wrapped in single quotes
      * - Empty arrays return "[]"
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Type<Character[]> type = TypeFactory.getType(Character[].class);
+     * Character[] array = {'a', 'b', null, 'z'};
+     * String result = type.stringOf(array);
+     * // result: "['a', 'b', null, 'z']"
+     *
+     * String empty = type.stringOf(new Character[0]);
+     * // empty: "[]"
+     * }</pre>
+     *
      * @param x the Character array to convert. Can be {@code null}.
      * @return A string representation of the array with quoted characters, or {@code null} if input is null
      */
@@ -84,6 +95,16 @@ public final class CharacterArrayType extends ObjectArrayType<Character> {
      * - Handles both quoted and unquoted characters
      * - "null" strings (4 characters) are converted to {@code null} elements
      * - Empty string or "[]" returns empty array
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Type<Character[]> type = TypeFactory.getType(Character[].class);
+     * Character[] result = type.valueOf("['a', 'b', null, 'z']");
+     * // result: {'a', 'b', null, 'z'}
+     *
+     * Character[] empty = type.valueOf("[]");
+     * // empty: {} (empty array)
+     * }</pre>
      *
      * @param str the string to parse. Can be {@code null}.
      * @return A Character array parsed from the string, or {@code null} if input is null

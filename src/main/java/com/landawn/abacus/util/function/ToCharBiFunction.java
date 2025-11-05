@@ -52,4 +52,23 @@ public interface ToCharBiFunction<T, U> {
      * @return the function result as a char value
      */
     char applyAsChar(T t, U u);
+
+    /**
+     * Converts this {@code ToCharBiFunction} to a {@code Throwables.ToCharBiFunction} that can throw a checked exception.
+     * This method provides a way to use this function in contexts that require explicit exception handling.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * ToCharBiFunction function = (...) -> { ... };
+     * var throwableFunction = function.toThrowable();
+     * // Can now be used in contexts that handle checked exceptions
+     * }</pre>
+     *
+     * @param <E> the type of exception that the returned function can throw
+     * @return a {@code Throwables.ToCharBiFunction} view of this function that can throw exceptions of type {@code E}
+     */
+    default <E extends Throwable> Throwables.ToCharBiFunction<T, U, E> toThrowable() {
+        return (Throwables.ToCharBiFunction<T, U, E>) this;
+    }
+
 }

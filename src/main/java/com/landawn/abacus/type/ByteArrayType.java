@@ -43,6 +43,17 @@ public final class ByteArrayType extends ObjectArrayType<Byte> {
      * The array is formatted with square brackets and comma-separated elements.
      * Null elements are represented as "null" in the output.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Type<Byte[]> type = TypeFactory.getType(Byte[].class);
+     * Byte[] array = {1, 2, null, 127};
+     * String result = type.stringOf(array);
+     * // result: "[1, 2, null, 127]"
+     *
+     * String empty = type.stringOf(new Byte[0]);
+     * // empty: "[]"
+     * }</pre>
+     *
      * @param x the Byte array to convert
      * @return a string representation like "[1, 2, null]", or {@code null} if input is {@code null},
      *         or "[]" if the array is empty
@@ -62,6 +73,16 @@ public final class ByteArrayType extends ObjectArrayType<Byte> {
      * Converts a string representation back to a Byte array.
      * Parses a string in the format "[1, 2, null]" into a Byte array.
      * The string "null" (case-sensitive) is parsed as a {@code null} element.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Type<Byte[]> type = TypeFactory.getType(Byte[].class);
+     * Byte[] result = type.valueOf("[1, 2, null, 127]");
+     * // result: {1, 2, null, 127}
+     *
+     * Byte[] empty = type.valueOf("[]");
+     * // empty: {} (empty array)
+     * }</pre>
      *
      * @param str the string to parse, expecting format like "[1, 2, null]"
      * @return a Byte array parsed from the string, or {@code null} if str is {@code null},
@@ -96,6 +117,14 @@ public final class ByteArrayType extends ObjectArrayType<Byte> {
     /**
      * Retrieves a Byte array from a ResultSet at the specified column index.
      * The primitive byte[] from the database is converted to a Byte[] object array.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Type<Byte[]> type = TypeFactory.getType(Byte[].class);
+     * ResultSet rs = ...; // from SQL query
+     * Byte[] data = type.get(rs, 1);
+     * // Converts database byte[] to Byte[]
+     * }</pre>
      *
      * @param rs the ResultSet to retrieve the value from
      * @param columnIndex the column index (1-based) of the byte array

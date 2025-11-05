@@ -90,4 +90,23 @@ public interface ToFloatFunction<T> extends Throwables.ToFloatFunction<T, Runtim
      */
     @Override
     float applyAsFloat(T value);
+
+    /**
+     * Converts this {@code ToFloatFunction} to a {@code Throwables.ToFloatFunction} that can throw a checked exception.
+     * This method provides a way to use this function in contexts that require explicit exception handling.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * ToFloatFunction function = (...) -> { ... };
+     * var throwableFunction = function.toThrowable();
+     * // Can now be used in contexts that handle checked exceptions
+     * }</pre>
+     *
+     * @param <E> the type of exception that the returned function can throw
+     * @return a {@code Throwables.ToFloatFunction} view of this function that can throw exceptions of type {@code E}
+     */
+    default <E extends Throwable> Throwables.ToFloatFunction<T, E> toThrowable() {
+        return (Throwables.ToFloatFunction<T, E>) this;
+    }
+
 }

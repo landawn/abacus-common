@@ -128,6 +128,11 @@ public interface Logger {
     /**
      * Logs a message at the TRACE level with two parameters.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * logger.trace("Processing {} items in batch {}", itemCount, batchId);
+     * }</pre>
+     *
      * @param template the message template containing two placeholders
      * @param arg1 the first argument
      * @param arg2 the second argument
@@ -136,6 +141,11 @@ public interface Logger {
 
     /**
      * Logs a message at the TRACE level with three parameters.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * logger.trace("Method {} called with args: {}, {}", methodName, arg1, arg2);
+     * }</pre>
      *
      * @param template the message template containing three placeholders
      * @param arg1 the first argument
@@ -316,6 +326,11 @@ public interface Logger {
     /**
      * Logs a message at the DEBUG level with two parameters.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * logger.debug("User {} accessed resource {} ", username, resourceId);
+     * }</pre>
+     *
      * @param template the message template containing two placeholders
      * @param arg1 the first argument
      * @param arg2 the second argument
@@ -324,6 +339,11 @@ public interface Logger {
 
     /**
      * Logs a message at the DEBUG level with three parameters.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * logger.debug("Query {} returned {} results in {}ms", queryId, resultCount, executionTime);
+     * }</pre>
      *
      * @param template the message template containing three placeholders
      * @param arg1 the first argument
@@ -509,6 +529,11 @@ public interface Logger {
     /**
      * Logs a message at the INFO level with two parameters.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * logger.info("Processed {} records in {}ms", recordCount, duration);
+     * }</pre>
+     *
      * @param template the message template containing two placeholders
      * @param arg1 the first argument
      * @param arg2 the second argument
@@ -517,6 +542,11 @@ public interface Logger {
 
     /**
      * Logs a message at the INFO level with three parameters.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * logger.info("Server {} started on port {} with protocol {}", serverName, port, protocol);
+     * }</pre>
      *
      * @param template the message template containing three placeholders
      * @param arg1 the first argument
@@ -702,6 +732,11 @@ public interface Logger {
     /**
      * Logs a message at the WARN level with two parameters.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * logger.warn("Cache size {} exceeds limit of {}", cacheSize, maxSize);
+     * }</pre>
+     *
      * @param template the message template containing two placeholders
      * @param arg1 the first argument
      * @param arg2 the second argument
@@ -710,6 +745,11 @@ public interface Logger {
 
     /**
      * Logs a message at the WARN level with three parameters.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * logger.warn("Retry {} of {} failed for operation {}", attemptNum, maxAttempts, operationId);
+     * }</pre>
      *
      * @param template the message template containing three placeholders
      * @param arg1 the first argument
@@ -895,6 +935,11 @@ public interface Logger {
     /**
      * Logs a message at the ERROR level with two parameters.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * logger.error("Failed to connect to {} on port {}", hostname, port);
+     * }</pre>
+     *
      * @param template the message template containing two placeholders
      * @param arg1 the first argument
      * @param arg2 the second argument
@@ -903,6 +948,11 @@ public interface Logger {
 
     /**
      * Logs a message at the ERROR level with three parameters.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * logger.error("Transaction {} failed for user {} with error code {}", txnId, userId, errorCode);
+     * }</pre>
      *
      * @param template the message template containing three placeholders
      * @param arg1 the first argument

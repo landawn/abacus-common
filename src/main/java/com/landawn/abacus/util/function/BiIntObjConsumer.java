@@ -66,4 +66,23 @@ public interface BiIntObjConsumer<T> extends Throwables.BiIntObjConsumer<T, Runt
             after.accept(i, j, t);
         };
     }
+
+    /**
+     * Converts this {@code BiIntObjConsumer} to a {@code Throwables.BiIntObjConsumer} that can throw a checked exception.
+     * This method provides a way to use this consumer in contexts that require explicit exception handling.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * BiIntObjConsumer consumer = (...) -> { ... };
+     * var throwableConsumer = consumer.toThrowable();
+     * // Can now be used in contexts that handle checked exceptions
+     * }</pre>
+     *
+     * @param <E> the type of exception that the returned consumer can throw
+     * @return a {@code Throwables.BiIntObjConsumer} view of this consumer that can throw exceptions of type {@code E}
+     */
+    default <E extends Throwable> Throwables.BiIntObjConsumer<T, E> toThrowable() {
+        return (Throwables.BiIntObjConsumer<T, E>) this;
+    }
+
 }

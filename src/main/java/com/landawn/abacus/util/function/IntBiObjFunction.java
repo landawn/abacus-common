@@ -76,4 +76,23 @@ public interface IntBiObjFunction<T, U, R> extends Throwables.IntBiObjFunction<T
     default <V> IntBiObjFunction<T, U, V> andThen(final java.util.function.Function<? super R, ? extends V> after) {
         return (i, t, u) -> after.apply(apply(i, t, u));
     }
+
+    /**
+     * Converts this {@code IntBiObjFunction} to a {@code Throwables.IntBiObjFunction} that can throw a checked exception.
+     * This method provides a way to use this function in contexts that require explicit exception handling.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * IntBiObjFunction function = (...) -> { ... };
+     * var throwableFunction = function.toThrowable();
+     * // Can now be used in contexts that handle checked exceptions
+     * }</pre>
+     *
+     * @param <E> the type of exception that the returned function can throw
+     * @return a {@code Throwables.IntBiObjFunction} view of this function that can throw exceptions of type {@code E}
+     */
+    default <E extends Throwable> Throwables.IntBiObjFunction<T, U, R, E> toThrowable() {
+        return (Throwables.IntBiObjFunction<T, U, R, E>) this;
+    }
+
 }

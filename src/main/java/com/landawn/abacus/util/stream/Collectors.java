@@ -5078,7 +5078,11 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
     /**
      * Returns a {@code Collector} that produces the sum of a double-valued function
      * applied to the input elements.
-     * 
+     *
+     * <p>This collector sums up double values extracted from the stream elements.
+     * If no elements are present, the result is 0.0. The sum is computed using
+     * Kahan summation algorithm for improved numerical accuracy with floating-point values.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Sum prices with decimal values

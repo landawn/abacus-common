@@ -412,14 +412,28 @@ import lombok.Data;
 public final class ExcelUtil {
 
     /**
-     * Default cell getter function that extracts cell values based on their type.
-     * Returns appropriate Java objects: String for STRING cells, Double for NUMERIC cells,
-     * Boolean for BOOLEAN cells, String for FORMULA cells, and empty string for BLANK cells.
-     * 
+     * Default cell value extractor function that retrieves cell values based on their type.
+     * This function provides automatic type-preserving extraction, returning appropriate Java
+     * objects based on the cell's actual type: {@code String} for STRING cells, {@code Double} for
+     * NUMERIC cells, {@code Boolean} for BOOLEAN cells, {@code String} for FORMULA cells (returns
+     * formula text), and empty string for BLANK cells.
+     *
+     * <p>This extractor is commonly used as the default cell processor for reading Excel data
+     * when you want to preserve the original cell types without conversion. It's ideal for
+     * generic data loading scenarios where type preservation is important.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
+     * // Use directly on a cell
+     * Cell cell = row.getCell(0);
      * Object value = CELL_GETTER.apply(cell);
+     *
+     * // Use with row mapper
+     * Function<Row, List<Object>> mapper = RowMappers.toList(CELL_GETTER);
+     * List<List<Object>> rows = ExcelUtil.readSheet(file, 0, true, mapper);
      * }</pre>
+     *
+     * @throws RuntimeException if the cell has an unsupported cell type
      */
     public static final Function<Cell, Object> CELL_GETTER = cell -> switch (cell.getCellType()) {
         case STRING -> cell.getStringCellValue();
@@ -432,12 +446,27 @@ public final class ExcelUtil {
 
     /**
      * Cell to String converter function that converts any cell value to its string representation.
-     * Handles all cell types including STRING, NUMERIC, BOOLEAN, FORMULA, and BLANK.
-     * 
+     * This function normalizes all cell types to {@code String}, making it useful for text-based
+     * processing, CSV conversion, or when uniform string representation is required. Handles all
+     * standard cell types including STRING, NUMERIC, BOOLEAN, FORMULA, and BLANK cells.
+     *
+     * <p>Numeric values are converted using {@code String.valueOf()}, boolean values are converted
+     * to "true" or "false", formula cells return the formula text (not the evaluated result), and
+     * blank cells return an empty string. This converter is ideal for export operations and text-based
+     * data processing where type information is not critical.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
+     * // Use directly on a cell
+     * Cell cell = row.getCell(0);
      * String stringValue = CELL2STRING.apply(cell);
+     *
+     * // Use with row mapper to get all values as strings
+     * Function<Row, List<String>> stringMapper = RowMappers.toList(CELL2STRING);
+     * List<List<String>> rows = ExcelUtil.readSheet(file, 0, true, stringMapper);
      * }</pre>
+     *
+     * @throws RuntimeException if the cell has an unsupported cell type
      */
     public static final Function<Cell, String> CELL2STRING = cell -> switch (cell.getCellType()) {
         case STRING -> cell.getStringCellValue();
@@ -1312,27 +1341,59 @@ public final class ExcelUtil {
     }
 
     /**
-     * Collection of predefined row mapping functions for common use cases.
-     * Provides ready-to-use mappers for converting Excel rows to various formats.
-     * 
+     * Collection of predefined row mapping functions for common Excel data transformation use cases.
+     * This utility class provides ready-to-use mapper functions that convert Excel {@code Row} objects
+     * to various Java types including {@code List<Object>}, {@code List<String>}, or delimited string
+     * representations. These mappers are designed for use with {@code readSheet} methods to control
+     * how row data is extracted and transformed during the read process.
+     *
+     * <p>The class offers both predefined constants for common scenarios ({@code DEFAULT}, {@code ROW2STRING})
+     * and factory methods for creating custom mappers with specific cell processing logic. This flexibility
+     * allows for tailored data extraction while maintaining clean, reusable code patterns.</p>
+     *
+     * <p><b>Key Features:</b>
+     * <ul>
+     *   <li><b>DEFAULT Mapper:</b> Converts rows to {@code List<Object>} with type preservation</li>
+     *   <li><b>ROW2STRING Mapper:</b> Converts rows to delimited strings using default separator</li>
+     *   <li><b>Custom Separators:</b> Create string mappers with custom delimiters</li>
+     *   <li><b>Custom Cell Processing:</b> Define custom cell transformation logic</li>
+     *   <li><b>Type-Safe Extraction:</b> Create strongly-typed list mappers for specific data types</li>
+     * </ul>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * // Use default mapper to get list of objects
+     * // Use default mapper to get list of objects with type preservation
      * List<List<Object>> rows = ExcelUtil.readSheet(
-     *     new File("data.xlsx"), 
-     *     0, 
-     *     false, 
+     *     new File("data.xlsx"),
+     *     0,
+     *     true,  // Skip header row
      *     RowMappers.DEFAULT
      * );
-     * 
-     * // Convert rows to strings
+     *
+     * // Convert rows to comma-separated strings
      * List<String> rowStrings = ExcelUtil.readSheet(
-     *     new File("data.xlsx"), 
-     *     0, 
-     *     false, 
+     *     new File("data.xlsx"),
+     *     0,
+     *     false,
      *     RowMappers.ROW2STRING
      * );
+     *
+     * // Create custom mapper with pipe separator
+     * Function<Row, String> pipeMapper = RowMappers.toString("|");
+     * List<String> pipeDelimited = ExcelUtil.readSheet(file, 0, true, pipeMapper);
+     *
+     * // Create strongly-typed mapper for numeric data
+     * Function<Cell, Double> numericExtractor = cell ->
+     *     cell.getCellType() == CellType.NUMERIC ? cell.getNumericCellValue() : 0.0;
+     * Function<Row, List<Double>> numericMapper = RowMappers.toList(numericExtractor);
+     * List<List<Double>> numericData = ExcelUtil.readSheet(file, 0, true, numericMapper);
      * }</pre>
+     *
+     * @see #DEFAULT
+     * @see #ROW2STRING
+     * @see #toString(String)
+     * @see #toString(String, Function)
+     * @see #toList(Function)
      */
     public static final class RowMappers {
         private RowMappers() {
@@ -1340,14 +1401,60 @@ public final class ExcelUtil {
         }
 
         /**
-         * Default row mapper that converts each row to a List of Objects.
-         * Uses CELL_GETTER to extract appropriate Java objects from cells.
+         * Default row mapper that converts each Excel row to a {@code List<Object>} with type preservation.
+         * This mapper uses {@link #CELL_GETTER} to extract cell values while maintaining their original
+         * data types: {@code String} for text cells, {@code Double} for numeric cells, {@code Boolean}
+         * for boolean cells, etc. This is the recommended mapper for general-purpose data extraction
+         * when you need to preserve Excel cell types in your Java objects.
+         *
+         * <p>The resulting list contains one element per cell in the row, with each element typed
+         * according to the cell's content. This allows for flexible downstream processing while
+         * maintaining data type integrity from the source Excel file.</p>
+         *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * // Read all rows with type preservation
+         * List<List<Object>> rows = ExcelUtil.readSheet(
+         *     new File("data.xlsx"),
+         *     0,
+         *     true,  // Skip first row (headers)
+         *     RowMappers.DEFAULT
+         * );
+         *
+         * // Process typed data
+         * for (List<Object> row : rows) {
+         *     String name = (String) row.get(0);
+         *     Double value = (Double) row.get(1);
+         *     Boolean flag = (Boolean) row.get(2);
+         * }
+         * }</pre>
          */
         public static final Function<Row, List<Object>> DEFAULT = toList(CELL_GETTER);
 
         /**
-         * Row to String mapper that converts entire rows to delimited strings.
-         * Uses the default element separator from Strings.ELEMENT_SEPARATOR.
+         * Row to String mapper that converts entire Excel rows to delimited string representations.
+         * This mapper converts each cell to its string representation and joins them using the
+         * default element separator defined by {@code Strings.ELEMENT_SEPARATOR}. Useful for quick
+         * text conversion of Excel data or debugging purposes where a simple string representation
+         * of row data is sufficient.
+         *
+         * <p>All cell types are converted to strings: numbers are formatted as decimal strings,
+         * booleans as "true"/"false", and formulas as their formula text. The resulting string
+         * provides a readable representation of the complete row data.</p>
+         *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * // Convert all rows to strings with default separator
+         * List<String> rowStrings = ExcelUtil.readSheet(
+         *     new File("data.xlsx"),
+         *     "Sheet1",
+         *     false,
+         *     RowMappers.ROW2STRING
+         * );
+         *
+         * // Print or log row data
+         * rowStrings.forEach(System.out::println);
+         * }</pre>
          */
         public static final Function<Row, String> ROW2STRING = toString(Strings.ELEMENT_SEPARATOR);
 
@@ -1462,19 +1569,53 @@ public final class ExcelUtil {
     }
 
     /**
-     * Collection of row extractors for use with loadSheet methods.
-     * Extractors process rows and populate output arrays for Dataset creation.
-     * 
+     * Collection of row extraction functions specifically designed for use with {@code loadSheet} methods.
+     * Row extractors are specialized consumers that process Excel {@code Row} objects and populate output
+     * arrays with extracted data, which is then used to construct {@code Dataset} objects. Unlike
+     * {@link RowMappers} which transform rows to various types, extractors focus on efficient data
+     * extraction for Dataset creation with column-oriented data structures.
+     *
+     * <p>Extractors receive three parameters: the header names array, the current row being processed,
+     * and an output array to populate. This design enables efficient, array-based data transfer optimized
+     * for Dataset construction while allowing custom cell processing logic.</p>
+     *
+     * <p><b>Key Differences from RowMappers:</b>
+     * <ul>
+     *   <li><b>Purpose:</b> Extractors are for Dataset creation; mappers are for general row transformation</li>
+     *   <li><b>Output:</b> Extractors populate pre-allocated arrays; mappers return new objects</li>
+     *   <li><b>Performance:</b> Extractors are optimized for bulk data loading with minimal object allocation</li>
+     *   <li><b>Use Case:</b> Extractors with {@code loadSheet()}; mappers with {@code readSheet()}</li>
+     * </ul>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * // Use default extractor
-     * Dataset ds = ExcelUtil.loadSheet(file, 0, RowExtractors.DEFAULT);
-     * 
-     * // Create custom extractor for specific processing
-     * TriConsumer<String[], Row, Object[]> customExtractor = 
-     *     RowExtractors.create(cell -> cell.getStringCellValue().toUpperCase());
-     * Dataset ds = ExcelUtil.loadSheet(file, 0, customExtractor);
+     * // Use default extractor for standard Dataset loading
+     * Dataset ds = ExcelUtil.loadSheet(
+     *     new File("data.xlsx"),
+     *     0,
+     *     RowExtractors.DEFAULT
+     * );
+     *
+     * // Create custom extractor for specific processing (e.g., uppercase conversion)
+     * TriConsumer<String[], Row, Object[]> uppercaseExtractor =
+     *     RowExtractors.create(cell ->
+     *         cell.getCellType() == CellType.STRING
+     *             ? cell.getStringCellValue().toUpperCase()
+     *             : ExcelUtil.CELL_GETTER.apply(cell)
+     *     );
+     * Dataset ds = ExcelUtil.loadSheet(file, 0, uppercaseExtractor);
+     *
+     * // Create extractor with null handling
+     * TriConsumer<String[], Row, Object[]> safeExtractor =
+     *     RowExtractors.create(cell ->
+     *         cell == null ? "" : ExcelUtil.CELL_GETTER.apply(cell)
+     *     );
+     * Dataset ds = ExcelUtil.loadSheet(file, "Sheet1", safeExtractor);
      * }</pre>
+     *
+     * @see #DEFAULT
+     * @see #create(Function)
+     * @see RowMappers
      */
     public static final class RowExtractors {
 
@@ -1483,8 +1624,30 @@ public final class ExcelUtil {
         }
 
         /**
-         * Default row extractor that uses CELL_GETTER to extract cell values.
-         * Suitable for general-purpose data extraction maintaining original data types.
+         * Default row extractor that extracts cell values while preserving their original data types.
+         * This extractor uses {@link #CELL_GETTER} to extract values from each cell, maintaining
+         * the Excel cell's native type: {@code String} for text, {@code Double} for numbers,
+         * {@code Boolean} for boolean values, etc. This is the recommended extractor for standard
+         * Dataset creation when type preservation is desired.
+         *
+         * <p>The extractor iterates through all cells in a row and populates the output array with
+         * appropriately typed values, which are then used to construct column-oriented Dataset
+         * structures. This provides the most natural and type-safe representation of Excel data
+         * in Dataset form.</p>
+         *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * // Load Excel sheet into Dataset with type preservation
+         * Dataset dataset = ExcelUtil.loadSheet(
+         *     new File("sales.xlsx"),
+         *     0,  // First sheet
+         *     RowExtractors.DEFAULT
+         * );
+         *
+         * // Access data with original types preserved
+         * List<Object> productCol = dataset.getColumn("Product");  // Strings
+         * List<Object> priceCol = dataset.getColumn("Price");      // Doubles
+         * }</pre>
          */
         public static final TriConsumer<String[], Row, Object[]> DEFAULT = create(CELL_GETTER);
 
@@ -1524,23 +1687,59 @@ public final class ExcelUtil {
     }
 
     /**
-     * Configuration options for creating Excel sheets with specific formatting.
-     * Uses the builder pattern to provide a fluent API for configuration.
-     * 
+     * Configuration options for controlling Excel sheet creation with professional formatting and features.
+     * This class provides a comprehensive set of options to enhance the appearance and usability of
+     * generated Excel files, including automatic column sizing, freeze panes for easier navigation,
+     * and auto-filters for data exploration. Uses the builder pattern to enable fluent, readable
+     * configuration with optional settings.
+     *
+     * <p>These options are applied after all sheet data has been written, ensuring that formatting
+     * decisions can be based on the actual content. Auto-sizing, for example, adjusts column widths
+     * based on the actual data written to each column, and auto-filters are positioned based on the
+     * header row structure.</p>
+     *
+     * <p><b>Configuration Precedence Rules:</b>
+     * <ul>
+     *   <li>If {@code freezePane} is set, it takes precedence over {@code freezeFirstRow}</li>
+     *   <li>If {@code autoFilter} is set, it takes precedence over {@code autoFilterByFirstRow}</li>
+     *   <li>All other options are applied independently and can be combined</li>
+     * </ul>
+     *
+     * <p><b>Common Configuration Patterns:</b>
+     * <ul>
+     *   <li><b>Basic Report:</b> Enable {@code autoSizeColumn} and {@code freezeFirstRow}</li>
+     *   <li><b>Interactive Data:</b> Add {@code autoFilterByFirstRow} for filtering capabilities</li>
+     *   <li><b>Large Dataset:</b> Use {@code freezePane} to freeze multiple columns/rows</li>
+     *   <li><b>Simple Export:</b> Leave all options disabled (default values)</li>
+     * </ul>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * SheetCreateOptions options = SheetCreateOptions.builder()
+     * // Basic formatted report with auto-sizing and frozen header
+     * SheetCreateOptions basicOptions = SheetCreateOptions.builder()
      *     .autoSizeColumn(true)
-     *     .freezePane(new FreezePane(1, 1))
+     *     .freezeFirstRow(true)
      *     .autoFilterByFirstRow(true)
      *     .build();
-     * 
-     * ExcelUtil.writeSheet("Report", data, options, new File("report.xlsx"));
+     *
+     * ExcelUtil.writeSheet("Sales Report", data, basicOptions, new File("report.xlsx"));
+     *
+     * // Advanced formatting with custom freeze pane
+     * SheetCreateOptions advancedOptions = SheetCreateOptions.builder()
+     *     .autoSizeColumn(true)
+     *     .freezePane(new FreezePane(2, 1))  // Freeze first 2 columns and first row
+     *     .autoFilter(new CellRangeAddress(0, 0, 0, 5))  // Filter first 6 columns
+     *     .build();
+     *
+     * ExcelUtil.writeSheet("Detailed Analysis", dataset, advancedOptions, new File("analysis.xlsx"));
+     *
+     * // Default (no formatting) - fastest option
+     * SheetCreateOptions defaultOptions = new SheetCreateOptions();
+     * ExcelUtil.writeSheet("Raw Data", data, defaultOptions, new File("raw.xlsx"));
      * }</pre>
      *
-     * <p>Configuration options for creating Excel sheets with specific formatting and behavior.
-     * This class provides various settings to control sheet creation including auto-sizing,
-     * freeze panes, filtering, and cell styling.</p>
+     * @see FreezePane
+     * @see CellRangeAddress
      */
     @Data
     @Builder
@@ -1549,57 +1748,140 @@ public final class ExcelUtil {
 
         /**
          * Creates a new instance of SheetCreateOptions with default values.
-         * All boolean flags are initialized to false and object references to null.
+         * All boolean flags are initialized to {@code false}, and object references are {@code null},
+         * resulting in no special formatting being applied to the generated sheet. This is the
+         * fastest option as it skips all post-processing formatting operations.
          */
         public SheetCreateOptions() {
         }
 
         /**
-         * Whether to automatically size columns to fit their content.
-         * When {@code true}, columns will be resized after all data is written.
+         * Whether to automatically resize columns to fit their content width.
+         * When set to {@code true}, after all data is written to the sheet, each column will be
+         * auto-sized based on the width of its content. This ensures all data is visible without
+         * manual column width adjustments, improving readability of the generated Excel file.
+         *
+         * <p><b>Performance Note:</b> Auto-sizing can be slow for sheets with many columns or rows,
+         * as it requires Apache POI to measure the width of content in each cell. For large datasets
+         * (>10,000 rows or >50 columns), consider disabling this option or using fixed column widths.</p>
+         *
+         * <p><b>Default:</b> {@code false} (no auto-sizing)</p>
          */
         private boolean autoSizeColumn;
 
         /**
-         * Freeze pane configuration specifying which rows/columns to freeze.
-         * Takes precedence over freezeFirstRow if both are set.
+         * Custom freeze pane configuration specifying the number of columns and rows to freeze.
+         * When set, creates a freeze pane at the specified position, allowing users to scroll
+         * through data while keeping certain columns and rows visible. This is particularly useful
+         * for large datasets where you want to keep headers and/or ID columns always visible.
+         *
+         * <p>This option takes precedence over {@link #freezeFirstRow}. If both are set, only
+         * {@code freezePane} will be applied. Set to {@code null} to use {@code freezeFirstRow}
+         * instead or to disable freeze panes entirely.</p>
+         *
+         * <p><b>Common Use Cases:</b>
+         * <ul>
+         *   <li>{@code new FreezePane(0, 1)} - Freeze only the first row (header row)</li>
+         *   <li>{@code new FreezePane(1, 1)} - Freeze first column and first row</li>
+         *   <li>{@code new FreezePane(2, 1)} - Freeze first two columns and first row</li>
+         * </ul>
+         *
+         * <p><b>Default:</b> {@code null} (no custom freeze pane)</p>
+         *
+         * @see FreezePane
          */
         private FreezePane freezePane;
 
         /**
-         * Whether to freeze the first row (typically headers).
-         * Ignored if freezePane is specified.
+         * Whether to freeze the first row of the sheet (typically the header row).
+         * When set to {@code true}, the first row remains visible while scrolling through data,
+         * making it easy to keep track of column meanings in large datasets. This is a convenience
+         * option equivalent to setting {@code freezePane} to {@code new FreezePane(0, 1)}.
+         *
+         * <p>This option is ignored if {@link #freezePane} is also set. Use {@code freezePane}
+         * for more control over which rows and columns to freeze.</p>
+         *
+         * <p><b>Default:</b> {@code false} (no freeze)</p>
          */
         private boolean freezeFirstRow;
 
         /**
-         * Cell range for applying auto-filter.
-         * Takes precedence over autoFilterByFirstRow if both are set.
+         * Custom cell range for applying Excel's auto-filter feature.
+         * When set, creates filter dropdown buttons for the specified range of cells, allowing users
+         * to interactively filter and sort data within Excel. This provides maximum control over
+         * which columns and rows should have filtering enabled.
+         *
+         * <p>This option takes precedence over {@link #autoFilterByFirstRow}. If both are set,
+         * only {@code autoFilter} will be applied. Set to {@code null} to use {@code autoFilterByFirstRow}
+         * instead or to disable auto-filters entirely.</p>
+         *
+         * <p><b>Example:</b>
+         * {@code new CellRangeAddress(0, 0, 0, 5)} creates auto-filter for the first row
+         * across columns A through F (indices 0-5).</p>
+         *
+         * <p><b>Default:</b> {@code null} (no custom auto-filter)</p>
+         *
+         * @see CellRangeAddress
          */
         private CellRangeAddress autoFilter;
 
         /**
-         * Whether to apply auto-filter to the first row.
-         * Creates filter dropdowns for all columns in the header row.
+         * Whether to apply auto-filter to all columns in the first row.
+         * When set to {@code true}, creates filter dropdown buttons for all columns in the header row,
+         * enabling users to filter and sort data interactively. This is a convenience option that
+         * automatically determines the correct column range based on the data written.
+         *
+         * <p>This option is ignored if {@link #autoFilter} is also set. Use {@code autoFilter}
+         * for more precise control over the filter range.</p>
+         *
+         * <p><b>Default:</b> {@code false} (no auto-filter)</p>
          */
         private boolean autoFilterByFirstRow;
     }
 
     /**
-     * Represents freeze pane configuration for Excel sheets.
-     * Specifies the number of columns and rows to freeze from the top-left corner.
-     * 
+     * Represents a freeze pane configuration for Excel sheets, specifying which columns and rows
+     * should remain visible when scrolling through the worksheet. Freeze panes are essential for
+     * improving the usability of large Excel datasets by keeping headers and key columns always
+     * visible, making it easier for users to understand the data context while scrolling.
+     *
+     * <p>The freeze pane divides the sheet into panes at the specified position. Columns to the
+     * left of {@code colSplit} and rows above {@code rowSplit} will remain fixed in place when
+     * scrolling. The split occurs <b>after</b> the specified column/row number, meaning
+     * {@code new FreezePane(1, 1)} freezes the first column (index 0) and first row (index 0).</p>
+     *
+     * <p><b>Common Freeze Pane Patterns:</b>
+     * <ul>
+     *   <li><b>Header Row Only:</b> {@code new FreezePane(0, 1)} - Freezes just the top row</li>
+     *   <li><b>Header and ID Column:</b> {@code new FreezePane(1, 1)} - Freezes first column and first row</li>
+     *   <li><b>Multiple Columns:</b> {@code new FreezePane(2, 1)} - Freezes first two columns and top row</li>
+     *   <li><b>Column Only:</b> {@code new FreezePane(1, 0)} - Freezes just the first column</li>
+     *   <li><b>Multiple Rows:</b> {@code new FreezePane(0, 2)} - Freezes the first two rows</li>
+     * </ul>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * // Freeze first column and first row
-     * FreezePane freezeHeaders = new FreezePane(1, 1);
-     * 
-     * // Freeze first two columns only
-     * FreezePane freezeColumns = new FreezePane(2, 0);
+     * // Freeze first column and first row (most common pattern)
+     * FreezePane headerAndId = new FreezePane(1, 1);
+     * SheetCreateOptions options = SheetCreateOptions.builder()
+     *     .freezePane(headerAndId)
+     *     .build();
+     *
+     * // Freeze only the header row for wide datasets
+     * FreezePane headerOnly = new FreezePane(0, 1);
+     * ExcelUtil.writeSheet("Data", dataset, SheetCreateOptions.builder()
+     *     .freezePane(headerOnly)
+     *     .autoFilterByFirstRow(true)
+     *     .build(), new File("output.xlsx"));
+     *
+     * // Freeze first two columns for comparison
+     * FreezePane twoColumns = new FreezePane(2, 0);
      * }</pre>
-     * 
-     * @param colSplit number of columns to freeze (0 for none)
-     * @param rowSplit number of rows to freeze (0 for none)
+     *
+     * @param colSplit the number of columns to freeze from the left (0 for none). The freeze occurs
+     *                 after this many columns, so {@code colSplit=1} freezes column A (index 0).
+     * @param rowSplit the number of rows to freeze from the top (0 for none). The freeze occurs
+     *                 after this many rows, so {@code rowSplit=1} freezes row 1 (index 0).
      */
     public record FreezePane(int colSplit, int rowSplit) {
     }

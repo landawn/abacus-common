@@ -50,10 +50,18 @@ import java.lang.annotation.Target;
  *     public E remove(int index) {
  *         throw new UnsupportedOperationException("Cannot modify an immutable list");
  *     }
+ *
+ *     @UnsupportedOperation
+ *     @Override
+ *     public void clear() {
+ *         throw new UnsupportedOperationException("Cannot modify an immutable list");
+ *     }
  * }
  * }</pre>
  *
  * @see UnsupportedOperationException
+ * @see Immutable
+ * @see ReadOnly
  */
 @Documented
 @Target(value = { METHOD })

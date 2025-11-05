@@ -96,4 +96,22 @@ public interface LongConsumer extends Throwables.LongConsumer<RuntimeException>,
             after.accept(t);
         };
     }
+
+    /**
+     * Converts this {@code LongConsumer} to a {@code Throwables.LongConsumer} that can throw a checked exception.
+     * This method provides a way to use this consumer in contexts that require explicit exception handling.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * LongConsumer consumer = value -> System.out.println(value);
+     * var throwableConsumer = consumer.toThrowable();
+     * // Can now be used in contexts that handle checked exceptions
+     * }</pre>
+     *
+     * @param <E> the type of exception that the returned consumer can throw
+     * @return a {@code Throwables.LongConsumer} view of this consumer that can throw exceptions of type {@code E}
+     */
+    default <E extends Throwable> Throwables.LongConsumer<E> toThrowable() {
+        return (Throwables.LongConsumer<E>) this;
+    }
 }

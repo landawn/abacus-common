@@ -88,6 +88,19 @@ public class DurationType extends AbstractType<Duration> {
      * Converts a string representation back to a Duration.
      * The string should contain a numeric value representing milliseconds.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Type<Duration> type = TypeFactory.getType(Duration.class);
+     * Duration duration1 = type.valueOf("5000");
+     * // Creates 5-second duration
+     *
+     * Duration duration2 = type.valueOf("60000");
+     * // Creates 1-minute duration
+     *
+     * Duration duration3 = type.valueOf(null);
+     * // Returns null
+     * }</pre>
+     *
      * @param str the string containing milliseconds value. Can be {@code null} or empty.
      * @return A Duration created from the milliseconds value, or {@code null} if input is null/empty
      */

@@ -207,8 +207,19 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
      *   <li>Either key or element is null</li>
      *   <li>The element has already expired</li>
      *   <li>The pool is at capacity and auto-balancing is disabled</li>
-     *   <li>The operation will fail if the element would exceed memory constraints</li>
+     *   <li>The element would exceed memory constraints (when memory measure is configured)</li>
      * </ul>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * DBConnection conn = new DBConnection("server1");
+     * if (pool.put("database1", conn)) {
+     *     System.out.println("Connection added successfully");
+     * } else {
+     *     System.out.println("Failed to add - pool full or connection expired");
+     *     conn.destroy(Caller.PUT_ADD_FAILURE);
+     * }
+     * }</pre>
      *
      * @param key the key with which the specified element is to be associated
      * @param e the element to be associated with the specified key
@@ -296,6 +307,26 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
      * If the element has expired, it is removed and destroyed, and {@code null} is returned.
      * The element's activity print is updated to reflect this access.
      *
+     * <p>This method performs the following operations:</p>
+     * <ol>
+     *   <li>Retrieves the element associated with the key</li>
+     *   <li>Checks if the element has expired</li>
+     *   <li>If expired: removes and destroys the element, returns {@code null}</li>
+     *   <li>If valid: updates last access time and access count, returns the element</li>
+     * </ol>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * E cached = pool.get("myKey");
+     * if (cached != null) {
+     *     // Use cached element
+     * } else {
+     *     // Create new element and add to pool
+     *     E newElement = createElement();
+     *     pool.put("myKey", newElement);
+     * }
+     * }</pre>
+     *
      * @param key the key whose associated element is to be returned
      * @return the element associated with the key, or {@code null} if no mapping exists or element expired
      * @throws IllegalStateException if the pool has been closed
@@ -341,6 +372,21 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
      * Removes and returns the element associated with the specified key.
      * The element's activity print is updated to reflect this access.
      *
+     * <p>Unlike {@link #get(Object)}, this method removes the element from the pool,
+     * so it will not be available for future requests unless re-added.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * E element = pool.remove("myKey");
+     * if (element != null) {
+     *     try {
+     *         // use the element exclusively
+     *     } finally {
+     *         element.destroy(Caller.REMOVE_REPLACE_CLEAR);
+     *     }
+     * }
+     * }</pre>
+     *
      * @param key the key whose mapping is to be removed
      * @return the element previously associated with the key, or {@code null} if no mapping exists
      * @throws IllegalStateException if the pool has been closed
@@ -379,6 +425,30 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
      * Returns the element associated with the specified key without updating access statistics.
      * If the element has expired, it is removed and destroyed, and {@code null} is returned.
      *
+     * <p><b>Important Side Effects:</b></p>
+     * <ul>
+     *   <li><b>Does NOT update</b> last access time - element's access time remains unchanged</li>
+     *   <li><b>Does NOT update</b> access count - element's access counter remains unchanged</li>
+     *   <li><b>DOES remove and destroy</b> expired elements - if the element has expired, it will be
+     *       destroyed and removed from the pool, and {@code null} will be returned</li>
+     *   <li><b>Does NOT remove</b> the element from the pool (if valid) - the element remains available
+     *       for future requests</li>
+     * </ul>
+     *
+     * <p>Use this method when you need to inspect pool contents for monitoring, debugging, or
+     * administrative purposes without affecting the element's eviction priority. If you need to
+     * use the element for regular operations, use {@link #get(Object)} instead.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * // Check if an element exists without affecting its access statistics
+     * DBConnection conn = pool.peek("database1");
+     * if (conn != null) {
+     *     System.out.println("Connection available: " + conn.isActive());
+     *     // Connection remains in pool with unchanged access statistics
+     * }
+     * }</pre>
+     *
      * @param key the key whose associated element is to be returned
      * @return the element associated with the key, or {@code null} if no mapping exists or element expired
      * @throws IllegalStateException if the pool has been closed
@@ -412,7 +482,17 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
 
     /**
      * Returns {@code true} if this pool contains a mapping for the specified key.
-     * 
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * if (pool.containsKey("database1")) {
+     *     DBConnection conn = pool.get("database1");
+     *     // use connection
+     * } else {
+     *     // create and add new connection
+     * }
+     * }</pre>
+     *
      * @param key the key whose presence in this pool is to be tested
      * @return {@code true} if this pool contains a mapping for the specified key
      * @throws IllegalStateException if the pool has been closed
@@ -433,7 +513,16 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
     /**
      * Returns a snapshot of the keys contained in this pool.
      * The returned set is a copy and will not reflect subsequent changes to the pool.
-     * 
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Set<String> databases = pool.keySet();
+     * System.out.println("Pooled databases: " + databases);
+     * for (String db : databases) {
+     *     System.out.println("Database: " + db);
+     * }
+     * }</pre>
+     *
      * @return a set containing all keys currently in the pool
      * @throws IllegalStateException if the pool has been closed
      */
@@ -453,6 +542,15 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
     /**
      * Returns a snapshot of the elements contained in this pool.
      * The returned collection is a copy and will not reflect subsequent changes to the pool.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Collection<DBConnection> connections = pool.values();
+     * System.out.println("Total pooled connections: " + connections.size());
+     * for (DBConnection conn : connections) {
+     *     System.out.println("Connection status: " + conn.isActive());
+     * }
+     * }</pre>
      *
      * @return a collection containing all elements currently in the pool
      * @throws IllegalStateException if the pool has been closed

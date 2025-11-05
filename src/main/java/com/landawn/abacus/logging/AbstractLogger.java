@@ -86,12 +86,14 @@ public abstract class AbstractLogger implements Logger {
     /**
      * Logs a message at TRACE level with two parameters.
      *
+     * <p>The message template can use {} or %s as placeholders.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * logger.trace("Processing {} items for user {}", itemCount, userId);
      * }</pre>
      *
-     * @param template the message template
+     * @param template the message template containing two placeholders
      * @param arg1 the first argument
      * @param arg2 the second argument
      */
@@ -105,7 +107,9 @@ public abstract class AbstractLogger implements Logger {
     /**
      * Logs a message at TRACE level with three parameters.
      *
-     * @param template the message template
+     * <p>The message template can use {} or %s as placeholders.</p>
+     *
+     * @param template the message template containing three placeholders
      * @param arg1 the first argument
      * @param arg2 the second argument
      * @param arg3 the third argument
@@ -120,7 +124,9 @@ public abstract class AbstractLogger implements Logger {
     /**
      * Logs a message at TRACE level with four parameters.
      *
-     * @param template the message template
+     * <p>The message template can use {} or %s as placeholders.</p>
+     *
+     * @param template the message template containing four placeholders
      * @param arg1 the first argument
      * @param arg2 the second argument
      * @param arg3 the third argument
@@ -136,7 +142,9 @@ public abstract class AbstractLogger implements Logger {
     /**
      * Logs a message at TRACE level with five parameters.
      *
-     * @param template the message template
+     * <p>The message template can use {} or %s as placeholders.</p>
+     *
+     * @param template the message template containing five placeholders
      * @param arg1 the first argument
      * @param arg2 the second argument
      * @param arg3 the third argument
@@ -153,7 +161,9 @@ public abstract class AbstractLogger implements Logger {
     /**
      * Logs a message at TRACE level with six parameters.
      *
-     * @param template the message template
+     * <p>The message template can use {} or %s as placeholders.</p>
+     *
+     * @param template the message template containing six placeholders
      * @param arg1 the first argument
      * @param arg2 the second argument
      * @param arg3 the third argument
@@ -171,7 +181,9 @@ public abstract class AbstractLogger implements Logger {
     /**
      * Logs a message at TRACE level with seven parameters.
      *
-     * @param template the message template
+     * <p>The message template can use {} or %s as placeholders.</p>
+     *
+     * @param template the message template containing seven placeholders
      * @param arg1 the first argument
      * @param arg2 the second argument
      * @param arg3 the third argument
@@ -223,6 +235,8 @@ public abstract class AbstractLogger implements Logger {
     /**
      * Logs a formatted message at TRACE level with an exception and one parameter.
      *
+     * <p>The message template can use {} or %s as placeholder.</p>
+     *
      * @param t the exception or error to log
      * @param template the message template
      * @param arg the argument to be substituted in the template
@@ -236,6 +250,8 @@ public abstract class AbstractLogger implements Logger {
 
     /**
      * Logs a formatted message at TRACE level with an exception and two parameters.
+     *
+     * <p>The message template can use {} or %s as placeholders.</p>
      *
      * @param t the exception or error to log
      * @param template the message template
@@ -251,6 +267,8 @@ public abstract class AbstractLogger implements Logger {
 
     /**
      * Logs a formatted message at TRACE level with an exception and three parameters.
+     *
+     * <p>The message template can use {} or %s as placeholders.</p>
      *
      * @param t the exception or error to log
      * @param template the message template
@@ -333,7 +351,9 @@ public abstract class AbstractLogger implements Logger {
     /**
      * Logs a message at DEBUG level with two parameters.
      *
-     * @param template the message template
+     * <p>The message template can use {} or %s as placeholders.</p>
+     *
+     * @param template the message template containing two placeholders
      * @param arg1 the first argument
      * @param arg2 the second argument
      */
@@ -347,7 +367,9 @@ public abstract class AbstractLogger implements Logger {
     /**
      * Logs a message at DEBUG level with three parameters.
      *
-     * @param template the message template
+     * <p>The message template can use {} or %s as placeholders.</p>
+     *
+     * @param template the message template containing three placeholders
      * @param arg1 the first argument
      * @param arg2 the second argument
      * @param arg3 the third argument
@@ -362,7 +384,9 @@ public abstract class AbstractLogger implements Logger {
     /**
      * Logs a message at DEBUG level with four parameters.
      *
-     * @param template the message template
+     * <p>The message template can use {} or %s as placeholders.</p>
+     *
+     * @param template the message template containing four placeholders
      * @param arg1 the first argument
      * @param arg2 the second argument
      * @param arg3 the third argument
@@ -378,7 +402,9 @@ public abstract class AbstractLogger implements Logger {
     /**
      * Logs a message at DEBUG level with five parameters.
      *
-     * @param template the message template
+     * <p>The message template can use {} or %s as placeholders.</p>
+     *
+     * @param template the message template containing five placeholders
      * @param arg1 the first argument
      * @param arg2 the second argument
      * @param arg3 the third argument
@@ -395,7 +421,9 @@ public abstract class AbstractLogger implements Logger {
     /**
      * Logs a message at DEBUG level with six parameters.
      *
-     * @param template the message template
+     * <p>The message template can use {} or %s as placeholders.</p>
+     *
+     * @param template the message template containing six placeholders
      * @param arg1 the first argument
      * @param arg2 the second argument
      * @param arg3 the third argument
@@ -413,7 +441,9 @@ public abstract class AbstractLogger implements Logger {
     /**
      * Logs a message at DEBUG level with seven parameters.
      *
-     * @param template the message template
+     * <p>The message template can use {} or %s as placeholders.</p>
+     *
+     * @param template the message template containing seven placeholders
      * @param arg1 the first argument
      * @param arg2 the second argument
      * @param arg3 the third argument
@@ -432,6 +462,8 @@ public abstract class AbstractLogger implements Logger {
 
     /**
      * Logs a message at DEBUG level with variable number of parameters.
+     *
+     * <p>The message template can use {} or %s as placeholders.</p>
      *
      * @param template the message template
      * @param args the arguments to be substituted in the template
@@ -460,6 +492,8 @@ public abstract class AbstractLogger implements Logger {
     /**
      * Logs a formatted message at DEBUG level with an exception and one parameter.
      *
+     * <p>The message template can use {} or %s as placeholder.</p>
+     *
      * @param t the exception or error to log
      * @param template the message template
      * @param arg the argument to be substituted in the template
@@ -473,6 +507,8 @@ public abstract class AbstractLogger implements Logger {
 
     /**
      * Logs a formatted message at DEBUG level with an exception and two parameters.
+     *
+     * <p>The message template can use {} or %s as placeholders.</p>
      *
      * @param t the exception or error to log
      * @param template the message template
@@ -488,6 +524,8 @@ public abstract class AbstractLogger implements Logger {
 
     /**
      * Logs a formatted message at DEBUG level with an exception and three parameters.
+     *
+     * <p>The message template can use {} or %s as placeholders.</p>
      *
      * @param t the exception or error to log
      * @param template the message template
@@ -563,7 +601,9 @@ public abstract class AbstractLogger implements Logger {
     /**
      * Logs a message at INFO level with two parameters.
      *
-     * @param template the message template
+     * <p>The message template can use {} or %s as placeholders.</p>
+     *
+     * @param template the message template containing two placeholders
      * @param arg1 the first argument
      * @param arg2 the second argument
      */
@@ -577,7 +617,9 @@ public abstract class AbstractLogger implements Logger {
     /**
      * Logs a message at INFO level with three parameters.
      *
-     * @param template the message template
+     * <p>The message template can use {} or %s as placeholders.</p>
+     *
+     * @param template the message template containing three placeholders
      * @param arg1 the first argument
      * @param arg2 the second argument
      * @param arg3 the third argument
@@ -592,7 +634,9 @@ public abstract class AbstractLogger implements Logger {
     /**
      * Logs a message at INFO level with four parameters.
      *
-     * @param template the message template
+     * <p>The message template can use {} or %s as placeholders.</p>
+     *
+     * @param template the message template containing four placeholders
      * @param arg1 the first argument
      * @param arg2 the second argument
      * @param arg3 the third argument
@@ -608,7 +652,9 @@ public abstract class AbstractLogger implements Logger {
     /**
      * Logs a message at INFO level with five parameters.
      *
-     * @param template the message template
+     * <p>The message template can use {} or %s as placeholders.</p>
+     *
+     * @param template the message template containing five placeholders
      * @param arg1 the first argument
      * @param arg2 the second argument
      * @param arg3 the third argument
@@ -625,7 +671,9 @@ public abstract class AbstractLogger implements Logger {
     /**
      * Logs a message at INFO level with six parameters.
      *
-     * @param template the message template
+     * <p>The message template can use {} or %s as placeholders.</p>
+     *
+     * @param template the message template containing six placeholders
      * @param arg1 the first argument
      * @param arg2 the second argument
      * @param arg3 the third argument
@@ -643,7 +691,9 @@ public abstract class AbstractLogger implements Logger {
     /**
      * Logs a message at INFO level with seven parameters.
      *
-     * @param template the message template
+     * <p>The message template can use {} or %s as placeholders.</p>
+     *
+     * @param template the message template containing seven placeholders
      * @param arg1 the first argument
      * @param arg2 the second argument
      * @param arg3 the third argument
@@ -662,6 +712,8 @@ public abstract class AbstractLogger implements Logger {
 
     /**
      * Logs a message at INFO level with variable number of parameters.
+     *
+     * <p>The message template can use {} or %s as placeholders.</p>
      *
      * @param template the message template
      * @param args the arguments to be substituted in the template
@@ -690,6 +742,8 @@ public abstract class AbstractLogger implements Logger {
     /**
      * Logs a formatted message at INFO level with an exception and one parameter.
      *
+     * <p>The message template can use {} or %s as placeholder.</p>
+     *
      * @param t the exception or error to log
      * @param template the message template
      * @param arg the argument to be substituted in the template
@@ -703,6 +757,8 @@ public abstract class AbstractLogger implements Logger {
 
     /**
      * Logs a formatted message at INFO level with an exception and two parameters.
+     *
+     * <p>The message template can use {} or %s as placeholders.</p>
      *
      * @param t the exception or error to log
      * @param template the message template
@@ -718,6 +774,8 @@ public abstract class AbstractLogger implements Logger {
 
     /**
      * Logs a formatted message at INFO level with an exception and three parameters.
+     *
+     * <p>The message template can use {} or %s as placeholders.</p>
      *
      * @param t the exception or error to log
      * @param template the message template
@@ -793,7 +851,9 @@ public abstract class AbstractLogger implements Logger {
     /**
      * Logs a message at WARN level with two parameters.
      *
-     * @param template the message template
+     * <p>The message template can use {} or %s as placeholders.</p>
+     *
+     * @param template the message template containing two placeholders
      * @param arg1 the first argument
      * @param arg2 the second argument
      */
@@ -807,7 +867,9 @@ public abstract class AbstractLogger implements Logger {
     /**
      * Logs a message at WARN level with three parameters.
      *
-     * @param template the message template
+     * <p>The message template can use {} or %s as placeholders.</p>
+     *
+     * @param template the message template containing three placeholders
      * @param arg1 the first argument
      * @param arg2 the second argument
      * @param arg3 the third argument
@@ -822,7 +884,9 @@ public abstract class AbstractLogger implements Logger {
     /**
      * Logs a message at WARN level with four parameters.
      *
-     * @param template the message template
+     * <p>The message template can use {} or %s as placeholders.</p>
+     *
+     * @param template the message template containing four placeholders
      * @param arg1 the first argument
      * @param arg2 the second argument
      * @param arg3 the third argument
@@ -838,7 +902,9 @@ public abstract class AbstractLogger implements Logger {
     /**
      * Logs a message at WARN level with five parameters.
      *
-     * @param template the message template
+     * <p>The message template can use {} or %s as placeholders.</p>
+     *
+     * @param template the message template containing five placeholders
      * @param arg1 the first argument
      * @param arg2 the second argument
      * @param arg3 the third argument
@@ -855,7 +921,9 @@ public abstract class AbstractLogger implements Logger {
     /**
      * Logs a message at WARN level with six parameters.
      *
-     * @param template the message template
+     * <p>The message template can use {} or %s as placeholders.</p>
+     *
+     * @param template the message template containing six placeholders
      * @param arg1 the first argument
      * @param arg2 the second argument
      * @param arg3 the third argument
@@ -873,7 +941,9 @@ public abstract class AbstractLogger implements Logger {
     /**
      * Logs a message at WARN level with seven parameters.
      *
-     * @param template the message template
+     * <p>The message template can use {} or %s as placeholders.</p>
+     *
+     * @param template the message template containing seven placeholders
      * @param arg1 the first argument
      * @param arg2 the second argument
      * @param arg3 the third argument
@@ -892,6 +962,8 @@ public abstract class AbstractLogger implements Logger {
 
     /**
      * Logs a message at WARN level with variable number of parameters.
+     *
+     * <p>The message template can use {} or %s as placeholders.</p>
      *
      * @param template the message template
      * @param args the arguments to be substituted in the template
@@ -920,6 +992,8 @@ public abstract class AbstractLogger implements Logger {
     /**
      * Logs a formatted message at WARN level with an exception and one parameter.
      *
+     * <p>The message template can use {} or %s as placeholder.</p>
+     *
      * @param t the exception or error to log
      * @param template the message template
      * @param arg the argument to be substituted in the template
@@ -933,6 +1007,8 @@ public abstract class AbstractLogger implements Logger {
 
     /**
      * Logs a formatted message at WARN level with an exception and two parameters.
+     *
+     * <p>The message template can use {} or %s as placeholders.</p>
      *
      * @param t the exception or error to log
      * @param template the message template
@@ -948,6 +1024,8 @@ public abstract class AbstractLogger implements Logger {
 
     /**
      * Logs a formatted message at WARN level with an exception and three parameters.
+     *
+     * <p>The message template can use {} or %s as placeholders.</p>
      *
      * @param t the exception or error to log
      * @param template the message template
@@ -1023,7 +1101,9 @@ public abstract class AbstractLogger implements Logger {
     /**
      * Logs a message at ERROR level with two parameters.
      *
-     * @param template the message template
+     * <p>The message template can use {} or %s as placeholders.</p>
+     *
+     * @param template the message template containing two placeholders
      * @param arg1 the first argument
      * @param arg2 the second argument
      */
@@ -1037,7 +1117,9 @@ public abstract class AbstractLogger implements Logger {
     /**
      * Logs a message at ERROR level with three parameters.
      *
-     * @param template the message template
+     * <p>The message template can use {} or %s as placeholders.</p>
+     *
+     * @param template the message template containing three placeholders
      * @param arg1 the first argument
      * @param arg2 the second argument
      * @param arg3 the third argument
@@ -1052,7 +1134,9 @@ public abstract class AbstractLogger implements Logger {
     /**
      * Logs a message at ERROR level with four parameters.
      *
-     * @param template the message template
+     * <p>The message template can use {} or %s as placeholders.</p>
+     *
+     * @param template the message template containing four placeholders
      * @param arg1 the first argument
      * @param arg2 the second argument
      * @param arg3 the third argument
@@ -1068,7 +1152,9 @@ public abstract class AbstractLogger implements Logger {
     /**
      * Logs a message at ERROR level with five parameters.
      *
-     * @param template the message template
+     * <p>The message template can use {} or %s as placeholders.</p>
+     *
+     * @param template the message template containing five placeholders
      * @param arg1 the first argument
      * @param arg2 the second argument
      * @param arg3 the third argument
@@ -1085,7 +1171,9 @@ public abstract class AbstractLogger implements Logger {
     /**
      * Logs a message at ERROR level with six parameters.
      *
-     * @param template the message template
+     * <p>The message template can use {} or %s as placeholders.</p>
+     *
+     * @param template the message template containing six placeholders
      * @param arg1 the first argument
      * @param arg2 the second argument
      * @param arg3 the third argument
@@ -1103,7 +1191,9 @@ public abstract class AbstractLogger implements Logger {
     /**
      * Logs a message at ERROR level with seven parameters.
      *
-     * @param template the message template
+     * <p>The message template can use {} or %s as placeholders.</p>
+     *
+     * @param template the message template containing seven placeholders
      * @param arg1 the first argument
      * @param arg2 the second argument
      * @param arg3 the third argument
@@ -1122,6 +1212,8 @@ public abstract class AbstractLogger implements Logger {
 
     /**
      * Logs a message at ERROR level with variable number of parameters.
+     *
+     * <p>The message template can use {} or %s as placeholders.</p>
      *
      * @param template the message template
      * @param args the arguments to be substituted in the template
@@ -1150,6 +1242,8 @@ public abstract class AbstractLogger implements Logger {
     /**
      * Logs a formatted message at ERROR level with an exception and one parameter.
      *
+     * <p>The message template can use {} or %s as placeholder.</p>
+     *
      * @param t the exception or error to log
      * @param template the message template
      * @param arg the argument to be substituted in the template
@@ -1163,6 +1257,8 @@ public abstract class AbstractLogger implements Logger {
 
     /**
      * Logs a formatted message at ERROR level with an exception and two parameters.
+     *
+     * <p>The message template can use {} or %s as placeholders.</p>
      *
      * @param t the exception or error to log
      * @param template the message template
@@ -1178,6 +1274,8 @@ public abstract class AbstractLogger implements Logger {
 
     /**
      * Logs a formatted message at ERROR level with an exception and three parameters.
+     *
+     * <p>The message template can use {} or %s as placeholders.</p>
      *
      * @param t the exception or error to log
      * @param template the message template

@@ -84,4 +84,23 @@ public interface LongBiFunction<R> extends Throwables.LongBiFunction<R, RuntimeE
     default <V> LongBiFunction<V> andThen(final java.util.function.Function<? super R, ? extends V> after) {
         return (t, u) -> after.apply(apply(t, u));
     }
+
+    /**
+     * Converts this {@code LongBiFunction} to a {@code Throwables.LongBiFunction} that can throw a checked exception.
+     * This method provides a way to use this function in contexts that require explicit exception handling.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * LongBiFunction function = (...) -> { ... };
+     * var throwableFunction = function.toThrowable();
+     * // Can now be used in contexts that handle checked exceptions
+     * }</pre>
+     *
+     * @param <E> the type of exception that the returned function can throw
+     * @return a {@code Throwables.LongBiFunction} view of this function that can throw exceptions of type {@code E}
+     */
+    default <E extends Throwable> Throwables.LongBiFunction<R, E> toThrowable() {
+        return (Throwables.LongBiFunction<R, E>) this;
+    }
+
 }

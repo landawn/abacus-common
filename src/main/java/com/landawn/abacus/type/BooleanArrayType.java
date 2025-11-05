@@ -38,6 +38,20 @@ public final class BooleanArrayType extends ObjectArrayType<Boolean> {
      * The array is formatted with square brackets and comma-separated elements.
      * Null elements are represented as "null" in the output.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Type<Boolean[]> type = TypeFactory.getType(Boolean[].class);
+     * Boolean[] array = {true, false, null, true};
+     * String result = type.stringOf(array);
+     * // result: "[true, false, null, true]"
+     *
+     * String empty = type.stringOf(new Boolean[0]);
+     * // empty: "[]"
+     *
+     * String nullResult = type.stringOf(null);
+     * // nullResult: null
+     * }</pre>
+     *
      * @param x the Boolean array to convert
      * @return a string representation like "[true, false, null]", or {@code null} if input is {@code null},
      *         or "[]" if the array is empty
@@ -57,6 +71,19 @@ public final class BooleanArrayType extends ObjectArrayType<Boolean> {
      * Converts a string representation back to a Boolean array.
      * Parses a string in the format "[true, false, null]" into a Boolean array.
      * The string "null" (case-sensitive) is parsed as a {@code null} element.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Type<Boolean[]> type = TypeFactory.getType(Boolean[].class);
+     * Boolean[] result = type.valueOf("[true, false, null, true]");
+     * // result: {true, false, null, true}
+     *
+     * Boolean[] empty = type.valueOf("[]");
+     * // empty: {} (empty array)
+     *
+     * Boolean[] nullResult = type.valueOf(null);
+     * // nullResult: null
+     * }</pre>
      *
      * @param str the string to parse, expecting format like "[true, false, null]"
      * @return a Boolean array parsed from the string, or {@code null} if str is {@code null},

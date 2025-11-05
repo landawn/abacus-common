@@ -40,4 +40,23 @@ public interface ByteBinaryOperator extends Throwables.ByteBinaryOperator<Runtim
      */
     @Override
     byte applyAsByte(byte left, byte right);
+
+    /**
+     * Converts this {@code ByteBinaryOperator} to a {@code Throwables.ByteBinaryOperator} that can throw a checked exception.
+     * This method provides a way to use this operator in contexts that require explicit exception handling.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * ByteBinaryOperator operator = (...) -> { ... };
+     * var throwableOperator = operator.toThrowable();
+     * // Can now be used in contexts that handle checked exceptions
+     * }</pre>
+     *
+     * @param <E> the type of exception that the returned operator can throw
+     * @return a {@code Throwables.ByteBinaryOperator} view of this operator that can throw exceptions of type {@code E}
+     */
+    default <E extends Throwable> Throwables.ByteBinaryOperator<E> toThrowable() {
+        return (Throwables.ByteBinaryOperator<E>) this;
+    }
+
 }

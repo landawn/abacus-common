@@ -39,6 +39,17 @@ public final class IntegerArrayType extends ObjectArrayType<Integer> {
      * Null elements are represented as "null" in the output string.
      * This method is optimized for performance using string joining.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Type<Integer[]> type = TypeFactory.getType(Integer[].class);
+     * Integer[] array = {1, null, 3, 42};
+     * String result = type.stringOf(array);
+     * // result: "[1, null, 3, 42]"
+     *
+     * String empty = type.stringOf(new Integer[0]);
+     * // empty: "[]"
+     * }</pre>
+     *
      * @param x the Integer array to convert to string
      * @return the JSON array string representation (e.g., "[1,null,3]"), or {@code null} if the input array is null
      */
@@ -59,6 +70,16 @@ public final class IntegerArrayType extends ObjectArrayType<Integer> {
      * - {@code null} string: returns null
      * - empty string or "[]": returns empty Integer array
      * - JSON array: parses each element, treating "null" strings as {@code null} values
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Type<Integer[]> type = TypeFactory.getType(Integer[].class);
+     * Integer[] result = type.valueOf("[1, null, 3, 42]");
+     * // result: {1, null, 3, 42}
+     *
+     * Integer[] empty = type.valueOf("[]");
+     * // empty: {} (empty array)
+     * }</pre>
      *
      * @param str the JSON array string to parse (e.g., "[1,null,3]")
      * @return the parsed Integer array, or {@code null} if the input is null

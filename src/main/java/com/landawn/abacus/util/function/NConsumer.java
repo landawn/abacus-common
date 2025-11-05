@@ -112,4 +112,23 @@ public interface NConsumer<T> {
             after.accept(args);
         };
     }
+
+    /**
+     * Converts this {@code NConsumer} to a {@code Throwables.NConsumer} that can throw a checked exception.
+     * This method provides a way to use this consumer in contexts that require explicit exception handling.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * NConsumer consumer = (...) -> { ... };
+     * var throwableConsumer = consumer.toThrowable();
+     * // Can now be used in contexts that handle checked exceptions
+     * }</pre>
+     *
+     * @param <E> the type of exception that the returned consumer can throw
+     * @return a {@code Throwables.NConsumer} view of this consumer that can throw exceptions of type {@code E}
+     */
+    default <E extends Throwable> Throwables.NConsumer<T, E> toThrowable() {
+        return (Throwables.NConsumer<T, E>) this;
+    }
+
 }

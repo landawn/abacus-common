@@ -58,4 +58,23 @@ public interface ToLongTriFunction<A, B, C> extends Throwables.ToLongTriFunction
      */
     @Override
     long applyAsLong(A a, B b, C c);
+
+    /**
+     * Converts this {@code ToLongTriFunction} to a {@code Throwables.ToLongTriFunction} that can throw a checked exception.
+     * This method provides a way to use this function in contexts that require explicit exception handling.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * ToLongTriFunction function = (...) -> { ... };
+     * var throwableFunction = function.toThrowable();
+     * // Can now be used in contexts that handle checked exceptions
+     * }</pre>
+     *
+     * @param <E> the type of exception that the returned function can throw
+     * @return a {@code Throwables.ToLongTriFunction} view of this function that can throw exceptions of type {@code E}
+     */
+    default <E extends Throwable> Throwables.ToLongTriFunction<A, B, C, E> toThrowable() {
+        return (Throwables.ToLongTriFunction<A, B, C, E>) this;
+    }
+
 }

@@ -70,4 +70,23 @@ public interface ShortBinaryOperator extends Throwables.ShortBinaryOperator<Runt
      */
     @Override
     short applyAsShort(short left, short right);
+
+    /**
+     * Converts this {@code ShortBinaryOperator} to a {@code Throwables.ShortBinaryOperator} that can throw a checked exception.
+     * This method provides a way to use this operator in contexts that require explicit exception handling.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * ShortBinaryOperator operator = (...) -> { ... };
+     * var throwableOperator = operator.toThrowable();
+     * // Can now be used in contexts that handle checked exceptions
+     * }</pre>
+     *
+     * @param <E> the type of exception that the returned operator can throw
+     * @return a {@code Throwables.ShortBinaryOperator} view of this operator that can throw exceptions of type {@code E}
+     */
+    default <E extends Throwable> Throwables.ShortBinaryOperator<E> toThrowable() {
+        return (Throwables.ShortBinaryOperator<E>) this;
+    }
+
 }

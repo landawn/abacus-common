@@ -50,4 +50,23 @@ public interface ToIntBiFunction<T, U> extends Throwables.ToIntBiFunction<T, U, 
      */
     @Override
     int applyAsInt(T t, U u);
+
+    /**
+     * Converts this {@code ToIntBiFunction} to a {@code Throwables.ToIntBiFunction} that can throw a checked exception.
+     * This method provides a way to use this function in contexts that require explicit exception handling.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * ToIntBiFunction function = (...) -> { ... };
+     * var throwableFunction = function.toThrowable();
+     * // Can now be used in contexts that handle checked exceptions
+     * }</pre>
+     *
+     * @param <E> the type of exception that the returned function can throw
+     * @return a {@code Throwables.ToIntBiFunction} view of this function that can throw exceptions of type {@code E}
+     */
+    default <E extends Throwable> Throwables.ToIntBiFunction<T, U, E> toThrowable() {
+        return (Throwables.ToIntBiFunction<T, U, E>) this;
+    }
+
 }

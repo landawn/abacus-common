@@ -80,6 +80,16 @@ public class GregorianCalendarType extends AbstractCalendarType<GregorianCalenda
      * - numeric strings: interpreted as milliseconds since epoch
      * - date/time strings: parsed according to standard date formats
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Type<GregorianCalendar> type = TypeFactory.getType(GregorianCalendar.class);
+     * GregorianCalendar gc1 = type.valueOf("2023-12-25 10:30:45");
+     * // Parses date-time string
+     *
+     * GregorianCalendar gc2 = type.valueOf("sysTime");
+     * // Returns current time
+     * }</pre>
+     *
      * @param str the string to parse into a GregorianCalendar
      * @return the parsed GregorianCalendar instance, or {@code null} if the input is {@code null} or empty
      */

@@ -140,4 +140,23 @@ public interface DoubleBiPredicate extends Throwables.DoubleBiPredicate<RuntimeE
     default DoubleBiPredicate or(final DoubleBiPredicate other) {
         return (t, u) -> test(t, u) || other.test(t, u);
     }
+
+    /**
+     * Converts this {@code DoubleBiPredicate} to a {@code Throwables.DoubleBiPredicate} that can throw a checked exception.
+     * This method provides a way to use this predicate in contexts that require explicit exception handling.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * DoubleBiPredicate predicate = (...) -> { ... };
+     * var throwablePredicate = predicate.toThrowable();
+     * // Can now be used in contexts that handle checked exceptions
+     * }</pre>
+     *
+     * @param <E> the type of exception that the returned predicate can throw
+     * @return a {@code Throwables.DoubleBiPredicate} view of this predicate that can throw exceptions of type {@code E}
+     */
+    default <E extends Throwable> Throwables.DoubleBiPredicate<E> toThrowable() {
+        return (Throwables.DoubleBiPredicate<E>) this;
+    }
+
 }

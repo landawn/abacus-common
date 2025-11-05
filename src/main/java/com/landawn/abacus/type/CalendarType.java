@@ -82,6 +82,19 @@ public class CalendarType extends AbstractCalendarType<Calendar> {
      * - "sysTime": returns the current system time as Calendar
      * - Other strings: parsed using date parsing utilities
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Type<Calendar> type = TypeFactory.getType(Calendar.class);
+     * Calendar cal1 = type.valueOf("2023-12-25 10:30:45");
+     * // Parses ISO date-time string
+     *
+     * Calendar cal2 = type.valueOf("sysTime");
+     * // Returns current system time
+     *
+     * Calendar cal3 = type.valueOf(null);
+     * // Returns null
+     * }</pre>
+     *
      * @param str the string to parse. Can be {@code null} or empty.
      * @return A Calendar instance parsed from the string, or {@code null} if input is null/empty
      */

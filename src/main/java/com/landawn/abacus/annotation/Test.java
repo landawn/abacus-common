@@ -38,15 +38,41 @@ import java.lang.annotation.Target;
  * 
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
+ * import java.util.concurrent.ConcurrentHashMap;
+ *
  * public class UserService {
+ *     private ConcurrentHashMap<String, User> cache = new ConcurrentHashMap<>();
+ *
  *     @Test
  *     void resetForTesting() {
  *         // Method exposed only for test cleanup
  *         cache.clear();
- *         connections.closeAll();
+ *     }
+ *
+ *     @Test
+ *     UserService(CacheProvider provider) {
+ *         // Constructor with package-private access for testing
+ *         this.cache = provider.getCache();
+ *     }
+ * }
+ *
+ * @Test
+ * public class MockUserRepository implements UserRepository {
+ *     // Test double implementation
+ *     private List<User> testData = new ArrayList<>();
+ *
+ *     @Override
+ *     public User findById(Long id) {
+ *         return testData.stream()
+ *             .filter(u -> u.getId().equals(id))
+ *             .findFirst()
+ *             .orElse(null);
  *     }
  * }
  * }</pre>
+ *
+ * @see Internal
+ * @see Beta
  */
 @Documented
 @Retention(value = RetentionPolicy.CLASS)
