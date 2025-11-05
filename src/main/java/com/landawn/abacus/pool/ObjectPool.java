@@ -87,6 +87,16 @@ public interface ObjectPool<E extends Poolable> extends Pool {
      * Adds a new object to the pool with optional automatic destruction on failure.
      * This is a convenience method that ensures proper cleanup if the object cannot be pooled.
      *
+     * <p><b>Execution Order:</b></p>
+     * <ol>
+     *   <li>Attempts to add the object to the pool using {@link #add(Poolable)}</li>
+     *   <li>If add fails and {@code autoDestroyOnFailedToAdd} is {@code true}, calls {@code e.destroy(PUT_ADD_FAILURE)}</li>
+     *   <li>Returns the success status of the add operation</li>
+     * </ol>
+     *
+     * <p>The destroy operation is guaranteed to execute in a finally block if the add fails,
+     * even if an exception occurs during the add attempt. This ensures no resource leaks.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * MyPoolable obj = createExpensiveObject();
@@ -130,6 +140,16 @@ public interface ObjectPool<E extends Poolable> extends Pool {
     /**
      * Attempts to add an object to the pool with timeout and automatic destruction on failure.
      * Combines the timeout and auto-destroy features for maximum convenience.
+     *
+     * <p><b>Execution Order:</b></p>
+     * <ol>
+     *   <li>Attempts to add the object to the pool using {@link #add(Poolable, long, TimeUnit)}, waiting up to the specified timeout</li>
+     *   <li>If add fails (timeout or capacity) and {@code autoDestroyOnFailedToAdd} is {@code true}, calls {@code e.destroy(PUT_ADD_FAILURE)}</li>
+     *   <li>Returns the success status of the add operation</li>
+     * </ol>
+     *
+     * <p>The destroy operation is guaranteed to execute in a finally block if the add fails,
+     * even if an exception occurs during the add attempt. This ensures no resource leaks.</p>
      *
      * @param e the object to be added to the pool, must not be {@code null}
      * @param timeout the maximum time to wait for space to become available

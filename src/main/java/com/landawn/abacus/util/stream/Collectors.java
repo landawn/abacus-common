@@ -5220,7 +5220,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * @param <T> the type of input elements
      * @param mapper function to extract an integer value from an element
      * @return a {@code Collector} that produces the average of the extracted values
-     * @throws ArithmeticException if no elements are present
+     * @throws NoSuchElementException if no elements are present
      * @see #averagingInt(ToIntFunction)
      * @see #averagingIntOrEmpty(ToIntFunction)
      */
@@ -5304,7 +5304,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * @param <T> the type of input elements
      * @param mapper function to extract a long value from an element
      * @return a {@code Collector} that produces the average of the extracted values
-     * @throws ArithmeticException if no elements are present
+     * @throws NoSuchElementException if no elements are present
      * @see #averagingLong(ToLongFunction)
      * @see #averagingLongOrEmpty(ToLongFunction)
      */
@@ -5382,7 +5382,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * @param <T> the type of input elements
      * @param mapper function to extract a double value from an element
      * @return a {@code Collector} that produces the average of the extracted values
-     * @throws ArithmeticException if no elements are present
+     * @throws NoSuchElementException if no elements are present
      * @see #averagingDouble(ToDoubleFunction)
      * @see #averagingDoubleOrEmpty(ToDoubleFunction)
      */

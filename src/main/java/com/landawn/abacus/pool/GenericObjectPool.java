@@ -305,10 +305,29 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
      * Attempts to add an object to the pool within the specified timeout period.
      * This method blocks until space becomes available, the timeout expires, or the thread is interrupted.
      *
+     * <p><b>Safety Mechanism:</b> This method implements a maxSpins (10,000) safety limit to prevent
+     * potential infinite loops in edge cases. After 10,000 iterations of checking for available space,
+     * the method will return {@code false} even if the timeout has not expired. This is an additional
+     * safeguard against extremely high contention scenarios or potential implementation issues. Under
+     * normal operation, the timeout mechanism will trigger long before reaching this limit.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * MyPoolable obj = new MyPoolable();
+     * // Wait up to 5 seconds to add the object
+     * if (pool.add(obj, 5, TimeUnit.SECONDS)) {
+     *     System.out.println("Object added successfully");
+     * } else {
+     *     System.out.println("Failed to add - pool full or timeout");
+     *     obj.destroy(Caller.PUT_ADD_FAILURE);
+     * }
+     * }</pre>
+     *
      * @param e the object to add, must not be null
      * @param timeout the maximum time to wait
      * @param unit the time unit of the timeout argument
      * @return {@code true} if successful, {@code false} if the timeout elapsed before space was available
+     *         or if the maxSpins safety limit (10,000 iterations) is reached
      * @throws IllegalArgumentException if the object is null
      * @throws IllegalStateException if the pool has been closed
      * @throws InterruptedException if interrupted while waiting

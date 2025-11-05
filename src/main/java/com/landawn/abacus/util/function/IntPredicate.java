@@ -85,6 +85,15 @@ public interface IntPredicate extends Throwables.IntPredicate<RuntimeException>,
     /**
      * Returns a predicate that represents the logical negation of this predicate.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * IntPredicate isEven = value -> value % 2 == 0;
+     * IntPredicate isOdd = isEven.negate();
+     * boolean result = isOdd.test(3); // Returns true
+     *
+     * IntStream.of(1, 2, 3, 4, 5).filter(isEven.negate()).forEach(System.out::println); // Prints: 1 3 5
+     * }</pre>
+     *
      * @return a predicate that represents the logical negation of this predicate
      */
     @Override
@@ -99,6 +108,16 @@ public interface IntPredicate extends Throwables.IntPredicate<RuntimeException>,
      *
      * <p>Any exceptions thrown during evaluation of either predicate are relayed to the caller;
      * if evaluation of this predicate throws an exception, the {@code other} predicate will not be evaluated.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * IntPredicate isPositive = value -> value > 0;
+     * IntPredicate isEven = value -> value % 2 == 0;
+     * IntPredicate isPositiveAndEven = isPositive.and(isEven);
+     * boolean result = isPositiveAndEven.test(4); // Returns true
+     *
+     * IntStream.of(-2, -1, 0, 1, 2, 3, 4).filter(isPositive.and(isEven)).forEach(System.out::println); // Prints: 2 4
+     * }</pre>
      *
      * @param other a predicate that will be logically-ANDed with this predicate
      * @return a composed predicate that represents the short-circuiting logical AND of this predicate and
@@ -116,6 +135,16 @@ public interface IntPredicate extends Throwables.IntPredicate<RuntimeException>,
      *
      * <p>Any exceptions thrown during evaluation of either predicate are relayed to the caller;
      * if evaluation of this predicate throws an exception, the {@code other} predicate will not be evaluated.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * IntPredicate isNegative = value -> value < 0;
+     * IntPredicate isZero = value -> value == 0;
+     * IntPredicate isNonPositive = isNegative.or(isZero);
+     * boolean result = isNonPositive.test(0); // Returns true
+     *
+     * IntStream.of(-2, -1, 0, 1, 2).filter(isNegative.or(isZero)).forEach(System.out::println); // Prints: -2 -1 0
+     * }</pre>
      *
      * @param other a predicate that will be logically-ORed with this predicate
      * @return a composed predicate that represents the short-circuiting logical OR of this predicate and

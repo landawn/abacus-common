@@ -51,7 +51,7 @@ public interface ObjIntConsumer<T> extends Throwables.ObjIntConsumer<T, RuntimeE
      * }</pre>
      *
      * @param t the first input argument of type T
-     * @param value the second input argument, a primitive int value if the operation cannot be completed
+     * @param value the second input argument, a primitive int value
      */
     @Override
     void accept(T t, int value);

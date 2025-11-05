@@ -99,7 +99,47 @@ public enum HttpMethod {
     /**
      * The PATCH method applies partial modifications to a resource.
      * Unlike PUT, PATCH is used for partial updates rather than complete replacement.
-     * Note: Not supported by {@link java.net.HttpURLConnection} in standard Java HTTP client.
+     *
+     * <p><b>Important Limitation:</b> The PATCH method is not supported by {@link java.net.HttpURLConnection}
+     * in the standard Java HTTP client implementation. Attempting to use PATCH with HttpURLConnection
+     * will result in a {@link java.net.ProtocolException}.</p>
+     *
+     * <p><b>Workarounds:</b></p>
+     * <ol>
+     *   <li><b>Use OkHttpClient:</b> Switch to OkHttp library which fully supports PATCH
+     *       <pre>{@code
+     * OkHttpClient client = new OkHttpClient();
+     * // OkHttp natively supports PATCH method
+     *       }</pre>
+     *   </li>
+     *   <li><b>Use POST with X-HTTP-Method-Override header:</b> Some servers support method tunneling
+     *       <pre>{@code
+     * HttpRequest.url("https://api.example.com/users/1")
+     *     .header("X-HTTP-Method-Override", "PATCH")
+     *     .post(String.class);
+     *       }</pre>
+     *   </li>
+     *   <li><b>Use PUT for updates:</b> If the API supports it, use PUT instead
+     *       <pre>{@code
+     * HttpRequest.url("https://api.example.com/users/1")
+     *     .jsonBody("{\"name\":\"Updated Name\"}")
+     *     .put(String.class);
+     *       }</pre>
+     *   </li>
+     *   <li><b>Reflection workaround (not recommended):</b> Override the protected method field
+     *       <pre>{@code
+     * // This is fragile and may break with different JVM versions
+     * HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+     * connection.setRequestMethod("POST");
+     * Field methodField = HttpURLConnection.class.getDeclaredField("method");
+     * methodField.setAccessible(true);
+     * methodField.set(connection, "PATCH");
+     *       }</pre>
+     *   </li>
+     * </ol>
+     *
+     * <p><b>Recommendation:</b> For applications requiring PATCH support, use OkHttpClient or another
+     * modern HTTP client library that fully supports all HTTP methods.</p>
      */
     PATCH
 }

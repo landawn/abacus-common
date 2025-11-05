@@ -148,11 +148,33 @@ public interface KeyedObjectPool<K, E extends Poolable> extends Pool {
 
     /**
      * Returns the element associated with the specified key without updating access statistics.
-     * This method is useful for monitoring or administrative purposes.
-     * 
-     * <p>If the element has expired, it will be removed and destroyed, and {@code null} will be returned.
-     * Unlike {@link #get(Object)}, this method does not update the last access time or access count.
-     * 
+     * This method is useful for monitoring or administrative purposes where you want to check
+     * the pool's contents without affecting eviction behavior.
+     *
+     * <p><b>Important Side Effects:</b></p>
+     * <ul>
+     *   <li><b>Does NOT update</b> last access time - element's access time remains unchanged</li>
+     *   <li><b>Does NOT update</b> access count - element's access counter remains unchanged</li>
+     *   <li><b>DOES remove and destroy</b> expired elements - if the element has expired, it will be
+     *       destroyed and removed from the pool, and {@code null} will be returned</li>
+     *   <li><b>Does NOT remove</b> the element from the pool (if valid) - the element remains available
+     *       for future requests</li>
+     * </ul>
+     *
+     * <p>Use this method when you need to inspect pool contents for monitoring, debugging, or
+     * administrative purposes without affecting the element's eviction priority. If you need to
+     * use the element for regular operations, use {@link #get(Object)} instead.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * // Check if an element exists without affecting its access statistics
+     * DBConnection conn = pool.peek("database1");
+     * if (conn != null) {
+     *     System.out.println("Connection available: " + conn.isActive());
+     *     // Connection remains in pool with unchanged access statistics
+     * }
+     * }</pre>
+     *
      * @param key the key whose associated element is to be returned
      * @return the element associated with the key, or {@code null} if no mapping exists or element expired
      * @throws IllegalStateException if the pool has been closed

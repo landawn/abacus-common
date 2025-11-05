@@ -755,19 +755,19 @@ public interface Type<T> {
     }
 
     default boolean isList() {
-        return isPrimitiveArray() || isObjectArray(); // Default implementation, can be overridden by specific types
+        return false; // Default implementation, can be overridden by specific types
     }
 
     default boolean isSet() {
-        return isPrimitiveArray() || isObjectArray(); // Default implementation, can be overridden by specific types
+        return false; // Default implementation, can be overridden by specific types
     }
 
     default boolean isCollection() {
-        return isPrimitiveArray() || isObjectArray(); // Default implementation, can be overridden by specific types
+        return false; // Default implementation, can be overridden by specific types
     }
 
     default boolean isMap() {
-        return isPrimitiveArray() || isObjectArray(); // Default implementation, can be overridden by specific types
+        return false; // Default implementation, can be overridden by specific types
     }
 
     /**
@@ -776,19 +776,19 @@ public interface Type<T> {
      * @return {@code true} if this is a Bean type
      */
     default boolean isBean() {
-        return isPrimitiveArray() || isObjectArray(); // Default implementation, can be overridden by specific types
+        return false; // Default implementation, can be overridden by specific types
     }
 
     default boolean isMapEntity() {
-        return isPrimitiveArray() || isObjectArray(); // Default implementation, can be overridden by specific types
+        return false; // Default implementation, can be overridden by specific types
     }
 
     default boolean isEntityId() {
-        return isPrimitiveArray() || isObjectArray(); // Default implementation, can be overridden by specific types
+        return false; // Default implementation, can be overridden by specific types
     }
 
     default boolean isDataset() {
-        return isPrimitiveArray() || isObjectArray(); // Default implementation, can be overridden by specific types
+        return false; // Default implementation, can be overridden by specific types
     }
 
     default boolean isInputStream() {
