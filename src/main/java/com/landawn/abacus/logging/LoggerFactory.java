@@ -88,6 +88,7 @@ public final class LoggerFactory {
      *
      * @param clazz the class for which to get the logger
      * @return a Logger instance for the specified class
+     * @throws NullPointerException if clazz is null
      */
     public static synchronized Logger getLogger(final Class<?> clazz) {
         return getLogger(clazz.getName());
@@ -95,11 +96,11 @@ public final class LoggerFactory {
 
     /**
      * Gets a logger instance for the specified name.
-     * 
+     *
      * <p>This method returns a cached logger if one exists for the given name, otherwise
      * it creates a new logger using the detected logging framework. The detection happens
      * only once during the first logger creation.</p>
-     * 
+     *
      * <p>The logging framework detection order is:</p>
      * <ol>
      *   <li>Android Logger (only on Android platform)</li>
@@ -107,7 +108,7 @@ public final class LoggerFactory {
      *   <li>Log4j v2 Logger</li>
      *   <li>JDK Logger (fallback)</li>
      * </ol>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Logger logger = LoggerFactory.getLogger("com.mycompany.MyComponent");
@@ -116,6 +117,7 @@ public final class LoggerFactory {
      *
      * @param name the name of the logger
      * @return a Logger instance for the specified name
+     * @throws NullPointerException if name is null
      */
     @SuppressFBWarnings("SF_SWITCH_FALLTHROUGH")
     @SuppressWarnings("fallthrough")

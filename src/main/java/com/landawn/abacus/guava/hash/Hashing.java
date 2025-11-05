@@ -94,10 +94,50 @@ public final class Hashing {
      * <p>Multiple calls to this method with the same {@code minimumBits} value within the
      * same JVM instance will return identically-behaving HashFunction instances.
      *
+     * <p><b>When to Use goodFastHash() vs. Specific Algorithms:</b></p>
+     * <table border="1">
+     * <caption>Hash Function Selection Guide</caption>
+     * <tr>
+     *   <th>Use Case</th>
+     *   <th>Recommended Function</th>
+     *   <th>Reason</th>
+     * </tr>
+     * <tr>
+     *   <td>In-memory hash tables, caches</td>
+     *   <td>{@code goodFastHash(32)} or {@code goodFastHash(64)}</td>
+     *   <td>Optimized for speed, good distribution</td>
+     * </tr>
+     * <tr>
+     *   <td>Persistent storage, cross-process</td>
+     *   <td>{@link #murmur3_128()} or {@link #murmur3_32()}</td>
+     *   <td>Consistent across JVM restarts</td>
+     * </tr>
+     * <tr>
+     *   <td>Security, data integrity</td>
+     *   <td>{@link #sha256()} or {@link #sha512()}</td>
+     *   <td>Cryptographically secure</td>
+     * </tr>
+     * <tr>
+     *   <td>Checksums, error detection</td>
+     *   <td>{@link #crc32c()} or {@link #crc32()}</td>
+     *   <td>Designed for error detection</td>
+     * </tr>
+     * <tr>
+     *   <td>Hash table DoS protection</td>
+     *   <td>{@link #sipHash24(long, long)}</td>
+     *   <td>Keyed hashing resists attacks</td>
+     * </tr>
+     * </table>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
+     * // For temporary in-memory use
      * HashFunction hashFunc = Hashing.goodFastHash(128);
      * HashCode hash = hashFunc.hash("data".getBytes());
+     *
+     * // For persistent use, choose a specific algorithm instead:
+     * HashFunction persistentHash = Hashing.murmur3_128();
+     * HashCode stableHash = persistentHash.hash("data".getBytes());
      * }</pre>
      *
      * @param minimumBits a positive integer specifying the minimum number of bits the
@@ -105,6 +145,10 @@ public final class Hashing {
      *                    typically rounded up to a multiple of 32 or 64)
      * @return a hash function that produces hash codes of length {@code minimumBits} or greater
      * @throws IllegalArgumentException if {@code minimumBits} is not positive
+     * @see #murmur3_128()
+     * @see #murmur3_32()
+     * @see #sha256()
+     * @see #sipHash24(long, long)
      */
     public static HashFunction goodFastHash(final int minimumBits) {
         return GuavaHashFunction.wrap(com.google.common.hash.Hashing.goodFastHash(minimumBits));

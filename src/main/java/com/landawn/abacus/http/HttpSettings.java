@@ -109,18 +109,37 @@ public final class HttpSettings {
 
     /**
      * Sets the connection timeout in milliseconds.
-     * The connection timeout is the time to wait for a connection to be established.
-     * A timeout of 0 means infinite timeout.
-     * 
-     * Note: Only for {@code HttpClient}, not for {@code OKHttpClient}.
+     *
+     * <p>The connection timeout controls how long the client will wait while attempting
+     * to establish a connection to the remote server. This timeout begins when the connection
+     * attempt starts and expires if the connection cannot be established within the specified time.</p>
+     *
+     * <p>If the timeout expires before a connection is established, a {@link java.net.SocketTimeoutException}
+     * will be thrown. A timeout of 0 means infinite timeout (wait indefinitely), which is not recommended
+     * for production environments.</p>
+     *
+     * <p><b>Important:</b> This setting only applies to {@code HttpClient}, not {@code OKHttpClient}.</p>
+     *
+     * <p><b>Recommended Values:</b></p>
+     * <ul>
+     *   <li>Fast network environments: 3000-5000ms (3-5 seconds)</li>
+     *   <li>Standard environments: 5000-10000ms (5-10 seconds)</li>
+     *   <li>Slow or unreliable networks: 10000-30000ms (10-30 seconds)</li>
+     * </ul>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * settings.setConnectionTimeout(5000); // 5 seconds
+     * // Set 5 second connection timeout
+     * settings.setConnectionTimeout(5000);
+     *
+     * // Set different timeouts for connection and read operations
+     * settings.setConnectionTimeout(5000)   // 5s to establish connection
+     *         .setReadTimeout(10000);        // 10s to read response
      * }</pre>
      *
-     * @param connectionTimeout The connection timeout in milliseconds
+     * @param connectionTimeout The connection timeout in milliseconds (0 = infinite)
      * @return This HttpSettings instance for method chaining
+     * @throws java.net.SocketTimeoutException if the timeout expires before connection is established
      */
     public HttpSettings setConnectionTimeout(final long connectionTimeout) {
         this.connectionTimeout = connectionTimeout;

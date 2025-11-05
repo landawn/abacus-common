@@ -239,6 +239,19 @@ public final class HttpUtil {
      * Checks that the key is not empty, doesn't contain line separators or colons,
      * and that the value doesn't contain unescaped line separators.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * // Valid headers
+     * boolean valid1 = HttpUtil.isValidHttpHeader("Content-Type", "application/json"); // true
+     * boolean valid2 = HttpUtil.isValidHttpHeader("Authorization", "Bearer token123"); // true
+     *
+     * // Invalid headers
+     * boolean invalid1 = HttpUtil.isValidHttpHeader("", "value"); // false (empty key)
+     * boolean invalid2 = HttpUtil.isValidHttpHeader("Key:Name", "value"); // false (contains colon)
+     * boolean invalid3 = HttpUtil.isValidHttpHeader("Key\nName", "value"); // false (contains line separator)
+     * boolean invalid4 = HttpUtil.isValidHttpHeader("Key", "value\nwithout continuation"); // false (unescaped newline)
+     * }</pre>
+     *
      * @param key The header key to validate
      * @param value The header value to validate
      * @return {@code true} if the header is valid, {@code false} otherwise

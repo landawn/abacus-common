@@ -252,12 +252,15 @@ public class HttpResponse {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Deserialize to a list of users
-     * Type<List<User>> listType = new TypeReference<List<User>>() {};
+     * Type<List<User>> listType = N.typeOf("List<User>");
      * List<User> users = response.body(listType);
-     * 
+     *
      * // Deserialize to a map
-     * Type<Map<String, Object>> mapType = new TypeReference<Map<String, Object>>() {};
+     * Type<Map<String, Object>> mapType = N.typeOf("Map<String, Object>");
      * Map<String, Object> data = response.body(mapType);
+     *
+     * // Alternative: using Type.of()
+     * List<User> users2 = response.body(Type.of("List<User>"));
      * }</pre>
      *
      * @param <T> The type to deserialize to

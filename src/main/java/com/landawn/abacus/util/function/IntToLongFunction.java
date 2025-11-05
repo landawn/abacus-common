@@ -62,6 +62,17 @@ public interface IntToLongFunction extends Throwables.IntToLongFunction<RuntimeE
      *       to long before calculation</li>
      * </ul>
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * IntToLongFunction square = value -> (long) value * value;
+     * long result = square.applyAsLong(50000); // Returns 2500000000L (avoiding overflow)
+     *
+     * IntToLongFunction toMillis = seconds -> seconds * 1000L;
+     * long millis = toMillis.applyAsLong(60); // Returns 60000L
+     *
+     * IntStream.of(1, 2, 3).mapToLong(IntToLongFunction.DEFAULT).forEach(System.out::println);
+     * }</pre>
+     *
      * @param value the function argument, an int value to be converted to long
      * @return the function result as a long value, which exactly represents
      *         the input int value with the same sign and magnitude

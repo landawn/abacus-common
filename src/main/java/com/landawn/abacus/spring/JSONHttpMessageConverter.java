@@ -166,8 +166,15 @@ public class JSONHttpMessageConverter extends AbstractJsonHttpMessageConverter {
      *
      * <p>The method uses Abacus's JSON serialization capabilities through {@link N#toJson(Object, Writer)}
      * to convert Java objects into JSON format. The serialization process automatically handles circular
-     * references, custom date formats, and complex nested object graphs. The type parameter is available
-     * for potential future use but is currently not utilized as abacus-common can infer types from the object itself.</p>
+     * references, custom date formats, and complex nested object graphs.</p>
+     *
+     * <p><b>About the 'type' Parameter:</b><br>
+     * The {@code type} parameter is provided by Spring's framework and represents the declared return type
+     * from the controller method. However, this implementation <b>does not use</b> the type parameter because
+     * Abacus's JSON serialization can infer all necessary type information from the object itself at runtime.
+     * The parameter is kept for interface compliance with Spring's {@link AbstractJsonHttpMessageConverter}
+     * and for potential future enhancements. This design allows the serializer to handle polymorphic types
+     * and dynamic objects correctly without requiring explicit type declarations.</p>
      *
      * <p><b>Serialization Features:</b></p>
      * <ul>
@@ -212,8 +219,9 @@ public class JSONHttpMessageConverter extends AbstractJsonHttpMessageConverter {
      *
      * @param obj the object to serialize to JSON. Can be {@code null}, in which case the JSON output will be "null".
      *            Can be any Java object including primitives, collections, maps, POJOs, or complex nested structures.
-     * @param type the type information for the object. This parameter is currently unused but provided for
-     *             future compatibility with Spring's type system. May be {@code null}.
+     * @param type the declared return type from the controller method, provided by Spring's framework.
+     *             <b>Currently unused</b> by this implementation as Abacus can infer types from the object.
+     *             Kept for interface compliance and potential future use. May be {@code null}.
      * @param writer the Writer to write the JSON output to. The Writer is managed by Spring's framework
      *               and will be flushed and closed automatically after this method returns.
      * @throws com.landawn.abacus.exception.UncheckedIOException if an I/O error occurs while writing to the Writer

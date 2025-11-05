@@ -43,7 +43,7 @@ public class GuavaUtil {
     /**
      * Transforms a Range from one comparable type to another using the provided mapping function.
      * This method preserves the bound types (open/closed) of the original range.
-     * 
+     *
      * <p>The transformation is applied to both the lower and upper bounds of the range (if they exist).
      * The resulting range will have the same bound types as the original:
      * <ul>
@@ -51,22 +51,22 @@ public class GuavaUtil {
      *   <li>If the original has an open upper bound, the result will have an open upper bound</li>
      *   <li>If the original is unbounded (e.g., {@code Range.all()}), the result will also be unbounded</li>
      * </ul>
-     * 
+     *
      * <p>This method is particularly useful when you need to convert ranges of one type to another,
      * such as converting a range of integers to a range of strings, or a range of dates to a range
      * of timestamps.
-     * 
-     * <p>Example usage:
+     *
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Transform a range of integers to a range of strings
      * Range<Integer> intRange = Range.closed(1, 10);
      * Range<String> stringRange = GuavaUtil.transform(intRange, Object::toString);
      * // Result: [1..10] as strings
-     * 
+     *
      * // Transform a range of dates to timestamps
      * Range<Date> dateRange = Range.closedOpen(startDate, endDate);
      * Range<Long> timestampRange = GuavaUtil.transform(dateRange, Date::getTime);
-     * 
+     *
      * // Handle unbounded ranges
      * Range<Integer> unbounded = Range.greaterThan(5);
      * Range<Double> doubleRange = GuavaUtil.transform(unbounded, Integer::doubleValue);
@@ -78,6 +78,13 @@ public class GuavaUtil {
      * @param range the source range to transform, must not be null
      * @param mapper the function to transform elements from type T to type U, must not be null
      * @return a new Range with elements of type U, preserving the original range's bound types
+     * @throws NullPointerException if range or mapper is null
+     * @throws IllegalArgumentException if the mapper function returns null for any endpoint
+     * @throws RuntimeException if the mapper function throws an exception during transformation
+     * @see Range
+     * @see Range#range(Comparable, com.google.common.collect.BoundType, Comparable, com.google.common.collect.BoundType)
+     * @see Range#downTo(Comparable, com.google.common.collect.BoundType)
+     * @see Range#upTo(Comparable, com.google.common.collect.BoundType)
      */
     public static <T extends Comparable<? super T>, U extends Comparable<? super U>> Range<U> transform(final Range<T> range, final Function<T, U> mapper) {
         if (range.hasLowerBound() && range.hasUpperBound()) {

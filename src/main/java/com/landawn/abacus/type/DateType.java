@@ -60,6 +60,21 @@ public class DateType extends AbstractDateType<Date> {
      * - String: parsed as a date string
      * - Other objects: converted to string first, then parsed
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Type<Date> dateType = TypeFactory.getType(Date.class);
+     *
+     * // Convert from milliseconds (Number)
+     * Date date1 = dateType.valueOf(1609459200000L);  // 2021-01-01
+     *
+     * // Convert from java.util.Date
+     * Date date2 = dateType.valueOf(new java.util.Date());
+     *
+     * // Convert from String (including special "sysTime" value)
+     * Date date3 = dateType.valueOf("2021-01-01");
+     * Date date4 = dateType.valueOf("sysTime");  // current system date
+     * }</pre>
+     *
      * @param obj the object to convert to SQL Date. Can be {@code null}.
      * @return A SQL Date instance representing the input value, or {@code null} if input is null
      */
@@ -80,6 +95,22 @@ public class DateType extends AbstractDateType<Date> {
      * - {@code null} or empty string: returns null
      * - "sysTime": returns the current system date
      * - Other strings: parsed using date parsing utilities
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Type<Date> dateType = TypeFactory.getType(Date.class);
+     *
+     * // Parse standard date strings
+     * Date date1 = dateType.valueOf("2021-01-01");
+     * Date date2 = dateType.valueOf("2021/01/01");
+     *
+     * // Use special "sysTime" value to get current system date
+     * Date now = dateType.valueOf("sysTime");
+     *
+     * // Handle null/empty strings
+     * Date nullDate = dateType.valueOf(null);  // returns null
+     * Date emptyDate = dateType.valueOf("");   // returns null
+     * }</pre>
      *
      * @param str the string to parse. Can be {@code null} or empty.
      * @return A SQL Date instance parsed from the string, or {@code null} if input is null/empty
@@ -120,6 +151,17 @@ public class DateType extends AbstractDateType<Date> {
     /**
      * Retrieves a SQL Date value from a ResultSet at the specified column index.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Type<Date> dateType = TypeFactory.getType(Date.class);
+     *
+     * try (ResultSet rs = stmt.executeQuery("SELECT created_date FROM users")) {
+     *     if (rs.next()) {
+     *         Date createdDate = dateType.get(rs, 1);  // retrieves date from column 1
+     *     }
+     * }
+     * }</pre>
+     *
      * @param rs the ResultSet containing the data
      * @param columnIndex the column index (1-based) of the date value
      * @return A SQL Date instance from the result set, or {@code null} if the column value is SQL NULL
@@ -132,6 +174,17 @@ public class DateType extends AbstractDateType<Date> {
 
     /**
      * Retrieves a SQL Date value from a ResultSet using the specified column label.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Type<Date> dateType = TypeFactory.getType(Date.class);
+     *
+     * try (ResultSet rs = stmt.executeQuery("SELECT created_date FROM users")) {
+     *     if (rs.next()) {
+     *         Date createdDate = dateType.get(rs, "created_date");  // retrieves by column name
+     *     }
+     * }
+     * }</pre>
      *
      * @param rs the ResultSet containing the data
      * @param columnLabel the label of the column containing the date value

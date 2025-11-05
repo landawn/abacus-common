@@ -18,6 +18,33 @@ package com.landawn.abacus.type;
  * Type handler for {@link String} objects. This class provides the standard
  * implementation for String type handling in the type system. It extends
  * AbstractStringType which provides the core functionality for string operations.
+ *
+ * <p>StringType handles String serialization/deserialization, database operations,
+ * and type conversions. It is automatically registered in the type system and can be
+ * retrieved using {@link com.landawn.abacus.type.TypeFactory}.
+ *
+ * <p><b>Usage Examples:</b></p>
+ * <pre>{@code
+ * // Retrieve the String type from TypeFactory
+ * Type<String> stringType = TypeFactory.getType(String.class);
+ *
+ * // Convert various objects to String
+ * String str1 = stringType.valueOf("hello");      // returns "hello"
+ * String str2 = stringType.valueOf(123);          // returns "123"
+ * String str3 = stringType.valueOf(null);         // returns null
+ *
+ * // Use with database operations
+ * try (PreparedStatement stmt = conn.prepareStatement("INSERT INTO users (name) VALUES (?)")) {
+ *     stringType.set(stmt, 1, "John Doe");
+ *     stmt.executeUpdate();
+ * }
+ *
+ * try (ResultSet rs = stmt.executeQuery("SELECT name FROM users")) {
+ *     if (rs.next()) {
+ *         String name = stringType.get(rs, 1);  // or get(rs, "name")
+ *     }
+ * }
+ * }</pre>
  */
 public class StringType extends AbstractStringType {
 
