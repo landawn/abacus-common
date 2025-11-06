@@ -40,6 +40,17 @@ public final class DoubleArrayType extends ObjectArrayType<Double> {
      * - Empty arrays return "[]"
      * - Uses efficient string joining for performance
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Type<Double[]> type = TypeFactory.getType(Double[].class);
+     * Double[] array = {1.5, null, 3.14, -0.5};
+     * String result = type.stringOf(array);
+     * // result: "[1.5, null, 3.14, -0.5]"
+     *
+     * String empty = type.stringOf(new Double[0]);
+     * // empty: "[]"
+     * }</pre>
+     *
      * @param x the Double array to convert. Can be {@code null}.
      * @return A string representation of the array, or {@code null} if input is null
      */
@@ -60,6 +71,16 @@ public final class DoubleArrayType extends ObjectArrayType<Double> {
      * - "null" strings (4 characters) are converted to {@code null} elements
      * - Empty string or "[]" returns empty array
      * - Individual elements are parsed as Double values
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Type<Double[]> type = TypeFactory.getType(Double[].class);
+     * Double[] result = type.valueOf("[1.5, null, 3.14, -0.5]");
+     * // result: {1.5, null, 3.14, -0.5}
+     *
+     * Double[] empty = type.valueOf("[]");
+     * // empty: {} (empty array)
+     * }</pre>
      *
      * @param str the string to parse. Can be {@code null}.
      * @return A Double array parsed from the string, or {@code null} if input is null

@@ -66,4 +66,23 @@ public interface BooleanTriConsumer extends Throwables.BooleanTriConsumer<Runtim
             after.accept(a, b, c);
         };
     }
+
+    /**
+     * Converts this {@code BooleanTriConsumer} to a {@code Throwables.BooleanTriConsumer} that can throw a checked exception.
+     * This method provides a way to use this consumer in contexts that require explicit exception handling.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * BooleanTriConsumer consumer = (...) -> { ... };
+     * var throwableConsumer = consumer.toThrowable();
+     * // Can now be used in contexts that handle checked exceptions
+     * }</pre>
+     *
+     * @param <E> the type of exception that the returned consumer can throw
+     * @return a {@code Throwables.BooleanTriConsumer} view of this consumer that can throw exceptions of type {@code E}
+     */
+    default <E extends Throwable> Throwables.BooleanTriConsumer<E> toThrowable() {
+        return (Throwables.BooleanTriConsumer<E>) this;
+    }
+
 }

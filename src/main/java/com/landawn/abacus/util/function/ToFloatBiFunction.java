@@ -47,4 +47,23 @@ public interface ToFloatBiFunction<T, U> {
      * @return the function result as a primitive float
      */
     float applyAsFloat(T t, U u);
+
+    /**
+     * Converts this {@code ToFloatBiFunction} to a {@code Throwables.ToFloatBiFunction} that can throw a checked exception.
+     * This method provides a way to use this function in contexts that require explicit exception handling.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * ToFloatBiFunction function = (...) -> { ... };
+     * var throwableFunction = function.toThrowable();
+     * // Can now be used in contexts that handle checked exceptions
+     * }</pre>
+     *
+     * @param <E> the type of exception that the returned function can throw
+     * @return a {@code Throwables.ToFloatBiFunction} view of this function that can throw exceptions of type {@code E}
+     */
+    default <E extends Throwable> Throwables.ToFloatBiFunction<T, U, E> toThrowable() {
+        return (Throwables.ToFloatBiFunction<T, U, E>) this;
+    }
+
 }

@@ -55,4 +55,23 @@ public interface BooleanTriFunction<R> extends Throwables.BooleanTriFunction<R, 
     default <V> BooleanTriFunction<V> andThen(final java.util.function.Function<? super R, ? extends V> after) {
         return (a, b, c) -> after.apply(apply(a, b, c));
     }
+
+    /**
+     * Converts this {@code BooleanTriFunction} to a {@code Throwables.BooleanTriFunction} that can throw a checked exception.
+     * This method provides a way to use this function in contexts that require explicit exception handling.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * BooleanTriFunction function = (...) -> { ... };
+     * var throwableFunction = function.toThrowable();
+     * // Can now be used in contexts that handle checked exceptions
+     * }</pre>
+     *
+     * @param <E> the type of exception that the returned function can throw
+     * @return a {@code Throwables.BooleanTriFunction} view of this function that can throw exceptions of type {@code E}
+     */
+    default <E extends Throwable> Throwables.BooleanTriFunction<R, E> toThrowable() {
+        return (Throwables.BooleanTriFunction<R, E>) this;
+    }
+
 }

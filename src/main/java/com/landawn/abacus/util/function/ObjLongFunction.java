@@ -97,4 +97,23 @@ public interface ObjLongFunction<T, R> extends Throwables.ObjLongFunction<T, R, 
     default <V> ObjLongFunction<T, V> andThen(final java.util.function.Function<? super R, ? extends V> after) {
         return (t, u) -> after.apply(apply(t, u));
     }
+
+    /**
+     * Converts this {@code ObjLongFunction} to a {@code Throwables.ObjLongFunction} that can throw a checked exception.
+     * This method provides a way to use this function in contexts that require explicit exception handling.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * ObjLongFunction function = (...) -> { ... };
+     * var throwableFunction = function.toThrowable();
+     * // Can now be used in contexts that handle checked exceptions
+     * }</pre>
+     *
+     * @param <E> the type of exception that the returned function can throw
+     * @return a {@code Throwables.ObjLongFunction} view of this function that can throw exceptions of type {@code E}
+     */
+    default <E extends Throwable> Throwables.ObjLongFunction<T, R, E> toThrowable() {
+        return (Throwables.ObjLongFunction<T, R, E>) this;
+    }
+
 }

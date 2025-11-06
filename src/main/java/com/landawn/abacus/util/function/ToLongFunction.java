@@ -87,4 +87,23 @@ public interface ToLongFunction<T> extends Throwables.ToLongFunction<T, RuntimeE
      */
     @Override
     long applyAsLong(T value);
+
+    /**
+     * Converts this {@code ToLongFunction} to a {@code Throwables.ToLongFunction} that can throw a checked exception.
+     * This method provides a way to use this function in contexts that require explicit exception handling.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * ToLongFunction function = (...) -> { ... };
+     * var throwableFunction = function.toThrowable();
+     * // Can now be used in contexts that handle checked exceptions
+     * }</pre>
+     *
+     * @param <E> the type of exception that the returned function can throw
+     * @return a {@code Throwables.ToLongFunction} view of this function that can throw exceptions of type {@code E}
+     */
+    default <E extends Throwable> Throwables.ToLongFunction<T, E> toThrowable() {
+        return (Throwables.ToLongFunction<T, E>) this;
+    }
+
 }

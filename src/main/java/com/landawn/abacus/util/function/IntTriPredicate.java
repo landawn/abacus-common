@@ -120,4 +120,23 @@ public interface IntTriPredicate extends Throwables.IntTriPredicate<RuntimeExcep
     default IntTriPredicate or(final IntTriPredicate other) {
         return (a, b, c) -> test(a, b, c) || other.test(a, b, c);
     }
+
+    /**
+     * Converts this {@code IntTriPredicate} to a {@code Throwables.IntTriPredicate} that can throw a checked exception.
+     * This method provides a way to use this predicate in contexts that require explicit exception handling.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * IntTriPredicate predicate = (...) -> { ... };
+     * var throwablePredicate = predicate.toThrowable();
+     * // Can now be used in contexts that handle checked exceptions
+     * }</pre>
+     *
+     * @param <E> the type of exception that the returned predicate can throw
+     * @return a {@code Throwables.IntTriPredicate} view of this predicate that can throw exceptions of type {@code E}
+     */
+    default <E extends Throwable> Throwables.IntTriPredicate<E> toThrowable() {
+        return (Throwables.IntTriPredicate<E>) this;
+    }
+
 }

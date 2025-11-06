@@ -49,29 +49,36 @@ import java.lang.annotation.Target;
  * 
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
+ * import java.util.Arrays;
+ * import java.util.Collections;
+ * import java.util.List;
+ * import java.util.Optional;
+ *
  * public class StringUtils {
  *     @NullSafe
  *     public static String trim(@NullSafe String input) {
  *         return input == null ? "" : input.trim();
  *     }
- *     
+ *
  *     @NullSafe
  *     public static boolean isEmpty(@NullSafe String str) {
  *         return str == null || str.length() == 0;
  *     }
- *     
+ *
  *     @NullSafe
- *     public List<String> parseTokens(@NullSafe String input) {
+ *     public static List<String> parseTokens(@NullSafe String input) {
  *         if (input == null) {
  *             return Collections.emptyList();
  *         }
  *         return Arrays.asList(input.split(","));
  *     }
+ *
+ *     @NullSafe
+ *     public static Optional<String> toOptional(@NullSafe String value) {
+ *         return Optional.ofNullable(value);
+ *     }
  * }
  * }</pre>
- * 
- * @see NotNull
- * @see MayReturnNull
  */
 @Documented
 @Retention(RetentionPolicy.RUNTIME)

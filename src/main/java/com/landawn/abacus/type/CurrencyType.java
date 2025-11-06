@@ -68,6 +68,19 @@ public class CurrencyType extends AbstractType<Currency> {
      * Parses a string representation to create a Currency instance.
      * The string should be a valid ISO 4217 currency code.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Type<Currency> type = TypeFactory.getType(Currency.class);
+     * Currency usd = type.valueOf("USD");
+     * // Creates Currency instance for US Dollar
+     *
+     * Currency eur = type.valueOf("EUR");
+     * // Creates Currency instance for Euro
+     *
+     * String code = type.stringOf(usd);
+     * // code: "USD"
+     * }</pre>
+     *
      * @param str the ISO 4217 currency code. Can be {@code null} or empty.
      * @return The Currency instance for the specified code, or {@code null} if input is null/empty
      * @throws IllegalArgumentException if the currency code is not a supported ISO 4217 code

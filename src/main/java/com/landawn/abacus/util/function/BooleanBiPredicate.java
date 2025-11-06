@@ -124,4 +124,23 @@ public interface BooleanBiPredicate extends Throwables.BooleanBiPredicate<Runtim
     default BooleanBiPredicate or(final BooleanBiPredicate other) {
         return (t, u) -> test(t, u) || other.test(t, u);
     }
+
+    /**
+     * Converts this {@code BooleanBiPredicate} to a {@code Throwables.BooleanBiPredicate} that can throw a checked exception.
+     * This method provides a way to use this predicate in contexts that require explicit exception handling.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * BooleanBiPredicate predicate = (...) -> { ... };
+     * var throwablePredicate = predicate.toThrowable();
+     * // Can now be used in contexts that handle checked exceptions
+     * }</pre>
+     *
+     * @param <E> the type of exception that the returned predicate can throw
+     * @return a {@code Throwables.BooleanBiPredicate} view of this predicate that can throw exceptions of type {@code E}
+     */
+    default <E extends Throwable> Throwables.BooleanBiPredicate<E> toThrowable() {
+        return (Throwables.BooleanBiPredicate<E>) this;
+    }
+
 }

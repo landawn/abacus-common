@@ -53,4 +53,23 @@ public interface ObjFloatConsumer<T> extends Throwables.ObjFloatConsumer<T, Runt
      */
     @Override
     void accept(T t, float value);
+
+    /**
+     * Converts this {@code ObjFloatConsumer} to a {@code Throwables.ObjFloatConsumer} that can throw a checked exception.
+     * This method provides a way to use this consumer in contexts that require explicit exception handling.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * ObjFloatConsumer consumer = (...) -> { ... };
+     * var throwableConsumer = consumer.toThrowable();
+     * // Can now be used in contexts that handle checked exceptions
+     * }</pre>
+     *
+     * @param <E> the type of exception that the returned consumer can throw
+     * @return a {@code Throwables.ObjFloatConsumer} view of this consumer that can throw exceptions of type {@code E}
+     */
+    default <E extends Throwable> Throwables.ObjFloatConsumer<T, E> toThrowable() {
+        return (Throwables.ObjFloatConsumer<T, E>) this;
+    }
+
 }

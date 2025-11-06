@@ -43,24 +43,45 @@ import java.lang.annotation.Target;
  * 
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
+ * import java.io.BufferedReader;
+ * import java.util.Iterator;
+ *
  * @Stateful
  * public class Counter {
  *     private int count = 0;
- *     
+ *
  *     public int increment() {
  *         return ++count;  // Not thread-safe!
  *     }
+ *
+ *     public int getCount() {
+ *         return count;
+ *     }
  * }
- * 
+ *
+ * public class DataReader {
+ *     @Stateful
+ *     public Iterator<String> getIterator(BufferedReader reader) {
+ *         // Returns a stateful iterator that maintains position
+ *         return reader.lines().iterator();
+ *     }
+ * }
+ *
  * @Stateful
- * public Iterator<String> getIterator() {
- *     // Returns a stateful iterator that maintains position
- *     return new FileLineIterator(file);
+ * public class StreamBuilder<T> {
+ *     private List<T> elements = new ArrayList<>();
+ *
+ *     public StreamBuilder<T> add(T element) {
+ *         elements.add(element);
+ *         return this;  // Modifies internal state
+ *     }
  * }
  * }</pre>
- * 
+ *
  * @see Immutable
  * @see SequentialOnly
+ * @see Mutable
+ * @see ParallelSupported
  */
 @Documented
 @Retention(value = RetentionPolicy.CLASS)

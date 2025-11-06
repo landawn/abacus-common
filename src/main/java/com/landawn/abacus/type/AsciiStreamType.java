@@ -49,6 +49,15 @@ public class AsciiStreamType extends InputStreamType {
     /**
      * Retrieves an ASCII InputStream from a ResultSet at the specified column index.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Type<InputStream> type = TypeFactory.getType("AsciiStream");
+     * ResultSet rs = ...; // from SQL query
+     * InputStream stream = type.get(rs, 1);
+     * // Read ASCII text data from database column
+     * String content = IOUtil.readAllToString(stream);
+     * }</pre>
+     *
      * @param rs the ResultSet to retrieve the ASCII stream from
      * @param columnIndex the column index (1-based) of the ASCII stream
      * @return an InputStream containing the ASCII data, or {@code null} if the value is SQL NULL

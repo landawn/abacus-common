@@ -73,4 +73,23 @@ public interface DoubleBiConsumer extends Throwables.DoubleBiConsumer<RuntimeExc
             after.accept(t, u);
         };
     }
+
+    /**
+     * Converts this {@code DoubleBiConsumer} to a {@code Throwables.DoubleBiConsumer} that can throw a checked exception.
+     * This method provides a way to use this consumer in contexts that require explicit exception handling.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * DoubleBiConsumer consumer = (...) -> { ... };
+     * var throwableConsumer = consumer.toThrowable();
+     * // Can now be used in contexts that handle checked exceptions
+     * }</pre>
+     *
+     * @param <E> the type of exception that the returned consumer can throw
+     * @return a {@code Throwables.DoubleBiConsumer} view of this consumer that can throw exceptions of type {@code E}
+     */
+    default <E extends Throwable> Throwables.DoubleBiConsumer<E> toThrowable() {
+        return (Throwables.DoubleBiConsumer<E>) this;
+    }
+
 }

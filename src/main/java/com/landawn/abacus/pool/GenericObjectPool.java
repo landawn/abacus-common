@@ -213,8 +213,19 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
      *   <li>The object is null</li>
      *   <li>The object has already expired</li>
      *   <li>The pool is at capacity and auto-balancing is disabled</li>
-     *   <li>The operation will fail if the object would exceed memory constraints</li>
+     *   <li>The object would exceed memory constraints (when memory measure is configured)</li>
      * </ul>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * MyPoolable obj = new MyPoolable();
+     * if (pool.add(obj)) {
+     *     System.out.println("Object added successfully");
+     * } else {
+     *     System.out.println("Failed to add - pool full or object expired");
+     *     obj.destroy(Caller.PUT_ADD_FAILURE);
+     * }
+     * }</pre>
      *
      * @param e the object to add, must not be null
      * @return {@code true} if the object was successfully added, {@code false} otherwise
@@ -420,6 +431,28 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
      * <p>If the retrieved object has expired, it will be destroyed and the method
      * will return {@code null}. The object's activity print is updated to reflect this access.
      *
+     * <p>This method performs the following operations:</p>
+     * <ol>
+     *   <li>Removes an object from the head of the pool (LIFO)</li>
+     *   <li>Checks if the object has expired</li>
+     *   <li>If expired: destroys the object, returns {@code null}</li>
+     *   <li>If valid: updates last access time and access count, returns the object</li>
+     * </ol>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * E obj = pool.take();
+     * if (obj != null) {
+     *     try {
+     *         // use the object
+     *     } finally {
+     *         pool.add(obj); // return to pool
+     *     }
+     * } else {
+     *     // pool is empty, create new object if needed
+     * }
+     * }</pre>
+     *
      * @return an object from the pool, or {@code null} if the pool is empty
      * @throws IllegalStateException if the pool has been closed
      */
@@ -534,6 +567,16 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
     /**
      * Checks if the pool contains the specified object.
      * This method uses the equals method for comparison.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * MyPoolable obj = new MyPoolable();
+     * pool.add(obj);
+     *
+     * if (pool.contains(obj)) {
+     *     System.out.println("Object is in the pool");
+     * }
+     * }</pre>
      *
      * @param valueToFind the object to search for
      * @return {@code true} if the pool contains the object, {@code false} otherwise

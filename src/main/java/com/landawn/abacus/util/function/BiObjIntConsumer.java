@@ -69,4 +69,23 @@ public interface BiObjIntConsumer<T, U> extends Throwables.BiObjIntConsumer<T, U
             after.accept(t, u, i);
         };
     }
+
+    /**
+     * Converts this {@code BiObjIntConsumer} to a {@code Throwables.BiObjIntConsumer} that can throw a checked exception.
+     * This method provides a way to use this consumer in contexts that require explicit exception handling.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * BiObjIntConsumer consumer = (...) -> { ... };
+     * var throwableConsumer = consumer.toThrowable();
+     * // Can now be used in contexts that handle checked exceptions
+     * }</pre>
+     *
+     * @param <E> the type of exception that the returned consumer can throw
+     * @return a {@code Throwables.BiObjIntConsumer} view of this consumer that can throw exceptions of type {@code E}
+     */
+    default <E extends Throwable> Throwables.BiObjIntConsumer<T, U, E> toThrowable() {
+        return (Throwables.BiObjIntConsumer<T, U, E>) this;
+    }
+
 }

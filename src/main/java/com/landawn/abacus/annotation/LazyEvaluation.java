@@ -80,6 +80,8 @@ import java.lang.annotation.Target;
  * }</pre>
  *
  * @see IntermediateOp
+ * @see TerminalOp
+ * @see TerminalOpTriggered
  */
 @Target({ ElementType.METHOD, ElementType.TYPE })
 @Retention(RetentionPolicy.RUNTIME)

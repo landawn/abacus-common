@@ -53,4 +53,23 @@ public interface FloatSupplier extends Throwables.FloatSupplier<RuntimeException
      */
     @Override
     float getAsFloat();
+
+    /**
+     * Converts this {@code FloatSupplier} to a {@code Throwables.FloatSupplier} that can throw a checked exception.
+     * This method provides a way to use this supplier in contexts that require explicit exception handling.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * FloatSupplier supplier = () -> { ... };
+     * var throwableSupplier = supplier.toThrowable();
+     * // Can now be used in contexts that handle checked exceptions
+     * }</pre>
+     *
+     * @param <E> the type of exception that the returned supplier can throw
+     * @return a {@code Throwables.FloatSupplier} view of this supplier that can throw exceptions of type {@code E}
+     */
+    default <E extends Throwable> Throwables.FloatSupplier<E> toThrowable() {
+        return (Throwables.FloatSupplier<E>) this;
+    }
+
 }

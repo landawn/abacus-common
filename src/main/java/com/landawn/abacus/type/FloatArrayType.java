@@ -40,6 +40,17 @@ public final class FloatArrayType extends ObjectArrayType<Float> {
      * - Empty arrays return "[]"
      * - Uses efficient string joining for performance
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Type<Float[]> type = TypeFactory.getType(Float[].class);
+     * Float[] array = {1.5f, null, 3.14f, -0.5f};
+     * String result = type.stringOf(array);
+     * // result: "[1.5, null, 3.14, -0.5]"
+     *
+     * String empty = type.stringOf(new Float[0]);
+     * // empty: "[]"
+     * }</pre>
+     *
      * @param x the Float array to convert. Can be {@code null}.
      * @return A string representation of the array, or {@code null} if input is null
      */
@@ -60,6 +71,16 @@ public final class FloatArrayType extends ObjectArrayType<Float> {
      * - "null" strings (4 characters) are converted to {@code null} elements
      * - Empty string or "[]" returns empty array
      * - Individual elements are parsed as Float values
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Type<Float[]> type = TypeFactory.getType(Float[].class);
+     * Float[] result = type.valueOf("[1.5, null, 3.14, -0.5]");
+     * // result: {1.5f, null, 3.14f, -0.5f}
+     *
+     * Float[] empty = type.valueOf("[]");
+     * // empty: {} (empty array)
+     * }</pre>
      *
      * @param str the string to parse. Can be {@code null}.
      * @return A Float array parsed from the string, or {@code null} if input is null

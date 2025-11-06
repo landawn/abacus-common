@@ -91,4 +91,23 @@ public interface FloatBiFunction<R> extends Throwables.FloatBiFunction<R, Runtim
     default <V> FloatBiFunction<V> andThen(final java.util.function.Function<? super R, ? extends V> after) {
         return (t, u) -> after.apply(apply(t, u));
     }
+
+    /**
+     * Converts this {@code FloatBiFunction} to a {@code Throwables.FloatBiFunction} that can throw a checked exception.
+     * This method provides a way to use this function in contexts that require explicit exception handling.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * FloatBiFunction function = (...) -> { ... };
+     * var throwableFunction = function.toThrowable();
+     * // Can now be used in contexts that handle checked exceptions
+     * }</pre>
+     *
+     * @param <E> the type of exception that the returned function can throw
+     * @return a {@code Throwables.FloatBiFunction} view of this function that can throw exceptions of type {@code E}
+     */
+    default <E extends Throwable> Throwables.FloatBiFunction<R, E> toThrowable() {
+        return (Throwables.FloatBiFunction<R, E>) this;
+    }
+
 }

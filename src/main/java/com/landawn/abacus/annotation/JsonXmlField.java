@@ -255,12 +255,28 @@ public @interface JsonXmlField {
     /**
      * Defines the exposure levels for field serialization and deserialization operations.
      * This enum controls whether a field participates in JSON/XML reading, writing, or both.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * public class User {
+     *     // Always included
+     *     private String username;
+     *
+     *     // Read-only: included in responses but not accepted in requests
+     *     @JsonXmlField(expose = Expose.SERIALIZE_ONLY)
+     *     private String userId;
+     *
+     *     // Write-only: accepted in requests but never in responses
+     *     @JsonXmlField(expose = Expose.DESERIALIZE_ONLY)
+     *     private String password;
+     * }
+     * }</pre>
      */
     enum Expose {
         /**
          * The field participates in both serialization and deserialization operations.
          * This is the standard behavior for most fields.
-         * 
+         *
          * @deprecated don't need to set it. It's {@code DEFAULT} by default.
          */
         @Deprecated
@@ -269,26 +285,44 @@ public @interface JsonXmlField {
         /**
          * The field is only included during serialization (object to JSON/XML).
          * During deserialization (JSON/XML to object), this field will be ignored.
-         * 
+         *
          * <p>Use this for:</p>
          * <ul>
          *   <li>Computed fields that should appear in output but not be set from input</li>
          *   <li>Read-only properties like timestamps, IDs, or calculated values</li>
          *   <li>Fields that contain sensitive information in responses but shouldn't be settable</li>
          * </ul>
+         *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * @JsonXmlField(expose = Expose.SERIALIZE_ONLY)
+         * private String displayName;  // Computed from firstName + lastName
+         *
+         * @JsonXmlField(expose = Expose.SERIALIZE_ONLY)
+         * private Long userId;  // Auto-generated ID
+         * }</pre>
          */
         SERIALIZE_ONLY,
 
         /**
          * The field is only included during deserialization (JSON/XML to object).
          * During serialization (object to JSON/XML), this field will be ignored.
-         * 
+         *
          * <p>Use this for:</p>
          * <ul>
          *   <li>Input-only fields like passwords or temporary data</li>
          *   <li>Fields that should accept values but never expose them</li>
          *   <li>Configuration fields that are needed for setup but not for output</li>
          * </ul>
+         *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * @JsonXmlField(expose = Expose.DESERIALIZE_ONLY)
+         * private String password;  // Accepted but never returned
+         *
+         * @JsonXmlField(expose = Expose.DESERIALIZE_ONLY)
+         * private String resetToken;  // Used for validation, not exposed
+         * }</pre>
          */
         DESERIALIZE_ONLY
     }

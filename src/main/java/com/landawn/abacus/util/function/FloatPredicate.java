@@ -210,4 +210,23 @@ public interface FloatPredicate extends Throwables.FloatPredicate<RuntimeExcepti
     static FloatPredicate between(final float minValue, final float maxValue) {
         return value -> N.compare(value, minValue) > 0 && N.compare(value, maxValue) < 0;
     }
+
+    /**
+     * Converts this {@code FloatPredicate} to a {@code Throwables.FloatPredicate} that can throw a checked exception.
+     * This method provides a way to use this predicate in contexts that require explicit exception handling.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * FloatPredicate predicate = (...) -> { ... };
+     * var throwablePredicate = predicate.toThrowable();
+     * // Can now be used in contexts that handle checked exceptions
+     * }</pre>
+     *
+     * @param <E> the type of exception that the returned predicate can throw
+     * @return a {@code Throwables.FloatPredicate} view of this predicate that can throw exceptions of type {@code E}
+     */
+    default <E extends Throwable> Throwables.FloatPredicate<E> toThrowable() {
+        return (Throwables.FloatPredicate<E>) this;
+    }
+
 }

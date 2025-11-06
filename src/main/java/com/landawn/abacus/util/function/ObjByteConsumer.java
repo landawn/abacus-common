@@ -85,4 +85,23 @@ public interface ObjByteConsumer<T> extends Throwables.ObjByteConsumer<T, Runtim
      */
     @Override
     void accept(T t, byte value);
+
+    /**
+     * Converts this {@code ObjByteConsumer} to a {@code Throwables.ObjByteConsumer} that can throw a checked exception.
+     * This method provides a way to use this consumer in contexts that require explicit exception handling.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * ObjByteConsumer consumer = (...) -> { ... };
+     * var throwableConsumer = consumer.toThrowable();
+     * // Can now be used in contexts that handle checked exceptions
+     * }</pre>
+     *
+     * @param <E> the type of exception that the returned consumer can throw
+     * @return a {@code Throwables.ObjByteConsumer} view of this consumer that can throw exceptions of type {@code E}
+     */
+    default <E extends Throwable> Throwables.ObjByteConsumer<T, E> toThrowable() {
+        return (Throwables.ObjByteConsumer<T, E>) this;
+    }
+
 }

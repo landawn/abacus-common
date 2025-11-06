@@ -101,6 +101,17 @@ public class JSONType<T> extends AbstractType<T> {
      * This method deserializes the JSON string using the JSON parser into
      * an instance of the type class handled by this JSONType.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Type<Map> mapType = TypeFactory.getType("JSON<Map>");
+     * Map map = mapType.valueOf("{\"key\":\"value\"}");
+     * // Deserializes JSON to Map
+     *
+     * Type<List> listType = TypeFactory.getType("JSON<List>");
+     * List list = listType.valueOf("[1,2,3]");
+     * // Deserializes JSON to List
+     * }</pre>
+     *
      * @param str the JSON string to parse
      * @return the deserialized object of type T, or {@code null} if the string is empty or null
      */

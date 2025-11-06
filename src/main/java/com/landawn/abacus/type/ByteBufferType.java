@@ -80,6 +80,19 @@ public class ByteBufferType extends AbstractType<ByteBuffer> {
      * Creates a ByteBuffer wrapping the decoded byte array with position
      * set to the array length and limit/capacity set to array length.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Type<ByteBuffer> type = TypeFactory.getType(ByteBuffer.class);
+     * ByteBuffer buffer = ByteBuffer.wrap("Hello".getBytes());
+     * buffer.position(5);
+     *
+     * String encoded = type.stringOf(buffer);
+     * // encoded: Base64 string of "Hello"
+     *
+     * ByteBuffer decoded = type.valueOf(encoded);
+     * // decoded: ByteBuffer containing "Hello" bytes
+     * }</pre>
+     *
      * @param str the Base64-encoded string to decode
      * @return a ByteBuffer containing the decoded data, or {@code null} if str is {@code null},
      *         or an empty buffer if str is empty

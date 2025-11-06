@@ -91,6 +91,19 @@ public class InstantType extends AbstractTemporalType<Instant> {
      * - ISO-8601 formatted strings: parsed according to standard formats
      * - Standard Instant.parse() format for other strings
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Type<Instant> type = TypeFactory.getType(Instant.class);
+     * Instant instant1 = type.valueOf("2023-12-25T10:30:45Z");
+     * // Parses ISO-8601 date-time
+     *
+     * Instant instant2 = type.valueOf("1703502645123");
+     * // Parses milliseconds since epoch
+     *
+     * Instant instant3 = type.valueOf("sysTime");
+     * // Returns current instant
+     * }</pre>
+     *
      * @param str the string to parse into an Instant
      * @return the parsed Instant instance, or {@code null} if the input is {@code null} or represents a {@code null} datetime
      */

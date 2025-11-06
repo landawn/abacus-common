@@ -78,4 +78,23 @@ public interface IntBiFunction<R> extends Throwables.IntBiFunction<R, RuntimeExc
     default <V> IntBiFunction<V> andThen(final java.util.function.Function<? super R, ? extends V> after) {
         return (t, u) -> after.apply(apply(t, u));
     }
+
+    /**
+     * Converts this {@code IntBiFunction} to a {@code Throwables.IntBiFunction} that can throw a checked exception.
+     * This method provides a way to use this function in contexts that require explicit exception handling.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * IntBiFunction function = (...) -> { ... };
+     * var throwableFunction = function.toThrowable();
+     * // Can now be used in contexts that handle checked exceptions
+     * }</pre>
+     *
+     * @param <E> the type of exception that the returned function can throw
+     * @return a {@code Throwables.IntBiFunction} view of this function that can throw exceptions of type {@code E}
+     */
+    default <E extends Throwable> Throwables.IntBiFunction<R, E> toThrowable() {
+        return (Throwables.IntBiFunction<R, E>) this;
+    }
+
 }

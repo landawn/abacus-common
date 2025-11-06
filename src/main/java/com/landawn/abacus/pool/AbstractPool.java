@@ -252,13 +252,16 @@ public abstract class AbstractPool implements Pool {
     /**
      * Returns a snapshot of the current pool statistics.
      * The statistics include capacity, current size, operation counts, and memory usage.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * PoolStats stats = pool.stats();
-     * System.out.println("Hit rate: " + (double)stats.hitCount() / stats.getCount());
+     * double hitRate = stats.getCount() > 0 ?
+     *     (double) stats.hitCount() / stats.getCount() : 0.0;
+     * System.out.println("Hit rate: " + (hitRate * 100) + "%");
+     * System.out.println("Pool utilization: " + stats.size() + "/" + stats.capacity());
      * }</pre>
-     * 
+     *
      * @return a PoolStats object containing current pool statistics
      */
     @Override
