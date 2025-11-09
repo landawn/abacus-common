@@ -1,3 +1,7 @@
+### 6.26.2
+
+* Improves javadoc, unit tests and bug fixes
+
 ### 6.25.12
 
 * Improves javadoc, unit tests and bug fixes

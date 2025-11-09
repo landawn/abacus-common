@@ -1,4 +1,4 @@
-package com.landawn.abacus.type;
+package com.landawn.abacus.util;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Tag;

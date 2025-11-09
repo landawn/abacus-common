@@ -607,6 +607,7 @@ public final class Multiset<E> implements Collection<E> {
      * @deprecated Use {@link #getCount(Object)} instead
      * @see #getCount(Object)
      */
+    @Deprecated
     public int get(final Object element) {
         return getCount(element);
     }

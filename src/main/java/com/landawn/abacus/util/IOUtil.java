@@ -691,6 +691,7 @@ public final class IOUtil {
      * @deprecated use {@link #LINE_SEPARATOR_UNIX} instead. It's recommended to use '\n' as the line separator in all platforms(?).
      * It will make things easier when files are shared between different OS platforms. Windows can handle '\n' correctly. 
      */
+    @Deprecated
     public static final String LINE_SEPARATOR_WINDOWS = "\r\n";
 
     /**
