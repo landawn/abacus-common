@@ -166,23 +166,4 @@ public interface LongBiPredicate extends Throwables.LongBiPredicate<RuntimeExcep
     default LongBiPredicate or(final LongBiPredicate other) {
         return (t, u) -> test(t, u) || other.test(t, u);
     }
-
-    /**
-     * Converts this {@code LongBiPredicate} to a {@code Throwables.LongBiPredicate} that can throw a checked exception.
-     * This method provides a way to use this predicate in contexts that require explicit exception handling.
-     *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * LongBiPredicate predicate = (...) -> { ... };
-     * var throwablePredicate = predicate.toThrowable();
-     * // Can now be used in contexts that handle checked exceptions
-     * }</pre>
-     *
-     * @param <E> the type of exception that the returned predicate can throw
-     * @return a {@code Throwables.LongBiPredicate} view of this predicate that can throw exceptions of type {@code E}
-     */
-    default <E extends Throwable> Throwables.LongBiPredicate<E> toThrowable() {
-        return (Throwables.LongBiPredicate<E>) this;
-    }
-
 }

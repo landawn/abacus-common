@@ -38,7 +38,6 @@ import java.lang.annotation.Target;
  * 
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
- * import java.util.concurrent.ConcurrentHashMap;
  *
  * public class UserService {
  *     private ConcurrentHashMap<String, User> cache = new ConcurrentHashMap<>();

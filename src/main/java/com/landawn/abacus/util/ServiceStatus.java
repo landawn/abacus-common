@@ -34,6 +34,10 @@ package com.landawn.abacus.util;
  * ServiceStatus restoredStatus = ServiceStatus.valueOf(storedValue); // SUSPENDED
  * }</pre>
  * 
+ * @see AccountStatus
+ * @see Status
+ * @see WeekDay
+ * @see Color
  */
 public enum ServiceStatus {
     /**

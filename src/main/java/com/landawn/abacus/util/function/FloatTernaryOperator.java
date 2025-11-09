@@ -45,23 +45,4 @@ public interface FloatTernaryOperator extends Throwables.FloatTernaryOperator<Ru
      */
     @Override
     float applyAsFloat(float a, float b, float c);
-
-    /**
-     * Converts this {@code FloatTernaryOperator} to a {@code Throwables.FloatTernaryOperator} that can throw a checked exception.
-     * This method provides a way to use this operator in contexts that require explicit exception handling.
-     *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * FloatTernaryOperator operator = (...) -> { ... };
-     * var throwableOperator = operator.toThrowable();
-     * // Can now be used in contexts that handle checked exceptions
-     * }</pre>
-     *
-     * @param <E> the type of exception that the returned operator can throw
-     * @return a {@code Throwables.FloatTernaryOperator} view of this operator that can throw exceptions of type {@code E}
-     */
-    default <E extends Throwable> Throwables.FloatTernaryOperator<E> toThrowable() {
-        return (Throwables.FloatTernaryOperator<E>) this;
-    }
-
 }

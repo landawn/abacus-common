@@ -44,23 +44,4 @@ public interface IntTernaryOperator extends Throwables.IntTernaryOperator<Runtim
      */
     @Override
     int applyAsInt(int a, int b, int c);
-
-    /**
-     * Converts this {@code IntTernaryOperator} to a {@code Throwables.IntTernaryOperator} that can throw a checked exception.
-     * This method provides a way to use this operator in contexts that require explicit exception handling.
-     *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * IntTernaryOperator operator = (...) -> { ... };
-     * var throwableOperator = operator.toThrowable();
-     * // Can now be used in contexts that handle checked exceptions
-     * }</pre>
-     *
-     * @param <E> the type of exception that the returned operator can throw
-     * @return a {@code Throwables.IntTernaryOperator} view of this operator that can throw exceptions of type {@code E}
-     */
-    default <E extends Throwable> Throwables.IntTernaryOperator<E> toThrowable() {
-        return (Throwables.IntTernaryOperator<E>) this;
-    }
-
 }

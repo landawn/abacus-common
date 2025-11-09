@@ -407,7 +407,8 @@ public final class OkHttpRequest {
     }
 
     /**
-     * Removes all headers on this builder and adds {@code headers}.
+     * Removes all headers on this request and adds the specified headers.
+     * This method replaces all existing headers with the provided HttpHeaders instance.
      *
      * @param headers the HttpHeaders object containing all headers to set
      * @return this OkHttpRequest instance for method chaining

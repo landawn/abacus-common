@@ -79,7 +79,6 @@ public interface BiPredicate<T, U> extends Throwables.BiPredicate<T, U, RuntimeE
      *
      * @param other a predicate that will be logically-ANDed with this predicate. Must not be {@code null}.
      * @return a composed {@code BiPredicate} that represents the short-circuiting logical AND of this predicate and the {@code other} predicate
-     * @throws NullPointerException if {@code other} is null
      */
     @Override
     default BiPredicate<T, U> and(final java.util.function.BiPredicate<? super T, ? super U> other) {
@@ -103,7 +102,6 @@ public interface BiPredicate<T, U> extends Throwables.BiPredicate<T, U, RuntimeE
      *
      * @param other a predicate that will be logically-ORed with this predicate. Must not be {@code null}.
      * @return a composed {@code BiPredicate} that represents the short-circuiting logical OR of this predicate and the {@code other} predicate
-     * @throws NullPointerException if {@code other} is null
      */
     @Override
     default BiPredicate<T, U> or(final java.util.function.BiPredicate<? super T, ? super U> other) {

@@ -65,7 +65,6 @@ import java.lang.annotation.Target;
  *
  * <h3>One-to-Many Join Example:</h3>
  * <pre>{@code
- * import java.util.List;
  *
  * @Entity
  * public class Account {
@@ -87,8 +86,6 @@ import java.lang.annotation.Target;
  *
  * <h3>Many-to-Many Join Example:</h3>
  * <pre>{@code
- * import java.util.Date;
- * import java.util.List;
  *
  * @Entity
  * public class Employee {

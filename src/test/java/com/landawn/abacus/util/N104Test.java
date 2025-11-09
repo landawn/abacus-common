@@ -3144,7 +3144,7 @@ public class N104Test extends TestBase {
 
             baos.reset();
             N.fprintln("No arguments");
-            assertEquals("No arguments" + System.lineSeparator(), baos.toString());
+            assertEquals("No arguments" + IOUtil.LINE_SEPARATOR, baos.toString());
 
             baos.reset();
             N.fprintln("%d%% complete", 75);

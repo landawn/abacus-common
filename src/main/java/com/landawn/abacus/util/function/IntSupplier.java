@@ -56,23 +56,4 @@ public interface IntSupplier extends Throwables.IntSupplier<RuntimeException>, j
      */
     @Override
     int getAsInt();
-
-    /**
-     * Converts this {@code IntSupplier} to a {@code Throwables.IntSupplier} that can throw a checked exception.
-     * This method provides a way to use this supplier in contexts that require explicit exception handling.
-     *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * IntSupplier supplier = () -> { ... };
-     * var throwableSupplier = supplier.toThrowable();
-     * // Can now be used in contexts that handle checked exceptions
-     * }</pre>
-     *
-     * @param <E> the type of exception that the returned supplier can throw
-     * @return a {@code Throwables.IntSupplier} view of this supplier that can throw exceptions of type {@code E}
-     */
-    default <E extends Throwable> Throwables.IntSupplier<E> toThrowable() {
-        return (Throwables.IntSupplier<E>) this;
-    }
-
 }

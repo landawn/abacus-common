@@ -2450,6 +2450,47 @@ public final class ParserUtil {
 
         static {
             // Static initializer block remains the same...
+            propFuncMap.put(String.class, new DateTimeReaderWriter<String>() {
+                @Override
+                public String read(final PropInfo propInfo, final String strValue) {
+                    return strValue;
+                }
+
+                @Override
+                public void write(final PropInfo propInfo, final String x, final CharacterWriter writer) throws IOException {
+                    writer.write(x);
+                }
+            });
+
+            propFuncMap.put(long.class, new DateTimeReaderWriter<Long>() {
+                @Override
+                public Long read(final PropInfo propInfo, final String strValue) {
+                    return Numbers.toLong(strValue);
+                }
+
+                @Override
+                public void write(final PropInfo propInfo, final Long x, final CharacterWriter writer) throws IOException {
+                    writer.write(x);
+                }
+            });
+
+            propFuncMap.put(Long.class, new DateTimeReaderWriter<Long>() {
+                @Override
+                public Long read(final PropInfo propInfo, final String strValue) {
+                    return strValue == null ? null : Numbers.toLong(strValue);
+                }
+
+                @Override
+                public void write(final PropInfo propInfo, final Long x, final CharacterWriter writer) throws IOException {
+                    if (x == null) {
+                        writer.write(Strings.NULL);
+                    } else {
+                        writer.write(x);
+                    }
+                }
+            });
+
+            // Static initializer block remains the same...
             propFuncMap.put(java.util.Date.class, new DateTimeReaderWriter<java.util.Date>() {
                 @Override
                 public java.util.Date read(final PropInfo propInfo, final String strValue) {

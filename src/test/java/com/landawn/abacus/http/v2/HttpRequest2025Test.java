@@ -18,11 +18,10 @@ import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
-import com.landawn.abacus.http.HttpHeaders;
 import com.landawn.abacus.http.HttpMethod;
 
 @Tag("2025")
@@ -155,25 +154,25 @@ public class HttpRequest2025Test extends TestBase {
         assertNotNull(request);
     }
 
-    @Test
-    public void test_headers_withHttpHeaders() {
-        HttpHeaders headers = HttpHeaders.create();
-        headers.set("Accept", "application/json");
-        headers.set("User-Agent", "TestAgent");
-
-        HttpRequest request = HttpRequest.url(TEST_URL).headers(headers);
-        assertNotNull(request);
-    }
+    //    @Test
+    //    public void test_headers_withHttpHeaders() {
+    //        HttpHeaders headers = HttpHeaders.create();
+    //        headers.set("Accept", "application/json");
+    //        headers.set("User-Agent", "TestAgent");
+    //
+    //        HttpRequest request = HttpRequest.url(TEST_URL).headers(headers);
+    //        assertNotNull(request);
+    //    }
+    //
+    //    @Test
+    //    public void test_headers_withNullHttpHeaders() {
+    //        HttpRequest request = HttpRequest.url(TEST_URL).headers((HttpHeaders) null);
+    //        assertNotNull(request);
+    //    }
 
     @Test
     public void test_headers_withNullMap() {
         HttpRequest request = HttpRequest.url(TEST_URL).headers((Map<String, String>) null);
-        assertNotNull(request);
-    }
-
-    @Test
-    public void test_headers_withNullHttpHeaders() {
-        HttpRequest request = HttpRequest.url(TEST_URL).headers((HttpHeaders) null);
         assertNotNull(request);
     }
 

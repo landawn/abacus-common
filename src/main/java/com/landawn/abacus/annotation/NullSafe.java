@@ -49,10 +49,6 @@ import java.lang.annotation.Target;
  * 
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
- * import java.util.Arrays;
- * import java.util.Collections;
- * import java.util.List;
- * import java.util.Optional;
  *
  * public class StringUtils {
  *     @NullSafe

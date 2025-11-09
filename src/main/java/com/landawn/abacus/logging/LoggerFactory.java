@@ -88,7 +88,6 @@ public final class LoggerFactory {
      *
      * @param clazz the class for which to get the logger
      * @return a Logger instance for the specified class
-     * @throws NullPointerException if clazz is null
      */
     public static synchronized Logger getLogger(final Class<?> clazz) {
         return getLogger(clazz.getName());
@@ -117,7 +116,6 @@ public final class LoggerFactory {
      *
      * @param name the name of the logger
      * @return a Logger instance for the specified name
-     * @throws NullPointerException if name is null
      */
     @SuppressFBWarnings("SF_SWITCH_FALLTHROUGH")
     @SuppressWarnings("fallthrough")

@@ -104,23 +104,4 @@ public interface BiObjIntPredicate<T, U> extends Throwables.BiObjIntPredicate<T,
     default BiObjIntPredicate<T, U> or(final BiObjIntPredicate<? super T, ? super U> other) {
         return (t, u, i) -> test(t, u, i) || other.test(t, u, i);
     }
-
-    /**
-     * Converts this {@code BiObjIntPredicate} to a {@code Throwables.BiObjIntPredicate} that can throw a checked exception.
-     * This method provides a way to use this predicate in contexts that require explicit exception handling.
-     *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * BiObjIntPredicate predicate = (...) -> { ... };
-     * var throwablePredicate = predicate.toThrowable();
-     * // Can now be used in contexts that handle checked exceptions
-     * }</pre>
-     *
-     * @param <E> the type of exception that the returned predicate can throw
-     * @return a {@code Throwables.BiObjIntPredicate} view of this predicate that can throw exceptions of type {@code E}
-     */
-    default <E extends Throwable> Throwables.BiObjIntPredicate<T, U, E> toThrowable() {
-        return (Throwables.BiObjIntPredicate<T, U, E>) this;
-    }
-
 }

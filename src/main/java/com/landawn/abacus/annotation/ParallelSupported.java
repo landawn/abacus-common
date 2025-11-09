@@ -47,10 +47,6 @@ import java.lang.annotation.Target;
  *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
- * import java.util.List;
- * import java.util.concurrent.ConcurrentHashMap;
- * import java.util.concurrent.ConcurrentMap;
- * import java.util.function.Function;
  *
  * public class MathUtils {
  *     @ParallelSupported

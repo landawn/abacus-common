@@ -41,7 +41,7 @@ public class IOUtil2025Test extends TestBase {
     private File largeFile;
     private File emptyFile;
     private static final String TEST_CONTENT = "Hello World!";
-    private static final String MULTILINE_CONTENT = "Line 1\r\nLine 2\r\nLine 3\r\nLine 4\r\nLine 5\r\n";
+    private static final String MULTILINE_CONTENT = "Line 1\nLine 2\nLine 3\nLine 4\nLine 5\n";
     private static final String UNICODE_CONTENT = "Hello 世界 \uD83D\uDE00 Здравствуй мир";
     private static final Charset UTF_8 = StandardCharsets.UTF_8;
     private static final Charset UTF_16 = StandardCharsets.UTF_16;
@@ -57,7 +57,7 @@ public class IOUtil2025Test extends TestBase {
 
         StringBuilder largeSb = new StringBuilder();
         for (int i = 0; i < 1000; i++) {
-            largeSb.append("Line ").append(i).append(": This is a test line with some content.\r\n");
+            largeSb.append("Line ").append(i).append(": This is a test line with some content.\n");
         }
         Files.write(largeFile.toPath(), largeSb.toString().getBytes(UTF_8));
     }
@@ -2216,7 +2216,7 @@ public class IOUtil2025Test extends TestBase {
     @Test
     public void testReadLastLine_NoTrailingNewline() throws IOException {
         File noNewlineFile = Files.createTempFile(tempFolder, "nonewline", ".txt").toFile();
-        Files.write(noNewlineFile.toPath(), "Line 1\r\nLine 2\r\nLine 3".getBytes(UTF_8));
+        Files.write(noNewlineFile.toPath(), "Line 1\nLine 2\nLine 3".getBytes(UTF_8));
 
         String lastLine = IOUtil.readLastLine(noNewlineFile);
         assertNotNull(lastLine);
@@ -2300,7 +2300,7 @@ public class IOUtil2025Test extends TestBase {
         IOUtil.writeLine("Test Line", outputFile);
 
         String content = IOUtil.readAllToString(outputFile);
-        assertEquals("Test Line\r\n", content);
+        assertEquals("Test Line\n", content);
     }
 
     @Test
@@ -2312,7 +2312,7 @@ public class IOUtil2025Test extends TestBase {
         }
 
         String content = IOUtil.readAllToString(outputFile);
-        assertEquals("Test Line\r\n", content);
+        assertEquals("Test Line\n", content);
     }
 
     @Test
@@ -2324,7 +2324,7 @@ public class IOUtil2025Test extends TestBase {
         }
 
         String content = IOUtil.readAllToString(outputFile);
-        assertEquals("Test Line\r\n", content);
+        assertEquals("Test Line\n", content);
     }
 
     @Test
@@ -2338,7 +2338,7 @@ public class IOUtil2025Test extends TestBase {
         }
 
         String content = IOUtil.readAllToString(outputFile);
-        assertEquals("Line 1\r\nLine 2\r\nLine 3\r\n", content);
+        assertEquals("Line 1\nLine 2\nLine 3\n", content);
     }
 
     @Test
@@ -2348,7 +2348,7 @@ public class IOUtil2025Test extends TestBase {
         IOUtil.writeLine(null, outputFile);
 
         String content = IOUtil.readAllToString(outputFile);
-        assertEquals("null\r\n", content);
+        assertEquals("null\n", content);
     }
 
     @Test
@@ -2358,7 +2358,7 @@ public class IOUtil2025Test extends TestBase {
         IOUtil.writeLine("", outputFile);
 
         String content = IOUtil.readAllToString(outputFile);
-        assertEquals("\r\n", content);
+        assertEquals("\n", content);
     }
 
     @Test
@@ -2369,7 +2369,7 @@ public class IOUtil2025Test extends TestBase {
         IOUtil.writeLines(lines.iterator(), outputFile);
 
         String content = IOUtil.readAllToString(outputFile);
-        assertEquals("Line 1\r\nLine 2\r\nLine 3\r\n", content);
+        assertEquals("Line 1\nLine 2\nLine 3\n", content);
     }
 
     @Test
@@ -2382,7 +2382,7 @@ public class IOUtil2025Test extends TestBase {
         }
 
         String content = IOUtil.readAllToString(outputFile);
-        assertEquals("Line 1\r\nLine 2\r\nLine 3\r\n", content);
+        assertEquals("Line 1\nLine 2\nLine 3\n", content);
     }
 
     @Test
@@ -2395,7 +2395,7 @@ public class IOUtil2025Test extends TestBase {
         }
 
         String content = IOUtil.readAllToString(outputFile);
-        assertEquals("Line 1\r\nLine 2\r\nLine 3\r\n", content);
+        assertEquals("Line 1\nLine 2\nLine 3\n", content);
     }
 
     @Test
@@ -2417,7 +2417,7 @@ public class IOUtil2025Test extends TestBase {
         IOUtil.writeLines(lines, outputFile);
 
         String content = IOUtil.readAllToString(outputFile);
-        assertEquals("Line 1\r\nLine 2\r\nLine 3\r\n", content);
+        assertEquals("Line 1\nLine 2\nLine 3\n", content);
     }
 
     @Test
@@ -2430,7 +2430,7 @@ public class IOUtil2025Test extends TestBase {
         }
 
         String content = IOUtil.readAllToString(outputFile);
-        assertEquals("Line 1\r\nLine 2\r\nLine 3\r\n", content);
+        assertEquals("Line 1\nLine 2\nLine 3\n", content);
     }
 
     @Test
@@ -2443,7 +2443,7 @@ public class IOUtil2025Test extends TestBase {
         }
 
         String content = IOUtil.readAllToString(outputFile);
-        assertEquals("Line 1\r\nLine 2\r\nLine 3\r\n", content);
+        assertEquals("Line 1\nLine 2\nLine 3\n", content);
     }
 
     @Test
@@ -2633,7 +2633,7 @@ public class IOUtil2025Test extends TestBase {
     @Test
     public void testLineOperations_FirstLastAndIndex() throws IOException {
         File multilineFile = Files.createTempFile(tempFolder, "multiline", ".txt").toFile();
-        Files.write(multilineFile.toPath(), "First\r\nSecond\r\nThird\r\nFourth\r\nFifth".getBytes(UTF_8));
+        Files.write(multilineFile.toPath(), "First\nSecond\nThird\nFourth\nFifth".getBytes(UTF_8));
 
         String first = IOUtil.readFirstLine(multilineFile);
         assertEquals("First", first);
@@ -2648,7 +2648,7 @@ public class IOUtil2025Test extends TestBase {
     @Test
     public void testLineOperations_PartialRead() throws IOException {
         File multilineFile = Files.createTempFile(tempFolder, "multiline", ".txt").toFile();
-        Files.write(multilineFile.toPath(), "Line0\r\nLine1\r\nLine2\r\nLine3\r\nLine4\r\nLine5".getBytes(UTF_8));
+        Files.write(multilineFile.toPath(), "Line0\nLine1\nLine2\nLine3\nLine4\nLine5".getBytes(UTF_8));
 
         java.util.List<String> lines = IOUtil.readLines(multilineFile, 2, 3);
         assertEquals(3, lines.size());
@@ -3015,7 +3015,7 @@ public class IOUtil2025Test extends TestBase {
     @Test
     public void testAppendInputStream_LargeStream() throws IOException {
         File targetFile = Files.createTempFile(tempFolder, "target", ".txt").toFile();
-        Files.write(targetFile.toPath(), "Header\r\n".getBytes(UTF_8));
+        Files.write(targetFile.toPath(), "Header\n".getBytes(UTF_8));
 
         byte[] largeData = new byte[10000];
         for (int i = 0; i < largeData.length; i++) {
@@ -3026,7 +3026,7 @@ public class IOUtil2025Test extends TestBase {
             long bytesAppended = IOUtil.append(is, targetFile);
 
             byte[] result = IOUtil.readAllBytes(targetFile);
-            assertEquals(8 + 10000, result.length);
+            assertEquals(7 + 10000, result.length);
             assertEquals(10000, bytesAppended);
         }
     }
@@ -3104,7 +3104,7 @@ public class IOUtil2025Test extends TestBase {
     @Test
     public void testAppendLine_String() throws IOException {
         File targetFile = Files.createTempFile(tempFolder, "target", ".txt").toFile();
-        Files.write(targetFile.toPath(), "Line 1\r\n".getBytes(UTF_8));
+        Files.write(targetFile.toPath(), "Line 1\n".getBytes(UTF_8));
 
         IOUtil.appendLine("Line 2", targetFile);
 
@@ -3116,7 +3116,7 @@ public class IOUtil2025Test extends TestBase {
     @Test
     public void testAppendLine_WithCharset() throws IOException {
         File targetFile = Files.createTempFile(tempFolder, "target", ".txt").toFile();
-        Files.write(targetFile.toPath(), "First\r\n".getBytes(UTF_16));
+        Files.write(targetFile.toPath(), "First\n".getBytes(UTF_16));
 
         IOUtil.appendLine("Second", UTF_16, targetFile);
 
@@ -3128,7 +3128,7 @@ public class IOUtil2025Test extends TestBase {
     @Test
     public void testAppendLine_NullObject() throws IOException {
         File targetFile = Files.createTempFile(tempFolder, "target", ".txt").toFile();
-        Files.write(targetFile.toPath(), "Start\r\n".getBytes(UTF_8));
+        Files.write(targetFile.toPath(), "Start\n".getBytes(UTF_8));
 
         IOUtil.appendLine(null, targetFile);
 
@@ -3139,7 +3139,7 @@ public class IOUtil2025Test extends TestBase {
     @Test
     public void testAppendLine_Integer() throws IOException {
         File targetFile = Files.createTempFile(tempFolder, "target", ".txt").toFile();
-        Files.write(targetFile.toPath(), "Number:\r\n".getBytes(UTF_8));
+        Files.write(targetFile.toPath(), "Number:\n".getBytes(UTF_8));
 
         IOUtil.appendLine(42, targetFile);
 
@@ -3151,7 +3151,7 @@ public class IOUtil2025Test extends TestBase {
     @Test
     public void testAppendLines_StringList() throws IOException {
         File targetFile = Files.createTempFile(tempFolder, "target", ".txt").toFile();
-        Files.write(targetFile.toPath(), "Header\r\n".getBytes(UTF_8));
+        Files.write(targetFile.toPath(), "Header\n".getBytes(UTF_8));
 
         java.util.List<String> lines = java.util.Arrays.asList("Line A", "Line B", "Line C");
         IOUtil.appendLines(lines, targetFile);
@@ -3166,7 +3166,7 @@ public class IOUtil2025Test extends TestBase {
     @Test
     public void testAppendLines_WithCharset() throws IOException {
         File targetFile = Files.createTempFile(tempFolder, "target", ".txt").toFile();
-        Files.write(targetFile.toPath(), "Title\r\n".getBytes(UTF_16));
+        Files.write(targetFile.toPath(), "Title\n".getBytes(UTF_16));
 
         java.util.List<String> lines = java.util.Arrays.asList("Data 1", "Data 2");
         IOUtil.appendLines(lines, UTF_16, targetFile);
@@ -3192,7 +3192,7 @@ public class IOUtil2025Test extends TestBase {
     @Test
     public void testAppendLines_MixedTypes() throws IOException {
         File targetFile = Files.createTempFile(tempFolder, "target", ".txt").toFile();
-        Files.write(targetFile.toPath(), "Start\r\n".getBytes(UTF_8));
+        Files.write(targetFile.toPath(), "Start\n".getBytes(UTF_8));
 
         java.util.List<Object> lines = java.util.Arrays.asList("Text", 123, true, null);
         IOUtil.appendLines(lines, targetFile);
@@ -5869,7 +5869,7 @@ public class IOUtil2025Test extends TestBase {
         File sourceFile = Files.createTempFile(tempFolder, "split-source", ".txt").toFile();
         StringBuilder content = new StringBuilder();
         for (int i = 0; i < 100; i++) {
-            content.append("Line ").append(i).append("\r\n");
+            content.append("Line ").append(i).append("\n");
         }
         Files.write(sourceFile.toPath(), content.toString().getBytes(UTF_8));
 
@@ -6006,12 +6006,12 @@ public class IOUtil2025Test extends TestBase {
         java.util.List<File> sourceFiles = java.util.Arrays.asList(file1, file2);
         File destFile = Files.createTempFile(tempFolder, "merged-delim", ".txt").toFile();
 
-        byte[] delimiter = "\r\n".getBytes(UTF_8);
+        byte[] delimiter = "\n".getBytes(UTF_8);
         long totalBytes = IOUtil.merge(sourceFiles, delimiter, destFile);
 
         assertTrue(totalBytes > 0);
         String merged = IOUtil.readAllToString(destFile);
-        assertEquals("Line1\r\nLine2", merged);
+        assertEquals("Line1\nLine2", merged);
     }
 
     @Test
@@ -6480,8 +6480,8 @@ public class IOUtil2025Test extends TestBase {
         File file1 = Files.createTempFile(tempFolder, "eol1", ".txt").toFile();
         File file2 = Files.createTempFile(tempFolder, "eol2", ".txt").toFile();
 
-        Files.write(file1.toPath(), "Line1\r\nLine2\r\n".getBytes(UTF_8));
-        Files.write(file2.toPath(), "Line1\r\nLine2\r\n".getBytes(UTF_8));
+        Files.write(file1.toPath(), "Line1\nLine2\n".getBytes(UTF_8));
+        Files.write(file2.toPath(), "Line1\nLine2\n".getBytes(UTF_8));
 
         boolean result = IOUtil.contentEqualsIgnoreEOL(file1, file2, UTF_8.name());
 
@@ -6494,7 +6494,7 @@ public class IOUtil2025Test extends TestBase {
         File file2 = Files.createTempFile(tempFolder, "eol-win", ".txt").toFile();
 
         Files.write(file1.toPath(), "Line1\nLine2\n".getBytes(UTF_8));
-        Files.write(file2.toPath(), "Line1\r\nLine2\r\n".getBytes(UTF_8));
+        Files.write(file2.toPath(), "Line1\nLine2\n".getBytes(UTF_8));
 
         boolean result = IOUtil.contentEqualsIgnoreEOL(file1, file2, UTF_8.name());
 
@@ -6507,7 +6507,7 @@ public class IOUtil2025Test extends TestBase {
         File file2 = Files.createTempFile(tempFolder, "eol-diff2", ".txt").toFile();
 
         Files.write(file1.toPath(), "Line1\nLine2\n".getBytes(UTF_8));
-        Files.write(file2.toPath(), "Line1\r\nLine3\r\n".getBytes(UTF_8));
+        Files.write(file2.toPath(), "Line1\nLine3\n".getBytes(UTF_8));
 
         boolean result = IOUtil.contentEqualsIgnoreEOL(file1, file2, UTF_8.name());
 
@@ -6517,7 +6517,7 @@ public class IOUtil2025Test extends TestBase {
     @Test
     public void testContentEqualsIgnoreEOL_Readers_DifferentEOL() throws Exception {
         Reader r1 = new StringReader("Line1\nLine2");
-        Reader r2 = new StringReader("Line1\r\nLine2");
+        Reader r2 = new StringReader("Line1\nLine2");
 
         boolean result = IOUtil.contentEqualsIgnoreEOL(r1, r2);
 
@@ -6526,8 +6526,8 @@ public class IOUtil2025Test extends TestBase {
 
     @Test
     public void testContentEqualsIgnoreEOL_Readers_DifferentContent() throws Exception {
-        Reader r1 = new StringReader("Line1\r\nLine2");
-        Reader r2 = new StringReader("Line1\r\nLine3");
+        Reader r1 = new StringReader("Line1\nLine2");
+        Reader r2 = new StringReader("Line1\nLine3");
 
         boolean result = IOUtil.contentEqualsIgnoreEOL(r1, r2);
 
@@ -6547,7 +6547,7 @@ public class IOUtil2025Test extends TestBase {
     @Test
     public void testForLines_File_Basic() throws Exception {
         File file = Files.createTempFile(tempFolder, "for-lines", ".txt").toFile();
-        Files.write(file.toPath(), "Line1\r\nLine2\r\nLine3\r\n".getBytes(UTF_8));
+        Files.write(file.toPath(), "Line1\nLine2\nLine3\n".getBytes(UTF_8));
 
         java.util.List<String> lines = new java.util.ArrayList<>();
         IOUtil.forLines(file, line -> lines.add(line));
@@ -6561,7 +6561,7 @@ public class IOUtil2025Test extends TestBase {
     @Test
     public void testForLines_File_WithCharset() throws Exception {
         File file = Files.createTempFile(tempFolder, "for-lines-enc", ".txt").toFile();
-        Files.write(file.toPath(), "Line1\r\nLine2\r\n".getBytes(UTF_8));
+        Files.write(file.toPath(), "Line1\nLine2\n".getBytes(UTF_8));
 
         java.util.List<String> lines = new java.util.ArrayList<>();
         IOUtil.forLines(file, line -> lines.add(line), () -> {
@@ -6573,7 +6573,7 @@ public class IOUtil2025Test extends TestBase {
     @Test
     public void testForLines_File_WithOffsetAndCount() throws Exception {
         File file = Files.createTempFile(tempFolder, "for-lines-offset", ".txt").toFile();
-        Files.write(file.toPath(), "Line1\r\nLine2\r\nLine3\r\nLine4\r\nLine5\r\n".getBytes(UTF_8));
+        Files.write(file.toPath(), "Line1\nLine2\nLine3\nLine4\nLine5\n".getBytes(UTF_8));
 
         java.util.List<String> lines = new java.util.ArrayList<>();
         IOUtil.forLines(file, 1, 3, line -> lines.add(line));
@@ -6587,7 +6587,7 @@ public class IOUtil2025Test extends TestBase {
     @Test
     public void testForLines_File_WithOffsetCountAndCallback() throws Exception {
         File file = Files.createTempFile(tempFolder, "for-lines-callback", ".txt").toFile();
-        Files.write(file.toPath(), "Line1\r\nLine2\r\nLine3\r\n".getBytes(UTF_8));
+        Files.write(file.toPath(), "Line1\nLine2\nLine3\n".getBytes(UTF_8));
 
         java.util.List<String> lines = new java.util.ArrayList<>();
         final boolean[] callbackInvoked = { false };
@@ -6603,7 +6603,7 @@ public class IOUtil2025Test extends TestBase {
         File file = Files.createTempFile(tempFolder, "for-lines-threads", ".txt").toFile();
         StringBuilder sb = new StringBuilder();
         for (int i = 0; i < 100; i++) {
-            sb.append("Line").append(i).append("\r\n");
+            sb.append("Line").append(i).append("\n");
         }
         Files.write(file.toPath(), sb.toString().getBytes(UTF_8));
 
@@ -6616,7 +6616,7 @@ public class IOUtil2025Test extends TestBase {
     @Test
     public void testForLines_File_WithThreadsAndCallback() throws Exception {
         File file = Files.createTempFile(tempFolder, "for-lines-threads-cb", ".txt").toFile();
-        Files.write(file.toPath(), "Line1\r\nLine2\r\nLine3\r\n".getBytes(UTF_8));
+        Files.write(file.toPath(), "Line1\nLine2\nLine3\n".getBytes(UTF_8));
 
         java.util.List<String> lines = java.util.Collections.synchronizedList(new java.util.ArrayList<>());
         final boolean[] callbackInvoked = { false };
@@ -6631,8 +6631,8 @@ public class IOUtil2025Test extends TestBase {
     public void testForLines_Collection_Basic() throws Exception {
         File file1 = Files.createTempFile(tempFolder, "coll1", ".txt").toFile();
         File file2 = Files.createTempFile(tempFolder, "coll2", ".txt").toFile();
-        Files.write(file1.toPath(), "File1Line1\r\nFile1Line2\r\n".getBytes(UTF_8));
-        Files.write(file2.toPath(), "File2Line1\r\nFile2Line2\r\n".getBytes(UTF_8));
+        Files.write(file1.toPath(), "File1Line1\nFile1Line2\n".getBytes(UTF_8));
+        Files.write(file2.toPath(), "File2Line1\nFile2Line2\n".getBytes(UTF_8));
 
         java.util.List<File> files = java.util.Arrays.asList(file1, file2);
         java.util.List<String> lines = new java.util.ArrayList<>();
@@ -6645,7 +6645,7 @@ public class IOUtil2025Test extends TestBase {
     @Test
     public void testForLines_Collection_WithCallback() throws Exception {
         File file1 = Files.createTempFile(tempFolder, "coll-cb1", ".txt").toFile();
-        Files.write(file1.toPath(), "Line1\r\n".getBytes(UTF_8));
+        Files.write(file1.toPath(), "Line1\n".getBytes(UTF_8));
 
         java.util.List<File> files = java.util.Arrays.asList(file1);
         java.util.List<String> lines = new java.util.ArrayList<>();
@@ -6660,7 +6660,7 @@ public class IOUtil2025Test extends TestBase {
     @Test
     public void testForLines_Collection_WithOffsetAndCount() throws Exception {
         File file1 = Files.createTempFile(tempFolder, "coll-offset1", ".txt").toFile();
-        Files.write(file1.toPath(), "Line1\r\nLine2\r\nLine3\r\nLine4\r\n".getBytes(UTF_8));
+        Files.write(file1.toPath(), "Line1\nLine2\nLine3\nLine4\n".getBytes(UTF_8));
 
         java.util.List<File> files = java.util.Arrays.asList(file1);
         java.util.List<String> lines = new java.util.ArrayList<>();
@@ -6676,7 +6676,7 @@ public class IOUtil2025Test extends TestBase {
         File file1 = Files.createTempFile(tempFolder, "coll-threads", ".txt").toFile();
         StringBuilder sb = new StringBuilder();
         for (int i = 0; i < 50; i++) {
-            sb.append("Line").append(i).append("\r\n");
+            sb.append("Line").append(i).append("\n");
         }
         Files.write(file1.toPath(), sb.toString().getBytes(UTF_8));
 
@@ -6693,7 +6693,7 @@ public class IOUtil2025Test extends TestBase {
         File file = Files.createTempFile(tempFolder, "read-process", ".txt").toFile();
         StringBuilder sb = new StringBuilder();
         for (int i = 0; i < 100; i++) {
-            sb.append("Line").append(i).append("\r\n");
+            sb.append("Line").append(i).append("\n");
         }
         Files.write(file.toPath(), sb.toString().getBytes(UTF_8));
 
@@ -6706,7 +6706,7 @@ public class IOUtil2025Test extends TestBase {
     @Test
     public void testForLines_File_ReadProcessThreadsWithCallback() throws Exception {
         File file = Files.createTempFile(tempFolder, "read-process-cb", ".txt").toFile();
-        Files.write(file.toPath(), "Line1\r\nLine2\r\nLine3\r\n".getBytes(UTF_8));
+        Files.write(file.toPath(), "Line1\nLine2\nLine3\n".getBytes(UTF_8));
 
         java.util.List<String> lines = java.util.Collections.synchronizedList(new java.util.ArrayList<>());
         final boolean[] callbackInvoked = { false };
@@ -6722,7 +6722,7 @@ public class IOUtil2025Test extends TestBase {
         File file = Files.createTempFile(tempFolder, "offset-read-process", ".txt").toFile();
         StringBuilder sb = new StringBuilder();
         for (int i = 0; i < 100; i++) {
-            sb.append("Line").append(i).append("\r\n");
+            sb.append("Line").append(i).append("\n");
         }
         Files.write(file.toPath(), sb.toString().getBytes(UTF_8));
 
@@ -6735,7 +6735,7 @@ public class IOUtil2025Test extends TestBase {
     @Test
     public void testForLines_File_WithOffsetCountReadProcessThreadsCallback() throws Exception {
         File file = Files.createTempFile(tempFolder, "offset-read-process-cb", ".txt").toFile();
-        Files.write(file.toPath(), "Line1\r\nLine2\r\nLine3\r\nLine4\r\nLine5\r\n".getBytes(UTF_8));
+        Files.write(file.toPath(), "Line1\nLine2\nLine3\nLine4\nLine5\n".getBytes(UTF_8));
 
         java.util.List<String> lines = java.util.Collections.synchronizedList(new java.util.ArrayList<>());
         final boolean[] callbackInvoked = { false };
@@ -6753,7 +6753,7 @@ public class IOUtil2025Test extends TestBase {
 
         StringBuilder sb = new StringBuilder();
         for (int i = 0; i < 50; i++) {
-            sb.append("Line").append(i).append("\r\n");
+            sb.append("Line").append(i).append("\n");
         }
         Files.write(file1.toPath(), sb.toString().getBytes(UTF_8));
         Files.write(file2.toPath(), sb.toString().getBytes(UTF_8));
@@ -6769,7 +6769,7 @@ public class IOUtil2025Test extends TestBase {
     @Test
     public void testForLines_Collection_ReadProcessThreadsCallback() throws Exception {
         File file1 = Files.createTempFile(tempFolder, "coll-rp-cb", ".txt").toFile();
-        Files.write(file1.toPath(), "Line1\r\nLine2\r\n".getBytes(UTF_8));
+        Files.write(file1.toPath(), "Line1\nLine2\n".getBytes(UTF_8));
 
         java.util.List<File> files = java.util.Arrays.asList(file1);
         java.util.List<String> lines = java.util.Collections.synchronizedList(new java.util.ArrayList<>());
@@ -6786,7 +6786,7 @@ public class IOUtil2025Test extends TestBase {
         File file1 = Files.createTempFile(tempFolder, "coll-offset-rp", ".txt").toFile();
         StringBuilder sb = new StringBuilder();
         for (int i = 0; i < 100; i++) {
-            sb.append("Line").append(i).append("\r\n");
+            sb.append("Line").append(i).append("\n");
         }
         Files.write(file1.toPath(), sb.toString().getBytes(UTF_8));
 
@@ -6801,7 +6801,7 @@ public class IOUtil2025Test extends TestBase {
     @Test
     public void testForLines_Collection_WithOffsetCountReadProcessThreadsCallback() throws Exception {
         File file1 = Files.createTempFile(tempFolder, "coll-offset-rp-cb", ".txt").toFile();
-        Files.write(file1.toPath(), "Line1\r\nLine2\r\nLine3\r\nLine4\r\nLine5\r\n".getBytes(UTF_8));
+        Files.write(file1.toPath(), "Line1\nLine2\nLine3\nLine4\nLine5\n".getBytes(UTF_8));
 
         java.util.List<File> files = java.util.Arrays.asList(file1);
         java.util.List<String> lines = java.util.Collections.synchronizedList(new java.util.ArrayList<>());
@@ -6815,7 +6815,7 @@ public class IOUtil2025Test extends TestBase {
 
     @Test
     public void testForLines_InputStream_Basic() throws Exception {
-        String content = "Line1\r\nLine2\r\nLine3\r\n";
+        String content = "Line1\nLine2\nLine3\n";
         InputStream is = new ByteArrayInputStream(content.getBytes(UTF_8));
 
         java.util.List<String> lines = new java.util.ArrayList<>();
@@ -6827,7 +6827,7 @@ public class IOUtil2025Test extends TestBase {
 
     @Test
     public void testForLines_InputStream_WithCallback() throws Exception {
-        String content = "Line1\r\nLine2\r\n";
+        String content = "Line1\nLine2\n";
         InputStream is = new ByteArrayInputStream(content.getBytes(UTF_8));
 
         java.util.List<String> lines = new java.util.ArrayList<>();
@@ -6841,7 +6841,7 @@ public class IOUtil2025Test extends TestBase {
 
     @Test
     public void testForLines_InputStream_WithOffsetAndCount() throws Exception {
-        String content = "Line1\r\nLine2\r\nLine3\r\nLine4\r\nLine5\r\n";
+        String content = "Line1\nLine2\nLine3\nLine4\nLine5\n";
         InputStream is = new ByteArrayInputStream(content.getBytes(UTF_8));
 
         java.util.List<String> lines = new java.util.ArrayList<>();
@@ -6853,7 +6853,7 @@ public class IOUtil2025Test extends TestBase {
 
     @Test
     public void testForLines_InputStream_WithOffsetCountCallback() throws Exception {
-        String content = "Line1\r\nLine2\r\nLine3\r\n";
+        String content = "Line1\nLine2\nLine3\n";
         InputStream is = new ByteArrayInputStream(content.getBytes(UTF_8));
 
         java.util.List<String> lines = new java.util.ArrayList<>();
@@ -6869,7 +6869,7 @@ public class IOUtil2025Test extends TestBase {
     public void testForLines_InputStream_WithProcessThreads() throws Exception {
         StringBuilder sb = new StringBuilder();
         for (int i = 0; i < 100; i++) {
-            sb.append("Line").append(i).append("\r\n");
+            sb.append("Line").append(i).append("\n");
         }
         InputStream is = new ByteArrayInputStream(sb.toString().getBytes(UTF_8));
 
@@ -6881,7 +6881,7 @@ public class IOUtil2025Test extends TestBase {
 
     @Test
     public void testForLines_InputStream_WithProcessThreadsCallback() throws Exception {
-        String content = "Line1\r\nLine2\r\nLine3\r\n";
+        String content = "Line1\nLine2\nLine3\n";
         InputStream is = new ByteArrayInputStream(content.getBytes(UTF_8));
 
         java.util.List<String> lines = java.util.Collections.synchronizedList(new java.util.ArrayList<>());
@@ -6895,7 +6895,7 @@ public class IOUtil2025Test extends TestBase {
 
     @Test
     public void testForLines_Reader_Basic() throws Exception {
-        Reader reader = new StringReader("Line1\r\nLine2\r\nLine3\r\n");
+        Reader reader = new StringReader("Line1\nLine2\nLine3\n");
 
         java.util.List<String> lines = new java.util.ArrayList<>();
         IOUtil.forLines(reader, line -> lines.add(line));
@@ -6906,7 +6906,7 @@ public class IOUtil2025Test extends TestBase {
 
     @Test
     public void testForLines_Reader_WithCallback() throws Exception {
-        Reader reader = new StringReader("Line1\r\nLine2\r\n");
+        Reader reader = new StringReader("Line1\nLine2\n");
 
         java.util.List<String> lines = new java.util.ArrayList<>();
         final boolean[] callbackInvoked = { false };
@@ -6919,7 +6919,7 @@ public class IOUtil2025Test extends TestBase {
 
     @Test
     public void testForLines_Reader_WithOffsetAndCount() throws Exception {
-        Reader reader = new StringReader("Line1\r\nLine2\r\nLine3\r\nLine4\r\nLine5\r\n");
+        Reader reader = new StringReader("Line1\nLine2\nLine3\nLine4\nLine5\n");
 
         java.util.List<String> lines = new java.util.ArrayList<>();
         IOUtil.forLines(reader, 1, 3, line -> lines.add(line));
@@ -6930,7 +6930,7 @@ public class IOUtil2025Test extends TestBase {
 
     @Test
     public void testForLines_Reader_WithOffsetCountCallback() throws Exception {
-        Reader reader = new StringReader("Line1\r\nLine2\r\nLine3\r\n");
+        Reader reader = new StringReader("Line1\nLine2\nLine3\n");
 
         java.util.List<String> lines = new java.util.ArrayList<>();
         final boolean[] callbackInvoked = { false };
@@ -6945,7 +6945,7 @@ public class IOUtil2025Test extends TestBase {
     public void testForLines_Reader_WithProcessThreads() throws Exception {
         StringBuilder sb = new StringBuilder();
         for (int i = 0; i < 100; i++) {
-            sb.append("Line").append(i).append("\r\n");
+            sb.append("Line").append(i).append("\n");
         }
         Reader reader = new StringReader(sb.toString());
 
@@ -6957,7 +6957,7 @@ public class IOUtil2025Test extends TestBase {
 
     @Test
     public void testForLines_Reader_WithProcessThreadsCallback() throws Exception {
-        Reader reader = new StringReader("Line1\r\nLine2\r\nLine3\r\n");
+        Reader reader = new StringReader("Line1\nLine2\nLine3\n");
 
         java.util.List<String> lines = java.util.Collections.synchronizedList(new java.util.ArrayList<>());
         final boolean[] callbackInvoked = { false };
@@ -7041,7 +7041,7 @@ public class IOUtil2025Test extends TestBase {
         File largeSource = Files.createTempFile(tempFolder, "large-source", ".txt").toFile();
         StringBuilder largeContent = new StringBuilder();
         for (int i = 0; i < 10000; i++) {
-            largeContent.append("This is line ").append(i).append(" with some content to make it larger.\r\n");
+            largeContent.append("This is line ").append(i).append(" with some content to make it larger.\n");
         }
         Files.write(largeSource.toPath(), largeContent.toString().getBytes(UTF_8));
 
@@ -7060,7 +7060,7 @@ public class IOUtil2025Test extends TestBase {
 
         StringBuilder content = new StringBuilder();
         for (int i = 0; i < 1000; i++) {
-            content.append("Line ").append(i).append("\r\n");
+            content.append("Line ").append(i).append("\n");
         }
 
         Files.write(file1.toPath(), content.toString().getBytes(UTF_8));
@@ -7080,7 +7080,7 @@ public class IOUtil2025Test extends TestBase {
         File largeFile = Files.createTempFile(tempFolder, "large-for-lines", ".txt").toFile();
         StringBuilder sb = new StringBuilder();
         for (int i = 0; i < 10000; i++) {
-            sb.append("Line ").append(i).append("\r\n");
+            sb.append("Line ").append(i).append("\n");
         }
         Files.write(largeFile.toPath(), sb.toString().getBytes(UTF_8));
 
@@ -7093,7 +7093,7 @@ public class IOUtil2025Test extends TestBase {
     @Test
     public void testForLines_WithException() throws Exception {
         File file = Files.createTempFile(tempFolder, "for-lines-exception", ".txt").toFile();
-        Files.write(file.toPath(), "Line1\r\nLine2\r\nLine3\r\n".getBytes(UTF_8));
+        Files.write(file.toPath(), "Line1\nLine2\nLine3\n".getBytes(UTF_8));
 
         assertThrows(Exception.class, () -> {
             IOUtil.forLines(file, line -> {
@@ -7111,7 +7111,7 @@ public class IOUtil2025Test extends TestBase {
 
         StringBuilder content = new StringBuilder();
         for (int i = 0; i < 10000; i++) {
-            content.append("Line ").append(i).append("\r\n");
+            content.append("Line ").append(i).append("\n");
         }
 
         Files.write(file1.toPath(), content.toString().getBytes(UTF_8));
@@ -7184,7 +7184,7 @@ public class IOUtil2025Test extends TestBase {
         Writer writer = IOUtil.newAppendableWriter(sb);
 
         for (int i = 0; i < 5; i++) {
-            writer.write("Line" + i + "\r\n");
+            writer.write("Line" + i + "\n");
         }
         writer.flush();
 

@@ -52,23 +52,4 @@ public interface DoubleSupplier extends Throwables.DoubleSupplier<RuntimeExcepti
      */
     @Override
     double getAsDouble();
-
-    /**
-     * Converts this {@code DoubleSupplier} to a {@code Throwables.DoubleSupplier} that can throw a checked exception.
-     * This method provides a way to use this supplier in contexts that require explicit exception handling.
-     *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * DoubleSupplier supplier = () -> { ... };
-     * var throwableSupplier = supplier.toThrowable();
-     * // Can now be used in contexts that handle checked exceptions
-     * }</pre>
-     *
-     * @param <E> the type of exception that the returned supplier can throw
-     * @return a {@code Throwables.DoubleSupplier} view of this supplier that can throw exceptions of type {@code E}
-     */
-    default <E extends Throwable> Throwables.DoubleSupplier<E> toThrowable() {
-        return (Throwables.DoubleSupplier<E>) this;
-    }
-
 }

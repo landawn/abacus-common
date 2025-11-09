@@ -46,12 +46,6 @@ import java.lang.annotation.Target;
  *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
- * import java.nio.file.Files;
- * import java.nio.file.Path;
- * import java.util.List;
- * import java.util.function.Function;
- * import java.util.function.Supplier;
- * import java.util.stream.Stream;
  *
  * public class DataProcessor {
  *     @LazyEvaluation

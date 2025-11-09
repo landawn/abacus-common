@@ -82,23 +82,4 @@ public interface DoubleNFunction<R> extends Throwables.DoubleNFunction<R, Runtim
     default <V> DoubleNFunction<V> andThen(final java.util.function.Function<? super R, ? extends V> after) {
         return args -> after.apply(apply(args));
     }
-
-    /**
-     * Converts this {@code DoubleNFunction} to a {@code Throwables.DoubleNFunction} that can throw a checked exception.
-     * This method provides a way to use this function in contexts that require explicit exception handling.
-     *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * DoubleNFunction function = (...) -> { ... };
-     * var throwableFunction = function.toThrowable();
-     * // Can now be used in contexts that handle checked exceptions
-     * }</pre>
-     *
-     * @param <E> the type of exception that the returned function can throw
-     * @return a {@code Throwables.DoubleNFunction} view of this function that can throw exceptions of type {@code E}
-     */
-    default <E extends Throwable> Throwables.DoubleNFunction<R, E> toThrowable() {
-        return (Throwables.DoubleNFunction<R, E>) this;
-    }
-
 }

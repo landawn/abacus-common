@@ -97,7 +97,6 @@ public interface Predicate<T> extends Throwables.Predicate<T, RuntimeException>,
      * @param other a predicate that will be logically-ANDed with this predicate. Must not be {@code null}.
      * @return a composed {@code Predicate} that represents the short-circuiting logical
      *         AND of this predicate and the {@code other} predicate
-     * @throws NullPointerException if {@code other} is null
      */
     @Override
     default Predicate<T> and(final java.util.function.Predicate<? super T> other) {
@@ -127,7 +126,6 @@ public interface Predicate<T> extends Throwables.Predicate<T, RuntimeException>,
      * @param other a predicate that will be logically-ORed with this predicate. Must not be {@code null}.
      * @return a composed {@code Predicate} that represents the short-circuiting logical
      *         OR of this predicate and the {@code other} predicate
-     * @throws NullPointerException if {@code other} is null
      */
     @Override
     default Predicate<T> or(final java.util.function.Predicate<? super T> other) {

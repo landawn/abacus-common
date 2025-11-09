@@ -123,7 +123,7 @@ public final class CodeGenerationUtil {
 
     private static final String BUILDER = "Builder";
 
-    private static final String LINE_SEPARATOR = IOUtil.LINE_SEPARATOR;
+    private static final String LINE_SEPARATOR = IOUtil.LINE_SEPARATOR_UNIX;
 
     /** Identity property name converter that returns property names unchanged. */
     private static final BiFunction<Class<?>, String, String> identityPropNameConverter = (cls, propName) -> propName;

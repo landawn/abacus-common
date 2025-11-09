@@ -29,6 +29,10 @@ package com.landawn.abacus.util;
  * Color fromCode = Color.valueOf(2);  // returns Color.RED
  * }</pre>
  * 
+ * @see WeekDay
+ * @see Status
+ * @see ServiceStatus
+ * @see AccountStatus
  */
 public enum Color {
 

@@ -79,23 +79,4 @@ public interface ObjDoubleConsumer<T> extends Throwables.ObjDoubleConsumer<T, Ru
             after.accept(t, u);
         };
     }
-
-    /**
-     * Converts this {@code ObjDoubleConsumer} to a {@code Throwables.ObjDoubleConsumer} that can throw a checked exception.
-     * This method provides a way to use this consumer in contexts that require explicit exception handling.
-     *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * ObjDoubleConsumer consumer = (...) -> { ... };
-     * var throwableConsumer = consumer.toThrowable();
-     * // Can now be used in contexts that handle checked exceptions
-     * }</pre>
-     *
-     * @param <E> the type of exception that the returned consumer can throw
-     * @return a {@code Throwables.ObjDoubleConsumer} view of this consumer that can throw exceptions of type {@code E}
-     */
-    default <E extends Throwable> Throwables.ObjDoubleConsumer<T, E> toThrowable() {
-        return (Throwables.ObjDoubleConsumer<T, E>) this;
-    }
-
 }

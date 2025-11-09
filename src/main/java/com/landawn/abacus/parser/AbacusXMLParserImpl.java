@@ -334,7 +334,7 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
         final int nameTagIdx = jsonXmlNamingPolicy.ordinal();
 
         if (isPrettyFormat && indentation != null) {
-            bw.write(IOUtil.LINE_SEPARATOR);
+            bw.write(IOUtil.LINE_SEPARATOR_UNIX);
             bw.write(indentation);
         }
 
@@ -357,7 +357,7 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
         writeProperties(obj, config, propIndentation, serializedObjects, type, bw);
 
         if (isPrettyFormat) {
-            bw.write(IOUtil.LINE_SEPARATOR);
+            bw.write(IOUtil.LINE_SEPARATOR_UNIX);
 
             if (indentation != null) {
                 bw.write(indentation);
@@ -415,7 +415,7 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
             }
 
             if (isPrettyFormat) {
-                bw.write(IOUtil.LINE_SEPARATOR);
+                bw.write(IOUtil.LINE_SEPARATOR_UNIX);
                 bw.write(propIndentation);
             }
 
@@ -466,7 +466,7 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
                     write(propValue, propInfo, config, nextIndentation, serializedObjects, bw, false);
 
                     if (isPrettyFormat) {
-                        bw.write(IOUtil.LINE_SEPARATOR);
+                        bw.write(IOUtil.LINE_SEPARATOR_UNIX);
                         bw.write(propIndentation);
                     }
                 }
@@ -493,7 +493,7 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
         final boolean isPrettyFormat = config.prettyFormat();
 
         if (isPrettyFormat && indentation != null) {
-            bw.write(IOUtil.LINE_SEPARATOR);
+            bw.write(IOUtil.LINE_SEPARATOR_UNIX);
             bw.write(indentation);
         }
 
@@ -530,14 +530,14 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
             //    }
 
             if (isPrettyFormat) {
-                bw.write(IOUtil.LINE_SEPARATOR);
+                bw.write(IOUtil.LINE_SEPARATOR_UNIX);
                 bw.write(entryIndentation);
             }
 
             bw.write(XMLConstants.ENTRY_ELE_START);
 
             if (isPrettyFormat) {
-                bw.write(IOUtil.LINE_SEPARATOR);
+                bw.write(IOUtil.LINE_SEPARATOR_UNIX);
                 bw.write(keyValueIndentation);
             }
 
@@ -575,7 +575,7 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
                         write(key, null, config, nextIndentation, serializedObjects, bw, false);
 
                         if (isPrettyFormat) {
-                            bw.write(IOUtil.LINE_SEPARATOR);
+                            bw.write(IOUtil.LINE_SEPARATOR_UNIX);
                             bw.write(keyValueIndentation);
                         }
                     }
@@ -585,7 +585,7 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
             }
 
             if (isPrettyFormat) {
-                bw.write(IOUtil.LINE_SEPARATOR);
+                bw.write(IOUtil.LINE_SEPARATOR_UNIX);
                 bw.write(keyValueIndentation);
             }
 
@@ -614,7 +614,7 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
                     write(value, null, config, nextIndentation, serializedObjects, bw, false);
 
                     if (isPrettyFormat) {
-                        bw.write(IOUtil.LINE_SEPARATOR);
+                        bw.write(IOUtil.LINE_SEPARATOR_UNIX);
                         bw.write(keyValueIndentation);
                     }
                 }
@@ -623,7 +623,7 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
             }
 
             if (isPrettyFormat) {
-                bw.write(IOUtil.LINE_SEPARATOR);
+                bw.write(IOUtil.LINE_SEPARATOR_UNIX);
                 bw.write(entryIndentation);
             }
 
@@ -631,7 +631,7 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
         }
 
         if (isPrettyFormat) {
-            bw.write(IOUtil.LINE_SEPARATOR);
+            bw.write(IOUtil.LINE_SEPARATOR_UNIX);
 
             if (indentation != null) {
                 bw.write(indentation);
@@ -652,7 +652,7 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
         final boolean isPrettyFormat = config.prettyFormat();
 
         if (isPrettyFormat && indentation != null) {
-            bw.write(IOUtil.LINE_SEPARATOR);
+            bw.write(IOUtil.LINE_SEPARATOR_UNIX);
             bw.write(indentation);
         }
 
@@ -671,7 +671,7 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
 
         for (final Object e : a) {
             if (isPrettyFormat) {
-                bw.write(IOUtil.LINE_SEPARATOR);
+                bw.write(IOUtil.LINE_SEPARATOR_UNIX);
                 bw.write(eleIndentation);
             }
 
@@ -700,7 +700,7 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
                     write(e, null, config, nextIndentation, serializedObjects, bw, false);
 
                     if (isPrettyFormat) {
-                        bw.write(IOUtil.LINE_SEPARATOR);
+                        bw.write(IOUtil.LINE_SEPARATOR_UNIX);
                         bw.write(eleIndentation);
                     }
                 }
@@ -710,7 +710,7 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
         }
 
         if (isPrettyFormat) {
-            bw.write(IOUtil.LINE_SEPARATOR);
+            bw.write(IOUtil.LINE_SEPARATOR_UNIX);
 
             if (indentation != null) {
                 bw.write(indentation);
@@ -730,7 +730,7 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
         final boolean isPrettyFormat = config.prettyFormat();
 
         if (isPrettyFormat && indentation != null) {
-            bw.write(IOUtil.LINE_SEPARATOR);
+            bw.write(IOUtil.LINE_SEPARATOR_UNIX);
             bw.write(indentation);
         }
 
@@ -767,7 +767,7 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
 
         for (final Object e : c) {
             if (isPrettyFormat) {
-                bw.write(IOUtil.LINE_SEPARATOR);
+                bw.write(IOUtil.LINE_SEPARATOR_UNIX);
                 bw.write(eleIndentation);
             }
 
@@ -796,7 +796,7 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
                     write(e, null, config, nextIndentation, serializedObjects, bw, false);
 
                     if (isPrettyFormat) {
-                        bw.write(IOUtil.LINE_SEPARATOR);
+                        bw.write(IOUtil.LINE_SEPARATOR_UNIX);
                         bw.write(eleIndentation);
                     }
                 }
@@ -806,7 +806,7 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
         }
 
         if (isPrettyFormat) {
-            bw.write(IOUtil.LINE_SEPARATOR);
+            bw.write(IOUtil.LINE_SEPARATOR_UNIX);
 
             if (indentation != null) {
                 bw.write(indentation);

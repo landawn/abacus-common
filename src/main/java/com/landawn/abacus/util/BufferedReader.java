@@ -391,7 +391,7 @@ final class BufferedReader extends java.io.BufferedReader { // NOSONAR
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * BufferedReader reader = new BufferedReader("Line 1\r\nLine 2\nLine 3");
+     * BufferedReader reader = new BufferedReader("Line 1\nLine 2\nLine 3");
      * System.out.println(reader.readLine()); // "Line 1"
      * System.out.println(reader.readLine()); // "Line 2"
      * System.out.println(reader.readLine()); // "Line 3"

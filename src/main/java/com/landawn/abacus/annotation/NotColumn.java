@@ -44,8 +44,6 @@ import java.lang.annotation.Target;
  * 
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
- * import java.math.BigDecimal;
- * import java.util.List;
  *
  * @Entity
  * public class Product {

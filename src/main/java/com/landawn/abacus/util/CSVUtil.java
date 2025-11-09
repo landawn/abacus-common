@@ -3058,7 +3058,7 @@ public final class CSVUtil {
                     writeField(bw, null, headers.get(i));
                 }
 
-                bw.write(IOUtil.LINE_SEPARATOR);
+                bw.write(IOUtil.LINE_SEPARATOR_UNIX);
 
                 for (int i = 0; i < headSize; i++) {
                     if (i > 0) {
@@ -3071,7 +3071,7 @@ public final class CSVUtil {
                 while (iter.hasNext()) {
                     row = iter.next();
 
-                    bw.write(IOUtil.LINE_SEPARATOR);
+                    bw.write(IOUtil.LINE_SEPARATOR_UNIX);
 
                     for (int i = 0; i < headSize; i++) {
                         if (i > 0) {

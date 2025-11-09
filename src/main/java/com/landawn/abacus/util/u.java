@@ -997,7 +997,7 @@ public class u { // NOSONAR
          */
         @Override
         public int hashCode() {
-            return N.hashCode(isPresent) * 31 + N.hashCode(value);
+            return isPresent ? 1 + N.hashCode(value) * 31 : 0;
         }
 
         /**
@@ -1680,7 +1680,7 @@ public class u { // NOSONAR
          */
         @Override
         public int hashCode() {
-            return N.hashCode(isPresent()) * 31 + N.hashCode(value);
+            return isPresent ? 1 + N.hashCode(value) * 31 : 0;
         }
 
         /**
@@ -2306,7 +2306,7 @@ public class u { // NOSONAR
          */
         @Override
         public int hashCode() {
-            return N.hashCode(isPresent) * 31 + N.hashCode(value);
+            return isPresent ? 1 + N.hashCode(value) * 31 : 0;
         }
 
         /**
@@ -2928,7 +2928,7 @@ public class u { // NOSONAR
          */
         @Override
         public int hashCode() {
-            return N.hashCode(isPresent) * 31 + N.hashCode(value);
+            return isPresent ? 1 + N.hashCode(value) * 31 : 0;
         }
 
         /**
@@ -3668,7 +3668,7 @@ public class u { // NOSONAR
          */
         @Override
         public int hashCode() {
-            return N.hashCode(isPresent) * 31 + N.hashCode(value);
+            return isPresent ? 1 + N.hashCode(value) * 31 : 0;
         }
 
         /**
@@ -4320,7 +4320,7 @@ public class u { // NOSONAR
          */
         @Override
         public int hashCode() {
-            return N.hashCode(isPresent) * 31 + N.hashCode(value);
+            return isPresent ? 1 + N.hashCode(value) * 31 : 0;
         }
 
         /**
@@ -4919,7 +4919,7 @@ public class u { // NOSONAR
          */
         @Override
         public int hashCode() {
-            return N.hashCode(isPresent) * 31 + N.hashCode(value);
+            return isPresent ? 1 + N.hashCode(value) * 31 : 0;
         }
 
         /**
@@ -5540,7 +5540,7 @@ public class u { // NOSONAR
          */
         @Override
         public int hashCode() {
-            return N.hashCode(isPresent) * 31 + N.hashCode(value);
+            return isPresent ? 1 + N.hashCode(value) * 31 : 0;
         }
 
         /**
@@ -6303,7 +6303,7 @@ public class u { // NOSONAR
          */
         @Override
         public int hashCode() {
-            return N.hashCode(isPresent()) * 31 + N.hashCode(value);
+            return isPresent() ? 1 + N.hashCode(value) * 31 : 0;
         }
 
         /**
@@ -7740,7 +7740,7 @@ public class u { // NOSONAR
          */
         @Override
         public int hashCode() {
-            return N.hashCode(isPresent) * 31 + N.hashCode(value);
+            return isPresent ? 1 + N.hashCode(value) * 31 : 0;
         }
 
         /**

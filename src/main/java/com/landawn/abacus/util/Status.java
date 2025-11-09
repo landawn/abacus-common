@@ -47,6 +47,9 @@ package com.landawn.abacus.util;
  * }</pre>
  * 
  * @see ServiceStatus
+ * @see AccountStatus
+ * @see WeekDay
+ * @see Color
  */
 public enum Status {
 

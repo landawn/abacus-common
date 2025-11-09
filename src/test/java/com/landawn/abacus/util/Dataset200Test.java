@@ -974,7 +974,7 @@ public class Dataset200Test extends TestBase {
         StringWriter sw = new StringWriter();
         sampleDataset.toCsv(sw);
         String csv = sw.toString();
-        String[] lines = csv.split(System.lineSeparator());
+        String[] lines = csv.split(IOUtil.LINE_SEPARATOR_UNIX);
         assertEquals("\"ID\",\"Name\",\"Age\"", lines[0]);
         assertEquals("1,\"Alice\",30", lines[1]);
     }

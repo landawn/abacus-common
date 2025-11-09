@@ -37,7 +37,6 @@ import java.lang.annotation.Target;
  * 
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
- * import java.math.BigDecimal;
  *
  * public class Amount {
  *     @JsonXmlValue

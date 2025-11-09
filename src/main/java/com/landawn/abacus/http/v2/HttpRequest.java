@@ -349,6 +349,8 @@ public final class HttpRequest {
      * @param password the password for authentication
      * @return this HttpRequest instance for method chaining
      * @see HttpHeaders
+     * @see HttpHeaders.Names
+     * @see HttpHeaders.Values
      */
     public HttpRequest basicAuth(final String user, final Object password) {
         header(HttpHeaders.Names.AUTHORIZATION, "Basic " + Strings.base64Encode((user + ":" + password).getBytes(Charsets.UTF_8)));
@@ -372,6 +374,8 @@ public final class HttpRequest {
      * @param value the header value (will be converted to string)
      * @return this HttpRequest instance for method chaining
      * @see HttpHeaders
+     * @see HttpHeaders.Names
+     * @see HttpHeaders.Values
      */
     public HttpRequest header(final String name, final Object value) {
         requestBuilder.header(name, HttpHeaders.valueOf(value));
@@ -397,7 +401,8 @@ public final class HttpRequest {
      * @param value2 the second header value (will be converted to string)
      * @return this HttpRequest instance for method chaining
      * @see HttpHeaders
-     * @see #header(String, Object)
+     * @see HttpHeaders.Names
+     * @see HttpHeaders.Values
      */
     public HttpRequest headers(final String name1, final Object value1, final String name2, final Object value2) {
         return header(name1, value1).header(name2, value2);
@@ -425,7 +430,8 @@ public final class HttpRequest {
      * @param value3 the third header value (will be converted to string)
      * @return this HttpRequest instance for method chaining
      * @see HttpHeaders
-     * @see #header(String, Object)
+     * @see HttpHeaders.Names
+     * @see HttpHeaders.Values
      */
     public HttpRequest headers(final String name1, final Object value1, final String name2, final Object value2, final String name3, final Object value3) {
         return header(name1, value1).header(name2, value2).header(name3, value3);
@@ -449,6 +455,8 @@ public final class HttpRequest {
      * @param headers a map containing header names and values
      * @return this HttpRequest instance for method chaining
      * @see HttpHeaders
+     * @see HttpHeaders.Names
+     * @see HttpHeaders.Values
      */
     public HttpRequest headers(final Map<String, ?> headers) {
         if (N.notEmpty(headers)) {
@@ -460,34 +468,39 @@ public final class HttpRequest {
         return this;
     }
 
-    /**
-     * Sets HTTP headers from a provided HttpHeaders object.
-     * If this HttpRequest already has any headers with those names, they are all replaced.
-     * This is useful when you have a collection of headers to apply from another source.
-     *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * HttpHeaders headers = new HttpHeaders();
-     * headers.set("Accept", "application/json");
-     * headers.set("Authorization", "Bearer token123");
-     *
-     * HttpRequest.url("https://api.example.com/data")
-     *     .headers(headers)
-     *     .get();
-     * }</pre>
-     *
-     * @param headers the HttpHeaders object containing all headers to set
-     * @return this HttpRequest instance for method chaining
-     * @see HttpHeaders
-     * @see #header(String, Object)
-     */
-    public HttpRequest headers(final HttpHeaders headers) {
-        if (headers != null && !headers.isEmpty()) {
-            headers.forEach(this::header);
-        }
-
-        return this;
-    }
+    //    /**
+    //     * Sets HTTP headers from a provided HttpHeaders object.
+    //     * If this HttpRequest already has any headers with those names, they are all replaced.
+    //     * The existing headers in this HttpRequest but not in the provided HttpHeaders remain unchanged.
+    //     * This is useful when you have a collection of headers to apply from another source.
+    //     *
+    //     * <p><b>Usage Examples:</b></p>
+    //     * <pre>{@code
+    //     * HttpHeaders headers = new HttpHeaders();
+    //     * headers.set("Accept", "application/json");
+    //     * headers.set("Authorization", "Bearer token123");
+    //     *
+    //     * HttpRequest.url("https://api.example.com/data")
+    //     *     .headers(headers)
+    //     *     .get();
+    //     * }</pre>
+    //     *
+    //     * @param headers the HttpHeaders object containing all headers to set
+    //     * @return this HttpRequest instance for method chaining
+    //     * @see HttpHeaders
+    //     * @see HttpHeaders.Names
+    //     * @see HttpHeaders.Values
+    //     * @see HttpHeaders#toMap()
+    //     * @deprecated use {@link #headers(Map)} instead. Due to limitations of java.net.http.HttpRequest.Builder, the existing headers in this HttpRequest can't be removed. 
+    //     *                  This is inconsistent with the similar methods {@link OkHttpRequest#headers(HttpHeaders)} and {@link com.landawn.abacus.http.HttpRequest#headers(HttpHeaders)}.
+    //     */
+    //    public HttpRequest headers(final HttpHeaders headers) {
+    //        if (headers != null && !headers.isEmpty()) {
+    //            headers.forEach(this::header);
+    //        }
+    //
+    //        return this;
+    //    }
 
     /**
      * Sets query parameters for {@code GET} or {@code DELETE} request.

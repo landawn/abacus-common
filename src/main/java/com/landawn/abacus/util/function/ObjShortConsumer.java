@@ -53,23 +53,4 @@ public interface ObjShortConsumer<T> extends Throwables.ObjShortConsumer<T, Runt
      */
     @Override
     void accept(T t, short value);
-
-    /**
-     * Converts this {@code ObjShortConsumer} to a {@code Throwables.ObjShortConsumer} that can throw a checked exception.
-     * This method provides a way to use this consumer in contexts that require explicit exception handling.
-     *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * ObjShortConsumer consumer = (...) -> { ... };
-     * var throwableConsumer = consumer.toThrowable();
-     * // Can now be used in contexts that handle checked exceptions
-     * }</pre>
-     *
-     * @param <E> the type of exception that the returned consumer can throw
-     * @return a {@code Throwables.ObjShortConsumer} view of this consumer that can throw exceptions of type {@code E}
-     */
-    default <E extends Throwable> Throwables.ObjShortConsumer<T, E> toThrowable() {
-        return (Throwables.ObjShortConsumer<T, E>) this;
-    }
-
 }

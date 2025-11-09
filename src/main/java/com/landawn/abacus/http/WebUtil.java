@@ -143,10 +143,10 @@ public final class WebUtil {
             requestBody = "  String requestBody = \"" + escapeJava(body) + "\";";
         }
 
-        final StringBuilder sb = new StringBuilder(IOUtil.LINE_SEPARATOR);
+        final StringBuilder sb = new StringBuilder(IOUtil.LINE_SEPARATOR_UNIX);
 
         if (Strings.isNotEmpty(requestBody)) {
-            sb.append(requestBody).append(IOUtil.LINE_SEPARATOR).append(IOUtil.LINE_SEPARATOR);
+            sb.append(requestBody).append(IOUtil.LINE_SEPARATOR_UNIX).append(IOUtil.LINE_SEPARATOR_UNIX);
         }
 
         sb.append("  HttpRequest.url(\"").append(url).append("\")");
@@ -290,10 +290,10 @@ public final class WebUtil {
             requestBody = "  RequestBody requestBody = RequestBody.create(" + mediaType + ", \"" + escapeJava(body) + "\");";
         }
 
-        final StringBuilder sb = new StringBuilder(IOUtil.LINE_SEPARATOR);
+        final StringBuilder sb = new StringBuilder(IOUtil.LINE_SEPARATOR_UNIX);
 
         if (Strings.isNotEmpty(requestBody)) {
-            sb.append(requestBody).append(IOUtil.LINE_SEPARATOR).append(IOUtil.LINE_SEPARATOR);
+            sb.append(requestBody).append(IOUtil.LINE_SEPARATOR_UNIX).append(IOUtil.LINE_SEPARATOR_UNIX);
         }
 
         sb.append("  OkHttpRequest.url(\"").append(url).append("\")");
@@ -578,7 +578,7 @@ public final class WebUtil {
         final StringBuilder sb = Objectory.createStringBuilder();
 
         try {
-            sb.append(IOUtil.LINE_SEPARATOR);
+            sb.append(IOUtil.LINE_SEPARATOR_UNIX);
             sb.append("curl -X ").append(httpMethod).append(" ").append(quoteChar).append(url).append(quoteChar);
 
             if (N.notEmpty(headers)) {
@@ -606,7 +606,7 @@ public final class WebUtil {
                 sb.append(" -d ").append(quoteChar).append(Strings.quoteEscaped(body, quoteChar)).append(quoteChar);
             }
 
-            sb.append(IOUtil.LINE_SEPARATOR);
+            sb.append(IOUtil.LINE_SEPARATOR_UNIX);
 
             return sb.toString();
         } finally {

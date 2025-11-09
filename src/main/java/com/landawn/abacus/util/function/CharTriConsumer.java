@@ -72,23 +72,4 @@ public interface CharTriConsumer extends Throwables.CharTriConsumer<RuntimeExcep
             after.accept(a, b, c);
         };
     }
-
-    /**
-     * Converts this {@code CharTriConsumer} to a {@code Throwables.CharTriConsumer} that can throw a checked exception.
-     * This method provides a way to use this consumer in contexts that require explicit exception handling.
-     *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * CharTriConsumer consumer = (...) -> { ... };
-     * var throwableConsumer = consumer.toThrowable();
-     * // Can now be used in contexts that handle checked exceptions
-     * }</pre>
-     *
-     * @param <E> the type of exception that the returned consumer can throw
-     * @return a {@code Throwables.CharTriConsumer} view of this consumer that can throw exceptions of type {@code E}
-     */
-    default <E extends Throwable> Throwables.CharTriConsumer<E> toThrowable() {
-        return (Throwables.CharTriConsumer<E>) this;
-    }
-
 }

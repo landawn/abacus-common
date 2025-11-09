@@ -86,23 +86,4 @@ public interface DoubleTriFunction<R> extends Throwables.DoubleTriFunction<R, Ru
     default <V> DoubleTriFunction<V> andThen(final java.util.function.Function<? super R, ? extends V> after) {
         return (a, b, c) -> after.apply(apply(a, b, c));
     }
-
-    /**
-     * Converts this {@code DoubleTriFunction} to a {@code Throwables.DoubleTriFunction} that can throw a checked exception.
-     * This method provides a way to use this function in contexts that require explicit exception handling.
-     *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * DoubleTriFunction function = (...) -> { ... };
-     * var throwableFunction = function.toThrowable();
-     * // Can now be used in contexts that handle checked exceptions
-     * }</pre>
-     *
-     * @param <E> the type of exception that the returned function can throw
-     * @return a {@code Throwables.DoubleTriFunction} view of this function that can throw exceptions of type {@code E}
-     */
-    default <E extends Throwable> Throwables.DoubleTriFunction<R, E> toThrowable() {
-        return (Throwables.DoubleTriFunction<R, E>) this;
-    }
-
 }

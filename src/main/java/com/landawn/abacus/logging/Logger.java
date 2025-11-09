@@ -48,8 +48,6 @@ import java.util.function.Supplier;
  *
  * <p>Typical usage pattern:</p>
  * <pre>{@code
- * import com.landawn.abacus.logging.Logger;
- * import com.landawn.abacus.logging.LoggerFactory;
  *
  * public class Wombat {
  *   static final Logger logger = LoggerFactory.getLogger(Wombat.class);

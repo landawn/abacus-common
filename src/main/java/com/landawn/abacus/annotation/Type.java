@@ -47,7 +47,6 @@ import java.lang.annotation.Target;
  * 
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
- * import java.util.Date;
  *
  * public class User {
  *     @Type(name = "EncryptedString", scope = Scope.PERSISTENCE)

@@ -59,23 +59,4 @@ public interface ToBooleanFunction<T> extends Throwables.ToBooleanFunction<T, Ru
      */
     @Override
     boolean applyAsBoolean(T value);
-
-    /**
-     * Converts this {@code ToBooleanFunction} to a {@code Throwables.ToBooleanFunction} that can throw a checked exception.
-     * This method provides a way to use this function in contexts that require explicit exception handling.
-     *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * ToBooleanFunction function = (...) -> { ... };
-     * var throwableFunction = function.toThrowable();
-     * // Can now be used in contexts that handle checked exceptions
-     * }</pre>
-     *
-     * @param <E> the type of exception that the returned function can throw
-     * @return a {@code Throwables.ToBooleanFunction} view of this function that can throw exceptions of type {@code E}
-     */
-    default <E extends Throwable> Throwables.ToBooleanFunction<T, E> toThrowable() {
-        return (Throwables.ToBooleanFunction<T, E>) this;
-    }
-
 }

@@ -297,7 +297,7 @@ final class XMLParserImpl extends AbstractXMLParser {
         final int nameTagIdx = jsonXmlNamingPolicy.ordinal();
 
         if (isPrettyFormat && indentation != null) {
-            bw.write(IOUtil.LINE_SEPARATOR);
+            bw.write(IOUtil.LINE_SEPARATOR_UNIX);
             bw.write(indentation);
         }
 
@@ -320,7 +320,7 @@ final class XMLParserImpl extends AbstractXMLParser {
         writeProperties(obj, config, propIndentation, serializedObjects, type, bw);
 
         if (isPrettyFormat) {
-            bw.write(IOUtil.LINE_SEPARATOR);
+            bw.write(IOUtil.LINE_SEPARATOR_UNIX);
 
             if (indentation != null) {
                 bw.write(indentation);
@@ -378,7 +378,7 @@ final class XMLParserImpl extends AbstractXMLParser {
             }
 
             if (isPrettyFormat) {
-                bw.write(IOUtil.LINE_SEPARATOR);
+                bw.write(IOUtil.LINE_SEPARATOR_UNIX);
                 bw.write(propIndentation);
             }
 
@@ -441,7 +441,7 @@ final class XMLParserImpl extends AbstractXMLParser {
         final boolean isPrettyFormat = config.prettyFormat();
 
         if (isPrettyFormat && indentation != null) {
-            bw.write(IOUtil.LINE_SEPARATOR);
+            bw.write(IOUtil.LINE_SEPARATOR_UNIX);
             bw.write(indentation);
         }
 
@@ -477,7 +477,7 @@ final class XMLParserImpl extends AbstractXMLParser {
             //    }
 
             if (isPrettyFormat) {
-                bw.write(IOUtil.LINE_SEPARATOR);
+                bw.write(IOUtil.LINE_SEPARATOR_UNIX);
                 bw.write(propIndentation);
             }
 
@@ -510,7 +510,7 @@ final class XMLParserImpl extends AbstractXMLParser {
         }
 
         if (isPrettyFormat) {
-            bw.write(IOUtil.LINE_SEPARATOR);
+            bw.write(IOUtil.LINE_SEPARATOR_UNIX);
 
             if (indentation != null) {
                 bw.write(indentation);
@@ -534,7 +534,7 @@ final class XMLParserImpl extends AbstractXMLParser {
         final boolean isPrettyFormat = config.prettyFormat();
 
         if (isPrettyFormat && indentation != null) {
-            bw.write(IOUtil.LINE_SEPARATOR);
+            bw.write(IOUtil.LINE_SEPARATOR_UNIX);
             bw.write(indentation);
         }
 
@@ -567,7 +567,7 @@ final class XMLParserImpl extends AbstractXMLParser {
             //    }
 
             if (isPrettyFormat) {
-                bw.write(IOUtil.LINE_SEPARATOR);
+                bw.write(IOUtil.LINE_SEPARATOR_UNIX);
                 bw.write(propIndentation);
             }
 
@@ -602,7 +602,7 @@ final class XMLParserImpl extends AbstractXMLParser {
         }
 
         if (isPrettyFormat) {
-            bw.write(IOUtil.LINE_SEPARATOR);
+            bw.write(IOUtil.LINE_SEPARATOR_UNIX);
 
             if (indentation != null) {
                 bw.write(indentation);
@@ -626,7 +626,7 @@ final class XMLParserImpl extends AbstractXMLParser {
         final boolean isPrettyFormat = config.prettyFormat();
 
         if (isPrettyFormat && indentation != null) {
-            bw.write(IOUtil.LINE_SEPARATOR);
+            bw.write(IOUtil.LINE_SEPARATOR_UNIX);
             bw.write(indentation);
         }
 
@@ -657,7 +657,7 @@ final class XMLParserImpl extends AbstractXMLParser {
         }
 
         if (isPrettyFormat && !isSerializableByJSON) {
-            bw.write(IOUtil.LINE_SEPARATOR);
+            bw.write(IOUtil.LINE_SEPARATOR_UNIX);
 
             if (indentation != null) {
                 bw.write(indentation);
@@ -678,7 +678,7 @@ final class XMLParserImpl extends AbstractXMLParser {
         final boolean isPrettyFormat = config.prettyFormat();
 
         if (isPrettyFormat && indentation != null) {
-            bw.write(IOUtil.LINE_SEPARATOR);
+            bw.write(IOUtil.LINE_SEPARATOR_UNIX);
             bw.write(indentation);
         }
 
@@ -726,7 +726,7 @@ final class XMLParserImpl extends AbstractXMLParser {
         }
 
         if (isPrettyFormat && !isSerializableByJSON) {
-            bw.write(IOUtil.LINE_SEPARATOR);
+            bw.write(IOUtil.LINE_SEPARATOR_UNIX);
 
             if (indentation != null) {
                 bw.write(indentation);
@@ -789,7 +789,7 @@ final class XMLParserImpl extends AbstractXMLParser {
                 for (final Object e : a) {
                     if (e == null) {
                         if (isPrettyFormat) {
-                            bw.write(IOUtil.LINE_SEPARATOR);
+                            bw.write(IOUtil.LINE_SEPARATOR_UNIX);
                             bw.write(nextIndentation);
                         }
 
@@ -800,7 +800,7 @@ final class XMLParserImpl extends AbstractXMLParser {
                 }
 
                 if (isPrettyFormat) {
-                    bw.write(IOUtil.LINE_SEPARATOR);
+                    bw.write(IOUtil.LINE_SEPARATOR_UNIX);
                     bw.write(propIndentation);
                 }
             }
@@ -817,7 +817,7 @@ final class XMLParserImpl extends AbstractXMLParser {
                 for (final Object e : c) {
                     if (e == null) {
                         if (isPrettyFormat) {
-                            bw.write(IOUtil.LINE_SEPARATOR);
+                            bw.write(IOUtil.LINE_SEPARATOR_UNIX);
                             bw.write(nextIndentation);
                         }
 
@@ -828,7 +828,7 @@ final class XMLParserImpl extends AbstractXMLParser {
                 }
 
                 if (isPrettyFormat) {
-                    bw.write(IOUtil.LINE_SEPARATOR);
+                    bw.write(IOUtil.LINE_SEPARATOR_UNIX);
                     bw.write(propIndentation);
                 }
             }
@@ -837,7 +837,7 @@ final class XMLParserImpl extends AbstractXMLParser {
             write(value, config, nextIndentation, serializedObjects, bw, false);
 
             if (isPrettyFormat) {
-                bw.write(IOUtil.LINE_SEPARATOR);
+                bw.write(IOUtil.LINE_SEPARATOR_UNIX);
                 bw.write(propIndentation);
             }
         }

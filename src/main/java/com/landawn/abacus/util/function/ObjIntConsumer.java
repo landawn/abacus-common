@@ -89,23 +89,4 @@ public interface ObjIntConsumer<T> extends Throwables.ObjIntConsumer<T, RuntimeE
             after.accept(t, u);
         };
     }
-
-    /**
-     * Converts this {@code ObjIntConsumer} to a {@code Throwables.ObjIntConsumer} that can throw a checked exception.
-     * This method provides a way to use this consumer in contexts that require explicit exception handling.
-     *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * ObjIntConsumer consumer = (...) -> { ... };
-     * var throwableConsumer = consumer.toThrowable();
-     * // Can now be used in contexts that handle checked exceptions
-     * }</pre>
-     *
-     * @param <E> the type of exception that the returned consumer can throw
-     * @return a {@code Throwables.ObjIntConsumer} view of this consumer that can throw exceptions of type {@code E}
-     */
-    default <E extends Throwable> Throwables.ObjIntConsumer<T, E> toThrowable() {
-        return (Throwables.ObjIntConsumer<T, E>) this;
-    }
-
 }

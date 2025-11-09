@@ -26,10 +26,11 @@ import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
+import com.landawn.abacus.util.IOUtil;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Pair;
 
@@ -131,7 +132,7 @@ public class AbstractStream201Test extends TestBase {
         long count = Stream.of("line1", "line2").persist(Object::toString, writer);
 
         assertEquals(2, count);
-        String expected = "line1" + System.lineSeparator() + "line2" + System.lineSeparator();
+        String expected = "line1" + IOUtil.LINE_SEPARATOR_UNIX + "line2" + IOUtil.LINE_SEPARATOR_UNIX;
         assertEquals(expected, writer.toString());
     }
 
@@ -141,7 +142,7 @@ public class AbstractStream201Test extends TestBase {
         long count = Stream.of("data").persist("Header", "Tail", Object::toString, writer);
 
         assertEquals(1, count);
-        String expected = "Header" + System.lineSeparator() + "data" + System.lineSeparator() + "Tail" + System.lineSeparator();
+        String expected = "Header" + IOUtil.LINE_SEPARATOR_UNIX + "data" + IOUtil.LINE_SEPARATOR_UNIX + "Tail" + IOUtil.LINE_SEPARATOR_UNIX;
         assertEquals(expected, writer.toString());
     }
 
@@ -152,7 +153,7 @@ public class AbstractStream201Test extends TestBase {
 
         long count = Stream.of(data).persistToCSV(List.of("h1", "h2"), writer);
         assertEquals(2, count);
-        String expected = "\"h1\",\"h2\"" + System.lineSeparator() + "\"a\",\"b\"" + System.lineSeparator() + "\"c\",\"d\"";
+        String expected = "\"h1\",\"h2\"" + IOUtil.LINE_SEPARATOR_UNIX + "\"a\",\"b\"" + IOUtil.LINE_SEPARATOR_UNIX + "\"c\",\"d\"";
         assertEquals(expected, writer.toString().trim());
     }
 

@@ -109,21 +109,4 @@ public interface QuadConsumer<A, B, C, D> extends Throwables.QuadConsumer<A, B, 
             after.accept(a, b, c, d);
         };
     }
-    /**
-     * Converts this {@code QuadConsumer} to a {@code Throwables.QuadConsumer} that can throw a checked exception.
-     * This method provides a way to use this consumer in contexts that require explicit exception handling.
-     *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * QuadConsumer<String, Integer, Boolean, Date> consumer = (a, b, c, d) -> { ... };
-     * var throwableConsumer = consumer.toThrowable();
-     * // Can now be used in contexts that handle checked exceptions
-     * }</pre>
-     *
-     * @param <E> the type of exception that the returned consumer can throw
-     * @return a {@code Throwables.QuadConsumer} view of this consumer that can throw exceptions of type {@code E}
-     */
-    default <E extends Throwable> Throwables.QuadConsumer<A, B, C, D, E> toThrowable() {
-        return (Throwables.QuadConsumer<A, B, C, D, E>) this;
-    }
 }

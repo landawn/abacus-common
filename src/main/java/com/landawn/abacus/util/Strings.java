@@ -81,7 +81,7 @@ import com.landawn.abacus.util.stream.Stream;
  *
  * <p><b>Core Functional Categories:</b>
  * <ul>
- *   <li><b>Validation:</b> isEmpty, isBlank, isEmail, isURL, isJavaIdentifier, isBase64</li>
+ *   <li><b>Validation:</b> isEmpty, isBlank, isEmail, isJavaIdentifier, isBase64</li>
  *   <li><b>Transformation:</b> reverse, abbreviate, capitalize, uncapitalize, swapCase</li>
  *   <li><b>Case Operations:</b> upperCase, lowerCase, toCamelCase, toSnakeCase, toPascalCase</li>
  *   <li><b>Padding:</b> leftPad, rightPad, center with character or string padding</li>
@@ -112,7 +112,6 @@ import com.landawn.abacus.util.stream.Stream;
  * boolean empty = Strings.isEmpty(null);              // Returns true
  * boolean blank = Strings.isBlank("   ");             // Returns true
  * boolean email = Strings.isEmail("user@domain.com"); // Returns true
- * boolean url = Strings.isURL("https://example.com"); // Returns true
  *
  * // Safe transformation operations
  * String reversed = Strings.reverse(null);            // Returns null
@@ -167,7 +166,7 @@ import com.landawn.abacus.util.stream.Stream;
  * <p><b>Validation Operations:</b>
  * <ul>
  *   <li><b>Empty/Blank Checking:</b> {@code isEmpty()}, {@code isBlank()}, {@code isNotEmpty()}, {@code isNotBlank()}</li>
- *   <li><b>Format Validation:</b> {@code isEmail()}, {@code isURL()}, {@code isBase64()}</li>
+ *   <li><b>Format Validation:</b> {@code isEmail()}, {@code isBase64()}</li>
  *   <li><b>Identifier Validation:</b> {@code isJavaIdentifier()}, {@code isValidIdentifier()}</li>
  *   <li><b>Pattern Matching:</b> {@code matches()}, {@code matchesIgnoreCase()}</li>
  * </ul>
@@ -285,13 +284,6 @@ import com.landawn.abacus.util.stream.Stream;
  *         // Email: john.doe@company.com
  *         // Phone: 1234567890
  *     }
- * }
- *
- * // URL processing example
- * String url = "https://example.com/path with spaces";
- * if (Strings.isURL(url)) {
- *     String encoded = Strings.urlEncode(url);
- *     String decoded = Strings.urlDecode(encoded);
  * }
  *
  * // Base64 encoding example
@@ -636,7 +628,7 @@ public final class Strings {
             return false;
         }
 
-        return RegExUtil.EMAIL_ADDRESS_RFC_5322_FINDER.matcher(cs).matches();
+        return RegExUtil.EMAIL_ADDRESS_RFC_5322_MATCHER.matcher(cs).matches();
     }
 
     /**
@@ -671,7 +663,7 @@ public final class Strings {
             return false;
         }
 
-        return RegExUtil.URL_FINDER.matcher(cs).matches();
+        return RegExUtil.URL_MATCHER.matcher(cs).matches();
     }
 
     /**
@@ -706,7 +698,7 @@ public final class Strings {
             return false;
         }
 
-        return RegExUtil.HTTP_URL_FINDER.matcher(cs).matches();
+        return RegExUtil.HTTP_URL_MATCHER.matcher(cs).matches();
     }
 
     /**
@@ -836,6 +828,10 @@ public final class Strings {
      * @param a the first CharSequence to be checked, may be {@code null}
      * @param b the second CharSequence to be checked, may be {@code null}
      * @return {@code true} if both CharSequences are {@code null} or empty, {@code false} otherwise.
+     * @see #isEmpty(CharSequence)
+     * @see #isAllEmpty(CharSequence, CharSequence, CharSequence)
+     * @see #isAllEmpty(CharSequence...)
+     * @see #isAnyEmpty(CharSequence, CharSequence)
      */
     public static boolean isAllEmpty(final CharSequence a, final CharSequence b) {
         return isEmpty(a) && isEmpty(b);
@@ -861,6 +857,10 @@ public final class Strings {
      * @param b the second CharSequence to be checked, may be {@code null}
      * @param c the third CharSequence to be checked, may be {@code null}
      * @return {@code true} if all CharSequences are {@code null} or empty, {@code false} otherwise.
+     * @see #isEmpty(CharSequence)
+     * @see #isAllEmpty(CharSequence, CharSequence)
+     * @see #isAllEmpty(CharSequence...)
+     * @see #isAnyEmpty(CharSequence, CharSequence, CharSequence)
      */
     public static boolean isAllEmpty(final CharSequence a, final CharSequence b, final CharSequence c) {
         return isEmpty(a) && isEmpty(b) && isEmpty(c);
@@ -888,7 +888,10 @@ public final class Strings {
      *
      * @param css the CharSequences to check, may be {@code null} or empty
      * @return {@code true} if all the CharSequences are empty or null
-     * @see Strings#isAllEmpty(CharSequence...)
+     * @see #isEmpty(CharSequence)
+     * @see #isAllEmpty(CharSequence, CharSequence)
+     * @see #isAllEmpty(Iterable)
+     * @see #isAnyEmpty(CharSequence...)
      */
     public static boolean isAllEmpty(final CharSequence... css) {
         if (N.isEmpty(css)) {
@@ -925,6 +928,9 @@ public final class Strings {
      *
      * @param css the Iterable of CharSequences to be checked, may be {@code null}
      * @return {@code true} if all CharSequences in the Iterable are {@code null} or empty, {@code false} otherwise.
+     * @see #isEmpty(CharSequence)
+     * @see #isAllEmpty(CharSequence...)
+     * @see #isAnyEmpty(Iterable)
      */
     public static boolean isAllEmpty(final Iterable<? extends CharSequence> css) {
         if (N.isEmpty(css)) {
@@ -959,6 +965,10 @@ public final class Strings {
      * @param a the first CharSequence to be checked, may be {@code null}
      * @param b the second CharSequence to be checked, may be {@code null}
      * @return {@code true} if both CharSequences are {@code null} or blank, {@code false} otherwise.
+     * @see #isBlank(CharSequence)
+     * @see #isAllBlank(CharSequence, CharSequence, CharSequence)
+     * @see #isAllBlank(CharSequence...)
+     * @see #isAnyBlank(CharSequence, CharSequence)
      */
     public static boolean isAllBlank(final CharSequence a, final CharSequence b) {
         return isBlank(a) && isBlank(b);
@@ -983,6 +993,10 @@ public final class Strings {
      * @param b the second CharSequence to be checked, may be {@code null}
      * @param c the third CharSequence to be checked, may be {@code null}
      * @return {@code true} if all CharSequences are {@code null} or blank, {@code false} otherwise.
+     * @see #isBlank(CharSequence)
+     * @see #isAllBlank(CharSequence, CharSequence)
+     * @see #isAllBlank(CharSequence...)
+     * @see #isAnyBlank(CharSequence, CharSequence, CharSequence)
      */
     public static boolean isAllBlank(final CharSequence a, final CharSequence b, final CharSequence c) {
         return isBlank(a) && isBlank(b) && isBlank(c);
@@ -1012,7 +1026,10 @@ public final class Strings {
      *
      * @param css the CharSequences to check, may be {@code null} or empty
      * @return {@code true} if all the CharSequences are empty or {@code null} or whitespace only
-     * @see Strings#isAllBlank(CharSequence...)
+     * @see #isBlank(CharSequence)
+     * @see #isAllBlank(CharSequence, CharSequence)
+     * @see #isAllBlank(Iterable)
+     * @see #isAnyBlank(CharSequence...)
      */
     public static boolean isAllBlank(final CharSequence... css) {
         if (N.isEmpty(css)) {
@@ -1049,6 +1066,9 @@ public final class Strings {
      *
      * @param css the Iterable of CharSequences to be checked, may be {@code null}
      * @return {@code true} if all CharSequences in the Iterable are {@code null} or blank, {@code false} otherwise.
+     * @see #isBlank(CharSequence)
+     * @see #isAllBlank(CharSequence...)
+     * @see #isAnyBlank(Iterable)
      */
     public static boolean isAllBlank(final Iterable<? extends CharSequence> css) {
         if (N.isEmpty(css)) {
@@ -1084,6 +1104,10 @@ public final class Strings {
      * @param a the first CharSequence to be checked, may be {@code null}
      * @param b the second CharSequence to be checked, may be {@code null}
      * @return {@code true} if any of the CharSequences are {@code null} or empty, {@code false} otherwise.
+     * @see #isEmpty(CharSequence)
+     * @see #isAnyEmpty(CharSequence, CharSequence, CharSequence)
+     * @see #isAnyEmpty(CharSequence...)
+     * @see #isAllEmpty(CharSequence, CharSequence)
      */
     public static boolean isAnyEmpty(final CharSequence a, final CharSequence b) {
         return isEmpty(a) || isEmpty(b);
@@ -1109,6 +1133,10 @@ public final class Strings {
      * @param b the second CharSequence to be checked, may be {@code null}
      * @param c the third CharSequence to be checked, may be {@code null}
      * @return {@code true} if any of the CharSequences are {@code null} or empty, {@code false} otherwise.
+     * @see #isEmpty(CharSequence)
+     * @see #isAnyEmpty(CharSequence, CharSequence)
+     * @see #isAnyEmpty(CharSequence...)
+     * @see #isAllEmpty(CharSequence, CharSequence, CharSequence)
      */
     public static boolean isAnyEmpty(final CharSequence a, final CharSequence b, final CharSequence c) {
         return isEmpty(a) || isEmpty(b) || isEmpty(c);
@@ -1137,7 +1165,10 @@ public final class Strings {
      *
      * @param css the CharSequences to check, may be {@code null} or empty
      * @return {@code true} if any of the CharSequences are empty or null
-     * @see Strings#isAnyEmpty(CharSequence...)
+     * @see #isEmpty(CharSequence)
+     * @see #isAnyEmpty(CharSequence, CharSequence)
+     * @see #isAnyEmpty(Iterable)
+     * @see #isAllEmpty(CharSequence...)
      */
     public static boolean isAnyEmpty(final CharSequence... css) {
         if (N.isEmpty(css)) {
@@ -1174,6 +1205,9 @@ public final class Strings {
      *
      * @param css the Iterable of CharSequences to be checked, may be {@code null}
      * @return {@code true} if any CharSequences in the Iterable are {@code null} or empty, {@code false} otherwise.
+     * @see #isEmpty(CharSequence)
+     * @see #isAnyEmpty(CharSequence...)
+     * @see #isAllEmpty(Iterable)
      */
     public static boolean isAnyEmpty(final Iterable<? extends CharSequence> css) {
         if (N.isEmpty(css)) {
@@ -1208,6 +1242,10 @@ public final class Strings {
      * @param a the first CharSequence to be checked, may be {@code null}
      * @param b the second CharSequence to be checked, may be {@code null}
      * @return {@code true} if any of the CharSequences are {@code null} or blank, {@code false} otherwise.
+     * @see #isBlank(CharSequence)
+     * @see #isAnyBlank(CharSequence, CharSequence, CharSequence)
+     * @see #isAnyBlank(CharSequence...)
+     * @see #isAllBlank(CharSequence, CharSequence)
      */
     public static boolean isAnyBlank(final CharSequence a, final CharSequence b) {
         return isBlank(a) || isBlank(b);
@@ -1232,6 +1270,10 @@ public final class Strings {
      * @param b the second CharSequence to be checked, may be {@code null}
      * @param c the third CharSequence to be checked, may be {@code null}
      * @return {@code true} if any of the CharSequences are {@code null} or blank, {@code false} otherwise.
+     * @see #isBlank(CharSequence)
+     * @see #isAnyBlank(CharSequence, CharSequence)
+     * @see #isAnyBlank(CharSequence...)
+     * @see #isAllBlank(CharSequence, CharSequence, CharSequence)
      */
     public static boolean isAnyBlank(final CharSequence a, final CharSequence b, final CharSequence c) {
         return isBlank(a) || isBlank(b) || isBlank(c);
@@ -1263,7 +1305,10 @@ public final class Strings {
      *
      * @param css the CharSequences to check, may be {@code null} or empty
      * @return {@code true} if any of the CharSequences are empty or {@code null} or whitespace only
-     * @see Strings#isAnyBlank(CharSequence...)
+     * @see #isBlank(CharSequence)
+     * @see #isAnyBlank(CharSequence, CharSequence)
+     * @see #isAnyBlank(Iterable)
+     * @see #isAllBlank(CharSequence...)
      */
     public static boolean isAnyBlank(final CharSequence... css) {
         if (N.isEmpty(css)) {
@@ -1300,6 +1345,9 @@ public final class Strings {
      *
      * @param css the Iterable of CharSequences to be checked, may be {@code null}
      * @return {@code true} if any CharSequences in the Iterable are {@code null} or blank, {@code false} otherwise.
+     * @see #isBlank(CharSequence)
+     * @see #isAnyBlank(CharSequence...)
+     * @see #isAllBlank(Iterable)
      */
     public static boolean isAnyBlank(final Iterable<? extends CharSequence> css) {
         if (N.isEmpty(css)) {
@@ -1336,6 +1384,7 @@ public final class Strings {
      * @param prefixSuffix the string that should be the prefix and suffix of the input string.
      * @return {@code true} if the input string starts and ends with the prefixSuffix string, {@code false} otherwise.
      * @throws IllegalArgumentException if prefixSuffix is empty.
+     * @see #isWrappedWith(String, String, String)
      */
     public static boolean isWrappedWith(final String str, final String prefixSuffix) throws IllegalArgumentException {
         N.checkArgNotEmpty(prefixSuffix, cs.prefixSuffix);
@@ -1364,6 +1413,7 @@ public final class Strings {
      * @param suffix the string that should be the suffix of the input string.
      * @return {@code true} if the input string starts with the prefix and ends with the suffix, {@code false} otherwise.
      * @throws IllegalArgumentException if prefix or suffix is empty.
+     * @see #isWrappedWith(String, String)
      */
     public static boolean isWrappedWith(final String str, final String prefix, final String suffix) throws IllegalArgumentException {
         N.checkArgNotEmpty(prefix, cs.prefix);
@@ -1391,6 +1441,7 @@ public final class Strings {
      * @param defaultForNull the default value to return if {@code str} is {@code null}
      * @return {@code str} if it is not {@code null}, otherwise {@code defaultForNull}
      * @throws IllegalArgumentException if the specified default value is {@code null}.
+     * @see #defaultIfNull(CharSequence, Supplier)
      * @see #defaultIfEmpty(CharSequence, CharSequence)
      * @see #defaultIfBlank(CharSequence, CharSequence)
      * @see N#defaultIfNull(Object, Object)
@@ -1420,6 +1471,7 @@ public final class Strings {
      * @param supplierForDefault the supplier that provides the default value if {@code str} is {@code null}
      * @return {@code str} if it is not {@code null}, otherwise the value provided by {@code supplierForDefault}
      * @throws IllegalArgumentException if default value provided by specified {@code Supplier} is {@code null} when the specified {@code charSequence} is {@code null}.
+     * @see #defaultIfNull(CharSequence, CharSequence)
      * @see #defaultIfEmpty(CharSequence, Supplier)
      * @see #defaultIfBlank(CharSequence, Supplier)
      * @see N#defaultIfNull(Object, Supplier)
@@ -1451,6 +1503,7 @@ public final class Strings {
      * @param defaultForEmpty the default value to return if {@code str} is empty
      * @return {@code str} if it is not empty, otherwise {@code defaultForEmpty}
      * @throws IllegalArgumentException if the specified default charSequence value is empty.
+     * @see #defaultIfEmpty(CharSequence, Supplier)
      * @see #defaultIfNull(CharSequence, CharSequence)
      * @see #defaultIfBlank(CharSequence, CharSequence)
      * @see #firstNonEmpty(String, String)
@@ -1481,6 +1534,7 @@ public final class Strings {
      * @param supplierForDefault the supplier that provides the default value if {@code str} is empty
      * @return {@code str} if it is not empty, otherwise the value provided by {@code supplierForDefault}
      * @throws IllegalArgumentException if default value provided by specified {@code Supplier} is empty when the specified {@code charSequence} is empty.
+     * @see #defaultIfEmpty(CharSequence, CharSequence)
      * @see #defaultIfNull(CharSequence, Supplier)
      * @see #defaultIfBlank(CharSequence, Supplier)
      * @see #firstNonEmpty(String, String)
@@ -1514,6 +1568,7 @@ public final class Strings {
      * @param defaultForBlank the default value to return if {@code str} is blank
      * @return {@code str} if it is not blank, otherwise {@code defaultForBlank}
      * @throws IllegalArgumentException if the specified default charSequence value is blank.
+     * @see #defaultIfBlank(CharSequence, Supplier)
      * @see #defaultIfNull(CharSequence, CharSequence)
      * @see #defaultIfEmpty(CharSequence, CharSequence)
      * @see #firstNonBlank(String, String)
@@ -1544,6 +1599,7 @@ public final class Strings {
      * @param supplierForDefault the supplier that provides the default value if {@code str} is blank
      * @return {@code str} if it is not blank, otherwise the value provided by {@code supplierForDefault}
      * @throws IllegalArgumentException if default value provided by specified {@code Supplier} is blank when the specified {@code charSequence} is blank.
+     * @see #defaultIfBlank(CharSequence, CharSequence)
      * @see #defaultIfNull(CharSequence, Supplier)
      * @see #defaultIfEmpty(CharSequence, Supplier)
      * @see #firstNonBlank(String, String)
@@ -1576,6 +1632,9 @@ public final class Strings {
      * @param a the first String to be checked, may be {@code null} or empty
      * @param b the second String to be checked, may be {@code null} or empty
      * @return the first non-empty String from the given two Strings. If both are empty, returns an empty string {@code ""}.
+     * @see #firstNonEmpty(String, String, String)
+     * @see #firstNonEmpty(String...)
+     * @see #firstNonBlank(String, String)
      * @see N#firstNonEmpty(CharSequence, CharSequence)
      */
     public static String firstNonEmpty(final String a, final String b) {
@@ -1603,6 +1662,9 @@ public final class Strings {
      * @param b the second String to be checked, may be {@code null} or empty
      * @param c the third String to be checked, may be {@code null} or empty
      * @return the first non-empty String from the given three Strings. If all are empty, returns an empty string {@code ""}.
+     * @see #firstNonEmpty(String, String)
+     * @see #firstNonEmpty(String...)
+     * @see #firstNonBlank(String, String, String)
      * @see N#firstNonEmpty(CharSequence, CharSequence, CharSequence)
      */
     public static String firstNonEmpty(final String a, final String b, final String c) {
@@ -1630,6 +1692,9 @@ public final class Strings {
      *
      * @param css the values to test, may be {@code null} or empty
      * @return the first non-empty String from the given array. If all Strings are empty or the array is {@code null}, returns an empty string {@code ""}.
+     * @see #firstNonEmpty(String, String)
+     * @see #firstNonEmpty(Iterable)
+     * @see #firstNonBlank(String...)
      * @see N#firstNonEmpty(CharSequence...)
      */
     public static String firstNonEmpty(final String... css) {
@@ -1667,6 +1732,8 @@ public final class Strings {
      *
      * @param css the Iterable of Strings to be checked, may be {@code null}
      * @return the first non-empty String from the given Iterable. If all Strings are empty or the Iterable is {@code null}, returns an empty string {@code ""}.
+     * @see #firstNonEmpty(String...)
+     * @see #firstNonBlank(Iterable)
      * @see N#firstNonEmpty(Iterable)
      */
     public static String firstNonEmpty(final Iterable<String> css) {
@@ -1702,6 +1769,9 @@ public final class Strings {
      * @param a the first String to be checked, may be {@code null} or empty
      * @param b the second String to be checked, may be {@code null} or empty
      * @return the first non-blank String from the given two Strings. If both are blank, returns an empty string {@code ""}.
+     * @see #firstNonBlank(String, String, String)
+     * @see #firstNonBlank(String...)
+     * @see #firstNonEmpty(String, String)
      * @see N#firstNonBlank(CharSequence, CharSequence)
      */
     public static String firstNonBlank(final String a, final String b) {
@@ -1729,6 +1799,9 @@ public final class Strings {
      * @param b the second String to be checked, may be {@code null} or empty
      * @param c the third String to be checked, may be {@code null} or empty
      * @return the first non-blank String from the given three Strings. If all are blank, returns an empty string {@code ""}.
+     * @see #firstNonBlank(String, String)
+     * @see #firstNonBlank(String...)
+     * @see #firstNonEmpty(String, String, String)
      * @see N#firstNonBlank(CharSequence, CharSequence, CharSequence)
      */
     public static String firstNonBlank(final String a, final String b, final String c) {
@@ -1754,6 +1827,9 @@ public final class Strings {
      *
      * @param css the Strings to be checked. They can be {@code null} or empty.
      * @return the first non-blank String from the given Strings. If all are blank, returns an empty string {@code ""}.
+     * @see #firstNonBlank(String, String)
+     * @see #firstNonBlank(Iterable)
+     * @see #firstNonEmpty(String...)
      * @see N#firstNonBlank(CharSequence...)
      */
     public static String firstNonBlank(final String... css) {
@@ -1791,6 +1867,8 @@ public final class Strings {
      *
      * @param css the Iterable of Strings to be checked, may be {@code null}
      * @return the first non-blank String from the given Iterable. If all Strings are blank or the Iterable is {@code null}, returns an empty string {@code ""}.
+     * @see #firstNonBlank(String...)
+     * @see #firstNonEmpty(Iterable)
      * @see N#firstNonBlank(Iterable)
      */
     public static String firstNonBlank(final Iterable<String> css) {
@@ -3028,6 +3106,9 @@ public final class Strings {
      *
      * @param str the input string to be converted
      * @return the converted string in lower case with underscores
+     * @see #toUpperCaseWithUnderscore(String)
+     * @see #toCamelCase(String)
+     * @see #toPascalCase(String)
      */
     public static String toLowerCaseWithUnderscore(final String str) {
         if (str == null || str.isEmpty()) {
@@ -3173,6 +3254,9 @@ public final class Strings {
      *
      * @param str the input string to be converted, may be {@code null} or empty
      * @return the converted string in upper case with underscores, or the original string if it is {@code null} or empty.
+     * @see #toLowerCaseWithUnderscore(String)
+     * @see #toCamelCase(String)
+     * @see #toPascalCase(String)
      */
     public static String toUpperCaseWithUnderscore(final String str) {
         if (str == null || str.isEmpty()) {
@@ -3237,6 +3321,9 @@ public final class Strings {
      *
      * @param str the input string to be converted, may be {@code null} or empty
      * @return a camel case representation of the input string. Returns the original string if it's {@code null} or empty.
+     * @see #toCamelCase(String, char)
+     * @see #toPascalCase(String)
+     * @see #toLowerCaseWithUnderscore(String)
      */
     public static String toCamelCase(final String str) {
         if (str == null || str.isEmpty()) {
@@ -3268,6 +3355,9 @@ public final class Strings {
      * @param str the input string to be converted, may be {@code null} or empty
      * @param splitChar the character used to split the input string.
      * @return a camel case representation of the input string. Returns the original string if it's {@code null} or empty.
+     * @see #toCamelCase(String)
+     * @see #toPascalCase(String, char)
+     * @see #toLowerCaseWithUnderscore(String)
      */
     public static String toCamelCase(final String str, final char splitChar) {
         if (str == null || str.isEmpty()) {
@@ -3343,6 +3433,9 @@ public final class Strings {
      *
      * @param str the input string to be converted, may be {@code null} or empty
      * @return a Pascal case representation of the input string. Returns the original string if it's {@code null} or empty.
+     * @see #toPascalCase(String, char)
+     * @see #toCamelCase(String)
+     * @see #toUpperCaseWithUnderscore(String)
      */
     public static String toPascalCase(final String str) {
         if (str == null || str.isEmpty()) {
@@ -3377,6 +3470,9 @@ public final class Strings {
      * @param str the input string to be converted, may be {@code null} or empty
      * @param splitChar the character used to split the input string.
      * @return a Pascal case representation of the input string. Returns the original string if it's {@code null} or empty.
+     * @see #toPascalCase(String)
+     * @see #toCamelCase(String, char)
+     * @see #toUpperCaseWithUnderscore(String)
      */
     public static String toPascalCase(final String str, final char splitChar) {
         if (str == null || str.isEmpty()) {
@@ -3426,6 +3522,9 @@ public final class Strings {
      *
      * @param ch the input character to be case-swapped.
      * @return the case-swapped representation of the input character.
+     * @see #swapCase(String)
+     * @see Character#toLowerCase(char)
+     * @see Character#toUpperCase(char)
      */
     public static char swapCase(final char ch) {
         return Character.isUpperCase(ch) || Character.isTitleCase(ch) ? Character.toLowerCase(ch)
@@ -3454,6 +3553,7 @@ public final class Strings {
      *
      * @param str the String to swap case, may be {@code null}
      * @return the case-swapped String, {@code null} if the input is {@code null}
+     * @see #swapCase(char)
      */
     public static String swapCase(final String str) {
         if (isEmpty(str)) {
@@ -3504,6 +3604,8 @@ public final class Strings {
      *
      * @param str the string to be uncapitalized, may be {@code null} or empty
      * @return a string with its first character converted to lower case, or the original string if it's {@code null}, empty, or already starts with a lowercase character.
+     * @see #capitalize(String)
+     * @see #capitalizeFully(String)
      */
     public static String uncapitalize(final String str) {
         if (str == null || str.isEmpty()) {
@@ -3556,6 +3658,8 @@ public final class Strings {
      *
      * @param str the string to be capitalized, may be {@code null} or empty
      * @return a string with its first character converted to upper case, or the original string if it's {@code null}, empty, or already starts with an uppercase character.
+     * @see #uncapitalize(String)
+     * @see #capitalizeFully(String)
      */
     public static String capitalize(final String str) {
         if (str == null || str.isEmpty()) {
@@ -3604,6 +3708,8 @@ public final class Strings {
      *
      * @param str the string to be processed, may be {@code null} or empty
      * @return the processed string with all words capitalized, or the original string if it's {@code null} or empty.
+     * @see #capitalizeFully(String, String)
+     * @see #capitalize(String)
      */
     public static String capitalizeFully(final String str) {
         return capitalizeFully(str, " ");
@@ -3630,6 +3736,8 @@ public final class Strings {
      * @param delimiter the delimiter used to split the string into words. It must not be empty.
      * @return the processed string with all words capitalized, or the original string if it's {@code null} or empty.
      * @throws IllegalArgumentException if the provided delimiter is empty.
+     * @see #capitalizeFully(String)
+     * @see #capitalizeFully(String, String, String...)
      * @see #convertWords(String, String, Collection, Function)
      */
     public static String capitalizeFully(final String str, final String delimiter) throws IllegalArgumentException {
@@ -3671,6 +3779,8 @@ public final class Strings {
      * @param excludedWords an array of words to be excluded from capitalization. If it's {@code null} or empty, all words will be capitalized.
      * @return the processed string with all non-excluded words capitalized.
      * @throws IllegalArgumentException if the provided delimiter is empty.
+     * @see #capitalizeFully(String, String)
+     * @see #capitalizeFully(String, String, Collection)
      */
     public static String capitalizeFully(final String str, final String delimiter, final String... excludedWords) throws IllegalArgumentException {
         N.checkArgNotEmpty(delimiter, cs.delimiter); // NOSONAR
@@ -3709,6 +3819,8 @@ public final class Strings {
      * @param excludedWords a collection of words to be excluded from capitalization. If it's {@code null} or empty, all words will be capitalized.
      * @return the processed string with all non-excluded words capitalized.
      * @throws IllegalArgumentException if the provided delimiter is empty.
+     * @see #capitalizeFully(String, String)
+     * @see #capitalizeFully(String, String, String...)
      * @see #convertWords(String, String, Collection, Function)
      */
     public static String capitalizeFully(final String str, final String delimiter, final Collection<String> excludedWords) throws IllegalArgumentException {
@@ -3751,6 +3863,8 @@ public final class Strings {
      * @param str the string to be processed, may be {@code null} or empty If it's {@code null} or empty, the method will return the input string.
      * @param converter the function used to convert each word. This function should accept a string and return a string.
      * @return the processed string with all words converted using the provided converter function.
+     * @see #convertWords(String, String, Function)
+     * @see #convertWords(String, String, Collection, Function)
      */
     public static String convertWords(final String str, final Function<? super String, String> converter) {
         return convertWords(str, " ", converter);
@@ -3776,6 +3890,8 @@ public final class Strings {
      * @param converter the function used to convert each word.
      * @return the processed string with all words converted using the provided converter function.
      * @throws IllegalArgumentException if the provided delimiter is empty.
+     * @see #convertWords(String, Function)
+     * @see #convertWords(String, String, Collection, Function)
      */
     public static String convertWords(final String str, final String delimiter, final Function<? super String, String> converter)
             throws IllegalArgumentException {
@@ -3817,6 +3933,8 @@ public final class Strings {
      * @param converter the function used to convert each word. If a word is in the excludedWords collection, it will not be converted.
      * @return the processed string with all non-excluded words converted using the provided converter function.
      * @throws IllegalArgumentException if the provided delimiter is empty.
+     * @see #convertWords(String, Function)
+     * @see #convertWords(String, String, Function)
      */
     public static String convertWords(final String str, final String delimiter, final Collection<String> excludedWords,
             final Function<? super String, String> converter) throws IllegalArgumentException {
@@ -3861,6 +3979,7 @@ public final class Strings {
      *
      * @param str the string to be processed, may be {@code null} or empty
      * @return the string with all unescaped single and double quotes escaped, or the original string if it's {@code null} or empty.
+     * @see #quoteEscaped(String, char)
      */
     public static String quoteEscaped(final String str) {
         if (str == null || str.isEmpty()) {
@@ -3912,6 +4031,7 @@ public final class Strings {
      * @param str the input string to be processed, may be {@code null} or empty
      * @param quoteChar the quotation character to be escaped, should be either {@code "} or {@code '}
      * @return the processed string with the specified quotation character escaped, or the original string if it is {@code null} or empty
+     * @see #quoteEscaped(String)
      */
     public static String quoteEscaped(final String str, final char quoteChar) {
         if (str == null || str.isEmpty()) {
@@ -6455,6 +6575,8 @@ public final class Strings {
      * @param maxWidth maximum length of result String, must be positive
      * @return truncated String, {@code null} if {@code null} String input
      * @throws IllegalArgumentException if {@code maxWidth} is less than 0
+     * @see #truncate(String, int, int)
+     * @see #truncate(String[], int)
      */
     public static String truncate(final String str, final int maxWidth) {
         return truncate(str, 0, maxWidth);
@@ -6488,6 +6610,8 @@ public final class Strings {
      * @param maxWidth maximum length of result String, must be positive
      * @return truncated String, {@code null} if {@code null} String input
      * @throws IllegalArgumentException if {@code offset} or {@code maxWidth} is less than 0
+     * @see #truncate(String, int)
+     * @see #truncate(String[], int, int)
      */
     @MayReturnNull
     public static String truncate(final String str, final int offset, final int maxWidth) throws IllegalArgumentException {
@@ -6524,6 +6648,8 @@ public final class Strings {
      * @param strs the array of strings to be truncated. Each string in the array will be updated in-place.
      * @param maxWidth the maximum length for each string. Must be non-negative.
      * @throws IllegalArgumentException if maxWidth is less than 0.
+     * @see #truncate(String, int)
+     * @see #truncate(String[], int, int)
      */
     public static void truncate(final String[] strs, final int maxWidth) {
         N.checkArgNotNegative(maxWidth, cs.maxWidth);
@@ -6558,6 +6684,8 @@ public final class Strings {
      * @param offset the starting index from where the string needs to be truncated.
      * @param maxWidth the maximum length for each string starting from the offset. Must be non-negative.
      * @throws IllegalArgumentException if maxWidth or offset is less than 0.
+     * @see #truncate(String, int, int)
+     * @see #truncate(String[], int)
      */
     public static void truncate(final String[] strs, final int offset, final int maxWidth) {
         N.checkArgNotNegative(offset, cs.offset);
@@ -6594,6 +6722,7 @@ public final class Strings {
      *
      * @param str the String to delete whitespace from, may be {@code null}
      * @return the String without whitespaces, {@code null} if {@code null} String input
+     * @see #deleteWhitespace(String[])
      */
     public static String deleteWhitespace(final String str) {
         if (str == null || str.isEmpty()) {
@@ -6633,6 +6762,7 @@ public final class Strings {
      * }</pre>
      *
      * @param strs the array of strings to be processed. Each string in the array will be updated in-place.
+     * @see #deleteWhitespace(String)
      */
     public static void deleteWhitespace(final String[] strs) {
         if (N.isEmpty(strs)) {
@@ -6667,6 +6797,8 @@ public final class Strings {
      * @param suffix the suffix to append to the string. Must not be empty.
      * @return the input string with the suffix appended if it was not already present; otherwise, the original string.
      * @throws IllegalArgumentException if the suffix is empty.
+     * @see #appendIfMissingIgnoreCase(String, String)
+     * @see #prependIfMissing(String, String)
      */
     public static String appendIfMissing(final String str, final String suffix) throws IllegalArgumentException {
         N.checkArgNotEmpty(suffix, cs.suffix);
@@ -6704,6 +6836,8 @@ public final class Strings {
      * @param suffix the suffix to append to the string. Must not be empty.
      * @return the input string with the suffix appended if it was not already present; otherwise, the original string.
      * @throws IllegalArgumentException if the suffix is empty.
+     * @see #appendIfMissing(String, String)
+     * @see #prependIfMissingIgnoreCase(String, String)
      */
     public static String appendIfMissingIgnoreCase(final String str, final String suffix) throws IllegalArgumentException {
         N.checkArgNotEmpty(suffix, cs.suffix);
@@ -6740,6 +6874,8 @@ public final class Strings {
      * @param prefix the prefix to prepend to the string. Must not be empty.
      * @return the input string with the prefix prepended if it was not already present; otherwise, the original string.
      * @throws IllegalArgumentException if the prefix is empty.
+     * @see #prependIfMissingIgnoreCase(String, String)
+     * @see #appendIfMissing(String, String)
      */
     public static String prependIfMissing(final String str, final String prefix) throws IllegalArgumentException {
         N.checkArgNotEmpty(prefix, cs.prefix);
@@ -6777,6 +6913,8 @@ public final class Strings {
      * @param prefix the prefix to prepend to the string. Must not be empty.
      * @return the input string with the prefix prepended if it was not already present; otherwise, the original string.
      * @throws IllegalArgumentException if the prefix is empty.
+     * @see #prependIfMissing(String, String)
+     * @see #appendIfMissingIgnoreCase(String, String)
      */
     public static String prependIfMissingIgnoreCase(final String str, final String prefix) throws IllegalArgumentException {
         N.checkArgNotEmpty(prefix, cs.prefix);
@@ -6819,6 +6957,8 @@ public final class Strings {
      * @param prefixSuffix the string to be used as both the prefix and suffix for wrapping. Must not be empty.
      * @return the input string wrapped with the prefixSuffix at both ends if they were not already present; otherwise, the original string.
      * @throws IllegalArgumentException if the prefixSuffix is empty.
+     * @see #wrapIfMissing(String, String, String)
+     * @see #wrap(String, String)
      */
     public static String wrapIfMissing(final String str, final String prefixSuffix) throws IllegalArgumentException {
         N.checkArgNotEmpty(prefixSuffix, cs.prefixSuffix);
@@ -6861,6 +7001,8 @@ public final class Strings {
      * @param suffix the string to be used as the suffix for wrapping. Must not be empty.
      * @return the input string wrapped with the prefix and suffix at both ends if they were not already present; otherwise, the original string.
      * @throws IllegalArgumentException if the prefix or suffix is empty.
+     * @see #wrapIfMissing(String, String)
+     * @see #wrap(String, String, String)
      */
     public static String wrapIfMissing(final String str, final String prefix, final String suffix) throws IllegalArgumentException {
         N.checkArgNotEmpty(prefix, cs.prefix);
@@ -6901,6 +7043,8 @@ public final class Strings {
      * @param prefixSuffix the string to be used as both the prefix and suffix for wrapping. Must not be empty.
      * @return the input string wrapped with the prefixSuffix at both ends.
      * @throws IllegalArgumentException if the prefixSuffix is empty.
+     * @see #wrap(String, String, String)
+     * @see #wrapIfMissing(String, String)
      */
     public static String wrap(final String str, final String prefixSuffix) throws IllegalArgumentException {
         N.checkArgNotEmpty(prefixSuffix, cs.prefixSuffix);
@@ -6934,6 +7078,8 @@ public final class Strings {
      * @param suffix the string to be used as the suffix for wrapping. Must not be empty.
      * @return the input string wrapped with the prefix and suffix at both ends.
      * @throws IllegalArgumentException if the prefix or suffix is empty.
+     * @see #wrap(String, String)
+     * @see #wrapIfMissing(String, String, String)
      */
     public static String wrap(final String str, final String prefix, final String suffix) throws IllegalArgumentException {
         N.checkArgNotEmpty(prefix, cs.prefix);
@@ -6972,6 +7118,7 @@ public final class Strings {
      * @param prefixSuffix the string used as both the prefix and suffix for unwrapping. Must not be empty.
      * @return the input string with the prefixSuffix removed from both ends if they were present; otherwise, the original string.
      * @throws IllegalArgumentException if the prefixSuffix is empty.
+     * @see #unwrap(String, String, String)
      */
     public static String unwrap(final String str, final String prefixSuffix) throws IllegalArgumentException {
         N.checkArgNotEmpty(prefixSuffix, cs.prefixSuffix);
@@ -7010,6 +7157,7 @@ public final class Strings {
      * @param suffix the string used as the suffix for unwrapping. Must not be empty.
      * @return the input string with the prefix and suffix removed from both ends if they were present; otherwise, the original string.
      * @throws IllegalArgumentException if the prefix or suffix is empty.
+     * @see #unwrap(String, String)
      */
     public static String unwrap(final String str, final String prefix, final String suffix) throws IllegalArgumentException {
         N.checkArgNotEmpty(prefix, cs.prefix);
@@ -7041,6 +7189,8 @@ public final class Strings {
      * @param ch the character to check
      * @return {@code true} if the character is lowercase, {@code false} otherwise
      * @see Character#isLowerCase(char)
+     * @see #isUpperCase(char)
+     * @see #isAsciiLowerCase(char)
      */
     public static boolean isLowerCase(final char ch) {
         return Character.isLowerCase(ch);
@@ -7064,6 +7214,8 @@ public final class Strings {
      *
      * @param ch the character to check
      * @return {@code true} if the character is an ASCII lowercase letter, {@code false} otherwise
+     * @see #isLowerCase(char)
+     * @see #isAsciiUpperCase(char)
      */
     public static boolean isAsciiLowerCase(final char ch) {
         return (ch >= 'a') && (ch <= 'z');
@@ -7086,6 +7238,8 @@ public final class Strings {
      * @param ch the character to check
      * @return {@code true} if the character is uppercase, {@code false} otherwise
      * @see Character#isUpperCase(char)
+     * @see #isLowerCase(char)
+     * @see #isAsciiUpperCase(char)
      */
     public static boolean isUpperCase(final char ch) {
         return Character.isUpperCase(ch);
@@ -7133,6 +7287,9 @@ public final class Strings {
      *
      * @param cs the CharSequence to check, may be {@code null}
      * @return {@code true} if all characters are lowercase or the CharSequence is empty or {@code null}; {@code false} otherwise
+     * @see #isLowerCase(char)
+     * @see #isAllUpperCase(CharSequence)
+     * @see #isMixedCase(CharSequence)
      */
     public static boolean isAllLowerCase(final CharSequence cs) {
         if (isEmpty(cs)) {
@@ -7169,6 +7326,9 @@ public final class Strings {
      *
      * @param cs the CharSequence to check, may be {@code null}
      * @return {@code true} if all characters are uppercase or the CharSequence is empty; {@code false} otherwise
+     * @see #isUpperCase(char)
+     * @see #isAllLowerCase(CharSequence)
+     * @see #isMixedCase(CharSequence)
      */
     public static boolean isAllUpperCase(final CharSequence cs) {
         if (isEmpty(cs)) {
@@ -7209,6 +7369,8 @@ public final class Strings {
      *
      * @param cs the CharSequence to check. It may be {@code null}.
      * @return {@code true} if the CharSequence is mixed case, {@code false} otherwise.
+     * @see #isAllLowerCase(CharSequence)
+     * @see #isAllUpperCase(CharSequence)
      */
     public static boolean isMixedCase(final CharSequence cs) {
         if (isEmpty(cs) || cs.length() == 1) {
@@ -7257,6 +7419,9 @@ public final class Strings {
      * @param ch the character to check
      * @return {@code true} if the character is a digit, {@code false} otherwise
      * @see Character#isDigit(char)
+     * @see #isLetter(char)
+     * @see #isLetterOrDigit(char)
+     * @see #isAsciiNumeric(char)
      */
     public static boolean isDigit(final char ch) {
         return Character.isDigit(ch);
@@ -7282,6 +7447,9 @@ public final class Strings {
      * @param ch the character to check
      * @return {@code true} if the character is a letter, {@code false} otherwise
      * @see Character#isLetter(char)
+     * @see #isDigit(char)
+     * @see #isLetterOrDigit(char)
+     * @see #isAsciiAlpha(char)
      */
     public static boolean isLetter(final char ch) {
         return Character.isLetter(ch);
@@ -7308,6 +7476,9 @@ public final class Strings {
      * @param ch the character to check
      * @return {@code true} if the character is a letter or digit, {@code false} otherwise
      * @see Character#isLetterOrDigit(char)
+     * @see #isLetter(char)
+     * @see #isDigit(char)
+     * @see #isAsciiAlphanumeric(char)
      */
     public static boolean isLetterOrDigit(final char ch) {
         return Character.isLetterOrDigit(ch);
@@ -7335,6 +7506,10 @@ public final class Strings {
      *
      * @param ch the character to check
      * @return {@code true} if the character value is less than 128, {@code false} otherwise
+     * @see #isAsciiPrintable(char)
+     * @see #isAsciiControl(char)
+     * @see #isAsciiAlpha(char)
+     * @see #isAsciiNumeric(char)
      */
     public static boolean isAscii(final char ch) {
         return ch < 128;
@@ -7362,6 +7537,9 @@ public final class Strings {
      *
      * @param ch the character to check
      * @return {@code true} if between 32 and 126 inclusive, {@code false} otherwise
+     * @see #isAscii(char)
+     * @see #isAsciiControl(char)
+     * @see #isAsciiPrintable(CharSequence)
      */
     public static boolean isAsciiPrintable(final char ch) {
         return ch > 31 && ch < 127;
@@ -7389,6 +7567,8 @@ public final class Strings {
      *
      * @param ch the character to check
      * @return {@code true} if less than 32 or equals 127, {@code false} otherwise
+     * @see #isAscii(char)
+     * @see #isAsciiPrintable(char)
      */
     public static boolean isAsciiControl(final char ch) {
         return ch < 32 || ch == 127;
@@ -7416,6 +7596,10 @@ public final class Strings {
      *
      * @param ch the character to check
      * @return {@code true} if between 65 and 90 or 97 and 122 inclusive, {@code false} otherwise
+     * @see #isAsciiAlphaUpper(char)
+     * @see #isAsciiAlphaLower(char)
+     * @see #isAsciiAlphanumeric(char)
+     * @see #isLetter(char)
      */
     public static boolean isAsciiAlpha(final char ch) {
         return isAsciiAlphaUpper(ch) || isAsciiAlphaLower(ch);
@@ -7442,6 +7626,8 @@ public final class Strings {
      *
      * @param ch the character to check
      * @return {@code true} if between 65 and 90 inclusive, {@code false} otherwise
+     * @see #isUpperCase(char)
+     * @see #isAsciiLowerCase(char)
      */
     public static boolean isAsciiAlphaUpper(final char ch) {
         return ch >= 'A' && ch <= 'Z';
@@ -7468,6 +7654,9 @@ public final class Strings {
      *
      * @param ch the character to check
      * @return {@code true} if between 97 and 122 inclusive, {@code false} otherwise
+     * @see #isAsciiAlpha(char)
+     * @see #isAsciiAlphaUpper(char)
+     * @see #isLowerCase(char)
      */
     public static boolean isAsciiAlphaLower(final char ch) {
         return ch >= 'a' && ch <= 'z';
@@ -7494,6 +7683,8 @@ public final class Strings {
      *
      * @param ch the character to check
      * @return {@code true} if between 48 and 57 inclusive, {@code false} otherwise
+     * @see #isDigit(char)
+     * @see #isAsciiAlphanumeric(char)
      */
     public static boolean isAsciiNumeric(final char ch) {
         return ch >= '0' && ch <= '9';
@@ -7523,6 +7714,9 @@ public final class Strings {
      *
      * @param ch the character to check
      * @return {@code true} if between 48 and 57 or 65 and 90 or 97 and 122 inclusive, {@code false} otherwise
+     * @see #isLetterOrDigit(char)
+     * @see #isAsciiAlpha(char)
+     * @see #isAsciiNumeric(char)
      */
     public static boolean isAsciiAlphanumeric(final char ch) {
         return isAsciiAlpha(ch) || isAsciiNumeric(ch);
@@ -7554,6 +7748,7 @@ public final class Strings {
      *
      * @param cs the CharSequence to check, may be null
      * @return {@code true} if every character is ASCII printable, {@code false} if the CharSequence is {@code null} or contains non-printable characters
+     * @see #isAsciiPrintable(char)
      */
     public static boolean isAsciiPrintable(final CharSequence cs) {
         if (cs == null) {
@@ -7595,6 +7790,7 @@ public final class Strings {
      *
      * @param cs the CharSequence to be checked, may be {@code null} or empty
      * @return {@code true} if the CharSequence contains only ASCII alphabetic characters and is non-null/non-empty, {@code false} otherwise.
+     * @see #isAsciiAlpha(char)
      * @see #isAlpha(CharSequence)
      * @see #isAsciiAlphaSpace(CharSequence)
      */

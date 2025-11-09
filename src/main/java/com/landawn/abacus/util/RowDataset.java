@@ -4153,7 +4153,7 @@ public final class RowDataset implements Dataset, Cloneable {
             Object element = null;
 
             for (int rowIndex = fromRowIndex; rowIndex < toRowIndex; rowIndex++) {
-                bw.write(IOUtil.LINE_SEPARATOR);
+                bw.write(IOUtil.LINE_SEPARATOR_UNIX);
 
                 for (int i = 0; i < columnCount; i++) {
                     if (i > 0) {
@@ -9256,7 +9256,7 @@ public final class RowDataset implements Dataset, Cloneable {
         final Appendable appendable = bw != null ? bw : output;
         final int rowLen = toRowIndex - fromRowIndex;
         final int columnLen = columnIndexes.length;
-        final String lineSeparator = Strings.isEmpty(prefix) ? IOUtil.LINE_SEPARATOR : (IOUtil.LINE_SEPARATOR + prefix);
+        final String lineSeparator = Strings.isEmpty(prefix) ? IOUtil.LINE_SEPARATOR_UNIX : (IOUtil.LINE_SEPARATOR_UNIX + prefix);
 
         try {
             if (N.notEmpty(prefix)) {
@@ -9367,7 +9367,7 @@ public final class RowDataset implements Dataset, Cloneable {
                 appendable.append('+');
             }
 
-            appendable.append(IOUtil.LINE_SEPARATOR);
+            appendable.append(IOUtil.LINE_SEPARATOR_UNIX);
 
             if (bw != null) {
                 bw.flush();

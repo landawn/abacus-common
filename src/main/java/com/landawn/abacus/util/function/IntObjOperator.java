@@ -41,23 +41,4 @@ public interface IntObjOperator<T> extends Throwables.IntObjOperator<T, RuntimeE
      */
     @Override
     int applyAsInt(int operand, T obj);
-
-    /**
-     * Converts this {@code IntObjOperator} to a {@code Throwables.IntObjOperator} that can throw a checked exception.
-     * This method provides a way to use this operator in contexts that require explicit exception handling.
-     *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * IntObjOperator operator = (...) -> { ... };
-     * var throwableOperator = operator.toThrowable();
-     * // Can now be used in contexts that handle checked exceptions
-     * }</pre>
-     *
-     * @param <E> the type of exception that the returned operator can throw
-     * @return a {@code Throwables.IntObjOperator} view of this operator that can throw exceptions of type {@code E}
-     */
-    default <E extends Throwable> Throwables.IntObjOperator<T, E> toThrowable() {
-        return (Throwables.IntObjOperator<T, E>) this;
-    }
-
 }

@@ -49,23 +49,4 @@ public interface CharTernaryOperator extends Throwables.CharTernaryOperator<Runt
      */
     @Override
     char applyAsChar(char a, char b, char c);
-
-    /**
-     * Converts this {@code CharTernaryOperator} to a {@code Throwables.CharTernaryOperator} that can throw a checked exception.
-     * This method provides a way to use this operator in contexts that require explicit exception handling.
-     *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * CharTernaryOperator operator = (...) -> { ... };
-     * var throwableOperator = operator.toThrowable();
-     * // Can now be used in contexts that handle checked exceptions
-     * }</pre>
-     *
-     * @param <E> the type of exception that the returned operator can throw
-     * @return a {@code Throwables.CharTernaryOperator} view of this operator that can throw exceptions of type {@code E}
-     */
-    default <E extends Throwable> Throwables.CharTernaryOperator<E> toThrowable() {
-        return (Throwables.CharTernaryOperator<E>) this;
-    }
-
 }

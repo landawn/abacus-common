@@ -1755,7 +1755,7 @@ public class Seq200Test extends TestBase {
         System.setOut(new PrintStream(baos));
         try {
             Seq.of(1, "hello", 3.0).println();
-            assertEquals("[1, hello, 3.0]" + System.lineSeparator(), baos.toString());
+            assertEquals("[1, hello, 3.0]" + IOUtil.LINE_SEPARATOR, baos.toString());
         } finally {
             System.setOut(originalOut);
         }

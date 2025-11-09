@@ -167,9 +167,9 @@ public class N204Test extends TestBase {
 
     private String getExpectedJsonForSampleBean(boolean pretty) {
         if (pretty) {
-            return String.join(System.lineSeparator(),
-                    "{\r\n" + "    \"name\": \"testName\",\r\n" + "    \"value\": 123,\r\n" + "    \"items\": [\"item1\", \"item2\"],\r\n"
-                            + "    \"properties\": {\r\n" + "        \"key1\": 100,\r\n" + "        \"key2\": 200\r\n" + "    }\r\n" + "}");
+            return String.join(IOUtil.LINE_SEPARATOR_UNIX,
+                    "{\n" + "    \"name\": \"testName\",\n" + "    \"value\": 123,\n" + "    \"items\": [\"item1\", \"item2\"],\n" + "    \"properties\": {\n"
+                            + "        \"key1\": 100,\n" + "        \"key2\": 200\n" + "    }\n" + "}");
         } else {
             return "{\"name\": \"testName\", \"value\": 123, \"items\": [\"item1\", \"item2\"], \"properties\": {\"key1\": 100, \"key2\": 200}}";
         }
@@ -429,9 +429,10 @@ public class N204Test extends TestBase {
 
     private String getExpectedXmlForSampleBean(boolean pretty) {
         if (pretty) {
-            return String.join(System.lineSeparator(), "<TestBean>", "  <name>testName</name>", "  <value>123</value>", "  <items>", "    <item>item1</item>",
-                    "    <item>item2</item>", "  </items>", "  <properties>", "    <entry>", "      <key>key1</key>", "      <value>100</value>",
-                    "    </entry>", "    <entry>", "      <key>key2</key>", "      <value>200</value>", "    </entry>", "  </properties>", "</TestBean>");
+            return String.join(IOUtil.LINE_SEPARATOR_UNIX, "<TestBean>", "  <name>testName</name>", "  <value>123</value>", "  <items>",
+                    "    <item>item1</item>", "    <item>item2</item>", "  </items>", "  <properties>", "    <entry>", "      <key>key1</key>",
+                    "      <value>100</value>", "    </entry>", "    <entry>", "      <key>key2</key>", "      <value>200</value>", "    </entry>",
+                    "  </properties>", "</TestBean>");
         } else {
             return "<TestBean><name>testName</name><value>123</value><items><item>item1</item><item>item2</item></items><properties><entry><key>key1</key><value>100</value></entry><entry><key>key2</key><value>200</value></entry></properties></TestBean>";
         }

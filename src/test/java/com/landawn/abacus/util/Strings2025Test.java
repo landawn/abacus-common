@@ -3355,16 +3355,14 @@ public class Strings2025Test extends TestBase {
     @Test
     @DisplayName("Test substringBetweenFirstAndLast(String, String, String) - nested delimiters")
     public void testSubstringBetweenFirstAndLast_TwoDelimiters_Nested() {
-        assertEquals("outer<inner>content</inner>outer",
-                     Strings.substringBetweenFirstAndLast("<outer<inner>content</inner>outer>", "<", ">"));
+        assertEquals("outer<inner>content</inner>outer", Strings.substringBetweenFirstAndLast("<outer<inner>content</inner>outer>", "<", ">"));
         assertEquals("a[b[c]]d", Strings.substringBetweenFirstAndLast("[a[b[c]]d]", "[", "]"));
     }
 
     @Test
     @DisplayName("Test substringBetweenFirstAndLast(String, String, String) - multiple pairs")
     public void testSubstringBetweenFirstAndLast_TwoDelimiters_MultiplePairs() {
-        assertEquals("first</tag><tag>second",
-                     Strings.substringBetweenFirstAndLast("<tag>first</tag><tag>second</tag>", "<tag>", "</tag>"));
+        assertEquals("first</tag><tag>second", Strings.substringBetweenFirstAndLast("<tag>first</tag><tag>second</tag>", "<tag>", "</tag>"));
         assertEquals("a](b)[c", Strings.substringBetweenFirstAndLast("[a](b)[c]", "[", "]"));
     }
 
@@ -3475,8 +3473,7 @@ public class Strings2025Test extends TestBase {
     @Test
     @DisplayName("Test StrUtil.substringBetweenFirstAndLast(String, String, String) - nested delimiters")
     public void testStrUtil_SubstringBetweenFirstAndLast_TwoDelimiters_Nested() {
-        assertEquals("outer<inner>text</inner>outer",
-                     StrUtil.substringBetweenFirstAndLast("<outer<inner>text</inner>outer>", "<", ">").get());
+        assertEquals("outer<inner>text</inner>outer", StrUtil.substringBetweenFirstAndLast("<outer<inner>text</inner>outer>", "<", ">").get());
     }
 
     @Test
@@ -3529,12 +3526,10 @@ public class Strings2025Test extends TestBase {
         String input = "<div><span>text1</span></div><div><span>text2</span></div>";
 
         // From beginning - gets text1</span></div><div><span>text2
-        assertEquals("div><span>text1</span></div><div><span>text2</span></div",
-                     StrUtil.substringBetweenFirstAndLast(input, 0, "<", ">").get());
+        assertEquals("div><span>text1</span></div><div><span>text2</span></div", StrUtil.substringBetweenFirstAndLast(input, 0, "<", ">").get());
 
         // From after first div - gets span>text1</span></div><div><span>text2
-        assertEquals("span>text1</span></div><div><span>text2</span></div",
-                     StrUtil.substringBetweenFirstAndLast(input, 5, "<", ">").get());
+        assertEquals("span>text1</span></div><div><span>text2</span></div", StrUtil.substringBetweenFirstAndLast(input, 5, "<", ">").get());
     }
 
     @Test

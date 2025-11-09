@@ -626,7 +626,7 @@ final class JSONParserImpl extends AbstractJSONParser {
 
         if (config.wrapRootValue()) {
             if (isPrettyFormat) {
-                bw.write(IOUtil.LINE_SEPARATOR);
+                bw.write(IOUtil.LINE_SEPARATOR_UNIX);
 
                 if (indentation != null) {
                     bw.write(indentation);
@@ -676,7 +676,7 @@ final class JSONParserImpl extends AbstractJSONParser {
             }
 
             if (isPrettyFormat) {
-                bw.write(IOUtil.LINE_SEPARATOR);
+                bw.write(IOUtil.LINE_SEPARATOR_UNIX);
                 bw.write(nextIndentation);
             }
 
@@ -718,7 +718,7 @@ final class JSONParserImpl extends AbstractJSONParser {
 
         {
             if (isPrettyFormat && cnt > 0) {
-                bw.write(IOUtil.LINE_SEPARATOR);
+                bw.write(IOUtil.LINE_SEPARATOR_UNIX);
 
                 if (indentation != null) {
                     bw.write(indentation);
@@ -732,7 +732,7 @@ final class JSONParserImpl extends AbstractJSONParser {
 
         if (config.bracketRootValue() || !isFirstCall) {
             if (isPrettyFormat && (config.wrapRootValue() || cnt > 0)) {
-                bw.write(IOUtil.LINE_SEPARATOR);
+                bw.write(IOUtil.LINE_SEPARATOR_UNIX);
 
                 if (indentation != null) {
                     bw.write(indentation);
@@ -790,7 +790,7 @@ final class JSONParserImpl extends AbstractJSONParser {
             }
 
             if (isPrettyFormat) {
-                bw.write(IOUtil.LINE_SEPARATOR);
+                bw.write(IOUtil.LINE_SEPARATOR_UNIX);
                 bw.write(nextIndentation);
             }
 
@@ -823,7 +823,7 @@ final class JSONParserImpl extends AbstractJSONParser {
 
         if (config.bracketRootValue() || !isFirstCall) {
             if (isPrettyFormat && N.notEmpty(m)) {
-                bw.write(IOUtil.LINE_SEPARATOR);
+                bw.write(IOUtil.LINE_SEPARATOR_UNIX);
 
                 if (indentation != null) {
                     bw.write(indentation);
@@ -866,7 +866,7 @@ final class JSONParserImpl extends AbstractJSONParser {
             }
 
             if (isPrettyFormat) {
-                bw.write(IOUtil.LINE_SEPARATOR);
+                bw.write(IOUtil.LINE_SEPARATOR_UNIX);
                 bw.write(nextIndentation);
             }
 
@@ -879,7 +879,7 @@ final class JSONParserImpl extends AbstractJSONParser {
 
         if (config.bracketRootValue() || !isFirstCall) {
             if (isPrettyFormat && len > 0) {
-                bw.write(IOUtil.LINE_SEPARATOR);
+                bw.write(IOUtil.LINE_SEPARATOR_UNIX);
 
                 if (indentation != null) {
                     bw.write(indentation);
@@ -916,7 +916,7 @@ final class JSONParserImpl extends AbstractJSONParser {
             }
 
             if (isPrettyFormat) {
-                bw.write(IOUtil.LINE_SEPARATOR);
+                bw.write(IOUtil.LINE_SEPARATOR_UNIX);
                 bw.write(nextIndentation);
             }
 
@@ -929,7 +929,7 @@ final class JSONParserImpl extends AbstractJSONParser {
 
         if (config.bracketRootValue() || !isFirstCall) {
             if (isPrettyFormat && N.notEmpty(c)) {
-                bw.write(IOUtil.LINE_SEPARATOR);
+                bw.write(IOUtil.LINE_SEPARATOR_UNIX);
 
                 if (indentation != null) {
                     bw.write(indentation);
@@ -957,7 +957,7 @@ final class JSONParserImpl extends AbstractJSONParser {
 
         {
             if (isPrettyFormat) {
-                bw.write(IOUtil.LINE_SEPARATOR);
+                bw.write(IOUtil.LINE_SEPARATOR_UNIX);
 
                 if (indentation != null) {
                     bw.write(indentation);
@@ -995,7 +995,7 @@ final class JSONParserImpl extends AbstractJSONParser {
                 }
 
                 if (isPrettyFormat) {
-                    bw.write(IOUtil.LINE_SEPARATOR);
+                    bw.write(IOUtil.LINE_SEPARATOR_UNIX);
                     bw.write(nextIndentation);
                 }
 
@@ -1015,7 +1015,7 @@ final class JSONParserImpl extends AbstractJSONParser {
 
         {
             if (isPrettyFormat && !mapEntity.isEmpty()) {
-                bw.write(IOUtil.LINE_SEPARATOR);
+                bw.write(IOUtil.LINE_SEPARATOR_UNIX);
 
                 if (indentation != null) {
                     bw.write(indentation);
@@ -1029,7 +1029,7 @@ final class JSONParserImpl extends AbstractJSONParser {
 
         if (config.bracketRootValue() || !isFirstCall) {
             if (isPrettyFormat) {
-                bw.write(IOUtil.LINE_SEPARATOR);
+                bw.write(IOUtil.LINE_SEPARATOR_UNIX);
 
                 if (indentation != null) {
                     bw.write(indentation);
@@ -1057,7 +1057,7 @@ final class JSONParserImpl extends AbstractJSONParser {
 
         {
             if (isPrettyFormat) {
-                bw.write(IOUtil.LINE_SEPARATOR);
+                bw.write(IOUtil.LINE_SEPARATOR_UNIX);
 
                 if (indentation != null) {
                     bw.write(indentation);
@@ -1095,7 +1095,7 @@ final class JSONParserImpl extends AbstractJSONParser {
                 }
 
                 if (isPrettyFormat) {
-                    bw.write(IOUtil.LINE_SEPARATOR);
+                    bw.write(IOUtil.LINE_SEPARATOR_UNIX);
                     bw.write(nextIndentation);
                 }
 
@@ -1115,7 +1115,7 @@ final class JSONParserImpl extends AbstractJSONParser {
 
         {
             if (isPrettyFormat && !entityId.isEmpty()) {
-                bw.write(IOUtil.LINE_SEPARATOR);
+                bw.write(IOUtil.LINE_SEPARATOR_UNIX);
 
                 if (indentation != null) {
                     bw.write(indentation);
@@ -1129,7 +1129,7 @@ final class JSONParserImpl extends AbstractJSONParser {
 
         if (config.bracketRootValue() || !isFirstCall) {
             if (isPrettyFormat) {
-                bw.write(IOUtil.LINE_SEPARATOR);
+                bw.write(IOUtil.LINE_SEPARATOR_UNIX);
 
                 if (indentation != null) {
                     bw.write(indentation);
@@ -1166,7 +1166,7 @@ final class JSONParserImpl extends AbstractJSONParser {
 
         {
             if (isPrettyFormat) {
-                bw.write(IOUtil.LINE_SEPARATOR);
+                bw.write(IOUtil.LINE_SEPARATOR_UNIX);
 
                 if (indentation != null) {
                     bw.write(indentation);
@@ -1197,7 +1197,7 @@ final class JSONParserImpl extends AbstractJSONParser {
         if (writeColumnType) {
             {
                 if (isPrettyFormat) {
-                    bw.write(IOUtil.LINE_SEPARATOR);
+                    bw.write(IOUtil.LINE_SEPARATOR_UNIX);
 
                     if (indentation != null) {
                         bw.write(indentation);
@@ -1240,7 +1240,7 @@ final class JSONParserImpl extends AbstractJSONParser {
         if (N.notEmpty(ds.getProperties())) {
             {
                 if (isPrettyFormat) {
-                    bw.write(IOUtil.LINE_SEPARATOR);
+                    bw.write(IOUtil.LINE_SEPARATOR_UNIX);
 
                     if (indentation != null) {
                         bw.write(indentation);
@@ -1272,7 +1272,7 @@ final class JSONParserImpl extends AbstractJSONParser {
         if (ds.isFrozen()) {
             {
                 if (isPrettyFormat) {
-                    bw.write(IOUtil.LINE_SEPARATOR);
+                    bw.write(IOUtil.LINE_SEPARATOR_UNIX);
 
                     if (indentation != null) {
                         bw.write(indentation);
@@ -1303,7 +1303,7 @@ final class JSONParserImpl extends AbstractJSONParser {
 
         {
             if (isPrettyFormat) {
-                bw.write(IOUtil.LINE_SEPARATOR);
+                bw.write(IOUtil.LINE_SEPARATOR_UNIX);
 
                 if (indentation != null) {
                     bw.write(indentation);
@@ -1343,7 +1343,7 @@ final class JSONParserImpl extends AbstractJSONParser {
                 }
 
                 if (isPrettyFormat) {
-                    bw.write(IOUtil.LINE_SEPARATOR);
+                    bw.write(IOUtil.LINE_SEPARATOR_UNIX);
                     bw.write(doubleIndentation);
                 }
 
@@ -1363,7 +1363,7 @@ final class JSONParserImpl extends AbstractJSONParser {
 
         {
             if (isPrettyFormat && columnNames.size() > 0) {
-                bw.write(IOUtil.LINE_SEPARATOR);
+                bw.write(IOUtil.LINE_SEPARATOR_UNIX);
 
                 if (indentation != null) {
                     bw.write(indentation);
@@ -1377,7 +1377,7 @@ final class JSONParserImpl extends AbstractJSONParser {
 
         if (config.bracketRootValue() || !isFirstCall) {
             if (isPrettyFormat) {
-                bw.write(IOUtil.LINE_SEPARATOR);
+                bw.write(IOUtil.LINE_SEPARATOR_UNIX);
 
                 if (indentation != null) {
                     bw.write(indentation);
@@ -1409,7 +1409,7 @@ final class JSONParserImpl extends AbstractJSONParser {
         if (writeRowColumnKeyType) {
             {
                 if (isPrettyFormat) {
-                    bw.write(IOUtil.LINE_SEPARATOR);
+                    bw.write(IOUtil.LINE_SEPARATOR_UNIX);
 
                     if (indentation != null) {
                         bw.write(indentation);
@@ -1448,7 +1448,7 @@ final class JSONParserImpl extends AbstractJSONParser {
 
             {
                 if (isPrettyFormat) {
-                    bw.write(IOUtil.LINE_SEPARATOR);
+                    bw.write(IOUtil.LINE_SEPARATOR_UNIX);
 
                     if (indentation != null) {
                         bw.write(indentation);
@@ -1488,7 +1488,7 @@ final class JSONParserImpl extends AbstractJSONParser {
 
         {
             if (isPrettyFormat) {
-                bw.write(IOUtil.LINE_SEPARATOR);
+                bw.write(IOUtil.LINE_SEPARATOR_UNIX);
 
                 if (indentation != null) {
                     bw.write(indentation);
@@ -1518,7 +1518,7 @@ final class JSONParserImpl extends AbstractJSONParser {
 
         {
             if (isPrettyFormat) {
-                bw.write(IOUtil.LINE_SEPARATOR);
+                bw.write(IOUtil.LINE_SEPARATOR_UNIX);
 
                 if (indentation != null) {
                     bw.write(indentation);
@@ -1549,7 +1549,7 @@ final class JSONParserImpl extends AbstractJSONParser {
         if (writeColumnType) {
             {
                 if (isPrettyFormat) {
-                    bw.write(IOUtil.LINE_SEPARATOR);
+                    bw.write(IOUtil.LINE_SEPARATOR_UNIX);
 
                     if (indentation != null) {
                         bw.write(indentation);
@@ -1591,7 +1591,7 @@ final class JSONParserImpl extends AbstractJSONParser {
 
         {
             if (isPrettyFormat) {
-                bw.write(IOUtil.LINE_SEPARATOR);
+                bw.write(IOUtil.LINE_SEPARATOR_UNIX);
 
                 if (indentation != null) {
                     bw.write(indentation);
@@ -1632,7 +1632,7 @@ final class JSONParserImpl extends AbstractJSONParser {
                 }
 
                 if (isPrettyFormat) {
-                    bw.write(IOUtil.LINE_SEPARATOR);
+                    bw.write(IOUtil.LINE_SEPARATOR_UNIX);
                     bw.write(doubleIndentation);
                 }
 
@@ -1652,7 +1652,7 @@ final class JSONParserImpl extends AbstractJSONParser {
 
         {
             if (isPrettyFormat && sheet.columnKeySet().size() > 0) {
-                bw.write(IOUtil.LINE_SEPARATOR);
+                bw.write(IOUtil.LINE_SEPARATOR_UNIX);
 
                 if (indentation != null) {
                     bw.write(indentation);
@@ -1666,7 +1666,7 @@ final class JSONParserImpl extends AbstractJSONParser {
 
         if (config.bracketRootValue() || !isFirstCall) {
             if (isPrettyFormat) {
-                bw.write(IOUtil.LINE_SEPARATOR);
+                bw.write(IOUtil.LINE_SEPARATOR_UNIX);
 
                 if (indentation != null) {
                     bw.write(indentation);

@@ -44,8 +44,6 @@ import java.lang.annotation.Target;
  * 
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
- * import java.sql.Timestamp;
- * import com.landawn.abacus.util.Difference;
  *
  * public class User {
  *     private Long id;

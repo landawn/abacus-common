@@ -432,8 +432,6 @@ public final class ExcelUtil {
      * Function<Row, List<Object>> mapper = RowMappers.toList(CELL_GETTER);
      * List<List<Object>> rows = ExcelUtil.readSheet(file, 0, true, mapper);
      * }</pre>
-     *
-     * @throws RuntimeException if the cell has an unsupported cell type
      */
     public static final Function<Cell, Object> CELL_GETTER = cell -> switch (cell.getCellType()) {
         case STRING -> cell.getStringCellValue();
@@ -465,8 +463,6 @@ public final class ExcelUtil {
      * Function<Row, List<String>> stringMapper = RowMappers.toList(CELL2STRING);
      * List<List<String>> rows = ExcelUtil.readSheet(file, 0, true, stringMapper);
      * }</pre>
-     *
-     * @throws RuntimeException if the cell has an unsupported cell type
      */
     public static final Function<Cell, String> CELL2STRING = cell -> switch (cell.getCellType()) {
         case STRING -> cell.getStringCellValue();
@@ -1311,7 +1307,7 @@ public final class ExcelUtil {
 
                 for (Row row : sheet) {
                     if (rowIndex++ > 0) {
-                        bw.write(IOUtil.LINE_SEPARATOR);
+                        bw.write(IOUtil.LINE_SEPARATOR_UNIX);
                     }
 
                     int idx = 0;

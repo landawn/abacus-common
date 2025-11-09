@@ -65,23 +65,4 @@ public interface LongToDoubleFunction extends Throwables.LongToDoubleFunction<Ru
      */
     @Override
     double applyAsDouble(long value);
-
-    /**
-     * Converts this {@code LongToDoubleFunction} to a {@code Throwables.LongToDoubleFunction} that can throw a checked exception.
-     * This method provides a way to use this function in contexts that require explicit exception handling.
-     *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * LongToDoubleFunction function = value -> { ... };
-     * var throwableFunction = function.toThrowable();
-     * // Can now be used in contexts that handle checked exceptions
-     * }</pre>
-     *
-     * @param <E> the type of exception that the returned function can throw
-     * @return a {@code Throwables.LongToDoubleFunction} view of this function that can throw exceptions of type {@code E}
-     */
-    default <E extends Throwable> Throwables.LongToDoubleFunction<E> toThrowable() {
-        return (Throwables.LongToDoubleFunction<E>) this;
-    }
-
 }

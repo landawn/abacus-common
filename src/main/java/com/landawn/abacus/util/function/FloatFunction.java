@@ -128,23 +128,4 @@ public interface FloatFunction<R> extends Throwables.FloatFunction<R, RuntimeExc
     static FloatFunction<Float> identity() {
         return t -> t;
     }
-
-    /**
-     * Converts this {@code FloatFunction} to a {@code Throwables.FloatFunction} that can throw a checked exception.
-     * This method provides a way to use this function in contexts that require explicit exception handling.
-     *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * FloatFunction function = (...) -> { ... };
-     * var throwableFunction = function.toThrowable();
-     * // Can now be used in contexts that handle checked exceptions
-     * }</pre>
-     *
-     * @param <E> the type of exception that the returned function can throw
-     * @return a {@code Throwables.FloatFunction} view of this function that can throw exceptions of type {@code E}
-     */
-    default <E extends Throwable> Throwables.FloatFunction<R, E> toThrowable() {
-        return (Throwables.FloatFunction<R, E>) this;
-    }
-
 }

@@ -680,6 +680,20 @@ public final class IOUtil {
     public static final String LINE_SEPARATOR = System.lineSeparator();
 
     /**
+     * The Unix line separator string ("\n").
+     * @see System#lineSeparator()
+     */
+    public static final String LINE_SEPARATOR_UNIX = "\n";
+
+    /**
+     * The Windows line separator string ("\r\n").
+     * @see System#lineSeparator()
+     * @deprecated use {@link #LINE_SEPARATOR_UNIX} instead. It's recommended to use '\n' as the line separator in all platforms(?).
+     * It will make things easier when files are shared between different OS platforms. Windows can handle '\n' correctly. 
+     */
+    public static final String LINE_SEPARATOR_WINDOWS = "\r\n";
+
+    /**
      * current path retrieved by {@code new File("./").getAbsolutePath()}
      */
     public static final String CURRENT_DIR;
@@ -3259,7 +3273,7 @@ public final class IOUtil {
             output.write(N.toString(obj));
         }
 
-        output.write(IOUtil.LINE_SEPARATOR);
+        output.write(IOUtil.LINE_SEPARATOR_UNIX);
 
         if (flush) {
             output.flush();
@@ -3339,7 +3353,7 @@ public final class IOUtil {
                     bw.write(N.toString(line));
                 }
 
-                bw.write(IOUtil.LINE_SEPARATOR);
+                bw.write(IOUtil.LINE_SEPARATOR_UNIX);
             }
 
             if (flush || !isBufferedWriter) {
@@ -3423,7 +3437,7 @@ public final class IOUtil {
                     bw.write(N.toString(line));
                 }
 
-                bw.write(IOUtil.LINE_SEPARATOR);
+                bw.write(IOUtil.LINE_SEPARATOR_UNIX);
             }
 
             if (flush || !isBufferedWriter) {
@@ -4826,7 +4840,7 @@ public final class IOUtil {
      * @see N#toString(Object)
      */
     public static void appendLine(final Object obj, final Charset charset, final File targetFile) throws IOException {
-        final String str = N.toString(obj) + IOUtil.LINE_SEPARATOR;
+        final String str = N.toString(obj) + IOUtil.LINE_SEPARATOR_UNIX;
 
         append(toByteArray(str, charset), targetFile);
     }
@@ -7953,7 +7967,7 @@ public final class IOUtil {
 
             for (String line = br.readLine(); line != null; line = br.readLine()) {
                 bw.write(line);
-                bw.write(IOUtil.LINE_SEPARATOR);
+                bw.write(IOUtil.LINE_SEPARATOR_UNIX);
                 lineCounter++;
 
                 if ((lineCounter % lineNumOfPart) == 0) {

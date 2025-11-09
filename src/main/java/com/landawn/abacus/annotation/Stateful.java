@@ -43,8 +43,6 @@ import java.lang.annotation.Target;
  * 
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
- * import java.io.BufferedReader;
- * import java.util.Iterator;
  *
  * @Stateful
  * public class Counter {

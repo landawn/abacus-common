@@ -178,23 +178,4 @@ public interface CharPredicate extends Throwables.CharPredicate<RuntimeException
     static CharPredicate between(final char minValue, final char maxValue) {
         return value -> value > minValue && value < maxValue;
     }
-
-    /**
-     * Converts this {@code CharPredicate} to a {@code Throwables.CharPredicate} that can throw a checked exception.
-     * This method provides a way to use this predicate in contexts that require explicit exception handling.
-     *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * CharPredicate predicate = (...) -> { ... };
-     * var throwablePredicate = predicate.toThrowable();
-     * // Can now be used in contexts that handle checked exceptions
-     * }</pre>
-     *
-     * @param <E> the type of exception that the returned predicate can throw
-     * @return a {@code Throwables.CharPredicate} view of this predicate that can throw exceptions of type {@code E}
-     */
-    default <E extends Throwable> Throwables.CharPredicate<E> toThrowable() {
-        return (Throwables.CharPredicate<E>) this;
-    }
-
 }

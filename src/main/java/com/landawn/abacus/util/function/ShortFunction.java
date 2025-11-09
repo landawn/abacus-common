@@ -110,23 +110,4 @@ public interface ShortFunction<R> extends Throwables.ShortFunction<R, RuntimeExc
     static ShortFunction<Short> identity() {
         return t -> t;
     }
-
-    /**
-     * Converts this {@code ShortFunction} to a {@code Throwables.ShortFunction} that can throw a checked exception.
-     * This method provides a way to use this function in contexts that require explicit exception handling.
-     *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * ShortFunction function = (...) -> { ... };
-     * var throwableFunction = function.toThrowable();
-     * // Can now be used in contexts that handle checked exceptions
-     * }</pre>
-     *
-     * @param <E> the type of exception that the returned function can throw
-     * @return a {@code Throwables.ShortFunction} view of this function that can throw exceptions of type {@code E}
-     */
-    default <E extends Throwable> Throwables.ShortFunction<R, E> toThrowable() {
-        return (Throwables.ShortFunction<R, E>) this;
-    }
-
 }

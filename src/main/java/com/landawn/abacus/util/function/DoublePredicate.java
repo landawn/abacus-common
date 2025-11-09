@@ -199,23 +199,4 @@ public interface DoublePredicate extends Throwables.DoublePredicate<RuntimeExcep
     static DoublePredicate between(final double minValue, final double maxValue) {
         return value -> N.compare(value, minValue) > 0 && N.compare(value, maxValue) < 0;
     }
-
-    /**
-     * Converts this {@code DoublePredicate} to a {@code Throwables.DoublePredicate} that can throw a checked exception.
-     * This method provides a way to use this predicate in contexts that require explicit exception handling.
-     *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * DoublePredicate predicate = (...) -> { ... };
-     * var throwablePredicate = predicate.toThrowable();
-     * // Can now be used in contexts that handle checked exceptions
-     * }</pre>
-     *
-     * @param <E> the type of exception that the returned predicate can throw
-     * @return a {@code Throwables.DoublePredicate} view of this predicate that can throw exceptions of type {@code E}
-     */
-    default <E extends Throwable> Throwables.DoublePredicate<E> toThrowable() {
-        return (Throwables.DoublePredicate<E>) this;
-    }
-
 }

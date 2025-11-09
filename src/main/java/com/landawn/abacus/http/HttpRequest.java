@@ -203,6 +203,8 @@ public final class HttpRequest {
      * @param password The password for authentication
      * @return This HttpRequest instance for method chaining
      * @see HttpHeaders
+     * @see HttpHeaders.Names
+     * @see HttpHeaders.Values
      */
     public HttpRequest basicAuth(final String user, final Object password) {
         checkSettings();
@@ -227,8 +229,9 @@ public final class HttpRequest {
      * @param name The header name
      * @param value The header value
      * @return This HttpRequest instance for method chaining
-     * @see HttpSettings#header(String, Object)
      * @see HttpHeaders
+     * @see HttpHeaders.Names
+     * @see HttpHeaders.Values
      */
     public HttpRequest header(final String name, final Object value) {
         checkSettings();
@@ -256,8 +259,9 @@ public final class HttpRequest {
      * @param name2 The second header name
      * @param value2 The second header value
      * @return This HttpRequest instance for method chaining
-     * @see HttpSettings#headers(String, Object, String, Object)
      * @see HttpHeaders
+     * @see HttpHeaders.Names
+     * @see HttpHeaders.Values
      */
     public HttpRequest headers(final String name1, final Object value1, final String name2, final Object value2) {
         checkSettings();
@@ -288,8 +292,9 @@ public final class HttpRequest {
      * @param name3 The third header name
      * @param value3 The third header value
      * @return This HttpRequest instance for method chaining
-     * @see HttpSettings#headers(String, Object, String, Object, String, Object)
      * @see HttpHeaders
+     * @see HttpHeaders.Names
+     * @see HttpHeaders.Values
      */
     public HttpRequest headers(final String name1, final Object value1, final String name2, final Object value2, final String name3, final Object value3) {
         checkSettings();
@@ -316,8 +321,9 @@ public final class HttpRequest {
      *
      * @param headers A map containing header names and values
      * @return This HttpRequest instance for method chaining
-     * @see HttpSettings#headers(Map)
      * @see HttpHeaders
+     * @see HttpHeaders.Names
+     * @see HttpHeaders.Values
      */
     public HttpRequest headers(final Map<String, ?> headers) {
         checkSettings();
@@ -343,8 +349,9 @@ public final class HttpRequest {
      *
      * @param headers The HttpHeaders instance to set
      * @return This HttpRequest instance for method chaining
-     * @see HttpSettings#headers(HttpHeaders)
      * @see HttpHeaders
+     * @see HttpHeaders.Names
+     * @see HttpHeaders.Values
      */
     public HttpRequest headers(final HttpHeaders headers) {
         checkSettings();

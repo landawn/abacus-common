@@ -48,9 +48,6 @@ import java.lang.annotation.Target;
  * 
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
- * import java.util.Comparator;
- * import java.util.List;
- * import java.util.stream.Collectors;
  *
  * public class StreamProcessor<T> {
  *     @TerminalOpTriggered

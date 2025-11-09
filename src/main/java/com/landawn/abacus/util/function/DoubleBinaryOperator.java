@@ -59,23 +59,4 @@ public interface DoubleBinaryOperator extends Throwables.DoubleBinaryOperator<Ru
      */
     @Override
     double applyAsDouble(double left, double right);
-
-    /**
-     * Converts this {@code DoubleBinaryOperator} to a {@code Throwables.DoubleBinaryOperator} that can throw a checked exception.
-     * This method provides a way to use this operator in contexts that require explicit exception handling.
-     *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * DoubleBinaryOperator operator = (...) -> { ... };
-     * var throwableOperator = operator.toThrowable();
-     * // Can now be used in contexts that handle checked exceptions
-     * }</pre>
-     *
-     * @param <E> the type of exception that the returned operator can throw
-     * @return a {@code Throwables.DoubleBinaryOperator} view of this operator that can throw exceptions of type {@code E}
-     */
-    default <E extends Throwable> Throwables.DoubleBinaryOperator<E> toThrowable() {
-        return (Throwables.DoubleBinaryOperator<E>) this;
-    }
-
 }

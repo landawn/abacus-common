@@ -50,23 +50,4 @@ public interface ToLongBiFunction<T, U> extends Throwables.ToLongBiFunction<T, U
      */
     @Override
     long applyAsLong(T t, U u);
-
-    /**
-     * Converts this {@code ToLongBiFunction} to a {@code Throwables.ToLongBiFunction} that can throw a checked exception.
-     * This method provides a way to use this function in contexts that require explicit exception handling.
-     *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * ToLongBiFunction function = (...) -> { ... };
-     * var throwableFunction = function.toThrowable();
-     * // Can now be used in contexts that handle checked exceptions
-     * }</pre>
-     *
-     * @param <E> the type of exception that the returned function can throw
-     * @return a {@code Throwables.ToLongBiFunction} view of this function that can throw exceptions of type {@code E}
-     */
-    default <E extends Throwable> Throwables.ToLongBiFunction<T, U, E> toThrowable() {
-        return (Throwables.ToLongBiFunction<T, U, E>) this;
-    }
-
 }

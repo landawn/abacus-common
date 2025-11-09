@@ -128,7 +128,7 @@ public class IOUtil200Test extends TestBase {
         assertNotNull(IOUtil.USER_NAME);
         assertNotNull(IOUtil.PATH_SEPARATOR);
         assertNotNull(IOUtil.DIR_SEPARATOR);
-        assertNotNull(IOUtil.LINE_SEPARATOR);
+        assertNotNull(IOUtil.LINE_SEPARATOR_UNIX);
         assertNotNull(IOUtil.CURRENT_DIR);
 
         assertEquals(-1, IOUtil.EOF);
@@ -495,7 +495,7 @@ public class IOUtil200Test extends TestBase {
         String line1 = "First line.";
         String line2 = "Second line with Ümlauts.";
         String line3 = "Third line €.";
-        String content = line1 + IOUtil.LINE_SEPARATOR + line2 + IOUtil.LINE_SEPARATOR + line3;
+        String content = line1 + IOUtil.LINE_SEPARATOR_UNIX + line2 + IOUtil.LINE_SEPARATOR_UNIX + line3;
         List<String> expectedLines = Arrays.asList(line1, line2, line3);
 
         File testFileDefault = createTempFileWithContent("allLinesFile", ".txt", content, Charsets.DEFAULT);
@@ -507,7 +507,8 @@ public class IOUtil200Test extends TestBase {
         File emptyFile = createTempFileWithContent("emptyLinesFile", ".txt", "");
         assertEquals(Collections.emptyList(), IOUtil.readAllLines(emptyFile));
 
-        File fileWithEmptyLine = createTempFileWithContent("fileWithEmptyLine", ".txt", "line1" + IOUtil.LINE_SEPARATOR + "" + IOUtil.LINE_SEPARATOR + "line3");
+        File fileWithEmptyLine = createTempFileWithContent("fileWithEmptyLine", ".txt",
+                "line1" + IOUtil.LINE_SEPARATOR_UNIX + "" + IOUtil.LINE_SEPARATOR_UNIX + "line3");
         assertEquals(Arrays.asList("line1", "", "line3"), IOUtil.readAllLines(fileWithEmptyLine));
     }
 
@@ -515,7 +516,7 @@ public class IOUtil200Test extends TestBase {
     public void testReadAllLinesFromInputStream() throws IOException {
         String line1 = "Stream line 1.";
         String line2 = "Stream line 2 with ñ.";
-        String content = line1 + IOUtil.LINE_SEPARATOR + line2;
+        String content = line1 + IOUtil.LINE_SEPARATOR_UNIX + line2;
         List<String> expectedLines = Arrays.asList(line1, line2);
 
         InputStream isDefault = new ByteArrayInputStream(content.getBytes(Charsets.DEFAULT));
@@ -532,7 +533,7 @@ public class IOUtil200Test extends TestBase {
     public void testReadAllLinesFromReader() throws IOException {
         String line1 = "Reader line one.";
         String line2 = "Reader line two.";
-        String content = line1 + IOUtil.LINE_SEPARATOR + line2;
+        String content = line1 + IOUtil.LINE_SEPARATOR_UNIX + line2;
         List<String> expectedLines = Arrays.asList(line1, line2);
 
         Reader reader = new StringReader(content);
@@ -545,7 +546,7 @@ public class IOUtil200Test extends TestBase {
     @Test
     public void testReadLinesFromFile() throws IOException {
         String[] lines = { "Line 0", "Line 1", "Line 2", "Line 3", "Line 4" };
-        String content = String.join(IOUtil.LINE_SEPARATOR, lines);
+        String content = String.join(IOUtil.LINE_SEPARATOR_UNIX, lines);
         File testFile = createTempFileWithContent("readLinesFile", ".txt", content, StandardCharsets.UTF_8);
 
         List<String> expected1 = Arrays.asList("Line 1", "Line 2");
@@ -563,7 +564,7 @@ public class IOUtil200Test extends TestBase {
     @Test
     public void testReadLinesFromInputStream() throws IOException {
         String[] lines = { "IS Line 0", "IS Line 1", "IS Line 2", "IS Line 3", "IS Line 4" };
-        String content = String.join(IOUtil.LINE_SEPARATOR, lines);
+        String content = String.join(IOUtil.LINE_SEPARATOR_UNIX, lines);
 
         InputStream is1 = new ByteArrayInputStream(content.getBytes(StandardCharsets.UTF_8));
         List<String> expected1 = Arrays.asList("IS Line 1", "IS Line 2");
@@ -584,7 +585,7 @@ public class IOUtil200Test extends TestBase {
     @Test
     public void testReadLinesFromReader() throws IOException {
         String[] lines = { "Reader Line 0", "Reader Line 1", "Reader Line 2", "Reader Line 3" };
-        String content = String.join(IOUtil.LINE_SEPARATOR, lines);
+        String content = String.join(IOUtil.LINE_SEPARATOR_UNIX, lines);
 
         Reader r1 = new StringReader(content);
         List<String> expected1 = Arrays.asList("Reader Line 1", "Reader Line 2");
@@ -646,10 +647,10 @@ public class IOUtil200Test extends TestBase {
         IOUtil.writeLines(iterator, testFile);
 
         StringBuilder expectedSb = new StringBuilder();
-        expectedSb.append("Iter Line 1").append(IOUtil.LINE_SEPARATOR);
-        expectedSb.append("Iter Line 2").append(IOUtil.LINE_SEPARATOR);
-        expectedSb.append(Strings.NULL.toCharArray()).append(IOUtil.LINE_SEPARATOR);
-        expectedSb.append("Iter Line 4").append(IOUtil.LINE_SEPARATOR);
+        expectedSb.append("Iter Line 1").append(IOUtil.LINE_SEPARATOR_UNIX);
+        expectedSb.append("Iter Line 2").append(IOUtil.LINE_SEPARATOR_UNIX);
+        expectedSb.append(Strings.NULL.toCharArray()).append(IOUtil.LINE_SEPARATOR_UNIX);
+        expectedSb.append("Iter Line 4").append(IOUtil.LINE_SEPARATOR_UNIX);
         assertEquals(expectedSb.toString(), IOUtil.readAllToString(testFile));
     }
 
@@ -1037,20 +1038,20 @@ public class IOUtil200Test extends TestBase {
     @Test
     public void testAppendLine() throws IOException {
         File testFile = createTempFile("appendLine", ".txt");
-        String initialContent = "Initial line." + IOUtil.LINE_SEPARATOR;
+        String initialContent = "Initial line." + IOUtil.LINE_SEPARATOR_UNIX;
         IOUtil.write(initialContent, StandardCharsets.UTF_8, testFile);
 
         Object objToAppend = "Appended line with Ümlaut €";
         IOUtil.appendLine(objToAppend, StandardCharsets.UTF_8, testFile);
 
-        String expected = initialContent + CommonUtil.toString(objToAppend) + IOUtil.LINE_SEPARATOR;
+        String expected = initialContent + CommonUtil.toString(objToAppend) + IOUtil.LINE_SEPARATOR_UNIX;
         assertEquals(expected, IOUtil.readAllToString(testFile, StandardCharsets.UTF_8));
     }
 
     @Test
     public void testAppendLines() throws IOException {
         File testFile = createTempFile("appendLines", ".txt");
-        String initialContent = "First existing line." + IOUtil.LINE_SEPARATOR;
+        String initialContent = "First existing line." + IOUtil.LINE_SEPARATOR_UNIX;
         IOUtil.write(initialContent, StandardCharsets.UTF_8, testFile);
 
         List<String> linesToAppend = Arrays.asList("Append Line 1", "Append Line 2 with Ümlaut €");
@@ -1058,7 +1059,7 @@ public class IOUtil200Test extends TestBase {
 
         StringBuilder expectedSb = new StringBuilder(initialContent);
         for (String line : linesToAppend) {
-            expectedSb.append(line).append(IOUtil.LINE_SEPARATOR);
+            expectedSb.append(line).append(IOUtil.LINE_SEPARATOR_UNIX);
         }
         assertEquals(expectedSb.toString(), IOUtil.readAllToString(testFile, StandardCharsets.UTF_8));
     }

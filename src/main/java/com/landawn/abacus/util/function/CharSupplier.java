@@ -57,23 +57,4 @@ public interface CharSupplier extends Throwables.CharSupplier<RuntimeException> 
      */
     @Override
     char getAsChar();
-
-    /**
-     * Converts this {@code CharSupplier} to a {@code Throwables.CharSupplier} that can throw a checked exception.
-     * This method provides a way to use this supplier in contexts that require explicit exception handling.
-     *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * CharSupplier supplier = () -> { ... };
-     * var throwableSupplier = supplier.toThrowable();
-     * // Can now be used in contexts that handle checked exceptions
-     * }</pre>
-     *
-     * @param <E> the type of exception that the returned supplier can throw
-     * @return a {@code Throwables.CharSupplier} view of this supplier that can throw exceptions of type {@code E}
-     */
-    default <E extends Throwable> Throwables.CharSupplier<E> toThrowable() {
-        return (Throwables.CharSupplier<E>) this;
-    }
-
 }

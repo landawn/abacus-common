@@ -540,7 +540,7 @@ sealed class BufferedWriter extends java.io.BufferedWriter permits CharacterWrit
      */
     @Override
     public void newLine() throws IOException {
-        write(IOUtil.LINE_SEPARATOR);
+        write(IOUtil.LINE_SEPARATOR_UNIX);
     }
 
     /**

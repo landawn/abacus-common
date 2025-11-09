@@ -6169,7 +6169,7 @@ public final class Sheet<R, C, V> implements Cloneable {
         final boolean isBufferedWriter = output instanceof Writer writer && IOUtil.isBufferedWriter(writer);
         final Writer bw = isBufferedWriter ? (Writer) output : (output instanceof Writer writer ? Objectory.createBufferedWriter((writer)) : null);
         final Appendable appendable = bw != null ? bw : output;
-        final String lineSeparator = Strings.isEmpty(prefix) ? IOUtil.LINE_SEPARATOR : (IOUtil.LINE_SEPARATOR + prefix);
+        final String lineSeparator = Strings.isEmpty(prefix) ? IOUtil.LINE_SEPARATOR_UNIX : (IOUtil.LINE_SEPARATOR_UNIX + prefix);
 
         try {
             if (N.notEmpty(prefix)) {
@@ -6330,7 +6330,7 @@ public final class Sheet<R, C, V> implements Cloneable {
                 appendable.append('+');
             }
 
-            appendable.append(IOUtil.LINE_SEPARATOR);
+            appendable.append(IOUtil.LINE_SEPARATOR_UNIX);
 
             if (bw != null) {
                 bw.flush();

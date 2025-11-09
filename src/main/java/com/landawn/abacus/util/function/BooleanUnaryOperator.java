@@ -90,23 +90,4 @@ public interface BooleanUnaryOperator extends Throwables.BooleanUnaryOperator<Ru
     static BooleanUnaryOperator identity() {
         return t -> t;
     }
-
-    /**
-     * Converts this {@code BooleanUnaryOperator} to a {@code Throwables.BooleanUnaryOperator} that can throw a checked exception.
-     * This method provides a way to use this operator in contexts that require explicit exception handling.
-     *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * BooleanUnaryOperator operator = (...) -> { ... };
-     * var throwableOperator = operator.toThrowable();
-     * // Can now be used in contexts that handle checked exceptions
-     * }</pre>
-     *
-     * @param <E> the type of exception that the returned operator can throw
-     * @return a {@code Throwables.BooleanUnaryOperator} view of this operator that can throw exceptions of type {@code E}
-     */
-    default <E extends Throwable> Throwables.BooleanUnaryOperator<E> toThrowable() {
-        return (Throwables.BooleanUnaryOperator<E>) this;
-    }
-
 }

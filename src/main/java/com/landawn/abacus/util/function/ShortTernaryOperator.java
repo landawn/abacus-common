@@ -55,23 +55,4 @@ public interface ShortTernaryOperator extends Throwables.ShortTernaryOperator<Ru
      */
     @Override
     short applyAsShort(short a, short b, short c);
-
-    /**
-     * Converts this {@code ShortTernaryOperator} to a {@code Throwables.ShortTernaryOperator} that can throw a checked exception.
-     * This method provides a way to use this operator in contexts that require explicit exception handling.
-     *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * ShortTernaryOperator operator = (...) -> { ... };
-     * var throwableOperator = operator.toThrowable();
-     * // Can now be used in contexts that handle checked exceptions
-     * }</pre>
-     *
-     * @param <E> the type of exception that the returned operator can throw
-     * @return a {@code Throwables.ShortTernaryOperator} view of this operator that can throw exceptions of type {@code E}
-     */
-    default <E extends Throwable> Throwables.ShortTernaryOperator<E> toThrowable() {
-        return (Throwables.ShortTernaryOperator<E>) this;
-    }
-
 }

@@ -38,7 +38,6 @@ import com.landawn.abacus.annotation.Type.EnumBy;
  * 
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
- * import java.util.Date;
  *
  * public class User {
  *     @JsonXmlField(name = "user_id")

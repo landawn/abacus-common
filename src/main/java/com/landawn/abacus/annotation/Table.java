@@ -44,9 +44,6 @@ import java.lang.annotation.Target;
  * 
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
- * import java.math.BigDecimal;
- * import java.util.Date;
- * import java.util.Map;
  *
  * @Table(name = "user_accounts", alias = "ua")
  * public class User {

@@ -50,23 +50,4 @@ public interface ToBooleanBiFunction<T, U> {
      * @return the function result as a boolean value
      */
     boolean applyAsBoolean(T t, U u);
-
-    /**
-     * Converts this {@code ToBooleanBiFunction} to a {@code Throwables.ToBooleanBiFunction} that can throw a checked exception.
-     * This method provides a way to use this function in contexts that require explicit exception handling.
-     *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * ToBooleanBiFunction function = (...) -> { ... };
-     * var throwableFunction = function.toThrowable();
-     * // Can now be used in contexts that handle checked exceptions
-     * }</pre>
-     *
-     * @param <E> the type of exception that the returned function can throw
-     * @return a {@code Throwables.ToBooleanBiFunction} view of this function that can throw exceptions of type {@code E}
-     */
-    default <E extends Throwable> Throwables.ToBooleanBiFunction<T, U, E> toThrowable() {
-        return (Throwables.ToBooleanBiFunction<T, U, E>) this;
-    }
-
 }

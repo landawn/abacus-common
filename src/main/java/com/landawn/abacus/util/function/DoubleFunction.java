@@ -112,23 +112,4 @@ public interface DoubleFunction<R> extends Throwables.DoubleFunction<R, RuntimeE
     static DoubleFunction<Double> identity() {
         return t -> t;
     }
-
-    /**
-     * Converts this {@code DoubleFunction} to a {@code Throwables.DoubleFunction} that can throw a checked exception.
-     * This method provides a way to use this function in contexts that require explicit exception handling.
-     *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * DoubleFunction function = (...) -> { ... };
-     * var throwableFunction = function.toThrowable();
-     * // Can now be used in contexts that handle checked exceptions
-     * }</pre>
-     *
-     * @param <E> the type of exception that the returned function can throw
-     * @return a {@code Throwables.DoubleFunction} view of this function that can throw exceptions of type {@code E}
-     */
-    default <E extends Throwable> Throwables.DoubleFunction<R, E> toThrowable() {
-        return (Throwables.DoubleFunction<R, E>) this;
-    }
-
 }

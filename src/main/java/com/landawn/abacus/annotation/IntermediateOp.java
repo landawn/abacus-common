@@ -55,8 +55,6 @@ import java.lang.annotation.Target;
  * 
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
- * import java.util.function.Function;
- * import java.util.function.Predicate;
  *
  * public class StreamProcessor<T> {
  *     @IntermediateOp

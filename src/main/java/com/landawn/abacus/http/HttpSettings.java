@@ -139,7 +139,6 @@ public final class HttpSettings {
      *
      * @param connectionTimeout The connection timeout in milliseconds (0 = infinite)
      * @return This HttpSettings instance for method chaining
-     * @throws java.net.SocketTimeoutException if the timeout expires before connection is established
      */
     public HttpSettings setConnectionTimeout(final long connectionTimeout) {
         this.connectionTimeout = connectionTimeout;

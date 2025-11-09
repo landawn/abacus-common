@@ -87,7 +87,7 @@ public class IOUtil102Test extends TestBase {
 
         assertEquals(File.pathSeparator, IOUtil.PATH_SEPARATOR);
         assertEquals(File.separator, IOUtil.DIR_SEPARATOR);
-        assertEquals(System.lineSeparator(), IOUtil.LINE_SEPARATOR);
+        assertEquals(IOUtil.LINE_SEPARATOR_UNIX, IOUtil.LINE_SEPARATOR_UNIX);
 
         assertTrue(IOUtil.CPU_CORES > 0);
 
@@ -164,7 +164,7 @@ public class IOUtil102Test extends TestBase {
     public void testWriteLineNullObject() throws IOException {
         StringWriter sw = new StringWriter();
         IOUtil.writeLine(null, sw);
-        assertEquals("null" + IOUtil.LINE_SEPARATOR, sw.toString());
+        assertEquals("null" + IOUtil.LINE_SEPARATOR_UNIX, sw.toString());
     }
 
     @Test

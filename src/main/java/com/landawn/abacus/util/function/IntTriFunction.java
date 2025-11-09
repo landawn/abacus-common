@@ -84,23 +84,4 @@ public interface IntTriFunction<R> extends Throwables.IntTriFunction<R, RuntimeE
     default <V> IntTriFunction<V> andThen(final java.util.function.Function<? super R, ? extends V> after) {
         return (a, b, c) -> after.apply(apply(a, b, c));
     }
-
-    /**
-     * Converts this {@code IntTriFunction} to a {@code Throwables.IntTriFunction} that can throw a checked exception.
-     * This method provides a way to use this function in contexts that require explicit exception handling.
-     *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * IntTriFunction function = (...) -> { ... };
-     * var throwableFunction = function.toThrowable();
-     * // Can now be used in contexts that handle checked exceptions
-     * }</pre>
-     *
-     * @param <E> the type of exception that the returned function can throw
-     * @return a {@code Throwables.IntTriFunction} view of this function that can throw exceptions of type {@code E}
-     */
-    default <E extends Throwable> Throwables.IntTriFunction<R, E> toThrowable() {
-        return (Throwables.IntTriFunction<R, E>) this;
-    }
-
 }

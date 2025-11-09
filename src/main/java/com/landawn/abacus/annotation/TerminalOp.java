@@ -55,11 +55,6 @@ import java.lang.annotation.Target;
  *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
- * import java.util.ArrayList;
- * import java.util.Iterator;
- * import java.util.List;
- * import java.util.Optional;
- * import java.util.function.Consumer;
  *
  * public class StreamProcessor<T> {
  *     @TerminalOp

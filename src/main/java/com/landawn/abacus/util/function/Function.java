@@ -71,7 +71,6 @@ public interface Function<T, R> extends Throwables.Function<T, R, RuntimeExcepti
      * @param before the function to apply before this function is applied. Must not be {@code null}.
      * @return a composed {@code Function} that first applies the {@code before}
      *         function and then applies this function
-     * @throws NullPointerException if {@code before} is null
      *
      * @see #andThen(java.util.function.Function)
      */

@@ -25,15 +25,14 @@ import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.exception.UncheckedIOException;
-import com.landawn.abacus.http.HttpHeaders;
 import com.landawn.abacus.http.HttpMethod;
 
 import lombok.Data;
@@ -179,14 +178,14 @@ public class HttpRequest101Test extends TestBase {
         assertNotNull(request);
     }
 
-    @Test
-    public void testHeadersWithHttpHeaders() {
-        HttpHeaders headers = HttpHeaders.create();
-        headers.set("Accept", "application/json");
-
-        HttpRequest request = HttpRequest.url(testUrl).headers(headers);
-        assertNotNull(request);
-    }
+    //    @Test
+    //    public void testHeadersWithHttpHeaders() {
+    //        HttpHeaders headers = HttpHeaders.create();
+    //        headers.set("Accept", "application/json");
+    //
+    //        HttpRequest request = HttpRequest.url(testUrl).headers(headers);
+    //        assertNotNull(request);
+    //    }
 
     @Test
     public void testQueryWithString() {
