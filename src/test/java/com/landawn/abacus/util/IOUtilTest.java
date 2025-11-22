@@ -93,7 +93,7 @@ public class IOUtilTest extends AbstractTest {
         final char[] chars = "abc124黎".toCharArray();
         final byte[] bytes = IOUtil.chars2Bytes(chars);
         final char[] chars2 = IOUtil.bytes2Chars(bytes);
-        assertTrue(CommonUtil.equals(chars, chars2));
+        assertTrue(N.equals(chars, chars2));
     }
 
     @Test
@@ -156,7 +156,7 @@ public class IOUtilTest extends AbstractTest {
 
         final Writer writer = new FileWriter(file);
         for (int i = 0; i < 1000; i++) {
-            IOUtil.write(i + ": " + Strings.uuid() + IOUtil.LINE_SEPARATOR, writer);
+            IOUtil.write(i + ": " + Strings.uuid() + IOUtil.LINE_SEPARATOR_UNIX, writer);
         }
 
         writer.flush();
@@ -637,7 +637,7 @@ public class IOUtilTest extends AbstractTest {
     public void test_readString_2() throws IOException {
 
         List<String> lines = CommonUtil.asList("abc", "1海洋23", "ef😀g😁");
-        String allInString = Strings.join(lines, IOUtil.LINE_SEPARATOR) + IOUtil.LINE_SEPARATOR;
+        String allInString = Strings.join(lines, IOUtil.LINE_SEPARATOR_UNIX) + IOUtil.LINE_SEPARATOR_UNIX;
 
         File file = new File("./test.txt");
 
