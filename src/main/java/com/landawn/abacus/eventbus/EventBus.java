@@ -90,6 +90,7 @@ import com.landawn.abacus.util.ThreadMode;
  *
  * // Unregister when done
  * eventBus.unregister(strSubscriber);
+ * eventBus.unregister(annotatedSubscriber);
  * }</pre>
  * 
  * <p>This class is thread-safe and can be used in multi-threaded environments.</p>

@@ -5671,7 +5671,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
-     * Replaces all elements in the array that satisfy the predicate with the specified value.
+     * Replaces each element in the array that satisfies the given predicate with the specified value.
      * Returns the number of replacements made.
      * Returns 0 if the array is {@code null} or empty.
      * The array is modified in place.
@@ -5686,7 +5686,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param a the array to modify
      * @param predicate the predicate to test each element
      * @param newValue the value to replace matching elements with
-     * @return the number of elements that were replaced
+     * @return the number of replacements made.
      * @see #replaceAll(boolean[], boolean, boolean)
      */
     public static int replaceIf(final boolean[] a, final BooleanPredicate predicate, final boolean newValue) {
@@ -5707,7 +5707,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
-     * Replaces all elements in the array that satisfy the predicate with the specified value.
+     * Replaces each element in the array that satisfies the given predicate with the specified value.
      * Returns the number of replacements made.
      * Returns 0 if the array is {@code null} or empty.
      * The array is modified in place.
@@ -5722,7 +5722,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param a the array to modify
      * @param predicate the predicate to test each element
      * @param newValue the value to replace matching elements with
-     * @return the number of elements that were replaced
+     * @return the number of replacements made.
      * @see #replaceAll(char[], char, char)
      */
     public static int replaceIf(final char[] a, final CharPredicate predicate, final char newValue) {
@@ -5743,7 +5743,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
-     * Replaces all elements in the array that satisfy the predicate with the specified value.
+     * Replaces each element in the array that satisfies the given predicate with the specified value.
      * Returns the number of replacements made.
      * Returns 0 if the array is {@code null} or empty.
      * The array is modified in place.
@@ -5758,7 +5758,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param a the array to modify
      * @param predicate the predicate to test each element
      * @param newValue the value to replace matching elements with
-     * @return the number of elements that were replaced
+     * @return the number of replacements made.
      * @see #replaceAll(byte[], byte, byte)
      */
     public static int replaceIf(final byte[] a, final BytePredicate predicate, final byte newValue) {
@@ -5779,7 +5779,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
-     * Replaces all elements in the array that satisfy the predicate with the specified value.
+     * Replaces each element in the array that satisfies the given predicate with the specified value.
      * Returns the number of replacements made.
      * Returns 0 if the array is {@code null} or empty.
      * The array is modified in place.
@@ -5794,7 +5794,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param a the array to modify
      * @param predicate the predicate to test each element
      * @param newValue the value to replace matching elements with
-     * @return the number of elements that were replaced
+     * @return the number of replacements made.
      * @see #replaceAll(short[], short, short)
      */
     public static int replaceIf(final short[] a, final ShortPredicate predicate, final short newValue) {
@@ -5815,7 +5815,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
-     * Replaces all elements in the array that satisfy the predicate with the specified value.
+     * Replaces each element in the array that satisfies the given predicate with the specified value.
      * Returns the number of replacements made.
      * Returns 0 if the array is {@code null} or empty.
      * The array is modified in place.
@@ -5830,7 +5830,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param a the array to modify
      * @param predicate the predicate to test each element
      * @param newValue the value to replace matching elements with
-     * @return the number of elements that were replaced
+     * @return the number of replacements made.
      * @see #replaceAll(int[], int, int)
      */
     public static int replaceIf(final int[] a, final IntPredicate predicate, final int newValue) {
@@ -5851,7 +5851,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
-     * Replaces all elements in the array that satisfy the predicate with the specified value.
+     * Replaces each element in the array that satisfies the given predicate with the specified value.
      * Returns the number of replacements made.
      * Returns 0 if the array is {@code null} or empty.
      * The array is modified in place.
@@ -5866,7 +5866,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param a the array to modify
      * @param predicate the predicate to test each element
      * @param newValue the value to replace matching elements with
-     * @return the number of elements that were replaced
+     * @return the number of replacements made.
      * @see #replaceAll(long[], long, long)
      */
     public static int replaceIf(final long[] a, final LongPredicate predicate, final long newValue) {
@@ -5887,7 +5887,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
-     * Replaces all elements in the array that satisfy the predicate with the specified value.
+     * Replaces each element in the array that satisfies the given predicate with the specified value.
      * Returns the number of replacements made.
      * Returns 0 if the array is {@code null} or empty.
      * The array is modified in place.
@@ -5902,7 +5902,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param a the array to modify
      * @param predicate the predicate to test each element
      * @param newValue the value to replace matching elements with
-     * @return the number of elements that were replaced
+     * @return the number of replacements made.
      * @see #replaceAll(float[], float, float)
      */
     public static int replaceIf(final float[] a, final FloatPredicate predicate, final float newValue) {
@@ -5923,7 +5923,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
-     * Replaces all elements in the array that satisfy the predicate with the specified value.
+     * Replaces each element in the array that satisfies the given predicate with the specified value.
      * Returns the number of replacements made.
      * Returns 0 if the array is {@code null} or empty.
      * The array is modified in place.
@@ -5938,7 +5938,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param a the array to modify
      * @param predicate the predicate to test each element
      * @param newValue the value to replace matching elements with
-     * @return the number of elements that were replaced
+     * @return the number of replacements made.
      * @see #replaceAll(double[], double, double)
      */
     public static int replaceIf(final double[] a, final DoublePredicate predicate, final double newValue) {
@@ -5959,7 +5959,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
-     * Replaces all elements in the array that satisfy the predicate with the specified value.
+     * Replaces each element in the array that satisfies the given predicate with the specified value.
      * Returns the number of replacements made.
      * Returns 0 if the array is {@code null} or empty.
      * The array is modified in place.
@@ -5975,7 +5975,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param a the array to modify
      * @param predicate the predicate to test each element
      * @param newValue the value to replace matching elements with
-     * @return the number of elements that were replaced
+     * @return the number of replacements made.
      * @see #replaceAll(Object[], Object, Object)
      */
     public static <T> int replaceIf(final T[] a, final Predicate<? super T> predicate, final T newValue) {
@@ -5996,7 +5996,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
-     * Replaces all elements in the list that satisfy the predicate with the specified value.
+     * Replaces each element in the list that satisfies the given predicate with the specified value.
      * Returns the number of replacements made.
      * Returns 0 if the list is {@code null} or empty.
      * The list is modified in place.
@@ -6012,7 +6012,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param list the list to modify
      * @param predicate the predicate to test each element
      * @param newValue the value to replace matching elements with
-     * @return the number of elements that were replaced
+     * @return the number of replacements made.
      * @see #replaceAll(List, Object, Object)
      */
     public static <T> int replaceIf(final List<T> list, final Predicate<? super T> predicate, final T newValue) {
@@ -9840,6 +9840,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
+     * Removes all occurrences of the specified values from the array.
      * Returns a new array with elements copied from the specified array except all occurrences of the specified values.
      * <br />
      * The original array remains unchanged.
@@ -9865,6 +9866,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
+     * Removes all occurrences of the specified values from the array.
      * Returns a new array with elements copied from the specified array except all occurrences of the specified values.
      * <br />
      * The original array remains unchanged.
@@ -9890,6 +9892,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
+     * Removes all occurrences of the specified values from the array.
      * Returns a new array with elements copied from the specified array except all occurrences of the specified values.
      * <br />
      * The original array remains unchanged.
@@ -9915,6 +9918,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
+     * Removes all occurrences of the specified values from the array.
      * Returns a new array with elements copied from the specified array except all occurrences of the specified values.
      * <br />
      * The original array remains unchanged.
@@ -9940,6 +9944,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
+     * Removes all occurrences of the specified values from the array.
      * Returns a new array with elements copied from the specified array except all occurrences of the specified values.
      * <br />
      * The original array remains unchanged.
@@ -9965,6 +9970,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
+     * Removes all occurrences of the specified values from the array.
      * Returns a new array with elements copied from the specified array except all occurrences of the specified values.
      * <br />
      * The original array remains unchanged.
@@ -9990,6 +9996,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
+     * Removes all occurrences of the specified values from the array.
      * Returns a new array with elements copied from the specified array except all occurrences of the specified values.
      * <br />
      * The original array remains unchanged.
@@ -10015,6 +10022,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
+     * Removes all occurrences of the specified values from the array.
      * Returns a new array with elements copied from the specified array except all occurrences of the specified values.
      * <br />
      * The original array remains unchanged.
@@ -10040,6 +10048,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
+     * Removes all occurrences of the specified values from the array.
      * Returns a new array with elements copied from the specified array except all occurrences of the specified values.
      * <br />
      * The original array remains unchanged.
@@ -10071,6 +10080,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
+     * Removes all occurrences of the specified values from the array.
      * Returns a new array with elements copied from the specified array except all occurrences of the specified values.
      * <br />
      * The original array remains unchanged.
@@ -10078,7 +10088,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param <T> the type of elements in the array
      * @param a the array from which the values should be removed.
      * @param valuesToRemove the values to be removed from the array.
-     * @return a new array with the first occurrence of the specified value removed. The input array itself is returned if the specified array is {@code null} or empty.
+     * @return a new array with all occurrences of the specified values removed. The input array itself is returned if the specified array is {@code null} or empty.
      * @see N#difference(int[], int[])
      */
     @MayReturnNull
@@ -10185,7 +10195,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
-     * Returns a new array with elements copied from the specified array except all occurrence of the specified value.
+     * Removes all occurrences of the specified value from the array.
+     * Returns a new array with elements copied from the specified array except all occurrences of the specified value.
      * <br />
      * The original array remains unchanged.
      *
@@ -10213,7 +10224,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
-     * Returns a new array with elements copied from the specified array except all occurrence of the specified value.
+     * Removes all occurrences of the specified value from the array.
+     * Returns a new array with elements copied from the specified array except all occurrences of the specified value.
      * <br />
      * The original array remains unchanged.
      *
@@ -10241,7 +10253,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
-     * Returns a new array with elements copied from the specified array except all occurrence of the specified value.
+     * Removes all occurrences of the specified value from the array.
+     * Returns a new array with elements copied from the specified array except all occurrences of the specified value.
      * <br />
      * The original array remains unchanged.
      *
@@ -10269,7 +10282,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
-     * Returns a new array with elements copied from the specified array except all occurrence of the specified value.
+     * Removes all occurrences of the specified value from the array.
+     * Returns a new array with elements copied from the specified array except all occurrences of the specified value.
      * <br />
      * The original array remains unchanged.
      *
@@ -10297,7 +10311,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
-     * Returns a new array with elements copied from the specified array except all occurrence of the specified value.
+     * Removes all occurrences of the specified value from the array.
+     * Returns a new array with elements copied from the specified array except all occurrences of the specified value.
      * <br />
      * The original array remains unchanged.
      *
@@ -10325,7 +10340,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
-     * Returns a new array with elements copied from the specified array except all occurrence of the specified value.
+     * Removes all occurrences of the specified value from the array.
+     * Returns a new array with elements copied from the specified array except all occurrences of the specified value.
      * <br />
      * The original array remains unchanged.
      *
@@ -10353,7 +10369,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
-     * Returns a new array with elements copied from the specified array except all occurrence of the specified value.
+     * Removes all occurrences of the specified value from the array.
+     * Returns a new array with elements copied from the specified array except all occurrences of the specified value.
      * <br />
      * The original array remains unchanged.
      *
@@ -10381,7 +10398,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
-     * Returns a new array with elements copied from the specified array except all occurrence of the specified value.
+     * Removes all occurrences of the specified value from the array.
+     * Returns a new array with elements copied from the specified array except all occurrences of the specified value.
      * <br />
      * The original array remains unchanged.
      *
@@ -10409,7 +10427,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
-     * Returns a new array with elements copied from the specified array except all occurrence of the specified value.
+     * Removes all occurrences of the specified value from the array.
+     * Returns a new array with elements copied from the specified array except all occurrences of the specified value.
      * <br />
      * The original array remains unchanged.
      *
@@ -10437,7 +10456,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
-     * Returns a new array with elements copied from the specified array except all occurrence of the specified value.
+     * Removes all occurrences of the specified value from the array.
+     * Returns a new array with elements copied from the specified array except all occurrences of the specified value.
      * <br />
      * The original array remains unchanged.
      *
@@ -10555,12 +10575,13 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
-     * Returns a new array with elements from the input array but without any duplicates.
+     * Removes duplicate elements from the array.
+     * Returns a new array with distinct elements.
      * <br />
      * The original array remains unchanged.
      *
      * @param a the array from which duplicates should be removed.
-     * @param isSorted a boolean flag indicating whether the input array is sorted. If {@code true}, the algorithm will be faster
+     * @param isSorted {@code true} if the array is already sorted, {@code false} otherwise. If true, a more efficient algorithm is used.
      * @return a new array with all duplicates removed. An empty array is returned if the specified array is {@code null} or empty.
      */
     public static char[] removeDuplicates(final char[] a, final boolean isSorted) {
@@ -10572,6 +10593,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
+     * Removes duplicate elements from the specified range of the array.
      * Returns a new array with distinct elements within the specified range, preserving the order of first occurrence.
      * <br />
      * The original array remains unchanged.
@@ -10670,12 +10692,13 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
-     * Returns a new array with elements from the input array but without any duplicates.
+     * Removes duplicate elements from the array.
+     * Returns a new array with distinct elements.
      * <br />
      * The original array remains unchanged.
      *
      * @param a the array from which duplicates should be removed.
-     * @param isSorted a boolean flag indicating whether the input array is sorted. If {@code true}, the algorithm will be faster
+     * @param isSorted {@code true} if the array is already sorted, {@code false} otherwise. If true, a more efficient algorithm is used.
      * @return a new array with all duplicates removed. An empty array is returned if the specified array is {@code null} or empty.
      */
     public static byte[] removeDuplicates(final byte[] a, final boolean isSorted) {
@@ -10687,6 +10710,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
+     * Removes duplicate elements from the specified range of the array.
      * Returns a new array with distinct elements within the specified range.
      * <br />
      * The original array remains unchanged.
@@ -10694,7 +10718,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param a the array from which duplicates should be removed.
      * @param fromIndex the initial index of the range to be considered for duplicate removal.
      * @param toIndex the final index of the range to be considered for duplicate removal.
-     * @param isSorted a boolean flag indicating whether the input array within the specified range is sorted. If {@code true}, the algorithm will be faster.
+     * @param isSorted {@code true} if the array is already sorted, {@code false} otherwise. If true, a more efficient algorithm is used.
      * @return a new array with distinct elements within the specified range.
      * @throws IndexOutOfBoundsException if the range is out of the array bounds.
      */
@@ -10761,12 +10785,13 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
-     * Returns a new array with elements from the input array but without any duplicates.
+     * Removes duplicate elements from the array.
+     * Returns a new array with distinct elements.
      * <br />
      * The original array remains unchanged.
      *
      * @param a the array from which duplicates should be removed.
-     * @param isSorted a boolean flag indicating whether the input array is sorted. If {@code true}, the algorithm will be faster
+     * @param isSorted {@code true} if the array is already sorted, {@code false} otherwise. If true, a more efficient algorithm is used.
      * @return a new array with all duplicates removed. An empty array is returned if the specified array is {@code null} or empty.
      */
     public static short[] removeDuplicates(final short[] a, final boolean isSorted) {
@@ -10778,6 +10803,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
+     * Removes duplicate elements from the specified range of the array.
      * Returns a new array with distinct elements within the specified range.
      * <br />
      * The original array remains unchanged.
@@ -10785,7 +10811,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param a the array from which duplicates should be removed.
      * @param fromIndex the initial index of the range to be considered for duplicate removal.
      * @param toIndex the final index of the range to be considered for duplicate removal.
-     * @param isSorted a boolean flag indicating whether the input array within the specified range is sorted. If {@code true}, the algorithm will be faster.
+     * @param isSorted {@code true} if the array is already sorted, {@code false} otherwise. If true, a more efficient algorithm is used.
      * @return a new array with distinct elements within the specified range.
      * @throws IndexOutOfBoundsException if the range is out of the array bounds.
      */
@@ -10852,12 +10878,13 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
-     * Returns a new array with elements from the input array but without any duplicates.
+     * Removes duplicate elements from the array.
+     * Returns a new array with distinct elements.
      * <br />
      * The original array remains unchanged.
      *
      * @param a the array from which duplicates should be removed.
-     * @param isSorted a boolean flag indicating whether the input array is sorted. If {@code true}, the algorithm will be faster
+     * @param isSorted {@code true} if the array is already sorted, {@code false} otherwise. If true, a more efficient algorithm is used.
      * @return a new array with all duplicates removed. An empty array is returned if the specified array is {@code null} or empty.
      */
     public static int[] removeDuplicates(final int[] a, final boolean isSorted) {
@@ -10869,6 +10896,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
+     * Removes duplicate elements from the specified range of the array.
      * Returns a new array with distinct elements within the specified range.
      * <br />
      * The original array remains unchanged.
@@ -10876,7 +10904,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param a the array from which duplicates should be removed.
      * @param fromIndex the initial index of the range to be considered for duplicate removal.
      * @param toIndex the final index of the range to be considered for duplicate removal.
-     * @param isSorted a boolean flag indicating whether the input array within the specified range is sorted. If {@code true}, the algorithm will be faster.
+     * @param isSorted {@code true} if the array is already sorted, {@code false} otherwise. If true, a more efficient algorithm is used.
      * @return a new array with distinct elements within the specified range.
      * @throws IndexOutOfBoundsException if the range is out of the array bounds.
      */
@@ -10943,12 +10971,13 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
-     * Returns a new array with elements from the input array but without any duplicates.
+     * Removes duplicate elements from the array.
+     * Returns a new array with distinct elements.
      * <br />
      * The original array remains unchanged.
      *
      * @param a the array from which duplicates should be removed.
-     * @param isSorted a boolean flag indicating whether the input array is sorted. If {@code true}, the algorithm will be faster
+     * @param isSorted {@code true} if the array is already sorted, {@code false} otherwise. If true, a more efficient algorithm is used.
      * @return a new array with all duplicates removed. An empty array is returned if the specified array is {@code null} or empty.
      */
     public static long[] removeDuplicates(final long[] a, final boolean isSorted) {
@@ -10960,6 +10989,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
+     * Removes duplicate elements from the specified range of the array.
      * Returns a new array with distinct elements within the specified range.
      * <br />
      * The original array remains unchanged.
@@ -10967,7 +10997,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param a the array from which duplicates should be removed.
      * @param fromIndex the initial index of the range to be considered for duplicate removal.
      * @param toIndex the final index of the range to be considered for duplicate removal.
-     * @param isSorted a boolean flag indicating whether the input array within the specified range is sorted. If {@code true}, the algorithm will be faster.
+     * @param isSorted {@code true} if the array is already sorted, {@code false} otherwise. If true, a more efficient algorithm is used.
      * @return a new array with distinct elements within the specified range.
      * @throws IndexOutOfBoundsException if the range is out of the array bounds.
      */
@@ -11034,12 +11064,13 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
-     * Returns a new array with elements from the input array but without any duplicates.
+     * Removes duplicate elements from the array.
+     * Returns a new array with distinct elements.
      * <br />
      * The original array remains unchanged.
      *
      * @param a the array from which duplicates should be removed.
-     * @param isSorted a boolean flag indicating whether the input array is sorted. If {@code true}, the algorithm will be faster
+     * @param isSorted {@code true} if the array is already sorted, {@code false} otherwise. If true, a more efficient algorithm is used.
      * @return a new array with all duplicates removed. An empty array is returned if the specified array is {@code null} or empty.
      */
     public static float[] removeDuplicates(final float[] a, final boolean isSorted) {
@@ -11051,6 +11082,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
+     * Removes duplicate elements from the specified range of the array.
      * Returns a new array with distinct elements within the specified range.
      * <br />
      * The original array remains unchanged.
@@ -11058,7 +11090,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param a the array from which duplicates should be removed.
      * @param fromIndex the initial index of the range to be considered for duplicate removal.
      * @param toIndex the final index of the range to be considered for duplicate removal.
-     * @param isSorted a boolean flag indicating whether the input array within the specified range is sorted. If {@code true}, the algorithm will be faster.
+     * @param isSorted {@code true} if the array is already sorted, {@code false} otherwise. If true, a more efficient algorithm is used.
      * @return a new array with distinct elements within the specified range.
      * @throws IndexOutOfBoundsException if the range is out of the array bounds.
      */
@@ -11126,12 +11158,13 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
-     * Returns a new array with elements from the input array but without any duplicates.
+     * Removes duplicate elements from the array.
+     * Returns a new array with distinct elements.
      * <br />
      * The original array remains unchanged.
      *
      * @param a the array from which duplicates should be removed.
-     * @param isSorted a boolean flag indicating whether the input array is sorted. If {@code true}, the algorithm will be faster
+     * @param isSorted {@code true} if the array is already sorted, {@code false} otherwise. If true, a more efficient algorithm is used.
      * @return a new array with all duplicates removed. An empty array is returned if the specified array is {@code null} or empty.
      */
     public static double[] removeDuplicates(final double[] a, final boolean isSorted) {
@@ -11143,6 +11176,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
+     * Removes duplicate elements from the specified range of the array.
      * Returns a new array with distinct elements within the specified range.
      * <br />
      * The original array remains unchanged.
@@ -11150,7 +11184,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param a the array from which duplicates should be removed.
      * @param fromIndex the initial index of the range to be considered for duplicate removal.
      * @param toIndex the final index of the range to be considered for duplicate removal.
-     * @param isSorted a boolean flag indicating whether the input array within the specified range is sorted. If {@code true}, the algorithm will be faster.
+     * @param isSorted {@code true} if the array is already sorted, {@code false} otherwise. If true, a more efficient algorithm is used.
      * @return a new array with distinct elements within the specified range.
      * @throws IndexOutOfBoundsException if the range is out of the array bounds.
      */
@@ -11216,12 +11250,13 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
-     * Returns a new array with elements from the input array but without any duplicates.
+     * Removes duplicate elements from the array.
+     * Returns a new array with distinct elements.
      * <br />
      * The original array remains unchanged.
      *
      * @param a the array from which duplicates should be removed.
-     * @param isSorted a boolean flag indicating whether the input array is sorted. If {@code true}, the algorithm will be faster
+     * @param isSorted {@code true} if the array is already sorted, {@code false} otherwise. If true, a more efficient algorithm is used.
      * @return a new array with all duplicates removed. An empty array is returned if the specified array is {@code null} or empty.
      */
     public static String[] removeDuplicates(final String[] a, final boolean isSorted) {
@@ -11233,6 +11268,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
+     * Removes duplicate elements from the specified range of the array.
      * Returns a new array with distinct elements within the specified range.
      * <br />
      * The original array remains unchanged.
@@ -11240,7 +11276,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param a the array from which duplicates should be removed.
      * @param fromIndex the initial index of the range to be considered for duplicate removal.
      * @param toIndex the final index of the range to be considered for duplicate removal.
-     * @param isSorted a boolean flag indicating whether the input array within the specified range is sorted. If {@code true}, the algorithm will be faster.
+     * @param isSorted {@code true} if the array is already sorted, {@code false} otherwise. If true, a more efficient algorithm is used.
      * @return a new array with distinct elements within the specified range.
      * @throws IndexOutOfBoundsException if the range is out of the array bounds.
      */
@@ -11308,13 +11344,14 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
-     * Returns a new array with elements from the input array but without any duplicates.
+     * Removes duplicate elements from the array.
+     * Returns a new array with distinct elements.
      * <br />
      * The original array remains unchanged.
      *
      * @param <T> the type of elements in the array
      * @param a the array from which duplicates should be removed.
-     * @param isSorted a boolean flag indicating whether the input array is sorted. If {@code true}, the algorithm will be faster
+     * @param isSorted {@code true} if the array is already sorted, {@code false} otherwise. If true, a more efficient algorithm is used.
      * @return a new array with all duplicates removed. The input array itself is returned if the specified array is {@code null} or empty.
      */
     public static <T> T[] removeDuplicates(final T[] a, final boolean isSorted) {
@@ -11326,6 +11363,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
+     * Removes duplicate elements from the specified range of the array.
      * Returns a new array with distinct elements within the specified range.
      * <br />
      * The original array remains unchanged.
@@ -11334,7 +11372,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param a the array from which duplicates should be removed.
      * @param fromIndex the initial index of the range to be considered for duplicate removal.
      * @param toIndex the final index of the range to be considered for duplicate removal.
-     * @param isSorted a boolean flag indicating whether the input array within the specified range is sorted. If {@code true}, the algorithm will be faster.
+     * @param isSorted {@code true} if the array is already sorted, {@code false} otherwise. If true, a more efficient algorithm is used.
      * @return a new array with distinct elements within the specified range.
      * @throws IndexOutOfBoundsException if the range is out of the array bounds.
      */
@@ -13618,6 +13656,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     /**
      * Returns the sum of all elements in the array.
      * Returns 0 if the array is {@code null} or empty.
+     * The result may overflow; for larger sums, use {@link #sumToLong(int...)}.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -13642,6 +13681,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     /**
      * Returns the sum of elements within the specified range of the int array.
      * Returns 0 if the array is {@code null} or empty.
+     * The result may overflow; for larger sums, use {@link #sumToLong(int[], int, int)}.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -18035,7 +18075,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
-     * Returns the largest value within the specified range of the float array.
+     * Returns the largest value in the specified range of the float array.
      * NaN values are skipped; if all values in the range are NaN, returns NaN.
      *
      * <p><b>Usage Examples:</b></p>
@@ -18047,7 +18087,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param a the array of float values, must not be {@code null} or empty
      * @param fromIndex the starting index (inclusive) of the range
      * @param toIndex the ending index (exclusive) of the range
-     * @return the largest value within the specified range; NaN if all values in the range are NaN
+     * @return the largest value in the specified range; NaN if all values in the range are NaN
      * @throws IllegalArgumentException if the array is {@code null} or empty, or if {@code toIndex - fromIndex < 1}
      * @see #max(float...)
      * @see #min(float[], int, int)
@@ -18102,7 +18142,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
-     * Returns the largest value within the specified range of the double array.
+     * Returns the largest value in the specified range of the double array.
      * NaN values are skipped; if all values in the range are NaN, returns NaN.
      *
      * <p><b>Usage Examples:</b></p>
@@ -18114,7 +18154,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param a the array of double values, must not be {@code null} or empty
      * @param fromIndex the starting index (inclusive) of the range
      * @param toIndex the ending index (exclusive) of the range
-     * @return the largest value within the specified range; NaN if all values in the range are NaN
+     * @return the largest value in the specified range; NaN if all values in the range are NaN
      * @throws IllegalArgumentException if the array is {@code null} or empty, or if {@code toIndex - fromIndex < 1}
      * @see #max(double...)
      * @see #min(double[], int, int)
@@ -25933,9 +25973,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
-     * Returns a new list containing elements starting from the first element where the predicate returns {@code false}.
-     * Returns an empty list if the array is {@code null} or empty.
-     * Skips all leading elements while the predicate returns {@code true}.
+     * Returns a new list containing the remaining elements of the array after dropping the longest prefix of elements that satisfy the predicate.
+     * Returns an empty list if the array is {@code null} or empty, or if all elements match the predicate.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -25972,9 +26011,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
-     * Returns a new list containing elements starting from the first element where the predicate returns {@code false}.
-     * Returns an empty list if the iterable is {@code null} or empty.
-     * Skips all leading elements while the predicate returns {@code true}.
+     * Returns a new list containing the remaining elements of the iterable after dropping the longest prefix of elements that satisfy the predicate.
+     * Returns an empty list if the iterable is {@code null} or empty, or if all elements match the predicate.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -25999,9 +26037,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
-     * Returns a new list containing elements starting from the first element where the predicate returns {@code false}.
-     * Returns an empty list if the iterator is {@code null} or has no elements.
-     * Skips all leading elements while the predicate returns {@code true}.
+     * Returns a new list containing the remaining elements of the iterator after dropping the longest prefix of elements that satisfy the predicate.
+     * Returns an empty list if the iterator is {@code null} or has no elements, or if all elements match the predicate.
      * The iterator will be fully consumed by this operation.
      *
      * <p><b>Usage Examples:</b></p>
@@ -37578,7 +37615,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
-     * Prints a formatted string to the standard output stream (System.out) followed by a newline.
+     * Prints a formatted string to the standard output stream (System.out) followed by a newline using the specified format string and arguments.
      * This method provides convenient formatted printing using printf-style format strings,
      * combining the functionality of {@link String#format(String, Object...)} with automatic newline addition.
      *

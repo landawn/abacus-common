@@ -44,7 +44,7 @@ import com.landawn.abacus.exception.ParseException;
  * 
  * // Custom separator
  * CSVParser tabParser = new CSVParser('\t');
- * String[] fields = tabParser.parseLineToArray("John\tDoe\t30");
+ * String[] tabFields = tabParser.parseLineToArray("John\tDoe\t30");
  * // Result: ["John", "Doe", "30"]
  * 
  * // Parse with strict quotes (ignores characters outside quotes)

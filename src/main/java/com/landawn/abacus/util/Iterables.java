@@ -758,6 +758,12 @@ public final class Iterables {
      * Returns the minimum value from the provided array of characters.
      * If the array is {@code null} or empty, it returns an empty {@code OptionalChar}.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * char[] array = {'a', 'b', 'c'};
+     * OptionalChar result = Iterables.min(array); // OptionalChar['a']
+     * }</pre>
+     *
      * @param a the array of characters to evaluate
      * @return an {@code OptionalChar} containing the minimum value if the array is not {@code null} or empty, otherwise an empty {@code OptionalChar}
      * @see N#min(char...)
@@ -769,6 +775,12 @@ public final class Iterables {
     /**
      * Returns the minimum value from the provided array of bytes.
      * If the array is {@code null} or empty, it returns an empty {@code OptionalByte}.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * byte[] array = {1, 2, 3};
+     * OptionalByte result = Iterables.min(array); // OptionalByte[1]
+     * }</pre>
      *
      * @param a the array of bytes to evaluate
      * @return an {@code OptionalByte} containing the minimum value if the array is not {@code null} or empty, otherwise an empty {@code OptionalByte}
@@ -782,6 +794,12 @@ public final class Iterables {
      * Returns the minimum value from the provided array of shorts.
      * If the array is {@code null} or empty, it returns an empty {@code OptionalShort}.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * short[] array = {1, 2, 3};
+     * OptionalShort result = Iterables.min(array); // OptionalShort[1]
+     * }</pre>
+     *
      * @param a the array of shorts to evaluate
      * @return an {@code OptionalShort} containing the minimum value if the array is not {@code null} or empty, otherwise an empty {@code OptionalShort}
      * @see N#min(short...)
@@ -794,8 +812,14 @@ public final class Iterables {
      * Returns the minimum value from the provided array of integers.
      * If the array is {@code null} or empty, it returns an empty {@code OptionalInt}.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * int[] array = {1, 2, 3};
+     * OptionalInt result = Iterables.min(array); // OptionalInt[1]
+     * }</pre>
+     *
      * @param a the array of integers to evaluate
-     * @return an  {@code OptionalInt} containing the minimum value if the array is not {@code null} or empty, otherwise an empty {@code OptionalInt}
+     * @return an {@code OptionalInt} containing the minimum value if the array is not {@code null} or empty, otherwise an empty {@code OptionalInt}
      * @see N#min(int...)
      */
     public static OptionalInt min(final int... a) {
@@ -805,6 +829,12 @@ public final class Iterables {
     /**
      * Returns the minimum value from the provided array of longs.
      * If the array is {@code null} or empty, it returns an empty {@code OptionalLong}.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * long[] array = {1L, 2L, 3L};
+     * OptionalLong result = Iterables.min(array); // OptionalLong[1]
+     * }</pre>
      *
      * @param a the array of longs to evaluate
      * @return an {@code OptionalLong} containing the minimum value if the array is not {@code null} or empty, otherwise an empty {@code OptionalLong}
@@ -818,6 +848,12 @@ public final class Iterables {
      * Returns the minimum value from the provided array of floats.
      * If the array is {@code null} or empty, it returns an empty {@code OptionalFloat}.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * float[] array = {1.0f, 2.0f, 3.0f};
+     * OptionalFloat result = Iterables.min(array); // OptionalFloat[1.0]
+     * }</pre>
+     *
      * @param a the array of floats to evaluate
      * @return an {@code OptionalFloat} containing the minimum value if the array is not {@code null} or empty, otherwise an empty {@code OptionalFloat}
      * @see N#min(float...)
@@ -829,6 +865,12 @@ public final class Iterables {
     /**
      * Returns the minimum value from the provided array of doubles.
      * If the array is {@code null} or empty, it returns an empty {@code OptionalDouble}.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * double[] array = {1.0, 2.0, 3.0};
+     * OptionalDouble result = Iterables.min(array); // OptionalDouble[1.0]
+     * }</pre>
      *
      * @param a the array of doubles to evaluate
      * @return an {@code OptionalDouble} containing the minimum value if the array is not {@code null} or empty, otherwise an empty {@code OptionalDouble}
@@ -843,6 +885,12 @@ public final class Iterables {
      * Null values are considered to be maximum value.
      * If the array is {@code null} or empty, it returns an empty {@code Nullable}.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * String[] array = {"b", "a", "c"};
+     * Nullable<String> result = Iterables.min(array); // Nullable["a"]
+     * }</pre>
+     *
      * @param <T> the type of the elements
      * @param a the array of elements to evaluate
      * @return a {@code Nullable} containing the minimum value if the array is not {@code null} or empty, otherwise an empty {@code Nullable}
@@ -855,6 +903,12 @@ public final class Iterables {
     /**
      * Returns the minimum value from the provided array of elements according to the provided comparator.
      * If the array is {@code null} or empty, it returns an empty {@code Nullable}.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * String[] array = {"b", "a", "c"};
+     * Nullable<String> result = Iterables.min(array, Comparator.reverseOrder()); // Nullable["c"]
+     * }</pre>
      *
      * @param <T> the type of the elements
      * @param a the array of elements to evaluate
@@ -871,6 +925,12 @@ public final class Iterables {
      * Null values are considered to be maximum value.
      * If the iterable is {@code null} or empty, it returns an empty {@code Nullable}.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * List<String> list = Arrays.asList("b", "a", "c");
+     * Nullable<String> result = Iterables.min(list); // Nullable["a"]
+     * }</pre>
+     *
      * @param <T> the type of the elements
      * @param c the iterable of elements to evaluate
      * @return a {@code Nullable} containing the minimum value if the iterable is not {@code null} or empty, otherwise an empty {@code Nullable}
@@ -883,6 +943,12 @@ public final class Iterables {
     /**
      * Returns the minimum value from the provided iterable of elements according to the provided comparator.
      * If the iterable is {@code null} or empty, it returns an empty {@code Nullable}.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * List<String> list = Arrays.asList("b", "a", "c");
+     * Nullable<String> result = Iterables.min(list, Comparator.reverseOrder()); // Nullable["c"]
+     * }</pre>
      *
      * @param <T> the type of the elements
      * @param c the iterable of elements to evaluate
@@ -899,6 +965,12 @@ public final class Iterables {
      * Null values are considered to be maximum value.
      * If the iterator is {@code null} or empty, it returns an empty {@code Nullable}.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Iterator<String> iter = Arrays.asList("b", "a", "c").iterator();
+     * Nullable<String> result = Iterables.min(iter); // Nullable["a"]
+     * }</pre>
+     *
      * @param <T> the type of the elements
      * @param iter the iterator of elements to evaluate
      * @return a {@code Nullable} containing the minimum value if the iterator is not {@code null} or empty, otherwise an empty {@code Nullable}
@@ -911,6 +983,12 @@ public final class Iterables {
     /**
      * Returns the minimum value from the provided iterator of elements according to the provided comparator.
      * If the iterator is {@code null} or empty, it returns an empty {@code Nullable}.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Iterator<String> iter = Arrays.asList("b", "a", "c").iterator();
+     * Nullable<String> result = Iterables.min(iter, Comparator.reverseOrder()); // Nullable["c"]
+     * }</pre>
      *
      * @param <T> the type of the elements
      * @param iter the iterator of elements to evaluate
@@ -949,6 +1027,12 @@ public final class Iterables {
      * Null values are considered to be maximum value.
      * If the array is {@code null} or empty, it returns an empty {@code Nullable}.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * String[] array = {"apple", "banana", "pear"};
+     * Nullable<String> result = Iterables.minBy(array, String::length); // Nullable["pear"]
+     * }</pre>
+     *
      * @param <T> the type of the elements
      * @param a the array of elements to evaluate
      * @param keyExtractor the function to transform the elements into a comparable type for comparison
@@ -964,6 +1048,12 @@ public final class Iterables {
      * Returns the minimum value from the provided iterable of elements according to the key extracted by the {@code keyExtractor} function.
      * Null values are considered to be maximum value.
      * If the iterable is {@code null} or empty, it returns an empty {@code Nullable}.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * List<String> list = Arrays.asList("apple", "banana", "pear");
+     * Nullable<String> result = Iterables.minBy(list, String::length); // Nullable["pear"]
+     * }</pre>
      *
      * @param <T> the type of the elements
      * @param c the iterable of elements to evaluate
@@ -981,6 +1071,12 @@ public final class Iterables {
      * Null values are considered to be maximum value.
      * If the iterator is {@code null} or empty, it returns an empty {@code Nullable}.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Iterator<String> iter = Arrays.asList("apple", "banana", "pear").iterator();
+     * Nullable<String> result = Iterables.minBy(iter, String::length); // Nullable["pear"]
+     * }</pre>
+     *
      * @param <T> the type of the elements
      * @param iter the iterator of elements to evaluate
      * @param keyExtractor the function to transform the elements into a comparable type for comparison
@@ -995,6 +1091,12 @@ public final class Iterables {
     /**
      * Returns the minimum integer value extracted from the elements in the provided array by the input {@code valueExtractor} function.
      * If the array is {@code null} or empty, it returns an empty {@code OptionalInt}.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * String[] array = {"a", "bb", "ccc"};
+     * OptionalInt result = Iterables.minInt(array, String::length); // OptionalInt[1]
+     * }</pre>
      *
      * @param <T> the type of the elements in the array
      * @param a the array of elements to evaluate
@@ -1026,6 +1128,12 @@ public final class Iterables {
      * Returns the minimum integer value extracted from the elements in the provided iterable by the input {@code valueExtractor} function.
      * If the iterable is {@code null} or empty, it returns an empty {@code OptionalInt}.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * List<String> list = Arrays.asList("a", "bb", "ccc");
+     * OptionalInt result = Iterables.minInt(list, String::length); // OptionalInt[1]
+     * }</pre>
+     *
      * @param <T> the type of the elements in the iterable
      * @param c the iterable of elements to evaluate
      * @param valueExtractor the function to extract an integer value from each element
@@ -1044,6 +1152,12 @@ public final class Iterables {
     /**
      * Returns the minimum integer value extracted from the elements in the provided iterator by the input {@code valueExtractor} function.
      * If the iterator is {@code null} or empty, it returns an empty {@code OptionalInt}.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Iterator<String> iter = Arrays.asList("a", "bb", "ccc").iterator();
+     * OptionalInt result = Iterables.minInt(iter, String::length); // OptionalInt[1]
+     * }</pre>
      *
      * @param <T> the type of the elements in the iterator
      * @param iter the iterator of elements to evaluate
@@ -1075,6 +1189,12 @@ public final class Iterables {
      * Returns the minimum long value extracted from the elements in the provided array by the input {@code valueExtractor} function.
      * If the array is {@code null} or empty, it returns an empty {@code OptionalLong}.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * String[] array = {"a", "bb", "ccc"};
+     * OptionalLong result = Iterables.minLong(array, String::length); // OptionalLong[1]
+     * }</pre>
+     *
      * @param <T> the type of the elements in the array
      * @param a the array of elements to evaluate
      * @param valueExtractor the function to extract a long value from each element
@@ -1105,6 +1225,12 @@ public final class Iterables {
      * Returns the minimum long value extracted from the elements in the provided iterable by the input {@code valueExtractor} function.
      * If the iterable is {@code null} or empty, it returns an empty {@code OptionalLong}.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * List<String> list = Arrays.asList("a", "bb", "ccc");
+     * OptionalLong result = Iterables.minLong(list, String::length); // OptionalLong[1]
+     * }</pre>
+     *
      * @param <T> the type of the elements in the iterable
      * @param c the iterable of elements to evaluate
      * @param valueExtractor the function to extract a long value from each element
@@ -1123,6 +1249,12 @@ public final class Iterables {
     /**
      * Returns the minimum long value extracted from the elements in the provided iterator by the input {@code valueExtractor} function.
      * If the iterator is {@code null} or empty, it returns an empty {@code OptionalLong}.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Iterator<String> iter = Arrays.asList("a", "bb", "ccc").iterator();
+     * OptionalLong result = Iterables.minLong(iter, String::length); // OptionalLong[1]
+     * }</pre>
      *
      * @param <T> the type of the elements in the iterator
      * @param iter the iterator of elements to evaluate
@@ -1154,6 +1286,12 @@ public final class Iterables {
      * Returns the minimum double value extracted from the elements in the provided array by the input {@code valueExtractor} function.
      * If the array is {@code null} or empty, it returns an empty {@code OptionalDouble}.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * String[] array = {"a", "bb", "ccc"};
+     * OptionalDouble result = Iterables.minDouble(array, s -> (double) s.length()); // OptionalDouble[1.0]
+     * }</pre>
+     *
      * @param <T> the type of the elements in the array
      * @param a the array of elements to evaluate
      * @param valueExtractor the function to extract a double value from each element
@@ -1184,6 +1322,12 @@ public final class Iterables {
      * Returns the minimum double value extracted from the elements in the provided iterable by the input {@code valueExtractor} function.
      * If the iterable is {@code null} or empty, it returns an empty {@code OptionalDouble}.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * List<String> list = Arrays.asList("a", "bb", "ccc");
+     * OptionalDouble result = Iterables.minDouble(list, s -> (double) s.length()); // OptionalDouble[1.0]
+     * }</pre>
+     *
      * @param <T> the type of the elements in the iterable
      * @param c the iterable of elements to evaluate
      * @param valueExtractor the function to extract a double value from each element
@@ -1202,6 +1346,12 @@ public final class Iterables {
     /**
      * Returns the minimum double value extracted from the elements in the provided iterator by the input {@code valueExtractor} function.
      * If the iterator is {@code null} or empty, it returns an empty {@code OptionalDouble}.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Iterator<String> iter = Arrays.asList("a", "bb", "ccc").iterator();
+     * OptionalDouble result = Iterables.minDouble(iter, s -> (double) s.length()); // OptionalDouble[1.0]
+     * }</pre>
      *
      * @param <T> the type of the elements in the iterator
      * @param iter the iterator of elements to evaluate
@@ -1233,6 +1383,12 @@ public final class Iterables {
      * Returns the maximum value from the provided array of characters.
      * If the array is {@code null} or empty, it returns an empty {@code OptionalChar}.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * char[] array = {'a', 'b', 'c'};
+     * OptionalChar result = Iterables.max(array); // OptionalChar['c']
+     * }</pre>
+     *
      * @param a the array of characters to evaluate
      * @return an {@code OptionalChar} containing the maximum value if the array is not {@code null} or empty, otherwise an empty {@code OptionalChar}
      * @see N#max(char...)
@@ -1244,6 +1400,12 @@ public final class Iterables {
     /**
      * Returns the maximum value from the provided array of bytes.
      * If the array is {@code null} or empty, it returns an empty {@code OptionalByte}.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * byte[] array = {1, 2, 3};
+     * OptionalByte result = Iterables.max(array); // OptionalByte[3]
+     * }</pre>
      *
      * @param a the array of bytes to evaluate
      * @return an {@code OptionalByte} containing the maximum value if the array is not {@code null} or empty, otherwise an empty {@code OptionalByte}
@@ -1257,6 +1419,12 @@ public final class Iterables {
      * Returns the maximum value from the provided array of shorts.
      * If the array is {@code null} or empty, it returns an empty {@code OptionalShort}.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * short[] array = {1, 2, 3};
+     * OptionalShort result = Iterables.max(array); // OptionalShort[3]
+     * }</pre>
+     *
      * @param a the array of shorts to evaluate
      * @return an {@code OptionalShort} containing the maximum value if the array is not {@code null} or empty, otherwise an empty {@code OptionalShort}
      * @see N#max(short...)
@@ -1268,6 +1436,12 @@ public final class Iterables {
     /**
      * Returns the maximum value from the provided array of integers.
      * If the array is {@code null} or empty, it returns an empty {@code OptionalInt}.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * int[] array = {1, 2, 3};
+     * OptionalInt result = Iterables.max(array); // OptionalInt[3]
+     * }</pre>
      *
      * @param a the array of integers to evaluate
      * @return an  {@code OptionalInt} containing the maximum value if the array is not {@code null} or empty, otherwise an empty {@code OptionalInt}
@@ -1281,6 +1455,12 @@ public final class Iterables {
      * Returns the maximum value from the provided array of longs.
      * If the array is {@code null} or empty, it returns an empty {@code OptionalLong}.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * long[] array = {1L, 2L, 3L};
+     * OptionalLong result = Iterables.max(array); // OptionalLong[3]
+     * }</pre>
+     *
      * @param a the array of longs to evaluate
      * @return an {@code OptionalLong} containing the maximum value if the array is not {@code null} or empty, otherwise an empty {@code OptionalLong}
      * @see N#max(long...)
@@ -1293,6 +1473,12 @@ public final class Iterables {
      * Returns the maximum value from the provided array of floats.
      * If the array is {@code null} or empty, it returns an empty {@code OptionalFloat}.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * float[] array = {1.0f, 2.0f, 3.0f};
+     * OptionalFloat result = Iterables.max(array); // OptionalFloat[3.0]
+     * }</pre>
+     *
      * @param a the array of floats to evaluate
      * @return an {@code OptionalFloat} containing the maximum value if the array is not {@code null} or empty, otherwise an empty {@code OptionalFloat}
      * @see N#max(float...)
@@ -1304,6 +1490,12 @@ public final class Iterables {
     /**
      * Returns the maximum value from the provided array of doubles.
      * If the array is {@code null} or empty, it returns an empty {@code OptionalDouble}.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * double[] array = {1.0, 2.0, 3.0};
+     * OptionalDouble result = Iterables.max(array); // OptionalDouble[3.0]
+     * }</pre>
      *
      * @param a the array of doubles to evaluate
      * @return an {@code OptionalDouble} containing the maximum value if the array is not {@code null} or empty, otherwise an empty {@code OptionalDouble}
@@ -1318,6 +1510,12 @@ public final class Iterables {
      * Null values are considered to be minimum value.
      * If the array is {@code null} or empty, it returns an empty {@code Nullable}.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * String[] array = {"a", "c", "b"};
+     * Nullable<String> result = Iterables.max(array); // Nullable["c"]
+     * }</pre>
+     *
      * @param <T> the type of the elements
      * @param a the array of elements to evaluate
      * @return a {@code Nullable} containing the maximum value if the array is not {@code null} or empty, otherwise an empty {@code Nullable}
@@ -1330,6 +1528,12 @@ public final class Iterables {
     /**
      * Returns the maximum value from the provided array of elements according to the provided comparator.
      * If the array is {@code null} or empty, it returns an empty {@code Nullable}.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * String[] array = {"a", "c", "b"};
+     * Nullable<String> result = Iterables.max(array, Comparator.reverseOrder()); // Nullable["a"]
+     * }</pre>
      *
      * @param <T> the type of the elements
      * @param a the array of elements to evaluate
@@ -1346,6 +1550,12 @@ public final class Iterables {
      * Null values are considered to be minimum value.
      * If the iterable is {@code null} or empty, it returns an empty {@code Nullable}.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * List<String> list = Arrays.asList("a", "c", "b");
+     * Nullable<String> result = Iterables.max(list); // Nullable["c"]
+     * }</pre>
+     *
      * @param <T> the type of the elements
      * @param c the iterable of elements to evaluate
      * @return a {@code Nullable} containing the maximum value if the iterable is not {@code null} or empty, otherwise an empty {@code Nullable}
@@ -1358,6 +1568,12 @@ public final class Iterables {
     /**
      * Returns the maximum value from the provided iterable of elements according to the provided comparator.
      * If the iterable is {@code null} or empty, it returns an empty {@code Nullable}.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * List<String> list = Arrays.asList("a", "c", "b");
+     * Nullable<String> result = Iterables.max(list, Comparator.reverseOrder()); // Nullable["a"]
+     * }</pre>
      *
      * @param <T> the type of the elements
      * @param c the iterable of elements to evaluate
@@ -1374,6 +1590,12 @@ public final class Iterables {
      * Null values are considered to be minimum value.
      * If the iterator is {@code null} or empty, it returns an empty {@code Nullable}.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Iterator<String> iter = Arrays.asList("a", "c", "b").iterator();
+     * Nullable<String> result = Iterables.max(iter); // Nullable["c"]
+     * }</pre>
+     *
      * @param <T> the type of the elements
      * @param iter the iterator of elements to evaluate
      * @return a {@code Nullable} containing the maximum value if the iterator is not {@code null} or empty, otherwise an empty {@code Nullable}
@@ -1386,6 +1608,12 @@ public final class Iterables {
     /**
      * Returns the maximum value from the provided iterator of elements according to the provided comparator.
      * If the iterator is {@code null} or empty, it returns an empty {@code Nullable}.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Iterator<String> iter = Arrays.asList("a", "c", "b").iterator();
+     * Nullable<String> result = Iterables.max(iter, Comparator.reverseOrder()); // Nullable["a"]
+     * }</pre>
      *
      * @param <T> the type of the elements
      * @param iter the iterator of elements to evaluate
@@ -1424,6 +1652,12 @@ public final class Iterables {
      * Null values are considered to be minimum value.
      * If the array is {@code null} or empty, it returns an empty {@code Nullable}.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * String[] array = {"apple", "banana", "pear"};
+     * Nullable<String> result = Iterables.maxBy(array, String::length); // Nullable["banana"]
+     * }</pre>
+     *
      * @param <T> the type of the elements
      * @param a the array of elements to evaluate
      * @param keyExtractor the function to transform the elements into a comparable type for comparison
@@ -1439,6 +1673,12 @@ public final class Iterables {
      * Returns the maximum value from the provided iterable of elements according to the key extracted by the {@code keyExtractor} function.
      * Null values are considered to be minimum value.
      * If the iterable is {@code null} or empty, it returns an empty {@code Nullable}.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * List<String> list = Arrays.asList("apple", "banana", "pear");
+     * Nullable<String> result = Iterables.maxBy(list, String::length); // Nullable["banana"]
+     * }</pre>
      *
      * @param <T> the type of the elements
      * @param c the iterable of elements to evaluate
@@ -1456,6 +1696,12 @@ public final class Iterables {
      * Null values are considered to be minimum value.
      * If the iterator is {@code null} or empty, it returns an empty {@code Nullable}.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Iterator<String> iter = Arrays.asList("apple", "banana", "pear").iterator();
+     * Nullable<String> result = Iterables.maxBy(iter, String::length); // Nullable["banana"]
+     * }</pre>
+     *
      * @param <T> the type of the elements
      * @param iter the iterator of elements to evaluate
      * @param keyExtractor the function to transform the elements into a comparable type for comparison
@@ -1470,6 +1716,12 @@ public final class Iterables {
     /**
      * Returns the maximum integer value extracted from the elements in the provided array by the input {@code valueExtractor} function.
      * If the array is {@code null} or empty, it returns an empty {@code OptionalInt}.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * String[] array = {"a", "bb", "ccc"};
+     * OptionalInt result = Iterables.maxInt(array, String::length); // OptionalInt[3]
+     * }</pre>
      *
      * @param <T> the type of the elements in the array
      * @param a the array of elements to evaluate
@@ -1501,6 +1753,12 @@ public final class Iterables {
      * Returns the maximum integer value extracted from the elements in the provided iterable by the input {@code valueExtractor} function.
      * If the iterable is {@code null} or empty, it returns an empty {@code OptionalInt}.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * List<String> list = Arrays.asList("a", "bb", "ccc");
+     * OptionalInt result = Iterables.maxInt(list, String::length); // OptionalInt[3]
+     * }</pre>
+     *
      * @param <T> the type of the elements in the iterable
      * @param c the iterable of elements to evaluate
      * @param valueExtractor the function to extract an integer value from each element
@@ -1519,6 +1777,12 @@ public final class Iterables {
     /**
      * Returns the maximum integer value extracted from the elements in the provided iterator by the input {@code valueExtractor} function.
      * If the iterator is {@code null} or empty, it returns an empty {@code OptionalInt}.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Iterator<String> iter = Arrays.asList("a", "bb", "ccc").iterator();
+     * OptionalInt result = Iterables.maxInt(iter, String::length); // OptionalInt[3]
+     * }</pre>
      *
      * @param <T> the type of the elements in the iterator
      * @param iter the iterator of elements to evaluate
@@ -1550,6 +1814,12 @@ public final class Iterables {
      * Returns the maximum long value extracted from the elements in the provided array by the input {@code valueExtractor} function.
      * If the array is {@code null} or empty, it returns an empty {@code OptionalLong}.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * String[] array = {"a", "bb", "ccc"};
+     * OptionalLong result = Iterables.maxLong(array, String::length); // OptionalLong[3]
+     * }</pre>
+     *
      * @param <T> the type of the elements in the array
      * @param a the array of elements to evaluate
      * @param valueExtractor the function to extract a long value from each element
@@ -1580,6 +1850,12 @@ public final class Iterables {
      * Returns the maximum long value extracted from the elements in the provided iterable by the input {@code valueExtractor} function.
      * If the iterable is {@code null} or empty, it returns an empty {@code OptionalLong}.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * List<String> list = Arrays.asList("a", "bb", "ccc");
+     * OptionalLong result = Iterables.maxLong(list, String::length); // OptionalLong[3]
+     * }</pre>
+     *
      * @param <T> the type of the elements in the iterable
      * @param c the iterable of elements to evaluate
      * @param valueExtractor the function to extract a long value from each element
@@ -1598,6 +1874,12 @@ public final class Iterables {
     /**
      * Returns the maximum long value extracted from the elements in the provided iterator by the input {@code valueExtractor} function.
      * If the iterator is {@code null} or empty, it returns an empty {@code OptionalLong}.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Iterator<String> iter = Arrays.asList("a", "bb", "ccc").iterator();
+     * OptionalLong result = Iterables.maxLong(iter, String::length); // OptionalLong[3]
+     * }</pre>
      *
      * @param <T> the type of the elements in the iterator
      * @param iter the iterator of elements to evaluate
@@ -1629,6 +1911,12 @@ public final class Iterables {
      * Returns the maximum double value extracted from the elements in the provided array by the input {@code valueExtractor} function.
      * If the array is {@code null} or empty, it returns an empty {@code OptionalDouble}.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * String[] array = {"a", "bb", "ccc"};
+     * OptionalDouble result = Iterables.maxDouble(array, s -> (double) s.length()); // OptionalDouble[3.0]
+     * }</pre>
+     *
      * @param <T> the type of the elements in the array
      * @param a the array of elements to evaluate
      * @param valueExtractor the function to extract a double value from each element
@@ -1659,6 +1947,12 @@ public final class Iterables {
      * Returns the maximum double value extracted from the elements in the provided iterable by the input {@code valueExtractor} function.
      * If the iterable is {@code null} or empty, it returns an empty {@code OptionalDouble}.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * List<String> list = Arrays.asList("a", "bb", "ccc");
+     * OptionalDouble result = Iterables.maxDouble(list, s -> (double) s.length()); // OptionalDouble[3.0]
+     * }</pre>
+     *
      * @param <T> the type of the elements in the iterable
      * @param c the iterable of elements to evaluate
      * @param valueExtractor the function to extract a double value from each element
@@ -1677,6 +1971,12 @@ public final class Iterables {
     /**
      * Returns the maximum double value extracted from the elements in the provided iterator by the input {@code valueExtractor} function.
      * If the iterator is {@code null} or empty, it returns an empty {@code OptionalDouble}.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Iterator<String> iter = Arrays.asList("a", "bb", "ccc").iterator();
+     * OptionalDouble result = Iterables.maxDouble(iter, s -> (double) s.length()); // OptionalDouble[3.0]
+     * }</pre>
      *
      * @param <T> the type of the elements in the iterator
      * @param iter the iterator of elements to evaluate
@@ -1709,6 +2009,12 @@ public final class Iterables {
      * The result is wrapped in an Optional Pair, where the first element is the minimum and the second is the maximum.
      * If the array is {@code null} or empty, it returns an empty Optional.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Integer[] array = {5, 2, 8, 1, 9};
+     * Optional<Pair<Integer, Integer>> result = Iterables.minMax(array); // Optional[Pair[1, 9]]
+     * }</pre>
+     *
      * @param <T> the type of the elements
      * @param a the array of elements to evaluate
      * @return an Optional Pair containing the minimum and maximum values if the array is not {@code null} or empty, otherwise an empty Optional
@@ -1722,6 +2028,12 @@ public final class Iterables {
      * Returns the minimum and maximum values from the provided array of elements according to the provided comparator.
      * The result is wrapped in an Optional Pair, where the first element is the minimum and the second is the maximum.
      * If the array is {@code null} or empty, it returns an empty Optional.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Integer[] array = {5, 2, 8, 1, 9};
+     * Optional<Pair<Integer, Integer>> result = Iterables.minMax(array, Comparator.naturalOrder()); // Optional[Pair[1, 9]]
+     * }</pre>
      *
      * @param <T> the type of the elements in the array
      * @param a the array of elements to evaluate
@@ -1738,6 +2050,12 @@ public final class Iterables {
      * The result is wrapped in an Optional Pair, where the first element is the minimum and the second is the maximum.
      * If the iterable is {@code null} or empty, it returns an empty Optional.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * List<Integer> list = Arrays.asList(5, 2, 8, 1, 9);
+     * Optional<Pair<Integer, Integer>> result = Iterables.minMax(list); // Optional[Pair[1, 9]]
+     * }</pre>
+     *
      * @param <T> the type of the elements
      * @param c the iterable of elements to evaluate
      * @return an Optional Pair containing the minimum and maximum values if the iterable is not {@code null} or empty, otherwise an empty Optional
@@ -1753,6 +2071,12 @@ public final class Iterables {
      * Returns the minimum and maximum values from the provided iterable of elements, according to the provided comparator.
      * The result is wrapped in an Optional Pair, where the first element is the minimum and the second is the maximum.
      * If the iterable is {@code null} or empty, it returns an empty Optional.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * List<Integer> list = Arrays.asList(5, 2, 8, 1, 9);
+     * Optional<Pair<Integer, Integer>> result = Iterables.minMax(list, Comparator.naturalOrder()); // Optional[Pair[1, 9]]
+     * }</pre>
      *
      * @param <T> the type of the elements
      * @param c the iterable of elements to evaluate
@@ -1771,6 +2095,12 @@ public final class Iterables {
      * The result is wrapped in an Optional Pair, where the first element is the minimum and the second is the maximum.
      * If the iterator is {@code null} or empty, it returns an empty Optional.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Iterator<Integer> iter = Arrays.asList(5, 2, 8, 1, 9).iterator();
+     * Optional<Pair<Integer, Integer>> result = Iterables.minMax(iter); // Optional[Pair[1, 9]]
+     * }</pre>
+     *
      * @param <T> the type of the elements in the iterator
      * @param iter the iterator of elements to evaluate
      * @return an Optional Pair containing the minimum and maximum values if the iterator is not {@code null} or empty, otherwise an empty Optional
@@ -1784,6 +2114,12 @@ public final class Iterables {
      * Returns the minimum and maximum values from the provided iterator of elements, according to the provided comparator.
      * The result is wrapped in an Optional Pair, where the first element is the minimum and the second is the maximum.
      * If the iterator is {@code null} or empty, it returns an empty Optional.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Iterator<Integer> iter = Arrays.asList(5, 2, 8, 1, 9).iterator();
+     * Optional<Pair<Integer, Integer>> result = Iterables.minMax(iter, Comparator.naturalOrder()); // Optional[Pair[1, 9]]
+     * }</pre>
      *
      * @param <T> the type of the elements in the iterator
      * @param iter the iterator of elements to evaluate
@@ -1802,6 +2138,15 @@ public final class Iterables {
      * an odd number of elements, this is the exact middle element. For array with an even number of
      * elements, this method returns the lower of the two middle elements (not the average).</p>
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Integer[] oddArray = {1, 5, 2, 8, 3};
+     * Nullable<Integer> median1 = Iterables.median(oddArray); // Nullable[3]
+     *
+     * Integer[] evenArray = {1, 5, 2, 8, 3, 4};
+     * Nullable<Integer> median2 = Iterables.median(evenArray); // Nullable[3]
+     * }</pre>
+     *
      * @param <T> the type of elements in the input array
      * @param a the array of values to find the median of
      * @return a {@code Nullable} containing the median value if the array is not {@code null} or empty, otherwise an empty {@code Nullable}
@@ -1819,6 +2164,15 @@ public final class Iterables {
      * <p>The median is the middle value when the elements are sorted in ascending order. For array with
      * an odd number of elements, this is the exact middle element. For array with an even number of
      * elements, this method returns the lower of the two middle elements (not the average).</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Integer[] oddArray = {1, 5, 2, 8, 3};
+     * Nullable<Integer> median1 = Iterables.median(oddArray, Comparator.naturalOrder()); // Nullable[3]
+     *
+     * Integer[] evenArray = {1, 5, 2, 8, 3, 4};
+     * Nullable<Integer> median2 = Iterables.median(evenArray, Comparator.naturalOrder()); // Nullable[3]
+     * }</pre>
      *
      * @param <T> the type of elements in the input array
      * @param a the array of values to find the median of
@@ -1839,6 +2193,15 @@ public final class Iterables {
      * an odd number of elements, this is the exact middle element. For collection with an even number of
      * elements, this method returns the lower of the two middle elements (not the average).</p>
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * List<Integer> oddList = Arrays.asList(1, 5, 2, 8, 3);
+     * Nullable<Integer> median1 = Iterables.median(oddList); // Nullable[3]
+     *
+     * List<Integer> evenList = Arrays.asList(1, 5, 2, 8, 3, 4);
+     * Nullable<Integer> median2 = Iterables.median(evenList); // Nullable[3]
+     * }</pre>
+     *
      * @param <T> the type of elements in the input collection
      * @param c the collection of values to find the median of
      * @return a {@code Nullable} containing the median value if the collection is not {@code null} or empty, otherwise an empty {@code Nullable}
@@ -1857,6 +2220,15 @@ public final class Iterables {
      * an odd number of elements, this is the exact middle element. For collection with an even number of
      * elements, this method returns the lower of the two middle elements (not the average).</p>
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * List<Integer> oddList = Arrays.asList(1, 5, 2, 8, 3);
+     * Nullable<Integer> median1 = Iterables.median(oddList, Comparator.naturalOrder()); // Nullable[3]
+     *
+     * List<Integer> evenList = Arrays.asList(1, 5, 2, 8, 3, 4);
+     * Nullable<Integer> median2 = Iterables.median(evenList, Comparator.naturalOrder()); // Nullable[3]
+     * }</pre>
+     *
      * @param <T> the type of elements in the input collection
      * @param c the collection of values to find the median of
      * @param cmp the comparator to determine the order of the values
@@ -1873,6 +2245,12 @@ public final class Iterables {
      * Returns the <i>k-th</i> largest element from the provided array based on their natural ordering.
      * If the array is {@code null}, empty, or its length is less than {@code k}, it returns an empty {@code Nullable}.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Integer[] array = {3, 1, 4, 1, 5, 9, 2, 6};
+     * Nullable<Integer> result = Iterables.kthLargest(array, 3); // Nullable[5] (3rd largest is 5)
+     * }</pre>
+     *
      * @param <T> the type of the elements in the array, which must be a subtype of Comparable
      * @param a the array of elements to evaluate
      * @param k the position of the largest element to find (1-based index)
@@ -1886,6 +2264,12 @@ public final class Iterables {
     /**
      * Returns the <i>k-th</i> largest element from the provided array according to the provided comparator.
      * If the array is {@code null}, empty, or its length is less than {@code k}, it returns an empty {@code Nullable}.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Integer[] array = {3, 1, 4, 1, 5, 9, 2, 6};
+     * Nullable<Integer> result = Iterables.kthLargest(array, 3, Comparator.naturalOrder()); // Nullable[5]
+     * }</pre>
      *
      * @param <T> the type of the elements in the array
      * @param a the array of elements to evaluate
@@ -1902,6 +2286,12 @@ public final class Iterables {
      * Returns the <i>k-th</i> largest element from the provided collection based on their natural ordering.
      * If the collection is {@code null}, empty, or its size is less than {@code k}, it returns an empty {@code Nullable}.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * List<Integer> list = Arrays.asList(3, 1, 4, 1, 5, 9, 2, 6);
+     * Nullable<Integer> result = Iterables.kthLargest(list, 3); // Nullable[5]
+     * }</pre>
+     *
      * @param <T> the type of the elements in the collection, which must be a subtype of Comparable
      * @param c the collection of elements to evaluate
      * @param k the position of the largest element to find (1-based index)
@@ -1915,6 +2305,12 @@ public final class Iterables {
     /**
      * Returns the <i>k-th</i> largest element from the provided collection based on the provided comparator.
      * If the collection is {@code null}, empty, or its size is less than k, a {@code Nullable}.empty() is returned.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * List<Integer> list = Arrays.asList(3, 1, 4, 1, 5, 9, 2, 6);
+     * Nullable<Integer> result = Iterables.kthLargest(list, 3, Comparator.naturalOrder()); // Nullable[5]
+     * }</pre>
      *
      * @param <T> the type of elements in the collection.
      * @param c the collection from which to find the <i>k-th</i> largest element.
@@ -1931,6 +2327,12 @@ public final class Iterables {
      * Returns the sum of the integer value of provided numbers as an {@code OptionalInt}.
      * If the iterable is {@code null} or empty, it returns an empty {@code OptionalInt}.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * List<Integer> numbers = Arrays.asList(1, 2, 3, 4, 5);
+     * OptionalInt sum = Iterables.sumInt(numbers); // OptionalInt[15]
+     * }</pre>
+     *
      * @param <T> the type of the elements in the iterable, which must be a subtype of Number
      * @param c the iterable of elements to evaluate
      * @return an {@code OptionalInt} containing the sum if the iterable is not {@code null} or empty, otherwise an empty {@code OptionalInt}
@@ -1943,6 +2345,12 @@ public final class Iterables {
     /**
      * Returns the sum of the integer values extracted from the elements in the provided iterable by the input {@code func} function.
      * If the iterable is {@code null} or empty, it returns an empty {@code OptionalInt}.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * List<String> list = Arrays.asList("a", "bb", "ccc");
+     * OptionalInt sum = Iterables.sumInt(list, String::length); // OptionalInt[6] (1 + 2 + 3)
+     * }</pre>
      *
      * @param <T> the type of the elements in the iterable
      * @param c the iterable of elements to evaluate
@@ -1964,6 +2372,12 @@ public final class Iterables {
      * Returns the sum of the integer values of the provided numbers as an {@code OptionalLong}.
      * If the iterable is {@code null} or empty, it returns an empty {@code OptionalLong}.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * List<Integer> numbers = Arrays.asList(Integer.MAX_VALUE, 1, 2);
+     * OptionalLong sum = Iterables.sumIntToLong(numbers); // OptionalLong[2147483650]
+     * }</pre>
+     *
      * @param <T> the type of the elements in the iterable, which must be a subtype of Number
      * @param c the iterable of elements to evaluate
      * @return an {@code OptionalLong} containing the sum if the iterable is not {@code null} or empty, otherwise an empty {@code OptionalLong}
@@ -1976,6 +2390,12 @@ public final class Iterables {
     /**
      * Returns the sum of the integer values extracted from the elements in the provided iterable by the input {@code func} function as an {@code OptionalLong}.
      * If the iterable is {@code null} or empty, it returns an empty {@code OptionalLong}.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * List<String> list = Arrays.asList("a", "bb", "ccc");
+     * OptionalLong sum = Iterables.sumIntToLong(list, String::length); // OptionalLong[6]
+     * }</pre>
      *
      * @param <T> the type of the elements in the iterable
      * @param c the iterable of elements to evaluate
@@ -1997,6 +2417,12 @@ public final class Iterables {
      * Returns the sum of the long values of the provided numbers as an {@code OptionalLong}.
      * If the iterable is {@code null} or empty, it returns an empty {@code OptionalLong}.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * List<Long> numbers = Arrays.asList(1L, 2L, 3L, 4L, 5L);
+     * OptionalLong sum = Iterables.sumLong(numbers); // OptionalLong[15]
+     * }</pre>
+     *
      * @param <T> the type of the elements in the iterable, which must be a subtype of Number
      * @param c the iterable of elements to evaluate
      * @return an {@code OptionalLong} containing the sum if the iterable is not {@code null} or empty, otherwise an empty {@code OptionalLong}
@@ -2009,6 +2435,12 @@ public final class Iterables {
     /**
      * Returns the sum of the long values extracted from the elements in the provided iterable by the input {@code func} function.
      * If the iterable is {@code null} or empty, it returns an empty {@code OptionalLong}.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * List<String> list = Arrays.asList("a", "bb", "ccc");
+     * OptionalLong sum = Iterables.sumLong(list, String::length); // OptionalLong[6] (1 + 2 + 3)
+     * }</pre>
      *
      * @param <T> the type of the elements in the iterable
      * @param c the iterable of elements to evaluate
@@ -2030,6 +2462,12 @@ public final class Iterables {
      * Returns the sum of the double values of the provided numbers as an {@code OptionalDouble}.
      * If the iterable is {@code null} or empty, it returns an empty {@code OptionalDouble}.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * List<Double> numbers = Arrays.asList(1.0, 2.0, 3.0, 4.0, 5.0);
+     * OptionalDouble sum = Iterables.sumDouble(numbers); // OptionalDouble[15.0]
+     * }</pre>
+     *
      * @param <T> the type of the elements in the iterable, which must be a subtype of Number
      * @param c the iterable of elements to evaluate
      * @return an {@code OptionalDouble} containing the sum if the iterable is not {@code null} or empty, otherwise an empty {@code OptionalDouble}
@@ -2042,6 +2480,12 @@ public final class Iterables {
     /**
      * Returns the sum of the double values extracted from the elements in the provided iterable by the input {@code func} function.
      * If the iterable is {@code null} or empty, it returns an empty {@code OptionalDouble}.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * List<String> list = Arrays.asList("a", "bb", "ccc");
+     * OptionalDouble sum = Iterables.sumDouble(list, s -> (double) s.length()); // OptionalDouble[6.0]
+     * }</pre>
      *
      * @param <T> the type of the elements in the iterable
      * @param c the iterable of elements to evaluate
@@ -2063,6 +2507,12 @@ public final class Iterables {
      * Returns the sum of the BigInteger values in the provided iterable.
      * If the iterable is {@code null} or empty, it returns an empty {@code Optional<BigInteger>}.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * List<BigInteger> numbers = Arrays.asList(BigInteger.valueOf(1), BigInteger.valueOf(2));
+     * Optional<BigInteger> sum = Iterables.sumBigInteger(numbers); // Optional[3]
+     * }</pre>
+     *
      * @param c the iterable of BigInteger elements to evaluate
      * @return an {@code Optional<BigInteger>} containing the sum if the iterable is not {@code null} or empty, otherwise an empty {@code Optional<BigInteger>}
      * @see N#sumBigInteger(Iterable)
@@ -2074,6 +2524,12 @@ public final class Iterables {
     /**
      * Returns the sum of the BigInteger values extracted from the elements in the provided iterable by the input {@code func} function.
      * If the iterable is {@code null} or empty, it returns an empty {@code Optional<BigInteger>}.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * List<String> list = Arrays.asList("1", "2", "3");
+     * Optional<BigInteger> sum = Iterables.sumBigInteger(list, BigInteger::new); // Optional[6]
+     * }</pre>
      *
      * @param <T> the type of the elements in the iterable
      * @param c the iterable of elements to evaluate
@@ -2095,6 +2551,12 @@ public final class Iterables {
      * Returns the sum of the BigDecimal values in the provided iterable.
      * If the iterable is {@code null} or empty, it returns an empty {@code Optional<BigDecimal>}.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * List<BigDecimal> numbers = Arrays.asList(new BigDecimal("1.5"), new BigDecimal("2.5"));
+     * Optional<BigDecimal> sum = Iterables.sumBigDecimal(numbers); // Optional[4.0]
+     * }</pre>
+     *
      * @param c the iterable of BigDecimal elements to evaluate
      * @return an {@code Optional<BigDecimal>} containing the sum if the iterable is not {@code null} or empty, otherwise an empty {@code Optional<BigDecimal>}
      * @see N#sumBigDecimal(Iterable)
@@ -2106,6 +2568,12 @@ public final class Iterables {
     /**
      * Returns the sum of the BigDecimal values extracted from the elements in the provided iterable by the input {@code func} function.
      * If the iterable is {@code null} or empty, it returns an empty {@code Optional<BigDecimal>}.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * List<String> list = Arrays.asList("1.5", "2.5", "3.0");
+     * Optional<BigDecimal> sum = Iterables.sumBigDecimal(list, BigDecimal::new); // Optional[7.0]
+     * }</pre>
      *
      * @param <T> the type of the elements in the iterable
      * @param c the iterable of elements to evaluate
@@ -2126,6 +2594,12 @@ public final class Iterables {
     /**
      * Returns the average of the integer values of the provided numbers as an {@code OptionalDouble}.
      * If the array is {@code null} or empty, it returns an empty {@code OptionalDouble}.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Integer[] array = {1, 2, 3, 4, 5};
+     * OptionalDouble avg = Iterables.averageInt(array); // OptionalDouble[3.0]
+     * }</pre>
      *
      * @param <T> the type of the elements in the array, which must be a subtype of Number
      * @param a the array of elements to evaluate

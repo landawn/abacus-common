@@ -669,9 +669,16 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
     /**
      * Removes the first occurrence of the specified element from this list, if it is present.
      * If the list does not contain the element, it is unchanged.
-     * 
+     *
      * <p>This method runs in linear time, as it may need to search through the entire list
      * to find the element.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * BooleanList flags = BooleanList.of(true, false, true, false);
+     * boolean removed = flags.remove(true);   // Returns true, list is now [false, true, false]
+     * boolean notFound = flags.remove(true);  // Returns true, list is now [false, false]
+     * }</pre>
      *
      * @param e the element to be removed from this list, if present
      * @return {@code true} if this list contained the specified element (and it was removed);

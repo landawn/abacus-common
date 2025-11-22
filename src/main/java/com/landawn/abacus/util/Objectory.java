@@ -132,6 +132,16 @@ public final class Objectory {
      * 
      * <p>After use, the list should be recycled using {@link #recycle(List)}.</p>
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * List<String> list = Objectory.createList();
+     * try {
+     *     list.add("a");
+     * } finally {
+     *     Objectory.recycle(list);
+     * }
+     * }</pre>
+     *
      * @param <T> the type of elements in the list
      * @return an empty ArrayList from the pool or a new instance if the pool is empty
      * @deprecated for internal use only
@@ -149,6 +159,16 @@ public final class Objectory {
      * The returned set is empty and ready for use.
      * 
      * <p>After use, the set should be recycled using {@link #recycle(Set)}.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Set<String> set = Objectory.createSet();
+     * try {
+     *     set.add("a");
+     * } finally {
+     *     Objectory.recycle(set);
+     * }
+     * }</pre>
      *
      * @param <T> the type of elements in the set
      * @return an empty HashSet from the pool or a new instance if the pool is empty
@@ -168,6 +188,16 @@ public final class Objectory {
      * 
      * <p>After use, the set should be recycled using {@link #recycle(Set)}.</p>
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Set<String> set = Objectory.createLinkedHashSet();
+     * try {
+     *     set.add("a");
+     * } finally {
+     *     Objectory.recycle(set);
+     * }
+     * }</pre>
+     *
      * @param <T> the type of elements in the set
      * @return an empty LinkedHashSet from the pool or a new instance if the pool is empty
      * @deprecated for internal use only
@@ -186,6 +216,16 @@ public final class Objectory {
      * 
      * <p>After use, the map should be recycled using {@link #recycle(Map)}.</p>
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Map<String, String> map = Objectory.createMap();
+     * try {
+     *     map.put("k", "v");
+     * } finally {
+     *     Objectory.recycle(map);
+     * }
+     * }</pre>
+     *
      * @param <K> the type of keys in the map
      * @param <V> the type of values in the map
      * @return an empty HashMap from the pool or a new instance if the pool is empty
@@ -203,6 +243,16 @@ public final class Objectory {
      * The returned map is empty and ready for use, maintaining insertion order.
      * 
      * <p>After use, the map should be recycled using {@link #recycle(Map)}.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Map<String, String> map = Objectory.createLinkedHashMap();
+     * try {
+     *     map.put("k", "v");
+     * } finally {
+     *     Objectory.recycle(map);
+     * }
+     * }</pre>
      *
      * @param <K> the type of keys in the map
      * @param <V> the type of values in the map
@@ -581,6 +631,16 @@ public final class Objectory {
      * 
      * <p>After use, the writer should be recycled using {@link #recycle(BufferedXMLWriter)}.</p>
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * BufferedXMLWriter writer = Objectory.createBufferedXMLWriter(outputStream);
+     * try {
+     *     writer.write("Hello");
+     * } finally {
+     *     Objectory.recycle(writer);
+     * }
+     * }</pre>
+     *
      * @param os the OutputStream to wrap
      * @return a BufferedXMLWriter wrapping the specified stream
      */
@@ -647,6 +707,16 @@ public final class Objectory {
      * 
      * <p>After use, the writer should be recycled using {@link #recycle(BufferedJSONWriter)}.</p>
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * BufferedJSONWriter writer = Objectory.createBufferedJSONWriter(outputStream);
+     * try {
+     *     writer.write("Hello");
+     * } finally {
+     *     Objectory.recycle(writer);
+     * }
+     * }</pre>
+     *
      * @param os the OutputStream to wrap
      * @return a BufferedJSONWriter wrapping the specified stream
      */
@@ -712,6 +782,16 @@ public final class Objectory {
      * Creates or retrieves a BufferedCSVWriter wrapping the specified OutputStream.
      * 
      * <p>After use, the writer should be recycled using {@link #recycle(BufferedCSVWriter)}.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * BufferedCSVWriter writer = Objectory.createBufferedCSVWriter(outputStream);
+     * try {
+     *     writer.write("Hello");
+     * } finally {
+     *     Objectory.recycle(writer);
+     * }
+     * }</pre>
      *
      * @param os the OutputStream to wrap
      * @return a BufferedCSVWriter wrapping the specified stream

@@ -188,7 +188,7 @@ public class U100Test extends TestBase {
             assertTrue(length.isPresent());
             assertEquals(4, length.get());
 
-            assertThrows(NullPointerException.class, () -> opt.map(s -> null));
+            assertTrue(opt.map(s -> null).isEmpty());
 
             Optional<Integer> emptyMapped = Optional.<String> empty().map(String::length);
             assertFalse(emptyMapped.isPresent());
@@ -645,7 +645,7 @@ public class U100Test extends TestBase {
             assertTrue(strOpt.isPresent());
             assertEquals("yes", strOpt.get());
 
-            assertThrows(NullPointerException.class, () -> OptionalBoolean.of(true).mapToObj(b -> null));
+            assertTrue(OptionalBoolean.of(true).mapToObj(c -> null).isEmpty());
 
             assertFalse(OptionalBoolean.empty().mapToObj(b -> "test").isPresent());
         }
@@ -999,7 +999,7 @@ public class U100Test extends TestBase {
             assertTrue(strOpt.isPresent());
             assertEquals("Char: X", strOpt.get());
 
-            assertThrows(NullPointerException.class, () -> OptionalChar.of('X').mapToObj(c -> null));
+            assertTrue(OptionalChar.of('X').mapToObj(c -> null).isEmpty());
 
             assertFalse(OptionalChar.empty().mapToObj(c -> "test").isPresent());
         }
@@ -1387,7 +1387,7 @@ public class U100Test extends TestBase {
             assertTrue(strOpt.isPresent());
             assertEquals("Number: 42", strOpt.get());
 
-            assertThrows(NullPointerException.class, () -> OptionalInt.of(42).mapToObj(v -> null));
+            assertTrue(OptionalInt.of(42).mapToObj(c -> null).isEmpty());
 
             assertFalse(OptionalInt.empty().mapToObj(v -> "test").isPresent());
         }
@@ -2440,7 +2440,7 @@ public class U100Test extends TestBase {
             assertTrue(strOpt.isPresent());
             assertEquals("Number: 42", strOpt.get());
 
-            assertThrows(NullPointerException.class, () -> OptionalLong.of(42L).mapToObj(v -> null));
+            assertTrue(OptionalLong.of(42L).mapToObj(c -> null).isEmpty());
 
             assertFalse(OptionalLong.empty().mapToObj(v -> "test").isPresent());
         }
@@ -2836,7 +2836,7 @@ public class U100Test extends TestBase {
             assertTrue(strOpt.isPresent());
             assertEquals("42.50", strOpt.get());
 
-            assertThrows(NullPointerException.class, () -> OptionalDouble.of(42.5).mapToObj(v -> null));
+            assertTrue(OptionalDouble.of(42.5).mapToObj(c -> null).isEmpty());
 
             assertFalse(OptionalDouble.empty().mapToObj(v -> "test").isPresent());
         }
@@ -3224,7 +3224,7 @@ public class U100Test extends TestBase {
             assertTrue(strOpt.isPresent());
             assertEquals("42.50", strOpt.get());
 
-            assertThrows(NullPointerException.class, () -> OptionalFloat.of(42.5f).mapToObj(v -> null));
+            assertTrue(OptionalFloat.of(42.5f).mapToObj(c -> null).isEmpty());
         }
 
         @Test

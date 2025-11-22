@@ -301,7 +301,7 @@ public final class HttpUtil {
      * }</pre>
      *
      * @param value The header value (can be {@code null}, String, Collection, or any object)
-     * @return The header value as a string, or {@code null} string if value is null
+     * @return The header value as a string, or {@code null} if value is null
      */
     public static String readHttpHeadValue(final Object value) {
         if (value == null) {

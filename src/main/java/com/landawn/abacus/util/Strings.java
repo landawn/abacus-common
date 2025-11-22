@@ -165,34 +165,34 @@ import com.landawn.abacus.util.stream.Stream;
  *
  * <p><b>Validation Operations:</b>
  * <ul>
- *   <li><b>Empty/Blank Checking:</b> {@code isEmpty()}, {@code isBlank()}, {@code isNotEmpty()}, {@code isNotBlank()}</li>
- *   <li><b>Format Validation:</b> {@code isEmail()}, {@code isBase64()}</li>
- *   <li><b>Identifier Validation:</b> {@code isJavaIdentifier()}, {@code isValidIdentifier()}</li>
- *   <li><b>Pattern Matching:</b> {@code matches()}, {@code matchesIgnoreCase()}</li>
+ *   <li><b>Empty/Blank Checking:</b> {@code Strings.isEmpty()}, {@code Strings.isBlank()}, {@code Strings.isNotEmpty()}, {@code Strings.isNotBlank()}</li>
+ *   <li><b>Format Validation:</b> {@code Strings.isEmail()}, {@code Strings.isBase64()}</li>
+ *   <li><b>Identifier Validation:</b> {@code Strings.isJavaIdentifier()}, {@code Strings.isValidIdentifier()}</li>
+ *   <li><b>Pattern Matching:</b> {@code Strings.matches()}, {@code Strings.matchesIgnoreCase()}</li>
  * </ul>
  *
  * <p><b>Case Operations:</b>
  * <ul>
- *   <li><b>Basic Case:</b> {@code upperCase()}, {@code lowerCase()}, {@code swapCase()}</li>
- *   <li><b>Word Case:</b> {@code capitalize()}, {@code uncapitalize()}, {@code capitalizeWords()}</li>
- *   <li><b>Naming Conventions:</b> {@code toCamelCase()}, {@code toSnakeCase()}, {@code toPascalCase()}</li>
+ *   <li><b>Basic Case:</b> {@code Strings.upperCase()}, {@code Strings.lowerCase()}, {@code Strings.swapCase()}</li>
+ *   <li><b>Word Case:</b> {@code Strings.capitalize()}, {@code Strings.uncapitalize()}, {@code Strings.capitalizeWords()}</li>
+ *   <li><b>Naming Conventions:</b> {@code Strings.toCamelCase()}, {@code Strings.toSnakeCase()}, {@code Strings.toPascalCase()}</li>
  *   <li><b>Locale Support:</b> Locale-aware case conversion operations</li>
  * </ul>
  *
  * <p><b>Encoding/Decoding Support:</b>
  * <ul>
- *   <li><b>Base64:</b> {@code base64Encode()}, {@code base64Decode()} with standard and URL-safe variants</li>
- *   <li><b>URL Encoding:</b> {@code urlEncode()}, {@code urlDecode()} with charset support</li>
- *   <li><b>Unicode:</b> {@code normalize()}, {@code toUnicode()}, {@code fromUnicode()}</li>
+ *   <li><b>Base64:</b> {@code Strings.base64Encode()}, {@code Strings.base64Decode()} with standard and URL-safe variants</li>
+ *   <li><b>URL Encoding:</b> {@code Strings.urlEncode()}, {@code Strings.urlDecode()} with charset support</li>
+ *   <li><b>Unicode:</b> {@code Strings.normalize()}, {@code Strings.toUnicode()}, {@code Strings.fromUnicode()}</li>
  *   <li><b>Character Sets:</b> Support for various character encodings</li>
  * </ul>
  *
  * <p><b>Pattern Extraction:</b>
  * <ul>
- *   <li><b>Email Extraction:</b> {@code findFirstEmailAddress()}, {@code findAllEmailAddresses()}</li>
- *   <li><b>Number Extraction:</b> {@code extractFirstInteger()}, {@code extractFirstDouble()}</li>
+ *   <li><b>Email Extraction:</b> {@code Strings.findFirstEmailAddress()}, {@code Strings.findAllEmailAddresses()}</li>
+ *   <li><b>Number Extraction:</b> {@code Strings.extractFirstInteger()}, {@code Strings.extractFirstDouble()}</li>
  *   <li><b>Custom Patterns:</b> Regular expression-based extraction utilities</li>
- *   <li><b>Replacement:</b> {@code replaceFirstInteger()}, {@code replaceFirstDouble()}</li>
+ *   <li><b>Replacement:</b> {@code Strings.replaceFirstInteger()}, {@code Strings.replaceFirstDouble()}</li>
  * </ul>
  *
  * <p><b>Error Handling Strategy:</b>
@@ -504,10 +504,10 @@ public final class Strings {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * char[] chars = {'h', 'e', 'l', 'l', 'o'};
-     * valueOf(chars);                                // returns "hello"
-     * valueOf(new char[] {'a', 'b', 'c'});          // returns "abc"
-     * valueOf(new char[0]);                          // returns ""
-     * valueOf(null);                                 // returns null
+     * Strings.valueOf(chars);                                // returns "hello"
+     * Strings.valueOf(new char[] {'a', 'b', 'c'});          // returns "abc"
+     * Strings.valueOf(new char[0]);                          // returns ""
+     * Strings.valueOf(null);                                 // returns null
      * }</pre>
      *
      * @param value the character array to be converted, may be {@code null}
@@ -532,17 +532,17 @@ public final class Strings {
       * <p><b>Usage Examples:</b></p>
       * <pre>{@code
       * // Valid Java identifiers
-      * isValidJavaIdentifier("myVariable");           // returns true
-      * isValidJavaIdentifier("_privateField");        // returns true
-      * isValidJavaIdentifier("$money");               // returns true
-      * isValidJavaIdentifier("MAX_VALUE");            // returns true
-      * isValidJavaIdentifier("userId123");            // returns true
+      * Strings.isValidJavaIdentifier("myVariable");           // returns true
+      * Strings.isValidJavaIdentifier("_privateField");        // returns true
+      * Strings.isValidJavaIdentifier("$money");               // returns true
+      * Strings.isValidJavaIdentifier("MAX_VALUE");            // returns true
+      * Strings.isValidJavaIdentifier("userId123");            // returns true
       * 
       * // Invalid Java identifiers
-      * isValidJavaIdentifier(null);                   // returns false
-      * isValidJavaIdentifier("");                     // returns false
-      * isValidJavaIdentifier("   ");                  // returns false
-      * isValidJavaIdentifier("123abc");               // returns {@code false} (starts with digit)
+      * Strings.isValidJavaIdentifier(null);                   // returns false
+      * Strings.isValidJavaIdentifier("");                     // returns false
+      * Strings.isValidJavaIdentifier("   ");                  // returns false
+      * Strings.isValidJavaIdentifier("123abc");               // returns {@code false} (starts with digit)
       * }</pre>
       *
       * @param cs the CharSequence to be checked, may be {@code null} or empty
@@ -563,7 +563,8 @@ public final class Strings {
      * Checks if the given CharSequence is a Java keyword.
      *
      * <p>This method verifies whether the provided CharSequence matches any of the reserved
-     * keywords in the Java programming language. Java keywords include reserved words like
+     * keywords in the Java programming language, based on the latest source version supported
+     * by the runtime environment. Java keywords include reserved words like
      * {@code class}, {@code public}, {@code if}, {@code else}, etc.</p>
      *
      * <p>The method returns {@code false} for {@code null} or empty input.</p>
@@ -571,20 +572,21 @@ public final class Strings {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Java keywords
-     * isKeyword("class");                            // returns true
-     * isKeyword("public");                           // returns true
-     * isKeyword("if");                               // returns true
-     * isKeyword("return");                           // returns true
+     * Strings.isKeyword("class");                            // returns true
+     * Strings.isKeyword("public");                           // returns true
+     * Strings.isKeyword("if");                               // returns true
+     * Strings.isKeyword("return");                           // returns true
      * 
      * // Not Java keywords
-     * isKeyword("Class");                            // returns {@code false} (case sensitive)
-     * isKeyword("myVariable");                       // returns false
-     * isKeyword(null);                               // returns false
-     * isKeyword("");                                 // returns false
+     * Strings.isKeyword("Class");                            // returns {@code false} (case sensitive)
+     * Strings.isKeyword("myVariable");                       // returns false
+     * Strings.isKeyword(null);                               // returns false
+     * Strings.isKeyword("");                                 // returns false
      * }</pre>
      *
      * @param cs the CharSequence to be checked, may be {@code null} or empty
      * @return {@code true} if the CharSequence is a Java keyword, {@code false} otherwise.
+     * @see javax.lang.model.SourceVersion#isKeyword(CharSequence)
      */
     public static boolean isKeyword(final CharSequence cs) {
         if (isEmpty(cs)) {
@@ -606,16 +608,16 @@ public final class Strings {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Valid email addresses
-     * isValidEmailAddress("user@example.com");       // returns true
-     * isValidEmailAddress("john.doe@company.org");   // returns true
-     * isValidEmailAddress("admin+tag@domain.co.uk"); // returns true
+     * Strings.isValidEmailAddress("user@example.com");       // returns true
+     * Strings.isValidEmailAddress("john.doe@company.org");   // returns true
+     * Strings.isValidEmailAddress("admin+tag@domain.co.uk"); // returns true
      * 
      * // Invalid email addresses
-     * isValidEmailAddress("invalid.email");          // returns {@code false} (no @ symbol)
-     * isValidEmailAddress("@example.com");           // returns {@code false} (no local part)
-     * isValidEmailAddress("user@");                  // returns {@code false} (no domain)
-     * isValidEmailAddress(null);                     // returns false
-     * isValidEmailAddress("");                       // returns false
+     * Strings.isValidEmailAddress("invalid.email");          // returns {@code false} (no @ symbol)
+     * Strings.isValidEmailAddress("@example.com");           // returns {@code false} (no local part)
+     * Strings.isValidEmailAddress("user@");                  // returns {@code false} (no domain)
+     * Strings.isValidEmailAddress(null);                     // returns false
+     * Strings.isValidEmailAddress("");                       // returns false
      * }</pre>
      *
      * @param cs the CharSequence to be checked, may be {@code null} or empty
@@ -643,16 +645,16 @@ public final class Strings {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Valid URLs
-     * isValidUrl("http://www.example.com");          // returns true
-     * isValidUrl("https://example.com:8080/path");   // returns true
-     * isValidUrl("ftp://files.example.com/doc.pdf"); // returns true
-     * isValidUrl("file://C:/Users/doc.txt");         // returns true
+     * Strings.isValidUrl("http://www.example.com");          // returns true
+     * Strings.isValidUrl("https://example.com:8080/path");   // returns true
+     * Strings.isValidUrl("ftp://files.example.com/doc.pdf"); // returns true
+     * Strings.isValidUrl("file://C:/Users/doc.txt");         // returns true
      * 
      * // Invalid URLs
-     * isValidUrl("not a url");                       // returns false
-     * isValidUrl("www.example.com");                 // returns {@code false} (no protocol)
-     * isValidUrl(null);                              // returns false
-     * isValidUrl("");                                // returns false
+     * Strings.isValidUrl("not a url");                       // returns false
+     * Strings.isValidUrl("www.example.com");                 // returns {@code false} (no protocol)
+     * Strings.isValidUrl(null);                              // returns false
+     * Strings.isValidUrl("");                                // returns false
      * }</pre>
      *
      * @param cs the CharSequence to be checked, may be {@code null} or empty
@@ -678,16 +680,16 @@ public final class Strings {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Valid HTTP URLs
-     * isValidHttpUrl("http://www.example.com");      // returns true
-     * isValidHttpUrl("https://example.com/path");    // returns true
-     * isValidHttpUrl("https://api.example.com:8443");// returns true
+     * Strings.isValidHttpUrl("http://www.example.com");      // returns true
+     * Strings.isValidHttpUrl("https://example.com/path");    // returns true
+     * Strings.isValidHttpUrl("https://api.example.com:8443");// returns true
      * 
      * // Invalid HTTP URLs
-     * isValidHttpUrl("ftp://files.example.com");     // returns {@code false} (not HTTP)
-     * isValidHttpUrl("www.example.com");             // returns {@code false} (no protocol)
-     * isValidHttpUrl("file:///C:/doc.txt");          // returns {@code false} (not HTTP)
-     * isValidHttpUrl(null);                          // returns false
-     * isValidHttpUrl("");                            // returns false
+     * Strings.isValidHttpUrl("ftp://files.example.com");     // returns {@code false} (not HTTP)
+     * Strings.isValidHttpUrl("www.example.com");             // returns {@code false} (no protocol)
+     * Strings.isValidHttpUrl("file:///C:/doc.txt");          // returns {@code false} (not HTTP)
+     * Strings.isValidHttpUrl(null);                          // returns false
+     * Strings.isValidHttpUrl("");                            // returns false
      * }</pre>
      *
      * @param cs the CharSequence to be checked, may be {@code null} or empty
@@ -709,11 +711,11 @@ public final class Strings {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * isEmpty(null);                                 // returns true
-     * isEmpty("");                                   // returns true
-     * isEmpty("   ");                                // returns {@code false} (contains spaces)
-     * isEmpty("abc");                                // returns false
-     * isEmpty(new StringBuilder());                  // returns true
+     * Strings.isEmpty(null);                                 // returns true
+     * Strings.isEmpty("");                                   // returns true
+     * Strings.isEmpty("   ");                                // returns {@code false} (contains spaces)
+     * Strings.isEmpty("abc");                                // returns false
+     * Strings.isEmpty(new StringBuilder());                  // returns true
      * }</pre>
      *
      * @param cs the CharSequence to be checked, may be {@code null}
@@ -732,12 +734,12 @@ public final class Strings {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * isBlank(null);                                 // returns true
-     * isBlank("");                                   // returns true
-     * isBlank("   ");                                // returns true
-     * isBlank("\t\n\r");                            // returns true
-     * isBlank("  abc  ");                           // returns false
-     * isBlank("abc");                                // returns false
+     * Strings.isBlank(null);                                 // returns true
+     * Strings.isBlank("");                                   // returns true
+     * Strings.isBlank("   ");                                // returns true
+     * Strings.isBlank("\t\n\r");                            // returns true
+     * Strings.isBlank("  abc  ");                           // returns false
+     * Strings.isBlank("abc");                                // returns false
      * }</pre>
      *
      * @param cs the CharSequence to be checked, may be {@code null} or empty
@@ -769,11 +771,11 @@ public final class Strings {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * isNotEmpty("abc");                             // returns true
-     * isNotEmpty("   ");                             // returns {@code true} (contains spaces)
-     * isNotEmpty(new StringBuilder("test"));         // returns true
-     * isNotEmpty("");                                // returns false
-     * isNotEmpty(null);                              // returns false
+     * Strings.isNotEmpty("abc");                             // returns true
+     * Strings.isNotEmpty("   ");                             // returns {@code true} (contains spaces)
+     * Strings.isNotEmpty(new StringBuilder("test"));         // returns true
+     * Strings.isNotEmpty("");                                // returns false
+     * Strings.isNotEmpty(null);                              // returns false
      * }</pre>
      *
      * @param cs the CharSequence to be checked, may be {@code null}
@@ -793,11 +795,11 @@ public final class Strings {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * isNotBlank("abc");                             // returns true
-     * isNotBlank("  abc  ");                         // returns true
-     * isNotBlank("   ");                             // returns {@code false} (only whitespace)
-     * isNotBlank("");                                // returns false
-     * isNotBlank(null);                              // returns false
+     * Strings.isNotBlank("abc");                             // returns true
+     * Strings.isNotBlank("  abc  ");                         // returns true
+     * Strings.isNotBlank("   ");                             // returns {@code false} (only whitespace)
+     * Strings.isNotBlank("");                                // returns false
+     * Strings.isNotBlank(null);                              // returns false
      * }</pre>
      *
      * @param cs the CharSequence to be checked, may be {@code null}
@@ -816,13 +818,13 @@ public final class Strings {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * isAllEmpty(null, null);                        // returns true
-     * isAllEmpty("", "");                            // returns true
-     * isAllEmpty(null, "");                          // returns true
-     * isAllEmpty("", null);                          // returns true
-     * isAllEmpty("abc", "");                         // returns false
-     * isAllEmpty("", "xyz");                         // returns false
-     * isAllEmpty("abc", "xyz");                      // returns false
+     * Strings.isAllEmpty(null, null);                        // returns true
+     * Strings.isAllEmpty("", "");                            // returns true
+     * Strings.isAllEmpty(null, "");                          // returns true
+     * Strings.isAllEmpty("", null);                          // returns true
+     * Strings.isAllEmpty("abc", "");                         // returns false
+     * Strings.isAllEmpty("", "xyz");                         // returns false
+     * Strings.isAllEmpty("abc", "xyz");                      // returns false
      * }</pre>
      *
      * @param a the first CharSequence to be checked, may be {@code null}
@@ -845,12 +847,12 @@ public final class Strings {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * isAllEmpty(null, null, null);                  // returns true
-     * isAllEmpty("", "", "");                        // returns true
-     * isAllEmpty(null, "", null);                    // returns true
-     * isAllEmpty("abc", "", "");                     // returns false
-     * isAllEmpty("", "xyz", "");                     // returns false
-     * isAllEmpty("", "", "123");                     // returns false
+     * Strings.isAllEmpty(null, null, null);                  // returns true
+     * Strings.isAllEmpty("", "", "");                        // returns true
+     * Strings.isAllEmpty(null, "", null);                    // returns true
+     * Strings.isAllEmpty("abc", "", "");                     // returns false
+     * Strings.isAllEmpty("", "xyz", "");                     // returns false
+     * Strings.isAllEmpty("", "", "123");                     // returns false
      * }</pre>
      *
      * @param a the first CharSequence to be checked, may be {@code null}
@@ -875,15 +877,15 @@ public final class Strings {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * isAllEmpty(null);                              // returns true
-     * isAllEmpty(null, "");                          // returns true
-     * isAllEmpty(new String[] {});                   // returns true
-     * isAllEmpty(null, "foo");                       // returns false
-     * isAllEmpty("", "bar");                         // returns false
-     * isAllEmpty("bob", "");                         // returns false
-     * isAllEmpty("  bob  ", null);                   // returns false
-     * isAllEmpty(" ", "bar");                        // returns false
-     * isAllEmpty("foo", "bar");                      // returns false
+     * Strings.isAllEmpty(null);                              // returns true
+     * Strings.isAllEmpty(null, "");                          // returns true
+     * Strings.isAllEmpty(new String[] {});                   // returns true
+     * Strings.isAllEmpty(null, "foo");                       // returns false
+     * Strings.isAllEmpty("", "bar");                         // returns false
+     * Strings.isAllEmpty("bob", "");                         // returns false
+     * Strings.isAllEmpty("  bob  ", null);                   // returns false
+     * Strings.isAllEmpty(" ", "bar");                        // returns false
+     * Strings.isAllEmpty("foo", "bar");                      // returns false
      * }</pre>
      *
      * @param css the CharSequences to check, may be {@code null} or empty
@@ -917,13 +919,13 @@ public final class Strings {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * List<String> list1 = Arrays.asList(null, "", null);
-     * isAllEmpty(list1);                             // returns true
+     * Strings.isAllEmpty(list1);                             // returns true
      * 
      * List<String> list2 = Arrays.asList("", "abc", "");
-     * isAllEmpty(list2);                             // returns false
+     * Strings.isAllEmpty(list2);                             // returns false
      * 
-     * isAllEmpty(null);                              // returns true
-     * isAllEmpty(new ArrayList<>());                 // returns true
+     * Strings.isAllEmpty(null);                              // returns true
+     * Strings.isAllEmpty(new ArrayList<>());                 // returns true
      * }</pre>
      *
      * @param css the Iterable of CharSequences to be checked, may be {@code null}
@@ -954,12 +956,12 @@ public final class Strings {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * isAllBlank(null, null);                        // returns true
-     * isAllBlank("", "");                            // returns true
-     * isAllBlank("   ", "\t\n");                     // returns true
-     * isAllBlank(null, "   ");                       // returns true
-     * isAllBlank("abc", "   ");                      // returns false
-     * isAllBlank("   ", "xyz");                      // returns false
+     * Strings.isAllBlank(null, null);                        // returns true
+     * Strings.isAllBlank("", "");                            // returns true
+     * Strings.isAllBlank("   ", "\t\n");                     // returns true
+     * Strings.isAllBlank(null, "   ");                       // returns true
+     * Strings.isAllBlank("abc", "   ");                      // returns false
+     * Strings.isAllBlank("   ", "xyz");                      // returns false
      * }</pre>
      *
      * @param a the first CharSequence to be checked, may be {@code null}
@@ -982,11 +984,11 @@ public final class Strings {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * isAllBlank(null, null, null);                  // returns true
-     * isAllBlank("", "", "");                        // returns true
-     * isAllBlank("   ", "\t", "\n");                 // returns true
-     * isAllBlank("abc", "   ", "");                  // returns false
-     * isAllBlank("", "xyz", "   ");                  // returns false
+     * Strings.isAllBlank(null, null, null);                  // returns true
+     * Strings.isAllBlank("", "", "");                        // returns true
+     * Strings.isAllBlank("   ", "\t", "\n");                 // returns true
+     * Strings.isAllBlank("abc", "   ", "");                  // returns false
+     * Strings.isAllBlank("", "xyz", "   ");                  // returns false
      * }</pre>
      *
      * @param a the first CharSequence to be checked, may be {@code null}
@@ -1013,15 +1015,15 @@ public final class Strings {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * isAllBlank(null);                              // returns true
-     * isAllBlank(null, "foo");                       // returns false
-     * isAllBlank(null, null);                        // returns true
-     * isAllBlank("", "bar");                         // returns false
-     * isAllBlank("bob", "");                         // returns false
-     * isAllBlank("  bob  ", null);                   // returns false
-     * isAllBlank(" ", "bar");                        // returns false
-     * isAllBlank("foo", "bar");                      // returns false
-     * isAllBlank(new String[] {});                   // returns true
+     * Strings.isAllBlank(null);                              // returns true
+     * Strings.isAllBlank(null, "foo");                       // returns false
+     * Strings.isAllBlank(null, null);                        // returns true
+     * Strings.isAllBlank("", "bar");                         // returns false
+     * Strings.isAllBlank("bob", "");                         // returns false
+     * Strings.isAllBlank("  bob  ", null);                   // returns false
+     * Strings.isAllBlank(" ", "bar");                        // returns false
+     * Strings.isAllBlank("foo", "bar");                      // returns false
+     * Strings.isAllBlank(new String[] {});                   // returns true
      * }</pre>
      *
      * @param css the CharSequences to check, may be {@code null} or empty
@@ -1055,13 +1057,13 @@ public final class Strings {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * List<String> list1 = Arrays.asList(null, "", "   ");
-     * isAllBlank(list1);                             // returns true
+     * Strings.isAllBlank(list1);                             // returns true
      * 
      * List<String> list2 = Arrays.asList("   ", "abc", "");
-     * isAllBlank(list2);                             // returns false
+     * Strings.isAllBlank(list2);                             // returns false
      * 
-     * isAllBlank(null);                              // returns true
-     * isAllBlank(new ArrayList<>());                 // returns true
+     * Strings.isAllBlank(null);                              // returns true
+     * Strings.isAllBlank(new ArrayList<>());                 // returns true
      * }</pre>
      *
      * @param css the Iterable of CharSequences to be checked, may be {@code null}
@@ -1092,13 +1094,13 @@ public final class Strings {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * isAnyEmpty(null, null);                        // returns true
-     * isAnyEmpty("", "");                            // returns true
-     * isAnyEmpty("abc", "");                         // returns true
-     * isAnyEmpty("", "xyz");                         // returns true
-     * isAnyEmpty(null, "xyz");                       // returns true
-     * isAnyEmpty("abc", "xyz");                      // returns false
-     * isAnyEmpty("   ", "xyz");                      // returns {@code false} (spaces are not empty)
+     * Strings.isAnyEmpty(null, null);                        // returns true
+     * Strings.isAnyEmpty("", "");                            // returns true
+     * Strings.isAnyEmpty("abc", "");                         // returns true
+     * Strings.isAnyEmpty("", "xyz");                         // returns true
+     * Strings.isAnyEmpty(null, "xyz");                       // returns true
+     * Strings.isAnyEmpty("abc", "xyz");                      // returns false
+     * Strings.isAnyEmpty("   ", "xyz");                      // returns {@code false} (spaces are not empty)
      * }</pre>
      *
      * @param a the first CharSequence to be checked, may be {@code null}
@@ -1121,12 +1123,12 @@ public final class Strings {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * isAnyEmpty(null, null, null);                  // returns true
-     * isAnyEmpty("abc", "", "xyz");                  // returns true
-     * isAnyEmpty("", "def", "xyz");                  // returns true
-     * isAnyEmpty("abc", "def", null);                // returns true
-     * isAnyEmpty("abc", "def", "xyz");               // returns false
-     * isAnyEmpty("   ", "def", "xyz");               // returns {@code false} (spaces are not empty)
+     * Strings.isAnyEmpty(null, null, null);                  // returns true
+     * Strings.isAnyEmpty("abc", "", "xyz");                  // returns true
+     * Strings.isAnyEmpty("", "def", "xyz");                  // returns true
+     * Strings.isAnyEmpty("abc", "def", null);                // returns true
+     * Strings.isAnyEmpty("abc", "def", "xyz");               // returns false
+     * Strings.isAnyEmpty("   ", "def", "xyz");               // returns {@code false} (spaces are not empty)
      * }</pre>
      *
      * @param a the first CharSequence to be checked, may be {@code null}
@@ -1151,16 +1153,16 @@ public final class Strings {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * isAnyEmpty((String) null);                     // returns true
-     * isAnyEmpty((String[]) null);                   // returns false
-     * isAnyEmpty(null, "foo");                       // returns true
-     * isAnyEmpty("", "bar");                         // returns true
-     * isAnyEmpty("bob", "");                         // returns true
-     * isAnyEmpty("  bob  ", null);                   // returns true
-     * isAnyEmpty(" ", "bar");                        // returns false
-     * isAnyEmpty("foo", "bar");                      // returns false
-     * isAnyEmpty(new String[] {});                    // returns false
-     * isAnyEmpty(new String[] {""});                  // returns true
+     * Strings.isAnyEmpty((String) null);                     // returns true
+     * Strings.isAnyEmpty((String[]) null);                   // returns false
+     * Strings.isAnyEmpty(null, "foo");                       // returns true
+     * Strings.isAnyEmpty("", "bar");                         // returns true
+     * Strings.isAnyEmpty("bob", "");                         // returns true
+     * Strings.isAnyEmpty("  bob  ", null);                   // returns true
+     * Strings.isAnyEmpty(" ", "bar");                        // returns false
+     * Strings.isAnyEmpty("foo", "bar");                      // returns false
+     * Strings.isAnyEmpty(new String[] {});                    // returns false
+     * Strings.isAnyEmpty(new String[] {""});                  // returns true
      * }</pre>
      *
      * @param css the CharSequences to check, may be {@code null} or empty
@@ -1194,13 +1196,13 @@ public final class Strings {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * List<String> list1 = Arrays.asList("abc", "", "xyz");
-     * isAnyEmpty(list1);                             // returns true
+     * Strings.isAnyEmpty(list1);                             // returns true
      * 
      * List<String> list2 = Arrays.asList("abc", "def", "xyz");
-     * isAnyEmpty(list2);                             // returns false
+     * Strings.isAnyEmpty(list2);                             // returns false
      * 
-     * isAnyEmpty(null);                              // returns false
-     * isAnyEmpty(new ArrayList<>());                 // returns false
+     * Strings.isAnyEmpty(null);                              // returns false
+     * Strings.isAnyEmpty(new ArrayList<>());                 // returns false
      * }</pre>
      *
      * @param css the Iterable of CharSequences to be checked, may be {@code null}
@@ -1231,12 +1233,12 @@ public final class Strings {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * isAnyBlank(null, null);                        // returns true
-     * isAnyBlank("", "");                            // returns true
-     * isAnyBlank("   ", "xyz");                      // returns true
-     * isAnyBlank("abc", "\t\n");                     // returns true
-     * isAnyBlank(null, "xyz");                       // returns true
-     * isAnyBlank("abc", "xyz");                      // returns false
+     * Strings.isAnyBlank(null, null);                        // returns true
+     * Strings.isAnyBlank("", "");                            // returns true
+     * Strings.isAnyBlank("   ", "xyz");                      // returns true
+     * Strings.isAnyBlank("abc", "\t\n");                     // returns true
+     * Strings.isAnyBlank(null, "xyz");                       // returns true
+     * Strings.isAnyBlank("abc", "xyz");                      // returns false
      * }</pre>
      *
      * @param a the first CharSequence to be checked, may be {@code null}
@@ -1259,11 +1261,11 @@ public final class Strings {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * isAnyBlank(null, null, null);                  // returns true
-     * isAnyBlank("abc", "   ", "xyz");               // returns true
-     * isAnyBlank("", "def", "xyz");                  // returns true
-     * isAnyBlank("abc", "def", null);                // returns true
-     * isAnyBlank("abc", "def", "xyz");               // returns false
+     * Strings.isAnyBlank(null, null, null);                  // returns true
+     * Strings.isAnyBlank("abc", "   ", "xyz");               // returns true
+     * Strings.isAnyBlank("", "def", "xyz");                  // returns true
+     * Strings.isAnyBlank("abc", "def", null);                // returns true
+     * Strings.isAnyBlank("abc", "def", "xyz");               // returns false
      * }</pre>
      *
      * @param a the first CharSequence to be checked, may be {@code null}
@@ -1290,17 +1292,17 @@ public final class Strings {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * isAnyBlank((String) null);                     // returns true
-     * isAnyBlank((String[]) null);                   // returns false
-     * isAnyBlank(null, "foo");                       // returns true
-     * isAnyBlank(null, null);                        // returns true
-     * isAnyBlank("", "bar");                         // returns true
-     * isAnyBlank("bob", "");                         // returns true
-     * isAnyBlank("  bob  ", null);                   // returns true
-     * isAnyBlank(" ", "bar");                        // returns true
-     * isAnyBlank(new String[] {});                   // returns false
-     * isAnyBlank(new String[] {""});                  // returns true
-     * isAnyBlank("foo", "bar");                      // returns false
+     * Strings.isAnyBlank((String) null);                     // returns true
+     * Strings.isAnyBlank((String[]) null);                   // returns false
+     * Strings.isAnyBlank(null, "foo");                       // returns true
+     * Strings.isAnyBlank(null, null);                        // returns true
+     * Strings.isAnyBlank("", "bar");                         // returns true
+     * Strings.isAnyBlank("bob", "");                         // returns true
+     * Strings.isAnyBlank("  bob  ", null);                   // returns true
+     * Strings.isAnyBlank(" ", "bar");                        // returns true
+     * Strings.isAnyBlank(new String[] {});                   // returns false
+     * Strings.isAnyBlank(new String[] {""});                  // returns true
+     * Strings.isAnyBlank("foo", "bar");                      // returns false
      * }</pre>
      *
      * @param css the CharSequences to check, may be {@code null} or empty
@@ -1334,13 +1336,13 @@ public final class Strings {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * List<String> list1 = Arrays.asList("abc", "   ", "xyz");
-     * isAnyBlank(list1);                             // returns true
+     * Strings.isAnyBlank(list1);                             // returns true
      * 
      * List<String> list2 = Arrays.asList("abc", "def", "xyz");
-     * isAnyBlank(list2);                             // returns false
+     * Strings.isAnyBlank(list2);                             // returns false
      * 
-     * isAnyBlank(null);                              // returns false
-     * isAnyBlank(new ArrayList<>());                 // returns false
+     * Strings.isAnyBlank(null);                              // returns false
+     * Strings.isAnyBlank(new ArrayList<>());                 // returns false
      * }</pre>
      *
      * @param css the Iterable of CharSequences to be checked, may be {@code null}
@@ -1372,12 +1374,12 @@ public final class Strings {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * isWrappedWith("'hello'", "'");                 // returns true
-     * isWrappedWith("\"text\"", "\"");               // returns true
-     * isWrappedWith("--comment--", "--");            // returns true
-     * isWrappedWith("hello", "'");                   // returns false
-     * isWrappedWith("'hello\"", "'");                // returns false
-     * isWrappedWith(null, "'");                      // returns false
+     * Strings.isWrappedWith("'hello'", "'");                 // returns true
+     * Strings.isWrappedWith("\"text\"", "\"");               // returns true
+     * Strings.isWrappedWith("--comment--", "--");            // returns true
+     * Strings.isWrappedWith("hello", "'");                   // returns false
+     * Strings.isWrappedWith("'hello\"", "'");                // returns false
+     * Strings.isWrappedWith(null, "'");                      // returns false
      * }</pre>
      *
      * @param str the input string to be checked, may be {@code null} or empty
@@ -1400,12 +1402,12 @@ public final class Strings {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * isWrappedWith("<html>content</html>", "<html>", "</html>");   // returns true
-     * isWrappedWith("{data}", "{", "}");                            // returns true
-     * isWrappedWith("[array]", "[", "]");                           // returns true
-     * isWrappedWith("hello", "<", ">");                             // returns false
-     * isWrappedWith("<hello", "<", ">");                            // returns false
-     * isWrappedWith(null, "<", ">");                                // returns false
+     * Strings.isWrappedWith("<html>content</html>", "<html>", "</html>");   // returns true
+     * Strings.isWrappedWith("{data}", "{", "}");                            // returns true
+     * Strings.isWrappedWith("[array]", "[", "]");                           // returns true
+     * Strings.isWrappedWith("hello", "<", ">");                             // returns false
+     * Strings.isWrappedWith("<hello", "<", ">");                            // returns false
+     * Strings.isWrappedWith(null, "<", ">");                                // returns false
      * }</pre>
      *
      * @param str the input string to be checked, may be {@code null} or empty
@@ -1430,10 +1432,10 @@ public final class Strings {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * defaultIfNull("hello", "default");             // returns "hello"
-     * defaultIfNull(null, "default");                // returns "default"
-     * defaultIfNull("", "default");                  // returns ""
-     * defaultIfNull("   ", "default");               // returns "   "
+     * Strings.defaultIfNull("hello", "default");             // returns "hello"
+     * Strings.defaultIfNull(null, "default");                // returns "default"
+     * Strings.defaultIfNull("", "default");                  // returns ""
+     * Strings.defaultIfNull("   ", "default");               // returns "   "
      * }</pre>
      *
      * @param <T> the type of {@code CharSequence}
@@ -1460,10 +1462,10 @@ public final class Strings {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * defaultIfNull("hello", () -> "default");       // returns "hello"
-     * defaultIfNull(null, () -> "default");          // returns "default"
-     * defaultIfNull("", () -> "default");            // returns ""
-     * defaultIfNull(null, () -> generateDefault());  // calls generateDefault() and returns its result
+     * Strings.defaultIfNull("hello", () -> "default");       // returns "hello"
+     * Strings.defaultIfNull(null, () -> "default");          // returns "default"
+     * Strings.defaultIfNull("", () -> "default");            // returns ""
+     * Strings.defaultIfNull(null, () -> generateDefault());  // calls generateDefault() and returns its result
      * }</pre>
      *
      * @param <T> the type of {@code CharSequence}
@@ -1492,10 +1494,10 @@ public final class Strings {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * defaultIfEmpty("hello", "default");            // returns "hello"
-     * defaultIfEmpty("", "default");                 // returns "default"
-     * defaultIfEmpty(null, "default");               // returns "default"
-     * defaultIfEmpty("   ", "default");              // returns "   " (spaces are not empty)
+     * Strings.defaultIfEmpty("hello", "default");            // returns "hello"
+     * Strings.defaultIfEmpty("", "default");                 // returns "default"
+     * Strings.defaultIfEmpty(null, "default");               // returns "default"
+     * Strings.defaultIfEmpty("   ", "default");              // returns "   " (spaces are not empty)
      * }</pre>
      *
      * @param <T> the type of {@code CharSequence}
@@ -1523,10 +1525,10 @@ public final class Strings {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * defaultIfEmpty("hello", () -> "default");      // returns "hello"
-     * defaultIfEmpty("", () -> "default");           // returns "default"
-     * defaultIfEmpty(null, () -> "default");         // returns "default"
-     * defaultIfEmpty("", () -> generateDefault());   // calls generateDefault() and returns its result
+     * Strings.defaultIfEmpty("hello", () -> "default");      // returns "hello"
+     * Strings.defaultIfEmpty("", () -> "default");           // returns "default"
+     * Strings.defaultIfEmpty(null, () -> "default");         // returns "default"
+     * Strings.defaultIfEmpty("", () -> generateDefault());   // calls generateDefault() and returns its result
      * }</pre>
      *
      * @param <T> the type of {@code CharSequence}
@@ -1556,11 +1558,11 @@ public final class Strings {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * defaultIfBlank("hello", "default");            // returns "hello"
-     * defaultIfBlank("   ", "default");              // returns "default"
-     * defaultIfBlank("", "default");                 // returns "default"
-     * defaultIfBlank(null, "default");               // returns "default"
-     * defaultIfBlank("  abc  ", "default");          // returns "  abc  "
+     * Strings.defaultIfBlank("hello", "default");            // returns "hello"
+     * Strings.defaultIfBlank("   ", "default");              // returns "default"
+     * Strings.defaultIfBlank("", "default");                 // returns "default"
+     * Strings.defaultIfBlank(null, "default");               // returns "default"
+     * Strings.defaultIfBlank("  abc  ", "default");          // returns "  abc  "
      * }</pre>
      *
      * @param <T> the type of {@code CharSequence}
@@ -1588,10 +1590,10 @@ public final class Strings {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * defaultIfBlank("hello", () -> "default");      // returns "hello"
-     * defaultIfBlank("   ", () -> "default");        // returns "default"
-     * defaultIfBlank(null, () -> "default");         // returns "default"
-     * defaultIfBlank("   ", () -> generateDefault());// calls generateDefault() and returns its result
+     * Strings.defaultIfBlank("hello", () -> "default");      // returns "hello"
+     * Strings.defaultIfBlank("   ", () -> "default");        // returns "default"
+     * Strings.defaultIfBlank(null, () -> "default");         // returns "default"
+     * Strings.defaultIfBlank("   ", () -> generateDefault());// calls generateDefault() and returns its result
      * }</pre>
      *
      * @param <T> the type of {@code CharSequence}
@@ -1622,11 +1624,11 @@ public final class Strings {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * firstNonEmpty("hello", "world");               // returns "hello"
-     * firstNonEmpty("", "world");                    // returns "world"
-     * firstNonEmpty(null, "world");                  // returns "world"
-     * firstNonEmpty("", "");                         // returns ""
-     * firstNonEmpty(null, null);                     // returns ""
+     * Strings.firstNonEmpty("hello", "world");               // returns "hello"
+     * Strings.firstNonEmpty("", "world");                    // returns "world"
+     * Strings.firstNonEmpty(null, "world");                  // returns "world"
+     * Strings.firstNonEmpty("", "");                         // returns ""
+     * Strings.firstNonEmpty(null, null);                     // returns ""
      * }</pre>
      *
      * @param a the first String to be checked, may be {@code null} or empty
@@ -1650,12 +1652,12 @@ public final class Strings {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * firstNonEmpty("hello", "world", "!");          // returns "hello"
-     * firstNonEmpty("", "world", "!");               // returns "world"
-     * firstNonEmpty("", "", "!");                    // returns "!"
-     * firstNonEmpty(null, null, "!");                // returns "!"
-     * firstNonEmpty("", "", "");                     // returns ""
-     * firstNonEmpty(null, null, null);               // returns ""
+     * Strings.firstNonEmpty("hello", "world", "!");          // returns "hello"
+     * Strings.firstNonEmpty("", "world", "!");               // returns "world"
+     * Strings.firstNonEmpty("", "", "!");                    // returns "!"
+     * Strings.firstNonEmpty(null, null, "!");                // returns "!"
+     * Strings.firstNonEmpty("", "", "");                     // returns ""
+     * Strings.firstNonEmpty(null, null, null);               // returns ""
      * }</pre>
      *
      * @param a the first String to be checked, may be {@code null} or empty
@@ -1680,14 +1682,14 @@ public final class Strings {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * firstNonEmpty(null, null, null);                   // returns ""
-     * firstNonEmpty(null, null, "");                     // returns ""
-     * firstNonEmpty(null, "", " ");                      // returns " "
-     * firstNonEmpty("abc");                              // returns "abc"
-     * firstNonEmpty(null, "xyz");                        // returns "xyz"
-     * firstNonEmpty("", "xyz");                          // returns "xyz"
-     * firstNonEmpty(null, "xyz", "abc");                 // returns "xyz"
-     * firstNonEmpty();                                   // returns ""
+     * Strings.firstNonEmpty(null, null, null);                   // returns ""
+     * Strings.firstNonEmpty(null, null, "");                     // returns ""
+     * Strings.firstNonEmpty(null, "", " ");                      // returns " "
+     * Strings.firstNonEmpty("abc");                              // returns "abc"
+     * Strings.firstNonEmpty(null, "xyz");                        // returns "xyz"
+     * Strings.firstNonEmpty("", "xyz");                          // returns "xyz"
+     * Strings.firstNonEmpty(null, "xyz", "abc");                 // returns "xyz"
+     * Strings.firstNonEmpty();                                   // returns ""
      * }</pre>
      *
      * @param css the values to test, may be {@code null} or empty
@@ -1721,13 +1723,13 @@ public final class Strings {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * List<String> list1 = Arrays.asList("", null, "hello");
-     * firstNonEmpty(list1);                          // returns "hello"
+     * Strings.firstNonEmpty(list1);                          // returns "hello"
      * 
      * List<String> list2 = Arrays.asList("", null, "");
-     * firstNonEmpty(list2);                          // returns ""
+     * Strings.firstNonEmpty(list2);                          // returns ""
      * 
-     * firstNonEmpty(null);                           // returns ""
-     * firstNonEmpty(new ArrayList<>());              // returns ""
+     * Strings.firstNonEmpty(null);                           // returns ""
+     * Strings.firstNonEmpty(new ArrayList<>());              // returns ""
      * }</pre>
      *
      * @param css the Iterable of Strings to be checked, may be {@code null}
@@ -1759,11 +1761,11 @@ public final class Strings {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * firstNonBlank("hello", "world");               // returns "hello"
-     * firstNonBlank("   ", "world");                 // returns "world"
-     * firstNonBlank(null, "world");                  // returns "world"
-     * firstNonBlank("   ", "   ");                   // returns ""
-     * firstNonBlank(null, null);                     // returns ""
+     * Strings.firstNonBlank("hello", "world");               // returns "hello"
+     * Strings.firstNonBlank("   ", "world");                 // returns "world"
+     * Strings.firstNonBlank(null, "world");                  // returns "world"
+     * Strings.firstNonBlank("   ", "   ");                   // returns ""
+     * Strings.firstNonBlank(null, null);                     // returns ""
      * }</pre>
      *
      * @param a the first String to be checked, may be {@code null} or empty
@@ -1787,12 +1789,12 @@ public final class Strings {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * firstNonBlank("hello", "world", "!");          // returns "hello"
-     * firstNonBlank("   ", "world", "!");            // returns "world"
-     * firstNonBlank("   ", "   ", "!");              // returns "!"
-     * firstNonBlank(null, null, "!");                // returns "!"
-     * firstNonBlank("   ", "   ", "   ");            // returns ""
-     * firstNonBlank(null, null, null);               // returns ""
+     * Strings.firstNonBlank("hello", "world", "!");          // returns "hello"
+     * Strings.firstNonBlank("   ", "world", "!");            // returns "world"
+     * Strings.firstNonBlank("   ", "   ", "!");              // returns "!"
+     * Strings.firstNonBlank(null, null, "!");                // returns "!"
+     * Strings.firstNonBlank("   ", "   ", "   ");            // returns ""
+     * Strings.firstNonBlank(null, null, null);               // returns ""
      * }</pre>
      *
      * @param a the first String to be checked, may be {@code null} or empty
@@ -1817,12 +1819,12 @@ public final class Strings {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * firstNonBlank(null, "   ", "hello");           // returns "hello"
-     * firstNonBlank("", "\t", "world");              // returns "world"
-     * firstNonBlank("   ", "   ", "   ");            // returns ""
-     * firstNonBlank(null, null, null);               // returns ""
-     * firstNonBlank();                               // returns ""
-     * firstNonBlank((String[]) null);                // returns ""
+     * Strings.firstNonBlank(null, "   ", "hello");           // returns "hello"
+     * Strings.firstNonBlank("", "\t", "world");              // returns "world"
+     * Strings.firstNonBlank("   ", "   ", "   ");            // returns ""
+     * Strings.firstNonBlank(null, null, null);               // returns ""
+     * Strings.firstNonBlank();                               // returns ""
+     * Strings.firstNonBlank((String[]) null);                // returns ""
      * }</pre>
      *
      * @param css the Strings to be checked. They can be {@code null} or empty.
@@ -1856,13 +1858,13 @@ public final class Strings {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * List<String> list1 = Arrays.asList("   ", null, "hello");
-     * firstNonBlank(list1);                          // returns "hello"
+     * Strings.firstNonBlank(list1);                          // returns "hello"
      *
      * List<String> list2 = Arrays.asList("   ", null, "\t");
-     * firstNonBlank(list2);                          // returns ""
+     * Strings.firstNonBlank(list2);                          // returns ""
      *
-     * firstNonBlank(null);                           // returns ""
-     * firstNonBlank(new ArrayList<>());              // returns ""
+     * Strings.firstNonBlank(null);                           // returns ""
+     * Strings.firstNonBlank(new ArrayList<>());              // returns ""
      * }</pre>
      *
      * @param css the Iterable of Strings to be checked, may be {@code null}
@@ -1892,10 +1894,10 @@ public final class Strings {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * nullToEmpty(null);                             // returns ""
-     * nullToEmpty("");                               // returns ""
-     * nullToEmpty("   ");                            // returns "   "
-     * nullToEmpty("hello");                          // returns "hello"
+     * Strings.nullToEmpty(null);                             // returns ""
+     * Strings.nullToEmpty("");                               // returns ""
+     * Strings.nullToEmpty("   ");                            // returns "   "
+     * Strings.nullToEmpty("hello");                          // returns "hello"
      * }</pre>
      *
      * @param str the input string to be checked, may be {@code null}
@@ -1916,13 +1918,13 @@ public final class Strings {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String[] arr = {null, "hello", null, "world"};
-     * nullToEmpty(arr);                              // arr becomes {"", "hello", "", "world"}
+     * Strings.nullToEmpty(arr);                              // arr becomes {"", "hello", "", "world"}
      * 
      * String[] arr2 = {"a", "b", "c"};
-     * nullToEmpty(arr2);                             // arr2 remains {"a", "b", "c"}
+     * Strings.nullToEmpty(arr2);                             // arr2 remains {"a", "b", "c"}
      * 
-     * nullToEmpty(null);                             // does nothing
-     * nullToEmpty(new String[0]);                    // does nothing
+     * Strings.nullToEmpty(null);                             // does nothing
+     * Strings.nullToEmpty(new String[0]);                    // does nothing
      * }</pre>
      *
      * @param strs the input string array to be checked. Each {@code null} element in the array will be converted to an empty string, may be {@code null} or empty
@@ -1947,10 +1949,10 @@ public final class Strings {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * emptyToNull("");                               // returns null
-     * emptyToNull(null);                             // returns null
-     * emptyToNull("   ");                            // returns "   " (spaces are not empty)
-     * emptyToNull("hello");                          // returns "hello"
+     * Strings.emptyToNull("");                               // returns null
+     * Strings.emptyToNull(null);                             // returns null
+     * Strings.emptyToNull("   ");                            // returns "   " (spaces are not empty)
+     * Strings.emptyToNull("hello");                          // returns "hello"
      * }</pre>
      *
      * @param <T> the type of the CharSequence
@@ -1971,13 +1973,13 @@ public final class Strings {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String[] arr = {"", "hello", "", "world"};
-     * emptyToNull(arr);                              // arr becomes {null, "hello", null, "world"}
+     * Strings.emptyToNull(arr);                              // arr becomes {null, "hello", null, "world"}
      * 
      * String[] arr2 = {"a", "   ", "c"};
-     * emptyToNull(arr2);                             // arr2 remains {"a", "   ", "c"} (spaces are not empty)
+     * Strings.emptyToNull(arr2);                             // arr2 remains {"a", "   ", "c"} (spaces are not empty)
      * 
-     * emptyToNull(null);                             // does nothing
-     * emptyToNull(new String[0]);                    // does nothing
+     * Strings.emptyToNull(null);                             // does nothing
+     * Strings.emptyToNull(new String[0]);                    // does nothing
      * }</pre>
      *
      * @param <T> the type of the CharSequence
@@ -2000,12 +2002,12 @@ public final class Strings {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * blankToEmpty(null);                            // returns ""
-     * blankToEmpty("");                              // returns ""
-     * blankToEmpty("   ");                           // returns ""
-     * blankToEmpty("\t\n");                          // returns ""
-     * blankToEmpty("hello");                         // returns "hello"
-     * blankToEmpty("  hello  ");                     // returns "  hello  "
+     * Strings.blankToEmpty(null);                            // returns ""
+     * Strings.blankToEmpty("");                              // returns ""
+     * Strings.blankToEmpty("   ");                           // returns ""
+     * Strings.blankToEmpty("\t\n");                          // returns ""
+     * Strings.blankToEmpty("hello");                         // returns "hello"
+     * Strings.blankToEmpty("  hello  ");                     // returns "  hello  "
      * }</pre>
      *
      * @param str the input string to be checked, may be {@code null} or empty
@@ -2026,13 +2028,13 @@ public final class Strings {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String[] arr = {null, "   ", "hello", "\t"};
-     * blankToEmpty(arr);                             // arr becomes {"", "", "hello", ""}
+     * Strings.blankToEmpty(arr);                             // arr becomes {"", "", "hello", ""}
      * 
      * String[] arr2 = {"a", "  b  ", "c"};
-     * blankToEmpty(arr2);                            // arr2 remains {"a", "  b  ", "c"}
+     * Strings.blankToEmpty(arr2);                            // arr2 remains {"a", "  b  ", "c"}
      * 
-     * blankToEmpty(null);                            // does nothing
-     * blankToEmpty(new String[0]);                   // does nothing
+     * Strings.blankToEmpty(null);                            // does nothing
+     * Strings.blankToEmpty(new String[0]);                   // does nothing
      * }</pre>
      *
      * @param strs the input string array to be checked. Each blank element in the array will be converted to an empty string, may be {@code null} or empty
@@ -2054,12 +2056,12 @@ public final class Strings {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * blankToNull("");                               // returns null
-     * blankToNull("   ");                            // returns null
-     * blankToNull("\t\n");                           // returns null
-     * blankToNull(null);                             // returns null
-     * blankToNull("hello");                          // returns "hello"
-     * blankToNull("  hello  ");                      // returns "  hello  "
+     * Strings.blankToNull("");                               // returns null
+     * Strings.blankToNull("   ");                            // returns null
+     * Strings.blankToNull("\t\n");                           // returns null
+     * Strings.blankToNull(null);                             // returns null
+     * Strings.blankToNull("hello");                          // returns "hello"
+     * Strings.blankToNull("  hello  ");                      // returns "  hello  "
      * }</pre>
      *
      * @param <T> the type of the CharSequence
@@ -2081,13 +2083,13 @@ public final class Strings {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String[] arr = {"   ", "hello", "\t", "world"};
-     * blankToNull(arr);                              // arr becomes {null, "hello", null, "world"}
+     * Strings.blankToNull(arr);                              // arr becomes {null, "hello", null, "world"}
      * 
      * String[] arr2 = {"a", "  b  ", "c"};
-     * blankToNull(arr2);                             // arr2 remains {"a", "  b  ", "c"}
+     * Strings.blankToNull(arr2);                             // arr2 remains {"a", "  b  ", "c"}
      * 
-     * blankToNull(null);                             // does nothing
-     * blankToNull(new String[0]);                    // does nothing
+     * Strings.blankToNull(null);                             // does nothing
+     * Strings.blankToNull(new String[0]);                    // does nothing
      * }</pre>
      *
      * @param <T> the type of the CharSequence
@@ -2107,7 +2109,7 @@ public final class Strings {
      * <p>Abbreviates a String using ellipses. This will turn
      * "Now is the time for all good men" into "...is the time for..."</p>
      *
-     * <p>Works like {@code abbreviate(String, int)}, but allows you to specify
+     * <p>Works like {@code Strings.abbreviate(String, int)}, but allows you to specify
      * a "left edge" offset.  Note that this left edge is not necessarily going to
      * be the leftmost character in the result, or the first character following the
      * ellipses, but it will appear somewhere in the result.
@@ -2152,7 +2154,7 @@ public final class Strings {
      * "Now is the time for all good men" into "...is the time for..." if "..." was defined
      * as the replacement marker.</p>
      *
-     * <p>Works like {@code abbreviate(String, String, int)}, but allows you to specify
+     * <p>Works like {@code Strings.abbreviate(String, String, int)}, but allows you to specify
      * a "left edge" offset.  Note that this left edge is not necessarily going to
      * be the leftmost character in the result, or the first character following the
      * replacement marker, but it will appear somewhere in the result.
@@ -2238,7 +2240,7 @@ public final class Strings {
      * <ul>
      *   <li>If the number of characters in {@code str} is less than or equal to
      *       {@code maxWidth}, return {@code str}.</li>
-     *   <li>Else abbreviate it to {@code (substring(str, 0, max-3) + "...")}.</li>
+     *   <li>Else abbreviate it to {@code (Strings.substring(str, 0, max - 3) + "...")}.</li>
      *   <li>If {@code maxWidth} is less than {@code 4}, throw an
      *       {@code IllegalArgumentException}.</li>
      *   <li>In no case will it return a String of length greater than
@@ -2274,7 +2276,7 @@ public final class Strings {
      * <ul>
      *   <li>If the number of characters in {@code str} is less than or equal to
      *       {@code maxWidth}, return {@code str}.</li>
-     *   <li>Else abbreviate it to {@code (substring(str, 0, max-abbrevMarker.length) + abbrevMarker)}.</li>
+     *   <li>Else abbreviate it to {@code (Strings.substring(str, 0, max - abbrevMarker.length) + abbrevMarker)}.</li>
      *   <li>If {@code maxWidth} is less than {@code abbrevMarker.length + 1}, throw an
      *       {@code IllegalArgumentException}.</li>
      *   <li>In no case will it return a String of length greater than
@@ -2351,7 +2353,7 @@ public final class Strings {
      * using the space character (' ').</p>
      *
      * <p>If the size is less than the String length, the original String is returned.
-     * This method is equivalent to {@code center(str, size, " ")}.</p>
+     * This method is equivalent to {@code Strings.center(str, size, " ")}.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -2466,11 +2468,11 @@ public final class Strings {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * padStart("abc", 5);                            // returns "  abc"
-     * padStart("abc", 3);                            // returns "abc"
-     * padStart("abc", 1);                            // returns "abc"
-     * padStart("", 3);                               // returns "   "
-     * padStart(null, 3);                             // returns "   "
+     * Strings.padStart("abc", 5);                            // returns "  abc"
+     * Strings.padStart("abc", 3);                            // returns "abc"
+     * Strings.padStart("abc", 1);                            // returns "abc"
+     * Strings.padStart("", 3);                               // returns "   "
+     * Strings.padStart(null, 3);                             // returns "   "
      * }</pre>
      *
      * @param str the string to be padded, may be {@code null} or empty
@@ -2488,11 +2490,11 @@ public final class Strings {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * padStart("abc", 5, '*');                       // returns "**abc"
-     * padStart("abc", 3, '*');                       // returns "abc"
-     * padStart("abc", 6, '0');                       // returns "000abc"
-     * padStart("", 3, 'x');                          // returns "xxx"
-     * padStart(null, 3, '-');                        // returns "---"
+     * Strings.padStart("abc", 5, '*');                       // returns "**abc"
+     * Strings.padStart("abc", 3, '*');                       // returns "abc"
+     * Strings.padStart("abc", 6, '0');                       // returns "000abc"
+     * Strings.padStart("", 3, 'x');                          // returns "xxx"
+     * Strings.padStart(null, 3, '-');                        // returns "---"
      * }</pre>
      *
      * @param str the string to be padded, may be {@code null} or empty
@@ -2523,11 +2525,11 @@ public final class Strings {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * padStart("abc", 7, "xy");                      // returns "xyxyabc"
-     * padStart("abc", 6, "123");                     // returns "123abc"
-     * padStart("abc", 8, "xy");                      // returns "xyxyxabc"
-     * padStart("", 4, "ab");                         // returns "abab"
-     * padStart(null, 3, "0");                        // returns "000"
+     * Strings.padStart("abc", 7, "xy");                      // returns "xyxyabc"
+     * Strings.padStart("abc", 6, "123");                     // returns "123abc"
+     * Strings.padStart("abc", 8, "xy");                      // returns "xyxyxabc"
+     * Strings.padStart("", 4, "ab");                         // returns "abab"
+     * Strings.padStart(null, 3, "0");                        // returns "000"
      * }</pre>
      *
      * @param str the string to be padded, may be {@code null} or empty
@@ -2585,11 +2587,11 @@ public final class Strings {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * padEnd("abc", 5);                              // returns "abc  "
-     * padEnd("abc", 3);                              // returns "abc"
-     * padEnd("abc", 1);                              // returns "abc"
-     * padEnd("", 3);                                 // returns "   "
-     * padEnd(null, 3);                               // returns "   "
+     * Strings.padEnd("abc", 5);                              // returns "abc  "
+     * Strings.padEnd("abc", 3);                              // returns "abc"
+     * Strings.padEnd("abc", 1);                              // returns "abc"
+     * Strings.padEnd("", 3);                                 // returns "   "
+     * Strings.padEnd(null, 3);                               // returns "   "
      * }</pre>
      *
      * @param str the string to be padded, may be {@code null} or empty
@@ -2607,11 +2609,11 @@ public final class Strings {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * padEnd("abc", 5, '*');                         // returns "abc**"
-     * padEnd("abc", 3, '*');                         // returns "abc"
-     * padEnd("abc", 6, '0');                         // returns "abc000"
-     * padEnd("", 3, 'x');                            // returns "xxx"
-     * padEnd(null, 3, '-');                          // returns "---"
+     * Strings.padEnd("abc", 5, '*');                         // returns "abc**"
+     * Strings.padEnd("abc", 3, '*');                         // returns "abc"
+     * Strings.padEnd("abc", 6, '0');                         // returns "abc000"
+     * Strings.padEnd("", 3, 'x');                            // returns "xxx"
+     * Strings.padEnd(null, 3, '-');                          // returns "---"
      * }</pre>
      *
      * @param str the string to be padded, may be {@code null} or empty
@@ -2642,11 +2644,11 @@ public final class Strings {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * padEnd("abc", 7, "xy");                        // returns "abcxyxy"
-     * padEnd("abc", 6, "123");                       // returns "abc123"
-     * padEnd("abc", 8, "xy");                        // returns "abcxyxyx"
-     * padEnd("", 4, "ab");                           // returns "abab"
-     * padEnd(null, 3, "0");                          // returns "000"
+     * Strings.padEnd("abc", 7, "xy");                        // returns "abcxyxy"
+     * Strings.padEnd("abc", 6, "123");                       // returns "abc123"
+     * Strings.padEnd("abc", 8, "xy");                        // returns "abcxyxyx"
+     * Strings.padEnd("", 4, "ab");                           // returns "abab"
+     * Strings.padEnd(null, 3, "0");                          // returns "000"
      * }</pre>
      *
      * @param str the string to be padded, may be {@code null} or empty
@@ -2709,10 +2711,10 @@ public final class Strings {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * repeat('a', 0);                                // returns ""
-     * repeat('a', 3);                                // returns "aaa"
-     * repeat('*', 5);                                // returns "*****"
-     * repeat(' ', 4);                                // returns "    "
+     * Strings.repeat('a', 0);                                // returns ""
+     * Strings.repeat('a', 3);                                // returns "aaa"
+     * Strings.repeat('*', 5);                                // returns "*****"
+     * Strings.repeat(' ', 4);                                // returns "    "
      * }</pre>
      *
      * @param ch the character to be repeated.
@@ -2740,10 +2742,10 @@ public final class Strings {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * repeat('a', 0, ',');                           // returns ""
-     * repeat('a', 1, ',');                           // returns "a"
-     * repeat('a', 3, ',');                           // returns "a,a,a"
-     * repeat('*', 4, '-');                           // returns "*-*-*-*"
+     * Strings.repeat('a', 0, ',');                           // returns ""
+     * Strings.repeat('a', 1, ',');                           // returns "a"
+     * Strings.repeat('a', 3, ',');                           // returns "a,a,a"
+     * Strings.repeat('*', 4, '-');                           // returns "*-*-*-*"
      * }</pre>
      *
      * @param ch the character to be repeated.
@@ -2768,12 +2770,12 @@ public final class Strings {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * repeat("ab", 0);                               // returns ""
-     * repeat("ab", 1);                               // returns "ab"
-     * repeat("ab", 3);                               // returns "ababab"
-     * repeat("Hello", 2);                            // returns "HelloHello"
-     * repeat(null, 3);                               // returns ""
-     * repeat("", 3);                                 // returns ""
+     * Strings.repeat("ab", 0);                               // returns ""
+     * Strings.repeat("ab", 1);                               // returns "ab"
+     * Strings.repeat("ab", 3);                               // returns "ababab"
+     * Strings.repeat("Hello", 2);                            // returns "HelloHello"
+     * Strings.repeat(null, 3);                               // returns ""
+     * Strings.repeat("", 3);                                 // returns ""
      * }</pre>
      *
      * @param str the string to be repeated, may be {@code null} or empty
@@ -2803,11 +2805,11 @@ public final class Strings {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * repeat("ab", 0, ",");                          // returns ""
-     * repeat("ab", 1, ",");                          // returns "ab"
-     * repeat("ab", 3, ",");                          // returns "ab,ab,ab"
-     * repeat("Hello", 2, " ");                       // returns "Hello Hello"
-     * repeat("X", 4, "-");                           // returns "X-X-X-X"
+     * Strings.repeat("ab", 0, ",");                          // returns ""
+     * Strings.repeat("ab", 1, ",");                          // returns "ab"
+     * Strings.repeat("ab", 3, ",");                          // returns "ab,ab,ab"
+     * Strings.repeat("Hello", 2, " ");                       // returns "Hello Hello"
+     * Strings.repeat("X", 4, "-");                           // returns "X-X-X-X"
      * }</pre>
      *
      * @param str the string to be repeated, may be {@code null} or empty
@@ -2833,10 +2835,10 @@ public final class Strings {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * repeat("ab", 0, ",", "[", "]");                // returns "[]"
-     * repeat("ab", 1, ",", "[", "]");                // returns "[ab]"
-     * repeat("ab", 3, ",", "[", "]");                // returns "[ab,ab,ab]"
-     * repeat("X", 4, "-", "Start:", ":End");         // returns "Start:X-X-X-X:End"
+     * Strings.repeat("ab", 0, ",", "[", "]");                // returns "[]"
+     * Strings.repeat("ab", 1, ",", "[", "]");                // returns "[ab]"
+     * Strings.repeat("ab", 3, ",", "[", "]");                // returns "[ab,ab,ab]"
+     * Strings.repeat("X", 4, "-", "Start:", ":End");         // returns "Start:X-X-X-X:End"
      * }</pre>
      *
      * @param str the string to be repeated, may be {@code null} or empty
@@ -2871,9 +2873,9 @@ public final class Strings {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * getBytes("hello");                             // returns byte array of "hello"
-     * getBytes("");                                  // returns empty byte array
-     * getBytes(null);                                // returns null
+     * Strings.getBytes("hello");                             // returns byte array of "hello"
+     * Strings.getBytes("");                                  // returns empty byte array
+     * Strings.getBytes(null);                                // returns null
      * }</pre>
      *
      * @param string the input string to be converted, may be {@code null}
@@ -2891,10 +2893,10 @@ public final class Strings {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * getBytes("hello", StandardCharsets.UTF_8);     // returns UTF-8 encoded bytes
-     * getBytes("hello", StandardCharsets.US_ASCII);  // returns ASCII encoded bytes
-     * getBytes("", StandardCharsets.UTF_8);          // returns empty byte array
-     * getBytes(null, StandardCharsets.UTF_8);        // returns null
+     * Strings.getBytes("hello", StandardCharsets.UTF_8);     // returns UTF-8 encoded bytes
+     * Strings.getBytes("hello", StandardCharsets.US_ASCII);  // returns ASCII encoded bytes
+     * Strings.getBytes("", StandardCharsets.UTF_8);          // returns empty byte array
+     * Strings.getBytes(null, StandardCharsets.UTF_8);        // returns null
      * }</pre>
      *
      * @param string the input string to be converted, may be {@code null}
@@ -2913,10 +2915,10 @@ public final class Strings {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * getBytesUtf8("hello");                         // returns UTF-8 encoded bytes
-     * getBytesUtf8("世界");                           // returns UTF-8 encoded bytes
-     * getBytesUtf8("");                              // returns empty byte array
-     * getBytesUtf8(null);                            // returns null
+     * Strings.getBytesUtf8("hello");                         // returns UTF-8 encoded bytes
+     * Strings.getBytesUtf8("世界");                           // returns UTF-8 encoded bytes
+     * Strings.getBytesUtf8("");                              // returns empty byte array
+     * Strings.getBytesUtf8(null);                            // returns null
      * }</pre>
      *
      * @param string the input string to be converted, may be {@code null}
@@ -2935,10 +2937,10 @@ public final class Strings {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * toCharArray("hello");                          // returns ['h','e','l','l','o']
-     * toCharArray("");                               // returns []
-     * toCharArray(null);                             // returns null
-     * toCharArray(new StringBuilder("abc"));         // returns ['a','b','c']
+     * Strings.toCharArray("hello");                          // returns ['h','e','l','l','o']
+     * Strings.toCharArray("");                               // returns []
+     * Strings.toCharArray(null);                             // returns null
+     * Strings.toCharArray(new StringBuilder("abc"));         // returns ['a','b','c']
      * }</pre>
      *
      * @param source the input CharSequence to be converted, may be {@code null}
@@ -3004,11 +3006,11 @@ public final class Strings {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * toLowerCase('A');                              // returns 'a'
-     * toLowerCase('Z');                              // returns 'z'
-     * toLowerCase('a');                              // returns 'a'
-     * toLowerCase('1');                              // returns '1'
-     * toLowerCase('Ω');                              // returns 'ω'
+     * Strings.toLowerCase('A');                              // returns 'a'
+     * Strings.toLowerCase('Z');                              // returns 'z'
+     * Strings.toLowerCase('a');                              // returns 'a'
+     * Strings.toLowerCase('1');                              // returns '1'
+     * Strings.toLowerCase('Ω');                              // returns 'ω'
      * }</pre>
      *
      * @param ch the character to convert to lowercase.
@@ -3096,12 +3098,12 @@ public final class Strings {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * toLowerCaseWithUnderscore("helloWorld");       // returns "hello_world"
-     * toLowerCaseWithUnderscore("HelloWorld");       // returns "hello_world"
-     * toLowerCaseWithUnderscore("helloWorldAPI");    // returns "hello_world_api"
-     * toLowerCaseWithUnderscore("IOError");          // returns "io_error"
-     * toLowerCaseWithUnderscore(null);               // returns null
-     * toLowerCaseWithUnderscore("");                 // returns ""
+     * Strings.toLowerCaseWithUnderscore("helloWorld");       // returns "hello_world"
+     * Strings.toLowerCaseWithUnderscore("HelloWorld");       // returns "hello_world"
+     * Strings.toLowerCaseWithUnderscore("helloWorldAPI");    // returns "hello_world_api"
+     * Strings.toLowerCaseWithUnderscore("IOError");          // returns "io_error"
+     * Strings.toLowerCaseWithUnderscore(null);               // returns null
+     * Strings.toLowerCaseWithUnderscore("");                 // returns ""
      * }</pre>
      *
      * @param str the input string to be converted
@@ -3149,11 +3151,11 @@ public final class Strings {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * toUpperCase('a');                              // returns 'A'
-     * toUpperCase('z');                              // returns 'Z'
-     * toUpperCase('A');                              // returns 'A'
-     * toUpperCase('1');                              // returns '1'
-     * toUpperCase('ω');                              // returns 'Ω'
+     * Strings.toUpperCase('a');                              // returns 'A'
+     * Strings.toUpperCase('z');                              // returns 'Z'
+     * Strings.toUpperCase('A');                              // returns 'A'
+     * Strings.toUpperCase('1');                              // returns '1'
+     * Strings.toUpperCase('ω');                              // returns 'Ω'
      * }</pre>
      *
      * @param ch the character to convert to uppercase.
@@ -3243,13 +3245,13 @@ public final class Strings {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * toUpperCaseWithUnderscore(null);           // returns null
-     * toUpperCaseWithUnderscore("");             // returns ""
-     * toUpperCaseWithUnderscore("helloWorld");   // returns "HELLO_WORLD"
-     * toUpperCaseWithUnderscore("HelloWorld");   // returns "HELLO_WORLD"
-     * toUpperCaseWithUnderscore("helloWorldAPI"); // returns "HELLO_WORLD_API"
-     * toUpperCaseWithUnderscore("XMLParser");     // returns "XML_PARSER"
-     * toUpperCaseWithUnderscore("IOError");       // returns "IO_ERROR"
+     * Strings.toUpperCaseWithUnderscore(null);           // returns null
+     * Strings.toUpperCaseWithUnderscore("");             // returns ""
+     * Strings.toUpperCaseWithUnderscore("helloWorld");   // returns "HELLO_WORLD"
+     * Strings.toUpperCaseWithUnderscore("HelloWorld");   // returns "HELLO_WORLD"
+     * Strings.toUpperCaseWithUnderscore("helloWorldAPI"); // returns "HELLO_WORLD_API"
+     * Strings.toUpperCaseWithUnderscore("XMLParser");     // returns "XML_PARSER"
+     * Strings.toUpperCaseWithUnderscore("IOError");       // returns "IO_ERROR"
      * }</pre>
      *
      * @param str the input string to be converted, may be {@code null} or empty
@@ -3309,14 +3311,14 @@ public final class Strings {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * toCamelCase(null);                 // returns null
-     * toCamelCase("");                   // returns ""
-     * toCamelCase("first_name");         // returns "firstName"
-     * toCamelCase("FIRST_NAME");         // returns "firstName"
-     * toCamelCase("first-name");         // returns "firstName"
-     * toCamelCase("FirstName");          // returns "firstName"
-     * toCamelCase("FIRSTNAME");          // returns "firstname"
-     * toCamelCase("firstName");          // returns "firstName"
+     * Strings.toCamelCase(null);                 // returns null
+     * Strings.toCamelCase("");                   // returns ""
+     * Strings.toCamelCase("first_name");         // returns "firstName"
+     * Strings.toCamelCase("FIRST_NAME");         // returns "firstName"
+     * Strings.toCamelCase("first-name");         // returns "firstName"
+     * Strings.toCamelCase("FirstName");          // returns "firstName"
+     * Strings.toCamelCase("FIRSTNAME");          // returns "firstname"
+     * Strings.toCamelCase("firstName");          // returns "firstName"
      * }</pre>
      *
      * @param str the input string to be converted, may be {@code null} or empty
@@ -3344,12 +3346,12 @@ public final class Strings {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * toCamelCase(null, '.');            // returns null
-     * toCamelCase("", '.');              // returns ""
-     * toCamelCase("first.name", '.');    // returns "firstName"
-     * toCamelCase("FIRST.NAME", '.');    // returns "firstName"
-     * toCamelCase("first#name", '#');    // returns "firstName"
-     * toCamelCase("firstName", '.');     // returns "firstName"
+     * Strings.toCamelCase(null, '.');            // returns null
+     * Strings.toCamelCase("", '.');              // returns ""
+     * Strings.toCamelCase("first.name", '.');    // returns "firstName"
+     * Strings.toCamelCase("FIRST.NAME", '.');    // returns "firstName"
+     * Strings.toCamelCase("first#name", '#');    // returns "firstName"
+     * Strings.toCamelCase("firstName", '.');     // returns "firstName"
      * }</pre>
      *
      * @param str the input string to be converted, may be {@code null} or empty
@@ -3422,13 +3424,13 @@ public final class Strings {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * toPascalCase(null);                // returns null
-     * toPascalCase("");                  // returns ""
-     * toPascalCase("first_name");        // returns "FirstName"
-     * toPascalCase("FIRST_NAME");        // returns "FirstName"
-     * toPascalCase("firstName");         // returns "FirstName"
-     * toPascalCase("FirstName");         // returns "FirstName"
-     * toPascalCase("first");             // returns "First"
+     * Strings.toPascalCase(null);                // returns null
+     * Strings.toPascalCase("");                  // returns ""
+     * Strings.toPascalCase("first_name");        // returns "FirstName"
+     * Strings.toPascalCase("FIRST_NAME");        // returns "FirstName"
+     * Strings.toPascalCase("firstName");         // returns "FirstName"
+     * Strings.toPascalCase("FirstName");         // returns "FirstName"
+     * Strings.toPascalCase("first");             // returns "First"
      * }</pre>
      *
      * @param str the input string to be converted, may be {@code null} or empty
@@ -3458,13 +3460,13 @@ public final class Strings {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * toPascalCase(null, '.');           // returns null
-     * toPascalCase("", '.');             // returns ""
-     * toPascalCase("first.name", '.');   // returns "FirstName"
-     * toPascalCase("FIRST.NAME", '.');   // returns "FirstName"
-     * toPascalCase("first-name", '-');   // returns "FirstName"
-     * toPascalCase("firstName", '.');    // returns "FirstName"
-     * toPascalCase("firstname", '.');    // returns "Firstname"
+     * Strings.toPascalCase(null, '.');           // returns null
+     * Strings.toPascalCase("", '.');             // returns ""
+     * Strings.toPascalCase("first.name", '.');   // returns "FirstName"
+     * Strings.toPascalCase("FIRST.NAME", '.');   // returns "FirstName"
+     * Strings.toPascalCase("first-name", '-');   // returns "FirstName"
+     * Strings.toPascalCase("firstName", '.');    // returns "FirstName"
+     * Strings.toPascalCase("firstname", '.');    // returns "Firstname"
      * }</pre>
      *
      * @param str the input string to be converted, may be {@code null} or empty
@@ -3514,10 +3516,10 @@ public final class Strings {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * swapCase('A');    // returns 'a'
-     * swapCase('a');    // returns 'A'
-     * swapCase('1');    // returns '1'
-     * swapCase(' ');    // returns ' '
+     * Strings.swapCase('A');    // returns 'a'
+     * Strings.swapCase('a');    // returns 'A'
+     * Strings.swapCase('1');    // returns '1'
+     * Strings.swapCase(' ');    // returns ' '
      * }</pre>
      *
      * @param ch the input character to be case-swapped.
@@ -3544,11 +3546,11 @@ public final class Strings {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * swapCase(null);                    // returns null
-     * swapCase("");                      // returns ""
-     * swapCase("The dog has a BONE");    // returns "tHE DOG HAS A bone"
-     * swapCase("Hello World");           // returns "hELLO wORLD"
-     * swapCase("ABC123xyz");             // returns "abc123XYZ"
+     * Strings.swapCase(null);                    // returns null
+     * Strings.swapCase("");                      // returns ""
+     * Strings.swapCase("The dog has a BONE");    // returns "tHE DOG HAS A bone"
+     * Strings.swapCase("Hello World");           // returns "hELLO wORLD"
+     * Strings.swapCase("ABC123xyz");             // returns "abc123XYZ"
      * }</pre>
      *
      * @param str the String to swap case, may be {@code null}
@@ -3594,12 +3596,12 @@ public final class Strings {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * uncapitalize(null);        // returns null
-     * uncapitalize("");          // returns ""
-     * uncapitalize("Cat");       // returns "cat"
-     * uncapitalize("CAT");       // returns "cAT"
-     * uncapitalize("cat");       // returns "cat"
-     * uncapitalize("C");         // returns "c"
+     * Strings.uncapitalize(null);        // returns null
+     * Strings.uncapitalize("");          // returns ""
+     * Strings.uncapitalize("Cat");       // returns "cat"
+     * Strings.uncapitalize("CAT");       // returns "cAT"
+     * Strings.uncapitalize("cat");       // returns "cat"
+     * Strings.uncapitalize("C");         // returns "c"
      * }</pre>
      *
      * @param str the string to be uncapitalized, may be {@code null} or empty
@@ -3647,13 +3649,13 @@ public final class Strings {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * capitalize(null);          // returns null
-     * capitalize("");            // returns ""
-     * capitalize("cat");         // returns "Cat"
-     * capitalize("cAT");         // returns "CAT"
-     * capitalize("Cat");         // returns "Cat"
-     * capitalize("c");           // returns "C"
-     * capitalize("'cat'");       // returns "'cat'"
+     * Strings.capitalize(null);          // returns null
+     * Strings.capitalize("");            // returns ""
+     * Strings.capitalize("cat");         // returns "Cat"
+     * Strings.capitalize("cAT");         // returns "CAT"
+     * Strings.capitalize("Cat");         // returns "Cat"
+     * Strings.capitalize("c");           // returns "C"
+     * Strings.capitalize("'cat'");       // returns "'cat'"
      * }</pre>
      *
      * @param str the string to be capitalized, may be {@code null} or empty
@@ -3698,12 +3700,12 @@ public final class Strings {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * capitalizeFully(null);                     // returns null
-     * capitalizeFully("");                       // returns ""
-     * capitalizeFully("hello world");            // returns "Hello World"
-     * capitalizeFully("HELLO WORLD");            // returns "HELLO WORLD"
-     * capitalizeFully("hello  world");           // returns "Hello  World"
-     * capitalizeFully("hELLO wORLD");            // returns "HELLO WORLD"
+     * Strings.capitalizeFully(null);                     // returns null
+     * Strings.capitalizeFully("");                       // returns ""
+     * Strings.capitalizeFully("hello world");            // returns "Hello World"
+     * Strings.capitalizeFully("HELLO WORLD");            // returns "HELLO WORLD"
+     * Strings.capitalizeFully("hello  world");           // returns "Hello  World"
+     * Strings.capitalizeFully("hELLO wORLD");            // returns "HELLO WORLD"
      * }</pre>
      *
      * @param str the string to be processed, may be {@code null} or empty
@@ -3725,11 +3727,11 @@ public final class Strings {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * capitalizeFully(null, "-");                // returns null
-     * capitalizeFully("", "-");                  // returns ""
-     * capitalizeFully("hello-world", "-");       // returns "Hello-World"
-     * capitalizeFully("HELLO_WORLD", "_");       // returns "HELLO_WORLD"
-     * capitalizeFully("hello.world.java", ".");  // returns "Hello.World.Java"
+     * Strings.capitalizeFully(null, "-");                // returns null
+     * Strings.capitalizeFully("", "-");                  // returns ""
+     * Strings.capitalizeFully("hello-world", "-");       // returns "Hello-World"
+     * Strings.capitalizeFully("HELLO_WORLD", "_");       // returns "HELLO_WORLD"
+     * Strings.capitalizeFully("hello.world.java", ".");  // returns "Hello.World.Java"
      * }</pre>
      *
      * @param str the string to be processed, may be {@code null} or empty
@@ -3769,9 +3771,9 @@ public final class Strings {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * capitalizeFully("the quick brown fox", " ", "the", "of");     // returns "The Quick Brown Fox"
-     * capitalizeFully("the end of story", " ", "the", "of");        // returns "The End of Story"
-     * capitalizeFully("of mice and men", " ", "of", "and");         // returns "Of Mice and Men"
+     * Strings.capitalizeFully("the quick brown fox", " ", "the", "of");     // returns "The Quick Brown Fox"
+     * Strings.capitalizeFully("the end of story", " ", "the", "of");        // returns "The End of Story"
+     * Strings.capitalizeFully("of mice and men", " ", "of", "and");         // returns "Of Mice and Men"
      * }</pre>
      *
      * @param str the string to be processed, may be {@code null} or empty If it's {@code null} or empty, the method will return the input string.
@@ -3810,8 +3812,8 @@ public final class Strings {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Set<String> excluded = Set.of("the", "of", "and");
-     * capitalizeFully("the lord of the rings", " ", excluded);      // returns "The Lord of the Rings"
-     * capitalizeFully("and then there were none", " ", excluded);   // returns "And Then There Were None"
+     * Strings.capitalizeFully("the lord of the rings", " ", excluded);      // returns "The Lord of the Rings"
+     * Strings.capitalizeFully("and then there were none", " ", excluded);   // returns "And Then There Were None"
      * }</pre>
      *
      * @param str the string to be processed, may be {@code null} or empty If it's {@code null} or empty, the method will return the input string.
@@ -3855,9 +3857,9 @@ public final class Strings {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * convertWords("hello world", String::toUpperCase);          // returns "HELLO WORLD"
-     * convertWords("hello world", s -> s + "!");                 // returns "hello! world!"
-     * convertWords("hello  world", String::toUpperCase);         // returns "HELLO  WORLD"
+     * Strings.convertWords("hello world", String::toUpperCase);          // returns "HELLO WORLD"
+     * Strings.convertWords("hello world", s -> s + "!");                 // returns "hello! world!"
+     * Strings.convertWords("hello  world", String::toUpperCase);         // returns "HELLO  WORLD"
      * }</pre>
      *
      * @param str the string to be processed, may be {@code null} or empty If it's {@code null} or empty, the method will return the input string.
@@ -3880,9 +3882,9 @@ public final class Strings {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * convertWords("hello-world", "-", String::toUpperCase);     // returns "HELLO-WORLD"
-     * convertWords("hello.world.java", ".", s -> "[" + s + "]"); // returns "[hello].[world].[java]"
-     * convertWords("hello--world", "-", String::toUpperCase);    // returns "HELLO--WORLD"
+     * Strings.convertWords("hello-world", "-", String::toUpperCase);     // returns "HELLO-WORLD"
+     * Strings.convertWords("hello.world.java", ".", s -> "[" + s + "]"); // returns "[hello].[world].[java]"
+     * Strings.convertWords("hello--world", "-", String::toUpperCase);    // returns "HELLO--WORLD"
      * }</pre>
      *
      * @param str the string to be processed, may be {@code null} or empty If it's {@code null} or empty, the method will return the input string.
@@ -3923,8 +3925,8 @@ public final class Strings {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Set<String> excluded = Set.of("and", "or");
-     * convertWords("jack and jill", " ", excluded, String::toUpperCase);  // returns "JACK and JILL"
-     * convertWords("true or false", " ", excluded, s -> "*" + s + "*");   // returns "*true* or *false*"
+     * Strings.convertWords("jack and jill", " ", excluded, String::toUpperCase);  // returns "JACK and JILL"
+     * Strings.convertWords("true or false", " ", excluded, s -> "*" + s + "*");   // returns "*true* or *false*"
      * }</pre>
      *
      * @param str the string to be processed, may be {@code null} or empty If it's {@code null} or empty, the method will return the input string.
@@ -3969,12 +3971,12 @@ public final class Strings {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * quoteEscaped(null);                    // returns null
-     * quoteEscaped("");                      // returns ""
-     * quoteEscaped("Hello World");           // returns "Hello World"
-     * quoteEscaped("She said \"Hi\"");       // returns "She said \"Hi\""
-     * quoteEscaped("It's a test");           // returns "It\'s a test"
-     * quoteEscaped("Already \\'escaped\\'"); // returns "Already \\'escaped\\'"
+     * Strings.quoteEscaped(null);                    // returns null
+     * Strings.quoteEscaped("");                      // returns ""
+     * Strings.quoteEscaped("Hello World");           // returns "Hello World"
+     * Strings.quoteEscaped("She said \"Hi\"");       // returns "She said \"Hi\""
+     * Strings.quoteEscaped("It's a test");           // returns "It\'s a test"
+     * Strings.quoteEscaped("Already \\'escaped\\'"); // returns "Already \\'escaped\\'"
      * }</pre>
      *
      * @param str the string to be processed, may be {@code null} or empty
@@ -4020,12 +4022,12 @@ public final class Strings {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * quoteEscaped(null, '"');               // returns null
-     * quoteEscaped("", '"');                 // returns ""
-     * quoteEscaped("She said \"Hi\"", '"'); // returns "She said \"Hi\""
-     * quoteEscaped("It's a test", '\'');     // returns "It\'s a test"
-     * quoteEscaped("No quotes here", '"');   // returns "No quotes here"
-     * quoteEscaped("Already \\\"escaped\\\"", '"'); // returns "Already \\\"escaped\\\""
+     * Strings.quoteEscaped(null, '"');               // returns null
+     * Strings.quoteEscaped("", '"');                 // returns ""
+     * Strings.quoteEscaped("She said \"Hi\"", '"'); // returns "She said \"Hi\""
+     * Strings.quoteEscaped("It's a test", '\'');     // returns "It\'s a test"
+     * Strings.quoteEscaped("No quotes here", '"');   // returns "No quotes here"
+     * Strings.quoteEscaped("Already \\\"escaped\\\"", '"'); // returns "Already \\\"escaped\\\""
      * }</pre>
      *
      * @param str the input string to be processed, may be {@code null} or empty
@@ -4072,10 +4074,10 @@ public final class Strings {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * unicodeEscaped(' ');     // returns "\u0020"
-     * unicodeEscaped('A');     // returns "\u0041"
-     * unicodeEscaped('€');     // returns "\u20ac"
-     * unicodeEscaped('\n');    // returns "\u000a"
+     * Strings.unicodeEscaped(' ');     // returns "\u0020"
+     * Strings.unicodeEscaped('A');     // returns "\u0041"
+     * Strings.unicodeEscaped('€');     // returns "\u20ac"
+     * Strings.unicodeEscaped('\n');    // returns "\u000a"
      * }</pre>
      *
      * @param ch the character to convert
@@ -4104,14 +4106,14 @@ public final class Strings {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * normalizeSpace(null);                     // returns null
-     * normalizeSpace("");                       // returns ""
-     * normalizeSpace("  ");                     // returns ""
-     * normalizeSpace("abc");                    // returns "abc"
-     * normalizeSpace("  abc  ");                // returns "abc"
-     * normalizeSpace("  abc    def  ");         // returns "abc def"
-     * normalizeSpace("abc\n\tdef");             // returns "abc def"
-     * normalizeSpace("  multiple   spaces  ");  // returns "multiple spaces"
+     * Strings.normalizeSpace(null);                     // returns null
+     * Strings.normalizeSpace("");                       // returns ""
+     * Strings.normalizeSpace("  ");                     // returns ""
+     * Strings.normalizeSpace("abc");                    // returns "abc"
+     * Strings.normalizeSpace("  abc  ");                // returns "abc"
+     * Strings.normalizeSpace("  abc    def  ");         // returns "abc def"
+     * Strings.normalizeSpace("abc\n\tdef");             // returns "abc def"
+     * Strings.normalizeSpace("  multiple   spaces  ");  // returns "multiple spaces"
      * }</pre>
      *
      * @param str the source String to normalize whitespaces from, may be {@code null}
@@ -4136,15 +4138,15 @@ public final class Strings {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * replaceAll(null, *, *);           // returns null
-     * replaceAll("", *, *);             // returns ""
-     * replaceAll("any", null, *);       // returns "any"
-     * replaceAll("any", *, null);       // returns "any"
-     * replaceAll("any", "", *);         // returns "any"
-     * replaceAll("aba", "a", null);     // returns "b"
-     * replaceAll("aba", "a", "");       // returns "b"
-     * replaceAll("aba", "a", "z");      // returns "zbz"
-     * replaceAll("abaaaba", "aa", "z"); // returns "abzaba"
+     * Strings.replaceAll(null, *, *);           // returns null
+     * Strings.replaceAll("", *, *);             // returns ""
+     * Strings.replaceAll("any", null, *);       // returns "any"
+     * Strings.replaceAll("any", *, null);       // returns "any"
+     * Strings.replaceAll("any", "", *);         // returns "any"
+     * Strings.replaceAll("aba", "a", null);     // returns "b"
+     * Strings.replaceAll("aba", "a", "");       // returns "b"
+     * Strings.replaceAll("aba", "a", "z");      // returns "zbz"
+     * Strings.replaceAll("abaaaba", "aa", "z"); // returns "abzaba"
      * }</pre>
      *
      * @param str text to search and replace in, may be {@code null}
@@ -4164,11 +4166,11 @@ public final class Strings {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * replaceAll("abacadae", 0, "a", "z");    // returns "zbzczde"
-     * replaceAll("abacadae", 3, "a", "z");    // returns "abzczde"
-     * replaceAll("abacadae", 5, "a", "z");    // returns "abacadze"
-     * replaceAll("hello world", 0, "o", "0"); // returns "hell0 w0rld"
-     * replaceAll("hello world", 6, "o", "0"); // returns "hello w0rld"
+     * Strings.replaceAll("abacadae", 0, "a", "z");    // returns "zbzczde"
+     * Strings.replaceAll("abacadae", 3, "a", "z");    // returns "abzczde"
+     * Strings.replaceAll("abacadae", 5, "a", "z");    // returns "abacadze"
+     * Strings.replaceAll("hello world", 0, "o", "0"); // returns "hell0 w0rld"
+     * Strings.replaceAll("hello world", 6, "o", "0"); // returns "hello w0rld"
      * }</pre>
      *
      * @param str the input string where the replacement should occur, may be {@code null} or empty
@@ -4189,15 +4191,15 @@ public final class Strings {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * replaceFirst(null, *, *);            // returns null
-     * replaceFirst("", *, *);              // returns ""
-     * replaceFirst("any", null, *);        // returns "any"
-     * replaceFirst("any", *, null);        // returns "ny"
-     * replaceFirst("any", "", *);          // returns "any"
-     * replaceFirst("aba", "a", null);      // returns "ba"
-     * replaceFirst("aba", "a", "");        // returns "ba"
-     * replaceFirst("aba", "a", "z");       // returns "zba"
-     * replaceFirst("abaaaba", "aa", "z");  // returns "abzaba"
+     * Strings.replaceFirst(null, *, *);            // returns null
+     * Strings.replaceFirst("", *, *);              // returns ""
+     * Strings.replaceFirst("any", null, *);        // returns "any"
+     * Strings.replaceFirst("any", *, null);        // returns "ny"
+     * Strings.replaceFirst("any", "", *);          // returns "any"
+     * Strings.replaceFirst("aba", "a", null);      // returns "ba"
+     * Strings.replaceFirst("aba", "a", "");        // returns "ba"
+     * Strings.replaceFirst("aba", "a", "z");       // returns "zba"
+     * Strings.replaceFirst("abaaaba", "aa", "z");  // returns "abzaba"
      * }</pre>
      *
      * @param str the input string where the replacement should occur, may be {@code null} or empty
@@ -4217,11 +4219,11 @@ public final class Strings {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * replaceFirst("abacadae", 0, "a", "z");    // returns "zbacadae"
-     * replaceFirst("abacadae", 3, "a", "z");    // returns "abzcadae"
-     * replaceFirst("abacadae", 5, "a", "z");    // returns "abacadze"
-     * replaceFirst("hello world", 0, "o", "0"); // returns "hell0 world"
-     * replaceFirst("hello world", 6, "o", "0"); // returns "hello w0rld"
+     * Strings.replaceFirst("abacadae", 0, "a", "z");    // returns "zbacadae"
+     * Strings.replaceFirst("abacadae", 3, "a", "z");    // returns "abzcadae"
+     * Strings.replaceFirst("abacadae", 5, "a", "z");    // returns "abacadze"
+     * Strings.replaceFirst("hello world", 0, "o", "0"); // returns "hell0 world"
+     * Strings.replaceFirst("hello world", 6, "o", "0"); // returns "hello w0rld"
      * }</pre>
      *
      * @param str the input string where the replacement should occur, may be {@code null} or empty
@@ -4241,14 +4243,14 @@ public final class Strings {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * replaceOnce(null, *, *);            // returns null
-     * replaceOnce("", *, *);              // returns ""
-     * replaceOnce("any", null, *);        // returns "any"
-     * replaceOnce("any", *, null);        // returns "any"
-     * replaceOnce("any", "", *);          // returns "any"
-     * replaceOnce("aba", "a", null);      // returns "ba"
-     * replaceOnce("aba", "a", "");        // returns "ba"
-     * replaceOnce("aba", "a", "z");       // returns "zba"
+     * Strings.replaceOnce(null, *, *);            // returns null
+     * Strings.replaceOnce("", *, *);              // returns ""
+     * Strings.replaceOnce("any", null, *);        // returns "any"
+     * Strings.replaceOnce("any", *, null);        // returns "any"
+     * Strings.replaceOnce("any", "", *);          // returns "any"
+     * Strings.replaceOnce("aba", "a", null);      // returns "ba"
+     * Strings.replaceOnce("aba", "a", "");        // returns "ba"
+     * Strings.replaceOnce("aba", "a", "z");       // returns "zba"
      * }</pre>
      *
      * @param str the input string where the replacement should occur, may be {@code null}
@@ -4288,15 +4290,15 @@ public final class Strings {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * replaceLast(null, *, *);            // returns null
-     * replaceLast("", *, *);              // returns ""
-     * replaceLast("any", null, *);        // returns "any"
-     * replaceLast("any", a, null);        // returns "ny"
-     * replaceLast("any", "", *);          // returns "any"
-     * replaceLast("aba", "a", null);      // returns "ab"
-     * replaceLast("aba", "a", "");        // returns "ab"
-     * replaceLast("aba", "a", "z");       // returns "abz"
-     * replaceLast("abaaaba", "aa", "z");  // returns "abaazba"
+     * Strings.replaceLast(null, *, *);            // returns null
+     * Strings.replaceLast("", *, *);              // returns ""
+     * Strings.replaceLast("any", null, *);        // returns "any"
+     * Strings.replaceLast("any", a, null);        // returns "ny"
+     * Strings.replaceLast("any", "", *);          // returns "any"
+     * Strings.replaceLast("aba", "a", null);      // returns "ab"
+     * Strings.replaceLast("aba", "a", "");        // returns "ab"
+     * Strings.replaceLast("aba", "a", "z");       // returns "abz"
+     * Strings.replaceLast("abaaaba", "aa", "z");  // returns "abaazba"
      * }</pre>
      *
      * @param str the input string where the replacement should occur, may be {@code null} or empty
@@ -4317,11 +4319,11 @@ public final class Strings {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * replaceLast("abacadae", 8, "a", "z");    // returns "abacadze"
-     * replaceLast("abacadae", 5, "a", "z");    // returns "abzcadae"
-     * replaceLast("abacadae", 2, "a", "z");    // returns "zbacadae"
-     * replaceLast("hello world", 11, "o", "0"); // returns "hello w0rld"
-     * replaceLast("hello world", 5, "o", "0");  // returns "hell0 world"
+     * Strings.replaceLast("abacadae", 8, "a", "z");    // returns "abacadze"
+     * Strings.replaceLast("abacadae", 5, "a", "z");    // returns "abzcadae"
+     * Strings.replaceLast("abacadae", 2, "a", "z");    // returns "zbacadae"
+     * Strings.replaceLast("hello world", 11, "o", "0"); // returns "hello w0rld"
+     * Strings.replaceLast("hello world", 5, "o", "0");  // returns "hell0 world"
      * }</pre>
      *
      * @param str the input string where the replacement should occur, may be {@code null} or empty
@@ -4355,24 +4357,24 @@ public final class Strings {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * replace(null, *, *, *, *);              // returns null
-     * replace("", *, *, *, *);                // returns ""
-     * replace("any", *, null, *, *);          // returns "any"
-     * replace("any", *, "", *, *);            // returns "any"
-     * replace("any", *, *, *, 0);             // returns "any"
-     * replace("abaa", 0, "a", null, -1);      // returns "b"
-     * replace("abaa", 0, "a", "", -1);        // returns "b"
-     * replace("abaa", 0, "a", "z", 0);        // returns "abaa"
-     * replace("abaa", 0, "a", "z", 1);        // returns "zbaa"
-     * replace("abaa", 0, "a", "z", 2);        // returns "zbza"
-     * replace("abaa", 0, "a", "z", -1);       // returns "zbzz"
-     * replace("abaa", 1, "a", "z", -1);       // returns "abzz"
+     * Strings.replace(null, *, *, *, *);              // returns null
+     * Strings.replace("", *, *, *, *);                // returns ""
+     * Strings.replace("any", *, null, *, *);          // returns "any"
+     * Strings.replace("any", *, "", *, *);            // returns "any"
+     * Strings.replace("any", *, *, *, 0);             // returns "any"
+     * Strings.replace("abaa", 0, "a", null, -1);      // returns "b"
+     * Strings.replace("abaa", 0, "a", "", -1);        // returns "b"
+     * Strings.replace("abaa", 0, "a", "z", 0);        // returns "abaa"
+     * Strings.replace("abaa", 0, "a", "z", 1);        // returns "zbaa"
+     * Strings.replace("abaa", 0, "a", "z", 2);        // returns "zbza"
+     * Strings.replace("abaa", 0, "a", "z", -1);       // returns "zbzz"
+     * Strings.replace("abaa", 1, "a", "z", -1);       // returns "abzz"
      * }</pre>
      *
      * @param str the input string where the replacement should occur, may be {@code null}
      * @param fromIndex the index from which to start the search for the target string. It should be a non-negative integer.
      * @param target the string to be replaced, may be {@code null}
-     * @param replacement the string to replace the target string. It cannot be {@code null}.
+     * @param replacement the string to replace the target string. If it's {@code null}, it will be treated as an empty string.
      * @param max the maximum number of replacements. If it's -1, all occurrences will be replaced.
      * @return a new string with occurrences of the target string replaced with the replacement string, starting from the specified index and up to the maximum number of replacements.
      *         If the input string is {@code null}, the method returns {@code null}. If the input string is empty, or the target string is not found, the input string is returned unchanged.
@@ -4389,15 +4391,15 @@ public final class Strings {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * replaceAllIgnoreCase(null, *, *);              // returns null
-     * replaceAllIgnoreCase("", *, *);                // returns ""
-     * replaceAllIgnoreCase("any", null, *);          // returns "any"
-     * replaceAllIgnoreCase("any", *, null);          // returns "any"
-     * replaceAllIgnoreCase("any", "", *);            // returns "any"
-     * replaceAllIgnoreCase("aba", "A", null);        // returns "b"
-     * replaceAllIgnoreCase("aba", "A", "");          // returns "b"
-     * replaceAllIgnoreCase("aba", "A", "z");         // returns "zbz"
-     * replaceAllIgnoreCase("ABa", "a", "z");         // returns "zBz"
+     * Strings.replaceAllIgnoreCase(null, *, *);              // returns null
+     * Strings.replaceAllIgnoreCase("", *, *);                // returns ""
+     * Strings.replaceAllIgnoreCase("any", null, *);          // returns "any"
+     * Strings.replaceAllIgnoreCase("any", *, null);          // returns "any"
+     * Strings.replaceAllIgnoreCase("any", "", *);            // returns "any"
+     * Strings.replaceAllIgnoreCase("aba", "A", null);        // returns "b"
+     * Strings.replaceAllIgnoreCase("aba", "A", "");          // returns "b"
+     * Strings.replaceAllIgnoreCase("aba", "A", "z");         // returns "zbz"
+     * Strings.replaceAllIgnoreCase("ABa", "a", "z");         // returns "zBz"
      * }</pre>
      *
      * @param str the input string where the replacement should occur, may be {@code null} or empty
@@ -4418,11 +4420,11 @@ public final class Strings {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * replaceAllIgnoreCase("aBaCaDaE", 0, "A", "z");    // returns "zBzCzDzE"
-     * replaceAllIgnoreCase("aBaCaDaE", 3, "A", "z");    // returns "aBzCzDzE"
-     * replaceAllIgnoreCase("aBaCaDaE", 5, "A", "z");    // returns "aBaCzDzE"
-     * replaceAllIgnoreCase("HELLO world", 0, "o", "0"); // returns "HELL0 w0rld"
-     * replaceAllIgnoreCase("HELLO world", 6, "o", "0"); // returns "HELLO w0rld"
+     * Strings.replaceAllIgnoreCase("aBaCaDaE", 0, "A", "z");    // returns "zBzCzDzE"
+     * Strings.replaceAllIgnoreCase("aBaCaDaE", 3, "A", "z");    // returns "aBzCzDzE"
+     * Strings.replaceAllIgnoreCase("aBaCaDaE", 5, "A", "z");    // returns "aBaCzDzE"
+     * Strings.replaceAllIgnoreCase("HELLO world", 0, "o", "0"); // returns "HELL0 w0rld"
+     * Strings.replaceAllIgnoreCase("HELLO world", 6, "o", "0"); // returns "HELLO w0rld"
      * }</pre>
      *
      * @param str the input string where the replacement should occur, may be {@code null} or empty
@@ -4446,12 +4448,12 @@ public final class Strings {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * replaceFirstIgnoreCase("Hello World", "hello", "Hi");     // returns "Hi World"
-     * replaceFirstIgnoreCase("JAVA java Java", "java", "C++");  // returns "C++ java Java"
-     * replaceFirstIgnoreCase("Programming", "GRAM", "");        // returns "Proming"
-     * replaceFirstIgnoreCase("Test", "xyz", "abc");             // returns "Test"
-     * replaceFirstIgnoreCase(null, "test", "new");              // returns null
-     * replaceFirstIgnoreCase("Test", null, "new");              // returns "Test"
+     * Strings.replaceFirstIgnoreCase("Hello World", "hello", "Hi");     // returns "Hi World"
+     * Strings.replaceFirstIgnoreCase("JAVA java Java", "java", "C++");  // returns "C++ java Java"
+     * Strings.replaceFirstIgnoreCase("Programming", "GRAM", "");        // returns "Proming"
+     * Strings.replaceFirstIgnoreCase("Test", "xyz", "abc");             // returns "Test"
+     * Strings.replaceFirstIgnoreCase(null, "test", "new");              // returns null
+     * Strings.replaceFirstIgnoreCase("Test", null, "new");              // returns "Test"
      * }</pre>
      *
      * @param str the input string where the replacement should occur, may be {@code null} or empty
@@ -4474,11 +4476,11 @@ public final class Strings {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * replaceFirstIgnoreCase("Hello HELLO hello", 0, "hello", "Hi");    // returns "Hi HELLO hello"
-     * replaceFirstIgnoreCase("Hello HELLO hello", 6, "hello", "Hi");    // returns "Hello Hi hello"
-     * replaceFirstIgnoreCase("Hello HELLO hello", 12, "hello", "Hi");   // returns "Hello HELLO Hi"
-     * replaceFirstIgnoreCase("Test String", 5, "test", "Best");         // returns "Test String"
-     * replaceFirstIgnoreCase("Test", 10, "test", "Best");               // returns "Test"
+     * Strings.replaceFirstIgnoreCase("Hello HELLO hello", 0, "hello", "Hi");    // returns "Hi HELLO hello"
+     * Strings.replaceFirstIgnoreCase("Hello HELLO hello", 6, "hello", "Hi");    // returns "Hello Hi hello"
+     * Strings.replaceFirstIgnoreCase("Hello HELLO hello", 12, "hello", "Hi");   // returns "Hello HELLO Hi"
+     * Strings.replaceFirstIgnoreCase("Test String", 5, "test", "Best");         // returns "Test String"
+     * Strings.replaceFirstIgnoreCase("Test", 10, "test", "Best");               // returns "Test"
      * }</pre>
      *
      * @param str the input string where the replacement should occur, may be {@code null} or empty
@@ -4503,11 +4505,11 @@ public final class Strings {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * replaceIgnoreCase("Java JAVA java", 0, "java", "C++", -1);    // returns "C++ C++ C++"
-     * replaceIgnoreCase("Java JAVA java", 0, "java", "C++", 2);     // returns "C++ C++ java"
-     * replaceIgnoreCase("Java JAVA java", 5, "java", "C++", -1);    // returns "Java C++ C++"
-     * replaceIgnoreCase("Test String", 0, "xyz", "abc", -1);        // returns "Test String"
-     * replaceIgnoreCase("Test", 0, "test", null, 1);                // returns ""
+     * Strings.replaceIgnoreCase("Java JAVA java", 0, "java", "C++", -1);    // returns "C++ C++ C++"
+     * Strings.replaceIgnoreCase("Java JAVA java", 0, "java", "C++", 2);     // returns "C++ C++ java"
+     * Strings.replaceIgnoreCase("Java JAVA java", 5, "java", "C++", -1);    // returns "Java C++ C++"
+     * Strings.replaceIgnoreCase("Test String", 0, "xyz", "abc", -1);        // returns "Test String"
+     * Strings.replaceIgnoreCase("Test", 0, "test", null, 1);                // returns ""
      * }</pre>
      *
      * @param str the input string where the replacement should occur, may be {@code null} or empty
@@ -4524,11 +4526,6 @@ public final class Strings {
 
     private static String replace(final String str, final int fromIndex, final String target, String replacement, int max, final boolean ignoreCase) {
         N.checkPositionIndex(fromIndex, N.len(str));
-
-        // TODO
-        //    if (replacement == null) {
-        //        throw new IllegalArgumentException("Replacement can't be null");
-        //    }
 
         if (isEmpty(str) || isEmpty(target) || max == 0) {
             return str;
@@ -4580,10 +4577,10 @@ public final class Strings {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * replaceRange("Hello World", 6, 11, "Java");     // returns "Hello Java"
-     * replaceRange("Programming", 0, 7, "Test");      // returns "Testming"
-     * replaceRange("ABCDEF", 2, 4, "XYZ");            // returns "ABXYZEF"
-     * replaceRange("Test", 1, 3, "");                 // returns "Tt"
+     * Strings.replaceRange("Hello World", 6, 11, "Java");     // returns "Hello Java"
+     * Strings.replaceRange("Programming", 0, 7, "Test");      // returns "Testming"
+     * Strings.replaceRange("ABCDEF", 2, 4, "XYZ");            // returns "ABXYZEF"
+     * Strings.replaceRange("Test", 1, 3, "");                 // returns "Tt"
      * }</pre>
      *
      * @param str the input string where the replacement should occur. It cannot be {@code null}.
@@ -4611,12 +4608,12 @@ public final class Strings {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * replaceBetween("Hello [World]!", "[", "]", "Java");       // returns "Hello [Java]!"
-     * replaceBetween("Start<old>End", "<", ">", "new");         // returns "Start<new>End"
-     * replaceBetween("A{B{C}D}E", "{", "}", "X");               // returns "A{X}D}E"
-     * replaceBetween("No delimiters", "[", "]", "test");        // returns "No delimiters"
-     * replaceBetween("Only[Start", "[", "]", "test");           // returns "Only[Start"
-     * replaceBetween(null, "[", "]", "test");                   // returns null
+     * Strings.replaceBetween("Hello [World]!", "[", "]", "Java");       // returns "Hello [Java]!"
+     * Strings.replaceBetween("Start<old>End", "<", ">", "new");         // returns "Start<new>End"
+     * Strings.replaceBetween("A{B{C}D}E", "{", "}", "X");               // returns "A{X}D}E"
+     * Strings.replaceBetween("No delimiters", "[", "]", "test");        // returns "No delimiters"
+     * Strings.replaceBetween("Only[Start", "[", "]", "test");           // returns "Only[Start"
+     * Strings.replaceBetween(null, "[", "]", "test");                   // returns null
      * }</pre>
      *
      * @param str the string to be processed, may be {@code null} or empty
@@ -4658,12 +4655,12 @@ public final class Strings {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * replaceAfter("Hello, World!", ",", " Java!");      // returns "Hello, Java!"
-     * replaceAfter("prefix:suffix", ":", "new");         // returns "prefix:new"
-     * replaceAfter("NoDelimiter", ":", "test");          // returns "NoDelimiter"
-     * replaceAfter("EndsWith:", ":", "");                // returns "EndsWith:"
-     * replaceAfter("Multiple:colons:here", ":", "X");    // returns "Multiple:X"
-     * replaceAfter(null, ":", "test");                   // returns null
+     * Strings.replaceAfter("Hello, World!", ",", " Java!");      // returns "Hello, Java!"
+     * Strings.replaceAfter("prefix:suffix", ":", "new");         // returns "prefix:new"
+     * Strings.replaceAfter("NoDelimiter", ":", "test");          // returns "NoDelimiter"
+     * Strings.replaceAfter("EndsWith:", ":", "");                // returns "EndsWith:"
+     * Strings.replaceAfter("Multiple:colons:here", ":", "X");    // returns "Multiple:X"
+     * Strings.replaceAfter(null, ":", "test");                   // returns null
      * }</pre>
      *
      * @param str the string to be processed, may be {@code null} or empty
@@ -4696,12 +4693,12 @@ public final class Strings {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * replaceBefore("Hello, World!", ",", "Hi");         // returns "Hi, World!"
-     * replaceBefore("prefix:suffix", ":", "new");        // returns "new:suffix"
-     * replaceBefore("NoDelimiter", ":", "test");         // returns "NoDelimiter"
-     * replaceBefore(":StartsWith", ":", "");             // returns ":StartsWith"
-     * replaceBefore("Multiple:colons:here", ":", "X");   // returns "X:colons:here"
-     * replaceBefore(null, ":", "test");                  // returns null
+     * Strings.replaceBefore("Hello, World!", ",", "Hi");         // returns "Hi, World!"
+     * Strings.replaceBefore("prefix:suffix", ":", "new");        // returns "new:suffix"
+     * Strings.replaceBefore("NoDelimiter", ":", "test");         // returns "NoDelimiter"
+     * Strings.replaceBefore(":StartsWith", ":", "");             // returns ":StartsWith"
+     * Strings.replaceBefore("Multiple:colons:here", ":", "X");   // returns "X:colons:here"
+     * Strings.replaceBefore(null, ":", "test");                  // returns null
      * }</pre>
      *
      * @param str the string to be processed, may be {@code null} or empty
@@ -4735,13 +4732,13 @@ public final class Strings {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * removeStart(null, "*");                  // returns null
-     * removeStart("", "*");                    // returns ""
-     * removeStart("abc", null);                // returns "abc"
-     * removeStart("www.domain.com", "www.");   // returns "domain.com"
-     * removeStart("domain.com", "www.");       // returns "domain.com"
-     * removeStart("www.domain.com", "domain"); // returns "www.domain.com"
-     * removeStart("abc", "");                  // returns "abc"
+     * Strings.removeStart(null, "*");                  // returns null
+     * Strings.removeStart("", "*");                    // returns ""
+     * Strings.removeStart("abc", null);                // returns "abc"
+     * Strings.removeStart("www.domain.com", "www.");   // returns "domain.com"
+     * Strings.removeStart("domain.com", "www.");       // returns "domain.com"
+     * Strings.removeStart("www.domain.com", "domain"); // returns "www.domain.com"
+     * Strings.removeStart("abc", "");                  // returns "abc"
      * }</pre>
      *
      * @param str the source String to search, may be {@code null}
@@ -4768,14 +4765,14 @@ public final class Strings {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * removeStartIgnoreCase(null, "*");                   // returns null
-     * removeStartIgnoreCase("", "*");                     // returns ""
-     * removeStartIgnoreCase("abc", null);                 // returns "abc"
-     * removeStartIgnoreCase("www.domain.com", "www.");    // returns "domain.com"
-     * removeStartIgnoreCase("www.domain.com", "WWW.");    // returns "domain.com"
-     * removeStartIgnoreCase("domain.com", "www.");        // returns "domain.com"
-     * removeStartIgnoreCase("www.domain.com", "domain");  // returns "www.domain.com"
-     * removeStartIgnoreCase("abc", "");                   // returns "abc"
+     * Strings.removeStartIgnoreCase(null, "*");                   // returns null
+     * Strings.removeStartIgnoreCase("", "*");                     // returns ""
+     * Strings.removeStartIgnoreCase("abc", null);                 // returns "abc"
+     * Strings.removeStartIgnoreCase("www.domain.com", "www.");    // returns "domain.com"
+     * Strings.removeStartIgnoreCase("www.domain.com", "WWW.");    // returns "domain.com"
+     * Strings.removeStartIgnoreCase("domain.com", "www.");        // returns "domain.com"
+     * Strings.removeStartIgnoreCase("www.domain.com", "domain");  // returns "www.domain.com"
+     * Strings.removeStartIgnoreCase("abc", "");                   // returns "abc"
      * }</pre>
      *
      * @param str the source String to search, may be {@code null}
@@ -4802,13 +4799,13 @@ public final class Strings {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * removeEnd(null, "*");                   // returns null
-     * removeEnd("", "*");                     // returns ""
-     * removeEnd("abc", null);                 // returns "abc"
-     * removeEnd("www.domain.com", ".com.");   // returns "www.domain.com"
-     * removeEnd("www.domain.com", ".com");    // returns "www.domain"
-     * removeEnd("www.domain.com", "domain");  // returns "www.domain.com"
-     * removeEnd("abc", "");                   // returns "abc"
+     * Strings.removeEnd(null, "*");                   // returns null
+     * Strings.removeEnd("", "*");                     // returns ""
+     * Strings.removeEnd("abc", null);                 // returns "abc"
+     * Strings.removeEnd("www.domain.com", ".com.");   // returns "www.domain.com"
+     * Strings.removeEnd("www.domain.com", ".com");    // returns "www.domain"
+     * Strings.removeEnd("www.domain.com", "domain");  // returns "www.domain.com"
+     * Strings.removeEnd("abc", "");                   // returns "abc"
      * }</pre>
      *
      * @param str the source String to search, may be {@code null}
@@ -4835,15 +4832,15 @@ public final class Strings {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * removeEndIgnoreCase(null, "*");                    // returns null
-     * removeEndIgnoreCase("", "*");                      // returns ""
-     * removeEndIgnoreCase("abc", null);                  // returns "abc"
-     * removeEndIgnoreCase("www.domain.com", ".com.");    // returns "www.domain.com"
-     * removeEndIgnoreCase("www.domain.com", ".com");     // returns "www.domain"
-     * removeEndIgnoreCase("www.domain.com", "domain");   // returns "www.domain.com"
-     * removeEndIgnoreCase("abc", "");                    // returns "abc"
-     * removeEndIgnoreCase("www.domain.com", ".COM");     // returns "www.domain"
-     * removeEndIgnoreCase("www.domain.COM", ".com");     // returns "www.domain"
+     * Strings.removeEndIgnoreCase(null, "*");                    // returns null
+     * Strings.removeEndIgnoreCase("", "*");                      // returns ""
+     * Strings.removeEndIgnoreCase("abc", null);                  // returns "abc"
+     * Strings.removeEndIgnoreCase("www.domain.com", ".com.");    // returns "www.domain.com"
+     * Strings.removeEndIgnoreCase("www.domain.com", ".com");     // returns "www.domain"
+     * Strings.removeEndIgnoreCase("www.domain.com", "domain");   // returns "www.domain.com"
+     * Strings.removeEndIgnoreCase("abc", "");                    // returns "abc"
+     * Strings.removeEndIgnoreCase("www.domain.com", ".COM");     // returns "www.domain"
+     * Strings.removeEndIgnoreCase("www.domain.COM", ".com");     // returns "www.domain"
      * }</pre>
      *
      * @param str the source String to search, may be {@code null}
@@ -4870,11 +4867,11 @@ public final class Strings {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * removeAll("abcabc", 'a');    // returns "bcbc"
-     * removeAll("hello", 'l');     // returns "heo"
-     * removeAll("test", 'x');      // returns "test" (character not found)
-     * removeAll(null, 'a');        // returns null
-     * removeAll("", 'a');          // returns null
+     * Strings.removeAll("abcabc", 'a');    // returns "bcbc"
+     * Strings.removeAll("hello", 'l');     // returns "heo"
+     * Strings.removeAll("test", 'x');      // returns "test" (character not found)
+     * Strings.removeAll(null, 'a');        // returns null
+     * Strings.removeAll("", 'a');          // returns null
      * }</pre>
      *
      * @param str the input string from which the character should be removed, may be {@code null} or empty
@@ -4894,12 +4891,12 @@ public final class Strings {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * removeAll("abcabc", 0, 'a');    // returns "bcbc"
-     * removeAll("abcabc", 3, 'a');    // returns "abcbc"
-     * removeAll("abcabc", 3, 'b');    // returns "abcac"
-     * removeAll("hello", 0, 'l');     // returns "heo"
-     * removeAll("test", 10, 't');     // returns "test" (index out of bounds)
-     * removeAll(null, 0, 'a');        // returns null
+     * Strings.removeAll("abcabc", 0, 'a');    // returns "bcbc"
+     * Strings.removeAll("abcabc", 3, 'a');    // returns "abcbc"
+     * Strings.removeAll("abcabc", 3, 'b');    // returns "abcac"
+     * Strings.removeAll("hello", 0, 'l');     // returns "heo"
+     * Strings.removeAll("test", 10, 't');     // returns "test" (index out of bounds)
+     * Strings.removeAll(null, 0, 'a');        // returns null
      * }</pre>
      *
      * @param str the input string where the removal should occur, may be {@code null} or empty
@@ -4948,13 +4945,13 @@ public final class Strings {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * removeAll(null, "*");         // returns null
-     * removeAll("", "*");           // returns ""
-     * removeAll("abc", null);       // returns "abc"
-     * removeAll("abc", "");         // returns "abc"
-     * removeAll("queued", "ue");    // returns "qd"
-     * removeAll("queued", "zz");    // returns "queued"
-     * removeAll("abcabc", "abc");   // returns ""
+     * Strings.removeAll(null, "*");         // returns null
+     * Strings.removeAll("", "*");           // returns ""
+     * Strings.removeAll("abc", null);       // returns "abc"
+     * Strings.removeAll("abc", "");         // returns "abc"
+     * Strings.removeAll("queued", "ue");    // returns "qd"
+     * Strings.removeAll("queued", "zz");    // returns "queued"
+     * Strings.removeAll("abcabc", "abc");   // returns ""
      * }</pre>
      *
      * @param str the source String to search, may be {@code null}
@@ -4973,12 +4970,12 @@ public final class Strings {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * removeAll("abcabcabc", 0, "abc");    // returns ""
-     * removeAll("abcabcabc", 3, "abc");    // returns "abc"
-     * removeAll("abcabcabc", 6, "abc");    // returns "abcabc"
-     * removeAll("hello world", 0, "o");    // returns "hell wrld"
-     * removeAll("test", 10, "es");         // returns "test" (index out of bounds)
-     * removeAll(null, 0, "abc");           // returns null
+     * Strings.removeAll("abcabcabc", 0, "abc");    // returns ""
+     * Strings.removeAll("abcabcabc", 3, "abc");    // returns "abc"
+     * Strings.removeAll("abcabcabc", 6, "abc");    // returns "abcabc"
+     * Strings.removeAll("hello world", 0, "o");    // returns "hell wrld"
+     * Strings.removeAll("test", 10, "es");         // returns "test" (index out of bounds)
+     * Strings.removeAll(null, 0, "abc");           // returns null
      * }</pre>
      *
      * @param str the input string where the removal should occur, may be {@code null} or empty
@@ -5005,12 +5002,12 @@ public final class Strings {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * split("a,b,c", ',');         // returns ["a", "b", "c"]
-     * split("a,,b,c", ',');        // returns ["a", "b", "c"]
-     * split(",a,b,c,", ',');       // returns ["a", "b", "c"]
-     * split("abc", ',');           // returns ["abc"]
-     * split("", ',');              // returns []
-     * split(null, ',');            // returns []
+     * Strings.split("a,b,c", ',');         // returns ["a", "b", "c"]
+     * Strings.split("a,,b,c", ',');        // returns ["a", "b", "c"]
+     * Strings.split(",a,b,c,", ',');       // returns ["a", "b", "c"]
+     * Strings.split("abc", ',');           // returns ["abc"]
+     * Strings.split("", ',');              // returns []
+     * Strings.split(null, ',');            // returns []
      * }</pre>
      *
      * @param str the string to be split, may be {@code null} or empty
@@ -5039,11 +5036,11 @@ public final class Strings {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * split(" a , b , c ", ',', true);    // returns ["a", "b", "c"]
-     * split(" a , b , c ", ',', false);   // returns [" a ", " b ", " c "]
-     * split("a,,b", ',', true);           // returns ["a", "b"]
-     * split("", ',', true);               // returns []
-     * split(null, ',', true);             // returns []
+     * Strings.split(" a , b , c ", ',', true);    // returns ["a", "b", "c"]
+     * Strings.split(" a , b , c ", ',', false);   // returns [" a ", " b ", " c "]
+     * Strings.split("a,,b", ',', true);           // returns ["a", "b"]
+     * Strings.split("", ',', true);               // returns []
+     * Strings.split(null, ',', true);             // returns []
      * }</pre>
      *
      * @param str the string to be split, may be {@code null} or empty
@@ -5075,13 +5072,13 @@ public final class Strings {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * split("a::b::c", "::");        // returns ["a", "b", "c"]
-     * split("a::::b::c", "::");      // returns ["a", "b", "c"]
-     * split("::a::b::c::", "::");    // returns ["a", "b", "c"]
-     * split("abc", "::");            // returns ["abc"]
-     * split("a b  c", null);         // returns ["a", "b", "c"]
-     * split("", "::");               // returns []
-     * split(null, "::");             // returns []
+     * Strings.split("a::b::c", "::");        // returns ["a", "b", "c"]
+     * Strings.split("a::::b::c", "::");      // returns ["a", "b", "c"]
+     * Strings.split("::a::b::c::", "::");    // returns ["a", "b", "c"]
+     * Strings.split("abc", "::");            // returns ["abc"]
+     * Strings.split("a b  c", null);         // returns ["a", "b", "c"]
+     * Strings.split("", "::");               // returns []
+     * Strings.split(null, "::");             // returns []
      * }</pre>
      *
      * @param str the string to be split, may be {@code null} or empty
@@ -5110,12 +5107,12 @@ public final class Strings {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * split(" a :: b :: c ", "::", true);    // returns ["a", "b", "c"]
-     * split(" a :: b :: c ", "::", false);   // returns [" a ", " b ", " c "]
-     * split("a::::b", "::", true);           // returns ["a", "b"]
-     * split(" a  b  c ", null, true);        // returns ["a", "b", "c"]
-     * split("", "::", true);                 // returns []
-     * split(null, "::", true);               // returns []
+     * Strings.split(" a :: b :: c ", "::", true);    // returns ["a", "b", "c"]
+     * Strings.split(" a :: b :: c ", "::", false);   // returns [" a ", " b ", " c "]
+     * Strings.split("a::::b", "::", true);           // returns ["a", "b"]
+     * Strings.split(" a  b  c ", null, true);        // returns ["a", "b", "c"]
+     * Strings.split("", "::", true);                 // returns []
+     * Strings.split(null, "::", true);               // returns []
      * }</pre>
      *
      * @param str the string to be split, may be {@code null} or empty
@@ -5149,12 +5146,12 @@ public final class Strings {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * split("a:b:c:d:e", ":", 3);    // returns ["a", "b", "c:d:e"]
-     * split("a:b:c:d:e", ":", 5);    // returns ["a", "b", "c", "d", "e"]
-     * split("a:b:c:d:e", ":", 10);   // returns ["a", "b", "c", "d", "e"]
-     * split("a:b:c", ":", 1);        // returns ["a:b:c"]
-     * split("", ":", 3);             // returns []
-     * split(null, ":", 3);           // returns []
+     * Strings.split("a:b:c:d:e", ":", 3);    // returns ["a", "b", "c:d:e"]
+     * Strings.split("a:b:c:d:e", ":", 5);    // returns ["a", "b", "c", "d", "e"]
+     * Strings.split("a:b:c:d:e", ":", 10);   // returns ["a", "b", "c", "d", "e"]
+     * Strings.split("a:b:c", ":", 1);        // returns ["a:b:c"]
+     * Strings.split("", ":", 3);             // returns []
+     * Strings.split(null, ":", 3);           // returns []
      * }</pre>
      *
      * @param str the string to be split, may be {@code null} or empty
@@ -5192,12 +5189,12 @@ public final class Strings {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * split(" a : b : c : d ", ":", 3, true);    // returns ["a", "b", "c : d"]
-     * split(" a : b : c : d ", ":", 3, false);   // returns [" a ", " b ", " c : d "]
-     * split("a:b:c", ":", 1, true);              // returns ["a:b:c"]
-     * split("a:b:c", ":", 1, false);             // returns ["a:b:c"]
-     * split("", ":", 3, true);                   // returns []
-     * split(null, ":", 3, true);                 // returns []
+     * Strings.split(" a : b : c : d ", ":", 3, true);    // returns ["a", "b", "c : d"]
+     * Strings.split(" a : b : c : d ", ":", 3, false);   // returns [" a ", " b ", " c : d "]
+     * Strings.split("a:b:c", ":", 1, true);              // returns ["a:b:c"]
+     * Strings.split("a:b:c", ":", 1, false);             // returns ["a:b:c"]
+     * Strings.split("", ":", 3, true);                   // returns []
+     * Strings.split(null, ":", 3, true);                 // returns []
      * }</pre>
      *
      * @param str the string to be split, may be {@code null} or empty
@@ -5236,14 +5233,14 @@ public final class Strings {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * splitPreserveAllTokens(null, '*');              // returns []
-     * splitPreserveAllTokens("", '*');                // returns [""]
-     * splitPreserveAllTokens("a.b.c", '.');           // returns ["a", "b", "c"]
-     * splitPreserveAllTokens("a..b.c", '.');          // returns ["a", "", "b", "c"]
-     * splitPreserveAllTokens("a:b:c", '.');           // returns ["a:b:c"]
-     * splitPreserveAllTokens("a b c", ' ');           // returns ["a", "b", "c"]
-     * splitPreserveAllTokens("a b c ", ' ');          // returns ["a", "b", "c", ""]
-     * splitPreserveAllTokens(" a b c", ' ');          // returns ["", "a", "b", "c"]
+     * Strings.splitPreserveAllTokens(null, '*');              // returns []
+     * Strings.splitPreserveAllTokens("", '*');                // returns [""]
+     * Strings.splitPreserveAllTokens("a.b.c", '.');           // returns ["a", "b", "c"]
+     * Strings.splitPreserveAllTokens("a..b.c", '.');          // returns ["a", "", "b", "c"]
+     * Strings.splitPreserveAllTokens("a:b:c", '.');           // returns ["a:b:c"]
+     * Strings.splitPreserveAllTokens("a b c", ' ');           // returns ["a", "b", "c"]
+     * Strings.splitPreserveAllTokens("a b c ", ' ');          // returns ["a", "b", "c", ""]
+     * Strings.splitPreserveAllTokens(" a b c", ' ');          // returns ["", "a", "b", "c"]
      * }</pre>
      *
      * @param str  the String to parse, may be {@code null}
@@ -5276,12 +5273,12 @@ public final class Strings {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * splitPreserveAllTokens(" a . b . c ", '.', true);     // returns ["a", "b", "c"]
-     * splitPreserveAllTokens(" a . b . c ", '.', false);    // returns [" a ", " b ", " c "]
-     * splitPreserveAllTokens("a..b", '.', true);            // returns ["a", "", "b"]
-     * splitPreserveAllTokens(" .. ", '.', true);            // returns ["", "", ""]
-     * splitPreserveAllTokens("", '.', true);                // returns [""]
-     * splitPreserveAllTokens(null, '.', true);              // returns []
+     * Strings.splitPreserveAllTokens(" a . b . c ", '.', true);     // returns ["a", "b", "c"]
+     * Strings.splitPreserveAllTokens(" a . b . c ", '.', false);    // returns [" a ", " b ", " c "]
+     * Strings.splitPreserveAllTokens("a..b", '.', true);            // returns ["a", "", "b"]
+     * Strings.splitPreserveAllTokens(" .. ", '.', true);            // returns ["", "", ""]
+     * Strings.splitPreserveAllTokens("", '.', true);                // returns [""]
+     * Strings.splitPreserveAllTokens(null, '.', true);              // returns []
      * }</pre>
      *
      * @param str the String to parse, may be {@code null}
@@ -5318,15 +5315,15 @@ public final class Strings {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * splitPreserveAllTokens(null, "*");            // returns []
-     * splitPreserveAllTokens("", "*");              // returns [""]
-     * splitPreserveAllTokens("abc def", null);      // returns ["abc", "def"]
-     * splitPreserveAllTokens("abc def", " ");       // returns ["abc", "def"]
-     * splitPreserveAllTokens("abc  def", " ");      // returns ["abc", "", "def"]
-     * splitPreserveAllTokens("ab:cd:ef", ":");      // returns ["ab", "cd", "ef"]
-     * splitPreserveAllTokens("ab:cd:ef:", ":");     // returns ["ab", "cd", "ef", ""]
-     * splitPreserveAllTokens(":cd:ef", ":");        // returns ["", "cd", "ef"]
-     * splitPreserveAllTokens("a::b::c", "::")       // returns ["a", "b", "c"]
+     * Strings.splitPreserveAllTokens(null, "*");            // returns []
+     * Strings.splitPreserveAllTokens("", "*");              // returns [""]
+     * Strings.splitPreserveAllTokens("abc def", null);      // returns ["abc", "def"]
+     * Strings.splitPreserveAllTokens("abc def", " ");       // returns ["abc", "def"]
+     * Strings.splitPreserveAllTokens("abc  def", " ");      // returns ["abc", "", "def"]
+     * Strings.splitPreserveAllTokens("ab:cd:ef", ":");      // returns ["ab", "cd", "ef"]
+     * Strings.splitPreserveAllTokens("ab:cd:ef:", ":");     // returns ["ab", "cd", "ef", ""]
+     * Strings.splitPreserveAllTokens(":cd:ef", ":");        // returns ["", "cd", "ef"]
+     * Strings.splitPreserveAllTokens("a::b::c", "::")       // returns ["a", "b", "c"]
      * }</pre>
      *
      * @param str  the String to parse, may be {@code null}
@@ -5359,12 +5356,12 @@ public final class Strings {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * splitPreserveAllTokens(" a : b : c ", ":", true);     // returns ["a", "b", "c"]
-     * splitPreserveAllTokens(" a : b : c ", ":", false);    // returns [" a ", " b ", " c "]
-     * splitPreserveAllTokens("a::b", ":", true);            // returns ["a", "", "b"]
-     * splitPreserveAllTokens(" :: ", ":", true);            // returns ["", "", ""]
-     * splitPreserveAllTokens("", ":", true);                // returns [""]
-     * splitPreserveAllTokens(null, ":", true);              // returns []
+     * Strings.splitPreserveAllTokens(" a : b : c ", ":", true);     // returns ["a", "b", "c"]
+     * Strings.splitPreserveAllTokens(" a : b : c ", ":", false);    // returns [" a ", " b ", " c "]
+     * Strings.splitPreserveAllTokens("a::b", ":", true);            // returns ["a", "", "b"]
+     * Strings.splitPreserveAllTokens(" :: ", ":", true);            // returns ["", "", ""]
+     * Strings.splitPreserveAllTokens("", ":", true);                // returns [""]
+     * Strings.splitPreserveAllTokens(null, ":", true);              // returns []
      * }</pre>
      *
      * @param str  the String to parse, may be {@code null}
@@ -5404,12 +5401,12 @@ public final class Strings {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * splitPreserveAllTokens("a:b:c:d", ":", 3);      // returns ["a", "b", "c:d"]
-     * splitPreserveAllTokens("a:b:::d", ":", 3);      // returns ["a", "b", "::d"]
-     * splitPreserveAllTokens("a:b:c:d", ":", 5);      // returns ["a", "b", "c", "d"]
-     * splitPreserveAllTokens(":a:b:c", ":", 4);       // returns ["", "a", "b", "c"]
-     * splitPreserveAllTokens("a:b:c:", ":", 4);       // returns ["a", "b", "c", ""]
-     * splitPreserveAllTokens("a:b:c", ":", 1);        // returns ["a:b:c"]
+     * Strings.splitPreserveAllTokens("a:b:c:d", ":", 3);      // returns ["a", "b", "c:d"]
+     * Strings.splitPreserveAllTokens("a:b:::d", ":", 3);      // returns ["a", "b", "::d"]
+     * Strings.splitPreserveAllTokens("a:b:c:d", ":", 5);      // returns ["a", "b", "c", "d"]
+     * Strings.splitPreserveAllTokens(":a:b:c", ":", 4);       // returns ["", "a", "b", "c"]
+     * Strings.splitPreserveAllTokens("a:b:c:", ":", 4);       // returns ["a", "b", "c", ""]
+     * Strings.splitPreserveAllTokens("a:b:c", ":", 1);        // returns ["a:b:c"]
      * }</pre>
      *
      * @param str  the String to parse, may be {@code null}
@@ -5451,12 +5448,12 @@ public final class Strings {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * splitPreserveAllTokens(" a : b : c : d ", ":", 3, true);    // returns ["a", "b", "c : d"]
-     * splitPreserveAllTokens(" a : b : c : d ", ":", 3, false);   // returns [" a ", " b ", " c : d "]
-     * splitPreserveAllTokens("a::b:c", ":", 4, true);             // returns ["a", "", "b", "c"]
-     * splitPreserveAllTokens(" : : ", ":", 3, true);              // returns ["", "", ""]
-     * splitPreserveAllTokens("a:b:c", ":", 1, true);              // returns ["a:b:c"]
-     * splitPreserveAllTokens("a:b:c", ":", 1, false);             // returns ["a:b:c"]
+     * Strings.splitPreserveAllTokens(" a : b : c : d ", ":", 3, true);    // returns ["a", "b", "c : d"]
+     * Strings.splitPreserveAllTokens(" a : b : c : d ", ":", 3, false);   // returns [" a ", " b ", " c : d "]
+     * Strings.splitPreserveAllTokens("a::b:c", ":", 4, true);             // returns ["a", "", "b", "c"]
+     * Strings.splitPreserveAllTokens(" : : ", ":", 3, true);              // returns ["", "", ""]
+     * Strings.splitPreserveAllTokens("a:b:c", ":", 1, true);              // returns ["a:b:c"]
+     * Strings.splitPreserveAllTokens("a:b:c", ":", 1, false);             // returns ["a:b:c"]
      * }</pre>
      *
      * @param str  the String to parse, may be {@code null}
@@ -5651,12 +5648,12 @@ public final class Strings {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * splitToLines("Line1\nLine2\nLine3");     // returns ["Line1", "Line2", "Line3"]
-     * splitToLines("Line1\r\nLine2\r\nLine3"); // returns ["Line1", "Line2", "Line3"]
-     * splitToLines("Line1\rLine2\rLine3");     // returns ["Line1", "Line2", "Line3"]
-     * splitToLines("\n\n");                    // returns ["", "", ""]
-     * splitToLines("");                        // returns [""]
-     * splitToLines(null);                      // returns []
+     * Strings.splitToLines("Line1\nLine2\nLine3");     // returns ["Line1", "Line2", "Line3"]
+     * Strings.splitToLines("Line1\r\nLine2\r\nLine3"); // returns ["Line1", "Line2", "Line3"]
+     * Strings.splitToLines("Line1\rLine2\rLine3");     // returns ["Line1", "Line2", "Line3"]
+     * Strings.splitToLines("\n\n");                    // returns ["", "", ""]
+     * Strings.splitToLines("");                        // returns [""]
+     * Strings.splitToLines(null);                      // returns []
      * }</pre>
      *
      * @param str the string to be split, may be {@code null} or empty If it's {@code null}, the method will return an empty String array.
@@ -5683,13 +5680,13 @@ public final class Strings {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * splitToLines(" Line1 \n Line2 \n Line3 ", true, false);    // returns ["Line1", "Line2", "Line3"]
-     * splitToLines(" Line1 \n \n Line3 ", true, true);           // returns ["Line1", "Line3"]
-     * splitToLines("Line1\n\nLine3", false, true);               // returns ["Line1", "Line3"]
-     * splitToLines("\n\n", false, false);                        // returns ["", "", ""]
-     * splitToLines("\n\n", true, true);                          // returns []
-     * splitToLines("", true, true);                              // returns []
-     * splitToLines(null, true, true);                            // returns []
+     * Strings.splitToLines(" Line1 \n Line2 \n Line3 ", true, false);    // returns ["Line1", "Line2", "Line3"]
+     * Strings.splitToLines(" Line1 \n \n Line3 ", true, true);           // returns ["Line1", "Line3"]
+     * Strings.splitToLines("Line1\n\nLine3", false, true);               // returns ["Line1", "Line3"]
+     * Strings.splitToLines("\n\n", false, false);                        // returns ["", "", ""]
+     * Strings.splitToLines("\n\n", true, true);                          // returns []
+     * Strings.splitToLines("", true, true);                              // returns []
+     * Strings.splitToLines(null, true, true);                            // returns []
      * }</pre>
      *
      * @param str the string to be split, may be {@code null} or empty
@@ -5730,12 +5727,12 @@ public final class Strings {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * trim(null);           // returns null
-     * trim("");             // returns ""
-     * trim("     ");        // returns ""
-     * trim("abc");          // returns "abc"
-     * trim("    abc    ");  // returns "abc"
-     * trim(" \t\r\n ");     // returns ""
+     * Strings.trim(null);           // returns null
+     * Strings.trim("");             // returns ""
+     * Strings.trim("     ");        // returns ""
+     * Strings.trim("abc");          // returns "abc"
+     * Strings.trim("    abc    ");  // returns "abc"
+     * Strings.trim(" \t\r\n ");     // returns ""
      * }</pre>
      *
      * @param str the String to be trimmed, may be {@code null}
@@ -5754,10 +5751,10 @@ public final class Strings {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String[] arr = {"  abc  ", " def ", "ghi"};
-     * trim(arr);  // arr becomes ["abc", "def", "ghi"]
+     * Strings.trim(arr);  // arr becomes ["abc", "def", "ghi"]
      * 
      * String[] arr2 = {null, "  test  ", ""};
-     * trim(arr2); // arr2 becomes [null, "test", ""]
+     * Strings.trim(arr2); // arr2 becomes [null, "test", ""]
      * }</pre>
      *
      * @param strs the array of strings to be trimmed. Each string in the array will be updated in-place.
@@ -5780,12 +5777,12 @@ public final class Strings {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * trimToNull(null);           // returns null
-     * trimToNull("");             // returns null
-     * trimToNull("     ");        // returns null
-     * trimToNull("abc");          // returns "abc"
-     * trimToNull("    abc    ");  // returns "abc"
-     * trimToNull(" \t\r\n ");     // returns null
+     * Strings.trimToNull(null);           // returns null
+     * Strings.trimToNull("");             // returns null
+     * Strings.trimToNull("     ");        // returns null
+     * Strings.trimToNull("abc");          // returns "abc"
+     * Strings.trimToNull("    abc    ");  // returns "abc"
+     * Strings.trimToNull(" \t\r\n ");     // returns null
      * }</pre>
      *
      * @param str the String to be trimmed, may be {@code null}
@@ -5807,10 +5804,10 @@ public final class Strings {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String[] arr = {"  abc  ", "   ", "def", ""};
-     * trimToNull(arr);  // arr becomes ["abc", null, "def", null]
+     * Strings.trimToNull(arr);  // arr becomes ["abc", null, "def", null]
      * 
      * String[] arr2 = {null, "  test  ", " \t\n "};
-     * trimToNull(arr2); // arr2 becomes [null, "test", null]
+     * Strings.trimToNull(arr2); // arr2 becomes [null, "test", null]
      * }</pre>
      *
      * @param strs the array of strings to be trimmed. Each string in the array will be updated in-place.
@@ -5833,12 +5830,12 @@ public final class Strings {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * trimToEmpty(null);           // returns ""
-     * trimToEmpty("");             // returns ""
-     * trimToEmpty("     ");        // returns ""
-     * trimToEmpty("abc");          // returns "abc"
-     * trimToEmpty("    abc    ");  // returns "abc"
-     * trimToEmpty(" \t\r\n ");     // returns ""
+     * Strings.trimToEmpty(null);           // returns ""
+     * Strings.trimToEmpty("");             // returns ""
+     * Strings.trimToEmpty("     ");        // returns ""
+     * Strings.trimToEmpty("abc");          // returns "abc"
+     * Strings.trimToEmpty("    abc    ");  // returns "abc"
+     * Strings.trimToEmpty(" \t\r\n ");     // returns ""
      * }</pre>
      *
      * @param str the String to be trimmed, may be {@code null}
@@ -5858,10 +5855,10 @@ public final class Strings {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String[] arr = {"  abc  ", null, "def", "   "};
-     * trimToEmpty(arr);  // arr becomes ["abc", "", "def", ""]
+     * Strings.trimToEmpty(arr);  // arr becomes ["abc", "", "def", ""]
      * 
      * String[] arr2 = {null, "  test  ", " \t\n "};
-     * trimToEmpty(arr2); // arr2 becomes ["", "test", ""]
+     * Strings.trimToEmpty(arr2); // arr2 becomes ["", "test", ""]
      * }</pre>
      *
      * @param strs the array of strings to be trimmed. Each string in the array will be updated in-place.
@@ -5889,14 +5886,14 @@ public final class Strings {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * strip(null);      // returns null
-     * strip("");        // returns ""
-     * strip("   ");     // returns ""
-     * strip("abc");     // returns "abc"
-     * strip("  abc");   // returns "abc"
-     * strip("abc  ");   // returns "abc"
-     * strip(" abc ");   // returns "abc"
-     * strip(" ab c ");  // returns "ab c"
+     * Strings.strip(null);      // returns null
+     * Strings.strip("");        // returns ""
+     * Strings.strip("   ");     // returns ""
+     * Strings.strip("abc");     // returns "abc"
+     * Strings.strip("  abc");   // returns "abc"
+     * Strings.strip("abc  ");   // returns "abc"
+     * Strings.strip(" abc ");   // returns "abc"
+     * Strings.strip(" ab c ");  // returns "ab c"
      * }</pre>
      *
      * @param str the String to remove whitespace from, may be {@code null}
@@ -5916,10 +5913,10 @@ public final class Strings {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String[] arr = {"  abc  ", " def ", "ghi"};
-     * strip(arr);  // arr becomes ["abc", "def", "ghi"]
+     * Strings.strip(arr);  // arr becomes ["abc", "def", "ghi"]
      * 
      * String[] arr2 = {null, "  test  ", " \t\n "};
-     * strip(arr2); // arr2 becomes [null, "test", ""]
+     * Strings.strip(arr2); // arr2 becomes [null, "test", ""]
      * }</pre>
      *
      * @param strs the array of strings to be stripped. Each string in the array will be updated in-place.
@@ -5942,14 +5939,14 @@ public final class Strings {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * stripToNull(null);      // returns null
-     * stripToNull("");        // returns null
-     * stripToNull("   ");     // returns null
-     * stripToNull("abc");     // returns "abc"
-     * stripToNull("  abc");   // returns "abc"
-     * stripToNull("abc  ");   // returns "abc"
-     * stripToNull(" abc ");   // returns "abc"
-     * stripToNull(" ab c ");  // returns "ab c"
+     * Strings.stripToNull(null);      // returns null
+     * Strings.stripToNull("");        // returns null
+     * Strings.stripToNull("   ");     // returns null
+     * Strings.stripToNull("abc");     // returns "abc"
+     * Strings.stripToNull("  abc");   // returns "abc"
+     * Strings.stripToNull("abc  ");   // returns "abc"
+     * Strings.stripToNull(" abc ");   // returns "abc"
+     * Strings.stripToNull(" ab c ");  // returns "ab c"
      * }</pre>
      *
      * @param str the String to be stripped, may be {@code null}
@@ -5972,10 +5969,10 @@ public final class Strings {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String[] arr = {"  abc  ", "   ", "def", ""};
-     * stripToNull(arr);  // arr becomes ["abc", null, "def", null]
+     * Strings.stripToNull(arr);  // arr becomes ["abc", null, "def", null]
      * 
      * String[] arr2 = {null, "  test  ", " \t\n "};
-     * stripToNull(arr2); // arr2 becomes [null, "test", null]
+     * Strings.stripToNull(arr2); // arr2 becomes [null, "test", null]
      * }</pre>
      *
      * @param strs the array of strings to be stripped. Each string in the array will be updated in-place.
@@ -5998,14 +5995,14 @@ public final class Strings {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * stripToEmpty(null);      // returns ""
-     * stripToEmpty("");        // returns ""
-     * stripToEmpty("   ");     // returns ""
-     * stripToEmpty("abc");     // returns "abc"
-     * stripToEmpty("  abc");   // returns "abc"
-     * stripToEmpty("abc  ");   // returns "abc"
-     * stripToEmpty(" abc ");   // returns "abc"
-     * stripToEmpty(" ab c ");  // returns "ab c"
+     * Strings.stripToEmpty(null);      // returns ""
+     * Strings.stripToEmpty("");        // returns ""
+     * Strings.stripToEmpty("   ");     // returns ""
+     * Strings.stripToEmpty("abc");     // returns "abc"
+     * Strings.stripToEmpty("  abc");   // returns "abc"
+     * Strings.stripToEmpty("abc  ");   // returns "abc"
+     * Strings.stripToEmpty(" abc ");   // returns "abc"
+     * Strings.stripToEmpty(" ab c ");  // returns "ab c"
      * }</pre>
      *
      * @param str the String to be stripped, may be {@code null}
@@ -6026,10 +6023,10 @@ public final class Strings {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String[] arr = {"  abc  ", null, "def", "   "};
-     * stripToEmpty(arr);  // arr becomes ["abc", "", "def", ""]
+     * Strings.stripToEmpty(arr);  // arr becomes ["abc", "", "def", ""]
      * 
      * String[] arr2 = {null, "  test  ", " \t\n "};
-     * stripToEmpty(arr2); // arr2 becomes ["", "test", ""]
+     * Strings.stripToEmpty(arr2); // arr2 becomes ["", "test", ""]
      * }</pre>
      *
      * @param strs the array of strings to be stripped. Each string in the array will be updated in-place.
@@ -6056,14 +6053,14 @@ public final class Strings {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * strip(null, "*");           // returns null
-     * strip("", "*");             // returns ""
-     * strip("abc", null);         // returns "abc"
-     * strip("  abc", null);       // returns "abc"
-     * strip("abc  ", null);       // returns "abc"
-     * strip(" abc ", null);       // returns "abc"
-     * strip("  abcyx", "xyz");    // returns "  abc"
-     * strip("yxabcxyz", "xyz");   // returns "abc"
+     * Strings.strip(null, "*");           // returns null
+     * Strings.strip("", "*");             // returns ""
+     * Strings.strip("abc", null);         // returns "abc"
+     * Strings.strip("  abc", null);       // returns "abc"
+     * Strings.strip("abc  ", null);       // returns "abc"
+     * Strings.strip(" abc ", null);       // returns "abc"
+     * Strings.strip("  abcyx", "xyz");    // returns "  abc"
+     * Strings.strip("yxabcxyz", "xyz");   // returns "abc"
      * }</pre>
      *
      * @param str the String to remove characters from, may be {@code null}
@@ -6088,10 +6085,10 @@ public final class Strings {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String[] arr = {"xxabcyy", "xydefyx", "xyz"};
-     * strip(arr, "xyz");  // arr becomes ["abc", "def", ""]
+     * Strings.strip(arr, "xyz");  // arr becomes ["abc", "def", ""]
      * 
      * String[] arr2 = {"  test  ", null, " \tabc\n "};
-     * strip(arr2, null);  // arr2 becomes ["test", null, "abc"]
+     * Strings.strip(arr2, null);  // arr2 becomes ["test", null, "abc"]
      * }</pre>
      *
      * @param strs the array of strings to be stripped. Each string in the array will be updated in-place.
@@ -6115,12 +6112,12 @@ public final class Strings {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * stripStart(null);        // returns null
-     * stripStart("");          // returns ""
-     * stripStart("abc");       // returns "abc"
-     * stripStart("  abc");     // returns "abc"
-     * stripStart("abc  ");     // returns "abc  "
-     * stripStart(" abc ");     // returns "abc "
+     * Strings.stripStart(null);        // returns null
+     * Strings.stripStart("");          // returns ""
+     * Strings.stripStart("abc");       // returns "abc"
+     * Strings.stripStart("  abc");     // returns "abc"
+     * Strings.stripStart("abc  ");     // returns "abc  "
+     * Strings.stripStart(" abc ");     // returns "abc "
      * }</pre>
      *
      * @param str the String to remove whitespace from, may be {@code null}
@@ -6139,15 +6136,15 @@ public final class Strings {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * stripStart(null, "*");           // returns null
-     * stripStart("", "*");             // returns ""
-     * stripStart("abc", "");           // returns "abc"
-     * stripStart("abc", null);         // returns "abc"
-     * stripStart("  abc", null);       // returns "abc"
-     * stripStart("abc  ", null);       // returns "abc  "
-     * stripStart(" abc ", null);       // returns "abc "
-     * stripStart("yxabc  ", "xyz");    // returns "abc  "
-     * stripStart("xyzabc", "xyz");     // returns "abc"
+     * Strings.stripStart(null, "*");           // returns null
+     * Strings.stripStart("", "*");             // returns ""
+     * Strings.stripStart("abc", "");           // returns "abc"
+     * Strings.stripStart("abc", null);         // returns "abc"
+     * Strings.stripStart("  abc", null);       // returns "abc"
+     * Strings.stripStart("abc  ", null);       // returns "abc  "
+     * Strings.stripStart(" abc ", null);       // returns "abc "
+     * Strings.stripStart("yxabc  ", "xyz");    // returns "abc  "
+     * Strings.stripStart("xyzabc", "xyz");     // returns "abc"
      * }</pre>
      *
      * @param str the String to remove characters from, may be {@code null}
@@ -6184,10 +6181,10 @@ public final class Strings {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String[] arr = {"xxabc", "xydef", "xyz"};
-     * stripStart(arr, "xyz");  // arr becomes ["abc", "def", ""]
+     * Strings.stripStart(arr, "xyz");  // arr becomes ["abc", "def", ""]
      * 
      * String[] arr2 = {"  test", null, " \tabc"};
-     * stripStart(arr2, null);  // arr2 becomes ["test", null, "abc"]
+     * Strings.stripStart(arr2, null);  // arr2 becomes ["test", null, "abc"]
      * }</pre>
      *
      * @param strs the array of strings to be stripped. Each string in the array will be updated in-place.
@@ -6212,12 +6209,12 @@ public final class Strings {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * stripEnd(null);          // returns null
-     * stripEnd("");            // returns ""
-     * stripEnd("abc");         // returns "abc"
-     * stripEnd("  abc");       // returns "  abc"
-     * stripEnd("abc  ");       // returns "abc"
-     * stripEnd(" abc ");       // returns " abc"
+     * Strings.stripEnd(null);          // returns null
+     * Strings.stripEnd("");            // returns ""
+     * Strings.stripEnd("abc");         // returns "abc"
+     * Strings.stripEnd("  abc");       // returns "  abc"
+     * Strings.stripEnd("abc  ");       // returns "abc"
+     * Strings.stripEnd(" abc ");       // returns " abc"
      * }</pre>
      *
      * @param str the String to remove whitespace from, may be {@code null}
@@ -6236,16 +6233,16 @@ public final class Strings {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * stripEnd(null, "*");           // returns null
-     * stripEnd("", "*");             // returns ""
-     * stripEnd("abc", "");           // returns "abc"
-     * stripEnd("abc", null);         // returns "abc"
-     * stripEnd("  abc", null);       // returns "  abc"
-     * stripEnd("abc  ", null);       // returns "abc"
-     * stripEnd(" abc ", null);       // returns " abc"
-     * stripEnd("  abcyx", "xyz");    // returns "  abc"
-     * stripEnd("120.00", ".0");      // returns "12"
-     * stripEnd("abcxyz", "xyz");     // returns "abc"
+     * Strings.stripEnd(null, "*");           // returns null
+     * Strings.stripEnd("", "*");             // returns ""
+     * Strings.stripEnd("abc", "");           // returns "abc"
+     * Strings.stripEnd("abc", null);         // returns "abc"
+     * Strings.stripEnd("  abc", null);       // returns "  abc"
+     * Strings.stripEnd("abc  ", null);       // returns "abc"
+     * Strings.stripEnd(" abc ", null);       // returns " abc"
+     * Strings.stripEnd("  abcyx", "xyz");    // returns "  abc"
+     * Strings.stripEnd("120.00", ".0");      // returns "12"
+     * Strings.stripEnd("abcxyz", "xyz");     // returns "abc"
      * }</pre>
      *
      * @param str the String to remove characters from, may be {@code null}
@@ -6282,10 +6279,10 @@ public final class Strings {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String[] arr = {"abcxx", "defxy", "xyz"};
-     * stripEnd(arr, "xyz");  // arr becomes ["abc", "def", ""]
+     * Strings.stripEnd(arr, "xyz");  // arr becomes ["abc", "def", ""]
      * 
      * String[] arr2 = {"test  ", null, "abc \t"};
-     * stripEnd(arr2, null);  // arr2 becomes ["test", null, "abc"]
+     * Strings.stripEnd(arr2, null);  // arr2 becomes ["test", null, "abc"]
      * }</pre>
      *
      * @param strs the array of strings to be stripped. Each string in the array will be updated in-place.
@@ -6313,12 +6310,12 @@ public final class Strings {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * stripAccents(null);                  // returns null
-     * stripAccents("");                    // returns ""
-     * stripAccents("control");             // returns "control"
-     * stripAccents("éclair");              // returns "eclair"
-     * stripAccents("à la carte");          // returns "a la carte"
-     * stripAccents("Łódź");                // returns "Lodz"
+     * Strings.stripAccents(null);                  // returns null
+     * Strings.stripAccents("");                    // returns ""
+     * Strings.stripAccents("control");             // returns "control"
+     * Strings.stripAccents("éclair");              // returns "eclair"
+     * Strings.stripAccents("à la carte");          // returns "a la carte"
+     * Strings.stripAccents("Łódź");                // returns "Lodz"
      * }</pre>
      *
      * @param str the String to strip accents from, may be {@code null}
@@ -6366,10 +6363,10 @@ public final class Strings {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String[] arr = {"éclair", "café", "naïve"};
-     * stripAccents(arr);  // arr becomes ["eclair", "cafe", "naive"]
+     * Strings.stripAccents(arr);  // arr becomes ["eclair", "cafe", "naive"]
      * 
      * String[] arr2 = {null, "Łódź", "résumé"};
-     * stripAccents(arr2); // arr2 becomes [null, "Lodz", "resume"]
+     * Strings.stripAccents(arr2); // arr2 becomes [null, "Lodz", "resume"]
      * }</pre>
      *
      * @param strs the array of strings to be stripped. Each string in the array will be updated in-place.
@@ -6397,18 +6394,18 @@ public final class Strings {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * chomp(null)          = null
-     * chomp("")            = ""
-     * chomp("a")           = "a"
-     * chomp("abc \r")      = "abc "
-     * chomp("abc\n")       = "abc"
-     * chomp("abc\r\n")     = "abc"
-     * chomp("abc\r\n\r\n") = "abc\r\n"
-     * chomp("abc\n\r")     = "abc\n"
-     * chomp("abc\n\rabc")  = "abc\n\rabc"
-     * chomp("\r")          = ""
-     * chomp("\n")          = ""
-     * chomp("\r\n")        = ""
+     * Strings.chomp(null)          = null
+     * Strings.chomp("")            = ""
+     * Strings.chomp("a")           = "a"
+     * Strings.chomp("abc \r")      = "abc "
+     * Strings.chomp("abc\n")       = "abc"
+     * Strings.chomp("abc\r\n")     = "abc"
+     * Strings.chomp("abc\r\n\r\n") = "abc\r\n"
+     * Strings.chomp("abc\n\r")     = "abc\n"
+     * Strings.chomp("abc\n\rabc")  = "abc\n\rabc"
+     * Strings.chomp("\r")          = ""
+     * Strings.chomp("\n")          = ""
+     * Strings.chomp("\r\n")        = ""
      * }</pre>
      *
      * @param str the String to chomp a newline from, may be {@code null}
@@ -6456,7 +6453,7 @@ public final class Strings {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String[] strs = {"abc\n", "def\r", "ghi"};
-     * chomp(strs);
+     * Strings.chomp(strs);
      * // strs is now {"abc", "def", "ghi"}
      * }</pre>
      *
@@ -6486,17 +6483,17 @@ public final class Strings {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * chop(null)          = null
-     * chop("")            = ""
-     * chop("abc \r")      = "abc "
-     * chop("abc\n")       = "abc"
-     * chop("abc\r\n")     = "abc"
-     * chop("abc")         = "ab"
-     * chop("abc\nabc")    = "abc\nab"
-     * chop("a")           = ""
-     * chop("\r")          = ""
-     * chop("\n")          = ""
-     * chop("\r\n")        = ""
+     * Strings.chop(null)          = null
+     * Strings.chop("")            = ""
+     * Strings.chop("abc \r")      = "abc "
+     * Strings.chop("abc\n")       = "abc"
+     * Strings.chop("abc\r\n")     = "abc"
+     * Strings.chop("abc")         = "ab"
+     * Strings.chop("abc\nabc")    = "abc\nab"
+     * Strings.chop("a")           = ""
+     * Strings.chop("\r")          = ""
+     * Strings.chop("\n")          = ""
+     * Strings.chop("\r\n")        = ""
      * }</pre>
      *
      * @param str the String to chop last character from, may be {@code null}
@@ -6534,7 +6531,7 @@ public final class Strings {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String[] strs = {"abc", "def\r\n", "g"};
-     * chop(strs);
+     * Strings.chop(strs);
      * // strs is now {"ab", "def", ""}
      * }</pre>
      *
@@ -6561,14 +6558,14 @@ public final class Strings {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * truncate(null, 0)       = null
-     * truncate(null, 2)       = null
-     * truncate("", 4)         = ""
-     * truncate("abcdefg", 4)  = "abcd"
-     * truncate("abcdefg", 6)  = "abcdef"
-     * truncate("abcdefg", 7)  = "abcdefg"
-     * truncate("abcdefg", 8)  = "abcdefg"
-     * truncate("abcdefg", -1) = throws an IllegalArgumentException
+     * Strings.truncate(null, 0)       = null
+     * Strings.truncate(null, 2)       = null
+     * Strings.truncate("", 4)         = ""
+     * Strings.truncate("abcdefg", 4)  = "abcd"
+     * Strings.truncate("abcdefg", 6)  = "abcdef"
+     * Strings.truncate("abcdefg", 7)  = "abcdefg"
+     * Strings.truncate("abcdefg", 8)  = "abcdefg"
+     * Strings.truncate("abcdefg", -1) = throws an IllegalArgumentException
      * }</pre>
      *
      * @param str the String to truncate, may be {@code null}
@@ -6593,16 +6590,16 @@ public final class Strings {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * truncate(null, 0, 0) = null
-     * truncate(null, 2, 4) = null
-     * truncate("", 0, 10) = ""
-     * truncate("", 2, 10) = ""
-     * truncate("abcdefghij", 0, 3) = "abc"
-     * truncate("abcdefghij", 5, 6) = "fghij"
-     * truncate("raspberry peach", 10, 15) = "peach"
-     * truncate("abcdefghijklmno", 0, 10) = "abcdefghij"
-     * truncate("abcdefghijklmno", -1, 10) = throws an IllegalArgumentException
-     * truncate("abcdefghij", 3, -1) = throws an IllegalArgumentException
+     * Strings.truncate(null, 0, 0) = null
+     * Strings.truncate(null, 2, 4) = null
+     * Strings.truncate("", 0, 10) = ""
+     * Strings.truncate("", 2, 10) = ""
+     * Strings.truncate("abcdefghij", 0, 3) = "abc"
+     * Strings.truncate("abcdefghij", 5, 6) = "fghij"
+     * Strings.truncate("raspberry peach", 10, 15) = "peach"
+     * Strings.truncate("abcdefghijklmno", 0, 10) = "abcdefghij"
+     * Strings.truncate("abcdefghijklmno", -1, 10) = throws an IllegalArgumentException
+     * Strings.truncate("abcdefghij", 3, -1) = throws an IllegalArgumentException
      * }</pre>
      *
      * @param str the String to truncate, may be {@code null}
@@ -6641,7 +6638,7 @@ public final class Strings {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String[] strs = {"hello", "world123", "hi"};
-     * truncate(strs, 5);
+     * Strings.truncate(strs, 5);
      * // strs is now {"hello", "world", "hi"}
      * }</pre>
      *
@@ -6676,7 +6673,7 @@ public final class Strings {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String[] strs = {"hello", "world123", "hi"};
-     * truncate(strs, 2, 3);
+     * Strings.truncate(strs, 2, 3);
      * // strs is now {"llo", "rld", ""}
      * }</pre>
      *
@@ -6712,12 +6709,12 @@ public final class Strings {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * deleteWhitespace(null)         = null
-     * deleteWhitespace("")           = ""
-     * deleteWhitespace("abc")        = "abc"
-     * deleteWhitespace("   ab  c  ") = "abc"
-     * deleteWhitespace("a\tb\nc")    = "abc"
-     * deleteWhitespace("a b\tc\r\n") = "abc"
+     * Strings.deleteWhitespace(null)         = null
+     * Strings.deleteWhitespace("")           = ""
+     * Strings.deleteWhitespace("abc")        = "abc"
+     * Strings.deleteWhitespace("   ab  c  ") = "abc"
+     * Strings.deleteWhitespace("a\tb\nc")    = "abc"
+     * Strings.deleteWhitespace("a b\tc\r\n") = "abc"
      * }</pre>
      *
      * @param str the String to delete whitespace from, may be {@code null}
@@ -6757,7 +6754,7 @@ public final class Strings {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String[] strs = {"  hello  ", "world\t123", " h i "};
-     * deleteWhitespace(strs);
+     * Strings.deleteWhitespace(strs);
      * // strs is now {"hello", "world123", "hi"}
      * }</pre>
      *
@@ -6785,12 +6782,12 @@ public final class Strings {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * appendIfMissing(null, ".txt")     = ".txt"
-     * appendIfMissing("", ".txt")       = ".txt"
-     * appendIfMissing("file", ".txt")   = "file.txt"
-     * appendIfMissing("file.txt", ".txt") = "file.txt"
-     * appendIfMissing("file.doc", ".txt") = "file.doc.txt"
-     * appendIfMissing("file", "")       = throws IllegalArgumentException
+     * Strings.appendIfMissing(null, ".txt")     = ".txt"
+     * Strings.appendIfMissing("", ".txt")       = ".txt"
+     * Strings.appendIfMissing("file", ".txt")   = "file.txt"
+     * Strings.appendIfMissing("file.txt", ".txt") = "file.txt"
+     * Strings.appendIfMissing("file.doc", ".txt") = "file.doc.txt"
+     * Strings.appendIfMissing("file", "")       = throws IllegalArgumentException
      * }</pre>
      *
      * @param str the string to which the suffix should be appended, may be {@code null} or empty
@@ -6824,12 +6821,12 @@ public final class Strings {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * appendIfMissingIgnoreCase(null, ".TXT")     = ".TXT"
-     * appendIfMissingIgnoreCase("", ".TXT")       = ".TXT"
-     * appendIfMissingIgnoreCase("file", ".TXT")   = "file.TXT"
-     * appendIfMissingIgnoreCase("file.txt", ".TXT") = "file.txt"
-     * appendIfMissingIgnoreCase("file.TXT", ".txt") = "file.TXT"
-     * appendIfMissingIgnoreCase("file", "")       = throws IllegalArgumentException
+     * Strings.appendIfMissingIgnoreCase(null, ".TXT")     = ".TXT"
+     * Strings.appendIfMissingIgnoreCase("", ".TXT")       = ".TXT"
+     * Strings.appendIfMissingIgnoreCase("file", ".TXT")   = "file.TXT"
+     * Strings.appendIfMissingIgnoreCase("file.txt", ".TXT") = "file.txt"
+     * Strings.appendIfMissingIgnoreCase("file.TXT", ".txt") = "file.TXT"
+     * Strings.appendIfMissingIgnoreCase("file", "")       = throws IllegalArgumentException
      * }</pre>
      *
      * @param str the string to which the suffix should be appended, may be {@code null} or empty
@@ -6862,12 +6859,12 @@ public final class Strings {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * prependIfMissing(null, "http://")     = "http://"
-     * prependIfMissing("", "http://")       = "http://"
-     * prependIfMissing("example.com", "http://") = "http://example.com"
-     * prependIfMissing("http://example.com", "http://") = "http://example.com"
-     * prependIfMissing("ftp://example.com", "http://") = "http://ftp://example.com"
-     * prependIfMissing("example.com", "")   = throws IllegalArgumentException
+     * Strings.prependIfMissing(null, "http://")     = "http://"
+     * Strings.prependIfMissing("", "http://")       = "http://"
+     * Strings.prependIfMissing("example.com", "http://") = "http://example.com"
+     * Strings.prependIfMissing("http://example.com", "http://") = "http://example.com"
+     * Strings.prependIfMissing("ftp://example.com", "http://") = "http://ftp://example.com"
+     * Strings.prependIfMissing("example.com", "")   = throws IllegalArgumentException
      * }</pre>
      *
      * @param str the string to which the prefix should be prepended, may be {@code null} or empty
@@ -6901,12 +6898,12 @@ public final class Strings {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * prependIfMissingIgnoreCase(null, "HTTP://")     = "HTTP://"
-     * prependIfMissingIgnoreCase("", "HTTP://")       = "HTTP://"
-     * prependIfMissingIgnoreCase("example.com", "HTTP://") = "HTTP://example.com"
-     * prependIfMissingIgnoreCase("http://example.com", "HTTP://") = "http://example.com"
-     * prependIfMissingIgnoreCase("HTTP://example.com", "http://") = "HTTP://example.com"
-     * prependIfMissingIgnoreCase("example.com", "")   = throws IllegalArgumentException
+     * Strings.prependIfMissingIgnoreCase(null, "HTTP://")     = "HTTP://"
+     * Strings.prependIfMissingIgnoreCase("", "HTTP://")       = "HTTP://"
+     * Strings.prependIfMissingIgnoreCase("example.com", "HTTP://") = "HTTP://example.com"
+     * Strings.prependIfMissingIgnoreCase("http://example.com", "HTTP://") = "http://example.com"
+     * Strings.prependIfMissingIgnoreCase("HTTP://example.com", "http://") = "HTTP://example.com"
+     * Strings.prependIfMissingIgnoreCase("example.com", "")   = throws IllegalArgumentException
      * }</pre>
      *
      * @param str the string to which the prefix should be prepended, may be {@code null} or empty
@@ -6944,13 +6941,13 @@ public final class Strings {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * wrapIfMissing(null, "\"")    = "\"\""
-     * wrapIfMissing("", "\"")      = "\"\""
-     * wrapIfMissing("abc", "\"")   = "\"abc\""
-     * wrapIfMissing("\"abc", "\"") = "\"abc\""
-     * wrapIfMissing("abc\"", "\"") = "\"abc\""
-     * wrapIfMissing("\"abc\"", "\"") = "\"abc\""
-     * wrapIfMissing("abc", "")     = throws IllegalArgumentException
+     * Strings.wrapIfMissing(null, "\"")    = "\"\""
+     * Strings.wrapIfMissing("", "\"")      = "\"\""
+     * Strings.wrapIfMissing("abc", "\"")   = "\"abc\""
+     * Strings.wrapIfMissing("\"abc", "\"") = "\"abc\""
+     * Strings.wrapIfMissing("abc\"", "\"") = "\"abc\""
+     * Strings.wrapIfMissing("\"abc\"", "\"") = "\"abc\""
+     * Strings.wrapIfMissing("abc", "")     = throws IllegalArgumentException
      * }</pre>
      *
      * @param str the string to be wrapped. May be {@code null} or empty.
@@ -6982,18 +6979,18 @@ public final class Strings {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * wrapIfMissing(null, "[", "]") = "[]"
-     * wrapIfMissing("", "[", "]") = "[]"
-     * wrapIfMissing("[", "[", "]") = "[]"
-     * wrapIfMissing("]", "[", "]") = "[]"
-     * wrapIfMissing("abc", "[", "]") = "[abc]"
-     * wrapIfMissing("[abc", "[", "]") = "[abc]"
-     * wrapIfMissing("abc]", "[", "]") = "[abc]"
-     * wrapIfMissing("[abc]", "[", "]") = "[abc]"
-     * wrapIfMissing("a", "aa", "aa") = "aaaaa"
-     * wrapIfMissing("aa", "aa", "aa") = "aaaa"
-     * wrapIfMissing("aaa", "aa", "aa") = "aaaaa"
-     * wrapIfMissing("aaaa", "aa", "aa") = "aaaa"
+     * Strings.wrapIfMissing(null, "[", "]") = "[]"
+     * Strings.wrapIfMissing("", "[", "]") = "[]"
+     * Strings.wrapIfMissing("[", "[", "]") = "[]"
+     * Strings.wrapIfMissing("]", "[", "]") = "[]"
+     * Strings.wrapIfMissing("abc", "[", "]") = "[abc]"
+     * Strings.wrapIfMissing("[abc", "[", "]") = "[abc]"
+     * Strings.wrapIfMissing("abc]", "[", "]") = "[abc]"
+     * Strings.wrapIfMissing("[abc]", "[", "]") = "[abc]"
+     * Strings.wrapIfMissing("a", "aa", "aa") = "aaaaa"
+     * Strings.wrapIfMissing("aa", "aa", "aa") = "aaaa"
+     * Strings.wrapIfMissing("aaa", "aa", "aa") = "aaaaa"
+     * Strings.wrapIfMissing("aaaa", "aa", "aa") = "aaaa"
      * }</pre>
      *
      * @param str the string to be wrapped. May be {@code null} or empty.
@@ -7030,13 +7027,13 @@ public final class Strings {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * wrap(null, "\"")    = "\"\""
-     * wrap("", "\"")      = "\"\""
-     * wrap("abc", "\"")   = "\"abc\""
-     * wrap("\"abc", "\"") = "\"\"abc\""
-     * wrap("abc\"", "\"") = "\"abc\"\""
-     * wrap("\"abc\"", "\"") = "\"\"abc\"\""
-     * wrap("abc", "")     = throws IllegalArgumentException
+     * Strings.wrap(null, "\"")    = "\"\""
+     * Strings.wrap("", "\"")      = "\"\""
+     * Strings.wrap("abc", "\"")   = "\"abc\""
+     * Strings.wrap("\"abc", "\"") = "\"\"abc\""
+     * Strings.wrap("abc\"", "\"") = "\"abc\"\""
+     * Strings.wrap("\"abc\"", "\"") = "\"\"abc\"\""
+     * Strings.wrap("abc", "")     = throws IllegalArgumentException
      * }</pre>
      *
      * @param str the string to be wrapped. May be {@code null}.
@@ -7062,15 +7059,15 @@ public final class Strings {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * wrap(null, "[", "]") = "[]"
-     * wrap("", "[", "]") = "[]"
-     * wrap("[", "[", "]") = "[[]"
-     * wrap("]", "[", "]") = "[]]"
-     * wrap("abc", "[", "]") = "[abc]"
-     * wrap("[abc]", "[", "]") = "[[abc]]"
-     * wrap("a", "aa", "aa") = "aaaaa"
-     * wrap("aa", "aa", "aa") = "aaaaaa"
-     * wrap("aaa", "aa", "aa") = "aaaaaaa"
+     * Strings.wrap(null, "[", "]") = "[]"
+     * Strings.wrap("", "[", "]") = "[]"
+     * Strings.wrap("[", "[", "]") = "[[]"
+     * Strings.wrap("]", "[", "]") = "[]]"
+     * Strings.wrap("abc", "[", "]") = "[abc]"
+     * Strings.wrap("[abc]", "[", "]") = "[[abc]]"
+     * Strings.wrap("a", "aa", "aa") = "aaaaa"
+     * Strings.wrap("aa", "aa", "aa") = "aaaaaa"
+     * Strings.wrap("aaa", "aa", "aa") = "aaaaaaa"
      * }</pre>
      *
      * @param str the string to be wrapped. May be {@code null}.
@@ -7104,14 +7101,14 @@ public final class Strings {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * unwrap(null, "\"")     = null
-     * unwrap("", "\"")       = ""
-     * unwrap("abc", "\"")    = "abc"
-     * unwrap("\"abc", "\"")  = "\"abc"
-     * unwrap("abc\"", "\"")  = "abc\""
-     * unwrap("\"abc\"", "\"") = "abc"
-     * unwrap("\"\"abc\"\"", "\"") = "\"abc\""
-     * unwrap("abc", "")      = throws IllegalArgumentException
+     * Strings.unwrap(null, "\"")     = null
+     * Strings.unwrap("", "\"")       = ""
+     * Strings.unwrap("abc", "\"")    = "abc"
+     * Strings.unwrap("\"abc", "\"")  = "\"abc"
+     * Strings.unwrap("abc\"", "\"")  = "abc\""
+     * Strings.unwrap("\"abc\"", "\"") = "abc"
+     * Strings.unwrap("\"\"abc\"\"", "\"") = "\"abc\""
+     * Strings.unwrap("abc", "")      = throws IllegalArgumentException
      * }</pre>
      *
      * @param str the string to be unwrapped. May be {@code null} or empty.
@@ -7138,18 +7135,18 @@ public final class Strings {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * unwrap(null, "[", "]") = null
-     * unwrap("", "[", "]") = ""
-     * unwrap("[", "[", "]") = "["
-     * unwrap("]", "[", "]") = "]"
-     * unwrap("[abc]", "[", "]") = "abc"
-     * unwrap("[[abc]]", "[", "]") = "[abc]"
-     * unwrap("[abc", "[", "]") = "[abc"
-     * unwrap("abc]", "[", "]") = "abc]"
-     * unwrap("aaaaa", "aa", "aa") = "a"
-     * unwrap("aa", "aa", "aa") = "aa"
-     * unwrap("aaa", "aa", "aa") = "aaa"
-     * unwrap("aaaa", "aa", "aa") = ""
+     * Strings.unwrap(null, "[", "]") = null
+     * Strings.unwrap("", "[", "]") = ""
+     * Strings.unwrap("[", "[", "]") = "["
+     * Strings.unwrap("]", "[", "]") = "]"
+     * Strings.unwrap("[abc]", "[", "]") = "abc"
+     * Strings.unwrap("[[abc]]", "[", "]") = "[abc]"
+     * Strings.unwrap("[abc", "[", "]") = "[abc"
+     * Strings.unwrap("abc]", "[", "]") = "abc]"
+     * Strings.unwrap("aaaaa", "aa", "aa") = "a"
+     * Strings.unwrap("aa", "aa", "aa") = "aa"
+     * Strings.unwrap("aaa", "aa", "aa") = "aaa"
+     * Strings.unwrap("aaaa", "aa", "aa") = ""
      * }</pre>
      *
      * @param str the string to be unwrapped. May be {@code null} or empty.
@@ -7180,10 +7177,10 @@ public final class Strings {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * isLowerCase('a') = true
-     * isLowerCase('A') = false
-     * isLowerCase('1') = false
-     * isLowerCase('ñ') = true
+     * Strings.isLowerCase('a') = true
+     * Strings.isLowerCase('A') = false
+     * Strings.isLowerCase('1') = false
+     * Strings.isLowerCase('ñ') = true
      * }</pre>
      *
      * @param ch the character to check
@@ -7205,11 +7202,11 @@ public final class Strings {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * isAsciiLowerCase('a') = true
-     * isAsciiLowerCase('z') = true
-     * isAsciiLowerCase('A') = false
-     * isAsciiLowerCase('1') = false
-     * isAsciiLowerCase('ñ') = false
+     * Strings.isAsciiLowerCase('a') = true
+     * Strings.isAsciiLowerCase('z') = true
+     * Strings.isAsciiLowerCase('A') = false
+     * Strings.isAsciiLowerCase('1') = false
+     * Strings.isAsciiLowerCase('ñ') = false
      * }</pre>
      *
      * @param ch the character to check
@@ -7229,10 +7226,10 @@ public final class Strings {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * isUpperCase('A') = true
-     * isUpperCase('a') = false
-     * isUpperCase('1') = false
-     * isUpperCase('Ñ') = true
+     * Strings.isUpperCase('A') = true
+     * Strings.isUpperCase('a') = false
+     * Strings.isUpperCase('1') = false
+     * Strings.isUpperCase('Ñ') = true
      * }</pre>
      *
      * @param ch the character to check
@@ -7254,11 +7251,11 @@ public final class Strings {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * isAsciiUpperCase('A') = true
-     * isAsciiUpperCase('Z') = true
-     * isAsciiUpperCase('a') = false
-     * isAsciiUpperCase('1') = false
-     * isAsciiUpperCase('Ñ') = false
+     * Strings.isAsciiUpperCase('A') = true
+     * Strings.isAsciiUpperCase('Z') = true
+     * Strings.isAsciiUpperCase('a') = false
+     * Strings.isAsciiUpperCase('1') = false
+     * Strings.isAsciiUpperCase('Ñ') = false
      * }</pre>
      *
      * @param ch the character to check
@@ -7277,12 +7274,12 @@ public final class Strings {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * isAllLowerCase(null)   = true
-     * isAllLowerCase("")     = true
-     * isAllLowerCase("abc")  = true
-     * isAllLowerCase("abC")  = false
-     * isAllLowerCase("ab c") = false (space is not a lowercase letter)
-     * isAllLowerCase("ab1")  = false (digit is not a lowercase letter)
+     * Strings.isAllLowerCase(null)   = true
+     * Strings.isAllLowerCase("")     = true
+     * Strings.isAllLowerCase("abc")  = true
+     * Strings.isAllLowerCase("abC")  = false
+     * Strings.isAllLowerCase("ab c") = false (space is not a lowercase letter)
+     * Strings.isAllLowerCase("ab1")  = false (digit is not a lowercase letter)
      * }</pre>
      *
      * @param cs the CharSequence to check, may be {@code null}
@@ -7316,12 +7313,12 @@ public final class Strings {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * isAllUpperCase(null)   = true
-     * isAllUpperCase("")     = true
-     * isAllUpperCase("ABC")  = true
-     * isAllUpperCase("ABc")  = false
-     * isAllUpperCase("AB C") = false (space is not an uppercase letter)
-     * isAllUpperCase("AB1")  = false (digit is not an uppercase letter)
+     * Strings.isAllUpperCase(null)   = true
+     * Strings.isAllUpperCase("")     = true
+     * Strings.isAllUpperCase("ABC")  = true
+     * Strings.isAllUpperCase("ABc")  = false
+     * Strings.isAllUpperCase("AB C") = false (space is not an uppercase letter)
+     * Strings.isAllUpperCase("AB1")  = false (digit is not an uppercase letter)
      * }</pre>
      *
      * @param cs the CharSequence to check, may be {@code null}
@@ -7355,16 +7352,16 @@ public final class Strings {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * isMixedCase(null)    = false
-     * isMixedCase("")      = false
-     * isMixedCase("a")     = false
-     * isMixedCase("A")     = false
-     * isMixedCase("abc")   = false
-     * isMixedCase("ABC")   = false
-     * isMixedCase("aBc")   = true
-     * isMixedCase("Hello") = true
-     * isMixedCase("123")   = false (no letters)
-     * isMixedCase("a1B2")  = true
+     * Strings.isMixedCase(null)    = false
+     * Strings.isMixedCase("")      = false
+     * Strings.isMixedCase("a")     = false
+     * Strings.isMixedCase("A")     = false
+     * Strings.isMixedCase("abc")   = false
+     * Strings.isMixedCase("ABC")   = false
+     * Strings.isMixedCase("aBc")   = true
+     * Strings.isMixedCase("Hello") = true
+     * Strings.isMixedCase("123")   = false (no letters)
+     * Strings.isMixedCase("a1B2")  = true
      * }</pre>
      *
      * @param cs the CharSequence to check. It may be {@code null}.
@@ -7409,11 +7406,11 @@ public final class Strings {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * isDigit('0') = true
-     * isDigit('9') = true
-     * isDigit('a') = false
-     * isDigit('A') = false
-     * isDigit('٠') = true (Arabic-Indic digit zero)
+     * Strings.isDigit('0') = true
+     * Strings.isDigit('9') = true
+     * Strings.isDigit('a') = false
+     * Strings.isDigit('A') = false
+     * Strings.isDigit('٠') = true (Arabic-Indic digit zero)
      * }</pre>
      *
      * @param ch the character to check
@@ -7436,12 +7433,12 @@ public final class Strings {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * isLetter('a') = true
-     * isLetter('A') = true
-     * isLetter('ñ') = true
-     * isLetter('中') = true
-     * isLetter('1') = false
-     * isLetter(' ') = false
+     * Strings.isLetter('a') = true
+     * Strings.isLetter('A') = true
+     * Strings.isLetter('ñ') = true
+     * Strings.isLetter('中') = true
+     * Strings.isLetter('1') = false
+     * Strings.isLetter(' ') = false
      * }</pre>
      *
      * @param ch the character to check
@@ -7464,13 +7461,13 @@ public final class Strings {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * isLetterOrDigit('a') = true
-     * isLetterOrDigit('A') = true
-     * isLetterOrDigit('1') = true
-     * isLetterOrDigit('ñ') = true
-     * isLetterOrDigit('中') = true
-     * isLetterOrDigit(' ') = false
-     * isLetterOrDigit('!') = false
+     * Strings.isLetterOrDigit('a') = true
+     * Strings.isLetterOrDigit('A') = true
+     * Strings.isLetterOrDigit('1') = true
+     * Strings.isLetterOrDigit('ñ') = true
+     * Strings.isLetterOrDigit('中') = true
+     * Strings.isLetterOrDigit(' ') = false
+     * Strings.isLetterOrDigit('!') = false
      * }</pre>
      *
      * @param ch the character to check
@@ -7495,13 +7492,13 @@ public final class Strings {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * isAscii('a')  = true
-     * isAscii('A')  = true
-     * isAscii('3')  = true
-     * isAscii('-')  = true
-     * isAscii('\n') = true
-     * isAscii('©')  = false (value 169)
-     * isAscii('ñ')  = false (value 241)
+     * Strings.isAscii('a')  = true
+     * Strings.isAscii('A')  = true
+     * Strings.isAscii('3')  = true
+     * Strings.isAscii('-')  = true
+     * Strings.isAscii('\n') = true
+     * Strings.isAscii('©')  = false (value 169)
+     * Strings.isAscii('ñ')  = false (value 241)
      * }</pre>
      *
      * @param ch the character to check
@@ -7524,15 +7521,15 @@ public final class Strings {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * isAsciiPrintable('a')  = true
-     * isAsciiPrintable('A')  = true
-     * isAsciiPrintable('3')  = true
-     * isAsciiPrintable('-')  = true
-     * isAsciiPrintable(' ')  = true (space, value 32)
-     * isAsciiPrintable('~')  = true (tilde, value 126)
-     * isAsciiPrintable('\n') = false (newline, value 10)
-     * isAsciiPrintable('\t') = false (tab, value 9)
-     * isAsciiPrintable('©')  = false (value 169)
+     * Strings.isAsciiPrintable('a')  = true
+     * Strings.isAsciiPrintable('A')  = true
+     * Strings.isAsciiPrintable('3')  = true
+     * Strings.isAsciiPrintable('-')  = true
+     * Strings.isAsciiPrintable(' ')  = true (space, value 32)
+     * Strings.isAsciiPrintable('~')  = true (tilde, value 126)
+     * Strings.isAsciiPrintable('\n') = false (newline, value 10)
+     * Strings.isAsciiPrintable('\t') = false (tab, value 9)
+     * Strings.isAsciiPrintable('©')  = false (value 169)
      * }</pre>
      *
      * @param ch the character to check
@@ -7554,15 +7551,15 @@ public final class Strings {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * isAsciiControl('\n') = true (newline, value 10)
-     * isAsciiControl('\r') = true (carriage return, value 13)
-     * isAsciiControl('\t') = true (tab, value 9)
-     * isAsciiControl('\0') = true (null, value 0)
-     * isAsciiControl('\u007F') = true (DEL, value 127)
-     * isAsciiControl('a')  = false
-     * isAsciiControl('A')  = false
-     * isAsciiControl(' ')  = false (space, value 32)
-     * isAsciiControl('©')  = false
+     * Strings.isAsciiControl('\n') = true (newline, value 10)
+     * Strings.isAsciiControl('\r') = true (carriage return, value 13)
+     * Strings.isAsciiControl('\t') = true (tab, value 9)
+     * Strings.isAsciiControl('\0') = true (null, value 0)
+     * Strings.isAsciiControl('\u007F') = true (DEL, value 127)
+     * Strings.isAsciiControl('a')  = false
+     * Strings.isAsciiControl('A')  = false
+     * Strings.isAsciiControl(' ')  = false (space, value 32)
+     * Strings.isAsciiControl('©')  = false
      * }</pre>
      *
      * @param ch the character to check
@@ -7583,15 +7580,15 @@ public final class Strings {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * isAsciiAlpha('a')  = true
-     * isAsciiAlpha('A')  = true
-     * isAsciiAlpha('z')  = true
-     * isAsciiAlpha('Z')  = true
-     * isAsciiAlpha('3')  = false
-     * isAsciiAlpha('-')  = false
-     * isAsciiAlpha('\n') = false
-     * isAsciiAlpha('ñ')  = false
-     * isAsciiAlpha('©')  = false
+     * Strings.isAsciiAlpha('a')  = true
+     * Strings.isAsciiAlpha('A')  = true
+     * Strings.isAsciiAlpha('z')  = true
+     * Strings.isAsciiAlpha('Z')  = true
+     * Strings.isAsciiAlpha('3')  = false
+     * Strings.isAsciiAlpha('-')  = false
+     * Strings.isAsciiAlpha('\n') = false
+     * Strings.isAsciiAlpha('ñ')  = false
+     * Strings.isAsciiAlpha('©')  = false
      * }</pre>
      *
      * @param ch the character to check
@@ -7614,14 +7611,14 @@ public final class Strings {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * isAsciiAlphaUpper('A')  = true
-     * isAsciiAlphaUpper('Z')  = true
-     * isAsciiAlphaUpper('a')  = false
-     * isAsciiAlphaUpper('3')  = false
-     * isAsciiAlphaUpper('-')  = false
-     * isAsciiAlphaUpper('\n') = false
-     * isAsciiAlphaUpper('Ñ')  = false
-     * isAsciiAlphaUpper('©')  = false
+     * Strings.isAsciiAlphaUpper('A')  = true
+     * Strings.isAsciiAlphaUpper('Z')  = true
+     * Strings.isAsciiAlphaUpper('a')  = false
+     * Strings.isAsciiAlphaUpper('3')  = false
+     * Strings.isAsciiAlphaUpper('-')  = false
+     * Strings.isAsciiAlphaUpper('\n') = false
+     * Strings.isAsciiAlphaUpper('Ñ')  = false
+     * Strings.isAsciiAlphaUpper('©')  = false
      * }</pre>
      *
      * @param ch the character to check
@@ -7642,14 +7639,14 @@ public final class Strings {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * isAsciiAlphaLower('a')  = true
-     * isAsciiAlphaLower('z')  = true
-     * isAsciiAlphaLower('A')  = false
-     * isAsciiAlphaLower('3')  = false
-     * isAsciiAlphaLower('-')  = false
-     * isAsciiAlphaLower('\n') = false
-     * isAsciiAlphaLower('ñ')  = false
-     * isAsciiAlphaLower('©')  = false
+     * Strings.isAsciiAlphaLower('a')  = true
+     * Strings.isAsciiAlphaLower('z')  = true
+     * Strings.isAsciiAlphaLower('A')  = false
+     * Strings.isAsciiAlphaLower('3')  = false
+     * Strings.isAsciiAlphaLower('-')  = false
+     * Strings.isAsciiAlphaLower('\n') = false
+     * Strings.isAsciiAlphaLower('ñ')  = false
+     * Strings.isAsciiAlphaLower('©')  = false
      * }</pre>
      *
      * @param ch the character to check
@@ -7670,15 +7667,15 @@ public final class Strings {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * isAsciiNumeric('0')  = true
-     * isAsciiNumeric('9')  = true
-     * isAsciiNumeric('5')  = true
-     * isAsciiNumeric('a')  = false
-     * isAsciiNumeric('A')  = false
-     * isAsciiNumeric('-')  = false
-     * isAsciiNumeric('\n') = false
-     * isAsciiNumeric('٠')  = false (Arabic-Indic digit)
-     * isAsciiNumeric('©')  = false
+     * Strings.isAsciiNumeric('0')  = true
+     * Strings.isAsciiNumeric('9')  = true
+     * Strings.isAsciiNumeric('5')  = true
+     * Strings.isAsciiNumeric('a')  = false
+     * Strings.isAsciiNumeric('A')  = false
+     * Strings.isAsciiNumeric('-')  = false
+     * Strings.isAsciiNumeric('\n') = false
+     * Strings.isAsciiNumeric('٠')  = false (Arabic-Indic digit)
+     * Strings.isAsciiNumeric('©')  = false
      * }</pre>
      *
      * @param ch the character to check
@@ -7699,17 +7696,17 @@ public final class Strings {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * isAsciiAlphanumeric('a')  = true
-     * isAsciiAlphanumeric('A')  = true
-     * isAsciiAlphanumeric('3')  = true
-     * isAsciiAlphanumeric('z')  = true
-     * isAsciiAlphanumeric('Z')  = true
-     * isAsciiAlphanumeric('0')  = true
-     * isAsciiAlphanumeric('-')  = false
-     * isAsciiAlphanumeric(' ')  = false
-     * isAsciiAlphanumeric('\n') = false
-     * isAsciiAlphanumeric('ñ')  = false
-     * isAsciiAlphanumeric('©')  = false
+     * Strings.isAsciiAlphanumeric('a')  = true
+     * Strings.isAsciiAlphanumeric('A')  = true
+     * Strings.isAsciiAlphanumeric('3')  = true
+     * Strings.isAsciiAlphanumeric('z')  = true
+     * Strings.isAsciiAlphanumeric('Z')  = true
+     * Strings.isAsciiAlphanumeric('0')  = true
+     * Strings.isAsciiAlphanumeric('-')  = false
+     * Strings.isAsciiAlphanumeric(' ')  = false
+     * Strings.isAsciiAlphanumeric('\n') = false
+     * Strings.isAsciiAlphanumeric('ñ')  = false
+     * Strings.isAsciiAlphanumeric('©')  = false
      * }</pre>
      *
      * @param ch the character to check
@@ -7732,18 +7729,18 @@ public final class Strings {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * isAsciiPrintable(null)     = false
-     * isAsciiPrintable("")       = true
-     * isAsciiPrintable(" ")      = true
-     * isAsciiPrintable("Ceki")   = true
-     * isAsciiPrintable("ab2c")   = true
-     * isAsciiPrintable("!ab-c~") = true
-     * isAsciiPrintable("\u0020") = true (space)
-     * isAsciiPrintable("\u0021") = true (!)
-     * isAsciiPrintable("\u007e") = true (~)
-     * isAsciiPrintable("\u007f") = false (DEL)
-     * isAsciiPrintable("Ceki Gülcü") = false (contains non-ASCII)
-     * isAsciiPrintable("abc\n")  = false (contains newline)
+     * Strings.isAsciiPrintable(null)     = false
+     * Strings.isAsciiPrintable("")       = true
+     * Strings.isAsciiPrintable(" ")      = true
+     * Strings.isAsciiPrintable("Ceki")   = true
+     * Strings.isAsciiPrintable("ab2c")   = true
+     * Strings.isAsciiPrintable("!ab-c~") = true
+     * Strings.isAsciiPrintable("\u0020") = true (space)
+     * Strings.isAsciiPrintable("\u0021") = true (!)
+     * Strings.isAsciiPrintable("\u007e") = true (~)
+     * Strings.isAsciiPrintable("\u007f") = false (DEL)
+     * Strings.isAsciiPrintable("Ceki Gülcü") = false (contains non-ASCII)
+     * Strings.isAsciiPrintable("abc\n")  = false (contains newline)
      * }</pre>
      *
      * @param cs the CharSequence to check, may be null
@@ -7777,15 +7774,15 @@ public final class Strings {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // ASCII alphabetic strings
-     * isAsciiAlpha("abcDEF");                // returns true
-     * isAsciiAlpha("HelloWorld");            // returns true
+     * Strings.isAsciiAlpha("abcDEF");                // returns true
+     * Strings.isAsciiAlpha("HelloWorld");            // returns true
      * 
      * // Non-ASCII alphabetic strings
-     * isAsciiAlpha(null);                    // returns false
-     * isAsciiAlpha("");                      // returns false
-     * isAsciiAlpha("abc123");                // returns {@code false} (contains digits)
-     * isAsciiAlpha("hello world");           // returns {@code false} (contains space)
-     * isAsciiAlpha("café");                  // returns {@code false} (contains non-ASCII character)
+     * Strings.isAsciiAlpha(null);                    // returns false
+     * Strings.isAsciiAlpha("");                      // returns false
+     * Strings.isAsciiAlpha("abc123");                // returns {@code false} (contains digits)
+     * Strings.isAsciiAlpha("hello world");           // returns {@code false} (contains space)
+     * Strings.isAsciiAlpha("café");                  // returns {@code false} (contains non-ASCII character)
      * }</pre>
      *
      * @param cs the CharSequence to be checked, may be {@code null} or empty
@@ -7821,15 +7818,15 @@ public final class Strings {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // ASCII alphabetic strings with spaces
-     * isAsciiAlphaSpace("Hello World");      // returns true
-     * isAsciiAlphaSpace("The Quick Brown");  // returns true
-     * isAsciiAlphaSpace("");                 // returns true
+     * Strings.isAsciiAlphaSpace("Hello World");      // returns true
+     * Strings.isAsciiAlphaSpace("The Quick Brown");  // returns true
+     * Strings.isAsciiAlphaSpace("");                 // returns true
      * 
      * // Invalid strings
-     * isAsciiAlphaSpace(null);               // returns false
-     * isAsciiAlphaSpace("Hello123");         // returns {@code false} (contains digits)
-     * isAsciiAlphaSpace("Hello\tWorld");     // returns {@code false} (contains tab)
-     * isAsciiAlphaSpace("café");             // returns {@code false} (contains non-ASCII character)
+     * Strings.isAsciiAlphaSpace(null);               // returns false
+     * Strings.isAsciiAlphaSpace("Hello123");         // returns {@code false} (contains digits)
+     * Strings.isAsciiAlphaSpace("Hello\tWorld");     // returns {@code false} (contains tab)
+     * Strings.isAsciiAlphaSpace("café");             // returns {@code false} (contains non-ASCII character)
      * }</pre>
      *
      * @param cs the CharSequence to be checked, may be {@code null} or empty
@@ -7868,17 +7865,17 @@ public final class Strings {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // ASCII alphanumeric strings
-     * isAsciiAlphanumeric("abc123");         // returns true
-     * isAsciiAlphanumeric("HelloWorld2023"); // returns true
-     * isAsciiAlphanumeric("ABC");            // returns true
-     * isAsciiAlphanumeric("123");            // returns true
+     * Strings.isAsciiAlphanumeric("abc123");         // returns true
+     * Strings.isAsciiAlphanumeric("HelloWorld2023"); // returns true
+     * Strings.isAsciiAlphanumeric("ABC");            // returns true
+     * Strings.isAsciiAlphanumeric("123");            // returns true
      * 
      * // Non-ASCII alphanumeric strings
-     * isAsciiAlphanumeric(null);             // returns false
-     * isAsciiAlphanumeric("");               // returns false
-     * isAsciiAlphanumeric("hello world");    // returns {@code false} (contains space)
-     * isAsciiAlphanumeric("user@email");     // returns {@code false} (contains special character)
-     * isAsciiAlphanumeric("café123");        // returns {@code false} (contains non-ASCII character)
+     * Strings.isAsciiAlphanumeric(null);             // returns false
+     * Strings.isAsciiAlphanumeric("");               // returns false
+     * Strings.isAsciiAlphanumeric("hello world");    // returns {@code false} (contains space)
+     * Strings.isAsciiAlphanumeric("user@email");     // returns {@code false} (contains special character)
+     * Strings.isAsciiAlphanumeric("café123");        // returns {@code false} (contains non-ASCII character)
      * }</pre>
      *
      * @param cs the CharSequence to be checked, may be {@code null} or empty
@@ -7915,15 +7912,15 @@ public final class Strings {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // ASCII alphanumeric strings with spaces
-     * isAsciiAlphanumericSpace("Hello World 123");  // returns true
-     * isAsciiAlphanumericSpace("Test 2023");        // returns true
-     * isAsciiAlphanumericSpace("");                 // returns true
+     * Strings.isAsciiAlphanumericSpace("Hello World 123");  // returns true
+     * Strings.isAsciiAlphanumericSpace("Test 2023");        // returns true
+     * Strings.isAsciiAlphanumericSpace("");                 // returns true
      * 
      * // Invalid strings
-     * isAsciiAlphanumericSpace(null);               // returns false
-     * isAsciiAlphanumericSpace("Hello@World");      // returns {@code false} (contains special character)
-     * isAsciiAlphanumericSpace("Test\t123");        // returns {@code false} (contains tab)
-     * isAsciiAlphanumericSpace("café 2023");        // returns {@code false} (contains non-ASCII character)
+     * Strings.isAsciiAlphanumericSpace(null);               // returns false
+     * Strings.isAsciiAlphanumericSpace("Hello@World");      // returns {@code false} (contains special character)
+     * Strings.isAsciiAlphanumericSpace("Test\t123");        // returns {@code false} (contains tab)
+     * Strings.isAsciiAlphanumericSpace("café 2023");        // returns {@code false} (contains non-ASCII character)
      * }</pre>
      *
      * @param cs the CharSequence to be checked, may be {@code null} or empty
@@ -7961,17 +7958,17 @@ public final class Strings {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // ASCII numeric strings
-     * isAsciiNumeric("123");                 // returns true
-     * isAsciiNumeric("0");                   // returns true
-     * isAsciiNumeric("9876543210");          // returns true
+     * Strings.isAsciiNumeric("123");                 // returns true
+     * Strings.isAsciiNumeric("0");                   // returns true
+     * Strings.isAsciiNumeric("9876543210");          // returns true
      * 
      * // Non-ASCII numeric strings
-     * isAsciiNumeric(null);                  // returns false
-     * isAsciiNumeric("");                    // returns false
-     * isAsciiNumeric("12.3");                // returns {@code false} (contains decimal point)
-     * isAsciiNumeric("-123");                // returns {@code false} (contains minus sign)
-     * isAsciiNumeric("12 34");               // returns {@code false} (contains space)
-     * isAsciiNumeric("12a");                 // returns {@code false} (contains letter)
+     * Strings.isAsciiNumeric(null);                  // returns false
+     * Strings.isAsciiNumeric("");                    // returns false
+     * Strings.isAsciiNumeric("12.3");                // returns {@code false} (contains decimal point)
+     * Strings.isAsciiNumeric("-123");                // returns {@code false} (contains minus sign)
+     * Strings.isAsciiNumeric("12 34");               // returns {@code false} (contains space)
+     * Strings.isAsciiNumeric("12a");                 // returns {@code false} (contains letter)
      * }</pre>
      *
      * @param cs the CharSequence to be checked, may be {@code null} or empty
@@ -8010,18 +8007,18 @@ public final class Strings {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Unicode letter strings
-     * isAlpha("abc");                        // returns true
-     * isAlpha("ABC");                        // returns true
-     * isAlpha("αβγ");                        // returns {@code true} (Greek letters)
-     * isAlpha("你好");                        // returns {@code true} (Chinese characters)
-     * isAlpha("café");                       // returns {@code true} (includes accented letter)
+     * Strings.isAlpha("abc");                        // returns true
+     * Strings.isAlpha("ABC");                        // returns true
+     * Strings.isAlpha("αβγ");                        // returns {@code true} (Greek letters)
+     * Strings.isAlpha("你好");                        // returns {@code true} (Chinese characters)
+     * Strings.isAlpha("café");                       // returns {@code true} (includes accented letter)
      * 
      * // Non-letter strings
-     * isAlpha(null);                         // returns false
-     * isAlpha("");                           // returns false
-     * isAlpha("  ");                         // returns {@code false} (contains spaces)
-     * isAlpha("ab2c");                       // returns {@code false} (contains digit)
-     * isAlpha("ab-c");                       // returns {@code false} (contains hyphen)
+     * Strings.isAlpha(null);                         // returns false
+     * Strings.isAlpha("");                           // returns false
+     * Strings.isAlpha("  ");                         // returns {@code false} (contains spaces)
+     * Strings.isAlpha("ab2c");                       // returns {@code false} (contains digit)
+     * Strings.isAlpha("ab-c");                       // returns {@code false} (contains hyphen)
      * }</pre>
      *
      * @param cs the CharSequence to check, may be {@code null}
@@ -8057,18 +8054,18 @@ public final class Strings {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Unicode letter strings with spaces
-     * isAlphaSpace("Hello World");           // returns true
-     * isAlphaSpace("café au lait");          // returns true
-     * isAlphaSpace("你好 世界");               // returns {@code true} (Chinese with space)
-     * isAlphaSpace("");                      // returns {@code true} (empty string)
-     * isAlphaSpace("  ");                    // returns {@code true} (only spaces)
+     * Strings.isAlphaSpace("Hello World");           // returns true
+     * Strings.isAlphaSpace("café au lait");          // returns true
+     * Strings.isAlphaSpace("你好 世界");               // returns {@code true} (Chinese with space)
+     * Strings.isAlphaSpace("");                      // returns {@code true} (empty string)
+     * Strings.isAlphaSpace("  ");                    // returns {@code true} (only spaces)
      * 
      * // Invalid strings
-     * isAlphaSpace(null);                    // returns false
-     * isAlphaSpace("ab c");                  // returns true
-     * isAlphaSpace("ab2c");                  // returns {@code false} (contains digit)
-     * isAlphaSpace("ab-c");                  // returns {@code false} (contains hyphen)
-     * isAlphaSpace("ab\tc");                 // returns {@code false} (contains tab)
+     * Strings.isAlphaSpace(null);                    // returns false
+     * Strings.isAlphaSpace("ab c");                  // returns true
+     * Strings.isAlphaSpace("ab2c");                  // returns {@code false} (contains digit)
+     * Strings.isAlphaSpace("ab-c");                  // returns {@code false} (contains hyphen)
+     * Strings.isAlphaSpace("ab\tc");                 // returns {@code false} (contains tab)
      * }</pre>
      *
      * @param cs the CharSequence to check, may be {@code null}
@@ -8107,19 +8104,19 @@ public final class Strings {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Unicode alphanumeric strings
-     * isAlphanumeric("abc");                 // returns true
-     * isAlphanumeric("abc123");              // returns true
-     * isAlphanumeric("αβγ123");              // returns {@code true} (Greek letters with digits)
-     * isAlphanumeric("你好123");              // returns {@code true} (Chinese with digits)
-     * isAlphanumeric("café2023");            // returns true
+     * Strings.isAlphanumeric("abc");                 // returns true
+     * Strings.isAlphanumeric("abc123");              // returns true
+     * Strings.isAlphanumeric("αβγ123");              // returns {@code true} (Greek letters with digits)
+     * Strings.isAlphanumeric("你好123");              // returns {@code true} (Chinese with digits)
+     * Strings.isAlphanumeric("café2023");            // returns true
      * 
      * // Invalid strings
-     * isAlphanumeric(null);                  // returns false
-     * isAlphanumeric("");                    // returns false
-     * isAlphanumeric("  ");                  // returns {@code false} (contains spaces)
-     * isAlphanumeric("ab c");                // returns {@code false} (contains space)
-     * isAlphanumeric("ab2c");                // returns true
-     * isAlphanumeric("ab-c");                // returns {@code false} (contains hyphen)
+     * Strings.isAlphanumeric(null);                  // returns false
+     * Strings.isAlphanumeric("");                    // returns false
+     * Strings.isAlphanumeric("  ");                  // returns {@code false} (contains spaces)
+     * Strings.isAlphanumeric("ab c");                // returns {@code false} (contains space)
+     * Strings.isAlphanumeric("ab2c");                // returns true
+     * Strings.isAlphanumeric("ab-c");                // returns {@code false} (contains hyphen)
      * }</pre>
      *
      * @param cs the CharSequence to check, may be {@code null}
@@ -8155,18 +8152,18 @@ public final class Strings {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Unicode alphanumeric strings with spaces
-     * isAlphanumericSpace("Hello World 123");       // returns true
-     * isAlphanumericSpace("café au lait 2023");     // returns true
-     * isAlphanumericSpace("你好 123");              // returns true
-     * isAlphanumericSpace("");                      // returns {@code true} (empty string)
-     * isAlphanumericSpace("  ");                    // returns {@code true} (only spaces)
+     * Strings.isAlphanumericSpace("Hello World 123");       // returns true
+     * Strings.isAlphanumericSpace("café au lait 2023");     // returns true
+     * Strings.isAlphanumericSpace("你好 123");              // returns true
+     * Strings.isAlphanumericSpace("");                      // returns {@code true} (empty string)
+     * Strings.isAlphanumericSpace("  ");                    // returns {@code true} (only spaces)
      * 
      * // Invalid strings
-     * isAlphanumericSpace(null);                    // returns false
-     * isAlphanumericSpace("ab c");                  // returns true
-     * isAlphanumericSpace("ab2c");                  // returns true
-     * isAlphanumericSpace("ab-c");                  // returns {@code false} (contains hyphen)
-     * isAlphanumericSpace("ab\tc");                 // returns {@code false} (contains tab)
+     * Strings.isAlphanumericSpace(null);                    // returns false
+     * Strings.isAlphanumericSpace("ab c");                  // returns true
+     * Strings.isAlphanumericSpace("ab2c");                  // returns true
+     * Strings.isAlphanumericSpace("ab-c");                  // returns {@code false} (contains hyphen)
+     * Strings.isAlphanumericSpace("ab\tc");                 // returns {@code false} (contains tab)
      * }</pre>
      *
      * @param cs the CharSequence to check, may be {@code null}
@@ -8210,20 +8207,20 @@ public final class Strings {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Unicode numeric strings
-     * isNumeric("123");                      // returns true
-     * isNumeric("१२३");                      // returns {@code true} (Devanagari digits)
-     * isNumeric("٤٥٦");                      // returns {@code true} (Arabic-Indic digits)
+     * Strings.isNumeric("123");                      // returns true
+     * Strings.isNumeric("१२३");                      // returns {@code true} (Devanagari digits)
+     * Strings.isNumeric("٤٥٦");                      // returns {@code true} (Arabic-Indic digits)
      * 
      * // Invalid strings
-     * isNumeric(null);                       // returns false
-     * isNumeric("");                         // returns false
-     * isNumeric("  ");                       // returns {@code false} (contains spaces)
-     * isNumeric("12 3");                     // returns {@code false} (contains space)
-     * isNumeric("ab2c");                     // returns {@code false} (contains letters)
-     * isNumeric("12-3");                     // returns {@code false} (contains hyphen)
-     * isNumeric("12.3");                     // returns {@code false} (contains decimal point)
-     * isNumeric("-123");                     // returns {@code false} (contains minus sign)
-     * isNumeric("+123");                     // returns {@code false} (contains plus sign)
+     * Strings.isNumeric(null);                       // returns false
+     * Strings.isNumeric("");                         // returns false
+     * Strings.isNumeric("  ");                       // returns {@code false} (contains spaces)
+     * Strings.isNumeric("12 3");                     // returns {@code false} (contains space)
+     * Strings.isNumeric("ab2c");                     // returns {@code false} (contains letters)
+     * Strings.isNumeric("12-3");                     // returns {@code false} (contains hyphen)
+     * Strings.isNumeric("12.3");                     // returns {@code false} (contains decimal point)
+     * Strings.isNumeric("-123");                     // returns {@code false} (contains minus sign)
+     * Strings.isNumeric("+123");                     // returns {@code false} (contains plus sign)
      * }</pre>
      *
      * @param cs the CharSequence to check, may be {@code null}
@@ -8261,19 +8258,19 @@ public final class Strings {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Unicode numeric strings with spaces
-     * isNumericSpace("123 456");             // returns true
-     * isNumericSpace("१२३ ४५६");             // returns {@code true} (Devanagari digits with space)
-     * isNumericSpace("");                    // returns {@code true} (empty string)
-     * isNumericSpace("  ");                  // returns {@code true} (only spaces)
-     * isNumericSpace("\u0967\u0968\u0969"); // returns true
-     * isNumericSpace("\u0967\u0968 \u0969");// returns true
+     * Strings.isNumericSpace("123 456");             // returns true
+     * Strings.isNumericSpace("१२३ ४५६");             // returns {@code true} (Devanagari digits with space)
+     * Strings.isNumericSpace("");                    // returns {@code true} (empty string)
+     * Strings.isNumericSpace("  ");                  // returns {@code true} (only spaces)
+     * Strings.isNumericSpace("\u0967\u0968\u0969"); // returns true
+     * Strings.isNumericSpace("\u0967\u0968 \u0969");// returns true
      * 
      * // Invalid strings
-     * isNumericSpace(null);                  // returns false
-     * isNumericSpace("ab2c");                // returns {@code false} (contains letters)
-     * isNumericSpace("12-3");                // returns {@code false} (contains hyphen)
-     * isNumericSpace("12.3");                // returns {@code false} (contains decimal point)
-     * isNumericSpace("12\t3");               // returns {@code false} (contains tab)
+     * Strings.isNumericSpace(null);                  // returns false
+     * Strings.isNumericSpace("ab2c");                // returns {@code false} (contains letters)
+     * Strings.isNumericSpace("12-3");                // returns {@code false} (contains hyphen)
+     * Strings.isNumericSpace("12.3");                // returns {@code false} (contains decimal point)
+     * Strings.isNumericSpace("12\t3");               // returns {@code false} (contains tab)
      * }</pre>
      *
      * @param cs the CharSequence to check, may be {@code null}
@@ -8311,17 +8308,17 @@ public final class Strings {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Whitespace strings
-     * isWhitespace("");                      // returns {@code true} (empty string)
-     * isWhitespace("  ");                    // returns {@code true} (spaces)
-     * isWhitespace("\t\n\r");                // returns {@code true} (tab, newline, carriage return)
-     * isWhitespace("  \t  ");                // returns {@code true} (mixed whitespace)
+     * Strings.isWhitespace("");                      // returns {@code true} (empty string)
+     * Strings.isWhitespace("  ");                    // returns {@code true} (spaces)
+     * Strings.isWhitespace("\t\n\r");                // returns {@code true} (tab, newline, carriage return)
+     * Strings.isWhitespace("  \t  ");                // returns {@code true} (mixed whitespace)
      * 
      * // Non-whitespace strings
-     * isWhitespace(null);                    // returns false
-     * isWhitespace("abc");                   // returns {@code false} (contains letters)
-     * isWhitespace("ab2c");                  // returns {@code false} (contains letters and digit)
-     * isWhitespace("ab-c");                  // returns {@code false} (contains letters and hyphen)
-     * isWhitespace(" a ");                   // returns {@code false} (contains letter)
+     * Strings.isWhitespace(null);                    // returns false
+     * Strings.isWhitespace("abc");                   // returns {@code false} (contains letters)
+     * Strings.isWhitespace("ab2c");                  // returns {@code false} (contains letters and digit)
+     * Strings.isWhitespace("ab-c");                  // returns {@code false} (contains letters and hyphen)
+     * Strings.isWhitespace(" a ");                   // returns {@code false} (contains letter)
      * }</pre>
      *
      * @param cs the CharSequence to check, may be {@code null}
@@ -8372,34 +8369,35 @@ public final class Strings {
     }
 
     /**
-     * Checks if the given string contains only ASCII digital number characters.
+     * Checks if the given string contains only valid ASCII number characters.
      *
-     * <p>ASCII digital numbers can include digits (0-9), decimal point (.), signs (+ or -),
-     * and exponential notation (e or E). The method validates proper number format including
-     * optional sign, integer part, optional decimal part, and optional exponential part.</p>
+     * <p>This method checks if the string is a valid number representation using only ASCII characters.
+     * It supports digits (0-9), decimal point (.), signs (+ or -), and exponential notation (e or E).
+     * The method validates proper number format including optional sign, integer part,
+     * optional decimal part, and optional exponential part.</p>
      *
      * <p>The method returns {@code false} for {@code null}, empty strings, or strings containing spaces.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Valid ASCII digital numbers
-     * isAsciiDigitalNumber("0");             // returns true
-     * isAsciiDigitalNumber("123");           // returns true
-     * isAsciiDigitalNumber("-456");          // returns true
-     * isAsciiDigitalNumber("+789");          // returns true
-     * isAsciiDigitalNumber("12.34");         // returns true
-     * isAsciiDigitalNumber("2e10");          // returns true
-     * isAsciiDigitalNumber("2E-10");         // returns true
-     * isAsciiDigitalNumber("-3.14e+5");      // returns true
+     * Strings.isAsciiDigitalNumber("0");             // returns true
+     * Strings.isAsciiDigitalNumber("123");           // returns true
+     * Strings.isAsciiDigitalNumber("-456");          // returns true
+     * Strings.isAsciiDigitalNumber("+789");          // returns true
+     * Strings.isAsciiDigitalNumber("12.34");         // returns true
+     * Strings.isAsciiDigitalNumber("2e10");          // returns true
+     * Strings.isAsciiDigitalNumber("2E-10");         // returns true
+     * Strings.isAsciiDigitalNumber("-3.14e+5");      // returns true
      * 
      * // Invalid strings
-     * isAsciiDigitalNumber(null);            // returns false
-     * isAsciiDigitalNumber("");              // returns false
-     * isAsciiDigitalNumber(" 0.1 ");         // returns {@code false} (contains spaces)
-     * isAsciiDigitalNumber("abc");           // returns {@code false} (contains letters)
-     * isAsciiDigitalNumber("1 a");           // returns {@code false} (contains space and letter)
-     * isAsciiDigitalNumber("1.2.3");         // returns {@code false} (multiple decimal points)
-     * isAsciiDigitalNumber("e10");           // returns {@code false} (no digits before 'e')
+     * Strings.isAsciiDigitalNumber(null);            // returns false
+     * Strings.isAsciiDigitalNumber("");              // returns false
+     * Strings.isAsciiDigitalNumber(" 0.1 ");         // returns {@code false} (contains spaces)
+     * Strings.isAsciiDigitalNumber("abc");           // returns {@code false} (contains letters)
+     * Strings.isAsciiDigitalNumber("1 a");           // returns {@code false} (contains space and letter)
+     * Strings.isAsciiDigitalNumber("1.2.3");         // returns {@code false} (multiple decimal points)
+     * Strings.isAsciiDigitalNumber("e10");           // returns {@code false} (no digits before 'e')
      * }</pre>
      *
      * @param str the string to check, may be {@code null}
@@ -8488,9 +8486,10 @@ public final class Strings {
     }
 
     /**
-     * Checks if the given string contains only ASCII digital integer characters.
+     * Checks if the given string contains only valid ASCII integer characters.
      *
-     * <p>ASCII digital integers can include digits (0-9) and optional leading sign (+ or -).
+     * <p>This method checks if the string is a valid integer representation using only ASCII characters.
+     * It supports digits (0-9) and an optional leading sign (+ or -).
      * The method does not allow decimal points, exponential notation, or any other characters.
      * Empty strings and strings containing only a sign are considered invalid.</p>
      *
@@ -8499,22 +8498,22 @@ public final class Strings {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Valid ASCII digital integers
-     * isAsciiDigitalInteger("0");            // returns true
-     * isAsciiDigitalInteger("123");          // returns true
-     * isAsciiDigitalInteger("-123");         // returns true
-     * isAsciiDigitalInteger("+123");         // returns true
-     * isAsciiDigitalInteger("+0");           // returns true
-     * isAsciiDigitalInteger("-0");           // returns true
+     * Strings.isAsciiDigitalInteger("0");            // returns true
+     * Strings.isAsciiDigitalInteger("123");          // returns true
+     * Strings.isAsciiDigitalInteger("-123");         // returns true
+     * Strings.isAsciiDigitalInteger("+123");         // returns true
+     * Strings.isAsciiDigitalInteger("+0");           // returns true
+     * Strings.isAsciiDigitalInteger("-0");           // returns true
      * 
      * // Invalid strings
-     * isAsciiDigitalInteger(null);           // returns false
-     * isAsciiDigitalInteger("");             // returns false
-     * isAsciiDigitalInteger(" 0.1 ");        // returns {@code false} (contains spaces and decimal)
-     * isAsciiDigitalInteger("12.34");        // returns {@code false} (contains decimal point)
-     * isAsciiDigitalInteger("abc");          // returns {@code false} (contains letters)
-     * isAsciiDigitalInteger("1 a");          // returns {@code false} (contains space and letter)
-     * isAsciiDigitalInteger("2e10");         // returns {@code false} (contains exponential notation)
-     * isAsciiDigitalInteger("+");            // returns {@code false} (only sign, no digits)
+     * Strings.isAsciiDigitalInteger(null);           // returns false
+     * Strings.isAsciiDigitalInteger("");             // returns false
+     * Strings.isAsciiDigitalInteger(" 0.1 ");        // returns {@code false} (contains spaces and decimal)
+     * Strings.isAsciiDigitalInteger("12.34");        // returns {@code false} (contains decimal point)
+     * Strings.isAsciiDigitalInteger("abc");          // returns {@code false} (contains letters)
+     * Strings.isAsciiDigitalInteger("1 a");          // returns {@code false} (contains space and letter)
+     * Strings.isAsciiDigitalInteger("2e10");         // returns {@code false} (contains exponential notation)
+     * Strings.isAsciiDigitalInteger("+");            // returns {@code false} (only sign, no digits)
      * }</pre>
      *
      * @param str the string to check, may be {@code null}
@@ -8566,15 +8565,15 @@ public final class Strings {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Character found
-     * indexOf("hello", 'h');                 // returns 0
-     * indexOf("hello", 'e');                 // returns 1
-     * indexOf("hello", 'o');                 // returns 4
-     * indexOf("hello world", ' ');           // returns 5
+     * Strings.indexOf("hello", 'h');                 // returns 0
+     * Strings.indexOf("hello", 'e');                 // returns 1
+     * Strings.indexOf("hello", 'o');                 // returns 4
+     * Strings.indexOf("hello world", ' ');           // returns 5
      * 
      * // Character not found
-     * indexOf("hello", 'x');                 // returns -1
-     * indexOf(null, 'a');                    // returns -1
-     * indexOf("", 'a');                      // returns -1
+     * Strings.indexOf("hello", 'x');                 // returns -1
+     * Strings.indexOf(null, 'a');                    // returns -1
+     * Strings.indexOf("", 'a');                      // returns -1
      * }</pre>
      *
      * @param str the string to be checked. May be {@code null} or empty.
@@ -8604,15 +8603,15 @@ public final class Strings {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Character found
-     * indexOf("hello", 'l', 0);              // returns 2
-     * indexOf("hello", 'l', 3);              // returns 3
-     * indexOf("hello", 'o', 0);              // returns 4
+     * Strings.indexOf("hello", 'l', 0);              // returns 2
+     * Strings.indexOf("hello", 'l', 3);              // returns 3
+     * Strings.indexOf("hello", 'o', 0);              // returns 4
      * 
      * // Character not found
-     * indexOf("hello", 'h', 1);              // returns -1
-     * indexOf("hello", 'x', 0);              // returns -1
-     * indexOf(null, 'a', 0);                 // returns -1
-     * indexOf("", 'a', 0);                   // returns -1
+     * Strings.indexOf("hello", 'h', 1);              // returns -1
+     * Strings.indexOf("hello", 'x', 0);              // returns -1
+     * Strings.indexOf(null, 'a', 0);                 // returns -1
+     * Strings.indexOf("", 'a', 0);                   // returns -1
      * }</pre>
      *
      * @param str the string to be checked. May be {@code null} or empty.
@@ -8645,16 +8644,16 @@ public final class Strings {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Substring found
-     * indexOf("hello world", "world");       // returns 6
-     * indexOf("hello world", "hello");       // returns 0
-     * indexOf("hello world", "o");           // returns 4
-     * indexOf("hello world", "");            // returns 0 (empty string always found at index 0)
+     * Strings.indexOf("hello world", "world");       // returns 6
+     * Strings.indexOf("hello world", "hello");       // returns 0
+     * Strings.indexOf("hello world", "o");           // returns 4
+     * Strings.indexOf("hello world", "");            // returns 0 (empty string always found at index 0)
      * 
      * // Substring not found
-     * indexOf("hello", "world");             // returns -1
-     * indexOf(null, "test");                 // returns -1
-     * indexOf("test", null);                 // returns -1
-     * indexOf("", "test");                   // returns -1 (substring longer than string)
+     * Strings.indexOf("hello", "world");             // returns -1
+     * Strings.indexOf(null, "test");                 // returns -1
+     * Strings.indexOf("test", null);                 // returns -1
+     * Strings.indexOf("", "test");                   // returns -1 (substring longer than string)
      * }</pre>
      *
      * @param str the string to be checked. May be {@code null} or empty.
@@ -8685,15 +8684,15 @@ public final class Strings {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Substring found
-     * indexOf("hello world", "o", 0);        // returns 4
-     * indexOf("hello world", "o", 5);        // returns 7
-     * indexOf("hello world", "world", 0);    // returns 6
+     * Strings.indexOf("hello world", "o", 0);        // returns 4
+     * Strings.indexOf("hello world", "o", 5);        // returns 7
+     * Strings.indexOf("hello world", "world", 0);    // returns 6
      * 
      * // Substring not found
-     * indexOf("hello", "o", 5);              // returns -1 (fromIndex beyond string)
-     * indexOf("hello", "world", 0);          // returns -1
-     * indexOf(null, "test", 0);              // returns -1
-     * indexOf("test", null, 0);              // returns -1
+     * Strings.indexOf("hello", "o", 5);              // returns -1 (fromIndex beyond string)
+     * Strings.indexOf("hello", "world", 0);          // returns -1
+     * Strings.indexOf(null, "test", 0);              // returns -1
+     * Strings.indexOf("test", null, 0);              // returns -1
      * }</pre>
      *
      * @param str the string to be checked. May be {@code null} or empty.
@@ -8723,20 +8722,20 @@ public final class Strings {
      * <p>The method returns {@code -1} if none of the characters are found, or if the input string
      * is {@code null} or empty, or if the character array is {@code null} or empty.</p>
      * 
-     * <p>Note: Use the {@code indexOf(String, int)} method when searching for a single character to avoid ambiguous compilation errors.</p>
+     * <p>Note: Use the {@code Strings.indexOf(String, int)} method when searching for a single character to avoid ambiguous compilation errors.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Characters found
-     * indexOfAny("hello", 'e', 'o');         // returns 1 (first 'e')
-     * indexOfAny("hello", 'o', 'l');         // returns 2 (first 'l')
-     * indexOfAny("hello", 'x', 'y', 'h');    // returns 0 (first 'h')
+     * Strings.indexOfAny("hello", 'e', 'o');         // returns 1 (first 'e')
+     * Strings.indexOfAny("hello", 'o', 'l');         // returns 2 (first 'l')
+     * Strings.indexOfAny("hello", 'x', 'y', 'h');    // returns 0 (first 'h')
      * 
      * // Characters not found
-     * indexOfAny("hello", 'x', 'y', 'z');    // returns -1
-     * indexOfAny(null, 'a');                 // returns -1
-     * indexOfAny("", 'a');                   // returns -1
-     * indexOfAny("hello");                   // returns -1 (empty array)
+     * Strings.indexOfAny("hello", 'x', 'y', 'z');    // returns -1
+     * Strings.indexOfAny(null, 'a');                 // returns -1
+     * Strings.indexOfAny("", 'a');                   // returns -1
+     * Strings.indexOfAny("hello");                   // returns -1 (empty array)
      * }</pre>
      *
      * @param str the string to be checked. May be {@code null} or empty.
@@ -8761,19 +8760,19 @@ public final class Strings {
      * <p>The method returns {@code -1} if none of the characters are found, or if the input string
      * is {@code null} or empty, or if the character array is {@code null} or empty.</p>
      * 
-     * <p>Note: Use the {@code indexOf(String, int, int)} method when searching for a single character to avoid ambiguous compilation errors.</p>
+     * <p>Note: Use the {@code Strings.indexOf(String, int, int)} method when searching for a single character to avoid ambiguous compilation errors.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Characters found
-     * indexOfAny("hello", 0, 'e', 'o');      // returns 1 (first 'e')
-     * indexOfAny("hello", 2, 'e', 'o');      // returns 4 (first 'o' after index 2)
-     * indexOfAny("hello", 0, 'l');           // returns 2 (first 'l')
+     * Strings.indexOfAny("hello", 0, 'e', 'o');      // returns 1 (first 'e')
+     * Strings.indexOfAny("hello", 2, 'e', 'o');      // returns 4 (first 'o' after index 2)
+     * Strings.indexOfAny("hello", 0, 'l');           // returns 2 (first 'l')
      * 
      * // Characters not found
-     * indexOfAny("hello", 5, 'h', 'e');      // returns -1 (no match after index 5)
-     * indexOfAny("hello", 0, 'x', 'y');      // returns -1
-     * indexOfAny(null, 0, 'a');              // returns -1
+     * Strings.indexOfAny("hello", 5, 'h', 'e');      // returns -1 (no match after index 5)
+     * Strings.indexOfAny("hello", 0, 'x', 'y');      // returns -1
+     * Strings.indexOfAny(null, 0, 'a');              // returns -1
      * }</pre>
      *
      * @param str the string to be checked. May be {@code null} or empty.
@@ -8821,20 +8820,20 @@ public final class Strings {
      * <p>The method returns {@code -1} if none of the substrings are found, or if the input string
      * is {@code null}, or if the substring array is {@code null} or empty. Empty substrings in the array are ignored.</p>
      * 
-     * <p>Note: Use the {@code indexOf(String, String)} method when searching for a single string to avoid ambiguous compilation errors.</p>
+     * <p>Note: Use the {@code Strings.indexOf(String, String)} method when searching for a single string to avoid ambiguous compilation errors.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Substrings found
-     * indexOfAny("hello world", "world", "hello");    // returns 0 ("hello" comes first)
-     * indexOfAny("hello world", "xyz", "world");      // returns 6 ("world" found)
-     * indexOfAny("hello world", "o", "e");            // returns 1 ("e" comes first)
+     * Strings.indexOfAny("hello world", "world", "hello");    // returns 0 ("hello" comes first)
+     * Strings.indexOfAny("hello world", "xyz", "world");      // returns 6 ("world" found)
+     * Strings.indexOfAny("hello world", "o", "e");            // returns 1 ("e" comes first)
      * 
      * // Substrings not found
-     * indexOfAny("hello", "xyz", "abc");              // returns -1
-     * indexOfAny(null, "test");                       // returns -1
-     * indexOfAny("test", (String[]) null);            // returns -1
-     * indexOfAny("test", new String[0]);              // returns -1 (empty array)
+     * Strings.indexOfAny("hello", "xyz", "abc");              // returns -1
+     * Strings.indexOfAny(null, "test");                       // returns -1
+     * Strings.indexOfAny("test", (String[]) null);            // returns -1
+     * Strings.indexOfAny("test", new String[0]);              // returns -1 (empty array)
      * }</pre>
      *
      * @param str the string to be checked. May be {@code null} or empty.
@@ -8859,19 +8858,19 @@ public final class Strings {
      * <p>The method returns {@code -1} if none of the substrings are found, or if the input string
      * is {@code null}, or if the substring array is {@code null} or empty. Empty substrings in the array are ignored.</p>
      * 
-     * <p>Note: Use the {@code indexOf(String, String, int)} method when searching for a single string to avoid ambiguous compilation errors.</p>
+     * <p>Note: Use the {@code Strings.indexOf(String, String, int)} method when searching for a single string to avoid ambiguous compilation errors.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Substrings found
-     * indexOfAny("hello world", 0, "world", "hello"); // returns 0 ("hello" at index 0)
-     * indexOfAny("hello world", 6, "world", "hello"); // returns 6 ("world" at index 6)
-     * indexOfAny("hello world", 7, "world", "o");     // returns 7 ("o" at index 7)
+     * Strings.indexOfAny("hello world", 0, "world", "hello"); // returns 0 ("hello" at index 0)
+     * Strings.indexOfAny("hello world", 6, "world", "hello"); // returns 6 ("world" at index 6)
+     * Strings.indexOfAny("hello world", 7, "world", "o");     // returns 7 ("o" at index 7)
      * 
      * // Substrings not found
-     * indexOfAny("hello", 0, "xyz", "abc");           // returns -1
-     * indexOfAny("hello", 10, "h", "e");              // returns -1 (fromIndex beyond string)
-     * indexOfAny(null, 0, "test");                    // returns -1
+     * Strings.indexOfAny("hello", 0, "xyz", "abc");           // returns -1
+     * Strings.indexOfAny("hello", 10, "h", "e");              // returns -1 (fromIndex beyond string)
+     * Strings.indexOfAny(null, 0, "test");                    // returns -1
      * }</pre>
      *
      * @param str the string to be checked. May be {@code null} or empty.
@@ -8921,15 +8920,15 @@ public final class Strings {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Characters not in exclusion array found
-     * indexOfAnyBut("hello", 'h', 'e');      // returns 2 (first 'l')
-     * indexOfAnyBut("hello", 'x', 'y');      // returns 0 (first 'h')
-     * indexOfAnyBut("aaabbb", 'a');          // returns 3 (first 'b')
+     * Strings.indexOfAnyBut("hello", 'h', 'e');      // returns 2 (first 'l')
+     * Strings.indexOfAnyBut("hello", 'x', 'y');      // returns 0 (first 'h')
+     * Strings.indexOfAnyBut("aaabbb", 'a');          // returns 3 (first 'b')
      * 
      * // All characters excluded or special cases
-     * indexOfAnyBut("aaa", 'a');             // returns -1 (all excluded)
-     * indexOfAnyBut(null, 'a');              // returns -1
-     * indexOfAnyBut("", 'a');                // returns -1
-     * indexOfAnyBut("hello");                // returns 0 (empty exclusion array)
+     * Strings.indexOfAnyBut("aaa", 'a');             // returns -1 (all excluded)
+     * Strings.indexOfAnyBut(null, 'a');              // returns -1
+     * Strings.indexOfAnyBut("", 'a');                // returns -1
+     * Strings.indexOfAnyBut("hello");                // returns 0 (empty exclusion array)
      * }</pre>
      *
      * @param str the string to be checked. May be {@code null} or empty.
@@ -8958,15 +8957,15 @@ public final class Strings {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Characters not in exclusion array found
-     * indexOfAnyBut("hello", 0, 'h', 'e');   // returns 2 (first 'l')
-     * indexOfAnyBut("hello", 3, 'h', 'e');   // returns 3 (first 'l' from index 3)
-     * indexOfAnyBut("aaabbb", 0, 'a');       // returns 3 (first 'b')
-     * indexOfAnyBut("aaabbb", 3, 'a');       // returns 3 (first 'b' from index 3)
+     * Strings.indexOfAnyBut("hello", 0, 'h', 'e');   // returns 2 (first 'l')
+     * Strings.indexOfAnyBut("hello", 3, 'h', 'e');   // returns 3 (first 'l' from index 3)
+     * Strings.indexOfAnyBut("aaabbb", 0, 'a');       // returns 3 (first 'b')
+     * Strings.indexOfAnyBut("aaabbb", 3, 'a');       // returns 3 (first 'b' from index 3)
      * 
      * // All characters excluded or special cases
-     * indexOfAnyBut("aaa", 0, 'a');          // returns -1 (all excluded)
-     * indexOfAnyBut("hello", 10, 'x');       // returns -1 (fromIndex beyond string)
-     * indexOfAnyBut(null, 0, 'a');           // returns -1
+     * Strings.indexOfAnyBut("aaa", 0, 'a');          // returns -1 (all excluded)
+     * Strings.indexOfAnyBut("hello", 10, 'x');       // returns -1 (fromIndex beyond string)
+     * Strings.indexOfAnyBut(null, 0, 'a');           // returns -1
      * }</pre>
      *
      * @param str the string to be checked. May be {@code null} or empty.
@@ -9023,16 +9022,16 @@ public final class Strings {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Delimited substring found
-     * indexOf("apple,banana,cherry", "banana", ",");     // returns 6
-     * indexOf("apple banana cherry", "banana", " ");     // returns 6
-     * indexOf(",banana,", "banana", ",");                // returns 1
-     * indexOf("banana", "banana", ",");                  // returns 0 (whole string matches)
+     * Strings.indexOf("apple,banana,cherry", "banana", ",");     // returns 6
+     * Strings.indexOf("apple banana cherry", "banana", " ");     // returns 6
+     * Strings.indexOf(",banana,", "banana", ",");                // returns 1
+     * Strings.indexOf("banana", "banana", ",");                  // returns 0 (whole string matches)
      * 
      * // Delimited substring not found
-     * indexOf("applesauce", "apple", ",");               // returns -1 (not delimited)
-     * indexOf("apple,ban,cherry", "banana", ",");        // returns -1 (partial match)
-     * indexOf(null, "test", ",");                        // returns -1
-     * indexOf("test", null, ",");                        // returns -1
+     * Strings.indexOf("applesauce", "apple", ",");               // returns -1 (not delimited)
+     * Strings.indexOf("apple,ban,cherry", "banana", ",");        // returns -1 (partial match)
+     * Strings.indexOf(null, "test", ",");                        // returns -1
+     * Strings.indexOf("test", null, ",");                        // returns -1
      * }</pre>
      *
      * @param str the string to be checked. May be {@code null} or empty.
@@ -9064,14 +9063,14 @@ public final class Strings {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Delimited substring found
-     * indexOf("apple,banana,cherry", "banana", ",", 0);  // returns 6
-     * indexOf("apple,banana,banana", "banana", ",", 7);  // returns 13 (second occurrence)
-     * indexOf("apple banana cherry", "banana", " ", 0);  // returns 6
+     * Strings.indexOf("apple,banana,cherry", "banana", ",", 0);  // returns 6
+     * Strings.indexOf("apple,banana,banana", "banana", ",", 7);  // returns 13 (second occurrence)
+     * Strings.indexOf("apple banana cherry", "banana", " ", 0);  // returns 6
      * 
      * // Delimited substring not found
-     * indexOf("applesauce", "apple", ",", 0);            // returns -1 (not delimited)
-     * indexOf("apple,ban,cherry", "banana", ",", 0);     // returns -1 (partial match)
-     * indexOf("test", "test", ",", 5);                   // returns -1 (fromIndex beyond match)
+     * Strings.indexOf("applesauce", "apple", ",", 0);            // returns -1 (not delimited)
+     * Strings.indexOf("apple,ban,cherry", "banana", ",", 0);     // returns -1 (partial match)
+     * Strings.indexOf("test", "test", ",", 5);                   // returns -1 (fromIndex beyond match)
      * }</pre>
      *
      * @param str the string to be checked. May be {@code null} or empty.
@@ -9140,11 +9139,11 @@ public final class Strings {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * indexOfIgnoreCase("Hello World", "WORLD");     // returns 6
-     * indexOfIgnoreCase("Hello World", "world");     // returns 6
-     * indexOfIgnoreCase("Hello World", "xyz");       // returns -1
-     * indexOfIgnoreCase(null, "test");               // returns -1
-     * indexOfIgnoreCase("test", null);               // returns -1
+     * Strings.indexOfIgnoreCase("Hello World", "WORLD");     // returns 6
+     * Strings.indexOfIgnoreCase("Hello World", "world");     // returns 6
+     * Strings.indexOfIgnoreCase("Hello World", "xyz");       // returns -1
+     * Strings.indexOfIgnoreCase(null, "test");               // returns -1
+     * Strings.indexOfIgnoreCase("test", null);               // returns -1
      * }</pre>
      *
      * @param str the string to be checked. May be {@code null} or empty.
@@ -9169,10 +9168,10 @@ public final class Strings {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * indexOfIgnoreCase("Hello World Hello", "hello", 0);    // returns 0
-     * indexOfIgnoreCase("Hello World Hello", "hello", 7);    // returns 13
-     * indexOfIgnoreCase("Hello World", "WORLD", 10);         // returns -1
-     * indexOfIgnoreCase("test", "TEST", -5);                 // returns 0
+     * Strings.indexOfIgnoreCase("Hello World Hello", "hello", 0);    // returns 0
+     * Strings.indexOfIgnoreCase("Hello World Hello", "hello", 7);    // returns 13
+     * Strings.indexOfIgnoreCase("Hello World", "WORLD", 10);         // returns -1
+     * Strings.indexOfIgnoreCase("test", "TEST", -5);                 // returns 0
      * }</pre>
      *
      * @param str the string to be checked. May be {@code null} or empty.
@@ -9213,10 +9212,10 @@ public final class Strings {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * indexOfIgnoreCase("apple,APPLE,banana", "apple", ",");    // returns 0
-     * indexOfIgnoreCase("apple,APPLE,banana", "APPLE", ",");    // returns 0
-     * indexOfIgnoreCase("pineapple,apple", "apple", ",");       // returns 10
-     * indexOfIgnoreCase("test", "test", ",");                   // returns 0
+     * Strings.indexOfIgnoreCase("apple,APPLE,banana", "apple", ",");    // returns 0
+     * Strings.indexOfIgnoreCase("apple,APPLE,banana", "APPLE", ",");    // returns 0
+     * Strings.indexOfIgnoreCase("pineapple,apple", "apple", ",");       // returns 10
+     * Strings.indexOfIgnoreCase("test", "test", ",");                   // returns 0
      * }</pre>
      *
      * @param str the string to be checked. May be {@code null} or empty.
@@ -9242,10 +9241,10 @@ public final class Strings {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * indexOfIgnoreCase("apple,APPLE,banana", "apple", ",", 0);     // returns 0
-     * indexOfIgnoreCase("apple,APPLE,banana", "apple", ",", 7);     // returns 6
-     * indexOfIgnoreCase("pineapple,apple", "apple", ",", 0);        // returns 10
-     * indexOfIgnoreCase("test value test", "test", " ", 5);         // returns 11
+     * Strings.indexOfIgnoreCase("apple,APPLE,banana", "apple", ",", 0);     // returns 0
+     * Strings.indexOfIgnoreCase("apple,APPLE,banana", "apple", ",", 7);     // returns 6
+     * Strings.indexOfIgnoreCase("pineapple,apple", "apple", ",", 0);        // returns 10
+     * Strings.indexOfIgnoreCase("test value test", "test", " ", 5);         // returns 11
      * }</pre>
      *
      * @param str the string to be checked. May be {@code null} or empty.
@@ -9313,10 +9312,10 @@ public final class Strings {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * lastIndexOf("Hello World", 'o');         // returns 7
-     * lastIndexOf("Hello World", 'x');         // returns -1
-     * lastIndexOf("", 'a');                    // returns -1
-     * lastIndexOf(null, 'a');                  // returns -1
+     * Strings.lastIndexOf("Hello World", 'o');         // returns 7
+     * Strings.lastIndexOf("Hello World", 'x');         // returns -1
+     * Strings.lastIndexOf("", 'a');                    // returns -1
+     * Strings.lastIndexOf(null, 'a');                  // returns -1
      * }</pre>
      *
      * @param str the string to be checked. May be {@code null} or empty.
@@ -9347,10 +9346,10 @@ public final class Strings {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * lastIndexOf("Hello World", 'o', 10);     // returns 7
-     * lastIndexOf("Hello World", 'o', 5);      // returns 4
-     * lastIndexOf("Hello World", 'o', 3);      // returns -1
-     * lastIndexOf("Hello", 'l', -1);           // returns -1
+     * Strings.lastIndexOf("Hello World", 'o', 10);     // returns 7
+     * Strings.lastIndexOf("Hello World", 'o', 5);      // returns 4
+     * Strings.lastIndexOf("Hello World", 'o', 3);      // returns -1
+     * Strings.lastIndexOf("Hello", 'l', -1);           // returns -1
      * }</pre>
      *
      * @param str the string to be checked. May be {@code null} or empty.
@@ -9387,11 +9386,11 @@ public final class Strings {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * lastIndexOf("Hello World Hello", "Hello");    // returns 13
-     * lastIndexOf("Hello World", "World");          // returns 6
-     * lastIndexOf("Hello World", "xyz");            // returns -1
-     * lastIndexOf(null, "test");                    // returns -1
-     * lastIndexOf("test", null);                    // returns -1
+     * Strings.lastIndexOf("Hello World Hello", "Hello");    // returns 13
+     * Strings.lastIndexOf("Hello World", "World");          // returns 6
+     * Strings.lastIndexOf("Hello World", "xyz");            // returns -1
+     * Strings.lastIndexOf(null, "test");                    // returns -1
+     * Strings.lastIndexOf("test", null);                    // returns -1
      * }</pre>
      *
      * @param str the string to be checked. May be {@code null} or empty.
@@ -9420,10 +9419,10 @@ public final class Strings {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * lastIndexOf("Hello World Hello", "Hello", 15);    // returns 13
-     * lastIndexOf("Hello World Hello", "Hello", 10);    // returns 0
-     * lastIndexOf("Hello World", "World", 5);           // returns -1
-     * lastIndexOf("test", "test", -1);                  // returns -1
+     * Strings.lastIndexOf("Hello World Hello", "Hello", 15);    // returns 13
+     * Strings.lastIndexOf("Hello World Hello", "Hello", 10);    // returns 0
+     * Strings.lastIndexOf("Hello World", "World", 5);           // returns -1
+     * Strings.lastIndexOf("test", "test", -1);                  // returns -1
      * }</pre>
      *
      * @param str the string to be checked. May be {@code null} or empty.
@@ -9456,10 +9455,10 @@ public final class Strings {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * lastIndexOf("apple,banana,apple", "apple", ",");     // returns 13
-     * lastIndexOf("pineapple,apple", "apple", ",");        // returns 10
-     * lastIndexOf("apple test", "apple", " ");             // returns 0
-     * lastIndexOf("test", "test", ",");                    // returns 0
+     * Strings.lastIndexOf("apple,banana,apple", "apple", ",");     // returns 13
+     * Strings.lastIndexOf("pineapple,apple", "apple", ",");        // returns 10
+     * Strings.lastIndexOf("apple test", "apple", " ");             // returns 0
+     * Strings.lastIndexOf("test", "test", ",");                    // returns 0
      * }</pre>
      *
      * @param str the string to be checked. May be {@code null} or empty.
@@ -9486,10 +9485,10 @@ public final class Strings {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * lastIndexOf("apple,banana,apple", "apple", ",", 20);    // returns 13
-     * lastIndexOf("apple,banana,apple", "apple", ",", 10);    // returns 0
-     * lastIndexOf("pineapple,apple", "apple", ",", 20);       // returns 10
-     * lastIndexOf("test value test", "test", " ", 10);        // returns 0
+     * Strings.lastIndexOf("apple,banana,apple", "apple", ",", 20);    // returns 13
+     * Strings.lastIndexOf("apple,banana,apple", "apple", ",", 10);    // returns 0
+     * Strings.lastIndexOf("pineapple,apple", "apple", ",", 20);       // returns 10
+     * Strings.lastIndexOf("test value test", "test", " ", 10);        // returns 0
      * }</pre>
      *
      * @param str the string to be checked. May be {@code null} or empty.
@@ -9556,11 +9555,11 @@ public final class Strings {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * lastIndexOfIgnoreCase("Hello World HELLO", "hello");    // returns 13
-     * lastIndexOfIgnoreCase("Hello World", "WORLD");          // returns 6
-     * lastIndexOfIgnoreCase("Hello World", "xyz");            // returns -1
-     * lastIndexOfIgnoreCase(null, "test");                    // returns -1
-     * lastIndexOfIgnoreCase("test", null);                    // returns -1
+     * Strings.lastIndexOfIgnoreCase("Hello World HELLO", "hello");    // returns 13
+     * Strings.lastIndexOfIgnoreCase("Hello World", "WORLD");          // returns 6
+     * Strings.lastIndexOfIgnoreCase("Hello World", "xyz");            // returns -1
+     * Strings.lastIndexOfIgnoreCase(null, "test");                    // returns -1
+     * Strings.lastIndexOfIgnoreCase("test", null);                    // returns -1
      * }</pre>
      *
      * @param str the string to be checked. May be {@code null} or empty.
@@ -9589,10 +9588,10 @@ public final class Strings {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * lastIndexOfIgnoreCase("Hello World HELLO", "hello", 15);    // returns 13
-     * lastIndexOfIgnoreCase("Hello World HELLO", "hello", 10);    // returns 0
-     * lastIndexOfIgnoreCase("Hello World", "WORLD", 5);           // returns -1
-     * lastIndexOfIgnoreCase("test", "TEST", -1);                  // returns -1
+     * Strings.lastIndexOfIgnoreCase("Hello World HELLO", "hello", 15);    // returns 13
+     * Strings.lastIndexOfIgnoreCase("Hello World HELLO", "hello", 10);    // returns 0
+     * Strings.lastIndexOfIgnoreCase("Hello World", "WORLD", 5);           // returns -1
+     * Strings.lastIndexOfIgnoreCase("test", "TEST", -1);                  // returns -1
      * }</pre>
      *
      * @param str the string to be checked. May be {@code null} or empty.
@@ -9631,10 +9630,10 @@ public final class Strings {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * lastIndexOfAny("Hello World", 'o', 'l');        // returns 9 or 7 (implementation dependent)
-     * lastIndexOfAny("Hello World", 'x', 'y', 'z');   // returns -1
-     * lastIndexOfAny("", 'a', 'b');                   // returns -1
-     * lastIndexOfAny(null, 'a');                      // returns -1
+     * Strings.lastIndexOfAny("Hello World", 'o', 'l');        // returns 9 or 7 (implementation dependent)
+     * Strings.lastIndexOfAny("Hello World", 'x', 'y', 'z');   // returns -1
+     * Strings.lastIndexOfAny("", 'a', 'b');                   // returns -1
+     * Strings.lastIndexOfAny(null, 'a');                      // returns -1
      * }</pre>
      *
      * @param str the string to be checked. May be {@code null} or empty.
@@ -9695,10 +9694,10 @@ public final class Strings {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * lastIndexOfAny("Hello World", "World", "Hello");       // returns 6 or 0 (implementation dependent)
-     * lastIndexOfAny("Hello World", "xyz", "abc");           // returns -1
-     * lastIndexOfAny("test", null, "test");                  // returns 0
-     * lastIndexOfAny(null, "test");                          // returns -1
+     * Strings.lastIndexOfAny("Hello World", "World", "Hello");       // returns 6 or 0 (implementation dependent)
+     * Strings.lastIndexOfAny("Hello World", "xyz", "abc");           // returns -1
+     * Strings.lastIndexOfAny("test", null, "test");                  // returns 0
+     * Strings.lastIndexOfAny(null, "test");                          // returns -1
      * }</pre>
      *
      * @param str the string to be checked. May be {@code null} or empty.
@@ -9776,10 +9775,10 @@ public final class Strings {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * smallestIndexOfAll("Hello World", "World", "o");        // returns 4
-     * smallestIndexOfAll("Hello World", "xyz", "abc");        // returns -1
-     * smallestIndexOfAll("test string", "string", "test");    // returns 0
-     * smallestIndexOfAll(null, "test");                       // returns -1
+     * Strings.smallestIndexOfAll("Hello World", "World", "o");        // returns 4
+     * Strings.smallestIndexOfAll("Hello World", "xyz", "abc");        // returns -1
+     * Strings.smallestIndexOfAll("test string", "string", "test");    // returns 0
+     * Strings.smallestIndexOfAll(null, "test");                       // returns -1
      * }</pre>
      *
      * @param str the string to be checked. May be {@code null} or empty.
@@ -9805,10 +9804,10 @@ public final class Strings {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * smallestIndexOfAll("Hello World", 0, "World", "o");       // returns 4
-     * smallestIndexOfAll("Hello World", 5, "World", "o");       // returns 6
-     * smallestIndexOfAll("Hello World", 8, "World", "o");       // returns -1
-     * smallestIndexOfAll("test", -5, "test");                   // returns 0
+     * Strings.smallestIndexOfAll("Hello World", 0, "World", "o");       // returns 4
+     * Strings.smallestIndexOfAll("Hello World", 5, "World", "o");       // returns 6
+     * Strings.smallestIndexOfAll("Hello World", 8, "World", "o");       // returns -1
+     * Strings.smallestIndexOfAll("test", -5, "test");                   // returns 0
      * }</pre>
      *
      * @param str the string to be checked. May be {@code null} or empty.
@@ -9858,10 +9857,10 @@ public final class Strings {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * largestIndexOfAll("Hello World", "o", "World");         // returns 6
-     * largestIndexOfAll("Hello World", "H", "d");             // returns 10
-     * largestIndexOfAll("Hello World", "xyz", "abc");         // returns -1
-     * largestIndexOfAll(null, "test");                        // returns -1
+     * Strings.largestIndexOfAll("Hello World", "o", "World");         // returns 6
+     * Strings.largestIndexOfAll("Hello World", "H", "d");             // returns 10
+     * Strings.largestIndexOfAll("Hello World", "xyz", "abc");         // returns -1
+     * Strings.largestIndexOfAll(null, "test");                        // returns -1
      * }</pre>
      *
      * @param str the string to be checked. May be {@code null} or empty.
@@ -9888,10 +9887,10 @@ public final class Strings {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * largestIndexOfAll("Hello World", 0, "o", "World");      // returns 6
-     * largestIndexOfAll("Hello World", 5, "o", "H");          // returns 7
-     * largestIndexOfAll("Hello World", 8, "o", "World");      // returns -1
-     * largestIndexOfAll("test", -5, "test", "t");             // returns 3
+     * Strings.largestIndexOfAll("Hello World", 0, "o", "World");      // returns 6
+     * Strings.largestIndexOfAll("Hello World", 5, "o", "H");          // returns 7
+     * Strings.largestIndexOfAll("Hello World", 8, "o", "World");      // returns -1
+     * Strings.largestIndexOfAll("test", -5, "test", "t");             // returns 3
      * }</pre>
      *
      * @param str the string to be checked. May be {@code null} or empty.
@@ -9943,10 +9942,10 @@ public final class Strings {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * smallestLastIndexOfAll("Hello World", "o", "World");      // returns 6
-     * smallestLastIndexOfAll("Hello Hello", "Hello", "o");      // returns 7
-     * smallestLastIndexOfAll("test", "xyz", "abc");             // returns -1
-     * smallestLastIndexOfAll(null, "test");                     // returns -1
+     * Strings.smallestLastIndexOfAll("Hello World", "o", "World");      // returns 6
+     * Strings.smallestLastIndexOfAll("Hello Hello", "Hello", "o");      // returns 7
+     * Strings.smallestLastIndexOfAll("test", "xyz", "abc");             // returns -1
+     * Strings.smallestLastIndexOfAll(null, "test");                     // returns -1
      * }</pre>
      *
      * @param str the string to search within. It may be {@code null}.
@@ -9972,10 +9971,10 @@ public final class Strings {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * smallestLastIndexOfAll("Hello World", 10, "o", "World");    // returns 6
-     * smallestLastIndexOfAll("Hello World", 5, "o", "World");     // returns 4
-     * smallestLastIndexOfAll("Hello World", 3, "o", "World");     // returns -1
-     * smallestLastIndexOfAll("test", -1, "test");                 // returns -1
+     * Strings.smallestLastIndexOfAll("Hello World", 10, "o", "World");    // returns 6
+     * Strings.smallestLastIndexOfAll("Hello World", 5, "o", "World");     // returns 4
+     * Strings.smallestLastIndexOfAll("Hello World", 3, "o", "World");     // returns -1
+     * Strings.smallestLastIndexOfAll("test", -1, "test");                 // returns -1
      * }</pre>
      *
      * @param str the string to search within. It may be {@code null}.
@@ -10025,10 +10024,10 @@ public final class Strings {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * largestLastIndexOfAll("Hello World", "o", "World");       // returns 7
-     * largestLastIndexOfAll("Hello Hello", "Hello", "e");       // returns 8
-     * largestLastIndexOfAll("test", "xyz", "abc");              // returns -1
-     * largestLastIndexOfAll(null, "test");                      // returns -1
+     * Strings.largestLastIndexOfAll("Hello World", "o", "World");       // returns 7
+     * Strings.largestLastIndexOfAll("Hello Hello", "Hello", "e");       // returns 8
+     * Strings.largestLastIndexOfAll("test", "xyz", "abc");              // returns -1
+     * Strings.largestLastIndexOfAll(null, "test");                      // returns -1
      * }</pre>
      *
      * @param str the string to search within. It may be {@code null}.
@@ -10054,10 +10053,10 @@ public final class Strings {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * largestLastIndexOfAll("Hello World", 10, "o", "World");     // returns 7
-     * largestLastIndexOfAll("Hello World", 6, "o", "World");      // returns 6
-     * largestLastIndexOfAll("Hello World", 3, "o", "H");          // returns 0
-     * largestLastIndexOfAll("test", -1, "test");                  // returns -1
+     * Strings.largestLastIndexOfAll("Hello World", 10, "o", "World");     // returns 7
+     * Strings.largestLastIndexOfAll("Hello World", 6, "o", "World");      // returns 6
+     * Strings.largestLastIndexOfAll("Hello World", 3, "o", "H");          // returns 0
+     * Strings.largestLastIndexOfAll("test", -1, "test");                  // returns -1
      * }</pre>
      *
      * @param str the string to search within. It may be {@code null}.
@@ -10104,15 +10103,15 @@ public final class Strings {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * ordinalIndexOf("aabaabaa", "a", 1);      // returns 0
-     * ordinalIndexOf("aabaabaa", "a", 3);      // returns 3
-     * ordinalIndexOf("aabaabaa", "b", 2);      // returns 5
-     * ordinalIndexOf("aabaabaa", "ab", 2);     // returns 4
-     * ordinalIndexOf("aabaabaa", "c", 1);      // returns -1
-     * ordinalIndexOf("", "", 1)                // returns 0
-     * ordinalIndexOf("", null, 1)              // returns -1
-     * ordinalIndexOf(null, "", 1)              // returns -1
-     * ordinalIndexOf(null, null, 1)            // returns -1
+     * Strings.ordinalIndexOf("aabaabaa", "a", 1);      // returns 0
+     * Strings.ordinalIndexOf("aabaabaa", "a", 3);      // returns 3
+     * Strings.ordinalIndexOf("aabaabaa", "b", 2);      // returns 5
+     * Strings.ordinalIndexOf("aabaabaa", "ab", 2);     // returns 4
+     * Strings.ordinalIndexOf("aabaabaa", "c", 1);      // returns -1
+     * Strings.ordinalIndexOf("", "", 1)                // returns 0
+     * Strings.ordinalIndexOf("", null, 1)              // returns -1
+     * Strings.ordinalIndexOf(null, "", 1)              // returns -1
+     * Strings.ordinalIndexOf(null, null, 1)            // returns -1
      * }</pre>
      *
      * @param str the string to be checked. May be {@code null} or empty.
@@ -10137,15 +10136,15 @@ public final class Strings {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * lastOrdinalIndexOf("aabaabaa", "a", 1);      // returns 7
-     * lastOrdinalIndexOf("aabaabaa", "a", 3);      // returns 4
-     * lastOrdinalIndexOf("aabaabaa", "b", 2);      // returns 2
-     * lastOrdinalIndexOf("aabaabaa", "ab", 2);     // returns 1
-     * lastOrdinalIndexOf("aabaabaa", "c", 1);      // returns -1
-     * lastOrdinalIndexOf("", "", 1)                // returns 0
-     * lastOrdinalIndexOf("", null, 1)              // returns -1
-     * lastOrdinalIndexOf(null, "", 1)              // returns -1
-     * lastOrdinalIndexOf(null, null, 1)            // returns -1
+     * Strings.lastOrdinalIndexOf("aabaabaa", "a", 1);      // returns 7
+     * Strings.lastOrdinalIndexOf("aabaabaa", "a", 3);      // returns 4
+     * Strings.lastOrdinalIndexOf("aabaabaa", "b", 2);      // returns 2
+     * Strings.lastOrdinalIndexOf("aabaabaa", "ab", 2);     // returns 1
+     * Strings.lastOrdinalIndexOf("aabaabaa", "c", 1);      // returns -1
+     * Strings.lastOrdinalIndexOf("", "", 1)                // returns 0
+     * Strings.lastOrdinalIndexOf("", null, 1)              // returns -1
+     * Strings.lastOrdinalIndexOf(null, "", 1)              // returns -1
+     * Strings.lastOrdinalIndexOf(null, null, 1)            // returns -1
      * }</pre>
      *
      * @param str the string to be checked. May be {@code null} or empty.
@@ -10171,12 +10170,12 @@ public final class Strings {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * indicesOf("abca", "a").join(", ");       // returns "0, 3"
-     * indicesOf("abcA", "a").join(", ");       // returns "0"
-     * indicesOf("abcA", null).join(", ");      // returns ""
-     * indicesOf(null, "").join(", ");          // returns ""
-     * indicesOf("", null).join(", ");          // returns ""
-     * indicesOf("abcA", "").join(", ");        // returns "0, 1, 2, 3"
+     * Strings.indicesOf("abca", "a").join(", ");       // returns "0, 3"
+     * Strings.indicesOf("abcA", "a").join(", ");       // returns "0"
+     * Strings.indicesOf("abcA", null).join(", ");      // returns ""
+     * Strings.indicesOf(null, "").join(", ");          // returns ""
+     * Strings.indicesOf("", null).join(", ");          // returns ""
+     * Strings.indicesOf("abcA", "").join(", ");        // returns "0, 1, 2, 3"
      * }</pre>
      *
      * @param str the string to be checked, may be {@code null} or empty
@@ -10202,10 +10201,10 @@ public final class Strings {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * indicesOf("abcabc", "a", 0).join(", ");      // returns "0, 3"
-     * indicesOf("abcabc", "a", 2).join(", ");      // returns "3"
-     * indicesOf("abcabc", "a", 4).join(", ");      // returns ""
-     * indicesOf("abcA", "", 2).join(", ");         // returns "2, 3, 4"
+     * Strings.indicesOf("abcabc", "a", 0).join(", ");      // returns "0, 3"
+     * Strings.indicesOf("abcabc", "a", 2).join(", ");      // returns "3"
+     * Strings.indicesOf("abcabc", "a", 4).join(", ");      // returns ""
+     * Strings.indicesOf("abcA", "", 2).join(", ");         // returns "2, 3, 4"
      * }</pre>
      *
      * @param str the string to be checked, may be {@code null} or empty
@@ -10304,11 +10303,11 @@ public final class Strings {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Count character occurrences
-     * countMatches("hello world", 'l');              // returns 3
-     * countMatches("programming", 'm');              // returns 2
-     * countMatches("test", 'x');                     // returns 0
-     * countMatches("", 'a');                         // returns 0
-     * countMatches(null, 'a');                       // returns 0
+     * Strings.countMatches("hello world", 'l');              // returns 3
+     * Strings.countMatches("programming", 'm');              // returns 2
+     * Strings.countMatches("test", 'x');                     // returns 0
+     * Strings.countMatches("", 'a');                         // returns 0
+     * Strings.countMatches(null, 'a');                       // returns 0
      * }</pre>
      *
      * @param str the string to be checked, may be {@code null} or empty
@@ -10345,13 +10344,13 @@ public final class Strings {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Count substring occurrences
-     * countMatches("abcabcabc", "abc");              // returns 3
-     * countMatches("hello world", "o");              // returns 2
-     * countMatches("programming", "mm");             // returns 1
-     * countMatches("test", "xyz");                   // returns 0
-     * countMatches("aaa", "aa");                     // returns 1 (non-overlapping)
-     * countMatches(null, "test");                    // returns 0
-     * countMatches("test", null);                    // returns 0
+     * Strings.countMatches("abcabcabc", "abc");              // returns 3
+     * Strings.countMatches("hello world", "o");              // returns 2
+     * Strings.countMatches("programming", "mm");             // returns 1
+     * Strings.countMatches("test", "xyz");                   // returns 0
+     * Strings.countMatches("aaa", "aa");                     // returns 1 (non-overlapping)
+     * Strings.countMatches(null, "test");                    // returns 0
+     * Strings.countMatches("test", null);                    // returns 0
      * }</pre>
      *
      * @param str the string to be checked, may be {@code null} or empty
@@ -10391,11 +10390,11 @@ public final class Strings {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Check character presence
-     * contains("hello", 'e');                        // returns true
-     * contains("world", 'x');                        // returns false
-     * contains("", 'a');                             // returns false
-     * contains(null, 'a');                           // returns false
-     * contains("test", 't');                         // returns true
+     * Strings.contains("hello", 'e');                        // returns true
+     * Strings.contains("world", 'x');                        // returns false
+     * Strings.contains("", 'a');                             // returns false
+     * Strings.contains(null, 'a');                           // returns false
+     * Strings.contains("test", 't');                         // returns true
      * }</pre>
      *
      * @param str the string to be checked, may be {@code null} or empty
@@ -10422,12 +10421,12 @@ public final class Strings {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Check substring presence
-     * contains("hello world", "world");              // returns true
-     * contains("hello world", "World");              // returns {@code false} (case-sensitive)
-     * contains("programming", "gram");               // returns true
-     * contains("test", "xyz");                       // returns false
-     * contains(null, "test");                        // returns false
-     * contains("test", null);                        // returns false
+     * Strings.contains("hello world", "world");              // returns true
+     * Strings.contains("hello world", "World");              // returns {@code false} (case-sensitive)
+     * Strings.contains("programming", "gram");               // returns true
+     * Strings.contains("test", "xyz");                       // returns false
+     * Strings.contains(null, "test");                        // returns false
+     * Strings.contains("test", null);                        // returns false
      * }</pre>
      *
      * @param str the string to be checked, may be {@code null} or empty
@@ -10454,11 +10453,11 @@ public final class Strings {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Check token presence with delimiter
-     * contains("apple,banana,orange", "banana", ","); // returns true
-     * contains("apple,banana,orange", "ban", ",");    // returns {@code false} (partial match)
-     * contains("one two three", "two", " ");          // returns true
-     * contains("one-two-three", "two", "-");          // returns true
-     * contains("testing", "test", ",");               // returns {@code false} (no delimiter)
+     * Strings.contains("apple,banana,orange", "banana", ","); // returns true
+     * Strings.contains("apple,banana,orange", "ban", ",");    // returns {@code false} (partial match)
+     * Strings.contains("one two three", "two", " ");          // returns true
+     * Strings.contains("one-two-three", "two", "-");          // returns true
+     * Strings.contains("testing", "test", ",");               // returns {@code false} (no delimiter)
      * }</pre>
      *
      * @param str the string to be checked, may be {@code null} or empty
@@ -10486,12 +10485,12 @@ public final class Strings {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Check substring presence ignoring case
-     * containsIgnoreCase("Hello World", "world");    // returns true
-     * containsIgnoreCase("Hello World", "HELLO");    // returns true
-     * containsIgnoreCase("Programming", "GRAM");     // returns true
-     * containsIgnoreCase("test", "XYZ");             // returns false
-     * containsIgnoreCase(null, "test");              // returns false
-     * containsIgnoreCase("test", null);              // returns false
+     * Strings.containsIgnoreCase("Hello World", "world");    // returns true
+     * Strings.containsIgnoreCase("Hello World", "HELLO");    // returns true
+     * Strings.containsIgnoreCase("Programming", "GRAM");     // returns true
+     * Strings.containsIgnoreCase("test", "XYZ");             // returns false
+     * Strings.containsIgnoreCase(null, "test");              // returns false
+     * Strings.containsIgnoreCase("test", null);              // returns false
      * }</pre>
      *
      * @param str the string to be checked, may be {@code null} or empty
@@ -10518,10 +10517,10 @@ public final class Strings {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Check token presence with delimiter ignoring case
-     * containsIgnoreCase("Apple,Banana,Orange", "banana", ","); // returns true
-     * containsIgnoreCase("Apple,Banana,Orange", "BAN", ",");    // returns {@code false} (partial)
-     * containsIgnoreCase("ONE TWO THREE", "two", " ");          // returns true
-     * containsIgnoreCase("One-Two-Three", "TWO", "-");          // returns true
+     * Strings.containsIgnoreCase("Apple,Banana,Orange", "banana", ","); // returns true
+     * Strings.containsIgnoreCase("Apple,Banana,Orange", "BAN", ",");    // returns {@code false} (partial)
+     * Strings.containsIgnoreCase("ONE TWO THREE", "two", " ");          // returns true
+     * Strings.containsIgnoreCase("One-Two-Three", "TWO", "-");          // returns true
      * }</pre>
      *
      * @param str the string to be checked, may be {@code null} or empty
@@ -10550,12 +10549,12 @@ public final class Strings {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Check if all characters are present
-     * containsAll("hello world", 'h', 'e', 'l');    // returns true
-     * containsAll("hello world", 'h', 'x');         // returns {@code false} ('x' not present)
-     * containsAll("test", 't', 'e', 's');           // returns true
-     * containsAll("test");                          // returns {@code true} (empty array)
-     * containsAll(null, 'a');                       // returns false
-     * containsAll("", 'a');                         // returns false
+     * Strings.containsAll("hello world", 'h', 'e', 'l');    // returns true
+     * Strings.containsAll("hello world", 'h', 'x');         // returns {@code false} ('x' not present)
+     * Strings.containsAll("test", 't', 'e', 's');           // returns true
+     * Strings.containsAll("test");                          // returns {@code true} (empty array)
+     * Strings.containsAll(null, 'a');                       // returns false
+     * Strings.containsAll("", 'a');                         // returns false
      * }</pre>
      *
      * @param str the string to be checked, may be {@code null} or empty
@@ -10595,12 +10594,12 @@ public final class Strings {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Check if all substrings are present
-     * containsAll("hello world", "hello", "world"); // returns true
-     * containsAll("hello world", "hello", "xyz");   // returns false
-     * containsAll("programming", "gram", "pro");    // returns true
-     * containsAll("test");                          // returns {@code true} (empty array)
-     * containsAll(null, "test");                    // returns false
-     * containsAll("", "test");                      // returns false
+     * Strings.containsAll("hello world", "hello", "world"); // returns true
+     * Strings.containsAll("hello world", "hello", "xyz");   // returns false
+     * Strings.containsAll("programming", "gram", "pro");    // returns true
+     * Strings.containsAll("test");                          // returns {@code true} (empty array)
+     * Strings.containsAll(null, "test");                    // returns false
+     * Strings.containsAll("", "test");                      // returns false
      * }</pre>
      *
      * @param str the string to be checked, may be {@code null} or empty
@@ -10638,11 +10637,11 @@ public final class Strings {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Check if all substrings are present ignoring case
-     * containsAllIgnoreCase("Hello World", "HELLO", "world"); // returns true
-     * containsAllIgnoreCase("Hello World", "HELLO", "XYZ");   // returns false
-     * containsAllIgnoreCase("Programming", "GRAM", "PRO");    // returns true
-     * containsAllIgnoreCase("test");                          // returns {@code true} (empty array)
-     * containsAllIgnoreCase(null, "test");                    // returns false
+     * Strings.containsAllIgnoreCase("Hello World", "HELLO", "world"); // returns true
+     * Strings.containsAllIgnoreCase("Hello World", "HELLO", "XYZ");   // returns false
+     * Strings.containsAllIgnoreCase("Programming", "GRAM", "PRO");    // returns true
+     * Strings.containsAllIgnoreCase("test");                          // returns {@code true} (empty array)
+     * Strings.containsAllIgnoreCase(null, "test");                    // returns false
      * }</pre>
      *
      * @param str the string to be checked, may be {@code null} or empty
@@ -10679,12 +10678,12 @@ public final class Strings {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Check if any character is present
-     * containsAny("hello", 'a', 'e', 'i');          // returns {@code true} ('e' is present)
-     * containsAny("hello", 'x', 'y', 'z');          // returns false
-     * containsAny("test", 't');                     // returns true
-     * containsAny("", 'a');                         // returns false
-     * containsAny(null, 'a');                       // returns false
-     * containsAny("test");                          // returns {@code false} (empty array)
+     * Strings.containsAny("hello", 'a', 'e', 'i');          // returns {@code true} ('e' is present)
+     * Strings.containsAny("hello", 'x', 'y', 'z');          // returns false
+     * Strings.containsAny("test", 't');                     // returns true
+     * Strings.containsAny("", 'a');                         // returns false
+     * Strings.containsAny(null, 'a');                       // returns false
+     * Strings.containsAny("test");                          // returns {@code false} (empty array)
      * }</pre>
      *
      * @param str the string to be checked, may be {@code null} or empty
@@ -10712,16 +10711,16 @@ public final class Strings {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Check if any substring is present
-     * containsAny("hello world", "xyz", "world");   // returns {@code true} ("world" is present)
-     * containsAny("hello world", "xyz", "abc");     // returns false
-     * containsAny("programming", "gram", "xyz");    // returns true
-     * containsAny("", "test");                      // returns false
-     * containsAny(null, "test");                    // returns false
-     * containsAny(null, "");                        // returns false
-     * containsAny(null, null);                      // returns false
-     * containsAny("", "");                          // returns false
-     * containsAny("", null);                        // returns false
-     * containsAny("test");                          // returns {@code false} (empty array)
+     * Strings.containsAny("hello world", "xyz", "world");   // returns {@code true} ("world" is present)
+     * Strings.containsAny("hello world", "xyz", "abc");     // returns false
+     * Strings.containsAny("programming", "gram", "xyz");    // returns true
+     * Strings.containsAny("", "test");                      // returns false
+     * Strings.containsAny(null, "test");                    // returns false
+     * Strings.containsAny(null, "");                        // returns false
+     * Strings.containsAny(null, null);                      // returns false
+     * Strings.containsAny("", "");                          // returns false
+     * Strings.containsAny("", null);                        // returns false
+     * Strings.containsAny("test");                          // returns {@code false} (empty array)
      * }</pre>
      *
      * @param str the string to be checked, may be {@code null} or empty
@@ -10749,11 +10748,11 @@ public final class Strings {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Check if any substring is present ignoring case
-     * containsAnyIgnoreCase("Hello World", "xyz", "WORLD");  // returns true
-     * containsAnyIgnoreCase("Hello World", "XYZ", "ABC");    // returns false
-     * containsAnyIgnoreCase("Programming", "GRAM", "xyz");   // returns true
-     * containsAnyIgnoreCase("", "test");                     // returns false
-     * containsAnyIgnoreCase(null, "test");                   // returns false
+     * Strings.containsAnyIgnoreCase("Hello World", "xyz", "WORLD");  // returns true
+     * Strings.containsAnyIgnoreCase("Hello World", "XYZ", "ABC");    // returns false
+     * Strings.containsAnyIgnoreCase("Programming", "GRAM", "xyz");   // returns true
+     * Strings.containsAnyIgnoreCase("", "test");                     // returns false
+     * Strings.containsAnyIgnoreCase(null, "test");                   // returns false
      * }</pre>
      *
      * @param str the string to be checked, may be {@code null} or empty
@@ -10799,12 +10798,12 @@ public final class Strings {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Check if none of the characters are present
-     * containsNone("hello", 'x', 'y', 'z');         // returns true
-     * containsNone("hello", 'h', 'x');              // returns {@code false} ('h' is present)
-     * containsNone("test", 'a', 'b', 'c');          // returns true
-     * containsNone("", 'a');                        // returns true
-     * containsNone(null, 'a');                      // returns true
-     * containsNone("test");                         // returns {@code true} (empty array)
+     * Strings.containsNone("hello", 'x', 'y', 'z');         // returns true
+     * Strings.containsNone("hello", 'h', 'x');              // returns {@code false} ('h' is present)
+     * Strings.containsNone("test", 'a', 'b', 'c');          // returns true
+     * Strings.containsNone("", 'a');                        // returns true
+     * Strings.containsNone(null, 'a');                      // returns true
+     * Strings.containsNone("test");                         // returns {@code true} (empty array)
      * }</pre>
      *
      * @param str the string to be checked, may be {@code null} or empty
@@ -10844,19 +10843,19 @@ public final class Strings {
      * in the input string. The search is case-sensitive. If either the input string or the 
      * substring array is {@code null} or empty, the method returns {@code true}.</p>
      *
-     * <p>This method is equivalent to {@code !containsAny(str, valuesToFind)}.</p>
+     * <p>This method is equivalent to {@code !Strings.containsAny(str, valuesToFind)}.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Check if none of the substrings are present
-     * containsNone("hello world", "xyz", "abc");    // returns true
-     * containsNone("hello world", "hello", "xyz");  // returns {@code false} ("hello" is present)
-     * containsNone("test", "abc", "xyz");           // returns true
-     * containsNone("", "test");                     // returns true
-     * containsNone(null, "test");                   // returns true
-     * containsNone(null, null);                     // returns true
-     * containsNone("", "");                         // returns true
-     * containsNone("", null);                       // returns true
+     * Strings.containsNone("hello world", "xyz", "abc");    // returns true
+     * Strings.containsNone("hello world", "hello", "xyz");  // returns {@code false} ("hello" is present)
+     * Strings.containsNone("test", "abc", "xyz");           // returns true
+     * Strings.containsNone("", "test");                     // returns true
+     * Strings.containsNone(null, "test");                   // returns true
+     * Strings.containsNone(null, null);                     // returns true
+     * Strings.containsNone("", "");                         // returns true
+     * Strings.containsNone("", null);                       // returns true
      * }</pre>
      *
      * @param str the string to be checked, may be {@code null} or empty
@@ -10879,16 +10878,16 @@ public final class Strings {
      * in the input string, performing case-insensitive comparisons. The method returns {@code true} 
      * if the string is {@code null} or empty, or if the specified substring array is empty or {@code null}.</p>
      *
-     * <p>This method is equivalent to {@code !containsAnyIgnoreCase(str, valuesToFind)}.</p>
+     * <p>This method is equivalent to {@code !Strings.containsAnyIgnoreCase(str, valuesToFind)}.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Check if none of the substrings are present ignoring case
-     * containsNoneIgnoreCase("Hello World", "xyz", "abc");   // returns true
-     * containsNoneIgnoreCase("Hello World", "HELLO", "xyz"); // returns false
-     * containsNoneIgnoreCase("test", "ABC", "XYZ");          // returns true
-     * containsNoneIgnoreCase("", "test");                    // returns true
-     * containsNoneIgnoreCase(null, "test");                  // returns true
+     * Strings.containsNoneIgnoreCase("Hello World", "xyz", "abc");   // returns true
+     * Strings.containsNoneIgnoreCase("Hello World", "HELLO", "xyz"); // returns false
+     * Strings.containsNoneIgnoreCase("test", "ABC", "XYZ");          // returns true
+     * Strings.containsNoneIgnoreCase("", "test");                    // returns true
+     * Strings.containsNoneIgnoreCase(null, "test");                  // returns true
      * }</pre>
      *
      * @param str the string to be checked, may be {@code null} or empty
@@ -10917,12 +10916,12 @@ public final class Strings {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Check if string contains only specified characters
-     * containsOnly("aaa", 'a');                     // returns true
-     * containsOnly("abc", 'a', 'b', 'c', 'd');      // returns true
-     * containsOnly("abcd", 'a', 'b', 'c');          // returns {@code false} ('d' not allowed)
-     * containsOnly("", 'a');                        // returns true
-     * containsOnly(null, 'a');                      // returns true
-     * containsOnly("test");                         // returns {@code false} (empty allowed set)
+     * Strings.containsOnly("aaa", 'a');                     // returns true
+     * Strings.containsOnly("abc", 'a', 'b', 'c', 'd');      // returns true
+     * Strings.containsOnly("abcd", 'a', 'b', 'c');          // returns {@code false} ('d' not allowed)
+     * Strings.containsOnly("", 'a');                        // returns true
+     * Strings.containsOnly(null, 'a');                      // returns true
+     * Strings.containsOnly("test");                         // returns {@code false} (empty allowed set)
      * }</pre>
      *
      * @param str the string to be checked, may be {@code null} or empty
@@ -10952,12 +10951,12 @@ public final class Strings {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Check for whitespace presence
-     * containsWhitespace("hello world");            // returns {@code true} (space)
-     * containsWhitespace("hello\tworld");           // returns {@code true} (tab)
-     * containsWhitespace("hello\nworld");           // returns {@code true} (newline)
-     * containsWhitespace("helloworld");             // returns false
-     * containsWhitespace("");                       // returns false
-     * containsWhitespace(null);                     // returns false
+     * Strings.containsWhitespace("hello world");            // returns {@code true} (space)
+     * Strings.containsWhitespace("hello\tworld");           // returns {@code true} (tab)
+     * Strings.containsWhitespace("hello\nworld");           // returns {@code true} (newline)
+     * Strings.containsWhitespace("helloworld");             // returns false
+     * Strings.containsWhitespace("");                       // returns false
+     * Strings.containsWhitespace(null);                     // returns false
      * }</pre>
      *
      * @param str the string to be checked, may be {@code null} or empty
@@ -10990,12 +10989,12 @@ public final class Strings {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Check if string starts with prefix
-     * startsWith("hello world", "hello");           // returns true
-     * startsWith("hello world", "Hello");           // returns {@code false} (case-sensitive)
-     * startsWith("hello", "hello world");           // returns {@code false} (prefix too long)
-     * startsWith("test", "");                       // returns {@code true} (empty prefix)
-     * startsWith(null, "test");                     // returns false
-     * startsWith("test", null);                     // returns false
+     * Strings.startsWith("hello world", "hello");           // returns true
+     * Strings.startsWith("hello world", "Hello");           // returns {@code false} (case-sensitive)
+     * Strings.startsWith("hello", "hello world");           // returns {@code false} (prefix too long)
+     * Strings.startsWith("test", "");                       // returns {@code true} (empty prefix)
+     * Strings.startsWith(null, "test");                     // returns false
+     * Strings.startsWith("test", null);                     // returns false
      * }</pre>
      *
      * @param str the string to be checked, may be {@code null} or empty
@@ -11018,12 +11017,12 @@ public final class Strings {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Check if string starts with prefix ignoring case
-     * startsWithIgnoreCase("Hello World", "hello"); // returns true
-     * startsWithIgnoreCase("Hello World", "HELLO"); // returns true
-     * startsWithIgnoreCase("test", "TEST");         // returns true
-     * startsWithIgnoreCase("hello", "hello world"); // returns {@code false} (prefix too long)
-     * startsWithIgnoreCase(null, "test");           // returns false
-     * startsWithIgnoreCase("test", null);           // returns false
+     * Strings.startsWithIgnoreCase("Hello World", "hello"); // returns true
+     * Strings.startsWithIgnoreCase("Hello World", "HELLO"); // returns true
+     * Strings.startsWithIgnoreCase("test", "TEST");         // returns true
+     * Strings.startsWithIgnoreCase("hello", "hello world"); // returns {@code false} (prefix too long)
+     * Strings.startsWithIgnoreCase(null, "test");           // returns false
+     * Strings.startsWithIgnoreCase("test", null);           // returns false
      * }</pre>
      *
      * @param str the string to be checked, may be {@code null} or empty
@@ -11062,12 +11061,12 @@ public final class Strings {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Check if string starts with any prefix
-     * startsWithAny("hello world", "hi", "hello");  // returns true
-     * startsWithAny("hello world", "Hi", "Hello");  // returns {@code false} (case-sensitive)
-     * startsWithAny("test", "a", "b", "t");         // returns true
-     * startsWithAny("test", "a", "b", "c");         // returns false
-     * startsWithAny(null, "test");                  // returns false
-     * startsWithAny("test");                        // returns {@code false} (empty array)
+     * Strings.startsWithAny("hello world", "hi", "hello");  // returns true
+     * Strings.startsWithAny("hello world", "Hi", "Hello");  // returns {@code false} (case-sensitive)
+     * Strings.startsWithAny("test", "a", "b", "t");         // returns true
+     * Strings.startsWithAny("test", "a", "b", "c");         // returns false
+     * Strings.startsWithAny(null, "test");                  // returns false
+     * Strings.startsWithAny("test");                        // returns {@code false} (empty array)
      * }</pre>
      *
      * @param str the string to be checked, may be {@code null} or empty
@@ -11101,11 +11100,11 @@ public final class Strings {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Check if string starts with any prefix ignoring case
-     * startsWithAnyIgnoreCase("Hello World", "hi", "hello"); // returns true
-     * startsWithAnyIgnoreCase("Hello World", "HI", "HELLO"); // returns true
-     * startsWithAnyIgnoreCase("test", "A", "B", "T");        // returns true
-     * startsWithAnyIgnoreCase("test", "A", "B", "C");        // returns false
-     * startsWithAnyIgnoreCase(null, "test");                 // returns false
+     * Strings.startsWithAnyIgnoreCase("Hello World", "hi", "hello"); // returns true
+     * Strings.startsWithAnyIgnoreCase("Hello World", "HI", "HELLO"); // returns true
+     * Strings.startsWithAnyIgnoreCase("test", "A", "B", "T");        // returns true
+     * Strings.startsWithAnyIgnoreCase("test", "A", "B", "C");        // returns false
+     * Strings.startsWithAnyIgnoreCase(null, "test");                 // returns false
      * }</pre>
      *
      * @param str the string to be checked, may be {@code null} or empty
@@ -11139,12 +11138,12 @@ public final class Strings {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Check if string ends with suffix
-     * endsWith("hello world", "world");             // returns true
-     * endsWith("hello world", "World");             // returns {@code false} (case-sensitive)
-     * endsWith("hello", "hello world");             // returns {@code false} (suffix too long)
-     * endsWith("test", "");                         // returns {@code true} (empty suffix)
-     * endsWith(null, "test");                       // returns false
-     * endsWith("test", null);                       // returns false
+     * Strings.endsWith("hello world", "world");             // returns true
+     * Strings.endsWith("hello world", "World");             // returns {@code false} (case-sensitive)
+     * Strings.endsWith("hello", "hello world");             // returns {@code false} (suffix too long)
+     * Strings.endsWith("test", "");                         // returns {@code true} (empty suffix)
+     * Strings.endsWith(null, "test");                       // returns false
+     * Strings.endsWith("test", null);                       // returns false
      * }</pre>
      *
      * @param str the string to be checked, may be {@code null} or empty
@@ -11167,12 +11166,12 @@ public final class Strings {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Check if string ends with suffix ignoring case
-     * endsWithIgnoreCase("Hello World", "world");   // returns true
-     * endsWithIgnoreCase("Hello World", "WORLD");   // returns true
-     * endsWithIgnoreCase("test", "TEST");           // returns true
-     * endsWithIgnoreCase("hello", "hello world");   // returns {@code false} (suffix too long)
-     * endsWithIgnoreCase(null, "test");             // returns false
-     * endsWithIgnoreCase("test", null);             // returns false
+     * Strings.endsWithIgnoreCase("Hello World", "world");   // returns true
+     * Strings.endsWithIgnoreCase("Hello World", "WORLD");   // returns true
+     * Strings.endsWithIgnoreCase("test", "TEST");           // returns true
+     * Strings.endsWithIgnoreCase("hello", "hello world");   // returns {@code false} (suffix too long)
+     * Strings.endsWithIgnoreCase(null, "test");             // returns false
+     * Strings.endsWithIgnoreCase("test", null);             // returns false
      * }</pre>
      *
      * @param str the string to be checked, may be {@code null} or empty
@@ -11195,12 +11194,12 @@ public final class Strings {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Check if string ends with any suffix
-     * endsWithAny("hello.txt", ".txt", ".doc");     // returns true
-     * endsWithAny("hello.txt", ".TXT", ".DOC");     // returns {@code false} (case-sensitive)
-     * endsWithAny("test", "st", "ing");             // returns true
-     * endsWithAny("test", "ing", "ed");             // returns false
-     * endsWithAny(null, "test");                    // returns false
-     * endsWithAny("test");                          // returns {@code false} (empty array)
+     * Strings.endsWithAny("hello.txt", ".txt", ".doc");     // returns true
+     * Strings.endsWithAny("hello.txt", ".TXT", ".DOC");     // returns {@code false} (case-sensitive)
+     * Strings.endsWithAny("test", "st", "ing");             // returns true
+     * Strings.endsWithAny("test", "ing", "ed");             // returns false
+     * Strings.endsWithAny(null, "test");                    // returns false
+     * Strings.endsWithAny("test");                          // returns {@code false} (empty array)
      * }</pre>
      *
      * @param str the string to be checked, may be {@code null} or empty
@@ -11233,11 +11232,11 @@ public final class Strings {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Check if string ends with any suffix ignoring case
-     * endsWithAnyIgnoreCase("hello.txt", ".TXT", ".DOC");    // returns true
-     * endsWithAnyIgnoreCase("HELLO.TXT", ".txt", ".doc");    // returns true
-     * endsWithAnyIgnoreCase("test", "ST", "ING");            // returns true
-     * endsWithAnyIgnoreCase("test", "ING", "ED");            // returns false
-     * endsWithAnyIgnoreCase(null, "test");                   // returns false
+     * Strings.endsWithAnyIgnoreCase("hello.txt", ".TXT", ".DOC");    // returns true
+     * Strings.endsWithAnyIgnoreCase("HELLO.TXT", ".txt", ".doc");    // returns true
+     * Strings.endsWithAnyIgnoreCase("test", "ST", "ING");            // returns true
+     * Strings.endsWithAnyIgnoreCase("test", "ING", "ED");            // returns false
+     * Strings.endsWithAnyIgnoreCase(null, "test");                   // returns false
      * }</pre>
      *
      * @param str the string to be checked, may be {@code null} or empty
@@ -11289,12 +11288,12 @@ public final class Strings {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Compare strings for equality
-     * equals("hello", "hello");                     // returns true
-     * equals("hello", "Hello");                     // returns {@code false} (case-sensitive)
-     * equals(null, null);                           // returns true
-     * equals("test", null);                         // returns false
-     * equals(null, "test");                         // returns false
-     * equals("", "");                               // returns true
+     * Strings.equals("hello", "hello");                     // returns true
+     * Strings.equals("hello", "Hello");                     // returns {@code false} (case-sensitive)
+     * Strings.equals(null, null);                           // returns true
+     * Strings.equals("test", null);                         // returns false
+     * Strings.equals(null, "test");                         // returns false
+     * Strings.equals("", "");                               // returns true
      * }</pre>
      *
      * @param a the first string to compare, may be {@code null}
@@ -11317,12 +11316,12 @@ public final class Strings {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Compare strings for equality ignoring case
-     * equalsIgnoreCase("hello", "HELLO");           // returns true
-     * equalsIgnoreCase("Hello", "hello");           // returns true
-     * equalsIgnoreCase(null, null);                 // returns true
-     * equalsIgnoreCase("test", null);               // returns false
-     * equalsIgnoreCase(null, "test");               // returns false
-     * equalsIgnoreCase("", "");                     // returns true
+     * Strings.equalsIgnoreCase("hello", "HELLO");           // returns true
+     * Strings.equalsIgnoreCase("Hello", "hello");           // returns true
+     * Strings.equalsIgnoreCase(null, null);                 // returns true
+     * Strings.equalsIgnoreCase("test", null);               // returns false
+     * Strings.equalsIgnoreCase(null, "test");               // returns false
+     * Strings.equalsIgnoreCase("", "");                     // returns true
      * }</pre>
      *
      * @param a the first string to compare, may be {@code null}
@@ -11345,11 +11344,11 @@ public final class Strings {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Check if string equals any value
-     * equalsAny("test", "test", "demo", "sample");  // returns true
-     * equalsAny("test", "Test", "TEST");            // returns {@code false} (case-sensitive)
-     * equalsAny(null, "test", null, "demo");        // returns {@code true} (null match)
-     * equalsAny("test", "demo", "sample");          // returns false
-     * equalsAny("test");                            // returns {@code false} (empty array)
+     * Strings.equalsAny("test", "test", "demo", "sample");  // returns true
+     * Strings.equalsAny("test", "Test", "TEST");            // returns {@code false} (case-sensitive)
+     * Strings.equalsAny(null, "test", null, "demo");        // returns {@code true} (null match)
+     * Strings.equalsAny("test", "demo", "sample");          // returns false
+     * Strings.equalsAny("test");                            // returns {@code false} (empty array)
      * }</pre>
      *
      * @param str the string to be checked, may be {@code null}
@@ -11382,11 +11381,11 @@ public final class Strings {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Check if string equals any value ignoring case
-     * equalsAnyIgnoreCase("test", "TEST", "demo");  // returns true
-     * equalsAnyIgnoreCase("Test", "test", "TEST");  // returns true
-     * equalsAnyIgnoreCase(null, "test", null);      // returns {@code true} (null match)
-     * equalsAnyIgnoreCase("test", "demo", "sample");// returns false
-     * equalsAnyIgnoreCase("test");                  // returns {@code false} (empty array)
+     * Strings.equalsAnyIgnoreCase("test", "TEST", "demo");  // returns true
+     * Strings.equalsAnyIgnoreCase("Test", "test", "TEST");  // returns true
+     * Strings.equalsAnyIgnoreCase(null, "test", null);      // returns {@code true} (null match)
+     * Strings.equalsAnyIgnoreCase("test", "demo", "sample");// returns false
+     * Strings.equalsAnyIgnoreCase("test");                  // returns {@code false} (empty array)
      * }</pre>
      *
      * @param str the string to be checked, may be {@code null}
@@ -11429,12 +11428,12 @@ public final class Strings {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Compare strings ignoring case
-     * compareIgnoreCase("abc", "ABC");              // returns 0
-     * compareIgnoreCase("abc", "def");              // returns negative value
-     * compareIgnoreCase("def", "abc");              // returns positive value
-     * compareIgnoreCase(null, "abc");               // returns -1
-     * compareIgnoreCase("abc", null);               // returns 1
-     * compareIgnoreCase(null, null);                // returns 0
+     * Strings.compareIgnoreCase("abc", "ABC");              // returns 0
+     * Strings.compareIgnoreCase("abc", "def");              // returns negative value
+     * Strings.compareIgnoreCase("def", "abc");              // returns positive value
+     * Strings.compareIgnoreCase(null, "abc");               // returns -1
+     * Strings.compareIgnoreCase("abc", null);               // returns 1
+     * Strings.compareIgnoreCase(null, null);                // returns 0
      * }</pre>
      *
      * @param a the first string to compare, may be {@code null}
@@ -11457,16 +11456,16 @@ public final class Strings {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Find index of first difference
-     * indexOfDifference("i am a machine", "i am a robot");    // returns 7
-     * indexOfDifference("abc", "abc");                        // returns -1 (identical)
-     * indexOfDifference("ab", "abxyz");                       // returns 2
-     * indexOfDifference("abcde", "abxyz");                    // returns 2
-     * indexOfDifference("abcde", "xyz");                      // returns 0
-     * indexOfDifference("", "abc");                           // returns 0
-     * indexOfDifference(null, "abc");                         // returns 0
-     * indexOfDifference(null, null);                          // returns -1
-     * indexOfDifference("", "");                              // returns -1
-     * indexOfDifference(null, "");                            // returns -1
+     * Strings.indexOfDifference("i am a machine", "i am a robot");    // returns 7
+     * Strings.indexOfDifference("abc", "abc");                        // returns -1 (identical)
+     * Strings.indexOfDifference("ab", "abxyz");                       // returns 2
+     * Strings.indexOfDifference("abcde", "abxyz");                    // returns 2
+     * Strings.indexOfDifference("abcde", "xyz");                      // returns 0
+     * Strings.indexOfDifference("", "abc");                           // returns 0
+     * Strings.indexOfDifference(null, "abc");                         // returns 0
+     * Strings.indexOfDifference(null, null);                          // returns -1
+     * Strings.indexOfDifference("", "");                              // returns -1
+     * Strings.indexOfDifference(null, "");                            // returns -1
      * }</pre>
      *
      * @param a the first String, may be {@code null}
@@ -11510,12 +11509,12 @@ public final class Strings {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Find index of first difference across multiple strings
-     * indexOfDifference("i am a machine", "i am a robot");     // returns 7
-     * indexOfDifference("abc", "abc", "abc");                  // returns -1
-     * indexOfDifference("abc", "a");                           // returns 1
-     * indexOfDifference("ab", "abxyz", "abcde");               // returns 2
-     * indexOfDifference("", "abc", "xyz");                     // returns 0
-     * indexOfDifference((String[]) null);                      // returns -1
+     * Strings.indexOfDifference("i am a machine", "i am a robot");     // returns 7
+     * Strings.indexOfDifference("abc", "abc", "abc");                  // returns -1
+     * Strings.indexOfDifference("abc", "a");                           // returns 1
+     * Strings.indexOfDifference("ab", "abxyz", "abcde");               // returns 2
+     * Strings.indexOfDifference("", "abc", "xyz");                     // returns 0
+     * Strings.indexOfDifference((String[]) null);                      // returns -1
      * }</pre>
      *
      * @param strs array of Strings, entries may be null
@@ -11591,12 +11590,12 @@ public final class Strings {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * lengthOfCommonPrefix("hello", "help");         // returns 3 (common prefix "hel")
-     * lengthOfCommonPrefix("abc", "abcdef");         // returns 3 (common prefix "abc")
-     * lengthOfCommonPrefix("test", "best");          // returns 0 (no common prefix)
-     * lengthOfCommonPrefix("", "hello");             // returns 0 (empty string)
-     * lengthOfCommonPrefix(null, "hello");           // returns 0 (null input)
-     * lengthOfCommonPrefix("hello", "hello");        // returns 5 (identical strings)
+     * Strings.lengthOfCommonPrefix("hello", "help");         // returns 3 (common prefix "hel")
+     * Strings.lengthOfCommonPrefix("abc", "abcdef");         // returns 3 (common prefix "abc")
+     * Strings.lengthOfCommonPrefix("test", "best");          // returns 0 (no common prefix)
+     * Strings.lengthOfCommonPrefix("", "hello");             // returns 0 (empty string)
+     * Strings.lengthOfCommonPrefix(null, "hello");           // returns 0 (null input)
+     * Strings.lengthOfCommonPrefix("hello", "hello");        // returns 5 (identical strings)
      * }</pre>
      *
      * @param a the first CharSequence to compare, may be {@code null}
@@ -11635,12 +11634,12 @@ public final class Strings {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * lengthOfCommonSuffix("hello", "jello");        // returns 4 (common suffix "ello")
-     * lengthOfCommonSuffix("testing", "ing");        // returns 3 (common suffix "ing")
-     * lengthOfCommonSuffix("test", "best");          // returns 3 (common suffix "est")
-     * lengthOfCommonSuffix("abc", "xyz");            // returns 0 (no common suffix)
-     * lengthOfCommonSuffix("", "hello");             // returns 0 (empty string)
-     * lengthOfCommonSuffix(null, "hello");           // returns 0 (null input)
+     * Strings.lengthOfCommonSuffix("hello", "jello");        // returns 4 (common suffix "ello")
+     * Strings.lengthOfCommonSuffix("testing", "ing");        // returns 3 (common suffix "ing")
+     * Strings.lengthOfCommonSuffix("test", "best");          // returns 3 (common suffix "est")
+     * Strings.lengthOfCommonSuffix("abc", "xyz");            // returns 0 (no common suffix)
+     * Strings.lengthOfCommonSuffix("", "hello");             // returns 0 (empty string)
+     * Strings.lengthOfCommonSuffix(null, "hello");           // returns 0 (null input)
      * }</pre>
      *
      * @param a the first CharSequence to compare, may be {@code null}
@@ -11710,13 +11709,13 @@ public final class Strings {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * commonPrefix("flower", "flow", "flight");      // returns "fl"
-     * commonPrefix("dog", "racecar", "car");         // returns "" (no common prefix)
-     * commonPrefix("interspecies", "interstellar", "interstate"); // returns "inters"
-     * commonPrefix("prefix");                        // returns "prefix" (single element)
-     * commonPrefix();                                // returns "" (empty array)
-     * commonPrefix("test", null, "testing");         // returns "" (null element)
-     * commonPrefix("", "hello");                     // returns "" (empty element)
+     * Strings.commonPrefix("flower", "flow", "flight");      // returns "fl"
+     * Strings.commonPrefix("dog", "racecar", "car");         // returns "" (no common prefix)
+     * Strings.commonPrefix("interspecies", "interstellar", "interstate"); // returns "inters"
+     * Strings.commonPrefix("prefix");                        // returns "prefix" (single element)
+     * Strings.commonPrefix();                                // returns "" (empty array)
+     * Strings.commonPrefix("test", null, "testing");         // returns "" (null element)
+     * Strings.commonPrefix("", "hello");                     // returns "" (empty element)
      * }</pre>
      *
      * @param strs the array of CharSequences to compare. It can be empty or contain {@code null} elements.
@@ -11793,13 +11792,13 @@ public final class Strings {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * commonSuffix("testing", "eating", "meeting");  // returns "ting"
-     * commonSuffix("hello", "jello", "yellow");      // returns "llo"
-     * commonSuffix("abc", "xyz", "123");             // returns "" (no common suffix)
-     * commonSuffix("suffix");                        // returns "suffix" (single element)
-     * commonSuffix();                                // returns "" (empty array)
-     * commonSuffix("test", null, "best");            // returns "" (null element)
-     * commonSuffix("", "hello");                     // returns "" (empty element)
+     * Strings.commonSuffix("testing", "eating", "meeting");  // returns "ting"
+     * Strings.commonSuffix("hello", "jello", "yellow");      // returns "llo"
+     * Strings.commonSuffix("abc", "xyz", "123");             // returns "" (no common suffix)
+     * Strings.commonSuffix("suffix");                        // returns "suffix" (single element)
+     * Strings.commonSuffix();                                // returns "" (empty array)
+     * Strings.commonSuffix("test", null, "best");            // returns "" (null element)
+     * Strings.commonSuffix("", "hello");                     // returns "" (empty element)
      * }</pre>
      *
      * @param strs the array of CharSequences to compare. It can be empty or contain {@code null} elements.
@@ -11860,12 +11859,12 @@ public final class Strings {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * longestCommonSubstring("abcdxyz", "xyzabcd");  // returns "abcd" (or "xyz")
-     * longestCommonSubstring("zxabcdezy", "yzabcdezx"); // returns "abcdez"
-     * longestCommonSubstring("hello", "yellow");     // returns "ello"
-     * longestCommonSubstring("abc", "def");          // returns "" (no common substring)
-     * longestCommonSubstring("", "hello");           // returns "" (empty string)
-     * longestCommonSubstring(null, "hello");         // returns "" (null input)
+     * Strings.longestCommonSubstring("abcdxyz", "xyzabcd");  // returns "abcd" (or "xyz")
+     * Strings.longestCommonSubstring("zxabcdezy", "yzabcdezx"); // returns "abcdez"
+     * Strings.longestCommonSubstring("hello", "yellow");     // returns "ello"
+     * Strings.longestCommonSubstring("abc", "def");          // returns "" (no common substring)
+     * Strings.longestCommonSubstring("", "hello");           // returns "" (empty string)
+     * Strings.longestCommonSubstring(null, "hello");         // returns "" (null input)
      * }</pre>
      *
      * @param a the first CharSequence to compare, may be {@code null}
@@ -11946,11 +11945,11 @@ public final class Strings {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * firstChar("Hello");                    // returns OptionalChar.of('H')
-     * firstChar("A");                        // returns OptionalChar.of('A')
-     * firstChar("");                         // returns OptionalChar.empty()
-     * firstChar(null);                       // returns OptionalChar.empty()
-     * firstChar("  spaces");                 // returns OptionalChar.of(' ')
+     * Strings.firstChar("Hello");                    // returns OptionalChar.of('H')
+     * Strings.firstChar("A");                        // returns OptionalChar.of('A')
+     * Strings.firstChar("");                         // returns OptionalChar.empty()
+     * Strings.firstChar(null);                       // returns OptionalChar.empty()
+     * Strings.firstChar("  spaces");                 // returns OptionalChar.of(' ')
      * }</pre>
      *
      * @param str the input string from which to extract the first character, may be {@code null} or empty
@@ -11975,11 +11974,11 @@ public final class Strings {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * lastChar("Hello");                     // returns OptionalChar.of('o')
-     * lastChar("A");                         // returns OptionalChar.of('A')
-     * lastChar("");                          // returns OptionalChar.empty()
-     * lastChar(null);                        // returns OptionalChar.empty()
-     * lastChar("test ");                     // returns OptionalChar.of(' ')
+     * Strings.lastChar("Hello");                     // returns OptionalChar.of('o')
+     * Strings.lastChar("A");                         // returns OptionalChar.of('A')
+     * Strings.lastChar("");                          // returns OptionalChar.empty()
+     * Strings.lastChar(null);                        // returns OptionalChar.empty()
+     * Strings.lastChar("test ");                     // returns OptionalChar.of(' ')
      * }</pre>
      *
      * @param str the input string from which to extract the last character, may be {@code null} or empty
@@ -12004,12 +12003,12 @@ public final class Strings {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * firstChars("Hello World", 5);          // returns "Hello"
-     * firstChars("Hi", 5);                   // returns "Hi" (string shorter than n)
-     * firstChars("Testing", 0);              // returns ""
-     * firstChars("", 5);                     // returns ""
-     * firstChars(null, 5);                   // returns ""
-     * firstChars("Example", 7);              // returns "Example" (exact length)
+     * Strings.firstChars("Hello World", 5);          // returns "Hello"
+     * Strings.firstChars("Hi", 5);                   // returns "Hi" (string shorter than n)
+     * Strings.firstChars("Testing", 0);              // returns ""
+     * Strings.firstChars("", 5);                     // returns ""
+     * Strings.firstChars(null, 5);                   // returns ""
+     * Strings.firstChars("Example", 7);              // returns "Example" (exact length)
      * }</pre>
      *
      * @param str the input string from which to extract characters, may be {@code null} or empty
@@ -12040,12 +12039,12 @@ public final class Strings {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * lastChars("Hello World", 5);           // returns "World"
-     * lastChars("Hi", 5);                    // returns "Hi" (string shorter than n)
-     * lastChars("Testing", 0);               // returns ""
-     * lastChars("", 5);                      // returns ""
-     * lastChars(null, 5);                    // returns ""
-     * lastChars("Example", 7);               // returns "Example" (exact length)
+     * Strings.lastChars("Hello World", 5);           // returns "World"
+     * Strings.lastChars("Hi", 5);                    // returns "Hi" (string shorter than n)
+     * Strings.lastChars("Testing", 0);               // returns ""
+     * Strings.lastChars("", 5);                      // returns ""
+     * Strings.lastChars(null, 5);                    // returns ""
+     * Strings.lastChars("Example", 7);               // returns "Example" (exact length)
      * }</pre>
      *
      * @param str the input string from which to extract characters, may be {@code null} or empty
@@ -12079,12 +12078,12 @@ public final class Strings {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * substring("Hello World", 6);           // returns "World"
-     * substring("Hello", 0);                 // returns "Hello"
-     * substring("Hello", 5);                 // returns "" (index at string length)
-     * substring("Hello", -1);                // returns null (negative index)
-     * substring("Hello", 10);                // returns null (index > length)
-     * substring(null, 0);                    // returns null
+     * Strings.substring("Hello World", 6);           // returns "World"
+     * Strings.substring("Hello", 0);                 // returns "Hello"
+     * Strings.substring("Hello", 5);                 // returns "" (index at string length)
+     * Strings.substring("Hello", -1);                // returns null (negative index)
+     * Strings.substring("Hello", 10);                // returns null (index > length)
+     * Strings.substring(null, 0);                    // returns null
      * }</pre>
      *
      * @param str the input string from which to extract the substring, may be {@code null}
@@ -12116,13 +12115,13 @@ public final class Strings {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * substring("Hello World", 0, 5);        // returns "Hello"
-     * substring("Hello World", 6, 11);       // returns "World"
-     * substring("Hello", 1, 10);             // returns "ello" (end index adjusted)
-     * substring("Hello", 2, 2);              // returns "" (empty range)
-     * substring("Hello", -1, 3);             // returns null (negative index)
-     * substring("Hello", 3, 1);              // returns null (begin > end)
-     * substring(null, 0, 5);                 // returns null
+     * Strings.substring("Hello World", 0, 5);        // returns "Hello"
+     * Strings.substring("Hello World", 6, 11);       // returns "World"
+     * Strings.substring("Hello", 1, 10);             // returns "ello" (end index adjusted)
+     * Strings.substring("Hello", 2, 2);              // returns "" (empty range)
+     * Strings.substring("Hello", -1, 3);             // returns null (negative index)
+     * Strings.substring("Hello", 3, 1);              // returns null (begin > end)
+     * Strings.substring(null, 0, 5);                 // returns null
      * }</pre>
      *
      * @param str the input string from which to extract the substring, may be {@code null}
@@ -12153,15 +12152,15 @@ public final class Strings {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Get next 3 characters from index
-     * substring("Hello World", 0, i -> i + 3);      // returns "Hel"
-     * substring("Hello World", 6, i -> i + 5);      // returns "World"
+     * Strings.substring("Hello World", 0, i -> i + 3);      // returns "Hel"
+     * Strings.substring("Hello World", 6, i -> i + 5);      // returns "World"
      * 
      * // Get to string length
-     * substring("Hello", 2, i -> 5);                // returns "llo"
+     * Strings.substring("Hello", 2, i -> 5);                // returns "llo"
      * 
      * // Invalid cases
-     * substring("Hello", -1, i -> i + 3);           // returns null (negative index)
-     * substring(null, 0, i -> i + 3);               // returns null
+     * Strings.substring("Hello", -1, i -> i + 3);           // returns null (negative index)
+     * Strings.substring(null, 0, i -> i + 3);               // returns null
      * }</pre>
      *
      * @param str the input string from which to extract the substring, may be {@code null}
@@ -12193,15 +12192,15 @@ public final class Strings {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Get 3 characters before end index
-     * substring("Hello World", i -> i - 3, 8);      // returns "Wor"
-     * substring("Hello World", i -> i - 5, 5);      // returns "Hello"
+     * Strings.substring("Hello World", i -> i - 3, 8);      // returns "Wor"
+     * Strings.substring("Hello World", i -> i - 5, 5);      // returns "Hello"
      * 
      * // Get from start to index
-     * substring("Hello", i -> 0, 3);                // returns "Hel"
+     * Strings.substring("Hello", i -> 0, 3);                // returns "Hel"
      * 
      * // Invalid cases
-     * substring("Hello", i -> i - 3, -1);           // returns null (negative end index)
-     * substring(null, i -> 0, 5);                   // returns null
+     * Strings.substring("Hello", i -> i - 3, -1);           // returns null (negative end index)
+     * Strings.substring(null, i -> 0, 5);                   // returns null
      * }</pre>
      *
      * @param str the input string from which to extract the substring, may be {@code null}
@@ -12231,11 +12230,11 @@ public final class Strings {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * substring("Hello World", ' ');         // returns " World"
-     * substring("user@example.com", '@');    // returns "@example.com"
-     * substring("Hello", 'x');               // returns null (not found)
-     * substring("", 'a');                    // returns null (empty string)
-     * substring(null, 'a');                  // returns null
+     * Strings.substring("Hello World", ' ');         // returns " World"
+     * Strings.substring("user@example.com", '@');    // returns "@example.com"
+     * Strings.substring("Hello", 'x');               // returns null (not found)
+     * Strings.substring("", 'a');                    // returns null (empty string)
+     * Strings.substring(null, 'a');                  // returns null
      * }</pre>
      *
      * @param str the input string to search in, may be {@code null} or empty
@@ -12267,11 +12266,11 @@ public final class Strings {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * substring("Hello World", "Wo");        // returns "World"
-     * substring("user@example.com", "@");    // returns "@example.com"
-     * substring("Hello", "xyz");             // returns null (not found)
-     * substring("Hello", "");                // returns "Hello" (empty delimiter)
-     * substring(null, "test");               // returns null
+     * Strings.substring("Hello World", "Wo");        // returns "World"
+     * Strings.substring("user@example.com", "@");    // returns "@example.com"
+     * Strings.substring("Hello", "xyz");             // returns null (not found)
+     * Strings.substring("Hello", "");                // returns "Hello" (empty delimiter)
+     * Strings.substring(null, "test");               // returns null
      * }</pre>
      *
      * @param str the input string to search in, may be {@code null}
@@ -12306,11 +12305,11 @@ public final class Strings {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * substring("Hello, World!", 0, ',');    // returns "Hello"
-     * substring("a-b-c-d", 2, '-');          // returns "b"
-     * substring("test", 0, 'x');             // returns null (delimiter not found)
-     * substring("test", -1, 't');            // returns null (invalid index)
-     * substring(null, 0, ',');               // returns null
+     * Strings.substring("Hello, World!", 0, ',');    // returns "Hello"
+     * Strings.substring("a-b-c-d", 2, '-');          // returns "b"
+     * Strings.substring("test", 0, 'x');             // returns null (delimiter not found)
+     * Strings.substring("test", -1, 't');            // returns null (invalid index)
+     * Strings.substring(null, 0, ',');               // returns null
      * }</pre>
      *
      * @param str the input string to search in, may be {@code null} or empty
@@ -12350,11 +12349,11 @@ public final class Strings {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * substring("Hello, World!", 0, ", ");   // returns "Hello"
-     * substring("<tag>content</tag>", 5, "</"); // returns "content"
-     * substring("test", 0, "xyz");           // returns null (delimiter not found)
-     * substring("test", 0, "");              // returns "" (empty delimiter)
-     * substring(null, 0, "test");            // returns null
+     * Strings.substring("Hello, World!", 0, ", ");   // returns "Hello"
+     * Strings.substring("<tag>content</tag>", 5, "</"); // returns "content"
+     * Strings.substring("test", 0, "xyz");           // returns null (delimiter not found)
+     * Strings.substring("test", 0, "");              // returns "" (empty delimiter)
+     * Strings.substring(null, 0, "test");            // returns null
      * }</pre>
      *
      * @param str the input string to search in, may be {@code null}
@@ -12390,11 +12389,11 @@ public final class Strings {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * substring("a-b-c-d", '-', 7);          // returns "-d" (last '-' before index 6)
-     * substring("hello world", ' ', 11);     // returns " world"
-     * substring("test", 'x', 4);             // returns null (delimiter not found)
-     * substring("test", 't', -1);            // returns null (negative index)
-     * substring(null, 'a', 5);               // returns null
+     * Strings.substring("a-b-c-d", '-', 7);          // returns "-d" (last '-' before index 6)
+     * Strings.substring("hello world", ' ', 11);     // returns " world"
+     * Strings.substring("test", 'x', 4);             // returns null (delimiter not found)
+     * Strings.substring("test", 't', -1);            // returns null (negative index)
+     * Strings.substring(null, 'a', 5);               // returns null
      * }</pre>
      *
      * @param str the input string to search in, may be {@code null} or empty
@@ -12427,11 +12426,11 @@ public final class Strings {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * substring("<a><b><c>", "<", 9);        // returns "<c>" (last '<' before adjusted position)
-     * substring("foo-bar-baz", "-", 11);     // returns "-baz"
-     * substring("test", "xyz", 4);           // returns null (delimiter not found)
-     * substring("test", "", 4);              // returns "" (empty delimiter)
-     * substring(null, "test", 5);            // returns null
+     * Strings.substring("<a><b><c>", "<", 9);        // returns "<c>" (last '<' before adjusted position)
+     * Strings.substring("foo-bar-baz", "-", 11);     // returns "-baz"
+     * Strings.substring("test", "xyz", 4);           // returns null (delimiter not found)
+     * Strings.substring("test", "", 4);              // returns "" (empty delimiter)
+     * Strings.substring(null, "test", 5);            // returns null
      * }</pre>
      *
      * @param str the input string to search in, may be {@code null}
@@ -12466,12 +12465,12 @@ public final class Strings {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * substringAfter("user@example.com", '@');      // returns "example.com"
-     * substringAfter("Hello World", ' ');           // returns "World"
-     * substringAfter("test", 'x');                  // returns null (not found)
-     * substringAfter("test:", ':');                 // returns "" (delimiter at end)
-     * substringAfter("", 'a');                      // returns null (empty string)
-     * substringAfter(null, 'a');                    // returns null
+     * Strings.substringAfter("user@example.com", '@');      // returns "example.com"
+     * Strings.substringAfter("Hello World", ' ');           // returns "World"
+     * Strings.substringAfter("test", 'x');                  // returns null (not found)
+     * Strings.substringAfter("test:", ':');                 // returns "" (delimiter at end)
+     * Strings.substringAfter("", 'a');                      // returns null (empty string)
+     * Strings.substringAfter(null, 'a');                    // returns null
      * }</pre>
      *
      * @param str the input string to search in, may be {@code null} or empty
@@ -12507,12 +12506,12 @@ public final class Strings {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * substringAfter("www.example.com", "www.");    // returns "example.com"
-     * substringAfter("Hello::World", "::");         // returns "World"
-     * substringAfter("NoDelimiter", "xyz");         // returns null (not found)
-     * substringAfter("test", "");                   // returns "test" (empty delimiter)
-     * substringAfter(null, "test");                 // returns null
-     * substringAfter("test", null);                 // returns null
+     * Strings.substringAfter("www.example.com", "www.");    // returns "example.com"
+     * Strings.substringAfter("Hello::World", "::");         // returns "World"
+     * Strings.substringAfter("NoDelimiter", "xyz");         // returns null (not found)
+     * Strings.substringAfter("test", "");                   // returns "test" (empty delimiter)
+     * Strings.substringAfter(null, "test");                 // returns null
+     * Strings.substringAfter("test", null);                 // returns null
      * }</pre>
      *
      * @param str the input string to search in, may be {@code null}
@@ -12552,12 +12551,12 @@ public final class Strings {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * substringAfter("Hello, World!", ", ", 10);    // returns "Wo"
-     * substringAfter("a-b-c-d", "-", 5);            // returns "b"
-     * substringAfter("test", "t", 3);               // returns "es"
-     * substringAfter("test", "", 2);                // returns "te" (empty delimiter)
-     * substringAfter("test", "st", 4);              // returns null (delimiter end > endIndex)
-     * substringAfter(null, "test", 5);              // returns null
+     * Strings.substringAfter("Hello, World!", ", ", 10);    // returns "Wo"
+     * Strings.substringAfter("a-b-c-d", "-", 5);            // returns "b"
+     * Strings.substringAfter("test", "t", 3);               // returns "es"
+     * Strings.substringAfter("test", "", 2);                // returns "te" (empty delimiter)
+     * Strings.substringAfter("test", "st", 4);              // returns null (delimiter end > endIndex)
+     * Strings.substringAfter(null, "test", 5);              // returns null
      * }</pre>
      *
      * @param str the input string to search in, may be {@code null}
@@ -12601,12 +12600,12 @@ public final class Strings {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * substringAfterIgnoreCase("Hello WORLD", "hello ");  // returns "WORLD"
-     * substringAfterIgnoreCase("user@EXAMPLE.com", "@");  // returns "EXAMPLE.com"
-     * substringAfterIgnoreCase("Test", "TEST");           // returns "" (delimiter is entire string)
-     * substringAfterIgnoreCase("NoMatch", "xyz");         // returns null (not found)
-     * substringAfterIgnoreCase("test", "");               // returns "test" (empty delimiter)
-     * substringAfterIgnoreCase(null, "test");             // returns null
+     * Strings.substringAfterIgnoreCase("Hello WORLD", "hello ");  // returns "WORLD"
+     * Strings.substringAfterIgnoreCase("user@EXAMPLE.com", "@");  // returns "EXAMPLE.com"
+     * Strings.substringAfterIgnoreCase("Test", "TEST");           // returns "" (delimiter is entire string)
+     * Strings.substringAfterIgnoreCase("NoMatch", "xyz");         // returns null (not found)
+     * Strings.substringAfterIgnoreCase("test", "");               // returns "test" (empty delimiter)
+     * Strings.substringAfterIgnoreCase(null, "test");             // returns null
      * }</pre>
      *
      * @param str the input string to search in, may be {@code null}
@@ -12646,12 +12645,12 @@ public final class Strings {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * substringAfterLast("com.example.App", '.');       // returns "App"
-     * substringAfterLast("/home/user/file.txt", '/');   // returns "file.txt"
-     * substringAfterLast("NoDelimiter", '.');           // returns null (not found)
-     * substringAfterLast("test.", '.');                 // returns "" (delimiter at end)
-     * substringAfterLast("", 'a');                      // returns null (empty string)
-     * substringAfterLast(null, 'a');                    // returns null
+     * Strings.substringAfterLast("com.example.App", '.');       // returns "App"
+     * Strings.substringAfterLast("/home/user/file.txt", '/');   // returns "file.txt"
+     * Strings.substringAfterLast("NoDelimiter", '.');           // returns null (not found)
+     * Strings.substringAfterLast("test.", '.');                 // returns "" (delimiter at end)
+     * Strings.substringAfterLast("", 'a');                      // returns null (empty string)
+     * Strings.substringAfterLast(null, 'a');                    // returns null
      * }</pre>
      *
      * @param str the input string to search in, may be {@code null} or empty
@@ -12687,12 +12686,12 @@ public final class Strings {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * substringAfterLast("a.b.c.txt", ".");             // returns "txt"
-     * substringAfterLast("folder1/folder2/file", "/");  // returns "file"
-     * substringAfterLast("NoDelimiter", "::");          // returns null (not found)
-     * substringAfterLast("test::", "::");               // returns "" (delimiter at end)
-     * substringAfterLast("test", "");                   // returns "" (empty delimiter)
-     * substringAfterLast(null, "test");                 // returns null
+     * Strings.substringAfterLast("a.b.c.txt", ".");             // returns "txt"
+     * Strings.substringAfterLast("folder1/folder2/file", "/");  // returns "file"
+     * Strings.substringAfterLast("NoDelimiter", "::");          // returns null (not found)
+     * Strings.substringAfterLast("test::", "::");               // returns "" (delimiter at end)
+     * Strings.substringAfterLast("test", "");                   // returns "" (empty delimiter)
+     * Strings.substringAfterLast(null, "test");                 // returns null
      * }</pre>
      *
      * @param str the input string to search in, may be {@code null}
@@ -12733,13 +12732,13 @@ public final class Strings {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * substringAfterLast("com.example.Test", ".", 11);     // returns "example"
-     * substringAfterLast("a.b.c.d", ".", 5);               // returns "b"
-     * substringAfterLast("hello", ".", 5);                 // returns null (delimiter not found)
-     * substringAfterLast("test.", ".", 5);                 // returns "" (empty string after delimiter)
-     * substringAfterLast(null, ".", 5);                    // returns null
-     * substringAfterLast("test", null, 5);                 // returns null
-     * substringAfterLast("test", ".", -1);                 // returns null
+     * Strings.substringAfterLast("com.example.Test", ".", 11);     // returns "example"
+     * Strings.substringAfterLast("a.b.c.d", ".", 5);               // returns "b"
+     * Strings.substringAfterLast("hello", ".", 5);                 // returns null (delimiter not found)
+     * Strings.substringAfterLast("test.", ".", 5);                 // returns "" (empty string after delimiter)
+     * Strings.substringAfterLast(null, ".", 5);                    // returns null
+     * Strings.substringAfterLast("test", null, 5);                 // returns null
+     * Strings.substringAfterLast("test", ".", -1);                 // returns null
      * }</pre>
      *
      * @param str the string to search in, may be {@code null}
@@ -12782,13 +12781,13 @@ public final class Strings {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * substringAfterLastIgnoreCase("com.Example.Test", ".example.");  // returns "Test"
-     * substringAfterLastIgnoreCase("COM.EXAMPLE.TEST", ".example.");  // returns "TEST"
-     * substringAfterLastIgnoreCase("test.example", ".EXAMPLE");       // returns ""
-     * substringAfterLastIgnoreCase("hello", ".");                     // returns null
-     * substringAfterLastIgnoreCase(null, ".");                        // returns null
-     * substringAfterLastIgnoreCase("test", null);                     // returns null
-     * substringAfterLastIgnoreCase("test", "");                       // returns ""
+     * Strings.substringAfterLastIgnoreCase("com.Example.Test", ".example.");  // returns "Test"
+     * Strings.substringAfterLastIgnoreCase("COM.EXAMPLE.TEST", ".example.");  // returns "TEST"
+     * Strings.substringAfterLastIgnoreCase("test.example", ".EXAMPLE");       // returns ""
+     * Strings.substringAfterLastIgnoreCase("hello", ".");                     // returns null
+     * Strings.substringAfterLastIgnoreCase(null, ".");                        // returns null
+     * Strings.substringAfterLastIgnoreCase("test", null);                     // returns null
+     * Strings.substringAfterLastIgnoreCase("test", "");                       // returns ""
      * }</pre>
      *
      * @param str the string to search in, may be {@code null}
@@ -12827,13 +12826,13 @@ public final class Strings {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * substringAfterAny("user@example.com", '@', '.');     // returns "example.com"
-     * substringAfterAny("first.last@domain", '.', '@');    // returns "last@domain"
-     * substringAfterAny("no-delimiters", '@', '.');        // returns null
-     * substringAfterAny("@leading", '@');                  // returns "leading"
-     * substringAfterAny(null, '@');                        // returns null
-     * substringAfterAny("test", null);                     // returns null
-     * substringAfterAny("test", new char[0]);              // returns null
+     * Strings.substringAfterAny("user@example.com", '@', '.');     // returns "example.com"
+     * Strings.substringAfterAny("first.last@domain", '.', '@');    // returns "last@domain"
+     * Strings.substringAfterAny("no-delimiters", '@', '.');        // returns null
+     * Strings.substringAfterAny("@leading", '@');                  // returns "leading"
+     * Strings.substringAfterAny(null, '@');                        // returns null
+     * Strings.substringAfterAny("test", null);                     // returns null
+     * Strings.substringAfterAny("test", new char[0]);              // returns null
      * }</pre>
      *
      * @param str the string to search in, may be {@code null}
@@ -12874,13 +12873,13 @@ public final class Strings {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * substringAfterAny("user@@domain.com", "@@", "@");    // returns "domain.com"
-     * substringAfterAny("Hello World Java", " ", ", ");    // returns "World Java"
-     * substringAfterAny("no-match", "@@", "##");           // returns null
-     * substringAfterAny("@@leading", "@@");                // returns "leading"
-     * substringAfterAny(null, "@@");                       // returns null
-     * substringAfterAny("test", null);                     // returns null
-     * substringAfterAny("test", new String[0]);            // returns null
+     * Strings.substringAfterAny("user@@domain.com", "@@", "@");    // returns "domain.com"
+     * Strings.substringAfterAny("Hello World Java", " ", ", ");    // returns "World Java"
+     * Strings.substringAfterAny("no-match", "@@", "##");           // returns null
+     * Strings.substringAfterAny("@@leading", "@@");                // returns "leading"
+     * Strings.substringAfterAny(null, "@@");                       // returns null
+     * Strings.substringAfterAny("test", null);                     // returns null
+     * Strings.substringAfterAny("test", new String[0]);            // returns null
      * }</pre>
      *
      * @param str the string to search in, may be {@code null}
@@ -12919,11 +12918,11 @@ public final class Strings {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * substringBefore("user@example.com", '@');           // returns "user"
-     * substringBefore("first.last", '.');                 // returns "first"
-     * substringBefore("no-delimiter", '@');               // returns null
-     * substringBefore("@leading", '@');                   // returns ""
-     * substringBefore(null, '@');                         // returns null
+     * Strings.substringBefore("user@example.com", '@');           // returns "user"
+     * Strings.substringBefore("first.last", '.');                 // returns "first"
+     * Strings.substringBefore("no-delimiter", '@');               // returns null
+     * Strings.substringBefore("@leading", '@');                   // returns ""
+     * Strings.substringBefore(null, '@');                         // returns null
      * }</pre>
      *
      * @param str the string to search in, may be {@code null}
@@ -12957,13 +12956,13 @@ public final class Strings {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * substringBefore("user@example.com", "@");           // returns "user"
-     * substringBefore("Hello World Java", " World");      // returns "Hello"
-     * substringBefore("no-delimiter", "@");               // returns null
-     * substringBefore("@leading", "@");                   // returns ""
-     * substringBefore(null, "@");                         // returns null
-     * substringBefore("test", null);                      // returns null
-     * substringBefore("test", "");                        // returns ""
+     * Strings.substringBefore("user@example.com", "@");           // returns "user"
+     * Strings.substringBefore("Hello World Java", " World");      // returns "Hello"
+     * Strings.substringBefore("no-delimiter", "@");               // returns null
+     * Strings.substringBefore("@leading", "@");                   // returns ""
+     * Strings.substringBefore(null, "@");                         // returns null
+     * Strings.substringBefore("test", null);                      // returns null
+     * Strings.substringBefore("test", "");                        // returns ""
      * }</pre>
      *
      * @param str the string to search in, may be {@code null}
@@ -13002,13 +13001,13 @@ public final class Strings {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * substringBefore("user@example@com", 5, "@");        // returns "example"
-     * substringBefore("Hello World Java", 6, " ");        // returns "World"
-     * substringBefore("test", 0, "@");                    // returns null (delimiter not found)
-     * substringBefore("test@end", 4, "@");                // returns null (no delimiter after index 4)
-     * substringBefore(null, 0, "@");                      // returns null
-     * substringBefore("test", -1, "@");                   // returns null
-     * substringBefore("test", 0, "");                     // returns ""
+     * Strings.substringBefore("user@example@com", 5, "@");        // returns "example"
+     * Strings.substringBefore("Hello World Java", 6, " ");        // returns "World"
+     * Strings.substringBefore("test", 0, "@");                    // returns null (delimiter not found)
+     * Strings.substringBefore("test@end", 4, "@");                // returns null (no delimiter after index 4)
+     * Strings.substringBefore(null, 0, "@");                      // returns null
+     * Strings.substringBefore("test", -1, "@");                   // returns null
+     * Strings.substringBefore("test", 0, "");                     // returns ""
      * }</pre>
      *
      * @param str the string to search in, may be {@code null}
@@ -13049,13 +13048,13 @@ public final class Strings {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * substringBeforeIgnoreCase("User@Example.com", "@EXAMPLE");  // returns "User"
-     * substringBeforeIgnoreCase("HELLO world", " WORLD");         // returns "HELLO"
-     * substringBeforeIgnoreCase("test", "TEST");                  // returns ""
-     * substringBeforeIgnoreCase("no-match", "@");                 // returns null
-     * substringBeforeIgnoreCase(null, "@");                       // returns null
-     * substringBeforeIgnoreCase("test", null);                    // returns null
-     * substringBeforeIgnoreCase("test", "");                      // returns ""
+     * Strings.substringBeforeIgnoreCase("User@Example.com", "@EXAMPLE");  // returns "User"
+     * Strings.substringBeforeIgnoreCase("HELLO world", " WORLD");         // returns "HELLO"
+     * Strings.substringBeforeIgnoreCase("test", "TEST");                  // returns ""
+     * Strings.substringBeforeIgnoreCase("no-match", "@");                 // returns null
+     * Strings.substringBeforeIgnoreCase(null, "@");                       // returns null
+     * Strings.substringBeforeIgnoreCase("test", null);                    // returns null
+     * Strings.substringBeforeIgnoreCase("test", "");                      // returns ""
      * }</pre>
      *
      * @param str the string to search in, may be {@code null}
@@ -13094,12 +13093,12 @@ public final class Strings {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * substringBeforeLast("com.example.Test", '.');       // returns "com.example"
-     * substringBeforeLast("user@example@com", '@');       // returns "user@example"
-     * substringBeforeLast("no-delimiter", '.');           // returns null
-     * substringBeforeLast(".leading", '.');               // returns ""
-     * substringBeforeLast(null, '.');                     // returns null
-     * substringBeforeLast("", '.');                       // returns null
+     * Strings.substringBeforeLast("com.example.Test", '.');       // returns "com.example"
+     * Strings.substringBeforeLast("user@example@com", '@');       // returns "user@example"
+     * Strings.substringBeforeLast("no-delimiter", '.');           // returns null
+     * Strings.substringBeforeLast(".leading", '.');               // returns ""
+     * Strings.substringBeforeLast(null, '.');                     // returns null
+     * Strings.substringBeforeLast("", '.');                       // returns null
      * }</pre>
      *
      * @param str the string to search in, may be {@code null} or empty
@@ -13133,13 +13132,13 @@ public final class Strings {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * substringBeforeLast("com.example.Test", ".");       // returns "com.example"
-     * substringBeforeLast("Hello World World", " World"); // returns "Hello World"
-     * substringBeforeLast("no-delimiter", ".");           // returns null
-     * substringBeforeLast(".leading", ".");               // returns ""
-     * substringBeforeLast(null, ".");                     // returns null
-     * substringBeforeLast("test", null);                  // returns null
-     * substringBeforeLast("test", "");                    // returns "test"
+     * Strings.substringBeforeLast("com.example.Test", ".");       // returns "com.example"
+     * Strings.substringBeforeLast("Hello World World", " World"); // returns "Hello World"
+     * Strings.substringBeforeLast("no-delimiter", ".");           // returns null
+     * Strings.substringBeforeLast(".leading", ".");               // returns ""
+     * Strings.substringBeforeLast(null, ".");                     // returns null
+     * Strings.substringBeforeLast("test", null);                  // returns null
+     * Strings.substringBeforeLast("test", "");                    // returns "test"
      * }</pre>
      *
      * @param str the string to search in, may be {@code null}
@@ -13178,13 +13177,13 @@ public final class Strings {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * substringBeforeLast("com.example.Test", 4, ".");    // returns "example"
-     * substringBeforeLast("a.b.c.d", 2, ".");             // returns "b.c"
-     * substringBeforeLast("test", 0, ".");                // returns null (delimiter not found)
-     * substringBeforeLast("a.b", 3, ".");                 // returns null (delimiter before index)
-     * substringBeforeLast(null, 0, ".");                  // returns null
-     * substringBeforeLast("test", -1, ".");               // returns null
-     * substringBeforeLast("test", 0, "");                 // returns "test"
+     * Strings.substringBeforeLast("com.example.Test", 4, ".");    // returns "example"
+     * Strings.substringBeforeLast("a.b.c.d", 2, ".");             // returns "b.c"
+     * Strings.substringBeforeLast("test", 0, ".");                // returns null (delimiter not found)
+     * Strings.substringBeforeLast("a.b", 3, ".");                 // returns null (delimiter before index)
+     * Strings.substringBeforeLast(null, 0, ".");                  // returns null
+     * Strings.substringBeforeLast("test", -1, ".");               // returns null
+     * Strings.substringBeforeLast("test", 0, "");                 // returns "test"
      * }</pre>
      *
      * @param str the string to search in, may be {@code null}
@@ -13226,13 +13225,13 @@ public final class Strings {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * substringBeforeLastIgnoreCase("Com.Example.TEST", ".test");  // returns "Com.Example"
-     * substringBeforeLastIgnoreCase("HELLO world WORLD", " world"); // returns "HELLO world"
-     * substringBeforeLastIgnoreCase("test", "TEST");                // returns ""
-     * substringBeforeLastIgnoreCase("no-match", "@");               // returns null
-     * substringBeforeLastIgnoreCase(null, "@");                     // returns null
-     * substringBeforeLastIgnoreCase("test", null);                  // returns null
-     * substringBeforeLastIgnoreCase("test", "");                    // returns "test"
+     * Strings.substringBeforeLastIgnoreCase("Com.Example.TEST", ".test");  // returns "Com.Example"
+     * Strings.substringBeforeLastIgnoreCase("HELLO world WORLD", " world"); // returns "HELLO world"
+     * Strings.substringBeforeLastIgnoreCase("test", "TEST");                // returns ""
+     * Strings.substringBeforeLastIgnoreCase("no-match", "@");               // returns null
+     * Strings.substringBeforeLastIgnoreCase(null, "@");                     // returns null
+     * Strings.substringBeforeLastIgnoreCase("test", null);                  // returns null
+     * Strings.substringBeforeLastIgnoreCase("test", "");                    // returns "test"
      * }</pre>
      *
      * @param str the string to search in, may be {@code null}
@@ -13271,13 +13270,13 @@ public final class Strings {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * substringBeforeAny("user@example.com", '@', '.');    // returns "user"
-     * substringBeforeAny("first.last@domain", '.', '@');   // returns "first"
-     * substringBeforeAny("no-delimiters", '@', '.');       // returns null
-     * substringBeforeAny("@leading", '@');                 // returns ""
-     * substringBeforeAny(null, '@');                       // returns null
-     * substringBeforeAny("test", null);                    // returns null
-     * substringBeforeAny("test", new char[0]);             // returns null
+     * Strings.substringBeforeAny("user@example.com", '@', '.');    // returns "user"
+     * Strings.substringBeforeAny("first.last@domain", '.', '@');   // returns "first"
+     * Strings.substringBeforeAny("no-delimiters", '@', '.');       // returns null
+     * Strings.substringBeforeAny("@leading", '@');                 // returns ""
+     * Strings.substringBeforeAny(null, '@');                       // returns null
+     * Strings.substringBeforeAny("test", null);                    // returns null
+     * Strings.substringBeforeAny("test", new char[0]);             // returns null
      * }</pre>
      *
      * @param str the string to search in, may be {@code null}
@@ -13319,13 +13318,13 @@ public final class Strings {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * substringBeforeAny("user@@domain.com", "@@", "@");   // returns "user"
-     * substringBeforeAny("Hello World Java", " World", " ");// returns "Hello"
-     * substringBeforeAny("no-match", "@@", "##");          // returns null
-     * substringBeforeAny("@@leading", "@@");               // returns ""
-     * substringBeforeAny(null, "@@");                      // returns null
-     * substringBeforeAny("test", null);                    // returns null
-     * substringBeforeAny("test", new String[0]);           // returns null
+     * Strings.substringBeforeAny("user@@domain.com", "@@", "@");   // returns "user"
+     * Strings.substringBeforeAny("Hello World Java", " World", " ");// returns "Hello"
+     * Strings.substringBeforeAny("no-match", "@@", "##");          // returns null
+     * Strings.substringBeforeAny("@@leading", "@@");               // returns ""
+     * Strings.substringBeforeAny(null, "@@");                      // returns null
+     * Strings.substringBeforeAny("test", null);                    // returns null
+     * Strings.substringBeforeAny("test", new String[0]);           // returns null
      * }</pre>
      *
      * @param str the string to search in, may be {@code null}
@@ -13365,13 +13364,13 @@ public final class Strings {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * substringBetween("abcdef", 0, 3);                    // returns "bc"
-     * substringBetween("abcdef", -1, 3);                  // returns "abc"
-     * substringBetween("abcdef", 2, 6);                    // returns "def"
-     * substringBetween("abcdef", 2, 10);                  // returns "def" (endIndex capped at length)
-     * substringBetween(null, 0, 3);                        // returns null
-     * substringBetween("test", 3, 3);                      // returns null (beginIndex >= endIndex)
-     * substringBetween("test", -2, 3);                     // returns null (beginIndex < -1)
+     * Strings.substringBetween("abcdef", 0, 3);                    // returns "bc"
+     * Strings.substringBetween("abcdef", -1, 3);                  // returns "abc"
+     * Strings.substringBetween("abcdef", 2, 6);                    // returns "def"
+     * Strings.substringBetween("abcdef", 2, 10);                  // returns "def" (endIndex capped at length)
+     * Strings.substringBetween(null, 0, 3);                        // returns null
+     * Strings.substringBetween("test", 3, 3);                      // returns null (beginIndex >= endIndex)
+     * Strings.substringBetween("test", -2, 3);                     // returns null (beginIndex < -1)
      * }</pre>
      *
      * @param str the string to extract from, may be {@code null}
@@ -13401,12 +13400,12 @@ public final class Strings {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * substringBetween("user@example.com", 3, '@');       // returns "r"
-     * substringBetween("a,b,c,d", 1, ',');                // returns "b"
-     * substringBetween("test", -1, 's');                  // returns "te"
-     * substringBetween("test", 2, 'x');                   // returns null (delimiter not found)
-     * substringBetween(null, 0, '@');                     // returns null
-     * substringBetween("test", 4, '@');                   // returns null (beginIndex >= length)
+     * Strings.substringBetween("user@example.com", 3, '@');       // returns "r"
+     * Strings.substringBetween("a,b,c,d", 1, ',');                // returns "b"
+     * Strings.substringBetween("test", -1, 's');                  // returns "te"
+     * Strings.substringBetween("test", 2, 'x');                   // returns null (delimiter not found)
+     * Strings.substringBetween(null, 0, '@');                     // returns null
+     * Strings.substringBetween("test", 4, '@');                   // returns null (beginIndex >= length)
      * }</pre>
      *
      * @param str the string to extract from, may be {@code null}
@@ -13444,13 +13443,13 @@ public final class Strings {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * substringBetween("Hello World Java", 5, " ");       // returns "World"
-     * substringBetween("user@@domain.com", 3, "@@");      // returns "r"
-     * substringBetween("test", -1, "st");                 // returns "te"
-     * substringBetween("test", 2, "xyz");                 // returns null (delimiter not found)
-     * substringBetween(null, 0, "@");                     // returns null
-     * substringBetween("test", 0, null);                  // returns null
-     * substringBetween("test", 4, "@");                   // returns null (beginIndex >= length)
+     * Strings.substringBetween("Hello World Java", 5, " ");       // returns "World"
+     * Strings.substringBetween("user@@domain.com", 3, "@@");      // returns "r"
+     * Strings.substringBetween("test", -1, "st");                 // returns "te"
+     * Strings.substringBetween("test", 2, "xyz");                 // returns null (delimiter not found)
+     * Strings.substringBetween(null, 0, "@");                     // returns null
+     * Strings.substringBetween("test", 0, null);                  // returns null
+     * Strings.substringBetween("test", 4, "@");                   // returns null (beginIndex >= length)
      * }</pre>
      *
      * @param str the string to extract from, may be {@code null}
@@ -13487,13 +13486,13 @@ public final class Strings {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * substringBetween("user@example", '@', 11);          // returns "example"
-     * substringBetween("a,b,c", ',', 3);                  // returns "b"
-     * substringBetween("test", 't', 4);                   // returns "es"
-     * substringBetween("test", 'x', 4);                   // returns null (delimiter not found)
-     * substringBetween("test", 't', 1);                   // returns null (delimiter at or after endIndex)
-     * substringBetween(null, '@', 5);                     // returns null
-     * substringBetween("test", '@', 0);                   // returns null (endIndex <= 0)
+     * Strings.substringBetween("user@example", '@', 11);          // returns "example"
+     * Strings.substringBetween("a,b,c", ',', 3);                  // returns "b"
+     * Strings.substringBetween("test", 't', 4);                   // returns "es"
+     * Strings.substringBetween("test", 'x', 4);                   // returns null (delimiter not found)
+     * Strings.substringBetween("test", 't', 1);                   // returns null (delimiter at or after endIndex)
+     * Strings.substringBetween(null, '@', 5);                     // returns null
+     * Strings.substringBetween("test", '@', 0);                   // returns null (endIndex <= 0)
      * }</pre>
      *
      * @param str the string to extract from, may be {@code null}
@@ -13536,14 +13535,14 @@ public final class Strings {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * substringBetween("Hello World Java", " ", 11);      // returns "World"
-     * substringBetween("user@@domain", "@@", 13);         // returns "domain"
-     * substringBetween("test", "es", 4);                  // returns "t"
-     * substringBetween("test", "xyz", 4);                 // returns null (delimiter not found)
-     * substringBetween("test", "st", 2);                  // returns null (delimiter ends after endIndex)
-     * substringBetween(null, "@", 5);                     // returns null
-     * substringBetween("test", null, 5);                  // returns null
-     * substringBetween("test", "@", -1);                  // returns null (endIndex < 0)
+     * Strings.substringBetween("Hello World Java", " ", 11);      // returns "World"
+     * Strings.substringBetween("user@@domain", "@@", 13);         // returns "domain"
+     * Strings.substringBetween("test", "es", 4);                  // returns "t"
+     * Strings.substringBetween("test", "xyz", 4);                 // returns null (delimiter not found)
+     * Strings.substringBetween("test", "st", 2);                  // returns null (delimiter ends after endIndex)
+     * Strings.substringBetween(null, "@", 5);                     // returns null
+     * Strings.substringBetween("test", null, 5);                  // returns null
+     * Strings.substringBetween("test", "@", -1);                  // returns null (endIndex < 0)
      * }</pre>
      *
      * @param str the string to extract from, may be {@code null}
@@ -13585,14 +13584,14 @@ public final class Strings {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * substringBetween("a,b,c", ',', ',');                 // returns "b"
-     * substringBetween("'quoted'", '\'', '\'');           // returns "quoted"
-     * substringBetween("test", 't', 't');                 // returns "es"
-     * substringBetween("abc", 'a', 'c');                  // returns "b"
-     * substringBetween("no-match", 'x', 'y');             // returns null (first delimiter not found)
-     * substringBetween("a,b", ',', ',');                  // returns null (second delimiter not found)
-     * substringBetween(null, ',', ',');                   // returns null
-     * substringBetween("", ',', ',');                     // returns null
+     * Strings.substringBetween("a,b,c", ',', ',');                 // returns "b"
+     * Strings.substringBetween("'quoted'", '\'', '\'');           // returns "quoted"
+     * Strings.substringBetween("test", 't', 't');                 // returns "es"
+     * Strings.substringBetween("abc", 'a', 'c');                  // returns "b"
+     * Strings.substringBetween("no-match", 'x', 'y');             // returns null (first delimiter not found)
+     * Strings.substringBetween("a,b", ',', ',');                  // returns null (second delimiter not found)
+     * Strings.substringBetween(null, ',', ',');                   // returns null
+     * Strings.substringBetween("", ',', ',');                     // returns null
      * }</pre>
      *
      * @param str the string to extract from, may be {@code null}
@@ -13641,13 +13640,13 @@ public final class Strings {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * substringBetween("#content#", "#");                 // returns "content"
-     * substringBetween("<tag>value<tag>", "<tag>");       // returns "value"
-     * substringBetween("@@text@@", "@@");                 // returns "text"
-     * substringBetween("no-match", "[[");                 // returns null (delimiter not found)
-     * substringBetween("[[only-one", "[[");               // returns null (second delimiter not found)
-     * substringBetween(null, "[[");                       // returns null
-     * substringBetween("test", null);                     // returns null
+     * Strings.substringBetween("#content#", "#");                 // returns "content"
+     * Strings.substringBetween("<tag>value<tag>", "<tag>");       // returns "value"
+     * Strings.substringBetween("@@text@@", "@@");                 // returns "text"
+     * Strings.substringBetween("no-match", "[[");                 // returns null (delimiter not found)
+     * Strings.substringBetween("[[only-one", "[[");               // returns null (second delimiter not found)
+     * Strings.substringBetween(null, "[[");                       // returns null
+     * Strings.substringBetween("test", null);                     // returns null
      * }</pre>
      *
      * @param str the string to extract from, may be {@code null}
@@ -13672,14 +13671,14 @@ public final class Strings {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * substringBetween("<tag>content</tag>", "<tag>", "</tag>");  // returns "content"
-     * substringBetween("[[start]]middle[[end]]", "[[start]]", "[[end]]"); // returns "middle"
-     * substringBetween("Hello [World]!", "[", "]");               // returns "World"
-     * substringBetween("no-match", "[[", "]]");                   // returns null (begin delimiter not found)
-     * substringBetween("[[no-end", "[[", "]]");                   // returns null (end delimiter not found)
-     * substringBetween(null, "[[", "]]");                         // returns null
-     * substringBetween("test", null, "]]");                       // returns null
-     * substringBetween("test", "[[", null);                       // returns null
+     * Strings.substringBetween("<tag>content</tag>", "<tag>", "</tag>");  // returns "content"
+     * Strings.substringBetween("[[start]]middle[[end]]", "[[start]]", "[[end]]"); // returns "middle"
+     * Strings.substringBetween("Hello [World]!", "[", "]");               // returns "World"
+     * Strings.substringBetween("no-match", "[[", "]]");                   // returns null (begin delimiter not found)
+     * Strings.substringBetween("[[no-end", "[[", "]]");                   // returns null (end delimiter not found)
+     * Strings.substringBetween(null, "[[", "]]");                         // returns null
+     * Strings.substringBetween("test", null, "]]");                       // returns null
+     * Strings.substringBetween("test", "[[", null);                       // returns null
      * }</pre>
      *
      * @param str the string to extract from, may be {@code null}
@@ -13706,14 +13705,14 @@ public final class Strings {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * substringBetween("<a>text1</a><a>text2</a>", 5, "<a>", "</a>");  // returns "text2"
-     * substringBetween("{{x}}{{y}}", 3, "{{", "}}");                    // returns "y"
-     * substringBetween("Hello World", 0, "Hello", "World");             // returns " "
-     * substringBetween("test", 10, "t", "t");                           // returns null (fromIndex > length)
-     * substringBetween("no-match", 0, "{{", "}}");                      // returns null (delimiter not found)
-     * substringBetween(null, 0, "{{", "}}");                            // returns null
-     * substringBetween("test", 0, null, "}}");                          // returns null
-     * substringBetween("test", 0, "{{", null);                          // returns null
+     * Strings.substringBetween("<a>text1</a><a>text2</a>", 5, "<a>", "</a>");  // returns "text2"
+     * Strings.substringBetween("{{x}}{{y}}", 3, "{{", "}}");                    // returns "y"
+     * Strings.substringBetween("Hello World", 0, "Hello", "World");             // returns " "
+     * Strings.substringBetween("test", 10, "t", "t");                           // returns null (fromIndex > length)
+     * Strings.substringBetween("no-match", 0, "{{", "}}");                      // returns null (delimiter not found)
+     * Strings.substringBetween(null, 0, "{{", "}}");                            // returns null
+     * Strings.substringBetween("test", 0, null, "}}");                          // returns null
+     * Strings.substringBetween("test", 0, "{{", null);                          // returns null
      * }</pre>
      *
      * @param str the string to extract from, may be {@code null}
@@ -13760,13 +13759,13 @@ public final class Strings {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * substringBetweenIgnoreCaes("#CONTENT#", "#");                 // returns "CONTENT"
-     * substringBetweenIgnoreCaes("<TAG>value<TAG>", "<tag>");       // returns "value"
-     * substringBetweenIgnoreCaes("@@Text@@", "@@");                 // returns "Text"
-     * substringBetweenIgnoreCaes("no-match", "[[");                 // returns null (delimiter not found)
-     * substringBetweenIgnoreCaes("[[only-one", "[[");               // returns null (second delimiter not found)
-     * substringBetweenIgnoreCaes(null, "[[");                       // returns null
-     * substringBetweenIgnoreCaes("test", null);                     // returns null
+     * Strings.substringBetweenIgnoreCaes("#CONTENT#", "#");                 // returns "CONTENT"
+     * Strings.substringBetweenIgnoreCaes("<TAG>value<TAG>", "<tag>");       // returns "value"
+     * Strings.substringBetweenIgnoreCaes("@@Text@@", "@@");                 // returns "Text"
+     * Strings.substringBetweenIgnoreCaes("no-match", "[[");                 // returns null (delimiter not found)
+     * Strings.substringBetweenIgnoreCaes("[[only-one", "[[");               // returns null (second delimiter not found)
+     * Strings.substringBetweenIgnoreCaes(null, "[[");                       // returns null
+     * Strings.substringBetweenIgnoreCaes("test", null);                     // returns null
      * }</pre>
      *
      * @param str the string to extract from, may be {@code null}
@@ -13792,14 +13791,14 @@ public final class Strings {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * substringBetweenIgnoreCaes("<TAG>content</TAG>", "<tag>", "</tag>");  // returns "content"
-     * substringBetweenIgnoreCaes("[[START]]middle[[END]]", "[[start]]", "[[end]]"); // returns "middle"
-     * substringBetweenIgnoreCaes("Hello [WORLD]!", "[", "]");               // returns "WORLD"
-     * substringBetweenIgnoreCaes("no-match", "[[", "]]");                   // returns null (begin delimiter not found)
-     * substringBetweenIgnoreCaes("[[no-end", "[[", "]]");                   // returns null (end delimiter not found)
-     * substringBetweenIgnoreCaes(null, "[[", "]]");                         // returns null
-     * substringBetweenIgnoreCaes("test", null, "]]");                       // returns null
-     * substringBetweenIgnoreCaes("test", "[[", null);                       // returns null
+     * Strings.substringBetweenIgnoreCaes("<TAG>content</TAG>", "<tag>", "</tag>");  // returns "content"
+     * Strings.substringBetweenIgnoreCaes("[[START]]middle[[END]]", "[[start]]", "[[end]]"); // returns "middle"
+     * Strings.substringBetweenIgnoreCaes("Hello [WORLD]!", "[", "]");               // returns "WORLD"
+     * Strings.substringBetweenIgnoreCaes("no-match", "[[", "]]");                   // returns null (begin delimiter not found)
+     * Strings.substringBetweenIgnoreCaes("[[no-end", "[[", "]]");                   // returns null (end delimiter not found)
+     * Strings.substringBetweenIgnoreCaes(null, "[[", "]]");                         // returns null
+     * Strings.substringBetweenIgnoreCaes("test", null, "]]");                       // returns null
+     * Strings.substringBetweenIgnoreCaes("test", "[[", null);                       // returns null
      * }</pre>
      *
      * @param str the string to extract from, may be {@code null}
@@ -13828,14 +13827,14 @@ public final class Strings {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * substringBetweenIgnoreCaes("<A>text1</A><A>text2</A>", 5, "<a>", "</a>");  // returns "text2"
-     * substringBetweenIgnoreCaes("{{X}}{{Y}}", 3, "{{", "}}");                    // returns "Y"
-     * substringBetweenIgnoreCaes("HELLO world", 0, "hello", "WORLD");             // returns " "
-     * substringBetweenIgnoreCaes("test", 10, "t", "t");                           // returns null (fromIndex > length)
-     * substringBetweenIgnoreCaes("no-match", 0, "{{", "}}");                      // returns null (delimiter not found)
-     * substringBetweenIgnoreCaes(null, 0, "{{", "}}");                            // returns null
-     * substringBetweenIgnoreCaes("test", 0, null, "}}");                          // returns null
-     * substringBetweenIgnoreCaes("test", 0, "{{", null);                          // returns null
+     * Strings.substringBetweenIgnoreCaes("<A>text1</A><A>text2</A>", 5, "<a>", "</a>");  // returns "text2"
+     * Strings.substringBetweenIgnoreCaes("{{X}}{{Y}}", 3, "{{", "}}");                    // returns "Y"
+     * Strings.substringBetweenIgnoreCaes("HELLO world", 0, "hello", "WORLD");             // returns " "
+     * Strings.substringBetweenIgnoreCaes("test", 10, "t", "t");                           // returns null (fromIndex > length)
+     * Strings.substringBetweenIgnoreCaes("no-match", 0, "{{", "}}");                      // returns null (delimiter not found)
+     * Strings.substringBetweenIgnoreCaes(null, 0, "{{", "}}");                            // returns null
+     * Strings.substringBetweenIgnoreCaes("test", 0, null, "}}");                          // returns null
+     * Strings.substringBetweenIgnoreCaes("test", 0, "{{", null);                          // returns null
      * }</pre>
      *
      * @param str the string to extract from, may be {@code null}
@@ -13884,14 +13883,14 @@ public final class Strings {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Extract substring with dynamic end index
-     * substringBetween("Hello World", 0, i -> i + 6);     // returns "ello "
-     * substringBetween("Hello World", 5, i -> i + 6);     // returns " World"
-     * substringBetween("Hello World", -1, i -> 5);        // returns "Hello"
+     * Strings.substringBetween("Hello World", 0, i -> i + 6);     // returns "ello "
+     * Strings.substringBetween("Hello World", 5, i -> i + 6);     // returns " World"
+     * Strings.substringBetween("Hello World", -1, i -> 5);        // returns "Hello"
      * 
      * // Invalid cases
-     * substringBetween(null, 0, i -> 5);                  // returns null
-     * substringBetween("Hello", 10, i -> 15);             // returns null
-     * substringBetween("Hello", 2, i -> 2);               // returns null (end <= begin)
+     * Strings.substringBetween(null, 0, i -> 5);                  // returns null
+     * Strings.substringBetween("Hello", 10, i -> 15);             // returns null
+     * Strings.substringBetween("Hello", 2, i -> 2);               // returns null (end <= begin)
      * }</pre>
      *
      * @param str the input string from which to extract the substring, may be {@code null}
@@ -13929,14 +13928,14 @@ public final class Strings {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Extract substring with dynamic begin index
-     * substringBetween("Hello World", i -> i - 6, 11);    // returns "World"
-     * substringBetween("Hello World", i -> -1, 5);        // returns "Hello"
-     * substringBetween("Hello World", i -> 2, 8);         // returns "lo Wo"
+     * Strings.substringBetween("Hello World", i -> i - 6, 11);    // returns "World"
+     * Strings.substringBetween("Hello World", i -> -1, 5);        // returns "Hello"
+     * Strings.substringBetween("Hello World", i -> 2, 8);         // returns "lo Wo"
      * 
      * // Invalid cases
-     * substringBetween(null, i -> 0, 5);                  // returns null
-     * substringBetween("Hello", i -> 0, 0);               // returns null (end <= 0)
-     * substringBetween("Hello", i -> 5, 3);               // returns null (begin >= end)
+     * Strings.substringBetween(null, i -> 0, 5);                  // returns null
+     * Strings.substringBetween("Hello", i -> 0, 0);               // returns null (end <= 0)
+     * Strings.substringBetween("Hello", i -> 5, 3);               // returns null (begin >= end)
      * }</pre>
      *
      * @param str the input string from which to extract the substring, may be {@code null}
@@ -13976,14 +13975,14 @@ public final class Strings {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Extract substring after delimiter with dynamic end
-     * substringBetween("Hello:World", ":", i -> i + 5);     // returns "World"
-     * substringBetween("A=B=C", "=", i -> i + 1);           // returns "B"
-     * substringBetween("[content]", "[", i -> i + 7);       // returns "content"
+     * Strings.substringBetween("Hello:World", ":", i -> i + 5);     // returns "World"
+     * Strings.substringBetween("A=B=C", "=", i -> i + 1);           // returns "B"
+     * Strings.substringBetween("[content]", "[", i -> i + 7);       // returns "content"
      * 
      * // Invalid cases
-     * substringBetween(null, ":", i -> 5);                  // returns null
-     * substringBetween("Hello", "x", i -> 10);              // returns null (delimiter not found)
-     * substringBetween("Hello", "Hello", i -> 10);          // returns null (delimiter too long)
+     * Strings.substringBetween(null, ":", i -> 5);                  // returns null
+     * Strings.substringBetween("Hello", "x", i -> 10);              // returns null (delimiter not found)
+     * Strings.substringBetween("Hello", "Hello", i -> 10);          // returns null (delimiter too long)
      * }</pre>
      *
      * @param str the input string from which to extract the substring, may be {@code null}
@@ -14030,14 +14029,14 @@ public final class Strings {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Extract substring with dynamic begin before delimiter
-     * substringBetween("Hello:World", i -> i - 5, ":");     // returns "Hello"
-     * substringBetween("A=B=C", i -> i - 1, "=");           // returns "B"
-     * substringBetween("[content]", i -> 0, "]");           // returns "content"
+     * Strings.substringBetween("Hello:World", i -> i - 5, ":");     // returns "Hello"
+     * Strings.substringBetween("A=B=C", i -> i - 1, "=");           // returns "B"
+     * Strings.substringBetween("[content]", i -> 0, "]");           // returns "content"
      * 
      * // Invalid cases
-     * substringBetween(null, i -> 0, ":");                  // returns null
-     * substringBetween("Hello", i -> 0, "x");               // returns null (delimiter not found)
-     * substringBetween("Hello", i -> 0, "Hello");           // returns null (delimiter too long)
+     * Strings.substringBetween(null, i -> 0, ":");                  // returns null
+     * Strings.substringBetween("Hello", i -> 0, "x");               // returns null (delimiter not found)
+     * Strings.substringBetween("Hello", i -> 0, "Hello");           // returns null (delimiter too long)
      * }</pre>
      *
      * @param str the input string from which to extract the substring, may be {@code null}
@@ -14079,13 +14078,13 @@ public final class Strings {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * substringBetweenFirstAndLast("[middle[]]", "[");                // returns "middle"
-     * substringBetweenFirstAndLast("<tag>value<tag>", "<tag>");       // returns "value"
-     * substringBetweenFirstAndLast("@@text@@", "@@");                 // returns "text"
-     * substringBetweenFirstAndLast("no-match", "[[");                 // returns null (delimiter not found)
-     * substringBetweenFirstAndLast("[[only-one", "[[");               // returns null (last delimiter not found)
-     * substringBetweenFirstAndLast(null, "[[");                       // returns null
-     * substringBetweenFirstAndLast("test", null);                     // returns null
+     * Strings.substringBetweenFirstAndLast("[middle[]]", "[");                // returns "middle"
+     * Strings.substringBetweenFirstAndLast("<tag>value<tag>", "<tag>");       // returns "value"
+     * Strings.substringBetweenFirstAndLast("@@text@@", "@@");                 // returns "text"
+     * Strings.substringBetweenFirstAndLast("no-match", "[[");                 // returns null (delimiter not found)
+     * Strings.substringBetweenFirstAndLast("[[only-one", "[[");               // returns null (last delimiter not found)
+     * Strings.substringBetweenFirstAndLast(null, "[[");                       // returns null
+     * Strings.substringBetweenFirstAndLast("test", null);                     // returns null
      * }</pre>
      *
      * @param str the string to extract from, may be {@code null}
@@ -14111,14 +14110,14 @@ public final class Strings {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * substringBetweenFirstAndLast("[middle[]]", "[", "]");                   // returns "middle[]"
-     * substringBetweenFirstAndLast("<tag>content</tag>", "<tag>", "</tag>");  // returns "content"
-     * substringBetweenFirstAndLast("Hello [World]!", "[", "]");               // returns "World"
-     * substringBetweenFirstAndLast("no-match", "[[", "]]");                   // returns null (begin delimiter not found)
-     * substringBetweenFirstAndLast("[[no-end", "[[", "]]");                   // returns null (last delimiter not found)
-     * substringBetweenFirstAndLast(null, "[[", "]]");                         // returns null
-     * substringBetweenFirstAndLast("test", null, "]]");                       // returns null
-     * substringBetweenFirstAndLast("test", "[[", null);                       // returns null
+     * Strings.substringBetweenFirstAndLast("[middle[]]", "[", "]");                   // returns "middle[]"
+     * Strings.substringBetweenFirstAndLast("<tag>content</tag>", "<tag>", "</tag>");  // returns "content"
+     * Strings.substringBetweenFirstAndLast("Hello [World]!", "[", "]");               // returns "World"
+     * Strings.substringBetweenFirstAndLast("no-match", "[[", "]]");                   // returns null (begin delimiter not found)
+     * Strings.substringBetweenFirstAndLast("[[no-end", "[[", "]]");                   // returns null (last delimiter not found)
+     * Strings.substringBetweenFirstAndLast(null, "[[", "]]");                         // returns null
+     * Strings.substringBetweenFirstAndLast("test", null, "]]");                       // returns null
+     * Strings.substringBetweenFirstAndLast("test", "[[", null);                       // returns null
      * }</pre>
      *
      * @param str the string to extract from, may be {@code null}
@@ -14148,14 +14147,14 @@ public final class Strings {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * substringBetweenFirstAndLast("<<data>>more<<data>>", 2, "<<", ">>");  // returns "data"
-     * substringBetweenFirstAndLast("{{x}}{{y}}", 3, "{{", "}}");            // returns "y"
-     * substringBetweenFirstAndLast("Hello World", 0, "Hello", "World");     // returns " "
-     * substringBetweenFirstAndLast("test", 10, "t", "t");                   // returns null (fromIndex > length)
-     * substringBetweenFirstAndLast("no-match", 0, "{{", "}}");              // returns null (delimiter not found)
-     * substringBetweenFirstAndLast(null, 0, "{{", "}}");                    // returns null
-     * substringBetweenFirstAndLast("test", 0, null, "}}");                  // returns null
-     * substringBetweenFirstAndLast("test", 0, "{{", null);                  // returns null
+     * Strings.substringBetweenFirstAndLast("<<data>>more<<data>>", 2, "<<", ">>");  // returns "data"
+     * Strings.substringBetweenFirstAndLast("{{x}}{{y}}", 3, "{{", "}}");            // returns "y"
+     * Strings.substringBetweenFirstAndLast("Hello World", 0, "Hello", "World");     // returns " "
+     * Strings.substringBetweenFirstAndLast("test", 10, "t", "t");                   // returns null (fromIndex > length)
+     * Strings.substringBetweenFirstAndLast("no-match", 0, "{{", "}}");              // returns null (delimiter not found)
+     * Strings.substringBetweenFirstAndLast(null, 0, "{{", "}}");                    // returns null
+     * Strings.substringBetweenFirstAndLast("test", 0, null, "}}");                  // returns null
+     * Strings.substringBetweenFirstAndLast("test", 0, "{{", null);                  // returns null
      * }</pre>
      *
      * @param str the string to extract from, may be {@code null}
@@ -14201,14 +14200,14 @@ public final class Strings {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Extract content between brackets
-     * substringsBetween("3[a]2[b]", '[', ']');              // returns ["a", "b"]
-     * substringsBetween("(hello)(world)", '(', ')');        // returns ["hello", "world"]
-     * substringsBetween("<tag>content</tag>", '<', '>');    // returns ["tag", "/tag"]
+     * Strings.substringsBetween("3[a]2[b]", '[', ']');              // returns ["a", "b"]
+     * Strings.substringsBetween("(hello)(world)", '(', ')');        // returns ["hello", "world"]
+     * Strings.substringsBetween("<tag>content</tag>", '<', '>');    // returns ["tag", "/tag"]
      * 
      * // Empty results
-     * substringsBetween(null, '[', ']');                    // returns []
-     * substringsBetween("no delimiters", '[', ']');         // returns []
-     * substringsBetween("", '[', ']');                      // returns []
+     * Strings.substringsBetween(null, '[', ']');                    // returns []
+     * Strings.substringsBetween("no delimiters", '[', ']');         // returns []
+     * Strings.substringsBetween("", '[', ']');                      // returns []
      * }</pre>
      *
      * @param str the string to search in, may be {@code null}
@@ -14239,13 +14238,13 @@ public final class Strings {
      * <pre>{@code
      * // With nested delimiters
      * String str = "3[a2[c]]2[a]";
-     * substringsBetween(str, '[', ']', ExtractStrategy.DEFAULT);        // returns ["a2[c", "a"]
-     * substringsBetween(str, '[', ']', ExtractStrategy.STACK_BASED);    // returns ["c", "a2[c]", "a"]
-     * substringsBetween(str, '[', ']', ExtractStrategy.IGNORE_NESTED);  // returns ["a2[c]", "a"]
+     * Strings.substringsBetween(str, '[', ']', ExtractStrategy.DEFAULT);        // returns ["a2[c", "a"]
+     * Strings.substringsBetween(str, '[', ']', ExtractStrategy.STACK_BASED);    // returns ["c", "a2[c]", "a"]
+     * Strings.substringsBetween(str, '[', ']', ExtractStrategy.IGNORE_NESTED);  // returns ["a2[c]", "a"]
      * 
      * // Simple cases
-     * substringsBetween("(a)(b)", '(', ')', ExtractStrategy.DEFAULT);   // returns ["a", "b"]
-     * substringsBetween(null, '[', ']', ExtractStrategy.DEFAULT);       // returns []
+     * Strings.substringsBetween("(a)(b)", '(', ')', ExtractStrategy.DEFAULT);   // returns ["a", "b"]
+     * Strings.substringsBetween(null, '[', ']', ExtractStrategy.DEFAULT);       // returns []
      * }</pre>
      *
      * @param str the string to search in, may be {@code null}
@@ -14275,13 +14274,13 @@ public final class Strings {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Search within specific range
-     * substringsBetween("a[b]c[d]e[f]", 2, 8, '[', ']');    // returns ["b", "d"]
-     * substringsBetween("(1)(2)(3)", 0, 6, '(', ')');       // returns ["1", "2"]
-     * substringsBetween("no match", 0, 8, '[', ']');        // returns []
+     * Strings.substringsBetween("a[b]c[d]e[f]", 2, 8, '[', ']');    // returns ["b", "d"]
+     * Strings.substringsBetween("(1)(2)(3)", 0, 6, '(', ')');       // returns ["1", "2"]
+     * Strings.substringsBetween("no match", 0, 8, '[', ']');        // returns []
      * 
      * // Edge cases
-     * substringsBetween("a[b]c", 4, 5, '[', ']');           // returns []
-     * substringsBetween(null, 0, 5, '[', ']');              // returns []
+     * Strings.substringsBetween("a[b]c", 4, 5, '[', ']');           // returns []
+     * Strings.substringsBetween(null, 0, 5, '[', ']');              // returns []
      * }</pre>
      *
      * @param str the string to search in, may be {@code null}
@@ -14313,14 +14312,14 @@ public final class Strings {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Extract content between string delimiters
-     * substringsBetween("a<tag>b</tag>c<tag>d</tag>", "<tag>", "</tag>");  // returns ["b", "d"]
-     * substringsBetween("start:middle:end", "start:", ":end");             // returns ["middle"]
-     * substringsBetween("[[content]]", "[[", "]]");                        // returns ["content"]
+     * Strings.substringsBetween("a<tag>b</tag>c<tag>d</tag>", "<tag>", "</tag>");  // returns ["b", "d"]
+     * Strings.substringsBetween("start:middle:end", "start:", ":end");             // returns ["middle"]
+     * Strings.substringsBetween("[[content]]", "[[", "]]");                        // returns ["content"]
      * 
      * // Empty results
-     * substringsBetween(null, "<", ">");                                   // returns []
-     * substringsBetween("no match", "<", ">");                             // returns []
-     * substringsBetween("test", null, ">");                                // returns []
+     * Strings.substringsBetween(null, "<", ">");                                   // returns []
+     * Strings.substringsBetween("no match", "<", ">");                             // returns []
+     * Strings.substringsBetween("test", null, ">");                                // returns []
      * }</pre>
      *
      * @param str the string to search in, may be {@code null}
@@ -14351,14 +14350,14 @@ public final class Strings {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // String: 3[a2[c]]2[a]
-     * substringsBetween("3[a2[c]]2[a]", "[", "]", ExtractStrategy.DEFAULT);       // returns ["a2[c", "a"]
-     * substringsBetween("3[a2[c]]2[a]", "[", "]", ExtractStrategy.STACK_BASED);   // returns ["c", "a2[c]", "a"]
-     * substringsBetween("3[a2[c]]2[a]", "[", "]", ExtractStrategy.IGNORE_NESTED); // returns ["a2[c]", "a"]
+     * Strings.substringsBetween("3[a2[c]]2[a]", "[", "]", ExtractStrategy.DEFAULT);       // returns ["a2[c", "a"]
+     * Strings.substringsBetween("3[a2[c]]2[a]", "[", "]", ExtractStrategy.STACK_BASED);   // returns ["c", "a2[c]", "a"]
+     * Strings.substringsBetween("3[a2[c]]2[a]", "[", "]", ExtractStrategy.IGNORE_NESTED); // returns ["a2[c]", "a"]
      * 
      * // String: [[b[a]]c]
-     * substringsBetween("[[b[a]]c]", "[", "]", ExtractStrategy.DEFAULT);          // returns ["[b[a"]
-     * substringsBetween("[[b[a]]c]", "[", "]", ExtractStrategy.STACK_BASED);      // returns ["a", "b[a]", "[b[a]]c"]
-     * substringsBetween("[[b[a]]c]", "[", "]", ExtractStrategy.IGNORE_NESTED);    // returns ["[b[a]]c"]
+     * Strings.substringsBetween("[[b[a]]c]", "[", "]", ExtractStrategy.DEFAULT);          // returns ["[b[a"]
+     * Strings.substringsBetween("[[b[a]]c]", "[", "]", ExtractStrategy.STACK_BASED);      // returns ["a", "b[a]", "[b[a]]c"]
+     * Strings.substringsBetween("[[b[a]]c]", "[", "]", ExtractStrategy.IGNORE_NESTED);    // returns ["[b[a]]c"]
      * }</pre>
      *
      * @param str the string to search in, may be {@code null}
@@ -14388,13 +14387,13 @@ public final class Strings {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Search within specific range
-     * substringsBetween("a<b>c<d>e<f>", 2, 10, "<", ">");   // returns ["b", "d"]
-     * substringsBetween("[[1]][[2]][[3]]", 0, 10, "[[", "]]"); // returns ["1", "2"]
-     * substringsBetween("no match", 0, 8, "<", ">");        // returns []
+     * Strings.substringsBetween("a<b>c<d>e<f>", 2, 10, "<", ">");   // returns ["b", "d"]
+     * Strings.substringsBetween("[[1]][[2]][[3]]", 0, 10, "[[", "]]"); // returns ["1", "2"]
+     * Strings.substringsBetween("no match", 0, 8, "<", ">");        // returns []
      * 
      * // Edge cases
-     * substringsBetween("a<b>c", 4, 5, "<", ">");           // returns []
-     * substringsBetween(null, 0, 5, "<", ">");              // returns []
+     * Strings.substringsBetween("a<b>c", 4, 5, "<", ">");           // returns []
+     * Strings.substringsBetween(null, 0, 5, "<", ">");              // returns []
      * }</pre>
      *
      * @param str the string to search in, may be {@code null}
@@ -14432,13 +14431,13 @@ public final class Strings {
      * <pre>{@code
      * // Extract with different strategies
      * String str = "3[a2[c]]2[a]";
-     * substringsBetween(str, 0, str.length(), "[", "]", ExtractStrategy.DEFAULT, 10);       // returns ["a2[c", "a"]
-     * substringsBetween(str, 0, str.length(), "[", "]", ExtractStrategy.STACK_BASED, 10);   // returns ["c", "a2[c]", "a"]
-     * substringsBetween(str, 0, str.length(), "[", "]", ExtractStrategy.IGNORE_NESTED, 10); // returns ["a2[c]", "a"]
+     * Strings.substringsBetween(str, 0, str.length(), "[", "]", ExtractStrategy.DEFAULT, 10);       // returns ["a2[c", "a"]
+     * Strings.substringsBetween(str, 0, str.length(), "[", "]", ExtractStrategy.STACK_BASED, 10);   // returns ["c", "a2[c]", "a"]
+     * Strings.substringsBetween(str, 0, str.length(), "[", "]", ExtractStrategy.IGNORE_NESTED, 10); // returns ["a2[c]", "a"]
      * 
      * // Limit results
-     * substringsBetween("a[b]c[d]e[f]", 0, 15, "[", "]", ExtractStrategy.DEFAULT, 2);       // returns ["b", "d"]
-     * substringsBetween("test", 0, 4, "[", "]", ExtractStrategy.DEFAULT, 0);               // returns []
+     * Strings.substringsBetween("a[b]c[d]e[f]", 0, 15, "[", "]", ExtractStrategy.DEFAULT, 2);       // returns ["b", "d"]
+     * Strings.substringsBetween("test", 0, 4, "[", "]", ExtractStrategy.DEFAULT, 0);               // returns []
      * }</pre>
      *
      * @param str the string to search in, may be {@code null}
@@ -14483,14 +14482,14 @@ public final class Strings {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Get indices of content between brackets
-     * substringIndicesBetween("3[a]2[b]", '[', ']');        // returns [[2, 3], [6, 7]]
-     * substringIndicesBetween("(hello)(world)", '(', ')');  // returns [[1, 6], [8, 13]]
-     * substringIndicesBetween("<tag>text</tag>", '<', '>'); // returns [[1, 4], [10, 14]]
+     * Strings.substringIndicesBetween("3[a]2[b]", '[', ']');        // returns [[2, 3], [6, 7]]
+     * Strings.substringIndicesBetween("(hello)(world)", '(', ')');  // returns [[1, 6], [8, 13]]
+     * Strings.substringIndicesBetween("<tag>text</tag>", '<', '>'); // returns [[1, 4], [10, 14]]
      * 
      * // Empty results
-     * substringIndicesBetween(null, '[', ']');              // returns []
-     * substringIndicesBetween("", '[', ']');                // returns []
-     * substringIndicesBetween("no match", '[', ']');        // returns []
+     * Strings.substringIndicesBetween(null, '[', ']');              // returns []
+     * Strings.substringIndicesBetween("", '[', ']');                // returns []
+     * Strings.substringIndicesBetween("no match", '[', ']');        // returns []
      * }</pre>
      *
      * @param str the string to search in, may be {@code null}
@@ -14523,13 +14522,13 @@ public final class Strings {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // String: 3[a2[c]]2[a]
-     * substringIndicesBetween("3[a2[c]]2[a]", '[', ']', ExtractStrategy.DEFAULT);       // returns [[2, 6], [10, 11]]
-     * substringIndicesBetween("3[a2[c]]2[a]", '[', ']', ExtractStrategy.STACK_BASED);   // returns [[5, 6], [2, 7], [10, 11]]
-     * substringIndicesBetween("3[a2[c]]2[a]", '[', ']', ExtractStrategy.IGNORE_NESTED); // returns [[2, 7], [10, 11]]
+     * Strings.substringIndicesBetween("3[a2[c]]2[a]", '[', ']', ExtractStrategy.DEFAULT);       // returns [[2, 6], [10, 11]]
+     * Strings.substringIndicesBetween("3[a2[c]]2[a]", '[', ']', ExtractStrategy.STACK_BASED);   // returns [[5, 6], [2, 7], [10, 11]]
+     * Strings.substringIndicesBetween("3[a2[c]]2[a]", '[', ']', ExtractStrategy.IGNORE_NESTED); // returns [[2, 7], [10, 11]]
      * 
      * // Simple cases
-     * substringIndicesBetween("(a)(b)", '(', ')', ExtractStrategy.DEFAULT);             // returns [[1, 2], [4, 5]]
-     * substringIndicesBetween(null, '[', ']', ExtractStrategy.DEFAULT);                 // returns []
+     * Strings.substringIndicesBetween("(a)(b)", '(', ')', ExtractStrategy.DEFAULT);             // returns [[1, 2], [4, 5]]
+     * Strings.substringIndicesBetween(null, '[', ']', ExtractStrategy.DEFAULT);                 // returns []
      * }</pre>
      *
      * @param str the string to search in, may be {@code null}
@@ -14567,13 +14566,13 @@ public final class Strings {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Search within specific range
-     * substringIndicesBetween("a[b]c[d]e[f]", 2, 8, '[', ']');  // returns [[3, 4], [6, 7]]
-     * substringIndicesBetween("(1)(2)(3)", 0, 6, '(', ')');     // returns [[1, 2], [4, 5]]
-     * substringIndicesBetween("no match", 0, 8, '[', ']');      // returns []
+     * Strings.substringIndicesBetween("a[b]c[d]e[f]", 2, 8, '[', ']');  // returns [[3, 4], [6, 7]]
+     * Strings.substringIndicesBetween("(1)(2)(3)", 0, 6, '(', ')');     // returns [[1, 2], [4, 5]]
+     * Strings.substringIndicesBetween("no match", 0, 8, '[', ']');      // returns []
      * 
      * // Edge cases
-     * substringIndicesBetween("a[b]c", 4, 5, '[', ']');         // returns []
-     * substringIndicesBetween(null, 0, 5, '[', ']');            // returns []
+     * Strings.substringIndicesBetween("a[b]c", 4, 5, '[', ']');         // returns []
+     * Strings.substringIndicesBetween(null, 0, 5, '[', ']');            // returns []
      * }</pre>
      *
      * @param str the string to search in, may be {@code null}
@@ -14613,14 +14612,14 @@ public final class Strings {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Get indices of content between string delimiters
-     * substringIndicesBetween("a<tag>b</tag>c<tag>d</tag>", "<tag>", "</tag>");  // returns [[6, 7], [19, 20]]
-     * substringIndicesBetween("start:middle:end", "start:", ":end");             // returns [[6, 12]]
-     * substringIndicesBetween("[[content]]", "[[", "]]");                        // returns [[2, 9]]
+     * Strings.substringIndicesBetween("a<tag>b</tag>c<tag>d</tag>", "<tag>", "</tag>");  // returns [[6, 7], [19, 20]]
+     * Strings.substringIndicesBetween("start:middle:end", "start:", ":end");             // returns [[6, 12]]
+     * Strings.substringIndicesBetween("[[content]]", "[[", "]]");                        // returns [[2, 9]]
      * 
      * // Empty results
-     * substringIndicesBetween(null, "<", ">");                                   // returns []
-     * substringIndicesBetween("no match", "<", ">");                             // returns []
-     * substringIndicesBetween("test", null, ">");                                // returns []
+     * Strings.substringIndicesBetween(null, "<", ">");                                   // returns []
+     * Strings.substringIndicesBetween("no match", "<", ">");                             // returns []
+     * Strings.substringIndicesBetween("test", null, ">");                                // returns []
      * }</pre>
      *
      * @param str the string to search in, may be {@code null}
@@ -14655,14 +14654,14 @@ public final class Strings {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // String: 3[a2[c]]2[a]
-     * substringIndicesBetween("3[a2[c]]2[a]", "[", "]", ExtractStrategy.DEFAULT);       // returns [[2, 6], [10, 11]]
-     * substringIndicesBetween("3[a2[c]]2[a]", "[", "]", ExtractStrategy.STACK_BASED);   // returns [[5, 6], [2, 7], [10, 11]]
-     * substringIndicesBetween("3[a2[c]]2[a]", "[", "]", ExtractStrategy.IGNORE_NESTED); // returns [[2, 7], [10, 11]]
+     * Strings.substringIndicesBetween("3[a2[c]]2[a]", "[", "]", ExtractStrategy.DEFAULT);       // returns [[2, 6], [10, 11]]
+     * Strings.substringIndicesBetween("3[a2[c]]2[a]", "[", "]", ExtractStrategy.STACK_BASED);   // returns [[5, 6], [2, 7], [10, 11]]
+     * Strings.substringIndicesBetween("3[a2[c]]2[a]", "[", "]", ExtractStrategy.IGNORE_NESTED); // returns [[2, 7], [10, 11]]
      * 
      * // String: [[b[a]]c]
-     * substringIndicesBetween("[[b[a]]c]", "[", "]", ExtractStrategy.DEFAULT);          // returns [[1, 5]]
-     * substringIndicesBetween("[[b[a]]c]", "[", "]", ExtractStrategy.STACK_BASED);      // returns [[4, 5], [2, 6], [1, 8]]
-     * substringIndicesBetween("[[b[a]]c]", "[", "]", ExtractStrategy.IGNORE_NESTED);    // returns [[1, 8]]
+     * Strings.substringIndicesBetween("[[b[a]]c]", "[", "]", ExtractStrategy.DEFAULT);          // returns [[1, 5]]
+     * Strings.substringIndicesBetween("[[b[a]]c]", "[", "]", ExtractStrategy.STACK_BASED);      // returns [[4, 5], [2, 6], [1, 8]]
+     * Strings.substringIndicesBetween("[[b[a]]c]", "[", "]", ExtractStrategy.IGNORE_NESTED);    // returns [[1, 8]]
      * }</pre>
      *
      * @param str the string to search in, may be {@code null}
@@ -14698,13 +14697,13 @@ public final class Strings {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Search within specific range
-     * substringIndicesBetween("a<b>c<d>e<f>", 2, 10, "<", ">");     // returns [[3, 4], [6, 7]]
-     * substringIndicesBetween("[[1]][[2]][[3]]", 0, 10, "[[", "]]"); // returns [[2, 3], [7, 8]]
-     * substringIndicesBetween("no match", 0, 8, "<", ">");          // returns []
+     * Strings.substringIndicesBetween("a<b>c<d>e<f>", 2, 10, "<", ">");     // returns [[3, 4], [6, 7]]
+     * Strings.substringIndicesBetween("[[1]][[2]][[3]]", 0, 10, "[[", "]]"); // returns [[2, 3], [7, 8]]
+     * Strings.substringIndicesBetween("no match", 0, 8, "<", ">");          // returns []
      * 
      * // Edge cases
-     * substringIndicesBetween("a<b>c", 4, 5, "<", ">");             // returns []
-     * substringIndicesBetween(null, 0, 5, "<", ">");                // returns []
+     * Strings.substringIndicesBetween("a<b>c", 4, 5, "<", ">");             // returns []
+     * Strings.substringIndicesBetween(null, 0, 5, "<", ">");                // returns []
      * }</pre>
      *
      * @param str the string to search in, may be {@code null}
@@ -14744,13 +14743,13 @@ public final class Strings {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // String: 3[a2[c]]2[a]
-     * substringIndicesBetween("3[a2[c]]2[a]", 0, 12, "[", "]", ExtractStrategy.DEFAULT, 10);       // returns [[2, 6], [10, 11]]
-     * substringIndicesBetween("3[a2[c]]2[a]", 0, 12, "[", "]", ExtractStrategy.STACK_BASED, 10);   // returns [[5, 6], [2, 7], [10, 11]]
-     * substringIndicesBetween("3[a2[c]]2[a]", 0, 12, "[", "]", ExtractStrategy.IGNORE_NESTED, 10); // returns [[2, 7], [10, 11]]
+     * Strings.substringIndicesBetween("3[a2[c]]2[a]", 0, 12, "[", "]", ExtractStrategy.DEFAULT, 10);       // returns [[2, 6], [10, 11]]
+     * Strings.substringIndicesBetween("3[a2[c]]2[a]", 0, 12, "[", "]", ExtractStrategy.STACK_BASED, 10);   // returns [[5, 6], [2, 7], [10, 11]]
+     * Strings.substringIndicesBetween("3[a2[c]]2[a]", 0, 12, "[", "]", ExtractStrategy.IGNORE_NESTED, 10); // returns [[2, 7], [10, 11]]
      * 
      * // Limit results
-     * substringIndicesBetween("a[b]c[d]e[f]", 0, 15, "[", "]", ExtractStrategy.DEFAULT, 2);        // returns [[2, 3], [6, 7]]
-     * substringIndicesBetween("test", 0, 4, "[", "]", ExtractStrategy.DEFAULT, 0);                 // returns []
+     * Strings.substringIndicesBetween("a[b]c[d]e[f]", 0, 15, "[", "]", ExtractStrategy.DEFAULT, 2);        // returns [[2, 3], [6, 7]]
+     * Strings.substringIndicesBetween("test", 0, 4, "[", "]", ExtractStrategy.DEFAULT, 0);                 // returns []
      * }</pre>
      *
      * @param str the string to search in, may be {@code null}
@@ -14886,17 +14885,17 @@ public final class Strings {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Replace range with new text
-     * replaceRange("Hello World", 6, 11, "Java");           // returns "Hello Java"
-     * replaceRange("Hello World", 0, 5, "Hi");              // returns "Hi World"
-     * replaceRange("Hello World", 5, 5, " Beautiful");      // returns "Hello Beautiful World"
+     * Strings.replaceRange("Hello World", 6, 11, "Java");           // returns "Hello Java"
+     * Strings.replaceRange("Hello World", 0, 5, "Hi");              // returns "Hi World"
+     * Strings.replaceRange("Hello World", 5, 5, " Beautiful");      // returns "Hello Beautiful World"
      *
      * // Delete range (null or empty replacement)
-     * replaceRange("Hello World", 5, 11, null);            // returns "Hello"
-     * replaceRange("Hello World", 5, 11, "");              // returns "Hello"
+     * Strings.replaceRange("Hello World", 5, 11, null);            // returns "Hello"
+     * Strings.replaceRange("Hello World", 5, 11, "");              // returns "Hello"
      *
      * // Edge cases
-     * replaceRange(null, 0, 0, "Text");                    // returns "Text"
-     * replaceRange("", 0, 0, "Text");                      // returns "Text"
+     * Strings.replaceRange(null, 0, 0, "Text");                    // returns "Text"
+     * Strings.replaceRange("", 0, 0, "Text");                      // returns "Text"
      * }</pre>
      *
      * @param str the original string, may be {@code null}
@@ -14937,15 +14936,15 @@ public final class Strings {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Moving a range of characters
-     * moveRange("ABCDEFGH", 2, 5, 0);      // returns "CDEABFGH" (moves "CDE" to position 0)
-     * moveRange("ABCDEFGH", 2, 5, 5);      // returns "ABFGHCDE" (moves "CDE" to position 6)
-     * moveRange("Hello World", 0, 5, 5);   // returns " WorldHello" (moves "Hello" after "World")
+     * Strings.moveRange("ABCDEFGH", 2, 5, 0);      // returns "CDEABFGH" (moves "CDE" to position 0)
+     * Strings.moveRange("ABCDEFGH", 2, 5, 5);      // returns "ABFGHCDE" (moves "CDE" to position 6)
+     * Strings.moveRange("Hello World", 0, 5, 5);   // returns " WorldHello" (moves "Hello" after "World")
      *
      * // Edge cases
-     * moveRange(null, 0, 0, 0);            // returns ""
-     * moveRange("", 0, 0, 0);              // returns ""
-     * moveRange("ABC", 1, 1, 2);           // returns "ABC" (no change when fromIndex == toIndex)
-     * moveRange("ABC", 0, 2, 0);           // returns "ABC" (no change when already at position)
+     * Strings.moveRange(null, 0, 0, 0);            // returns ""
+     * Strings.moveRange("", 0, 0, 0);              // returns ""
+     * Strings.moveRange("ABC", 1, 1, 2);           // returns "ABC" (no change when fromIndex == toIndex)
+     * Strings.moveRange("ABC", 0, 2, 0);           // returns "ABC" (no change when already at position)
      * }</pre>
      *
      * @param str the original string to be modified
@@ -14993,16 +14992,16 @@ public final class Strings {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Deleting a range of characters
-     * deleteRange("ABCDEFGH", 2, 5);       // returns "ABFGH" (removes "CDE")
-     * deleteRange("Hello World", 5, 11);   // returns "Hello" (removes " World")
-     * deleteRange("Test", 0, 2);           // returns "st" (removes "Te")
+     * Strings.deleteRange("ABCDEFGH", 2, 5);       // returns "ABFGH" (removes "CDE")
+     * Strings.deleteRange("Hello World", 5, 11);   // returns "Hello" (removes " World")
+     * Strings.deleteRange("Test", 0, 2);           // returns "st" (removes "Te")
      *
      * // Edge cases
-     * deleteRange(null, 0, 1);             // returns ""
-     * deleteRange("", 0, 0);               // returns "" (OK - valid range for empty string)
-     * deleteRange("ABC", 1, 1);            // returns "ABC" (no deletion when fromIndex == toIndex)
-     * deleteRange("ABC", 3, 5);            // returns "ABC" (no deletion when fromIndex >= length)
-     * deleteRange("ABC", 0, 10);           // returns "" (deletes entire string and beyond)
+     * Strings.deleteRange(null, 0, 1);             // returns ""
+     * Strings.deleteRange("", 0, 0);               // returns "" (OK - valid range for empty string)
+     * Strings.deleteRange("ABC", 1, 1);            // returns "ABC" (no deletion when fromIndex == toIndex)
+     * Strings.deleteRange("ABC", 3, 5);            // returns "ABC" (no deletion when fromIndex >= length)
+     * Strings.deleteRange("ABC", 0, 10);           // returns "" (deletes entire string and beyond)
      * }</pre>
      *
      * @param str the input string from which a range of characters are to be deleted; may be {@code null}
@@ -15043,12 +15042,12 @@ public final class Strings {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Joining boolean arrays
-     * join(new boolean[] {true, false, true});    // returns "true, false, true" (using default separator)
-     * join(new boolean[] {true});                 // returns "true"
+     * Strings.join(new boolean[] {true, false, true});    // returns "true, false, true" (using default separator)
+     * Strings.join(new boolean[] {true});                 // returns "true"
      * 
      * // Edge cases
-     * join((boolean[]) null);                    // returns ""
-     * join(new boolean[] {});                     // returns ""
+     * Strings.join((boolean[]) null);                    // returns ""
+     * Strings.join(new boolean[] {});                     // returns ""
      * }</pre>
      *
      * @param a the boolean array to join
@@ -15071,13 +15070,13 @@ public final class Strings {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Joining boolean arrays with string delimiters
-     * join(new boolean[] {true, false, true}, ", ");    // returns "true, false, true"
-     * join(new boolean[] {true, false, true}, " - ");   // returns "true - false - true"
-     * join(new boolean[] {true, false, true}, "");      // returns "truefalsetrue"
+     * Strings.join(new boolean[] {true, false, true}, ", ");    // returns "true, false, true"
+     * Strings.join(new boolean[] {true, false, true}, " - ");   // returns "true - false - true"
+     * Strings.join(new boolean[] {true, false, true}, "");      // returns "truefalsetrue"
      * 
      * // Edge cases
-     * join((boolean[]) null, ", ");                    // returns ""
-     * join(new boolean[] {}, ", ");                     // returns ""
+     * Strings.join((boolean[]) null, ", ");                    // returns ""
+     * Strings.join(new boolean[] {}, ", ");                     // returns ""
      * }</pre>
      *
      * @param a the boolean array to join
@@ -15107,13 +15106,13 @@ public final class Strings {
      * <pre>{@code
      * // Joining a range of boolean array elements
      * boolean[] arr = {true, false, true, false, true};
-     * join(arr, 1, 4, ", ");                   // returns "false, true, false"
-     * join(arr, 0, 3, " - ");                  // returns "true - false - true"
-     * join(arr, 2, 5, "");                     // returns "truefalsetrue"
+     * Strings.join(arr, 1, 4, ", ");                   // returns "false, true, false"
+     * Strings.join(arr, 0, 3, " - ");                  // returns "true - false - true"
+     * Strings.join(arr, 2, 5, "");                     // returns "truefalsetrue"
      * 
      * // Edge cases
-     * join(arr, 1, 1, ", ");                   // returns "" (fromIndex == toIndex)
-     * join((boolean[]) null, 0, 0, ", ");      // returns ""
+     * Strings.join(arr, 1, 1, ", ");                   // returns "" (fromIndex == toIndex)
+     * Strings.join((boolean[]) null, 0, 0, ", ");      // returns ""
      * }</pre>
      *
      * @param a the boolean array to join
@@ -15143,14 +15142,14 @@ public final class Strings {
      * <pre>{@code
      * // Joining with prefix and suffix
      * boolean[] arr = {true, false, true, false, true};
-     * join(arr, 0, 3, ", ", "[", "]");         // returns "[true, false, true]"
-     * join(arr, 1, 4, " | ", "Results: ", "");  // returns "Results: false | true | false"
-     * join(arr, 2, 3, ", ", "(", ")");         // returns "(true)"
+     * Strings.join(arr, 0, 3, ", ", "[", "]");         // returns "[true, false, true]"
+     * Strings.join(arr, 1, 4, " | ", "Results: ", "");  // returns "Results: false | true | false"
+     * Strings.join(arr, 2, 3, ", ", "(", ")");         // returns "(true)"
      * 
      * // Edge cases
-     * join(arr, 1, 1, ", ", "[", "]");         // returns "[]" (empty range)
-     * join(null, 0, 0, ", ", "[", "]");        // returns "[]"
-     * join(arr, 0, 2, "", "<", ">");           // returns "<truefalse>"
+     * Strings.join(arr, 1, 1, ", ", "[", "]");         // returns "[]" (empty range)
+     * Strings.join(null, 0, 0, ", ", "[", "]");        // returns "[]"
+     * Strings.join(arr, 0, 2, "", "<", ">");           // returns "<truefalse>"
      * }</pre>
      *
      * @param a the array containing the elements to join together. It can be empty.
@@ -15222,12 +15221,12 @@ public final class Strings {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Joining char arrays
-     * join(new char[] {'a', 'b', 'c'});         // returns "a, b, c" (using default separator)
-     * join(new char[] {'x'});                   // returns "x"
+     * Strings.join(new char[] {'a', 'b', 'c'});         // returns "a, b, c" (using default separator)
+     * Strings.join(new char[] {'x'});                   // returns "x"
      * 
      * // Edge cases
-     * join((char[]) null);                     // returns ""
-     * join(new char[] {});                      // returns ""
+     * Strings.join((char[]) null);                     // returns ""
+     * Strings.join(new char[] {});                      // returns ""
      * }</pre>
      *
      * @param a the char array to join
@@ -15249,13 +15248,13 @@ public final class Strings {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Joining char arrays with string delimiters
-     * join(new char[] {'a', 'b', 'c'}, ", ");    // returns "a, b, c"
-     * join(new char[] {'x', 'y', 'z'}, " - ");   // returns "x - y - z"
-     * join(new char[] {'A', 'B', 'C'}, "");      // returns "ABC"
+     * Strings.join(new char[] {'a', 'b', 'c'}, ", ");    // returns "a, b, c"
+     * Strings.join(new char[] {'x', 'y', 'z'}, " - ");   // returns "x - y - z"
+     * Strings.join(new char[] {'A', 'B', 'C'}, "");      // returns "ABC"
      * 
      * // Edge cases
-     * join((char[]) null, ", ");                // returns ""
-     * join(new char[] {}, ", ");                 // returns ""
+     * Strings.join((char[]) null, ", ");                // returns ""
+     * Strings.join(new char[] {}, ", ");                 // returns ""
      * }</pre>
      *
      * @param a the char array to join
@@ -15284,13 +15283,13 @@ public final class Strings {
      * <pre>{@code
      * // Joining a range of char array elements
      * char[] arr = {'a', 'b', 'c', 'd', 'e'};
-     * join(arr, 1, 4, ", ");                   // returns "b, c, d"
-     * join(arr, 0, 3, " - ");                  // returns "a - b - c"
-     * join(arr, 2, 5, "");                     // returns "cde"
+     * Strings.join(arr, 1, 4, ", ");                   // returns "b, c, d"
+     * Strings.join(arr, 0, 3, " - ");                  // returns "a - b - c"
+     * Strings.join(arr, 2, 5, "");                     // returns "cde"
      * 
      * // Edge cases
-     * join(arr, 1, 1, ", ");                   // returns "" (fromIndex == toIndex)
-     * join((char[]) null, 0, 0, ", ");         // returns ""
+     * Strings.join(arr, 1, 1, ", ");                   // returns "" (fromIndex == toIndex)
+     * Strings.join((char[]) null, 0, 0, ", ");         // returns ""
      * }</pre>
      *
      * @param a the char array to join
@@ -15319,14 +15318,14 @@ public final class Strings {
      * <pre>{@code
      * // Joining with prefix and suffix
      * char[] arr = {'a', 'b', 'c', 'd', 'e'};
-     * join(arr, 0, 3, ", ", "[", "]");         // returns "[a, b, c]"
-     * join(arr, 1, 4, " | ", "Chars: ", "");   // returns "Chars: b | c | d"
-     * join(arr, 2, 3, ", ", "(", ")");         // returns "(c)"
+     * Strings.join(arr, 0, 3, ", ", "[", "]");         // returns "[a, b, c]"
+     * Strings.join(arr, 1, 4, " | ", "Chars: ", "");   // returns "Chars: b | c | d"
+     * Strings.join(arr, 2, 3, ", ", "(", ")");         // returns "(c)"
      * 
      * // Edge cases
-     * join(arr, 1, 1, ", ", "[", "]");         // returns "[]" (empty range)
-     * join(null, 0, 0, ", ", "[", "]");        // returns "[]"
-     * join(arr, 0, 2, "", "<", ">");           // returns "<ab>"
+     * Strings.join(arr, 1, 1, ", ", "[", "]");         // returns "[]" (empty range)
+     * Strings.join(null, 0, 0, ", ", "[", "]");        // returns "[]"
+     * Strings.join(arr, 0, 2, "", "<", ">");           // returns "<ab>"
      * }</pre>
      *
      * @param a the array containing the elements to join together. It can be empty.
@@ -15398,12 +15397,12 @@ public final class Strings {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Joining byte arrays
-     * join(new byte[] {1, 2, 3});               // returns "1, 2, 3" (using default separator)
-     * join(new byte[] {127});                   // returns "127"
+     * Strings.join(new byte[] {1, 2, 3});               // returns "1, 2, 3" (using default separator)
+     * Strings.join(new byte[] {127});                   // returns "127"
      * 
      * // Edge cases
-     * join((byte[]) null);                     // returns ""
-     * join(new byte[] {});                      // returns ""
+     * Strings.join((byte[]) null);                     // returns ""
+     * Strings.join(new byte[] {});                      // returns ""
      * }</pre>
      *
      * @param a the byte array to join
@@ -15426,13 +15425,13 @@ public final class Strings {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Joining byte arrays with string delimiters
-     * join(new byte[] {1, 2, 3}, ", ");         // returns "1, 2, 3"
-     * join(new byte[] {10, 20, 30}, " - ");     // returns "10 - 20 - 30"
-     * join(new byte[] {1, 2, 3}, "");           // returns "123"
+     * Strings.join(new byte[] {1, 2, 3}, ", ");         // returns "1, 2, 3"
+     * Strings.join(new byte[] {10, 20, 30}, " - ");     // returns "10 - 20 - 30"
+     * Strings.join(new byte[] {1, 2, 3}, "");           // returns "123"
      * 
      * // Edge cases
-     * join((byte[]) null, ", ");               // returns ""
-     * join(new byte[] {}, ", ");                // returns ""
+     * Strings.join((byte[]) null, ", ");               // returns ""
+     * Strings.join(new byte[] {}, ", ");                // returns ""
      * }</pre>
      *
      * @param a the byte array to join
@@ -15461,13 +15460,13 @@ public final class Strings {
      * <pre>{@code
      * // Joining a range of byte array elements
      * byte[] arr = {1, 2, 3, 4, 5};
-     * join(arr, 1, 4, ", ");                   // returns "2, 3, 4"
-     * join(arr, 0, 3, " - ");                  // returns "1 - 2 - 3"
-     * join(arr, 2, 5, "");                     // returns "345"
+     * Strings.join(arr, 1, 4, ", ");                   // returns "2, 3, 4"
+     * Strings.join(arr, 0, 3, " - ");                  // returns "1 - 2 - 3"
+     * Strings.join(arr, 2, 5, "");                     // returns "345"
      * 
      * // Edge cases
-     * join(arr, 1, 1, ", ");                   // returns "" (fromIndex == toIndex)
-     * join((byte[]) null, 0, 0, ", ");         // returns ""
+     * Strings.join(arr, 1, 1, ", ");                   // returns "" (fromIndex == toIndex)
+     * Strings.join((byte[]) null, 0, 0, ", ");         // returns ""
      * }</pre>
      *
      * @param a the byte array to join
@@ -15497,14 +15496,14 @@ public final class Strings {
      * <pre>{@code
      * // Joining with prefix and suffix
      * byte[] arr = {1, 2, 3, 4, 5};
-     * join(arr, 0, 3, ", ", "[", "]");         // returns "[1, 2, 3]"
-     * join(arr, 1, 4, " | ", "Bytes: ", "");   // returns "Bytes: 2 | 3 | 4"
-     * join(arr, 2, 3, ", ", "(", ")");         // returns "(3)"
+     * Strings.join(arr, 0, 3, ", ", "[", "]");         // returns "[1, 2, 3]"
+     * Strings.join(arr, 1, 4, " | ", "Bytes: ", "");   // returns "Bytes: 2 | 3 | 4"
+     * Strings.join(arr, 2, 3, ", ", "(", ")");         // returns "(3)"
      * 
      * // Edge cases
-     * join(arr, 1, 1, ", ", "[", "]");         // returns "[]" (empty range)
-     * join(null, 0, 0, ", ", "[", "]");        // returns "[]"
-     * join(arr, 0, 2, "", "<", ">");           // returns "<12>"
+     * Strings.join(arr, 1, 1, ", ", "[", "]");         // returns "[]" (empty range)
+     * Strings.join(null, 0, 0, ", ", "[", "]");        // returns "[]"
+     * Strings.join(arr, 0, 2, "", "<", ">");           // returns "<12>"
      * }</pre>
      *
      * @param a the array containing the elements to join together. It can be empty.
@@ -15576,12 +15575,12 @@ public final class Strings {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Joining short arrays
-     * join(new short[] {1, 2, 3});              // returns "1, 2, 3" (using default separator)
-     * join(new short[] {32767});                // returns "32767"
+     * Strings.join(new short[] {1, 2, 3});              // returns "1, 2, 3" (using default separator)
+     * Strings.join(new short[] {32767});                // returns "32767"
      * 
      * // Edge cases
-     * join((short[]) null);                    // returns ""
-     * join(new short[] {});                     // returns ""
+     * Strings.join((short[]) null);                    // returns ""
+     * Strings.join(new short[] {});                     // returns ""
      * }</pre>
      *
      * @param a the short array to join
@@ -15604,13 +15603,13 @@ public final class Strings {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Joining short arrays with string delimiters
-     * join(new short[] {1, 2, 3}, ", ");        // returns "1, 2, 3"
-     * join(new short[] {100, 200, 300}, " - "); // returns "100 - 200 - 300"
-     * join(new short[] {1, 2, 3}, "");          // returns "123"
+     * Strings.join(new short[] {1, 2, 3}, ", ");        // returns "1, 2, 3"
+     * Strings.join(new short[] {100, 200, 300}, " - "); // returns "100 - 200 - 300"
+     * Strings.join(new short[] {1, 2, 3}, "");          // returns "123"
      * 
      * // Edge cases
-     * join((short[]) null, ", ");              // returns ""
-     * join(new short[] {}, ", ");               // returns ""
+     * Strings.join((short[]) null, ", ");              // returns ""
+     * Strings.join(new short[] {}, ", ");               // returns ""
      * }</pre>
      *
      * @param a the short array to join
@@ -15639,13 +15638,13 @@ public final class Strings {
      * <pre>{@code
      * // Joining a range of short array elements
      * short[] arr = {10, 20, 30, 40, 50};
-     * join(arr, 1, 4, ", ");                   // returns "20, 30, 40"
-     * join(arr, 0, 3, " - ");                  // returns "10 - 20 - 30"
-     * join(arr, 2, 5, "");                     // returns "30304050"
+     * Strings.join(arr, 1, 4, ", ");                   // returns "20, 30, 40"
+     * Strings.join(arr, 0, 3, " - ");                  // returns "10 - 20 - 30"
+     * Strings.join(arr, 2, 5, "");                     // returns "30304050"
      * 
      * // Edge cases
-     * join(arr, 1, 1, ", ");                   // returns "" (fromIndex == toIndex)
-     * join((short[]) null, 0, 0, ", ");        // returns ""
+     * Strings.join(arr, 1, 1, ", ");                   // returns "" (fromIndex == toIndex)
+     * Strings.join((short[]) null, 0, 0, ", ");        // returns ""
      * }</pre>
      *
      * @param a the short array to join
@@ -15674,16 +15673,16 @@ public final class Strings {
      * short[] numbers = {1, 2, 3, 4, 5};
      * 
      * // Basic joining with delimiter
-     * join(numbers, 0, 5, ", ", "", "");           // returns "1, 2, 3, 4, 5"
-     * join(numbers, 1, 4, "-", "", "");            // returns "2-3-4"
+     * Strings.join(numbers, 0, 5, ", ", "", "");           // returns "1, 2, 3, 4, 5"
+     * Strings.join(numbers, 1, 4, "-", "", "");            // returns "2-3-4"
      * 
      * // With prefix and suffix
-     * join(numbers, 0, 3, ", ", "[", "]");         // returns "[1, 2, 3]"
-     * join(numbers, 0, 5, ", ", "Numbers: ", "");  // returns "Numbers: 1, 2, 3, 4, 5"
+     * Strings.join(numbers, 0, 3, ", ", "[", "]");         // returns "[1, 2, 3]"
+     * Strings.join(numbers, 0, 5, ", ", "Numbers: ", "");  // returns "Numbers: 1, 2, 3, 4, 5"
      * 
      * // Edge cases
-     * join(null, 0, 0, ", ", "", "");              // returns ""
-     * join(numbers, 2, 2, ", ", "[", "]");         // returns "[]"
+     * Strings.join(null, 0, 0, ", ", "", "");              // returns ""
+     * Strings.join(numbers, 2, 2, ", ", "[", "]");         // returns "[]"
      * }</pre>
      *
      * @param a the array containing the elements to join together, may be {@code null} or empty
@@ -15748,16 +15747,16 @@ public final class Strings {
      * Joins all elements of the provided int array into a single String.
      *
      * <p>This method concatenates all elements of the array using the default element separator.
-     * It is equivalent to calling {@code join(a, 0, a.length, ELEMENT_SEPARATOR)}.</p>
+     * It is equivalent to calling {@code Strings.join(a, 0, a.length, ELEMENT_SEPARATOR)}.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * int[] numbers = {1, 2, 3, 4, 5};
-     * join(numbers);                    // returns "1, 2, 3, 4, 5" (using default separator)
+     * Strings.join(numbers);                    // returns "1, 2, 3, 4, 5" (using default separator)
      * 
      * int[] empty = {};
-     * join(empty);                      // returns ""
-     * join(null);                       // returns ""
+     * Strings.join(empty);                      // returns ""
+     * Strings.join(null);                       // returns ""
      * }</pre>
      *
      * @param a the array containing the elements to join together, may be {@code null} or empty
@@ -15777,10 +15776,10 @@ public final class Strings {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * int[] numbers = {1, 2, 3, 4, 5};
-     * join(numbers, ", ");              // returns "1, 2, 3, 4, 5"
-     * join(numbers, " - ");             // returns "1 - 2 - 3 - 4 - 5"
-     * join(numbers, "");                // returns "12345"
-     * join(numbers, " and ");           // returns "1 and 2 and 3 and 4 and 5"
+     * Strings.join(numbers, ", ");              // returns "1, 2, 3, 4, 5"
+     * Strings.join(numbers, " - ");             // returns "1 - 2 - 3 - 4 - 5"
+     * Strings.join(numbers, "");                // returns "12345"
+     * Strings.join(numbers, " and ");           // returns "1 and 2 and 3 and 4 and 5"
      * }</pre>
      *
      * @param a the array containing the elements to join together, may be {@code null} or empty
@@ -15805,13 +15804,13 @@ public final class Strings {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * int[] numbers = {1, 2, 3, 4, 5};
-     * join(numbers, 1, 4, ", ");        // returns "2, 3, 4"
-     * join(numbers, 0, 3, " - ");       // returns "1 - 2 - 3"
-     * join(numbers, 2, 5, "");          // returns "345"
+     * Strings.join(numbers, 1, 4, ", ");        // returns "2, 3, 4"
+     * Strings.join(numbers, 0, 3, " - ");       // returns "1 - 2 - 3"
+     * Strings.join(numbers, 2, 5, "");          // returns "345"
      * 
      * // Edge cases
-     * join(numbers, 2, 2, ", ");        // returns "" (fromIndex == toIndex)
-     * join(numbers, 0, 1, ", ");        // returns "1" (single element)
+     * Strings.join(numbers, 2, 2, ", ");        // returns "" (fromIndex == toIndex)
+     * Strings.join(numbers, 0, 1, ", ");        // returns "1" (single element)
      * }</pre>
      *
      * @param a the array containing the elements to join together, may be {@code null} or empty
@@ -15840,17 +15839,17 @@ public final class Strings {
      * int[] numbers = {1, 2, 3, 4, 5};
      * 
      * // Basic joining with delimiter
-     * join(numbers, 0, 5, ", ", "", "");           // returns "1, 2, 3, 4, 5"
-     * join(numbers, 1, 4, "-", "", "");            // returns "2-3-4"
+     * Strings.join(numbers, 0, 5, ", ", "", "");           // returns "1, 2, 3, 4, 5"
+     * Strings.join(numbers, 1, 4, "-", "", "");            // returns "2-3-4"
      * 
      * // With prefix and suffix
-     * join(numbers, 0, 3, ", ", "[", "]");         // returns "[1, 2, 3]"
-     * join(numbers, 0, 5, ", ", "Numbers: ", "");  // returns "Numbers: 1, 2, 3, 4, 5"
-     * join(numbers, 2, 4, " | ", "Result: ", "!");  // returns "Result: 3 | 4!"
+     * Strings.join(numbers, 0, 3, ", ", "[", "]");         // returns "[1, 2, 3]"
+     * Strings.join(numbers, 0, 5, ", ", "Numbers: ", "");  // returns "Numbers: 1, 2, 3, 4, 5"
+     * Strings.join(numbers, 2, 4, " | ", "Result: ", "!");  // returns "Result: 3 | 4!"
      * 
      * // Edge cases
-     * join(null, 0, 0, ", ", "[", "]");            // returns "[]"
-     * join(numbers, 2, 2, ", ", "[", "]");         // returns "[]"
+     * Strings.join(null, 0, 0, ", ", "[", "]");            // returns "[]"
+     * Strings.join(numbers, 2, 2, ", ", "[", "]");         // returns "[]"
      * }</pre>
      *
      * @param a the array containing the elements to join together, may be {@code null} or empty
@@ -15915,16 +15914,16 @@ public final class Strings {
      * Joins all elements of the provided long array into a single String.
      *
      * <p>This method concatenates all elements of the array using the default element separator.
-     * It is equivalent to calling {@code join(a, 0, a.length, ELEMENT_SEPARATOR)}.</p>
+     * It is equivalent to calling {@code Strings.join(a, 0, a.length, ELEMENT_SEPARATOR)}.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * long[] numbers = {100L, 200L, 300L};
-     * join(numbers);                    // returns "100, 200, 300" (using default separator)
+     * Strings.join(numbers);                    // returns "100, 200, 300" (using default separator)
      * 
      * long[] empty = {};
-     * join(empty);                      // returns ""
-     * join(null);                       // returns ""
+     * Strings.join(empty);                      // returns ""
+     * Strings.join(null);                       // returns ""
      * }</pre>
      *
      * @param a the array containing the elements to join together, may be {@code null} or empty
@@ -15944,10 +15943,10 @@ public final class Strings {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * long[] numbers = {100L, 200L, 300L};
-     * join(numbers, ", ");              // returns "100, 200, 300"
-     * join(numbers, " - ");             // returns "100 - 200 - 300"
-     * join(numbers, "");                // returns "100200300"
-     * join(numbers, " and ");           // returns "100 and 200 and 300"
+     * Strings.join(numbers, ", ");              // returns "100, 200, 300"
+     * Strings.join(numbers, " - ");             // returns "100 - 200 - 300"
+     * Strings.join(numbers, "");                // returns "100200300"
+     * Strings.join(numbers, " and ");           // returns "100 and 200 and 300"
      * }</pre>
      *
      * @param a the array containing the elements to join together, may be {@code null} or empty
@@ -15972,13 +15971,13 @@ public final class Strings {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * long[] numbers = {100L, 200L, 300L, 400L, 500L};
-     * join(numbers, 1, 4, ", ");        // returns "200, 300, 400"
-     * join(numbers, 0, 3, " - ");       // returns "100 - 200 - 300"
-     * join(numbers, 2, 5, "");          // returns "300400500"
+     * Strings.join(numbers, 1, 4, ", ");        // returns "200, 300, 400"
+     * Strings.join(numbers, 0, 3, " - ");       // returns "100 - 200 - 300"
+     * Strings.join(numbers, 2, 5, "");          // returns "300400500"
      * 
      * // Edge cases
-     * join(numbers, 2, 2, ", ");        // returns "" (fromIndex == toIndex)
-     * join(numbers, 0, 1, ", ");        // returns "100" (single element)
+     * Strings.join(numbers, 2, 2, ", ");        // returns "" (fromIndex == toIndex)
+     * Strings.join(numbers, 0, 1, ", ");        // returns "100" (single element)
      * }</pre>
      *
      * @param a the array containing the elements to join together, may be {@code null} or empty
@@ -16007,17 +16006,17 @@ public final class Strings {
      * long[] numbers = {100L, 200L, 300L, 400L, 500L};
      * 
      * // Basic joining with delimiter
-     * join(numbers, 0, 5, ", ", "", "");           // returns "100, 200, 300, 400, 500"
-     * join(numbers, 1, 4, "-", "", "");            // returns "200-300-400"
+     * Strings.join(numbers, 0, 5, ", ", "", "");           // returns "100, 200, 300, 400, 500"
+     * Strings.join(numbers, 1, 4, "-", "", "");            // returns "200-300-400"
      * 
      * // With prefix and suffix
-     * join(numbers, 0, 3, ", ", "[", "]");         // returns "[100, 200, 300]"
-     * join(numbers, 0, 5, ", ", "Values: ", "");   // returns "Values: 100, 200, 300, 400, 500"
-     * join(numbers, 2, 4, " | ", "Result: ", "!");  // returns "Result: 300 | 400!"
+     * Strings.join(numbers, 0, 3, ", ", "[", "]");         // returns "[100, 200, 300]"
+     * Strings.join(numbers, 0, 5, ", ", "Values: ", "");   // returns "Values: 100, 200, 300, 400, 500"
+     * Strings.join(numbers, 2, 4, " | ", "Result: ", "!");  // returns "Result: 300 | 400!"
      * 
      * // Edge cases
-     * join(null, 0, 0, ", ", "[", "]");            // returns "[]"
-     * join(numbers, 2, 2, ", ", "[", "]");         // returns "[]"
+     * Strings.join(null, 0, 0, ", ", "[", "]");            // returns "[]"
+     * Strings.join(numbers, 2, 2, ", ", "[", "]");         // returns "[]"
      * }</pre>
      *
      * @param a the array containing the elements to join together, may be {@code null} or empty
@@ -16082,16 +16081,16 @@ public final class Strings {
      * Joins all elements of the provided float array into a single String.
      *
      * <p>This method concatenates all elements of the array using the default element separator.
-     * It is equivalent to calling {@code join(a, 0, a.length, ELEMENT_SEPARATOR)}.</p>
+     * It is equivalent to calling {@code Strings.join(a, 0, a.length, ELEMENT_SEPARATOR)}.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * float[] numbers = {1.5f, 2.7f, 3.14f};
-     * join(numbers);                    // returns "1.5, 2.7, 3.14" (using default separator)
+     * Strings.join(numbers);                    // returns "1.5, 2.7, 3.14" (using default separator)
      * 
      * float[] empty = {};
-     * join(empty);                      // returns ""
-     * join(null);                       // returns ""
+     * Strings.join(empty);                      // returns ""
+     * Strings.join(null);                       // returns ""
      * }</pre>
      *
      * @param a the array containing the elements to join together, may be {@code null} or empty
@@ -16111,10 +16110,10 @@ public final class Strings {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * float[] numbers = {1.5f, 2.7f, 3.14f};
-     * join(numbers, ", ");              // returns "1.5, 2.7, 3.14"
-     * join(numbers, " - ");             // returns "1.5 - 2.7 - 3.14"
-     * join(numbers, "");                // returns "1.52.73.14"
-     * join(numbers, " and ");           // returns "1.5 and 2.7 and 3.14"
+     * Strings.join(numbers, ", ");              // returns "1.5, 2.7, 3.14"
+     * Strings.join(numbers, " - ");             // returns "1.5 - 2.7 - 3.14"
+     * Strings.join(numbers, "");                // returns "1.52.73.14"
+     * Strings.join(numbers, " and ");           // returns "1.5 and 2.7 and 3.14"
      * }</pre>
      *
      * @param a the array containing the elements to join together, may be {@code null} or empty
@@ -16139,13 +16138,13 @@ public final class Strings {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * float[] numbers = {1.1f, 2.2f, 3.3f, 4.4f, 5.5f};
-     * join(numbers, 1, 4, ", ");        // returns "2.2, 3.3, 4.4"
-     * join(numbers, 0, 3, " - ");       // returns "1.1 - 2.2 - 3.3"
-     * join(numbers, 2, 5, "");          // returns "3.34.45.5"
+     * Strings.join(numbers, 1, 4, ", ");        // returns "2.2, 3.3, 4.4"
+     * Strings.join(numbers, 0, 3, " - ");       // returns "1.1 - 2.2 - 3.3"
+     * Strings.join(numbers, 2, 5, "");          // returns "3.34.45.5"
      * 
      * // Edge cases
-     * join(numbers, 2, 2, ", ");        // returns "" (fromIndex == toIndex)
-     * join(numbers, 0, 1, ", ");        // returns "1.1" (single element)
+     * Strings.join(numbers, 2, 2, ", ");        // returns "" (fromIndex == toIndex)
+     * Strings.join(numbers, 0, 1, ", ");        // returns "1.1" (single element)
      * }</pre>
      *
      * @param a the array containing the elements to join together, may be {@code null} or empty
@@ -16174,17 +16173,17 @@ public final class Strings {
      * float[] numbers = {1.1f, 2.2f, 3.3f, 4.4f, 5.5f};
      * 
      * // Basic joining with delimiter
-     * join(numbers, 0, 5, ", ", "", "");           // returns "1.1, 2.2, 3.3, 4.4, 5.5"
-     * join(numbers, 1, 4, "-", "", "");            // returns "2.2-3.3-4.4"
+     * Strings.join(numbers, 0, 5, ", ", "", "");           // returns "1.1, 2.2, 3.3, 4.4, 5.5"
+     * Strings.join(numbers, 1, 4, "-", "", "");            // returns "2.2-3.3-4.4"
      * 
      * // With prefix and suffix
-     * join(numbers, 0, 3, ", ", "[", "]");         // returns "[1.1, 2.2, 3.3]"
-     * join(numbers, 0, 5, ", ", "Values: ", "");   // returns "Values: 1.1, 2.2, 3.3, 4.4, 5.5"
-     * join(numbers, 2, 4, " | ", "Result: ", "!");  // returns "Result: 3.3 | 4.4!"
+     * Strings.join(numbers, 0, 3, ", ", "[", "]");         // returns "[1.1, 2.2, 3.3]"
+     * Strings.join(numbers, 0, 5, ", ", "Values: ", "");   // returns "Values: 1.1, 2.2, 3.3, 4.4, 5.5"
+     * Strings.join(numbers, 2, 4, " | ", "Result: ", "!");  // returns "Result: 3.3 | 4.4!"
      * 
      * // Edge cases
-     * join(null, 0, 0, ", ", "[", "]");            // returns "[]"
-     * join(numbers, 2, 2, ", ", "[", "]");         // returns "[]"
+     * Strings.join(null, 0, 0, ", ", "[", "]");            // returns "[]"
+     * Strings.join(numbers, 2, 2, ", ", "[", "]");         // returns "[]"
      * }</pre>
      *
      * @param a the array containing the elements to join together, may be {@code null} or empty
@@ -16249,16 +16248,16 @@ public final class Strings {
      * Joins all elements of the provided double array into a single String.
      *
      * <p>This method concatenates all elements of the array using the default element separator.
-     * It is equivalent to calling {@code join(a, 0, a.length, ELEMENT_SEPARATOR)}.</p>
+     * It is equivalent to calling {@code Strings.join(a, 0, a.length, ELEMENT_SEPARATOR)}.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * double[] numbers = {1.5, 2.7, 3.14159};
-     * join(numbers);                    // returns "1.5, 2.7, 3.14159" (using default separator)
+     * Strings.join(numbers);                    // returns "1.5, 2.7, 3.14159" (using default separator)
      * 
      * double[] empty = {};
-     * join(empty);                      // returns ""
-     * join(null);                       // returns ""
+     * Strings.join(empty);                      // returns ""
+     * Strings.join(null);                       // returns ""
      * }</pre>
      *
      * @param a the array containing the elements to join together, may be {@code null} or empty
@@ -16278,10 +16277,10 @@ public final class Strings {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * double[] numbers = {1.5, 2.7, 3.14159};
-     * join(numbers, ", ");              // returns "1.5, 2.7, 3.14159"
-     * join(numbers, " - ");             // returns "1.5 - 2.7 - 3.14159"
-     * join(numbers, "");                // returns "1.52.73.14159"
-     * join(numbers, " and ");           // returns "1.5 and 2.7 and 3.14159"
+     * Strings.join(numbers, ", ");              // returns "1.5, 2.7, 3.14159"
+     * Strings.join(numbers, " - ");             // returns "1.5 - 2.7 - 3.14159"
+     * Strings.join(numbers, "");                // returns "1.52.73.14159"
+     * Strings.join(numbers, " and ");           // returns "1.5 and 2.7 and 3.14159"
      * }</pre>
      *
      * @param a the array containing the elements to join together, may be {@code null} or empty
@@ -16306,13 +16305,13 @@ public final class Strings {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * double[] numbers = {1.1, 2.2, 3.3, 4.4, 5.5};
-     * join(numbers, 1, 4, ", ");        // returns "2.2, 3.3, 4.4"
-     * join(numbers, 0, 3, " - ");       // returns "1.1 - 2.2 - 3.3"
-     * join(numbers, 2, 5, "");          // returns "3.34.45.5"
+     * Strings.join(numbers, 1, 4, ", ");        // returns "2.2, 3.3, 4.4"
+     * Strings.join(numbers, 0, 3, " - ");       // returns "1.1 - 2.2 - 3.3"
+     * Strings.join(numbers, 2, 5, "");          // returns "3.34.45.5"
      * 
      * // Edge cases
-     * join(numbers, 2, 2, ", ");        // returns "" (fromIndex == toIndex)
-     * join(numbers, 0, 1, ", ");        // returns "1.1" (single element)
+     * Strings.join(numbers, 2, 2, ", ");        // returns "" (fromIndex == toIndex)
+     * Strings.join(numbers, 0, 1, ", ");        // returns "1.1" (single element)
      * }</pre>
      *
      * @param a the array containing the elements to join together, may be {@code null} or empty
@@ -16341,17 +16340,17 @@ public final class Strings {
      * double[] numbers = {1.1, 2.2, 3.3, 4.4, 5.5};
      * 
      * // Basic joining with delimiter
-     * join(numbers, 0, 5, ", ", "", "");           // returns "1.1, 2.2, 3.3, 4.4, 5.5"
-     * join(numbers, 1, 4, "-", "", "");            // returns "2.2-3.3-4.4"
+     * Strings.join(numbers, 0, 5, ", ", "", "");           // returns "1.1, 2.2, 3.3, 4.4, 5.5"
+     * Strings.join(numbers, 1, 4, "-", "", "");            // returns "2.2-3.3-4.4"
      * 
      * // With prefix and suffix
-     * join(numbers, 0, 3, ", ", "[", "]");         // returns "[1.1, 2.2, 3.3]"
-     * join(numbers, 0, 5, ", ", "Values: ", "");   // returns "Values: 1.1, 2.2, 3.3, 4.4, 5.5"
-     * join(numbers, 2, 4, " | ", "Result: ", "!");  // returns "Result: 3.3 | 4.4!"
+     * Strings.join(numbers, 0, 3, ", ", "[", "]");         // returns "[1.1, 2.2, 3.3]"
+     * Strings.join(numbers, 0, 5, ", ", "Values: ", "");   // returns "Values: 1.1, 2.2, 3.3, 4.4, 5.5"
+     * Strings.join(numbers, 2, 4, " | ", "Result: ", "!");  // returns "Result: 3.3 | 4.4!"
      * 
      * // Edge cases
-     * join(null, 0, 0, ", ", "[", "]");            // returns "[]"
-     * join(numbers, 2, 2, ", ", "[", "]");         // returns "[]"
+     * Strings.join(null, 0, 0, ", ", "[", "]");            // returns "[]"
+     * Strings.join(numbers, 2, 2, ", ", "[", "]");         // returns "[]"
      * }</pre>
      *
      * @param a the array containing the elements to join together, may be {@code null} or empty
@@ -16416,7 +16415,7 @@ public final class Strings {
      * Joins the elements of the provided array into a single String.
      *
      * <p>This method concatenates all elements in the array using the default element separator.
-     * Each element is converted to a string representation using its {@code toString()} method.
+     * Each element is converted to a string representation using its {@code Strings.toString()} method.
      * Null elements are handled as "null" strings.</p>
      *
      * <p>The method returns an empty string if the specified array is {@code null} or empty.</p>
@@ -16424,13 +16423,13 @@ public final class Strings {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String[] arr = {"apple", "banana", "cherry"};
-     * join(arr);                                     // returns "apple, banana, cherry"
+     * Strings.join(arr);                                     // returns "apple, banana, cherry"
      * 
      * Object[] mixed = {1, "hello", true};
-     * join(mixed);                                   // returns "1, hello, true"
+     * Strings.join(mixed);                                   // returns "1, hello, true"
      * 
-     * join(null);                                    // returns ""
-     * join(new String[0]);                           // returns ""
+     * Strings.join(null);                                    // returns ""
+     * Strings.join(new String[0]);                           // returns ""
      * }</pre>
      *
      * @param a the array containing the elements to join together, may be {@code null}
@@ -16445,7 +16444,7 @@ public final class Strings {
      * Joins the elements of the provided array into a single String with the specified delimiter.
      *
      * <p>This method concatenates all elements in the array, separating each element with the specified delimiter string.
-     * Each element is converted to a string representation using its {@code toString()} method.
+     * Each element is converted to a string representation using its {@code Strings.toString()} method.
      * The delimiter can be empty, in which case the elements are concatenated without any separator.</p>
      *
      * <p>The method returns an empty string if the specified array is {@code null} or empty.</p>
@@ -16453,15 +16452,15 @@ public final class Strings {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String[] arr = {"apple", "banana", "cherry"};
-     * join(arr, " - ");                              // returns "apple - banana - cherry"
-     * join(arr, "");                                 // returns "applebananacherry"
-     * join(arr, ", ");                               // returns "apple, banana, cherry"
+     * Strings.join(arr, " - ");                              // returns "apple - banana - cherry"
+     * Strings.join(arr, "");                                 // returns "applebananacherry"
+     * Strings.join(arr, ", ");                               // returns "apple, banana, cherry"
      * 
      * Object[] mixed = {1, 2, 3};
-     * join(mixed, " and ");                          // returns "1 and 2 and 3"
+     * Strings.join(mixed, " and ");                          // returns "1 and 2 and 3"
      * 
-     * join(null, ", ");                              // returns ""
-     * join(new String[0], ", ");                     // returns ""
+     * Strings.join(null, ", ");                              // returns ""
+     * Strings.join(new String[0], ", ");                     // returns ""
      * }</pre>
      *
      * @param a the array containing the elements to join together, may be {@code null}
@@ -16482,18 +16481,18 @@ public final class Strings {
      *
      * <p>This method concatenates all elements in the array, separating each element with the specified delimiter.
      * The resulting string is prefixed and suffixed with the specified strings.
-     * Each element is converted to a string representation using its {@code toString()} method.</p>
+     * Each element is converted to a string representation using its {@code Strings.toString()} method.</p>
      *
      * <p>The method returns an empty string if the specified array is {@code null} or empty and both prefix and suffix are empty.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String[] arr = {"apple", "banana", "cherry"};
-     * join(arr, ", ", "[", "]");                     // returns "[apple, banana, cherry]"
-     * join(arr, " | ", "Items: ", ".");              // returns "Items: apple | banana | cherry."
+     * Strings.join(arr, ", ", "[", "]");                     // returns "[apple, banana, cherry]"
+     * Strings.join(arr, " | ", "Items: ", ".");              // returns "Items: apple | banana | cherry."
      * 
-     * join(new String[0], ", ", "[", "]");           // returns "[]"
-     * join(null, ", ", "Start: ", " :End");          // returns "Start:  :End"
+     * Strings.join(new String[0], ", ", "[", "]");           // returns "[]"
+     * Strings.join(null, ", ", "Start: ", " :End");          // returns "Start:  :End"
      * }</pre>
      *
      * @param a the array containing the elements to join together, may be {@code null}
@@ -16512,7 +16511,7 @@ public final class Strings {
      *
      * <p>This method concatenates all elements in the array, separating each element with the specified delimiter.
      * The resulting string is prefixed and suffixed with the specified strings.
-     * Each element is converted to a string representation using its {@code toString()} method.
+     * Each element is converted to a string representation using its {@code Strings.toString()} method.
      * If trim is {@code true}, leading and trailing whitespace is removed from each element's string representation.</p>
      *
      * <p>The method returns an empty string if the specified array is {@code null} or empty and both prefix and suffix are empty.</p>
@@ -16520,11 +16519,11 @@ public final class Strings {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String[] arr = {" apple ", " banana ", " cherry "};
-     * join(arr, ", ", "[", "]", true);               // returns "[apple, banana, cherry]"
-     * join(arr, ", ", "[", "]", false);              // returns "[ apple ,  banana ,  cherry ]"
+     * Strings.join(arr, ", ", "[", "]", true);               // returns "[apple, banana, cherry]"
+     * Strings.join(arr, ", ", "[", "]", false);              // returns "[ apple ,  banana ,  cherry ]"
      * 
      * Object[] mixed = {1, "  hello  ", true};
-     * join(mixed, " | ", "", "", true);              // returns "1 | hello | true"
+     * Strings.join(mixed, " | ", "", "", true);              // returns "1 | hello | true"
      * }</pre>
      *
      * @param a the array containing the elements to join together, may be {@code null}
@@ -16543,7 +16542,7 @@ public final class Strings {
      *
      * <p>This method concatenates elements in the array from {@code fromIndex} (inclusive) to {@code toIndex} (exclusive),
      * separating each element with the specified delimiter string.
-     * Each element is converted to a string representation using its {@code toString()} method.
+     * Each element is converted to a string representation using its {@code Strings.toString()} method.
      * The delimiter can be empty, in which case the elements are concatenated without any separator.</p>
      *
      * <p>The method returns an empty string if the specified array is {@code null} or empty, or if {@code fromIndex == toIndex}.</p>
@@ -16551,9 +16550,9 @@ public final class Strings {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String[] arr = {"apple", "banana", "cherry", "date", "elderberry"};
-     * join(arr, 1, 4, " - ");                        // returns "banana - cherry - date"
-     * join(arr, 0, 3, ", ");                         // returns "apple, banana, cherry"
-     * join(arr, 2, 4, "");                           // returns "cherrydate"
+     * Strings.join(arr, 1, 4, " - ");                        // returns "banana - cherry - date"
+     * Strings.join(arr, 0, 3, ", ");                         // returns "apple, banana, cherry"
+     * Strings.join(arr, 2, 4, "");                           // returns "cherrydate"
      * }</pre>
      *
      * @param a the array containing the elements to join together.
@@ -16573,7 +16572,7 @@ public final class Strings {
      *
      * <p>This method concatenates elements in the array from {@code fromIndex} (inclusive) to {@code toIndex} (exclusive),
      * separating each element with the specified delimiter string.
-     * Each element is converted to a string representation using its {@code toString()} method.
+     * Each element is converted to a string representation using its {@code Strings.toString()} method.
      * If trim is {@code true}, leading and trailing whitespace is removed from each element's string representation.</p>
      *
      * <p>The method returns an empty string if the specified array is {@code null} or empty, or if {@code fromIndex == toIndex}.</p>
@@ -16581,9 +16580,9 @@ public final class Strings {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String[] arr = {" apple ", " banana ", " cherry ", " date "};
-     * join(arr, 1, 3, " - ", true);                  // returns "banana - cherry"
-     * join(arr, 1, 3, " - ", false);                 // returns " banana  -  cherry "
-     * join(arr, 0, 4, "", true);                     // returns "applebananacherrydate"
+     * Strings.join(arr, 1, 3, " - ", true);                  // returns "banana - cherry"
+     * Strings.join(arr, 1, 3, " - ", false);                 // returns " banana  -  cherry "
+     * Strings.join(arr, 0, 4, "", true);                     // returns "applebananacherrydate"
      * }</pre>
      *
      * @param a the array containing the elements to join together.
@@ -16605,16 +16604,16 @@ public final class Strings {
      * <p>This method concatenates elements in the array from {@code fromIndex} (inclusive) to {@code toIndex} (exclusive),
      * separating each element with the specified delimiter string.
      * The resulting string is prefixed and suffixed with the specified strings.
-     * Each element is converted to a string representation using its {@code toString()} method.</p>
+     * Each element is converted to a string representation using its {@code Strings.toString()} method.</p>
      *
      * <p>The method returns an empty string if the specified array is {@code null} or empty or {@code fromIndex == toIndex} and both prefix and suffix are empty.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String[] arr = {"apple", "banana", "cherry", "date"};
-     * join(arr, 1, 3, ", ", "[", "]");               // returns "[banana, cherry]"
-     * join(arr, 0, 4, " | ", "Fruits: ", ".");       // returns "Fruits: apple | banana | cherry | date."
-     * join(arr, 2, 2, ", ", "[", "]");               // returns "[]"
+     * Strings.join(arr, 1, 3, ", ", "[", "]");               // returns "[banana, cherry]"
+     * Strings.join(arr, 0, 4, " | ", "Fruits: ", ".");       // returns "Fruits: apple | banana | cherry | date."
+     * Strings.join(arr, 2, 2, ", ", "[", "]");               // returns "[]"
      * }</pre>
      *
      * @param a the array containing the elements to join together, may be {@code null}
@@ -16636,7 +16635,7 @@ public final class Strings {
      * <p>This method concatenates elements in the array from {@code fromIndex} (inclusive) to {@code toIndex} (exclusive),
      * separating each element with the specified delimiter string.
      * The resulting string is prefixed and suffixed with the specified strings.
-     * Each element is converted to a string representation using its {@code toString()} method.
+     * Each element is converted to a string representation using its {@code Strings.toString()} method.
      * If trim is {@code true}, leading and trailing whitespace is removed from each element's string representation.</p>
      *
      * <p>The method handles edge cases gracefully: if the array is {@code null} or empty, or if {@code fromIndex == toIndex},
@@ -16645,13 +16644,13 @@ public final class Strings {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String[] arr = {" apple ", " banana ", " cherry ", " date "};
-     * join(arr, 1, 3, ", ", "[", "]", true);         // returns "[banana, cherry]"
-     * join(arr, 1, 3, ", ", "[", "]", false);        // returns "[ banana ,  cherry ]"
-     * join(arr, 0, 4, " | ", "Items: ", ".", true);  // returns "Items: apple | banana | cherry | date."
+     * Strings.join(arr, 1, 3, ", ", "[", "]", true);         // returns "[banana, cherry]"
+     * Strings.join(arr, 1, 3, ", ", "[", "]", false);        // returns "[ banana ,  cherry ]"
+     * Strings.join(arr, 0, 4, " | ", "Items: ", ".", true);  // returns "Items: apple | banana | cherry | date."
      * 
      * // Edge cases
-     * join(null, 0, 0, ", ", "[", "]", true);        // returns "[]"
-     * join(new String[0], 0, 0, ", ", "", "", true); // returns ""
+     * Strings.join(null, 0, 0, ", ", "[", "]", true);        // returns "[]"
+     * Strings.join(new String[0], 0, 0, ", ", "", "", true); // returns ""
      * }</pre>
      *
      * @param a the array containing the elements to join together, may be {@code null}
@@ -16699,7 +16698,7 @@ public final class Strings {
      * Joins the elements of the provided Iterable into a single String.
      *
      * <p>This method concatenates all elements in the iterable using the default element separator.
-     * Each element is converted to a string representation using its {@code toString()} method.
+     * Each element is converted to a string representation using its {@code Strings.toString()} method.
      * Null elements are handled as "null" strings.</p>
      *
      * <p>The method returns an empty string if the specified Iterable is {@code null} or empty.</p>
@@ -16707,13 +16706,13 @@ public final class Strings {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * List<String> list = Arrays.asList("apple", "banana", "cherry");
-     * join(list);                                    // returns "apple, banana, cherry"
+     * Strings.join(list);                                    // returns "apple, banana, cherry"
      * 
      * Set<Integer> numbers = new HashSet<>(Arrays.asList(1, 2, 3));
-     * join(numbers);                                 // returns "1, 2, 3" (order may vary)
+     * Strings.join(numbers);                                 // returns "1, 2, 3" (order may vary)
      * 
-     * join(null);                                    // returns ""
-     * join(new ArrayList<>());                       // returns ""
+     * Strings.join(null);                                    // returns ""
+     * Strings.join(new ArrayList<>());                       // returns ""
      * }</pre>
      *
      * @param c the Iterable containing the elements to join together, may be {@code null}
@@ -16728,7 +16727,7 @@ public final class Strings {
      * Joins the elements of the provided Iterable into a single String with the specified delimiter.
      *
      * <p>This method concatenates all elements in the iterable, separating each element with the specified delimiter string.
-     * Each element is converted to a string representation using its {@code toString()} method.
+     * Each element is converted to a string representation using its {@code Strings.toString()} method.
      * The delimiter can be empty, in which case the elements are concatenated without any separator.</p>
      *
      * <p>The method returns an empty string if the specified Iterable is {@code null} or empty.</p>
@@ -16736,15 +16735,15 @@ public final class Strings {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * List<String> list = Arrays.asList("apple", "banana", "cherry");
-     * join(list, " - ");                             // returns "apple - banana - cherry"
-     * join(list, "");                                // returns "applebananacherry"
-     * join(list, ", ");                              // returns "apple, banana, cherry"
+     * Strings.join(list, " - ");                             // returns "apple - banana - cherry"
+     * Strings.join(list, "");                                // returns "applebananacherry"
+     * Strings.join(list, ", ");                              // returns "apple, banana, cherry"
      * 
      * List<Integer> numbers = Arrays.asList(1, 2, 3);
-     * join(numbers, " and ");                        // returns "1 and 2 and 3"
+     * Strings.join(numbers, " and ");                        // returns "1 and 2 and 3"
      * 
-     * join(null, ", ");                              // returns ""
-     * join(new ArrayList<>(), ", ");                 // returns ""
+     * Strings.join(null, ", ");                              // returns ""
+     * Strings.join(new ArrayList<>(), ", ");                 // returns ""
      * }</pre>
      *
      * @param c the Iterable containing the elements to join together, may be {@code null}
@@ -16761,18 +16760,18 @@ public final class Strings {
      *
      * <p>This method concatenates all elements in the iterable, separating each element with the specified delimiter.
      * The resulting string is prefixed and suffixed with the specified strings.
-     * Each element is converted to a string representation using its {@code toString()} method.</p>
+     * Each element is converted to a string representation using its {@code Strings.toString()} method.</p>
      *
      * <p>The method returns just the concatenation of prefix and suffix if the Iterable is {@code null} or empty.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * List<String> list = Arrays.asList("apple", "banana", "cherry");
-     * join(list, ", ", "[", "]");                    // returns "[apple, banana, cherry]"
-     * join(list, " | ", "Items: ", ".");             // returns "Items: apple | banana | cherry."
+     * Strings.join(list, ", ", "[", "]");                    // returns "[apple, banana, cherry]"
+     * Strings.join(list, " | ", "Items: ", ".");             // returns "Items: apple | banana | cherry."
      * 
-     * join(new ArrayList<>(), ", ", "[", "]");       // returns "[]"
-     * join(null, ", ", "Start: ", " :End");          // returns "Start:  :End"
+     * Strings.join(new ArrayList<>(), ", ", "[", "]");       // returns "[]"
+     * Strings.join(null, ", ", "Start: ", " :End");          // returns "Start:  :End"
      * }</pre>
      *
      * @param c the Iterable containing the elements to join together, may be {@code null}
@@ -16791,7 +16790,7 @@ public final class Strings {
      *
      * <p>This method concatenates all elements in the iterable, separating each element with the specified delimiter.
      * The resulting string is prefixed and suffixed with the specified strings.
-     * Each element is converted to a string representation using its {@code toString()} method.
+     * Each element is converted to a string representation using its {@code Strings.toString()} method.
      * If trim is {@code true}, leading and trailing whitespace is removed from each element's string representation.</p>
      *
      * <p>For Collection types, this method delegates to the more efficient range-based join method.
@@ -16800,11 +16799,11 @@ public final class Strings {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * List<String> list = Arrays.asList(" apple ", " banana ", " cherry ");
-     * join(list, ", ", "[", "]", true);              // returns "[apple, banana, cherry]"
-     * join(list, ", ", "[", "]", false);             // returns "[ apple ,  banana ,  cherry ]"
+     * Strings.join(list, ", ", "[", "]", true);              // returns "[apple, banana, cherry]"
+     * Strings.join(list, ", ", "[", "]", false);             // returns "[ apple ,  banana ,  cherry ]"
      * 
      * Set<String> set = new HashSet<>(Arrays.asList("  one  ", "  two  "));
-     * join(set, " | ", "", "", true);                // returns "one | two" (order may vary)
+     * Strings.join(set, " | ", "", "", true);                // returns "one | two" (order may vary)
      * }</pre>
      *
      * @param c the Iterable containing the elements to join together, may be {@code null}
@@ -16827,7 +16826,7 @@ public final class Strings {
      *
      * <p>This method concatenates elements in the collection from {@code fromIndex} (inclusive) to {@code toIndex} (exclusive),
      * separating each element with the specified delimiter string.
-     * Each element is converted to a string representation using its {@code toString()} method.
+     * Each element is converted to a string representation using its {@code Strings.toString()} method.
      * The delimiter can be empty, in which case the elements are concatenated without any separator.</p>
      *
      * <p>The method returns an empty string if the specified Collection is {@code null} or empty, or if {@code fromIndex == toIndex}.</p>
@@ -16835,9 +16834,9 @@ public final class Strings {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * List<String> list = Arrays.asList("apple", "banana", "cherry", "date", "elderberry");
-     * join(list, 1, 4, " - ");                       // returns "banana - cherry - date"
-     * join(list, 0, 3, ", ");                        // returns "apple, banana, cherry"
-     * join(list, 2, 4, "");                          // returns "cherrydate"
+     * Strings.join(list, 1, 4, " - ");                       // returns "banana - cherry - date"
+     * Strings.join(list, 0, 3, ", ");                        // returns "apple, banana, cherry"
+     * Strings.join(list, 2, 4, "");                          // returns "cherrydate"
      * }</pre>
      *
      * @param c the Collection containing the elements to join together.
@@ -16857,7 +16856,7 @@ public final class Strings {
      *
      * <p>This method concatenates elements in the collection from {@code fromIndex} (inclusive) to {@code toIndex} (exclusive),
      * separating each element with the specified delimiter string.
-     * Each element is converted to a string representation using its {@code toString()} method.
+     * Each element is converted to a string representation using its {@code Strings.toString()} method.
      * If trim is {@code true}, leading and trailing whitespace is removed from each element's string representation.</p>
      *
      * <p>The method returns an empty string if the specified Collection is {@code null} or empty, or if {@code fromIndex == toIndex}.</p>
@@ -16865,9 +16864,9 @@ public final class Strings {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * List<String> list = Arrays.asList(" apple ", " banana ", " cherry ", " date ");
-     * join(list, 1, 3, " - ", true);                 // returns "banana - cherry"
-     * join(list, 1, 3, " - ", false);                // returns " banana  -  cherry "
-     * join(list, 0, 4, "", true);                    // returns "applebananacherrydate"
+     * Strings.join(list, 1, 3, " - ", true);                 // returns "banana - cherry"
+     * Strings.join(list, 1, 3, " - ", false);                // returns " banana  -  cherry "
+     * Strings.join(list, 0, 4, "", true);                    // returns "applebananacherrydate"
      * }</pre>
      *
      * @param c the Collection containing the elements to join together.
@@ -16889,16 +16888,16 @@ public final class Strings {
      * <p>This method concatenates elements in the collection from {@code fromIndex} (inclusive) to {@code toIndex} (exclusive),
      * separating each element with the specified delimiter string.
      * The resulting string is prefixed and suffixed with the specified strings.
-     * Each element is converted to a string representation using its {@code toString()} method.</p>
+     * Each element is converted to a string representation using its {@code Strings.toString()} method.</p>
      *
      * <p>The method returns just the concatenation of prefix and suffix if the collection is {@code null} or empty or {@code fromIndex == toIndex}.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * List<String> list = Arrays.asList("apple", "banana", "cherry", "date");
-     * join(list, 1, 3, ", ", "[", "]");              // returns "[banana, cherry]"
-     * join(list, 0, 4, " | ", "Fruits: ", ".");      // returns "Fruits: apple | banana | cherry | date."
-     * join(list, 2, 2, ", ", "[", "]");              // returns "[]"
+     * Strings.join(list, 1, 3, ", ", "[", "]");              // returns "[banana, cherry]"
+     * Strings.join(list, 0, 4, " | ", "Fruits: ", ".");      // returns "Fruits: apple | banana | cherry | date."
+     * Strings.join(list, 2, 2, ", ", "[", "]");              // returns "[]"
      * }</pre>
      *
      * @param c the Collection containing the elements to join together, may be {@code null}
@@ -16920,7 +16919,7 @@ public final class Strings {
      * <p>This method concatenates elements in the collection from {@code fromIndex} (inclusive) to {@code toIndex} (exclusive),
      * separating each element with the specified delimiter string.
      * The resulting string is prefixed and suffixed with the specified strings.
-     * Each element is converted to a string representation using its {@code toString()} method.
+     * Each element is converted to a string representation using its {@code Strings.toString()} method.
      * If trim is {@code true}, leading and trailing whitespace is removed from each element's string representation.</p>
      *
      * <p>The method efficiently handles List types with RandomAccess for better performance.
@@ -16929,13 +16928,13 @@ public final class Strings {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * List<String> list = Arrays.asList(" apple ", " banana ", " cherry ", " date ");
-     * join(list, 1, 3, ", ", "[", "]", true);        // returns "[banana, cherry]"
-     * join(list, 1, 3, ", ", "[", "]", false);       // returns "[ banana ,  cherry ]"
-     * join(list, 0, 4, " | ", "Items: ", ".", true); // returns "Items: apple | banana | cherry | date."
+     * Strings.join(list, 1, 3, ", ", "[", "]", true);        // returns "[banana, cherry]"
+     * Strings.join(list, 1, 3, ", ", "[", "]", false);       // returns "[ banana ,  cherry ]"
+     * Strings.join(list, 0, 4, " | ", "Items: ", ".", true); // returns "Items: apple | banana | cherry | date."
      * 
      * // Edge cases
-     * join(null, 0, 0, ", ", "[", "]", true);        // returns "[]"
-     * join(new ArrayList<>(), 0, 0, ", ", "", "", true); // returns ""
+     * Strings.join(null, 0, 0, ", ", "[", "]", true);        // returns "[]"
+     * Strings.join(new ArrayList<>(), 0, 0, ", ", "", "", true); // returns ""
      * }</pre>
      *
      * @param c the Collection containing the elements to join together, may be {@code null}
@@ -16996,7 +16995,7 @@ public final class Strings {
      * Joins the elements of the provided Iterator into a single String.
      *
      * <p>This method concatenates all elements from the iterator using the default element separator.
-     * Each element is converted to a string representation using its {@code toString()} method.
+     * Each element is converted to a string representation using its {@code Strings.toString()} method.
      * The iterator is consumed during this operation.</p>
      *
      * <p>The method returns an empty string if the specified Iterator is {@code null} or has no elements.</p>
@@ -17004,13 +17003,13 @@ public final class Strings {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * List<String> list = Arrays.asList("apple", "banana", "cherry");
-     * join(list.iterator());                         // returns "apple, banana, cherry"
+     * Strings.join(list.iterator());                         // returns "apple, banana, cherry"
      * 
      * Set<Integer> numbers = new HashSet<>(Arrays.asList(1, 2, 3));
-     * join(numbers.iterator());                      // returns "1, 2, 3" (order may vary)
+     * Strings.join(numbers.iterator());                      // returns "1, 2, 3" (order may vary)
      * 
-     * join(null);                                    // returns ""
-     * join(new ArrayList<>().iterator());            // returns ""
+     * Strings.join(null);                                    // returns ""
+     * Strings.join(new ArrayList<>().iterator());            // returns ""
      * }</pre>
      *
      * @param iter the Iterator containing the elements to join together, may be {@code null}
@@ -17025,7 +17024,7 @@ public final class Strings {
      * Joins the elements of the provided Iterator into a single String with the specified delimiter.
      *
      * <p>This method concatenates all elements from the iterator, separating each element with the specified delimiter string.
-     * Each element is converted to a string representation using its {@code toString()} method.
+     * Each element is converted to a string representation using its {@code Strings.toString()} method.
      * The delimiter can be empty, in which case the elements are concatenated without any separator.
      * The iterator is consumed during this operation.</p>
      *
@@ -17034,15 +17033,15 @@ public final class Strings {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * List<String> list = Arrays.asList("apple", "banana", "cherry");
-     * join(list.iterator(), " - ");                  // returns "apple - banana - cherry"
-     * join(list.iterator(), "");                     // returns "applebananacherry"
-     * join(list.iterator(), ", ");                   // returns "apple, banana, cherry"
+     * Strings.join(list.iterator(), " - ");                  // returns "apple - banana - cherry"
+     * Strings.join(list.iterator(), "");                     // returns "applebananacherry"
+     * Strings.join(list.iterator(), ", ");                   // returns "apple, banana, cherry"
      * 
      * List<Integer> numbers = Arrays.asList(1, 2, 3);
-     * join(numbers.iterator(), " and ");             // returns "1 and 2 and 3"
+     * Strings.join(numbers.iterator(), " and ");             // returns "1 and 2 and 3"
      * 
-     * join(null, ", ");                              // returns ""
-     * join(new ArrayList<>().iterator(), ", ");      // returns ""
+     * Strings.join(null, ", ");                              // returns ""
+     * Strings.join(new ArrayList<>().iterator(), ", ");      // returns ""
      * }</pre>
      *
      * @param iter the Iterator containing the elements to join together, may be {@code null}
@@ -17059,7 +17058,7 @@ public final class Strings {
      *
      * <p>This method concatenates all elements from the iterator, separating each element with the specified delimiter.
      * The resulting string is prefixed and suffixed with the specified strings.
-     * Each element is converted to a string representation using its {@code toString()} method.
+     * Each element is converted to a string representation using its {@code Strings.toString()} method.
      * The iterator is consumed during this operation.</p>
      *
      * <p>The method returns just the concatenation of prefix and suffix if the Iterator is {@code null} or has no elements.</p>
@@ -17067,11 +17066,11 @@ public final class Strings {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * List<String> list = Arrays.asList("apple", "banana", "cherry");
-     * join(list.iterator(), ", ", "[", "]");         // returns "[apple, banana, cherry]"
-     * join(list.iterator(), " | ", "Items: ", ".");  // returns "Items: apple | banana | cherry."
+     * Strings.join(list.iterator(), ", ", "[", "]");         // returns "[apple, banana, cherry]"
+     * Strings.join(list.iterator(), " | ", "Items: ", ".");  // returns "Items: apple | banana | cherry."
      * 
-     * join(new ArrayList<>().iterator(), ", ", "[", "]"); // returns "[]"
-     * join(null, ", ", "Start: ", " :End");          // returns "Start:  :End"
+     * Strings.join(new ArrayList<>().iterator(), ", ", "[", "]"); // returns "[]"
+     * Strings.join(null, ", ", "Start: ", " :End");          // returns "Start:  :End"
      * }</pre>
      *
      * @param iter the Iterator containing the elements to join together, may be {@code null}
@@ -17090,7 +17089,7 @@ public final class Strings {
      *
      * <p>This method concatenates all elements from the iterator, separating each element with the specified delimiter.
      * The resulting string is prefixed and suffixed with the specified strings.
-     * Each element is converted to a string representation using its {@code toString()} method.
+     * Each element is converted to a string representation using its {@code Strings.toString()} method.
      * If trim is {@code true}, leading and trailing whitespace is removed from each element's string representation.
      * The iterator is consumed during this operation.</p>
      *
@@ -17099,11 +17098,11 @@ public final class Strings {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * List<String> list = Arrays.asList(" apple ", " banana ", " cherry ");
-     * join(list.iterator(), ", ", "[", "]", true);   // returns "[apple, banana, cherry]"
-     * join(list.iterator(), ", ", "[", "]", false);  // returns "[ apple ,  banana ,  cherry ]"
+     * Strings.join(list.iterator(), ", ", "[", "]", true);   // returns "[apple, banana, cherry]"
+     * Strings.join(list.iterator(), ", ", "[", "]", false);  // returns "[ apple ,  banana ,  cherry ]"
      * 
      * Set<String> set = new HashSet<>(Arrays.asList("  one  ", "  two  "));
-     * join(set.iterator(), " | ", "", "", true);     // returns "one | two" (order may vary)
+     * Strings.join(set.iterator(), " | ", "", "", true);     // returns "one | two" (order may vary)
      * }</pre>
      *
      * @param iter the Iterator containing the elements to join together, may be {@code null}
@@ -17145,11 +17144,11 @@ public final class Strings {
      * Map<String, Integer> map = new HashMap<>();
      * map.put("apple", 5);
      * map.put("banana", 3);
-     * joinEntries(map);                              // returns "apple=5, banana=3" (order may vary)
+     * Strings.joinEntries(map);                              // returns "apple=5, banana=3" (order may vary)
      * 
      * Map<String, String> emptyMap = new HashMap<>();
-     * joinEntries(emptyMap);                         // returns ""
-     * joinEntries(null);                             // returns ""
+     * Strings.joinEntries(emptyMap);                         // returns ""
+     * Strings.joinEntries(null);                             // returns ""
      * }</pre>
      *
      * @param m the Map containing the entries to join, may be {@code null} or empty
@@ -17174,11 +17173,11 @@ public final class Strings {
      * Map<String, Integer> map = new LinkedHashMap<>();
      * map.put("name", 1);
      * map.put("age", 25);
-     * joinEntries(map, ", ");                        // returns "name=1, age=25"
-     * joinEntries(map, " AND ");                     // returns "name=1 AND age=25"
+     * Strings.joinEntries(map, ", ");                        // returns "name=1, age=25"
+     * Strings.joinEntries(map, " AND ");                     // returns "name=1 AND age=25"
      * 
      * Map<String, String> emptyMap = new HashMap<>();
-     * joinEntries(emptyMap, ", ");                   // returns ""
+     * Strings.joinEntries(emptyMap, ", ");                   // returns ""
      * }</pre>
      *
      * @param m the Map containing the entries to join, may be {@code null} or empty
@@ -17209,12 +17208,12 @@ public final class Strings {
      * Map<String, Integer> map = new LinkedHashMap<>();
      * map.put("min", 10);
      * map.put("max", 100);
-     * joinEntries(map, ", ", " = ");                 // returns "min = 10, max = 100"
-     * joinEntries(map, " AND ", " IS ");             // returns "min IS 10 AND max IS 100"
-     * joinEntries(map, "|", "");                     // returns "min10|max100"
+     * Strings.joinEntries(map, ", ", " = ");                 // returns "min = 10, max = 100"
+     * Strings.joinEntries(map, " AND ", " IS ");             // returns "min IS 10 AND max IS 100"
+     * Strings.joinEntries(map, "|", "");                     // returns "min10|max100"
      * 
      * Map<String, String> emptyMap = new HashMap<>();
-     * joinEntries(emptyMap, ", ", " = ");            // returns ""
+     * Strings.joinEntries(emptyMap, ", ", " = ");            // returns ""
      * }</pre>
      *
      * @param m the Map containing the entries to join, may be {@code null} or empty
@@ -17246,12 +17245,12 @@ public final class Strings {
      * Map<String, Integer> map = new LinkedHashMap<>();
      * map.put("x", 1);
      * map.put("y", 2);
-     * joinEntries(map, ", ", "=", "[", "]");         // returns "[x=1, y=2]"
-     * joinEntries(map, " AND ", " IS ", "WHERE ", ";"); // returns "WHERE x IS 1 AND y IS 2;"
+     * Strings.joinEntries(map, ", ", "=", "[", "]");         // returns "[x=1, y=2]"
+     * Strings.joinEntries(map, " AND ", " IS ", "WHERE ", ";"); // returns "WHERE x IS 1 AND y IS 2;"
      * 
      * Map<String, String> emptyMap = new HashMap<>();
-     * joinEntries(emptyMap, ", ", "=", "[", "]");    // returns "[]"
-     * joinEntries(emptyMap, ", ", "=", "", "");      // returns ""
+     * Strings.joinEntries(emptyMap, ", ", "=", "[", "]");    // returns "[]"
+     * Strings.joinEntries(emptyMap, ", ", "=", "", "");      // returns ""
      * }</pre>
      *
      * @param m the Map containing the entries to join, may be {@code null} or empty
@@ -17283,13 +17282,13 @@ public final class Strings {
      * map.put(" name ", " John ");
      * map.put(" age ", " 25 ");
      * 
-     * joinEntries(map, ", ", "=", "{", "}", false);  // returns "{ name = John ,  age = 25 }"
-     * joinEntries(map, ", ", "=", "{", "}", true);   // returns "{name=John, age=25}"
+     * Strings.joinEntries(map, ", ", "=", "{", "}", false);  // returns "{ name = John ,  age = 25 }"
+     * Strings.joinEntries(map, ", ", "=", "{", "}", true);   // returns "{name=John, age=25}"
      * 
      * Map<Integer, Integer> numbers = new LinkedHashMap<>();
      * numbers.put(1, 100);
      * numbers.put(2, 200);
-     * joinEntries(numbers, " + ", "*", "(", ")", false); // returns "(1*100 + 2*200)"
+     * Strings.joinEntries(numbers, " + ", "*", "(", ")", false); // returns "(1*100 + 2*200)"
      * }</pre>
      *
      * @param m the Map containing the entries to join, may be {@code null} or empty
@@ -17321,9 +17320,9 @@ public final class Strings {
      * map.put("second", 2);
      * map.put("third", 3);
      * 
-     * joinEntries(map, 0, 2, ", ");                  // returns "first=1, second=2"
-     * joinEntries(map, 1, 3, " AND ");               // returns "second=2 AND third=3"
-     * joinEntries(map, 2, 2, ", ");                  // returns ""
+     * Strings.joinEntries(map, 0, 2, ", ");                  // returns "first=1, second=2"
+     * Strings.joinEntries(map, 1, 3, " AND ");               // returns "second=2 AND third=3"
+     * Strings.joinEntries(map, 2, 2, ", ");                  // returns ""
      * }</pre>
      *
      * @param m the Map containing the entries to join, may be {@code null} or empty
@@ -17355,9 +17354,9 @@ public final class Strings {
      * map.put(" key2 ", " value2 ");
      * map.put(" key3 ", " value3 ");
      * 
-     * joinEntries(map, 0, 2, ", ", false);           // returns " key1 = value1 ,  key2 = value2 "
-     * joinEntries(map, 0, 2, ", ", true);            // returns "key1=value1, key2=value2"
-     * joinEntries(map, 1, 3, " | ", true);           // returns "key2=value2 | key3=value3"
+     * Strings.joinEntries(map, 0, 2, ", ", false);           // returns " key1 = value1 ,  key2 = value2 "
+     * Strings.joinEntries(map, 0, 2, ", ", true);            // returns "key1=value1, key2=value2"
+     * Strings.joinEntries(map, 1, 3, " | ", true);           // returns "key2=value2 | key3=value3"
      * }</pre>
      *
      * @param m the Map containing the entries to join, may be {@code null} or empty
@@ -17390,9 +17389,9 @@ public final class Strings {
      * map.put("max", 100);
      * map.put("avg", 55);
      * 
-     * joinEntries(map, 0, 2, ", ", " = ");           // returns "min = 10, max = 100"
-     * joinEntries(map, 1, 3, " AND ", " IS ");       // returns "max IS 100 AND avg IS 55"
-     * joinEntries(map, 0, 1, "|", "");               // returns "min10"
+     * Strings.joinEntries(map, 0, 2, ", ", " = ");           // returns "min = 10, max = 100"
+     * Strings.joinEntries(map, 1, 3, " AND ", " IS ");       // returns "max IS 100 AND avg IS 55"
+     * Strings.joinEntries(map, 0, 1, "|", "");               // returns "min10"
      * }</pre>
      *
      * @param m the Map containing the entries to join, may be {@code null} or empty
@@ -17426,9 +17425,9 @@ public final class Strings {
      * map.put(" age ", " 25 ");
      * map.put(" city ", " NYC ");
      * 
-     * joinEntries(map, 0, 2, ", ", "=", false);      // returns " name = John ,  age = 25 "
-     * joinEntries(map, 0, 2, ", ", "=", true);       // returns "name=John, age=25"
-     * joinEntries(map, 1, 3, " AND ", " IS ", true); // returns "age IS 25 AND city IS NYC"
+     * Strings.joinEntries(map, 0, 2, ", ", "=", false);      // returns " name = John ,  age = 25 "
+     * Strings.joinEntries(map, 0, 2, ", ", "=", true);       // returns "name=John, age=25"
+     * Strings.joinEntries(map, 1, 3, " AND ", " IS ", true); // returns "age IS 25 AND city IS NYC"
      * }</pre>
      *
      * @param m the Map containing the entries to join, may be {@code null} or empty
@@ -17464,9 +17463,9 @@ public final class Strings {
      * map.put("y", 2);
      * map.put("z", 3);
      * 
-     * joinEntries(map, 0, 2, ", ", "=", "[", "]");   // returns "[x=1, y=2]"
-     * joinEntries(map, 1, 3, " AND ", " IS ", "WHERE ", ";"); // returns "WHERE y IS 2 AND z IS 3;"
-     * joinEntries(map, 2, 2, ", ", "=", "{", "}");   // returns "{}"
+     * Strings.joinEntries(map, 0, 2, ", ", "=", "[", "]");   // returns "[x=1, y=2]"
+     * Strings.joinEntries(map, 1, 3, " AND ", " IS ", "WHERE ", ";"); // returns "WHERE y IS 2 AND z IS 3;"
+     * Strings.joinEntries(map, 2, 2, ", ", "=", "{", "}");   // returns "{}"
      * }</pre>
      *
      * @param m the Map containing the entries to join, may be {@code null} or empty
@@ -17504,12 +17503,12 @@ public final class Strings {
      * map.put(" name ", " John ");
      * map.put(" role ", " Admin ");
      * 
-     * joinEntries(map, 0, 2, ", ", ":", "{", "}", false); // returns "{ id : 123 ,  name : John }"
-     * joinEntries(map, 0, 2, ", ", ":", "{", "}", true);  // returns "{id:123, name:John}"
-     * joinEntries(map, 1, 3, " AND ", "=", "WHERE ", ";", true); // returns "WHERE name=John AND role=Admin;"
+     * Strings.joinEntries(map, 0, 2, ", ", ":", "{", "}", false); // returns "{ id : 123 ,  name : John }"
+     * Strings.joinEntries(map, 0, 2, ", ", ":", "{", "}", true);  // returns "{id:123, name:John}"
+     * Strings.joinEntries(map, 1, 3, " AND ", "=", "WHERE ", ";", true); // returns "WHERE name=John AND role=Admin;"
      * 
      * // Empty range example
-     * joinEntries(map, 2, 2, ", ", "=", "[", "]", false); // returns "[]"
+     * Strings.joinEntries(map, 2, 2, ", ", "=", "[", "]", false); // returns "[]"
      * }</pre>
      *
      * @param m the Map containing the entries to join, may be {@code null} or empty
@@ -17602,16 +17601,16 @@ public final class Strings {
      *     new Person("Jane", 30)
      * );
      * 
-     * joinEntries(people, ", ", "=", 
+     * Strings.joinEntries(people, ", ", "=", 
      *     person -> person.getName(), 
      *     person -> person.getAge());                // returns "John=25, Jane=30"
      * 
-     * joinEntries(people, " AND ", " IS ", 
+     * Strings.joinEntries(people, " AND ", " IS ", 
      *     person -> person.getName(), 
      *     person -> person.getAge());                // returns "John IS 25 AND Jane IS 30"
      * 
      * List<Person> emptyList = new ArrayList<>();
-     * joinEntries(emptyList, ", ", "=", 
+     * Strings.joinEntries(emptyList, ", ", "=", 
      *     Person::getName, Person::getAge);          // returns ""
      * }</pre>
      *
@@ -17649,10 +17648,10 @@ public final class Strings {
      *     Map.entry(" age ", 25)
      * );
      * 
-     * joinEntries(entries, ", ", "=", "[", "]", false,
+     * Strings.joinEntries(entries, ", ", "=", "[", "]", false,
      *     Map.Entry::getKey, Map.Entry::getValue);   // returns "[ name =1,  age =25]"
      * 
-     * joinEntries(entries, ", ", "=", "[", "]", true,
+     * Strings.joinEntries(entries, ", ", "=", "[", "]", true,
      *     Map.Entry::getKey, Map.Entry::getValue);   // returns "[name=1, age=25]"
      * 
      * List<Product> products = Arrays.asList(
@@ -17660,7 +17659,7 @@ public final class Strings {
      *     new Product("Banana", 0.99)
      * );
      * 
-     * joinEntries(products, " + ", " costs $", "Total: ", "", false,
+     * Strings.joinEntries(products, " + ", " costs $", "Total: ", "", false,
      *     Product::getName, Product::getPrice);       // returns "Total: Apple costs $1.99 + Banana costs $0.99"
      * }</pre>
      *
@@ -17745,12 +17744,12 @@ public final class Strings {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * concat("Hello", "World");          // returns "HelloWorld"
-     * concat("Hello", null);             // returns "Hello"
-     * concat(null, "World");             // returns "World"
-     * concat("", "World");               // returns "World"
-     * concat(null, null);                // returns ""
-     * concat("", "");                    // returns ""
+     * Strings.concat("Hello", "World");          // returns "HelloWorld"
+     * Strings.concat("Hello", null);             // returns "Hello"
+     * Strings.concat(null, "World");             // returns "World"
+     * Strings.concat("", "World");               // returns "World"
+     * Strings.concat(null, null);                // returns ""
+     * Strings.concat("", "");                    // returns ""
      * }</pre>
      *
      * @param a the first string to concatenate, may be {@code null} or empty
@@ -17776,11 +17775,11 @@ public final class Strings {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * concat("Hello", " ", "World");     // returns "Hello World"
-     * concat("A", "B", "C");             // returns "ABC"
-     * concat("Hello", null, "World");    // returns "HelloWorld"
-     * concat(null, null, null);          // returns ""
-     * concat("", "", "");                // returns ""
+     * Strings.concat("Hello", " ", "World");     // returns "Hello World"
+     * Strings.concat("A", "B", "C");             // returns "ABC"
+     * Strings.concat("Hello", null, "World");    // returns "HelloWorld"
+     * Strings.concat(null, null, null);          // returns ""
+     * Strings.concat("", "", "");                // returns ""
      * }</pre>
      *
      * @param a the first string to concatenate, may be {@code null} or empty
@@ -17803,10 +17802,10 @@ public final class Strings {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * concat("Hello", " ", "World", "!");        // returns "Hello World!"
-     * concat("A", "B", "C", "D");                // returns "ABCD"
-     * concat("Hello", null, "World", null);      // returns "HelloWorld"
-     * concat(null, null, null, null);            // returns ""
+     * Strings.concat("Hello", " ", "World", "!");        // returns "Hello World!"
+     * Strings.concat("A", "B", "C", "D");                // returns "ABCD"
+     * Strings.concat("Hello", null, "World", null);      // returns "HelloWorld"
+     * Strings.concat(null, null, null, null);            // returns ""
      * }</pre>
      *
      * @param a the first string to concatenate, may be {@code null} or empty
@@ -17830,10 +17829,10 @@ public final class Strings {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * concat("Hello", " ", "World", "!", "!");   // returns "Hello World!!"
-     * concat("A", "B", "C", "D", "E");           // returns "ABCDE"
-     * concat("1", null, "2", null, "3");         // returns "123"
-     * concat(null, null, null, null, null);      // returns ""
+     * Strings.concat("Hello", " ", "World", "!", "!");   // returns "Hello World!!"
+     * Strings.concat("A", "B", "C", "D", "E");           // returns "ABCDE"
+     * Strings.concat("1", null, "2", null, "3");         // returns "123"
+     * Strings.concat(null, null, null, null, null);      // returns ""
      * }</pre>
      *
      * @param a the first string to concatenate, may be {@code null} or empty
@@ -17858,10 +17857,10 @@ public final class Strings {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * concat("A", "B", "C", "D", "E", "F");      // returns "ABCDEF"
-     * concat("1", "2", "3", "4", "5", "6");      // returns "123456"
-     * concat("H", "e", "l", "l", "o", "!");      // returns "Hello!"
-     * concat(null, null, null, null, null, null); // returns ""
+     * Strings.concat("A", "B", "C", "D", "E", "F");      // returns "ABCDEF"
+     * Strings.concat("1", "2", "3", "4", "5", "6");      // returns "123456"
+     * Strings.concat("H", "e", "l", "l", "o", "!");      // returns "Hello!"
+     * Strings.concat(null, null, null, null, null, null); // returns ""
      * }</pre>
      *
      * @param a the first string to concatenate, may be {@code null} or empty
@@ -17887,9 +17886,9 @@ public final class Strings {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * concat("A", "B", "C", "D", "E", "F", "G"); // returns "ABCDEFG"
-     * concat("1", "2", "3", "4", "5", "6", "7"); // returns "1234567"
-     * concat("H", "e", "l", "l", "o", " ", "7"); // returns "Hello 7"
+     * Strings.concat("A", "B", "C", "D", "E", "F", "G"); // returns "ABCDEFG"
+     * Strings.concat("1", "2", "3", "4", "5", "6", "7"); // returns "1234567"
+     * Strings.concat("H", "e", "l", "l", "o", " ", "7"); // returns "Hello 7"
      * }</pre>
      *
      * @param a the first string to concatenate, may be {@code null} or empty
@@ -17916,9 +17915,9 @@ public final class Strings {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * concat("A", "B", "C", "D", "E", "F", "G", "H"); // returns "ABCDEFGH"
-     * concat("1", "2", "3", "4", "5", "6", "7", "8"); // returns "12345678"
-     * concat("H", "e", "l", "l", "o", " ", "8", "!"); // returns "Hello 8!"
+     * Strings.concat("A", "B", "C", "D", "E", "F", "G", "H"); // returns "ABCDEFGH"
+     * Strings.concat("1", "2", "3", "4", "5", "6", "7", "8"); // returns "12345678"
+     * Strings.concat("H", "e", "l", "l", "o", " ", "8", "!"); // returns "Hello 8!"
      * }</pre>
      *
      * @param a the first string to concatenate, may be {@code null} or empty
@@ -17948,9 +17947,9 @@ public final class Strings {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * concat("A", "B", "C", "D", "E", "F", "G", "H", "I"); // returns "ABCDEFGHI"
-     * concat("1", "2", "3", "4", "5", "6", "7", "8", "9"); // returns "123456789"
-     * concat("H", "e", "l", "l", "o", " ", "9", "!", "!"); // returns "Hello 9!!"
+     * Strings.concat("A", "B", "C", "D", "E", "F", "G", "H", "I"); // returns "ABCDEFGHI"
+     * Strings.concat("1", "2", "3", "4", "5", "6", "7", "8", "9"); // returns "123456789"
+     * Strings.concat("H", "e", "l", "l", "o", " ", "9", "!", "!"); // returns "Hello 9!!"
      * }</pre>
      *
      * @param a the first string to concatenate, may be {@code null}
@@ -17982,12 +17981,12 @@ public final class Strings {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * concat(new String[] {"Hello", " ", "World"});      // returns "Hello World"
-     * concat(new String[] {"A", "B", "C", "D"});         // returns "ABCD"
-     * concat(new String[] {"Hello", null, "World"});     // returns "HelloWorld"
-     * concat(new String[] {null, null});                 // returns ""
-     * concat(new String[0]);                            // returns ""
-     * concat((String[]) null);                          // returns ""
+     * Strings.concat(new String[] {"Hello", " ", "World"});      // returns "Hello World"
+     * Strings.concat(new String[] {"A", "B", "C", "D"});         // returns "ABCD"
+     * Strings.concat(new String[] {"Hello", null, "World"});     // returns "HelloWorld"
+     * Strings.concat(new String[] {null, null});                 // returns ""
+     * Strings.concat(new String[0]);                            // returns ""
+     * Strings.concat((String[]) null);                          // returns ""
      * }</pre>
      *
      * @param a the array of strings to concatenate, may be {@code null} or empty
@@ -18040,11 +18039,11 @@ public final class Strings {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * concat("Hello", 123);              // returns "Hello123"
-     * concat(42, " is the answer");      // returns "42 is the answer"
-     * concat(null, "World");             // returns "World"
-     * concat("Hello", null);             // returns "Hello"
-     * concat(null, null);                // returns ""
+     * Strings.concat("Hello", 123);              // returns "Hello123"
+     * Strings.concat(42, " is the answer");      // returns "42 is the answer"
+     * Strings.concat(null, "World");             // returns "World"
+     * Strings.concat("Hello", null);             // returns "Hello"
+     * Strings.concat(null, null);                // returns ""
      * }</pre>
      *
      * @param a the first object to concatenate, may be {@code null}
@@ -18066,10 +18065,10 @@ public final class Strings {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * concat("Hello", " ", "World");     // returns "Hello World"
-     * concat(1, 2, 3);                   // returns "123"
-     * concat("Value: ", 42, "!");        // returns "Value: 42!"
-     * concat(null, null, null);          // returns ""
+     * Strings.concat("Hello", " ", "World");     // returns "Hello World"
+     * Strings.concat(1, 2, 3);                   // returns "123"
+     * Strings.concat("Value: ", 42, "!");        // returns "Value: 42!"
+     * Strings.concat(null, null, null);          // returns ""
      * }</pre>
      *
      * @param a the first object to concatenate, may be {@code null}
@@ -18093,10 +18092,10 @@ public final class Strings {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * concat("A", "B", "C", "D");                // returns "ABCD"
-     * concat(1, "+", 2, "=3");                   // returns "1+2=3"
-     * concat("Result: ", 10, " out of ", 20);   // returns "Result: 10 out of 20"
-     * concat(null, null, null, null);            // returns ""
+     * Strings.concat("A", "B", "C", "D");                // returns "ABCD"
+     * Strings.concat(1, "+", 2, "=3");                   // returns "1+2=3"
+     * Strings.concat("Result: ", 10, " out of ", 20);   // returns "Result: 10 out of 20"
+     * Strings.concat(null, null, null, null);            // returns ""
      * }</pre>
      *
      * @param a the first object to concatenate, may be {@code null}
@@ -18121,10 +18120,10 @@ public final class Strings {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * concat("A", "B", "C", "D", "E");           // returns "ABCDE"
-     * concat(1, " ", 2, " ", 3);                 // returns "1 2 3"
-     * concat("Sum of ", 1, "+", 2, "=3");        // returns "Sum of 1+2=3"
-     * concat(null, null, null, null, null);      // returns ""
+     * Strings.concat("A", "B", "C", "D", "E");           // returns "ABCDE"
+     * Strings.concat(1, " ", 2, " ", 3);                 // returns "1 2 3"
+     * Strings.concat("Sum of ", 1, "+", 2, "=3");        // returns "Sum of 1+2=3"
+     * Strings.concat(null, null, null, null, null);      // returns ""
      * }</pre>
      *
      * @param a the first object to concatenate, may be {@code null}
@@ -18150,9 +18149,9 @@ public final class Strings {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * concat("A", "B", "C", "D", "E", "F");      // returns "ABCDEF"
-     * concat(1, 2, 3, 4, 5, 6);                  // returns "123456"
-     * concat("H", "e", "l", "l", "o", "!");      // returns "Hello!"
+     * Strings.concat("A", "B", "C", "D", "E", "F");      // returns "ABCDEF"
+     * Strings.concat(1, 2, 3, 4, 5, 6);                  // returns "123456"
+     * Strings.concat("H", "e", "l", "l", "o", "!");      // returns "Hello!"
      * }</pre>
      *
      * @param a the first object to concatenate, may be {@code null}
@@ -18179,9 +18178,9 @@ public final class Strings {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * concat("A", "B", "C", "D", "E", "F", "G"); // returns "ABCDEFG"
-     * concat(1, 2, 3, 4, 5, 6, 7);               // returns "1234567"
-     * concat("H", "e", "l", "l", "o", " ", 7);   // returns "Hello 7"
+     * Strings.concat("A", "B", "C", "D", "E", "F", "G"); // returns "ABCDEFG"
+     * Strings.concat(1, 2, 3, 4, 5, 6, 7);               // returns "1234567"
+     * Strings.concat("H", "e", "l", "l", "o", " ", 7);   // returns "Hello 7"
      * }</pre>
      *
      * @param a the first object to concatenate, may be {@code null}
@@ -18209,9 +18208,9 @@ public final class Strings {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * concat("A", "B", "C", "D", "E", "F", "G", "H"); // returns "ABCDEFGH"
-     * concat(1, 2, 3, 4, 5, 6, 7, 8);                 // returns "12345678"
-     * concat("H", "e", "l", "l", "o", " ", 8, "!");   // returns "Hello 8!"
+     * Strings.concat("A", "B", "C", "D", "E", "F", "G", "H"); // returns "ABCDEFGH"
+     * Strings.concat(1, 2, 3, 4, 5, 6, 7, 8);                 // returns "12345678"
+     * Strings.concat("H", "e", "l", "l", "o", " ", 8, "!");   // returns "Hello 8!"
      * }</pre>
      *
      * @param a the first object to concatenate, may be {@code null}
@@ -18241,9 +18240,9 @@ public final class Strings {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * concat("A", "B", "C", "D", "E", "F", "G", "H", "I"); // returns "ABCDEFGHI"
-     * concat(1, 2, 3, 4, 5, 6, 7, 8, 9);                   // returns "123456789"
-     * concat("H", "e", "l", "l", "o", " ", 9, "!", "!");   // returns "Hello 9!!"
+     * Strings.concat("A", "B", "C", "D", "E", "F", "G", "H", "I"); // returns "ABCDEFGHI"
+     * Strings.concat(1, 2, 3, 4, 5, 6, 7, 8, 9);                   // returns "123456789"
+     * Strings.concat("H", "e", "l", "l", "o", " ", 9, "!", "!");   // returns "Hello 9!!"
      * }</pre>
      *
      * @param a the first object to concatenate, may be {@code null}
@@ -18307,12 +18306,12 @@ public final class Strings {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * lenientFormat("Hello %s", "World");              // returns "Hello World"
-     * lenientFormat("Hello %s %s", "New", "World");    // returns "Hello New World"
-     * lenientFormat("Hello %s", "World", "Extra");     // returns "Hello World: [Extra]"
-     * lenientFormat("Hello %s %s", "World");           // returns "Hello World %s"
-     * lenientFormat("Hello", "World");                 // returns "Hello: [World]"
-     * lenientFormat(null, "arg1", "arg2");             // returns "null: [arg1, arg2]"
+     * Strings.lenientFormat("Hello %s", "World");              // returns "Hello World"
+     * Strings.lenientFormat("Hello %s %s", "New", "World");    // returns "Hello New World"
+     * Strings.lenientFormat("Hello %s", "World", "Extra");     // returns "Hello World: [Extra]"
+     * Strings.lenientFormat("Hello %s %s", "World");           // returns "Hello World %s"
+     * Strings.lenientFormat("Hello", "World");                 // returns "Hello: [World]"
+     * Strings.lenientFormat(null, "arg1", "arg2");             // returns "null: [arg1, arg2]"
      * }</pre>
      *
      * @param template a string containing zero or more {@code "%s"} placeholder sequences. {@code
@@ -18392,11 +18391,11 @@ public final class Strings {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * reverse("Hello");                  // returns "olleH"
-     * reverse("12345");                  // returns "54321"
-     * reverse("A");                      // returns "A"
-     * reverse("");                       // returns ""
-     * reverse(null);                     // returns null
+     * Strings.reverse("Hello");                  // returns "olleH"
+     * Strings.reverse("12345");                  // returns "54321"
+     * Strings.reverse("A");                      // returns "A"
+     * Strings.reverse("");                       // returns ""
+     * Strings.reverse(null);                     // returns null
      * }</pre>
      *
      * @param str the string to be reversed. May be {@code null} or empty.
@@ -18429,11 +18428,11 @@ public final class Strings {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * reverseDelimited(null, '*');       // returns null
-     * reverseDelimited("", '*');         // returns ""
-     * reverseDelimited("a.b.c", 'x');    // returns "a.b.c"
-     * reverseDelimited("a.b.c", '.');    // returns "c.b.a"
-     * reverseDelimited("java.lang.String", '.'); // returns "String.lang.java"
+     * Strings.reverseDelimited(null, '*');       // returns null
+     * Strings.reverseDelimited("", '*');         // returns ""
+     * Strings.reverseDelimited("a.b.c", 'x');    // returns "a.b.c"
+     * Strings.reverseDelimited("a.b.c", '.');    // returns "c.b.a"
+     * Strings.reverseDelimited("java.lang.String", '.'); // returns "String.lang.java"
      * }</pre>
      *
      * @param str the string to reverse, which may be {@code null}.
@@ -18465,11 +18464,11 @@ public final class Strings {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * reverseDelimited(null, " ");                // returns null
-     * reverseDelimited("", " ");                  // returns ""
-     * reverseDelimited("Hello World", "xyz");     // returns "Hello World"
-     * reverseDelimited("Hello World Java", " ");  // returns "Java World Hello"
-     * reverseDelimited("A::B::C", "::");         // returns "C::B::A"
+     * Strings.reverseDelimited(null, " ");                // returns null
+     * Strings.reverseDelimited("", " ");                  // returns ""
+     * Strings.reverseDelimited("Hello World", "xyz");     // returns "Hello World"
+     * Strings.reverseDelimited("Hello World Java", " ");  // returns "Java World Hello"
+     * Strings.reverseDelimited("A::B::C", "::");         // returns "C::B::A"
      * }</pre>
      *
      * @param str the string to be reversed. May be {@code null} or empty.
@@ -18501,12 +18500,12 @@ public final class Strings {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * sort("dcba");                      // returns "abcd"
-     * sort("54321");                     // returns "12345"
-     * sort("Hello");                     // returns "Helo" (duplicate 'l' preserved)
-     * sort("a");                         // returns "a"
-     * sort("");                          // returns ""
-     * sort(null);                        // returns null
+     * Strings.sort("dcba");                      // returns "abcd"
+     * Strings.sort("54321");                     // returns "12345"
+     * Strings.sort("Hello");                     // returns "Helo" (duplicate 'l' preserved)
+     * Strings.sort("a");                         // returns "a"
+     * Strings.sort("");                          // returns ""
+     * Strings.sort(null);                        // returns null
      * }</pre>
      *
      * @param str the string whose characters are to be sorted. May be {@code null} or empty.
@@ -18537,15 +18536,15 @@ public final class Strings {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * rotate(null, *);        // returns null
-     * rotate("", *);          // returns ""
-     * rotate("abcdefg", 0);   // returns "abcdefg"
-     * rotate("abcdefg", 2);   // returns "fgabcde"
-     * rotate("abcdefg", -2);  // returns "cdefgab"
-     * rotate("abcdefg", 7);   // returns "abcdefg"
-     * rotate("abcdefg", -7);  // returns "abcdefg"
-     * rotate("abcdefg", 9);   // returns "fgabcde"
-     * rotate("abcdefg", -9);  // returns "cdefgab"
+     * Strings.rotate(null, *);        // returns null
+     * Strings.rotate("", *);          // returns ""
+     * Strings.rotate("abcdefg", 0);   // returns "abcdefg"
+     * Strings.rotate("abcdefg", 2);   // returns "fgabcde"
+     * Strings.rotate("abcdefg", -2);  // returns "cdefgab"
+     * Strings.rotate("abcdefg", 7);   // returns "abcdefg"
+     * Strings.rotate("abcdefg", -7);  // returns "abcdefg"
+     * Strings.rotate("abcdefg", 9);   // returns "fgabcde"
+     * Strings.rotate("abcdefg", -9);  // returns "cdefgab"
      * }</pre>
      *
      * @param str the String to rotate, may be {@code null}
@@ -18585,11 +18584,11 @@ public final class Strings {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * shuffle("Hello");                  // might return "leHol", "olleH", etc.
-     * shuffle("12345");                  // might return "31524", "45213", etc.
-     * shuffle("a");                      // returns "a"
-     * shuffle("");                       // returns ""
-     * shuffle(null);                     // returns null
+     * Strings.shuffle("Hello");                  // might return "leHol", "olleH", etc.
+     * Strings.shuffle("12345");                  // might return "31524", "45213", etc.
+     * Strings.shuffle("a");                      // returns "a"
+     * Strings.shuffle("");                       // returns ""
+     * Strings.shuffle(null);                     // returns null
      * }</pre>
      *
      * @param str the string to be shuffled. May be {@code null} or empty.
@@ -18611,11 +18610,11 @@ public final class Strings {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Random rnd = new Random(42);
-     * shuffle("Hello", rnd);             // returns a deterministic shuffle
-     * shuffle("12345", rnd);             // returns another deterministic shuffle
-     * shuffle("a", rnd);                 // returns "a"
-     * shuffle("", rnd);                  // returns ""
-     * shuffle(null, rnd);                // returns null
+     * Strings.shuffle("Hello", rnd);             // returns a deterministic shuffle
+     * Strings.shuffle("12345", rnd);             // returns another deterministic shuffle
+     * Strings.shuffle("a", rnd);                 // returns "a"
+     * Strings.shuffle("", rnd);                  // returns ""
+     * Strings.shuffle(null, rnd);                // returns null
      * }</pre>
      *
      * @param str the string to be shuffled. May be {@code null} or empty.
@@ -18644,17 +18643,17 @@ public final class Strings {
      *
      * <p>This method replaces a portion of the original string (from {@code start} to {@code end - 1})
      * with the overlay string. The characters before {@code start} and from {@code end} onwards
-     * remain unchanged. This is functionally equivalent to {@code replace(str, start, end, overlay)}.</p>
+     * remain unchanged. This is functionally equivalent to {@code Strings.replace(str, start, end, overlay)}.</p>
      *
      * <p>If the overlay string is {@code null} or empty, the specified portion is simply removed.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * overlay(null, "abc", 0, 0);          // returns "abc"
-     * overlay("", "abc", 0, 0);            // returns "abc"
-     * overlay("abcdef", null, 2, 4);      // returns "abef"
-     * overlay("abcdef", "", 2, 4);        // returns "abef"
-     * overlay("abcdef", "zzzz", 2, 4);    // returns "abzzzzef"
+     * Strings.overlay(null, "abc", 0, 0);          // returns "abc"
+     * Strings.overlay("", "abc", 0, 0);            // returns "abc"
+     * Strings.overlay("abcdef", null, 2, 4);      // returns "abef"
+     * Strings.overlay("abcdef", "", 2, 4);        // returns "abef"
+     * Strings.overlay("abcdef", "zzzz", 2, 4);    // returns "abzzzzef"
      * }</pre>
      *
      * @param str the String to do overlaying in, may be {@code null}
@@ -18663,7 +18662,7 @@ public final class Strings {
      * @param end the position to stop overlaying before; must be valid
      * @return overlayed String, or {@code overlay} if {@code null} String input
      * @throws IndexOutOfBoundsException if start or end is negative, or end is greater than the length of str, or indices are invalid
-     * @deprecated replaced by {@code replace(String, int, int, String)}
+     * @deprecated replaced by {@code Strings.replace(String, int, int, String)}
      * @see #replace(String, int, int, String)
      * @see N#replaceRange(String, int, int, String)
      */
@@ -18683,13 +18682,13 @@ public final class Strings {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * parseBoolean("true");              // returns true
-     * parseBoolean("True");              // returns true
-     * parseBoolean("TRUE");              // returns true
-     * parseBoolean("false");             // returns false
-     * parseBoolean("yes");               // returns false
-     * parseBoolean("");                  // returns false
-     * parseBoolean(null);                // returns false
+     * Strings.parseBoolean("true");              // returns true
+     * Strings.parseBoolean("True");              // returns true
+     * Strings.parseBoolean("TRUE");              // returns true
+     * Strings.parseBoolean("false");             // returns false
+     * Strings.parseBoolean("yes");               // returns false
+     * Strings.parseBoolean("");                  // returns false
+     * Strings.parseBoolean(null);                // returns false
      * }</pre>
      *
      * @param str the string to be parsed. May be {@code null}.
@@ -18714,12 +18713,12 @@ public final class Strings {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * parseChar("A");                    // returns 'A'
-     * parseChar("65");                   // returns 'A' (ASCII code 65)
-     * parseChar("$");                    // returns '$'
-     * parseChar("36");                   // returns '$' (ASCII code 36)
-     * parseChar("");                     // returns '\0'
-     * parseChar(null);                   // returns '\0'
+     * Strings.parseChar("A");                    // returns 'A'
+     * Strings.parseChar("65");                   // returns 'A' (ASCII code 65)
+     * Strings.parseChar("$");                    // returns '$'
+     * Strings.parseChar("36");                   // returns '$' (ASCII code 36)
+     * Strings.parseChar("");                     // returns '\0'
+     * Strings.parseChar(null);                   // returns '\0'
      * }</pre>
      *
      * @param str the string to be parsed. May be {@code null}.
@@ -18848,10 +18847,10 @@ public final class Strings {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * base64Encode("Hello".getBytes());  // returns "SGVsbG8="
-     * base64Encode(new byte[] {1,2,3});   // returns "AQID"
-     * base64Encode(new byte[0]);         // returns ""
-     * base64Encode(null);                // returns ""
+     * Strings.base64Encode("Hello".getBytes());  // returns "SGVsbG8="
+     * Strings.base64Encode(new byte[] {1,2,3});   // returns "AQID"
+     * Strings.base64Encode(new byte[0]);         // returns ""
+     * Strings.base64Encode(null);                // returns ""
      * }</pre>
      *
      * @param binaryData the byte array to be encoded.
@@ -18876,10 +18875,10 @@ public final class Strings {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * base64EncodeString("Hello");       // returns "SGVsbG8="
-     * base64EncodeString("Hello World"); // returns "SGVsbG8gV29ybGQ="
-     * base64EncodeString("");            // returns ""
-     * base64EncodeString(null);          // returns ""
+     * Strings.base64EncodeString("Hello");       // returns "SGVsbG8="
+     * Strings.base64EncodeString("Hello World"); // returns "SGVsbG8gV29ybGQ="
+     * Strings.base64EncodeString("");            // returns ""
+     * Strings.base64EncodeString(null);          // returns ""
      * }</pre>
      *
      * @param str the string to be encoded.
@@ -18905,13 +18904,13 @@ public final class Strings {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Basic encoding
-     * base64EncodeUtf8String("Hello World");         // returns "SGVsbG8gV29ybGQ="
-     * base64EncodeUtf8String("test@123");            // returns "dGVzdEAxMjM="
-     * base64EncodeUtf8String("UTF-8 chars: ñ");     // returns "VVRGLTggY2hhcnM6IMOx"
+     * Strings.base64EncodeUtf8String("Hello World");         // returns "SGVsbG8gV29ybGQ="
+     * Strings.base64EncodeUtf8String("test@123");            // returns "dGVzdEAxMjM="
+     * Strings.base64EncodeUtf8String("UTF-8 chars: ñ");     // returns "VVRGLTggY2hhcnM6IMOx"
      * 
      * // Edge cases
-     * base64EncodeUtf8String(null);                  // returns ""
-     * base64EncodeUtf8String("");                    // returns ""
+     * Strings.base64EncodeUtf8String(null);                  // returns ""
+     * Strings.base64EncodeUtf8String("");                    // returns ""
      * }</pre>
      *
      * @param str the string to be encoded.
@@ -18934,13 +18933,13 @@ public final class Strings {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Different charset encodings
-     * base64EncodeString("Hello", StandardCharsets.UTF_8);      // returns "SGVsbG8="
-     * base64EncodeString("Hello", StandardCharsets.US_ASCII);   // returns "SGVsbG8="
-     * base64EncodeString("Test123", StandardCharsets.UTF_16);   // returns different encoding
+     * Strings.base64EncodeString("Hello", StandardCharsets.UTF_8);      // returns "SGVsbG8="
+     * Strings.base64EncodeString("Hello", StandardCharsets.US_ASCII);   // returns "SGVsbG8="
+     * Strings.base64EncodeString("Test123", StandardCharsets.UTF_16);   // returns different encoding
      * 
      * // Edge cases
-     * base64EncodeString(null, StandardCharsets.UTF_8);         // returns ""
-     * base64EncodeString("", StandardCharsets.UTF_8);           // returns ""
+     * Strings.base64EncodeString(null, StandardCharsets.UTF_8);         // returns ""
+     * Strings.base64EncodeString("", StandardCharsets.UTF_8);           // returns ""
      * }</pre>
      *
      * @param str the string to be encoded.
@@ -18967,12 +18966,12 @@ public final class Strings {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Basic decoding
-     * base64Decode("SGVsbG8gV29ybGQ=");             // returns byte array for "Hello World"
-     * base64Decode("dGVzdEAxMjM=");                  // returns byte array for "test@123"
+     * Strings.base64Decode("SGVsbG8gV29ybGQ=");             // returns byte array for "Hello World"
+     * Strings.base64Decode("dGVzdEAxMjM=");                  // returns byte array for "test@123"
      * 
      * // Edge cases
-     * base64Decode(null);                            // returns empty byte array
-     * base64Decode("");                              // returns empty byte array
+     * Strings.base64Decode(null);                            // returns empty byte array
+     * Strings.base64Decode("");                              // returns empty byte array
      * }</pre>
      *
      * @param base64String the Base64 encoded string to be decoded.
@@ -18998,12 +18997,12 @@ public final class Strings {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Basic decoding to string
-     * base64DecodeToString("SGVsbG8gV29ybGQ=");     // returns "Hello World"
-     * base64DecodeToString("dGVzdEAxMjM=");          // returns "test@123"
+     * Strings.base64DecodeToString("SGVsbG8gV29ybGQ=");     // returns "Hello World"
+     * Strings.base64DecodeToString("dGVzdEAxMjM=");          // returns "test@123"
      * 
      * // Edge cases
-     * base64DecodeToString(null);                    // returns ""
-     * base64DecodeToString("");                      // returns ""
+     * Strings.base64DecodeToString(null);                    // returns ""
+     * Strings.base64DecodeToString("");                      // returns ""
      * }</pre>
      *
      * @param base64String the Base64 encoded string to be decoded.
@@ -19028,12 +19027,12 @@ public final class Strings {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // UTF-8 specific decoding
-     * base64DecodeToUtf8String("SGVsbG8gV29ybGQ=");         // returns "Hello World"
-     * base64DecodeToUtf8String("VVRGLTggY2hhcnM6IMOx");     // returns "UTF-8 chars: ñ"
+     * Strings.base64DecodeToUtf8String("SGVsbG8gV29ybGQ=");         // returns "Hello World"
+     * Strings.base64DecodeToUtf8String("VVRGLTggY2hhcnM6IMOx");     // returns "UTF-8 chars: ñ"
      * 
      * // Edge cases
-     * base64DecodeToUtf8String(null);                        // returns ""
-     * base64DecodeToUtf8String("");                          // returns ""
+     * Strings.base64DecodeToUtf8String(null);                        // returns ""
+     * Strings.base64DecodeToUtf8String("");                          // returns ""
      * }</pre>
      *
      * @param base64String the Base64 URL encoded string to be decoded.
@@ -19055,13 +19054,13 @@ public final class Strings {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Different charset decoding
-     * base64DecodeToString("SGVsbG8=", StandardCharsets.UTF_8);      // returns "Hello"
-     * base64DecodeToString("SGVsbG8=", StandardCharsets.US_ASCII);   // returns "Hello"
-     * base64DecodeToString("base64String", StandardCharsets.UTF_16); // charset-specific decoding
+     * Strings.base64DecodeToString("SGVsbG8=", StandardCharsets.UTF_8);      // returns "Hello"
+     * Strings.base64DecodeToString("SGVsbG8=", StandardCharsets.US_ASCII);   // returns "Hello"
+     * Strings.base64DecodeToString("base64String", StandardCharsets.UTF_16); // charset-specific decoding
      * 
      * // Edge cases
-     * base64DecodeToString(null, StandardCharsets.UTF_8);            // returns ""
-     * base64DecodeToString("", StandardCharsets.UTF_8);              // returns ""
+     * Strings.base64DecodeToString(null, StandardCharsets.UTF_8);            // returns ""
+     * Strings.base64DecodeToString("", StandardCharsets.UTF_8);              // returns ""
      * }</pre>
      *
      * @param base64String the Base64 encoded string to be decoded.
@@ -19089,12 +19088,12 @@ public final class Strings {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // URL-safe encoding
-     * base64UrlEncode("Hello World".getBytes());     // returns URL-safe Base64 string
-     * base64UrlEncode("test/data+123".getBytes());   // returns string with - and _ instead of / and +
+     * Strings.base64UrlEncode("Hello World".getBytes());     // returns URL-safe Base64 string
+     * Strings.base64UrlEncode("test/data+123".getBytes());   // returns string with - and _ instead of / and +
      * 
      * // Edge cases
-     * base64UrlEncode(null);                         // returns ""
-     * base64UrlEncode(new byte[0]);                  // returns ""
+     * Strings.base64UrlEncode(null);                         // returns ""
+     * Strings.base64UrlEncode(new byte[0]);                  // returns ""
      * }</pre>
      *
      * @param binaryData the byte array to be encoded.
@@ -19120,12 +19119,12 @@ public final class Strings {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // URL-safe decoding
-     * base64UrlDecode("SGVsbG8gV29ybGQ");            // returns byte array for "Hello World"
-     * base64UrlDecode("dGVzdC1kYXRhXzEyMw");         // handles URL-safe characters
+     * Strings.base64UrlDecode("SGVsbG8gV29ybGQ");            // returns byte array for "Hello World"
+     * Strings.base64UrlDecode("dGVzdC1kYXRhXzEyMw");         // handles URL-safe characters
      * 
      * // Edge cases
-     * base64UrlDecode(null);                         // returns empty byte array
-     * base64UrlDecode("");                           // returns empty byte array
+     * Strings.base64UrlDecode(null);                         // returns empty byte array
+     * Strings.base64UrlDecode("");                           // returns empty byte array
      * }</pre>
      *
      * @param base64String the Base64 URL encoded string to be decoded.
@@ -19151,12 +19150,12 @@ public final class Strings {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // URL-safe decoding to string
-     * base64UrlDecodeToString("SGVsbG8gV29ybGQ");    // returns "Hello World"
-     * base64UrlDecodeToString("dGVzdEAxMjM");         // returns "test@123"
+     * Strings.base64UrlDecodeToString("SGVsbG8gV29ybGQ");    // returns "Hello World"
+     * Strings.base64UrlDecodeToString("dGVzdEAxMjM");         // returns "test@123"
      * 
      * // Edge cases
-     * base64UrlDecodeToString(null);                 // returns ""
-     * base64UrlDecodeToString("");                   // returns ""
+     * Strings.base64UrlDecodeToString(null);                 // returns ""
+     * Strings.base64UrlDecodeToString("");                   // returns ""
      * }</pre>
      *
      * @param base64String the Base64 URL encoded string to be decoded.
@@ -19183,12 +19182,12 @@ public final class Strings {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // URL-safe UTF-8 decoding
-     * base64UrlDecodeToUtf8String("SGVsbG8gV29ybGQ");       // returns "Hello World"
-     * base64UrlDecodeToUtf8String("VVRGLTggY2hhcnM6IMOx");  // returns "UTF-8 chars: ñ"
+     * Strings.base64UrlDecodeToUtf8String("SGVsbG8gV29ybGQ");       // returns "Hello World"
+     * Strings.base64UrlDecodeToUtf8String("VVRGLTggY2hhcnM6IMOx");  // returns "UTF-8 chars: ñ"
      * 
      * // Edge cases
-     * base64UrlDecodeToUtf8String(null);                     // returns ""
-     * base64UrlDecodeToUtf8String("");                       // returns ""
+     * Strings.base64UrlDecodeToUtf8String(null);                     // returns ""
+     * Strings.base64UrlDecodeToUtf8String("");                       // returns ""
      * }</pre>
      *
      * @param base64String the Base64 URL encoded string to be decoded.
@@ -19210,13 +19209,13 @@ public final class Strings {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Different charset URL-safe decoding
-     * base64UrlDecodeToString("SGVsbG8", StandardCharsets.UTF_8);      // returns "Hello"
-     * base64UrlDecodeToString("SGVsbG8", StandardCharsets.US_ASCII);   // returns "Hello"
-     * base64UrlDecodeToString("base64Url", StandardCharsets.UTF_16);   // charset-specific decoding
+     * Strings.base64UrlDecodeToString("SGVsbG8", StandardCharsets.UTF_8);      // returns "Hello"
+     * Strings.base64UrlDecodeToString("SGVsbG8", StandardCharsets.US_ASCII);   // returns "Hello"
+     * Strings.base64UrlDecodeToString("base64Url", StandardCharsets.UTF_16);   // charset-specific decoding
      * 
      * // Edge cases
-     * base64UrlDecodeToString(null, StandardCharsets.UTF_8);           // returns ""
-     * base64UrlDecodeToString("", StandardCharsets.UTF_8);             // returns ""
+     * Strings.base64UrlDecodeToString(null, StandardCharsets.UTF_8);           // returns ""
+     * Strings.base64UrlDecodeToString("", StandardCharsets.UTF_8);             // returns ""
      * }</pre>
      *
      * @param base64String the Base64 URL encoded string to be decoded.
@@ -19246,15 +19245,15 @@ public final class Strings {
      * Map<String, String> params = new HashMap<>();
      * params.put("name", "John Doe");
      * params.put("age", "30");
-     * urlEncode(params);                              // returns "name=John+Doe&age=30"
+     * Strings.urlEncode(params);                              // returns "name=John+Doe&age=30"
      * 
      * // Encoding with special characters
      * Map<String, String> data = new HashMap<>();
      * data.put("email", "test@example.com");
      * data.put("info", "hello world!");
-     * urlEncode(data);                                // returns "email=test%40example.com&info=hello+world%21"
+     * Strings.urlEncode(data);                                // returns "email=test%40example.com&info=hello+world%21"
      * 
-     * urlEncode(null);                                // returns ""        
+     * Strings.urlEncode(null);                                // returns ""        
      * }</pre>
      *
      * @param parameters the parameters to be URL-encoded.
@@ -19281,10 +19280,10 @@ public final class Strings {
      * Map<String, String> params = new HashMap<>();
      * params.put("name", "José");
      * params.put("city", "São Paulo");
-     * urlEncode(params, StandardCharsets.UTF_8);     // returns properly encoded UTF-8 string
+     * Strings.urlEncode(params, StandardCharsets.UTF_8);     // returns properly encoded UTF-8 string
      * 
      * // Encoding with different charset
-     * urlEncode(params, StandardCharsets.ISO_8859_1); // returns ISO-8859-1 encoded string
+     * Strings.urlEncode(params, StandardCharsets.ISO_8859_1); // returns ISO-8859-1 encoded string
      * }</pre>
      *
      * @param parameters the parameters to be URL-encoded.
@@ -19309,15 +19308,15 @@ public final class Strings {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Basic decoding
-     * urlDecode("name=John+Doe&age=30");             // returns {name=John Doe, age=30}
-     * urlDecode("email=test%40example.com");         // returns {email=test@example.com}
+     * Strings.urlDecode("name=John+Doe&age=30");             // returns {name=John Doe, age=30}
+     * Strings.urlDecode("email=test%40example.com");         // returns {email=test@example.com}
      * 
      * // Multiple values
-     * urlDecode("key1=value1&key2=value2&key3=");    // returns {key1=value1, key2=value2, key3=}
+     * Strings.urlDecode("key1=value1&key2=value2&key3=");    // returns {key1=value1, key2=value2, key3=}
      * 
      * // Edge cases
-     * urlDecode(null);                               // returns empty map
-     * urlDecode("");                                 // returns empty map
+     * Strings.urlDecode(null);                               // returns empty map
+     * Strings.urlDecode("");                                 // returns empty map
      * }</pre>
      *
      * @param urlQuery the URL query string to be decoded.
@@ -19341,11 +19340,11 @@ public final class Strings {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // UTF-8 decoding
-     * urlDecode("name=Jos%C3%A9&city=S%C3%A3o+Paulo", StandardCharsets.UTF_8);
+     * Strings.urlDecode("name=Jos%C3%A9&city=S%C3%A3o+Paulo", StandardCharsets.UTF_8);
      * // returns {name=José, city=São Paulo}
      * 
      * // Different charset
-     * urlDecode("data=test%20data", StandardCharsets.ISO_8859_1);
+     * Strings.urlDecode("data=test%20data", StandardCharsets.ISO_8859_1);
      * // returns {data=test data}
      * }</pre>
      *
@@ -19472,17 +19471,17 @@ public final class Strings {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Valid Base64 characters
-     * isBase64((byte)'A');                           // returns true
-     * isBase64((byte)'z');                           // returns true
-     * isBase64((byte)'0');                           // returns true
-     * isBase64((byte)'+');                           // returns true
-     * isBase64((byte)'/');                           // returns true
-     * isBase64((byte)'=');                           // returns {@code true} (padding)
+     * Strings.isBase64((byte)'A');                           // returns true
+     * Strings.isBase64((byte)'z');                           // returns true
+     * Strings.isBase64((byte)'0');                           // returns true
+     * Strings.isBase64((byte)'+');                           // returns true
+     * Strings.isBase64((byte)'/');                           // returns true
+     * Strings.isBase64((byte)'=');                           // returns {@code true} (padding)
      * 
      * // Invalid Base64 characters
-     * isBase64((byte)'!');                           // returns false
-     * isBase64((byte)' ');                           // returns false
-     * isBase64((byte)'@');                           // returns false
+     * Strings.isBase64((byte)'!');                           // returns false
+     * Strings.isBase64((byte)' ');                           // returns false
+     * Strings.isBase64((byte)'@');                           // returns false
      * }</pre>
      *
      * @param octet the value to test
@@ -19504,14 +19503,14 @@ public final class Strings {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Valid Base64 byte arrays
-     * isBase64("SGVsbG8=".getBytes());               // returns true
-     * isBase64("SGVs bG8=".getBytes());              // returns {@code true} (whitespace allowed)
-     * isBase64(new byte[0]);                         // returns {@code true} (empty array)
+     * Strings.isBase64("SGVsbG8=".getBytes());               // returns true
+     * Strings.isBase64("SGVs bG8=".getBytes());              // returns {@code true} (whitespace allowed)
+     * Strings.isBase64(new byte[0]);                         // returns {@code true} (empty array)
      * 
      * // Invalid Base64 byte arrays
-     * isBase64("Hello!".getBytes());                 // returns {@code false} (contains '!')
-     * isBase64("SGVs@G8=".getBytes());               // returns {@code false} (contains '@')
-     * isBase64((byte[]) null);                       // returns false
+     * Strings.isBase64("Hello!".getBytes());                 // returns {@code false} (contains '!')
+     * Strings.isBase64("SGVs@G8=".getBytes());               // returns {@code false} (contains '@')
+     * Strings.isBase64((byte[]) null);                       // returns false
      * }</pre>
      *
      * @param arrayOctet byte array to test
@@ -19543,15 +19542,15 @@ public final class Strings {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Valid Base64 strings
-     * isBase64("SGVsbG8gV29ybGQ=");                 // returns true
-     * isBase64("SGVs bG8g V29y bGQ=");              // returns {@code true} (whitespace allowed)
-     * isBase64("");                                  // returns {@code true} (empty string)
+     * Strings.isBase64("SGVsbG8gV29ybGQ=");                 // returns true
+     * Strings.isBase64("SGVs bG8g V29y bGQ=");              // returns {@code true} (whitespace allowed)
+     * Strings.isBase64("");                                  // returns {@code true} (empty string)
      * 
      * // Invalid Base64 strings
-     * isBase64("Hello World!");                      // returns false
-     * isBase64("SGVs!G8=");                          // returns {@code false} (contains '!')
-     * isBase64("test@123");                          // returns {@code false} (contains '@')
-     * isBase64((String) null);                       // returns {@code false}
+     * Strings.isBase64("Hello World!");                      // returns false
+     * Strings.isBase64("SGVs!G8=");                          // returns {@code false} (contains '!')
+     * Strings.isBase64("test@123");                          // returns {@code false} (contains '@')
+     * Strings.isBase64((String) null);                       // returns {@code false}
      * }</pre>
      *
      * @param base64 string to test
@@ -19578,14 +19577,14 @@ public final class Strings {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Finding email addresses
-     * findFirstEmailAddress("Contact: john@example.com");    // returns "john@example.com"
-     * findFirstEmailAddress("Email: test.user@domain.co.uk"); // returns "test.user@domain.co.uk"
-     * findFirstEmailAddress("Multiple: a@b.com and c@d.com"); // returns "a@b.com" (first only)
+     * Strings.findFirstEmailAddress("Contact: john@example.com");    // returns "john@example.com"
+     * Strings.findFirstEmailAddress("Email: test.user@domain.co.uk"); // returns "test.user@domain.co.uk"
+     * Strings.findFirstEmailAddress("Multiple: a@b.com and c@d.com"); // returns "a@b.com" (first only)
      * 
      * // No email found
-     * findFirstEmailAddress("No email here");                 // returns null
-     * findFirstEmailAddress(null);                           // returns null
-     * findFirstEmailAddress("");                             // returns null
+     * Strings.findFirstEmailAddress("No email here");                 // returns null
+     * Strings.findFirstEmailAddress(null);                           // returns null
+     * Strings.findFirstEmailAddress("");                             // returns null
      * }</pre>
      *
      * @param cs the CharSequence to be searched, may be {@code null} or empty
@@ -19624,16 +19623,16 @@ public final class Strings {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Finding multiple email addresses
-     * findAllEmailAddresses("Contact: john@example.com and jane@test.org");
+     * Strings.findAllEmailAddresses("Contact: john@example.com and jane@test.org");
      * // returns ["john@example.com", "jane@test.org"]
      * 
-     * findAllEmailAddresses("Emails: a@b.com, c@d.net, e@f.org");
+     * Strings.findAllEmailAddresses("Emails: a@b.com, c@d.net, e@f.org");
      * // returns ["a@b.com", "c@d.net", "e@f.org"]
      * 
      * // No emails found
-     * findAllEmailAddresses("No emails here");       // returns []
-     * findAllEmailAddresses(null);                   // returns []
-     * findAllEmailAddresses("");                     // returns []
+     * Strings.findAllEmailAddresses("No emails here");       // returns []
+     * Strings.findAllEmailAddresses(null);                   // returns []
+     * Strings.findAllEmailAddresses("");                     // returns []
      * }</pre>
      *
      * @param cs the CharSequence to be searched, may be {@code null} or empty
@@ -19677,8 +19676,8 @@ public final class Strings {
      * String[] trimmed = copyThenTrim(mixed);        // returns ["", "text", null, "value"]
      * 
      * // Edge cases
-     * copyThenTrim(null);                            // returns null
-     * copyThenTrim(new String[0]);                   // returns empty array
+     * Strings.copyThenTrim(null);                            // returns null
+     * Strings.copyThenTrim(new String[0]);                   // returns empty array
      * }</pre>
      *
      * @param strs the array of strings to be copied and trimmed. May be {@code null}.
@@ -19714,8 +19713,8 @@ public final class Strings {
      * String[] stripped = copyThenStrip(unicode);    // strips Unicode whitespace too
      * 
      * // Edge cases
-     * copyThenStrip(null);                           // returns null
-     * copyThenStrip(new String[0]);                  // returns empty array
+     * Strings.copyThenStrip(null);                           // returns null
+     * Strings.copyThenStrip(new String[0]);                  // returns empty array
      * }</pre>
      *
      * @param strs the array of strings to be copied and stripped. May be {@code null}.
@@ -19743,14 +19742,14 @@ public final class Strings {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Extracting integers
-     * extractFirstInteger("Price: $123");            // returns "123"
-     * extractFirstInteger("Temperature: -5 degrees"); // returns "-5"
-     * extractFirstInteger("Room 404, Floor 2");      // returns "404" (first integer)
+     * Strings.extractFirstInteger("Price: $123");            // returns "123"
+     * Strings.extractFirstInteger("Temperature: -5 degrees"); // returns "-5"
+     * Strings.extractFirstInteger("Room 404, Floor 2");      // returns "404" (first integer)
      * 
      * // No integer found
-     * extractFirstInteger("No numbers here");        // returns null
-     * extractFirstInteger(null);                     // returns null
-     * extractFirstInteger("");                       // returns null
+     * Strings.extractFirstInteger("No numbers here");        // returns null
+     * Strings.extractFirstInteger(null);                     // returns null
+     * Strings.extractFirstInteger("");                       // returns null
      * }</pre>
      *
      * @param str the string to extract the integer from, may be {@code null} or empty
@@ -19788,14 +19787,14 @@ public final class Strings {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Extracting doubles
-     * extractFirstDouble("Price: $12.99");           // returns "12.99"
-     * extractFirstDouble("Temperature: -5.5°C");     // returns "-5.5"
-     * extractFirstDouble("Value: 42");               // returns "42"
+     * Strings.extractFirstDouble("Price: $12.99");           // returns "12.99"
+     * Strings.extractFirstDouble("Temperature: -5.5°C");     // returns "-5.5"
+     * Strings.extractFirstDouble("Value: 42");               // returns "42"
      * 
      * // No double found
-     * extractFirstDouble("No numbers");              // returns null
-     * extractFirstDouble(null);                      // returns null
-     * extractFirstDouble("");                        // returns null
+     * Strings.extractFirstDouble("No numbers");              // returns null
+     * Strings.extractFirstDouble(null);                      // returns null
+     * Strings.extractFirstDouble("");                        // returns null
      * }</pre>
      *
      * @param str the string to extract the double from, may be {@code null} or empty
@@ -19824,18 +19823,18 @@ public final class Strings {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Regular number extraction
-     * extractFirstDouble("Value: 3.14159", false);   // returns "3.14159"
-     * extractFirstDouble("Count: -42.0", false);     // returns "-42.0"
+     * Strings.extractFirstDouble("Value: 3.14159", false);   // returns "3.14159"
+     * Strings.extractFirstDouble("Count: -42.0", false);     // returns "-42.0"
      * 
      * // Scientific notation
-     * extractFirstDouble("Result: 1.23e10", true);    // returns "1.23e10"
-     * extractFirstDouble("Small: 5E-3", true);        // returns "5E-3"
-     * extractFirstDouble("Result: 1.23e10", false);   // returns "1.23" (no scientific)
+     * Strings.extractFirstDouble("Result: 1.23e10", true);    // returns "1.23e10"
+     * Strings.extractFirstDouble("Small: 5E-3", true);        // returns "5E-3"
+     * Strings.extractFirstDouble("Result: 1.23e10", false);   // returns "1.23" (no scientific)
      * 
      * // No double found
-     * extractFirstDouble("No numbers", true);          // returns null
-     * extractFirstDouble(null, true);                  // returns null
-     * extractFirstDouble("", true;                     // returns null
+     * Strings.extractFirstDouble("No numbers", true);          // returns null
+     * Strings.extractFirstDouble(null, true);                  // returns null
+     * Strings.extractFirstDouble("", true);                    // returns null
      * }</pre>
      *
      * @param str the string to extract the double from, may be {@code null} or empty
@@ -19877,14 +19876,14 @@ public final class Strings {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Replacing integers
-     * replaceFirstInteger("Room 404, Floor 2", "X");  // returns "Room X, Floor 2"
-     * replaceFirstInteger("Price: $123", "[NUM]");    // returns "Price: $[NUM]"
-     * replaceFirstInteger("Temp: -5°C", "0");         // returns "Temp: 0°C"
+     * Strings.replaceFirstInteger("Room 404, Floor 2", "X");  // returns "Room X, Floor 2"
+     * Strings.replaceFirstInteger("Price: $123", "[NUM]");    // returns "Price: $[NUM]"
+     * Strings.replaceFirstInteger("Temp: -5°C", "0");         // returns "Temp: 0°C"
      * 
      * // No integer to replace
-     * replaceFirstInteger("No numbers", "X");         // returns "No numbers"
-     * replaceFirstInteger(null, "X");                 // returns ""
-     * replaceFirstInteger("", "X");                   // returns ""
+     * Strings.replaceFirstInteger("No numbers", "X");         // returns "No numbers"
+     * Strings.replaceFirstInteger(null, "X");                 // returns ""
+     * Strings.replaceFirstInteger("", "X");                   // returns ""
      * }</pre>
      *
      * @param str the string to be modified, may be {@code null} or empty
@@ -19915,13 +19914,13 @@ public final class Strings {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Replacing doubles
-     * replaceFirstDouble("Price: $12.99 (was $15.99)", "X"); // returns "Price: $X (was $15.99)"
-     * replaceFirstDouble("Temp: -5.5°C", "0.0");             // returns "Temp: 0.0°C"
-     * replaceFirstDouble("Count: 42", "[NUM]");              // returns "Count: [NUM]"
+     * Strings.replaceFirstDouble("Price: $12.99 (was $15.99)", "X"); // returns "Price: $X (was $15.99)"
+     * Strings.replaceFirstDouble("Temp: -5.5°C", "0.0");             // returns "Temp: 0.0°C"
+     * Strings.replaceFirstDouble("Count: 42", "[NUM]");              // returns "Count: [NUM]"
      * 
      * // No number to replace
-     * replaceFirstDouble("No numbers", "X");                 // returns "No numbers"
-     * replaceFirstDouble(null, "X");                         // returns ""
+     * Strings.replaceFirstDouble("No numbers", "X");                 // returns "No numbers"
+     * Strings.replaceFirstDouble(null, "X");                         // returns ""
      * }</pre>
      *
      * @param str the string to be modified, may be {@code null} or empty
@@ -19952,12 +19951,12 @@ public final class Strings {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Regular number replacement
-     * replaceFirstDouble("Value: 3.14, Pi", "X", false);     // returns "Value: X, Pi"
+     * Strings.replaceFirstDouble("Value: 3.14, Pi", "X", false);     // returns "Value: X, Pi"
      * 
      * // Scientific notation replacement
-     * replaceFirstDouble("Result: 1.23e10 units", "X", true); // returns "Result: X units"
-     * replaceFirstDouble("Normal: 5.0, Sci: 2E3", "X", true); // returns "Normal: X, Sci: 2E3"
-     * replaceFirstDouble("Result: 1.23e10", "X", false);      // returns "Result: Xe10" (partial)
+     * Strings.replaceFirstDouble("Result: 1.23e10 units", "X", true); // returns "Result: X units"
+     * Strings.replaceFirstDouble("Normal: 5.0, Sci: 2E3", "X", true); // returns "Normal: X, Sci: 2E3"
+     * Strings.replaceFirstDouble("Result: 1.23e10", "X", false);      // returns "Result: Xe10" (partial)
      * }</pre>
      *
      * @param str the string to be modified, may be {@code null} or empty
@@ -20011,7 +20010,7 @@ public final class Strings {
         /**
          * Default strategy used to extract substring between two delimiters.
          * <p>
-         * {@code substringsBetween("3[a2[c]]2[a]", '[', ']', ExtractStrategy.DEFAULT) = ["a2[c", "a"]}.
+         * {@code Strings.substringsBetween("3[a2[c]]2[a]", '[', ']', ExtractStrategy.DEFAULT) = ["a2[c", "a"]}.
          * </p>
          */
         DEFAULT,
@@ -20019,7 +20018,7 @@ public final class Strings {
         /**
          * Stack-based approach strategy used to extract substring between two delimiters.
          * <p>
-         * {@code substringsBetween("3[a2[c]]2[a]", '[', ']', ExtractStrategy.STACK_BASED) = ["c", "a2[c]", "a"]}.
+         * {@code Strings.substringsBetween("3[a2[c]]2[a]", '[', ']', ExtractStrategy.STACK_BASED) = ["c", "a2[c]", "a"]}.
          * </p>
          */
         STACK_BASED,
@@ -20027,7 +20026,7 @@ public final class Strings {
         /**
          * Stack-based approach strategy used to extract substring between two delimiters but nested substrings are ignored.
          * <p>
-         * {@code substringsBetween("3[a2[c]]2[a]", '[', ']', ExtractStrategy.IGNORE_NESTED) = ["a2[c]", "a"]}.
+         * {@code Strings.substringsBetween("3[a2[c]]2[a]", '[', ']', ExtractStrategy.IGNORE_NESTED) = ["a2[c]", "a"]}.
          * </p>
          */
         IGNORE_NESTED
@@ -20054,11 +20053,11 @@ public final class Strings {
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * substring("hello", 0);      // returns Optional.of("hello")
-         * substring("hello", 2);      // returns Optional.of("llo")
-         * substring("hello", 5);      // returns Optional.empty()
-         * substring("hello", -1);     // returns Optional.empty()
-         * substring(null, 0);         // returns Optional.empty()
+         * StrUtil.substring("hello", 0);      // returns Optional.of("hello")
+         * StrUtil.substring("hello", 2);      // returns Optional.of("llo")
+         * StrUtil.substring("hello", 5);      // returns Optional.empty()
+         * StrUtil.substring("hello", -1);     // returns Optional.empty()
+         * StrUtil.substring(null, 0);         // returns Optional.empty()
          * }</pre>
          *
          * @param str the string from which to extract the substring. Can be {@code null}.
@@ -20079,11 +20078,11 @@ public final class Strings {
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * substring("hello", 0, 5);   // returns Optional.of("hello")
-         * substring("hello", 1, 4);   // returns Optional.of("ell")
-         * substring("hello", 2, 2);   // returns Optional.empty() (begin == end)
-         * substring("hello", 3, 1);   // returns Optional.empty() (begin > end)
-         * substring(null, 0, 5);      // returns Optional.empty()
+         * StrUtil.substring("hello", 0, 5);   // returns Optional.of("hello")
+         * StrUtil.substring("hello", 1, 4);   // returns Optional.of("ell")
+         * StrUtil.substring("hello", 2, 2);   // returns Optional.empty() (begin == end)
+         * StrUtil.substring("hello", 3, 1);   // returns Optional.empty() (begin > end)
+         * StrUtil.substring(null, 0, 5);      // returns Optional.empty()
          * }</pre>
          *
          * @param str the string from which to extract the substring. Can be {@code null}.
@@ -20105,11 +20104,11 @@ public final class Strings {
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * substring("hello", 1, len -> len - 1);  // returns Optional.of("ell") (from 1 to 4)
-         * substring("hello", 0, len -> len);      // returns Optional.of("hello")
-         * substring("hello", 2, len -> 3);        // returns Optional.of("l")
-         * substring("hello", 5, len -> len);      // returns Optional.empty() (invalid begin)
-         * substring(null, 0, len -> len);         // returns Optional.empty()
+         * StrUtil.substring("hello", 1, len -> len - 1);  // returns Optional.of("ell") (from 1 to 4)
+         * StrUtil.substring("hello", 0, len -> len);      // returns Optional.of("hello")
+         * StrUtil.substring("hello", 2, len -> 3);        // returns Optional.of("l")
+         * StrUtil.substring("hello", 5, len -> len);      // returns Optional.empty() (invalid begin)
+         * StrUtil.substring(null, 0, len -> len);         // returns Optional.empty()
          * }</pre>
          *
          * @param str the string from which to extract the substring. Can be {@code null}.
@@ -20131,11 +20130,11 @@ public final class Strings {
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * substring("hello", end -> 0, 5);        // returns Optional.of("hello")
-         * substring("hello", end -> end - 3, 4);  // returns Optional.of("el") (from 1 to 4)
-         * substring("hello", end -> end, 3);      // returns Optional.empty() (begin == end)
-         * substring("hello", end -> 5, 3);        // returns Optional.empty() (begin > end)
-         * substring(null, end -> 0, 5);           // returns Optional.empty()
+         * StrUtil.substring("hello", end -> 0, 5);        // returns Optional.of("hello")
+         * StrUtil.substring("hello", end -> end - 3, 4);  // returns Optional.of("el") (from 1 to 4)
+         * StrUtil.substring("hello", end -> end, 3);      // returns Optional.empty() (begin == end)
+         * StrUtil.substring("hello", end -> 5, 3);        // returns Optional.empty() (begin > end)
+         * StrUtil.substring(null, end -> 0, 5);           // returns Optional.empty()
          * }</pre>
          *
          * @param str the string from which to extract the substring. Can be {@code null}.
@@ -20156,11 +20155,11 @@ public final class Strings {
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * substringOrElse("hello", 0, "default");     // returns "hello"
-         * substringOrElse("hello", 2, "default");     // returns "llo"
-         * substringOrElse("hello", 10, "default");    // returns "default"
-         * substringOrElse(null, 0, "default");        // returns "default"
-         * substringOrElse("hello", 2, null);          // returns "llo"
+         * StrUtil.substringOrElse("hello", 0, "default");     // returns "hello"
+         * StrUtil.substringOrElse("hello", 2, "default");     // returns "llo"
+         * StrUtil.substringOrElse("hello", 10, "default");    // returns "default"
+         * StrUtil.substringOrElse(null, 0, "default");        // returns "default"
+         * StrUtil.substringOrElse("hello", 2, null);          // returns "llo"
          * }</pre>
          *
          * @param str the string from which to extract the substring. Can be {@code null}.
@@ -20184,11 +20183,11 @@ public final class Strings {
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * substringOrElse("hello", 0, 5, "default");  // returns "hello"
-         * substringOrElse("hello", 1, 4, "default");  // returns "ell"
-         * substringOrElse("hello", 5, 10, "default"); // returns "default"
-         * substringOrElse(null, 0, 5, "default");     // returns "default"
-         * substringOrElse("hello", 1, 4, null);       // returns "ell"
+         * StrUtil.substringOrElse("hello", 0, 5, "default");  // returns "hello"
+         * StrUtil.substringOrElse("hello", 1, 4, "default");  // returns "ell"
+         * StrUtil.substringOrElse("hello", 5, 10, "default"); // returns "default"
+         * StrUtil.substringOrElse(null, 0, 5, "default");     // returns "default"
+         * StrUtil.substringOrElse("hello", 1, 4, null);       // returns "ell"
          * }</pre>
          *
          * @param str the string from which to extract the substring. Can be {@code null}.
@@ -20213,10 +20212,10 @@ public final class Strings {
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * substringOrElse("hello", 1, len -> len - 1, "default"); // returns "ell"
-         * substringOrElse("hello", 0, len -> len, "default");     // returns "hello"
-         * substringOrElse("hello", 10, len -> len, "default");    // returns "default"
-         * substringOrElse(null, 0, len -> len, "default");        // returns "default"
+         * StrUtil.substringOrElse("hello", 1, len -> len - 1, "default"); // returns "ell"
+         * StrUtil.substringOrElse("hello", 0, len -> len, "default");     // returns "hello"
+         * StrUtil.substringOrElse("hello", 10, len -> len, "default");    // returns "default"
+         * StrUtil.substringOrElse(null, 0, len -> len, "default");        // returns "default"
          * }</pre>
          *
          * @param str the string from which to extract the substring. Can be {@code null}.
@@ -20242,10 +20241,10 @@ public final class Strings {
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * substringOrElse("hello", end -> 0, 5, "default");       // returns "hello"
-         * substringOrElse("hello", end -> end - 3, 4, "default"); // returns "el"
-         * substringOrElse("hello", end -> 10, 3, "default");      // returns "default"
-         * substringOrElse(null, end -> 0, 5, "default");          // returns "default"
+         * StrUtil.substringOrElse("hello", end -> 0, 5, "default");       // returns "hello"
+         * StrUtil.substringOrElse("hello", end -> end - 3, 4, "default"); // returns "el"
+         * StrUtil.substringOrElse("hello", end -> 10, 3, "default");      // returns "default"
+         * StrUtil.substringOrElse(null, end -> 0, 5, "default");          // returns "default"
          * }</pre>
          *
          * @param str the string from which to extract the substring. Can be {@code null}.
@@ -20272,11 +20271,11 @@ public final class Strings {
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * substringOrElseItself("hello", 0);     // returns "hello"
-         * substringOrElseItself("hello", 2);     // returns "llo"
-         * substringOrElseItself("hello", 10);    // returns "hello"
-         * substringOrElseItself("hello", -1);    // returns "hello"
-         * substringOrElseItself(null, 0);        // returns null
+         * StrUtil.substringOrElseItself("hello", 0);     // returns "hello"
+         * StrUtil.substringOrElseItself("hello", 2);     // returns "llo"
+         * StrUtil.substringOrElseItself("hello", 10);    // returns "hello"
+         * StrUtil.substringOrElseItself("hello", -1);    // returns "hello"
+         * StrUtil.substringOrElseItself(null, 0);        // returns null
          * }</pre>
          *
          * @param str the string from which to extract the substring. Can be {@code null}.
@@ -20300,11 +20299,11 @@ public final class Strings {
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * substringOrElseItself("hello", 0, 5);  // returns "hello"
-         * substringOrElseItself("hello", 1, 4);  // returns "ell"
-         * substringOrElseItself("hello", 5, 10); // returns "hello"
-         * substringOrElseItself("hello", 2, 1);  // returns "hello"
-         * substringOrElseItself(null, 0, 5);     // returns null
+         * StrUtil.substringOrElseItself("hello", 0, 5);  // returns "hello"
+         * StrUtil.substringOrElseItself("hello", 1, 4);  // returns "ell"
+         * StrUtil.substringOrElseItself("hello", 5, 10); // returns "hello"
+         * StrUtil.substringOrElseItself("hello", 2, 1);  // returns "hello"
+         * StrUtil.substringOrElseItself(null, 0, 5);     // returns null
          * }</pre>
          *
          * @param str the string from which to extract the substring. Can be {@code null}.
@@ -20328,10 +20327,10 @@ public final class Strings {
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * substringOrElseItself("hello", 1, len -> len - 1); // returns "ell"
-         * substringOrElseItself("hello", 0, len -> len);     // returns "hello"
-         * substringOrElseItself("hello", 10, len -> len);    // returns "hello"
-         * substringOrElseItself(null, 0, len -> len);        // returns null
+         * StrUtil.substringOrElseItself("hello", 1, len -> len - 1); // returns "ell"
+         * StrUtil.substringOrElseItself("hello", 0, len -> len);     // returns "hello"
+         * StrUtil.substringOrElseItself("hello", 10, len -> len);    // returns "hello"
+         * StrUtil.substringOrElseItself(null, 0, len -> len);        // returns null
          * }</pre>
          *
          * @param str the string from which to extract the substring. Can be {@code null}.
@@ -20355,10 +20354,10 @@ public final class Strings {
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * substringOrElseItself("hello", end -> 0, 5);       // returns "hello"
-         * substringOrElseItself("hello", end -> end - 3, 4); // returns "el"
-         * substringOrElseItself("hello", end -> 10, 3);      // returns "hello"
-         * substringOrElseItself(null, end -> 0, 5);          // returns null
+         * StrUtil.substringOrElseItself("hello", end -> 0, 5);       // returns "hello"
+         * StrUtil.substringOrElseItself("hello", end -> end - 3, 4); // returns "el"
+         * StrUtil.substringOrElseItself("hello", end -> 10, 3);      // returns "hello"
+         * StrUtil.substringOrElseItself(null, end -> 0, 5);          // returns null
          * }</pre>
          *
          * @param str the string from which to extract the substring. Can be {@code null}.
@@ -20382,11 +20381,11 @@ public final class Strings {
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * substringAfter("hello.world", '.');    // returns Optional.of("world")
-         * substringAfter("hello", '.');          // returns Optional.empty()
-         * substringAfter("hello.", '.');         // returns Optional.of("")
-         * substringAfter("", '.');               // returns Optional.empty()
-         * substringAfter(null, '.');             // returns Optional.empty()
+         * StrUtil.substringAfter("hello.world", '.');    // returns Optional.of("world")
+         * StrUtil.substringAfter("hello", '.');          // returns Optional.empty()
+         * StrUtil.substringAfter("hello.", '.');         // returns Optional.of("")
+         * StrUtil.substringAfter("", '.');               // returns Optional.empty()
+         * StrUtil.substringAfter(null, '.');             // returns Optional.empty()
          * }</pre>
          *
          * @param str the string from which to extract the substring. Can be {@code null}.
@@ -20407,11 +20406,11 @@ public final class Strings {
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * substringAfter("hello world", " ");    // returns Optional.of("world")
-         * substringAfter("hello::world", "::");  // returns Optional.of("world")
-         * substringAfter("hello", " ");          // returns Optional.empty()
-         * substringAfter("hello ", " ");         // returns Optional.of("")
-         * substringAfter(null, " ");             // returns Optional.empty()
+         * StrUtil.substringAfter("hello world", " ");    // returns Optional.of("world")
+         * StrUtil.substringAfter("hello::world", "::");  // returns Optional.of("world")
+         * StrUtil.substringAfter("hello", " ");          // returns Optional.empty()
+         * StrUtil.substringAfter("hello ", " ");         // returns Optional.of("")
+         * StrUtil.substringAfter(null, " ");             // returns Optional.empty()
          * }</pre>
          *
          * @param str the string from which to extract the substring. Can be {@code null}.
@@ -20433,11 +20432,11 @@ public final class Strings {
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * substringAfter("hello world", " ", 8);     // returns Optional.of("wor")
-         * substringAfter("hello::world", "::", 10);  // returns Optional.of("world")
-         * substringAfter("hello", " ", 5);           // returns Optional.empty()
-         * substringAfter("hello ", " ", 6);          // returns Optional.of("")
-         * substringAfter(null, " ", 5);              // returns Optional.empty()
+         * StrUtil.substringAfter("hello world", " ", 8);     // returns Optional.of("wor")
+         * StrUtil.substringAfter("hello::world", "::", 10);  // returns Optional.of("world")
+         * StrUtil.substringAfter("hello", " ", 5);           // returns Optional.empty()
+         * StrUtil.substringAfter("hello ", " ", 6);          // returns Optional.of("")
+         * StrUtil.substringAfter(null, " ", 5);              // returns Optional.empty()
          * }</pre>
          *
          * @param str the string from which to extract the substring. Can be {@code null}.
@@ -20459,11 +20458,11 @@ public final class Strings {
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * substringAfterLast("com.example.Test", '.');   // returns Optional.of("Test")
-         * substringAfterLast("hello", '.');              // returns Optional.empty()
-         * substringAfterLast("hello.", '.');             // returns Optional.of("")
-         * substringAfterLast("a.b.c", '.');              // returns Optional.of("c")
-         * substringAfterLast(null, '.');                 // returns Optional.empty()
+         * StrUtil.substringAfterLast("com.example.Test", '.');   // returns Optional.of("Test")
+         * StrUtil.substringAfterLast("hello", '.');              // returns Optional.empty()
+         * StrUtil.substringAfterLast("hello.", '.');             // returns Optional.of("")
+         * StrUtil.substringAfterLast("a.b.c", '.');              // returns Optional.of("c")
+         * StrUtil.substringAfterLast(null, '.');                 // returns Optional.empty()
          * }</pre>
          *
          * @param str the string from which to extract the substring. Can be {@code null}.
@@ -20484,11 +20483,11 @@ public final class Strings {
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * substringAfterLast("com.example.Test", ".");   // returns Optional.of("Test")
-         * substringAfterLast("hello::world::test", "::"); // returns Optional.of("test")
-         * substringAfterLast("hello", " ");              // returns Optional.empty()
-         * substringAfterLast("hello ", " ");             // returns Optional.of("")
-         * substringAfterLast(null, ".");                 // returns Optional.empty()
+         * StrUtil.substringAfterLast("com.example.Test", ".");   // returns Optional.of("Test")
+         * StrUtil.substringAfterLast("hello::world::test", "::"); // returns Optional.of("test")
+         * StrUtil.substringAfterLast("hello", " ");              // returns Optional.empty()
+         * StrUtil.substringAfterLast("hello ", " ");             // returns Optional.of("")
+         * StrUtil.substringAfterLast(null, ".");                 // returns Optional.empty()
          * }</pre>
          *
          * @param str the string from which to extract the substring. Can be {@code null}.
@@ -20510,11 +20509,11 @@ public final class Strings {
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * substringAfterLast("com.example.Test", ".", 15);    // returns Optional.of("Tes")
-         * substringAfterLast("a::b::c::d", "::", 12);         // returns Optional.of("d")
-         * substringAfterLast("hello", " ", 5);                // returns Optional.empty()
-         * substringAfterLast("hello ", " ", 6);               // returns Optional.of("")
-         * substringAfterLast(null, ".", 10);                  // returns Optional.empty()
+         * StrUtil.substringAfterLast("com.example.Test", ".", 15);    // returns Optional.of("Tes")
+         * StrUtil.substringAfterLast("a::b::c::d", "::", 12);         // returns Optional.of("d")
+         * StrUtil.substringAfterLast("hello", " ", 5);                // returns Optional.empty()
+         * StrUtil.substringAfterLast("hello ", " ", 6);               // returns Optional.of("")
+         * StrUtil.substringAfterLast(null, ".", 10);                  // returns Optional.empty()
          * }</pre>
          *
          * @param str the string from which to extract the substring. Can be {@code null}.
@@ -20536,11 +20535,11 @@ public final class Strings {
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * substringAfterAny("hello.world", '.', '!');     // returns Optional.of("world")
-         * substringAfterAny("hello!world", '.', '!');     // returns Optional.of("world")
-         * substringAfterAny("hello", '.', '!');           // returns Optional.empty()
-         * substringAfterAny("hello.", '.', '!');          // returns Optional.of("")
-         * substringAfterAny(null, '.', '!');              // returns Optional.empty()
+         * StrUtil.substringAfterAny("hello.world", '.', '!');     // returns Optional.of("world")
+         * StrUtil.substringAfterAny("hello!world", '.', '!');     // returns Optional.of("world")
+         * StrUtil.substringAfterAny("hello", '.', '!');           // returns Optional.empty()
+         * StrUtil.substringAfterAny("hello.", '.', '!');          // returns Optional.of("")
+         * StrUtil.substringAfterAny(null, '.', '!');              // returns Optional.empty()
          * }</pre>
          *
          * @param str the string from which to extract the substring. Can be {@code null}.
@@ -20561,11 +20560,11 @@ public final class Strings {
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * substringAfterAny("hello world", " ", "::");    // returns Optional.of("world")
-         * substringAfterAny("hello::world", " ", "::");   // returns Optional.of("world")
-         * substringAfterAny("hello", " ", "::");          // returns Optional.empty()
-         * substringAfterAny("hello ", " ", "::");         // returns Optional.of("")
-         * substringAfterAny(null, " ", "::");             // returns Optional.empty()
+         * StrUtil.substringAfterAny("hello world", " ", "::");    // returns Optional.of("world")
+         * StrUtil.substringAfterAny("hello::world", " ", "::");   // returns Optional.of("world")
+         * StrUtil.substringAfterAny("hello", " ", "::");          // returns Optional.empty()
+         * StrUtil.substringAfterAny("hello ", " ", "::");         // returns Optional.of("")
+         * StrUtil.substringAfterAny(null, " ", "::");             // returns Optional.empty()
          * }</pre>
          *
          * @param str the string from which to extract the substring. Can be {@code null}.
@@ -20586,11 +20585,11 @@ public final class Strings {
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * substringBefore("hello.world", '.');    // returns Optional.of("hello")
-         * substringBefore("hello", '.');          // returns Optional.empty()
-         * substringBefore(".hello", '.');         // returns Optional.of("")
-         * substringBefore("", '.');               // returns Optional.empty()
-         * substringBefore(null, '.');             // returns Optional.empty()
+         * StrUtil.substringBefore("hello.world", '.');    // returns Optional.of("hello")
+         * StrUtil.substringBefore("hello", '.');          // returns Optional.empty()
+         * StrUtil.substringBefore(".hello", '.');         // returns Optional.of("")
+         * StrUtil.substringBefore("", '.');               // returns Optional.empty()
+         * StrUtil.substringBefore(null, '.');             // returns Optional.empty()
          * }</pre>
          *
          * @param str the string from which to extract the substring. Can be {@code null}.
@@ -20611,11 +20610,11 @@ public final class Strings {
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * substringBefore("hello world", " ");    // returns Optional.of("hello")
-         * substringBefore("hello::world", "::");  // returns Optional.of("hello")
-         * substringBefore("hello", " ");          // returns Optional.empty()
-         * substringBefore(" hello", " ");         // returns Optional.of("")
-         * substringBefore(null, " ");             // returns Optional.empty()
+         * StrUtil.substringBefore("hello world", " ");    // returns Optional.of("hello")
+         * StrUtil.substringBefore("hello::world", "::");  // returns Optional.of("hello")
+         * StrUtil.substringBefore("hello", " ");          // returns Optional.empty()
+         * StrUtil.substringBefore(" hello", " ");         // returns Optional.of("")
+         * StrUtil.substringBefore(null, " ");             // returns Optional.empty()
          * }</pre>
          *
          * @param str the string from which to extract the substring. Can be {@code null}.
@@ -20640,11 +20639,11 @@ public final class Strings {
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * substringBefore("hello.world.java", 0, ".");      // returns Optional.of("hello")
-         * substringBefore("hello.world.java", 6, ".");      // returns Optional.of("world")
-         * substringBefore("hello.world.java", 0, "xyz");    // returns Optional.empty()
-         * substringBefore(null, 0, ".");                    // returns Optional.empty()
-         * substringBefore("hello", 0, null);                // returns Optional.empty()
+         * StrUtil.substringBefore("hello.world.java", 0, ".");      // returns Optional.of("hello")
+         * StrUtil.substringBefore("hello.world.java", 6, ".");      // returns Optional.of("world")
+         * StrUtil.substringBefore("hello.world.java", 0, "xyz");    // returns Optional.empty()
+         * StrUtil.substringBefore(null, 0, ".");                    // returns Optional.empty()
+         * StrUtil.substringBefore("hello", 0, null);                // returns Optional.empty()
          * }</pre>
          *
          * @param str the string to search in. Can be {@code null}.
@@ -20670,10 +20669,10 @@ public final class Strings {
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * substringBeforeLast("hello.world.java", '.');     // returns Optional.of("hello.world")
-         * substringBeforeLast("hello", '.');                // returns Optional.empty()
-         * substringBeforeLast("hello.", '.');               // returns Optional.of("hello")
-         * substringBeforeLast(null, '.');                   // returns Optional.empty()
+         * StrUtil.substringBeforeLast("hello.world.java", '.');     // returns Optional.of("hello.world")
+         * StrUtil.substringBeforeLast("hello", '.');                // returns Optional.empty()
+         * StrUtil.substringBeforeLast("hello.", '.');               // returns Optional.of("hello")
+         * StrUtil.substringBeforeLast(null, '.');                   // returns Optional.empty()
          * }</pre>
          *
          * @param str the string to search in. Can be {@code null}.
@@ -20698,11 +20697,11 @@ public final class Strings {
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * substringBeforeLast("hello.world.java", ".");     // returns Optional.of("hello.world")
-         * substringBeforeLast("hello//world//java", "//");  // returns Optional.of("hello//world")
-         * substringBeforeLast("hello", ".");                // returns Optional.empty()
-         * substringBeforeLast(null, ".");                   // returns Optional.empty()
-         * substringBeforeLast("hello", null);               // returns Optional.empty()
+         * StrUtil.substringBeforeLast("hello.world.java", ".");     // returns Optional.of("hello.world")
+         * StrUtil.substringBeforeLast("hello//world//java", "//");  // returns Optional.of("hello//world")
+         * StrUtil.substringBeforeLast("hello", ".");                // returns Optional.empty()
+         * StrUtil.substringBeforeLast(null, ".");                   // returns Optional.empty()
+         * StrUtil.substringBeforeLast("hello", null);               // returns Optional.empty()
          * }</pre>
          *
          * @param str the string to search in. Can be {@code null}.
@@ -20727,11 +20726,11 @@ public final class Strings {
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * substringBeforeLast("hello.world.java", 0, ".");      // returns Optional.of("hello.world")
-         * substringBeforeLast("hello.world.java", 6, ".");      // returns Optional.of("world")
-         * substringBeforeLast("hello.world.java", 13, ".");     // returns Optional.empty()
-         * substringBeforeLast(null, 0, ".");                    // returns Optional.empty()
-         * substringBeforeLast("hello", 0, null);                // returns Optional.empty()
+         * StrUtil.substringBeforeLast("hello.world.java", 0, ".");      // returns Optional.of("hello.world")
+         * StrUtil.substringBeforeLast("hello.world.java", 6, ".");      // returns Optional.of("world")
+         * StrUtil.substringBeforeLast("hello.world.java", 13, ".");     // returns Optional.empty()
+         * StrUtil.substringBeforeLast(null, 0, ".");                    // returns Optional.empty()
+         * StrUtil.substringBeforeLast("hello", 0, null);                // returns Optional.empty()
          * }</pre>
          *
          * @param str the string to search in. Can be {@code null}.
@@ -20757,11 +20756,11 @@ public final class Strings {
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * substringBeforeAny("hello.world:java", '.', ':');     // returns Optional.of("hello")
-         * substringBeforeAny("hello-world", '.', ':');          // returns Optional.empty()
-         * substringBeforeAny("hello:world.java", '.', ':');     // returns Optional.of("hello")
-         * substringBeforeAny(null, '.', ':');                   // returns Optional.empty()
-         * substringBeforeAny("hello", (char[])null);            // returns Optional.empty()
+         * StrUtil.substringBeforeAny("hello.world:java", '.', ':');     // returns Optional.of("hello")
+         * StrUtil.substringBeforeAny("hello-world", '.', ':');          // returns Optional.empty()
+         * StrUtil.substringBeforeAny("hello:world.java", '.', ':');     // returns Optional.of("hello")
+         * StrUtil.substringBeforeAny(null, '.', ':');                   // returns Optional.empty()
+         * StrUtil.substringBeforeAny("hello", (char[])null);            // returns Optional.empty()
          * }</pre>
          *
          * @param str the string to search in. Can be {@code null}.
@@ -20786,11 +20785,11 @@ public final class Strings {
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * substringBeforeAny("hello.world::java", ".", "::");     // returns Optional.of("hello")
-         * substringBeforeAny("hello-world", ".", "::");           // returns Optional.empty()
-         * substringBeforeAny("hello::world.java", ".", "::");     // returns Optional.of("hello")
-         * substringBeforeAny(null, ".", "::");                    // returns Optional.empty()
-         * substringBeforeAny("hello", (String[])null);            // returns Optional.empty()
+         * StrUtil.substringBeforeAny("hello.world::java", ".", "::");     // returns Optional.of("hello")
+         * StrUtil.substringBeforeAny("hello-world", ".", "::");           // returns Optional.empty()
+         * StrUtil.substringBeforeAny("hello::world.java", ".", "::");     // returns Optional.of("hello")
+         * StrUtil.substringBeforeAny(null, ".", "::");                    // returns Optional.empty()
+         * StrUtil.substringBeforeAny("hello", (String[])null);            // returns Optional.empty()
          * }</pre>
          *
          * @param str the string to search in. Can be {@code null}.
@@ -20812,10 +20811,10 @@ public final class Strings {
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * substringAfterOrElse("hello.world", ".", "default");     // returns "world"
-         * substringAfterOrElse("hello", ".", "default");           // returns "default"
-         * substringAfterOrElse(null, ".", "default");              // returns "default"
-         * substringAfterOrElse("hello.", ".", "default");          // returns ""
+         * StrUtil.substringAfterOrElse("hello.world", ".", "default");     // returns "world"
+         * StrUtil.substringAfterOrElse("hello", ".", "default");           // returns "default"
+         * StrUtil.substringAfterOrElse(null, ".", "default");              // returns "default"
+         * StrUtil.substringAfterOrElse("hello.", ".", "default");          // returns ""
          * }</pre>
          *
          * @param str the string to search in. Can be {@code null}.
@@ -20841,10 +20840,10 @@ public final class Strings {
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * substringAfterLastOrElse("hello.world.java", ".", "default");     // returns "java"
-         * substringAfterLastOrElse("hello", ".", "default");                // returns "default"
-         * substringAfterLastOrElse(null, ".", "default");                   // returns "default"
-         * substringAfterLastOrElse("hello.world.", ".", "default");         // returns ""
+         * StrUtil.substringAfterLastOrElse("hello.world.java", ".", "default");     // returns "java"
+         * StrUtil.substringAfterLastOrElse("hello", ".", "default");                // returns "default"
+         * StrUtil.substringAfterLastOrElse(null, ".", "default");                   // returns "default"
+         * StrUtil.substringAfterLastOrElse("hello.world.", ".", "default");         // returns ""
          * }</pre>
          *
          * @param str the string to search in. Can be {@code null}.
@@ -20869,10 +20868,10 @@ public final class Strings {
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * substringBeforeOrElse("hello.world", ".", "default");     // returns "hello"
-         * substringBeforeOrElse("hello", ".", "default");           // returns "default"
-         * substringBeforeOrElse(null, ".", "default");              // returns "default"
-         * substringBeforeOrElse(".world", ".", "default");          // returns ""
+         * StrUtil.substringBeforeOrElse("hello.world", ".", "default");     // returns "hello"
+         * StrUtil.substringBeforeOrElse("hello", ".", "default");           // returns "default"
+         * StrUtil.substringBeforeOrElse(null, ".", "default");              // returns "default"
+         * StrUtil.substringBeforeOrElse(".world", ".", "default");          // returns ""
          * }</pre>
          *
          * @param str the string to search in. Can be {@code null}.
@@ -20898,10 +20897,10 @@ public final class Strings {
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * substringBeforeLastOrElse("hello.world.java", ".", "default");     // returns "hello.world"
-         * substringBeforeLastOrElse("hello", ".", "default");                // returns "default"
-         * substringBeforeLastOrElse(null, ".", "default");                   // returns "default"
-         * substringBeforeLastOrElse("hello.", ".", "default");               // returns "hello"
+         * StrUtil.substringBeforeLastOrElse("hello.world.java", ".", "default");     // returns "hello.world"
+         * StrUtil.substringBeforeLastOrElse("hello", ".", "default");                // returns "default"
+         * StrUtil.substringBeforeLastOrElse(null, ".", "default");                   // returns "default"
+         * StrUtil.substringBeforeLastOrElse("hello.", ".", "default");               // returns "hello"
          * }</pre>
          *
          * @param str the string to search in. Can be {@code null}.
@@ -20927,10 +20926,10 @@ public final class Strings {
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * substringAfterOrElseItself("hello.world", '.');     // returns "world"
-         * substringAfterOrElseItself("hello", '.');           // returns "hello"
-         * substringAfterOrElseItself(null, '.');              // returns null
-         * substringAfterOrElseItself("hello.", '.');          // returns ""
+         * StrUtil.substringAfterOrElseItself("hello.world", '.');     // returns "world"
+         * StrUtil.substringAfterOrElseItself("hello", '.');           // returns "hello"
+         * StrUtil.substringAfterOrElseItself(null, '.');              // returns null
+         * StrUtil.substringAfterOrElseItself("hello.", '.');          // returns ""
          * }</pre>
          *
          * @param str the string to search in. Can be {@code null}.
@@ -20955,10 +20954,10 @@ public final class Strings {
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * substringAfterOrElseItself("hello::world", "::");     // returns "world"
-         * substringAfterOrElseItself("hello", "::");            // returns "hello"
-         * substringAfterOrElseItself(null, "::");               // returns null
-         * substringAfterOrElseItself("hello::", "::");          // returns ""
+         * StrUtil.substringAfterOrElseItself("hello::world", "::");     // returns "world"
+         * StrUtil.substringAfterOrElseItself("hello", "::");            // returns "hello"
+         * StrUtil.substringAfterOrElseItself(null, "::");               // returns null
+         * StrUtil.substringAfterOrElseItself("hello::", "::");          // returns ""
          * }</pre>
          *
          * @param str the string to search in. Can be {@code null}.
@@ -20983,10 +20982,10 @@ public final class Strings {
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * substringAfterOrElseItself("hello.world.java", ".", 11);     // returns "world"
-         * substringAfterOrElseItself("hello.world.java", ".", 20);     // returns "world.java"
-         * substringAfterOrElseItself("hello", ".", 10);                // returns "hello"
-         * substringAfterOrElseItself(null, ".", 10);                   // returns null
+         * StrUtil.substringAfterOrElseItself("hello.world.java", ".", 11);     // returns "world"
+         * StrUtil.substringAfterOrElseItself("hello.world.java", ".", 20);     // returns "world.java"
+         * StrUtil.substringAfterOrElseItself("hello", ".", 10);                // returns "hello"
+         * StrUtil.substringAfterOrElseItself(null, ".", 10);                   // returns null
          * }</pre>
          *
          * @param str the string to search in. Can be {@code null}.
@@ -21012,10 +21011,10 @@ public final class Strings {
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * substringAfterLastOrElseItself("hello.world.java", '.');     // returns "java"
-         * substringAfterLastOrElseItself("hello", '.');                // returns "hello"
-         * substringAfterLastOrElseItself(null, '.');                   // returns null
-         * substringAfterLastOrElseItself("hello.world.", '.');         // returns ""
+         * StrUtil.substringAfterLastOrElseItself("hello.world.java", '.');     // returns "java"
+         * StrUtil.substringAfterLastOrElseItself("hello", '.');                // returns "hello"
+         * StrUtil.substringAfterLastOrElseItself(null, '.');                   // returns null
+         * StrUtil.substringAfterLastOrElseItself("hello.world.", '.');         // returns ""
          * }</pre>
          *
          * @param str the string to search in. Can be {@code null}.
@@ -21040,10 +21039,10 @@ public final class Strings {
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * substringAfterLastOrElseItself("hello::world::java", "::");     // returns "java"
-         * substringAfterLastOrElseItself("hello", "::");                  // returns "hello"
-         * substringAfterLastOrElseItself(null, "::");                     // returns null
-         * substringAfterLastOrElseItself("hello::world::", "::");         // returns ""
+         * StrUtil.substringAfterLastOrElseItself("hello::world::java", "::");     // returns "java"
+         * StrUtil.substringAfterLastOrElseItself("hello", "::");                  // returns "hello"
+         * StrUtil.substringAfterLastOrElseItself(null, "::");                     // returns null
+         * StrUtil.substringAfterLastOrElseItself("hello::world::", "::");         // returns ""
          * }</pre>
          *
          * @param str the string to search in. Can be {@code null}.
@@ -21068,10 +21067,10 @@ public final class Strings {
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * substringAfterLastOrElseItself("hello.world.java", ".", 16);     // returns "java"
-         * substringAfterLastOrElseItself("hello.world.java", ".", 14);     // returns "ja"
-         * substringAfterLastOrElseItself("hello", ".", 10);                // returns "hello"
-         * substringAfterLastOrElseItself(null, ".", 10);                   // returns null
+         * StrUtil.substringAfterLastOrElseItself("hello.world.java", ".", 16);     // returns "java"
+         * StrUtil.substringAfterLastOrElseItself("hello.world.java", ".", 14);     // returns "ja"
+         * StrUtil.substringAfterLastOrElseItself("hello", ".", 10);                // returns "hello"
+         * StrUtil.substringAfterLastOrElseItself(null, ".", 10);                   // returns null
          * }</pre>
          *
          * @param str the string to search in. Can be {@code null}.
@@ -21097,10 +21096,10 @@ public final class Strings {
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * substringBeforeOrElseItself("hello.world", '.');     // returns "hello"
-         * substringBeforeOrElseItself("hello", '.');           // returns "hello"
-         * substringBeforeOrElseItself(null, '.');              // returns null
-         * substringBeforeOrElseItself(".world", '.');          // returns ""
+         * StrUtil.substringBeforeOrElseItself("hello.world", '.');     // returns "hello"
+         * StrUtil.substringBeforeOrElseItself("hello", '.');           // returns "hello"
+         * StrUtil.substringBeforeOrElseItself(null, '.');              // returns null
+         * StrUtil.substringBeforeOrElseItself(".world", '.');          // returns ""
          * }</pre>
          *
          * @param str the string to search in. Can be {@code null}.
@@ -21125,10 +21124,10 @@ public final class Strings {
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * substringBeforeOrElseItself("hello::world", "::");     // returns "hello"
-         * substringBeforeOrElseItself("hello", "::");            // returns "hello"
-         * substringBeforeOrElseItself(null, "::");               // returns null
-         * substringBeforeOrElseItself("::world", "::");          // returns ""
+         * StrUtil.substringBeforeOrElseItself("hello::world", "::");     // returns "hello"
+         * StrUtil.substringBeforeOrElseItself("hello", "::");            // returns "hello"
+         * StrUtil.substringBeforeOrElseItself(null, "::");               // returns null
+         * StrUtil.substringBeforeOrElseItself("::world", "::");          // returns ""
          * }</pre>
          *
          * @param str the string to search in. Can be {@code null}.
@@ -21154,10 +21153,10 @@ public final class Strings {
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * substringBeforeOrElseItself("hello.world.java", 0, ".");      // returns "hello"
-         * substringBeforeOrElseItself("hello.world.java", 6, ".");      // returns "world"
-         * substringBeforeOrElseItself("hello.world.java", 0, "::");     // returns "hello.world.java"
-         * substringBeforeOrElseItself(null, 0, ".");                    // returns null
+         * StrUtil.substringBeforeOrElseItself("hello.world.java", 0, ".");      // returns "hello"
+         * StrUtil.substringBeforeOrElseItself("hello.world.java", 6, ".");      // returns "world"
+         * StrUtil.substringBeforeOrElseItself("hello.world.java", 0, "::");     // returns "hello.world.java"
+         * StrUtil.substringBeforeOrElseItself(null, 0, ".");                    // returns null
          * }</pre>
          *
          * @param str the string to search in. Can be {@code null}.
@@ -21183,10 +21182,10 @@ public final class Strings {
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * substringBeforeLastOrElseItself("hello.world.java", '.');     // returns "hello.world"
-         * substringBeforeLastOrElseItself("hello", '.');                // returns "hello"
-         * substringBeforeLastOrElseItself(null, '.');                   // returns null
-         * substringBeforeLastOrElseItself("hello.", '.');               // returns "hello"
+         * StrUtil.substringBeforeLastOrElseItself("hello.world.java", '.');     // returns "hello.world"
+         * StrUtil.substringBeforeLastOrElseItself("hello", '.');                // returns "hello"
+         * StrUtil.substringBeforeLastOrElseItself(null, '.');                   // returns null
+         * StrUtil.substringBeforeLastOrElseItself("hello.", '.');               // returns "hello"
          * }</pre>
          *
          * @param str the string to search in. Can be {@code null}.
@@ -21211,10 +21210,10 @@ public final class Strings {
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * substringBeforeLastOrElseItself("hello::world::java", "::");     // returns "hello::world"
-         * substringBeforeLastOrElseItself("hello", "::");                  // returns "hello"
-         * substringBeforeLastOrElseItself(null, "::");                     // returns null
-         * substringBeforeLastOrElseItself("hello::", "::");                // returns "hello"
+         * StrUtil.substringBeforeLastOrElseItself("hello::world::java", "::");     // returns "hello::world"
+         * StrUtil.substringBeforeLastOrElseItself("hello", "::");                  // returns "hello"
+         * StrUtil.substringBeforeLastOrElseItself(null, "::");                     // returns null
+         * StrUtil.substringBeforeLastOrElseItself("hello::", "::");                // returns "hello"
          * }</pre>
          *
          * @param str the string to search in. Can be {@code null}.
@@ -21239,10 +21238,10 @@ public final class Strings {
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * substringBeforeLastOrElseItself("hello.world.java", 16, ".");     // returns "hello.world"
-         * substringBeforeLastOrElseItself("hello.world.java", 11, ".");     // returns "hello"
-         * substringBeforeLastOrElseItself("hello", 5, ".");                 // returns "hello"
-         * substringBeforeLastOrElseItself(null, 10, ".");                   // returns null
+         * StrUtil.substringBeforeLastOrElseItself("hello.world.java", 16, ".");     // returns "hello.world"
+         * StrUtil.substringBeforeLastOrElseItself("hello.world.java", 11, ".");     // returns "hello"
+         * StrUtil.substringBeforeLastOrElseItself("hello", 5, ".");                 // returns "hello"
+         * StrUtil.substringBeforeLastOrElseItself(null, 10, ".");                   // returns null
          * }</pre>
          *
          * @param str the string to search in. Can be {@code null}.
@@ -21270,11 +21269,11 @@ public final class Strings {
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * substringBetween("hello world", 5, 11);     // returns Optional.of(" world")
-         * substringBetween("hello", 0, 5);            // returns Optional.of("ello")
-         * substringBetween("hello", 5, 10);           // returns Optional.empty() (indices out of bounds)
-         * substringBetween("hello", 3, 3);            // returns Optional.empty() (begin >= end)
-         * substringBetween(null, 0, 5);               // returns Optional.empty()
+         * StrUtil.substringBetween("hello world", 5, 11);     // returns Optional.of(" world")
+         * StrUtil.substringBetween("hello", 0, 5);            // returns Optional.of("ello")
+         * StrUtil.substringBetween("hello", 5, 10);           // returns Optional.empty() (indices out of bounds)
+         * StrUtil.substringBetween("hello", 3, 3);            // returns Optional.empty() (begin >= end)
+         * StrUtil.substringBetween(null, 0, 5);               // returns Optional.empty()
          * }</pre>
          *
          * @param str the string to extract from. Can be {@code null}.
@@ -21299,10 +21298,10 @@ public final class Strings {
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * substringBetween("hello.world.java", 5, '.');     // returns Optional.of("world")
-         * substringBetween("hello.world", 0, '.');          // returns Optional.of("ello")
-         * substringBetween("hello", 0, '.');                // returns Optional.empty()
-         * substringBetween(null, 0, '.');                   // returns Optional.empty()
+         * StrUtil.substringBetween("hello.world.java", 5, '.');     // returns Optional.of("world")
+         * StrUtil.substringBetween("hello.world", 0, '.');          // returns Optional.of("ello")
+         * StrUtil.substringBetween("hello", 0, '.');                // returns Optional.empty()
+         * StrUtil.substringBetween(null, 0, '.');                   // returns Optional.empty()
          * }</pre>
          *
          * @param str the string to extract from. Can be {@code null}.
@@ -21327,10 +21326,10 @@ public final class Strings {
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * substringBetween("hello::world::java", 5, "::");     // returns Optional.of("world")
-         * substringBetween("hello::world", 0, "::");           // returns Optional.of("ello")
-         * substringBetween("hello", 0, "::");                  // returns Optional.empty()
-         * substringBetween(null, 0, "::");                     // returns Optional.empty()
+         * StrUtil.substringBetween("hello::world::java", 5, "::");     // returns Optional.of("world")
+         * StrUtil.substringBetween("hello::world", 0, "::");           // returns Optional.of("ello")
+         * StrUtil.substringBetween("hello", 0, "::");                  // returns Optional.empty()
+         * StrUtil.substringBetween(null, 0, "::");                     // returns Optional.empty()
          * }</pre>
          *
          * @param str the string to extract from. Can be {@code null}.
@@ -21355,10 +21354,10 @@ public final class Strings {
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * substringBetween("hello.world.java", '.', 11);     // returns Optional.of("world")
-         * substringBetween("hello.world.java", '.', 20);     // returns Optional.of("world.java")
-         * substringBetween("hello", '.', 10);                // returns Optional.empty()
-         * substringBetween(null, '.', 10);                   // returns Optional.empty()
+         * StrUtil.substringBetween("hello.world.java", '.', 11);     // returns Optional.of("world")
+         * StrUtil.substringBetween("hello.world.java", '.', 20);     // returns Optional.of("world.java")
+         * StrUtil.substringBetween("hello", '.', 10);                // returns Optional.empty()
+         * StrUtil.substringBetween(null, '.', 10);                   // returns Optional.empty()
          * }</pre>
          *
          * @param str the string to extract from. Can be {@code null}.
@@ -21383,10 +21382,10 @@ public final class Strings {
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * substringBetween("hello::world::java", "::", 13);     // returns Optional.of("world")
-         * substringBetween("hello::world::java", "::", 20);     // returns Optional.of("world::java")
-         * substringBetween("hello", "::", 10);                  // returns Optional.empty()
-         * substringBetween(null, "::", 10);                     // returns Optional.empty()
+         * StrUtil.substringBetween("hello::world::java", "::", 13);     // returns Optional.of("world")
+         * StrUtil.substringBetween("hello::world::java", "::", 20);     // returns Optional.of("world::java")
+         * StrUtil.substringBetween("hello", "::", 10);                  // returns Optional.empty()
+         * StrUtil.substringBetween(null, "::", 10);                     // returns Optional.empty()
          * }</pre>
          *
          * @param str the string to extract from. Can be {@code null}.
@@ -21411,10 +21410,10 @@ public final class Strings {
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * substringBetween("hello[world]java", '[', ']');     // returns Optional.of("world")
-         * substringBetween("hello.world.java", '.', '.');     // returns Optional.of("world")
-         * substringBetween("hello[world", '[', ']');          // returns Optional.empty()
-         * substringBetween(null, '[', ']');                   // returns Optional.empty()
+         * StrUtil.substringBetween("hello[world]java", '[', ']');     // returns Optional.of("world")
+         * StrUtil.substringBetween("hello.world.java", '.', '.');     // returns Optional.of("world")
+         * StrUtil.substringBetween("hello[world", '[', ']');          // returns Optional.empty()
+         * StrUtil.substringBetween(null, '[', ']');                   // returns Optional.empty()
          * }</pre>
          *
          * @param str the string to extract from. Can be {@code null}.
@@ -21433,16 +21432,16 @@ public final class Strings {
          *
          * <p>This method extracts the substring between the first occurrence of the tag and
          * the next occurrence of the same tag. This is equivalent to calling
-         * {@code substringBetween(str, tag, tag)}.</p>
+         * {@code StrUtil.substringBetween(str, tag, tag)}.</p>
          *
          * <p>The method returns an empty {@code Optional} for {@code null} input string or tag.</p>
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * substringBetween("*hello*world*", "*");     // returns Optional.of("hello")
-         * substringBetween("##value##", "##");        // returns Optional.of("value")
-         * substringBetween("hello world", "*");       // returns Optional.empty()
-         * substringBetween(null, "*");                // returns Optional.empty()
+         * StrUtil.substringBetween("*hello*world*", "*");     // returns Optional.of("hello")
+         * StrUtil.substringBetween("##value##", "##");        // returns Optional.of("value")
+         * StrUtil.substringBetween("hello world", "*");       // returns Optional.empty()
+         * StrUtil.substringBetween(null, "*");                // returns Optional.empty()
          * }</pre>
          *
          * @param str the string to extract from. Can be {@code null}.
@@ -21467,10 +21466,10 @@ public final class Strings {
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * substringBetween("hello<start>world</end>java", "<start>", "</end>");     // returns Optional.of("world")
-         * substringBetween("hello::world::java", "::", "::");                       // returns Optional.of("world")
-         * substringBetween("hello<start>world", "<start>", "</end>");               // returns Optional.empty()
-         * substringBetween(null, "<start>", "</end>");                              // returns Optional.empty()
+         * StrUtil.substringBetween("hello<start>world</end>java", "<start>", "</end>");     // returns Optional.of("world")
+         * StrUtil.substringBetween("hello::world::java", "::", "::");                       // returns Optional.of("world")
+         * StrUtil.substringBetween("hello<start>world", "<start>", "</end>");               // returns Optional.empty()
+         * StrUtil.substringBetween(null, "<start>", "</end>");                              // returns Optional.empty()
          * }</pre>
          *
          * @param str the string to extract from. Can be {@code null}.
@@ -21496,10 +21495,10 @@ public final class Strings {
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * substringBetween("hello<a>world</a><a>java</a>", 10, "<a>", "</a>");     // returns Optional.of("java")
-         * substringBetween("hello::world::java", 0, "::", "::");                   // returns Optional.of("world")
-         * substringBetween("hello::world::java", 10, "::", "::");                  // returns Optional.empty()
-         * substringBetween(null, 0, "<a>", "</a>");                                // returns Optional.empty()
+         * StrUtil.substringBetween("hello<a>world</a><a>java</a>", 10, "<a>", "</a>");     // returns Optional.of("java")
+         * StrUtil.substringBetween("hello::world::java", 0, "::", "::");                   // returns Optional.of("world")
+         * StrUtil.substringBetween("hello::world::java", 10, "::", "::");                  // returns Optional.empty()
+         * StrUtil.substringBetween(null, 0, "<a>", "</a>");                                // returns Optional.empty()
          * }</pre>
          *
          * @param str the string to extract from. Can be {@code null}.
@@ -21527,12 +21526,12 @@ public final class Strings {
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * // Extract 5 characters after the begin index
-         * substringBetween("hello world", 5, beginIdx -> beginIdx + 6);     // returns Optional.of(" world")
+         * StrUtil.substringBetween("hello world", 5, beginIdx -> beginIdx + 6);     // returns Optional.of(" world")
          * 
          * // Extract until the end of the string
-         * substringBetween("hello", 1, beginIdx -> 5);                      // returns Optional.of("ello")
+         * StrUtil.substringBetween("hello", 1, beginIdx -> 5);                      // returns Optional.of("ello")
          * 
-         * substringBetween(null, 0, idx -> idx + 5);                        // returns Optional.empty()
+         * StrUtil.substringBetween(null, 0, idx -> idx + 5);                        // returns Optional.empty()
          * }</pre>
          *
          * @param str the string to extract from. Can be {@code null}.
@@ -21558,12 +21557,12 @@ public final class Strings {
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * // Extract 5 characters before the end index
-         * substringBetween("hello world", endIdx -> endIdx - 5, 11);     // returns Optional.of("world")
+         * StrUtil.substringBetween("hello world", endIdx -> endIdx - 5, 11);     // returns Optional.of("world")
          * 
          * // Extract from the beginning
-         * substringBetween("hello", endIdx -> 0, 4);                     // returns Optional.of("hell")
+         * StrUtil.substringBetween("hello", endIdx -> 0, 4);                     // returns Optional.of("hell")
          * 
-         * substringBetween(null, idx -> idx - 5, 10);                    // returns Optional.empty()
+         * StrUtil.substringBetween(null, idx -> idx - 5, 10);                    // returns Optional.empty()
          * }</pre>
          *
          * @param str the string to extract from. Can be {@code null}.
@@ -21590,12 +21589,12 @@ public final class Strings {
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * // Extract 5 characters after the delimiter
-         * substringBetween("hello::world", "::", idx -> idx + 5);     // returns Optional.of("world")
+         * StrUtil.substringBetween("hello::world", "::", idx -> idx + 5);     // returns Optional.of("world")
          * 
          * // Extract to the end of string
-         * substringBetween("key=value", "=", idx -> 10);              // returns Optional.of("value")
+         * StrUtil.substringBetween("key=value", "=", idx -> 10);              // returns Optional.of("value")
          * 
-         * substringBetween(null, "::", idx -> idx + 5);               // returns Optional.empty()
+         * StrUtil.substringBetween(null, "::", idx -> idx + 5);               // returns Optional.empty()
          * }</pre>
          *
          * @param str the string to extract from. Can be {@code null}.
@@ -21623,12 +21622,12 @@ public final class Strings {
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * // Extract from 5 characters before the last delimiter
-         * substringBetween("hello.world.java", idx -> idx - 5, ".");     // returns Optional.of("world")
+         * StrUtil.substringBetween("hello.world.java", idx -> idx - 5, ".");     // returns Optional.of("world")
          * 
          * // Extract from the beginning
-         * substringBetween("prefix::value", idx -> 0, "::");             // returns Optional.of("prefix")
+         * StrUtil.substringBetween("prefix::value", idx -> 0, "::");             // returns Optional.of("prefix")
          * 
-         * substringBetween(null, idx -> idx - 5, ".");                   // returns Optional.empty()
+         * StrUtil.substringBetween(null, idx -> idx - 5, ".");                   // returns Optional.empty()
          * }</pre>
          *
          * @param str the string to extract from. Can be {@code null}.
@@ -21654,10 +21653,10 @@ public final class Strings {
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * substringBetweenFirstAndLast("a<tag>value<tag>b", "<tag>");      // returns Optional.of("value")
-         * substringBetweenFirstAndLast("hello::world::java", "::");        // returns Optional.of("world")
-         * substringBetweenFirstAndLast("hello<tag>world", "<tag>");        // returns Optional.empty()
-         * substringBetweenFirstAndLast(null, "<tag>");                     // returns Optional.empty()
+         * StrUtil.substringBetweenFirstAndLast("a<tag>value<tag>b", "<tag>");      // returns Optional.of("value")
+         * StrUtil.substringBetweenFirstAndLast("hello::world::java", "::");        // returns Optional.of("world")
+         * StrUtil.substringBetweenFirstAndLast("hello<tag>world", "<tag>");        // returns Optional.empty()
+         * StrUtil.substringBetweenFirstAndLast(null, "<tag>");                     // returns Optional.empty()
          * }</pre>
          *
          * @param str the string to extract from. Can be {@code null}.
@@ -21681,10 +21680,10 @@ public final class Strings {
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * substringBetweenFirstAndLast("a<tag>value</tag>b", "<tag>", "</tag>");         // returns Optional.of("value")
-         * substringBetweenFirstAndLast("hello::world::java", "::", "::");                // returns Optional.of("world")
-         * substringBetweenFirstAndLast("hello<start>world", "<start>", "</end>");        // returns Optional.empty()
-         * substringBetweenFirstAndLast(null, "<start>", "</end>");                       // returns Optional.empty()
+         * StrUtil.substringBetweenFirstAndLast("a<tag>value</tag>b", "<tag>", "</tag>");         // returns Optional.of("value")
+         * StrUtil.substringBetweenFirstAndLast("hello::world::java", "::", "::");                // returns Optional.of("world")
+         * StrUtil.substringBetweenFirstAndLast("hello<start>world", "<start>", "</end>");        // returns Optional.empty()
+         * StrUtil.substringBetweenFirstAndLast(null, "<start>", "</end>");                       // returns Optional.empty()
          * }</pre>
          *
          * @param str the string to extract from. Can be {@code null}.
@@ -21711,10 +21710,10 @@ public final class Strings {
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * substringBetweenFirstAndLast("a<tag>value</tag><tag>java</tag>b", 5, "<tag>", "</tag>"); // returns Optional.of("java")
-         * substringBetweenFirstAndLast("hello::world::java", 0, "::", "::");                       // returns Optional.of("world")
-         * substringBetweenFirstAndLast("hello<start>world", 0, "<start>", "</end>");               // returns Optional.empty()
-         * substringBetweenFirstAndLast(null, 0, "<start>", "</end>");                              // returns Optional.empty()
+         * StrUtil.substringBetweenFirstAndLast("a<tag>value</tag><tag>java</tag>b", 5, "<tag>", "</tag>"); // returns Optional.of("java")
+         * StrUtil.substringBetweenFirstAndLast("hello::world::java", 0, "::", "::");                       // returns Optional.of("world")
+         * StrUtil.substringBetweenFirstAndLast("hello<start>world", 0, "<start>", "</end>");               // returns Optional.empty()
+         * StrUtil.substringBetweenFirstAndLast(null, 0, "<start>", "</end>");                              // returns Optional.empty()
          * }</pre>
          *
          * @param str the string to extract from. Can be {@code null}.
@@ -21740,13 +21739,13 @@ public final class Strings {
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * createInteger("123");        // returns OptionalInt.of(123)
-         * createInteger("-456");       // returns OptionalInt.of(-456)
-         * createInteger("0xFF");       // returns OptionalInt.of(255)
-         * createInteger("077");        // returns OptionalInt.of(63) - octal
-         * createInteger("abc");        // returns OptionalInt.empty()
-         * createInteger("");           // returns OptionalInt.empty()
-         * createInteger(null);         // returns OptionalInt.empty()
+         * StrUtil.createInteger("123");        // returns OptionalInt.of(123)
+         * StrUtil.createInteger("-456");       // returns OptionalInt.of(-456)
+         * StrUtil.createInteger("0xFF");       // returns OptionalInt.of(255)
+         * StrUtil.createInteger("077");        // returns OptionalInt.of(63) - octal
+         * StrUtil.createInteger("abc");        // returns OptionalInt.empty()
+         * StrUtil.createInteger("");           // returns OptionalInt.empty()
+         * StrUtil.createInteger(null);         // returns OptionalInt.empty()
          * }</pre>
          *
          * @param str the string to parse. Can be {@code null} or blank.
@@ -21777,13 +21776,13 @@ public final class Strings {
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * createLong("123456789");        // returns OptionalLong.of(123456789L)
-         * createLong("-9876543210");      // returns OptionalLong.of(-9876543210L)
-         * createLong("0xFFFFFFFF");       // returns OptionalLong.of(4294967295L)
-         * createLong("0777");             // returns OptionalLong.of(511L) - octal
-         * createLong("abc");              // returns OptionalLong.empty()
-         * createLong("");                 // returns OptionalLong.empty()
-         * createLong(null);               // returns OptionalLong.empty()
+         * StrUtil.createLong("123456789");        // returns OptionalLong.of(123456789L)
+         * StrUtil.createLong("-9876543210");      // returns OptionalLong.of(-9876543210L)
+         * StrUtil.createLong("0xFFFFFFFF");       // returns OptionalLong.of(4294967295L)
+         * StrUtil.createLong("0777");             // returns OptionalLong.of(511L) - octal
+         * StrUtil.createLong("abc");              // returns OptionalLong.empty()
+         * StrUtil.createLong("");                 // returns OptionalLong.empty()
+         * StrUtil.createLong(null);               // returns OptionalLong.empty()
          * }</pre>
          *
          * @param str the string to parse. Can be {@code null} or blank.
@@ -21814,14 +21813,14 @@ public final class Strings {
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * createFloat("123.45");          // returns OptionalFloat.of(123.45f)
-         * createFloat("-67.89");          // returns OptionalFloat.of(-67.89f)
-         * createFloat("1.23e4");          // returns OptionalFloat.of(12300.0f)
-         * createFloat("NaN");             // returns OptionalFloat.of(Float.NaN)
-         * createFloat("Infinity");        // returns OptionalFloat.of(Float.POSITIVE_INFINITY)
-         * createFloat("abc");             // returns OptionalFloat.empty()
-         * createFloat("");                // returns OptionalFloat.empty()
-         * createFloat(null);              // returns OptionalFloat.empty()
+         * StrUtil.createFloat("123.45");          // returns OptionalFloat.of(123.45f)
+         * StrUtil.createFloat("-67.89");          // returns OptionalFloat.of(-67.89f)
+         * StrUtil.createFloat("1.23e4");          // returns OptionalFloat.of(12300.0f)
+         * StrUtil.createFloat("NaN");             // returns OptionalFloat.of(Float.NaN)
+         * StrUtil.createFloat("Infinity");        // returns OptionalFloat.of(Float.POSITIVE_INFINITY)
+         * StrUtil.createFloat("abc");             // returns OptionalFloat.empty()
+         * StrUtil.createFloat("");                // returns OptionalFloat.empty()
+         * StrUtil.createFloat(null);              // returns OptionalFloat.empty()
          * }</pre>
          *
          * @param str the string to parse. Can be {@code null} or blank.
@@ -21852,14 +21851,14 @@ public final class Strings {
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * createDouble("123.456789");      // returns OptionalDouble.of(123.456789)
-         * createDouble("-67.89012");       // returns OptionalDouble.of(-67.89012)
-         * createDouble("1.23456e10");      // returns OptionalDouble.of(1.23456E10)
-         * createDouble("NaN");             // returns OptionalDouble.of(Double.NaN)
-         * createDouble("Infinity");        // returns OptionalDouble.of(Double.POSITIVE_INFINITY)
-         * createDouble("abc");             // returns OptionalDouble.empty()
-         * createDouble("");                // returns OptionalDouble.empty()
-         * createDouble(null);              // returns OptionalDouble.empty()
+         * StrUtil.createDouble("123.456789");      // returns OptionalDouble.of(123.456789)
+         * StrUtil.createDouble("-67.89012");       // returns OptionalDouble.of(-67.89012)
+         * StrUtil.createDouble("1.23456e10");      // returns OptionalDouble.of(1.23456E10)
+         * StrUtil.createDouble("NaN");             // returns OptionalDouble.of(Double.NaN)
+         * StrUtil.createDouble("Infinity");        // returns OptionalDouble.of(Double.POSITIVE_INFINITY)
+         * StrUtil.createDouble("abc");             // returns OptionalDouble.empty()
+         * StrUtil.createDouble("");                // returns OptionalDouble.empty()
+         * StrUtil.createDouble(null);              // returns OptionalDouble.empty()
          * }</pre>
          *
          * @param str the string to parse. Can be {@code null} or blank.
@@ -21890,13 +21889,13 @@ public final class Strings {
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * createBigInteger("123456789012345678901234567890");     // returns Optional of the BigInteger
-         * createBigInteger("-999999999999999999999999999999");    // returns Optional of the BigInteger
-         * createBigInteger("0xFF");                               // returns Optional.of(BigInteger.valueOf(255))
-         * createBigInteger("077");                                // returns Optional.of(BigInteger.valueOf(63))
-         * createBigInteger("abc");                                // returns Optional.empty()
-         * createBigInteger("");                                   // returns Optional.empty()
-         * createBigInteger(null);                                 // returns Optional.empty()
+         * StrUtil.createBigInteger("123456789012345678901234567890");     // returns Optional of the BigInteger
+         * StrUtil.createBigInteger("-999999999999999999999999999999");    // returns Optional of the BigInteger
+         * StrUtil.createBigInteger("0xFF");                               // returns Optional.of(BigInteger.valueOf(255))
+         * StrUtil.createBigInteger("077");                                // returns Optional.of(BigInteger.valueOf(63))
+         * StrUtil.createBigInteger("abc");                                // returns Optional.empty()
+         * StrUtil.createBigInteger("");                                   // returns Optional.empty()
+         * StrUtil.createBigInteger(null);                                 // returns Optional.empty()
          * }</pre>
          *
          * @param str the string to parse. Can be {@code null} or blank.
@@ -21927,13 +21926,13 @@ public final class Strings {
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * createBigDecimal("123.456789012345678901234567890");     // returns Optional of the BigDecimal
-         * createBigDecimal("-999999999999999999999.999999999");    // returns Optional of the BigDecimal
-         * createBigDecimal("1.23456E+10");                         // returns Optional of the BigDecimal
-         * createBigDecimal("NaN");                                 // returns Optional.empty()
-         * createBigDecimal("abc");                                 // returns Optional.empty()
-         * createBigDecimal("");                                    // returns Optional.empty()
-         * createBigDecimal(null);                                  // returns Optional.empty()
+         * StrUtil.createBigDecimal("123.456789012345678901234567890");     // returns Optional of the BigDecimal
+         * StrUtil.createBigDecimal("-999999999999999999999.999999999");    // returns Optional of the BigDecimal
+         * StrUtil.createBigDecimal("1.23456E+10");                         // returns Optional of the BigDecimal
+         * StrUtil.createBigDecimal("NaN");                                 // returns Optional.empty()
+         * StrUtil.createBigDecimal("abc");                                 // returns Optional.empty()
+         * StrUtil.createBigDecimal("");                                    // returns Optional.empty()
+         * StrUtil.createBigDecimal(null);                                  // returns Optional.empty()
          * }</pre>
          *
          * @param str the string to parse. Can be {@code null} or blank.
@@ -21965,14 +21964,14 @@ public final class Strings {
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * createNumber("123");                    // returns Optional.of(Integer 123)
-         * createNumber("1234567890123456789");    // returns Optional.of(Long or BigInteger)
-         * createNumber("123.45");                 // returns Optional.of(Float 123.45)
-         * createNumber("123.456789012345");       // returns Optional.of(Double)
-         * createNumber("0xFF");                   // returns Optional.of(Integer 255)
-         * createNumber("abc");                    // returns Optional.empty()
-         * createNumber("");                       // returns Optional.empty()
-         * createNumber(null);                     // returns Optional.empty()
+         * StrUtil.createNumber("123");                    // returns Optional.of(Integer 123)
+         * StrUtil.createNumber("1234567890123456789");    // returns Optional.of(Long or BigInteger)
+         * StrUtil.createNumber("123.45");                 // returns Optional.of(Float 123.45)
+         * StrUtil.createNumber("123.456789012345");       // returns Optional.of(Double)
+         * StrUtil.createNumber("0xFF");                   // returns Optional.of(Integer 255)
+         * StrUtil.createNumber("abc");                    // returns Optional.empty()
+         * StrUtil.createNumber("");                       // returns Optional.empty()
+         * StrUtil.createNumber(null);                     // returns Optional.empty()
          * }</pre>
          *
          * @param str the string to parse. Can be {@code null} or blank.

@@ -621,23 +621,26 @@ public class u { // NOSONAR
 
         /**
          * If a value is present, returns an {@code Optional} describing (as if by
-         * {@link Optional#of}) the result of applying the given mapping function to
+         * {@link Optional#ofNullable}) the result of applying the given mapping function to
          * the value, otherwise returns an empty {@code Optional}.
+         * If the mapping function returns a {@code null} result, an empty {@code Optional} is returned.
          *
          * @param <T> the type of the value returned from the mapping function
          * @param <E> the type of exception that the mapping function may throw
          * @param mapper the mapping function to apply to a value, if present
          * @return an {@code Optional} describing the result of applying a mapping
          *         function to the value of this {@code OptionalBoolean}, if a value is
-         *         present, otherwise an empty {@code Optional}
-         * @throws IllegalArgumentException if the mapping function is null
-         * @throws E if the mapping function throws an exception
+         *         present, otherwise an empty {@code Optional}. 
+         *         If the mapping function returns a {@code null} result, an empty {@code Optional} is returned.
+         * @throws IllegalArgumentException if {@code mapper} is {@code null}
+         * @throws E if the mapper function throws an exception
          */
-        public <T, E extends Exception> Optional<T> mapToObj(final Throwables.BooleanFunction<? extends T, E> mapper) throws IllegalArgumentException, E {
+        public <T, E extends Exception> Optional<T> mapToObj(final Throwables.BooleanFunction<? extends T, E> mapper)
+                throws IllegalArgumentException, E {
             N.checkArgNotNull(mapper, cs.mapper);
 
             if (isPresent) {
-                return Optional.of(mapper.apply(value));
+                return Optional.ofNullable(mapper.apply(value));
             } else {
                 return Optional.empty();
             }
@@ -1301,23 +1304,26 @@ public class u { // NOSONAR
 
         /**
          * If a value is present, returns an {@code Optional} describing (as if by
-         * {@link Optional#of}) the result of applying the given mapping function to
+         * {@link Optional#ofNullable}) the result of applying the given mapping function to
          * the value, otherwise returns an empty {@code Optional}.
+         * If the mapping function returns a {@code null} result, an empty {@code Optional} is returned.
          *
          * @param <T> the type of the value returned from the mapping function
          * @param <E> the type of exception that the mapping function may throw
          * @param mapper the mapping function to apply to a value, if present
          * @return an {@code Optional} describing the result of applying a mapping
-         *         function to the value of this {@code OptionalChar}, if a value is
-         *         present, otherwise an empty {@code Optional}
-         * @throws IllegalArgumentException if the mapping function is null
-         * @throws E if the mapping function throws an exception
+         *         function to the value of this {@code OptionalBoolean}, if a value is
+         *         present, otherwise an empty {@code Optional}. 
+         *         If the mapping function returns a {@code null} result, an empty {@code Optional} is returned.
+         * @throws IllegalArgumentException if {@code mapper} is {@code null}
+         * @throws E if the mapper function throws an exception
          */
-        public <T, E extends Exception> Optional<T> mapToObj(final Throwables.CharFunction<? extends T, E> mapper) throws IllegalArgumentException, E {
+        public <T, E extends Exception> Optional<T> mapToObj(final Throwables.CharFunction<? extends T, E> mapper)
+                throws IllegalArgumentException, E {
             N.checkArgNotNull(mapper, cs.mapper);
 
             if (isPresent) {
-                return Optional.of(mapper.apply(value));
+                return Optional.ofNullable(mapper.apply(value));
             } else {
                 return Optional.empty();
             }
@@ -1938,24 +1944,27 @@ public class u { // NOSONAR
         }
 
         /**
-         * If a value is present, applies the provided {@code byte}-to-{@code T} mapping
-         * function to it, and returns an {@code Optional} describing the result.
-         * Otherwise returns an empty {@code Optional}.
+         * If a value is present, returns an {@code Optional} describing (as if by
+         * {@link Optional#ofNullable}) the result of applying the given mapping function to
+         * the value, otherwise returns an empty {@code Optional}.
+         * If the mapping function returns a {@code null} result, an empty {@code Optional} is returned.
          *
          * @param <T> the type of the result of the mapping function
          * @param <E> the type of exception the mapping function may throw
          * @param mapper the mapping function to apply to the value, if present
-         * @return an {@code Optional} describing the result of applying the mapping
-         *         function to the value of this {@code OptionalByte}, if a value is
-         *         present, otherwise an empty {@code Optional}
-         * @throws IllegalArgumentException if {@code mapper} is null
-         * @throws E if the mapping function throws an exception
+         * @return an {@code Optional} describing the result of applying a mapping
+         *         function to the value of this {@code OptionalBoolean}, if a value is
+         *         present, otherwise an empty {@code Optional}. 
+         *         If the mapping function returns a {@code null} result, an empty {@code Optional} is returned.
+         * @throws IllegalArgumentException if {@code mapper} is {@code null}
+         * @throws E if the mapper function throws an exception
          */
-        public <T, E extends Exception> Optional<T> mapToObj(final Throwables.ByteFunction<? extends T, E> mapper) throws IllegalArgumentException, E {
+        public <T, E extends Exception> Optional<T> mapToObj(final Throwables.ByteFunction<? extends T, E> mapper)
+                throws IllegalArgumentException, E {
             N.checkArgNotNull(mapper, cs.mapper);
 
             if (isPresent) {
-                return Optional.of(mapper.apply(value));
+                return Optional.ofNullable(mapper.apply(value));
             } else {
                 return Optional.empty();
             }
@@ -2560,24 +2569,27 @@ public class u { // NOSONAR
         }
 
         /**
-         * If a value is present, applies the provided {@code short}-to-{@code T} mapping
-         * function to it, and returns an {@code Optional} describing the result.
-         * Otherwise returns an empty {@code Optional}.
+         * If a value is present, returns an {@code Optional} describing (as if by
+         * {@link Optional#ofNullable}) the result of applying the given mapping function to
+         * the value, otherwise returns an empty {@code Optional}.
+         * If the mapping function returns a {@code null} result, an empty {@code Optional} is returned.
          *
          * @param <T> the type of the result of the mapping function
          * @param <E> the type of exception the mapping function may throw
          * @param mapper the mapping function to apply to the value, if present
-         * @return an {@code Optional} describing the result of applying the mapping
-         *         function to the value of this {@code OptionalShort}, if a value is
-         *         present, otherwise an empty {@code Optional}
-         * @throws IllegalArgumentException if {@code mapper} is null
-         * @throws E if the mapping function throws an exception
+         * @return an {@code Optional} describing the result of applying a mapping
+         *         function to the value of this {@code OptionalBoolean}, if a value is
+         *         present, otherwise an empty {@code Optional}. 
+         *         If the mapping function returns a {@code null} result, an empty {@code Optional} is returned.
+         * @throws IllegalArgumentException if {@code mapper} is {@code null}
+         * @throws E if the mapper function throws an exception
          */
-        public <T, E extends Exception> Optional<T> mapToObj(final Throwables.ShortFunction<? extends T, E> mapper) throws IllegalArgumentException, E {
+        public <T, E extends Exception> Optional<T> mapToObj(final Throwables.ShortFunction<? extends T, E> mapper)
+                throws IllegalArgumentException, E {
             N.checkArgNotNull(mapper, cs.mapper);
 
             if (isPresent) {
-                return Optional.of(mapper.apply(value));
+                return Optional.ofNullable(mapper.apply(value));
             } else {
                 return Optional.empty();
             }
@@ -3296,22 +3308,27 @@ public class u { // NOSONAR
         }
 
         /**
-         * Applies the given mapper function to the value if present, returning an Optional containing the result.
-         * If this OptionalInt is empty, returns an empty Optional.
+         * If a value is present, returns an {@code Optional} describing (as if by
+         * {@link Optional#ofNullable}) the result of applying the given mapping function to
+         * the value, otherwise returns an empty {@code Optional}.
+         * If the mapping function returns a {@code null} result, an empty {@code Optional} is returned.
          *
          * @param <T> the type of the result of the mapper function
          * @param <E> the type of exception that the mapper may throw
          * @param mapper the mapper function to apply to the value if present
-         * @return an Optional containing the result of applying the mapper to the value if present,
-         *         otherwise an empty Optional
-         * @throws IllegalArgumentException if mapper is null
+         * @return an {@code Optional} describing the result of applying a mapping
+         *         function to the value of this {@code OptionalBoolean}, if a value is
+         *         present, otherwise an empty {@code Optional}. 
+         *         If the mapping function returns a {@code null} result, an empty {@code Optional} is returned.
+         * @throws IllegalArgumentException if {@code mapper} is {@code null}
          * @throws E if the mapper function throws an exception
          */
-        public <T, E extends Exception> Optional<T> mapToObj(final Throwables.IntFunction<? extends T, E> mapper) throws IllegalArgumentException, E {
+        public <T, E extends Exception> Optional<T> mapToObj(final Throwables.IntFunction<? extends T, E> mapper)
+                throws IllegalArgumentException, E {
             N.checkArgNotNull(mapper, cs.mapper);
 
             if (isPresent) {
-                return Optional.of(mapper.apply(value));
+                return Optional.ofNullable(mapper.apply(value));
             } else {
                 return Optional.empty();
             }
@@ -3948,22 +3965,27 @@ public class u { // NOSONAR
         }
 
         /**
-         * Applies the given mapper function to the value if present, returning an Optional containing the result.
-         * If this OptionalLong is empty, returns an empty Optional.
+         * If a value is present, returns an {@code Optional} describing (as if by
+         * {@link Optional#ofNullable}) the result of applying the given mapping function to
+         * the value, otherwise returns an empty {@code Optional}.
+         * If the mapping function returns a {@code null} result, an empty {@code Optional} is returned.
          *
          * @param <T> the type of the result of the mapper function
          * @param <E> the type of exception that the mapper may throw
          * @param mapper the mapper function to apply to the value if present
-         * @return an Optional containing the result of applying the mapper to the value if present,
-         *         otherwise an empty Optional
-         * @throws IllegalArgumentException if mapper is null
+         * @return an {@code Optional} describing the result of applying a mapping
+         *         function to the value of this {@code OptionalBoolean}, if a value is
+         *         present, otherwise an empty {@code Optional}. 
+         *         If the mapping function returns a {@code null} result, an empty {@code Optional} is returned.
+         * @throws IllegalArgumentException if {@code mapper} is {@code null}
          * @throws E if the mapper function throws an exception
          */
-        public <T, E extends Exception> Optional<T> mapToObj(final Throwables.LongFunction<? extends T, E> mapper) throws IllegalArgumentException, E {
+        public <T, E extends Exception> Optional<T> mapToObj(final Throwables.LongFunction<? extends T, E> mapper)
+                throws IllegalArgumentException, E {
             N.checkArgNotNull(mapper, cs.mapper);
 
             if (isPresent) {
-                return Optional.of(mapper.apply(value));
+                return Optional.ofNullable(mapper.apply(value));
             } else {
                 return Optional.empty();
             }
@@ -4578,16 +4600,19 @@ public class u { // NOSONAR
          * @param <T> the type of the result of the mapper function
          * @param <E> the type of exception that the mapper may throw
          * @param mapper the mapper function to apply to the value if present
-         * @return an {@code Optional} containing the result of applying the mapper to the value if present,
-         *         otherwise an empty {@code Optional}
+         * @return an {@code Optional} describing the result of applying a mapping
+         *         function to the value of this {@code OptionalBoolean}, if a value is
+         *         present, otherwise an empty {@code Optional}. 
+         *         If the mapping function returns a {@code null} result, an empty {@code Optional} is returned.
          * @throws IllegalArgumentException if {@code mapper} is {@code null}
          * @throws E if the mapper function throws an exception
          */
-        public <T, E extends Exception> Optional<T> mapToObj(final Throwables.FloatFunction<? extends T, E> mapper) throws IllegalArgumentException, E {
+        public <T, E extends Exception> Optional<T> mapToObj(final Throwables.FloatFunction<? extends T, E> mapper)
+                throws IllegalArgumentException, E {
             N.checkArgNotNull(mapper, cs.mapper);
 
             if (isPresent) {
-                return Optional.of(mapper.apply(value));
+                return Optional.ofNullable(mapper.apply(value));
             } else {
                 return Optional.empty();
             }
@@ -5176,20 +5201,27 @@ public class u { // NOSONAR
         }
 
         /**
-         * If a value is present, returns an {@code Optional} describing the result of applying the given mapping function to the value, otherwise returns an empty {@code Optional}.
+         * If a value is present, returns an {@code Optional} describing (as if by
+         * {@link Optional#ofNullable}) the result of applying the given mapping function to
+         * the value, otherwise returns an empty {@code Optional}.
+         * If the mapping function returns a {@code null} result, an empty {@code Optional} is returned.
          *
          * @param <T> the type of the value returned from the mapping function
          * @param <E> the type of exception that the mapping function may throw
          * @param mapper the mapping function to apply to the value if present
-         * @return an {@code Optional} describing the result of applying the mapping function to the value if present, otherwise an empty {@code Optional}
+         * @return an {@code Optional} describing the result of applying a mapping
+         *         function to the value of this {@code OptionalBoolean}, if a value is
+         *         present, otherwise an empty {@code Optional}. 
+         *         If the mapping function returns a {@code null} result, an empty {@code Optional} is returned.
          * @throws IllegalArgumentException if {@code mapper} is {@code null}
-         * @throws E if the mapping function throws an exception
+         * @throws E if the mapper function throws an exception
          */
-        public <T, E extends Exception> Optional<T> mapToObj(final Throwables.DoubleFunction<? extends T, E> mapper) throws IllegalArgumentException, E {
+        public <T, E extends Exception> Optional<T> mapToObj(final Throwables.DoubleFunction<? extends T, E> mapper)
+                throws IllegalArgumentException, E {
             N.checkArgNotNull(mapper, cs.mapper);
 
             if (isPresent) {
-                return Optional.of(mapper.apply(value));
+                return Optional.ofNullable(mapper.apply(value));
             } else {
                 return Optional.empty();
             }
@@ -5632,6 +5664,7 @@ public class u { // NOSONAR
          * @return an {@code Optional} containing the specified value
          * @throws NullPointerException if value is null
          */
+        @Beta
         public static Optional<String> of(final String value) throws NullPointerException {
             Objects.requireNonNull(value);
 
@@ -5667,6 +5700,7 @@ public class u { // NOSONAR
          * @param value the possibly-null value to store
          * @return an {@code Optional} containing the specified value if {@code non-null}, otherwise an empty {@code Optional}
          */
+        @Beta
         public static Optional<String> ofNullable(final String value) {
             if (value == null) {
                 return empty();
@@ -5800,20 +5834,27 @@ public class u { // NOSONAR
         }
 
         /**
-         * If a value is present, returns an {@code Optional} describing the result of applying the given mapping function to the value, otherwise returns an empty {@code Optional}.
+         * If a value is present, returns an {@code Optional} describing (as if by
+         * {@link Optional#ofNullable}) the result of applying the given mapping function to
+         * the value, otherwise returns an empty {@code Optional}.
+         * If the mapping function returns a {@code null} result, an empty {@code Optional} is returned.
          *
          * @param <U> the type of the value returned from the mapping function
          * @param <E> the type of exception that the mapping function may throw
          * @param mapper the mapping function to apply to the value if present
-         * @return an {@code Optional} describing the result of applying the mapping function to the value if present, otherwise an empty {@code Optional}
+         * @return an {@code Optional} describing the result of applying a mapping
+         *         function to the value of this {@code OptionalBoolean}, if a value is
+         *         present, otherwise an empty {@code Optional}. 
+         *         If the mapping function returns a {@code null} result, an empty {@code Optional} is returned.
          * @throws IllegalArgumentException if {@code mapper} is {@code null}
          * @throws E if the mapping function throws an exception
          */
-        public <U, E extends Exception> Optional<U> map(final Throwables.Function<? super T, ? extends U, E> mapper) throws IllegalArgumentException, E {
+        public <U, E extends Exception> Optional<U> map(final Throwables.Function<? super T, ? extends U, E> mapper)
+                throws IllegalArgumentException, E {
             N.checkArgNotNull(mapper, cs.mapper);
 
             if (isPresent()) {
-                return Optional.of(mapper.apply(value));
+                return Optional.ofNullable(mapper.apply(value));
             } else {
                 return Optional.empty();
             }
@@ -6699,10 +6740,11 @@ public class u { // NOSONAR
          * @param mapper the mapping function to apply to the value if present, must not return {@code null}
          * @return an {@code Optional} containing the result of applying the mapping function to the value if present, otherwise an empty {@code Optional}
          * @throws IllegalArgumentException if {@code mapper} is {@code null}
+         * @throws NullPointerException if the mapping function returns {@code null}
          * @throws E if the mapping function throws an exception
          */
         public <U, E extends Exception> Optional<U> mapToNonNull(final Throwables.Function<? super T, ? extends U, E> mapper)
-                throws IllegalArgumentException, E {
+                throws IllegalArgumentException, NullPointerException, E {
             N.checkArgNotNull(mapper, cs.mapper);
 
             if (isPresent()) {
@@ -6904,10 +6946,11 @@ public class u { // NOSONAR
          * @param mapper the mapping function to apply to the value if it is not {@code null}, must not return {@code null}
          * @return an {@code Optional} containing the result of applying the mapping function to the value if it is not {@code null}, otherwise an empty {@code Optional}
          * @throws IllegalArgumentException if {@code mapper} is {@code null}
+         * @throws NullPointerException if the mapping function returns {@code null}
          * @throws E if the mapping function throws an exception
          */
         public <U, E extends Exception> Optional<U> mapToNonNullIfNotNull(final Throwables.Function<? super T, ? extends U, E> mapper)
-                throws IllegalArgumentException, E {
+                throws IllegalArgumentException, NullPointerException, E {
             N.checkArgNotNull(mapper, cs.mapper);
 
             if (isNotNull()) {

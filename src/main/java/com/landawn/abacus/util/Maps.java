@@ -393,6 +393,13 @@ public final class Maps {
      * <p>This method generates a new entry using the provided key and value.
      * The created entry is mutable, meaning that its key and value can be changed after creation.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Map.Entry<String, Integer> entry = Maps.newEntry("key", 1);
+     * // entry.getKey() returns "key"
+     * // entry.getValue() returns 1
+     * }</pre>
+     *
      * @param <K> the type of the key
      * @param <V> the type of the value
      * @param key the key of the new entry
@@ -410,6 +417,14 @@ public final class Maps {
      *
      * <p>This method generates a new immutable entry (key-value pair) using the provided key and value.
      * The created entry is immutable, meaning that its key and value cannot be changed after creation.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * ImmutableEntry<String, Integer> entry = Maps.newImmutableEntry("key", 1);
+     * // entry.getKey() returns "key"
+     * // entry.getValue() returns 1
+     * // entry.setValue(2) throws UnsupportedOperationException
+     * }</pre>
      *
      * @param <K> the type of the key
      * @param <V> the type of the value
@@ -746,9 +761,9 @@ public final class Maps {
     }
 
     /**
-     * Returns a {@code Nullable} with the value to which the specified key is mapped,
-     * or an empty {@code Nullable} if the map is empty or contains no mapping for the key.
-     * This method properly handles {@code null} values in the map.
+     * Returns a {@code Nullable} containing the value to which the specified key is mapped.
+     * <p>If the map contains a mapping for the key, the returned {@code Nullable} contains the mapped value (which may be {@code null}).
+     * If the map is empty or contains no mapping for the key, returns an empty {@code Nullable}.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -783,9 +798,10 @@ public final class Maps {
     }
 
     /**
-     * Returns a {@code Nullable} with the value from a nested map structure.
+     * Returns a {@code Nullable} containing the value from a nested map structure.
      * First retrieves the inner map using the outer key, then retrieves the value using the inner key.
-     * Returns an empty {@code Nullable} if either map is empty or the keys are not found.
+     * <p>If the value is found (even if it is {@code null}), returns a {@code Nullable} containing the value.
+     * If either map is empty or the keys are not found, returns an empty {@code Nullable}.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -2768,7 +2784,7 @@ public final class Maps {
      * @param map the map to put the value in
      * @param key the key to associate the value with
      * @param value the value to put if the key is absent
-     * @return the previous value associated with the specified key, or {@code null} if there was no mapping for the key
+     * @return the previous value associated with the specified key, or {@code null} if there was no mapping for the key or if the key was mapped to {@code null}
      * @see Map#putIfAbsent(Object, Object)
      */
     public static <K, V> V putIfAbsent(final Map<K, V> map, final K key, final V value) {
@@ -2806,7 +2822,7 @@ public final class Maps {
      * @param map the map to put the value in
      * @param key the key to associate the value with
      * @param supplier the supplier to get the value from if the key is absent
-     * @return the previous value associated with the specified key, or {@code null} if there was no mapping for the key
+     * @return the previous value associated with the specified key, or {@code null} if there was no mapping for the key or if the key was mapped to {@code null}
      * @see Map#putIfAbsent(Object, Object)
      */
     public static <K, V> V putIfAbsent(final Map<K, V> map, final K key, final Supplier<V> supplier) {
@@ -3705,7 +3721,17 @@ public final class Maps {
      * the second map contains the second elements, and so on.
      * If the collections in the original map are of different sizes, the resulting list's size is equal to the size of the largest collection.
      *
-     * <p>Example: {a=[1, 2, 3], b=[4, 5, 6], c=[7, 8]} -&gt; [{a=1, b=4, c=7}, {a=2, b=5, c=8}, {a=3, b=6}].</p>
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Map<String, List<Integer>> map = new HashMap<>();
+     * map.put("a", Arrays.asList(1, 2, 3));
+     * map.put("b", Arrays.asList(4, 5, 6));
+     * map.put("c", Arrays.asList(7, 8));
+     *
+     * List<Map<String, Integer>> result = Maps.flatToMap(map);
+     * // result contains:
+     * // [{a=1, b=4, c=7}, {a=2, b=5, c=8}, {a=3, b=6}]
+     * }</pre>
      *
      * @param <K> the type of keys in the input map and the resulting maps.
      * @param <V> the type of values in the collections of the input map and the values in the resulting maps.

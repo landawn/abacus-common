@@ -48,7 +48,7 @@ import com.landawn.abacus.util.cs;
  * <pre>{@code
  * // Simple GET request
  * String response = HttpRequest.url("https://api.example.com/users")
- *     .get();
+ *     .get(String.class);
  *
  * // POST request with JSON body and headers
  * User createdUser = HttpRequest.url("https://api.example.com/users")
@@ -60,7 +60,7 @@ import com.landawn.abacus.util.cs;
  * ContinuableFuture<String> future = HttpRequest.url("https://api.example.com/data")
  *     .connectionTimeout(5000)
  *     .readTimeout(10000)
- *     .asyncGet();
+ *     .asyncGet(String.class);
  * }</pre>
  *
  * @see URLEncodedUtil
@@ -87,7 +87,7 @@ public final class HttpRequest {
      * Creates an HttpRequest instance with the specified HttpClient.
      * This method is useful when you want to use an existing HttpClient with specific configuration.
      *
-     * @param httpClient The HttpClient to use for the request
+     * @param httpClient The HttpClient to use for the request. Must not be {@code null}.
      * @return A new HttpRequest instance
      */
     public static HttpRequest create(final HttpClient httpClient) {
@@ -100,7 +100,7 @@ public final class HttpRequest {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * String response = HttpRequest.url("https://api.example.com/data").get();
+     * String response = HttpRequest.url("https://api.example.com/data").get(String.class);
      * }</pre>
      *
      * @param url The target URL for the request
@@ -116,7 +116,7 @@ public final class HttpRequest {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * String response = HttpRequest.url("https://api.example.com/data", 5000, 10000).get();
+     * String response = HttpRequest.url("https://api.example.com/data", 5000, 10000).get(String.class);
      * }</pre>
      *
      * @param url The target URL for the request

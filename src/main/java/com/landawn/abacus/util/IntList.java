@@ -800,6 +800,13 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
      * <p>This method runs in linear time, as it may need to search through the entire list
      * to find the element.</p>
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * IntList numbers = IntList.of(1, 2, 3, 2, 4);
+     * boolean removed = numbers.remove(2);  // Returns true, list is now [1, 3, 2, 4]
+     * boolean notFound = numbers.remove(99); // Returns false, list unchanged
+     * }</pre>
+     *
      * @param e the element to be removed from this list, if present
      * @return {@code true} if this list contained the specified element (and it was removed);
      *         {@code false} otherwise
@@ -821,8 +828,15 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
      * Removes all occurrences of the specified element from this list.
      * The list is compacted after removal, and remaining elements maintain their relative order.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * IntList numbers = IntList.of(1, 2, 3, 2, 4, 2, 5);
+     * numbers.removeAllOccurrences(2);  // Returns true, list is now [1, 3, 4, 5]
+     * }</pre>
+     *
      * @param e the element to be removed from this list
-     * @return {@code true} if this list was modified (i.e., at least one occurrence was removed)
+     * @return {@code true} if this list was modified (i.e., at least one occurrence was removed);
+     *         {@code false} otherwise
      */
     public boolean removeAllOccurrences(final int e) {
         int w = 0;

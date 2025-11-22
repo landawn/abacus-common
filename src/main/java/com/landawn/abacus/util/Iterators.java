@@ -1133,6 +1133,16 @@ public final class Iterators {
     /**
      * Concatenates multiple boolean arrays into a single BooleanIterator.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * boolean[] a1 = {true, false};
+     * boolean[] a2 = {true};
+     * BooleanIterator iter = Iterators.concat(a1, a2);
+     * // iter.nextBoolean() => true
+     * // iter.nextBoolean() => false
+     * // iter.nextBoolean() => true
+     * }</pre>
+     *
      * @param a the boolean arrays to be concatenated.
      * @return a BooleanIterator that will iterate over the elements of each provided boolean array in order.
      */
@@ -1169,6 +1179,16 @@ public final class Iterators {
 
     /**
      * Concatenates multiple char arrays into a single CharIterator.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * char[] a1 = {'a', 'b'};
+     * char[] a2 = {'c'};
+     * CharIterator iter = Iterators.concat(a1, a2);
+     * // iter.nextChar() => 'a'
+     * // iter.nextChar() => 'b'
+     * // iter.nextChar() => 'c'
+     * }</pre>
      *
      * @param a the char arrays to be concatenated.
      * @return a CharIterator that will iterate over the elements of each provided char array in order.
@@ -1207,6 +1227,16 @@ public final class Iterators {
     /**
      * Concatenates multiple byte arrays into a single ByteIterator.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * byte[] a1 = {1, 2};
+     * byte[] a2 = {3};
+     * ByteIterator iter = Iterators.concat(a1, a2);
+     * // iter.nextByte() => 1
+     * // iter.nextByte() => 2
+     * // iter.nextByte() => 3
+     * }</pre>
+     *
      * @param a the byte arrays to be concatenated.
      * @return a ByteIterator that will iterate over the elements of each provided byte array in order.
      */
@@ -1243,6 +1273,16 @@ public final class Iterators {
 
     /**
      * Concatenates multiple short arrays into a single ShortIterator.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * short[] a1 = {10, 20};
+     * short[] a2 = {30};
+     * ShortIterator iter = Iterators.concat(a1, a2);
+     * // iter.nextShort() => 10
+     * // iter.nextShort() => 20
+     * // iter.nextShort() => 30
+     * }</pre>
      *
      * @param a the short arrays to be concatenated.
      * @return a ShortIterator that will iterate over the elements of each provided short array in order.
@@ -1281,6 +1321,17 @@ public final class Iterators {
     /**
      * Concatenates multiple int arrays into a single IntIterator.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * int[] a1 = {1, 2};
+     * int[] a2 = {3, 4};
+     * IntIterator iter = Iterators.concat(a1, a2);
+     * // iter.nextInt() => 1
+     * // iter.nextInt() => 2
+     * // iter.nextInt() => 3
+     * // iter.nextInt() => 4
+     * }</pre>
+     *
      * @param a the int arrays to be concatenated.
      * @return an IntIterator that will iterate over the elements of each provided int array in order.
      */
@@ -1317,6 +1368,16 @@ public final class Iterators {
 
     /**
      * Concatenates multiple long arrays into a single LongIterator.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * long[] a1 = {1L, 2L};
+     * long[] a2 = {3L};
+     * LongIterator iter = Iterators.concat(a1, a2);
+     * // iter.nextLong() => 1L
+     * // iter.nextLong() => 2L
+     * // iter.nextLong() => 3L
+     * }</pre>
      *
      * @param a the long arrays to be concatenated.
      * @return a LongIterator that will iterate over the elements of each provided long array in order.
@@ -1355,6 +1416,15 @@ public final class Iterators {
     /**
      * Concatenates multiple float arrays into a single FloatIterator.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * float[] a1 = {1.1f};
+     * float[] a2 = {2.2f};
+     * FloatIterator iter = Iterators.concat(a1, a2);
+     * // iter.nextFloat() => 1.1f
+     * // iter.nextFloat() => 2.2f
+     * }</pre>
+     *
      * @param a the float arrays to be concatenated.
      * @return a FloatIterator that will iterate over the elements of each provided float array in order.
      */
@@ -1391,6 +1461,16 @@ public final class Iterators {
 
     /**
      * Concatenates multiple double arrays into a single DoubleIterator.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * double[] a1 = {1.1};
+     * double[] a2 = {2.2, 3.3};
+     * DoubleIterator iter = Iterators.concat(a1, a2);
+     * // iter.nextDouble() => 1.1
+     * // iter.nextDouble() => 2.2
+     * // iter.nextDouble() => 3.3
+     * }</pre>
      *
      * @param a the double arrays to be concatenated.
      * @return a DoubleIterator that will iterate over the elements of each provided double array in order.
@@ -1429,6 +1509,16 @@ public final class Iterators {
     /**
      * Concatenates multiple BooleanIterators into a single BooleanIterator.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * BooleanIterator iter1 = BooleanIterator.of(true, false);
+     * BooleanIterator iter2 = BooleanIterator.of(true);
+     * BooleanIterator result = Iterators.concat(iter1, iter2);
+     * // result.nextBoolean() => true
+     * // result.nextBoolean() => false
+     * // result.nextBoolean() => true
+     * }</pre>
+     *
      * @param a the BooleanIterators to be concatenated.
      * @return a BooleanIterator that will iterate over the elements of each provided BooleanIterator in order.
      */
@@ -1463,6 +1553,16 @@ public final class Iterators {
 
     /**
      * Concatenates multiple CharIterators into a single CharIterator.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * CharIterator iter1 = CharIterator.of('a', 'b');
+     * CharIterator iter2 = CharIterator.of('c');
+     * CharIterator result = Iterators.concat(iter1, iter2);
+     * // result.nextChar() => 'a'
+     * // result.nextChar() => 'b'
+     * // result.nextChar() => 'c'
+     * }</pre>
      *
      * @param a the CharIterators to be concatenated.
      * @return a CharIterator that will iterate over the elements of each provided CharIterator in order.
@@ -1499,6 +1599,16 @@ public final class Iterators {
     /**
      * Concatenates multiple ByteIterators into a single ByteIterator.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * ByteIterator iter1 = ByteIterator.of((byte) 1, (byte) 2);
+     * ByteIterator iter2 = ByteIterator.of((byte) 3);
+     * ByteIterator result = Iterators.concat(iter1, iter2);
+     * // result.nextByte() => 1
+     * // result.nextByte() => 2
+     * // result.nextByte() => 3
+     * }</pre>
+     *
      * @param a the ByteIterators to be concatenated.
      * @return a ByteIterator that will iterate over the elements of each provided ByteIterator in order.
      */
@@ -1533,6 +1643,16 @@ public final class Iterators {
 
     /**
      * Concatenates multiple ShortIterators into a single ShortIterator.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * ShortIterator iter1 = ShortIterator.of((short) 1, (short) 2);
+     * ShortIterator iter2 = ShortIterator.of((short) 3);
+     * ShortIterator result = Iterators.concat(iter1, iter2);
+     * // result.nextShort() => 1
+     * // result.nextShort() => 2
+     * // result.nextShort() => 3
+     * }</pre>
      *
      * @param a the ShortIterators to be concatenated.
      * @return a ShortIterator that will iterate over the elements of each provided ShortIterator in order.
@@ -1569,6 +1689,16 @@ public final class Iterators {
     /**
      * Concatenates multiple IntIterators into a single IntIterator.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * IntIterator iter1 = IntIterator.of(1, 2);
+     * IntIterator iter2 = IntIterator.of(3);
+     * IntIterator result = Iterators.concat(iter1, iter2);
+     * // result.nextInt() => 1
+     * // result.nextInt() => 2
+     * // result.nextInt() => 3
+     * }</pre>
+     *
      * @param a the IntIterators to be concatenated.
      * @return an IntIterator that will iterate over the elements of each provided IntIterator in order.
      */
@@ -1603,6 +1733,16 @@ public final class Iterators {
 
     /**
      * Concatenates multiple LongIterators into a single LongIterator.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * LongIterator iter1 = LongIterator.of(1L, 2L);
+     * LongIterator iter2 = LongIterator.of(3L);
+     * LongIterator result = Iterators.concat(iter1, iter2);
+     * // result.nextLong() => 1L
+     * // result.nextLong() => 2L
+     * // result.nextLong() => 3L
+     * }</pre>
      *
      * @param a the LongIterators to be concatenated.
      * @return a LongIterator that will iterate over the elements of each provided LongIterator in order.
@@ -1639,6 +1779,16 @@ public final class Iterators {
     /**
      * Concatenates multiple FloatIterators into a single FloatIterator.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * FloatIterator iter1 = FloatIterator.of(1.1f, 2.2f);
+     * FloatIterator iter2 = FloatIterator.of(3.3f);
+     * FloatIterator result = Iterators.concat(iter1, iter2);
+     * // result.nextFloat() => 1.1f
+     * // result.nextFloat() => 2.2f
+     * // result.nextFloat() => 3.3f
+     * }</pre>
+     *
      * @param a the FloatIterators to be concatenated.
      * @return a FloatIterator that will iterate over the elements of each provided FloatIterator in order.
      */
@@ -1673,6 +1823,16 @@ public final class Iterators {
 
     /**
      * Concatenates multiple DoubleIterators into a single DoubleIterator.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * DoubleIterator iter1 = DoubleIterator.of(1.1, 2.2);
+     * DoubleIterator iter2 = DoubleIterator.of(3.3);
+     * DoubleIterator result = Iterators.concat(iter1, iter2);
+     * // result.nextDouble() => 1.1
+     * // result.nextDouble() => 2.2
+     * // result.nextDouble() => 3.3
+     * }</pre>
      *
      * @param a the DoubleIterators to be concatenated.
      * @return a DoubleIterator that will iterate over the elements of each provided DoubleIterator in order.
@@ -1709,6 +1869,16 @@ public final class Iterators {
     /**
      * Concatenates multiple arrays into a single ObjIterator.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * String[] a1 = {"a", "b"};
+     * String[] a2 = {"c"};
+     * ObjIterator<String> iter = Iterators.concat(a1, a2);
+     * // iter.next() => "a"
+     * // iter.next() => "b"
+     * // iter.next() => "c"
+     * }</pre>
+     *
      * @param <T> the type of elements in the arrays.
      * @param a the arrays to be concatenated.
      * @return an ObjIterator that will iterate over the elements of each provided array in order.
@@ -1732,6 +1902,16 @@ public final class Iterators {
 
     /**
      * Concatenates multiple Iterators into a single ObjIterator.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Iterator<String> iter1 = Arrays.asList("a", "b").iterator();
+     * Iterator<String> iter2 = Arrays.asList("c").iterator();
+     * ObjIterator<String> result = Iterators.concat(iter1, iter2);
+     * // result.next() => "a"
+     * // result.next() => "b"
+     * // result.next() => "c"
+     * }</pre>
      *
      * @param <T> the type of elements in the Iterators.
      * @param a the Iterators to be concatenated.
@@ -1785,6 +1965,14 @@ public final class Iterators {
     /**
      * Concatenates multiple Maps into a single ObjIterator of Map.Entry.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Map<String, Integer> map1 = N.asMap("a", 1);
+     * Map<String, Integer> map2 = N.asMap("b", 2);
+     * ObjIterator<Map.Entry<String, Integer>> iter = Iterators.concat(map1, map2);
+     * // Iterates over entries from map1 then map2
+     * }</pre>
+     *
      * @param <K> the type of keys in the Maps.
      * @param <V> the type of values in the Maps.
      * @param a the Maps to be concatenated.
@@ -1809,6 +1997,18 @@ public final class Iterators {
 
     /**
      * Concatenates multiple Iterators into a single ObjIterator.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * List<Iterator<String>> iterators = Arrays.asList(
+     *     Arrays.asList("a", "b").iterator(),
+     *     Arrays.asList("c").iterator()
+     * );
+     * ObjIterator<String> result = Iterators.concat(iterators);
+     * // result.next() => "a"
+     * // result.next() => "b"
+     * // result.next() => "c"
+     * }</pre>
      *
      * @param <T> the type of elements in the Iterators.
      * @param c the collection of iterator to be concatenated.
@@ -1845,6 +2045,18 @@ public final class Iterators {
 
     /**
      * Concatenates multiple Iterable objects into a single ObjIterator.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * List<List<String>> iterables = Arrays.asList(
+     *     Arrays.asList("a", "b"),
+     *     Arrays.asList("c")
+     * );
+     * ObjIterator<String> result = Iterators.concatIterables(iterables);
+     * // result.next() => "a"
+     * // result.next() => "b"
+     * // result.next() => "c"
+     * }</pre>
      *
      * @param <T> the type of elements in the Iterable objects.
      * @param c the collection of Iterable objects to be concatenated.
@@ -1883,6 +2095,15 @@ public final class Iterators {
 
     /**
      * Concatenates multiple BiIterators into a single BiIterator.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * BiIterator<String, Integer> iter1 = BiIterator.of("a", 1);
+     * BiIterator<String, Integer> iter2 = BiIterator.of("b", 2);
+     * BiIterator<String, Integer> result = Iterators.concat(iter1, iter2);
+     * // result.next() => Pair("a", 1)
+     * // result.next() => Pair("b", 2)
+     * }</pre>
      *
      * @param <A> the type of the first element in the BiIterator.
      * @param <B> the type of the second element in the BiIterator.
@@ -1979,6 +2200,15 @@ public final class Iterators {
     /**
      * Concatenates multiple TriIterators into a single TriIterator.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * TriIterator<String, Integer, Boolean> iter1 = TriIterator.of("a", 1, true);
+     * TriIterator<String, Integer, Boolean> iter2 = TriIterator.of("b", 2, false);
+     * TriIterator<String, Integer, Boolean> result = Iterators.concat(iter1, iter2);
+     * // result.next() => Triple("a", 1, true)
+     * // result.next() => Triple("b", 2, false)
+     * }</pre>
+     *
      * @param <A> the type of the first element in the TriIterator.
      * @param <B> the type of the second element in the TriIterator.
      * @param <C> the type of the third element in the TriIterator.
@@ -2073,6 +2303,15 @@ public final class Iterators {
 
     /**
      * Merges two iterators into a single {@code ObjIterator}. The order of elements in the resulting iterator is determined by the provided {@code BiFunction}.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Iterator<Integer> iter1 = Arrays.asList(1, 3, 5).iterator();
+     * Iterator<Integer> iter2 = Arrays.asList(2, 4, 6).iterator();
+     * ObjIterator<Integer> result = Iterators.merge(iter1, iter2,
+     *     (a, b) -> a < b ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND);
+     * // result => 1, 2, 3, 4, 5, 6
+     * }</pre>
      *
      * @param <T> the type of elements in the iterators.
      * @param a the first iterator to be merged.
@@ -2233,6 +2472,14 @@ public final class Iterators {
      * Merges two sorted Iterators into a single ObjIterator, which will iterate over the elements of each Iterator in a sorted order.
      * The elements in the Iterators should implement Comparable interface.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Iterator<Integer> iter1 = Arrays.asList(1, 3, 5).iterator();
+     * Iterator<Integer> iter2 = Arrays.asList(2, 4, 6).iterator();
+     * ObjIterator<Integer> result = Iterators.mergeSorted(iter1, iter2);
+     * // result => 1, 2, 3, 4, 5, 6
+     * }</pre>
+     *
      * @param <T> the type of elements in the Iterators, which should implement Comparable interface.
      * @param sortedA the first Iterator to be merged. It should be in non-descending order.
      * @param sortedB the second Iterator to be merged. It should be in non-descending order.
@@ -2246,6 +2493,14 @@ public final class Iterators {
     /**
      * Merges two sorted iterators into a single {@code ObjIterator}, which will iterate over the elements of each iterator in a sorted order.
      * The order of elements in the resulting iterator is determined by the provided {@code Comparator}.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Iterator<Integer> iter1 = Arrays.asList(5, 3, 1).iterator();
+     * Iterator<Integer> iter2 = Arrays.asList(6, 4, 2).iterator();
+     * ObjIterator<Integer> result = Iterators.mergeSorted(iter1, iter2, Comparator.reverseOrder());
+     * // result => 6, 5, 4, 3, 2, 1
+     * }</pre>
      *
      * @param <T> the type of elements in the iterators.
      * @param sortedA the first iterator to be merged. It should be in non-descending order.
@@ -2296,6 +2551,15 @@ public final class Iterators {
      * Zips two iterators into a single {@code ObjIterator}, which will iterate over the elements of each iterator in parallel.
      * The resulting elements are determined by the provided {@code BiFunction}.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Iterator<String> a = Arrays.asList("a", "b").iterator();
+     * Iterator<Integer> b = Arrays.asList(1, 2).iterator();
+     * ObjIterator<String> result = Iterators.zip(a, b, (s, i) -> s + i);
+     * // result.next() => "a1"
+     * // result.next() => "b2"
+     * }</pre>
+     *
      * @param <A> the type of elements in the first iterator.
      * @param <B> the type of elements in the second iterator.
      * @param <R> the type of elements in the resulting {@code ObjIterator}.
@@ -2328,6 +2592,15 @@ public final class Iterators {
      * Zips two {@code Iterable} objects into a single {@code ObjIterator}, which will iterate over the elements of each {@code Iterable} in parallel.
      * The resulting elements are determined by the provided {@code BiFunction}.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * List<String> a = Arrays.asList("a", "b");
+     * List<Integer> b = Arrays.asList(1, 2);
+     * ObjIterator<String> result = Iterators.zip(a, b, (s, i) -> s + i);
+     * // result.next() => "a1"
+     * // result.next() => "b2"
+     * }</pre>
+     *
      * @param <A> the type of elements in the first {@code Iterable}.
      * @param <B> the type of elements in the second {@code Iterable}.
      * @param <R> the type of elements in the resulting {@code ObjIterator}.
@@ -2347,6 +2620,15 @@ public final class Iterators {
     /**
      * Zips three iterators into a single {@code ObjIterator}, which will iterate over the elements of each iterator in parallel.
      * The resulting elements are determined by the provided {@code TriFunction}.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Iterator<String> a = Arrays.asList("a").iterator();
+     * Iterator<Integer> b = Arrays.asList(1).iterator();
+     * Iterator<Boolean> c = Arrays.asList(true).iterator();
+     * ObjIterator<String> result = Iterators.zip(a, b, c, (s, i, bool) -> s + i + bool);
+     * // result.next() => "a1true"
+     * }</pre>
      *
      * @param <A> the type of elements in the first iterator.
      * @param <B> the type of elements in the second iterator.
@@ -2407,6 +2689,15 @@ public final class Iterators {
      * This method can be used to combine two Iterators into one, which will iterate over the elements of each Iterator in parallel.
      * When one iterator is exhausted, the provided default values are used.
      * The resulting elements are determined by the provided BiFunction <i>zipFunction</i>.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Iterator<String> a = Arrays.asList("a").iterator();
+     * Iterator<Integer> b = Arrays.asList(1, 2).iterator();
+     * ObjIterator<String> result = Iterators.zip(a, b, "empty", 0, (s, i) -> s + i);
+     * // result.next() => "a1"
+     * // result.next() => "empty2"
+     * }</pre>
      *
      * @param <A> the type of elements in the first Iterator.
      * @param <B> the type of elements in the second Iterator.
@@ -2540,6 +2831,17 @@ public final class Iterators {
      * Unzips an Iterator into a BiIterator.
      * The transformation is determined by the provided BiConsumer <i>unzip</i>.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Iterator<String> iter = Arrays.asList("a:1", "b:2").iterator();
+     * BiIterator<String, Integer> result = Iterators.unzip(iter, (s, pair) -> {
+     *     String[] parts = s.split(":");
+     *     pair.set(parts[0], Integer.parseInt(parts[1]));
+     * });
+     * // result.next() => Pair("a", 1)
+     * // result.next() => Pair("b", 2)
+     * }</pre>
+     *
      * @param <T> the type of elements in the original Iterator.
      * @param <A> the type of the first element in the resulting BiIterator.
      * @param <B> the type of the second element in the resulting BiIterator.
@@ -2556,6 +2858,17 @@ public final class Iterators {
     /**
      * Unzips an Iterable into a BiIterator.
      * The transformation is determined by the provided BiConsumer <i>unzip</i>.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * List<String> list = Arrays.asList("a:1", "b:2");
+     * BiIterator<String, Integer> result = Iterators.unzip(list, (s, pair) -> {
+     *     String[] parts = s.split(":");
+     *     pair.set(parts[0], Integer.parseInt(parts[1]));
+     * });
+     * // result.next() => Pair("a", 1)
+     * // result.next() => Pair("b", 2)
+     * }</pre>
      *
      * @param <T> the type of elements in the original Iterable.
      * @param <A> the type of the first element in the resulting BiIterator.
@@ -3414,6 +3727,14 @@ public final class Iterators {
     /**
      * Transforms the elements of the given iterator using the provided {@code Function} and returns an {@code ObjIterator} with the transformed elements.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Iterator<String> iter = Arrays.asList("a", "b").iterator();
+     * ObjIterator<String> result = Iterators.map(iter, String::toUpperCase);
+     * // result.next() => "A"
+     * // result.next() => "B"
+     * }</pre>
+     *
      * @param <T> the type of elements in the original iterator.
      * @param <U> the type of elements in the resulting {@code ObjIterator}.
      * @param iter the original iterator to be transformed, or {@code null} to return an empty iterator.
@@ -3462,6 +3783,15 @@ public final class Iterators {
 
     /**
      * Transforms the elements of the given iterator into {@code Iterable}s using the provided {@code Function} and flattens the result into an {@code ObjIterator}.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Iterator<String> iter = Arrays.asList("a,b", "c").iterator();
+     * ObjIterator<String> result = Iterators.flatMap(iter, s -> Arrays.asList(s.split(",")));
+     * // result.next() => "a"
+     * // result.next() => "b"
+     * // result.next() => "c"
+     * }</pre>
      *
      * @param <T> the type of elements in the original iterator.
      * @param <U> the type of elements in the resulting {@code ObjIterator}.
@@ -3530,6 +3860,15 @@ public final class Iterators {
     /**
      * Transforms the elements of the given iterator into arrays using the provided {@code Function} and flattens the result into an {@code ObjIterator}.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Iterator<String> iter = Arrays.asList("a,b", "c").iterator();
+     * ObjIterator<String> result = Iterators.flatmap(iter, s -> s.split(","));
+     * // result.next() => "a"
+     * // result.next() => "b"
+     * // result.next() => "c"
+     * }</pre>
+     *
      * @param <T> the type of elements in the original iterator.
      * @param <U> the type of elements in the resulting {@code ObjIterator}.
      * @param iter the original iterator to be transformed, or {@code null} to return an empty iterator.
@@ -3579,6 +3918,14 @@ public final class Iterators {
 
     /**
      * Performs an action for each element of the given iterator.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Iterator<String> iter = Arrays.asList("a", "b").iterator();
+     * List<String> list = new ArrayList<>();
+     * Iterators.forEach(iter, list::add);
+     * // list => ["a", "b"]
+     * }</pre>
      *
      * @param <T> the type of elements in the original iterator.
      * @param <E> the type of exception that can be thrown by the {@code elementConsumer}.
@@ -3646,6 +3993,14 @@ public final class Iterators {
     /**
      * Performs an action for each element of the given iterator, starting from a specified offset and up to a specified count.
      * This method also supports multi-threading with a specified number of threads and queue size.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Iterator<Integer> iter = IntStream.range(0, 100).iterator();
+     * Iterators.forEach(iter, 0, 100, 4, 10, i -> {
+     *     System.out.println("Processing " + i + " on thread " + Thread.currentThread().getName());
+     * });
+     * }</pre>
      *
      * @param <T> the type of elements in the original iterator.
      * @param <E> the type of exception that can be thrown by the {@code elementConsumer}.
@@ -3817,6 +4172,20 @@ public final class Iterators {
     /**
      * Performs an action for each element of the given collection of iterators, starting from a specified offset and up to a specified count.
      * This method also supports multi-threading with a specified number of threads for reading and processing, and a queue size for holding the processing records.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * List<Iterator<Integer>> iterators = Arrays.asList(
+     *     Arrays.asList(1, 2).iterator(),
+     *     Arrays.asList(3, 4).iterator()
+     * );
+     * 
+     * // Parallel processing with 2 read threads and 4 process threads
+     * Iterators.forEach(iterators, 0, Long.MAX_VALUE, 2, 4, 100, 
+     *     item -> process(item),
+     *     () -> System.out.println("Done")
+     * );
+     * }</pre>
      *
      * @param <T> the type of elements in the original iterators.
      * @param <E> the type of exception that can be thrown by the {@code elementConsumer}.

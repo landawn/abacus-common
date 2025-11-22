@@ -215,7 +215,7 @@ public class U101Test extends TestBase {
             assertTrue(mapped.isPresent());
             assertEquals(4, mapped.get());
 
-            assertThrows(NullPointerException.class, () -> opt.map(s -> null));
+            assertTrue(opt.map(s -> null).isEmpty());
 
             u.Optional<String> empty = u.Optional.empty();
             u.Optional<Integer> mappedEmpty = empty.map(String::length);

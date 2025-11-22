@@ -141,25 +141,25 @@ import com.landawn.abacus.util.Strings.StrUtil;
  *
  * <p><b>Rounding Operations:</b>
  * <ul>
- *   <li><b>Scale-Based:</b> {@code round(double, int)} with decimal places specification</li>
- *   <li><b>Mode-Based:</b> {@code round(double, int, RoundingMode)} with specific rounding behavior</li>
- *   <li><b>Format-Based:</b> {@code round(double, String)} using DecimalFormat patterns</li>
- *   <li><b>Type Conversion:</b> {@code roundToInt()}, {@code roundToLong()}, {@code roundToBigInteger()}</li>
+ *   <li><b>Scale-Based:</b> {@code Numbers.round(double, int)} with decimal places specification</li>
+ *   <li><b>Mode-Based:</b> {@code Numbers.round(double, int, RoundingMode)} with specific rounding behavior</li>
+ *   <li><b>Format-Based:</b> {@code Numbers.round(double, String)} using DecimalFormat patterns</li>
+ *   <li><b>Type Conversion:</b> {@code Numbers.roundToInt()}, {@code Numbers.roundToLong()}, {@code Numbers.roundToBigInteger()}</li>
  * </ul>
  *
  * <p><b>Mathematical Functions:</b>
  * <ul>
- *   <li><b>Factorial:</b> {@code factorialToLong()}, {@code factorialToDouble()}, {@code factorialToBigInteger()}</li>
- *   <li><b>Binomial:</b> {@code binomial()}, {@code binomialToLong()}, {@code binomialToBigInteger()}</li>
- *   <li><b>Mean:</b> {@code mean()} for various numeric types and arrays</li>
- *   <li><b>Hyperbolic:</b> {@code asinh()}, {@code acosh()}, {@code atanh()}</li>
+ *   <li><b>Factorial:</b> {@code Numbers.factorialToLong()}, {@code Numbers.factorialToDouble()}, {@code Numbers.factorialToBigInteger()}</li>
+ *   <li><b>Binomial:</b> {@code Numbers.binomial()}, {@code Numbers.binomialToLong()}, {@code Numbers.binomialToBigInteger()}</li>
+ *   <li><b>Mean:</b> {@code Numbers.mean()} for various numeric types and arrays</li>
+ *   <li><b>Hyperbolic:</b> {@code Numbers.asinh()}, {@code Numbers.acosh()}, {@code Numbers.atanh()}</li>
  * </ul>
  *
  * <p><b>Comparison and Validation:</b>
  * <ul>
- *   <li><b>Fuzzy Equality:</b> {@code fuzzyEquals()} with tolerance-based comparison</li>
- *   <li><b>Fuzzy Comparison:</b> {@code fuzzyCompare()} returning comparison result</li>
- *   <li><b>Mathematical Validation:</b> {@code isMathematicalInteger()}, {@code isFinite()}, {@code isNormal()}</li>
+ *   <li><b>Fuzzy Equality:</b> {@code Numbers.fuzzyEquals()} with tolerance-based comparison</li>
+ *   <li><b>Fuzzy Comparison:</b> {@code Numbers.fuzzyCompare()} returning comparison result</li>
+ *   <li><b>Mathematical Validation:</b> {@code Numbers.isMathematicalInteger()}, {@code Numbers.isFinite()}, {@code Numbers.isNormal()}</li>
  *   <li><b>Range Checking:</b> Internal validation for parameter bounds and overflow conditions</li>
  * </ul>
  *
@@ -454,14 +454,14 @@ public final class Numbers {
             (long) 2 * 3 * 4 * 5 * 6 * 7 * 8 * 9 * 10 * 11 * 12 * 13 * 14 * 15 * 16 * 17 * 18 * 19 * 20 };
 
     /*
-     * binomial(biggestBinomials[k], k) fits in a long, but not binomial(biggestBinomials[k] + 1, k).
+     * Numbers.binomial(biggestBinomials[k], k) fits in a long, but not binomial(biggestBinomials[k] + 1, k).
      */
     static final int[] biggestBinomials = { Integer.MAX_VALUE, Integer.MAX_VALUE, Integer.MAX_VALUE, 3810779, 121977, 16175, 4337, 1733, 887, 534, 361, 265,
             206, 169, 143, 125, 111, 101, 94, 88, 83, 79, 76, 74, 72, 70, 69, 68, 67, 67, 66, 66, 66, 66 };
 
     /*
-     * binomial(biggestSimpleBinomials[k], k) doesn't need to use the slower GCD-based impl, but
-     * binomial(biggestSimpleBinomials[k] + 1, k) does.
+     * Numbers.binomial(biggestSimpleBinomials[k], k) doesn't need to use the slower GCD-based impl, but
+     * Numbers.binomial(biggestSimpleBinomials[k] + 1, k) does.
      */
     static final int[] biggestSimpleBinomials = { Integer.MAX_VALUE, Integer.MAX_VALUE, Integer.MAX_VALUE, 2642246, 86251, 11724, 3218, 1313, 684, 419, 287,
             214, 169, 139, 119, 105, 95, 87, 81, 76, 73, 70, 68, 66, 64, 63, 62, 62, 61, 61, 61 };
@@ -976,7 +976,7 @@ public final class Numbers {
      * Integer result = Numbers.convert(123.45, Integer.class);
      * 
      * // Convert a BigInteger to a long (throws ArithmeticException if too large)
-     * Long longValue = Numbers.convert(new BigInteger("9223372036854775807"), Long.class);
+     * Long longValue = Numbers.convert(new Numbers.BigInteger("9223372036854775807"), Long.class);
      * 
      * // Null values return the default value for the target type
      * Byte byteValue = Numbers.convert(null, Byte.class); // Returns null
@@ -1023,7 +1023,7 @@ public final class Numbers {
      *
      * // Convert with overflow checking
      * try {
-     *     Byte byteValue = Numbers.convert(new BigInteger("1000"), Byte.class, (byte)0);
+     *     Byte byteValue = Numbers.convert(new Numbers.BigInteger("1000"), Byte.class, (byte)0);
      * } catch (ArithmeticException e) {
      *     // Handle overflow exception
      * }
@@ -1061,7 +1061,7 @@ public final class Numbers {
      *
      * // Convert a BigInteger to a long (throws ArithmeticException if too large)
      * Type<Long> longType = Type.of(Long.class);
-     * Long longValue = Numbers.convert(new BigInteger("9223372036854775807"), longType);
+     * Long longValue = Numbers.convert(new Numbers.BigInteger("9223372036854775807"), longType);
      *
      * // Null values return the default value for the target type
      * Type<Byte> byteType = Type.of(Byte.class);
@@ -1112,7 +1112,7 @@ public final class Numbers {
      * // Convert with overflow checking
      * try {
      *     Type<Byte> byteType = Type.of(Byte.class);
-     *     Byte byteValue = Numbers.convert(new BigInteger("1000"), byteType, (byte)0);
+     *     Byte byteValue = Numbers.convert(new Numbers.BigInteger("1000"), byteType, (byte)0);
      * } catch (ArithmeticException e) {
      *     // Handle overflow exception
      * }
@@ -3318,7 +3318,7 @@ public final class Numbers {
      *
      * <p>Note: It's copied from NumberUtils in Apache Commons Lang under Apache License 2.0</p>
      *
-     * <p>It's same as {@code isCreatable(String)}.</p>
+     * <p>It's same as {@code Numbers.isCreatable(String)}.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -3967,7 +3967,7 @@ public final class Numbers {
      * Returns the base 2 logarithm of a double value, rounded with the specified rounding mode to an
      * {@code int}.
      *
-     * <p>Regardless of the rounding mode, this is faster than {@code (int) log2(x)}.
+     * <p>Regardless of the rounding mode, this is faster than {@code (int) Numbers.log2(x)}.
      *
      * @param x the value to compute the logarithm of, must be positive and finite
      * @param mode the rounding mode to apply
@@ -4304,7 +4304,7 @@ public final class Numbers {
     /**
      * Returns {@code b} to the {@code k}th power.
      *
-     * <p>This method computes integer exponentiation using an efficient O(log k) algorithm.
+     * <p>This method computes integer exponentiation using an efficient Numbers.O(log k) algorithm.
      * If the result overflows, the returned value will be equal to the low-order bits of the
      * {@code true} result, following standard Java overflow semantics (similar to multiplication overflow).
      *
@@ -4368,7 +4368,7 @@ public final class Numbers {
     /**
      * Returns {@code b} to the {@code k}th power.
      *
-     * <p>This method computes long integer exponentiation using an efficient O(log k) algorithm.
+     * <p>This method computes long integer exponentiation using an efficient Numbers.O(log k) algorithm.
      * If the result overflows, the returned value will be equal to the low-order bits of the
      * {@code true} result, specifically {@code BigInteger.valueOf(b).pow(k).longValue()}, following
      * standard Java overflow semantics.
@@ -4433,7 +4433,7 @@ public final class Numbers {
 
     /**
      * Returns the smallest power of two greater than or equal to {@code x}.  This is equivalent to
-     * {@code checkedPow(2, log2(x, CEILING))}.
+     * {@code Numbers.checkedPow(2, Numbers.log2(x, CEILING))}.
      *
      * @param x the value to compute the ceiling power of two for, must be positive
      * @return the smallest power of two greater than or equal to x
@@ -4453,7 +4453,7 @@ public final class Numbers {
      * Returns the smallest power of two greater than or equal to the given BigInteger value.
      *
      * <p>This method computes the ceiling of x to the nearest power of two. For example, if x is 100,
-     * the result will be 128 (2^7). This is equivalent to 2^(ceiling(log2(x))).</p>
+     * the result will be 128 (2^7). This is equivalent to 2^(Numbers.ceiling(Numbers.log2(x))).</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -4475,7 +4475,7 @@ public final class Numbers {
 
     /**
      * Returns the largest power of two less than or equal to {@code x}.  This is equivalent to
-     * {@code checkedPow(2, log2(x, FLOOR))}.
+     * {@code Numbers.checkedPow(2, Numbers.log2(x, FLOOR))}.
      *
      * @param x the value to compute the floor power of two for, must be positive
      * @return the largest power of two less than or equal to x
@@ -4493,7 +4493,7 @@ public final class Numbers {
      * Returns the largest power of two less than or equal to the given BigInteger value.
      *
      * <p>This method computes the floor of x to the nearest power of two. For example, if x is 100,
-     * the result will be 64 (2^6). This is equivalent to 2^(floor(log2(x))).</p>
+     * the result will be 64 (2^6). This is equivalent to 2^(Numbers.floor(Numbers.log2(x))).</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -4536,7 +4536,7 @@ public final class Numbers {
      * @return the integer square root of {@code x}, rounded according to the specified mode
      * @throws IllegalArgumentException if {@code x < 0}
      * @throws ArithmeticException if {@code mode} is {@link RoundingMode#UNNECESSARY} and
-     *         {@code sqrt(x)} is not an integer (i.e., {@code x} is not a perfect square)
+     *         {@code Numbers.sqrt(x)} is not an integer (i.e., {@code x} is not a perfect square)
      * @see #sqrt(long, RoundingMode)
      * @see #sqrt(BigInteger, RoundingMode)
      * @see RoundingMode
@@ -4606,7 +4606,7 @@ public final class Numbers {
      * @return the integer square root of {@code x}, rounded according to the specified mode
      * @throws IllegalArgumentException if {@code x < 0}
      * @throws ArithmeticException if {@code mode} is {@link RoundingMode#UNNECESSARY} and
-     *         {@code sqrt(x)} is not an integer (i.e., {@code x} is not a perfect square)
+     *         {@code Numbers.sqrt(x)} is not an integer (i.e., {@code x} is not a perfect square)
      * @see #sqrt(int, RoundingMode)
      * @see #sqrt(BigInteger, RoundingMode)
      * @see RoundingMode
@@ -4693,7 +4693,7 @@ public final class Numbers {
      * Numbers.sqrt(ten, RoundingMode.HALF_UP) = 3      // rounds to nearest, ties away from zero
      *
      * // Large value example
-     * BigInteger large = new BigInteger("123456789012345678901234567890");
+     * BigInteger large = new Numbers.BigInteger("123456789012345678901234567890");
      * Numbers.sqrt(large, RoundingMode.DOWN) // computes sqrt with arbitrary precision
      * }</pre>
      *
@@ -4702,7 +4702,7 @@ public final class Numbers {
      * @return the integer square root of {@code x}, rounded according to the specified mode
      * @throws IllegalArgumentException if {@code x} is negative
      * @throws ArithmeticException if {@code mode} is {@link RoundingMode#UNNECESSARY} and
-     *         {@code sqrt(x)} is not an integer (i.e., {@code x} is not a perfect square)
+     *         {@code Numbers.sqrt(x)} is not an integer (i.e., {@code x} is not a perfect square)
      * @see RoundingMode
      * @see #sqrt(int, RoundingMode)
      * @see #sqrt(long, RoundingMode)
@@ -4998,11 +4998,11 @@ public final class Numbers {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * mod(7, 4) == 3
-     * mod(-7, 4) == 1
-     * mod(-1, 4) == 3
-     * mod(-8, 4) == 0
-     * mod(8, 4) == 0
+     * Numbers.mod(7, 4) == 3
+     * Numbers.mod(-7, 4) == 1
+     * Numbers.mod(-1, 4) == 3
+     * Numbers.mod(-8, 4) == 0
+     * Numbers.mod(8, 4) == 0
      * }</pre>
      *
      * @param x the dividend
@@ -5025,11 +5025,11 @@ public final class Numbers {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * mod(7, 4) == 3
-     * mod(-7, 4) == 1
-     * mod(-1, 4) == 3
-     * mod(-8, 4) == 0
-     * mod(8, 4) == 0
+     * Numbers.mod(7, 4) == 3
+     * Numbers.mod(-7, 4) == 1
+     * Numbers.mod(-1, 4) == 3
+     * Numbers.mod(-8, 4) == 0
+     * Numbers.mod(8, 4) == 0
      * }</pre>
      *
      * @param x the dividend
@@ -5049,11 +5049,11 @@ public final class Numbers {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * mod(7, 4) == 3
-     * mod(-7, 4) == 1
-     * mod(-1, 4) == 3
-     * mod(-8, 4) == 0
-     * mod(8, 4) == 0
+     * Numbers.mod(7, 4) == 3
+     * Numbers.mod(-7, 4) == 1
+     * Numbers.mod(-1, 4) == 3
+     * Numbers.mod(-8, 4) == 0
+     * Numbers.mod(8, 4) == 0
      * }</pre>
      *
      * @param x the dividend
@@ -5233,7 +5233,7 @@ public final class Numbers {
      * Returns the least common multiple (LCM) of two integers.
      * The LCM is the smallest positive integer that is divisible by both numbers.
      *
-     * <p>This method uses the formula {@code lcm(a,b) = (a / gcd(a,b)) * b}, computing
+     * <p>This method uses the formula {@code Numbers.lcm(a,b) = (a / Numbers.gcd(a,b)) * b}, computing
      * the LCM from the absolute values of the inputs. The method handles negative numbers
      * by taking their absolute values before computing the LCM.
      *
@@ -5248,10 +5248,10 @@ public final class Numbers {
      *
      * <p>Special cases:
      * <ul>
-     * <li>The invocations {@code lcm(Integer.MIN_VALUE, n)} and {@code lcm(n, Integer.MIN_VALUE)},
-     * where {@code abs(n)} is a power of 2, throw an {@code ArithmeticException}, because the result
+     * <li>The invocations {@code Numbers.lcm(Integer.MIN_VALUE, n)} and {@code Numbers.lcm(n, Integer.MIN_VALUE)},
+     * where {@code Numbers.abs(n)} is a power of 2, throw an {@code ArithmeticException}, because the result
      * would be 2^31, which is too large for an int value.</li>
-     * <li>The result of {@code lcm(0, x)} and {@code lcm(x, 0)} is {@code 0} for any {@code x}.</li>
+     * <li>The result of {@code Numbers.lcm(0, x)} and {@code Numbers.lcm(x, 0)} is {@code 0} for any {@code x}.</li>
      * </ul>
      *
      * @param a the first integer
@@ -5281,7 +5281,7 @@ public final class Numbers {
      * Returns the least common multiple (LCM) of two long integers.
      * The LCM is the smallest positive integer that is divisible by both numbers.
      *
-     * <p>This method uses the formula {@code lcm(a,b) = (a / gcd(a,b)) * b}, computing
+     * <p>This method uses the formula {@code Numbers.lcm(a,b) = (a / Numbers.gcd(a,b)) * b}, computing
      * the LCM from the absolute values of the inputs. The method handles negative numbers
      * by taking their absolute values before computing the LCM.
      *
@@ -5297,10 +5297,10 @@ public final class Numbers {
      *
      * <p>Special cases:
      * <ul>
-     * <li>The invocations {@code lcm(Long.MIN_VALUE, n)} and {@code lcm(n, Long.MIN_VALUE)},
-     * where {@code abs(n)} is a power of 2, throw an {@code ArithmeticException}, because the result
+     * <li>The invocations {@code Numbers.lcm(Long.MIN_VALUE, n)} and {@code Numbers.lcm(n, Long.MIN_VALUE)},
+     * where {@code Numbers.abs(n)} is a power of 2, throw an {@code ArithmeticException}, because the result
      * would be 2^63, which is too large for a long value.</li>
-     * <li>The result of {@code lcm(0L, x)} and {@code lcm(x, 0L)} is {@code 0L} for any {@code x}.</li>
+     * <li>The result of {@code Numbers.lcm(0L, x)} and {@code Numbers.lcm(x, 0L)} is {@code 0L} for any {@code x}.</li>
      * </ul>
      *
      * @param a the first long integer
@@ -6106,7 +6106,7 @@ public final class Numbers {
      *
      * <p><b>Performance Note:</b> This method uses an efficient binary recursive algorithm with
      * balanced multiplies. It removes all factors of 2 from intermediate products and shifts them
-     * back in at the end. The result takes <i>O(n log n)</i> space, so use cautiously for very
+     * back in at the end. The result takes <i>Numbers.O(n log n)</i> space, so use cautiously for very
      * large values of {@code n}.
      *
      * <p><b>Usage Examples:</b></p>
@@ -6201,7 +6201,7 @@ public final class Numbers {
     }
 
     /**
-     * Returns the binomial coefficient "n choose k", denoted as C(n, k) or (n k).
+     * Returns the binomial coefficient "n choose k", denoted as Numbers.C(n, k) or (n k).
      *
      * <p>The binomial coefficient represents the number of ways to choose {@code k} items from
      * {@code n} items without regard to order. It is calculated as {@code n! / (k! * (n-k)!)}.
@@ -6211,8 +6211,8 @@ public final class Numbers {
      * <pre>{@code
      * Numbers.binomial(5, 0) = 1      // only one way to choose nothing
      * Numbers.binomial(5, 1) = 5      // five ways to choose one item
-     * Numbers.binomial(5, 2) = 10     // C(5,2) = 5!/(2!*3!) = 10
-     * Numbers.binomial(5, 3) = 10     // C(5,3) = C(5,2) by symmetry
+     * Numbers.binomial(5, 2) = 10     // Numbers.C(5,2) = 5!/(2!*3!) = 10
+     * Numbers.binomial(5, 3) = 10     // Numbers.C(5,3) = Numbers.C(5,2) by symmetry
      * Numbers.binomial(10, 5) = 252
      * Numbers.binomial(52, 5) = 2598960  // poker hands from a deck
      * Numbers.binomial(100, 50) = Integer.MAX_VALUE  // overflow, saturates
@@ -6220,7 +6220,7 @@ public final class Numbers {
      *
      * @param n the total number of items; must be non-negative
      * @param k the number of items to choose; must be non-negative and at most {@code n}
-     * @return the binomial coefficient C(n, k) if it fits in an {@code int}, otherwise {@code Integer.MAX_VALUE}
+     * @return the binomial coefficient Numbers.C(n, k) if it fits in an {@code int}, otherwise {@code Integer.MAX_VALUE}
      * @throws IllegalArgumentException if {@code n < 0}, {@code k < 0}, or {@code k > n}
      * @see #binomialToLong(int, int)
      * @see #binomialToBigInteger(int, int)
@@ -6251,7 +6251,7 @@ public final class Numbers {
     }
 
     /**
-     * Returns the binomial coefficient "n choose k" as a {@code long}, denoted as C(n, k) or (n k).
+     * Returns the binomial coefficient "n choose k" as a {@code long}, denoted as Numbers.C(n, k) or (n k).
      *
      * <p>The binomial coefficient represents the number of ways to choose {@code k} items from
      * {@code n} items without regard to order. It is calculated as {@code n! / (k! * (n-k)!)}.
@@ -6261,7 +6261,7 @@ public final class Numbers {
      * <pre>{@code
      * Numbers.binomialToLong(5, 0) = 1L      // only one way to choose nothing
      * Numbers.binomialToLong(5, 1) = 5L      // five ways to choose one item
-     * Numbers.binomialToLong(5, 2) = 10L     // C(5,2) = 5!/(2!*3!) = 10
+     * Numbers.binomialToLong(5, 2) = 10L     // Numbers.C(5,2) = 5!/(2!*3!) = 10
      * Numbers.binomialToLong(10, 5) = 252L
      * Numbers.binomialToLong(52, 5) = 2598960L  // poker hands from a deck
      * Numbers.binomialToLong(60, 30) = 118264581564861424L
@@ -6270,7 +6270,7 @@ public final class Numbers {
      *
      * @param n the total number of items; must be non-negative
      * @param k the number of items to choose; must be non-negative and at most {@code n}
-     * @return the binomial coefficient C(n, k) if it fits in a {@code long}, otherwise {@code Long.MAX_VALUE}
+     * @return the binomial coefficient Numbers.C(n, k) if it fits in a {@code long}, otherwise {@code Long.MAX_VALUE}
      * @throws IllegalArgumentException if {@code n < 0}, {@code k < 0}, or {@code k > n}
      * @see #binomial(int, int)
      * @see #binomialToBigInteger(int, int)
@@ -6336,13 +6336,13 @@ public final class Numbers {
     }
 
     /**
-     * Returns the binomial coefficient "n choose k" as a {@code BigInteger}, denoted as C(n, k) or (n k).
+     * Returns the binomial coefficient "n choose k" as a {@code BigInteger}, denoted as Numbers.C(n, k) or (n k).
      *
      * <p>The binomial coefficient represents the number of ways to choose {@code k} items from
      * {@code n} items without regard to order. It is calculated as {@code n! / (k! * (n-k)!)}.
      * This method supports arbitrary-precision computation and can handle very large values.
      *
-     * <p><b>Performance Note:</b> The result can take as much as <i>O(k log n)</i> space. Use
+     * <p><b>Performance Note:</b> The result can take as much as <i>Numbers.O(k log n)</i> space. Use
      * cautiously for very large values of {@code k} and {@code n}.
      *
      * <p><b>Usage Examples:</b></p>
@@ -6356,7 +6356,7 @@ public final class Numbers {
      *
      * @param n the total number of items; must be non-negative
      * @param k the number of items to choose; must be non-negative and at most {@code n}
-     * @return the binomial coefficient C(n, k) as a {@code BigInteger}
+     * @return the binomial coefficient Numbers.C(n, k) as a {@code BigInteger}
      * @throws IllegalArgumentException if {@code n < 0}, {@code k < 0}, or {@code k > n}
      * @see #binomial(int, int)
      * @see #binomialToLong(int, int)
@@ -7012,7 +7012,7 @@ public final class Numbers {
      * Compares {@code a} and {@code b} "fuzzily," with a tolerance for nearly equal values.
      *
      * <p>This method is equivalent to
-     * {@code fuzzyEquals(a, b, tolerance) ? 0 : Float.compare(a, b)}. In particular, like
+     * {@code Numbers.fuzzyEquals(a, b, tolerance) ? 0 : Float.compare(a, b)}. In particular, like
      * {@link Float#compare(float, float)}, it treats all NaN values as equal and greater than all
      * other values (including {@link Float#POSITIVE_INFINITY}).
      *
@@ -7041,7 +7041,7 @@ public final class Numbers {
      * Compares {@code a} and {@code b} "fuzzily," with a tolerance for nearly equal values.
      *
      * <p>This method is equivalent to
-     * {@code fuzzyEquals(a, b, tolerance) ? 0 : Double.compare(a, b)}. In particular, like
+     * {@code Numbers.fuzzyEquals(a, b, tolerance) ? 0 : Double.compare(a, b)}. In particular, like
      * {@link Double#compare(double, double)}, it treats all NaN values as equal and greater than all
      * other values (including {@link Double#POSITIVE_INFINITY}).
      *
@@ -7298,17 +7298,17 @@ public final class Numbers {
     /**
      * Computes the inverse hyperbolic sine (arcsinh) of a number.
      *
-     * <p>The inverse hyperbolic sine is defined as: {@code asinh(x) = ln(x + sqrt(x² + 1))}.
+     * <p>The inverse hyperbolic sine is defined as: {@code Numbers.asinh(x) = Numbers.ln(x + Numbers.sqrt(x² + 1))}.
      * This function is the inverse of the hyperbolic sine function {@code sinh}, meaning
-     * {@code sinh(asinh(x)) = x} for all real {@code x}.
+     * {@code Numbers.sinh(Numbers.asinh(x)) = x} for all real {@code x}.
      *
      * <p>This implementation uses an efficient approximation based on Taylor series expansion
      * for small values, and the logarithmic formula for larger values.
      *
      * <p>Mathematical properties:
      * <ul>
-     *   <li>{@code asinh(-x) = -asinh(x)} (odd function)</li>
-     *   <li>{@code asinh(0) = 0}</li>
+     *   <li>{@code Numbers.asinh(-x) = -Numbers.asinh(x)} (odd function)</li>
+     *   <li>{@code Numbers.asinh(0) = 0}</li>
      *   <li>Domain: all real numbers (-∞, +∞)</li>
      *   <li>Range: all real numbers (-∞, +∞)</li>
      * </ul>
@@ -7359,13 +7359,13 @@ public final class Numbers {
     /**
      * Computes the inverse hyperbolic cosine (arccosh) of a number.
      *
-     * <p>The inverse hyperbolic cosine is defined as: {@code acosh(x) = ln(x + sqrt(x² - 1))}.
+     * <p>The inverse hyperbolic cosine is defined as: {@code Numbers.acosh(x) = Numbers.ln(x + Numbers.sqrt(x² - 1))}.
      * This function is the inverse of the hyperbolic cosine function {@code cosh}, meaning
-     * {@code cosh(acosh(x)) = x} for all {@code x >= 1}.
+     * {@code Numbers.cosh(Numbers.acosh(x)) = x} for all {@code x >= 1}.
      *
      * <p>Mathematical properties:
      * <ul>
-     *   <li>{@code acosh(1) = 0}</li>
+     *   <li>{@code Numbers.acosh(1) = 0}</li>
      *   <li>Domain: [1, +∞) (requires {@code x >= 1})</li>
      *   <li>Range: [0, +∞)</li>
      *   <li>For {@code x < 1}, the result is NaN</li>
@@ -7391,17 +7391,17 @@ public final class Numbers {
     /**
      * Computes the inverse hyperbolic tangent (arctanh) of a number.
      *
-     * <p>The inverse hyperbolic tangent is defined as: {@code atanh(x) = 0.5 * ln((1 + x) / (1 - x))}.
+     * <p>The inverse hyperbolic tangent is defined as: {@code Numbers.atanh(x) = 0.5 * Numbers.ln((1 + x) / (1 - x))}.
      * This function is the inverse of the hyperbolic tangent function {@code tanh}, meaning
-     * {@code tanh(atanh(x)) = x} for all {@code -1 < x < 1}.
+     * {@code Numbers.tanh(Numbers.atanh(x)) = x} for all {@code -1 < x < 1}.
      *
      * <p>This implementation uses an efficient approximation based on Taylor series expansion
      * for small values, and the logarithmic formula for larger values.
      *
      * <p>Mathematical properties:
      * <ul>
-     *   <li>{@code atanh(-x) = -atanh(x)} (odd function)</li>
-     *   <li>{@code atanh(0) = 0}</li>
+     *   <li>{@code Numbers.atanh(-x) = -Numbers.atanh(x)} (odd function)</li>
+     *   <li>{@code Numbers.atanh(0) = 0}</li>
      *   <li>Domain: (-1, 1) (requires {@code -1 < x < 1})</li>
      *   <li>Range: all real numbers (-∞, +∞)</li>
      *   <li>For {@code |x| >= 1}, the result is NaN or ±∞</li>
@@ -7461,7 +7461,7 @@ public final class Numbers {
 
         /**
          * A (self-inverse) bijection which converts the ordering on unsigned longs to the ordering on
-         * longs, that is, {@code a <= b} as unsigned longs if and only if {@code flip(a) <= flip(b)} as
+         * longs, that is, {@code a <= b} as unsigned longs if and only if {@code Numbers.flip(a) <= Numbers.flip(b)} as
          * signed longs.
          *
          * @param a the value to flip
@@ -7525,7 +7525,7 @@ public final class Numbers {
             @Override
             long mulMod(final long a, final long b, final long m) {
                 /*
-                 * NOTE(lowasser, 2015-Feb-12): Benchmarks suggest that changing this to
+                 * Numbers.NOTE(lowasser, 2015-Feb-12): Benchmarks suggest that changing this to
                  * UnsignedLongs.remainder and increasing the threshold to 2^32 doesn't pay for itself, and
                  * adding another enum constant hurts performance further -- I suspect because bimorphic
                  * implementation is a sweet spot for the JVM.

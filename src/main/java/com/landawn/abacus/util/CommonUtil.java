@@ -164,24 +164,24 @@ import com.landawn.abacus.util.function.ToFloatFunction;
  * <p><b>Common Usage Patterns:</b>
  * <pre>{@code
  * // Null-safe operations
- * boolean isEmpty = CommonUtil.isEmpty(collection);
- * String safe = CommonUtil.defaultIfNull(value, "default");
+ * boolean isEmpty = N.isEmpty(collection);
+ * String safe = N.defaultIfNull(value, "default");
  * 
  * // Array operations
- * int[] sorted = CommonUtil.sort(array);
- * boolean contains = CommonUtil.contains(array, element);
+ * int[] sorted = N.sort(array);
+ * boolean contains = N.contains(array, element);
  * 
  * // Collection operations
- * List<String> filtered = CommonUtil.filter(list, predicate);
- * Map<String, Integer> grouped = CommonUtil.groupBy(list, classifier);
+ * List<String> filtered = N.filter(list, predicate);
+ * Map<String, Integer> grouped = N.groupBy(list, classifier);
  * 
  * // String operations
- * boolean valid = CommonUtil.isNotBlank(text);
- * String trimmed = CommonUtil.trim(text);
+ * boolean valid = N.isNotBlank(text);
+ * String trimmed = N.trim(text);
  * 
  * // Type conversions
- * Optional<Integer> parsed = CommonUtil.tryParseInt(value);
- * List<String> converted = CommonUtil.map(list, converter);
+ * Optional<Integer> parsed = N.tryParseInt(value);
+ * List<String> converted = N.map(list, converter);
  * }</pre>
  *
  * <p><b>Thread Safety:</b>
@@ -259,25 +259,25 @@ import com.landawn.abacus.util.function.ToFloatFunction;
  * List<String> names = Arrays.asList("Alice", null, "Bob", "", "Charlie");
  * 
  * // Filter out null and empty strings
- * List<String> validNames = CommonUtil.filter(names, CommonUtil::isNotBlank);
+ * List<String> validNames = N.filter(names, CommonUtil::isNotBlank);
  * 
  * // Safe conversion and transformation
- * List<Integer> lengths = CommonUtil.map(validNames, String::length);
+ * List<Integer> lengths = N.map(validNames, String::length);
  * 
  * // Group by length
- * Map<Integer, List<String>> grouped = CommonUtil.groupBy(validNames, String::length);
+ * Map<Integer, List<String>> grouped = N.groupBy(validNames, String::length);
  * 
  * // Find maximum length safely
- * OptionalInt maxLength = CommonUtil.maxInt(lengths);
+ * OptionalInt maxLength = N.maxInt(lengths);
  * 
  * // Array operations
  * String[] array = validNames.toArray(new String[0]);
- * boolean contains = CommonUtil.contains(array, "Alice");
- * String[] sorted = CommonUtil.sort(array);
+ * boolean contains = N.contains(array, "Alice");
+ * String[] sorted = N.sort(array);
  * 
  * // Null-safe operations
- * String result = CommonUtil.defaultIfNull(CommonUtil.firstOrNull(validNames), "No names");
- * boolean isEmpty = CommonUtil.isEmpty(validNames);
+ * String result = N.defaultIfNull(N.firstOrNull(validNames), "No names");
+ * boolean isEmpty = N.isEmpty(validNames);
  * }</pre>
  *
  * <p><b>Attribution:</b>
@@ -1066,6 +1066,15 @@ sealed class CommonUtil permits N {
     /**
      * Checks if the specified boolean array argument is not {@code null} or empty, and throws {@code IllegalArgumentException} if it is.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * boolean[] array = {true, false};
+     * checkArgNotEmpty(array, "array"); // returns array
+     *
+     * checkArgNotEmpty(new boolean[0], "array"); // throws IllegalArgumentException
+     * checkArgNotEmpty(null, "array"); // throws IllegalArgumentException
+     * }</pre>
+     *
      * @param arg the boolean array argument to check
      * @param argNameOrErrorMsg the name of the argument or an error message to be used in the exception
      * @return the {@code non-null} and {@code non-empty} boolean array argument
@@ -1083,6 +1092,15 @@ sealed class CommonUtil permits N {
 
     /**
      * Checks if the specified char array argument is not {@code null} or empty, and throws {@code IllegalArgumentException} if it is.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * char[] array = {'a', 'b'};
+     * checkArgNotEmpty(array, "array"); // returns array
+     *
+     * checkArgNotEmpty(new char[0], "array"); // throws IllegalArgumentException
+     * checkArgNotEmpty(null, "array"); // throws IllegalArgumentException
+     * }</pre>
      *
      * @param arg the char array argument to check
      * @param argNameOrErrorMsg the name of the argument or an error message to be used in the exception
@@ -1102,6 +1120,15 @@ sealed class CommonUtil permits N {
     /**
      * Checks if the specified byte array argument is not {@code null} or empty, and throws {@code IllegalArgumentException} if it is.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * byte[] array = {1, 2};
+     * checkArgNotEmpty(array, "array"); // returns array
+     *
+     * checkArgNotEmpty(new byte[0], "array"); // throws IllegalArgumentException
+     * checkArgNotEmpty(null, "array"); // throws IllegalArgumentException
+     * }</pre>
+     *
      * @param arg the byte array argument to check
      * @param argNameOrErrorMsg the name of the argument or an error message to be used in the exception
      * @return the {@code non-null} and {@code non-empty} byte array argument
@@ -1119,6 +1146,15 @@ sealed class CommonUtil permits N {
 
     /**
      * Checks if the specified short array argument is not {@code null} or empty, and throws {@code IllegalArgumentException} if it is.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * short[] array = {1, 2};
+     * checkArgNotEmpty(array, "array"); // returns array
+     *
+     * checkArgNotEmpty(new short[0], "array"); // throws IllegalArgumentException
+     * checkArgNotEmpty(null, "array"); // throws IllegalArgumentException
+     * }</pre>
      *
      * @param arg the short array argument to check
      * @param argNameOrErrorMsg the name of the argument or an error message to be used in the exception
@@ -1138,6 +1174,15 @@ sealed class CommonUtil permits N {
     /**
      * Checks if the specified int array argument is not {@code null} or empty, and throws {@code IllegalArgumentException} if it is.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * int[] array = {1, 2};
+     * checkArgNotEmpty(array, "array"); // returns array
+     *
+     * checkArgNotEmpty(new int[0], "array"); // throws IllegalArgumentException
+     * checkArgNotEmpty(null, "array"); // throws IllegalArgumentException
+     * }</pre>
+     *
      * @param arg the int array argument to check
      * @param argNameOrErrorMsg the name of the argument or an error message to be used in the exception
      * @return the {@code non-null} and {@code non-empty} int array argument
@@ -1155,6 +1200,15 @@ sealed class CommonUtil permits N {
 
     /**
      * Checks if the specified long array argument is not {@code null} or empty, and throws {@code IllegalArgumentException} if it is.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * long[] array = {1L, 2L};
+     * checkArgNotEmpty(array, "array"); // returns array
+     *
+     * checkArgNotEmpty(new long[0], "array"); // throws IllegalArgumentException
+     * checkArgNotEmpty(null, "array"); // throws IllegalArgumentException
+     * }</pre>
      *
      * @param arg the long array argument to check
      * @param argNameOrErrorMsg the name of the argument or an error message to be used in the exception
@@ -1174,6 +1228,15 @@ sealed class CommonUtil permits N {
     /**
      * Checks if the specified float array argument is not {@code null} or empty, and throws {@code IllegalArgumentException} if it is.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * float[] array = {1.0f, 2.0f};
+     * checkArgNotEmpty(array, "array"); // returns array
+     *
+     * checkArgNotEmpty(new float[0], "array"); // throws IllegalArgumentException
+     * checkArgNotEmpty(null, "array"); // throws IllegalArgumentException
+     * }</pre>
+     *
      * @param arg the float array argument to check
      * @param argNameOrErrorMsg the name of the argument or an error message to be used in the exception
      * @return the {@code non-null} and {@code non-empty} float array argument
@@ -1192,6 +1255,15 @@ sealed class CommonUtil permits N {
     /**
      * Checks if the specified double array argument is not {@code null} or empty, and throws {@code IllegalArgumentException} if it is.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * double[] array = {1.0, 2.0};
+     * checkArgNotEmpty(array, "array"); // returns array
+     *
+     * checkArgNotEmpty(new double[0], "array"); // throws IllegalArgumentException
+     * checkArgNotEmpty(null, "array"); // throws IllegalArgumentException
+     * }</pre>
+     *
      * @param arg the double array argument to check
      * @param argNameOrErrorMsg the name of the argument or an error message to be used in the exception
      * @return the {@code non-null} and {@code non-empty} double array argument
@@ -1209,6 +1281,15 @@ sealed class CommonUtil permits N {
 
     /**
      * Checks if the specified Object array argument is not {@code null} or empty, and throws {@code IllegalArgumentException} if it is.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * String[] array = {"a", "b"};
+     * checkArgNotEmpty(array, "array"); // returns array
+     *
+     * checkArgNotEmpty(new String[0], "array"); // throws IllegalArgumentException
+     * checkArgNotEmpty(null, "array"); // throws IllegalArgumentException
+     * }</pre>
      *
      * @param <T> the type of the array elements
      * @param arg the Object array argument to check
@@ -1424,6 +1505,14 @@ sealed class CommonUtil permits N {
     /**
      * Checks if the specified byte argument is not negative, and throws {@code IllegalArgumentException} if it is.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * checkArgNotNegative((byte) 1, "value"); // returns 1
+     * checkArgNotNegative((byte) 0, "value"); // returns 0
+     *
+     * checkArgNotNegative((byte) -1, "value"); // throws IllegalArgumentException
+     * }</pre>
+     *
      * @param arg the byte argument to check
      * @param argNameOrErrorMsg the name of the argument or an error message to be used in the exception
      * @return the {@code non-negative} byte argument
@@ -1445,6 +1534,14 @@ sealed class CommonUtil permits N {
     /**
      * Checks if the specified short argument is not negative, and throws {@code IllegalArgumentException} if it is.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * checkArgNotNegative((short) 1, "value"); // returns 1
+     * checkArgNotNegative((short) 0, "value"); // returns 0
+     *
+     * checkArgNotNegative((short) -1, "value"); // throws IllegalArgumentException
+     * }</pre>
+     *
      * @param arg the short argument to check
      * @param argNameOrErrorMsg the name of the argument or an error message to be used in the exception
      * @return the {@code non-negative} short argument
@@ -1465,6 +1562,14 @@ sealed class CommonUtil permits N {
 
     /**
      * Checks if the specified int argument is not negative, and throws {@code IllegalArgumentException} if it is.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * checkArgNotNegative(1, "value"); // returns 1
+     * checkArgNotNegative(0, "value"); // returns 0
+     *
+     * checkArgNotNegative(-1, "value"); // throws IllegalArgumentException
+     * }</pre>
      *
      * @param arg the int argument to check
      * @param argNameOrErrorMsg the name of the argument or an error message to be used in the exception
@@ -1488,6 +1593,14 @@ sealed class CommonUtil permits N {
     /**
      * Checks if the specified long argument is not negative, and throws {@code IllegalArgumentException} if it is.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * checkArgNotNegative(1L, "value"); // returns 1L
+     * checkArgNotNegative(0L, "value"); // returns 0L
+     *
+     * checkArgNotNegative(-1L, "value"); // throws IllegalArgumentException
+     * }</pre>
+     *
      * @param arg the long argument to check
      * @param argNameOrErrorMsg the name of the argument or an error message to be used in the exception
      * @return the {@code non-negative} long argument
@@ -1510,6 +1623,14 @@ sealed class CommonUtil permits N {
     /**
      * Checks if the specified float argument is not negative, and throws {@code IllegalArgumentException} if it is.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * checkArgNotNegative(1.0f, "value"); // returns 1.0f
+     * checkArgNotNegative(0.0f, "value"); // returns 0.0f
+     *
+     * checkArgNotNegative(-1.0f, "value"); // throws IllegalArgumentException
+     * }</pre>
+     *
      * @param arg the float argument to check
      * @param argNameOrErrorMsg the name of the argument or an error message to be used in the exception
      * @return the {@code non-negative} float argument
@@ -1530,6 +1651,14 @@ sealed class CommonUtil permits N {
 
     /**
      * Checks if the specified double argument is not negative, and throws {@code IllegalArgumentException} if it is.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * checkArgNotNegative(1.0, "value"); // returns 1.0
+     * checkArgNotNegative(0.0, "value"); // returns 0.0
+     *
+     * checkArgNotNegative(-1.0, "value"); // throws IllegalArgumentException
+     * }</pre>
      *
      * @param arg the double argument to check
      * @param argNameOrErrorMsg the name of the argument or an error message to be used in the exception
@@ -1552,6 +1681,14 @@ sealed class CommonUtil permits N {
     /**
      * Checks if the specified byte argument is positive, and throws {@code IllegalArgumentException} if it is not.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * checkArgPositive((byte) 1, "value"); // returns 1
+     *
+     * checkArgPositive((byte) 0, "value"); // throws IllegalArgumentException
+     * checkArgPositive((byte) -1, "value"); // throws IllegalArgumentException
+     * }</pre>
+     *
      * @param arg the byte argument to check
      * @param argNameOrErrorMsg the name of the argument or an error message to be used in the exception
      * @return the {@code positive} byte argument
@@ -1573,6 +1710,14 @@ sealed class CommonUtil permits N {
     /**
      * Checks if the specified short argument is positive, and throws {@code IllegalArgumentException} if it is not.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * checkArgPositive((short) 1, "value"); // returns 1
+     *
+     * checkArgPositive((short) 0, "value"); // throws IllegalArgumentException
+     * checkArgPositive((short) -1, "value"); // throws IllegalArgumentException
+     * }</pre>
+     *
      * @param arg the short argument to check
      * @param argNameOrErrorMsg the name of the argument or an error message to be used in the exception
      * @return the {@code positive} short argument
@@ -1593,6 +1738,14 @@ sealed class CommonUtil permits N {
 
     /**
      * Checks if the specified int argument is positive, and throws {@code IllegalArgumentException} if it is not.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * checkArgPositive(1, "value"); // returns 1
+     *
+     * checkArgPositive(0, "value"); // throws IllegalArgumentException
+     * checkArgPositive(-1, "value"); // throws IllegalArgumentException
+     * }</pre>
      *
      * @param arg the int argument to check
      * @param argNameOrErrorMsg the name of the argument or an error message to be used in the exception
@@ -1616,6 +1769,14 @@ sealed class CommonUtil permits N {
     /**
      * Checks if the specified long argument is positive, and throws {@code IllegalArgumentException} if it is not.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * checkArgPositive(1L, "value"); // returns 1L
+     *
+     * checkArgPositive(0L, "value"); // throws IllegalArgumentException
+     * checkArgPositive(-1L, "value"); // throws IllegalArgumentException
+     * }</pre>
+     *
      * @param arg the long argument to check
      * @param argNameOrErrorMsg the name of the argument or an error message to be used in the exception
      * @return the {@code positive} long argument
@@ -1638,6 +1799,14 @@ sealed class CommonUtil permits N {
     /**
      * Checks if the specified float argument is positive, and throws {@code IllegalArgumentException} if it is not.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * checkArgPositive(1.0f, "value"); // returns 1.0f
+     *
+     * checkArgPositive(0.0f, "value"); // throws IllegalArgumentException
+     * checkArgPositive(-1.0f, "value"); // throws IllegalArgumentException
+     * }</pre>
+     *
      * @param arg the float argument to check
      * @param argNameOrErrorMsg the name of the argument or an error message to be used in the exception
      * @return the {@code positive} float argument
@@ -1658,6 +1827,14 @@ sealed class CommonUtil permits N {
 
     /**
      * Checks if the specified double argument is positive, and throws {@code IllegalArgumentException} if it is not.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * checkArgPositive(1.0, "value"); // returns 1.0
+     *
+     * checkArgPositive(0.0, "value"); // throws IllegalArgumentException
+     * checkArgPositive(-1.0, "value"); // throws IllegalArgumentException
+     * }</pre>
      *
      * @param arg the double argument to check
      * @param argNameOrErrorMsg the name of the argument or an error message to be used in the exception
@@ -1681,6 +1858,15 @@ sealed class CommonUtil permits N {
     /**
      * Checks if the specified array does not contain any {@code null} element, and throws {@code IllegalArgumentException} if it does.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * String[] array = {"a", "b"};
+     * checkElementNotNull(array); // Valid
+     *
+     * String[] arrayWithNull = {"a", null};
+     * checkElementNotNull(arrayWithNull); // throws IllegalArgumentException
+     * }</pre>
+     *
      * @param a the array to check
      * @throws IllegalArgumentException if a {@code null} element is found in the array
      */
@@ -1698,6 +1884,15 @@ sealed class CommonUtil permits N {
 
     /**
      * Checks if the specified array does not contain any {@code null} element, and throws {@code IllegalArgumentException} if it does.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * String[] array = {"a", "b"};
+     * checkElementNotNull(array, "array"); // Valid
+     *
+     * String[] arrayWithNull = {"a", null};
+     * checkElementNotNull(arrayWithNull, "array"); // throws IllegalArgumentException
+     * }</pre>
      *
      * @param a the array to check
      * @param argNameOrErrorMsg the name of the argument or an error message to be used in the exception
@@ -1722,6 +1917,15 @@ sealed class CommonUtil permits N {
     /**
      * Checks if the specified {@code Collection} does not contain any {@code null} element, and throws {@code IllegalArgumentException} if it does.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * List<String> list = Arrays.asList("a", "b");
+     * checkElementNotNull(list); // Valid
+     *
+     * List<String> listWithNull = Arrays.asList("a", null);
+     * checkElementNotNull(listWithNull); // throws IllegalArgumentException
+     * }</pre>
+     *
      * @param c the collection to check
      * @throws IllegalArgumentException if {@code null} element found in {@code c}
      */
@@ -1739,6 +1943,15 @@ sealed class CommonUtil permits N {
 
     /**
      * Checks if the specified {@code Collection} does not contain any {@code null} element, and throws {@code IllegalArgumentException} if it does.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * List<String> list = Arrays.asList("a", "b");
+     * checkElementNotNull(list, "list"); // Valid
+     *
+     * List<String> listWithNull = Arrays.asList("a", null);
+     * checkElementNotNull(listWithNull, "list"); // throws IllegalArgumentException
+     * }</pre>
      *
      * @param c the collection to check
      * @param argNameOrErrorMsg the name of the argument or an error message to be used in the exception
@@ -1763,6 +1976,17 @@ sealed class CommonUtil permits N {
     /**
      * Checks if the specified {@code Map} does not contain any {@code null} key, and throws {@code IllegalArgumentException} if it does.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Map<String, String> map = new HashMap<>();
+     * map.put("key", "value");
+     * checkKeyNotNull(map); // Valid
+     *
+     * Map<String, String> mapWithNullKey = new HashMap<>();
+     * mapWithNullKey.put(null, "value");
+     * checkKeyNotNull(mapWithNullKey); // throws IllegalArgumentException
+     * }</pre>
+     *
      * @param m the map to check
      * @throws IllegalArgumentException if {@code null} key found in {@code m}
      */
@@ -1780,6 +2004,17 @@ sealed class CommonUtil permits N {
 
     /**
      * Checks if the specified {@code Map} does not contain any {@code null} key, and throws {@code IllegalArgumentException} if it does.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Map<String, String> map = new HashMap<>();
+     * map.put("key", "value");
+     * checkKeyNotNull(map, "map"); // Valid
+     *
+     * Map<String, String> mapWithNullKey = new HashMap<>();
+     * mapWithNullKey.put(null, "value");
+     * checkKeyNotNull(mapWithNullKey, "map"); // throws IllegalArgumentException
+     * }</pre>
      *
      * @param m the map to check
      * @param argNameOrErrorMsg the name of the argument or an error message to be used in the exception
@@ -1804,6 +2039,17 @@ sealed class CommonUtil permits N {
     /**
      * Checks if the specified {@code Map} does not contain any {@code null} value, and throws {@code IllegalArgumentException} if it does.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Map<String, String> map = new HashMap<>();
+     * map.put("key", "value");
+     * checkValueNotNull(map); // Valid
+     *
+     * Map<String, String> mapWithNullValue = new HashMap<>();
+     * mapWithNullValue.put("key", null);
+     * checkValueNotNull(mapWithNullValue); // throws IllegalArgumentException
+     * }</pre>
+     *
      * @param m the map to check
      * @throws IllegalArgumentException if {@code null} value found in {@code m}
      */
@@ -1821,6 +2067,17 @@ sealed class CommonUtil permits N {
 
     /**
      * Checks if the specified {@code Map} does not contain any {@code null} value, and throws {@code IllegalArgumentException} if it does.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Map<String, String> map = new HashMap<>();
+     * map.put("key", "value");
+     * checkValueNotNull(map, "map"); // Valid
+     *
+     * Map<String, String> mapWithNullValue = new HashMap<>();
+     * mapWithNullValue.put("key", null);
+     * checkValueNotNull(mapWithNullValue, "map"); // throws IllegalArgumentException
+     * }</pre>
      *
      * @param m the map to check
      * @param argNameOrErrorMsg the name of the argument or an error message to be used in the exception
@@ -1845,6 +2102,12 @@ sealed class CommonUtil permits N {
     /**
      * Checks if the specified {@code expression} involving one or more parameters of the calling method is {@code true}, and throws {@code IllegalArgumentException} if it is not.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * checkArgument(count > 0); // Valid if count > 0
+     * checkArgument(false); // throws IllegalArgumentException
+     * }</pre>
+     *
      * @param b a boolean expression
      * @throws IllegalArgumentException if {@code expression} is false
      */
@@ -1856,6 +2119,11 @@ sealed class CommonUtil permits N {
 
     /**
      * Checks if the specified {@code expression} involving one or more parameters of the calling method is {@code true}, and throws {@code IllegalArgumentException} if it is not.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * checkArgument(count > 0, "Count must be positive");
+     * }</pre>
      *
      * @param b a boolean expression
      * @param argNameOrErrorMsg the name of the argument or an error message to be used in the exception
@@ -1869,6 +2137,12 @@ sealed class CommonUtil permits N {
 
     /**
      * Checks if the specified {@code expression} involving one or more parameters of the calling method is {@code true}, and throws {@code IllegalArgumentException} if it is not.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * checkArgument(i >= 0, "Argument was %s but expected nonnegative", i);
+     * checkArgument(i < j, "Expected i < j, but %s >= %s", i, j);
+     * }</pre>
      *
      * @param b a boolean expression
      * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
@@ -1884,6 +2158,11 @@ sealed class CommonUtil permits N {
     /**
      * Checks if the specified {@code expression} involving one or more parameters of the calling method is {@code true}, and throws {@code IllegalArgumentException} if it is not.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * checkArgument(c == 'a', "Expected 'a' but got %s", c);
+     * }</pre>
+     *
      * @param b a boolean expression
      * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
      * @param p the parameter to be used in the exception message
@@ -1897,6 +2176,11 @@ sealed class CommonUtil permits N {
 
     /**
      * Checks if the specified {@code expression} involving one or more parameters of the calling method is {@code true}, and throws {@code IllegalArgumentException} if it is not.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * checkArgument(count > 0, "Count must be positive: %s", count);
+     * }</pre>
      *
      * @param b a boolean expression
      * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
@@ -1912,6 +2196,11 @@ sealed class CommonUtil permits N {
     /**
      * Checks if the specified {@code expression} involving one or more parameters of the calling method is {@code true}, and throws {@code IllegalArgumentException} if it is not.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * checkArgument(count > 0, "Count must be positive: %s", count);
+     * }</pre>
+     *
      * @param b a boolean expression
      * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
      * @param p the parameter to be used in the exception message
@@ -1925,6 +2214,11 @@ sealed class CommonUtil permits N {
 
     /**
      * Checks if the specified {@code expression} involving one or more parameters of the calling method is {@code true}, and throws {@code IllegalArgumentException} if it is not.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * checkArgument(val > 0.0, "Value must be positive: %s", val);
+     * }</pre>
      *
      * @param b a boolean expression
      * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
@@ -1940,6 +2234,11 @@ sealed class CommonUtil permits N {
     /**
      * Checks if the specified {@code expression} involving one or more parameters of the calling method is {@code true}, and throws {@code IllegalArgumentException} if it is not.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * checkArgument(obj != null, "Object must not be null: %s", obj);
+     * }</pre>
+     *
      * @param b a boolean expression
      * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
      * @param p the parameter to be used in the exception message
@@ -1953,6 +2252,11 @@ sealed class CommonUtil permits N {
 
     /**
      * Checks if the specified {@code expression} involving one or more parameters of the calling method is {@code true}, and throws {@code IllegalArgumentException} if it is not.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * checkArgument(c1 != c2, "Chars must be different: %s, %s", c1, c2);
+     * }</pre>
      *
      * @param b a boolean expression
      * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
@@ -1969,6 +2273,11 @@ sealed class CommonUtil permits N {
     /**
      * Checks if the specified {@code expression} involving one or more parameters of the calling method is {@code true}, and throws {@code IllegalArgumentException} if it is not.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * checkArgument(c != i, "Char and int must be different: %s, %s", c, i);
+     * }</pre>
+     *
      * @param b a boolean expression
      * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
      * @param p1 the parameter to be used in the exception message
@@ -1983,6 +2292,11 @@ sealed class CommonUtil permits N {
 
     /**
      * Checks if the specified {@code expression} involving one or more parameters of the calling method is {@code true}, and throws {@code IllegalArgumentException} if it is not.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * checkArgument(c != l, "Char and long must be different: %s, %s", c, l);
+     * }</pre>
      *
      * @param b a boolean expression
      * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
@@ -2624,6 +2938,12 @@ sealed class CommonUtil permits N {
     /**
      * Checks if the specified {@code expression} involving the state check of the calling instance is {@code true}, and throws {@code IllegalStateException} if it is not.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * checkState(initialized); // Valid if initialized is true
+     * checkState(false); // throws IllegalStateException
+     * }</pre>
+     *
      * @param b a boolean expression
      * @throws IllegalStateException if {@code expression} is false
      */
@@ -2635,6 +2955,11 @@ sealed class CommonUtil permits N {
 
     /**
      * Checks if the specified {@code expression} involving the state check of the calling instance is {@code true}, and throws {@code IllegalStateException} if it is not.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * checkState(initialized, "Not initialized");
+     * }</pre>
      *
      * @param b a boolean expression
      * @param errorMessage the name of the argument or an error message to be used in the exception
@@ -2648,6 +2973,11 @@ sealed class CommonUtil permits N {
 
     /**
      * Checks if the specified {@code expression} involving the state check of the calling instance is {@code true}, and throws {@code IllegalStateException} if it is not.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * checkState(initialized, "Not initialized: %s", this);
+     * }</pre>
      *
      * @param b a boolean expression
      * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
@@ -2663,6 +2993,11 @@ sealed class CommonUtil permits N {
     /**
      * Checks if the specified {@code expression} involving the state check of the calling instance is {@code true}, and throws {@code IllegalStateException} if it is not.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * checkState(status == 'A', "Status must be 'A' but was %s", status);
+     * }</pre>
+     *
      * @param b a boolean expression
      * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
      * @param p the parameter to be used in the exception message
@@ -2676,6 +3011,11 @@ sealed class CommonUtil permits N {
 
     /**
      * Checks if the specified {@code expression} involving the state check of the calling instance is {@code true}, and throws {@code IllegalStateException} if it is not.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * checkState(size > 0, "Size must be positive: %s", size);
+     * }</pre>
      *
      * @param b a boolean expression
      * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
@@ -2691,6 +3031,11 @@ sealed class CommonUtil permits N {
     /**
      * Checks if the specified {@code expression} involving the state check of the calling instance is {@code true}, and throws {@code IllegalStateException} if it is not.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * checkState(count > 0, "Count must be positive: %s", count);
+     * }</pre>
+     *
      * @param b a boolean expression
      * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
      * @param p the parameter to be used in the exception message
@@ -2705,6 +3050,11 @@ sealed class CommonUtil permits N {
     /**
      * Checks if the specified {@code expression} involving the state check of the calling instance is {@code true}, and throws {@code IllegalStateException} if it is not.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * checkState(val > 0.0, "Value must be positive: %s", val);
+     * }</pre>
+     *
      * @param b a boolean expression
      * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
      * @param p the parameter to be used in the exception message
@@ -2718,6 +3068,11 @@ sealed class CommonUtil permits N {
 
     /**
      * Checks if the specified {@code expression} involving the state check of the calling instance is {@code true}, and throws {@code IllegalStateException} if it is not.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * checkState(obj != null, "Object must not be null: %s", obj);
+     * }</pre>
      *
      * @param b a boolean expression
      * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
@@ -3156,6 +3511,12 @@ sealed class CommonUtil permits N {
     /**
      * Checks if the specified object reference is not {@code null}, and throws {@code NullPointerException} if it is.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * requireNonNull("not null"); // Returns "not null"
+     * requireNonNull(null); // Throws NullPointerException
+     * }</pre>
+     *
      * @param <T> the type of the object
      * @param obj the object reference to check for nullity
      * @return the {@code non-null} object reference that was validated
@@ -3175,6 +3536,11 @@ sealed class CommonUtil permits N {
 
     /**
      * Checks if the specified object reference is not {@code null}, and throws {@code NullPointerException} if it is.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * requireNonNull(null, "Object cannot be null"); // Throws NullPointerException
+     * }</pre>
      *
      * @param <T> the type of the object
      * @param obj the object reference to check for nullity
@@ -3200,6 +3566,11 @@ sealed class CommonUtil permits N {
 
     /**
      * Checks if the specified object reference is not {@code null}, and throws {@code NullPointerException} if it is.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * requireNonNull(null, () -> "Object cannot be null"); // Throws NullPointerException
+     * }</pre>
      *
      * @param <T> the type of the object
      * @param obj the object reference to check for nullity
@@ -3409,6 +3780,23 @@ sealed class CommonUtil permits N {
     /**
      * Compares two boolean arrays for equality within the specified range.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * boolean[] a = {true, false, true};
+     * boolean[] b = {false, true, false};
+     * equals(a, 1, b, 1, 1); // returns true (compares false with true? No, index 1 of a is false, index 1 of b is true. Wait. a[1]=false, b[1]=true. Not equal.
+     * // Let's fix example:
+     * // a = {true, false, true}
+     * // b = {true, false, false}
+     * // equals(a, 0, b, 0, 2); // returns true (true, false == true, false)
+     * }</pre>
+     * <pre>{@code
+     * boolean[] a = {true, false, true};
+     * boolean[] b = {true, false, false};
+     * equals(a, 0, b, 0, 2); // returns true
+     * equals(a, 0, b, 0, 3); // returns false
+     * }</pre>
+     *
      * @param a the first boolean array, must not be null
      * @param fromIndexA the starting index in the first array, inclusive
      * @param b the second boolean array, must not be null
@@ -3452,6 +3840,14 @@ sealed class CommonUtil permits N {
 
     /**
      * Compares two char arrays for equality within the specified range.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * char[] a = {'a', 'b', 'c'};
+     * char[] b = {'a', 'b', 'd'};
+     * equals(a, 0, b, 0, 2); // returns true
+     * equals(a, 0, b, 0, 3); // returns false
+     * }</pre>
      *
      * @param a the first char array, must not be null
      * @param fromIndexA the starting index in the first array, inclusive
@@ -3497,6 +3893,14 @@ sealed class CommonUtil permits N {
     /**
      * Compares two byte arrays for equality within the specified range.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * byte[] a = {1, 2, 3};
+     * byte[] b = {1, 2, 4};
+     * equals(a, 0, b, 0, 2); // returns true
+     * equals(a, 0, b, 0, 3); // returns false
+     * }</pre>
+     *
      * @param a the first byte array, must not be null
      * @param fromIndexA the starting index in the first array, inclusive
      * @param b the second byte array, must not be null
@@ -3540,6 +3944,14 @@ sealed class CommonUtil permits N {
 
     /**
      * Compares two short arrays for equality within the specified range.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * short[] a = {1, 2, 3};
+     * short[] b = {1, 2, 4};
+     * equals(a, 0, b, 0, 2); // returns true
+     * equals(a, 0, b, 0, 3); // returns false
+     * }</pre>
      *
      * @param a the first short array, must not be null
      * @param fromIndexA the starting index in the first array, inclusive
@@ -3585,6 +3997,14 @@ sealed class CommonUtil permits N {
     /**
      * Compares two int arrays for equality within the specified range.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * int[] a = {1, 2, 3};
+     * int[] b = {1, 2, 4};
+     * equals(a, 0, b, 0, 2); // returns true
+     * equals(a, 0, b, 0, 3); // returns false
+     * }</pre>
+     *
      * @param a the first int array, must not be null
      * @param fromIndexA the starting index in the first array, inclusive
      * @param b the second int array, must not be null
@@ -3628,6 +4048,14 @@ sealed class CommonUtil permits N {
 
     /**
      * Compares two long arrays for equality within the specified range.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * long[] a = {1L, 2L, 3L};
+     * long[] b = {1L, 2L, 4L};
+     * equals(a, 0, b, 0, 2); // returns true
+     * equals(a, 0, b, 0, 3); // returns false
+     * }</pre>
      *
      * @param a the first long array, must not be null
      * @param fromIndexA the starting index in the first array, inclusive
@@ -4215,6 +4643,12 @@ sealed class CommonUtil permits N {
     /**
      * Returns the hash code for a range of elements in a boolean array.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * boolean[] a = {true, false, true};
+     * int hash = hashCode(a, 0, 2); // hash code for {true, false}
+     * }</pre>
+     *
      * @param a the array of booleans
      * @param fromIndex the starting index (inclusive)
      * @param toIndex the ending index (exclusive)
@@ -4250,6 +4684,12 @@ sealed class CommonUtil permits N {
 
     /**
      * Returns the hash code for a range of elements in a char array.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * char[] a = {'a', 'b', 'c'};
+     * int hash = hashCode(a, 0, 2); // hash code for {'a', 'b'}
+     * }</pre>
      *
      * @param a the array of chars
      * @param fromIndex the starting index (inclusive)
@@ -4287,6 +4727,12 @@ sealed class CommonUtil permits N {
     /**
      * Returns the hash code for a range of elements in a byte array.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * byte[] a = {1, 2, 3};
+     * int hash = hashCode(a, 0, 2); // hash code for {1, 2}
+     * }</pre>
+     *
      * @param a the array of bytes
      * @param fromIndex the starting index (inclusive)
      * @param toIndex the ending index (exclusive)
@@ -4322,6 +4768,12 @@ sealed class CommonUtil permits N {
 
     /**
      * Returns the hash code for a range of elements in a short array.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * short[] a = {1, 2, 3};
+     * int hash = hashCode(a, 0, 2); // hash code for {1, 2}
+     * }</pre>
      *
      * @param a the array of shorts
      * @param fromIndex the starting index (inclusive)
@@ -4359,6 +4811,12 @@ sealed class CommonUtil permits N {
     /**
      * Returns the hash code for a range of elements in an int array.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * int[] a = {1, 2, 3};
+     * int hash = hashCode(a, 0, 2); // hash code for {1, 2}
+     * }</pre>
+     *
      * @param a the array of ints
      * @param fromIndex the starting index (inclusive)
      * @param toIndex the ending index (exclusive)
@@ -4394,6 +4852,12 @@ sealed class CommonUtil permits N {
 
     /**
      * Returns the hash code for a range of elements in a long array.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * long[] a = {1L, 2L, 3L};
+     * int hash = hashCode(a, 0, 2); // hash code for {1L, 2L}
+     * }</pre>
      *
      * @param a the array of longs
      * @param fromIndex the starting index (inclusive)
@@ -4431,6 +4895,12 @@ sealed class CommonUtil permits N {
     /**
      * Returns the hash code for a range of elements in a float array.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * float[] a = {1.0f, 2.0f, 3.0f};
+     * int hash = hashCode(a, 0, 2); // hash code for {1.0f, 2.0f}
+     * }</pre>
+     *
      * @param a the array of floats
      * @param fromIndex the starting index (inclusive)
      * @param toIndex the ending index (exclusive)
@@ -4466,6 +4936,12 @@ sealed class CommonUtil permits N {
 
     /**
      * Returns the hash code for a range of elements in a double array.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * double[] a = {1.0, 2.0, 3.0};
+     * int hash = hashCode(a, 0, 2); // hash code for {1.0, 2.0}
+     * }</pre>
      *
      * @param a the array of doubles
      * @param fromIndex the starting index (inclusive)
@@ -4503,6 +4979,12 @@ sealed class CommonUtil permits N {
     /**
      * Returns the hash code for a range of elements in an Object array.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * String[] a = {"a", "b", "c"};
+     * int hash = hashCode(a, 0, 2); // hash code for {"a", "b"}
+     * }</pre>
+     *
      * @param a the array of Objects
      * @param fromIndex the starting index (inclusive)
      * @param toIndex the ending index (exclusive)
@@ -4527,6 +5009,13 @@ sealed class CommonUtil permits N {
 
     /**
      * Returns the hash code for the specified object. If the object is an array, the appropriate {@code Arrays.deepHashCode} method will be used.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * int[] array = {1, 2};
+     * int deepHash = deepHashCode(array); // deep hash code of array
+     * int hash = deepHashCode("string"); // hash code of string
+     * }</pre>
      *
      * @param obj the object for which the hash code is to be calculated
      * @return the hash code of the object, or 0 if the object is null
@@ -4585,6 +5074,12 @@ sealed class CommonUtil permits N {
     /**
      * Returns the hash code for an array of Objects.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * String[] array = {"a", "b"};
+     * int deepHash = deepHashCode(array); // deep hash code of array
+     * }</pre>
+     *
      * @param a the array of Objects
      * @return the hash code of the array
      * @see Arrays#deepHashCode(Object[])
@@ -4595,6 +5090,12 @@ sealed class CommonUtil permits N {
 
     /**
      * Returns the hash code for a range of elements in an Object array.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * String[] array = {"a", "b", "c"};
+     * int deepHash = deepHashCode(array, 0, 2); // deep hash code of {"a", "b"}
+     * }</pre>
      *
      * @param a the array of Objects
      * @param fromIndex the starting index (inclusive)
@@ -4620,37 +5121,27 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Calculates a comprehensive hash code by recursively traversing the entire object structure.
-     * <p>
-     * This method recursively processes the input object to generate a thorough hash code that 
-     * encompasses all nested elements:
+     * Calculates a comprehensive hash code by recursively traversing the entire object graph.
+     *
+     * <p>This method walks through common container types to incorporate nested content into the result:</p>
      * <ul>
-     *   <li>For arrays: processes each element recursively</li>
-     *   <li>For collections/iterables: processes each element recursively</li>
-     *   <li>For maps: processes each key and value recursively</li>
-     *   <li>For bean objects: processes each property/field recursively</li>
-     *   <li>For primitive values: uses appropriate hash code calculation</li>
+     *   <li>Arrays (primitive or object): each element is processed recursively</li>
+     *   <li>{@link Iterable} and {@link Iterator}: each element is processed recursively</li>
+     *   <li>{@link Map}: both keys and values are processed recursively</li>
+     *   <li>JavaBean objects: each property is processed recursively</li>
+     *   <li>Other objects: delegated to {@link N#hashCode(Object)}</li>
      * </ul>
-     * <p>
-     * Unlike {@link #hashCode(Object)} or {@link #deepHashCode(Object)}, this method provides a 
-     * more comprehensive hash code by traversing the complete object graph, ensuring that even 
-     * deeply nested structures are incorporated into the resulting hash code.
-     * <p>
-     * Note that this method may be computationally expensive for large or deeply nested objects.
-     * <p>
-     * Example usage:
-     * 
+     * <p>A {@code null} input returns {@code 0}. This is more exhaustive than {@link #hashCode(Object)} or
+     * {@link #deepHashCode(Object)} but can be expensive for large or deeply nested structures.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * // Create a complex nested structure
      * List<Map<String, Object[]>> complexObject = ...
-     * 
-     * // Calculate a comprehensive hash code
      * long hashCode = hashCodeEverything(complexObject);
      * }</pre>
      *
-     * @param obj the object for which to calculate a comprehensive hash code
-     * @return a long value representing the hash code of the entire object structure
+     * @param obj the object whose full structure should be hashed, may be {@code null}
+     * @return a long hash code representing the complete object graph, or {@code 0} for {@code null}
      * @see #hashCode(Object[])
      * @see #deepHashCode(Object[])
      */
@@ -4703,6 +5194,12 @@ sealed class CommonUtil permits N {
     /**
      * Returns a string representation of the specified boolean value.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * toString(true); // returns "true"
+     * toString(false); // returns "false"
+     * }</pre>
+     *
      * @param value the boolean value to be represented as a string
      * @return the String representation of the boolean value
      */
@@ -4712,6 +5209,11 @@ sealed class CommonUtil permits N {
 
     /**
      * Returns a string representation of the specified char value.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * toString('a'); // returns "a"
+     * }</pre>
      *
      * @param value the char value to be represented as a string
      * @return the String representation of the char value
@@ -4723,6 +5225,11 @@ sealed class CommonUtil permits N {
     /**
      * Returns a string representation of the specified byte value.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * toString((byte) 1); // returns "1"
+     * }</pre>
+     *
      * @param value the byte value to be represented as a string
      * @return the String representation of the byte value
      */
@@ -4732,6 +5239,11 @@ sealed class CommonUtil permits N {
 
     /**
      * Returns a string representation of the specified short value.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * toString((short) 1); // returns "1"
+     * }</pre>
      *
      * @param value the short value to be represented as a string
      * @return the String representation of the short value
@@ -4743,6 +5255,11 @@ sealed class CommonUtil permits N {
     /**
      * Returns a string representation of the specified int value.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * toString(1); // returns "1"
+     * }</pre>
+     *
      * @param value the int value to be represented as a string
      * @return the String representation of the int value
      */
@@ -4752,6 +5269,11 @@ sealed class CommonUtil permits N {
 
     /**
      * Returns a string representation of the specified long value.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * toString(1L); // returns "1"
+     * }</pre>
      *
      * @param value the long value to be represented as a string
      * @return the String representation of the long value
@@ -4763,6 +5285,11 @@ sealed class CommonUtil permits N {
     /**
      * Returns a string representation of the specified float value.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * toString(1.0f); // returns "1.0"
+     * }</pre>
+     *
      * @param value the float value to be represented as a string
      * @return the String representation of the float value
      */
@@ -4773,6 +5300,11 @@ sealed class CommonUtil permits N {
     /**
      * Returns a string representation of the specified double value.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * toString(1.0); // returns "1.0"
+     * }</pre>
+     *
      * @param value the double value to be represented as a string
      * @return the String representation of the double value
      */
@@ -4782,6 +5314,12 @@ sealed class CommonUtil permits N {
 
     /**
      * Returns a string representation of the specified object.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * toString(1); // returns "1"
+     * toString(null); // returns "null"
+     * }</pre>
      *
      * @param obj the object to be represented as a string
      * @return the String representation of the object. If the object is {@code null}, the string {@code "null"} is returned.
@@ -4842,6 +5380,12 @@ sealed class CommonUtil permits N {
     /**
      * Returns a string representation of the specified object. If the object is {@code null}, the specified default value is returned.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * toString(1, "default"); // returns "1"
+     * toString(null, "default"); // returns "default"
+     * }</pre>
+     *
      * @param obj the object to be represented as a string
      * @param defaultIfNull the default value to be returned if the object is null
      * @return the String representation of the object, or the default value if the object is null
@@ -4852,6 +5396,12 @@ sealed class CommonUtil permits N {
 
     /**
      * Returns a string representation of the specified boolean array.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * boolean[] array = {true, false};
+     * toString(array); // returns "[true, false]"
+     * }</pre>
      *
      * @param a the boolean array to be represented as a string
      * @return the String representation of the boolean array
@@ -4869,6 +5419,12 @@ sealed class CommonUtil permits N {
 
     /**
      * Returns a string representation of the specified range of elements in a boolean array.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * boolean[] array = {true, false, true};
+     * toString(array, 0, 2); // returns "[true, false]"
+     * }</pre>
      *
      * @param a the boolean array to be represented as a string
      * @param fromIndex the starting index (inclusive)
@@ -4915,6 +5471,12 @@ sealed class CommonUtil permits N {
     /**
      * Returns a string representation of the specified char array.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * char[] array = {'a', 'b'};
+     * toString(array); // returns "[a, b]"
+     * }</pre>
+     *
      * @param a the char array to be represented as a string
      * @return the String representation of the char array
      * @see Arrays#toString(char[])
@@ -4931,6 +5493,12 @@ sealed class CommonUtil permits N {
 
     /**
      * Returns a string representation of the specified range of elements in a char array.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * char[] array = {'a', 'b', 'c'};
+     * toString(array, 0, 2); // returns "[a, b]"
+     * }</pre>
      *
      * @param a the char array to be represented as a string
      * @param fromIndex the starting index (inclusive)
@@ -4979,6 +5547,12 @@ sealed class CommonUtil permits N {
     /**
      * Returns a string representation of the specified byte array.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * byte[] array = {1, 2};
+     * toString(array); // returns "[1, 2]"
+     * }</pre>
+     *
      * @param a the byte array to be represented as a string
      * @return the String representation of the byte array
      * @see Arrays#toString(byte[])
@@ -4995,6 +5569,12 @@ sealed class CommonUtil permits N {
 
     /**
      * Returns a string representation of the specified range of elements in a byte array.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * byte[] array = {1, 2, 3};
+     * toString(array, 0, 2); // returns "[1, 2]"
+     * }</pre>
      *
      * @param a the byte array to be represented as a string
      * @param fromIndex the starting index (inclusive)
@@ -5041,6 +5621,12 @@ sealed class CommonUtil permits N {
     /**
      * Returns a string representation of the specified short array.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * short[] array = {1, 2};
+     * toString(array); // returns "[1, 2]"
+     * }</pre>
+     *
      * @param a the short array to be represented as a string
      * @return the String representation of the short array
      * @see Arrays#toString(short[])
@@ -5057,6 +5643,12 @@ sealed class CommonUtil permits N {
 
     /**
      * Returns a string representation of the specified range of elements in a short array.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * short[] array = {1, 2, 3};
+     * toString(array, 0, 2); // returns "[1, 2]"
+     * }</pre>
      *
      * @param a the short array to be represented as a string
      * @param fromIndex the starting index (inclusive)
@@ -5103,6 +5695,12 @@ sealed class CommonUtil permits N {
     /**
      * Returns a string representation of the specified int array.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * int[] array = {1, 2};
+     * toString(array); // returns "[1, 2]"
+     * }</pre>
+     *
      * @param a the int array to be represented as a string
      * @return the String representation of the int array
      * @see Arrays#toString(int[])
@@ -5119,6 +5717,12 @@ sealed class CommonUtil permits N {
 
     /**
      * Returns a string representation of the specified range of elements in an int array.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * int[] array = {1, 2, 3};
+     * toString(array, 0, 2); // returns "[1, 2]"
+     * }</pre>
      *
      * @param a the int array to be represented as a string
      * @param fromIndex the starting index (inclusive)
@@ -5165,6 +5769,12 @@ sealed class CommonUtil permits N {
     /**
      * Returns a string representation of the specified long array.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * long[] array = {1L, 2L};
+     * toString(array); // returns "[1, 2]"
+     * }</pre>
+     *
      * @param a the long array to be represented as a string
      * @return the String representation of the long array
      * @see Arrays#toString(long[])
@@ -5181,6 +5791,12 @@ sealed class CommonUtil permits N {
 
     /**
      * Returns a string representation of the specified range of elements in a long array.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * long[] array = {1L, 2L, 3L};
+     * toString(array, 0, 2); // returns "[1, 2]"
+     * }</pre>
      *
      * @param a the long array to be represented as a string
      * @param fromIndex the starting index (inclusive)
@@ -5227,6 +5843,12 @@ sealed class CommonUtil permits N {
     /**
      * Returns a string representation of the specified float array.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * float[] array = {1.0f, 2.0f};
+     * toString(array); // returns "[1.0, 2.0]"
+     * }</pre>
+     *
      * @param a the float array to be represented as a string
      * @return the String representation of the float array
      * @see Arrays#toString(float[])
@@ -5243,6 +5865,12 @@ sealed class CommonUtil permits N {
 
     /**
      * Returns a string representation of the specified range of elements in a float array.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * float[] array = {1.0f, 2.0f, 3.0f};
+     * toString(array, 0, 2); // returns "[1.0, 2.0]"
+     * }</pre>
      *
      * @param a the float array to be represented as a string
      * @param fromIndex the starting index (inclusive)
@@ -5289,6 +5917,12 @@ sealed class CommonUtil permits N {
     /**
      * Returns a string representation of the specified double array.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * double[] array = {1.0, 2.0};
+     * toString(array); // returns "[1.0, 2.0]"
+     * }</pre>
+     *
      * @param a the double array to be represented as a string
      * @return the String representation of the double array
      * @see Arrays#toString(double[])
@@ -5305,6 +5939,12 @@ sealed class CommonUtil permits N {
 
     /**
      * Returns a string representation of the specified range of elements in a double array.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * double[] array = {1.0, 2.0, 3.0};
+     * toString(array, 0, 2); // returns "[1.0, 2.0]"
+     * }</pre>
      *
      * @param a the double array to be represented as a string
      * @param fromIndex the starting index (inclusive)
@@ -5367,6 +6007,12 @@ sealed class CommonUtil permits N {
     /**
      * Returns a string representation of the specified Object array.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * String[] array = {"a", "b"};
+     * toString(array); // returns "[a, b]"
+     * }</pre>
+     *
      * @param a the Object array to be represented as a string
      * @return the String representation of the Object array
      * @see Arrays#toString(Object[])
@@ -5383,6 +6029,12 @@ sealed class CommonUtil permits N {
 
     /**
      * Returns a string representation of the specified range of elements in an Object array.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * String[] array = {"a", "b", "c"};
+     * toString(array, 0, 2); // returns "[a, b]"
+     * }</pre>
      *
      * @param a the Object array to be represented as a string
      * @param fromIndex the starting index (inclusive)
@@ -5446,6 +6098,13 @@ sealed class CommonUtil permits N {
      * Returns a string representation of the "deep contents" of the specified object. If the object is an array, the appropriate {@code Arrays.toString(array)} method will be used.
      * This method recursively converts the object and its nested objects to a string.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * int[] array = {1, 2};
+     * deepToString(array); // returns "[1, 2]"
+     * deepToString("string"); // returns "string"
+     * }</pre>
+     *
      * @param obj the object to be represented as a string
      * @return the string representation of the object
      */
@@ -5501,6 +6160,12 @@ sealed class CommonUtil permits N {
 
     /**
      * Returns a string representation of the "deep contents" of the specified array. If the object is {@code null}, the specified default value is returned.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * String[] array = {"a", "b"};
+     * deepToString(array); // returns "[a, b]"
+     * }</pre>
      *
      * @param a the object array to be represented as a string
      * @return the String representation of the object, or the default value if the object is null
@@ -5671,6 +6336,13 @@ sealed class CommonUtil permits N {
     /**
      * Returns the length of the specified {@code CharSequence}, or {@code 0} if it's empty or {@code null}.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * len(null); // returns 0
+     * len(""); // returns 0
+     * len("abc"); // returns 3
+     * }</pre>
+     *
      * @param s the CharSequence to check
      * @return the length of the CharSequence, or 0 if the CharSequence is null
      */
@@ -5761,6 +6433,13 @@ sealed class CommonUtil permits N {
     /**
      * Returns the length/size of the specified {@code Array/Collection/Map}, or {@code 0} if it's empty or {@code null}.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * len((Object[]) null); // returns 0
+     * len(new String[0]); // returns 0
+     * len(new String[3]); // returns 3
+     * }</pre>
+     *
      * @param a the array to check
      * @return the length of the array, or 0 if the array is null
      */
@@ -5769,30 +6448,50 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Returns the length/size of the specified {@code Array/Collection/Map}, or {@code 0} if it's empty or {@code null}.
+     * Returns the size of the specified collection, or {@code 0} if the collection is {@code null}.
      *
-     * @param c the collection to check
-     * @return the size of the specified collection, or 0 if the collection is null
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * size(null); // returns 0
+     * size(Collections.emptyList()); // returns 0
+     * size(Arrays.asList("a", "b")); // returns 2
+     * }</pre>
+     *
+     * @param c the collection to check, may be {@code null}
+     * @return the collection size, or {@code 0} if the collection is {@code null}
      */
     public static int size(final Collection<?> c) {
         return c == null ? 0 : c.size();
     }
 
     /**
-     * Returns the length/size of the specified {@code Array/Collection/Map}, or {@code 0} if it's empty or {@code null}.
+     * Returns the size of the specified map, or {@code 0} if the map is {@code null}.
      *
-     * @param m the map to check
-     * @return the size of the specified map, or 0 if the map is null
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * size(null); // returns 0
+     * size(Collections.emptyMap()); // returns 0
+     * size(Collections.singletonMap("k", "v")); // returns 1
+     * }</pre>
+     *
+     * @param m the map to check, may be {@code null}
+     * @return the map size, or {@code 0} if the map is {@code null}
      */
     public static int size(final Map<?, ?> m) {
         return m == null ? 0 : m.size();
     }
 
     /**
-     * Returns the length/size of the specified {@code Array/Collection/Map}, or {@code 0} if it's empty or {@code null}.
+     * Returns the size of the specified {@code PrimitiveList}, or {@code 0} if it is {@code null}.
      *
-     * @param c the PrimitiveList to check
-     * @return the size of the specified PrimitiveList, or 0 if the PrimitiveList is null
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * size((PrimitiveList) null); // returns 0
+     * size(IntList.of(1, 2, 3)); // returns 3
+     * }</pre>
+     *
+     * @param c the {@code PrimitiveList} to check, may be {@code null}
+     * @return the {@code PrimitiveList} size, or {@code 0} if it is {@code null}
      */
     @Beta
     @SuppressWarnings("rawtypes")
@@ -5829,6 +6528,13 @@ sealed class CommonUtil permits N {
      *
      * <p>An array is considered empty if it has zero length.</p>
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * isEmpty((boolean[]) null); // returns true
+     * isEmpty(new boolean[0]); // returns true
+     * isEmpty(new boolean[1]); // returns false
+     * }</pre>
+     *
      * @param a the boolean array to be checked, may be {@code null}
      * @return {@code true} if the array is {@code null} or has zero length, {@code false} otherwise
      */
@@ -5840,6 +6546,13 @@ sealed class CommonUtil permits N {
      * Checks if the specified char array is {@code null} or empty.
      *
      * <p>An array is considered empty if it has zero length.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * isEmpty((char[]) null); // returns true
+     * isEmpty(new char[0]); // returns true
+     * isEmpty(new char[1]); // returns false
+     * }</pre>
      *
      * @param a the char array to be checked, may be {@code null}
      * @return {@code true} if the array is {@code null} or has zero length, {@code false} otherwise
@@ -5853,6 +6566,13 @@ sealed class CommonUtil permits N {
      *
      * <p>An array is considered empty if it has zero length.</p>
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * isEmpty((byte[]) null); // returns true
+     * isEmpty(new byte[0]); // returns true
+     * isEmpty(new byte[1]); // returns false
+     * }</pre>
+     *
      * @param a the byte array to be checked, may be {@code null}
      * @return {@code true} if the array is {@code null} or has zero length, {@code false} otherwise
      */
@@ -5864,6 +6584,13 @@ sealed class CommonUtil permits N {
      * Checks if the specified short array is {@code null} or empty.
      *
      * <p>An array is considered empty if it has zero length.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * isEmpty((short[]) null); // returns true
+     * isEmpty(new short[0]); // returns true
+     * isEmpty(new short[1]); // returns false
+     * }</pre>
      *
      * @param a the short array to be checked, may be {@code null}
      * @return {@code true} if the array is {@code null} or has zero length, {@code false} otherwise
@@ -5877,6 +6604,13 @@ sealed class CommonUtil permits N {
      *
      * <p>An array is considered empty if it has zero length.</p>
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * isEmpty((int[]) null); // returns true
+     * isEmpty(new int[0]); // returns true
+     * isEmpty(new int[1]); // returns false
+     * }</pre>
+     *
      * @param a the int array to be checked, may be {@code null}
      * @return {@code true} if the array is {@code null} or has zero length, {@code false} otherwise
      */
@@ -5888,6 +6622,13 @@ sealed class CommonUtil permits N {
      * Checks if the specified long array is {@code null} or empty.
      *
      * <p>An array is considered empty if it has zero length.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * isEmpty((long[]) null); // returns true
+     * isEmpty(new long[0]); // returns true
+     * isEmpty(new long[1]); // returns false
+     * }</pre>
      *
      * @param a the long array to be checked, may be {@code null}
      * @return {@code true} if the array is {@code null} or has zero length, {@code false} otherwise
@@ -5901,6 +6642,13 @@ sealed class CommonUtil permits N {
      *
      * <p>An array is considered empty if it has zero length.</p>
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * isEmpty((float[]) null); // returns true
+     * isEmpty(new float[0]); // returns true
+     * isEmpty(new float[1]); // returns false
+     * }</pre>
+     *
      * @param a the float array to be checked, may be {@code null}
      * @return {@code true} if the array is {@code null} or has zero length, {@code false} otherwise
      */
@@ -5912,6 +6660,13 @@ sealed class CommonUtil permits N {
      * Checks if the specified double array is {@code null} or empty.
      *
      * <p>An array is considered empty if it has zero length.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * isEmpty((double[]) null); // returns true
+     * isEmpty(new double[0]); // returns true
+     * isEmpty(new double[1]); // returns false
+     * }</pre>
      *
      * @param a the double array to be checked, may be {@code null}
      * @return {@code true} if the array is {@code null} or has zero length, {@code false} otherwise
@@ -5925,6 +6680,13 @@ sealed class CommonUtil permits N {
      *
      * <p>An array is considered empty if it has zero length.</p>
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * isEmpty((Object[]) null); // returns true
+     * isEmpty(new Object[0]); // returns true
+     * isEmpty(new Object[1]); // returns false
+     * }</pre>
+     *
      * @param a the object array to be checked, may be {@code null}
      * @return {@code true} if the array is {@code null} or has zero length, {@code false} otherwise
      */
@@ -5936,6 +6698,13 @@ sealed class CommonUtil permits N {
      * Checks if the specified {@code Collection} is {@code null} or empty.
      *
      * <p>A Collection is considered empty if it contains no elements.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * isEmpty((Collection) null); // returns true
+     * isEmpty(new ArrayList<>()); // returns true
+     * isEmpty(Arrays.asList("a")); // returns false
+     * }</pre>
      *
      * @param c the Collection to be checked, may be {@code null}
      * @return {@code true} if the Collection is {@code null} or empty, {@code false} otherwise
@@ -5950,6 +6719,13 @@ sealed class CommonUtil permits N {
      * <p>An Iterable is considered empty if it has no elements. For Collection instances,
      * this uses their {@code isEmpty()} method for efficiency. For other Iterables, this
      * checks if the iterator has any elements.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * isEmpty((Iterable) null); // returns true
+     * isEmpty(Arrays.asList()); // returns true
+     * isEmpty(Arrays.asList("a")); // returns false
+     * }</pre>
      *
      * @param c the Iterable to be checked, may be {@code null}
      * @return {@code true} if the Iterable is {@code null} or empty, {@code false} otherwise
@@ -5990,6 +6766,13 @@ sealed class CommonUtil permits N {
      *
      * <p>An Iterator is considered empty if it has no more elements ({@code hasNext()} returns {@code false}).</p>
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * isEmpty((Iterator) null); // returns true
+     * isEmpty(Collections.emptyIterator()); // returns true
+     * isEmpty(Arrays.asList("a").iterator()); // returns false
+     * }</pre>
+     *
      * @param iter the Iterator to be checked, may be {@code null}
      * @return {@code true} if the Iterator is {@code null} or has no more elements, {@code false} otherwise
      */
@@ -6003,6 +6786,13 @@ sealed class CommonUtil permits N {
      *
      * <p>A Map is considered empty if it contains no key-value mappings.</p>
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * isEmpty((Map) null); // returns true
+     * isEmpty(Collections.emptyMap()); // returns true
+     * isEmpty(Collections.singletonMap("k", "v")); // returns false
+     * }</pre>
+     *
      * @param m the Map to be checked, may be {@code null}
      * @return {@code true} if the Map is {@code null} or empty, {@code false} otherwise
      */
@@ -6014,6 +6804,13 @@ sealed class CommonUtil permits N {
      * Checks if the specified {@code PrimitiveList} is {@code null} or empty.
      *
      * <p>A PrimitiveList is considered empty if it contains no elements.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * isEmpty((PrimitiveList) null); // returns true
+     * isEmpty(IntList.of()); // returns true
+     * isEmpty(IntList.of(1)); // returns false
+     * }</pre>
      *
      * @param list the PrimitiveList to be checked, may be {@code null}
      * @return {@code true} if the PrimitiveList is {@code null} or empty, {@code false} otherwise
@@ -6028,6 +6825,15 @@ sealed class CommonUtil permits N {
      *
      * <p>A Multiset is considered empty if it contains no elements.</p>
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * isEmpty((Multiset) null); // returns true
+     * Multiset<String> multiset = new Multiset<>();
+     * isEmpty(multiset); // returns true
+     * multiset.add("a");
+     * isEmpty(multiset); // returns false
+     * }</pre>
+     *
      * @param s the Multiset to be checked, may be {@code null}
      * @return {@code true} if the Multiset is {@code null} or empty, {@code false} otherwise
      */
@@ -6039,6 +6845,15 @@ sealed class CommonUtil permits N {
      * Checks if the specified {@code Multimap} is {@code null} or empty.
      *
      * <p>A Multimap is considered empty if it contains no key-value mappings.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * isEmpty((Multimap) null); // returns true
+     * Multimap<String, String> multimap = new ListMultimap<>();
+     * isEmpty(multimap); // returns true
+     * multimap.put("k", "v");
+     * isEmpty(multimap); // returns false
+     * }</pre>
      *
      * @param m the Multimap to be checked, may be {@code null}
      * @return {@code true} if the Multimap is {@code null} or empty, {@code false} otherwise
@@ -6052,6 +6867,13 @@ sealed class CommonUtil permits N {
      *
      * <p>A Dataset is considered empty if it contains no rows.</p>
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * isEmpty((Dataset) null); // returns true
+     * // Dataset ds = ...
+     * // isEmpty(ds);
+     * }</pre>
+     *
      * @param ds the Dataset to be checked, may be {@code null}
      * @return {@code true} if the Dataset is {@code null} or empty, {@code false} otherwise
      */
@@ -6061,6 +6883,14 @@ sealed class CommonUtil permits N {
 
     /**
      * Checks if the specified {@code CharSequence} is {@code null}, empty, or contains only whitespace characters.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * isBlank(null); // returns true
+     * isBlank(""); // returns true
+     * isBlank("   "); // returns true
+     * isBlank("abc"); // returns false
+     * }</pre>
      *
      * @param cs the CharSequence to check
      * @return {@code true} if the CharSequence is {@code null}, empty, or contains only whitespace characters, otherwise {@code false}
@@ -6083,6 +6913,13 @@ sealed class CommonUtil permits N {
     /**
      * Returns {@code true} if the specified {@code boolean} is {@code Boolean.TRUE}, not {@code null} or {@code Boolean.FALSE}.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * isTrue(Boolean.TRUE); // returns true
+     * isTrue(Boolean.FALSE); // returns false
+     * isTrue(null); // returns false
+     * }</pre>
+     *
      * @param bool the Boolean to check
      * @return {@code true} if the Boolean is {@code Boolean.TRUE}, {@code false} otherwise
      */
@@ -6093,6 +6930,13 @@ sealed class CommonUtil permits N {
 
     /**
      * Returns {@code true} if the specified {@code boolean} is {@code null} or {@code Boolean.FALSE}.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * isNotTrue(Boolean.FALSE); // returns true
+     * isNotTrue(null); // returns true
+     * isNotTrue(Boolean.TRUE); // returns false
+     * }</pre>
      *
      * @param bool the Boolean to check
      * @return {@code true} if the Boolean is {@code null} or {@code Boolean.FALSE}, {@code false} otherwise
@@ -6105,6 +6949,13 @@ sealed class CommonUtil permits N {
     /**
      * Returns {@code true} if the specified {@code boolean} is {@code Boolean.FALSE}, not {@code null} or {@code Boolean.TRUE}.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * isFalse(Boolean.FALSE); // returns true
+     * isFalse(Boolean.TRUE); // returns false
+     * isFalse(null); // returns false
+     * }</pre>
+     *
      * @param bool the Boolean to check
      * @return {@code true} if the Boolean is {@code Boolean.FALSE}, {@code false} otherwise
      */
@@ -6115,6 +6966,13 @@ sealed class CommonUtil permits N {
 
     /**
      * Returns {@code true} if the specified {@code boolean} is {@code null} or {@code Boolean.TRUE}.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * isNotFalse(Boolean.TRUE); // returns true
+     * isNotFalse(null); // returns true
+     * isNotFalse(Boolean.FALSE); // returns false
+     * }</pre>
      *
      * @param bool the Boolean to check
      * @return {@code true} if the Boolean is {@code null} or {@code Boolean.TRUE}, {@code false} otherwise
@@ -6127,6 +6985,13 @@ sealed class CommonUtil permits N {
     /**
      * Checks if the specified {@code CharSequence} is not {@code null} and not empty.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * notEmpty("abc"); // returns true
+     * notEmpty(""); // returns false
+     * notEmpty(null); // returns false
+     * }</pre>
+     *
      * @param cs the CharSequence to check
      * @return {@code true} if the CharSequence is not {@code null} and not empty, otherwise {@code false}
      * @see Strings#isNotEmpty(CharSequence)
@@ -6138,6 +7003,13 @@ sealed class CommonUtil permits N {
     /**
      * Checks if the specified boolean array is not {@code null} and not empty.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * notEmpty(new boolean[] {true}); // returns true
+     * notEmpty(new boolean[0]); // returns false
+     * notEmpty(null); // returns false
+     * }</pre>
+     *
      * @param a the boolean array to check
      * @return {@code true} if the boolean array is not {@code null} and not empty, otherwise {@code false}
      */
@@ -6147,6 +7019,13 @@ sealed class CommonUtil permits N {
 
     /**
      * Checks if the specified char array is not {@code null} and not empty.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * notEmpty(new char[] {'a'}); // returns true
+     * notEmpty(new char[0]); // returns false
+     * notEmpty(null); // returns false
+     * }</pre>
      *
      * @param a the char array to check
      * @return {@code true} if the char array is not {@code null} and not empty, otherwise {@code false}
@@ -6158,6 +7037,13 @@ sealed class CommonUtil permits N {
     /**
      * Checks if the specified byte array is not {@code null} and not empty.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * notEmpty(new byte[] {1}); // returns true
+     * notEmpty(new byte[0]); // returns false
+     * notEmpty(null); // returns false
+     * }</pre>
+     *
      * @param a the byte array to check
      * @return {@code true} if the byte array is not {@code null} and not empty, otherwise {@code false}
      */
@@ -6167,6 +7053,13 @@ sealed class CommonUtil permits N {
 
     /**
      * Checks if the specified short array is not {@code null} and not empty.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * notEmpty(new short[] {1}); // returns true
+     * notEmpty(new short[0]); // returns false
+     * notEmpty(null); // returns false
+     * }</pre>
      *
      * @param a the short array to check
      * @return {@code true} if the short array is not {@code null} and not empty, otherwise {@code false}
@@ -6178,6 +7071,13 @@ sealed class CommonUtil permits N {
     /**
      * Checks if the specified int array is not {@code null} and not empty.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * notEmpty(new int[] {1}); // returns true
+     * notEmpty(new int[0]); // returns false
+     * notEmpty(null); // returns false
+     * }</pre>
+     *
      * @param a the int array to check
      * @return {@code true} if the int array is not {@code null} and not empty, otherwise {@code false}
      */
@@ -6187,6 +7087,13 @@ sealed class CommonUtil permits N {
 
     /**
      * Checks if the specified long array is not {@code null} and not empty.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * notEmpty(new long[] {1L}); // returns true
+     * notEmpty(new long[0]); // returns false
+     * notEmpty(null); // returns false
+     * }</pre>
      *
      * @param a the long array to check
      * @return {@code true} if the long array is not {@code null} and not empty, otherwise {@code false}
@@ -6198,6 +7105,13 @@ sealed class CommonUtil permits N {
     /**
      * Checks if the specified float array is not {@code null} and not empty.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * notEmpty(new float[] {1.0f}); // returns true
+     * notEmpty(new float[0]); // returns false
+     * notEmpty(null); // returns false
+     * }</pre>
+     *
      * @param a the float array to check
      * @return {@code true} if the float array is not {@code null} and not empty, otherwise {@code false}
      */
@@ -6207,6 +7121,13 @@ sealed class CommonUtil permits N {
 
     /**
      * Checks if the specified double array is not {@code null} and not empty.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * notEmpty(new double[] {1.0}); // returns true
+     * notEmpty(new double[0]); // returns false
+     * notEmpty(null); // returns false
+     * }</pre>
      *
      * @param a the double array to check
      * @return {@code true} if the double array is not {@code null} and not empty, otherwise {@code false}
@@ -6218,6 +7139,13 @@ sealed class CommonUtil permits N {
     /**
      * Checks if the specified object array is not {@code null} and not empty.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * notEmpty(new Object[] {1}); // returns true
+     * notEmpty(new Object[0]); // returns false
+     * notEmpty(null); // returns false
+     * }</pre>
+     *
      * @param a the object array to check
      * @return {@code true} if the object array is not {@code null} and not empty, otherwise {@code false}
      */
@@ -6228,6 +7156,13 @@ sealed class CommonUtil permits N {
     /**
      * Checks if the specified {@code Collection} is not {@code null} and not empty.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * notEmpty(Arrays.asList("a")); // returns true
+     * notEmpty(new ArrayList<>()); // returns false
+     * notEmpty(null); // returns false
+     * }</pre>
+     *
      * @param c the Collection to check
      * @return {@code true} if the Collection is not {@code null} and not empty, otherwise {@code false}
      */
@@ -6237,6 +7172,13 @@ sealed class CommonUtil permits N {
 
     /**
      * Checks if the specified iterable is not {@code null} and not empty.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * notEmpty(Arrays.asList("a")); // returns true
+     * notEmpty(Arrays.asList()); // returns false
+     * notEmpty(null); // returns false
+     * }</pre>
      *
      * @param iter the Iterable to check
      * @return {@code true} if the Iterable is not {@code null} and not empty, otherwise {@code false}
@@ -6257,6 +7199,13 @@ sealed class CommonUtil permits N {
     /**
      * Checks if the specified iterator is not {@code null} and not empty.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * notEmpty(Arrays.asList("a").iterator()); // returns true
+     * notEmpty(Collections.emptyIterator()); // returns false
+     * notEmpty(null); // returns false
+     * }</pre>
+     *
      * @param iter the Iterator to check
      * @return {@code true} if the Iterator is not {@code null} and not empty, otherwise {@code false}
      */
@@ -6268,6 +7217,13 @@ sealed class CommonUtil permits N {
     /**
      * Checks if the specified {@code Map} is not {@code null} and not empty.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * notEmpty(Collections.singletonMap("k", "v")); // returns true
+     * notEmpty(Collections.emptyMap()); // returns false
+     * notEmpty(null); // returns false
+     * }</pre>
+     *
      * @param m the Map to check
      * @return {@code true} if the Map is not {@code null} and not empty, otherwise {@code false}
      */
@@ -6277,6 +7233,13 @@ sealed class CommonUtil permits N {
 
     /**
      * Checks if the specified {@code PrimitiveList} is not {@code null} and not empty.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * notEmpty(IntList.of(1)); // returns true
+     * notEmpty(IntList.of()); // returns false
+     * notEmpty((PrimitiveList) null); // returns false
+     * }</pre>
      *
      * @param list the PrimitiveList to check
      * @return {@code true} if the PrimitiveList is not {@code null} and not empty, otherwise {@code false}
@@ -6289,6 +7252,15 @@ sealed class CommonUtil permits N {
     /**
      * Checks if the specified {@code Multiset} is not {@code null} and not empty.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Multiset<String> multiset = new Multiset<>();
+     * multiset.add("a");
+     * notEmpty(multiset); // returns true
+     * notEmpty(new Multiset<>()); // returns false
+     * notEmpty((Multiset) null); // returns false
+     * }</pre>
+     *
      * @param s the Multiset to check
      * @return {@code true} if the Multiset is not {@code null} and not empty, otherwise {@code false}
      */
@@ -6298,6 +7270,15 @@ sealed class CommonUtil permits N {
 
     /**
      * Checks if the specified {@code Multimap} is not {@code null} and not empty.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Multimap<String, String> multimap = new ListMultimap<>();
+     * multimap.put("k", "v");
+     * notEmpty(multimap); // returns true
+     * notEmpty(new ListMultimap<>()); // returns false
+     * notEmpty((Multimap) null); // returns false
+     * }</pre>
      *
      * @param m the Multimap to check
      * @return {@code true} if the Multimap is not {@code null} and not empty, otherwise {@code false}
@@ -6309,6 +7290,13 @@ sealed class CommonUtil permits N {
     /**
      * Checks if the specified {@code Dataset} is not {@code null} and not empty.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * // Dataset ds = ...
+     * // notEmpty(ds);
+     * notEmpty((Dataset) null); // returns false
+     * }</pre>
+     *
      * @param dataset the Dataset to check
      * @return {@code true} if the Dataset is not {@code null} and not empty, otherwise {@code false}
      */
@@ -6318,6 +7306,14 @@ sealed class CommonUtil permits N {
 
     /**
      * Checks if the specified {@code CharSequence} is not {@code null}, not empty, and does not contain only whitespace characters.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * notBlank("abc"); // returns true
+     * notBlank(""); // returns false
+     * notBlank("   "); // returns false
+     * notBlank(null); // returns false
+     * }</pre>
      *
      * @param cs the CharSequence to check
      * @return {@code true} if the CharSequence is not {@code null}, not empty, and does not contain only whitespace characters, otherwise {@code false}
@@ -6365,6 +7361,13 @@ sealed class CommonUtil permits N {
     /**
      * Checks if any element in the specified array is {@code null}.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * anyNull("a", null); // returns true
+     * anyNull("a", "b"); // returns false
+     * anyNull((Object[]) null); // returns false (empty array check)
+     * }</pre>
+     *
      * @param a the array of objects to check
      * @return {@code true} if any element in the specified array is {@code null}, otherwise {@code false}
      */
@@ -6384,6 +7387,13 @@ sealed class CommonUtil permits N {
 
     /**
      * Checks if any element in the specified collection is {@code null}.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * anyNull(Arrays.asList("a", null)); // returns true
+     * anyNull(Arrays.asList("a", "b")); // returns false
+     * anyNull(Collections.emptyList()); // returns false
+     * }</pre>
      *
      * @param c the collection of objects to check
      * @return {@code true} if any element in the specified collection is {@code null}, otherwise {@code false}
@@ -6455,6 +7465,13 @@ sealed class CommonUtil permits N {
     /**
      * Checks if any of the specified CharSequence objects in the collection is empty.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * anyEmpty(Arrays.asList("a", "")); // returns true
+     * anyEmpty(Arrays.asList("a", "b")); // returns false
+     * anyEmpty(Collections.emptyList()); // returns false
+     * }</pre>
+     *
      * @param css the collection of CharSequence objects to check
      * @return {@code true} if any of the CharSequence objects is empty, otherwise {@code false}
      * @see Strings#isAnyEmpty(Iterable)
@@ -6466,6 +7483,12 @@ sealed class CommonUtil permits N {
     /**
      * Checks if any of the specified arrays is empty.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * anyEmpty(new Object[0], new Object[]{1}); // returns true
+     * anyEmpty(new Object[]{1}, new Object[]{2}); // returns false
+     * }</pre>
+     *
      * @param a the first array to check
      * @param b the second array to check
      * @return {@code true} if any of the arrays is empty, otherwise {@code false}
@@ -6476,6 +7499,12 @@ sealed class CommonUtil permits N {
 
     /**
      * Checks if any of the specified arrays is empty.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * anyEmpty(new Object[0], new Object[]{1}, new Object[]{2}); // returns true
+     * anyEmpty(new Object[]{1}, new Object[]{2}, new Object[]{3}); // returns false
+     * }</pre>
      *
      * @param a the first array to check
      * @param b the second array to check
@@ -6489,6 +7518,12 @@ sealed class CommonUtil permits N {
     /**
      * Checks if any of the specified collections is empty.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * anyEmpty(new ArrayList<>(), Arrays.asList("a")); // returns true
+     * anyEmpty(Arrays.asList("a"), Arrays.asList("b")); // returns false
+     * }</pre>
+     *
      * @param a the first collection to check
      * @param b the second collection to check
      * @return {@code true} if any of the collections is empty, otherwise {@code false}
@@ -6499,6 +7534,12 @@ sealed class CommonUtil permits N {
 
     /**
      * Checks if any of the specified collections is empty.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * anyEmpty(new ArrayList<>(), Arrays.asList("a"), Arrays.asList("b")); // returns true
+     * anyEmpty(Arrays.asList("a"), Arrays.asList("b"), Arrays.asList("c")); // returns false
+     * }</pre>
      *
      * @param a the first collection to check
      * @param b the second collection to check
@@ -6512,6 +7553,12 @@ sealed class CommonUtil permits N {
     /**
      * Checks if any of the specified maps is empty.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * anyEmpty(new HashMap<>(), Collections.singletonMap("k", "v")); // returns true
+     * anyEmpty(Collections.singletonMap("k1", "v1"), Collections.singletonMap("k2", "v2")); // returns false
+     * }</pre>
+     *
      * @param a the first map to check
      * @param b the second map to check
      * @return {@code true} if any of the maps is empty, otherwise {@code false}
@@ -6522,6 +7569,12 @@ sealed class CommonUtil permits N {
 
     /**
      * Checks if any of the specified maps is empty.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * anyEmpty(new HashMap<>(), Collections.singletonMap("k", "v"), Collections.singletonMap("k2", "v2")); // returns true
+     * anyEmpty(Collections.singletonMap("k1", "v1"), Collections.singletonMap("k2", "v2"), Collections.singletonMap("k3", "v3")); // returns false
+     * }</pre>
      *
      * @param a the first map to check
      * @param b the second map to check
@@ -6535,6 +7588,12 @@ sealed class CommonUtil permits N {
     /**
      * Checks if any of the specified CharSequences is blank.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * anyBlank(" ", "abc"); // returns true
+     * anyBlank("abc", "def"); // returns false
+     * }</pre>
+     *
      * @param a the first CharSequence to check
      * @param b the second CharSequence to check
      * @return {@code true} if any of the CharSequences is blank, otherwise {@code false}
@@ -6546,6 +7605,12 @@ sealed class CommonUtil permits N {
 
     /**
      * Checks if any of the specified CharSequences is blank.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * anyBlank(" ", "abc", "def"); // returns true
+     * anyBlank("abc", "def", "ghi"); // returns false
+     * }</pre>
      *
      * @param a the first CharSequence to check
      * @param b the second CharSequence to check
@@ -6598,6 +7663,13 @@ sealed class CommonUtil permits N {
     /**
      * Checks if any of the specified CharSequences in the collection is blank.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * anyBlank(Arrays.asList(" ", "abc")); // returns true
+     * anyBlank(Arrays.asList("abc", "def")); // returns false
+     * anyBlank(Collections.emptyList()); // returns false
+     * }</pre>
+     *
      * @param css the collection of CharSequences to check
      * @return {@code true} if any of the CharSequences is blank, otherwise {@code false}
      * @see Strings#isAnyBlank(Iterable)
@@ -6619,6 +7691,12 @@ sealed class CommonUtil permits N {
     /**
      * Checks if both specified objects are {@code null}.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * allNull(null, null); // returns true
+     * allNull("a", null); // returns false
+     * }</pre>
+     *
      * @param a the first object to check
      * @param b the second object to check
      * @return {@code true} if both objects are {@code null}, otherwise {@code false}
@@ -6629,6 +7707,12 @@ sealed class CommonUtil permits N {
 
     /**
      * Checks if all specified objects are {@code null}.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * allNull(null, null, null); // returns true
+     * allNull("a", null, null); // returns false
+     * }</pre>
      *
      * @param a the first object to check
      * @param b the second object to check
@@ -6643,6 +7727,13 @@ sealed class CommonUtil permits N {
      * Checks if all specified objects are {@code null}.
      * <p><strong>Note:</strong> Returns {@code true} if the array itself is {@code null} or empty,
      * following the principle of <i>vacuous truth</i> (all elements of an empty set satisfy any predicate).
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * allNull(null, null); // returns true
+     * allNull("a", null); // returns false
+     * allNull((Object[]) null); // returns true
+     * }</pre>
      *
      * @param a the objects to check, may be {@code null}
      * @return {@code true} if all objects are {@code null}, or if the array is {@code null} or empty; {@code false} otherwise
@@ -6664,6 +7755,13 @@ sealed class CommonUtil permits N {
     /**
      * Checks if all elements in the specified collection are {@code null}.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * allNull(Arrays.asList(null, null)); // returns true
+     * allNull(Arrays.asList("a", null)); // returns false
+     * allNull(Collections.emptyList()); // returns true
+     * }</pre>
+     *
      * @param c the collection of objects to check
      * @return {@code true} if all elements in the specified collection are {@code null}, otherwise {@code false}
      */
@@ -6684,6 +7782,12 @@ sealed class CommonUtil permits N {
     /**
      * Checks if both specified CharSequences are empty ("") or {@code null}.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * allEmpty("", null); // returns true
+     * allEmpty("a", ""); // returns false
+     * }</pre>
+     *
      * @param a the first CharSequence to check
      * @param b the second CharSequence to check
      * @return {@code true} if both CharSequences are empty, otherwise {@code false}
@@ -6695,6 +7799,12 @@ sealed class CommonUtil permits N {
 
     /**
      * Checks if all the specified CharSequences are empty ("") or {@code null}.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * allEmpty("", null, ""); // returns true
+     * allEmpty("a", "", null); // returns false
+     * }</pre>
      *
      * @param a the first CharSequence to check
      * @param b the second CharSequence to check
@@ -6743,6 +7853,13 @@ sealed class CommonUtil permits N {
     /**
      * Checks if all specified CharSequences in the collection are empty or {@code null}.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * allEmpty(Arrays.asList("", null)); // returns true
+     * allEmpty(Arrays.asList("a", "")); // returns false
+     * allEmpty(Collections.emptyList()); // returns true
+     * }</pre>
+     *
      * @param css the collection of CharSequences to check, may be {@code null} or empty
      * @return {@code true} if all CharSequences in the collection are empty or {@code null}, otherwise {@code false}
      */
@@ -6763,6 +7880,12 @@ sealed class CommonUtil permits N {
     /**
      * Checks if all specified object arrays are empty.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * allEmpty(new Object[0], new Object[0]); // returns true
+     * allEmpty(new Object[]{1}, new Object[0]); // returns false
+     * }</pre>
+     *
      * @param a the first object array to check, which may be null
      * @param b the second object array to check, which may be null
      * @return {@code true} if both object arrays are empty or {@code null}, otherwise {@code false}
@@ -6773,6 +7896,12 @@ sealed class CommonUtil permits N {
 
     /**
      * Checks if all specified object arrays are empty.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * allEmpty(new Object[0], new Object[0], new Object[0]); // returns true
+     * allEmpty(new Object[]{1}, new Object[0], new Object[0]); // returns false
+     * }</pre>
      *
      * @param a the first object array to check, which may be null
      * @param b the second object array to check, which may be null
@@ -6786,6 +7915,12 @@ sealed class CommonUtil permits N {
     /**
      * Checks if all specified collections are empty.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * allEmpty(Collections.emptyList(), new HashSet<>()); // returns true
+     * allEmpty(Arrays.asList("a"), Collections.emptyList()); // returns false
+     * }</pre>
+     *
      * @param a the first collection to check, which may be null
      * @param b the second collection to check, which may be null
      * @return {@code true} if both collections are empty or {@code null}, otherwise {@code false}
@@ -6796,6 +7931,12 @@ sealed class CommonUtil permits N {
 
     /**
      * Checks if all specified collections are empty.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * allEmpty(Collections.emptyList(), new HashSet<>(), new ArrayList<>()); // returns true
+     * allEmpty(Arrays.asList("a"), Collections.emptyList(), Collections.emptyList()); // returns false
+     * }</pre>
      *
      * @param a the first collection to check, which may be null
      * @param b the second collection to check, which may be null
@@ -6809,6 +7950,12 @@ sealed class CommonUtil permits N {
     /**
      * Checks if all specified maps are empty.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * allEmpty(Collections.emptyMap(), new HashMap<>()); // returns true
+     * allEmpty(Collections.singletonMap("k", "v"), Collections.emptyMap()); // returns false
+     * }</pre>
+     *
      * @param a the first map to check, which may be null
      * @param b the second map to check, which may be null
      * @return {@code true} if both maps are empty or {@code null}, otherwise {@code false}
@@ -6819,6 +7966,12 @@ sealed class CommonUtil permits N {
 
     /**
      * Checks if all specified maps are empty.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * allEmpty(Collections.emptyMap(), new HashMap<>(), new TreeMap<>()); // returns true
+     * allEmpty(Collections.singletonMap("k", "v"), Collections.emptyMap(), Collections.emptyMap()); // returns false
+     * }</pre>
      *
      * @param a the first map to check, which may be null
      * @param b the second map to check, which may be null
@@ -6832,6 +7985,12 @@ sealed class CommonUtil permits N {
     /**
      * Checks if both specified CharSequences are blank.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * allBlank("  ", null); // returns true
+     * allBlank("a", "  "); // returns false
+     * }</pre>
+     *
      * @param a the first CharSequence to check
      * @param b the second CharSequence to check
      * @return {@code true} if both CharSequences are blank, otherwise {@code false}
@@ -6843,6 +8002,12 @@ sealed class CommonUtil permits N {
 
     /**
      * Checks if all the specified CharSequences are blank.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * allBlank("  ", null, ""); // returns true
+     * allBlank("a", "  ", null); // returns false
+     * }</pre>
      *
      * @param a the first CharSequence to check
      * @param b the second CharSequence to check
@@ -6893,6 +8058,13 @@ sealed class CommonUtil permits N {
     /**
      * Checks if all specified CharSequences in the collection are blank.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * allBlank(Arrays.asList("  ", null)); // returns true
+     * allBlank(Arrays.asList("a", "  ")); // returns false
+     * allBlank(Collections.emptyList()); // returns true
+     * }</pre>
+     *
      * @param css the collection of CharSequences to check
      * @return {@code true} if all CharSequences in the collection are blank, otherwise {@code false}
      * @see Strings#isAllBlank(Iterable)
@@ -6918,6 +8090,12 @@ sealed class CommonUtil permits N {
     /**
      * Converts a {@code null} string to an empty string.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * nullToEmpty(null); // returns ""
+     * nullToEmpty("abc"); // returns "abc"
+     * }</pre>
+     *
      * @param str the string to check
      * @return the original string if it is not {@code null}, otherwise an empty string
      * @see Strings#nullToEmpty(String)
@@ -6931,6 +8109,12 @@ sealed class CommonUtil permits N {
     /**
      * Returns an immutable empty list if the specified list is {@code null}, otherwise itself is returned.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * nullToEmpty((List) null); // returns immutable empty list
+     * nullToEmpty(new ArrayList<>()); // returns the original list
+     * }</pre>
+     *
      * @param <T> the type of elements in the list
      * @param list the list to check
      * @return an empty list if the specified list is {@code null}, otherwise the original list
@@ -6942,6 +8126,12 @@ sealed class CommonUtil permits N {
 
     /**
      * Returns an immutable empty set if the specified Set is {@code null}, otherwise itself is returned.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * nullToEmpty((Set) null); // returns immutable empty set
+     * nullToEmpty(new HashSet<>()); // returns the original set
+     * }</pre>
      *
      * @param <T> the type of elements in the set
      * @param set the set to check
@@ -6955,6 +8145,12 @@ sealed class CommonUtil permits N {
     /**
      * Returns an immutable empty {@code SortedSet} if the specified SortedSet is {@code null}, otherwise itself is returned.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * nullToEmpty((SortedSet) null); // returns immutable empty sorted set
+     * nullToEmpty(new TreeSet<>()); // returns the original set
+     * }</pre>
+     *
      * @param <T> the type of elements in the set
      * @param set the set to check
      * @return an empty {@code SortedSet} if the specified set is {@code null}, otherwise the original set
@@ -6967,6 +8163,12 @@ sealed class CommonUtil permits N {
     /**
      * Returns an immutable empty {@code NavigableSet} if the specified NavigableSet is {@code null}, otherwise itself is returned.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * nullToEmpty((NavigableSet) null); // returns immutable empty navigable set
+     * nullToEmpty(new TreeSet<>()); // returns the original set
+     * }</pre>
+     *
      * @param <T> the type of elements in the set
      * @param set the set to check
      * @return an empty {@code NavigableSet} if the specified set is {@code null}, otherwise the original set
@@ -6978,6 +8180,12 @@ sealed class CommonUtil permits N {
 
     /**
      * Returns an immutable empty {@code List} if the specified list is {@code null}, otherwise itself is returned.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * nullToEmpty((Collection) null); // returns immutable empty list
+     * nullToEmpty(new ArrayList<>()); // returns the original list
+     * }</pre>
      *
      * @param <T> the type of elements in the list
      * @param c the collection to check
@@ -6994,6 +8202,12 @@ sealed class CommonUtil permits N {
      * <p>{@code nullToEmpty(map).keySet()}</p>
      * <p>{@code nullToEmpty(map).values()}</p>
      * <p>{@code nullToEmpty(map).entrySet()}</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * nullToEmpty((Map) null); // returns immutable empty map
+     * nullToEmpty(new HashMap<>()); // returns the original map
+     * }</pre>
      *
      * @param <K> the key type
      * @param <V> the value type
@@ -7058,6 +8272,12 @@ sealed class CommonUtil permits N {
     /**
      * Returns an empty boolean array if the specified array is {@code null}, otherwise returns the original array.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * nullToEmpty((boolean[]) null); // returns empty boolean array
+     * nullToEmpty(new boolean[] {true}); // returns the original array
+     * }</pre>
+     *
      * @param a the boolean array to check
      * @return an empty boolean array if the specified array is {@code null}, otherwise the original array
      */
@@ -7067,6 +8287,12 @@ sealed class CommonUtil permits N {
 
     /**
      * Returns an empty char array if the specified array is {@code null}, otherwise returns the original array.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * nullToEmpty((char[]) null); // returns empty char array
+     * nullToEmpty(new char[] {'a'}); // returns the original array
+     * }</pre>
      *
      * @param a the char array to check
      * @return an empty char array if the specified array is {@code null}, otherwise the original array
@@ -7078,6 +8304,12 @@ sealed class CommonUtil permits N {
     /**
      * Returns an empty byte array if the specified array is {@code null}, otherwise returns the original array.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * nullToEmpty((byte[]) null); // returns empty byte array
+     * nullToEmpty(new byte[] {1}); // returns the original array
+     * }</pre>
+     *
      * @param a the byte array to check
      * @return an empty byte array if the specified array is {@code null}, otherwise the original array
      */
@@ -7087,6 +8319,12 @@ sealed class CommonUtil permits N {
 
     /**
      * Returns an empty short array if the specified array is {@code null}, otherwise returns the original array.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * nullToEmpty((short[]) null); // returns empty short array
+     * nullToEmpty(new short[] {1}); // returns the original array
+     * }</pre>
      *
      * @param a the short array to check
      * @return an empty short array if the specified array is {@code null}, otherwise the original array
@@ -7098,6 +8336,12 @@ sealed class CommonUtil permits N {
     /**
      * Returns an empty int array if the specified array is {@code null}, otherwise returns the original array.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * nullToEmpty((int[]) null); // returns empty int array
+     * nullToEmpty(new int[] {1}); // returns the original array
+     * }</pre>
+     *
      * @param a the int array to check
      * @return an empty int array if the specified array is {@code null}, otherwise the original array
      */
@@ -7107,6 +8351,12 @@ sealed class CommonUtil permits N {
 
     /**
      * Returns an empty long array if the specified array is {@code null}, otherwise returns the original array.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * nullToEmpty((long[]) null); // returns empty long array
+     * nullToEmpty(new long[] {1L}); // returns the original array
+     * }</pre>
      *
      * @param a the long array to check
      * @return an empty long array if the specified array is {@code null}, otherwise the original array
@@ -7118,6 +8368,12 @@ sealed class CommonUtil permits N {
     /**
      * Returns an empty float array if the specified array is {@code null}, otherwise returns the original array.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * nullToEmpty((float[]) null); // returns empty float array
+     * nullToEmpty(new float[] {1.0f}); // returns the original array
+     * }</pre>
+     *
      * @param a the float array to check
      * @return an empty float array if the specified array is {@code null}, otherwise the original array
      */
@@ -7127,6 +8383,12 @@ sealed class CommonUtil permits N {
 
     /**
      * Returns an empty double array if the specified array is {@code null}, otherwise returns the original array.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * nullToEmpty((double[]) null); // returns empty double array
+     * nullToEmpty(new double[] {1.0}); // returns the original array
+     * }</pre>
      *
      * @param a the double array to check
      * @return an empty double array if the specified array is {@code null}, otherwise the original array
@@ -7138,6 +8400,12 @@ sealed class CommonUtil permits N {
     /**
      * Returns an empty BigInteger array if the specified array is {@code null}, otherwise returns the original array.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * nullToEmpty((BigInteger[]) null); // returns empty BigInteger array
+     * nullToEmpty(new BigInteger[] {BigInteger.ONE}); // returns the original array
+     * }</pre>
+     *
      * @param a the BigInteger array to check
      * @return an empty BigInteger array if the specified array is {@code null}, otherwise the original array
      */
@@ -7148,6 +8416,12 @@ sealed class CommonUtil permits N {
     /**
      * Returns an empty BigDecimal array if the specified array is {@code null}, otherwise returns the original array.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * nullToEmpty((BigDecimal[]) null); // returns empty BigDecimal array
+     * nullToEmpty(new BigDecimal[] {BigDecimal.ONE}); // returns the original array
+     * }</pre>
+     *
      * @param a the BigDecimal array to check
      * @return an empty BigDecimal array if the specified array is {@code null}, otherwise the original array
      */
@@ -7157,6 +8431,12 @@ sealed class CommonUtil permits N {
 
     /**
      * Returns an empty String array if the specified array is {@code null}, otherwise returns the original array.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * nullToEmpty((String[]) null); // returns empty String array
+     * nullToEmpty(new String[] {"a"}); // returns the original array
+     * }</pre>
      *
      * @param a the String array to check
      * @return an empty String array if the specified array is {@code null}, otherwise the original array
@@ -7170,6 +8450,13 @@ sealed class CommonUtil permits N {
 
     /**
      * Converts the specified String array to an empty {@code String[0]} if it's {@code null} and each {@code null} element String to empty String {@code ""}.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * nullToEmptyForEach(null); // returns empty String array
+     * String[] array = {"a", null, "b"};
+     * nullToEmptyForEach(array); // modifies array to {"a", "", "b"} and returns it
+     * }</pre>
      *
      * @param a the String array to check
      * @return an empty String array if the specified array is {@code null}, otherwise the original array with each {@code null} element replaced by an empty string
@@ -7192,6 +8479,12 @@ sealed class CommonUtil permits N {
     /**
      * Returns an empty Date array if the specified array is {@code null}, otherwise returns the original array.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * nullToEmpty((java.util.Date[]) null); // returns empty Date array
+     * nullToEmpty(new java.util.Date[] {new java.util.Date()}); // returns the original array
+     * }</pre>
+     *
      * @param a the Date array to check
      * @return an empty Date array if the specified array is {@code null}, otherwise the original array
      */
@@ -7201,6 +8494,12 @@ sealed class CommonUtil permits N {
 
     /**
      * Returns an empty Date array if the specified array is {@code null}, otherwise returns the original array.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * nullToEmpty((java.sql.Date[]) null); // returns empty Date array
+     * nullToEmpty(new java.sql.Date[] {new java.sql.Date(0)}); // returns the original array
+     * }</pre>
      *
      * @param a the Date array to check
      * @return an empty Date array if the specified array is {@code null}, otherwise the original array
@@ -7212,6 +8511,12 @@ sealed class CommonUtil permits N {
     /**
      * Returns an empty Time array if the specified array is {@code null}, otherwise returns the original array.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * nullToEmpty((java.sql.Time[]) null); // returns empty Time array
+     * nullToEmpty(new java.sql.Time[] {new java.sql.Time(0)}); // returns the original array
+     * }</pre>
+     *
      * @param a the Time array to check
      * @return an empty Time array if the specified array is {@code null}, otherwise the original array
      */
@@ -7221,6 +8526,12 @@ sealed class CommonUtil permits N {
 
     /**
      * Returns an empty Timestamp array if the specified array is {@code null}, otherwise returns the original array.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * nullToEmpty((java.sql.Timestamp[]) null); // returns empty Timestamp array
+     * nullToEmpty(new java.sql.Timestamp[] {new java.sql.Timestamp(0)}); // returns the original array
+     * }</pre>
      *
      * @param a the Timestamp array to check
      * @return an empty Timestamp array if the specified array is {@code null}, otherwise the original array
@@ -7232,6 +8543,12 @@ sealed class CommonUtil permits N {
     /**
      * Returns an empty Calendar array if the specified array is {@code null}, otherwise returns the original array.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * nullToEmpty((Calendar[]) null); // returns empty Calendar array
+     * nullToEmpty(new Calendar[] {Calendar.getInstance()}); // returns the original array
+     * }</pre>
+     *
      * @param a the Calendar array to check
      * @return an empty Calendar array if the specified array is {@code null}, otherwise the original array
      */
@@ -7242,6 +8559,12 @@ sealed class CommonUtil permits N {
     /**
      * Returns an empty Object array if the specified array is {@code null}, otherwise returns the original array.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * nullToEmpty((Object[]) null); // returns empty Object array
+     * nullToEmpty(new Object[] {1}); // returns the original array
+     * }</pre>
+     *
      * @param a the Object array to check
      * @return an empty Object array if the specified array is {@code null}, otherwise the original array
      */
@@ -7251,6 +8574,13 @@ sealed class CommonUtil permits N {
 
     /**
      * Returns an empty array of the specified type if the given array is {@code null}, otherwise returns the original array.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * nullToEmpty(null, String[].class); // returns empty String array
+     * String[] array = {"a"};
+     * nullToEmpty(array, String[].class); // returns the original array
+     * }</pre>
      *
      * @param <T> the component type of the array
      * @param a the array to check
@@ -7264,6 +8594,12 @@ sealed class CommonUtil permits N {
     /**
      * Returns an immutable empty Collection if the specified ImmutableCollection is {@code null}, otherwise itself is returned.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * nullToEmpty((ImmutableCollection) null); // returns immutable empty collection
+     * nullToEmpty(ImmutableList.of(1)); // returns the original collection
+     * }</pre>
+     *
      * @param <T> the type of elements in the collection
      * @param c the ImmutableCollection to check
      * @return an empty ImmutableCollection if the specified collection is {@code null}, otherwise the original collection
@@ -7274,6 +8610,12 @@ sealed class CommonUtil permits N {
 
     /**
      * Returns an immutable empty list if the specified ImmutableList is {@code null}, otherwise returns the original list.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * nullToEmpty((ImmutableList) null); // returns immutable empty list
+     * nullToEmpty(ImmutableList.of(1)); // returns the original list
+     * }</pre>
      *
      * @param <T> the type of elements in the list
      * @param list the ImmutableList to check
@@ -7286,6 +8628,12 @@ sealed class CommonUtil permits N {
     /**
      * Returns an immutable empty set if the specified ImmutableSet is {@code null}, otherwise returns the original set.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * nullToEmpty((ImmutableSet) null); // returns immutable empty set
+     * nullToEmpty(ImmutableSet.of(1)); // returns the original set
+     * }</pre>
+     *
      * @param <T> the type of elements in the set
      * @param set the ImmutableSet to check
      * @return an empty ImmutableSet if the specified set is {@code null}, otherwise the original set
@@ -7296,6 +8644,12 @@ sealed class CommonUtil permits N {
 
     /**
      * Returns an immutable empty sorted set if the specified ImmutableSortedSet is {@code null}, otherwise returns the original set.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * nullToEmpty((ImmutableSortedSet) null); // returns immutable empty sorted set
+     * nullToEmpty(ImmutableSortedSet.of(1)); // returns the original set
+     * }</pre>
      *
      * @param <T> the type of elements in the set
      * @param set the ImmutableSortedSet to check
@@ -7308,6 +8662,12 @@ sealed class CommonUtil permits N {
     /**
      * Returns an immutable empty navigable set if the specified ImmutableNavigableSet is {@code null}, otherwise returns the original set.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * nullToEmpty((ImmutableNavigableSet) null); // returns immutable empty navigable set
+     * nullToEmpty(ImmutableNavigableSet.of(1)); // returns the original set
+     * }</pre>
+     *
      * @param <T> the type of elements in the set
      * @param set the ImmutableNavigableSet to check
      * @return an empty ImmutableNavigableSet if the specified set is {@code null}, otherwise the original set
@@ -7318,6 +8678,12 @@ sealed class CommonUtil permits N {
 
     /**
      * Returns an immutable empty map if the specified ImmutableMap is {@code null}, otherwise returns the original map.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * nullToEmpty((ImmutableMap) null); // returns immutable empty map
+     * nullToEmpty(ImmutableMap.of("k", "v")); // returns the original map
+     * }</pre>
      *
      * @param <K> the type of keys in the map
      * @param <V> the type of values in the map
@@ -7331,6 +8697,12 @@ sealed class CommonUtil permits N {
     /**
      * Returns an immutable empty sorted map if the specified ImmutableSortedMap is {@code null}, otherwise returns the original map.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * nullToEmpty((ImmutableSortedMap) null); // returns immutable empty sorted map
+     * nullToEmpty(ImmutableSortedMap.of("k", "v")); // returns the original map
+     * }</pre>
+     *
      * @param <K> the type of keys in the map
      * @param <V> the type of values in the map
      * @param map the ImmutableSortedMap to check
@@ -7342,6 +8714,12 @@ sealed class CommonUtil permits N {
 
     /**
      * Returns an immutable empty navigable map if the specified ImmutableNavigableMap is {@code null}, otherwise returns the original map.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * nullToEmpty((ImmutableNavigableMap) null); // returns immutable empty navigable map
+     * nullToEmpty(ImmutableNavigableMap.of("k", "v")); // returns the original map
+     * }</pre>
      *
      * @param <K> the type of keys in the map
      * @param <V> the type of values in the map
@@ -7355,6 +8733,12 @@ sealed class CommonUtil permits N {
     /**
      * Returns an immutable empty bi-map if the specified ImmutableBiMap is {@code null}, otherwise returns the original bi-map.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * nullToEmpty((ImmutableBiMap) null); // returns immutable empty bi-map
+     * nullToEmpty(ImmutableBiMap.of("k", "v")); // returns the original bi-map
+     * }</pre>
+     *
      * @param <K> the type of keys in the bi-map
      * @param <V> the type of values in the bi-map
      * @param map the ImmutableBiMap to check
@@ -7366,6 +8750,12 @@ sealed class CommonUtil permits N {
 
     /**
      * Returns the default value of the given type if the specified object is {@code null} or itself if the specified object is not {@code null}.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * defaultIfNull((Boolean) null); // returns false
+     * defaultIfNull(Boolean.TRUE); // returns true
+     * }</pre>
      *
      * @param b the Boolean value to check, may be {@code null}
      * @return the primitive boolean value, or {@code false} if {@code b} is {@code null}
@@ -7380,6 +8770,12 @@ sealed class CommonUtil permits N {
 
     /**
      * Returns the specified default value if the specified object is {@code null} or itself if the specified object is not {@code null}.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * defaultIfNull((Boolean) null, true); // returns true
+     * defaultIfNull(Boolean.FALSE, true); // returns false
+     * }</pre>
      *
      * @param b the Boolean value to check, may be {@code null}
      * @param defaultForNull the default value to return if {@code b} is {@code null}
@@ -7396,6 +8792,12 @@ sealed class CommonUtil permits N {
     /**
      * Returns the default value of the given type if the specified object is {@code null} or itself if the specified object is not {@code null}.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * defaultIfNull((Character) null); // returns '\0'
+     * defaultIfNull('a'); // returns 'a'
+     * }</pre>
+     *
      * @param c the Character value to check, may be {@code null}
      * @return the primitive char value, or {@code '\0'} if {@code c} is {@code null}
      */
@@ -7409,6 +8811,12 @@ sealed class CommonUtil permits N {
 
     /**
      * Returns the specified default value if the specified object is {@code null} or itself if the specified object is not {@code null}.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * defaultIfNull((Character) null, 'b'); // returns 'b'
+     * defaultIfNull('a', 'b'); // returns 'a'
+     * }</pre>
      *
      * @param c the Character value to check, may be {@code null}
      * @param defaultForNull the default value to return if {@code c} is {@code null}
@@ -7425,6 +8833,12 @@ sealed class CommonUtil permits N {
     /**
      * Returns the default value of the given type if the specified object is {@code null} or itself if the specified object is not {@code null}.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * defaultIfNull((Byte) null); // returns 0
+     * defaultIfNull((byte) 1); // returns 1
+     * }</pre>
+     *
      * @param b the Byte value to check, may be {@code null}
      * @return the primitive byte value, or {@code 0} if {@code b} is {@code null}
      */
@@ -7438,6 +8852,12 @@ sealed class CommonUtil permits N {
 
     /**
      * Returns the specified default value if the specified object is {@code null} or itself if the specified object is not {@code null}.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * defaultIfNull((Byte) null, (byte) 2); // returns 2
+     * defaultIfNull((byte) 1, (byte) 2); // returns 1
+     * }</pre>
      *
      * @param b the Byte value to check, may be {@code null}
      * @param defaultForNull the default value to return if {@code b} is {@code null}
@@ -7454,6 +8874,12 @@ sealed class CommonUtil permits N {
     /**
      * Returns the default value of the given type if the specified object is {@code null} or itself if the specified object is not {@code null}.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * defaultIfNull((Short) null); // returns 0
+     * defaultIfNull((short) 1); // returns 1
+     * }</pre>
+     *
      * @param b the Short value to check, may be {@code null}
      * @return the primitive short value, or {@code 0} if {@code b} is {@code null}
      */
@@ -7467,6 +8893,12 @@ sealed class CommonUtil permits N {
 
     /**
      * Returns the specified default value if the specified object is {@code null} or itself if the specified object is not {@code null}.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * defaultIfNull((Short) null, (short) 2); // returns 2
+     * defaultIfNull((short) 1, (short) 2); // returns 1
+     * }</pre>
      *
      * @param b the Short value to check, may be {@code null}
      * @param defaultForNull the default value to return if {@code b} is {@code null}
@@ -7483,6 +8915,12 @@ sealed class CommonUtil permits N {
     /**
      * Returns the default value of the given type if the specified object is {@code null} or itself if the specified object is not {@code null}.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * defaultIfNull((Integer) null); // returns 0
+     * defaultIfNull(1); // returns 1
+     * }</pre>
+     *
      * @param b the Integer value to check, may be {@code null}
      * @return the primitive int value, or {@code 0} if {@code b} is {@code null}
      */
@@ -7496,6 +8934,12 @@ sealed class CommonUtil permits N {
 
     /**
      * Returns the specified default value if the specified object is {@code null} or itself if the specified object is not {@code null}.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * defaultIfNull((Integer) null, 2); // returns 2
+     * defaultIfNull(1, 2); // returns 1
+     * }</pre>
      *
      * @param b the Integer value to check, may be {@code null}
      * @param defaultForNull the default value to return if {@code b} is {@code null}
@@ -7512,6 +8956,12 @@ sealed class CommonUtil permits N {
     /**
      * Returns the default value of the given type if the specified object is {@code null} or itself if the specified object is not {@code null}.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * defaultIfNull((Long) null); // returns 0L
+     * defaultIfNull(1L); // returns 1L
+     * }</pre>
+     *
      * @param b the Long value to check, may be {@code null}
      * @return the primitive long value, or {@code 0} if {@code b} is {@code null}
      */
@@ -7525,6 +8975,12 @@ sealed class CommonUtil permits N {
 
     /**
      * Returns the specified default value if the specified object is {@code null} or itself if the specified object is not {@code null}.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * defaultIfNull((Long) null, 2L); // returns 2L
+     * defaultIfNull(1L, 2L); // returns 1L
+     * }</pre>
      *
      * @param b the Long value to check, may be {@code null}
      * @param defaultForNull the default value to return if {@code b} is {@code null}
@@ -7541,6 +8997,12 @@ sealed class CommonUtil permits N {
     /**
      * Returns the default value of the given type if the specified object is {@code null} or itself if the specified object is not {@code null}.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * defaultIfNull((Float) null); // returns 0.0f
+     * defaultIfNull(1.0f); // returns 1.0f
+     * }</pre>
+     *
      * @param b the Float value to check, may be {@code null}
      * @return the primitive float value, or {@code 0} if {@code b} is {@code null}
      */
@@ -7554,6 +9016,12 @@ sealed class CommonUtil permits N {
 
     /**
      * Returns the specified default value if the specified object is {@code null} or itself if the specified object is not {@code null}.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * defaultIfNull((Float) null, 2.0f); // returns 2.0f
+     * defaultIfNull(1.0f, 2.0f); // returns 1.0f
+     * }</pre>
      *
      * @param b the Float value to check, may be {@code null}
      * @param defaultForNull the default value to return if {@code b} is {@code null}
@@ -7570,6 +9038,12 @@ sealed class CommonUtil permits N {
     /**
      * Returns the default value of the given type if the specified object is {@code null} or itself if the specified object is not {@code null}.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * defaultIfNull((Double) null); // returns 0.0
+     * defaultIfNull(1.0); // returns 1.0
+     * }</pre>
+     *
      * @param b the Double value to check, may be {@code null}
      * @return the primitive double value, or {@code 0} if {@code b} is {@code null}
      */
@@ -7583,6 +9057,12 @@ sealed class CommonUtil permits N {
 
     /**
      * Returns the specified default value if the specified object is {@code null} or itself if the specified object is not {@code null}.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * defaultIfNull((Double) null, 2.0); // returns 2.0
+     * defaultIfNull(1.0, 2.0); // returns 1.0
+     * }</pre>
      *
      * @param b the Double value to check, may be {@code null}
      * @param defaultForNull the default value to return if {@code b} is {@code null}
@@ -7599,6 +9079,12 @@ sealed class CommonUtil permits N {
     /**
      * Returns the specified default value if the given object is {@code null}, otherwise returns the object itself.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * defaultIfNull(null, "default"); // returns "default"
+     * defaultIfNull("value", "default"); // returns "value"
+     * }</pre>
+     *
      * @param <T> the type of the object
      * @param obj the object to check for {@code null}
      * @param defaultForNull the default value to return if {@code obj} is {@code null}
@@ -7614,6 +9100,12 @@ sealed class CommonUtil permits N {
 
     /**
      * Returns the default value provided by specified {@code Supplier} if the specified object is {@code null}, otherwise returns the object itself.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * defaultIfNull(null, () -> "default"); // returns "default"
+     * defaultIfNull("value", () -> "default"); // returns "value"
+     * }</pre>
      *
      * @param <T> the type of the object
      * @param obj the object to check, may be {@code null}
@@ -7633,6 +9125,13 @@ sealed class CommonUtil permits N {
     /**
      * Returns the specified default value if the specified {@code charSequence} is empty, otherwise returns the {@code charSequence} itself.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * defaultIfEmpty("", "default"); // returns "default"
+     * defaultIfEmpty("value", "default"); // returns "value"
+     * defaultIfEmpty(null, "default"); // returns "default"
+     * }</pre>
+     *
      * @param <T> the type of the CharSequence
      * @param str the CharSequence to check, may be {@code null} or empty
      * @param defaultForEmpty the default value to return if {@code str} is empty
@@ -7648,6 +9147,13 @@ sealed class CommonUtil permits N {
 
     /**
      * Returns the default value provided by specified {@code Supplier} if the specified {@code charSequence} is empty, otherwise returns the {@code charSequence} itself.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * defaultIfEmpty("", () -> "default"); // returns "default"
+     * defaultIfEmpty("value", () -> "default"); // returns "value"
+     * defaultIfEmpty(null, () -> "default"); // returns "default"
+     * }</pre>
      *
      * @param <T> the type of the CharSequence
      * @param str the CharSequence to check, may be {@code null} or empty
@@ -7667,6 +9173,13 @@ sealed class CommonUtil permits N {
     /**
      * Returns the specified default value if the specified {@code charSequence} is blank, otherwise returns the {@code charSequence} itself.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * defaultIfBlank("   ", "default"); // returns "default"
+     * defaultIfBlank("value", "default"); // returns "value"
+     * defaultIfBlank(null, "default"); // returns "default"
+     * }</pre>
+     *
      * @param <T> the type of CharSequence
      * @param str the CharSequence to check, may be {@code null}
      * @param defaultForBlank the default value to return if the string is blank
@@ -7682,6 +9195,13 @@ sealed class CommonUtil permits N {
 
     /**
      * Returns the default value provided by specified {@code Supplier} if the specified {@code charSequence} is blank, otherwise returns the {@code charSequence} itself.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * defaultIfBlank("   ", () -> "default"); // returns "default"
+     * defaultIfBlank("value", () -> "default"); // returns "value"
+     * defaultIfBlank(null, () -> "default"); // returns "default"
+     * }</pre>
      *
      * @param <T> the type of CharSequence
      * @param str the CharSequence to check, may be {@code null}
@@ -7701,6 +9221,13 @@ sealed class CommonUtil permits N {
     /**
      * Returns the specified default value if the specified Collection is empty, otherwise returns the {@code Collection} itself.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * defaultIfEmpty(Collections.emptyList(), Arrays.asList("default")); // returns ["default"]
+     * defaultIfEmpty(Arrays.asList("a"), Arrays.asList("default")); // returns ["a"]
+     * defaultIfEmpty(null, Arrays.asList("default")); // returns ["default"]
+     * }</pre>
+     *
      * @param <T> the type of Collection
      * @param c the collection to check, may be {@code null}
      * @param defaultForEmpty the default value to return if the collection is empty
@@ -7715,6 +9242,13 @@ sealed class CommonUtil permits N {
 
     /**
      * Returns the specified default value if the specified Map is empty, otherwise returns the {@code Map} itself.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * defaultIfEmpty(Collections.emptyMap(), Collections.singletonMap("k", "v")); // returns {"k"="v"}
+     * defaultIfEmpty(Collections.singletonMap("a", "b"), Collections.singletonMap("k", "v")); // returns {"a"="b"}
+     * defaultIfEmpty(null, Collections.singletonMap("k", "v")); // returns {"k"="v"}
+     * }</pre>
      *
      * @param <T> the type of Map
      * @param m the map to check, may be {@code null}
@@ -7731,6 +9265,13 @@ sealed class CommonUtil permits N {
     /**
      * Returns the default value of the given class type.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * defaultValueOf(int.class); // returns 0
+     * defaultValueOf(boolean.class); // returns false
+     * defaultValueOf(String.class); // returns null
+     * }</pre>
+     *
      * @param <T> the type to return the default value for
      * @param cls the class type for which the default value is to be returned.
      * @return the default value of the given class type. For example, for an Integer class type, it will return 0.
@@ -7743,6 +9284,12 @@ sealed class CommonUtil permits N {
 
     /**
      * Returns the default value of the given class type.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * defaultValueOf(Integer.class, true); // returns 0
+     * defaultValueOf(Integer.class, false); // returns null
+     * }</pre>
      *
      * @param <T> the type to return the default value for
      * @param cls the class type for which the default value is to be returned.
@@ -7765,6 +9312,11 @@ sealed class CommonUtil permits N {
 
     /**
      * Gets a Type by the given type name.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Type<String> type = typeOf("java.lang.String");
+     * }</pre>
      *
      * @param <T> the type parameter
      * @param typeName the name of the type to be retrieved.
@@ -8334,9 +9886,9 @@ sealed class CommonUtil permits N {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     *   BooleanUtils.negate(Boolean.TRUE)  = Boolean.FALSE;
-     *   BooleanUtils.negate(Boolean.FALSE) = Boolean.TRUE;
-     *   BooleanUtils.negate(null)          = null;
+     * N.negate(Boolean.TRUE);  // Boolean.FALSE
+     * N.negate(Boolean.FALSE); // Boolean.TRUE
+     * N.negate(null);          // null
      * }</pre>
      *
      * @param bool the Boolean to negate, which may be null
@@ -14932,6 +16484,14 @@ sealed class CommonUtil permits N {
     /**
      * Compares two arrays lexicographically over the specified range.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * boolean[] a = {false, true, false};
+     * boolean[] b = {false, true, true};
+     * compare(a, 0, b, 0, 3); // returns negative value (false < true at index 2)
+     * compare(a, 0, b, 0, 2); // returns 0
+     * }</pre>
+     *
      * @param a the first array to compare
      * @param fromIndexA the starting index in the first array
      * @param b the second array to compare
@@ -14996,6 +16556,14 @@ sealed class CommonUtil permits N {
     /**
      * Compares two arrays lexicographically over the specified range.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * char[] a = {'a', 'b', 'c'};
+     * char[] b = {'a', 'b', 'd'};
+     * compare(a, 0, b, 0, 3); // returns negative value ('c' < 'd')
+     * compare(a, 0, b, 0, 2); // returns 0
+     * }</pre>
+     *
      * @param a the first array to compare
      * @param fromIndexA the starting index in the first array
      * @param b the second array to compare
@@ -15059,6 +16627,14 @@ sealed class CommonUtil permits N {
 
     /**
      * Compares two arrays lexicographically over the specified range.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * byte[] a = {1, 2, 3};
+     * byte[] b = {1, 2, 4};
+     * compare(a, 0, b, 0, 3); // returns negative value (3 < 4)
+     * compare(a, 0, b, 0, 2); // returns 0
+     * }</pre>
      *
      * @param a the first array to compare
      * @param fromIndexA the starting index in the first array
@@ -15172,6 +16748,14 @@ sealed class CommonUtil permits N {
     /**
      * Compares two arrays lexicographically over the specified range.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * short[] a = {1, 2, 3};
+     * short[] b = {1, 2, 4};
+     * compare(a, 0, b, 0, 3); // returns negative value (3 < 4)
+     * compare(a, 0, b, 0, 2); // returns 0
+     * }</pre>
+     *
      * @param a the first array to compare
      * @param fromIndexA the starting index in the first array
      * @param b the second array to compare
@@ -15284,6 +16868,14 @@ sealed class CommonUtil permits N {
     /**
      * Compares two arrays lexicographically over the specified range.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * int[] a = {1, 2, 3};
+     * int[] b = {1, 2, 4};
+     * compare(a, 0, b, 0, 3); // returns negative value (3 < 4)
+     * compare(a, 0, b, 0, 2); // returns 0
+     * }</pre>
+     *
      * @param a the first array to compare
      * @param fromIndexA the starting index in the first array
      * @param b the second array to compare
@@ -15395,6 +16987,14 @@ sealed class CommonUtil permits N {
 
     /**
      * Compares two arrays lexicographically over the specified range.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * long[] a = {1L, 2L, 3L};
+     * long[] b = {1L, 2L, 4L};
+     * compare(a, 0, b, 0, 3); // returns negative value (3L < 4L)
+     * compare(a, 0, b, 0, 2); // returns 0
+     * }</pre>
      *
      * @param a the first array to compare
      * @param fromIndexA the starting index in the first array
@@ -15510,6 +17110,14 @@ sealed class CommonUtil permits N {
     /**
      * Compares two arrays lexicographically over the specified range.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * float[] a = {1.0f, 2.0f, 3.0f};
+     * float[] b = {1.0f, 2.0f, 4.0f};
+     * compare(a, 0, b, 0, 3); // returns negative value (3.0f < 4.0f)
+     * compare(a, 0, b, 0, 2); // returns 0
+     * }</pre>
+     *
      * @param a the first array to compare
      * @param fromIndexA the starting index in the first array
      * @param b the second array to compare
@@ -15577,6 +17185,14 @@ sealed class CommonUtil permits N {
 
     /**
      * Compares two arrays lexicographically over the specified range.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * double[] a = {1.0, 2.0, 3.0};
+     * double[] b = {1.0, 2.0, 4.0};
+     * compare(a, 0, b, 0, 3); // returns negative value (3.0 < 4.0)
+     * compare(a, 0, b, 0, 2); // returns 0
+     * }</pre>
      *
      * @param a the first array to compare
      * @param fromIndexA the starting index in the first array
@@ -21480,7 +23096,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Repeats each element in the specified Collection <i>n</i> times one by one.
+     * Repeats each element in the specified collection {@code n} times in iteration order.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -21488,10 +23104,10 @@ sealed class CommonUtil permits N {
      * }</pre>
      *
      * @param <T> the type of the elements in the collection
-     * @param c the collection whose elements are to be repeated
-     * @param n the number of times to repeat the elements
-     * @return a list containing the repeated elements
-     * @throws IllegalArgumentException if the specified collection is {@code null} or empty, or specified number of repetitions is negative
+     * @param c the collection whose elements are to be repeated; may be {@code null} or empty
+     * @param n the number of times to repeat the elements; must not be negative
+     * @return a list containing the repeated elements; an empty list if {@code n == 0} or the collection is {@code null} or empty
+     * @throws IllegalArgumentException if the specified number of repetitions is negative
      * @see Iterators#repeatElements(Collection, long)
      */
     public static <T> List<T> repeatElements(final Collection<? extends T> c, final int n) throws IllegalArgumentException {
@@ -21513,7 +23129,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Repeats the entire specified Collection {@code n} times.
+     * Repeats the entire specified collection {@code n} times.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -21521,10 +23137,10 @@ sealed class CommonUtil permits N {
      * }</pre>
      *
      * @param <T> the type of the elements in the collection
-     * @param c the collection whose elements are to be repeated
-     * @param n the number of times to repeat the elements
-     * @return a list containing the repeated elements
-     * @throws IllegalArgumentException if the specified collection is {@code null} or empty, or specified number of repetitions is negative
+     * @param c the collection whose elements are to be repeated; may be {@code null} or empty
+     * @param n the number of times to repeat the elements; must not be negative
+     * @return a list containing the repeated elements; an empty list if {@code n == 0} or the collection is {@code null} or empty
+     * @throws IllegalArgumentException if the specified number of repetitions is negative
      * @see Iterators#repeatCollection(Collection, long)
      */
     public static <T> List<T> repeatCollection(final Collection<T> c, final int n) throws IllegalArgumentException {
@@ -21554,8 +23170,8 @@ sealed class CommonUtil permits N {
      * @param <T> the type of the elements in the collection
      * @param c the collection whose elements are to be repeated
      * @param size the target size of the resulting list
-     * @return a list containing the repeated elements
-     * @throws IllegalArgumentException if the specified collection is {@code null} or empty, or the specified size is negative
+     * @return a list containing the repeated elements; an empty list if {@code size} is {@code 0}
+     * @throws IllegalArgumentException if the specified size is negative, or if {@code size > 0} and the collection is {@code null} or empty
      * @see Iterators#repeatElementsToSize(Collection, long)
      */
     public static <T> List<T> repeatElementsToSize(final Collection<T> c, final int size) throws IllegalArgumentException {
@@ -22505,13 +24121,15 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Returns a new int array containing a copy of the specified range of the original array, with elements selected at intervals defined by the step parameter.
-     * If step negative, the elements will be copied in reverse order.
+     * Returns a new int array containing a copy of the specified range of the original array, with elements selected at intervals defined by the {@code step} parameter.
+     * A positive {@code step} copies elements forward from {@code fromIndex} (inclusive) up to {@code toIndex} (exclusive). A negative {@code step} copies
+     * elements in reverse from {@code fromIndex} (inclusive) down to but not including {@code toIndex}; when {@code toIndex} is {@code -1} it is treated as
+     * {@code 0} for bounds validation.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * int[] a = { 0, 1, 2, 3, 4, 5 };
-     * copyOfRange(a, 1, 5, 1)); // [1, 2, 3, 4]
+     * copyOfRange(a, 1, 5, 1); // [1, 2, 3, 4]
      * copyOfRange(a, 1, 5, 2); // [1, 3]
      *
      * copyOfRange(a, 5, 1, -1); // [5, 4, 3, 2]
@@ -22525,7 +24143,7 @@ sealed class CommonUtil permits N {
      * @param toIndex the final index of the range to be copied, exclusive
      * @param step the interval between elements to be copied
      * @return a new int array containing the specified range from the original array
-     * @throws IndexOutOfBoundsException if fromIndex is negative or larger than toIndex, or toIndex is larger than the length of array
+     * @throws IndexOutOfBoundsException if the resolved range end points fall outside {@code [0, original.length]}
      * @throws IllegalArgumentException  if step is zero
      */
     public static int[] copyOfRange(final int[] original, int fromIndex, final int toIndex, final int step) throws IndexOutOfBoundsException {
@@ -28128,10 +29746,10 @@ sealed class CommonUtil permits N {
      * @param <T> the type of elements in the collection
      * @param c the collection to search - may be {@code null} or empty
      * @param predicate the predicate to test each element - must not be {@code null}
-     * @param fromIndex the index to start the search from (inclusive) - negative values treated as 0
-     * @return an array of indices where elements satisfy the predicate. Returns an empty array
-     *         if no matches are found, the collection is {@code null}/empty, or {@code fromIndex}
-     *         is beyond the collection size. The indices are in ascending order. if {@code predicate} is {@code null}
+     * @param fromIndex the index to start the search from (inclusive); negative values are treated as {@code 0}
+     * @return an array of indices where elements satisfy the predicate. Returns an empty array if no matches are found,
+     *         the collection is {@code null}/empty, or {@code fromIndex} is beyond the collection size. The indices are in ascending order.
+     * @throws NullPointerException if {@code predicate} is {@code null}
      * @see #indicesOfAll(Collection, Predicate)
      * @see #indicesOfAll(Object[], Predicate, int)
      * @see #findFirstIndex(Collection, Predicate)

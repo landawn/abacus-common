@@ -79,14 +79,13 @@ import com.landawn.abacus.util.stream.Stream;
  *
  * <p><b>Core Functional Categories:</b>
  * <ul>
- *   <li><b>Bean Validation:</b> isBeanClass, isBuilderClass, hasBuilder for type checking</li>
- *   <li><b>Property Discovery:</b> getPropNameList, getPropList, getFieldList for introspection</li>
- *   <li><b>Property Access:</b> getProperty, setProperty with type-safe operations</li>
- *   <li><b>Object Conversion:</b> bean2Map, map2Bean with deep and shallow conversion options</li>
- *   <li><b>Object Lifecycle:</b> newInstance, copy, clone, merge for object management</li>
- *   <li><b>Comparison Operations:</b> equals, deepEquals, compare with configurable comparators</li>
- *   <li><b>Transformation:</b> transform, convert, fill for object manipulation</li>
- *   <li><b>Utility Operations:</b> toString, hashCode, register for helper functions</li>
+ *   <li><b>Bean Validation:</b> {@link #isBeanClass(Class)}, {@link #isRecordClass(Class)} for type checking</li>
+ *   <li><b>Property Discovery:</b> {@link #getPropNameList(Class)}, {@link #getPropNames(Object, boolean)} for introspection</li>
+ *   <li><b>Property Access:</b> {@link #getPropValue(Object, String)}, {@link #setPropValue(Object, Method, Object)} with type-safe operations</li>
+ *   <li><b>Object Conversion:</b> {@link #bean2Map(Object)}, {@link #map2Bean(Map, Class)} with deep and shallow conversion options</li>
+ *   <li><b>Object Lifecycle:</b> {@link #newBean(Class)}, {@link #copy(Object, Class)}, {@link #clone(Object)}, {@link #merge(Object, Object)} for object management</li>
+ *   <li><b>Comparison Operations:</b> {@link #equalsByProps(Object, Object, Collection)}, {@link #compareByProps(Object, Object, Collection)} with configurable properties</li>
+ *   <li><b>Transformation:</b> {@link #fill(Object)} for object manipulation</li>
  * </ul>
  *
  * <p><b>Design Philosophy:</b>
@@ -105,40 +104,36 @@ import com.landawn.abacus.util.stream.Stream;
  * // Bean validation and introspection
  * boolean isBean = Beans.isBeanClass(User.class);              // Check if class follows bean pattern
  * List<String> properties = Beans.getPropNameList(User.class); // Get all property names
- * boolean hasBuilder = Beans.hasBuilder(User.class);           // Check for builder pattern support
+ * Tuple3<Class<?>, Supplier<Object>, Function<Object, Object>> builderInfo = Beans.getBuilderInfo(User.class); // Get builder info
  *
  * // Property access operations
  * User user = new User();
- * Beans.setProperty(user, "name", "John Doe");                 // Set property value
- * String name = Beans.getProperty(user, "name");               // Get property value
- * Class<?> nameType = Beans.getPropType(User.class, "name");   // Get property type
+ * Beans.setPropValue(user, "name", "John Doe");                // Set property value
+ * String name = Beans.getPropValue(user, "name");              // Get property value
  *
  * // Object creation and instantiation
- * User newUser = Beans.newInstance(User.class);                // Create new instance
+ * User newUser = Beans.newBean(User.class);                    // Create new instance
  * User copied = Beans.copy(user, User.class);                  // Create copy with type conversion
  * User cloned = Beans.clone(user);                             // Deep clone existing object
  *
  * // Bean to Map conversion (various formats)
- * Map<String, Object> flatMap = Beans.bean2Map(user);                    // Flat map conversion
- * Map<String, Object> deepMap = Beans.bean2Map(user, true);              // Deep map conversion
- * Map<String, Object> filteredMap = Beans.bean2Map(user, propName -> !propName.startsWith("_"));
+ * Map<String, Object> flatMap = Beans.bean2Map(user);                    // Map conversion
+ * Map<String, Object> deepMap = Beans.deepBean2Map(user);                // Deep map conversion
+ * Map<String, Object> selectedMap = Beans.bean2Map(user, Arrays.asList("name", "email")); // Selected properties
  *
  * // Map to Bean conversion
  * Map<String, Object> userData = Map.of("name", "Jane", "age", 25, "email", "jane@example.com");
  * User userFromMap = Beans.map2Bean(userData, User.class);               // Convert map to bean
- * User userFromMapIgnoreUnknown = Beans.map2Bean(userData, User.class, true); // Ignore unknown properties
+ * User userFromMapIgnoreUnknown = Beans.map2Bean(userData, false, true, User.class); // Ignore unknown properties
  *
  * // Object merging with strategies
  * User source = new User("John", 30, "john@example.com");
  * User target = new User("Jane", 25, null);
  * Beans.merge(source, target);                                          // Merge source into target
- * Beans.merge(source, target, Beans.IGNORE_NULL);                       // Merge ignoring null values
  * Beans.merge(source, target, (sourceVal, targetVal) -> sourceVal);     // Custom merge function
  *
  * // Object comparison operations
- * boolean isEqual = Beans.equals(user1, user2);                         // Standard equality
- * boolean isDeepEqual = Beans.deepEquals(user1, user2);                 // Deep equality check
- * int comparison = Beans.compare(user1, user2, "name", "age");          // Compare by specific properties
+ * boolean isEqual = Beans.equalsByProps(user1, user2, Arrays.asList("name")); // Equality check by props
  *
  * // Null-safe operations
  * Map<String, Object> nullSafeMap = Beans.bean2Map(null);               // Returns empty map
@@ -148,10 +143,9 @@ import com.landawn.abacus.util.stream.Stream;
  *
  * <p><b>Bean-to-Map Conversion Options:</b>
  * <ul>
- *   <li><b>Flat Conversion:</b> {@code bean2FlatMap()} - Single-level property mapping</li>
- *   <li><b>Deep Conversion:</b> {@code bean2Map(bean, true)} - Recursive nested object conversion</li>
- *   <li><b>Filtered Conversion:</b> {@code bean2Map(bean, propFilter)} - Property-based filtering</li>
- *   <li><b>Named Conversion:</b> {@code bean2Map(bean, propNames)} - Specific property selection</li>
+ *   <li><b>Flat Conversion:</b> {@code bean2FlatMap()} - Flat map representation with dot notation</li>
+ *   <li><b>Deep Conversion:</b> {@code deepBean2Map(bean)} - Recursive nested object conversion</li>
+ *   <li><b>Selected Conversion:</b> {@code bean2Map(bean, selectPropNames)} - Specific property selection</li>
  * </ul>
  *
  * <p><b>Map-to-Bean Conversion Features:</b>
@@ -165,9 +159,8 @@ import com.landawn.abacus.util.stream.Stream;
  * <p><b>Object Merging Strategies:</b>
  * <ul>
  *   <li><b>Default Merge:</b> Source values overwrite target values unconditionally</li>
- *   <li><b>Ignore Null:</b> {@code IGNORE_NULL} - Skip null values during merge</li>
- *   <li><b>Ignore Default:</b> {@code IGNORE_DEFAULT} - Skip default values during merge</li>
  *   <li><b>Custom Functions:</b> User-defined merge logic with BiFunction parameters</li>
+ *   <li><b>Partial Merge:</b> Merge only selected properties</li>
  * </ul>
  *
  * <p><b>Performance Characteristics:</b>
@@ -241,7 +234,7 @@ import com.landawn.abacus.util.stream.Stream;
  * <p><b>Common Patterns:</b>
  * <ul>
  *   <li><b>Bean Validation:</b> {@code if (Beans.isBeanClass(clazz)) { ... }}</li>
- *   <li><b>Safe Property Access:</b> {@code Object value = Beans.getProperty(bean, propName);}</li>
+ *   <li><b>Safe Property Access:</b> {@code Object value = Beans.getPropValue(bean, propName);}</li>
  *   <li><b>DTO Conversion:</b> {@code DTO dto = Beans.copy(entity, DTO.class);}</li>
  *   <li><b>Configuration Mapping:</b> {@code Config config = Beans.map2Bean(properties, Config.class);}</li>
  * </ul>
@@ -279,33 +272,28 @@ import com.landawn.abacus.util.stream.Stream;
  *
  * // Deep introspection
  * List<String> allProps = Beans.getPropNameList(User.class);           // [name, age, address, roles]
- * List<String> readableProps = Beans.getReadablePropNameList(User.class);
- * List<String> writableProps = Beans.getWritablePropNameList(User.class);
  *
  * // Complex conversion operations
- * Map<String, Object> deepMap = Beans.bean2Map(user, true);            // Deep nested conversion
- * Map<String, Object> flatMap = Beans.bean2FlatMap(user, "address");   // Flatten address properties
- * Map<String, Object> filteredMap = Beans.bean2Map(user, 
- *     propName -> !propName.equals("roles"));                          // Exclude roles
+ * Map<String, Object> deepMap = Beans.deepBean2Map(user);              // Deep nested conversion
+ * Map<String, Object> flatMap = Beans.bean2FlatMap(user, Arrays.asList("address"));   // Flatten address properties
+ * Map<String, Object> filteredMap = Beans.bean2Map(user, Arrays.asList("name", "age")); // Only name and age
  *
  * // Advanced copying with transformations
  * UserDTO dto = Beans.copy(user, UserDTO.class);                       // Convert to DTO
  * User cloned = Beans.clone(user);                                     // Deep clone
- * User partial = Beans.copy(user, User.class, N.asList("name", "age")); // Partial copy
+ * User partial = Beans.copy(user, Arrays.asList("name", "age"), User.class); // Partial copy
  *
  * // Merging with different strategies
  * User updates = new User();
  * updates.setName("Jane Doe");
- * updates.setAge(0);  // Default value
  *
- * Beans.merge(updates, user, Beans.IGNORE_DEFAULT);                    // Skip default values
- * Beans.merge(updates, user, (source, target) -> 
+ * Beans.merge(updates, user);                                          // Merge updates into user
+ * Beans.merge(updates, user, (source, target) ->
  *     source != null && !source.equals("") ? source : target);         // Custom merge logic
  *
  * // Validation and comparison
  * boolean isValid = Beans.isBeanClass(User.class);
- * boolean isEqual = Beans.deepEquals(user, cloned);
- * int comparison = Beans.compare(user, dto, "name", "age");
+ * boolean isEqual = Beans.equalsByProps(user, cloned, Arrays.asList("name", "age"));
  * }</pre>
  *
  * <p><b>Example: Configuration Management</b>
@@ -344,11 +332,10 @@ import com.landawn.abacus.util.stream.Stream;
  * boolean isValidBean = Beans.isBeanClass(DatabaseConfig.class);
  * List<String> requiredProps = Arrays.asList("host", "port", "database", "username");
  * boolean hasAllRequired = requiredProps.stream()
- *     .allMatch(prop -> Beans.getProperty(config, prop) != null);
+ *     .allMatch(prop -> Beans.getPropValue(config, prop) != null);
  *
  * // Generate configuration summary
- * Map<String, Object> summary = Beans.bean2Map(config, prop -> !prop.equals("password"));
- * String configString = Beans.toString(config, "host", "port", "database", "ssl");
+ * Map<String, Object> summary = Beans.bean2Map(config, Arrays.asList("host", "port", "database", "ssl"));
  * }</pre>
  *
  * <p><b>Attribution:</b>
