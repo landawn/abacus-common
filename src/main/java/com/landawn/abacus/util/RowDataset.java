@@ -137,7 +137,7 @@ public final class RowDataset implements Dataset, Cloneable {
 
     private static final XMLSerializationConfig xsc = XSC.create().setDateTimeFormat(DateTimeFormat.ISO_8601_TIMESTAMP);
 
-    private static final Type<Object> strType = N.typeOf(String.class);
+    private static final Type<Object> strType = Type.of(String.class);
 
     private List<String> _columnNameList; //NOSONAR
 
@@ -1480,7 +1480,7 @@ public final class RowDataset implements Dataset, Cloneable {
         N.checkPositionIndex(newRowPosition, size);
 
         final Class<?> rowClass = row.getClass();
-        final Type<?> rowType = N.typeOf(rowClass);
+        final Type<?> rowType = Type.of(rowClass);
 
         if (rowType.isObjectArray()) {
             final Object[] a = (Object[]) row;
@@ -1600,7 +1600,7 @@ public final class RowDataset implements Dataset, Cloneable {
         final int columnCount = columnCount();
         final int rowCountToAdd = rows.size();
         final Class<?> rowClass = firstRow.getClass();
-        final Type<?> rowType = N.typeOf(rowClass);
+        final Type<?> rowType = Type.of(rowClass);
 
         final List<Object> elements = new ArrayList<>(rowCountToAdd);
 
@@ -2153,11 +2153,11 @@ public final class RowDataset implements Dataset, Cloneable {
         if (rowClass == null && rowSupplier != null) {
             rowOutput = rowSupplier.apply(columnCount);
             rowClass = (Class<T>) rowOutput.getClass();
-            rowType = N.typeOf(rowClass);
+            rowType = Type.of(rowClass);
         }
 
         if (rowType == null && rowClass != null) {
-            rowType = N.typeOf(rowClass);
+            rowType = Type.of(rowClass);
         }
 
         if (rowSupplier == null && !rowType.isBean()) {
@@ -2593,7 +2593,7 @@ public final class RowDataset implements Dataset, Cloneable {
             }
             rowClass = (Class<T>) temp.getClass();
         }
-        final Type<?> rowType = N.typeOf(rowClass);
+        final Type<?> rowType = Type.of(rowClass);
 
         if (rowType.isBean()) {
             return toEntities(ParserUtil.getBeanInfo(rowClass), fromRowIndex, toRowIndex, null, columnNames, prefixAndFieldNameMap, false, true, rowClass,
@@ -3252,7 +3252,7 @@ public final class RowDataset implements Dataset, Cloneable {
         final int keyColumnIndex = checkColumnName(keyColumnName);
         final int[] valueColumnIndexes = checkColumnNames(valueColumnNames);
 
-        final Type<?> valueType = N.typeOf(rowType);
+        final Type<?> valueType = Type.of(rowType);
         final int valueColumnCount = valueColumnIndexes.length;
         final Map<Object, Object> resultMap = (Map<Object, Object>) supplier.apply(toRowIndex - fromRowIndex);
 
@@ -3354,7 +3354,7 @@ public final class RowDataset implements Dataset, Cloneable {
         final int[] valueColumnIndexes = checkColumnNames(valueColumnNames);
 
         final Class<V> rowClass = (Class<V>) rowSupplier.apply(0).getClass();
-        final Type<?> valueType = N.typeOf(rowClass);
+        final Type<?> valueType = Type.of(rowClass);
         final int valueColumnCount = valueColumnIndexes.length;
         final Map<Object, Object> resultMap = (Map<Object, Object>) supplier.apply(toRowIndex - fromRowIndex);
 
@@ -3476,7 +3476,7 @@ public final class RowDataset implements Dataset, Cloneable {
         final int keyColumnIndex = checkColumnName(keyColumnName);
         final int[] valueColumnIndexes = checkColumnNames(valueColumnNames);
 
-        final Type<?> valueType = N.typeOf(rowType);
+        final Type<?> valueType = Type.of(rowType);
         final int valueColumnCount = valueColumnIndexes.length;
 
         final M resultMap = supplier.apply(toRowIndex - fromRowIndex);
@@ -3580,7 +3580,7 @@ public final class RowDataset implements Dataset, Cloneable {
         final int[] valueColumnIndexes = checkColumnNames(valueColumnNames);
 
         final Class<?> rowClass = rowSupplier.apply(0).getClass();
-        final Type<?> valueType = N.typeOf(rowClass);
+        final Type<?> valueType = Type.of(rowClass);
         final int valueColumnCount = valueColumnIndexes.length;
 
         final M resultMap = supplier.apply(toRowIndex - fromRowIndex);
@@ -3775,7 +3775,7 @@ public final class RowDataset implements Dataset, Cloneable {
                 for (int i = 0; i < columnCount; i++) {
                     element = _columnList.get(columnIndexes[i]).get(rowIndex);
 
-                    type = element == null ? null : N.typeOf(element.getClass());
+                    type = element == null ? null : Type.of(element.getClass());
 
                     if (i > 0) {
                         bw.write(Strings.ELEMENT_SEPARATOR_CHAR_ARRAY);
@@ -4010,7 +4010,7 @@ public final class RowDataset implements Dataset, Cloneable {
                 for (int i = 0; i < columnCount; i++) {
                     element = _columnList.get(columnIndexes[i]).get(rowIndex);
 
-                    type = element == null ? null : N.typeOf(element.getClass());
+                    type = element == null ? null : Type.of(element.getClass());
 
                     bw.write(WD._LESS_THAN);
                     bw.write(charArrayOfColumnNames[i]);
@@ -4130,7 +4130,7 @@ public final class RowDataset implements Dataset, Cloneable {
             return;
         }
 
-        final Type<Object> strType = N.typeOf(String.class);
+        final Type<Object> strType = Type.of(String.class);
         final int[] columnIndexes = checkColumnNames(columnNames);
         final int columnCount = columnIndexes.length;
 
@@ -8836,7 +8836,7 @@ public final class RowDataset implements Dataset, Cloneable {
         final int columnCount = columnIndexes.length;
 
         final Class<? extends T> rowClass = inputRowClass == null ? (Class<T>) inputRowSupplier.apply(0).getClass() : inputRowClass;
-        final Type<T> rowType = N.typeOf(rowClass);
+        final Type<T> rowType = Type.of(rowClass);
         final BeanInfo beanInfo = rowType.isBean() ? ParserUtil.getBeanInfo(rowClass) : null;
 
         final IntFunction<? extends T> rowSupplier = inputRowSupplier == null && !rowType.isBean() ? this.createRowSupplier(rowClass, rowType)

@@ -1,7 +1,3 @@
-/*
- * Copyright (c) 2015, Haiyang Li. All rights reserved.
- */
-
 package com.landawn.abacus.type;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -26,6 +22,7 @@ import java.util.Set;
 import javax.xml.datatype.XMLGregorianCalendar;
 
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.google.common.collect.ArrayListMultimap;
@@ -64,27 +61,13 @@ import com.landawn.abacus.util.SetMultimap;
 import com.landawn.abacus.util.ShortList;
 import com.landawn.abacus.util.Status;
 import com.landawn.abacus.util.StringWriter;
-import com.landawn.abacus.util.Strings;
 
 import lombok.Builder;
 import lombok.Data;
 
 @SuppressWarnings("rawtypes")
+@Tag("old-test")
 public class TypeTest extends AbstractTest {
-    //    static {
-    //        TypeFactory.registerClass(WeekDay.class, "WeekDay");
-    //        TypeFactory.registerClass(Status.class, "Status");
-    //    }
-
-    //    @Test
-    //    public void testUri() {
-    //        String uriString = N.stringOf(Uri.parse("http://www.google.com"));
-    //        N.println(uriString);
-    //
-    //        Uri uri = N.valueOf(Uri.class, uriString);
-    //
-    //        assertEquals(Uri.parse("http://www.google.com"), uri);
-    //    }
 
     @Test
     public void test_GuavaTypes() throws Exception {
@@ -346,7 +329,6 @@ public class TypeTest extends AbstractTest {
 
             BufferedJSONWriter bw = Objectory.createBufferedJSONWriter();
             type.writeCharacter(bw, a, JSC.create());
-            // assertEquals(str2, bw.toString());
 
             assertTrue(N.equals(a, type.valueOf(type.stringOf(a))));
 
@@ -509,7 +491,6 @@ public class TypeTest extends AbstractTest {
 
             BufferedJSONWriter bw = Objectory.createBufferedJSONWriter();
             type.writeCharacter(bw, a, JSC.create());
-            // assertEquals(str2, bw.toString());
 
             assertTrue(N.equals(a, type.valueOf(type.stringOf(a))));
 
@@ -667,11 +648,9 @@ public class TypeTest extends AbstractTest {
             List<?> list = N.asList('a', 'b', null, 'c');
             Writer writer = new StringWriter();
             type.appendTo(writer, list);
-            // assertEquals(str, writer.toString());
 
             BufferedJSONWriter bw = Objectory.createBufferedJSONWriter();
             type.writeCharacter(bw, list, JSC.create());
-            // assertEquals(str, bw.toString());
 
             assertTrue(N.equals(list, type.valueOf(type.stringOf(list))));
 
@@ -833,7 +812,6 @@ public class TypeTest extends AbstractTest {
 
             BufferedJSONWriter bw = Objectory.createBufferedJSONWriter();
             type.writeCharacter(bw, list, JSC.create());
-            // assertEquals(str2, bw.toString());
 
             assertTrue(N.equals(list, type.valueOf(type.stringOf(list))));
 
@@ -1134,104 +1112,6 @@ public class TypeTest extends AbstractTest {
             for (String str : strs) {
                 N.println(type.valueOf(str));
             }
-        }
-    }
-
-    @Test
-    public void test_01() {
-        Map<String, Type<?>> typePool = TypeFactory.typePool;
-
-        for (String typeName : typePool.keySet()) {
-            Type<?> type = typePool.get(typeName);
-            N.println(type.clazz());
-
-            N.println(type.name());
-            N.println(type.declaringName());
-            N.println(type.xmlName());
-            N.println(type.isArray());
-            N.println(type.isBoolean());
-            N.println(type.isComparable());
-            N.println(type.isImmutable());
-            N.println(type.isNumber());
-            N.println(type.isPrimitiveType());
-            N.println(type.isPrimitiveWrapper());
-            N.println(type.isPrimitiveArray());
-            N.println(type.isPrimitiveList());
-            N.println(type.isSerializable());
-            N.println(type.defaultValue());
-
-            N.println(type.toString(null));
-            N.println(type.deepToString(null));
-
-            N.println(type.hashCode(null));
-            N.println(type.deepHashCode(null));
-
-            N.println(type.equals(null, null));
-            N.println(type.deepEquals(null, null));
-
-            try {
-                N.println(type.compare(null, null));
-            } catch (UnsupportedOperationException e) {
-            }
-
-            try {
-                N.println(type.collection2Array(null));
-            } catch (UnsupportedOperationException e) {
-            }
-        }
-
-        Object obj1 = null;
-        Object obj2 = null;
-
-        N.println(obj1 == obj2);
-    }
-
-    @Test
-    public void test_03() {
-        Map<String, Type<?>> typePool = TypeFactory.typePool;
-
-        for (String typeName : typePool.keySet()) {
-            N.println(typeName);
-            Type type = typePool.get(typeName);
-            try {
-                Object value = type.valueOf(null);
-                String str = type.stringOf(value);
-                N.println(str);
-
-                value = type.valueOf(Strings.EMPTY);
-                str = type.stringOf(value);
-                N.println(str);
-
-                value = type.valueOf(null, 0, 0);
-                str = type.stringOf(value);
-                N.println(str);
-
-                value = type.valueOf(new char[0], 0, 0);
-                str = type.stringOf(value);
-                N.println(str);
-            } catch (UnsupportedOperationException e) {
-                // ignore
-            } catch (IllegalArgumentException e) {
-                e.printStackTrace();
-                // ignore;
-
-                if (typeName.startsWith("java.") || typeName.startsWith("javax.") || typeName.startsWith("com.landawn") || (typeName.indexOf('.') == -1
-                        && !Strings.equalsAny(typeName, "Clob", "Ref", "Blob", "InputStream", "Reader", "Writer", "OutputStream"))) {
-                    fail("Should not throw UnsupportedOperationException or IllegalArgumentException for type: " + typeName);
-                }
-            }
-        }
-    }
-
-    @Test
-    public void test_04() throws Exception {
-        Map<String, Type<?>> typePool = TypeFactory.typePool;
-        BufferedJSONWriter writer = Objectory.createBufferedJSONWriter();
-
-        for (String typeName : typePool.keySet()) {
-            Type type = typePool.get(typeName);
-            type.appendTo(writer, null);
-            type.writeCharacter(writer, null, null);
         }
     }
 

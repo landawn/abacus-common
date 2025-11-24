@@ -105,7 +105,7 @@ public abstract class AbstractLongType extends NumberType<Number> {
             return Timestamp.valueOf((LocalDateTime) obj).getTime();
         }
 
-        return valueOf(N.typeOf(obj.getClass()).stringOf(obj));
+        return valueOf(Type.<Object> of(obj.getClass()).stringOf(obj));
     }
 
     /**

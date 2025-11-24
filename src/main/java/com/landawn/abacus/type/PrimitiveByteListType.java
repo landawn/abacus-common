@@ -23,7 +23,6 @@ import java.sql.SQLException;
 import com.landawn.abacus.parser.JSONXMLSerializationConfig;
 import com.landawn.abacus.util.ByteList;
 import com.landawn.abacus.util.CharacterWriter;
-import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Strings;
 
 /**
@@ -36,9 +35,9 @@ public final class PrimitiveByteListType extends AbstractPrimitiveListType<ByteL
 
     public static final String BYTE_LIST = ByteList.class.getSimpleName();
 
-    private final Type<byte[]> arrayType = N.typeOf(byte[].class);
+    private final Type<byte[]> arrayType = Type.of(byte[].class);
 
-    private final Type<Byte> elementType = N.typeOf(byte.class);
+    private final Type<Byte> elementType = Type.of(byte.class);
     private final Type<Byte>[] parameterTypes = new Type[] { elementType };
 
     protected PrimitiveByteListType() {

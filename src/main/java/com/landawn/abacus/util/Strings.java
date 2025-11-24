@@ -4270,6 +4270,11 @@ public final class Strings {
      *
      * <p>This method is equivalent to {@link #replaceFirst(String, int, String, String)}.</p>
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Strings.replaceOnce("aba", 1, "a", "z");    // returns "abz"
+     * }</pre>
+     *
      * @param str the input string where the replacement should occur, may be {@code null} or empty
      * @param fromIndex the index from which to start the search for the target string. It should be a non-negative integer.
      * @param target the string to be replaced, may be {@code null} or empty
@@ -8355,6 +8360,15 @@ public final class Strings {
      * {@code Null} and empty String will return {@code false}.
      * </p>
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Strings.isNumber("123");                    // returns true
+     * Strings.isNumber("12.3");                   // returns true
+     * Strings.isNumber("-123");                   // returns true
+     * Strings.isNumber(null);                     // returns false
+     * Strings.isNumber("abc");                    // returns false
+     * }</pre>
+     *
      * @param str the {@code String} to check
      * @return {@code true} if the string is a correctly formatted number
      * @see Numbers#isNumber(String)
@@ -11677,6 +11691,12 @@ public final class Strings {
      * , taking care not to split surrogate pairs. If {@code a} and {@code b}
      * have no common prefix, returns the empty string.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Strings.commonPrefix("abc", "ab");          // returns "ab"
+     * Strings.commonPrefix("abc", "xyz");         // returns ""
+     * }</pre>
+     *
      * @param a the first CharSequence to compare
      * @param b the second CharSequence to compare
      * @return the longest common prefix, or an empty string if there is no common prefix
@@ -11758,6 +11778,12 @@ public final class Strings {
      * {@code a.toString().endsWith(suffix) && b.toString().endsWith(suffix)},
      * taking care not to split surrogate pairs. If {@code a} and {@code b} have
      * no common suffix, returns the empty string.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Strings.commonSuffix("abc", "bc");          // returns "bc"
+     * Strings.commonSuffix("abc", "xyz");         // returns ""
+     * }</pre>
      *
      * @param a the first CharSequence to compare
      * @param b the second CharSequence to compare
@@ -18745,6 +18771,12 @@ public final class Strings {
      * is not {@code null}, otherwise, the default value 0 for {@code byte} is
      * returned.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Strings.parseByte("123");                   // returns 123
+     * Strings.parseByte(null);                    // returns 0
+     * }</pre>
+     *
      * @param str the string to parse, may be {@code null}
      * @return the parsed byte value, or 0 if the string is {@code null}
      * @throws NumberFormatException if the string is not a parsable {@code byte}.
@@ -18760,6 +18792,12 @@ public final class Strings {
      * Returns the value by calling {@code Short.valueOf(String)} if {@code str}
      * is not {@code null}, otherwise, the default value 0 for {@code short} is
      * returned.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Strings.parseShort("123");                  // returns 123
+     * Strings.parseShort(null);                   // returns 0
+     * }</pre>
      *
      * @param str the string to parse, may be {@code null}
      * @return the parsed short value, or 0 if the string is {@code null}
@@ -18778,6 +18816,12 @@ public final class Strings {
      * <p>This method attempts to convert the provided string to an integer. If the string is {@code null} or empty,
      * default value {@code 0} is returned. Otherwise, the method attempts to parse the string as an integer.</p>
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Strings.parseInt("123");                    // returns 123
+     * Strings.parseInt(null);                     // returns 0
+     * }</pre>
+     *
      * @param str the string to convert. This can be any instance of String.
      * @return the integer representation of the provided string, or {@code 0} if the object is {@code null} or empty.
      * @throws NumberFormatException if the string cannot be parsed as an integer.
@@ -18793,6 +18837,12 @@ public final class Strings {
      * Returns the value by calling {@code Long.valueOf(String)} if {@code str}
      * is not {@code null}, otherwise, the default value 0 for {@code long} is
      * returned.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Strings.parseLong("123");                   // returns 123
+     * Strings.parseLong(null);                    // returns 0
+     * }</pre>
      *
      * @param str the string to parse, may be {@code null}
      * @return the parsed long value, or 0 if the string is {@code null}
@@ -18810,6 +18860,12 @@ public final class Strings {
      * is not {@code null}, otherwise, the default value 0f for {@code float} is
      * returned.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Strings.parseFloat("123.45");               // returns 123.45f
+     * Strings.parseFloat(null);                   // returns 0.0f
+     * }</pre>
+     *
      * @param str the string to parse, may be {@code null}
      * @return the parsed float value, or 0f if the string is {@code null}
      * @throws NumberFormatException if the string is not a parsable {@code float}.
@@ -18825,6 +18881,12 @@ public final class Strings {
      * Returns the value by calling {@code Double.valueOf(String)} if {@code str}
      * is not {@code null}, otherwise, the default value 0d for {@code double} is
      * returned.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Strings.parseDouble("123.45");              // returns 123.45d
+     * Strings.parseDouble(null);                  // returns 0.0d
+     * }</pre>
      *
      * @param str the string to parse, may be {@code null}
      * @return the parsed double value, or 0d if the string is {@code null}

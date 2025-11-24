@@ -1,15 +1,13 @@
-/*
- * Copyright (c) 2015, Haiyang Li. All rights reserved.
- */
-
 package com.landawn.abacus.parser;
 
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.AbstractTest;
 import com.landawn.abacus.util.IOUtil;
 import com.landawn.abacus.util.N;
 
+@Tag("old-test")
 public class JSONReaderTest extends AbstractTest {
 
     @Test

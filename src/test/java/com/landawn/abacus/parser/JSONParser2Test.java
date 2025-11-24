@@ -1,7 +1,3 @@
-/*
- * Copyright (c) 2015, Haiyang Li. All rights reserved.
- */
-
 package com.landawn.abacus.parser;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -151,8 +147,6 @@ public class JSONParser2Test extends AbstractParserTest {
 
             String json00 = N.toJson(map00);
 
-            //  N.println(json00);
-
             Map map01 = N.fromJson(json00, Map.class);
 
             assertEquals(map00, map01);
@@ -201,7 +195,6 @@ public class JSONParser2Test extends AbstractParserTest {
 
                 for (Object key : floatKeys) {
                     if (map2.get(key) instanceof Number) {
-                        //
                     } else {
                         map2.put(key, Numbers.toDouble(((String) map2.get(key))));
                     }
@@ -252,7 +245,6 @@ public class JSONParser2Test extends AbstractParserTest {
 
                 for (Object key : floatKeys) {
                     if (map2.get(key) instanceof Number) {
-                        //
                     } else {
                         map2.put(key, Numbers.toDouble(((String) map2.get(key))));
                     }
@@ -468,7 +460,6 @@ public class JSONParser2Test extends AbstractParserTest {
 
     @Test
     public void test_reader() throws Exception {
-        //        String st = jsonParser.serialize(bigBean);
         final char[] cbuf = Objectory.createCharArrayBuffer();
 
         final BufferedReader reader = Objectory.createBufferedReader(bigBeanStr);
@@ -486,7 +477,6 @@ public class JSONParser2Test extends AbstractParserTest {
             Objectory.recycle(cbuf);
         }
 
-        //        jsonParser.deserialize(PersonsType.class, bigBeanStr);
     }
 
     @Test
@@ -535,11 +525,6 @@ public class JSONParser2Test extends AbstractParserTest {
         Account account = createAccount(Account.class);
         account.setId(100);
 
-        //
-        //        AccountContact contact = createAccountContact(AccountContact.class);
-        //        contact.setId(1000);
-        //        account.setContact(contact);
-        //
         String str = jsonParser.serialize(account);
         println(str);
 
@@ -552,13 +537,10 @@ public class JSONParser2Test extends AbstractParserTest {
 
         println(jsonParser.deserialize(str, Account.class));
 
-        // test unknown property:
         str = "{id:100,gui:\"5197aaf659794f1784fd45570ada3d62\",\"unknownProperty1\":null, emailAddress:\"13f6a5129c274c758a6eddf40fd825c6@earth.com\",firstName:\"firstName\",middleName:\"MN\",lastName:\"lastName\",birthDate:1399943675943,lastUpdateTime:1399943675943,createdTime:1399943675943,\"unknownProperty2\":1}";
         println(jsonParser.deserialize(str, Account.class));
         println(jsonParser.deserialize(str, Map.class));
 
-        //        assertEquals(N.stringOf(account),
-        //            N.stringOf(FasterJSON.deserialize(Account.class, FasterJSON.serialize(account))));
     }
 
     @Test
@@ -601,11 +583,6 @@ public class JSONParser2Test extends AbstractParserTest {
         N.println(jsonParser.serialize(xmlBean));
         N.println(N.stringOf(bean));
         N.println(N.stringOf(xmlBean));
-        // assertEquals(bean, xmlBean);
-        // assertEquals(N.deserialize(Bean.class, N.serialize(bean)),
-        // N.deserialize(Bean.class, N.serialize(xmlBean)));
-        // assertEquals(jsonParser.serialize(bean), jsonParser.serialize(xmlBean));
-        // assertEquals(N.stringOf(bean), N.stringOf(xmlBean));
         N.println(jsonParser.serialize(bean));
         N.println(jsonParser.serialize(xmlBean));
 
@@ -665,11 +642,8 @@ public class JSONParser2Test extends AbstractParserTest {
         N.println(jsonParser.serialize(xmlBean));
         N.println(N.stringOf(xBean));
         N.println(N.stringOf(xmlBean));
-        // assertEquals(N.stringOf(xBean), N.stringOf(xmlBean));
         assertEquals(jsonParser.deserialize(jsonParser.serialize(xBean), XBean.class), jsonParser.deserialize(jsonParser.serialize(xmlBean), XBean.class));
 
-        // assertEquals(jsonParser.serialize(xBean), jsonParser.serialize(xmlBean));
-        // assertEquals(N.stringOf(xBean), N.stringOf(xmlBean));
         N.println(jsonParser.serialize(xBean));
         N.println(jsonParser.serialize(xmlBean));
 
@@ -695,7 +669,6 @@ public class JSONParser2Test extends AbstractParserTest {
         println(jsonStr);
         println(jsonParser.serialize(jsonParser.deserialize(jsonStr, XBean.class)));
 
-        // assertEquals(xBean, FasterJSON.deserialize(XBean.class, jsonStr));
     }
 
     @Test
@@ -866,9 +839,6 @@ public class JSONParser2Test extends AbstractParserTest {
 
         jsonParser.deserialize(xml, XBean.class);
 
-        //        XBean xmlBean = FasterJSON.deserialize(XBean.class, xml);
-        //
-        //        assertEquals(N.stringOf(xBean), N.stringOf(xmlBean));
     }
 
     @Test
@@ -882,8 +852,6 @@ public class JSONParser2Test extends AbstractParserTest {
         N.println(N.stringOf(accounts));
         N.println(N.stringOf(xmlAccounts));
 
-        //        assertEquals(38080, N.stringOf(accounts).length());
-        //        assertEquals(39380, N.stringOf(xmlAccounts).length());
     }
 
     @Test
@@ -894,9 +862,6 @@ public class JSONParser2Test extends AbstractParserTest {
 
         jsonParser.deserialize(xml, com.landawn.abacus.entity.extendDirty.basic.Account.class);
 
-        //        com.landawn.abacus.entity.implDirty.basic.Account xmlBean = FasterJSON.deserialize(com.landawn.abacus.entity.implDirty.basic.Account.class,
-        //                xml);
-        //         assertEquals(N.stringOf(account), N.stringOf(xmlBean));
     }
 
     @Test
@@ -922,8 +887,6 @@ public class JSONParser2Test extends AbstractParserTest {
         assertEquals(bean, xmlBean);
         assertEquals(jsonParser.deserialize(jsonParser.serialize(bean), XBean.class), jsonParser.deserialize(jsonParser.serialize(xmlBean), XBean.class));
 
-        // assertEquals(N.serialize(bean), N.serialize(xmlBean));
-        // assertEquals(N.asString(bean), N.asString(xmlBean));
     }
 
     public static class Bean_1 {
@@ -981,7 +944,8 @@ public class JSONParser2Test extends AbstractParserTest {
 
             Bean_1 other = (Bean_1) obj;
 
-            if (!Objects.equals(intList, other.intList) || !Objects.equals(shortList, other.shortList) || !Objects.equals(strList, other.strList) || !Objects.equals(xmlGregorianCalendar, other.xmlGregorianCalendar)) {
+            if (!Objects.equals(intList, other.intList) || !Objects.equals(shortList, other.shortList) || !Objects.equals(strList, other.strList)
+                    || !Objects.equals(xmlGregorianCalendar, other.xmlGregorianCalendar)) {
                 return false;
             }
 
@@ -1140,7 +1104,8 @@ public class JSONParser2Test extends AbstractParserTest {
 
             Bean other = (Bean) obj;
 
-            if (!Arrays.equals(bytes, other.bytes) || !Arrays.equals(chars, other.chars) || !Arrays.equals(strings, other.strings) || !Objects.equals(typeList, other.typeList)) {
+            if (!Arrays.equals(bytes, other.bytes) || !Arrays.equals(chars, other.chars) || !Arrays.equals(strings, other.strings)
+                    || !Objects.equals(typeList, other.typeList)) {
                 return false;
             }
 
@@ -1422,7 +1387,8 @@ public class JSONParser2Test extends AbstractParserTest {
 
             XBean other = (XBean) obj;
 
-            if ((typeBoolean != other.typeBoolean) || !Objects.equals(typeBoolean2, other.typeBoolean2) || (typeByte != other.typeByte) || !Objects.equals(typeCalendar, other.typeCalendar)) {
+            if ((typeBoolean != other.typeBoolean) || !Objects.equals(typeBoolean2, other.typeBoolean2) || (typeByte != other.typeByte)
+                    || !Objects.equals(typeCalendar, other.typeCalendar)) {
                 return false;
             }
 

@@ -293,7 +293,7 @@ public class KryoParser100Test extends TestBase {
         String serialized = parser.serialize(original, serConfig);
 
         KryoDeserializationConfig deserConfig = new KryoDeserializationConfig();
-        TestObject result = parser.deserialize(serialized, deserConfig, null);
+        TestObject result = parser.deserialize(serialized, deserConfig, (Class<TestObject>) null);
 
         assertEquals(original, result);
     }

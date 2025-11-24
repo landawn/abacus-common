@@ -1,9 +1,6 @@
-/*
- * Copyright (c) 2015, Haiyang Li. All rights reserved.
- */
-
 package com.landawn.abacus.parser;
 
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.AbstractTest;
@@ -12,6 +9,7 @@ import com.landawn.abacus.parser.KryoSerializationConfig.KSC;
 import com.landawn.abacus.parser.XMLSerializationConfig.XSC;
 import com.landawn.abacus.util.DateTimeFormat;
 
+@Tag("old-test")
 public class ConfigTest extends AbstractTest {
 
     @Test

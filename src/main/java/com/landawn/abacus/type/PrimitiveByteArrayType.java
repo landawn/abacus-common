@@ -171,7 +171,7 @@ public final class PrimitiveByteArrayType extends AbstractPrimitiveArrayType<byt
                 }
             }
         } else {
-            return valueOf(N.typeOf(obj.getClass()).stringOf(obj));
+            return valueOf(Type.<Object> of(obj.getClass()).stringOf(obj));
         }
     }
 

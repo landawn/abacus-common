@@ -33,7 +33,6 @@ import com.landawn.abacus.parser.JSONXMLSerializationConfig;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.ClassUtil;
 import com.landawn.abacus.util.IOUtil;
-import com.landawn.abacus.util.N;
 
 /**
  * Type handler for InputStream and its subclasses.
@@ -154,7 +153,7 @@ public class InputStreamType extends AbstractType<InputStream> {
                 throw new UncheckedSQLException(e);
             }
         } else {
-            return valueOf(N.typeOf(obj.getClass()).stringOf(obj));
+            return valueOf(Type.<Object> of(obj.getClass()).stringOf(obj));
         }
     }
 

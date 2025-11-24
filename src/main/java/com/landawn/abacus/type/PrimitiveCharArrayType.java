@@ -188,7 +188,7 @@ public final class PrimitiveCharArrayType extends AbstractPrimitiveArrayType<cha
                 }
             }
         } else {
-            return valueOf(N.typeOf(obj.getClass()).stringOf(obj));
+            return valueOf(Type.<Object> of(obj.getClass()).stringOf(obj));
         }
     }
 

@@ -252,11 +252,11 @@ public class HttpResponse {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Deserialize to a list of users
-     * Type<List<User>> listType = N.typeOf("List<User>");
+     * Type<List<User>> listType = Type.of("List<User>");
      * List<User> users = response.body(listType);
      *
      * // Deserialize to a map
-     * Type<Map<String, Object>> mapType = N.typeOf("Map<String, Object>");
+     * Type<Map<String, Object>> mapType = Type.of("Map<String, Object>");
      * Map<String, Object> data = response.body(mapType);
      *
      * // Alternative: using Type.of()

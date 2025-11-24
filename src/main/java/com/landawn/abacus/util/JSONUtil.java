@@ -752,7 +752,7 @@ public final class JSONUtil {
      * @throws IllegalArgumentException if targetType is not a supported type (Map or Bean)
      */
     public static <T> T unwrap(final JSONObject jsonObject, final Class<? extends T> targetType) throws JSONException {
-        return unwrap(jsonObject, N.typeOf(targetType));
+        return unwrap(jsonObject, Type.of(targetType));
     }
 
     /**
@@ -775,18 +775,18 @@ public final class JSONUtil {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Complex generic Map
-     * Type<Map<String, List<String>>> type = N.typeOf("Map<String, List<String>>");
+     * Type<Map<String, List<String>>> type = Type.of("Map<String, List<String>>");
      * JSONObject json = new JSONObject("{\"tags\":[\"java\",\"json\"],\"categories\":[\"util\",\"parser\"]}");
      * Map<String, List<String>> result = JSONUtil.unwrap(json, type);
      * // result.get("tags") returns List ["java", "json"]
      * 
      * // Nested bean structures
-     * Type<Department> deptType = N.typeOf(Department.class);
+     * Type<Department> deptType = Type.of(Department.class);
      * JSONObject deptJson = new JSONObject("{\"name\":\"Engineering\",\"employees\":[...]}");
      * Department dept = JSONUtil.unwrap(deptJson, deptType);
      * 
      * // Object type defaults to Map
-     * Type<Object> objType = N.typeOf(Object.class);
+     * Type<Object> objType = Type.of(Object.class);
      * Object result2 = JSONUtil.unwrap(json, objType); // Returns Map<String, Object>
      * }</pre>
      *
@@ -803,7 +803,7 @@ public final class JSONUtil {
             return (T) jsonObject;
         }
 
-        targetType = targetType.isObjectType() ? N.typeOf("Map<String, Object>") : targetType;
+        targetType = targetType.isObjectType() ? Type.of("Map<String, Object>") : targetType;
         final Class<?> cls = targetType.clazz();
 
         if (targetType.isMap()) {
@@ -833,7 +833,7 @@ public final class JSONUtil {
 
             return (T) map;
         } else if (targetType.isBean()) {
-            final BeanInfo beanInfo = ParserUtil.getBeanInfo(cls);
+            final BeanInfo beanInfo = ParserUtil.getBeanInfo(targetType.javaType());
             final Object result = beanInfo.createBeanResult();
             final Iterator<String> iter = jsonObject.keys();
             String key = null;
@@ -944,7 +944,7 @@ public final class JSONUtil {
      * @throws IllegalArgumentException if targetType is not a supported type (Collection or Array)
      */
     public static <T> T unwrap(final JSONArray jsonArray, final Class<? extends T> targetType) throws JSONException {
-        return unwrap(jsonArray, N.typeOf(targetType));
+        return unwrap(jsonArray, Type.of(targetType));
     }
 
     /**
@@ -970,17 +970,17 @@ public final class JSONUtil {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Typed List with complex elements
-     * Type<List<User>> userListType = N.typeOf("List<User>");
+     * Type<List<User>> userListType = Type.of("List<User>");
      * JSONArray json = new JSONArray("[{\"name\":\"Alice\",\"age\":25},{\"name\":\"Bob\",\"age\":30}]");
      * List<User> users = JSONUtil.unwrap(json, userListType);
      * 
      * // Set of Maps
-     * Type<Set<Map<String, String>>> type = N.typeOf("Set<Map<String, String>>");
+     * Type<Set<Map<String, String>>> type = Type.of("Set<Map<String, String>>");
      * JSONArray data = new JSONArray("[{\"id\":\"1\"},{\"id\":\"2\"},{\"id\":\"1\"}]");
      * Set<Map<String, String>> result = JSONUtil.unwrap(data, type);
      * 
      * // Multi-dimensional array
-     * Type<int[][]> matrixType = N.typeOf(int[][].class);
+     * Type<int[][]> matrixType = Type.of(int[][].class);
      * JSONArray matrix = new JSONArray("[[1,2,3],[4,5,6],[7,8,9]]");
      * int[][] result2 = JSONUtil.unwrap(matrix, matrixType);
      * }</pre>
@@ -998,7 +998,7 @@ public final class JSONUtil {
             return (T) jsonArray;
         }
 
-        targetType = targetType.isObjectType() ? N.typeOf("List<Object>") : targetType;
+        targetType = targetType.isObjectType() ? Type.of("List<Object>") : targetType;
         final int len = jsonArray.length();
 
         if (targetType.isCollection()) {
@@ -1102,7 +1102,7 @@ public final class JSONUtil {
      * @throws ClassCastException if elements cannot be converted to the specified type
      */
     public static <T> List<T> toList(final JSONArray jsonArray, final Class<? extends T> elementClass) throws JSONException {
-        return toList(jsonArray, N.typeOf(elementClass));
+        return toList(jsonArray, Type.of(elementClass));
     }
 
     /**
@@ -1116,17 +1116,17 @@ public final class JSONUtil {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // List of Maps
-     * Type<Map<String, Object>> mapType = N.typeOf("Map<String, Object>");
+     * Type<Map<String, Object>> mapType = Type.of("Map<String, Object>");
      * JSONArray json = new JSONArray("[{\"id\":1,\"name\":\"Item1\"},{\"id\":2,\"name\":\"Item2\"}]");
      * List<Map<String, Object>> items = JSONUtil.toList(json, mapType);
      * 
      * // List of Lists (nested structure)
-     * Type<List<Integer>> listType = N.typeOf("List<Integer>");
+     * Type<List<Integer>> listType = Type.of("List<Integer>");
      * JSONArray matrix = new JSONArray("[[1,2,3],[4,5,6],[7,8,9]]");
      * List<List<Integer>> rows = JSONUtil.toList(matrix, listType);
      * 
      * // Complex bean with generics
-     * Type<Response<User>> responseType = N.typeOf("Response<User>");
+     * Type<Response<User>> responseType = Type.of("Response<User>");
      * JSONArray responses = new JSONArray("[{\"status\":200,\"data\":{\"name\":\"Alice\"}}]");
      * List<Response<User>> results = JSONUtil.toList(responses, responseType);
      * }</pre>

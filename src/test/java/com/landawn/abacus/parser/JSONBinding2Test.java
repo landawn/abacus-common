@@ -1,7 +1,3 @@
-/*
- * Copyright (c) 2015, Haiyang Li. All rights reserved.
- */
-
 package com.landawn.abacus.parser;
 
 import java.io.IOException;
@@ -13,6 +9,7 @@ import java.util.Map;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
+import com.alibaba.fastjson2.JSON;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
 import com.landawn.abacus.AbstractParserTest;
@@ -37,43 +34,13 @@ public class JSONBinding2Test extends AbstractParserTest {
         int threadNum = 6;
         int loopNumForSimpleBean = 300000;
         Map<String, Integer> methodLoopNumMap = new LinkedHashMap<>();
-        //        methodLoopNumMap.put("executeByJSONReaderWithSimpleBean", loopNum);
-        //        methodLoopNumMap.put("executeByAbacusJSONWithSimpleBeanMap", loopNum);
-        // performance: 0.016 ~ 0.017
         methodLoopNumMap.put("executeByAbacusJSONWithSimpleBean", loopNumForSimpleBean);
-        // performance: 0.012 ~ 0.013
         methodLoopNumMap.put("executeByJacksonWithSimpleBean", loopNumForSimpleBean);
-        // performance: 0.01 ~ 0.011
-        methodLoopNumMap.put("executeByFastJSONWithSimpleBean", loopNumForSimpleBean);
-        //        methodLoopNumMap.put("executeByFastJSON2WithSimpleBean", loopNum);
-        //        //
-        // methodLoopNumMap.put("executeByGSONWithSimpleBean", loopNumForSimpleBean);
-        //        //        methodLoopNumMap.put("executeByKRYOWithSimpleBean", loopNumForSimpleBean);
-        //        //        methodLoopNumMap.put("executeByXMLWithSimpleBean", loopNumForSimpleBean);
-        //        //        methodLoopNumMap.put("executeByAbacusXMLWithSimpleBean", loopNumForSimpleBean);
-        //
-        //        // TODO remove javaee*.jar before running test with Boon.
-        //        //        methodLoopNumMap.put("executeByBoonWithSimpleBean", loopNumForSimpleBean);
-        //        loopNum = 30000;
-        //
-        //        //
-        //        //        methodLoopNumMap.put("executeByJSONReaderWithBigBean", loopNumForSimpleBean / 10);
-        //        //        methodLoopNumMap.put("executeByAbacusJSONWithBigBeanMap", loopNumForSimpleBean / 10);
-        // performance: 1.6 ~ 1.7
+        methodLoopNumMap.put("executeByFastJSON2WithSimpleBean", loopNumForSimpleBean);
         methodLoopNumMap.put("executeByAbacusJSONWithBigBean", loopNumForSimpleBean / 30);
-        // performance: 1.2 ~ 1.3
         methodLoopNumMap.put("executeByJacksonWithBigBean", loopNumForSimpleBean / 30);
-        // performance: 1.0 ~ 1.1
-        methodLoopNumMap.put("executeByFastJSONWithBigBean", loopNumForSimpleBean / 30);
-        //        methodLoopNumMap.put("executeByFastJSON2WithBigBean", loopNumForSimpleBean / 10);
+        methodLoopNumMap.put("executeByFastJSON2WithBigBean", loopNumForSimpleBean / 10);
 
-        //
-        // methodLoopNumMap.put("executeByGSONWithBigBean", loopNumForSimpleBean / 10);
-        //        methodLoopNumMap.put("executeByKRYOWithBigBean", loopNumForSimpleBean / 10);
-        //        methodLoopNumMap.put("executeByXMLWithBigBean", loopNumForSimpleBean / 10);
-        //        methodLoopNumMap.put("executeByAbacusXMLWithBigBean", loopNumForSimpleBean / 10);
-
-        //         methodLoopNumMap.put("executeByBoonWithBigBean", loopNumForSimpleBean / 10);
         for (String methodName : methodLoopNumMap.keySet()) {
             Method method = ClassUtil.getDeclaredMethod(JSONBinding2Test.class, methodName);
             ClassUtil.setAccessible(method, true);
@@ -82,26 +49,26 @@ public class JSONBinding2Test extends AbstractParserTest {
             }).printResult();
         }
     }
-    //
-    //    void executeByBoonWithSimpleBean() throws Exception {
-    //        Boon.fromJson(Boon.toJson(simpleBean), XBean.class);
-    //    }
-    //
-    //    void executeByBoonWithBigBean() throws Exception {
-    //        String st = Boon.toJson(bigBean);
-    //        Boon.fromJson(st, BigXBean.class);
-    //
-    //        // N.println(st);
-    //    }
+
+    void executeByFastJSON2WithSimpleBean() {
+        String str = com.alibaba.fastjson2.JSON.toJSONString(simpleBean);
+
+        JSON.parseObject(str, XBean.class);
+
+    }
+
+    void executeByFastJSON2WithBigBean() {
+        String str = com.alibaba.fastjson2.JSON.toJSONString(bigBean);
+
+        JSON.parseObject(str, BigXBean.class);
+
+    }
 
     void executeByJacksonWithSimpleBean() throws Exception {
         ObjectMapper objectMapper = getObjectMapper();
         String str = objectMapper.writeValueAsString(simpleBean);
 
         objectMapper.readValue(str, XBean.class);
-
-        // InputStream is = IOUtil.string2InputStream(str);
-        // objectMapper.readValue(is, XBean.class);
 
         recycle(objectMapper);
     }
@@ -112,12 +79,8 @@ public class JSONBinding2Test extends AbstractParserTest {
 
         objectMapper.readValue(str, BigXBean.class);
 
-        // InputStream is = IOUtil.string2InputStream(str);
-        // objectMapper.readValue(is, BigXBean.class);
-
         recycle(objectMapper);
 
-        // N.println(st);
     }
 
     void executeByGSONWithSimpleBean() {
@@ -126,7 +89,6 @@ public class JSONBinding2Test extends AbstractParserTest {
         gson.fromJson(str, XBean.class);
         recycle(gson);
 
-        // N.println(N.stringOf(gson.fromJson(st, XBean.class)));
     }
 
     void executeByGSONWithBigBean() {
@@ -135,22 +97,17 @@ public class JSONBinding2Test extends AbstractParserTest {
         gson.fromJson(st, BigXBean.class);
         recycle(gson);
 
-        // N.println(N.stringOf(gson.fromJson(st, BigXBean.class)));
     }
 
     void executeByKRYOWithSimpleBean() {
         kryoParser.deserialize(kryoParser.serialize(simpleBean), XBean.class);
 
-        // N.println(N.stringOf(N.deserialize(XBean.class, N.serialize(simpleBean))));
     }
 
     void executeByKRYOWithBigBean() {
         String st = kryoParser.serialize(bigBean);
         kryoParser.deserialize(st, BigXBean.class);
 
-        // N.println(st);
-
-        // N.println(N.stringOf(N.deserialize(BigXBean.class, N.serialize(bigBean))));
     }
 
     void executeByAbacusJSONWithSimpleBean() {
@@ -158,8 +115,6 @@ public class JSONBinding2Test extends AbstractParserTest {
 
         jsonParser.deserialize(str, XBean.class);
 
-        // InputStream is = IOUtil.string2InputStream(str);
-        // jsonParser.deserialize(XBean.class, is);
     }
 
     void executeByAbacusJSONWithSimpleBeanMap() {
@@ -172,12 +127,6 @@ public class JSONBinding2Test extends AbstractParserTest {
 
         jsonParser.deserialize(str, BigXBean.class);
 
-        //        InputStream is = IOUtil.string2InputStream(str);
-        //        jsonParser.deserialize(BigXBean.class, is);
-
-        //        BufferedReader br = IOUtil.createBufferedReader(new StringReader(json));
-        //        jsonParser.deserialize(BigXBean.class, br);
-        //        IOUtil.recycle(br);
     }
 
     void executeByAbacusJSONWithBigBeanMap() {
@@ -185,9 +134,6 @@ public class JSONBinding2Test extends AbstractParserTest {
 
         jsonParser.deserialize(json, Map.class);
 
-        //        BufferedReader br = IOUtil.createBufferedReader(new StringReader(json));
-        //        jsonParser.deserialize(BigXBean.class, br);
-        //        IOUtil.recycle(br);
     }
 
     void executeByJSONReaderWithSimpleBean() throws IOException {
@@ -218,7 +164,6 @@ public class JSONBinding2Test extends AbstractParserTest {
         try {
             while (jr.nextToken() > -1) {
                 if (jr.hasText()) {
-                    //                    jr.getText();
                 }
             }
         } finally {
@@ -229,38 +174,37 @@ public class JSONBinding2Test extends AbstractParserTest {
     void executeByXMLWithSimpleBean() {
         xmlParser.deserialize(xmlParser.serialize(simpleBean), XBean.class);
 
-        // N.println(N.stringOf(N.deserialize(XBean.class, N.serialize(simpleBean))));
     }
 
     void executeByXMLWithBigBean() {
         String st = xmlParser.serialize(bigBean);
         xmlParser.deserialize(st, BigXBean.class);
 
-        // N.println(st);
-
-        // N.println(N.stringOf(N.deserialize(BigXBean.class, N.serialize(bigBean))));
     }
 
     void executeByAbacusXMLWithSimpleBean() {
         abacusXMLParser.deserialize(abacusXMLParser.serialize(simpleBean), XBean.class);
 
-        // N.println(N.stringOf(N.deserialize(XBean.class, N.serialize(simpleBean))));
     }
 
     void executeByAbacusXMLWithBigBean() {
         String st = abacusXMLParser.serialize(bigBean);
         abacusXMLParser.deserialize(st, BigXBean.class);
 
-        // N.println(st);
-
-        // N.println(N.stringOf(N.deserialize(BigXBean.class, N.serialize(bigBean))));
     }
 
     @Test
     public void test_withSimpleBean() {
         N.println(simpleBean);
 
-        N.println(xmlParser.deserialize(xmlParser.serialize(simpleBean), XBean.class));
+        N.println(jsonParser.deserialize(jsonParser.serialize(simpleBean), XBean.class));
+
+        long start = System.currentTimeMillis();
+        for (int i = 0; i < 10; i++) {
+            jsonParser.deserialize(jsonParser.serialize(simpleBean), XBean.class);
+        }
+        long end = System.currentTimeMillis();
+        N.println("Time taken: " + (end - start) + " ms");
     }
 
     @Test
@@ -279,8 +223,6 @@ public class JSONBinding2Test extends AbstractParserTest {
 
         String str = objectMapper.writeValueAsString(simpleBean);
 
-        //        objectMapper.readValue(str, XBean.class);
-
         InputStream is = IOUtil.string2InputStream(str);
         objectMapper.readValue(is, XBean.class);
 
@@ -293,21 +235,16 @@ public class JSONBinding2Test extends AbstractParserTest {
 
         String str = objectMapper.writeValueAsString(bigBean);
 
-        //        objectMapper.readValue(str, BigXBean.class);
-
         InputStream is = IOUtil.string2InputStream(str);
         objectMapper.readValue(is, BigXBean.class);
 
         recycle(objectMapper);
 
-        // N.println(st);
     }
 
     @Test
     public void test_executeByAbacusJSONWithSimpleBean() {
         String str = jsonParser.serialize(simpleBean, jsc);
-
-        //        jsonParser.deserialize(XBean.class, str);
 
         InputStream is = IOUtil.string2InputStream(str);
 
@@ -318,14 +255,9 @@ public class JSONBinding2Test extends AbstractParserTest {
     public void test_executeByAbacusJSONWithBigBean() {
         String str = jsonParser.serialize(bigBean, jsc);
 
-        //        jsonParser.deserialize(BigXBean.class, str);
-
         InputStream is = IOUtil.string2InputStream(str);
         BigXBean bigXBean = jsonParser.deserialize(is, BigXBean.class);
         N.println(Beans.bean2Map(bigXBean));
 
-        //        BufferedReader br = IOUtil.createBufferedReader(new StringReader(json));
-        //        jsonParser.deserialize(BigXBean.class, br);
-        //        IOUtil.recycle(br);
     }
 }

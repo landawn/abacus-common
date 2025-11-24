@@ -19,7 +19,6 @@ import java.io.IOException;
 import com.landawn.abacus.parser.JSONXMLSerializationConfig;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.LongList;
-import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Strings;
 
 @SuppressWarnings("java:S2160")
@@ -27,9 +26,9 @@ public final class PrimitiveLongListType extends AbstractPrimitiveListType<LongL
 
     public static final String LONG_LIST = LongList.class.getSimpleName();
 
-    private final Type<long[]> arrayType = N.typeOf(long[].class);
+    private final Type<long[]> arrayType = Type.of(long[].class);
 
-    private final Type<Long> elementType = N.typeOf(long.class);
+    private final Type<Long> elementType = Type.of(long.class);
     private final Type<Long>[] parameterTypes = new Type[] { elementType };
 
     protected PrimitiveLongListType() {

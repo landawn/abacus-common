@@ -20,16 +20,15 @@ import java.util.Map;
 import com.landawn.abacus.parser.ParserUtil.BeanInfo;
 import com.landawn.abacus.parser.ParserUtil.PropInfo;
 import com.landawn.abacus.type.Type;
-import com.landawn.abacus.util.Beans;
 import com.landawn.abacus.util.N;
 
 /**
  * Abstract base configuration class for deserialization operations.
  * This class provides common configuration options for controlling how data is deserialized
  * into Java objects across different formats (JSON, XML, etc.).
- * 
+ *
  * <p>The configuration supports method chaining for easy setup:</p>
- * 
+ *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * DeserializationConfig config = new MyDeserializationConfig()
@@ -38,7 +37,7 @@ import com.landawn.abacus.util.N;
  *     .setMapKeyType(String.class)
  *     .setMapValueType(Integer.class);
  * }</pre>
- * 
+ *
  * <p>Key features:</p>
  * <ul>
  *   <li>Control whether unmatched properties should be ignored or cause errors</li>
@@ -46,6 +45,21 @@ import com.landawn.abacus.util.N;
  *   <li>Configure value types for specific properties by name</li>
  *   <li>Set type information using bean classes for complex deserialization</li>
  * </ul>
+ *
+ * <p><b>Nested Property Support:</b></p>
+ * <p>This configuration supports nested property specifications using dot notation.
+ * Nested properties allow you to specify type information for properties at any depth
+ * within an object graph. For example:</p>
+ * <pre>{@code
+ * config.setValueType("address.city", String.class);                    // Simple nested property
+ * config.setValueType("account.devices.model", String.class);           // Multi-level nested property
+ * config.setValueType("order.items", List.class);                       // Collection in nested property
+ * config.setValueType("user.preferences.settings", Map.class);          // Map in deeply nested property
+ * }</pre>
+ *
+ * <p>When using methods that accept property names (such as {@link #setValueType(String, Class)}
+ * and {@link #getValueType(String)}), you can use dot notation to reference nested properties
+ * at any level of depth.</p>
  *
  * @param <C> the concrete configuration type for method chaining
  * @see JSONDeserializationConfig
@@ -109,7 +123,7 @@ public abstract class DeserializationConfig<C extends DeserializationConfig<C>> 
      * }</pre>
      *
      * @param ignoreUnmatchedProperty {@code true} to ignore unmatched properties, {@code false} to throw an exception
-     * @return this instance for method chaining
+     * @return this configuration instance for method chaining
      */
     public C ignoreUnmatchedProperty(final boolean ignoreUnmatchedProperty) {
         this.ignoreUnmatchedProperty = ignoreUnmatchedProperty;
@@ -142,10 +156,10 @@ public abstract class DeserializationConfig<C extends DeserializationConfig<C>> 
      * }</pre>
      *
      * @param cls the class of collection/array elements
-     * @return this instance for method chaining
+     * @return this configuration instance for method chaining
      */
     public C setElementType(final Class<?> cls) {
-        return setElementType(N.typeOf(cls));
+        return setElementType(Type.of(cls));
     }
 
     /**
@@ -155,12 +169,12 @@ public abstract class DeserializationConfig<C extends DeserializationConfig<C>> 
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // For complex generic types
-     * Type<List<String>> listType = N.typeOf("List<String>");
+     * Type<List<String>> listType = Type.of("List<String>");
      * config.setElementType(listType);
      * }</pre>
      *
      * @param type the type of collection/array elements
-     * @return this instance for method chaining
+     * @return this configuration instance for method chaining
      */
     public C setElementType(final Type<?> type) {
         elementType = type;
@@ -180,10 +194,10 @@ public abstract class DeserializationConfig<C extends DeserializationConfig<C>> 
      * }</pre>
      *
      * @param type the type name string
-     * @return this instance for method chaining
+     * @return this configuration instance for method chaining
      */
     public C setElementType(final String type) {
-        return setElementType(N.typeOf(type));
+        return setElementType(Type.of(type));
     }
 
     /**
@@ -211,10 +225,10 @@ public abstract class DeserializationConfig<C extends DeserializationConfig<C>> 
      * }</pre>
      *
      * @param cls the class of map keys
-     * @return this instance for method chaining
+     * @return this configuration instance for method chaining
      */
     public C setMapKeyType(final Class<?> cls) {
-        return this.setMapKeyType(N.typeOf(cls));
+        return this.setMapKeyType(Type.of(cls));
     }
 
     /**
@@ -222,7 +236,7 @@ public abstract class DeserializationConfig<C extends DeserializationConfig<C>> 
      * This allows for more complex key type specifications.
      *
      * @param keyType the type of map keys
-     * @return this instance for method chaining
+     * @return this configuration instance for method chaining
      */
     public C setMapKeyType(final Type<?> keyType) {
         mapKeyType = keyType;
@@ -240,10 +254,10 @@ public abstract class DeserializationConfig<C extends DeserializationConfig<C>> 
      * }</pre>
      *
      * @param keyType the key type name string
-     * @return this instance for method chaining
+     * @return this configuration instance for method chaining
      */
     public C setMapKeyType(final String keyType) {
-        return this.setMapKeyType(N.typeOf(keyType));
+        return this.setMapKeyType(Type.of(keyType));
     }
 
     /**
@@ -272,10 +286,10 @@ public abstract class DeserializationConfig<C extends DeserializationConfig<C>> 
      * }</pre>
      *
      * @param cls the class of map values
-     * @return this instance for method chaining
+     * @return this configuration instance for method chaining
      */
     public C setMapValueType(final Class<?> cls) {
-        return this.setMapValueType(N.typeOf(cls));
+        return this.setMapValueType(Type.of(cls));
     }
 
     /**
@@ -283,7 +297,7 @@ public abstract class DeserializationConfig<C extends DeserializationConfig<C>> 
      * This allows for more complex value type specifications including generics.
      *
      * @param valueType the type of map values
-     * @return this instance for method chaining
+     * @return this configuration instance for method chaining
      */
     public C setMapValueType(final Type<?> valueType) {
         mapValueType = valueType;
@@ -301,10 +315,10 @@ public abstract class DeserializationConfig<C extends DeserializationConfig<C>> 
      * }</pre>
      *
      * @param valueType the value type name string
-     * @return this instance for method chaining
+     * @return this configuration instance for method chaining
      */
     public C setMapValueType(final String valueType) {
-        return this.setMapValueType(N.typeOf(valueType));
+        return this.setMapValueType(Type.of(valueType));
     }
 
     /**
@@ -322,9 +336,7 @@ public abstract class DeserializationConfig<C extends DeserializationConfig<C>> 
      * Gets the value type for a specific property by its key name.
      * This is used during deserialization to determine the correct type
      * for nested properties.
-     * 
-     * <p>The key name supports nested properties using dot notation.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<Address> addressType = config.getValueType("address");
@@ -332,7 +344,7 @@ public abstract class DeserializationConfig<C extends DeserializationConfig<C>> 
      * }</pre>
      *
      * @param <T> the value type
-     * @param keyName the property name, supporting nested properties (e.g., "account.devices.model")
+     * @param keyName the property name, supporting nested properties (e.g., "account.devices.model") - see class documentation
      * @return the type for the specified property, or {@code null} if not configured
      */
     public <T> Type<T> getValueType(final String keyName) {
@@ -342,16 +354,16 @@ public abstract class DeserializationConfig<C extends DeserializationConfig<C>> 
     /**
      * Gets the value type for a specific property by its key name with a default type.
      * If no type is configured for the specified property, returns the default type.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Type<String> stringType = N.typeOf(String.class);
+     * Type<String> stringType = Type.of(String.class);
      * Type<?> type = config.getValueType("unknownProp", stringType);
      * // Returns stringType if "unknownProp" is not configured
      * }</pre>
      *
      * @param <T> the value type
-     * @param keyName the property name, supporting nested properties (e.g., "account.devices.model")
+     * @param keyName the property name, supporting nested properties (e.g., "account.devices.model") - see class documentation
      * @param defaultType the type to return if no type is configured for the property
      * @return the type for the specified property, or defaultType if not configured
      */
@@ -374,48 +386,9 @@ public abstract class DeserializationConfig<C extends DeserializationConfig<C>> 
     }
 
     /**
-     * Gets the value type class for a specific property by its key name.
-     * This is a convenience method that returns the raw class type
-     * instead of the Type wrapper.
-     * 
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * Class<Address> addressClass = config.getValueTypeClass("address");
-     * }</pre>
-     *
-     * @param <T> the value type
-     * @param keyName the property name, supporting nested properties (e.g., "account.devices.model")
-     * @return the class for the specified property, or {@code null} if not configured
-     */
-    public <T> Class<T> getValueTypeClass(final String keyName) {
-        return getValueTypeClass(keyName, null);
-    }
-
-    /**
-     * Gets the value type class for a specific property with a default class.
-     * If no type is configured for the specified property, returns the default class.
-     * 
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * Class<?> typeClass = config.getValueTypeClass("data", HashMap.class);
-     * // Returns HashMap.class if "data" property type is not configured
-     * }</pre>
-     *
-     * @param <T> the value type
-     * @param keyName the property name, supporting nested properties (e.g., "account.devices.model")
-     * @param defaultTypeClass the class to return if no type is configured for the property
-     * @return the class for the specified property, or defaultTypeClass if not configured
-     */
-    public <T> Class<T> getValueTypeClass(final String keyName, final Class<T> defaultTypeClass) {
-        final Type<T> ret = getValueType(keyName);
-
-        return ret == null ? defaultTypeClass : ret.clazz();
-    }
-
-    /**
      * Sets the value type for a specific property using a Class.
      * This allows fine-grained control over deserialization of nested properties.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * config.setValueType("address", Address.class);
@@ -423,27 +396,27 @@ public abstract class DeserializationConfig<C extends DeserializationConfig<C>> 
      * config.setValueType("metadata.tags", Set.class);
      * }</pre>
      *
-     * @param keyName the property name, supporting nested properties (e.g., "account.devices.model")
+     * @param keyName the property name, supporting nested properties (e.g., "account.devices.model") - see class documentation
      * @param typeClass the class to use for deserializing this property
-     * @return this instance for method chaining
+     * @return this configuration instance for method chaining
      */
     public C setValueType(final String keyName, final Class<?> typeClass) {
-        return setValueType(keyName, N.typeOf(typeClass));
+        return setValueType(keyName, Type.of(typeClass));
     }
 
     /**
      * Sets the value type for a specific property using a Type.
      * This allows for complex type specifications including generics.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Type<List<String>> listType = N.typeOf("List<String>");
+     * Type<List<String>> listType = Type.of("List<String>");
      * config.setValueType("tags", listType);
      * }</pre>
      *
-     * @param keyName the property name, supporting nested properties (e.g., "account.devices.model")
+     * @param keyName the property name, supporting nested properties (e.g., "account.devices.model") - see class documentation
      * @param type the type to use for deserializing this property
-     * @return this instance for method chaining
+     * @return this configuration instance for method chaining
      */
     public C setValueType(final String keyName, final Type<?> type) {
         if (valueTypeMap == null) {
@@ -457,19 +430,19 @@ public abstract class DeserializationConfig<C extends DeserializationConfig<C>> 
 
     /**
      * Sets the value type for a specific property using a type name string.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * config.setValueType("items", "List<Product>");
      * config.setValueType("metadata", "Map<String, Object>");
      * }</pre>
      *
-     * @param keyName the property name, supporting nested properties (e.g., "account.devices.model")
+     * @param keyName the property name, supporting nested properties (e.g., "account.devices.model") - see class documentation
      * @param typeName the type name string
-     * @return this instance for method chaining
+     * @return this configuration instance for method chaining
      */
     public C setValueType(final String keyName, final String typeName) {
-        return setValueType(keyName, N.typeOf(typeName));
+        return setValueType(keyName, Type.of(typeName));
     }
 
     /**
@@ -479,13 +452,13 @@ public abstract class DeserializationConfig<C extends DeserializationConfig<C>> 
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Map<String, Type<?>> types = new HashMap<>();
-     * types.put("address", N.typeOf(Address.class));
-     * types.put("items", N.typeOf("List<Item>"));
+     * types.put("address", Type.of(Address.class));
+     * types.put("items", Type.of("List<Item>"));
      * config.setValueTypes(types);
      * }</pre>
      *
      * @param valueTypes map of property names to their types
-     * @return this instance for method chaining
+     * @return this configuration instance for method chaining
      */
     public C setValueTypes(final Map<String, Type<?>> valueTypes) {
         valueTypeMap = valueTypes;
@@ -505,17 +478,15 @@ public abstract class DeserializationConfig<C extends DeserializationConfig<C>> 
      * // Now "name", "age", and "address" properties will use their declared types
      * }</pre>
      *
-     * @param beanClass the bean class to extract type information from (may be {@code null} to clear)
-     * @return this instance for method chaining
+     * @param beanType the bean class to extract type information from (may be {@code null} to clear)
+     * @return this configuration instance for method chaining
      * @throws IllegalArgumentException if the specified class is not a valid bean class
      */
-    public C setValueTypesByBeanClass(final Class<?> beanClass) throws IllegalArgumentException {
-        if (beanClass == null) {
+    public C setValueTypesByBeanClass(final java.lang.reflect.Type beanType) throws IllegalArgumentException {
+        if (beanType == null) {
             beanInfoForValueTypes = null;
         } else {
-            N.checkArgument(Beans.isBeanClass(beanClass), "{} is not a valid bean class", beanClass);
-
-            beanInfoForValueTypes = ParserUtil.getBeanInfo(beanClass);
+            beanInfoForValueTypes = ParserUtil.getBeanInfo(beanType);
         }
 
         return (C) this;

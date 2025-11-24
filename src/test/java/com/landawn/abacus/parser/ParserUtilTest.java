@@ -1,13 +1,10 @@
-/*
- * Copyright (c) 2015, Haiyang Li. All rights reserved.
- */
-
 package com.landawn.abacus.parser;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.util.Map;
 
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.AbstractTest;
@@ -26,6 +23,7 @@ import com.landawn.abacus.util.N;
 import lombok.Value;
 import lombok.experimental.Accessors;
 
+@Tag("old-test")
 public class ParserUtilTest extends AbstractTest {
 
     @Test

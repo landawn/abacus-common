@@ -78,6 +78,14 @@ public class AvroSerializationConfig extends SerializationConfig<AvroSerializati
         return this;
     }
 
+    /**
+     * Computes a hash code for this configuration based on its settings.
+     *
+     * <p>The hash code includes the schema setting in addition to settings
+     * inherited from the parent class.</p>
+     *
+     * @return a hash code value for this configuration
+     */
     @Override
     public int hashCode() {
         int h = 17;
@@ -110,6 +118,14 @@ public class AvroSerializationConfig extends SerializationConfig<AvroSerializati
         return false;
     }
 
+    /**
+     * Returns a string representation of this configuration.
+     *
+     * <p>The string includes all configuration settings in the format:
+     * {@code {ignoredPropNames=..., exclusion=..., skipTransientField=..., schema=...}}</p>
+     *
+     * @return a string representation of this configuration
+     */
     @Override
     public String toString() {
         return "{ignoredPropNames=" + N.toString(getIgnoredPropNames()) + ", exclusion=" + N.toString(getExclusion()) + ", skipTransientField="

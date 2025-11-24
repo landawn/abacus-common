@@ -79,6 +79,14 @@ public class AvroDeserializationConfig extends DeserializationConfig<AvroDeseria
         return this;
     }
 
+    /**
+     * Computes a hash code for this configuration based on its settings.
+     *
+     * <p>The hash code includes the schema setting in addition to settings
+     * inherited from the parent class.</p>
+     *
+     * @return a hash code value for this configuration
+     */
     @Override
     public int hashCode() {
         int h = 17;
@@ -108,6 +116,14 @@ public class AvroDeserializationConfig extends DeserializationConfig<AvroDeseria
                         && N.equals(schema, other.schema));
     }
 
+    /**
+     * Returns a string representation of this configuration.
+     *
+     * <p>The string includes all configuration settings in the format:
+     * {@code {ignoredPropNames=..., ignoreUnmatchedProperty=..., schema=...}}</p>
+     *
+     * @return a string representation of this configuration
+     */
     @Override
     public String toString() {
         return "{ignoredPropNames=" + N.toString(getIgnoredPropNames()) + ", ignoreUnmatchedProperty=" + N.toString(ignoreUnmatchedProperty()) + ", schema="

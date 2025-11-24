@@ -14,11 +14,14 @@
 
 package com.landawn.abacus.parser;
 
+import java.io.File;
 import java.io.InputStream;
 import java.io.Reader;
 import java.util.Map;
 
 import org.w3c.dom.Node;
+
+import com.landawn.abacus.type.Type;
 
 /**
  * Interface for XML parsing operations, extending the base {@link Parser} interface.
@@ -51,10 +54,10 @@ import org.w3c.dom.Node;
  * MyBean fromNode = parser.deserialize(doc.getFirstChild(), MyBean.class);
  * 
  * // Deserialize with node class mappings
- * Map<String, Class<?>> nodeClasses = new HashMap<>();
- * nodeClasses.put("person", Person.class);
- * nodeClasses.put("company", Company.class);
- * Object result = parser.deserialize(xmlStream, config, nodeClasses);
+ * Map<String, Class<?>> nodeTypes = new HashMap<>();
+ * nodeTypes.put("person", Person.class);
+ * nodeTypes.put("company", Company.class);
+ * Object result = parser.deserialize(xmlStream, config, nodeTypes);
  * }</pre>
  * 
  * @see Parser
@@ -62,6 +65,30 @@ import org.w3c.dom.Node;
  * @see XMLDeserializationConfig
  */
 public interface XMLParser extends Parser<XMLSerializationConfig, XMLDeserializationConfig> {
+
+    /**
+     * Deserializes an XML DOM node to an object of the specified type using a Type descriptor.
+     *
+     * <p>This method parses the provided DOM node and creates an instance of the target type,
+     * populating its fields with values from the XML structure. The deserialization process
+     * uses default configuration settings.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Document doc = DocumentBuilderFactory.newInstance()
+     *     .newDocumentBuilder().parse(xmlFile);
+     * Type<MyBean> type = Type.of(MyBean.class);
+     * MyBean bean = parser.deserialize(doc.getFirstChild(), type);
+     * }</pre>
+     *
+     * @param <T> the type of the target object
+     * @param source the DOM node containing the XML data to deserialize; must not be {@code null}
+     * @param targetType the Type descriptor of the object to create; must not be {@code null}
+     * @return the deserialized object of type {@code T}, never {@code null}
+     * @throws IllegalArgumentException if source or targetType is {@code null}
+     * @throws RuntimeException if deserialization fails due to XML structure mismatch or instantiation errors
+     */
+    <T> T deserialize(Node source, Type<? extends T> targetType);
 
     /**
      * Deserializes an XML DOM node to an object of the specified type using default deserialization configuration.
@@ -79,12 +106,40 @@ public interface XMLParser extends Parser<XMLSerializationConfig, XMLDeserializa
      *
      * @param <T> the type of the target object
      * @param source the DOM node containing the XML data to deserialize; must not be {@code null}
-     * @param targetClass the class of the object to create; must not be {@code null}
+     * @param targetType the class of the object to create; must not be {@code null}
      * @return the deserialized object of type {@code T}, never {@code null}
-     * @throws IllegalArgumentException if source or targetClass is {@code null}
+     * @throws IllegalArgumentException if source or targetType is {@code null}
      * @throws RuntimeException if deserialization fails due to XML structure mismatch or instantiation errors
      */
-    <T> T deserialize(Node source, Class<? extends T> targetClass);
+    <T> T deserialize(Node source, Class<? extends T> targetType);
+
+    /**
+     * Deserializes an XML DOM node to an object of the specified type with custom deserialization configuration.
+     *
+     * <p>This method provides fine-grained control over the deserialization process through the configuration
+     * parameter. The configuration can specify options such as ignoring unknown properties, handling {@code null} values,
+     * date/time formats, and other deserialization behaviors.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * XMLDeserializationConfig config = new XMLDeserializationConfig()
+     *     .ignoreUnmatchedProperty(true);
+     *
+     * Document doc = DocumentBuilderFactory.newInstance()
+     *     .newDocumentBuilder().parse(xmlFile);
+     * Type<MyBean> type = Type.of(MyBean.class);
+     * MyBean bean = parser.deserialize(doc.getFirstChild(), config, type);
+     * }</pre>
+     *
+     * @param <T> the type of the target object
+     * @param source the DOM node containing the XML data to deserialize; must not be {@code null}
+     * @param config the deserialization configuration to use (may be {@code null} for default behavior)
+     * @param targetType the Type descriptor of the object to create; must not be {@code null}
+     * @return the deserialized object of type {@code T}, never {@code null}
+     * @throws IllegalArgumentException if source or targetType is {@code null}
+     * @throws RuntimeException if deserialization fails due to XML structure mismatch or instantiation errors
+     */
+    <T> T deserialize(Node source, XMLDeserializationConfig config, Type<? extends T> targetType);
 
     /**
      * Deserializes an XML DOM node to an object of the specified type with custom deserialization configuration.
@@ -106,46 +161,74 @@ public interface XMLParser extends Parser<XMLSerializationConfig, XMLDeserializa
      * @param <T> the type of the target object
      * @param source the DOM node containing the XML data to deserialize; must not be {@code null}
      * @param config the deserialization configuration to use (may be {@code null} for default behavior)
-     * @param targetClass the class of the object to create; must not be {@code null}
+     * @param targetType the class of the object to create; must not be {@code null}
      * @return the deserialized object of type {@code T}, never {@code null}
-     * @throws IllegalArgumentException if source or targetClass is {@code null}
+     * @throws IllegalArgumentException if source or targetType is {@code null}
      * @throws RuntimeException if deserialization fails due to XML structure mismatch or instantiation errors
      */
-    <T> T deserialize(Node source, XMLDeserializationConfig config, Class<? extends T> targetClass);
+    <T> T deserialize(Node source, XMLDeserializationConfig config, Class<? extends T> targetType);
 
     /**
-     * Deserializes XML from an input stream using node class mappings for dynamic type resolution.
+     * Deserializes XML from a file using node class mappings for dynamic type resolution.
      *
-     * <p>This method enables polymorphic deserialization by mapping XML element names to Java classes.
-     * When the parser encounters an XML element, it looks up the element name in the nodeClasses map
+     * <p>This method enables polymorphic deserialization by mapping XML element names to types.
+     * When the parser encounters an XML element, it looks up the element name in the nodeTypes map
      * to determine which class to instantiate. This is particularly useful for deserializing heterogeneous
      * collections or when the target type cannot be determined statically.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Map<String, Class<?>> nodeClasses = new HashMap<>();
-     * nodeClasses.put("person", Person.class);
-     * nodeClasses.put("company", Company.class);
+     * Map<String, Type<?>> nodeTypes = new HashMap<>();
+     * nodeTypes.put("customer", Type.of(Customer.class));
+     * nodeTypes.put("invoice", Type.of(Invoice.class));
      *
-     * // XML: <person>...</person> will deserialize to Person class
-     * Object result = parser.deserialize(inputStream, config, nodeClasses);
+     * File xmlFile = new File("data.xml");
+     * Object result = parser.deserialize(xmlFile, config, nodeTypes);
+     * }</pre>
+     *
+     * @param <T> the type of the target object
+     * @param source the file containing XML data to deserialize; must not be {@code null}
+     * @param config the deserialization configuration to use (may be {@code null} for default behavior)
+     * @param nodeTypes mapping of XML element names to their corresponding types; must not be {@code null}
+     * @return the deserialized object of type {@code T}, or {@code null} if the file is empty
+     * @throws IllegalArgumentException if source or nodeTypes is {@code null}
+     * @throws RuntimeException if deserialization fails due to I/O errors, XML parsing errors, or instantiation errors
+     */
+    <T> T deserialize(File source, XMLDeserializationConfig config, Map<String, Type<?>> nodeTypes);
+
+    /**
+     * Deserializes XML from an input stream using node class mappings for dynamic type resolution.
+     *
+     * <p>This method enables polymorphic deserialization by mapping XML element names to types.
+     * When the parser encounters an XML element, it looks up the element name in the nodeTypes map
+     * to determine which class to instantiate. This is particularly useful for deserializing heterogeneous
+     * collections or when the target type cannot be determined statically.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Map<String, Type<?>> nodeTypes = new HashMap<>();
+     * nodeTypes.put("item", Type.of(Item.class));
+     * nodeTypes.put("order", Type.of(Order.class));
+     *
+     * InputStream inputStream = new FileInputStream("data.xml");
+     * Object result = parser.deserialize(inputStream, config, nodeTypes);
      * }</pre>
      *
      * @param <T> the type of the target object
      * @param source the input stream containing XML data to deserialize; must not be {@code null}
      * @param config the deserialization configuration to use (may be {@code null} for default behavior)
-     * @param nodeClasses mapping of XML element names to their corresponding Java classes; must not be {@code null}
-     * @return the deserialized object of type {@code T}, or {@code null} if the stream is empty
-     * @throws IllegalArgumentException if source or nodeClasses is {@code null}
+     * @param nodeTypes mapping of XML element names to their corresponding types; must not be {@code null}
+     * @return the deserialized object of type {@code T}, or {@code null} if the input stream is empty
+     * @throws IllegalArgumentException if source or nodeTypes is {@code null}
      * @throws RuntimeException if deserialization fails due to I/O errors, XML parsing errors, or instantiation errors
      */
-    <T> T deserialize(InputStream source, XMLDeserializationConfig config, Map<String, Class<?>> nodeClasses);
+    <T> T deserialize(InputStream source, XMLDeserializationConfig config, Map<String, Type<?>> nodeTypes);
 
     /**
      * Deserializes XML from a reader using node class mappings for dynamic type resolution.
      *
-     * <p>This method enables polymorphic deserialization by mapping XML element names to Java classes.
-     * When the parser encounters an XML element, it looks up the element name in the nodeClasses map
+     * <p>This method enables polymorphic deserialization by mapping XML element names to types.
+     * When the parser encounters an XML element, it looks up the element name in the nodeTypes map
      * to determine which class to instantiate. This is particularly useful for deserializing heterogeneous
      * collections or when the target type cannot be determined statically.
      *
@@ -154,54 +237,54 @@ public interface XMLParser extends Parser<XMLSerializationConfig, XMLDeserializa
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Map<String, Class<?>> nodeClasses = new HashMap<>();
-     * nodeClasses.put("employee", Employee.class);
-     * nodeClasses.put("department", Department.class);
+     * Map<String, Type<?>> nodeTypes = new HashMap<>();
+     * nodeTypes.put("employee", Type.of(Employee.class));
+     * nodeTypes.put("department", Type.of(Department.class));
      *
      * Reader reader = new FileReader("data.xml");
-     * Object result = parser.deserialize(reader, config, nodeClasses);
+     * Object result = parser.deserialize(reader, config, nodeTypes);
      * }</pre>
      *
      * @param <T> the type of the target object
      * @param source the reader containing XML data to deserialize; must not be {@code null}
      * @param config the deserialization configuration to use (may be {@code null} for default behavior)
-     * @param nodeClasses mapping of XML element names to their corresponding Java classes; must not be {@code null}
+     * @param nodeTypes mapping of XML element names to their corresponding types; must not be {@code null}
      * @return the deserialized object of type {@code T}, or {@code null} if the reader is empty
-     * @throws IllegalArgumentException if source or nodeClasses is {@code null}
+     * @throws IllegalArgumentException if source or nodeTypes is {@code null}
      * @throws RuntimeException if deserialization fails due to I/O errors, XML parsing errors, or instantiation errors
      */
-    <T> T deserialize(Reader source, XMLDeserializationConfig config, Map<String, Class<?>> nodeClasses);
+    <T> T deserialize(Reader source, XMLDeserializationConfig config, Map<String, Type<?>> nodeTypes);
 
     /**
      * Deserializes an XML DOM node using node class mappings for dynamic type resolution.
      *
      * <p>This method enables polymorphic deserialization from DOM nodes by mapping XML element names
-     * to Java classes. The target class is determined by matching the node name or its <i>name</i> attribute
+     * to types. The target class is determined by matching the node name or its <i>name</i> attribute
      * to the provided class mappings. This is particularly useful when working with pre-parsed DOM trees
      * containing heterogeneous elements.
      *
-     * <p>The parser first attempts to match the node's tag name against the nodeClasses map. If no match
+     * <p>The parser first attempts to match the node's tag name against the nodeTypes map. If no match
      * is found and the node has a <i>name</i> attribute, it will attempt to match using that attribute value.
      * This provides flexibility in XML structure design.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Map<String, Class<?>> nodeClasses = new HashMap<>();
-     * nodeClasses.put("product", Product.class);
-     * nodeClasses.put("category", Category.class);
+     * Map<String, Type<?>> nodeTypes = new HashMap<>();
+     * nodeTypes.put("product", Type.of(Product.class));
+     * nodeTypes.put("category", Type.of(Category.class));
      *
      * Document doc = DocumentBuilderFactory.newInstance()
      *     .newDocumentBuilder().parse(xmlFile);
-     * Object result = parser.deserialize(doc.getFirstChild(), config, nodeClasses);
+     * Object result = parser.deserialize(doc.getFirstChild(), config, nodeTypes);
      * }</pre>
      *
      * @param <T> the type of the target object
      * @param source the DOM node containing XML data to deserialize; must not be {@code null}
      * @param config the deserialization configuration to use (may be {@code null} for default behavior)
-     * @param nodeClasses mapping of XML element names to their corresponding Java classes; must not be {@code null}
+     * @param nodeTypes mapping of XML element names to their corresponding types; must not be {@code null}
      * @return the deserialized object of type {@code T}, or {@code null} if the node is empty
-     * @throws IllegalArgumentException if source or nodeClasses is {@code null}
+     * @throws IllegalArgumentException if source or nodeTypes is {@code null}
      * @throws RuntimeException if deserialization fails due to XML structure mismatch or instantiation errors
      */
-    <T> T deserialize(Node source, XMLDeserializationConfig config, Map<String, Class<?>> nodeClasses);
+    <T> T deserialize(Node source, XMLDeserializationConfig config, Map<String, Type<?>> nodeTypes);
 }

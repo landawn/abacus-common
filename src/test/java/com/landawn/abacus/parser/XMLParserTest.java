@@ -1,7 +1,3 @@
-/*
- * Copyright (c) 2015, Haiyang Li. All rights reserved.
- */
-
 package com.landawn.abacus.parser;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -34,6 +30,7 @@ import com.landawn.abacus.parser.XMLDeserializationConfig.XDC;
 import com.landawn.abacus.parser.XMLSerializationConfig.XSC;
 import com.landawn.abacus.parser.entity.GenericEntity;
 import com.landawn.abacus.parser.entity.XBean;
+import com.landawn.abacus.type.Type;
 import com.landawn.abacus.util.Array;
 import com.landawn.abacus.util.Beans;
 import com.landawn.abacus.util.BufferedXMLWriter;
@@ -47,6 +44,7 @@ import com.landawn.abacus.util.StringWriter;
 import com.landawn.abacus.util.Strings;
 import com.landawn.abacus.util.XmlUtil;
 
+@Tag("old-test")
 public class XMLParserTest extends AbstractXMLParserTest {
     @Override
     protected Parser<?, ?> getParser() {
@@ -104,7 +102,6 @@ public class XMLParserTest extends AbstractXMLParserTest {
         N.println(props);
         N.println(props2);
 
-        // assertEquals(props, props2);
     }
 
     @Test
@@ -133,7 +130,7 @@ public class XMLParserTest extends AbstractXMLParserTest {
         final String str = xmlParser.serialize(account);
         final InputStream is = IOUtil.string2InputStream(str);
 
-        final Map<String, Class<?>> nodeClasses = N.asMap("account", Account.class);
+        final Map<String, Type<?>> nodeClasses = N.asMap("account", Type.of(Account.class));
 
         Account account2 = xmlParser.deserialize(is, null, nodeClasses);
 
@@ -201,7 +198,6 @@ public class XMLParserTest extends AbstractXMLParserTest {
         N.println(str);
 
         final List<String> list2 = xmlParser.deserialize(str, List.class);
-        // assertTrue(N.equals(list, list2));
         N.println(list2);
 
         final Map<String, Object> map = N.asMap(nullElement, nullElement);
@@ -211,7 +207,6 @@ public class XMLParserTest extends AbstractXMLParserTest {
 
         final Map<String, Object> map2 = xmlParser.deserialize(str, Map.class);
         N.println(map2);
-        // assertTrue(N.equals(map, map2));
 
         xmlParser.deserialize(str, Object.class);
 
@@ -266,7 +261,6 @@ public class XMLParserTest extends AbstractXMLParserTest {
 
         final Map<String, Object> map2 = xmlParser.deserialize(str, Map.class);
         N.println(map2);
-        // assertTrue(N.equals(map, map2));
     }
 
     @Test
@@ -274,8 +268,6 @@ public class XMLParserTest extends AbstractXMLParserTest {
         final Account account = new Account();
 
         String str = xmlParser.serialize(account);
-
-        // assertEquals("<account></account>", str);
 
         account.setId(0);
         account.setFirstName("firstName");
@@ -299,8 +291,6 @@ public class XMLParserTest extends AbstractXMLParserTest {
 
         final Map<String, Object> map2 = xmlParser.deserialize(str, XDC.of(Account.class), Map.class);
         N.println(map2);
-
-        // assertEquals(map, map2);
 
         str = xmlParser.serialize(N.asList(map), xsc);
         N.println(str);
@@ -408,7 +398,6 @@ public class XMLParserTest extends AbstractXMLParserTest {
         Profiler.run(threadNum, loopNum, repeat, () -> abacusXMLDOMParser.deserialize(xml, Account.class)).printResult();
     }
 
-
     @Test
     public void testSerialize_List() throws Exception {
         final List<String> list = N.asList("abc", "123");
@@ -514,7 +503,6 @@ public class XMLParserTest extends AbstractXMLParserTest {
 
         N.println(xBean);
         N.println(xBean2);
-        // assertEquals(xBean, xBean2);
     }
 
     @Test
@@ -531,7 +519,6 @@ public class XMLParserTest extends AbstractXMLParserTest {
 
         N.println(xBean);
         N.println(xBean2);
-        // assertEquals(xBean, xBean2);
     }
 
     @Test
@@ -555,7 +542,6 @@ public class XMLParserTest extends AbstractXMLParserTest {
 
         N.println(xBean);
         N.println(xBean2);
-        // assertEquals(xBean, xBean2);
     }
 
     @Test
@@ -579,7 +565,6 @@ public class XMLParserTest extends AbstractXMLParserTest {
 
         N.println(xBean);
         N.println(xBean2);
-        // assertEquals(xBean, xBean2);
     }
 
     @Test
@@ -604,7 +589,6 @@ public class XMLParserTest extends AbstractXMLParserTest {
 
         N.println(xBean);
         N.println(xBean2);
-        // assertEquals(xBean, xBean2);
     }
 
     @Test
@@ -701,7 +685,6 @@ public class XMLParserTest extends AbstractXMLParserTest {
 
         N.println(xBean);
         N.println(xBean2);
-        // assertEquals(xBean, xBean2);
     }
 
     @Test
@@ -939,6 +922,5 @@ public class XMLParserTest extends AbstractXMLParserTest {
         final MapEntity accounts2 = xmlParser.deserialize(xml, MapEntity.class);
         N.println(accounts2);
 
-        // assertTrue(N.equals(account, accounts2));
     }
 }

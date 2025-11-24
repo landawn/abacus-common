@@ -112,7 +112,7 @@ interface JSONReader {
      * Reads the previous token from the JSON input.
      * This method allows backtracking to the last token read,
      * which can be useful for re-evaluating or skipping tokens.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * int token = reader.nextToken();
@@ -120,7 +120,7 @@ interface JSONReader {
      *     // Do something with the token
      * } else {
      *     // Backtrack to the previous token
-     *     reader.prevToken();
+     *     reader.lastToken();
      * }
      * }</pre>
      *
@@ -156,7 +156,7 @@ interface JSONReader {
      * 
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Type<Integer> intType = N.typeOf(Integer.class);
+     * Type<Integer> intType = Type.of(Integer.class);
      * int token = reader.nextToken(intType);
      * }</pre>
      *
@@ -210,10 +210,10 @@ interface JSONReader {
      * 
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Type<Integer> intType = N.typeOf(Integer.class);
+     * Type<Integer> intType = Type.of(Integer.class);
      * Integer value = reader.readValue(intType);
      *
-     * Type<Person> personType = N.typeOf(Person.class);
+     * Type<Person> personType = Type.of(Person.class);
      * Person person = reader.readValue(personType);
      * }</pre>
      *

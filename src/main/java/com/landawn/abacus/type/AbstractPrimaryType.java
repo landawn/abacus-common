@@ -14,8 +14,6 @@
 
 package com.landawn.abacus.type;
 
-import com.landawn.abacus.util.N;
-
 /**
  * Abstract base class for primary types in the type system.
  * Primary types are fundamental, immutable types that can be directly compared
@@ -74,6 +72,6 @@ public abstract class AbstractPrimaryType<T> extends AbstractType<T> {
             return valueOf((String) obj);
         }
 
-        return valueOf(N.typeOf(obj.getClass()).stringOf(obj));
+        return valueOf(Type.<Object> of(obj.getClass()).stringOf(obj));
     }
 }

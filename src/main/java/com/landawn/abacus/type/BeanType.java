@@ -46,10 +46,12 @@ import com.landawn.abacus.util.Strings;
 public final class BeanType<T> extends AbstractType<T> {
 
     private final Class<T> typeClass;
+    private final java.lang.reflect.Type javaType;
 
-    BeanType(final Class<T> cls) {
+    BeanType(final Class<T> cls, final java.lang.reflect.Type javaType) {
         super(TypeFactory.getClassName(cls));
-        typeClass = cls;
+        this.typeClass = cls;
+        this.javaType = javaType == null ? cls : javaType;
     }
 
     /**
@@ -60,6 +62,16 @@ public final class BeanType<T> extends AbstractType<T> {
     @Override
     public Class<T> clazz() {
         return typeClass;
+    }
+
+    /**
+     * Returns the Java Type representation of the bean type.
+     *
+     * @return the Java Type for the specific bean type T
+     */
+    @Override
+    public java.lang.reflect.Type javaType() {
+        return javaType;
     }
 
     /**

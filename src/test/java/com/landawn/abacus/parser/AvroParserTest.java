@@ -1,7 +1,3 @@
-/*
- * Copyright (c) 2015, Haiyang Li. All rights reserved.
- */
-
 package com.landawn.abacus.parser;
 
 import java.io.File;
@@ -40,7 +36,6 @@ public class AvroParserTest {
         User user1 = new User();
         user1.setName("Alyssa");
         user1.setFavoriteNumber(256);
-        // Leave favorite color null
 
         String str = avroParser.serialize(user1);
 
@@ -66,8 +61,6 @@ public class AvroParserTest {
         users = avroParser.deserialize(str, ds, List.class);
         N.println(users);
 
-        //    User[] users2 = avroParser.deserialize(str, User[].class);
-        //    N.println(users2);
     }
 
     @Test
@@ -75,7 +68,6 @@ public class AvroParserTest {
         User user1 = new User();
         user1.setName("Alyssa");
         user1.setFavoriteNumber(256);
-        // Leave favorite color null
         File file = new File("./src/test/resources/test.avsc");
         avroParser.serialize(user1, file);
 
@@ -98,9 +90,6 @@ public class AvroParserTest {
         users = avroParser.deserialize(file, ds, List.class);
         N.println(users);
 
-        //    User[] users2 = avroParser.deserialize(file, User[].class);
-        //    N.println(users2);
-        //    IOUtil.deleteAllIfExists(file);
     }
 
     @Test
@@ -108,7 +97,6 @@ public class AvroParserTest {
         GenericRecord user1 = new GenericData.Record(schema);
         user1.put("name", "Alyssa");
         user1.put("favorite_number", 256);
-        // Leave favorite color null
 
         AvroSerializationConfig sc = ASC.of(schema);
         String str = avroParser.serialize(user1, sc);

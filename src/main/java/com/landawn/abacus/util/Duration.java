@@ -13,6 +13,10 @@
  */
 package com.landawn.abacus.util;
 
+import java.time.temporal.ChronoUnit;
+import java.time.temporal.Temporal;
+import java.time.temporal.TemporalUnit;
+
 /**
  * A high-performance, immutable representation of a time-based amount of duration measured in milliseconds,
  * designed as an efficient alternative to {@code java.time.Duration} for scenarios where nanosecond precision
@@ -376,6 +380,162 @@ public final class Duration implements Comparable<Duration>, Immutable {
      */
     public static Duration ofMillis(final long millis) {
         return create(millis);
+    }
+
+    /**
+     * Calculates the duration between two dates by determining the time difference from the first date to the second.
+     * The result represents the time interval as a {@link Duration} object, which can be positive (if {@code end} is
+     * after {@code start}), negative (if {@code end} is before {@code start}), or zero (if both dates represent the same instant).
+     *
+     * <p><b>Calculation:</b> {@code Duration = end.getTime() - start.getTime()}</p>
+     *
+     * <p><b>Examples:</b>
+     * <pre>{@code
+     * // Measuring elapsed time
+     * Date start = new Date();
+     * // ... perform operation
+     * Date end = new Date();
+     * Duration elapsed = Duration.between(start, end);
+     * long millisElapsed = elapsed.toMillis();
+     *
+     * // Calculating age
+     * Date birthDate = Dates.parseDate("1990-05-15");
+     * Date today = new Date();
+     * Duration age = Duration.between(birthDate, today);
+     * long ageInDays = age.toDays();
+     *
+     * // Time until deadline
+     * Date now = new Date();
+     * Date deadline = Dates.parseDate("2024-12-31");
+     * Duration remaining = Duration.between(now, deadline);
+     * if (remaining.isNegative()) {
+     *     System.out.println("Deadline has passed");
+     * } else {
+     *     System.out.println("Days remaining: " + remaining.toDays());
+     * }
+     * }</pre>
+     *
+     * <p><b>Time Zone:</b> Operates on UTC millisecond timestamps, unaffected by time zones.
+     *
+     * @param start the start date (inclusive). Must not be {@code null}.
+     * @param end the end date (exclusive). Must not be {@code null}.
+     * @return a {@link Duration} representing the time difference from {@code from} to {@code to}.
+     *         Positive if {@code to} is after {@code from}, negative if {@code to} is before {@code from}.
+     * @throws IllegalArgumentException if either date is {@code null}.
+     * @see #between(java.util.Calendar, java.util.Calendar)
+     * @see #between(java.time.temporal.Temporal, java.time.temporal.Temporal)
+     * @see java.time.Duration#between(java.time.temporal.Temporal, java.time.temporal.Temporal)
+     */
+    public static Duration between(final java.util.Date start, final java.util.Date end) {
+        N.checkArgNotNull(start, "Start Date can't be null");
+        N.checkArgNotNull(end, "End Date can't be null");
+
+        return Duration.ofMillis(end.getTime() - start.getTime());
+    }
+
+    /**
+     * Calculates the duration between two calendar instances by determining the time difference from the first calendar to the second.
+     * The result represents the time interval as a {@link Duration} object, which can be positive (if {@code end} is
+     * after {@code start}), negative (if {@code end} is before {@code start}), or zero (if both calendars represent the same instant).
+     *
+     * <p><b>Calculation:</b> {@code Duration = end.getTimeInMillis() - start.getTimeInMillis()}</p>
+     *
+     * <p><b>Examples:</b>
+     * <pre>{@code
+     * // Measuring elapsed time
+     * Calendar start = Calendar.getInstance();
+     * // ... perform operation
+     * Calendar end = Calendar.getInstance();
+     * Duration elapsed = Duration.between(start, end);
+     * long millisElapsed = elapsed.toMillis();
+     *
+     * // Calculating age
+     * Calendar birthDate = Calendar.getInstance();
+     * birthDate.set(1990, Calendar.MAY, 15);
+     * Calendar today = Calendar.getInstance();
+     * Duration age = Duration.between(birthDate, today);
+     * long ageInDays = age.toDays();
+     *
+     * // Time until deadline
+     * Calendar now = Calendar.getInstance();
+     * Calendar deadline = Calendar.getInstance();
+     * deadline.set(2024, Calendar.DECEMBER, 31);
+     * Duration remaining = Duration.between(now, deadline);
+     * if (remaining.isNegative()) {
+     *     System.out.println("Deadline has passed");
+     * } else {
+     *     System.out.println("Days remaining: " + remaining.toDays());
+     * }
+     * }</pre>
+     *
+     * <p><b>Time Zone:</b> Operates on UTC millisecond timestamps, unaffected by time zones.
+     *
+     * @param start the start calendar (inclusive). Must not be {@code null}.
+     * @param end the end calendar (exclusive). Must not be {@code null}.
+     * @return a {@link Duration} representing the time difference from {@code from} to {@code to}.
+     *         Positive if {@code to} is after {@code from}, negative if {@code to} is before {@code from}.
+     * @throws IllegalArgumentException if either calendar is {@code null}.
+     * @see #between(java.util.Date, java.util.Date)
+     * @see #between(java.time.temporal.Temporal, java.time.temporal.Temporal)
+     * @see java.time.Duration#between(java.time.temporal.Temporal, java.time.temporal.Temporal)
+     */
+    public static Duration between(final java.util.Calendar start, final java.util.Calendar end) {
+        N.checkArgNotNull(start, "Start Calendar can't be null");
+        N.checkArgNotNull(end, "End Calendar can't be null");
+
+        return Duration.ofMillis(end.getTimeInMillis() - start.getTimeInMillis());
+    }
+
+    /**
+     * Calculates the duration between two temporal objects by determining the time difference from the first temporal to the second.
+     * The result represents the time interval as a {@link Duration} object, which can be positive (if {@code end} is
+     * after {@code start}), negative (if {@code end} is before {@code start}), or zero (if both temporals represent the same instant).
+     *
+     * <p><b>Calculation:</b> {@code Duration = start.until(end, ChronoUnit.MILLIS)}</p>
+     *
+     * <p><b>Examples:</b>
+     * <pre>{@code
+     * // Measuring elapsed time
+     * Instant start = Instant.now();
+     * // ... perform operation
+     * Instant end = Instant.now();
+     * Duration elapsed = Duration.between(start, end);
+     * long millisElapsed = elapsed.toMillis();
+     *
+     * // Calculating age
+     * LocalDateTime birthDate = LocalDateTime.of(1990, Month.MAY, 15, 0, 0);
+     * LocalDateTime today = LocalDateTime.now();
+     * Duration age = Duration.between(birthDate, today);
+     * long ageInDays = age.toDays();
+     *
+     * // Time until deadline
+     * LocalDateTime now = LocalDateTime.now();
+     * LocalDateTime deadline = LocalDateTime.of(2024, Month.DECEMBER, 31, 0, 0);
+     * Duration remaining = Duration.between(now, deadline);
+     * if (remaining.isNegative()) {
+     *     System.out.println("Deadline has passed");
+     * } else {
+     *     System.out.println("Days remaining: " + remaining.toDays());
+     * }
+     * }</pre>
+     *
+     * @param start the start temporal (inclusive). Must not be {@code null}.
+     * @param end the end temporal (exclusive). Must not be {@code null}.
+     * @return a {@link Duration} representing the time difference from {@code from} to {@code to}.
+     *         Positive if {@code to} is after {@code from}, negative if {@code to} is before {@code from}.
+     * @throws IllegalArgumentException if either temporal is {@code null}.
+     * @see #between(java.util.Date, java.util.Date)
+     * @see #between(java.util.Calendar, java.util.Calendar)
+     * @see Temporal#until(java.time.temporal.Temporal, java.time.temporal.TemporalUnit)
+     * @see TemporalUnit#between(Temporal, Temporal)
+     * @see ChronoUnit#between(Temporal, Temporal)
+     * @see java.time.Duration#between(java.time.temporal.Temporal, java.time.temporal.Temporal)
+     */
+    public static Duration between(final Temporal start, final Temporal end) {
+        N.checkArgNotNull(start, "Start Temporal can't be null");
+        N.checkArgNotNull(end, "End Temporal can't be null");
+
+        return Duration.ofMillis(start.until(end, ChronoUnit.MILLIS));
     }
 
     /**

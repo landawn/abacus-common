@@ -167,7 +167,7 @@ public class JSONParser100Test extends TestBase {
     public void testStreamFromInputStreamWithConfig() {
         String json = "[{\"x\":1},{\"x\":2}]";
         InputStream is = new ByteArrayInputStream(json.getBytes());
-        try (Stream<Map> stream = parser.stream(is, null, true, Type.of(Map.class))) {
+        try (Stream<Map> stream = parser.stream(is, true, null, Type.of(Map.class))) {
             List<Map> list = stream.toList();
             Assertions.assertEquals(2, list.size());
             Assertions.assertEquals(1, list.get(0).get("x"));
@@ -192,7 +192,7 @@ public class JSONParser100Test extends TestBase {
     public void testStreamFromReaderWithConfig() {
         String json = "[{\"n\":100},{\"n\":200}]";
         Reader reader = new StringReader(json);
-        try (Stream<Map> stream = parser.stream(reader, null, true, Type.of(Map.class))) {
+        try (Stream<Map> stream = parser.stream(reader, true, null, Type.of(Map.class))) {
             List<Map> list = stream.toList();
             Assertions.assertEquals(2, list.size());
             Assertions.assertEquals(100, list.get(0).get("n"));

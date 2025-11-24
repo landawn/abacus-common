@@ -19,7 +19,6 @@ import java.io.IOException;
 import com.landawn.abacus.parser.JSONXMLSerializationConfig;
 import com.landawn.abacus.util.BooleanList;
 import com.landawn.abacus.util.CharacterWriter;
-import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Strings;
 
 /**
@@ -32,9 +31,9 @@ public final class PrimitiveBooleanListType extends AbstractPrimitiveListType<Bo
 
     public static final String BOOLEAN_LIST = BooleanList.class.getSimpleName();
 
-    private final Type<boolean[]> arrayType = N.typeOf(boolean[].class);
+    private final Type<boolean[]> arrayType = Type.of(boolean[].class);
 
-    private final Type<Boolean> elementType = N.typeOf(boolean.class);
+    private final Type<Boolean> elementType = Type.of(boolean.class);
     private final Type<Boolean>[] parameterTypes = new Type[] { elementType };
 
     protected PrimitiveBooleanListType() {

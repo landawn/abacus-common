@@ -19,7 +19,6 @@ import java.io.IOException;
 import com.landawn.abacus.parser.JSONXMLSerializationConfig;
 import com.landawn.abacus.util.CharList;
 import com.landawn.abacus.util.CharacterWriter;
-import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Strings;
 
 /**
@@ -32,9 +31,9 @@ public final class PrimitiveCharListType extends AbstractPrimitiveListType<CharL
 
     public static final String CHAR_LIST = CharList.class.getSimpleName();
 
-    private final Type<char[]> arrayType = N.typeOf(char[].class);
+    private final Type<char[]> arrayType = Type.of(char[].class);
 
-    private final Type<Character> elementType = N.typeOf(char.class);
+    private final Type<Character> elementType = Type.of(char.class);
     private final Type<Character>[] parameterTypes = new Type[] { elementType };
 
     protected PrimitiveCharListType() {

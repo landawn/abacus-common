@@ -14,8 +14,11 @@
 
 package com.landawn.abacus.parser;
 
+import java.io.File;
+import java.io.InputStream;
 import java.io.Reader;
 import java.lang.reflect.Modifier;
+import java.util.Map;
 
 import javax.xml.stream.XMLStreamConstants;
 import javax.xml.stream.XMLStreamReader;
@@ -103,6 +106,27 @@ abstract class AbstractXMLParser extends AbstractParser<XMLSerializationConfig, 
     }
 
     /**
+     * Deserializes an XML DOM node into an object of the specified target type using default deserialization configuration.
+     * This method provides a convenient way to convert XML node structures into Java objects.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Document doc = XmlUtil.parse(xmlString);
+     * Node node = doc.getDocumentElement();
+     * User user = parser.deserialize(node, Type.of(User.class));
+     * }</pre>
+     *
+     * @param <T> the type of the target object
+     * @param source the XML DOM node to deserialize
+     * @param targetType the type of the target object to deserialize into
+     * @return an instance of the target type populated with data from the XML node
+     */
+    @Override
+    public <T> T deserialize(final Node source, final Type<? extends T> targetType) {
+        return deserialize(source, null, targetType);
+    }
+
+    /**
      * Deserializes an XML DOM node into an object of the specified target class using default deserialization configuration.
      * This method provides a convenient way to convert XML node structures into Java objects.
      *
@@ -115,12 +139,105 @@ abstract class AbstractXMLParser extends AbstractParser<XMLSerializationConfig, 
      *
      * @param <T> the type of the target class
      * @param source the XML DOM node to deserialize
-     * @param targetClass the class of the target object to deserialize into
+     * @param targetType the class of the target object to deserialize into
      * @return an instance of the target class populated with data from the XML node
      */
     @Override
-    public <T> T deserialize(final Node source, final Class<? extends T> targetClass) {
-        return deserialize(source, null, targetClass);
+    public <T> T deserialize(final Node source, final Class<? extends T> targetType) {
+        return deserialize(source, null, targetType);
+    }
+
+    /**
+     * Deserializes XML content from a file into an object using default deserialization configuration.
+     * This method is not supported in the abstract base class and should be implemented by subclasses.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * File xmlFile = new File("data.xml");
+     * MyObject obj = parser.deserialize(xmlFile, config, nodeTypes);
+     * }</pre>
+     *
+     * @param <T> the type of the target object
+     * @param source the file containing XML content
+     * @param config the XML deserialization configuration
+     * @param nodeTypes a map of node type definitions for deserialization
+     * @return an instance of the target type populated with data from the XML content
+     * @throws UnsupportedOperationException always thrown in this abstract implementation
+     */
+    @Override
+    public <T> T deserialize(final File source, final XMLDeserializationConfig config, final Map<String, Type<?>> nodeTypes)
+            throws UnsupportedOperationException {
+        throw new UnsupportedOperationException();
+    }
+
+    /**
+     * Deserializes XML content from an input stream into an object using default deserialization configuration.
+     * This method is not supported in the abstract base class and should be implemented by subclasses.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * InputStream inputStream = new FileInputStream("data.xml");
+     * MyObject obj = parser.deserialize(inputStream, config, nodeTypes);
+     * }</pre>
+     *
+     * @param <T> the type of the target object
+     * @param source the input stream containing XML content
+     * @param config the XML deserialization configuration
+     * @param nodeTypes a map of node type definitions for deserialization
+     * @return an instance of the target type populated with data from the XML content
+     * @throws UnsupportedOperationException always thrown in this abstract implementation
+     */
+    @Override
+    public <T> T deserialize(final InputStream source, final XMLDeserializationConfig config, final Map<String, Type<?>> nodeTypes)
+            throws UnsupportedOperationException {
+        throw new UnsupportedOperationException();
+    }
+
+    /**
+     * Deserializes XML content from a reader into an object using default deserialization configuration.
+     * This method is not supported in the abstract base class and should be implemented by subclasses.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Reader reader = new FileReader("data.xml");
+     * MyObject obj = parser.deserialize(reader, config, nodeTypes);
+     * }</pre>
+     *
+     * @param <T> the type of the target object
+     * @param source the reader containing XML content
+     * @param config the XML deserialization configuration
+     * @param nodeTypes a map of node type definitions for deserialization
+     * @return an instance of the target type populated with data from the XML content
+     * @throws UnsupportedOperationException always thrown in this abstract implementation
+     */
+    @Override
+    public <T> T deserialize(final Reader source, final XMLDeserializationConfig config, final Map<String, Type<?>> nodeTypes)
+            throws UnsupportedOperationException {
+        throw new UnsupportedOperationException();
+    }
+
+    /**
+     * Deserializes XML content from a DOM node into an object using default deserialization configuration.
+     * This method is not supported in the abstract base class and should be implemented by subclasses.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Document doc = XmlUtil.parse(xmlString);
+     * Node node = doc.getDocumentElement();
+     * MyObject obj = parser.deserialize(node, config, nodeTypes);
+     * }</pre>
+     *
+     * @param <T> the type of the target object
+     * @param source the XML DOM node to deserialize
+     * @param config the XML deserialization configuration
+     * @param nodeTypes a map of node type definitions for deserialization
+     * @return an instance of the target type populated with data from the XML node
+     * @throws UnsupportedOperationException always thrown in this abstract implementation
+     */
+    @Override
+    public <T> T deserialize(final Node source, final XMLDeserializationConfig config, final Map<String, Type<?>> nodeTypes)
+            throws UnsupportedOperationException {
+        throw new UnsupportedOperationException();
     }
 
     /**
@@ -294,7 +411,7 @@ abstract class AbstractXMLParser extends AbstractParser<XMLSerializationConfig, 
             return null;
         }
 
-        return N.typeOf(typeAttr).clazz();
+        return Type.of(typeAttr).clazz();
     }
 
     /**
@@ -321,7 +438,7 @@ abstract class AbstractXMLParser extends AbstractParser<XMLSerializationConfig, 
             return null;
         }
 
-        return N.typeOf(typeAttr).clazz();
+        return Type.of(typeAttr).clazz();
     }
 
     /**
@@ -348,7 +465,7 @@ abstract class AbstractXMLParser extends AbstractParser<XMLSerializationConfig, 
             return null;
         }
 
-        return N.typeOf(typeAttr).clazz();
+        return Type.of(typeAttr).clazz();
     }
 
     /**
@@ -358,21 +475,20 @@ abstract class AbstractXMLParser extends AbstractParser<XMLSerializationConfig, 
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Node node = doc.getElementsByTagName("item").item(0);
-     * Class<?> concreteClass = getConcreteClass(Collection.class, node);
+     * Class<?> concreteClass = getConcreteClass(node, Collection.class);
      * }</pre>
-     *
-     * @param targetClass the expected target class for deserialization
      * @param node the XML node that may contain type attribute information
+     * @param targetType the expected target class for deserialization
      * @return the concrete class to instantiate, either from the type attribute or the target class
      */
-    protected static Class<?> getConcreteClass(final Class<?> targetClass, final Node node) {
+    protected static Class<?> getConcreteClass(final Node node, final Class<?> targetType) {
         if (node == null) {
-            return targetClass;
+            return targetType;
         }
 
         final Class<?> typeClass = getAttributeTypeClass(node);
 
-        return getConcreteClass(targetClass, typeClass);
+        return getConcreteClass(typeClass, targetType);
     }
 
     /**
@@ -382,21 +498,20 @@ abstract class AbstractXMLParser extends AbstractParser<XMLSerializationConfig, 
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Attributes attrs = getAttributes();
-     * Class<?> concreteClass = getConcreteClass(List.class, attrs);
+     * Class<?> concreteClass = getConcreteClass(attrs, List.class);
      * }</pre>
-     *
-     * @param targetClass the expected target class for deserialization
      * @param attrs the XML attributes that may contain type information
+     * @param targetType the expected target class for deserialization 
      * @return the concrete class to instantiate, either from the type attribute or the target class
      */
-    protected static Class<?> getConcreteClass(final Class<?> targetClass, final Attributes attrs) {
+    protected static Class<?> getConcreteClass(final Attributes attrs, final Class<?> targetType) {
         if (attrs == null) {
-            return targetClass;
+            return targetType;
         }
 
         final Class<?> typeClass = getAttributeTypeClass(attrs);
 
-        return getConcreteClass(targetClass, typeClass);
+        return getConcreteClass(typeClass, targetType);
     }
 
     /**
@@ -406,21 +521,20 @@ abstract class AbstractXMLParser extends AbstractParser<XMLSerializationConfig, 
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * XMLStreamReader reader = createXMLStreamReader(inputReader);
-     * Class<?> concreteClass = getConcreteClass(Map.class, reader);
+     * Class<?> concreteClass = getConcreteClass(reader, Map.class);
      * }</pre>
-     *
-     * @param targetClass the expected target class for deserialization
      * @param xmlReader the XML stream reader positioned at an element with attributes
+     * @param targetType the expected target class for deserialization
      * @return the concrete class to instantiate, either from the type attribute or the target class
      */
-    protected static Class<?> getConcreteClass(final Class<?> targetClass, final XMLStreamReader xmlReader) {
+    protected static Class<?> getConcreteClass(final XMLStreamReader xmlReader, final Class<?> targetType) {
         if (xmlReader.getAttributeCount() == 0) {
-            return targetClass;
+            return targetType;
         }
 
         final Class<?> typeClass = getAttributeTypeClass(xmlReader);
 
-        return getConcreteClass(targetClass, typeClass);
+        return getConcreteClass(typeClass, targetType);
     }
 
     /**

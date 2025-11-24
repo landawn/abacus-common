@@ -589,7 +589,7 @@ public final class CSVUtil {
 
     @SuppressWarnings("deprecation")
     static final JSONSerializationConfig config = JSC.create().setDateTimeFormat(DateTimeFormat.ISO_8601_TIMESTAMP).setStringQuotation(WD._QUOTATION_D);
-    static final Type<Object> strType = N.typeOf(String.class);
+    static final Type<Object> strType = Type.of(String.class);
 
     /**
      * Writes a single field value to a CSV writer with appropriate formatting and escaping.
@@ -609,7 +609,7 @@ public final class CSVUtil {
      * @throws IOException if an I/O error occurs during writing
      */
     public static void writeField(final BufferedCSVWriter writer, final Type<?> type, final Object value) throws IOException {
-        final Type<Object> valType = type != null ? (Type<Object>) type : (value == null ? strType : N.typeOf(value.getClass()));
+        final Type<Object> valType = type != null ? (Type<Object>) type : (value == null ? strType : Type.of(value.getClass()));
 
         if (value == null) {
             writer.write(Strings.NULL_CHAR_ARRAY);

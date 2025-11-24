@@ -25,6 +25,7 @@ import org.w3c.dom.Node;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.exception.ParseException;
+import com.landawn.abacus.type.Type;
 
 @Tag("2025")
 public class XMLParser2025Test extends TestBase {
@@ -263,8 +264,8 @@ public class XMLParser2025Test extends TestBase {
         String xml = "<person><name>Charlie</name><age>28</age><email>charlie@example.com</email></person>";
         InputStream inputStream = new ByteArrayInputStream(xml.getBytes());
 
-        Map<String, Class<?>> nodeClasses = new HashMap<>();
-        nodeClasses.put("person", Person.class);
+        Map<String, Type<?>> nodeClasses = new HashMap<>();
+        nodeClasses.put("person", Type.of(Person.class));
 
         XMLDeserializationConfig config = new XMLDeserializationConfig();
 
@@ -280,9 +281,9 @@ public class XMLParser2025Test extends TestBase {
         String xml = "<company><companyName>TechCorp</companyName><employees>500</employees></company>";
         InputStream inputStream = new ByteArrayInputStream(xml.getBytes());
 
-        Map<String, Class<?>> nodeClasses = new HashMap<>();
-        nodeClasses.put("person", Person.class);
-        nodeClasses.put("company", Company.class);
+        Map<String, Type<?>> nodeClasses = new HashMap<>();
+        nodeClasses.put("person", Type.of(Person.class));
+        nodeClasses.put("company", Type.of(Company.class));
 
         XMLDeserializationConfig config = new XMLDeserializationConfig();
 
@@ -298,8 +299,8 @@ public class XMLParser2025Test extends TestBase {
         String xml = "<person><name>David</name><age>45</age></person>";
         InputStream inputStream = new ByteArrayInputStream(xml.getBytes());
 
-        Map<String, Class<?>> nodeClasses = new HashMap<>();
-        nodeClasses.put("person", Person.class);
+        Map<String, Type<?>> nodeClasses = new HashMap<>();
+        nodeClasses.put("person", Type.of(Person.class));
 
         Person result = parser.deserialize(inputStream, null, nodeClasses);
 
@@ -314,7 +315,7 @@ public class XMLParser2025Test extends TestBase {
         XMLDeserializationConfig config = new XMLDeserializationConfig();
 
         assertThrows(Exception.class, () -> {
-            parser.deserialize(inputStream, config, (Map<String, Class<?>>) null);
+            parser.deserialize(inputStream, config, (Map<String, Type<?>>) null);
         });
     }
 
@@ -323,7 +324,7 @@ public class XMLParser2025Test extends TestBase {
         String xml = "<person><name>Frank</name><age>55</age></person>";
         InputStream inputStream = new ByteArrayInputStream(xml.getBytes());
 
-        Map<String, Class<?>> nodeClasses = new HashMap<>();
+        Map<String, Type<?>> nodeClasses = new HashMap<>();
         XMLDeserializationConfig config = new XMLDeserializationConfig();
 
         assertThrows(ParseException.class, () -> parser.deserialize(inputStream, config, nodeClasses));
@@ -331,8 +332,8 @@ public class XMLParser2025Test extends TestBase {
 
     @Test
     public void testDeserializeFromInputStream_NullSource() {
-        Map<String, Class<?>> nodeClasses = new HashMap<>();
-        nodeClasses.put("person", Person.class);
+        Map<String, Type<?>> nodeClasses = new HashMap<>();
+        nodeClasses.put("person", Type.of(Person.class));
         XMLDeserializationConfig config = new XMLDeserializationConfig();
 
         assertThrows(Exception.class, () -> {
@@ -345,8 +346,8 @@ public class XMLParser2025Test extends TestBase {
         String xml = "<person><name>Grace</name><age>29</age><email>grace@example.com</email></person>";
         Reader reader = new StringReader(xml);
 
-        Map<String, Class<?>> nodeClasses = new HashMap<>();
-        nodeClasses.put("person", Person.class);
+        Map<String, Type<?>> nodeClasses = new HashMap<>();
+        nodeClasses.put("person", Type.of(Person.class));
 
         XMLDeserializationConfig config = new XMLDeserializationConfig();
 
@@ -362,9 +363,9 @@ public class XMLParser2025Test extends TestBase {
         String xml = "<company><companyName>StartupInc</companyName><employees>50</employees></company>";
         Reader reader = new StringReader(xml);
 
-        Map<String, Class<?>> nodeClasses = new HashMap<>();
-        nodeClasses.put("person", Person.class);
-        nodeClasses.put("company", Company.class);
+        Map<String, Type<?>> nodeClasses = new HashMap<>();
+        nodeClasses.put("person", Type.of(Person.class));
+        nodeClasses.put("company", Type.of(Company.class));
 
         XMLDeserializationConfig config = new XMLDeserializationConfig();
 
@@ -380,8 +381,8 @@ public class XMLParser2025Test extends TestBase {
         String xml = "<person><name>Henry</name><age>38</age></person>";
         Reader reader = new StringReader(xml);
 
-        Map<String, Class<?>> nodeClasses = new HashMap<>();
-        nodeClasses.put("person", Person.class);
+        Map<String, Type<?>> nodeClasses = new HashMap<>();
+        nodeClasses.put("person", Type.of(Person.class));
 
         Person result = parser.deserialize(reader, null, nodeClasses);
 
@@ -397,14 +398,14 @@ public class XMLParser2025Test extends TestBase {
         XMLDeserializationConfig config = new XMLDeserializationConfig();
 
         assertThrows(Exception.class, () -> {
-            parser.deserialize(reader, config, (Map<String, Class<?>>) null);
+            parser.deserialize(reader, config, (Map<String, Type<?>>) null);
         });
     }
 
     @Test
     public void testDeserializeFromReader_NullSource() {
-        Map<String, Class<?>> nodeClasses = new HashMap<>();
-        nodeClasses.put("person", Person.class);
+        Map<String, Type<?>> nodeClasses = new HashMap<>();
+        nodeClasses.put("person", Type.of(Person.class));
         XMLDeserializationConfig config = new XMLDeserializationConfig();
 
         assertThrows(Exception.class, () -> {
@@ -417,8 +418,8 @@ public class XMLParser2025Test extends TestBase {
         String xml = "";
         Reader reader = new StringReader(xml);
 
-        Map<String, Class<?>> nodeClasses = new HashMap<>();
-        nodeClasses.put("person", Person.class);
+        Map<String, Type<?>> nodeClasses = new HashMap<>();
+        nodeClasses.put("person", Type.of(Person.class));
         XMLDeserializationConfig config = new XMLDeserializationConfig();
 
         try {
@@ -433,8 +434,8 @@ public class XMLParser2025Test extends TestBase {
         String xml = "<person><name>Jack</name><age>33</age><email>jack@example.com</email></person>";
         Node node = parseXmlToNode(xml);
 
-        Map<String, Class<?>> nodeClasses = new HashMap<>();
-        nodeClasses.put("person", Person.class);
+        Map<String, Type<?>> nodeClasses = new HashMap<>();
+        nodeClasses.put("person", Type.of(Person.class));
 
         XMLDeserializationConfig config = new XMLDeserializationConfig();
 
@@ -450,9 +451,9 @@ public class XMLParser2025Test extends TestBase {
         String xml = "<company><companyName>BigCorp</companyName><employees>1000</employees></company>";
         Node node = parseXmlToNode(xml);
 
-        Map<String, Class<?>> nodeClasses = new HashMap<>();
-        nodeClasses.put("person", Person.class);
-        nodeClasses.put("company", Company.class);
+        Map<String, Type<?>> nodeClasses = new HashMap<>();
+        nodeClasses.put("person", Type.of(Person.class));
+        nodeClasses.put("company", Type.of(Company.class));
 
         XMLDeserializationConfig config = new XMLDeserializationConfig();
 
@@ -468,8 +469,8 @@ public class XMLParser2025Test extends TestBase {
         String xml = "<person><name>Karen</name><age>31</age></person>";
         Node node = parseXmlToNode(xml);
 
-        Map<String, Class<?>> nodeClasses = new HashMap<>();
-        nodeClasses.put("person", Person.class);
+        Map<String, Type<?>> nodeClasses = new HashMap<>();
+        nodeClasses.put("person", Type.of(Person.class));
 
         Person result = parser.deserialize(node, null, nodeClasses);
 
@@ -485,14 +486,14 @@ public class XMLParser2025Test extends TestBase {
         XMLDeserializationConfig config = new XMLDeserializationConfig();
 
         assertThrows(Exception.class, () -> {
-            parser.deserialize(node, config, (Map<String, Class<?>>) null);
+            parser.deserialize(node, config, (Map<String, Type<?>>) null);
         });
     }
 
     @Test
     public void testDeserializeFromNodeWithNodeClasses_NullSource() {
-        Map<String, Class<?>> nodeClasses = new HashMap<>();
-        nodeClasses.put("person", Person.class);
+        Map<String, Type<?>> nodeClasses = new HashMap<>();
+        nodeClasses.put("person", Type.of(Person.class));
         XMLDeserializationConfig config = new XMLDeserializationConfig();
 
         assertThrows(Exception.class, () -> {
@@ -505,7 +506,7 @@ public class XMLParser2025Test extends TestBase {
         String xml = "<person><name>Mike</name><age>36</age></person>";
         Node node = parseXmlToNode(xml);
 
-        Map<String, Class<?>> nodeClasses = new HashMap<>();
+        Map<String, Type<?>> nodeClasses = new HashMap<>();
         XMLDeserializationConfig config = new XMLDeserializationConfig();
 
         assertThrows(ParseException.class, () -> parser.deserialize(node, config, nodeClasses));
@@ -516,8 +517,8 @@ public class XMLParser2025Test extends TestBase {
         String xml = "<entity name=\"person\"><name>Nancy</name><age>28</age></entity>";
         Node node = parseXmlToNode(xml);
 
-        Map<String, Class<?>> nodeClasses = new HashMap<>();
-        nodeClasses.put("person", Person.class);
+        Map<String, Type<?>> nodeClasses = new HashMap<>();
+        nodeClasses.put("person", Type.of(Person.class));
 
         XMLDeserializationConfig config = new XMLDeserializationConfig();
 
@@ -531,10 +532,10 @@ public class XMLParser2025Test extends TestBase {
         String xml = "<person><name>Oliver</name><age>44</age></person>";
         Node node = parseXmlToNode(xml);
 
-        Map<String, Class<?>> nodeClasses = new HashMap<>();
-        nodeClasses.put("person", Person.class);
-        nodeClasses.put("company", Company.class);
-        nodeClasses.put("department", Department.class);
+        Map<String, Type<?>> nodeClasses = new HashMap<>();
+        nodeClasses.put("person", Type.of(Person.class));
+        nodeClasses.put("company", Type.of(Company.class));
+        nodeClasses.put("department", Type.of(Department.class));
 
         XMLDeserializationConfig config = new XMLDeserializationConfig();
 

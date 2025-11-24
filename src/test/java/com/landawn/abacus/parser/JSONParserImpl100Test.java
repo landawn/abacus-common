@@ -301,7 +301,7 @@ public class JSONParserImpl100Test extends TestBase {
         String json = "[{\"name\": \"M\",\"age\":15},{\"name\": \"N\",\"age\":25}]";
         ByteArrayInputStream bais = new ByteArrayInputStream(json.getBytes());
 
-        List<Person> people = parser.stream(bais, null, true, Type.of(Person.class)).toList();
+        List<Person> people = parser.stream(bais, true, null, Type.of(Person.class)).toList();
 
         assertEquals(2, people.size());
         assertEquals("M", people.get(0).getName());
@@ -313,7 +313,7 @@ public class JSONParserImpl100Test extends TestBase {
         String json = "[{\"name\": \"P\",\"age\":30},{\"name\": \"Q\",\"age\":40}]";
         StringReader reader = new StringReader(json);
 
-        List<Person> people = parser.stream(reader, null, true, Type.of(Person.class)).toList();
+        List<Person> people = parser.stream(reader, true, null, Type.of(Person.class)).toList();
 
         assertEquals(2, people.size());
         assertEquals("P", people.get(0).getName());

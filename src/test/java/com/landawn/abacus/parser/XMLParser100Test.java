@@ -24,6 +24,7 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 
 import com.landawn.abacus.TestBase;
+import com.landawn.abacus.type.Type;
 
 @Tag("new-test")
 public class XMLParser100Test extends TestBase {
@@ -138,7 +139,7 @@ public class XMLParser100Test extends TestBase {
         }
 
         @Override
-        public <T> T deserialize(InputStream source, XMLDeserializationConfig config, Map<String, Class<?>> nodeClasses) {
+        public <T> T deserialize(InputStream source, XMLDeserializationConfig config, Map<String, Type<?>> nodeClasses) {
             if (nodeClasses.containsKey("test")) {
                 return (T) deserialize("", nodeClasses.get("test"));
             }
@@ -146,7 +147,7 @@ public class XMLParser100Test extends TestBase {
         }
 
         @Override
-        public <T> T deserialize(Reader source, XMLDeserializationConfig config, Map<String, Class<?>> nodeClasses) {
+        public <T> T deserialize(Reader source, XMLDeserializationConfig config, Map<String, Type<?>> nodeClasses) {
             if (nodeClasses.containsKey("test")) {
                 return (T) deserialize("", nodeClasses.get("test"));
             }
@@ -154,11 +155,66 @@ public class XMLParser100Test extends TestBase {
         }
 
         @Override
-        public <T> T deserialize(Node source, XMLDeserializationConfig config, Map<String, Class<?>> nodeClasses) {
+        public <T> T deserialize(Node source, XMLDeserializationConfig config, Map<String, Type<?>> nodeClasses) {
             if (nodeClasses.containsKey("test")) {
                 return (T) deserialize("", nodeClasses.get("test"));
             }
             return null;
+        }
+
+        @Override
+        public <T> T deserialize(String source, Type<? extends T> targetType) {
+            return deserialize(source, targetType.clazz());
+        }
+
+        @Override
+        public <T> T deserialize(String source, XMLDeserializationConfig config, Type<? extends T> targetType) {
+            return deserialize(source, config, targetType.clazz());
+        }
+
+        @Override
+        public <T> T deserialize(File source, Type<? extends T> targetType) {
+            return deserialize(source, targetType.clazz());
+        }
+
+        @Override
+        public <T> T deserialize(File source, XMLDeserializationConfig config, Type<? extends T> targetType) {
+            return deserialize(source, config, targetType.clazz());
+        }
+
+        @Override
+        public <T> T deserialize(InputStream source, Type<? extends T> targetType) {
+            return deserialize(source, targetType.clazz());
+        }
+
+        @Override
+        public <T> T deserialize(InputStream source, XMLDeserializationConfig config, Type<? extends T> targetType) {
+            return deserialize(source, config, targetType.clazz());
+        }
+
+        @Override
+        public <T> T deserialize(Reader source, Type<? extends T> targetType) {
+            return deserialize(source, targetType.clazz());
+        }
+
+        @Override
+        public <T> T deserialize(Reader source, XMLDeserializationConfig config, Type<? extends T> targetType) {
+            return deserialize(source, config, targetType.clazz());
+        }
+
+        @Override
+        public <T> T deserialize(Node source, Type<? extends T> targetType) {
+            return deserialize(source, targetType.clazz());
+        }
+
+        @Override
+        public <T> T deserialize(Node source, XMLDeserializationConfig config, Type<? extends T> targetType) {
+            return deserialize(source, config, targetType.clazz());
+        }
+
+        @Override
+        public <T> T deserialize(File source, XMLDeserializationConfig config, Map<String, Type<?>> nodeTypes) {
+            return deserialize(source, config, nodeTypes);
         }
     }
 
@@ -196,8 +252,8 @@ public class XMLParser100Test extends TestBase {
 
     @Test
     public void testDeserializeWithNodeClassesFromInputStream() {
-        Map<String, Class<?>> nodeClasses = new HashMap<>();
-        nodeClasses.put("test", TestObject.class);
+        Map<String, Type<?>> nodeClasses = new HashMap<>();
+        nodeClasses.put("test", Type.of(TestObject.class));
 
         ByteArrayInputStream bais = new ByteArrayInputStream("<test/>".getBytes());
         XMLDeserializationConfig config = new XMLDeserializationConfig();
@@ -208,8 +264,8 @@ public class XMLParser100Test extends TestBase {
 
     @Test
     public void testDeserializeWithNodeClassesFromReader() {
-        Map<String, Class<?>> nodeClasses = new HashMap<>();
-        nodeClasses.put("test", TestObject.class);
+        Map<String, Type<?>> nodeClasses = new HashMap<>();
+        nodeClasses.put("test", Type.of(TestObject.class));
 
         StringReader reader = new StringReader("<test/>");
         XMLDeserializationConfig config = new XMLDeserializationConfig();
@@ -220,8 +276,8 @@ public class XMLParser100Test extends TestBase {
 
     @Test
     public void testDeserializeWithNodeClassesFromNode() throws Exception {
-        Map<String, Class<?>> nodeClasses = new HashMap<>();
-        nodeClasses.put("test", TestObject.class);
+        Map<String, Type<?>> nodeClasses = new HashMap<>();
+        nodeClasses.put("test", Type.of(TestObject.class));
 
         DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
         DocumentBuilder builder = factory.newDocumentBuilder();

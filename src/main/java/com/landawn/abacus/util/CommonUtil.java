@@ -100,7 +100,6 @@ import com.landawn.abacus.parser.ParserUtil;
 import com.landawn.abacus.parser.ParserUtil.BeanInfo;
 import com.landawn.abacus.parser.ParserUtil.PropInfo;
 import com.landawn.abacus.type.Type;
-import com.landawn.abacus.type.TypeFactory;
 import com.landawn.abacus.util.Builder.ComparisonBuilder;
 import com.landawn.abacus.util.u.Nullable;
 import com.landawn.abacus.util.u.Optional;
@@ -647,10 +646,6 @@ sealed class CommonUtil permits N {
     private static final Map<Class<? extends Enum<?>>, ImmutableSet<? extends Enum<?>>> enumSetPool = new ObjectPool<>(POOL_SIZE);
 
     private static final Map<Class<? extends Enum<?>>, ImmutableBiMap<? extends Enum<?>, String>> enumMapPool = new ObjectPool<>(POOL_SIZE);
-
-    private static final Map<String, Type<?>> nameTypePool = new ObjectPool<>(POOL_SIZE);
-
-    private static final Map<Class<?>, Type<?>> clsTypePool = new ObjectPool<>(POOL_SIZE);
 
     static final String[] charStringCache = new String[128];
 
@@ -9322,20 +9317,11 @@ sealed class CommonUtil permits N {
      * @param typeName the name of the type to be retrieved.
      * @return the Type corresponding to the given type name.
      * @throws IllegalArgumentException if the specified {@code typeName} is {@code null}.
+     * @see Type#of(String)
      */
     @SuppressWarnings("unchecked")
     public static <T> Type<T> typeOf(@NotNull final String typeName) throws IllegalArgumentException {
-        checkArgNotNull(typeName, cs.typeName);
-
-        Type<?> type = nameTypePool.get(typeName);
-
-        if (type == null) {
-            type = TypeFactory.getType(typeName);
-
-            nameTypePool.put(typeName, type);
-        }
-
-        return (Type<T>) type;
+        return Type.of(typeName);
     }
 
     /**
@@ -9345,19 +9331,11 @@ sealed class CommonUtil permits N {
      * @param cls the name of the type to be retrieved.
      * @return the Type corresponding to the given type name.
      * @throws IllegalArgumentException if the specified {@code Class} is {@code null}.
+     * @see Type#of(Class)
      */
     @SuppressWarnings("unchecked")
     public static <T> Type<T> typeOf(@NotNull final Class<?> cls) throws IllegalArgumentException {
-        checkArgNotNull(cls, cs.cls);
-
-        Type<?> type = clsTypePool.get(cls);
-
-        if (type == null) {
-            type = TypeFactory.getType(cls);
-            clsTypePool.put(cls, type);
-        }
-
-        return (Type<T>) type;
+        return (Type<T>) Type.of(cls);
     }
 
     /**

@@ -19,7 +19,6 @@ import java.io.IOException;
 import com.landawn.abacus.parser.JSONXMLSerializationConfig;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.IntList;
-import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Strings;
 
 @SuppressWarnings("java:S2160")
@@ -27,9 +26,9 @@ public final class PrimitiveIntListType extends AbstractPrimitiveListType<IntLis
 
     public static final String INT_LIST = IntList.class.getSimpleName();
 
-    private final Type<int[]> arrayType = N.typeOf(int[].class);
+    private final Type<int[]> arrayType = Type.of(int[].class);
 
-    private final Type<Integer> elementType = N.typeOf(int.class);
+    private final Type<Integer> elementType = Type.of(int.class);
     private final Type<Integer>[] parameterTypes = new Type[] { elementType };
 
     protected PrimitiveIntListType() {

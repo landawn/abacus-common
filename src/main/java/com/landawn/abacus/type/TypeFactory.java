@@ -33,7 +33,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
@@ -64,7 +63,6 @@ import com.landawn.abacus.util.Sheet;
 import com.landawn.abacus.util.Strings;
 import com.landawn.abacus.util.Timed;
 import com.landawn.abacus.util.Triple;
-import com.landawn.abacus.util.TypeAttrParser;
 import com.landawn.abacus.util.Tuple.Tuple1;
 import com.landawn.abacus.util.Tuple.Tuple2;
 import com.landawn.abacus.util.Tuple.Tuple3;
@@ -74,6 +72,7 @@ import com.landawn.abacus.util.Tuple.Tuple6;
 import com.landawn.abacus.util.Tuple.Tuple7;
 import com.landawn.abacus.util.Tuple.Tuple8;
 import com.landawn.abacus.util.Tuple.Tuple9;
+import com.landawn.abacus.util.TypeAttrParser;
 import com.landawn.abacus.util.cs;
 import com.landawn.abacus.util.u.Nullable;
 import com.landawn.abacus.util.u.Optional;
@@ -196,9 +195,9 @@ public final class TypeFactory {
     @SuppressWarnings("deprecation")
     private static final int POOL_SIZE = InternalUtil.POOL_SIZE;
 
-    private static final Map<Class<?>, Type<?>> classTypePool = new ObjectPool<>(POOL_SIZE);
+    private static final Map<java.lang.reflect.Type, Type<?>> javaType2TypeCache = new ObjectPool<>(POOL_SIZE);
 
-    static final Map<String, Type<?>> typePool = new ObjectPool<>(POOL_SIZE);
+    private static final Map<String, Type<?>> typePool = new ObjectPool<>(POOL_SIZE);
 
     static final Class<?> guavaMultisetClass; // could be null if Guava library is not in the classpath.
     static final Class<?> guavaMultimapClass; // could be null if Guava library is not in the classpath.
@@ -523,11 +522,9 @@ public final class TypeFactory {
                 continue;
             }
 
-            classTypePool.put(type.clazz(), type);
+            javaType2TypeCache.put(type.javaType(), type);
         }
     }
-
-    private static final Map<java.lang.reflect.Type, Type<?>> type2TypeCache = new ConcurrentHashMap<>();
 
     static String getClassName(final Class<?> cls) {
         String clsName = ClassUtil.getCanonicalClassName(cls);
@@ -540,7 +537,7 @@ public final class TypeFactory {
     }
 
     @SuppressWarnings({ "rawtypes", "unchecked" })
-    private static <T> Type<T> getType(Class cls, String typeName) {
+    private static <T> Type<T> getType(String typeName, Class cls, java.lang.reflect.Type javaType) {
         if (Strings.isEmpty(typeName)) {
             typeName = getClassName(cls);
         }
@@ -1095,7 +1092,7 @@ public final class TypeFactory {
                 } else if (Number.class.isAssignableFrom(cls)) {
                     type = new NumberType(cls);
                 } else if (Beans.isBeanClass(cls) && !mutablePrimitiveSimpleClassName.contains(ClassUtil.getSimpleClassName(cls))) {
-                    type = new BeanType(cls);
+                    type = new BeanType(cls, javaType);
                 } else if (Type.class.isAssignableFrom(cls)) {
                     type = TypeAttrParser.newInstance(cls, typeName);
                 } else if (NClob.class.isAssignableFrom(cls)) {
@@ -1212,13 +1209,13 @@ public final class TypeFactory {
     public static <T> Type<T> getType(final Class<?> cls) throws IllegalArgumentException {
         N.checkArgNotNull(cls, cs.cls);
 
-        Type type = classTypePool.get(cls);
+        Type type = javaType2TypeCache.get(cls);
 
         if (type == null) {
-            type = getType(cls, getClassName(cls));
+            type = getType(getClassName(cls), cls, cls);
 
             if (type != null) {
-                classTypePool.put(cls, type);
+                javaType2TypeCache.put(cls, type);
             }
         }
 
@@ -1254,24 +1251,27 @@ public final class TypeFactory {
      * </p>
      *
      * @param <T> the type parameter
-     * @param type the java.lang.reflect.Type to convert, can be a Class or ParameterizedType
+     * @param javaType the java.lang.reflect.Type to convert, can be a Class or ParameterizedType
      * @return the corresponding Type object
      * @see #getType(Class)
      * @see #getType(String)
      */
     @SuppressWarnings("rawtypes")
-    public static <T> Type<T> getType(final java.lang.reflect.Type type) {
-        Type result = type2TypeCache.get(type);
+    public static <T> Type<T> getType(final java.lang.reflect.Type javaType) {
+        Type result = javaType2TypeCache.get(javaType);
 
         if (result == null) {
             //noinspection ConditionCoveredByFurtherCondition
-            if ((type instanceof ParameterizedType) || !(type instanceof Class)) {
-                result = getType(ClassUtil.getTypeName(type));
+            if ((javaType instanceof ParameterizedType) || !(javaType instanceof Class)) {
+                final Class cls = javaType instanceof Class ? (Class) javaType
+                        : javaType instanceof ParameterizedType pt && pt.getRawType() instanceof Class ? (Class) pt.getRawType() : null;
+
+                result = getType(ClassUtil.getTypeName(javaType), cls, javaType);
             } else {
-                result = getType((Class) type);
+                result = getType((Class) javaType);
             }
 
-            type2TypeCache.put(type, result);
+            javaType2TypeCache.put(javaType, result);
         }
 
         return result;
@@ -1313,7 +1313,7 @@ public final class TypeFactory {
     public static <T> Type<T> getType(final String typeName) throws IllegalArgumentException {
         N.checkArgNotNull(typeName, cs.typeName);
 
-        return getType(null, typeName);
+        return getType(typeName, null, null);
     }
 
     /**
@@ -1443,13 +1443,13 @@ public final class TypeFactory {
         N.checkArgNotNull(cls, cs.cls);
         N.checkArgNotNull(type, cs.type);
 
-        if (classTypePool.containsKey(cls)) {
+        if (javaType2TypeCache.containsKey(cls)) {
             throw new IllegalArgumentException("A type has already registered with class: " + cls);
         }
 
         registerType(type);
 
-        classTypePool.put(cls, type);
+        javaType2TypeCache.put(cls, type);
     }
 
     /**
@@ -1506,8 +1506,8 @@ public final class TypeFactory {
 
         registerType(typeName, type);
 
-        if (!classTypePool.containsKey(targetClass)) {
-            classTypePool.put(targetClass, type);
+        if (!javaType2TypeCache.containsKey(targetClass)) {
+            javaType2TypeCache.put(targetClass, type);
         }
     }
 
@@ -1565,8 +1565,8 @@ public final class TypeFactory {
 
         registerType(typeName, type);
 
-        if (!classTypePool.containsKey(targetClass)) {
-            classTypePool.put(targetClass, type);
+        if (!javaType2TypeCache.containsKey(targetClass)) {
+            javaType2TypeCache.put(targetClass, type);
         }
     }
 

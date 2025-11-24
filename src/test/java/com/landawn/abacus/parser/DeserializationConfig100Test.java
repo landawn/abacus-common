@@ -151,25 +151,6 @@ public class DeserializationConfig100Test extends TestBase {
     }
 
     @Test
-    public void testGetValueTypeClass() {
-        Assertions.assertNull(config.getValueTypeClass("nonExistent"));
-
-        config.setValueType("prop1", String.class);
-        Class<?> clazz = config.getValueTypeClass("prop1");
-        Assertions.assertEquals(String.class, clazz);
-    }
-
-    @Test
-    public void testGetValueTypeClassWithDefault() {
-        Class<?> result = config.getValueTypeClass("nonExistent", Integer.class);
-        Assertions.assertEquals(Integer.class, result);
-
-        config.setValueType("prop1", String.class);
-        Class<?> clazz = config.getValueTypeClass("prop1", Integer.class);
-        Assertions.assertEquals(String.class, clazz);
-    }
-
-    @Test
     public void testSetValueTypeWithClass() {
         config.setValueType("prop1", Double.class);
         Type<?> type = config.getValueType("prop1");

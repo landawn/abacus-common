@@ -1,7 +1,3 @@
-/*
- * Copyright (c) 2015, Haiyang Li. All rights reserved.
- */
-
 package com.landawn.abacus.parser;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -24,6 +20,7 @@ import java.util.Set;
 
 import javax.xml.parsers.DocumentBuilder;
 
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
@@ -35,6 +32,7 @@ import com.landawn.abacus.parser.XMLSerializationConfig.XSC;
 import com.landawn.abacus.parser.entity.GenericEntity;
 import com.landawn.abacus.parser.entity.XBean;
 import com.landawn.abacus.record.Element;
+import com.landawn.abacus.type.Type;
 import com.landawn.abacus.types.WeekDay;
 import com.landawn.abacus.util.Array;
 import com.landawn.abacus.util.Beans;
@@ -46,6 +44,7 @@ import com.landawn.abacus.util.StringWriter;
 import com.landawn.abacus.util.Strings;
 import com.landawn.abacus.util.XmlUtil;
 
+@Tag("old-test")
 public class AbacusXMLSAXParserTest extends AbstractXMLParserTest {
     @Override
     protected Parser<?, ?> getParser() {
@@ -65,18 +64,14 @@ public class AbacusXMLSAXParserTest extends AbstractXMLParserTest {
 
         assertEquals(e, jsonParser.deserialize(jsonParser.serialize(e), Element.class));
 
-        // assertEquals(e, kryoParser.deserialize(Element.class, kryoParser.serialize(e)));
-
         assertEquals(e, xmlParser.deserialize(xmlParser.serialize(e), Element.class));
         assertEquals(e, xmlDOMParser.deserialize(xmlDOMParser.serialize(e), Element.class));
-        // assertEquals(e, jaxbXMLParser.deserialize(Element.class, jaxbXMLParser.serialize(e)));
 
         assertEquals(e, abacusXMLParser.deserialize(abacusXMLParser.serialize(e), Element.class));
         assertEquals(e, abacusXMLStAXParser.deserialize(abacusXMLStAXParser.serialize(e), Element.class));
         assertEquals(e, abacusXMLDOMParser.deserialize(abacusXMLDOMParser.serialize(e), Element.class));
         assertEquals(e, abacusXMLSAXParser.deserialize(abacusXMLSAXParser.serialize(e), Element.class));
 
-        // assertEquals(e, avroParser.deserialize(Element.class, avroParser.serialize(e)));
     }
 
     @Test
@@ -122,16 +117,11 @@ public class AbacusXMLSAXParserTest extends AbstractXMLParserTest {
 
         N.println(str);
 
-        //        GenericEntity genericBean2 = abacusXMLSAXParser.deserialize(GenericEntity.class, str);
-        //        N.println(genericBean2);
-        //        assertEquals(genericBean, genericBean2);
-
         XMLDeserializationConfig xdc = XDC.create().setValueType("account", Account.class);
         Map<String, Object> props2 = abacusXMLSAXParser.deserialize(str, xdc, Map.class);
         N.println(props);
         N.println(props2);
 
-        // assertEquals(props, props2);
     }
 
     @Test
@@ -160,7 +150,7 @@ public class AbacusXMLSAXParserTest extends AbstractXMLParserTest {
         String str = abacusXMLSAXParser.serialize(account);
         InputStream is = IOUtil.string2InputStream(str);
 
-        Map<String, Class<?>> nodeClasses = N.asMap("account", Account.class);
+        Map<String, Type<?>> nodeClasses = Map.of("account", Type.of(Account.class));
 
         Account account2 = abacusXMLSAXParser.deserialize(is, null, nodeClasses);
 
@@ -228,7 +218,6 @@ public class AbacusXMLSAXParserTest extends AbstractXMLParserTest {
         N.println(str);
 
         List<String> list2 = abacusXMLSAXParser.deserialize(str, List.class);
-        // assertTrue(N.equals(list, list2));
         N.println(list2);
 
         Map<String, Object> map = N.asMap(nullElement, nullElement);
@@ -238,7 +227,6 @@ public class AbacusXMLSAXParserTest extends AbstractXMLParserTest {
 
         Map<String, Object> map2 = abacusXMLSAXParser.deserialize(str, Map.class);
         N.println(map2);
-        // assertTrue(N.equals(map, map2));
 
         map2 = (Map<String, Object>) abacusXMLSAXParser.deserialize(str, Object.class);
         N.println(map2);
@@ -292,7 +280,6 @@ public class AbacusXMLSAXParserTest extends AbstractXMLParserTest {
         xdc.setValueType("account", Account.class);
         Map<String, Object> map2 = abacusXMLSAXParser.deserialize(str, xdc, Map.class);
         N.println(map2);
-        // assertTrue(N.equals(map, map2));
     }
 
     @Test
@@ -300,8 +287,6 @@ public class AbacusXMLSAXParserTest extends AbstractXMLParserTest {
         Account account = new Account();
 
         String str = abacusXMLSAXParser.serialize(account);
-
-        // assertEquals("<account></account>", str);
 
         account.setId(0);
         account.setFirstName("firstName");
@@ -327,8 +312,6 @@ public class AbacusXMLSAXParserTest extends AbstractXMLParserTest {
         xdc.setValueType("account", Account.class);
         Map<String, Object> map2 = abacusXMLSAXParser.deserialize(str, xdc, Map.class);
         N.println(map2);
-
-        // assertEquals(map, map2);
 
         str = abacusXMLSAXParser.serialize(N.asList(map), xsc);
         N.println(str);
@@ -488,34 +471,6 @@ public class AbacusXMLSAXParserTest extends AbstractXMLParserTest {
         String xml = abacusXMLSAXParser.serialize(account);
         N.println(xml);
         N.println(account);
-
-        //        xml = "<map><id>1002759403</id><gui>8354b425f53d4c1893b848a35191bd89</gui><emailAddress>a267c0eb96d84088968ec4885110ddab@earth.com</emailAddress><firstName>firstName</firstName><middleName>MN</middleName><lastName>lastName</lastName><birthDate>1414001208304</birthDate><lastUpdateTime>1414001208304</lastUpdateTime><createdTime>1414001208305</createdTime><contact><accountContact><id>2801</id><accountId>1002759403</accountId><address>ca, US</address><city>sunnyvale</city><state>CA</state><country>U.S.</country></accountContact></contact></map>";
-        //        Account account2 = abacusXMLSAXParser.deserialize(Account.class, xml);
-        //        N.println(account2);
-        //
-        //        xml = "<map><id>1002759403</id><gui>8354b425f53d4c1893b848a35191bd89</gui><emailAddress>a267c0eb96d84088968ec4885110ddab@earth.com</emailAddress><firstName>firstName</firstName><middleName>MN</middleName><lastName>lastName</lastName><birthDate>1414001208304</birthDate><lastUpdateTime>1414001208304</lastUpdateTime><createdTime>1414001208305</createdTime><contact><map><id>2801</id><accountId>1002759403</accountId><address>ca, US</address><city>sunnyvale</city><state>CA</state><country>U.S.</country></map></contact></map>";
-        //        account2 = abacusXMLSAXParser.deserialize(Account.class, xml);
-        //        N.println(account2);
-        //
-        //        xml = "<list><id>1002759403</id><gui>8354b425f53d4c1893b848a35191bd89</gui><emailAddress>a267c0eb96d84088968ec4885110ddab@earth.com</emailAddress><firstName>firstName</firstName><middleName>MN</middleName><lastName>lastName</lastName><birthDate>1414001208304</birthDate><lastUpdateTime>1414001208304</lastUpdateTime><createdTime>1414001208305</createdTime><contact><list><id>2801</id><accountId>1002759403</accountId><address>ca, US</address><city>sunnyvale</city><state>CA</state><country>U.S.</country></list></contact></list>";
-        //        account2 = abacusXMLSAXParser.deserialize(Account.class, xml);
-        //        N.println(account2);
-        //
-        //        xml = "<key><id>1002759403</id><gui>8354b425f53d4c1893b848a35191bd89</gui><emailAddress>a267c0eb96d84088968ec4885110ddab@earth.com</emailAddress><firstName>firstName</firstName><middleName>MN</middleName><lastName>lastName</lastName><birthDate>1414001208304</birthDate><lastUpdateTime>1414001208304</lastUpdateTime><createdTime>1414001208305</createdTime><contact><key><id>2801</id><accountId>1002759403</accountId><address>ca, US</address><city>sunnyvale</city><state>CA</state><country>U.S.</country></key></contact></key>";
-        //        account2 = abacusXMLSAXParser.deserialize(Account.class, xml);
-        //        N.println(account2);
-        //
-        //        xml = "<value><id>1002759403</id><gui>8354b425f53d4c1893b848a35191bd89</gui><emailAddress>a267c0eb96d84088968ec4885110ddab@earth.com</emailAddress><firstName>firstName</firstName><middleName>MN</middleName><lastName>lastName</lastName><birthDate>1414001208304</birthDate><lastUpdateTime>1414001208304</lastUpdateTime><createdTime>1414001208305</createdTime><contact><value><id>2801</id><accountId>1002759403</accountId><address>ca, US</address><city>sunnyvale</city><state>CA</state><country>U.S.</country></value></contact></value>";
-        //        account2 = abacusXMLSAXParser.deserialize(Account.class, xml);
-        //        N.println(account2);
-        //
-        //        xml = "<entry><id>1002759403</id><gui>8354b425f53d4c1893b848a35191bd89</gui><emailAddress>a267c0eb96d84088968ec4885110ddab@earth.com</emailAddress><firstName>firstName</firstName><middleName>MN</middleName><lastName>lastName</lastName><birthDate>1414001208304</birthDate><lastUpdateTime>1414001208304</lastUpdateTime><createdTime>1414001208305</createdTime><contact><entry><id>2801</id><accountId>1002759403</accountId><address>ca, US</address><city>sunnyvale</city><state>CA</state><country>U.S.</country></entry></contact></entry>";
-        //        account2 = abacusXMLSAXParser.deserialize(Account.class, xml);
-        //        N.println(account2);
-        //
-        //        xml = "<e><id>1002759403</id><gui>8354b425f53d4c1893b848a35191bd89</gui><emailAddress>a267c0eb96d84088968ec4885110ddab@earth.com</emailAddress><firstName>firstName</firstName><middleName>MN</middleName><lastName>lastName</lastName><birthDate>1414001208304</birthDate><lastUpdateTime>1414001208304</lastUpdateTime><createdTime>1414001208305</createdTime><contact><e><id>2801</id><accountId>1002759403</accountId><address>ca, US</address><city>sunnyvale</city><state>CA</state><country>U.S.</country></e></contact></e>";
-        //        account2 = abacusXMLSAXParser.deserialize(Account.class, xml);
-        //        N.println(account2);
 
         xml = "<unknown><id>1002759403</id><gui>8354b425f53d4c1893b848a35191bd89</gui><emailAddress>a267c0eb96d84088968ec4885110ddab@earth.com</emailAddress><firstName>firstName</firstName><middleName>MN</middleName><lastName>lastName</lastName><birthDate>1414001208304</birthDate><lastUpdateTime>1414001208304</lastUpdateTime><createdTime>1414001208305</createdTime><contact><unknown><id>2801</id><accountId>1002759403</accountId><address>ca, US</address><city>sunnyvale</city><state>CA</state><country>U.S.</country></unknown></contact></unknown>";
         Account account2 = abacusXMLSAXParser.deserialize(xml, Account.class);
@@ -740,7 +695,6 @@ public class AbacusXMLSAXParserTest extends AbstractXMLParserTest {
 
         N.println(xBean);
         N.println(xBean2);
-        // assertEquals(xBean, xBean2);
     }
 
     @Test

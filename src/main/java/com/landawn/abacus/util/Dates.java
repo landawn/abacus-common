@@ -2506,6 +2506,8 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * @param amount the amount to set
      * @return a new {@code Date} set with the specified value
      * @throws IllegalArgumentException if the date is null
+     * @see Calendar#YEAR
+     * @see Calendar#set(int, int)
      */
     public static <T extends java.util.Date> T setYears(final T date, final int amount) {
         return set(date, Calendar.YEAR, amount);
@@ -2525,6 +2527,8 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * @param amount the amount to set
      * @return a new {@code Date} set with the specified value
      * @throws IllegalArgumentException if the date is null
+     * @see Calendar#MONTH
+     * @see Calendar#set(int, int)
      */
     public static <T extends java.util.Date> T setMonths(final T date, final int amount) {
         return set(date, Calendar.MONTH, amount);
@@ -2544,6 +2548,8 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * @param amount the amount to set
      * @return a new {@code Date} set with the specified value
      * @throws IllegalArgumentException if the date is null
+     * @see Calendar#DAY_OF_MONTH
+     * @see Calendar#set(int, int)
      */
     public static <T extends java.util.Date> T setDays(final T date, final int amount) {
         return set(date, Calendar.DAY_OF_MONTH, amount);
@@ -2564,6 +2570,8 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * @param amount the amount to set
      * @return a new {@code Date} set with the specified value
      * @throws IllegalArgumentException if the date is null
+     * @see Calendar#HOUR_OF_DAY
+     * @see Calendar#set(int, int)
      */
     public static <T extends java.util.Date> T setHours(final T date, final int amount) {
         return set(date, Calendar.HOUR_OF_DAY, amount);
@@ -2583,6 +2591,8 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * @param amount the amount to set
      * @return a new {@code Date} set with the specified value
      * @throws IllegalArgumentException if the date is null
+     * @see Calendar#MINUTE
+     * @see Calendar#set(int, int)
      */
     public static <T extends java.util.Date> T setMinutes(final T date, final int amount) {
         return set(date, Calendar.MINUTE, amount);
@@ -2602,6 +2612,8 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * @param amount the amount to set
      * @return a new {@code Date} set with the specified value
      * @throws IllegalArgumentException if the date is null
+     * @see Calendar#SECOND
+     * @see Calendar#set(int, int)
      */
     public static <T extends java.util.Date> T setSeconds(final T date, final int amount) {
         return set(date, Calendar.SECOND, amount);
@@ -2621,6 +2633,8 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * @param amount the amount to set
      * @return a new {@code Date} set with the specified value
      * @throws IllegalArgumentException if the date is null
+     * @see Calendar#MILLISECOND
+     * @see Calendar#set(int, int)
      */
     public static <T extends java.util.Date> T setMilliseconds(final T date, final int amount) {
         return set(date, Calendar.MILLISECOND, amount);
@@ -2642,6 +2656,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * @param amount the amount to set
      * @return a new {@code Date} set with the specified value
      * @throws IllegalArgumentException if the date is null
+     * @see Calendar#set(int, int)
      */
     private static <T extends java.util.Date> T set(final T date, final int calendarField, final int amount) {
         N.checkArgNotNull(date, cs.date);
@@ -2669,6 +2684,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * @param unit the time unit to use for rolling
      * @return a new instance of Date with the specified amount rolled.
      * @throws IllegalArgumentException if the date is null
+     * @see Calendar#set(int, int)
      */
     @Beta
     public static <T extends java.util.Date> T roll(final T date, final long amount, final TimeUnit unit) throws IllegalArgumentException {
@@ -2690,6 +2706,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * @param unit the calendar field unit to use for rolling
      * @return a new instance of Date with the specified amount rolled.
      * @throws IllegalArgumentException if the date or unit is null
+     * @see Calendar#set(int, int)
      */
     @Beta
     public static <T extends java.util.Date> T roll(final T date, final int amount, final CalendarField unit) throws IllegalArgumentException {
@@ -2724,6 +2741,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * @param unit the time unit to use for rolling
      * @return a new instance of Calendar with the specified amount rolled.
      * @throws IllegalArgumentException if the calendar or unit is null
+     * @see Calendar#set(int, int)
      */
     @Beta
     public static <T extends Calendar> T roll(final T calendar, final long amount, final TimeUnit unit) throws IllegalArgumentException {
@@ -2746,6 +2764,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * @param unit the calendar field unit to use for rolling
      * @return a new instance of Calendar with the specified amount rolled.
      * @throws IllegalArgumentException if the calendar or unit is null
+     * @see Calendar#set(int, int)
      */
     @Beta
     public static <T extends Calendar> T roll(final T calendar, final int amount, final CalendarField unit) throws IllegalArgumentException {

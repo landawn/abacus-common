@@ -66,7 +66,7 @@ public abstract class TypeReference<T> {
      * This field is initialized in the constructor by analyzing the generic
      * superclass of the concrete subclass.
      */
-    protected final java.lang.reflect.Type _type;
+    protected final java.lang.reflect.Type javaType;
 
     /**
      * The Type instance representing the captured generic type information.
@@ -115,12 +115,12 @@ public abstract class TypeReference<T> {
             throw new IllegalArgumentException("TypeReference constructed without type arguments");
         }
 
-        _type = typeArguments[0];
+        javaType = typeArguments[0];
 
-        type = TypeFactory.getType(_type);
+        type = TypeFactory.getType(javaType);
 
         if (type == null) {
-            throw new IllegalStateException("Failed to resolve type from TypeFactory for: " + _type);
+            throw new IllegalStateException("Failed to resolve type from TypeFactory for: " + javaType);
         }
     }
 
@@ -169,15 +169,15 @@ public abstract class TypeReference<T> {
      * @see #type()
      * @see ParameterizedType
      */
-    public java.lang.reflect.Type getType() {
-        return _type;
+    public java.lang.reflect.Type javaType() {
+        return javaType;
     }
 
     /**
      * Returns the {@link Type} instance representing the captured generic type.
      *
      * <p>This method provides access to the framework-specific {@link Type} wrapper that
-     * encapsulates the generic type information. Unlike {@link #getType()}, which returns
+     * encapsulates the generic type information. Unlike {@link #javaType()}, which returns
      * the raw {@code java.lang.reflect.Type}, this method returns a {@code Type<T>} instance
      * from the abacus type system, which provides additional type manipulation and
      * introspection capabilities.</p>
@@ -214,7 +214,7 @@ public abstract class TypeReference<T> {
      *
      * @return the {@link Type} instance representing the generic type T;
      *         never {@code null} (validated during construction)
-     * @see #getType()
+     * @see #javaType()
      * @see Type
      * @see TypeFactory
      */

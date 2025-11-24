@@ -30646,7 +30646,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see #fromJson(String, Type)
      */
     public static <T> T fromJson(final String json, final JSONDeserializationConfig config, final Type<? extends T> targetType) {
-        return Utils.jsonParser.deserialize(json, setConfig(targetType, config, true), targetType.clazz());
+        return Utils.jsonParser.deserialize(json, setConfig(targetType, config, true), targetType);
     }
 
     /**
@@ -30738,7 +30738,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see #fromJson(File, Type)
      */
     public static <T> T fromJson(final File json, final JSONDeserializationConfig config, final Type<? extends T> targetType) {
-        return Utils.jsonParser.deserialize(json, setConfig(targetType, config, true), targetType.clazz());
+        return Utils.jsonParser.deserialize(json, setConfig(targetType, config, true), targetType);
     }
 
     /**
@@ -30842,7 +30842,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see #fromJson(InputStream, Type)
      */
     public static <T> T fromJson(final InputStream json, final JSONDeserializationConfig config, final Type<? extends T> targetType) {
-        return Utils.jsonParser.deserialize(json, setConfig(targetType, config, true), targetType.clazz());
+        return Utils.jsonParser.deserialize(json, setConfig(targetType, config, true), targetType);
     }
 
     /**
@@ -30946,7 +30946,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see #fromJson(Reader, Type)
      */
     public static <T> T fromJson(final Reader json, final JSONDeserializationConfig config, final Type<? extends T> targetType) {
-        return Utils.jsonParser.deserialize(json, setConfig(targetType, config, true), targetType.clazz());
+        return Utils.jsonParser.deserialize(json, setConfig(targetType, config, true), targetType);
     }
 
     /**
@@ -31054,7 +31054,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      */
     public static <T> T fromJson(final String json, final int fromIndex, final int toIndex, final JSONDeserializationConfig config,
             final Type<? extends T> targetType) throws IndexOutOfBoundsException {
-        return Utils.jsonParser.deserialize(json, fromIndex, toIndex, setConfig(targetType, config, true), targetType.clazz());
+        return Utils.jsonParser.deserialize(json, fromIndex, toIndex, setConfig(targetType, config, true), targetType);
     }
 
     /**
@@ -31216,7 +31216,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      */
     public static <T> Stream<T> streamJson(final InputStream jsonArray, final JSONDeserializationConfig config,
             final boolean closeInputStreamWhenStreamIsClosed, final Type<? extends T> elementType) {
-        return Utils.jsonParser.stream(jsonArray, setElementType(config, elementType), closeInputStreamWhenStreamIsClosed, elementType);
+        return Utils.jsonParser.stream(jsonArray, closeInputStreamWhenStreamIsClosed, setElementType(config, elementType), elementType);
     }
 
     /**
@@ -31288,7 +31288,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      */
     public static <T> Stream<T> streamJson(final Reader jsonArray, final JSONDeserializationConfig config, final boolean closeReaderWhenStreamIsClosed,
             final Type<? extends T> elementType) {
-        return Utils.jsonParser.stream(jsonArray, setElementType(config, elementType), closeReaderWhenStreamIsClosed, elementType);
+        return Utils.jsonParser.stream(jsonArray, closeReaderWhenStreamIsClosed, setElementType(config, elementType), elementType);
     }
 
     private static JSONDeserializationConfig setElementType(final JSONDeserializationConfig config, final Type<?> elementType) {
@@ -31741,7 +31741,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see TypeReference
      */
     public static <T> T fromXml(final String xml, final XMLDeserializationConfig config, final Type<? extends T> targetType) {
-        return Utils.xmlParser.deserialize(xml, setConfig(targetType, config, false), targetType.clazz());
+        return Utils.xmlParser.deserialize(xml, setConfig(targetType, config, false), targetType);
     }
 
     /**
@@ -31833,7 +31833,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see TypeReference
      */
     public static <T> T fromXml(final File xml, final XMLDeserializationConfig config, final Type<? extends T> targetType) {
-        return Utils.xmlParser.deserialize(xml, setConfig(targetType, config, false), targetType.clazz());
+        return Utils.xmlParser.deserialize(xml, setConfig(targetType, config, false), targetType);
     }
 
     /**
@@ -31937,7 +31937,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see TypeReference
      */
     public static <T> T fromXml(final InputStream xml, final XMLDeserializationConfig config, final Type<? extends T> targetType) {
-        return Utils.xmlParser.deserialize(xml, setConfig(targetType, config, false), targetType.clazz());
+        return Utils.xmlParser.deserialize(xml, setConfig(targetType, config, false), targetType);
     }
 
     /**
@@ -32041,7 +32041,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see TypeReference
      */
     public static <T> T fromXml(final Reader xml, final XMLDeserializationConfig config, final Type<? extends T> targetType) {
-        return Utils.xmlParser.deserialize(xml, setConfig(targetType, config, false), targetType.clazz());
+        return Utils.xmlParser.deserialize(xml, setConfig(targetType, config, false), targetType);
     }
 
     /**
@@ -32972,6 +32972,15 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * The {@code flatMapper} function maps each element of type {@code T} to an {@code Iterable} of elements of type {@code T2}.
      * The {@code flatMapper2} function maps each element of type {@code T2} to an {@code Iterable} of elements of type {@code T3}.
      * The {@code action} is then performed for each triple of elements from the original array and the resulting iterables.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * String[] words = {"hello", "world"};
+     * N.forEach(words, 
+     *     s -> N.asList(s.toCharArray()), 
+     *     c -> N.asList((int)c), 
+     *     (s, c, i) -> System.out.println(s + " " + c + " " + i));
+     * }</pre>
      *
      * @param <T> the type of the elements in the array
      * @param <T2> the type of the elements in the iterable returned by the flatMapper

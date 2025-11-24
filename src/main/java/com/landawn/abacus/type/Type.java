@@ -172,11 +172,11 @@ public interface Type<T> {
      * }</pre>
      *
      * @param <T> the type parameter
-     * @param type the Java reflection type
+     * @param javaType the Java reflection type
      * @return the corresponding Type instance
      */
-    static <T> Type<T> of(final java.lang.reflect.Type type) {
-        return TypeFactory.getType(type);
+    static <T> Type<T> of(final java.lang.reflect.Type javaType) {
+        return TypeFactory.getType(javaType);
     }
 
     /**
@@ -644,6 +644,14 @@ public interface Type<T> {
      * @return the class for this type
      */
     Class<T> clazz();
+
+    /**
+     * Returns the Java reflection Type representing this type.
+     * This may be a Class, ParameterizedType, GenericArrayType, etc.
+     *
+     * @return the Java reflection type
+     */
+    java.lang.reflect.Type javaType();
 
     /**
      * Checks if this is a primitive type (int, long, double, etc.).

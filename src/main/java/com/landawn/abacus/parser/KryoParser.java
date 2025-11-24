@@ -432,6 +432,29 @@ public final class KryoParser extends AbstractParser<KryoSerializationConfig, Kr
      * @param <T> the target type
      * @param source the Base64 encoded string to deserialize from (must not be {@code null})
      * @param config the deserialization configuration to use (may be {@code null} for default behavior)
+     * @param targetType the type of the object to create (must not be {@code null})
+     * @return the deserialized object instance
+     */
+    @Override
+    public <T> T deserialize(String source, KryoDeserializationConfig config, Type<? extends T> targetType) {
+        return deserialize(source, config, targetType.clazz());
+    }
+
+    /**
+     * Deserializes an object from a Base64 encoded string representation.
+     *
+     * <p>This method decodes the Base64 string and uses Kryo deserialization to convert
+     * the binary data back to an object. The input string must be Base64 encoded Kryo binary data.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * String base64Data = "rO0ABXNyABF..."; // Base64 encoded
+     * MyObject obj = parser.deserialize(base64Data, null, MyObject.class);
+     * }</pre>
+     *
+     * @param <T> the target type
+     * @param source the Base64 encoded string to deserialize from (must not be {@code null})
+     * @param config the deserialization configuration to use (may be {@code null} for default behavior)
      * @param targetClass the class of the object to create (must not be {@code null})
      * @return the deserialized object instance
      */
@@ -448,6 +471,30 @@ public final class KryoParser extends AbstractParser<KryoSerializationConfig, Kr
         } finally {
             recycle(input);
         }
+    }
+
+    /**
+     * Deserializes an object from a file containing raw binary data (NOT Base64 encoded).
+     *
+     * <p>This method reads binary Kryo data from the specified file and deserializes it
+     * to an object instance. The file should contain raw binary Kryo data (not Base64 encoded).</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * File file = new File("data.kryo");
+     * MyObject obj = parser.deserialize(file, null, MyObject.class);
+     * }</pre>
+     *
+     * @param <T> the target type
+     * @param source the source file to read from (must not be {@code null} and must exist)
+     * @param config the deserialization configuration to use (may be {@code null} for default behavior)
+     * @param targetType the type of the object to create (must not be {@code null})
+     * @return the deserialized object instance
+     * @throws UncheckedIOException if an I/O error occurs or the file doesn't exist
+     */
+    @Override
+    public <T> T deserialize(File source, KryoDeserializationConfig config, Type<? extends T> targetType) throws UncheckedIOException {
+        return deserialize(source, config, targetType.clazz());
     }
 
     /**
@@ -498,6 +545,31 @@ public final class KryoParser extends AbstractParser<KryoSerializationConfig, Kr
      * @param <T> the target type
      * @param source the input stream to read from (must not be {@code null})
      * @param config the deserialization configuration to use (may be {@code null} for default behavior)
+     * @param targetType the type of the object to create (must not be {@code null})
+     * @return the deserialized object instance
+     * @throws UncheckedIOException if an I/O error occurs during stream reading
+     */
+    @Override
+    public <T> T deserialize(InputStream source, KryoDeserializationConfig config, Type<? extends T> targetType) throws UncheckedIOException {
+        return deserialize(source, config, targetType.clazz());
+    }
+
+    /**
+     * Deserializes an object from an input stream containing raw binary data (NOT Base64 encoded).
+     *
+     * <p>The stream is not closed after reading, allowing the caller to manage stream lifecycle.
+     * The stream should contain raw binary Kryo data (not Base64 encoded).</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * try (FileInputStream fis = new FileInputStream("data.kryo")) {
+     *     MyObject obj = parser.deserialize(fis, null, MyObject.class);
+     * }
+     * }</pre>
+     *
+     * @param <T> the target type
+     * @param source the input stream to read from (must not be {@code null})
+     * @param config the deserialization configuration to use (may be {@code null} for default behavior)
      * @param targetClass the class of the object to create (must not be {@code null})
      * @return the deserialized object instance
      * @throws UncheckedIOException if an I/O error occurs during stream reading
@@ -505,6 +577,30 @@ public final class KryoParser extends AbstractParser<KryoSerializationConfig, Kr
     @Override
     public <T> T deserialize(final InputStream source, final KryoDeserializationConfig config, final Class<? extends T> targetClass) {
         return read(source, config, targetClass);
+    }
+
+    /**
+     * Deserializes an object from a reader containing Base64 encoded content.
+     *
+     * <p>The reader is not closed after reading, allowing the caller to manage reader lifecycle.
+     * The reader should contain Base64 encoded Kryo binary data.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * StringReader sr = new StringReader(base64String);
+     * MyObject obj = parser.deserialize(sr, null, MyObject.class);
+     * }</pre>
+     *
+     * @param <T> the target type
+     * @param source the reader to read from (must not be {@code null})
+     * @param config the deserialization configuration to use (may be {@code null} for default behavior)
+     * @param targetType the type of the object to create (must not be {@code null})
+     * @return the deserialized object instance
+     * @throws UncheckedIOException if an I/O error occurs during reading
+     */
+    @Override
+    public <T> T deserialize(Reader source, KryoDeserializationConfig config, Type<? extends T> targetType) throws UncheckedIOException {
+        return deserialize(source, config, targetType.clazz());
     }
 
     /**

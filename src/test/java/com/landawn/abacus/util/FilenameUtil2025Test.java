@@ -694,6 +694,8 @@ public class FilenameUtil2025Test extends TestBase {
     public void testGetExtension_MultipleExtensions() {
         // Returns last extension
         Assertions.assertEquals("gz", FilenameUtil.getExtension("file.tar.gz"));
+        Assertions.assertEquals("gz", FilenameUtil.getExtension("app-v2.3.1-star.gz"));
+        Assertions.assertEquals("app-v2.3.1-star", FilenameUtil.getBaseName("app-v2.3.1-star.gz"));
     }
 
     @Test

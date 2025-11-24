@@ -165,15 +165,42 @@ final class JSONParserImpl extends AbstractJSONParser {
         super(jsc, jdc);
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * <p>This implementation uses an internal {@link JSONReader} for efficient parsing
+     * and supports circular reference detection when enabled in the configuration.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * JSONDeserializationConfig config = new JSONDeserializationConfig()
+     *     .ignoreUnmatchedProperty(true)
+     *     .readNullToEmpty(true);
+     *
+     * String json = "{\"name\":\"John\",\"age\":30}";
+     * User user = parser.readString(json, config, Type.of(User.class));
+     *
+     * // Deserialize collection with type safety
+     * String jsonArray = "[{\"id\":1},{\"id\":2}]";
+     * List<Item> items = parser.readString(jsonArray, config, new TypeReference<List<Item>>() {});
+     * }</pre>
+     *
+     * @param <T> the type of the target object
+     * @param source the JSON string to parse; may be {@code null} or empty
+     * @param config the deserialization configuration to use; may be {@code null} to use default configuration
+     * @param targetType the type of the target object to deserialize into; must not be {@code null}
+     * @return the deserialized object of type {@code T}, or {@code null} if the source is {@code null}
+     * @throws UncheckedIOException if an I/O error occurs during parsing
+     * @throws ParseException if the JSON structure is invalid or doesn't match the target type
+     */
     @Override
-    public <T> T readString(final String source, final JSONDeserializationConfig config, final Class<? extends T> targetClass) {
+    public <T> T readString(String source, JSONDeserializationConfig config, Type<? extends T> targetType) {
         final JSONDeserializationConfig configToUse = check(config);
-        final Type<T> type = N.typeOf(targetClass);
 
         if ((Strings.isEmpty(source) && configToUse.readNullToEmpty()) || (source != null && source.isEmpty())) {
-            return emptyOrDefault(type);
+            return emptyOrDefault(targetType);
         } else if (source == null) {
-            return type.defaultValue();
+            return targetType.defaultValue();
         }
 
         final char[] cbuf = Objectory.createCharArrayBuffer();
@@ -181,7 +208,7 @@ final class JSONParserImpl extends AbstractJSONParser {
         try {
             final JSONReader jr = JSONStringReader.parse(source, cbuf);
 
-            return readString(source, jr, configToUse, targetClass, null);
+            return readString(source, jr, configToUse, targetType, null);
         } catch (final IOException e) {
             throw new UncheckedIOException(e);
         } finally {
@@ -189,6 +216,56 @@ final class JSONParserImpl extends AbstractJSONParser {
         }
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * <p>This implementation delegates to {@link #readString(String, JSONDeserializationConfig, Type)}
+     * after converting the class to a Type.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * JSONDeserializationConfig config = new JSONDeserializationConfig()
+     *     .ignoreUnmatchedProperty(true);
+     *
+     * String json = "{\"name\":\"John\",\"age\":30}";
+     * User user = parser.readString(json, config, User.class);
+     * }</pre>
+     *
+     * @param <T> the type of the target class
+     * @param source the JSON string to parse; may be {@code null} or empty
+     * @param config the deserialization configuration to use; may be {@code null} to use default configuration
+     * @param targetClass the class of the target object to deserialize into; must not be {@code null}
+     * @return the deserialized object of type {@code T}, or {@code null} if the source is {@code null}
+     * @throws UncheckedIOException if an I/O error occurs during parsing
+     * @throws ParseException if the JSON structure is invalid or doesn't match the target class
+     */
+    @Override
+    public <T> T readString(final String source, final JSONDeserializationConfig config, final Class<? extends T> targetClass) {
+        return readString(source, config, Type.of(targetClass));
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * <p>This implementation parses a JSON array and populates the provided array with
+     * deserialized elements. The array must be pre-allocated with sufficient size.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * JSONDeserializationConfig config = new JSONDeserializationConfig();
+     * String json = "[1, 2, 3, 4, 5]";
+     * Integer[] numbers = new Integer[5];
+     * parser.readString(json, config, numbers);
+     * // numbers array is now filled: [1, 2, 3, 4, 5]
+     * }</pre>
+     *
+     * @param source the JSON array string to parse; may be {@code null} (in which case no action is taken)
+     * @param config the deserialization configuration to use; may be {@code null} to use default configuration
+     * @param output the pre-allocated array to populate with parsed values; must not be {@code null}
+     * @throws UncheckedIOException if an I/O error occurs during parsing
+     * @throws ParseException if the JSON structure is invalid or not an array
+     * @throws IndexOutOfBoundsException if the JSON array contains more elements than the output array can hold
+     */
     @Override
     public void readString(final String source, final JSONDeserializationConfig config, final Object[] output) {
         final JSONDeserializationConfig configToUse = check(config);
@@ -206,7 +283,7 @@ final class JSONParserImpl extends AbstractJSONParser {
         try {
             final JSONReader jr = JSONStringReader.parse(source, cbuf);
 
-            readString(source, jr, configToUse, output.getClass(), output);
+            readString(source, jr, configToUse, Type.of(output.getClass()), output);
         } catch (final IOException e) {
             throw new UncheckedIOException(e);
         } finally {
@@ -214,6 +291,28 @@ final class JSONParserImpl extends AbstractJSONParser {
         }
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * <p>This implementation parses a JSON array and adds the deserialized elements to the
+     * provided collection. The collection is not cleared before adding elements.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * JSONDeserializationConfig config = new JSONDeserializationConfig();
+     * String json = "[\"apple\", \"banana\", \"orange\"]";
+     * List<String> fruits = new ArrayList<>();
+     * parser.readString(json, config, fruits);
+     * // fruits now contains: ["apple", "banana", "orange"]
+     * }</pre>
+     *
+     * @param source the JSON array string to parse; may be {@code null} (in which case no action is taken)
+     * @param config the deserialization configuration to use; may be {@code null} to use default configuration
+     * @param output the collection to populate with parsed elements; must not be {@code null}
+     * @throws UncheckedIOException if an I/O error occurs during parsing
+     * @throws ParseException if the JSON structure is invalid or not an array
+     * @throws UnsupportedOperationException if the collection is unmodifiable
+     */
     @Override
     public void readString(final String source, final JSONDeserializationConfig config, final Collection<?> output) {
         final JSONDeserializationConfig configToUse = check(config);
@@ -231,7 +330,7 @@ final class JSONParserImpl extends AbstractJSONParser {
         try {
             final JSONReader jr = JSONStringReader.parse(source, cbuf);
 
-            readString(source, jr, configToUse, output.getClass(), output);
+            readString(source, jr, configToUse, Type.of(output.getClass()), output);
         } catch (final IOException e) {
             throw new UncheckedIOException(e);
         } finally {
@@ -239,6 +338,28 @@ final class JSONParserImpl extends AbstractJSONParser {
         }
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * <p>This implementation parses a JSON object and adds the deserialized key-value pairs
+     * to the provided map. The map is not cleared before adding entries.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * JSONDeserializationConfig config = new JSONDeserializationConfig();
+     * String json = "{\"key1\":\"value1\",\"key2\":\"value2\"}";
+     * Map<String, String> map = new HashMap<>();
+     * parser.readString(json, config, map);
+     * // map now contains: {key1=value1, key2=value2}
+     * }</pre>
+     *
+     * @param source the JSON object string to parse; may be {@code null} or empty (in which case no action is taken)
+     * @param config the deserialization configuration to use; may be {@code null} to use default configuration
+     * @param output the map to populate with parsed key-value pairs; must not be {@code null}
+     * @throws UncheckedIOException if an I/O error occurs during parsing
+     * @throws ParseException if the JSON structure is invalid or not an object
+     * @throws UnsupportedOperationException if the map is unmodifiable
+     */
     @Override
     public void readString(final String source, final JSONDeserializationConfig config, final Map<?, ?> output) {
         final JSONDeserializationConfig configToUse = check(config);
@@ -252,7 +373,7 @@ final class JSONParserImpl extends AbstractJSONParser {
         try {
             final JSONReader jr = JSONStringReader.parse(source, cbuf);
 
-            readString(source, jr, configToUse, output.getClass(), output);
+            readString(source, jr, configToUse, Type.of(output.getClass()), output);
         } catch (final IOException e) {
             throw new UncheckedIOException(e);
         } finally {
@@ -271,74 +392,109 @@ final class JSONParserImpl extends AbstractJSONParser {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * JSONReader jr = JSONStringReader.parse(jsonString, charBuffer);
-     * MyBean bean = readString(jsonString, jr, config, MyBean.class, null);
+     * MyBean bean = readString(jsonString, jr, config, Type.of(MyBean.class), null);
      * }</pre>
      *
      * @param <T> the type of the target object
      * @param source the original JSON string source
      * @param jr the JSONReader instance for parsing the JSON
      * @param config the deserialization configuration
-     * @param targetClass the class of the target object to deserialize into
+     * @param targetType the type of the target object to deserialize into
      * @param output optional pre-existing output object (array, collection, or map) to populate; may be {@code null}
      * @return the deserialized object of type {@code T}
      * @throws IOException if an I/O error occurs during reading
      * @throws ParseException if the JSON structure doesn't match the target class or is invalid
      */
     @SuppressWarnings("unchecked")
-    protected <T> T readString(final String source, final JSONReader jr, final JSONDeserializationConfig config, final Class<? extends T> targetClass,
+    protected <T> T readString(final String source, final JSONReader jr, final JSONDeserializationConfig config, final Type<? extends T> targetType,
             final Object output) throws IOException {
-        final Type<T> type = output == null ? N.typeOf(targetClass) : N.typeOf(output.getClass());
+        final Class<? extends T> targetClass = targetType.clazz();
         final Object[] a = (output instanceof Object[]) ? (Object[]) output : null;
         final Collection<Object> c = (output instanceof Collection) ? (Collection<Object>) output : null;
         final Map<Object, Object> m = (output instanceof Map) ? (Map<Object, Object>) output : null;
 
-        switch (type.getSerializationType()) {
+        switch (targetType.getSerializationType()) {
             case SERIALIZABLE:
-                if (type.isArray()) {
-                    return readArray(jr, config, null, true, targetClass, a);
-                } else if (type.isCollection()) {
-                    return readCollection(jr, config, null, null, true, targetClass, c);
+                if (targetType.isArray()) {
+                    return readArray(jr, config, null, true, targetClass, targetType, a);
+                } else if (targetType.isCollection()) {
+                    return readCollection(jr, config, null, null, true, targetClass, targetType, c);
                 } else {
-                    return (T) readNullToEmpty(type, type.valueOf(source), config.readNullToEmpty());
+                    return (T) readNullToEmpty(targetType, targetType.valueOf(source), config.readNullToEmpty());
                 }
 
             case ENTITY:
-                return readBean(jr, config, true, targetClass, type);
+                return readBean(jr, config, true, targetClass, targetType);
 
             case MAP:
-                return readMap(jr, config, null, true, targetClass, m);
+                return readMap(jr, config, null, true, targetClass, targetType, m);
 
             case ARRAY:
-                return readArray(jr, config, null, true, targetClass, a);
+                return readArray(jr, config, null, true, targetClass, targetType, a);
 
             case COLLECTION:
-                return readCollection(jr, config, null, null, true, targetClass, c);
+                return readCollection(jr, config, null, null, true, targetClass, targetType, c);
+
+            case MAP_ENTITY:
+                return readMapEntity(jr, config, true, targetClass, targetType);
 
             case DATA_SET:
-                return readDataset(jr, UNDEFINED, config, true, targetClass);
+                return readDataset(jr, UNDEFINED, config, true, targetClass, targetType);
 
             case SHEET:
-                return readSheet(jr, UNDEFINED, config, true, targetClass);
+                return readSheet(jr, UNDEFINED, config, true, targetClass, targetType);
 
             case ENTITY_ID:
-                return readEntityId(jr, config, true, targetClass);
+                return readEntityId(jr, config, true, targetClass, targetType);
 
             default:
                 final int firstToken = jr.nextToken();
 
                 if (Object.class.equals(targetClass)) {
                     if (firstToken == START_BRACE) {
-                        return (T) readMap(jr, config, null, false, Map.class, null);
+                        return (T) readMap(jr, config, null, false, Map.class, null, null);
                     } else if (firstToken == START_BRACKET) {
-                        return (T) readCollection(jr, config, null, null, false, List.class, null);
+                        return (T) readCollection(jr, config, null, null, false, List.class, null, null);
                     }
                 }
 
-                throw new ParseException("Unsupported class: " + ClassUtil.getCanonicalClassName(type.clazz()) //NOSONAR
+                throw new ParseException("Unsupported class: " + ClassUtil.getCanonicalClassName(targetType.clazz()) //NOSONAR
                         + ". Only Array/List/Map and Bean class with getter/setter methods are supported"); //NOSONAR
         }
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * <p>This implementation converts Java objects to JSON string format with support for:</p>
+     * <ul>
+     *   <li>Circular reference detection and handling (when enabled in config)</li>
+     *   <li>Pretty printing and indentation</li>
+     *   <li>Custom property naming policies</li>
+     *   <li>Selective property inclusion/exclusion</li>
+     *   <li>Special handling for Dataset, Sheet, EntityId, and MapEntity types</li>
+     * </ul>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * User user = new User("John", 30);
+     * JSONSerializationConfig config = new JSONSerializationConfig()
+     *     .prettyFormat(true)
+     *     .skipNullValue(true);
+     *
+     * String json = parser.serialize(user, config);
+     * // Result (formatted):
+     * // {
+     * //   "name": "John",
+     * //   "age": 30
+     * // }
+     * }</pre>
+     *
+     * @param obj the object to serialize; may be {@code null}
+     * @param config the serialization configuration to use; may be {@code null} to use default configuration
+     * @return the JSON string representation of the object, or {@code null} if the object is {@code null}
+     * @throws UncheckedIOException if an I/O error occurs during serialization
+     */
     @Override
     public String serialize(final Object obj, final JSONSerializationConfig config) {
         final JSONSerializationConfig configToUse = check(config);
@@ -348,7 +504,7 @@ final class JSONParserImpl extends AbstractJSONParser {
         }
 
         final Class<?> cls = obj.getClass();
-        final Type<Object> type = N.typeOf(cls);
+        final Type<Object> type = Type.of(cls);
 
         if (type.isSerializable() && !(type.isCollection() || type.isArray() || type.clazz().isEnum())) {
             return type.stringOf(obj);
@@ -368,6 +524,28 @@ final class JSONParserImpl extends AbstractJSONParser {
         }
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * <p>This implementation serializes the object to JSON and writes it to the specified file.
+     * If the file doesn't exist, it will be created. If it exists, it will be overwritten.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * User user = new User("John", 30);
+     * JSONSerializationConfig config = new JSONSerializationConfig()
+     *     .prettyFormat(true);
+     *
+     * File outputFile = new File("user.json");
+     * parser.serialize(user, config, outputFile);
+     * // File now contains the JSON representation of the user
+     * }</pre>
+     *
+     * @param obj the object to serialize; may be {@code null} (writes empty string to file)
+     * @param config the serialization configuration to use; may be {@code null} to use default configuration
+     * @param output the file to write the JSON to; must not be {@code null}
+     * @throws UncheckedIOException if an I/O error occurs during serialization or file writing
+     */
     @Override
     public void serialize(final Object obj, final JSONSerializationConfig config, final File output) {
         final JSONSerializationConfig configToUse = check(config);
@@ -382,7 +560,7 @@ final class JSONParserImpl extends AbstractJSONParser {
         }
 
         final Class<?> cls = obj.getClass();
-        final Type<Object> type = N.typeOf(cls);
+        final Type<Object> type = Type.of(cls);
 
         if (type.isSerializable() && !(type.isCollection() || type.isArray() || type.clazz().isEnum())) {
             try {
@@ -411,6 +589,28 @@ final class JSONParserImpl extends AbstractJSONParser {
         }
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * <p>This implementation serializes the object to JSON and writes it to the specified output stream.
+     * The output stream is not closed by this method and should be managed by the caller.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * User user = new User("John", 30);
+     * JSONSerializationConfig config = new JSONSerializationConfig();
+     *
+     * try (OutputStream os = new FileOutputStream("user.json")) {
+     *     parser.serialize(user, config, os);
+     *     // Stream now contains the JSON representation
+     * }
+     * }</pre>
+     *
+     * @param obj the object to serialize; may be {@code null} (writes empty string to stream)
+     * @param config the serialization configuration to use; may be {@code null} to use default configuration
+     * @param output the output stream to write the JSON to; must not be {@code null}
+     * @throws UncheckedIOException if an I/O error occurs during serialization or stream writing
+     */
     @Override
     public void serialize(final Object obj, final JSONSerializationConfig config, final OutputStream output) {
         final JSONSerializationConfig configToUse = check(config);
@@ -426,7 +626,7 @@ final class JSONParserImpl extends AbstractJSONParser {
         }
 
         final Class<?> cls = obj.getClass();
-        final Type<Object> type = N.typeOf(cls);
+        final Type<Object> type = Type.of(cls);
 
         if (type.isSerializable() && !(type.isCollection() || type.isArray() || type.clazz().isEnum())) {
             try {
@@ -450,6 +650,29 @@ final class JSONParserImpl extends AbstractJSONParser {
         }
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * <p>This implementation serializes the object to JSON and writes it to the specified writer.
+     * The writer is not closed by this method and should be managed by the caller.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * User user = new User("John", 30);
+     * JSONSerializationConfig config = new JSONSerializationConfig()
+     *     .prettyFormat(true);
+     *
+     * try (Writer writer = new FileWriter("user.json")) {
+     *     parser.serialize(user, config, writer);
+     *     // Writer now contains the JSON representation
+     * }
+     * }</pre>
+     *
+     * @param obj the object to serialize; may be {@code null} (writes empty string to writer)
+     * @param config the serialization configuration to use; may be {@code null} to use default configuration
+     * @param output the writer to write the JSON to; must not be {@code null}
+     * @throws UncheckedIOException if an I/O error occurs during serialization or writing
+     */
     @Override
     public void serialize(final Object obj, final JSONSerializationConfig config, final Writer output) {
         final JSONSerializationConfig configToUse = check(config);
@@ -465,7 +688,7 @@ final class JSONParserImpl extends AbstractJSONParser {
         }
 
         final Class<?> cls = obj.getClass();
-        final Type<Object> type = N.typeOf(cls);
+        final Type<Object> type = Type.of(cls);
 
         if (type.isSerializable() && !(type.isCollection() || type.isArray() || type.clazz().isEnum())) {
             try {
@@ -499,7 +722,7 @@ final class JSONParserImpl extends AbstractJSONParser {
             return;
         }
 
-        final Type<Object> type = N.typeOf(obj.getClass());
+        final Type<Object> type = Type.of(obj.getClass());
 
         switch (type.getSerializationType()) {
             case SERIALIZABLE:
@@ -595,7 +818,7 @@ final class JSONParserImpl extends AbstractJSONParser {
         //    }
 
         final Class<?> cls = type.clazz();
-        final BeanInfo beanInfo = ParserUtil.getBeanInfo(cls);
+        final BeanInfo beanInfo = ParserUtil.getBeanInfo(type.javaType());
 
         if (N.isEmpty(beanInfo.jsonXmlSerializablePropInfos)) {
             throw new ParseException("No serializable property is found in class: " + ClassUtil.getCanonicalClassName(cls));
@@ -797,7 +1020,7 @@ final class JSONParserImpl extends AbstractJSONParser {
             if (key == null) {
                 bw.write(NULL_CHAR_ARRAY);
             } else {
-                keyType = N.typeOf(key.getClass());
+                keyType = Type.of(key.getClass());
 
                 if (keyType.isSerializable() && !(keyType.isArray() || keyType.isCollection() || keyType.clazz().isEnum())) {
                     if (isQuoteMapKey || !(keyType.isNumber() || keyType.isBoolean())) {
@@ -1223,7 +1446,7 @@ final class JSONParserImpl extends AbstractJSONParser {
             for (int i = 0, len = columnNames.size(); i < len; i++) {
                 eleTypeClass = getElementType(ds.getColumn(i));
 
-                types.add(eleTypeClass == null ? null : N.typeOf(eleTypeClass).name());
+                types.add(eleTypeClass == null ? null : Type.of(eleTypeClass).name());
             }
 
             write(types, config, false, nextIndentation, serializedObjects, bw);
@@ -1430,7 +1653,7 @@ final class JSONParserImpl extends AbstractJSONParser {
             bw.write(COLON_SPACE_CHAR_ARRAY);
 
             Class<?> eleTypeClass = getElementType(sheet.rowKeySet());
-            final String rowKeyTypeName = eleTypeClass == null ? null : N.typeOf(eleTypeClass).name();
+            final String rowKeyTypeName = eleTypeClass == null ? null : Type.of(eleTypeClass).name();
 
             if (rowKeyTypeName != null) {
                 bw.write(_D_QUOTATION);
@@ -1469,7 +1692,7 @@ final class JSONParserImpl extends AbstractJSONParser {
             bw.write(COLON_SPACE_CHAR_ARRAY);
 
             eleTypeClass = getElementType(sheet.columnKeySet());
-            final String columnKeyTypeName = eleTypeClass == null ? null : N.typeOf(eleTypeClass).name();
+            final String columnKeyTypeName = eleTypeClass == null ? null : Type.of(eleTypeClass).name();
 
             if (columnKeyTypeName != null) {
                 bw.write(_D_QUOTATION);
@@ -1575,7 +1798,7 @@ final class JSONParserImpl extends AbstractJSONParser {
             for (final Object columnKey : sheet.columnKeySet()) {
                 eleTypeClass = getElementType(sheet.getColumn(columnKey));
 
-                types.add(eleTypeClass == null ? null : N.typeOf(eleTypeClass).name());
+                types.add(eleTypeClass == null ? null : Type.of(eleTypeClass).name());
             }
 
             write(types, config, false, nextIndentation, serializedObjects, bw);
@@ -1698,16 +1921,43 @@ final class JSONParserImpl extends AbstractJSONParser {
         return cls;
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * <p>This implementation deserializes a JSON string into an object of the specified type,
+     * with full support for complex types including arrays, collections, maps, beans, datasets,
+     * sheets, and entity IDs.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * JSONDeserializationConfig config = new JSONDeserializationConfig()
+     *     .ignoreUnmatchedProperty(true)
+     *     .readNullToEmpty(true);
+     *
+     * String json = "{\"name\":\"John\",\"age\":30}";
+     * User user = parser.deserialize(json, config, Type.of(User.class));
+     *
+     * // For complex collections
+     * String jsonArray = "[{\"id\":1},{\"id\":2}]";
+     * List<Item> items = parser.deserialize(jsonArray, config, new TypeReference<List<Item>>() {});
+     * }</pre>
+     *
+     * @param <T> the type of the target object
+     * @param source the JSON string to deserialize; may be {@code null} or empty
+     * @param config the deserialization configuration to use; may be {@code null} to use default configuration
+     * @param targetType the type of the target object to deserialize into; must not be {@code null}
+     * @return the deserialized object of type {@code T}, or {@code null} if the source is {@code null}
+     * @throws UncheckedIOException if an I/O error occurs during deserialization
+     * @throws ParseException if the JSON structure is invalid or doesn't match the target type
+     */
     @Override
-    public <T> T deserialize(final String source, final JSONDeserializationConfig config, final Class<? extends T> targetClass) {
+    public <T> T deserialize(String source, JSONDeserializationConfig config, Type<? extends T> targetType) {
         final JSONDeserializationConfig configToUse = check(config);
 
-        final Type<T> type = N.typeOf(targetClass);
-
         if ((Strings.isEmpty(source) && configToUse.readNullToEmpty()) || (source != null && source.isEmpty())) {
-            return emptyOrDefault(type);
+            return emptyOrDefault(targetType);
         } else if (source == null) {
-            return type.defaultValue();
+            return targetType.defaultValue();
         }
 
         final char[] cbuf = Objectory.createCharArrayBuffer();
@@ -1715,7 +1965,7 @@ final class JSONParserImpl extends AbstractJSONParser {
         try {
             final JSONReader jr = JSONStringReader.parse(source, cbuf);
 
-            return read(source, jr, configToUse, targetClass, type);
+            return read(source, jr, configToUse, targetType.clazz(), targetType);
         } catch (final IOException e) {
             throw new UncheckedIOException(e);
         } finally {
@@ -1724,28 +1974,67 @@ final class JSONParserImpl extends AbstractJSONParser {
     }
 
     /**
+     * {@inheritDoc}
      *
-     * @param <T>
-     * @param source
-     * @param fromIndex
-     * @param toIndex
-     * @param config
-     * @param targetClass
-     * @return
-     * @throws IndexOutOfBoundsException
+     * <p>This implementation delegates to {@link #deserialize(String, JSONDeserializationConfig, Type)}
+     * after converting the class to a Type.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * JSONDeserializationConfig config = new JSONDeserializationConfig();
+     * String json = "{\"name\":\"John\",\"age\":30}";
+     * User user = parser.deserialize(json, config, User.class);
+     * }</pre>
+     *
+     * @param <T> the type of the target class
+     * @param source the JSON string to deserialize; may be {@code null} or empty
+     * @param config the deserialization configuration to use; may be {@code null} to use default configuration
+     * @param targetClass the class of the target object to deserialize into; must not be {@code null}
+     * @return the deserialized object of type {@code T}, or {@code null} if the source is {@code null}
+     * @throws UncheckedIOException if an I/O error occurs during deserialization
+     * @throws ParseException if the JSON structure is invalid or doesn't match the target class
      */
     @Override
-    public <T> T deserialize(final String source, final int fromIndex, final int toIndex, final JSONDeserializationConfig config,
-            final Class<? extends T> targetClass) throws IndexOutOfBoundsException {
+    public <T> T deserialize(final String source, final JSONDeserializationConfig config, final Class<? extends T> targetClass) {
+        return deserialize(source, config, Type.of(targetClass));
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * <p>This implementation efficiently parses a substring of a JSON string without creating
+     * an intermediate String object, which improves performance when working with large strings.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * String json = "prefix{\"name\":\"John\",\"age\":30}suffix";
+     * JSONDeserializationConfig config = new JSONDeserializationConfig();
+     *
+     * // Parse only the JSON object part (indices 6 to 30)
+     * User user = parser.deserialize(json, 6, 30, config, Type.of(User.class));
+     * }</pre>
+     *
+     * @param <T> the type of the target object
+     * @param source the JSON string containing the data to parse; must not be {@code null}
+     * @param fromIndex the starting index (inclusive) of the JSON content
+     * @param toIndex the ending index (exclusive) of the JSON content
+     * @param config the deserialization configuration to use; may be {@code null} to use default configuration
+     * @param targetType the type of the target object to deserialize into; must not be {@code null}
+     * @return the deserialized object of type {@code T}
+     * @throws IndexOutOfBoundsException if the indices are out of bounds or fromIndex &gt; toIndex
+     * @throws UncheckedIOException if an I/O error occurs during deserialization
+     * @throws ParseException if the JSON structure is invalid or doesn't match the target type
+     */
+    @Override
+    public <T> T deserialize(String source, int fromIndex, int toIndex, JSONDeserializationConfig config, Type<? extends T> targetType) {
         N.checkFromToIndex(fromIndex, toIndex, N.len(source));
 
         final JSONDeserializationConfig configToUse = check(config);
-        final Type<T> type = N.typeOf(targetClass);
 
         if ((Strings.isEmpty(source) && configToUse.readNullToEmpty()) || (source != null && fromIndex == toIndex)) {
-            return emptyOrDefault(type);
+            return emptyOrDefault(targetType);
         } else if (source == null) {
-            return type.defaultValue();
+            return targetType.defaultValue();
         }
 
         final char[] cbuf = Objectory.createCharArrayBuffer();
@@ -1754,7 +2043,7 @@ final class JSONParserImpl extends AbstractJSONParser {
             final JSONReader jr = JSONStringReader.parse(source, fromIndex, toIndex, cbuf);
 
             Object sourceToUse = fromIndex == 0 && toIndex == N.len(source) ? source : CharBuffer.wrap(source, fromIndex, toIndex);
-            return read(sourceToUse, jr, configToUse, targetClass, type);
+            return read(sourceToUse, jr, configToUse, targetType.clazz(), targetType);
         } catch (final IOException e) {
             throw new UncheckedIOException(e);
         } finally {
@@ -1762,45 +2051,222 @@ final class JSONParserImpl extends AbstractJSONParser {
         }
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * <p>This implementation delegates to {@link #deserialize(String, int, int, JSONDeserializationConfig, Type)}
+     * after converting the class to a Type.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * String json = "prefix{\"name\":\"John\"}suffix";
+     * JSONDeserializationConfig config = new JSONDeserializationConfig();
+     * User user = parser.deserialize(json, 6, 23, config, User.class);
+     * }</pre>
+     *
+     * @param <T> the type of the target class
+     * @param source the JSON string containing the data to parse; must not be {@code null}
+     * @param fromIndex the starting index (inclusive) of the JSON content
+     * @param toIndex the ending index (exclusive) of the JSON content
+     * @param config the deserialization configuration to use; may be {@code null} to use default configuration
+     * @param targetClass the class of the target object to deserialize into; must not be {@code null}
+     * @return the deserialized object of type {@code T}
+     * @throws IndexOutOfBoundsException if the indices are out of bounds or fromIndex &gt; toIndex
+     * @throws UncheckedIOException if an I/O error occurs during deserialization
+     * @throws ParseException if the JSON structure is invalid or doesn't match the target class
+     */
     @Override
-    public <T> T deserialize(final File source, final JSONDeserializationConfig config, final Class<? extends T> targetClass) {
+    public <T> T deserialize(final String source, final int fromIndex, final int toIndex, final JSONDeserializationConfig config,
+            final Class<? extends T> targetClass) throws IndexOutOfBoundsException {
+        return deserialize(source, fromIndex, toIndex, config, Type.of(targetClass));
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * <p>This implementation reads and deserializes a JSON file into an object of the specified type.
+     * The file is automatically closed after reading, even if an exception occurs.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * JSONDeserializationConfig config = new JSONDeserializationConfig()
+     *     .ignoreUnmatchedProperty(true);
+     *
+     * File jsonFile = new File("user.json");
+     * User user = parser.deserialize(jsonFile, config, Type.of(User.class));
+     * }</pre>
+     *
+     * @param <T> the type of the target object
+     * @param source the file containing the JSON data to deserialize; must not be {@code null}
+     * @param config the deserialization configuration to use; may be {@code null} to use default configuration
+     * @param targetType the type of the target object to deserialize into; must not be {@code null}
+     * @return the deserialized object of type {@code T}
+     * @throws UncheckedIOException if an I/O error occurs during file reading or deserialization
+     * @throws ParseException if the JSON structure is invalid or doesn't match the target type
+     */
+    @Override
+    public <T> T deserialize(File source, JSONDeserializationConfig config, Type<? extends T> targetType) {
         Reader reader = null;
 
         try {
             reader = IOUtil.newFileReader(source);
 
-            return deserialize(reader, config, targetClass);
+            return deserialize(reader, config, targetType);
         } finally {
             IOUtil.closeQuietly(reader);
         }
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * <p>This implementation delegates to {@link #deserialize(File, JSONDeserializationConfig, Type)}
+     * after converting the class to a Type.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * JSONDeserializationConfig config = new JSONDeserializationConfig();
+     * File jsonFile = new File("user.json");
+     * User user = parser.deserialize(jsonFile, config, User.class);
+     * }</pre>
+     *
+     * @param <T> the type of the target class
+     * @param source the file containing the JSON data to deserialize; must not be {@code null}
+     * @param config the deserialization configuration to use; may be {@code null} to use default configuration
+     * @param targetClass the class of the target object to deserialize into; must not be {@code null}
+     * @return the deserialized object of type {@code T}
+     * @throws UncheckedIOException if an I/O error occurs during file reading or deserialization
+     * @throws ParseException if the JSON structure is invalid or doesn't match the target class
+     */
     @Override
-    public <T> T deserialize(final InputStream source, final JSONDeserializationConfig config, final Class<? extends T> targetClass) {
+    public <T> T deserialize(final File source, final JSONDeserializationConfig config, final Class<? extends T> targetClass) {
+        return deserialize(source, config, Type.of(targetClass));
+    }
 
-        // No need to close the reader because the InputStream will/should be
-        // closely externally.
+    /**
+     * {@inheritDoc}
+     *
+     * <p>This implementation reads and deserializes JSON from an input stream into an object of the specified type.
+     * The input stream is not closed by this method and should be managed by the caller.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * JSONDeserializationConfig config = new JSONDeserializationConfig();
+     *
+     * try (InputStream is = new FileInputStream("user.json")) {
+     *     User user = parser.deserialize(is, config, Type.of(User.class));
+     * }
+     * }</pre>
+     *
+     * @param <T> the type of the target object
+     * @param source the input stream containing the JSON data to deserialize; must not be {@code null}
+     * @param config the deserialization configuration to use; may be {@code null} to use default configuration
+     * @param targetType the type of the target object to deserialize into; must not be {@code null}
+     * @return the deserialized object of type {@code T}
+     * @throws UncheckedIOException if an I/O error occurs during stream reading or deserialization
+     * @throws ParseException if the JSON structure is invalid or doesn't match the target type
+     */
+    @Override
+    public <T> T deserialize(InputStream source, JSONDeserializationConfig config, Type<? extends T> targetType) {
+        // No need to close the reader because the InputStream will/should be closely externally.
         final Reader reader = IOUtil.newInputStreamReader(source); // NOSONAR
 
-        return deserialize(reader, config, targetClass);
+        return deserialize(reader, config, targetType);
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * <p>This implementation delegates to {@link #deserialize(InputStream, JSONDeserializationConfig, Type)}
+     * after converting the class to a Type.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * JSONDeserializationConfig config = new JSONDeserializationConfig();
+     *
+     * try (InputStream is = new FileInputStream("user.json")) {
+     *     User user = parser.deserialize(is, config, User.class);
+     * }
+     * }</pre>
+     *
+     * @param <T> the type of the target class
+     * @param source the input stream containing the JSON data to deserialize; must not be {@code null}
+     * @param config the deserialization configuration to use; may be {@code null} to use default configuration
+     * @param targetClass the class of the target object to deserialize into; must not be {@code null}
+     * @return the deserialized object of type {@code T}
+     * @throws UncheckedIOException if an I/O error occurs during stream reading or deserialization
+     * @throws ParseException if the JSON structure is invalid or doesn't match the target class
+     */
+    @Override
+    public <T> T deserialize(final InputStream source, final JSONDeserializationConfig config, final Class<? extends T> targetClass) {
+        return deserialize(source, config, Type.of(targetClass));
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * <p>This implementation reads and deserializes JSON from a Reader into an object of the specified type.
+     * The reader is not closed by this method and should be managed by the caller.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * JSONDeserializationConfig config = new JSONDeserializationConfig();
+     *
+     * try (Reader reader = new FileReader("user.json")) {
+     *     User user = parser.deserialize(reader, config, Type.of(User.class));
+     * }
+     * }</pre>
+     *
+     * @param <T> the type of the target object
+     * @param source the reader containing the JSON data to deserialize; must not be {@code null}
+     * @param config the deserialization configuration to use; may be {@code null} to use default configuration
+     * @param targetType the type of the target object to deserialize into; must not be {@code null}
+     * @return the deserialized object of type {@code T}
+     * @throws UncheckedIOException if an I/O error occurs during reading or deserialization
+     * @throws ParseException if the JSON structure is invalid or doesn't match the target type
+     */
+    @Override
+    public <T> T deserialize(Reader source, JSONDeserializationConfig config, final Type<? extends T> targetType) {
+        return read(source, config, targetType);
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * <p>This implementation delegates to {@link #deserialize(Reader, JSONDeserializationConfig, Type)}
+     * after converting the class to a Type.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * JSONDeserializationConfig config = new JSONDeserializationConfig();
+     *
+     * try (Reader reader = new FileReader("user.json")) {
+     *     User user = parser.deserialize(reader, config, User.class);
+     * }
+     * }</pre>
+     *
+     * @param <T> the type of the target class
+     * @param source the reader containing the JSON data to deserialize; must not be {@code null}
+     * @param config the deserialization configuration to use; may be {@code null} to use default configuration
+     * @param targetClass the class of the target object to deserialize into; must not be {@code null}
+     * @return the deserialized object of type {@code T}
+     * @throws UncheckedIOException if an I/O error occurs during reading or deserialization
+     * @throws ParseException if the JSON structure is invalid or doesn't match the target class
+     */
     @Override
     public <T> T deserialize(final Reader source, final JSONDeserializationConfig config, final Class<? extends T> targetClass) {
-
-        return read(source, config, targetClass);
+        return deserialize(source, config, Type.of(targetClass));
     }
 
-    protected <T> T read(final Reader source, final JSONDeserializationConfig config, final Class<? extends T> targetClass) {
+    protected <T> T read(final Reader source, final JSONDeserializationConfig config, final Type<? extends T> targetType) {
         final JSONDeserializationConfig configToUse = check(config);
-        final Type<T> type = N.typeOf(targetClass);
         final char[] rbuf = Objectory.createCharArrayBuffer();
         final char[] cbuf = Objectory.createCharArrayBuffer();
 
         try {
             final JSONReader jr = JSONStreamReader.parse(source, rbuf, cbuf);
 
-            return read(source, jr, configToUse, targetClass, type);
+            return read(source, jr, configToUse, targetType.clazz(), targetType);
         } catch (final IOException e) {
             throw new UncheckedIOException(e);
         } finally {
@@ -1810,84 +2276,73 @@ final class JSONParserImpl extends AbstractJSONParser {
     }
 
     protected <T> T read(final Object source, final JSONReader jr, final JSONDeserializationConfig config, final Class<? extends T> targetClass,
-            final Type<? extends T> type) throws IOException {
-        return read(source, jr, UNDEFINED, config, true, targetClass, type);
+            final Type<? extends T> targetType) throws IOException {
+        return read(source, jr, UNDEFINED, config, true, targetClass, targetType);
     }
 
     @SuppressWarnings("unchecked")
     protected <T> T read(final Object source, final JSONReader jr, final int lastToken, final JSONDeserializationConfig config, final boolean isFirstCall,
-            final Class<? extends T> targetClass, final Type<? extends T> type) throws IOException {
-        switch (type.getSerializationType()) {
+            final Class<? extends T> targetClass, final Type<? extends T> targetType) throws IOException {
+        switch (targetType.getSerializationType()) {
             case SERIALIZABLE:
-                if (type.isArray()) {
-                    return readArray(jr, config, null, isFirstCall, targetClass, null);
-                } else if (type.isCollection()) {
-                    return readCollection(jr, config, null, null, isFirstCall, targetClass, null);
+                if (targetType.isArray()) {
+                    return readArray(jr, config, null, isFirstCall, targetClass, targetType, null);
+                } else if (targetType.isCollection()) {
+                    return readCollection(jr, config, null, null, isFirstCall, targetClass, targetType, null);
                 } else {
-                    return (T) readNullToEmpty(type, type.valueOf(source instanceof String ? (String) source
+                    return (T) readNullToEmpty(targetType, targetType.valueOf(source instanceof String ? (String) source
                             : (source instanceof Reader ? IOUtil.readAllToString(((Reader) source)) : source.toString())), config.readNullToEmpty());
                 }
 
             case ENTITY:
-                return readBean(jr, config, isFirstCall, targetClass, type);
+                return readBean(jr, config, isFirstCall, targetClass, targetType);
 
             case MAP:
-                return readMap(jr, config, null, isFirstCall, targetClass, null);
+                return readMap(jr, config, null, isFirstCall, targetClass, targetType, null);
 
             case ARRAY:
-                return readArray(jr, config, null, isFirstCall, targetClass, null);
+                return readArray(jr, config, null, isFirstCall, targetClass, targetType, null);
 
             case COLLECTION:
-                return readCollection(jr, config, null, null, isFirstCall, targetClass, null);
+                return readCollection(jr, config, null, null, isFirstCall, targetClass, targetType, null);
 
             case MAP_ENTITY:
-                return readMapEntity(jr, config, isFirstCall, targetClass);
+                return readMapEntity(jr, config, isFirstCall, targetClass, targetType);
 
             case DATA_SET:
-                return readDataset(jr, lastToken, config, isFirstCall, targetClass);
+                return readDataset(jr, lastToken, config, isFirstCall, targetClass, targetType);
 
             case SHEET:
-                return readSheet(jr, lastToken, config, isFirstCall, targetClass);
+                return readSheet(jr, lastToken, config, isFirstCall, targetClass, targetType);
 
             case ENTITY_ID:
-                return readEntityId(jr, config, isFirstCall, targetClass);
+                return readEntityId(jr, config, isFirstCall, targetClass, targetType);
 
             default:
                 final int firstTokenToUse = isFirstCall ? jr.nextToken() : lastToken;
 
                 if (Object.class.equals(targetClass)) {
                     if (firstTokenToUse == START_BRACE) {
-                        return (T) readMap(jr, config, null, false, Map.class, null);
+                        return (T) readMap(jr, config, null, false, Map.class, null, null);
                     } else if (firstTokenToUse == START_BRACKET) {
-                        return (T) readCollection(jr, config, null, null, false, List.class, null);
+                        return (T) readCollection(jr, config, null, null, false, List.class, null, null);
                     }
                 }
 
-                throw new ParseException(firstTokenToUse, "Unsupported class: " + ClassUtil.getCanonicalClassName(type.clazz())
+                throw new ParseException(firstTokenToUse, "Unsupported class: " + ClassUtil.getCanonicalClassName(targetType.clazz())
                         + ". Only Array/List/Map and Bean class with getter/setter methods are supported");
         }
     }
 
-    /**
-     *
-     * @param jr
-     * @param config
-     * @param isFirstCall
-     * @param targetClass
-     * @param type
-     * @param <T>
-     * @return
-     * @throws IOException Signals that an I/O exception has occurred.
-     */
     @SuppressWarnings("unused")
     protected <T> T readBean(final JSONReader jr, final JSONDeserializationConfig config, final boolean isFirstCall, final Class<? extends T> targetClass,
-            final Type<? extends T> type) throws IOException {
+            final Type<? extends T> targetType) throws IOException {
         final boolean hasValueTypes = config.hasValueTypes();
         final boolean ignoreUnmatchedProperty = config.ignoreUnmatchedProperty();
         final boolean ignoreNullOrEmpty = config.ignoreNullOrEmpty();
         final boolean readNullToEmpty = config.readNullToEmpty();
         final Collection<String> ignoredClassPropNames = config.getIgnoredPropNames(targetClass);
-        final BeanInfo beanInfo = ParserUtil.getBeanInfo(targetClass);
+        final BeanInfo beanInfo = ParserUtil.getBeanInfo(targetType.javaType());
         final Object result = beanInfo.createBeanResult();
 
         PropInfo propInfo = null;
@@ -2022,7 +2477,7 @@ final class JSONParserImpl extends AbstractJSONParser {
 
                     if (propInfo == null || propInfo.jsonXmlExpose == JsonXmlField.Expose.SERIALIZE_ONLY
                             || (propName != null && ignoredClassPropNames != null && ignoredClassPropNames.contains(propName))) {
-                        readMap(jr, defaultJSONDeserializationConfig, null, false, Map.class, null);
+                        readMap(jr, defaultJSONDeserializationConfig, null, false, Map.class, null, null);
                     } else {
                         if (propInfo.isJsonRawValue && propInfo.jsonXmlType.isCharSequence()) {
                             final StringBuilder sb = Objectory.createStringBuilder();
@@ -2074,7 +2529,7 @@ final class JSONParserImpl extends AbstractJSONParser {
 
                     if (propInfo == null || propInfo.jsonXmlExpose == JsonXmlField.Expose.SERIALIZE_ONLY
                             || (propName != null && ignoredClassPropNames != null && ignoredClassPropNames.contains(propName))) {
-                        readCollection(jr, defaultJSONDeserializationConfig, null, config.getPropHandler(propName), false, List.class, null);
+                        readCollection(jr, defaultJSONDeserializationConfig, null, config.getPropHandler(propName), false, List.class, null, null);
                     } else {
                         if (propInfo.isJsonRawValue && propInfo.jsonXmlType.isCharSequence()) {
                             final StringBuilder sb = Objectory.createStringBuilder();
@@ -2142,7 +2597,6 @@ final class JSONParserImpl extends AbstractJSONParser {
                     throw new ParseException(token, getErrorMsg(jr, token));
             }
         }
-
     }
 
     <T> void setPropValue(final PropInfo propInfo, final Object propValue, final T result, final boolean ignoreNullOrEmpty) {
@@ -2170,25 +2624,15 @@ final class JSONParserImpl extends AbstractJSONParser {
 
     private static final BiConsumer<Collection<Object>, Object> DEFAULT_PROP_HANDLER = Collection::add;
 
-    /**
-     *
-     * @param jr
-     * @param config
-     * @param propType
-     * @param isFirstCall
-     * @param targetClass
-     * @param output
-     * @param <T>
-     * @return
-     * @throws IOException Signals that an I/O exception has occurred.
-     */
     @SuppressWarnings("unchecked")
     protected <T> T readMap(final JSONReader jr, final JSONDeserializationConfig config, Type<?> propType, final boolean isFirstCall,
-            final Class<? extends T> targetClass, final Map<Object, Object> output) throws IOException {
+            final Class<? extends T> targetClass, final Type<? extends T> targetType, final Map<Object, Object> output) throws IOException {
         Type<?> keyType = defaultKeyType;
 
         if (propType != null && propType.isMap() && !propType.getParameterTypes()[0].isObjectType()) {
             keyType = propType.getParameterTypes()[0];
+        } else if (targetType != null && targetType.isMap() && !targetType.getParameterTypes()[0].isObjectType()) {
+            keyType = targetType.getParameterTypes()[0];
         } else if ((propType == null || !propType.isObjectType()) && (config.getMapKeyType() != null && !config.getMapKeyType().isObjectType())) {
             keyType = config.getMapKeyType();
         }
@@ -2199,6 +2643,8 @@ final class JSONParserImpl extends AbstractJSONParser {
 
         if (propType != null && propType.isMap() && !propType.getParameterTypes()[1].isObjectType()) {
             valueType = propType.getParameterTypes()[1];
+        } else if (targetType != null && targetType.isMap() && !targetType.getParameterTypes()[1].isObjectType()) {
+            valueType = targetType.getParameterTypes()[1];
         } else if ((propType == null || !propType.isObjectType()) && (config.getMapValueType() != null && !config.getMapValueType().isObjectType())) {
             valueType = config.getMapValueType();
         }
@@ -2306,7 +2752,7 @@ final class JSONParserImpl extends AbstractJSONParser {
                         propType = valueType;
                     } else {
                         if (propName != null && ignoredClassPropNames != null && ignoredClassPropNames.contains(propName)) {
-                            readMap(jr, defaultJSONDeserializationConfig, null, false, Map.class, null);
+                            readMap(jr, defaultJSONDeserializationConfig, null, false, Map.class, null, null);
                         } else {
                             //noinspection DataFlowIssue
                             value = readBracedValue(jr, config, propType);
@@ -2326,7 +2772,7 @@ final class JSONParserImpl extends AbstractJSONParser {
                         propType = valueType;
                     } else {
                         if (propName != null && ignoredClassPropNames != null && ignoredClassPropNames.contains(propName)) {
-                            readCollection(jr, defaultJSONDeserializationConfig, null, config.getPropHandler(propName), false, List.class, null);
+                            readCollection(jr, defaultJSONDeserializationConfig, null, config.getPropHandler(propName), false, List.class, null, null);
                         } else {
                             //noinspection DataFlowIssue
                             value = readBracketedValue(jr, config, key instanceof String ? config.getPropHandler((String) key) : null, propType);
@@ -2368,31 +2814,21 @@ final class JSONParserImpl extends AbstractJSONParser {
         }
     }
 
-    /**
-     *
-     * @param jr
-     * @param config
-     * @param propType
-     * @param isFirstCall
-     * @param targetClass
-     * @param output
-     * @param <T>
-     * @return
-     * @throws IOException Signals that an I/O exception has occurred.
-     */
     @SuppressWarnings({ "unchecked" })
     protected <T> T readArray(final JSONReader jr, final JSONDeserializationConfig config, final Type<?> propType, final boolean isFirstCall,
-            final Class<? extends T> targetClass, Object[] output) throws IOException {
+            final Class<? extends T> targetClass, final Type<? extends T> targetType, Object[] output) throws IOException {
         Type<?> eleType = defaultValueType;
 
         if (propType != null && (propType.isArray() || propType.isCollection()) && !propType.getElementType().isObjectType()) {
             eleType = propType.getElementType();
+        } else if (targetType != null && (targetType.isArray() || targetType.isCollection()) && !targetType.getElementType().isObjectType()) {
+            eleType = targetType.getElementType();
         } else if (propType == null || !propType.isObjectType()) {
             if (config.getElementType() != null && !config.getElementType().isObjectType()) {
                 eleType = config.getElementType();
             } else {
-                eleType = N
-                        .typeOf(targetClass.isArray() && !Object.class.equals(targetClass.getComponentType()) ? targetClass.getComponentType() : Object.class);
+                eleType = Type
+                        .of(targetClass.isArray() && !Object.class.equals(targetClass.getComponentType()) ? targetClass.getComponentType() : Object.class);
             }
         }
 
@@ -2489,7 +2925,7 @@ final class JSONParserImpl extends AbstractJSONParser {
                                 }
                             }
 
-                            return collection2Array(c, targetClass);
+                            return collection2Array(c, targetType);
 
                         default:
                             throw new ParseException(token, getErrorMsg(jr, token));
@@ -2572,27 +3008,16 @@ final class JSONParserImpl extends AbstractJSONParser {
         }
     }
 
-    /**
-     *
-     * @param jr
-     * @param config
-     * @param propType
-     * @param propHandler
-     * @param isFirstCall
-     * @param targetClass
-     * @param output
-     * @param <T>
-     * @return
-     * @throws IOException Signals that an I/O exception has occurred.
-     */
     @SuppressWarnings("unchecked")
     protected <T> T readCollection(final JSONReader jr, final JSONDeserializationConfig config, final Type<?> propType,
             final BiConsumer<? super Collection<Object>, ?> propHandler, final boolean isFirstCall, final Class<? extends T> targetClass,
-            final Collection<Object> output) throws IOException {
+            final Type<? extends T> targetType, final Collection<Object> output) throws IOException {
         Type<?> eleType = defaultValueType;
 
         if (propType != null && (propType.isCollection() || propType.isArray()) && !propType.getElementType().isObjectType()) {
             eleType = propType.getElementType();
+        } else if (targetType != null && (targetType.isCollection() || targetType.isArray()) && !targetType.getElementType().isObjectType()) {
+            eleType = targetType.getElementType();
         } else if ((propType == null || !propType.isObjectType()) && (config.getElementType() != null && !config.getElementType().isObjectType())) {
             eleType = config.getElementType();
         }
@@ -2702,20 +3127,9 @@ final class JSONParserImpl extends AbstractJSONParser {
         }
     }
 
-    /**
-     * Read map bean.
-     * @param jr
-     * @param config
-     * @param isFirstCall
-     * @param targetClass
-     *
-     * @param <T>
-     * @return
-     * @throws IOException Signals that an I/O exception has occurred.
-     */
     @SuppressWarnings("unused")
-    protected <T> T readMapEntity(final JSONReader jr, final JSONDeserializationConfig config, final boolean isFirstCall, final Class<? extends T> targetClass)
-            throws IOException {
+    protected <T> T readMapEntity(final JSONReader jr, final JSONDeserializationConfig config, final boolean isFirstCall, final Class<? extends T> targetClass,
+            final Type<? extends T> targetType) throws IOException {
         final int firstToken = isFirstCall ? jr.nextToken() : START_BRACKET;
 
         if (firstToken == EOF) {
@@ -2751,7 +3165,7 @@ final class JSONParserImpl extends AbstractJSONParser {
                     break;
 
                 case START_BRACE:
-                    final Map<String, Object> props = readMap(jr, config, null, false, Map.class, null);
+                    final Map<String, Object> props = readMap(jr, config, null, false, Map.class, null, null);
 
                     //noinspection DataFlowIssue
                     mapEntity.set(props);
@@ -2772,20 +3186,9 @@ final class JSONParserImpl extends AbstractJSONParser {
         }
     }
 
-    /**
-     * Read bean id.
-     * @param jr
-     * @param config
-     * @param isFirstCall
-     * @param targetClass
-     *
-     * @param <T>
-     * @return
-     * @throws IOException Signals that an I/O exception has occurred.
-     */
     @SuppressWarnings({ "unused" })
-    protected <T> T readEntityId(final JSONReader jr, final JSONDeserializationConfig config, final boolean isFirstCall, final Class<? extends T> targetClass)
-            throws IOException {
+    protected <T> T readEntityId(final JSONReader jr, final JSONDeserializationConfig config, final boolean isFirstCall, final Class<? extends T> targetClass,
+            final Type<? extends T> targetType) throws IOException {
         final int firstToken = isFirstCall ? jr.nextToken() : START_BRACKET;
 
         if (firstToken == EOF) {
@@ -2821,7 +3224,7 @@ final class JSONParserImpl extends AbstractJSONParser {
                     break;
 
                 case START_BRACE:
-                    final Map<String, Object> props = readMap(jr, config, null, false, Map.class, null);
+                    final Map<String, Object> props = readMap(jr, config, null, false, Map.class, null, null);
 
                     //noinspection DataFlowIssue
                     entityId.set(props);
@@ -2842,21 +3245,9 @@ final class JSONParserImpl extends AbstractJSONParser {
         }
     }
 
-    /**
-     * Reads a data set from JSON input.
-     *
-     * @param <T> the type of the target class
-     * @param jr the JSON reader to read from
-     * @param lastToken the last token read from the JSON input, used for context
-     * @param config the JSON deserialization configuration settings
-     * @param isFirstCall whether this is the first call in the deserialization process
-     * @param targetClass the class type to deserialize the data set into
-     * @return the deserialized data set of type T
-     * @throws IOException if an I/O error occurs during reading
-     */
     @SuppressWarnings("unused")
     protected <T> T readDataset(final JSONReader jr, final int lastToken, final JSONDeserializationConfig config, final boolean isFirstCall,
-            final Class<? extends T> targetClass) throws IOException {
+            final Class<? extends T> targetClass, final Type<? extends T> targetType) throws IOException {
 
         final int firstToken = isFirstCall ? jr.nextToken() : lastToken;
 
@@ -2954,7 +3345,7 @@ final class JSONParserImpl extends AbstractJSONParser {
                                 throw new ParseException(token, getErrorMsg(jr, token));
                             } else {
                                 if (key != null && ignoredClassPropNames != null && ignoredClassPropNames.contains(key)) {
-                                    readMap(jr, defaultJSONDeserializationConfig, null, false, Map.class, null);
+                                    readMap(jr, defaultJSONDeserializationConfig, null, false, Map.class, null, null);
                                 } else {
                                     value = readBracedValue(jr, config, valueType);
 
@@ -2969,7 +3360,7 @@ final class JSONParserImpl extends AbstractJSONParser {
                                 throw new ParseException(token, getErrorMsg(jr, token));
                             } else {
                                 if (key != null && ignoredClassPropNames != null && ignoredClassPropNames.contains(key)) {
-                                    readCollection(jr, defaultJSONDeserializationConfig, null, config.getPropHandler(key), false, List.class, null);
+                                    readCollection(jr, defaultJSONDeserializationConfig, null, config.getPropHandler(key), false, List.class, null, null);
                                 } else {
                                     value = readBracketedValue(jr, config, config.getPropHandler(key), valueType);
 
@@ -3120,11 +3511,11 @@ final class JSONParserImpl extends AbstractJSONParser {
 
                         switch (order) {
                             case 3:
-                                columnNameList = readCollection(jr, jdcForStringElement, null, null, false, List.class, null);
+                                columnNameList = readCollection(jr, jdcForStringElement, null, null, false, List.class, null, null);
                                 break;
 
                             case 4:
-                                columnTypeList = readCollection(jr, jdcForTypeElement, null, null, false, List.class, null);
+                                columnTypeList = readCollection(jr, jdcForTypeElement, null, null, false, List.class, null, null);
                                 break;
 
                             default:
@@ -3135,7 +3526,7 @@ final class JSONParserImpl extends AbstractJSONParser {
 
                     case START_BRACE:
                         if (PROPERTIES.equals(columnName)) {
-                            properties = readMap(jr, jdcForPropertiesElement, null, false, Map.class, null);
+                            properties = readMap(jr, jdcForPropertiesElement, null, false, Map.class, null, null);
                         } else if (COLUMNS.equals(columnName)) {
                             columnName = null;
                             isKey = true;
@@ -3198,7 +3589,7 @@ final class JSONParserImpl extends AbstractJSONParser {
                                         }
 
                                         final List<Object> column = readCollection(jr, JDC.create().setElementType(valueType), null,
-                                                config.getPropHandler(columnName), false, List.class, null);
+                                                config.getPropHandler(columnName), false, List.class, null, null);
 
                                         if (columnList == null) {
                                             //noinspection DataFlowIssue
@@ -3283,21 +3674,9 @@ final class JSONParserImpl extends AbstractJSONParser {
         //}
     }
 
-    /**
-     * Reads a data set from JSON input.
-     *
-     * @param <T> the type of the target class
-     * @param jr the JSON reader to read from
-     * @param lastToken the last token read from the JSON input, used for context
-     * @param config the JSON deserialization configuration settings
-     * @param isFirstCall whether this is the first call in the deserialization process
-     * @param targetClass the class type to deserialize the data set into
-     * @return the deserialized data set of type T
-     * @throws IOException if an I/O error occurs during reading
-     */
     @SuppressWarnings({ "unused", "rawtypes" })
     protected <T> T readSheet(final JSONReader jr, final int lastToken, final JSONDeserializationConfig config, final boolean isFirstCall,
-            final Class<? extends T> targetClass) throws IOException {
+            final Class<? extends T> targetClass, final Type<? extends T> targetType) throws IOException {
 
         final int firstToken = isFirstCall ? jr.nextToken() : lastToken;
 
@@ -3407,17 +3786,17 @@ final class JSONParserImpl extends AbstractJSONParser {
 
                     switch (order) {
                         case 4:
-                            columnTypeList = readCollection(jr, jdcForTypeElement, null, null, false, List.class, null);
+                            columnTypeList = readCollection(jr, jdcForTypeElement, null, null, false, List.class, null, null);
                             break;
 
                         case 8:
                             rowKeyList = readCollection(jr, JDC.create().setElementType(Strings.isEmpty(rowKeyType) ? strType : Type.of(rowKeyType)), null,
-                                    null, false, List.class, null);
+                                    null, false, List.class, null, null);
                             break;
 
                         case 9:
                             columnKeyList = readCollection(jr, JDC.create().setElementType(Strings.isEmpty(columnKeyType) ? strType : Type.of(columnKeyType)),
-                                    null, null, false, List.class, null);
+                                    null, null, false, List.class, null, null);
                             break;
 
                         default:
@@ -3489,7 +3868,7 @@ final class JSONParserImpl extends AbstractJSONParser {
                                     }
 
                                     final List<Object> column = readCollection(jr, JDC.create().setElementType(valueType), null,
-                                            config.getPropHandler(columnName), false, List.class, null);
+                                            config.getPropHandler(columnName), false, List.class, null, null);
 
                                     if (columnList == null) {
                                         //noinspection DataFlowIssue
@@ -3556,13 +3935,13 @@ final class JSONParserImpl extends AbstractJSONParser {
         }
 
         if (type.isArray()) {
-            return readArray(jr, config, type, false, type.clazz(), null);
+            return readArray(jr, config, type, false, type.clazz(), type, null);
         } else if (type.isCollection()) {
-            return readCollection(jr, config, type, propHandler, false, type.clazz(), null);
+            return readCollection(jr, config, type, propHandler, false, type.clazz(), type, null);
         } else if (type.isDataset()) {
-            return readDataset(jr, START_BRACKET, config, false, Dataset.class);
+            return readDataset(jr, START_BRACKET, config, false, type.clazz(), type);
         } else {
-            final List<?> list = readCollection(jr, config, type, propHandler, false, List.class, null);
+            final List<?> list = readCollection(jr, config, type, propHandler, false, List.class, null, null);
             final BiFunction<List<?>, Type<?>, Object> converter = list2PairTripleConverterMap.get(type.clazz());
 
             return converter == null ? list : converter.apply(list, type);
@@ -3579,15 +3958,17 @@ final class JSONParserImpl extends AbstractJSONParser {
         if (type.isBean()) {
             return readBean(jr, config, false, type.clazz(), type);
         } else if (type.isMap()) {
-            return readMap(jr, config, type, false, type.clazz(), null);
+            return readMap(jr, config, type, false, type.clazz(), type, null);
         } else if (type.isDataset()) {
-            return readDataset(jr, START_BRACE, config, false, Dataset.class);
+            return readDataset(jr, START_BRACE, config, false, type.clazz(), type);
+        } else if (Sheet.class.isAssignableFrom(type.clazz())) {
+            return readSheet(jr, START_BRACE, config, false, type.clazz(), type);
         } else if (type.isMapEntity()) {
-            return readMapEntity(jr, config, false, MapEntity.class);
+            return readMapEntity(jr, config, false, type.clazz(), type);
         } else if (type.isEntityId()) {
-            return readEntityId(jr, config, false, EntityId.class);
+            return readEntityId(jr, config, false, type.clazz(), type);
         } else {
-            final Map<Object, Object> map = readMap(jr, config, type, false, Map.class, null);
+            final Map<Object, Object> map = readMap(jr, config, type, false, Map.class, null, null);
             final Function<Map<Object, Object>, ?> converter = map2TargetTypeConverterMap.get(type.clazz());
 
             if (converter == null) {
@@ -3613,6 +3994,33 @@ final class JSONParserImpl extends AbstractJSONParser {
                 nullToEmpty);
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * <p>This implementation creates a lazy stream that deserializes JSON array elements on-demand,
+     * providing memory-efficient processing of large JSON arrays without loading all elements into memory.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * String json = "[{\"name\":\"John\",\"age\":30},{\"name\":\"Jane\",\"age\":25}]";
+     * JSONDeserializationConfig config = new JSONDeserializationConfig();
+     *
+     * try (Stream<User> users = parser.stream(json, config, Type.of(User.class))) {
+     *     users.filter(u -> u.getAge() > 25)
+     *          .forEach(System.out::println);
+     * }
+     * // Stream is automatically closed with try-with-resources
+     * }</pre>
+     *
+     * @param <T> the type of elements in the stream
+     * @param source the JSON array string to stream; may be {@code null} or empty (returns empty stream)
+     * @param config the deserialization configuration to use; may be {@code null} to use default configuration
+     * @param elementType the type of elements to deserialize; must not be {@code null}
+     * @return a Stream of deserialized elements; never {@code null}
+     * @throws IllegalArgumentException if the element type is not supported for streaming
+     * @throws UncheckedIOException if an I/O error occurs during parsing
+     * @throws ParseException if the JSON structure is invalid or not an array
+     */
     @Override
     public <T> Stream<T> stream(final String source, final JSONDeserializationConfig config, final Type<? extends T> elementType) {
         checkStreamSupportedType(elementType);
@@ -3639,6 +4047,35 @@ final class JSONParserImpl extends AbstractJSONParser {
         return result;
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * <p>This implementation creates a lazy stream from a JSON array file, automatically managing
+     * the file reader resource. The file is opened when the stream is created and closed when
+     * the stream is closed.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * File jsonFile = new File("users.json");
+     * JSONDeserializationConfig config = new JSONDeserializationConfig();
+     *
+     * try (Stream<User> users = parser.stream(jsonFile, config, Type.of(User.class))) {
+     *     long count = users.filter(u -> u.getAge() > 18)
+     *                       .count();
+     *     System.out.println("Adult users: " + count);
+     * }
+     * // File is automatically closed when stream is closed
+     * }</pre>
+     *
+     * @param <T> the type of elements in the stream
+     * @param source the file containing the JSON array to stream; must not be {@code null}
+     * @param config the deserialization configuration to use; may be {@code null} to use default configuration
+     * @param elementType the type of elements to deserialize; must not be {@code null}
+     * @return a Stream of deserialized elements; never {@code null}
+     * @throws IllegalArgumentException if the element type is not supported for streaming
+     * @throws UncheckedIOException if an I/O error occurs during file reading or parsing
+     * @throws ParseException if the JSON structure is invalid or not an array
+     */
     @Override
     public <T> Stream<T> stream(final File source, final JSONDeserializationConfig config, final Type<? extends T> elementType) {
         Stream<T> result = null;
@@ -3647,7 +4084,7 @@ final class JSONParserImpl extends AbstractJSONParser {
         try {
             reader = IOUtil.newFileReader(source);
 
-            result = stream(reader, config, true, elementType);
+            result = stream(reader, true, config, elementType);
         } finally {
             if (result == null) {
                 IOUtil.closeQuietly(reader);
@@ -3657,26 +4094,77 @@ final class JSONParserImpl extends AbstractJSONParser {
         return result;
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * <p>This implementation creates a lazy stream from a JSON array input stream with configurable
+     * resource management. The caller can control whether the input stream should be automatically
+     * closed when the stream is closed.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * InputStream is = new FileInputStream("users.json");
+     * JSONDeserializationConfig config = new JSONDeserializationConfig();
+     *
+     * // Stream will close the input stream when closed
+     * try (Stream<User> users = parser.stream(is, config, true, Type.of(User.class))) {
+     *     users.limit(10)
+     *          .forEach(System.out::println);
+     * }
+     * // Input stream is automatically closed
+     * }</pre>
+     *
+     * @param <T> the type of elements in the stream
+     * @param source the input stream containing the JSON array to stream; must not be {@code null}
+     * @param closeInputStreamWhenStreamIsClosed {@code true} to close the input stream when the stream is closed
+     * @param config the deserialization configuration to use; may be {@code null} to use default configuration
+     * @param elementType the type of elements to deserialize; must not be {@code null}
+     * @return a Stream of deserialized elements; never {@code null}
+     * @throws IllegalArgumentException if the element type is not supported for streaming
+     * @throws UncheckedIOException if an I/O error occurs during stream reading or parsing
+     * @throws ParseException if the JSON structure is invalid or not an array
+     */
     @Override
-    public <T> Stream<T> stream(final InputStream source, final JSONDeserializationConfig config, final boolean closeInputStreamWhenStreamIsClosed,
+    public <T> Stream<T> stream(final InputStream source, final boolean closeInputStreamWhenStreamIsClosed, final JSONDeserializationConfig config,
             final Type<? extends T> elementType) {
         final Reader reader = IOUtil.newInputStreamReader(source); // NOSONAR
 
-        return stream(reader, config, closeInputStreamWhenStreamIsClosed, elementType);
+        return stream(reader, closeInputStreamWhenStreamIsClosed, config, elementType);
     }
 
     /**
+     * {@inheritDoc}
      *
-     * @param <T>
-     * @param source
-     * @param config
-     * @param closeReaderWhenStreamIsClosed
-     * @param elementType
-     * @return
-     * @throws IllegalArgumentException
+     * <p>This implementation creates a lazy stream from a JSON array reader with configurable
+     * resource management. The caller can control whether the reader should be automatically
+     * closed when the stream is closed.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Reader reader = new FileReader("users.json");
+     * JSONDeserializationConfig config = new JSONDeserializationConfig();
+     *
+     * // Stream will close the reader when closed
+     * try (Stream<User> users = parser.stream(reader, config, true, Type.of(User.class))) {
+     *     List<User> topUsers = users.sorted(Comparator.comparing(User::getAge).reversed())
+     *                                .limit(5)
+     *                                .collect(Collectors.toList());
+     * }
+     * // Reader is automatically closed
+     * }</pre>
+     *
+     * @param <T> the type of elements in the stream
+     * @param source the reader containing the JSON array to stream; must not be {@code null}
+     * @param closeReaderWhenStreamIsClosed {@code true} to close the reader when the stream is closed
+     * @param config the deserialization configuration to use; may be {@code null} to use default configuration
+     * @param elementType the type of elements to deserialize; must not be {@code null}
+     * @return a Stream of deserialized elements; never {@code null}
+     * @throws IllegalArgumentException if the source is {@code null} or the element type is not supported for streaming
+     * @throws UncheckedIOException if an I/O error occurs during reading or parsing
+     * @throws ParseException if the JSON structure is invalid or not an array
      */
     @Override
-    public <T> Stream<T> stream(final Reader source, final JSONDeserializationConfig config, final boolean closeReaderWhenStreamIsClosed,
+    public <T> Stream<T> stream(final Reader source, final boolean closeReaderWhenStreamIsClosed, final JSONDeserializationConfig config,
             final Type<? extends T> elementType) throws IllegalArgumentException {
         N.checkArgNotNull(source, cs.source);
         checkStreamSupportedType(elementType);

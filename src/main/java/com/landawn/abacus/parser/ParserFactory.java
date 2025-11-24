@@ -255,6 +255,7 @@ public final class ParserFactory {
      * }</pre>
      *
      * @return a new {@link JSONParser} instance
+     * @throws NoClassDefFoundError if JSON parser implementation is not available
      */
     public static JSONParser createJSONParser() {
         return new JSONParserImpl();
@@ -277,6 +278,7 @@ public final class ParserFactory {
      * @param jsc the JSON serialization configuration
      * @param jdc the JSON deserialization configuration
      * @return a new {@link JSONParser} instance with the specified configurations
+     * @throws NoClassDefFoundError if JSON parser implementation is not available
      */
     public static JSONParser createJSONParser(final JSONSerializationConfig jsc, final JSONDeserializationConfig jdc) {
         return new JSONParserImpl(jsc, jdc);
@@ -424,6 +426,7 @@ public final class ParserFactory {
      * }</pre>
      *
      * @return a new JAXB {@link XMLParser} instance
+     * @throws NoClassDefFoundError if JAXB implementation is not available
      */
     public static XMLParser createJAXBParser() {
         return new JAXBParser();
@@ -442,7 +445,8 @@ public final class ParserFactory {
      *
      * @param xsc the XML serialization configuration, configures how objects are converted to XML
      * @param xdc the XML deserialization configuration, configures how XML is converted to objects
-          * @return a new JAXB {@link XMLParser} instance with the specified configurations
+     * @return a new JAXB {@link XMLParser} instance with the specified configurations
+     * @throws NoClassDefFoundError if JAXB implementation is not available
      */
     public static XMLParser createJAXBParser(final XMLSerializationConfig xsc, final XMLDeserializationConfig xdc) {
         return new JAXBParser(xsc, xdc);

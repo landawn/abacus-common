@@ -541,13 +541,13 @@ public final class Beans {
      * }
      * }</pre>
      *
-     * @param cls the class to get bean information for
+     * @param beanType the bean type to get bean information for
      * @return a BeanInfo instance containing metadata about the class
      * @throws IllegalArgumentException if the class is not a bean class (no properties)
      * @see ParserUtil#getBeanInfo(Class)
      */
-    public static BeanInfo getBeanInfo(final Class<?> cls) {
-        return ParserUtil.getBeanInfo(cls);
+    public static BeanInfo getBeanInfo(final java.lang.reflect.Type beanType) {
+        return ParserUtil.getBeanInfo(beanType);
     }
 
     /**
@@ -2539,7 +2539,7 @@ public final class Beans {
             if (propInfo == null) {
                 beanInfo.setPropValue(result, propName, propValue, ignoreUnmatchedProperty);
             } else {
-                if (propValue != null && propInfo.type.isBean() && N.typeOf(propValue.getClass()).isMap()) {
+                if (propValue != null && propInfo.type.isBean() && Type.of(propValue.getClass()).isMap()) {
                     propInfo.setPropValue(result, map2Bean((Map<String, Object>) propValue, ignoreNullProperty, ignoreUnmatchedProperty, propInfo.clazz));
                 } else {
                     propInfo.setPropValue(result, propValue);
@@ -2601,7 +2601,7 @@ public final class Beans {
             if (propInfo == null) {
                 beanInfo.setPropValue(result, propName, propValue, false);
             } else {
-                if (propValue != null && propInfo.type.isBean() && N.typeOf(propValue.getClass()).isMap()) {
+                if (propValue != null && propInfo.type.isBean() && Type.of(propValue.getClass()).isMap()) {
                     propInfo.setPropValue(result, map2Bean((Map<String, Object>) propValue, propInfo.clazz));
                 } else {
                     propInfo.setPropValue(result, propValue);

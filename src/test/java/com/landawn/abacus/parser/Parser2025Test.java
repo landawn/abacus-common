@@ -24,6 +24,7 @@ import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.exception.UncheckedIOException;
+import com.landawn.abacus.type.Type;
 
 @Tag("2025")
 public class Parser2025Test extends TestBase {
@@ -194,6 +195,47 @@ public class Parser2025Test extends TestBase {
             } catch (IOException e) {
                 throw new UncheckedIOException(e);
             }
+        }
+
+        @Override
+        public <T> T deserialize(String source, Type<? extends T> targetType) {
+            // TODO Auto-generated method stub
+            return null;
+        }
+
+        @Override
+        public <T> T deserialize(String source, TestDeserializationConfig config, Type<? extends T> targetType) {
+            return deserialize(source, config, (Class<? extends T>) targetType.clazz());
+        }
+
+        @Override
+        public <T> T deserialize(File source, Type<? extends T> targetType) throws UncheckedIOException {
+            return deserialize(source, null, targetType);
+        }
+
+        @Override
+        public <T> T deserialize(File source, TestDeserializationConfig config, Type<? extends T> targetType) throws UncheckedIOException {
+            return deserialize(source, config, (Class<? extends T>) targetType.clazz());
+        }
+
+        @Override
+        public <T> T deserialize(InputStream source, Type<? extends T> targetType) throws UncheckedIOException {
+            return deserialize(source, null, targetType);
+        }
+
+        @Override
+        public <T> T deserialize(InputStream source, TestDeserializationConfig config, Type<? extends T> targetType) throws UncheckedIOException {
+            return deserialize(source, config, (Class<? extends T>) targetType.clazz());
+        }
+
+        @Override
+        public <T> T deserialize(Reader source, Type<? extends T> targetType) throws UncheckedIOException {
+            return deserialize(source, null, targetType);
+        }
+
+        @Override
+        public <T> T deserialize(Reader source, TestDeserializationConfig config, Type<? extends T> targetType) throws UncheckedIOException {
+            return deserialize(source, config, (Class<? extends T>) targetType.clazz());
         }
     }
 

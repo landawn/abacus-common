@@ -18,9 +18,12 @@ import java.io.IOException;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
+import java.lang.reflect.GenericArrayType;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.TypeVariable;
 import java.sql.Timestamp;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
@@ -63,6 +66,7 @@ import com.landawn.abacus.logging.LoggerFactory;
 import com.landawn.abacus.type.ObjectType;
 import com.landawn.abacus.type.Type;
 import com.landawn.abacus.type.TypeFactory;
+import com.landawn.abacus.util.Array;
 import com.landawn.abacus.util.Beans;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.ClassUtil;
@@ -81,6 +85,7 @@ import com.landawn.abacus.util.Strings;
 import com.landawn.abacus.util.Tuple.Tuple3;
 import com.landawn.abacus.util.WD;
 import com.landawn.abacus.util.u.Optional;
+import com.landawn.abacus.util.stream.Stream;
 
 /**
  * Utility class for parser-related operations, providing methods for handling
@@ -131,7 +136,7 @@ public final class ParserUtil {
     private static final int defaultNameIndex = NamingPolicy.LOWER_CAMEL_CASE.ordinal();
 
     // ...
-    private static final Map<Class<?>, BeanInfo> beanInfoPool = new ObjectPool<>(POOL_SIZE);
+    private static final Map<java.lang.reflect.Type, BeanInfo> beanInfoPool = new ObjectPool<>(POOL_SIZE);
 
     private ParserUtil() {
         // Singleton.
@@ -724,6 +729,36 @@ public final class ParserUtil {
     }
 
     /**
+     * Retrieves or creates a {@link BeanInfo} instance for the specified java type.
+     * 
+     * <p>This method maintains a cache of BeanInfo instances to improve performance.
+     * The BeanInfo contains metadata about the class including property information,
+     * annotations, and type details.</p>
+     * 
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * BeanInfo beanInfo = ParserUtil.getBeanInfo(MyBean.class);
+     * List<PropInfo> properties = beanInfo.propInfoList;
+     * }</pre>
+     *
+     * @param beanType the java type of the bean class to get information for
+     * @return a BeanInfo instance containing metadata about the class
+     * @throws IllegalArgumentException if the class is not a bean class (no properties)
+     * @see BeanInfo
+     */
+    public static BeanInfo getBeanInfo(final java.lang.reflect.Type beanType) {
+        Class<?> beanClass = null;
+
+        if (beanType instanceof ParameterizedType pt && pt.getRawType() instanceof Class cls) {
+            beanClass = cls;
+        } else {
+            beanClass = (Class<?>) beanType;
+        }
+
+        return getBeanInfo(beanClass, beanType);
+    }
+
+    /**
      * Retrieves or creates a {@link BeanInfo} instance for the specified class.
      * 
      * <p>This method maintains a cache of BeanInfo instances to improve performance.
@@ -736,26 +771,30 @@ public final class ParserUtil {
      * List<PropInfo> properties = beanInfo.propInfoList;
      * }</pre>
      *
-     * @param cls the class to get bean information for
+     * @param beanClass the class to get bean information for
      * @return a BeanInfo instance containing metadata about the class
      * @throws IllegalArgumentException if the class is not a bean class (no properties)
      * @see BeanInfo
      */
-    public static BeanInfo getBeanInfo(final Class<?> cls) {
-        if (!Beans.isBeanClass(cls)) {
+    public static BeanInfo getBeanInfo(final Class<?> beanClass) {
+        return getBeanInfo(beanClass, beanClass);
+    }
+
+    private static BeanInfo getBeanInfo(final Class<?> beanClass, java.lang.reflect.Type javaType) {
+        if (!Beans.isBeanClass(beanClass)) {
             throw new IllegalArgumentException(
-                    "No property getter/setter method or public field found in the specified bean: " + ClassUtil.getCanonicalClassName(cls));
+                    "No property getter/setter method or public field found in the specified bean: " + ClassUtil.getCanonicalClassName(beanClass));
         }
 
-        BeanInfo beanInfo = beanInfoPool.get(cls);
+        BeanInfo beanInfo = beanInfoPool.get(javaType);
 
         if (beanInfo == null) {
             synchronized (beanInfoPool) {
-                beanInfo = beanInfoPool.get(cls);
+                beanInfo = beanInfoPool.get(javaType);
 
                 if (beanInfo == null) {
-                    beanInfo = new BeanInfo(cls);
-                    beanInfoPool.put(cls, beanInfo);
+                    beanInfo = new BeanInfo(beanClass, javaType);
+                    beanInfoPool.put(javaType, beanInfo);
                 }
             }
         }
@@ -769,10 +808,10 @@ public final class ParserUtil {
      * Retrieves or creates a {@link BeanInfo} instance for the specified class,
      * optionally supporting ASM-based property access.
      * 
-     * <p>This method is similar to {@link #getBeanInfo(Class)} but allows specifying
+     * <p>This method is similar to {@link #getBeanInfo(java.lang.reflect.Type)} but allows specifying
      * whether ASM support is enabled, which can improve performance for certain operations.</p>
      *
-     * @param cls the class to get bean information for
+     * @param beanType the java type of the bean class to get information for
      * @param isASMSupported whether ASM support is enabled
      * @return a BeanInfo instance containing metadata about the class
      * @see BeanInfo
@@ -780,26 +819,40 @@ public final class ParserUtil {
      */
     @Deprecated
     @Internal
-    static BeanInfo getBeanInfo(final Class<?> cls, final boolean isASMSupported) {
-        return new BeanInfo(cls, isASMSupported);
+    static BeanInfo getBeanInfo(final java.lang.reflect.Type beanType, final boolean isASMSupported) {
+        Class<?> beanClass = null;
+
+        if (beanType instanceof ParameterizedType pt && pt.getRawType() instanceof Class cls) {
+            beanClass = cls;
+        } else {
+            beanClass = (Class<?>) beanType;
+        }
+
+        return new BeanInfo(beanClass, beanType, isASMSupported);
     }
 
     /**
      * Refreshes the cached bean property information for the specified class.
-     * 
-     * <p>This method removes the cached BeanInfo for the specified class, forcing
-     * it to be recreated on the next call to {@link #getBeanInfo(Class)}.</p>
-     * 
-     * <p>This method is marked as deprecated and is for internal use only.</p>
      *
-     * @param cls the class whose bean property information should be refreshed
-     * @deprecated internal use only
+     * <p>This method removes the cached BeanInfo for the specified class, forcing
+     * it to be recreated on the next call to {@link #getBeanInfo(java.lang.reflect.Type)}.</p>
+     *
+     * <p>This method is primarily intended for internal framework use and testing scenarios
+     * where bean definitions may change at runtime (e.g., through bytecode manipulation or
+     * dynamic class reloading).</p>
+     *
+     * @param beanType the java type of the bean class to refresh
+     * @deprecated This method is for internal use only and should not be called by application code.
+     *             Bean property information is automatically cached and refreshed as needed by the framework.
+     *             If you encounter stale cached data, consider whether the underlying bean class
+     *             definition has been modified at runtime (which is generally not recommended in production).
+     *             There is no public replacement as this operation should not be needed in normal usage.
      */
     @Deprecated
     @Internal
-    public static void refreshBeanPropInfo(final Class<?> cls) {
+    public static void refreshBeanPropInfo(final java.lang.reflect.Type beanType) {
         synchronized (beanInfoPool) {
-            beanInfoPool.remove(cls);
+            beanInfoPool.remove(beanType);
         }
     }
 
@@ -830,6 +883,12 @@ public final class ParserUtil {
      */
     public static class BeanInfo implements JSONReader.SymbolReader {
 
+        /** Type information for this class */
+        public final Type<Object> type;
+
+        /** The Java type of the class */
+        public final java.lang.reflect.Type javaType;
+
         /** The class this BeanInfo describes */
         public final Class<Object> clazz;
 
@@ -838,11 +897,6 @@ public final class ParserUtil {
 
         /** Fully qualified class name */
         public final String canonicalClassName;
-
-        final String name;
-
-        /** Type information for this class */
-        public final Type<Object> type;
 
         /** Immutable list of all property names */
         public final ImmutableList<String> propNameList;
@@ -921,10 +975,11 @@ public final class ParserUtil {
          * <p>This constructor analyzes the class structure, extracts property information,
          * processes annotations, and builds comprehensive metadata about the bean.</p>
          * 
-         * @param cls the class to analyze
+         * @param beanClass the class to analyze
+         * @param beanType the Java type of the class
          */
-        BeanInfo(final Class<?> cls) {
-            this(cls, ASMUtil.isASMAvailable());
+        BeanInfo(final Class<?> beanClass, final java.lang.reflect.Type beanType) {
+            this(beanClass, beanType, ASMUtil.isASMAvailable());
         }
 
         /**
@@ -933,38 +988,50 @@ public final class ParserUtil {
          * <p>When ASM support is enabled, property access may be optimized using bytecode
          * generation instead of reflection.</p>
          * 
-         * @param cls the class to analyze
+         * @param beanClass the class to analyze
+         * @param beanType the Java type of the class
          * @param isASMSupported whether to enable ASM-based optimizations
          */
         @SuppressWarnings("deprecation")
-        BeanInfo(final Class<?> cls, final boolean isASMSupported) {
+        BeanInfo(final Class<?> beanClass, final java.lang.reflect.Type beanType, final boolean isASMSupported) {
             // Constructor implementation remains the same...
-            annotations = ImmutableMap.wrap(getAnnotations(cls));
-            simpleClassName = ClassUtil.getSimpleClassName(cls);
-            canonicalClassName = ClassUtil.getCanonicalClassName(cls);
-            name = Beans.formalizePropName(simpleClassName);
-            clazz = (Class<Object>) cls;
-            type = N.typeOf(cls);
+            annotations = ImmutableMap.wrap(getAnnotations(beanClass));
+            simpleClassName = ClassUtil.getSimpleClassName(beanClass);
+            canonicalClassName = ClassUtil.getCanonicalClassName(beanClass);
+            clazz = (Class<Object>) beanClass;
+            this.javaType = beanType;
+            type = Type.of(beanType);
             typeName = type.name();
 
-            propNameList = Beans.getPropNameList(cls);
+            final Map<TypeVariable<?>, java.lang.reflect.Type> typeParamArgMap = new HashMap<>();
+
+            if (beanType instanceof ParameterizedType pType) {
+                final java.lang.reflect.Type[] typeArgs = pType.getActualTypeArguments();
+                final TypeVariable<?>[] typeParams = beanClass.getTypeParameters();
+
+                for (int i = 0, len = typeParams.length; i < len; i++) {
+                    typeParamArgMap.put(typeParams[i], typeArgs[i]);
+                }
+            }
+
+            propNameList = Beans.getPropNameList(beanClass);
 
             boolean localIsImmutable = true;
 
-            if (Beans.isRecordClass(cls)) {
+            if (Beans.isRecordClass(beanClass)) {
                 //noinspection DataFlowIssue
                 localIsImmutable = true;
-            } else if (Beans.isRegisteredXMLBindingClass(cls)) {
+            } else if (Beans.isRegisteredXMLBindingClass(beanClass)) {
                 localIsImmutable = false;
             } else {
                 try {
-                    final Object tmp = N.newInstance(cls);
+                    final Object tmp = N.newInstance(beanClass);
                     Field field = null;
                     Method setMethod = null;
 
                     for (final String propName : propNameList) {
-                        field = Beans.getPropField(cls, propName);
-                        setMethod = Beans.getPropSetMethod(cls, propName);
+                        field = Beans.getPropField(beanClass, propName);
+                        setMethod = Beans.getPropSetMethod(beanClass, propName);
 
                         if (setMethod != null) {
                             localIsImmutable = false;
@@ -986,27 +1053,28 @@ public final class ParserUtil {
             }
 
             isImmutable = localIsImmutable;
-            builderInfo = localIsImmutable ? Beans.getBuilderInfo(cls) : null;
+            builderInfo = localIsImmutable ? Beans.getBuilderInfo(beanClass) : null;
             isByBuilder = localIsImmutable && builderInfo != null;
 
             final JsonXmlConfig jsonXmlConfig = (JsonXmlConfig) annotations.get(JsonXmlConfig.class);
             jsonXmlNamingPolicy = jsonXmlConfig == null || jsonXmlConfig.namingPolicy() == null ? NamingPolicy.LOWER_CAMEL_CASE : jsonXmlConfig.namingPolicy();
             jsonXmlSeriExclusion = jsonXmlConfig == null || jsonXmlConfig.exclusion() == null ? Exclusion.NULL : jsonXmlConfig.exclusion();
 
+            final String name = Beans.formalizePropName(simpleClassName);
             jsonNameTags = getJsonNameTags(name);
             xmlNameTags = getXmlNameTags(name, typeName, true);
 
             final List<String> idPropNames = new ArrayList<>();
             final List<String> readOnlyIdPropNames = new ArrayList<>();
 
-            if (cls.isAnnotationPresent(Id.class)) {
-                final String[] values = cls.getAnnotation(Id.class).value();
+            if (beanClass.isAnnotationPresent(Id.class)) {
+                final String[] values = beanClass.getAnnotation(Id.class).value();
                 N.checkArgNotEmpty(values, "values for annotation @Id on Type/Class can't be null or empty");
                 idPropNames.addAll(Arrays.asList(values));
             }
 
-            if (cls.isAnnotationPresent(ReadOnlyId.class)) {
-                final String[] values = cls.getAnnotation(ReadOnlyId.class).value();
+            if (beanClass.isAnnotationPresent(ReadOnlyId.class)) {
+                final String[] values = beanClass.getAnnotation(ReadOnlyId.class).value();
                 N.checkArgNotEmpty(values, "values for annotation @ReadOnlyId on Type/Class can't be null or empty");
                 idPropNames.addAll(Arrays.asList(values));
                 readOnlyIdPropNames.addAll(Arrays.asList(values));
@@ -1031,15 +1099,15 @@ public final class ParserUtil {
             Method setMethod = null;
 
             for (final String propName : propNameList) {
-                field = Beans.getPropField(cls, propName);
-                getMethod = Beans.getPropGetMethod(cls, propName);
-                setMethod = isByBuilder ? Beans.getPropSetMethod(builderInfo._1, propName) : Beans.getPropSetMethod(cls, propName);
+                field = Beans.getPropField(beanClass, propName);
+                getMethod = Beans.getPropGetMethod(beanClass, propName);
+                setMethod = isByBuilder ? Beans.getPropSetMethod(builderInfo._1, propName) : Beans.getPropSetMethod(beanClass, propName);
 
                 propInfo = ASMUtil.isASMAvailable() && isASMSupported
                         ? new ASMPropInfo(propName, field, getMethod, setMethod, jsonXmlConfig, annotations, idx, isImmutable, isByBuilder, idPropNames,
-                                readOnlyIdPropNames)
+                                readOnlyIdPropNames, typeParamArgMap)
                         : new PropInfo(propName, field, getMethod, setMethod, jsonXmlConfig, annotations, idx, isImmutable, isByBuilder, idPropNames,
-                                readOnlyIdPropNames);
+                                readOnlyIdPropNames, typeParamArgMap);
 
                 propInfos[idx++] = propInfo;
 
@@ -1073,7 +1141,7 @@ public final class ParserUtil {
                     for (final String str : aliases) {
                         if (propInfoMap.containsKey(str)) {
                             throw new IllegalArgumentException("Can't set alias: " + str + " for property/field: " + propInfo.field + " because " + str
-                                    + " is a property/field name in class: " + cls);
+                                    + " is a property/field name in class: " + beanClass);
                         }
 
                         propInfoMap.put(str, propInfoOpt);
@@ -1168,7 +1236,7 @@ public final class ParserUtil {
             }
 
             if (Strings.isNotEmpty(tmpTableName) && !tmpTableName.equals(Strings.strip(tmpTableName))) {
-                throw new IllegalArgumentException("Table name: \"" + tmpTableName + "\" must not start or end with any whitespace in class: " + cls);
+                throw new IllegalArgumentException("Table name: \"" + tmpTableName + "\" must not start or end with any whitespace in class: " + beanClass);
             }
 
             tableName = Strings.isEmpty(tmpTableName) ? Optional.empty() : Optional.ofNullable(tmpTableName);
@@ -1181,8 +1249,8 @@ public final class ParserUtil {
                 defaultFieldValues[i] = N.defaultValueOf(fieldTypes[i]);
             }
 
-            noArgsConstructor = ClassUtil.getDeclaredConstructor(cls);
-            allArgsConstructor = ClassUtil.getDeclaredConstructor(cls, fieldTypes);
+            noArgsConstructor = ClassUtil.getDeclaredConstructor(beanClass);
+            allArgsConstructor = ClassUtil.getDeclaredConstructor(beanClass, fieldTypes);
 
             if (noArgsConstructor != null) {
                 ClassUtil.setAccessibleQuietly(noArgsConstructor, true);
@@ -1934,16 +2002,28 @@ public final class ParserUtil {
         public final ImmutableList<String> aliases;
 
         /**
-         * The Java class type of this property.
-         * For collections, this is the collection type, not the element type.
-         */
-        public final Class<Object> clazz;
-
-        /**
          * The Type object representing this property's type.
          * This includes generic type information for parameterized types.
          */
         public final Type<Object> type;
+
+        /**
+         * The Type object specifically for JSON/XML serialization.
+         * May differ from the general type if custom type mappings are specified.
+         */
+        public final Type<Object> jsonXmlType;
+
+        /**
+         * The Type object specifically for database operations.
+         * May differ from the general type if custom database type mappings are specified.
+         */
+        public final Type<Object> dbType;
+
+        /**
+         * The Java class type of this property.
+         * For collections, this is the collection type, not the element type.
+         */
+        public final Class<Object> clazz;
 
         /**
          * The Field object for direct field access, or {@code null} if property is only accessible via methods.
@@ -1965,18 +2045,6 @@ public final class ParserUtil {
          * Includes annotations from the field, getter, and setter.
          */
         public final ImmutableMap<Class<? extends Annotation>, Annotation> annotations;
-
-        /**
-         * The Type object specifically for JSON/XML serialization.
-         * May differ from the general type if custom type mappings are specified.
-         */
-        public final Type<Object> jsonXmlType;
-
-        /**
-         * The Type object specifically for database operations.
-         * May differ from the general type if custom database type mappings are specified.
-         */
-        public final Type<Object> dbType;
 
         /**
          * Array of JSON name tags for custom JSON field naming.
@@ -2151,11 +2219,13 @@ public final class ParserUtil {
          * @param isByBuilder whether this property uses builder pattern
          * @param idPropNames list of property names that are identifiers
          * @param readOnlyIdPropNames list of property names that are read-only identifiers
+         * @param typeParamArgMap mapping of type variables to actual types for generic resolution
          */
         @SuppressWarnings("deprecation")
         PropInfo(final String propName, final Field field, final Method getMethod, final Method setMethod, final JsonXmlConfig jsonXmlConfig,
                 final ImmutableMap<Class<? extends Annotation>, Annotation> classAnnotations, final int fieldOrder, final boolean isImmutableBean,
-                final boolean isByBuilder, final List<String> idPropNames, final List<String> readOnlyIdPropNames) {
+                final boolean isByBuilder, final List<String> idPropNames, final List<String> readOnlyIdPropNames,
+                final Map<TypeVariable<?>, java.lang.reflect.Type> typeParamArgMap) {
             // Constructor implementation remains the same...
             declaringClass = (Class<Object>) (field != null ? field.getDeclaringClass() : getMethod.getDeclaringClass());
             this.field = field;
@@ -2167,10 +2237,16 @@ public final class ParserUtil {
             isTransient = annotations.containsKey(Transient.class) || annotations.keySet().stream().anyMatch(it -> it.getSimpleName().equals("Transient"))
                     || (field != null && Modifier.isTransient(field.getModifiers()));
 
-            clazz = (Class<Object>) (field == null ? (setMethod == null ? getMethod.getReturnType() : setMethod.getParameterTypes()[0]) : field.getType());
-            type = getType(getAnnoType(this.field, clazz, jsonXmlConfig), this.field, this.getMethod, this.setMethod, declaringClass);
-            jsonXmlType = getType(getJsonXmlAnnoType(this.field, clazz, jsonXmlConfig), this.field, this.getMethod, this.setMethod, declaringClass);
-            dbType = getType(getDBAnnoType(clazz), this.field, this.getMethod, this.setMethod, declaringClass);
+            final Class<?> propClass = field == null ? (setMethod == null ? getMethod.getReturnType() : setMethod.getParameterTypes()[0]) : field.getType();
+
+            type = getType(getAnnoType(this.field, propClass, jsonXmlConfig), this.field, this.getMethod, this.setMethod, declaringClass, typeParamArgMap);
+
+            jsonXmlType = getType(getJsonXmlAnnoType(this.field, propClass, jsonXmlConfig), this.field, this.getMethod, this.setMethod, declaringClass,
+                    typeParamArgMap);
+
+            dbType = getType(getDBAnnoType(propClass), this.field, this.getMethod, this.setMethod, declaringClass, typeParamArgMap);
+
+            clazz = type.clazz();
 
             jsonNameTags = getJsonNameTags(propName, field);
             xmlNameTags = getXmlNameTags(propName, field, jsonXmlType.name(), false);
@@ -3071,17 +3147,35 @@ public final class ParserUtil {
         }
 
         @SuppressWarnings("unused")
-        private <T> Type<T> getType(final String annoType, final Field field, final Method getMethod, final Method setMethod, final Class<?> beanClass) {
+        private <T> Type<T> getType(final String annoType, final Field field, final Method getMethod, final Method setMethod, final Class<?> beanClass,
+                final Map<TypeVariable<?>, java.lang.reflect.Type> typeParamArgMap) {
             if (Strings.isEmpty(annoType)) {
-                final String parameterizedTypeName = field != null ? ClassUtil.getParameterizedTypeNameByField(field)
-                        : ClassUtil.getParameterizedTypeNameByMethod((setMethod == null) ? getMethod : setMethod);
+                java.lang.reflect.Type genericType = field != null ? field.getGenericType()
+                        : setMethod != null ? setMethod.getGenericParameterTypes()[0] : getMethod.getGenericReturnType();
 
-                return N.typeOf(parameterizedTypeName);
+                if ((genericType instanceof TypeVariable) && typeParamArgMap.containsKey(genericType)) {
+                    return Type.of(typeParamArgMap.get(genericType));
+                } else if (genericType instanceof GenericArrayType genericArrayType) {
+                    if (typeParamArgMap.containsKey(genericArrayType.getGenericComponentType())) {
+                        final Class<?> componentActual = (Class<?>) typeParamArgMap.get(genericArrayType.getGenericComponentType());
+
+                        return Type.<T> of(Array.newInstance(componentActual, 0).getClass());
+                    } else {
+                        return Type.<T> of(Array.newInstance(getType(genericArrayType.getGenericComponentType(), typeParamArgMap).clazz(), 0).getClass());
+                    }
+                } else if (genericType instanceof ParameterizedType parameterizedType) {
+                    return getType(parameterizedType, typeParamArgMap);
+                } else {
+                    final String parameterizedTypeName = field != null ? ClassUtil.getParameterizedTypeNameByField(field)
+                            : ClassUtil.getParameterizedTypeNameByMethod((setMethod != null) ? setMethod : getMethod);
+
+                    return Type.of(parameterizedTypeName);
+                }
             } else {
                 Type<T> localType = null;
 
                 try {
-                    localType = N.typeOf(annoType);
+                    localType = Type.of(annoType);
                 } catch (final Exception e) {
                     // ignore
                 }
@@ -3097,7 +3191,7 @@ public final class ParserUtil {
                         if (ch == '<' || ch == '>' || ch == ' ' || ch == ',') {
                             final String str = annoType.substring(start, i);
 
-                            if (!str.isEmpty() && N.typeOf(str).isObjectType() && !N.typeOf(pkgName + "." + str).isObjectType()) {
+                            if (!str.isEmpty() && Type.of(str).isObjectType() && !Type.of(pkgName + "." + str).isObjectType()) {
                                 sb.append(pkgName).append(".").append(str);
                             } else {
                                 sb.append(str);
@@ -3111,17 +3205,45 @@ public final class ParserUtil {
                     if (start < annoType.length()) {
                         final String str = annoType.substring(start);
 
-                        if (N.typeOf(str).isObjectType() && !N.typeOf(pkgName + "." + str).isObjectType()) {
+                        if (Type.of(str).isObjectType() && !Type.of(pkgName + "." + str).isObjectType()) {
                             sb.append(pkgName).append(".").append(str);
                         } else {
                             sb.append(str);
                         }
                     }
 
-                    localType = N.typeOf(sb.toString());
+                    localType = Type.of(sb.toString());
                 }
 
                 return localType;
+            }
+        }
+
+        private <T> Type<T> getType(java.lang.reflect.Type genericType, final Map<TypeVariable<?>, java.lang.reflect.Type> typeParamArgMap) {
+            if ((genericType instanceof TypeVariable) && typeParamArgMap.containsKey(genericType)) {
+                return Type.of(typeParamArgMap.get(genericType));
+            } else if (genericType instanceof GenericArrayType genericArrayType) {
+                if (typeParamArgMap.containsKey(genericArrayType.getGenericComponentType())) {
+                    final Class<?> componentActual = (Class<?>) typeParamArgMap.get(genericArrayType.getGenericComponentType());
+
+                    return Type.<T> of(Array.newInstance(componentActual, 0).getClass());
+                } else {
+                    return Type.<T> of(Array.newInstance(getType(genericArrayType.getGenericComponentType(), typeParamArgMap).clazz(), 0).getClass());
+                }
+            } else if (genericType instanceof ParameterizedType parameterizedType) {
+                final java.lang.reflect.Type[] actualTypeArguments = parameterizedType.getActualTypeArguments();
+                final List<Type<?>> actualArgTypes = new ArrayList<>(actualTypeArguments.length);
+
+                for (java.lang.reflect.Type actualTypeArgument : actualTypeArguments) {
+                    actualArgTypes.add(getType(actualTypeArgument, typeParamArgMap));
+                }
+
+                final String typeName = ClassUtil.getCanonicalClassName((Class<?>) parameterizedType.getRawType())
+                        + Stream.of(actualArgTypes).map(Type::name).join(",", "<", ">");
+
+                return Type.of(typeName);
+            } else {
+                return Type.of(genericType);
             }
         }
 
@@ -3179,9 +3301,10 @@ public final class ParserUtil {
 
         ASMPropInfo(final String name, final Field field, final Method getMethod, final Method setMethod, final JsonXmlConfig jsonXmlConfig,
                 final ImmutableMap<Class<? extends Annotation>, Annotation> classAnnotations, final int fieldOrder, final boolean isImmutableBean,
-                final boolean isByBuilder, final List<String> idPropNames, final List<String> readOnlyIdPropNames) {
+                final boolean isByBuilder, final List<String> idPropNames, final List<String> readOnlyIdPropNames,
+                final Map<TypeVariable<?>, java.lang.reflect.Type> typeParamArgMap) {
             super(name, field, getMethod, setMethod, jsonXmlConfig, classAnnotations, fieldOrder, isImmutableBean, isByBuilder, idPropNames,
-                    readOnlyIdPropNames);
+                    readOnlyIdPropNames, typeParamArgMap);
 
             getMethodAccess = getMethod == null ? null : com.esotericsoftware.reflectasm.MethodAccess.get(getMethod.getDeclaringClass());
             setMethodAccess = setMethod == null ? null : com.esotericsoftware.reflectasm.MethodAccess.get(setMethod.getDeclaringClass());

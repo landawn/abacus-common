@@ -209,7 +209,7 @@ public class JdkOptionalType<T> extends AbstractOptionalType<Optional<T>> {
             appendable.append(NULL_STRING);
         } else {
             // elementType.write(writer, x.get());
-            N.typeOf(x.get().getClass()).appendTo(appendable, x.get());
+            Type.<Object> of(x.get().getClass()).appendTo(appendable, x.get());
         }
     }
 
@@ -229,7 +229,7 @@ public class JdkOptionalType<T> extends AbstractOptionalType<Optional<T>> {
             writer.write(NULL_CHAR_ARRAY);
         } else {
             // elementType.writeCharacter(writer, x.get(), config);
-            N.typeOf(x.get().getClass()).writeCharacter(writer, x.get(), config);
+            Type.<Object> of(x.get().getClass()).writeCharacter(writer, x.get(), config);
         }
     }
 }

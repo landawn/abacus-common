@@ -18,7 +18,6 @@ import java.io.IOException;
 
 import com.landawn.abacus.parser.JSONXMLSerializationConfig;
 import com.landawn.abacus.util.CharacterWriter;
-import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.ShortList;
 import com.landawn.abacus.util.Strings;
 
@@ -27,9 +26,9 @@ public final class PrimitiveShortListType extends AbstractPrimitiveListType<Shor
 
     public static final String SHORT_LIST = ShortList.class.getSimpleName();
 
-    private final Type<short[]> arrayType = N.typeOf(short[].class);
+    private final Type<short[]> arrayType = Type.of(short[].class);
 
-    private final Type<Short> elementType = N.typeOf(short.class);
+    private final Type<Short> elementType = Type.of(short.class);
     private final Type<Short>[] parameterTypes = new Type[] { elementType };
 
     protected PrimitiveShortListType() {

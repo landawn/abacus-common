@@ -72,21 +72,21 @@ final class Utils {
 
     static final XMLSerializationConfig xscForClone = XSC.create().writeTypeInfo(true);
 
-    static final Type<Boolean> booleanType = N.typeOf(boolean.class);
+    static final Type<Boolean> booleanType = Type.of(boolean.class);
 
-    static final Type<Character> charType = N.typeOf(char.class);
+    static final Type<Character> charType = Type.of(char.class);
 
-    static final Type<Byte> byteType = N.typeOf(byte.class);
+    static final Type<Byte> byteType = Type.of(byte.class);
 
-    static final Type<Short> shortType = N.typeOf(short.class);
+    static final Type<Short> shortType = Type.of(short.class);
 
-    static final Type<Integer> intType = N.typeOf(int.class);
+    static final Type<Integer> intType = Type.of(int.class);
 
-    static final Type<Long> longType = N.typeOf(long.class);
+    static final Type<Long> longType = Type.of(long.class);
 
-    static final Type<Float> floatType = N.typeOf(float.class);
+    static final Type<Float> floatType = Type.of(float.class);
 
-    static final Type<Double> doubleType = N.typeOf(double.class);
+    static final Type<Double> doubleType = Type.of(double.class);
 
     private Utils() {
         // singleton.

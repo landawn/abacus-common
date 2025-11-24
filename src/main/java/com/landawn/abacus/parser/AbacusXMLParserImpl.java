@@ -24,7 +24,6 @@ import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.IdentityHashMap;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Queue;
@@ -166,6 +165,40 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
         this.parserType = parserType;
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * <p>This abacus-specific implementation provides optimized XML serialization supporting SAX, DOM, and StAX
+     * parsing modes. The parser type determines the serialization strategy for optimal performance based on
+     * the use case.</p>
+     *
+     * <p><b>Parser Type Selection:</b></p>
+     * <ul>
+     *   <li><b>SAX</b>: Memory-efficient event-driven parsing, best for large documents (read-only)</li>
+     *   <li><b>DOM</b>: Tree-based parsing allowing random access, suitable for small to medium documents</li>
+     *   <li><b>StAX</b>: Streaming pull parser, balanced performance, recommended for most use cases</li>
+     * </ul>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * // StAX for balanced performance (recommended)
+     * XMLParser parser = new AbacusXMLParserImpl(XMLParserType.StAX);
+     * User user = new User("John", "Doe");
+     * String xml = parser.serialize(user, null);
+     *
+     * // With configuration
+     * XMLSerializationConfig config = new XMLSerializationConfig()
+     *     .prettyFormat(true)
+     *     .writeTypeInfo(true);
+     * String prettyXml = parser.serialize(user, config);
+     * }</pre>
+     *
+     * @param obj the object to serialize; may be {@code null}
+     * @param config the serialization configuration (may be {@code null} for default behavior)
+     * @return the XML string representation; returns empty string if {@code obj} is {@code null}
+     * @throws UncheckedIOException if an I/O error occurs during serialization
+     * @throws ParseException if the object type is not supported for serialization
+     */
     @Override
     public String serialize(final Object obj, final XMLSerializationConfig config) {
         if (obj == null) {
@@ -186,6 +219,30 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
         }
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * <p>This implementation writes XML output to a file using the configured parser type (SAX, DOM, or StAX).
+     * The file is created if it doesn't exist, and the contents are flushed and properly closed after serialization.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * XMLParser parser = new AbacusXMLParserImpl(XMLParserType.StAX);
+     * User user = new User("Jane", "Smith");
+     * File outputFile = new File("user.xml");
+     *
+     * XMLSerializationConfig config = new XMLSerializationConfig()
+     *     .prettyFormat(true)
+     *     .writeTypeInfo(false);
+     * parser.serialize(user, config, outputFile);
+     * }</pre>
+     *
+     * @param obj the object to serialize; may be {@code null}
+     * @param config the serialization configuration (may be {@code null} for default behavior)
+     * @param output the file to write the XML content to; must not be {@code null}
+     * @throws UncheckedIOException if an I/O error occurs during file operations
+     * @throws ParseException if the object type is not supported for serialization
+     */
     @Override
     public void serialize(final Object obj, final XMLSerializationConfig config, final File output) {
         Writer writer = null;
@@ -205,6 +262,31 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
         }
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * <p>This implementation writes XML output to an output stream using the configured parser type.
+     * The stream is flushed after serialization but is not closed, allowing the caller to manage
+     * the stream lifecycle.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * XMLParser parser = new AbacusXMLParserImpl(XMLParserType.StAX);
+     * User user = new User("Bob", "Johnson");
+     *
+     * try (OutputStream out = new FileOutputStream("user.xml")) {
+     *     XMLSerializationConfig config = new XMLSerializationConfig()
+     *         .prettyFormat(true);
+     *     parser.serialize(user, config, out);
+     * }
+     * }</pre>
+     *
+     * @param obj the object to serialize; may be {@code null}
+     * @param config the serialization configuration (may be {@code null} for default behavior)
+     * @param output the output stream to write the XML content to; must not be {@code null}
+     * @throws UncheckedIOException if an I/O error occurs during stream operations
+     * @throws ParseException if the object type is not supported for serialization
+     */
     @Override
     public void serialize(final Object obj, final XMLSerializationConfig config, final OutputStream output) {
         final BufferedXMLWriter bw = Objectory.createBufferedXMLWriter(output);
@@ -219,6 +301,32 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
         }
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * <p>This implementation writes XML output to a writer using the configured parser type. The writer
+     * is flushed after serialization but is not closed, allowing the caller to manage the writer lifecycle.
+     * If the provided writer is already a {@link BufferedXMLWriter}, it is used directly for optimal performance.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * XMLParser parser = new AbacusXMLParserImpl(XMLParserType.StAX);
+     * User user = new User("Alice", "Williams");
+     *
+     * StringWriter sw = new StringWriter();
+     * XMLSerializationConfig config = new XMLSerializationConfig()
+     *     .prettyFormat(true)
+     *     .writeTypeInfo(true);
+     * parser.serialize(user, config, sw);
+     * String xml = sw.toString();
+     * }</pre>
+     *
+     * @param obj the object to serialize; may be {@code null}
+     * @param config the serialization configuration (may be {@code null} for default behavior)
+     * @param output the writer to write the XML content to; must not be {@code null}
+     * @throws UncheckedIOException if an I/O error occurs during write operations
+     * @throws ParseException if the object type is not supported for serialization
+     */
     @Override
     public void serialize(final Object obj, final XMLSerializationConfig config, final Writer output) {
         final boolean isBufferedWriter = output instanceof BufferedXMLWriter;
@@ -236,17 +344,6 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
         }
     }
 
-    /**
-     *
-     * @param obj
-     * @param propInfo
-     * @param config
-     * @param indentation
-     * @param serializedObjects
-     * @param bw
-     * @param flush
-     * @throws IOException Signals that an I/O exception has occurred.
-     */
     void write(final Object obj, final PropInfo propInfo, final XMLSerializationConfig config, final String indentation,
             final IdentityHashSet<Object> serializedObjects, final BufferedXMLWriter bw, final boolean flush) throws IOException {
         final XMLSerializationConfig configToUse = check(config);
@@ -266,7 +363,7 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
         }
 
         final Class<?> cls = obj.getClass();
-        final Type<Object> type = N.typeOf(cls);
+        final Type<Object> type = Type.of(cls);
 
         switch (type.getSerializationType()) {
             case SERIALIZABLE:
@@ -321,7 +418,7 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
         //    }
 
         final Class<?> cls = type.clazz();
-        final BeanInfo beanInfo = ParserUtil.getBeanInfo(cls);
+        final BeanInfo beanInfo = ParserUtil.getBeanInfo(type.javaType());
 
         if (N.isEmpty(beanInfo.jsonXmlSerializablePropInfos)) {
             throw new ParseException("No serializable property is found in class: " + ClassUtil.getCanonicalClassName(cls));
@@ -378,7 +475,7 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
         //    }
 
         final Class<?> cls = type.clazz();
-        final BeanInfo beanInfo = ParserUtil.getBeanInfo(cls);
+        final BeanInfo beanInfo = ParserUtil.getBeanInfo(type.javaType());
 
         final Exclusion exclusion = getExclusion(config, beanInfo);
 
@@ -499,7 +596,7 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
 
         if (writeTypeInfo) {
             bw.write(XMLConstants.START_MAP_ELE_WITH_TYPE);
-            bw.write(N.typeOf(cls).xmlName());
+            bw.write(Type.of(cls).xmlName());
             bw.write(XMLConstants.CLOSE_ATTR_AND_ELE);
         } else {
             bw.write(XMLConstants.MAP_ELE_START);
@@ -509,7 +606,7 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
         final String keyValueIndentation = entryIndentation + config.getIndentation();
         final String nextIndentation = keyValueIndentation + config.getIndentation();
 
-        final Type<Object> stringType = N.typeOf(String.class);
+        final Type<Object> stringType = Type.of(String.class);
         Type<Object> keyType = null;
         Type<Object> valueType = null;
         Object key = null;
@@ -553,7 +650,7 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
 
                     stringType.writeCharacter(bw, key, config);
                 } else {
-                    keyType = N.typeOf(key.getClass());
+                    keyType = Type.of(key.getClass());
 
                     if (writeTypeInfo) {
                         bw.write(XMLConstants.START_KEY_ELE_WITH_TYPE);
@@ -592,7 +689,7 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
             if (value == null) {
                 bw.write(XMLConstants.VALUE_NULL_ELE);
             } else {
-                valueType = N.typeOf(value.getClass());
+                valueType = Type.of(value.getClass());
 
                 if (writeTypeInfo) {
                     bw.write(XMLConstants.START_VALUE_ELE_WITH_TYPE);
@@ -658,7 +755,7 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
 
         if (writeTypeInfo) {
             bw.write(XMLConstants.START_ARRAY_ELE_WITH_TYPE);
-            bw.write(N.typeOf(cls).xmlName());
+            bw.write(Type.of(cls).xmlName());
             bw.write(XMLConstants.CLOSE_ATTR_AND_ELE);
         } else {
             bw.write(XMLConstants.ARRAY_ELE_START);
@@ -678,7 +775,7 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
             if (e == null) {
                 bw.write(XMLConstants.E_NULL_ELE);
             } else {
-                eleType = N.typeOf(e.getClass());
+                eleType = Type.of(e.getClass());
 
                 if (writeTypeInfo) {
                     bw.write(XMLConstants.START_E_ELE_WITH_TYPE);
@@ -774,7 +871,7 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
             if (e == null) {
                 bw.write(XMLConstants.E_NULL_ELE);
             } else {
-                eleType = N.typeOf(e.getClass());
+                eleType = Type.of(e.getClass());
 
                 if (writeTypeInfo) {
                     bw.write(XMLConstants.START_E_ELE_WITH_TYPE);
@@ -822,87 +919,493 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
         }
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * <p>This abacus-specific implementation uses the configured parser type (SAX, DOM, or StAX) for XML
+     * deserialization. Each parser type offers different performance characteristics:</p>
+     * <ul>
+     *   <li><b>SAX</b>: Event-driven, extremely memory-efficient for large documents</li>
+     *   <li><b>DOM</b>: Tree-based, loads entire document into memory for random access</li>
+     *   <li><b>StAX</b>: Pull-based streaming, balanced performance (recommended for most cases)</li>
+     * </ul>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * // Using StAX (recommended)
+     * XMLParser parser = new AbacusXMLParserImpl(XMLParserType.StAX);
+     * String xml = "<user><name>John</name><age>30</age></user>";
+     * Type<User> userType = Type.of(User.class);
+     * User user = parser.deserialize(xml, null, userType);
+     *
+     * // Using SAX for large documents
+     * XMLParser saxParser = new AbacusXMLParserImpl(XMLParserType.SAX);
+     * XMLDeserializationConfig config = new XMLDeserializationConfig()
+     *     .ignoreUnmatchedProperty(true);
+     * User user2 = saxParser.deserialize(largeXml, config, userType);
+     * }</pre>
+     *
+     * @param <T> the type of the target object
+     * @param source the XML string to deserialize; may be {@code null} or empty
+     * @param config the deserialization configuration (may be {@code null} for default behavior)
+     * @param targetType the Type descriptor of the object to create; must not be {@code null}
+     * @return the deserialized object of type {@code T}; returns default value if source is empty
+     * @throws UncheckedIOException if an I/O error occurs during parsing
+     * @throws ParseException if the XML structure doesn't match the target type or is malformed
+     */
     @Override
-    public <T> T deserialize(final String source, final XMLDeserializationConfig config, final Class<? extends T> targetClass) {
+    public <T> T deserialize(String source, XMLDeserializationConfig config, Type<? extends T> targetType) {
         if (Strings.isEmpty(source)) {
-            return N.defaultValueOf(targetClass);
+            return targetType.defaultValue();
         }
 
         final BufferedReader br = Objectory.createBufferedReader(source);
 
         try {
-            return read(br, config, null, targetClass);
+            return read(br, config, null, targetType);
         } finally {
             Objectory.recycle(br);
         }
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * <p>This is a convenience method that delegates to {@link #deserialize(String, XMLDeserializationConfig, Type)}
+     * after wrapping the target class in a Type descriptor.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * XMLParser parser = new AbacusXMLParserImpl(XMLParserType.StAX);
+     * String xml = "<user><name>Jane</name><email>jane@example.com</email></user>";
+     * User user = parser.deserialize(xml, null, User.class);
+     * }</pre>
+     *
+     * @param <T> the type of the target object
+     * @param source the XML string to deserialize; may be {@code null} or empty
+     * @param config the deserialization configuration (may be {@code null} for default behavior)
+     * @param targetClass the class of the object to create; must not be {@code null}
+     * @return the deserialized object of type {@code T}; returns default value if source is empty
+     * @throws UncheckedIOException if an I/O error occurs during parsing
+     * @throws ParseException if the XML structure doesn't match the target type or is malformed
+     */
     @Override
-    public <T> T deserialize(final File source, final XMLDeserializationConfig config, final Class<? extends T> targetClass) {
+    public <T> T deserialize(final String source, final XMLDeserializationConfig config, final Class<? extends T> targetClass) {
+        return deserialize(source, config, Type.of(targetClass));
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * <p>This implementation reads XML from a file using the configured parser type (SAX, DOM, or StAX).
+     * The file is automatically opened, read, and closed.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * XMLParser parser = new AbacusXMLParserImpl(XMLParserType.StAX);
+     * File xmlFile = new File("user.xml");
+     * User user = parser.deserialize(xmlFile, null, Type.of(User.class));
+     * }</pre>
+     *
+     * @param <T> the type of the target object
+     * @param source the file containing XML data; must not be {@code null}
+     * @param config the deserialization configuration (may be {@code null} for default behavior)
+     * @param targetType the Type descriptor of the object to create; must not be {@code null}
+     * @return the deserialized object of type {@code T}
+     * @throws UncheckedIOException if an I/O error occurs while reading the file
+     * @throws ParseException if the XML structure doesn't match the target type or is malformed
+     */
+    @Override
+    public <T> T deserialize(File source, XMLDeserializationConfig config, Type<? extends T> targetType) {
         Reader reader = null;
 
         try {
             reader = IOUtil.newFileReader(source);
 
-            return deserialize(reader, config, targetClass);
+            return deserialize(reader, config, targetType);
         } finally {
             IOUtil.closeQuietly(reader);
         }
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * <p>This is a convenience method that delegates to {@link #deserialize(File, XMLDeserializationConfig, Type)}
+     * after wrapping the target class in a Type descriptor. Uses the configured parser type (SAX, DOM, or StAX)
+     * for XML deserialization.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * XMLParser parser = new AbacusXMLParserImpl(XMLParserType.StAX);
+     *
+     * File xmlFile = new File("data.xml");
+     * User user = parser.deserialize(xmlFile, null, User.class);
+     *
+     * // With configuration
+     * XMLDeserializationConfig config = new XMLDeserializationConfig()
+     *     .ignoreUnmatchedProperty(true);
+     * User user2 = parser.deserialize(xmlFile, config, User.class);
+     * }</pre>
+     *
+     * @param <T> the type of the target object
+     * @param source the file containing XML data; must not be {@code null}
+     * @param config the deserialization configuration (may be {@code null} for default behavior)
+     * @param targetClass the class of the object to create; must not be {@code null}
+     * @return the deserialized object of type {@code T}
+     * @throws UncheckedIOException if an I/O error occurs while reading the file
+     * @throws ParseException if the XML structure doesn't match the target type or is malformed
+     */
+    @Override
+    public <T> T deserialize(final File source, final XMLDeserializationConfig config, final Class<? extends T> targetClass) {
+        return deserialize(source, config, Type.of(targetClass));
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * <p>This implementation reads XML from an input stream using the configured parser type. The stream
+     * is read but not closed, allowing the caller to manage the stream lifecycle.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * XMLParser parser = new AbacusXMLParserImpl(XMLParserType.StAX);
+     * try (InputStream in = new FileInputStream("user.xml")) {
+     *     User user = parser.deserialize(in, null, Type.of(User.class));
+     * }
+     * }</pre>
+     *
+     * @param <T> the type of the target object
+     * @param source the input stream containing XML data; must not be {@code null}
+     * @param config the deserialization configuration (may be {@code null} for default behavior)
+     * @param targetType the Type descriptor of the object to create; must not be {@code null}
+     * @return the deserialized object of type {@code T}
+     * @throws UncheckedIOException if an I/O error occurs while reading the stream
+     * @throws ParseException if the XML structure doesn't match the target type or is malformed
+     */
+    @Override
+    public <T> T deserialize(InputStream source, XMLDeserializationConfig config, Type<? extends T> targetType) {
+        final BufferedReader br = Objectory.createBufferedReader(source);
+
+        try {
+            return read(br, config, null, targetType);
+        } finally {
+            Objectory.recycle(br);
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * <p>This is a convenience method that delegates to {@link #deserialize(InputStream, XMLDeserializationConfig, Type)}
+     * after wrapping the target class in a Type descriptor. Uses the configured parser type (SAX, DOM, or StAX)
+     * for XML deserialization.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * XMLParser parser = new AbacusXMLParserImpl(XMLParserType.StAX);
+     *
+     * try (InputStream in = new FileInputStream("data.xml")) {
+     *     User user = parser.deserialize(in, null, User.class);
+     * }
+     *
+     * // With configuration
+     * try (InputStream in = new URL("http://api.example.com/data.xml").openStream()) {
+     *     XMLDeserializationConfig config = new XMLDeserializationConfig()
+     *         .ignoreUnmatchedProperty(true);
+     *     User user = parser.deserialize(in, config, User.class);
+     * }
+     * }</pre>
+     *
+     * @param <T> the type of the target object
+     * @param source the input stream containing XML data; must not be {@code null}
+     * @param config the deserialization configuration (may be {@code null} for default behavior)
+     * @param targetClass the class of the object to create; must not be {@code null}
+     * @return the deserialized object of type {@code T}
+     * @throws UncheckedIOException if an I/O error occurs while reading the stream
+     * @throws ParseException if the XML structure doesn't match the target type or is malformed
+     */
     @Override
     public <T> T deserialize(final InputStream source, final XMLDeserializationConfig config, final Class<? extends T> targetClass) {
-        final BufferedReader br = Objectory.createBufferedReader(source);
-
-        try {
-            return read(br, config, null, targetClass);
-        } finally {
-            Objectory.recycle(br);
-        }
+        return deserialize(source, config, Type.of(targetClass));
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * <p>This implementation reads XML from a Reader using the configured parser type. The reader is used
+     * directly for parsing but is not closed, allowing the caller to manage the reader lifecycle.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * XMLParser parser = new AbacusXMLParserImpl(XMLParserType.StAX);
+     * try (Reader reader = new FileReader("user.xml")) {
+     *     User user = parser.deserialize(reader, null, Type.of(User.class));
+     * }
+     * }</pre>
+     *
+     * @param <T> the type of the target object
+     * @param source the reader containing XML data; must not be {@code null}
+     * @param config the deserialization configuration (may be {@code null} for default behavior)
+     * @param targetType the Type descriptor of the object to create; must not be {@code null}
+     * @return the deserialized object of type {@code T}
+     * @throws UncheckedIOException if an I/O error occurs while reading
+     * @throws ParseException if the XML structure doesn't match the target type or is malformed
+     */
+    @Override
+    public <T> T deserialize(Reader source, XMLDeserializationConfig config, Type<? extends T> targetType) throws UncheckedIOException {
+        // BufferedReader? will the target parser create the BufferedReader internally?
+        return read(source, config, null, targetType);
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * <p>This is a convenience method that delegates to {@link #deserialize(Reader, XMLDeserializationConfig, Type)}
+     * after wrapping the target class in a Type descriptor. Uses the configured parser type (SAX, DOM, or StAX)
+     * for XML deserialization.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * XMLParser parser = new AbacusXMLParserImpl(XMLParserType.StAX);
+     *
+     * try (Reader reader = new FileReader("data.xml")) {
+     *     User user = parser.deserialize(reader, null, User.class);
+     * }
+     *
+     * // From StringReader
+     * String xml = "<user><name>Alice</name><age>30</age></user>";
+     * Reader stringReader = new StringReader(xml);
+     * User user = parser.deserialize(stringReader, null, User.class);
+     * }</pre>
+     *
+     * @param <T> the type of the target object
+     * @param source the reader containing XML data; must not be {@code null}
+     * @param config the deserialization configuration (may be {@code null} for default behavior)
+     * @param targetClass the class of the object to create; must not be {@code null}
+     * @return the deserialized object of type {@code T}
+     * @throws UncheckedIOException if an I/O error occurs while reading
+     * @throws ParseException if the XML structure doesn't match the target type or is malformed
+     */
     @Override
     public <T> T deserialize(final Reader source, final XMLDeserializationConfig config, final Class<? extends T> targetClass) {
-        // BufferedReader? will the target parser create the BufferedReader internally?
-        return read(source, config, null, targetClass);
+        return deserialize(source, config, Type.of(targetClass));
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * <p>This implementation uses DOM parsing to deserialize from a pre-parsed node. This is useful when
+     * working with XML that has already been loaded into a DOM tree.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * XMLParser parser = new AbacusXMLParserImpl(XMLParserType.DOM);
+     * Document doc = DocumentBuilderFactory.newInstance()
+     *     .newDocumentBuilder()
+     *     .parse(new File("user.xml"));
+     * User user = parser.deserialize(doc.getDocumentElement(), null, Type.of(User.class));
+     * }</pre>
+     *
+     * @param <T> the type of the target object
+     * @param source the DOM node containing XML data; must not be {@code null}
+     * @param config the deserialization configuration (may be {@code null} for default behavior)
+     * @param targetType the Type descriptor of the object to create; must not be {@code null}
+     * @return the deserialized object of type {@code T}
+     * @throws ParseException if the XML structure doesn't match the target type
+     */
+    @Override
+    public <T> T deserialize(Node source, XMLDeserializationConfig config, Type<? extends T> targetType) {
+        return readByDOMParser(source, config, targetType);
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * <p>This is a convenience method that delegates to {@link #deserialize(Node, XMLDeserializationConfig, Type)}
+     * after wrapping the target class in a Type descriptor. This implementation uses DOM parsing for deserialization
+     * from a pre-parsed node.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * XMLParser parser = new AbacusXMLParserImpl(XMLParserType.DOM);
+     *
+     * Document doc = DocumentBuilderFactory.newInstance()
+     *     .newDocumentBuilder()
+     *     .parse(new File("user.xml"));
+     *
+     * User user = parser.deserialize(doc.getDocumentElement(), null, User.class);
+     *
+     * // Deserialize from a specific child node
+     * Node addressNode = doc.getElementsByTagName("address").item(0);
+     * Address address = parser.deserialize(addressNode, null, Address.class);
+     * }</pre>
+     *
+     * @param <T> the type of the target object
+     * @param source the DOM node containing XML data; must not be {@code null}
+     * @param config the deserialization configuration (may be {@code null} for default behavior)
+     * @param targetClass the class of the object to create; must not be {@code null}
+     * @return the deserialized object of type {@code T}
+     * @throws ParseException if the XML structure doesn't match the target type
+     */
     @Override
     public <T> T deserialize(final Node source, final XMLDeserializationConfig config, final Class<? extends T> targetClass) {
-        return readByDOMParser(source, config, targetClass);
+        return deserialize(source, config, Type.of(targetClass));
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * <p>This implementation reads XML from a file using the configured parser type and node class mappings
+     * for dynamic type resolution. This enables polymorphic deserialization where different XML elements map
+     * to different Java types.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * XMLParser parser = new AbacusXMLParserImpl(XMLParserType.StAX);
+     *
+     * Map<String, Type<?>> nodeTypes = new HashMap<>();
+     * nodeTypes.put("customer", Type.of(Customer.class));
+     * nodeTypes.put("supplier", Type.of(Supplier.class));
+     *
+     * File xmlFile = new File("entities.xml");
+     * Object entity = parser.deserialize(xmlFile, null, nodeTypes);
+     * }</pre>
+     *
+     * @param <T> the type of the target object
+     * @param source the file containing XML data; must not be {@code null}
+     * @param config the deserialization configuration (may be {@code null} for default behavior)
+     * @param nodeTypes mapping of XML element names to their corresponding types; must not be {@code null}
+     * @return the deserialized object of type {@code T}
+     * @throws UncheckedIOException if an I/O error occurs while reading the file
+     * @throws ParseException if no matching type is found in nodeTypes or XML is malformed
+     */
     @Override
-    public <T> T deserialize(final InputStream source, final XMLDeserializationConfig config, final Map<String, Class<?>> nodeClasses) {
+    public <T> T deserialize(final File source, final XMLDeserializationConfig config, final Map<String, Type<?>> nodeTypes) {
+        Reader reader = null;
+
+        try {
+            reader = IOUtil.newFileReader(source);
+
+            return read(reader, config, nodeTypes, null);
+        } finally {
+            IOUtil.closeQuietly(reader);
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * <p>This implementation reads XML from an input stream using the configured parser type and node class
+     * mappings for dynamic type resolution. The stream is read but not closed.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * XMLParser parser = new AbacusXMLParserImpl(XMLParserType.SAX);
+     *
+     * Map<String, Type<?>> nodeTypes = new HashMap<>();
+     * nodeTypes.put("order", Type.of(Order.class));
+     * nodeTypes.put("invoice", Type.of(Invoice.class));
+     *
+     * try (InputStream in = new FileInputStream("document.xml")) {
+     *     Object document = parser.deserialize(in, null, nodeTypes);
+     * }
+     * }</pre>
+     *
+     * @param <T> the type of the target object
+     * @param source the input stream containing XML data; must not be {@code null}
+     * @param config the deserialization configuration (may be {@code null} for default behavior)
+     * @param nodeTypes mapping of XML element names to their corresponding types; must not be {@code null}
+     * @return the deserialized object of type {@code T}
+     * @throws UncheckedIOException if an I/O error occurs while reading the stream
+     * @throws ParseException if no matching type is found in nodeTypes or XML is malformed
+     */
+    @Override
+    public <T> T deserialize(final InputStream source, final XMLDeserializationConfig config, final Map<String, Type<?>> nodeTypes) {
         final BufferedReader br = Objectory.createBufferedReader(source);
 
         try {
-            return read(br, config, nodeClasses, null);
+            return read(br, config, nodeTypes, null);
         } finally {
             Objectory.recycle(br);
         }
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * <p>This implementation reads XML from a Reader using the configured parser type and node class mappings
+     * for dynamic type resolution. The reader is used directly but is not closed.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * XMLParser parser = new AbacusXMLParserImpl(XMLParserType.StAX);
+     *
+     * Map<String, Type<?>> nodeTypes = new HashMap<>();
+     * nodeTypes.put("employee", Type.of(Employee.class));
+     * nodeTypes.put("contractor", Type.of(Contractor.class));
+     *
+     * try (Reader reader = new FileReader("workers.xml")) {
+     *     Object worker = parser.deserialize(reader, null, nodeTypes);
+     * }
+     * }</pre>
+     *
+     * @param <T> the type of the target object
+     * @param source the reader containing XML data; must not be {@code null}
+     * @param config the deserialization configuration (may be {@code null} for default behavior)
+     * @param nodeTypes mapping of XML element names to their corresponding types; must not be {@code null}
+     * @return the deserialized object of type {@code T}
+     * @throws UncheckedIOException if an I/O error occurs while reading
+     * @throws ParseException if no matching type is found in nodeTypes or XML is malformed
+     */
     @Override
-    public <T> T deserialize(final Reader source, final XMLDeserializationConfig config, final Map<String, Class<?>> nodeClasses) {
-        return read(source, config, nodeClasses, null);
+    public <T> T deserialize(final Reader source, final XMLDeserializationConfig config, final Map<String, Type<?>> nodeTypes) {
+        return read(source, config, nodeTypes, null);
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * <p>This implementation uses DOM parsing to deserialize from a pre-parsed node using node class mappings.
+     * The target type is determined by looking up the node's name in the nodeTypes map.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * XMLParser parser = new AbacusXMLParserImpl(XMLParserType.DOM);
+     *
+     * Map<String, Type<?>> nodeTypes = new HashMap<>();
+     * nodeTypes.put("product", Type.of(Product.class));
+     * nodeTypes.put("service", Type.of(Service.class));
+     *
+     * Document doc = DocumentBuilderFactory.newInstance()
+     *     .newDocumentBuilder()
+     *     .parse(new File("items.xml"));
+     *
+     * Object item = parser.deserialize(doc.getDocumentElement(), null, nodeTypes);
+     * }</pre>
+     *
+     * @param <T> the type of the target object
+     * @param source the DOM node containing XML data; must not be {@code null}
+     * @param config the deserialization configuration (may be {@code null} for default behavior)
+     * @param nodeTypes mapping of XML element names to their corresponding types; must not be {@code null}
+     * @return the deserialized object of type {@code T}
+     * @throws ParseException if no matching type is found in nodeTypes or XML structure is invalid
+     */
+    @SuppressWarnings("unchecked")
+    @Override
+    public <T> T deserialize(final Node source, final XMLDeserializationConfig config, final Map<String, Type<?>> nodeTypes) {
+        return (T) readByDOMParser(source, config, nodeTypes.get(source.getNodeName()));
     }
 
     @SuppressWarnings("unchecked")
-    @Override
-    public <T> T deserialize(final Node source, final XMLDeserializationConfig config, final Map<String, Class<?>> nodeClasses) {
-        return (T) readByDOMParser(source, config, nodeClasses.get(source.getNodeName()));
-    }
-
-    @SuppressWarnings("unchecked")
-    <T> T read(final Reader source, final XMLDeserializationConfig config, final Map<String, Class<?>> nodeClasses, Class<? extends T> targetClass) {
+    <T> T read(final Reader source, final XMLDeserializationConfig config, final Map<String, Type<?>> nodeTypes, Type<? extends T> targetType) {
         final XMLDeserializationConfig configToUse = check(config);
 
         switch (parserType) {
             case SAX:
 
                 final SAXParser saxParser = XmlUtil.createSAXParser();
-                final XmlSAXHandler<T> dh = getXmlSAXHandler(configToUse, nodeClasses, targetClass);
+                final XmlSAXHandler<T> dh = getXmlSAXHandler(configToUse, nodeTypes, targetType);
                 T result = null;
 
                 try {
@@ -928,7 +1431,7 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
                         // do nothing.
                     }
 
-                    if (targetClass == null && N.notEmpty(nodeClasses)) {
+                    if (targetType == null && N.notEmpty(nodeTypes)) {
                         String nodeName = null;
 
                         if (xmlReader.getAttributeCount() > 0) {
@@ -939,14 +1442,14 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
                             nodeName = xmlReader.getLocalName();
                         }
 
-                        targetClass = (Class<T>) nodeClasses.get(nodeName);
+                        targetType = (Type<T>) nodeTypes.get(nodeName);
                     }
 
-                    if (targetClass == null) {
-                        throw new ParseException("No target class is specified");
+                    if (targetType == null) {
+                        throw new ParseException("No target type is specified");
                     }
 
-                    return readByStreamParser(xmlReader, configToUse, targetClass);
+                    return readByStreamParser(xmlReader, configToUse, targetType);
                 } catch (final XMLStreamException e) {
                     throw new ParseException(e);
                 }
@@ -958,21 +1461,21 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
                     final Document doc = docBuilder.parse(new InputSource(source));
                     final Node node = doc.getFirstChild();
 
-                    if (targetClass == null && N.notEmpty(nodeClasses)) {
+                    if (targetType == null && N.notEmpty(nodeTypes)) {
                         String nodeName = XmlUtil.getAttribute(node, XMLConstants.NAME);
 
                         if (Strings.isEmpty(nodeName)) {
                             nodeName = node.getNodeName();
                         }
 
-                        targetClass = (Class<T>) nodeClasses.get(nodeName);
+                        targetType = (Type<T>) nodeTypes.get(nodeName);
                     }
 
-                    if (targetClass == null) {
+                    if (targetType == null) {
                         throw new ParseException("No target class is specified");
                     }
 
-                    return readByDOMParser(node, configToUse, targetClass);
+                    return readByDOMParser(node, configToUse, targetType);
                 } catch (final SAXException e) {
                     throw new ParseException(e);
                 } catch (final IOException e) {
@@ -986,40 +1489,14 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
         }
     }
 
-    /**
-     * Read by stream parser.
-     * @param xmlReader
-     * @param config
-     * @param inputClass
-     *
-     * @param <T>
-     * @return
-     * @throws XMLStreamException the XML stream exception
-     */
-    <T> T readByStreamParser(final XMLStreamReader xmlReader, final XMLDeserializationConfig config, final Class<T> inputClass) throws XMLStreamException {
-        return readByStreamParser(xmlReader, config, null, null, false, false, false, true, inputClass, inputClass);
+    <T> T readByStreamParser(final XMLStreamReader xmlReader, final XMLDeserializationConfig config, final Type<T> inputType) throws XMLStreamException {
+        return readByStreamParser(xmlReader, config, null, null, false, false, false, true, inputType, inputType);
     }
 
-    /**
-     * Read by stream parser.
-     * @param xmlReader
-     * @param config
-     * @param propType
-     * @param propInfo
-     * @param checkedAttr
-     * @param isTagByPropertyName
-     * @param ignoreTypeInfo
-     * @param isFirstCall
-     * @param inputClass
-     * @param targetClass
-     * @param <T>
-     * @return
-     * @throws XMLStreamException the XML stream exception
-     */
     @SuppressFBWarnings("RCN_REDUNDANT_NULLCHECK_OF_NULL_VALUE")
     @SuppressWarnings({ "null", "unused", "deprecation", "DataFlowIssue" })
     <T> T readByStreamParser(final XMLStreamReader xmlReader, final XMLDeserializationConfig config, Type<?> propType, PropInfo propInfo, boolean checkedAttr,
-            boolean isTagByPropertyName, boolean ignoreTypeInfo, final boolean isFirstCall, final Class<?> inputClass, Class<?> targetClass)
+            boolean isTagByPropertyName, boolean ignoreTypeInfo, final boolean isFirstCall, Type<?> targetType, final Type<?> inputType)
             throws XMLStreamException {
 
         final boolean hasPropTypes = config.hasValueTypes();
@@ -1032,13 +1509,19 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
             nodeName = Strings.isNotEmpty(nameAttr) ? nameAttr : xmlReader.getLocalName();
         }
 
-        targetClass = hasPropTypes ? config.getValueTypeClass(nodeName, targetClass) : targetClass;
+        targetType = hasPropTypes ? config.getValueType(nodeName, targetType) : targetType;
 
-        targetClass = checkedAttr ? (ignoreTypeInfo ? targetClass : getConcreteClass(targetClass, xmlReader)) : getConcreteClass(targetClass, xmlReader);
+        Class<?> targetClass = targetType == null ? null : targetType.clazz();
+
+        targetClass = checkedAttr ? (ignoreTypeInfo ? targetClass : getConcreteClass(xmlReader, targetClass)) : getConcreteClass(xmlReader, targetClass);
+
+        if (!targetType.clazz().equals(targetClass)) {
+            targetType = Type.of(targetClass);
+        }
+
         NodeType nodeType = null;
 
         if (nodeName == null) {
-            final Type<?> targetType = N.typeOf(targetClass);
             if (targetType.isMap()) {
                 nodeType = NodeType.MAP;
             } else if (targetType.isArray()) {
@@ -1062,24 +1545,26 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
 
         switch (nodeType) {
             case ENTITY: {
-                if (!Beans.isBeanClass(targetClass)) {
+                if (!targetType.isBean()) {
                     if ((propType != null) && propType.isBean()) {
-                        targetClass = propType.clazz();
+                        targetType = propType;
                     } else {
-                        if (ClassUtil.getSimpleClassName(inputClass).equalsIgnoreCase(nodeName)) {
-                            targetClass = inputClass;
+                        if (inputType.isBean() && ClassUtil.getSimpleClassName(inputType.clazz()).equalsIgnoreCase(nodeName)) {
+                            targetType = inputType;
                         } else {
-                            if (Collection.class.isAssignableFrom(inputClass) || Map.class.isAssignableFrom(inputClass) || inputClass.isArray()) {
+                            if (inputType.isCollection() || inputType.isArray() || inputType.isMap()) {
                                 if (propType != null) {
-                                    targetClass = getClassByNodeName(nodeName, propType.clazz());
+                                    targetType = Type.of(getClassByNodeName(nodeName, propType.clazz()));
                                 }
                             } else {
-                                targetClass = getClassByNodeName(nodeName, inputClass);
+                                targetType = Type.of(getClassByNodeName(nodeName, inputType.clazz()));
                             }
 
-                            checkBeanType(nodeName, inputClass, targetClass);
+                            checkBeanType(targetType.clazz(), nodeName, inputType.clazz());
                         }
                     }
+
+                    targetClass = targetType.clazz();
                 }
 
                 if (!checkedAttr) {
@@ -1092,7 +1577,7 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
 
                 final boolean ignoreUnmatchedProperty = config.ignoreUnmatchedProperty();
                 final Collection<String> ignoredClassPropNames = config.getIgnoredPropNames(targetClass);
-                final BeanInfo beanInfo = ParserUtil.getBeanInfo(targetClass);
+                final BeanInfo beanInfo = ParserUtil.getBeanInfo(targetType.javaType());
                 final Object result = isNullValue ? null : beanInfo.createBeanResult();
                 int attrCount = 0;
 
@@ -1115,7 +1600,7 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
                                     if (ignoreUnmatchedProperty) {
                                         continue;
                                     } else {
-                                        throw new ParseException("Unknown property element: " + propName + " for class: " + targetClass.getCanonicalName()); //NOSONAR
+                                        throw new ParseException("Unknown property element: " + propName + " for class: " + targetClass); //NOSONAR
                                     }
                                 }
 
@@ -1129,12 +1614,12 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
 
                                         if (attrCount == 1) {
                                             if (XMLConstants.TYPE.equals(xmlReader.getAttributeLocalName(0))) {
-                                                propType = N.typeOf(xmlReader.getAttributeValue(0));
+                                                propType = Type.of(xmlReader.getAttributeValue(0));
                                             }
                                         } else if (attrCount > 1) {
                                             for (int i = 0; i < attrCount; i++) {
                                                 if (XMLConstants.TYPE.equals(xmlReader.getAttributeLocalName(i))) {
-                                                    propType = N.typeOf(xmlReader.getAttributeValue(i));
+                                                    propType = Type.of(xmlReader.getAttributeValue(i));
 
                                                     break;
                                                 }
@@ -1158,7 +1643,7 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
                                     }
                                 } else {
                                     propValue = readByStreamParser(xmlReader, config, propType, propInfo, checkedAttr, isTagByPropertyName, ignoreTypeInfo,
-                                            false, inputClass, propType.clazz());
+                                            false, propType, inputType);
 
                                     for (int startCount = 0, e = xmlReader.next();; e = xmlReader.next()) {
                                         startCount += (e == XMLStreamConstants.START_ELEMENT) ? 1 : (e == XMLStreamConstants.END_ELEMENT ? -1 : 0);
@@ -1260,12 +1745,14 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
             }
 
             case MAP: {
-                if ((targetClass == null) || !Map.class.isAssignableFrom(targetClass)) {
+                if ((targetType == null) || !targetType.isMap()) {
                     if ((propType != null) && propType.isMap()) {
-                        targetClass = propType.clazz();
+                        targetType = propType;
                     } else {
-                        targetClass = LinkedHashMap.class;
+                        targetType = linkedHashMapType;
                     }
+
+                    targetClass = targetType.clazz();
                 }
 
                 final Collection<String> ignoredClassPropNames = config.getIgnoredPropNames(Map.class);
@@ -1312,14 +1799,14 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
 
                             isNullValue = Boolean.parseBoolean(getAttribute(xmlReader, XMLConstants.IS_NULL));
                             typeAttr = getAttribute(xmlReader, XMLConstants.TYPE);
-                            entryKeyType = Strings.isEmpty(typeAttr) ? keyType : N.typeOf(typeAttr);
+                            entryKeyType = Strings.isEmpty(typeAttr) ? keyType : Type.of(typeAttr);
                             isStringKey = entryKeyType.clazz().equals(String.class);
                             event = xmlReader.next();
 
                             switch (event) {
                                 case XMLStreamConstants.START_ELEMENT:
                                     key = readByStreamParser(xmlReader, config, entryKeyType, null, checkedAttr, isTagByPropertyName, ignoreTypeInfo, false,
-                                            inputClass, entryKeyType.clazz());
+                                            entryKeyType, inputType);
 
                                     // end of a key.
                                     xmlReader.next();
@@ -1371,7 +1858,7 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
 
                             isNullValue = Boolean.parseBoolean(getAttribute(xmlReader, XMLConstants.IS_NULL));
                             typeAttr = getAttribute(xmlReader, XMLConstants.TYPE);
-                            entryValueType = Strings.isEmpty(typeAttr) ? valueType : N.typeOf(typeAttr);
+                            entryValueType = Strings.isEmpty(typeAttr) ? valueType : Type.of(typeAttr);
 
                             if (hasPropTypes && isStringKey) {
                                 final Type<?> tmpType = config.getValueType(N.toString(key));
@@ -1384,7 +1871,7 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
                             switch (event) {
                                 case XMLStreamConstants.START_ELEMENT:
                                     propValue = readByStreamParser(xmlReader, config, entryValueType, null, checkedAttr, isTagByPropertyName, ignoreTypeInfo,
-                                            false, inputClass, entryValueType.clazz());
+                                            false, entryValueType, inputType);
 
                                     // end of value.
                                     xmlReader.next();
@@ -1460,23 +1947,25 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
             }
 
             case ARRAY: {
-                if ((targetClass == null) || !targetClass.isArray()) {
+                if ((targetType == null) || !targetType.isArray()) {
                     if ((propType != null) && propType.clazz().isArray()) {
-                        targetClass = propType.clazz();
+                        targetType = propType;
                     } else {
-                        targetClass = String[].class;
+                        targetType = strArrayType;
                     }
+
+                    targetClass = targetType.clazz();
                 }
 
                 Type<?> eleType = null;
 
                 if (propInfo != null && propInfo.clazz.isArray() && !Object.class.equals(propInfo.clazz.getComponentType())) {
-                    eleType = N.typeOf(propInfo.clazz.getComponentType());
+                    eleType = Type.of(propInfo.clazz.getComponentType());
                 } else {
                     if (config.getElementType() != null && !config.getElementType().isObjectType()) {
                         eleType = config.getElementType();
                     } else {
-                        eleType = N.typeOf(targetClass.isArray() ? targetClass.getComponentType() : String.class);
+                        eleType = targetType.isArray() ? targetType.getElementType() : strType;
                     }
                 }
 
@@ -1493,7 +1982,7 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
                                 switch (event) {
                                     case XMLStreamConstants.START_ELEMENT: {
                                         list.add(readByStreamParser(xmlReader, config, eleType, null, checkedAttr, isTagByPropertyName, ignoreTypeInfo, false,
-                                                inputClass, eleType.clazz()));
+                                                eleType, inputType));
 
                                         // end of an element.
                                         xmlReader.next();
@@ -1568,17 +2057,17 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
                                     }
                                 }
 
-                                if (eleType.clazz() == String.class || eleType.clazz() == Object.class) {
-                                    propValue = isNullValue ? null : N.typeOf(targetClass).valueOf(text);
+                                if (eleType.isString() || eleType.isObjectType()) {
+                                    propValue = isNullValue ? null : targetType.valueOf(text);
                                 } else {
-                                    propValue = isNullValue ? null : jsonParser.deserialize(text, JDC.create().setElementType(eleType.clazz()), targetClass);
+                                    propValue = isNullValue ? null : jsonParser.deserialize(text, JDC.create().setElementType(eleType.clazz()), targetType);
                                 }
 
                                 if (event == XMLStreamConstants.END_ELEMENT) {
                                     if (propValue != null) {
                                         return (T) propValue;
                                     } else {
-                                        return collection2Array(list, targetClass);
+                                        return collection2Array(list, targetType);
                                     }
                                 }
 
@@ -1589,7 +2078,7 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
                                 if (propValue != null) {
                                     return (T) propValue;
                                 } else {
-                                    return collection2Array(list, targetClass);
+                                    return collection2Array(list, targetType);
                                 }
                             }
 
@@ -1608,18 +2097,20 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
             }
 
             case COLLECTION: {
-                if ((targetClass == null) || !Collection.class.isAssignableFrom(targetClass)) {
-                    if ((propType != null) && Collection.class.isAssignableFrom(propType.clazz())) {
-                        targetClass = propType.clazz();
+                if ((targetType == null) || !targetType.isCollection()) {
+                    if ((propType != null) && propType.isCollection()) {
+                        targetType = propType;
                     } else {
-                        targetClass = List.class;
+                        targetType = listType;
                     }
+
+                    targetClass = targetType.clazz();
                 }
 
                 Type<?> eleType = defaultValueType;
 
                 if (propInfo != null && propInfo.clazz.isArray() && !Object.class.equals(propInfo.clazz.getComponentType())) {
-                    eleType = N.typeOf(propInfo.clazz.getComponentType());
+                    eleType = Type.of(propInfo.clazz.getComponentType());
                 } else if (propType != null && propType.getParameterTypes().length == 1 && Collection.class.isAssignableFrom(propType.clazz())
                         && !propType.getParameterTypes()[0].isObjectType()) {
                     eleType = propType.getParameterTypes()[0];
@@ -1644,7 +2135,7 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
                             switch (event) {
                                 case XMLStreamConstants.START_ELEMENT: {
                                     result.add(readByStreamParser(xmlReader, config, eleType, null, checkedAttr, isTagByPropertyName, ignoreTypeInfo, false,
-                                            inputClass, eleType.clazz()));
+                                            eleType, inputType));
                                     // N.println(xmlReader.getLocalName());
 
                                     // end of an element.
@@ -1719,10 +2210,10 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
                                 }
                             }
 
-                            if (eleType.clazz() == String.class || eleType.clazz() == Object.class) {
-                                propValue = isNullValue ? null : N.typeOf(targetClass).valueOf(text);
+                            if (eleType.isString() || eleType.isObjectType()) {
+                                propValue = isNullValue ? null : targetType.valueOf(text);
                             } else {
-                                propValue = isNullValue ? null : jsonParser.deserialize(text, JDC.create().setElementType(eleType.clazz()), targetClass);
+                                propValue = isNullValue ? null : jsonParser.deserialize(text, JDC.create().setElementType(eleType.clazz()), targetType);
                             }
 
                             if (event == XMLStreamConstants.END_ELEMENT) {
@@ -1753,20 +2244,19 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
             }
 
             default:
-                throw new ParseException("Unsupported class type: " + ClassUtil.getCanonicalClassName(targetClass)
-                        + ". Only object array, collection, map and bean types are supported");
+                throw new ParseException("Unsupported class type: " + targetClass + ". Only object array, collection, map and bean types are supported");
         }
     }
 
-    <T> T readByDOMParser(final Node node, final XMLDeserializationConfig config, final Class<? extends T> targetClass) {
+    <T> T readByDOMParser(final Node node, final XMLDeserializationConfig config, Type<? extends T> targetType) {
         final XMLDeserializationConfig configToUse = check(config);
 
-        return readByDOMParser(node, configToUse, configToUse.getElementType(), false, false, false, true, targetClass);
+        return readByDOMParser(node, configToUse, configToUse.getElementType(), false, false, false, true, targetType);
     }
 
     @SuppressWarnings({ "deprecation" })
     <T> T readByDOMParser(final Node node, final XMLDeserializationConfig config, Type<?> propType, boolean checkedAttr, boolean isTagByPropertyName,
-            boolean ignoreTypeInfo, final boolean isFirstCall, final Class<T> inputClass) {
+            boolean ignoreTypeInfo, final boolean isFirstCall, final Type<T> inputType) {
         if (node.getNodeType() == Document.TEXT_NODE) {
             return null;
         }
@@ -1777,29 +2267,38 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
                 : XmlUtil.getAttribute(node, XMLConstants.NAME);
         nodeName = (nodeName == null) ? node.getNodeName() : nodeName;
 
+        Type<?> targetType = null;
         Class<?> targetClass = null;
 
         if (isFirstCall) {
-            targetClass = inputClass;
+            targetType = inputType;
+            targetClass = targetType.clazz();
         } else {
-            if (propType == null || String.class.equals(propType.clazz()) || propType.isObjectType()) {
-                targetClass = hasPropTypes ? config.getValueTypeClass(nodeName, null) : null;
+            if (propType == null || propType.isString() || propType.isObjectType()) {
+                targetType = hasPropTypes ? config.getValueType(nodeName, null) : null;
             } else {
-                targetClass = propType.clazz();
+                targetType = propType;
             }
 
-            if (targetClass == null || String.class.equals(targetClass) || Object.class.equals(targetClass)) {
+            if (targetType == null || targetType.isString() || targetType.isObjectType()) {
                 // if (isOneNode(node)) {
                 // targetClass = Map.class;
                 // } else {
                 // targetClass = List.class;
                 // }
                 //
-                targetClass = List.class;
+                targetType = listType;
             }
+
+            targetClass = targetType == null ? null : targetType.clazz();
         }
 
-        Class<?> typeClass = checkedAttr ? (ignoreTypeInfo ? targetClass : getConcreteClass(targetClass, node)) : getConcreteClass(targetClass, node);
+        targetClass = checkedAttr ? (ignoreTypeInfo ? targetClass : getConcreteClass(node, targetClass)) : getConcreteClass(node, targetClass);
+
+        if (!targetType.clazz().equals(targetClass)) {
+            targetType = Type.of(targetClass);
+        }
+
         final NodeType nodeType = getNodeType(nodeName, null);
 
         final NodeList propNodes = node.getChildNodes();
@@ -1811,24 +2310,26 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
 
         switch (nodeType) {
             case ENTITY: {
-                if (!Beans.isBeanClass(typeClass)) {
+                if (!targetType.isBean()) {
                     if ((propType != null) && propType.isBean()) {
-                        typeClass = propType.clazz();
+                        targetType = propType;
                     } else {
-                        if (ClassUtil.getSimpleClassName(inputClass).equalsIgnoreCase(nodeName)) {
-                            typeClass = inputClass;
+                        if (inputType.isBean() && ClassUtil.getSimpleClassName(inputType.clazz()).equalsIgnoreCase(nodeName)) {
+                            targetType = inputType;
                         } else {
-                            if (Collection.class.isAssignableFrom(inputClass) || Map.class.isAssignableFrom(inputClass) || inputClass.isArray()) {
+                            if (inputType.isCollection() || inputType.isArray() || inputType.isMap()) {
                                 if (propType != null) {
-                                    typeClass = getClassByNodeName(nodeName, propType.clazz());
+                                    targetType = Type.of(getClassByNodeName(nodeName, propType.clazz()));
                                 }
                             } else {
-                                typeClass = getClassByNodeName(nodeName, inputClass);
+                                targetType = Type.of(getClassByNodeName(nodeName, inputType.clazz()));
                             }
 
-                            checkBeanType(nodeName, inputClass, typeClass);
+                            checkBeanType(targetType.clazz(), nodeName, inputType.clazz());
                         }
                     }
+
+                    targetClass = targetType.clazz();
                 }
 
                 if (!checkedAttr) {
@@ -1838,8 +2339,8 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
                 }
 
                 final boolean ignoreUnmatchedProperty = config.ignoreUnmatchedProperty();
-                final Collection<String> ignoredClassPropNames = config.getIgnoredPropNames(typeClass);
-                final BeanInfo beanInfo = ParserUtil.getBeanInfo(typeClass);
+                final Collection<String> ignoredClassPropNames = config.getIgnoredPropNames(targetClass);
+                final BeanInfo beanInfo = ParserUtil.getBeanInfo(targetType.javaType());
                 final Object result = beanInfo.createBeanResult();
 
                 for (int i = 0; i < propNodeLength; i++) {
@@ -1860,7 +2361,7 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
                         if (ignoreUnmatchedProperty) {
                             continue;
                         } else {
-                            throw new ParseException("Unknown property element: " + propName + " for class: " + typeClass.getCanonicalName());
+                            throw new ParseException("Unknown property element: " + propName + " for class: " + ClassUtil.getCanonicalClassName(targetClass));
                         }
                     }
 
@@ -1870,7 +2371,7 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
                         if (propInfo.jsonXmlType.isSerializable()) {
                             propType = propInfo.jsonXmlType;
                         } else {
-                            propType = ignoreTypeInfo ? propInfo.jsonXmlType : N.typeOf(getConcreteClass(propInfo.jsonXmlType.clazz(), propNode));
+                            propType = ignoreTypeInfo ? propInfo.jsonXmlType : Type.of(getConcreteClass(propNode, propInfo.jsonXmlType.clazz()));
                         }
                     }
 
@@ -1879,7 +2380,7 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
                     } else {
                         //noinspection ConstantValue
                         propValue = readByDOMParser(checkOneNode(propNode), config, propType, checkedAttr, isTagByPropertyName, ignoreTypeInfo, false,
-                                inputClass);
+                                inputType);
                     }
 
                     if (propInfo.jsonXmlExpose != JsonXmlField.Expose.SERIALIZE_ONLY) {
@@ -1891,12 +2392,14 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
             }
 
             case MAP: {
-                if ((typeClass == null) || !Map.class.isAssignableFrom(typeClass)) {
+                if ((targetType == null) || !targetType.isMap()) {
                     if ((propType != null) && propType.isMap()) {
-                        typeClass = propType.clazz();
+                        targetType = propType;
                     } else {
-                        typeClass = LinkedHashMap.class;
+                        targetType = linkedHashMapType;
                     }
+
+                    targetClass = targetType.clazz();
                 }
 
                 final Collection<String> ignoredClassPropNames = config.getIgnoredPropNames(Map.class);
@@ -1922,7 +2425,7 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
                     }
                 }
 
-                final Map<Object, Object> mResult = newPropInstance(typeClass, node);
+                final Map<Object, Object> mResult = newPropInstance(targetClass, node);
 
                 final NodeList entryNodes = node.getChildNodes();
                 Node entryNode = null;
@@ -1964,14 +2467,14 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
                         }
                     }
 
-                    propKeyClass = checkedAttr ? (ignoreTypeInfo ? keyType.clazz() : getConcreteClass(keyType.clazz(), propKeyNode))
-                            : getConcreteClass(keyType.clazz(), propKeyNode);
+                    propKeyClass = checkedAttr ? (ignoreTypeInfo ? keyType.clazz() : getConcreteClass(propKeyNode, keyType.clazz()))
+                            : getConcreteClass(propKeyNode, keyType.clazz());
 
                     if (propKeyClass == Object.class) {
                         propKeyClass = String.class;
                     }
 
-                    propKeyType = propKeyClass == keyType.clazz() ? keyType : N.typeOf(propKeyClass);
+                    propKeyType = propKeyClass == keyType.clazz() ? keyType : Type.of(propKeyClass);
 
                     //noinspection DataFlowIssue
                     if (XmlUtil.isTextElement(propKeyNode)) {
@@ -1979,7 +2482,7 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
                         propKey = getPropValue(XMLConstants.KEY, propKeyType, propInfo, propKeyNode);
                     } else {
                         propKey = readByDOMParser(checkOneNode(propKeyNode), config, keyType, checkedAttr, isTagByPropertyName, ignoreTypeInfo, false,
-                                inputClass);
+                                inputType);
                     }
 
                     //noinspection SuspiciousMethodCalls
@@ -1990,8 +2493,8 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
                     propValueType = hasPropTypes && isStringKey ? config.getValueType(N.toString(propKey)) : null;
 
                     if (propValueType == null) {
-                        propValueClass = checkedAttr ? (ignoreTypeInfo ? valueType.clazz() : getConcreteClass(valueType.clazz(), propValueNode))
-                                : getConcreteClass(valueType.clazz(), propValueNode);
+                        propValueClass = checkedAttr ? (ignoreTypeInfo ? valueType.clazz() : getConcreteClass(propValueNode, valueType.clazz()))
+                                : getConcreteClass(propValueNode, valueType.clazz());
                     } else {
                         propValueClass = propValueType.clazz();
                     }
@@ -2000,7 +2503,7 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
                         propValueClass = String.class;
                     }
 
-                    propValueType = propValueClass == valueType.clazz() ? valueType : N.typeOf(propValueClass);
+                    propValueType = propValueClass == valueType.clazz() ? valueType : Type.of(propValueClass);
 
                     //noinspection DataFlowIssue
                     if (XmlUtil.isTextElement(propValueNode)) {
@@ -2008,7 +2511,7 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
                         propValue = getPropValue(XMLConstants.VALUE, propValueType, propInfo, propValueNode);
                     } else {
                         propValue = readByDOMParser(checkOneNode(propValueNode), config, propValueType, checkedAttr, isTagByPropertyName, ignoreTypeInfo, false,
-                                inputClass);
+                                inputType);
                     }
 
                     mResult.put(propKey, propValue);
@@ -2018,12 +2521,14 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
             }
 
             case ARRAY: { //NOSONAR
-                if ((typeClass == null) || !typeClass.isArray()) {
-                    if ((propType != null) && propType.clazz().isArray()) {
-                        typeClass = propType.clazz();
+                if ((targetType == null) || !targetType.isArray()) {
+                    if ((propType != null) && propType.isArray()) {
+                        targetType = propType;
                     } else {
-                        typeClass = String[].class;
+                        targetType = strArrayType;
                     }
+
+                    targetClass = targetType.clazz();
                 }
 
                 Type<?> eleType = null;
@@ -2036,7 +2541,7 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
                     if (config.getElementType() != null && !config.getElementType().isObjectType()) {
                         eleType = config.getElementType();
                     } else {
-                        eleType = N.typeOf(typeClass.isArray() ? typeClass.getComponentType() : Object.class);
+                        eleType = targetType.isArray() ? targetType.getElementType() : objType;
                     }
                 }
 
@@ -2048,7 +2553,7 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
                     if (Strings.isEmpty(st)) {
                         return N.newArray(eleType.clazz(), 0);
                     } else {
-                        return (T) N.valueOf(st, typeClass);
+                        return (T) targetType.valueOf(st);
                     }
                 } else {
                     final List<Object> c = Objectory.createList();
@@ -2064,25 +2569,25 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
                                 continue;
                             }
 
-                            propClass = checkedAttr ? (ignoreTypeInfo ? eleType.clazz() : getConcreteClass(eleType.clazz(), eleNode))
-                                    : getConcreteClass(eleType.clazz(), eleNode);
+                            propClass = checkedAttr ? (ignoreTypeInfo ? eleType.clazz() : getConcreteClass(eleNode, eleType.clazz()))
+                                    : getConcreteClass(eleNode, eleType.clazz());
 
                             if (propClass == Object.class) {
                                 propClass = String.class;
                             }
 
-                            propType = propClass == eleType.clazz() ? eleType : N.typeOf(propClass);
+                            propType = propClass == eleType.clazz() ? eleType : Type.of(propClass);
 
                             if (XmlUtil.isTextElement(eleNode)) {
                                 //noinspection ConstantValue
                                 c.add(getPropValue(propName, propType, propInfo, eleNode));
                             } else {
                                 c.add(readByDOMParser(checkOneNode(eleNode), config, propType, checkedAttr, isTagByPropertyName, ignoreTypeInfo, false,
-                                        inputClass));
+                                        inputType));
                             }
                         }
 
-                        return collection2Array(c, typeClass);
+                        return collection2Array(c, targetType);
                     } finally {
                         Objectory.recycle(c);
                     }
@@ -2090,12 +2595,14 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
             }
 
             case COLLECTION: {
-                if ((typeClass == null) || !Collection.class.isAssignableFrom(typeClass)) {
-                    if ((propType != null) && Collection.class.isAssignableFrom(propType.clazz())) {
-                        typeClass = propType.clazz();
+                if ((targetType == null) || !targetType.isCollection()) {
+                    if ((propType != null) && propType.isCollection()) {
+                        targetType = propType;
                     } else {
-                        typeClass = List.class;
+                        targetType = listType;
                     }
+
+                    targetClass = targetType.clazz();
                 }
 
                 Type<?> eleType = null;
@@ -2113,7 +2620,7 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
 
                 propName = XMLConstants.E; //NOSONAR
 
-                final Collection<Object> result = newPropInstance(typeClass, node);
+                final Collection<Object> result = newPropInstance(targetClass, node);
 
                 final NodeList eleNodes = node.getChildNodes();
                 Node eleNode = null;
@@ -2125,21 +2632,21 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
                         continue;
                     }
 
-                    propClass = checkedAttr ? (ignoreTypeInfo ? eleType.clazz() : getConcreteClass(eleType.clazz(), eleNode))
-                            : getConcreteClass(eleType.clazz(), eleNode);
+                    propClass = checkedAttr ? (ignoreTypeInfo ? eleType.clazz() : getConcreteClass(eleNode, eleType.clazz()))
+                            : getConcreteClass(eleNode, eleType.clazz());
 
                     if (propClass == Object.class) {
                         propClass = String.class;
                     }
 
-                    propType = propClass == eleType.clazz() ? eleType : N.typeOf(propClass);
+                    propType = propClass == eleType.clazz() ? eleType : Type.of(propClass);
 
                     if (XmlUtil.isTextElement(eleNode)) {
                         //noinspection ConstantValue
                         result.add(getPropValue(propName, propType, propInfo, eleNode));
                     } else {
                         result.add(
-                                readByDOMParser(checkOneNode(eleNode), config, propType, checkedAttr, isTagByPropertyName, ignoreTypeInfo, false, inputClass));
+                                readByDOMParser(checkOneNode(eleNode), config, propType, checkedAttr, isTagByPropertyName, ignoreTypeInfo, false, inputType));
                     }
                 }
 
@@ -2152,7 +2659,7 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
         }
     }
 
-    private static void checkBeanType(final String nodeName, final Class<?> inputClass, final Class<?> targetClass) {
+    private static void checkBeanType(final Class<?> targetClass, final String nodeName, final Class<?> inputClass) {
         if (!Beans.isBeanClass(targetClass)) {
             throw new ParseException("No bean class found by node name : " + nodeName + " in package of class: " + inputClass.getCanonicalName());
         }
@@ -2246,16 +2753,16 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
     }
 
     @SuppressWarnings("unchecked")
-    private static <T> XmlSAXHandler<T> getXmlSAXHandler(final XMLDeserializationConfig config, final Map<String, Class<?>> nodeClasses,
-            final Class<? extends T> targetClass) {
+    private static <T> XmlSAXHandler<T> getXmlSAXHandler(final XMLDeserializationConfig config, final Map<String, Type<?>> nodeTypes,
+            Type<? extends T> targetType) {
         XmlSAXHandler<T> xmlSAXHandler = (XmlSAXHandler<T>) xmlSAXHandlerPool.poll();
 
         if (xmlSAXHandler == null) {
             xmlSAXHandler = new XmlSAXHandler<>();
         }
 
-        xmlSAXHandler.nodeClasses = nodeClasses;
-        xmlSAXHandler.inputClass = (Class<T>) targetClass;
+        xmlSAXHandler.nodeTypes = nodeTypes;
+        xmlSAXHandler.inputType = targetType;
         xmlSAXHandler.setConfig(config);
 
         return xmlSAXHandler;
@@ -2285,9 +2792,9 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
 
         private StringBuilder sb = null;
 
-        private Map<String, Class<?>> nodeClasses;
+        private Map<String, Type<?>> nodeTypes;
 
-        private Class<T> inputClass;
+        private Type<? extends T> inputType;
 
         private XMLDeserializationConfig config;
 
@@ -2328,9 +2835,9 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
 
         private Object eleValue;
 
-        private Class<?> targetClass;
+        private Type<?> targetType;
 
-        private Class<?> typeClass;
+        private Class<?> targetClass;
 
         private Type<?> propType;
 
@@ -2378,38 +2885,45 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
             }
 
             nodeName = qName;
+
             if (checkedPropNameTag) {
                 beanOrPropName = isTagByPropertyName || attrs == null || attrs.getLength() == 0 ? nodeName : attrs.getValue(XMLConstants.NAME);
             } else {
                 beanOrPropName = attrs.getValue(XMLConstants.NAME);
+
                 if (beanOrPropName == null) {
                     beanOrPropName = nodeName;
                 }
             }
 
             if (isFirstCall) {
-                if ((nodeClasses != null) && (inputClass == null)) {
-                    inputClass = (Class<T>) nodeClasses.get(beanOrPropName);
+                if ((nodeTypes != null) && (inputType == null)) {
+                    inputType = (Type<T>) nodeTypes.get(beanOrPropName);
                 }
 
-                if (inputClass == null) {
+                if (inputType == null) {
                     throw new ParseException("No input class found for node: " + nodeName);
                 }
 
-                targetClass = inputClass;
+                targetType = inputType;
             } else {
-                if (propType == null || String.class.equals(propType.clazz()) || propType.isObjectType()) {
-                    targetClass = hasPropTypes ? config.getValueTypeClass(nodeName, null) : null;
+                if (propType == null || propType.isString() || propType.isObjectType()) {
+                    targetType = hasPropTypes ? config.getValueType(nodeName, null) : null;
                 } else {
-                    targetClass = propType.clazz();
+                    targetType = propType;
                 }
             }
 
-            if (targetClass == null) {
-                typeClass = null;
-            } else {
-                typeClass = checkedTypeInfo ? ((ignoreTypeInfo || attrs == null || attrs.getLength() == 0) ? targetClass : getConcreteClass(targetClass, attrs))
-                        : ((attrs == null || attrs.getLength() == 0) ? targetClass : getConcreteClass(targetClass, attrs));
+            if (targetType != null) {
+                targetClass = targetType.clazz();
+
+                targetClass = checkedTypeInfo
+                        ? ((ignoreTypeInfo || attrs == null || attrs.getLength() == 0) ? targetClass : getConcreteClass(attrs, targetClass))
+                        : ((attrs == null || attrs.getLength() == 0) ? targetClass : getConcreteClass(attrs, targetClass));
+
+                if (!targetType.clazz().equals(targetClass)) {
+                    targetType = Type.of(targetClass);
+                }
             }
 
             final NodeType previousNodeType = (nodeTypeQueue.isEmpty()) ? null : nodeTypeQueue.get(nodeTypeQueue.size() - 1);
@@ -2419,7 +2933,6 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
 
             switch (nodeType) {
                 case ENTITY: {
-
                     if (!checkedPropNameTag) {
                         isTagByPropertyName = (attrs == null) || (Strings.isEmpty(attrs.getValue(XMLConstants.NAME)));
                         ignoreTypeInfo = (attrs == null) || (Strings.isEmpty(attrs.getValue(XMLConstants.TYPE)));
@@ -2433,30 +2946,32 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
                         beanOrPropNameQueue.add(beanOrPropName);
                     }
 
-                    typeClass = hasPropTypes ? config.getValueTypeClass(beanOrPropName, typeClass) : typeClass;
+                    targetType = hasPropTypes ? config.getValueType(beanOrPropName, targetType) : targetType;
 
-                    if (typeClass == null || !N.typeOf(typeClass).isBean()) {
-                        if ((eleType != null) && Beans.isBeanClass(eleType.clazz())) {
-                            typeClass = eleType.clazz();
+                    if (targetType == null || !targetType.isBean()) {
+                        if ((eleType != null) && eleType.isBean()) {
+                            targetType = eleType;
                         } else {
-                            if (ClassUtil.getSimpleClassName(inputClass).equalsIgnoreCase(beanOrPropName)) {
-                                typeClass = inputClass;
+                            if (inputType.isBean() && ClassUtil.getSimpleClassName(inputType.clazz()).equalsIgnoreCase(beanOrPropName)) {
+                                targetType = inputType;
                             } else {
-                                if (Collection.class.isAssignableFrom(inputClass) || Map.class.isAssignableFrom(inputClass) || inputClass.isArray()) {
+                                if (inputType.isCollection() || inputType.isArray() || inputType.isMap()) {
                                     if (config.getElementType() != null) {
-                                        typeClass = getClassByNodeName(beanOrPropName, config.getElementType().clazz());
+                                        targetType = Type.of(getClassByNodeName(beanOrPropName, config.getElementType().clazz()));
                                     }
                                 } else {
-                                    typeClass = getClassByNodeName(beanOrPropName, inputClass);
+                                    targetType = Type.of(getClassByNodeName(beanOrPropName, inputType.clazz()));
                                 }
 
-                                checkBeanType(nodeName, inputClass, typeClass);
+                                checkBeanType(targetType.clazz(), nodeName, inputType.clazz());
                             }
                         }
+
+                        targetClass = targetType.clazz();
                     }
 
-                    beanClass = typeClass;
-                    beanInfo = ParserUtil.getBeanInfo(beanClass);
+                    beanClass = targetClass;
+                    beanInfo = ParserUtil.getBeanInfo(targetType.javaType());
 
                     bean = beanInfo.createBeanResult();
                     nodeValueQueue.add(bean);
@@ -2475,18 +2990,19 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
                 }
 
                 case MAP: {
-
                     if (!checkedTypeInfo) {
                         ignoreTypeInfo = (attrs == null) || (Strings.isEmpty(attrs.getValue(XMLConstants.TYPE)));
                         checkedTypeInfo = true;
                     }
 
-                    if (typeClass == null || !N.typeOf(typeClass).isMap()) {
-                        if ((eleType != null) && Map.class.isAssignableFrom(eleType.clazz())) {
-                            typeClass = eleType.clazz();
+                    if (targetType == null || !targetType.isMap()) {
+                        if ((eleType != null) && eleType.isMap()) {
+                            targetType = eleType;
                         } else {
-                            typeClass = LinkedHashMap.class;
+                            targetType = linkedHashMapType;
                         }
+
+                        targetClass = targetType.clazz();
                     }
 
                     if (propInfo != null && propInfo.jsonXmlType.getParameterTypes().length == 2
@@ -2520,7 +3036,7 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
                     keyTypeQueue.add(keyType);
                     valueTypeQueue.add(valueType);
 
-                    map = newPropInstance(typeClass, attrs);
+                    map = newPropInstance(targetClass, attrs);
                     nodeValueQueue.add(map);
 
                     if (isFirstCall) {
@@ -2535,28 +3051,28 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
                 }
 
                 case ARRAY: {
-
                     if (!checkedTypeInfo) {
                         ignoreTypeInfo = (attrs == null) || (Strings.isEmpty(attrs.getValue(XMLConstants.TYPE)));
                         checkedTypeInfo = true;
                     }
 
-                    if (typeClass == null || !N.typeOf(typeClass).isArray()) {
-                        if ((eleType != null) && eleType.clazz().isArray()) {
-                            typeClass = eleType.clazz();
+                    if (targetType == null || !targetType.isArray()) {
+                        if ((eleType != null) && eleType.isArray()) {
+                            targetType = eleType;
                         } else {
-                            typeClass = String[].class;
+                            targetType = strArrayType;
                         }
+
+                        targetClass = targetType.clazz();
                     }
 
                     if (propInfo != null && propInfo.clazz.isArray() && !Object.class.equals(propInfo.clazz.getComponentType())) {
-                        eleType = N.typeOf(propInfo.clazz.getComponentType());
+                        eleType = Type.of(propInfo.clazz.getComponentType());
                     } else {
                         if (config.getElementType() != null && !config.getElementType().isObjectType()) {
                             eleType = config.getElementType();
                         } else {
-                            eleType = N.typeOf(
-                                    typeClass.isArray() && !Object.class.equals(typeClass.getComponentType()) ? typeClass.getComponentType() : String.class);
+                            eleType = targetType.isArray() && !targetType.getElementType().isObjectType() ? targetType.getElementType() : strType;
                         }
                     }
 
@@ -2580,18 +3096,19 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
                 }
 
                 case COLLECTION: {
-
                     if (!checkedTypeInfo) {
                         ignoreTypeInfo = (attrs == null) || (Strings.isEmpty(attrs.getValue(XMLConstants.TYPE)));
                         checkedTypeInfo = true;
                     }
 
-                    if (typeClass == null || !N.typeOf(typeClass).isCollection()) {
+                    if (targetType == null || !targetType.isCollection()) {
                         if ((eleType != null) && Collection.class.isAssignableFrom(eleType.clazz())) {
-                            typeClass = eleType.clazz();
+                            targetType = eleType;
                         } else {
-                            typeClass = List.class;
+                            targetType = listType;
                         }
+
+                        targetClass = targetType.clazz();
                     }
 
                     if (propInfo != null && propInfo.jsonXmlType.getParameterTypes().length == 1
@@ -2610,7 +3127,7 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
 
                     eleTypeQueue.add(eleType);
 
-                    coll = newPropInstance(typeClass, attrs);
+                    coll = newPropInstance(targetClass, attrs);
                     nodeValueQueue.add(coll);
 
                     if (isFirstCall) {
@@ -2652,10 +3169,10 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
                         propType = config.getValueType(beanOrPropName);
 
                         if (propType == null) {
-                            propType = ignoreTypeInfo ? propInfo.jsonXmlType : N.typeOf(getConcreteClass(propInfo.clazz, attrs));
+                            propType = ignoreTypeInfo ? propInfo.jsonXmlType : Type.of(getConcreteClass(attrs, propInfo.clazz));
                         }
                     } else {
-                        propType = ignoreTypeInfo ? propInfo.jsonXmlType : N.typeOf(getConcreteClass(propInfo.clazz, attrs));
+                        propType = ignoreTypeInfo ? propInfo.jsonXmlType : Type.of(getConcreteClass(attrs, propInfo.clazz));
                     }
 
                     if ((propType == null) || propType.clazz() == Object.class) {
@@ -2667,7 +3184,7 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
 
                 case ELEMENT: {
 
-                    propType = ignoreTypeInfo ? eleType : N.typeOf(getConcreteClass(eleType.clazz(), attrs));
+                    propType = ignoreTypeInfo ? eleType : Type.of(getConcreteClass(attrs, eleType.clazz()));
 
                     if ((propType == null) || propType.clazz() == Object.class) {
                         propType = defaultValueType;
@@ -2678,7 +3195,7 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
 
                 case KEY: {
 
-                    propType = ignoreTypeInfo ? keyType : N.typeOf(getConcreteClass(keyType.clazz(), attrs));
+                    propType = ignoreTypeInfo ? keyType : Type.of(getConcreteClass(attrs, keyType.clazz()));
 
                     if ((propType == null) || propType.clazz() == Object.class) {
                         propType = defaultKeyType;
@@ -2694,13 +3211,13 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
                             propType = config.getValueType((String) key);
 
                             if (propType == null) {
-                                propType = ignoreTypeInfo ? valueType : N.typeOf(getConcreteClass(valueType.clazz(), attrs));
+                                propType = ignoreTypeInfo ? valueType : Type.of(getConcreteClass(attrs, valueType.clazz()));
                             }
                         } else {
-                            propType = ignoreTypeInfo ? valueType : N.typeOf(getConcreteClass(valueType.clazz(), attrs));
+                            propType = ignoreTypeInfo ? valueType : Type.of(getConcreteClass(attrs, valueType.clazz()));
                         }
                     } else {
-                        propType = ignoreTypeInfo ? valueType : N.typeOf(getConcreteClass(valueType.clazz(), attrs));
+                        propType = ignoreTypeInfo ? valueType : Type.of(getConcreteClass(attrs, valueType.clazz()));
                     }
 
                     if ((propType == null) || propType.clazz() == Object.class) {
@@ -2755,9 +3272,9 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
                 case ARRAY: {
 
                     if (!coll.isEmpty()) {
-                        array = collection2Array(coll, nodeValueQueue.get(nodeValueQueue.size() - 2).getClass());
+                        array = collection2Array(coll, Type.of(nodeValueQueue.get(nodeValueQueue.size() - 2).getClass()));
                     } else if (!sb.isEmpty()) {
-                        array = N.valueOf(sb.toString(), typeClass);
+                        array = targetType.valueOf(sb.toString());
                     }
 
                     if (nodeTypeQueue.isEmpty()) {
@@ -2936,7 +3453,7 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
                     bean = next;
                     beanClass = beanInfo.clazz;
                 } else {
-                    typeClass = next.getClass();
+                    targetClass = next.getClass();
 
                     if (next instanceof Collection) {
                         coll = ((Collection<Object>) next);
@@ -2969,8 +3486,8 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
             sb = null;
 
             // ...
-            nodeClasses = null;
-            inputClass = null;
+            nodeTypes = null;
+            inputType = null;
             config = null;
 
             // ...
@@ -2996,8 +3513,8 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
             coll = null;
             map = null;
             eleValue = null;
+            targetType = null;
             targetClass = null;
-            typeClass = null;
             eleType = null;
             propType = null;
             keyType = null;

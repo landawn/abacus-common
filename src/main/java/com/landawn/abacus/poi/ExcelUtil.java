@@ -1283,7 +1283,7 @@ public final class ExcelUtil {
     }
 
     private static void saveSheetAsCsv(final Sheet sheet, List<String> csvHeaders, File outputCsvFile, Charset charset) {
-        final Type<Object> strType = N.typeOf(String.class);
+        final Type<Object> strType = Type.of(String.class);
         final char separator = WD._COMMA;
 
         try (Writer writer = IOUtil.newFileWriter(outputCsvFile, charset)) {

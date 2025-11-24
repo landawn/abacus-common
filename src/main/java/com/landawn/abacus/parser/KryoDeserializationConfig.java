@@ -17,20 +17,20 @@ package com.landawn.abacus.parser;
 /**
  * Configuration class for Kryo deserialization operations.
  * This class extends {@link DeserializationConfig} to provide Kryo-specific deserialization settings.
- * 
+ *
  * <p>The configuration allows control over various aspects of the deserialization process,
  * including property handling, type mappings, and value conversions inherited from the parent class.
- * 
+ *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * KryoDeserializationConfig config = KryoDeserializationConfig.create()
  *     .ignoreUnmatchedProperty(true)
  *     .setElementType(String.class);
- * 
+ *
  * KryoParser parser = new KryoParser();
  * MyObject obj = parser.deserialize(kryoData, config, MyObject.class);
  * }</pre>
- * 
+ *
  * @see DeserializationConfig
  * @see KryoParser
  */
@@ -40,6 +40,29 @@ public class KryoDeserializationConfig extends DeserializationConfig<KryoDeseria
      * Constructs a new KryoDeserializationConfig with default settings.
      */
     public KryoDeserializationConfig() {
+    }
+
+    /**
+     * Computes a hash code for this configuration based on its settings.
+     *
+     * @return a hash code value for this configuration
+     */
+    @Override
+    public int hashCode() {
+        return super.hashCode();
+    }
+
+    /**
+     * Returns a string representation of this configuration.
+     *
+     * <p>The string includes all configuration settings in the format:
+     * {@code {ignoredPropNames=..., ignoreUnmatchedProperty=..., ...}}</p>
+     *
+     * @return a string representation of this configuration
+     */
+    @Override
+    public String toString() {
+        return super.toString();
     }
 
     /**

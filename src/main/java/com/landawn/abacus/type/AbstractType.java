@@ -171,6 +171,16 @@ public abstract class AbstractType<T> implements Type<T> {
     }
 
     /**
+     * Returns the Java class that this type represents.
+     *
+     * @return the Java class
+     */
+    @Override
+    public java.lang.reflect.Type javaType() {
+        return clazz();
+    }
+
+    /**
      * Returns the declaring name of this type.
      * For most types, this is the same as {@link #name()}.
      *
@@ -620,7 +630,7 @@ public abstract class AbstractType<T> implements Type<T> {
      */
     @Override
     public T valueOf(final Object obj) {
-        return valueOf(obj == null ? null : N.typeOf(obj.getClass()).stringOf(obj));
+        return valueOf(obj == null ? null : Type.<Object> of(obj.getClass()).stringOf(obj));
     }
 
     /**
@@ -1168,7 +1178,7 @@ public abstract class AbstractType<T> implements Type<T> {
      * @throws SQLException if a database access error occurs
      */
     protected static <T> T getColumnValue(final ResultSet rs, final int columnIndex, final Class<? extends T> targetClass) throws SQLException {
-        return N.<T> typeOf(targetClass).get(rs, columnIndex);
+        return Type.of(targetClass).get(rs, columnIndex);
     }
 
     /**
@@ -1183,7 +1193,7 @@ public abstract class AbstractType<T> implements Type<T> {
      * @throws SQLException if a database access error occurs
      */
     protected static <T> T getColumnValue(final ResultSet rs, final String columnLabel, final Class<? extends T> targetClass) throws SQLException {
-        return N.<T> typeOf(targetClass).get(rs, columnLabel);
+        return Type.of(targetClass).get(rs, columnLabel);
     }
 
     /**

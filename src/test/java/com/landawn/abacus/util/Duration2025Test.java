@@ -8,6 +8,11 @@ import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.util.Calendar;
+import java.util.concurrent.TimeUnit;
+
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
@@ -528,5 +533,92 @@ public class Duration2025Test extends TestBase {
         Duration abs = original.abs();
         assertEquals(10000L, original.toMillis());
         assertEquals(10000L, abs.toMillis());
+    }
+    
+
+
+    @Test
+    public void test_difference_dates() {
+        java.util.Date later = new java.util.Date(2_000L);
+        java.util.Date earlier = new java.util.Date(500L);
+
+        Duration diff = Duration.between(earlier, later);
+        assertEquals(Duration.ofMillis(1_500L), diff);
+
+        Duration negativeDiff = Duration.between(later, earlier);
+        assertEquals(Duration.ofMillis(-1_500L), negativeDiff);
+
+        Duration zeroDiff = Duration.between(later, later);
+        assertEquals(Duration.ZERO, zeroDiff);
+    }
+
+    @Test
+    public void test_difference_dates_null() {
+        java.util.Date date = new java.util.Date();
+
+        assertThrows(IllegalArgumentException.class, () -> Duration.between(date, null));
+        assertThrows(IllegalArgumentException.class, () -> Duration.between(null, date));
+    }
+
+    @Test
+    public void test_difference_calendars() {
+        Calendar cal1 = Calendar.getInstance();
+        Calendar cal2 = Calendar.getInstance();
+
+        cal1.setTimeInMillis(1_000L);
+        cal2.setTimeInMillis(5_000L);
+
+        Duration diff = Duration.between(cal1, cal2);
+        assertEquals(Duration.ofMillis(4_000L), diff);
+
+        Duration negativeDiff = Duration.between(cal2, cal1);
+        assertEquals(Duration.ofMillis(-4_000L), negativeDiff);
+
+        cal1.setTimeInMillis(5_000L);
+        Duration zeroDiff = Duration.between(cal1, cal2);
+        assertEquals(Duration.ZERO, zeroDiff);
+    }
+
+    @Test
+    public void test_difference_calendars_null() {
+        Calendar cal = Calendar.getInstance();
+
+        assertThrows(IllegalArgumentException.class, () -> Duration.between(cal, null));
+        assertThrows(IllegalArgumentException.class, () -> Duration.between(null, cal));
+    }
+
+    @Test
+    public void test_difference_temporal_instant() {
+        Instant start = Instant.ofEpochMilli(1_000L);
+        Instant end = Instant.ofEpochMilli(1_600L);
+
+        Duration diff = Duration.between(start, end);
+        assertEquals(Duration.ofMillis(600L), diff);
+
+        Duration negativeDiff = Duration.between(end, start);
+        assertEquals(Duration.ofMillis(-600L), negativeDiff);
+
+        Duration zeroDiff = Duration.between(start, start);
+        assertEquals(Duration.ZERO, zeroDiff);
+    }
+
+    @Test
+    public void test_difference_temporal_localDateTime() {
+        LocalDateTime ldt1 = LocalDateTime.of(2025, 1, 1, 0, 0, 0);
+        LocalDateTime ldt2 = ldt1.plusDays(1).plusNanos(TimeUnit.MILLISECONDS.toNanos(123));
+
+        Duration diff = Duration.between(ldt1, ldt2);
+        assertEquals(Duration.ofMillis(TimeUnit.DAYS.toMillis(1) + 123), diff);
+
+        Duration negativeDiff = Duration.between(ldt2, ldt1);
+        assertEquals(Duration.ofMillis(-(TimeUnit.DAYS.toMillis(1) + 123)), negativeDiff);
+    }
+
+    @Test
+    public void test_difference_temporal_null() {
+        Instant now = Instant.now();
+
+        assertThrows(IllegalArgumentException.class, () -> Duration.between(now, null));
+        assertThrows(IllegalArgumentException.class, () -> Duration.between(null, now));
     }
 }

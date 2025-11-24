@@ -1333,7 +1333,7 @@ public final class HttpClient {
             if (request != null && requireBody(httpMethod)) {
                 os = HttpUtil.getOutputStream(connection, requestContentFormat, getContentType(settings), getContentEncoding(settings));
 
-                final Type<Object> type = N.typeOf(request.getClass());
+                final Type<Object> type = Type.of(request.getClass());
 
                 if (request instanceof File fileRequest) {
                     try (InputStream fileInputStream = IOUtil.newFileInputStream(fileRequest)) {

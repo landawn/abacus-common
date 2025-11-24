@@ -1,7 +1,3 @@
-/*
- * Copyright (c) 2015, Haiyang Li. All rights reserved.
- */
-
 package com.landawn.abacus.parser;
 
 import java.io.File;
@@ -18,6 +14,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Random;
 
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -33,6 +30,7 @@ import com.landawn.abacus.util.IOUtil;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Strings;
 
+@Tag("old-test")
 public abstract class AbstractParserTest extends AbstractTest {
 
     static final String NULL_STRING = "null".intern();
@@ -91,7 +89,6 @@ public abstract class AbstractParserTest extends AbstractTest {
         } catch (Exception e) {
             e.printStackTrace();
 
-            // throw new RuntimeException(e);
         }
     }
 
@@ -114,7 +111,6 @@ public abstract class AbstractParserTest extends AbstractTest {
         xBean.setTypeString("<<>>dfe<>afe><alfeji'slfj/ei\\o;;aj//fd:///// lsaj\\\\fei { asjfei } fjeiw [fjei ]safejioae : &dakf sfeij 黎jei \\d\\tskfjei \":"
                 + Strings.uuid());
         xBean.setTypeDate(Dates.currentJUDate());
-        // xBean.setTypeSqlDate(N.currentDate());
         xBean.setTypeSqlTimestamp(Dates.currentTimestamp());
         xBean.setWeekDay(WeekDay.FRIDAY);
         xBean.setFirstName(Strings.uuid());
@@ -152,27 +148,6 @@ public abstract class AbstractParserTest extends AbstractTest {
         return personType;
     }
 
-    //    protected static ObjectMapper getObjectMapper() {
-    //        synchronized (objectMapperPool) {
-    //            ObjectMapper mapper = null;
-    //
-    //            if (objectMapperPool.size() > 0) {
-    //                mapper = objectMapperPool.remove(objectMapperPool.size() - 1);
-    //            } else {
-    //                mapper = new ObjectMapper();
-    //            }
-    //
-    //            // mapper.configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);
-    //            return mapper;
-    //        }
-    //    }
-    //
-    //    protected static void recycle(ObjectMapper objectMapper) {
-    //        synchronized (objectMapperPool) {
-    //            objectMapperPool.add(objectMapper);
-    //        }
-    //    }
-
     protected static Gson getGson() {
         synchronized (gsonPool) {
             if (gsonPool.size() > 0) {
@@ -198,7 +173,6 @@ public abstract class AbstractParserTest extends AbstractTest {
 
         N.println(xBean);
         N.println(xBean2);
-        // assertEquals(xBean, xBean2);
     }
 
     @Test
@@ -215,7 +189,6 @@ public abstract class AbstractParserTest extends AbstractTest {
 
         N.println(xBean);
         N.println(xBean2);
-        // assertEquals(xBean, xBean2);
 
         IOUtil.deleteAllIfExists(file);
     }
@@ -235,8 +208,6 @@ public abstract class AbstractParserTest extends AbstractTest {
         parser.deserialize(is, XBean.class);
         IOUtil.close(is);
 
-        // assertEquals(xBean, xBean2);
-
         IOUtil.deleteAllIfExists(file);
     }
 
@@ -255,8 +226,6 @@ public abstract class AbstractParserTest extends AbstractTest {
         Reader reader = new FileReader(file);
         parser.deserialize(reader, XBean.class);
         IOUtil.close(reader);
-
-        // assertEquals(xBean, xBean2);
 
         IOUtil.deleteAllIfExists(file);
     }

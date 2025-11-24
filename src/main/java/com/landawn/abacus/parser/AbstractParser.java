@@ -24,6 +24,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.NavigableMap;
@@ -56,6 +57,7 @@ import com.landawn.abacus.util.ImmutableNavigableSet;
 import com.landawn.abacus.util.ImmutableSet;
 import com.landawn.abacus.util.ImmutableSortedMap;
 import com.landawn.abacus.util.ImmutableSortedSet;
+import com.landawn.abacus.util.MapEntity;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Tuple;
 import com.landawn.abacus.util.Tuple.Tuple2;
@@ -115,9 +117,22 @@ abstract class AbstractParser<SC extends SerializationConfig<?>, DC extends Dese
 
     static final Type<Object> objType = TypeFactory.getType(Object.class);
 
+    static final Type<Boolean> boolType = TypeFactory.getType(Boolean.class);
+
     static final Type<String> strType = TypeFactory.getType(String.class);
 
-    static final Type<Boolean> boolType = TypeFactory.getType(Boolean.class);
+    static final Type<String> strArrayType = TypeFactory.getType(String[].class);
+
+    @SuppressWarnings("rawtypes")
+    static final Type<List> listType = TypeFactory.getType(List.class);
+
+    @SuppressWarnings("rawtypes")
+    static final Type<Map> mapType = TypeFactory.getType(Map.class);
+
+    @SuppressWarnings("rawtypes")
+    static final Type<Map> linkedHashMapType = TypeFactory.getType(LinkedHashMap.class);
+
+    static final Type<MapEntity> mapEntityType = TypeFactory.getType(MapEntity.class);
 
     static final Type<Map<String, Object>> propsMapType = TypeFactory.getType("Map<String, Object>");
 
@@ -142,23 +157,43 @@ abstract class AbstractParser<SC extends SerializationConfig<?>, DC extends Dese
     }
 
     @Override
-    public <T> T deserialize(final String source, final Class<? extends T> targetClass) {
-        return deserialize(source, null, targetClass);
+    public <T> T deserialize(final String source, final Type<? extends T> targetType) {
+        return deserialize(source, null, targetType);
     }
 
     @Override
-    public <T> T deserialize(final File source, final Class<? extends T> targetClass) {
-        return deserialize(source, null, targetClass);
+    public <T> T deserialize(final String source, final Class<? extends T> targetType) {
+        return deserialize(source, null, targetType);
     }
 
     @Override
-    public <T> T deserialize(final InputStream source, final Class<? extends T> targetClass) {
-        return deserialize(source, null, targetClass);
+    public <T> T deserialize(final File source, final Type<? extends T> targetType) {
+        return deserialize(source, null, targetType);
     }
 
     @Override
-    public <T> T deserialize(final Reader source, final Class<? extends T> targetClass) {
-        return deserialize(source, null, targetClass);
+    public <T> T deserialize(final File source, final Class<? extends T> targetType) {
+        return deserialize(source, null, targetType);
+    }
+
+    @Override
+    public <T> T deserialize(final InputStream source, final Type<? extends T> targetType) {
+        return deserialize(source, null, targetType);
+    }
+
+    @Override
+    public <T> T deserialize(final InputStream source, final Class<? extends T> targetType) {
+        return deserialize(source, null, targetType);
+    }
+
+    @Override
+    public <T> T deserialize(final Reader source, final Type<? extends T> targetType) {
+        return deserialize(source, null, targetType);
+    }
+
+    @Override
+    public <T> T deserialize(final Reader source, final Class<? extends T> targetType) {
+        return deserialize(source, null, targetType);
     }
 
     static final Map<Class<?>, Tuple2<Function<Class<?>, Object>, Function<Object, Object>>> mapOfCreatorAndConvertorForTargetType = new HashMap<>();
@@ -187,6 +222,22 @@ abstract class AbstractParser<SC extends SerializationConfig<?>, DC extends Dese
         mapOfCreatorAndConvertorForTargetType.put(Object.class, Tuple.of(N::newInstance, t -> t));
     }
 
+    /**
+     * Chooses the appropriate property class based on declared type and attribute type information.
+     *
+     * <p>This method is used during deserialization to determine the actual class to instantiate
+     * when both a declared property type and an attribute-specified type are available. It follows
+     * these rules:</p>
+     * <ul>
+     *   <li>If attribute type is provided and compatible with property type, use attribute type</li>
+     *   <li>If attribute type is incompatible or null, use property type</li>
+     *   <li>This enables proper handling of polymorphic deserialization</li>
+     * </ul>
+     *
+     * @param propClass the declared property class from the target bean (may be {@code null})
+     * @param attribeTypeClass the type specified by a type attribute in the serialized data (may be {@code null})
+     * @return the class to use for instantiation, preferring the attribute type when compatible
+     */
     protected static Class<?> choosePropClass(final Class<?> propClass, final Class<?> attribeTypeClass) {
         if ((attribeTypeClass != null) && ((propClass == null) || propClass.isAssignableFrom(attribeTypeClass))) {
             return attribeTypeClass;
@@ -195,6 +246,22 @@ abstract class AbstractParser<SC extends SerializationConfig<?>, DC extends Dese
         return propClass;
     }
 
+    /**
+     * Gets the creator function and converter function for a target type.
+     *
+     * <p>This method is used for deserializing immutable collection types and other special types
+     * that require a two-phase instantiation process:</p>
+     * <ol>
+     *   <li>Creator function: Creates a mutable intermediate instance (e.g., ArrayList for ImmutableList)</li>
+     *   <li>Converter function: Converts the intermediate instance to the final type (e.g., wraps ArrayList in ImmutableList)</li>
+     * </ol>
+     *
+     * <p>For standard types, the creator creates the instance and the converter is a no-op.</p>
+     *
+     * @param propClass the declared property class from the target bean (may be {@code null})
+     * @param attribeTypeClass the type specified by a type attribute in the serialized data (may be {@code null})
+     * @return a tuple containing the creator function and converter function for the target type
+     */
     protected static Tuple2<Function<Class<?>, Object>, Function<Object, Object>> getCreatorAndConvertorForTargetType(final Class<?> propClass,
             final Class<?> attribeTypeClass) {
         final Class<?> t = choosePropClass(propClass, attribeTypeClass);
@@ -208,6 +275,25 @@ abstract class AbstractParser<SC extends SerializationConfig<?>, DC extends Dese
         return result;
     }
 
+    /**
+     * Creates a new instance of a property based on declared and attribute type information.
+     *
+     * <p>This method attempts to instantiate the most specific type available, with the following priority:</p>
+     * <ol>
+     *   <li>If attribute type is provided and compatible, instantiate attribute type</li>
+     *   <li>If attribute type instantiation fails or is incompatible, fall back to property class</li>
+     *   <li>If both fail or are null, throw ParseException</li>
+     * </ol>
+     *
+     * <p>This enables polymorphic deserialization where the serialized data contains type information
+     * that specifies a more concrete type than the declared property type.</p>
+     *
+     * @param <T> the return type
+     * @param propClass the declared property class from the target bean (may be {@code null})
+     * @param attrTypeClass the type specified by a type attribute in the serialized data (may be {@code null})
+     * @return a new instance of the appropriate type
+     * @throws ParseException if no suitable type is available or instantiation fails
+     */
     @SuppressFBWarnings("NP_LOAD_OF_KNOWN_NULL_VALUE")
     @SuppressWarnings("unchecked")
     protected static <T> T newPropInstance(final Class<?> propClass, final Class<?> attrTypeClass) {
@@ -228,7 +314,22 @@ abstract class AbstractParser<SC extends SerializationConfig<?>, DC extends Dese
         throw new ParseException("Failed to create property instance with property class by attribute " + attrTypeClass);
     }
 
-    protected static Class<?> getConcreteClass(final Class<?> targetClass, final Class<?> typeClass) {
+    /**
+     * Determines the concrete class to use for instantiation based on target and type information.
+     *
+     * <p>This method resolves which class should be used when both a target class and a type class
+     * are available, following these rules:</p>
+     * <ul>
+     *   <li>If type class is null, use target class</li>
+     *   <li>If target class is null or the same as type class, use type class</li>
+     *   <li>If type class is assignable to target class, use type class (more specific)</li>
+     *   <li>Otherwise, use target class (type class is incompatible)</li>
+     * </ul>
+     * @param typeClass the type class from serialized type information (may be {@code null})
+     * @param targetClass the target class from the deserialization context (may be {@code null}) 
+     * @return the concrete class to instantiate
+     */
+    protected static Class<?> getConcreteClass(final Class<?> typeClass, final Class<?> targetClass) {
         if (typeClass == null) {
             return targetClass;
         } else if ((targetClass == null) || (targetClass == typeClass || targetClass.isAssignableFrom(typeClass))) {
@@ -238,12 +339,29 @@ abstract class AbstractParser<SC extends SerializationConfig<?>, DC extends Dese
         }
     }
 
-    protected static <T> T collection2Array(final Collection<?> c, final Class<?> targetClass) {
+    /**
+     * Converts a collection to an array of the specified target type.
+     *
+     * <p>This method handles the conversion of collections to arrays during deserialization,
+     * with special handling for:</p>
+     * <ul>
+     *   <li>Primitive arrays: Uses the target type's conversion method</li>
+     *   <li>Object arrays: Attempts to determine the actual element type from collection contents</li>
+     *   <li>Empty collections: Returns an empty array of the target type</li>
+     * </ul>
+     *
+     * <p>The method inspects the first non-null element to determine if a more specific
+     * array type should be used than the declared target type.</p>
+     *
+     * @param <T> the return type
+     * @param c the collection to convert (may be {@code null})
+     * @param targetType the target array type
+     * @return an array containing the collection elements, or {@code null} if the collection is {@code null}
+     */
+    protected static <T> T collection2Array(final Collection<?> c, final Type<?> targetType) {
         if (c == null) {
             return null;
         }
-
-        final Type<?> targetType = N.typeOf(targetClass);
 
         //noinspection StatementWithEmptyBody
         if (targetType.isPrimitiveArray()) {
@@ -252,7 +370,7 @@ abstract class AbstractParser<SC extends SerializationConfig<?>, DC extends Dese
             // looking for the right array class.
             for (final Object e : c) {
                 if (e != null) {
-                    if (targetClass.getComponentType().isAssignableFrom(e.getClass())) {
+                    if (targetType.getElementType().clazz().isAssignableFrom(e.getClass())) {
                         return (T) targetType.collection2Array(c);
                     } else {
                         return (T) c.toArray((Object[]) N.newArray(e.getClass(), c.size()));
@@ -264,12 +382,41 @@ abstract class AbstractParser<SC extends SerializationConfig<?>, DC extends Dese
         return (T) targetType.collection2Array(c);
     }
 
+    /**
+     * Creates a new file if it does not already exist.
+     *
+     * <p>This utility method is used by serialization methods that write to files.
+     * It ensures the target file exists before attempting to write to it.</p>
+     *
+     * <p>Note: This method does not create parent directories. Parent directories
+     * must already exist or the file creation will fail.</p>
+     *
+     * @param file the file to create if it doesn't exist (must not be {@code null})
+     * @throws IOException if the file cannot be created or if parent directories don't exist
+     */
     protected static void createNewFileIfNotExists(final File file) throws IOException {
         if (!file.exists() && !IOUtil.createFileIfNotExists(file)) {
             throw new IOException("Failed to create new file: " + file.getName());
         }
     }
 
+    /**
+     * Determines the effective exclusion strategy to use for serialization.
+     *
+     * <p>This method resolves the exclusion strategy by checking multiple sources in order of priority:</p>
+     * <ol>
+     *   <li>Configuration-level exclusion (highest priority)</li>
+     *   <li>Bean-level exclusion from {@code @JsonXmlConfig} annotation</li>
+     *   <li>Default exclusion of {@code Exclusion.NULL} (lowest priority)</li>
+     * </ol>
+     *
+     * <p>This allows per-call configuration to override bean-level settings, which in turn
+     * override the default behavior.</p>
+     *
+     * @param config the serialization configuration (may be {@code null})
+     * @param beanInfo the bean metadata containing annotation-based exclusion settings
+     * @return the effective exclusion strategy to use
+     */
     protected static Exclusion getExclusion(final SerializationConfig<?> config, final BeanInfo beanInfo) {
         return config.getExclusion() == null ? (beanInfo.jsonXmlSeriExclusion == null ? Exclusion.NULL : beanInfo.jsonXmlSeriExclusion) : config.getExclusion();
     }

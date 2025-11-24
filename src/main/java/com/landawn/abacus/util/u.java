@@ -635,8 +635,7 @@ public class u { // NOSONAR
          * @throws IllegalArgumentException if {@code mapper} is {@code null}
          * @throws E if the mapper function throws an exception
          */
-        public <T, E extends Exception> Optional<T> mapToObj(final Throwables.BooleanFunction<? extends T, E> mapper)
-                throws IllegalArgumentException, E {
+        public <T, E extends Exception> Optional<T> mapToObj(final Throwables.BooleanFunction<? extends T, E> mapper) throws IllegalArgumentException, E {
             N.checkArgNotNull(mapper, cs.mapper);
 
             if (isPresent) {
@@ -1318,8 +1317,7 @@ public class u { // NOSONAR
          * @throws IllegalArgumentException if {@code mapper} is {@code null}
          * @throws E if the mapper function throws an exception
          */
-        public <T, E extends Exception> Optional<T> mapToObj(final Throwables.CharFunction<? extends T, E> mapper)
-                throws IllegalArgumentException, E {
+        public <T, E extends Exception> Optional<T> mapToObj(final Throwables.CharFunction<? extends T, E> mapper) throws IllegalArgumentException, E {
             N.checkArgNotNull(mapper, cs.mapper);
 
             if (isPresent) {
@@ -1959,8 +1957,7 @@ public class u { // NOSONAR
          * @throws IllegalArgumentException if {@code mapper} is {@code null}
          * @throws E if the mapper function throws an exception
          */
-        public <T, E extends Exception> Optional<T> mapToObj(final Throwables.ByteFunction<? extends T, E> mapper)
-                throws IllegalArgumentException, E {
+        public <T, E extends Exception> Optional<T> mapToObj(final Throwables.ByteFunction<? extends T, E> mapper) throws IllegalArgumentException, E {
             N.checkArgNotNull(mapper, cs.mapper);
 
             if (isPresent) {
@@ -2584,8 +2581,7 @@ public class u { // NOSONAR
          * @throws IllegalArgumentException if {@code mapper} is {@code null}
          * @throws E if the mapper function throws an exception
          */
-        public <T, E extends Exception> Optional<T> mapToObj(final Throwables.ShortFunction<? extends T, E> mapper)
-                throws IllegalArgumentException, E {
+        public <T, E extends Exception> Optional<T> mapToObj(final Throwables.ShortFunction<? extends T, E> mapper) throws IllegalArgumentException, E {
             N.checkArgNotNull(mapper, cs.mapper);
 
             if (isPresent) {
@@ -3323,8 +3319,7 @@ public class u { // NOSONAR
          * @throws IllegalArgumentException if {@code mapper} is {@code null}
          * @throws E if the mapper function throws an exception
          */
-        public <T, E extends Exception> Optional<T> mapToObj(final Throwables.IntFunction<? extends T, E> mapper)
-                throws IllegalArgumentException, E {
+        public <T, E extends Exception> Optional<T> mapToObj(final Throwables.IntFunction<? extends T, E> mapper) throws IllegalArgumentException, E {
             N.checkArgNotNull(mapper, cs.mapper);
 
             if (isPresent) {
@@ -3980,8 +3975,7 @@ public class u { // NOSONAR
          * @throws IllegalArgumentException if {@code mapper} is {@code null}
          * @throws E if the mapper function throws an exception
          */
-        public <T, E extends Exception> Optional<T> mapToObj(final Throwables.LongFunction<? extends T, E> mapper)
-                throws IllegalArgumentException, E {
+        public <T, E extends Exception> Optional<T> mapToObj(final Throwables.LongFunction<? extends T, E> mapper) throws IllegalArgumentException, E {
             N.checkArgNotNull(mapper, cs.mapper);
 
             if (isPresent) {
@@ -4607,8 +4601,7 @@ public class u { // NOSONAR
          * @throws IllegalArgumentException if {@code mapper} is {@code null}
          * @throws E if the mapper function throws an exception
          */
-        public <T, E extends Exception> Optional<T> mapToObj(final Throwables.FloatFunction<? extends T, E> mapper)
-                throws IllegalArgumentException, E {
+        public <T, E extends Exception> Optional<T> mapToObj(final Throwables.FloatFunction<? extends T, E> mapper) throws IllegalArgumentException, E {
             N.checkArgNotNull(mapper, cs.mapper);
 
             if (isPresent) {
@@ -5216,8 +5209,7 @@ public class u { // NOSONAR
          * @throws IllegalArgumentException if {@code mapper} is {@code null}
          * @throws E if the mapper function throws an exception
          */
-        public <T, E extends Exception> Optional<T> mapToObj(final Throwables.DoubleFunction<? extends T, E> mapper)
-                throws IllegalArgumentException, E {
+        public <T, E extends Exception> Optional<T> mapToObj(final Throwables.DoubleFunction<? extends T, E> mapper) throws IllegalArgumentException, E {
             N.checkArgNotNull(mapper, cs.mapper);
 
             if (isPresent) {
@@ -5849,8 +5841,7 @@ public class u { // NOSONAR
          * @throws IllegalArgumentException if {@code mapper} is {@code null}
          * @throws E if the mapping function throws an exception
          */
-        public <U, E extends Exception> Optional<U> map(final Throwables.Function<? super T, ? extends U, E> mapper)
-                throws IllegalArgumentException, E {
+        public <U, E extends Exception> Optional<U> map(final Throwables.Function<? super T, ? extends U, E> mapper) throws IllegalArgumentException, E {
             N.checkArgNotNull(mapper, cs.mapper);
 
             if (isPresent()) {

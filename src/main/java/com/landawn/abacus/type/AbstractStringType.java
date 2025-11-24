@@ -28,7 +28,6 @@ import com.landawn.abacus.exception.UncheckedSQLException;
 import com.landawn.abacus.parser.JSONXMLSerializationConfig;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.IOUtil;
-import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Strings;
 
 /**
@@ -177,7 +176,7 @@ public abstract class AbstractStringType extends AbstractCharSequenceType<String
                 }
             }
         } else {
-            return valueOf(N.typeOf(obj.getClass()).stringOf(obj));
+            return valueOf(Type.<Object> of(obj.getClass()).stringOf(obj));
         }
     }
 

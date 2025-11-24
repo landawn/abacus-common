@@ -22,6 +22,7 @@ import java.io.Writer;
 
 import com.landawn.abacus.annotation.JsonXmlField;
 import com.landawn.abacus.exception.UncheckedIOException;
+import com.landawn.abacus.type.Type;
 
 /**
  * Generic interface for object serialization and deserialization parsers.
@@ -226,6 +227,26 @@ public interface Parser<SC extends SerializationConfig<?>, DC extends Deserializ
      *
      * <p>This method uses default deserialization settings. The input string is parsed
      * according to the parser's format (JSON, XML, etc.) and converted to an instance
+     * of the specified target type.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * MyClass obj = parser.deserialize(jsonString, Type.of(MyClass.class));
+     * List<String> list = parser.deserialize(jsonArray, Type.of(new TypeReference<List<String>>() {}.getType()));
+     * }</pre>
+     *
+     * @param <T> the target type
+     * @param source the source string to deserialize from (must not be {@code null})
+     * @param targetType the type of the object to create (must not be {@code null})
+     * @return the deserialized object instance
+     */
+    <T> T deserialize(String source, Type<? extends T> targetType);
+
+    /**
+     * Deserializes an object from a string representation.
+     *
+     * <p>This method uses default deserialization settings. The input string is parsed
+     * according to the parser's format (JSON, XML, etc.) and converted to an instance
      * of the specified target class.</p>
      *
      * <p><b>Usage Examples:</b></p>
@@ -236,10 +257,33 @@ public interface Parser<SC extends SerializationConfig<?>, DC extends Deserializ
      *
      * @param <T> the target type
      * @param source the source string to deserialize from (must not be {@code null})
-     * @param targetClass the class of the object to create (must not be {@code null})
+     * @param targetType the class of the object to create (must not be {@code null})
      * @return the deserialized object instance
      */
-    <T> T deserialize(String source, Class<? extends T> targetClass);
+    <T> T deserialize(String source, Class<? extends T> targetType);
+
+    /**
+     * Deserializes an object from a string representation using custom configuration.
+     *
+     * <p>This method allows fine-grained control over the deserialization process through
+     * the configuration parameter, such as handling unknown properties, type information,
+     * custom type converters, and collection element types.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * MyDeserConfig config = new MyDeserConfig()
+     *     .ignoreUnmatchedProperty(true)
+     *     .setElementType(String.class);
+     * List<String> list = parser.deserialize(jsonArray, config, Type.of(new TypeReference<List<String>>() {}.getType()));
+     * }</pre>
+     *
+     * @param <T> the target type
+     * @param source the source string to deserialize from (must not be {@code null})
+     * @param config the deserialization configuration to use (may be {@code null} for default behavior)
+     * @param targetType the type of the object to create (must not be {@code null})
+     * @return the deserialized object instance
+     */
+    <T> T deserialize(String source, DC config, Type<? extends T> targetType);
 
     /**
      * Deserializes an object from a string representation using custom configuration.
@@ -259,10 +303,31 @@ public interface Parser<SC extends SerializationConfig<?>, DC extends Deserializ
      * @param <T> the target type
      * @param source the source string to deserialize from (must not be {@code null})
      * @param config the deserialization configuration to use (may be {@code null} for default behavior)
-     * @param targetClass the class of the object to create (must not be {@code null})
+     * @param targetType the class of the object to create (must not be {@code null})
      * @return the deserialized object instance
      */
-    <T> T deserialize(String source, DC config, Class<? extends T> targetClass);
+    <T> T deserialize(String source, DC config, Class<? extends T> targetType);
+
+    /**
+     * Deserializes an object from a file.
+     *
+     * <p>This method uses default deserialization settings. The file content is read
+     * and parsed according to the parser's format (JSON, XML, etc.) and converted to
+     * an instance of the specified target type.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * MyClass obj = parser.deserialize(new File("input.json"), Type.of(MyClass.class));
+     * List<String> list = parser.deserialize(new File("input.json"), Type.of(new TypeReference<List<String>>() {}.getType()));
+     * }</pre>
+     *
+     * @param <T> the target type
+     * @param source the source file to read from (must not be {@code null} and must exist)
+     * @param targetType the type of the object to create (must not be {@code null})
+     * @return the deserialized object instance
+     * @throws UncheckedIOException if an I/O error occurs or the file doesn't exist
+     */
+    <T> T deserialize(File source, Type<? extends T> targetType) throws UncheckedIOException;
 
     /**
      * Deserializes an object from a file.
@@ -278,11 +343,34 @@ public interface Parser<SC extends SerializationConfig<?>, DC extends Deserializ
      *
      * @param <T> the target type
      * @param source the source file to read from (must not be {@code null} and must exist)
-     * @param targetClass the class of the object to create (must not be {@code null})
+     * @param targetType the class of the object to create (must not be {@code null})
      * @return the deserialized object instance
      * @throws UncheckedIOException if an I/O error occurs or the file doesn't exist
      */
-    <T> T deserialize(File source, Class<? extends T> targetClass) throws UncheckedIOException;
+    <T> T deserialize(File source, Class<? extends T> targetType) throws UncheckedIOException;
+
+    /**
+     * Deserializes an object from a file using custom configuration.
+     *
+     * <p>This method allows fine-grained control over the deserialization process.
+     * The configuration parameter can specify date formats, type mappings, property
+     * handling, and other parser-specific options.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * MyDeserConfig config = new MyDeserConfig()
+     *     .setDateTimeFormat(DateTimeFormat.LONG);
+     * MyClass obj = parser.deserialize(new File("input.json"), config, Type.of(MyClass.class));
+     * }</pre>
+     *
+     * @param <T> the target type
+     * @param source the source file to read from (must not be {@code null} and must exist)
+     * @param config the deserialization configuration to use (may be {@code null} for default behavior)
+     * @param targetType the type of the object to create (must not be {@code null})
+     * @return the deserialized object instance
+     * @throws UncheckedIOException if an I/O error occurs or the file doesn't exist
+     */
+    <T> T deserialize(File source, DC config, Type<? extends T> targetType) throws UncheckedIOException;
 
     /**
      * Deserializes an object from a file using custom configuration.
@@ -301,11 +389,33 @@ public interface Parser<SC extends SerializationConfig<?>, DC extends Deserializ
      * @param <T> the target type
      * @param source the source file to read from (must not be {@code null} and must exist)
      * @param config the deserialization configuration to use (may be {@code null} for default behavior)
-     * @param targetClass the class of the object to create (must not be {@code null})
+     * @param targetType the class of the object to create (must not be {@code null})
      * @return the deserialized object instance
      * @throws UncheckedIOException if an I/O error occurs or the file doesn't exist
      */
-    <T> T deserialize(File source, DC config, Class<? extends T> targetClass) throws UncheckedIOException;
+    <T> T deserialize(File source, DC config, Class<? extends T> targetType) throws UncheckedIOException;
+
+    /**
+     * Deserializes an object from an input stream.
+     *
+     * <p>This method uses default deserialization settings. The stream is not closed
+     * after reading, allowing the caller to manage stream lifecycle. The stream content
+     * is read and parsed according to the parser's format.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * try (FileInputStream fis = new FileInputStream("input.json")) {
+     *     MyClass obj = parser.deserialize(fis, Type.of(MyClass.class));
+     * }
+     * }</pre>
+     *
+     * @param <T> the target type
+     * @param source the input stream to read from (must not be {@code null})
+     * @param targetType the type of the object to create (must not be {@code null})
+     * @return the deserialized object instance
+     * @throws UncheckedIOException if an I/O error occurs during stream reading
+     */
+    <T> T deserialize(InputStream source, Type<? extends T> targetType) throws UncheckedIOException;
 
     /**
      * Deserializes an object from an input stream.
@@ -323,11 +433,35 @@ public interface Parser<SC extends SerializationConfig<?>, DC extends Deserializ
      *
      * @param <T> the target type
      * @param source the input stream to read from (must not be {@code null})
-     * @param targetClass the class of the object to create (must not be {@code null})
+     * @param targetType the class of the object to create (must not be {@code null})
      * @return the deserialized object instance
      * @throws UncheckedIOException if an I/O error occurs during stream reading
      */
-    <T> T deserialize(InputStream source, Class<? extends T> targetClass) throws UncheckedIOException;
+    <T> T deserialize(InputStream source, Class<? extends T> targetType) throws UncheckedIOException;
+
+    /**
+     * Deserializes an object from an input stream using custom configuration.
+     *
+     * <p>The stream is not closed after reading, allowing the caller to manage stream
+     * lifecycle. The configuration parameter allows control over deserialization behavior,
+     * such as character encoding, type handling, and parser-specific options.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * MyDeserConfig config = new MyDeserConfig().ignoreUnmatchedProperty(true);
+     * try (FileInputStream fis = new FileInputStream("input.json")) {
+     *     MyClass obj = parser.deserialize(fis, config, Type.of(MyClass.class));
+     * }
+     * }</pre>
+     *
+     * @param <T> the target type
+     * @param source the input stream to read from (must not be {@code null})
+     * @param config the deserialization configuration to use (may be {@code null} for default behavior)
+     * @param targetType the type of the object to create (must not be {@code null})
+     * @return the deserialized object instance
+     * @throws UncheckedIOException if an I/O error occurs during stream reading
+     */
+    <T> T deserialize(InputStream source, DC config, Type<? extends T> targetType) throws UncheckedIOException;
 
     /**
      * Deserializes an object from an input stream using custom configuration.
@@ -347,11 +481,33 @@ public interface Parser<SC extends SerializationConfig<?>, DC extends Deserializ
      * @param <T> the target type
      * @param source the input stream to read from (must not be {@code null})
      * @param config the deserialization configuration to use (may be {@code null} for default behavior)
-     * @param targetClass the class of the object to create (must not be {@code null})
+     * @param targetType the class of the object to create (must not be {@code null})
      * @return the deserialized object instance
      * @throws UncheckedIOException if an I/O error occurs during stream reading
      */
-    <T> T deserialize(InputStream source, DC config, Class<? extends T> targetClass) throws UncheckedIOException;
+    <T> T deserialize(InputStream source, DC config, Class<? extends T> targetType) throws UncheckedIOException;
+
+    /**
+     * Deserializes an object from a reader.
+     *
+     * <p>This method uses default deserialization settings. The reader is not closed
+     * after reading, allowing the caller to manage reader lifecycle. The reader content
+     * is read and parsed according to the parser's format.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * try (FileReader reader = new FileReader("input.json")) {
+     *     MyClass obj = parser.deserialize(reader, Type.of(MyClass.class));
+     * }
+     * }</pre>
+     *
+     * @param <T> the target type
+     * @param source the reader to read from (must not be {@code null})
+     * @param targetType the type of the object to create (must not be {@code null})
+     * @return the deserialized object instance
+     * @throws UncheckedIOException if an I/O error occurs during reading
+     */
+    <T> T deserialize(Reader source, Type<? extends T> targetType) throws UncheckedIOException;
 
     /**
      * Deserializes an object from a reader.
@@ -369,11 +525,38 @@ public interface Parser<SC extends SerializationConfig<?>, DC extends Deserializ
      *
      * @param <T> the target type
      * @param source the reader to read from (must not be {@code null})
-     * @param targetClass the class of the object to create (must not be {@code null})
+     * @param targetType the class of the object to create (must not be {@code null})
      * @return the deserialized object instance
      * @throws UncheckedIOException if an I/O error occurs during reading
      */
-    <T> T deserialize(Reader source, Class<? extends T> targetClass) throws UncheckedIOException;
+    <T> T deserialize(Reader source, Class<? extends T> targetType) throws UncheckedIOException;
+
+    /**
+     * Deserializes an object from a reader using custom configuration.
+     *
+     * <p>The reader is not closed after reading, allowing the caller to manage reader
+     * lifecycle. The configuration parameter allows control over deserialization behavior,
+     * such as type mappings for collections and maps, property handling, and parser-specific
+     * options.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * MyDeserConfig config = new MyDeserConfig()
+     *     .setMapKeyType(String.class)
+     *     .setMapValueType(Integer.class);
+     * try (FileReader reader = new FileReader("input.json")) {
+     *     Map<String, Integer> map = parser.deserialize(reader, config, Type.of(Map.class));
+     * }
+     * }</pre>
+     *
+     * @param <T> the target type
+     * @param source the reader to read from (must not be {@code null})
+     * @param config the deserialization configuration to use (may be {@code null} for default behavior)
+     * @param targetType the type of the object to create (must not be {@code null})
+     * @return the deserialized object instance
+     * @throws UncheckedIOException if an I/O error occurs during reading
+     */
+    <T> T deserialize(Reader source, DC config, Type<? extends T> targetType) throws UncheckedIOException;
 
     /**
      * Deserializes an object from a reader using custom configuration.
@@ -396,9 +579,9 @@ public interface Parser<SC extends SerializationConfig<?>, DC extends Deserializ
      * @param <T> the target type
      * @param source the reader to read from (must not be {@code null})
      * @param config the deserialization configuration to use (may be {@code null} for default behavior)
-     * @param targetClass the class of the object to create (must not be {@code null})
+     * @param targetType the class of the object to create (must not be {@code null})
      * @return the deserialized object instance
      * @throws UncheckedIOException if an I/O error occurs during reading
      */
-    <T> T deserialize(Reader source, DC config, Class<? extends T> targetClass) throws UncheckedIOException;
+    <T> T deserialize(Reader source, DC config, Class<? extends T> targetType) throws UncheckedIOException;
 }

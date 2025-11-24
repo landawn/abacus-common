@@ -31,6 +31,7 @@ import org.w3c.dom.Node;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.parser.XMLSerializationConfig.XSC;
+import com.landawn.abacus.type.Type;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Strings;
 
@@ -208,8 +209,7 @@ public class AbacusXMLParserImpl100Test extends TestBase {
     public void testDeserializeWithNodeClasses() throws IOException {
         String xml = "<person><name>Jack</name><age>31</age></person>";
 
-        Map<String, Class<?>> nodeClasses = new HashMap<>();
-        nodeClasses.put("person", Person.class);
+        Map<String, Type<?>> nodeClasses = Map.of("person", Type.of(Person.class));
 
         ByteArrayInputStream bais = new ByteArrayInputStream(xml.getBytes());
         Person person = staxParser.deserialize(bais, new XMLDeserializationConfig(), nodeClasses);

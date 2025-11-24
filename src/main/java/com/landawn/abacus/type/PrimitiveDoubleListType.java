@@ -19,7 +19,6 @@ import java.io.IOException;
 import com.landawn.abacus.parser.JSONXMLSerializationConfig;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.DoubleList;
-import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Strings;
 
 /**
@@ -32,9 +31,9 @@ public final class PrimitiveDoubleListType extends AbstractPrimitiveListType<Dou
 
     public static final String DOUBLE_LIST = DoubleList.class.getSimpleName();
 
-    private final Type<double[]> arrayType = N.typeOf(double[].class);
+    private final Type<double[]> arrayType = Type.of(double[].class);
 
-    private final Type<Double> elementType = N.typeOf(double.class);
+    private final Type<Double> elementType = Type.of(double.class);
     private final Type<Double>[] parameterTypes = new Type[] { elementType };
 
     protected PrimitiveDoubleListType() {

@@ -825,7 +825,7 @@ public final class ClassUtil {
                                     }
                                 } else {
                                     try {
-                                        final Type<?> componentType = N.typeOf(componentTypeName);
+                                        final Type<?> componentType = Type.of(componentTypeName);
 
                                         if (componentType.isObjectType() && !componentType.name().equals(ObjectType.OBJECT)) {
                                             throw new IllegalArgumentException("No Class found by name: " + clsName);
@@ -1698,7 +1698,7 @@ public final class ClassUtil {
 
         if (Strings.isNotEmpty(typeName) && typeName.indexOf('<') > 0 && typeName.indexOf('>') > 0) { // NOSONAR
             try {
-                final Type<Object> type = N.typeOf(typeName);
+                final Type<Object> type = Type.of(typeName);
 
                 if (field.getType().isAssignableFrom(type.clazz())) {
                     return type.name();
@@ -1708,7 +1708,7 @@ public final class ClassUtil {
             }
         }
 
-        return N.typeOf(field.getType()).name();
+        return Type.of(field.getType()).name();
     }
 
     /**
@@ -1744,7 +1744,7 @@ public final class ClassUtil {
 
         if (Strings.isNotEmpty(typeName) && typeName.indexOf('<') > 0 && typeName.indexOf('>') > 0) { // NOSONAR
             try {
-                final Type<Object> type = N.typeOf(typeName);
+                final Type<Object> type = Type.of(typeName);
                 methodType = N.notEmpty(genericParameterTypes) ? method.getParameterTypes()[0] : method.getReturnType();
 
                 if (methodType.isAssignableFrom(type.clazz())) {
@@ -1759,7 +1759,7 @@ public final class ClassUtil {
             methodType = N.notEmpty(genericParameterTypes) ? method.getParameterTypes()[0] : method.getReturnType();
         }
 
-        return N.typeOf(methodType).name();
+        return Type.of(methodType).name();
     }
 
     // Superclasses/Superinterfaces. Copied from Apache Commons Lang under Apache License v2.
@@ -2393,7 +2393,7 @@ public final class ClassUtil {
     public static boolean isPrimitiveType(final Class<?> cls) throws IllegalArgumentException {
         N.checkArgNotNull(cls, cs.cls);
 
-        return N.typeOf(cls).isPrimitiveType();
+        return Type.of(cls).isPrimitiveType();
     }
 
     /**
@@ -2413,7 +2413,7 @@ public final class ClassUtil {
     public static boolean isPrimitiveWrapper(final Class<?> cls) throws IllegalArgumentException {
         N.checkArgNotNull(cls, cs.cls);
 
-        return N.typeOf(cls).isPrimitiveWrapper();
+        return Type.of(cls).isPrimitiveWrapper();
     }
 
     /**
@@ -2433,7 +2433,7 @@ public final class ClassUtil {
     public static boolean isPrimitiveArrayType(final Class<?> cls) throws IllegalArgumentException {
         N.checkArgNotNull(cls, cs.cls);
 
-        return N.typeOf(cls).isPrimitiveArray();
+        return Type.of(cls).isPrimitiveArray();
     }
 
     // ...

@@ -19,7 +19,6 @@ import java.io.IOException;
 import com.landawn.abacus.parser.JSONXMLSerializationConfig;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.FloatList;
-import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Strings;
 
 /**
@@ -32,9 +31,9 @@ public final class PrimitiveFloatListType extends AbstractPrimitiveListType<Floa
 
     public static final String FLOAT_LIST = FloatList.class.getSimpleName();
 
-    private final Type<float[]> arrayType = N.typeOf(float[].class);
+    private final Type<float[]> arrayType = Type.of(float[].class);
 
-    private final Type<Float> elementType = N.typeOf(float.class);
+    private final Type<Float> elementType = Type.of(float.class);
     private final Type<Float>[] parameterTypes = new Type[] { elementType };
 
     protected PrimitiveFloatListType() {

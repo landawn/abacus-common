@@ -927,7 +927,7 @@ public final class Splitter {
     public <T> List<T> split(final CharSequence source, final Class<? extends T> targetType) throws IllegalArgumentException {
         N.checkArgNotNull(targetType, cs.targetType);
 
-        final Type<T> type = N.typeOf(targetType);
+        final Type<T> type = Type.of(targetType);
 
         return split(source, type);
     }
@@ -1065,7 +1065,7 @@ public final class Splitter {
         N.checkArgNotNull(targetType, cs.targetType);
         N.checkArgNotNull(output, cs.output);
 
-        final Type<T> type = N.typeOf(targetType);
+        final Type<T> type = Type.of(targetType);
 
         split(source, type, output);
     }
@@ -1218,7 +1218,7 @@ public final class Splitter {
         if (eleCls.equals(String.class) || eleCls.equals(Object.class)) {
             return (T) substrs.toArray((Object[]) N.newArray(eleCls, substrs.size()));
         } else {
-            final Type<?> eleType = N.typeOf(eleCls);
+            final Type<?> eleType = Type.of(eleCls);
             final Object a = N.newArray(eleCls, substrs.size());
 
             if (ClassUtil.isPrimitiveType(eleCls)) {
@@ -1803,8 +1803,8 @@ public final class Splitter {
             N.checkArgNotNull(keyType, cs.keyType);
             N.checkArgNotNull(valueType, cs.valueType);
 
-            final Type<K> typeOfKey = N.typeOf(keyType);
-            final Type<V> typeOfValue = N.typeOf(valueType);
+            final Type<K> typeOfKey = Type.of(keyType);
+            final Type<V> typeOfValue = Type.of(valueType);
 
             return split(source, typeOfKey, typeOfValue);
         }
@@ -1973,8 +1973,8 @@ public final class Splitter {
             N.checkArgNotNull(valueType, cs.valueType);
             N.checkArgNotNull(output, cs.output);
 
-            final Type<K> typeOfKey = N.typeOf(keyType);
-            final Type<V> typeOfValue = N.typeOf(valueType);
+            final Type<K> typeOfKey = Type.of(keyType);
+            final Type<V> typeOfValue = Type.of(valueType);
 
             split(source, typeOfKey, typeOfValue, output);
         }

@@ -28,6 +28,7 @@ import org.w3c.dom.Node;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.exception.ParseException;
+import com.landawn.abacus.type.Type;
 import com.landawn.abacus.util.IOUtil;
 
 import jakarta.xml.bind.annotation.XmlAttribute;
@@ -267,7 +268,7 @@ public class JAXBParser100Test extends TestBase {
     @Test
     public void testDeserializeFromInputStreamWithNodeClasses() {
         ByteArrayInputStream bais = new ByteArrayInputStream("test".getBytes());
-        Map<String, Class<?>> nodeClasses = new HashMap<>();
+        Map<String, Type<?>> nodeClasses = new HashMap<>();
 
         assertThrows(UnsupportedOperationException.class, () -> parser.deserialize(bais, null, nodeClasses));
     }
@@ -275,14 +276,14 @@ public class JAXBParser100Test extends TestBase {
     @Test
     public void testDeserializeFromReaderWithNodeClasses() {
         StringReader reader = new StringReader("test");
-        Map<String, Class<?>> nodeClasses = new HashMap<>();
+        Map<String, Type<?>> nodeClasses = new HashMap<>();
 
         assertThrows(UnsupportedOperationException.class, () -> parser.deserialize(reader, null, nodeClasses));
     }
 
     @Test
     public void testDeserializeFromNodeWithNodeClasses() {
-        Map<String, Class<?>> nodeClasses = new HashMap<>();
+        Map<String, Type<?>> nodeClasses = new HashMap<>();
 
         assertThrows(UnsupportedOperationException.class, () -> parser.deserialize((Node) null, null, nodeClasses));
     }

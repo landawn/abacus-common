@@ -23,7 +23,7 @@ public class TypeReference2025Test extends TestBase {
     public void testGetType_SimpleType() {
         TypeReference<String> ref = new TypeReference<>() {
         };
-        java.lang.reflect.Type type = ref.getType();
+        java.lang.reflect.Type type = ref.javaType();
 
         Assertions.assertNotNull(type);
         Assertions.assertEquals(String.class, type);
@@ -33,7 +33,7 @@ public class TypeReference2025Test extends TestBase {
     public void testGetType_GenericList() {
         TypeReference<List<String>> ref = new TypeReference<>() {
         };
-        java.lang.reflect.Type type = ref.getType();
+        java.lang.reflect.Type type = ref.javaType();
 
         Assertions.assertNotNull(type);
         Assertions.assertTrue(type instanceof ParameterizedType);
@@ -46,7 +46,7 @@ public class TypeReference2025Test extends TestBase {
     public void testGetType_GenericMap() {
         TypeReference<Map<String, Integer>> ref = new TypeReference<>() {
         };
-        java.lang.reflect.Type type = ref.getType();
+        java.lang.reflect.Type type = ref.javaType();
 
         Assertions.assertNotNull(type);
         Assertions.assertTrue(type instanceof ParameterizedType);
@@ -60,7 +60,7 @@ public class TypeReference2025Test extends TestBase {
     public void testGetType_ComplexNestedGeneric() {
         TypeReference<Map<String, List<Set<Integer>>>> ref = new TypeReference<>() {
         };
-        java.lang.reflect.Type type = ref.getType();
+        java.lang.reflect.Type type = ref.javaType();
 
         Assertions.assertNotNull(type);
         Assertions.assertTrue(type instanceof ParameterizedType);
@@ -73,7 +73,7 @@ public class TypeReference2025Test extends TestBase {
     public void testGetType_ArrayType() {
         TypeReference<String[]> ref = new TypeReference<>() {
         };
-        java.lang.reflect.Type type = ref.getType();
+        java.lang.reflect.Type type = ref.javaType();
 
         Assertions.assertNotNull(type);
         Assertions.assertEquals(String[].class, type);
@@ -83,7 +83,7 @@ public class TypeReference2025Test extends TestBase {
     public void testGetType_PrimitiveWrapper() {
         TypeReference<Integer> ref = new TypeReference<>() {
         };
-        java.lang.reflect.Type type = ref.getType();
+        java.lang.reflect.Type type = ref.javaType();
 
         Assertions.assertNotNull(type);
         Assertions.assertEquals(Integer.class, type);
@@ -93,7 +93,7 @@ public class TypeReference2025Test extends TestBase {
     public void testGetType_WildcardUpperBound() {
         TypeReference<List<? extends Number>> ref = new TypeReference<>() {
         };
-        java.lang.reflect.Type type = ref.getType();
+        java.lang.reflect.Type type = ref.javaType();
 
         Assertions.assertNotNull(type);
         Assertions.assertTrue(type instanceof ParameterizedType);
@@ -103,7 +103,7 @@ public class TypeReference2025Test extends TestBase {
     public void testGetType_WildcardLowerBound() {
         TypeReference<List<? super Integer>> ref = new TypeReference<>() {
         };
-        java.lang.reflect.Type type = ref.getType();
+        java.lang.reflect.Type type = ref.javaType();
 
         Assertions.assertNotNull(type);
         Assertions.assertTrue(type instanceof ParameterizedType);
@@ -113,7 +113,7 @@ public class TypeReference2025Test extends TestBase {
     public void testGetType_MultipleTypeParameters() {
         TypeReference<Map<String, Integer>> ref = new TypeReference<>() {
         };
-        java.lang.reflect.Type type = ref.getType();
+        java.lang.reflect.Type type = ref.javaType();
 
         Assertions.assertNotNull(type);
         ParameterizedType pt = (ParameterizedType) type;
@@ -131,8 +131,8 @@ public class TypeReference2025Test extends TestBase {
         TypeReference<LinkedList<String>> ref2 = new TypeReference<>() {
         };
 
-        java.lang.reflect.Type type1 = ref1.getType();
-        java.lang.reflect.Type type2 = ref2.getType();
+        java.lang.reflect.Type type1 = ref1.javaType();
+        java.lang.reflect.Type type2 = ref2.javaType();
 
         Assertions.assertNotEquals(type1, type2);
     }
@@ -142,8 +142,8 @@ public class TypeReference2025Test extends TestBase {
         TypeReference<List<String>> ref = new TypeReference<>() {
         };
 
-        java.lang.reflect.Type type1 = ref.getType();
-        java.lang.reflect.Type type2 = ref.getType();
+        java.lang.reflect.Type type1 = ref.javaType();
+        java.lang.reflect.Type type2 = ref.javaType();
 
         Assertions.assertSame(type1, type2);
     }
@@ -286,7 +286,7 @@ public class TypeReference2025Test extends TestBase {
     public void testTypeToken_GetType() {
         TypeReference.TypeToken<List<Integer>> token = new TypeReference.TypeToken<>() {
         };
-        java.lang.reflect.Type type = token.getType();
+        java.lang.reflect.Type type = token.javaType();
 
         Assertions.assertNotNull(type);
         Assertions.assertTrue(type instanceof ParameterizedType);
@@ -404,7 +404,7 @@ public class TypeReference2025Test extends TestBase {
         TypeReference<List<String>> ref = new TypeReference<>() {
         };
 
-        java.lang.reflect.Type rawType = ref.getType();
+        java.lang.reflect.Type rawType = ref.javaType();
         Type<List<String>> abacusType = ref.type();
 
         Assertions.assertNotNull(rawType);
@@ -418,7 +418,7 @@ public class TypeReference2025Test extends TestBase {
         TypeReference.TypeToken<List<String>> token = new TypeReference.TypeToken<>() {
         };
 
-        Assertions.assertEquals(ref.getType(), token.getType());
+        Assertions.assertEquals(ref.javaType(), token.javaType());
         Assertions.assertEquals(ref.type(), token.type());
     }
 

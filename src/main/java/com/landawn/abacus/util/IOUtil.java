@@ -7640,6 +7640,13 @@ public final class IOUtil {
             while (entryEnum.hasMoreElements()) {
                 ze = entryEnum.nextElement();
 
+                // Fix for Zip Slip
+                File newFile = new File(targetDir, ze.getName());
+                
+                if (!newFile.getCanonicalPath().startsWith(targetDir.getCanonicalPath())) {
+                     throw new IOException("Zip entry is outside of the target dir: " + ze.getName());
+                }
+
                 if (ze.isDirectory()) {
                     Path entryPath = outputPath.resolve(ze.getName());
                     Files.createDirectories(entryPath);

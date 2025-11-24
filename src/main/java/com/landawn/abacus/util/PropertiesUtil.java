@@ -620,7 +620,7 @@ public final class PropertiesUtil {
                 if (Strings.isEmpty(typeAttr)) {
                     propValue = Strings.strip(XmlUtil.getTextContent(propNode));
                 } else {
-                    propValue = N.typeOf(typeAttr).valueOf(Strings.strip(XmlUtil.getTextContent(propNode)));
+                    propValue = Type.of(typeAttr).valueOf(Strings.strip(XmlUtil.getTextContent(propNode)));
                 }
             } else {
                 // TODO it's difficult to support duplicated property and may be misused.
@@ -902,7 +902,7 @@ public final class PropertiesUtil {
 
                             storeToXml((Properties<?, ?>) e, elementPropName, writeTypeInfo, false, output);
                         } else {
-                            type = N.typeOf(e.getClass());
+                            type = Type.of(e.getClass());
 
                             if (writeTypeInfo) {
                                 if (ClassUtil.isPrimitiveWrapper(type.clazz())) {
@@ -925,7 +925,7 @@ public final class PropertiesUtil {
 
                     storeToXml((Properties<?, ?>) propValue, propName, writeTypeInfo, false, output);
                 } else {
-                    type = N.typeOf(propValue.getClass());
+                    type = Type.of(propValue.getClass());
 
                     if (writeTypeInfo) {
                         if (ClassUtil.isPrimitiveWrapper(type.clazz())) {
@@ -1273,7 +1273,7 @@ public final class PropertiesUtil {
             attr = XmlUtil.getAttribute(childNode, TYPE);
 
             if (Strings.isNotEmpty(attr)) {
-                type = N.typeOf(attr);
+                type = Type.of(attr);
                 if (type != null) {
                     final Class<?> typeClass = type.clazz();
                     if (typeClass.getCanonicalName().startsWith("java.lang") || ClassUtil.isPrimitiveType(typeClass)
@@ -1297,8 +1297,7 @@ public final class PropertiesUtil {
     private static void writeMethod(final String spaces, final String propName, final String typeName, final Set<String> duplicatedPropNameSet,
             final Writer output) throws IOException {
         final String listPropName = propName + "List";
-        final String elementTypeName = N.typeOf(typeName).isPrimitiveType() ? ClassUtil.getSimpleClassName(ClassUtil.wrap(N.typeOf(typeName).clazz()))
-                : typeName;
+        final String elementTypeName = Type.of(typeName).isPrimitiveType() ? ClassUtil.getSimpleClassName(ClassUtil.wrap(Type.of(typeName).clazz())) : typeName;
 
         output.write(spaces + "public " + typeName + " get" + Strings.capitalize(propName) + "() {" + IOUtil.LINE_SEPARATOR_UNIX);
         output.write(spaces + "    " + "return (" + typeName + ") super.get(\"" + propName + "\");" + IOUtil.LINE_SEPARATOR_UNIX);
@@ -1321,7 +1320,7 @@ public final class PropertiesUtil {
 
         output.write(spaces + "public void remove" + Strings.capitalize(propName) + "() {" + IOUtil.LINE_SEPARATOR_UNIX);
         output.write(spaces + "    " + "super.remove(\"" + propName + "\");" + IOUtil.LINE_SEPARATOR_UNIX);
-        // output.write(spaces + "    " + "this." + propName + " = " + N.typeOf(typeName).defaultValue() + ";" + IOUtil.LINE_SEPARATOR_UNIX);
+        // output.write(spaces + "    " + "this." + propName + " = " + Type.of(typeName).defaultValue() + ";" + IOUtil.LINE_SEPARATOR_UNIX);
 
         // TODO it's difficult to support duplicated property and may be misused.
         //        if (duplicatedPropNameSet.contains(propName)) {
@@ -1356,7 +1355,7 @@ public final class PropertiesUtil {
             if (typeAttr.equals("Properties")) {
                 typeName = "Properties<String, Object>";
             } else {
-                final Type<?> type = N.typeOf(typeAttr);
+                final Type<?> type = Type.of(typeAttr);
                 if (type != null) {
                     typeName = type.clazz().getSimpleName();
                 }

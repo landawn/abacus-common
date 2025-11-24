@@ -92,7 +92,7 @@ public class KryoSerializationConfig extends SerializationConfig<KryoSerializati
 
     /**
      * Computes a hash code for this configuration based on its settings.
-     * 
+     *
      * <p>The hash code includes the writeClass setting in addition to settings
      * inherited from the parent class.</p>
      *
@@ -133,8 +133,9 @@ public class KryoSerializationConfig extends SerializationConfig<KryoSerializati
 
     /**
      * Returns a string representation of this configuration.
-     * 
-     * <p>The string includes all configuration settings in a readable format.</p>
+     *
+     * <p>The string includes all configuration settings in the format:
+     * {@code {ignoredPropNames=..., exclusion=..., skipTransientField=..., writeClass=...}}</p>
      *
      * @return a string representation of this configuration
      */

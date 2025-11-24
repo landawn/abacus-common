@@ -385,7 +385,7 @@ public class JSONParserImpl101Test extends TestBase {
         String json = "[{\"name\":\"A\"},{\"name\":\"B\"}]";
         ByteArrayInputStream bais = new ByteArrayInputStream(json.getBytes());
 
-        Stream<Map<String, String>> stream = parser.stream(bais, null, true, Type.ofMap(String.class, String.class));
+        Stream<Map<String, String>> stream = parser.stream(bais, true, null, Type.ofMap(String.class, String.class));
 
         AtomicInteger count = new AtomicInteger(0);
         stream.forEach(m -> {
@@ -401,7 +401,7 @@ public class JSONParserImpl101Test extends TestBase {
         String json = "[[1,2],[3,4],[5,6]]";
         StringReader reader = new StringReader(json);
 
-        Stream<List<Integer>> stream = parser.stream(reader, null, true, Type.ofList(Integer.class));
+        Stream<List<Integer>> stream = parser.stream(reader, true, null, Type.ofList(Integer.class));
 
         List<List<Integer>> result = stream.toList();
         Assertions.assertEquals(3, result.size());
@@ -415,13 +415,13 @@ public class JSONParserImpl101Test extends TestBase {
         String json = "[[1,2],[3,4],[5,6]]";
         ByteArrayInputStream bais = new ByteArrayInputStream(json.getBytes());
 
-        Stream<List<Integer>> stream = parser.stream(bais, null, true, Type.ofList(Integer.class));
+        Stream<List<Integer>> stream = parser.stream(bais, true, null, Type.ofList(Integer.class));
         stream.toList();
 
         Assertions.assertTrue(bais.available() >= 0);
 
         StringReader reader = new StringReader("[[1,2],[3,4],[5,6]]");
-        Stream<List<Integer>> stream2 = parser.stream(reader, null, false, Type.ofList(Integer.class));
+        Stream<List<Integer>> stream2 = parser.stream(reader, false, null, Type.ofList(Integer.class));
         List<List<Integer>> result = stream2.toList();
         Assertions.assertEquals(3, result.size());
     }

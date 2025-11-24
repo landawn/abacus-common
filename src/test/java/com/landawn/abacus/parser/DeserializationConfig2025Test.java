@@ -242,30 +242,6 @@ public class DeserializationConfig2025Test extends TestBase {
     }
 
     @Test
-    public void test_getValueTypeClass_withoutDefault() {
-        assertNull(config.getValueTypeClass("unknown"));
-    }
-
-    @Test
-    public void test_getValueTypeClass_withDefault() {
-        Class<?> result = config.getValueTypeClass("unknown", String.class);
-        assertEquals(String.class, result);
-    }
-
-    @Test
-    public void test_getValueTypeClass_configured() {
-        config.setValueType("name", String.class);
-        Class<?> result = config.getValueTypeClass("name");
-        assertEquals(String.class, result);
-    }
-
-    @Test
-    public void test_setValueType_withClass() {
-        config.setValueType("name", String.class);
-        assertEquals(String.class, config.getValueTypeClass("name"));
-    }
-
-    @Test
     public void test_setValueType_withType() {
         Type<String> type = N.typeOf(String.class);
         config.setValueType("name", type);
@@ -273,27 +249,9 @@ public class DeserializationConfig2025Test extends TestBase {
     }
 
     @Test
-    public void test_setValueType_withString() {
-        config.setValueType("name", "String");
-        assertEquals(String.class, config.getValueTypeClass("name"));
-    }
-
-    @Test
     public void test_setValueType_methodChaining() {
         TestDeserializationConfig result = config.setValueType("name", String.class);
         assertEquals(config, result);
-    }
-
-    @Test
-    public void test_setValueTypes_withMap() {
-        Map<String, Type<?>> types = new HashMap<>();
-        types.put("name", N.typeOf(String.class));
-        types.put("age", N.typeOf(Integer.class));
-
-        config.setValueTypes(types);
-
-        assertEquals(String.class, config.getValueTypeClass("name"));
-        assertEquals(Integer.class, config.getValueTypeClass("age"));
     }
 
     @Test

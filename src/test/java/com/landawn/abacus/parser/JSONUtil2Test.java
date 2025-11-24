@@ -1,7 +1,3 @@
-/*
- * Copyright (c) 2015, Haiyang Li. All rights reserved.
- */
-
 package com.landawn.abacus.parser;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -12,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.json.JSONObject;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.AbstractTest;
@@ -22,6 +19,7 @@ import com.landawn.abacus.util.JSONUtil;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Strings;
 
+@Tag("old-test")
 public class JSONUtil2Test extends AbstractTest {
 
     @Test

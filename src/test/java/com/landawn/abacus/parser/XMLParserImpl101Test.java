@@ -30,6 +30,7 @@ import com.landawn.abacus.annotation.JsonXmlField;
 import com.landawn.abacus.exception.ParseException;
 import com.landawn.abacus.parser.XMLDeserializationConfig.XDC;
 import com.landawn.abacus.parser.XMLSerializationConfig.XSC;
+import com.landawn.abacus.type.Type;
 import com.landawn.abacus.util.BufferedXMLWriter;
 import com.landawn.abacus.util.MapEntity;
 import com.landawn.abacus.util.N;
@@ -769,8 +770,8 @@ public class XMLParserImpl101Test extends TestBase {
     @Test
     public void testDeserializeWithNodeClasses() throws IOException {
         String xml = "<bean><name>Test</name><age>25</age></bean>";
-        Map<String, Class<?>> nodeClasses = new HashMap<>();
-        nodeClasses.put("bean", TestBean.class);
+        Map<String, Type<?>> nodeClasses = new HashMap<>();
+        nodeClasses.put("bean", Type.of(TestBean.class));
 
         ByteArrayInputStream bais = new ByteArrayInputStream(xml.getBytes());
         TestBean result = staxParser.deserialize(bais, null, nodeClasses);
@@ -793,8 +794,8 @@ public class XMLParserImpl101Test extends TestBase {
         Document doc = builder.parse(new ByteArrayInputStream(xml.getBytes()));
         Node node = doc.getDocumentElement();
 
-        Map<String, Class<?>> nodeClasses = new HashMap<>();
-        nodeClasses.put("bean", TestBean.class);
+        Map<String, Type<?>> nodeClasses = new HashMap<>();
+        nodeClasses.put("bean", Type.of(TestBean.class));
 
         TestBean result = staxParser.deserialize(node, null, nodeClasses);
         Assertions.assertNotNull(result);
@@ -805,8 +806,8 @@ public class XMLParserImpl101Test extends TestBase {
     @Test
     public void testDeserializeWithNodeClassesNoMatch() throws IOException {
         String xml = "<unknown><name>Test</name><age>25</age></unknown>";
-        Map<String, Class<?>> nodeClasses = new HashMap<>();
-        nodeClasses.put("bean", TestBean.class);
+        Map<String, Type<?>> nodeClasses = new HashMap<>();
+        nodeClasses.put("bean", Type.of(TestBean.class));
 
         ByteArrayInputStream bais = new ByteArrayInputStream(xml.getBytes());
         Assertions.assertThrows(ParseException.class, () -> {
@@ -817,7 +818,7 @@ public class XMLParserImpl101Test extends TestBase {
     @Test
     public void testDeserializeWithEmptyNodeClasses() throws IOException {
         String xml = "<bean><name>Test</name><age>25</age></bean>";
-        Map<String, Class<?>> nodeClasses = new HashMap<>();
+        Map<String, Type<?>> nodeClasses = new HashMap<>();
 
         ByteArrayInputStream bais = new ByteArrayInputStream(xml.getBytes());
         Assertions.assertThrows(ParseException.class, () -> {

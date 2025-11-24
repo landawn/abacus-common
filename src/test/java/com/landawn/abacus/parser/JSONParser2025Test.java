@@ -326,7 +326,7 @@ public class JSONParser2025Test extends TestBase {
         InputStream inputStream = new ByteArrayInputStream(json.getBytes());
         JSONDeserializationConfig config = new JSONDeserializationConfig();
 
-        try (Stream<Map> stream = parser.stream(inputStream, config, true, Type.of(Map.class))) {
+        try (Stream<Map> stream = parser.stream(inputStream, true, config, Type.of(Map.class))) {
             List<Map> list = stream.toList();
             Assertions.assertEquals(3, list.size());
             Assertions.assertEquals("X", list.get(0).get("val"));
@@ -335,7 +335,7 @@ public class JSONParser2025Test extends TestBase {
         }
 
         InputStream inputStream2 = new ByteArrayInputStream(json.getBytes());
-        try (Stream<Map> stream = parser.stream(inputStream2, null, true, Type.of(Map.class))) {
+        try (Stream<Map> stream = parser.stream(inputStream2, true, null, Type.of(Map.class))) {
             List<Map> list = stream.toList();
             Assertions.assertEquals(3, list.size());
         }
@@ -366,7 +366,7 @@ public class JSONParser2025Test extends TestBase {
         Reader reader = new StringReader(json);
         JSONDeserializationConfig config = new JSONDeserializationConfig();
 
-        try (Stream<Map> stream = parser.stream(reader, config, true, Type.of(Map.class))) {
+        try (Stream<Map> stream = parser.stream(reader, true, config, Type.of(Map.class))) {
             List<Map> list = stream.toList();
             Assertions.assertEquals(3, list.size());
             Assertions.assertEquals("apple", list.get(0).get("item"));
@@ -375,7 +375,7 @@ public class JSONParser2025Test extends TestBase {
         }
 
         Reader reader2 = new StringReader(json);
-        try (Stream<Map> stream = parser.stream(reader2, null, true, Type.of(Map.class))) {
+        try (Stream<Map> stream = parser.stream(reader2, true, null, Type.of(Map.class))) {
             List<Map> list = stream.toList();
             Assertions.assertEquals(3, list.size());
         }

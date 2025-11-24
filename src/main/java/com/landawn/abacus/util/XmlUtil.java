@@ -123,10 +123,33 @@ public final class XmlUtil {
     // ...
     private static final SAXParserFactory saxParserFactory = SAXParserFactory.newInstance();
 
+    static {
+        try {
+            saxParserFactory.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
+            saxParserFactory.setFeature("http://xml.org/sax/features/external-general-entities", false);
+            saxParserFactory.setFeature("http://xml.org/sax/features/external-parameter-entities", false);
+            saxParserFactory.setXIncludeAware(false);
+        } catch (Throwable e) {
+            // ignore
+        }
+    }
+
     private static final Queue<SAXParser> saxParserPool = new ArrayBlockingQueue<>(POOL_SIZE);
 
     // ...
     private static final DocumentBuilderFactory docBuilderFactory = DocumentBuilderFactory.newInstance();
+
+    static {
+        try {
+            docBuilderFactory.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
+            docBuilderFactory.setFeature("http://xml.org/sax/features/external-general-entities", false);
+            docBuilderFactory.setFeature("http://xml.org/sax/features/external-parameter-entities", false);
+            docBuilderFactory.setXIncludeAware(false);
+            docBuilderFactory.setExpandEntityReferences(false);
+        } catch (Throwable e) {
+            // ignore
+        }
+    }
 
     private static final Queue<DocumentBuilder> contentDocBuilderPool = new ArrayBlockingQueue<>(POOL_SIZE);
 
@@ -1642,7 +1665,7 @@ public final class XmlUtil {
             return null;
         }
 
-        final Type<?> type = N.typeOf(typeAttr);
+        final Type<?> type = Type.of(typeAttr);
 
         if (type != null) {
             return type.clazz();

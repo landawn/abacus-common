@@ -130,7 +130,7 @@ class JSONStringReader extends AbstractJSONReader {
     /**
      * Creates a JSONReader for parsing the given JSON string.
      * This factory method creates an optimized reader for string sources.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String json = "{\"name\":\"John\"}";
@@ -139,7 +139,7 @@ class JSONStringReader extends AbstractJSONReader {
      *
      * @param str the JSON string to parse
      * @param cbuf the character buffer to use for parsing
-          * @return a new JSONReader instance
+     * @return a new JSONReader instance
      */
     public static JSONReader parse(final String str, final char[] cbuf) {
         //        return new JSONStreamReader(new StringReader(str), new char[1], cbuf);
@@ -150,7 +150,7 @@ class JSONStringReader extends AbstractJSONReader {
     /**
      * Creates a JSONReader for parsing a substring of the given JSON string.
      * This allows parsing a portion of a larger string without creating a substring.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String json = "prefix{\"name\":\"John\"}suffix";
@@ -161,7 +161,7 @@ class JSONStringReader extends AbstractJSONReader {
      * @param beginIndex the starting index (inclusive)
      * @param endIndex the ending index (exclusive)
      * @param cbuf the character buffer to use for parsing
-          * @return a new JSONReader instance
+     * @return a new JSONReader instance
      */
     public static JSONReader parse(final String str, final int beginIndex, final int endIndex, final char[] cbuf) {
         return new JSONStringReader(str, beginIndex, endIndex, cbuf);

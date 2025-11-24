@@ -100,7 +100,7 @@ public class TypeFactory100Test extends TestBase {
     public void testRegisterTypeWithClassAndType() {
         class CustomClass3 {
         }
-        Type<CustomClass3> customType = new Type<>() {
+        Type<CustomClass3> customType = new AbstractType<>("CustomClass3") {
             @Override
             public String name() {
                 return "CustomClass3";
@@ -444,7 +444,7 @@ public class TypeFactory100Test extends TestBase {
 
     @Test
     public void testRegisterType() {
-        Type<?> customType = new Type<>() {
+        Type<?> customType = new AbstractType<>("UniqueTypeName456") {
             @Override
             public String name() {
                 return "UniqueTypeName456";
