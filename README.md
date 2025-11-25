@@ -233,13 +233,13 @@ compile 'com.landawn:abacus-common:6.26.4'
 
 * Most methods are designed to support broad and general use cases. `null` parameters are generally permitted as long as they do not violate the method’s intended contract. For example: `Numbers.createNumber(...)` or `N.filter(...)`. It is the user’s responsibility to handle `null` values appropriately if they are considered invalid in a given context.
 
-* Immutable vs. Mutable: Immutable objects are not preferred over mutable ones in this library. Mutable variables and parameters are generally used as the base cases. <u>*a),*</u> when a variable is passed as a method parameter, it should typically not be modified within the called method, unless it is explicitly intended to serve as an output parameter or modifying the input parameter is (part of) the purpose of the method call. <u>*b),*</u> a value returned from a method may be freely modified by the caller, as the caller is considered the owner/holder of the returned value. If the returned value is not meant to be modified by the caller, an immutable value should be returned instead. <u>*c),*</u> Variables must not be modified concurrently by multiple threads without proper synchronization, regardless of whether they are mutable or immutable. In other words, if no modifications occur, it makes no difference whether the variables are mutable or immutable.
+* Immutable vs. Mutable: Immutable objects are not preferred over mutable ones in this library. Mutable variables and parameters are generally used as the base cases. <u>*a),*</u> when a variable is passed as a method parameter, it should typically not be modified within the called method, unless it is explicitly intended to serve as an output parameter or modifying the input parameter is (part of) the purpose of the method call. <u>*b),*</u> a value returned from a method may be freely modified by the caller, as the caller is considered the owner/holder of the returned value. If the returned value is not meant to be modified by the caller, an immutable value should be returned instead. <u>*c),*</u> variables must not be modified concurrently by multiple threads without proper synchronization, regardless of whether they are mutable or immutable. In other words, if no modifications occur, it makes no difference whether the variables are mutable or immutable.
 
 * Given the large number of methods across this library, maintaining strict consistency in handling exceptions such as `IllegalArgumentException`, `IndexOutOfBoundsException`,  `NullPointerException`, and similar is inherently challenging. Therefore, these exceptions should not be treated differently, and the following approach **must be avoided**:
 
 ```java
 		try {
-		    call some methods which may throw IllegalArgumentException, IndexOutOfBoundsException or NullPointerException in this library.
+		    call some methods which may throw: IllegalArgumentException/IndexOutOfBoundsException/NullPointerException in this library.
 		} catch (IllegalArgumentException e) {
 		    // do something...
 		} catch (IndexOutOfBoundsException e) {
