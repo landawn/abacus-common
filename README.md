@@ -228,7 +228,7 @@ compile 'com.landawn:abacus-common:6.26.4'
 
 ### Design and Implementation Considerations:
 
-* In general, empty values—such as an empty `String`, `Collection`, or `Map`—are returned instead of `null`. However, certain methods (e.g., `Strings.firstNonEmpty()` or `Strings.emptyToNull()`) may legitimately return `null`. Methods that may return `null` are typically annotated with `@MayReturnNull`.
+* In general, empty values—such as an empty `String`, `Collection`, or `Map`—are returned instead of `null`. However, certain methods (e.g., `Strings.firstNonEmpty()` or `Strings.emptyToNull()`) may legitimately return `null`. Methods that may return `null` are typically annotated with `@MayReturnNull` or explicitly documented in the Javadoc.
 
 
 * Most methods are designed to support broad and general use cases. `null` parameters are generally permitted as long as they do not violate the method’s intended contract. For example: `Numbers.createNumber(...)` or `N.filter(...)`. It is the user’s responsibility to handle `null` values appropriately if they are considered invalid in a given context.
@@ -310,6 +310,7 @@ If Proposals is slow with Big class: N, Strings, Stream, Open the class file and
 ![image](https://github.com/landawn/abacus-common/assets/16568599/248990bb-f2c8-43e0-956b-edaa1477d5cd)
 
                                ...beyond imagination...
+
 
 
 
