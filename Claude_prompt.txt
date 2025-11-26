@@ -1,41 +1,61 @@
 
+-- ==========================================================
+
+Use multiple agents to fix all javadoc issues reported by running: mvn javadoc:javadoc.
+
+-- ==========================================================
 
 Use multiple agents to review all classes under folder: ./src/main/java/ line by line carefully to find bugs and fix them.
 
 
+-- ==========================================================
+
+Follow the steps below strictly and execute them in order.
+
+Step 1 - Use multiple agents to review the Javadoc comments for all public methods in the in all classes and interfaces under folder: ./src/main/java/. Ensure that similar methods have consistent and harmonized documentation, including clear and uniform descriptions of method behavior, parameters, and exceptions. For methods annotated with @Override, just review, improve and verify existing javadoc for them. Don't add or generate new javadoc for methods annotated with @Override.
+
+Step 2 - Use multiple agents to generate comprehensive Javadoc for all public methods, including public static methods but skip the methods annotated with @Override, in all classes and interfaces under folder: ./src/main/java/. The Javadoc should be detailed and precise, thoroughly explaining the method’s purpose, behavior, parameters, return value, and exceptions. Where applicable, include a concise usage example (a couple of lines). The example block should always be placed before any @param, @return, or other annotation tags. If Javadoc already exists, review it against the actual implementation and update it for accuracy and clarity. Finally, merge the new or revised Javadoc directly into source file, replacing any existing documentation. DON'T skip any class. For methods annotated with @Override, just review, improve and verify existing javadoc for them. Don't add or generate new javadoc for methods annotated with @Override. Use below template for usage example in Javadoc:
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Sample codes
+     * }</pre>
+
+Step 3 - Use multiple agents to verify each sample/example in all javadoc in all classes and interfaces under folder: ./src/main/java/ by implementation and make sure all the samples/examples pass tests.
+
+Step 4 - Run mvn javadoc:javadoc to verify all changes are valid
+
+
+-- ==========================================================
+
+
+Follow the steps below strictly and execute them in order.
+
+Step 1 - Use multiple agents to review the Javadoc comments for all public methods in the in all classes and interfaces in package: com.landawn.abacus under folder: ./src/main/java/. Ensure that similar methods have consistent and harmonized documentation, including clear and uniform descriptions of method behavior, parameters, and exceptions. For methods annotated with @Override, just review, improve and verify existing javadoc for them. Don't add or generate new javadoc for methods annotated with @Override.
+
+Step 2 - Use multiple agents to generate comprehensive Javadoc for all public methods, including public static methods but skip the methods annotated with @Override, in all classes and interfaces in package: com.landawn.abacus under folder: ./src/main/java/. The Javadoc should be detailed and precise, thoroughly explaining the method’s purpose, behavior, parameters, return value, and exceptions. Where applicable, include a concise usage example (a couple of lines). The example block should always be placed before any @param, @return, or other annotation tags. If Javadoc already exists, review it against the actual implementation and update it for accuracy and clarity. Finally, merge the new or revised Javadoc directly into source file, replacing any existing documentation. DON'T skip any class. For methods annotated with @Override, just review, improve and verify existing javadoc for them. Don't add or generate new javadoc for methods annotated with @Override. Use below template for usage example in Javadoc:
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Sample codes
+     * }</pre>
+
+Step 3 - Use multiple agents to verify each sample/example in all javadoc in all classes and interfaces in package: com.landawn.abacus under folder: ./src/main/java/ by implementation and make sure all the samples/examples pass tests.
+
+Step 4 - Run mvn javadoc:javadoc to verify all changes are valid
+
 
 -- ==========================================================
 
 Follow the steps below strictly and execute them in order.
 
-Step 1 - Use multiple agents to review the Javadoc comments for all public methods in the classes under ./src/main/java/. Ensure that similar methods have consistent and harmonized documentation, including clear and uniform descriptions of method behavior, parameters, and exceptions.
+Step 1 - Use multiple agents to verify each sample/example in all javadoc in all classes and interfaces under folder: ./src/main/java/ by implementation and make sure all the samples/examples pass tests.
 
-Step 2 - Use multiple agents to generate comprehensive Javadoc for all public methods, including public static methods but skip the methods annotated with @Override, in all classes in folder: ./src/main/java/. The Javadoc should be detailed and precise, thoroughly explaining the method’s purpose, behavior, parameters, return value, and exceptions. Where applicable, include a concise usage example (a couple of lines). The example block should always be placed before any @param, @return, or other annotation tags. If Javadoc already exists, review it against the actual implementation and update it for accuracy and clarity. Finally, merge the new or revised Javadoc directly into source file, replacing any existing documentation. DON'T skip any class. Use below template for usage example in Javadoc:
+Step 2 - Use multiple agents to review Javadoc against the actual implementation and update it for accuracy and clarity. Finally, merge the new or revised Javadoc directly into source file, replacing any existing documentation. DON'T skip any class. For methods annotated with @Override, just review, improve and verify existing javadoc for them. Don't add or generate new javadoc for methods annotated with @Override. Use below template for usage example in Javadoc:
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Sample codes
      * }</pre>
 
 Step 3 - Run mvn javadoc:javadoc to verify all changes are valid
-
-
--- ==========================================================
-
-Follow the steps below strictly and execute them in order.
-
-Step 1 - Use multiple agents to verify each sample/example in all javadoc in all classes under folder: ./src/main/java/ by implementation and make sure all the samples/examples pass tests.
-
-Step 2 - Use multiple agents to review Javadoc against the actual implementation and update it for accuracy and clarity. Finally, merge the new or revised Javadoc directly into source file, replacing any existing documentation. DON'T skip any class. Use below template for usage example in Javadoc:
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * Sample codes
-     * }</pre>
-
-Step 3 - Run mvn javadoc:javadoc to verify all changes are valid
-
-
-
-
 
 -- ==========================================================
 
@@ -180,5 +200,3 @@ Requirements:
 
 -- ==========================================================
 
-
-Use multiple agents to fix all javadoc issues reported by running: mvn javadoc:javadoc.
