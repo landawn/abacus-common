@@ -24,7 +24,8 @@
 	* More ... refer to: [How To Design A Good API and Why it Matters](https://static.googleusercontent.com/media/research.google.com/en//pubs/archive/32713.pdf), [video](https://www.youtube.com/watch?v=aAb7hSCtvGw)
 
 3. *Powerful and extensive*:
-   The library provides thousands of utility methods — covering everything from daily-use helpers to advanced support for I/O, concurrency, JSON/XML serialization, and functional programming.
+   The library provides thousands of utility methods — covering everything from daily-use helpers to advanced support for I/O, concurrency, JSON/XML serialization, and functional programming(e.g.,`Stream.of(persons).map(Person::getEmail())...filter(Strings::isNotEmpty).groupBy(Person::getLastName).persist(file)...`).
+
 
 ##### Why abacus-common?
 
