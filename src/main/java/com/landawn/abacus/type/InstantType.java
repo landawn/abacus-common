@@ -45,6 +45,13 @@ public class InstantType extends AbstractTemporalType<Instant> {
     /**
      * Returns the Class object representing the Instant type.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Type<Instant> type = TypeFactory.getType(Instant.class);
+     * Class<Instant> clazz = type.clazz();
+     * // Returns: Instant.class
+     * }</pre>
+     *
      * @return Instant.class
      */
     @Override
@@ -55,6 +62,17 @@ public class InstantType extends AbstractTemporalType<Instant> {
     /**
      * Converts an Instant to its string representation.
      * Uses ISO-8601 timestamp format with millisecond precision (e.g., "2023-12-25T10:30:45.123Z").
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Type<Instant> type = TypeFactory.getType(Instant.class);
+     * Instant instant = Instant.ofEpochMilli(1703502645123L);
+     * String result = type.stringOf(instant);
+     * // Returns: "2023-12-25T10:30:45.123Z"
+     *
+     * result = type.stringOf(null);
+     * // Returns: null
+     * }</pre>
      *
      * @param x the Instant to convert to string
      * @return the ISO-8601 timestamp string representation, or {@code null} if the input is null
@@ -163,6 +181,14 @@ public class InstantType extends AbstractTemporalType<Instant> {
      * Retrieves an Instant value from the specified column in a ResultSet.
      * The method reads a Timestamp from the database and converts it to an Instant.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Type<Instant> type = TypeFactory.getType(Instant.class);
+     * ResultSet rs = ...; // obtained from database query
+     * Instant instant = type.get(rs, 1);
+     * // Returns: Instant value from column 1
+     * }</pre>
+     *
      * @param rs the ResultSet to read from
      * @param columnIndex the index of the column to read (1-based)
      * @return the Instant value from the column, or {@code null} if the column value is SQL NULL
@@ -194,6 +220,16 @@ public class InstantType extends AbstractTemporalType<Instant> {
     /**
      * Sets an Instant parameter in a PreparedStatement.
      * The Instant is converted to a Timestamp for database storage.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Type<Instant> type = TypeFactory.getType(Instant.class);
+     * PreparedStatement stmt = connection.prepareStatement(
+     *     "INSERT INTO events (id, created_at) VALUES (?, ?)");
+     * Instant now = Instant.now();
+     * type.set(stmt, 2, now);
+     * // Sets parameter to current instant
+     * }</pre>
      *
      * @param stmt the PreparedStatement to set the parameter on
      * @param columnIndex the index of the parameter to set (1-based)

@@ -99,7 +99,7 @@ public final class Holder<T> implements Mutable {
      * String value = holder.value(); // returns "test"
      * }</pre>
      *
-     * @return the value held by this Holder, or {@code null} if no value is set
+     * @return the value held by this Holder, may be {@code null}
      */
     public T value() {
         return value;
@@ -107,9 +107,14 @@ public final class Holder<T> implements Mutable {
 
     /**
      * Returns the value held by this Holder.
-     * The value may be {@code null}.
      *
-     * @return the value held by this Holder, or {@code null} if no value is set
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Holder<String> holder = Holder.of("test");
+     * String value = holder.getValue(); // returns "test"
+     * }</pre>
+     *
+     * @return the value held by this Holder, may be {@code null}
      * @deprecated This method is deprecated in favor of the more concise {@link #value()} method.
      */
     @Deprecated
@@ -264,9 +269,16 @@ public final class Holder<T> implements Mutable {
      * when tested with both the current value and the new value. If the predicate returns
      * {@code false}, the value remains unchanged.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Holder<Integer> holder = Holder.of(5);
+     * boolean updated = holder.setIf(10, (current, newVal) -> current != null && newVal > current);
+     * // returns true, holder now contains 10
+     * }</pre>
+     *
      * @param <E> the type of exception that the predicate may throw
      * @param newValue the new value to set if the predicate returns {@code true}, may be {@code null}
-     * @param predicate the predicate that tests both the current value (first parameter) and the new value (second parameter)
+     * @param predicate the predicate that tests both the current value (first parameter) and the new value (second parameter), must not be {@code null}
      * @return {@code true} if the value was updated, {@code false} otherwise
      * @throws E if the predicate throws an exception
      * @deprecated use {@link #setIf(Object, Throwables.Predicate)} instead
@@ -388,8 +400,14 @@ public final class Holder<T> implements Mutable {
      * Performs the given action with the value held by this Holder.
      * The action is performed regardless of whether the value is {@code null} or not.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Holder<String> holder = Holder.of("test");
+     * holder.accept(value -> System.out.println(value)); // prints "test"
+     * }</pre>
+     *
      * @param <E> the type of exception that the action may throw
-     * @param action the action to be performed with the value
+     * @param action the action to be performed with the value, must not be {@code null}
      * @throws E if the action throws an exception
      * @deprecated use {@link #ifNotNull(Throwables.Consumer)} for conditional execution or direct value access for unconditional use
      */
@@ -402,8 +420,14 @@ public final class Holder<T> implements Mutable {
      * Performs the given action with the value if the value is not {@code null}.
      * If the value is {@code null}, no action is performed.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Holder<String> holder = Holder.of("test");
+     * holder.acceptIfNotNull(value -> System.out.println(value.toUpperCase())); // prints "TEST"
+     * }</pre>
+     *
      * @param <E> the type of exception that the action may throw
-     * @param action the action to be performed with the {@code non-null} value
+     * @param action the action to be performed with the {@code non-null} value, must not be {@code null}
      * @throws IllegalArgumentException if the action is {@code null}
      * @throws E if the action throws an exception
      * @deprecated replaced by {@link #ifNotNull(Throwables.Consumer)}
@@ -491,7 +515,6 @@ public final class Holder<T> implements Mutable {
      * @param mapper the mapping function to apply to the {@code non-null} value, must not be {@code null} and must not return {@code null}
      * @return an {@code Optional} containing the mapped value if the value was not {@code null}, otherwise an empty {@code Optional}
      * @throws IllegalArgumentException if the mapper is {@code null}
-     * @throws NullPointerException if the mapping function returns {@code null}
      * @throws E if the mapping function throws an exception
      */
     public <U, E extends Exception> Optional<U> mapToNonNullIfNotNull(final Throwables.Function<? super T, ? extends U, E> mapper)
@@ -596,8 +619,8 @@ public final class Holder<T> implements Mutable {
      * String value = holder.orElseGetIfNull(() -> computeExpensiveDefault()); // supplier only called if needed
      * }</pre>
      *
-     * @param other a {@code Supplier} whose result is returned if the held value is {@code null}, must not be {@code null}
-     * @return the value if not {@code null}, otherwise the result of {@code other.get()}
+     * @param other the supplier whose result is returned if the held value is {@code null}, must not be {@code null}
+     * @return the value if not {@code null}, otherwise the result of {@code other.get()}, may be {@code null}
      * @throws IllegalArgumentException if the supplier is {@code null}
      */
     public T orElseGetIfNull(final Supplier<? extends T> other) throws IllegalArgumentException {
@@ -783,7 +806,7 @@ public final class Holder<T> implements Mutable {
      * }</pre>
      *
      * @param <E> the type of exception to be thrown
-     * @param exceptionSupplier the supplier which will provide the exception to be thrown if the value is {@code null}, must not be {@code null}
+     * @param exceptionSupplier the supplier that will provide the exception to be thrown if the value is {@code null}, must not be {@code null}
      * @return the value held by this Holder
      * @throws IllegalArgumentException if the exception supplier is {@code null}
      * @throws E if the value is {@code null}

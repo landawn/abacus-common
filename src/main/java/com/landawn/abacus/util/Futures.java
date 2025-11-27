@@ -367,8 +367,7 @@ public final class Futures {
      * @param <R> the result type of the composed future
      * @param cf1 the first future
      * @param cf2 the second future
-     * @param zipFunctionForGet the function that combines the futures' results. It receives the Future objects
-     *                          and should call get() on them to retrieve values
+     * @param zipFunctionForGet the function that combines the futures' results
      * @return a ContinuableFuture that completes when both input futures complete, with a result
      *         computed by the provided zip function
      * @throws RuntimeException if the zip function throws an exception other than InterruptedException or ExecutionException
@@ -410,7 +409,7 @@ public final class Futures {
      * @param <R> the result type of the composed future
      * @param cf1 the first future
      * @param cf2 the second future
-     * @param zipFunctionForGet the function for regular get() operations
+     * @param zipFunctionForGet the function that combines the futures' results
      * @param zipFunctionTimeoutGet the function for get(timeout, unit) operations. Receives a Tuple4 with
      *                              (future1, future2, timeout, timeUnit)
      * @return a ContinuableFuture with custom logic for both regular and timeout operations
@@ -449,7 +448,7 @@ public final class Futures {
      * @param cf1 the first future
      * @param cf2 the second future
      * @param cf3 the third future
-     * @param zipFunctionForGet the function that combines the three futures' results
+     * @param zipFunctionForGet the function that combines the futures' results
      * @return a ContinuableFuture that completes when all three input futures complete
      */
     public static <T1, T2, T3, R> ContinuableFuture<R> compose(final Future<T1> cf1, final Future<T2> cf2, final Future<T3> cf3,
@@ -490,7 +489,7 @@ public final class Futures {
      * @param cf1 the first future
      * @param cf2 the second future
      * @param cf3 the third future
-     * @param zipFunctionForGet the function for regular get() operations
+     * @param zipFunctionForGet the function that combines the futures' results
      * @param zipFunctionTimeoutGet the function for get(timeout, unit) operations. Receives a Tuple5 with
      *                              (future1, future2, future3, timeout, timeUnit)
      * @return a ContinuableFuture with custom logic for both regular and timeout operations
@@ -535,7 +534,7 @@ public final class Futures {
      * @param <FC> the specific collection type containing the futures
      * @param <R> the result type of the composed future
      * @param cfs the collection of input futures, must not be {@code null} or empty
-     * @param zipFunctionForGet the function that processes the collection of futures
+     * @param zipFunctionForGet the function that combines the futures' results
      * @return a ContinuableFuture that completes when all input futures complete
      * @throws IllegalArgumentException if the collection is {@code null} or empty
      */
@@ -586,7 +585,7 @@ public final class Futures {
      * @param <FC> the specific collection type containing the futures
      * @param <R> the result type of the composed future
      * @param cfs the collection of input futures, must not be {@code null} or empty
-     * @param zipFunctionForGet the function for regular get() operations
+     * @param zipFunctionForGet the function that combines the futures' results
      * @param zipFunctionTimeoutGet the function for get(timeout, unit) operations. Receives a Tuple3 with
      *                              (futures collection, timeout, timeUnit)
      * @return a ContinuableFuture with custom logic for both regular and timeout operations
@@ -700,6 +699,11 @@ public final class Futures {
      * @param cf1 the first future
      * @param cf2 the second future
      * @return a ContinuableFuture containing a Tuple2 with both results
+     * @see #combine(Future, Future, Future)
+     * @see #combine(Future, Future, Future, Future)
+     * @see #combine(Future, Future, Future, Future, Future)
+     * @see #combine(Future, Future, Future, Future, Future, Future)
+     * @see #combine(Future, Future, Future, Future, Future, Future, Future)
      */
     public static <T1, T2> ContinuableFuture<Tuple2<T1, T2>> combine(final Future<? extends T1> cf1, final Future<? extends T2> cf2) {
         return allOf(Arrays.asList(cf1, cf2)).map(t -> Tuple.of((T1) t.get(0), (T2) t.get(1)));
@@ -731,6 +735,11 @@ public final class Futures {
      * @param cf2 the second future
      * @param cf3 the third future
      * @return a ContinuableFuture containing a Tuple3 with all three results
+     * @see #combine(Future, Future)
+     * @see #combine(Future, Future, Future, Future)
+     * @see #combine(Future, Future, Future, Future, Future)
+     * @see #combine(Future, Future, Future, Future, Future, Future)
+     * @see #combine(Future, Future, Future, Future, Future, Future, Future)
      */
     public static <T1, T2, T3> ContinuableFuture<Tuple3<T1, T2, T3>> combine(final Future<? extends T1> cf1, final Future<? extends T2> cf2,
             final Future<? extends T3> cf3) {
@@ -766,6 +775,11 @@ public final class Futures {
      * @param cf3 the third future
      * @param cf4 the fourth future
      * @return a ContinuableFuture containing a Tuple4 with all four results
+     * @see #combine(Future, Future)
+     * @see #combine(Future, Future, Future)
+     * @see #combine(Future, Future, Future, Future, Future)
+     * @see #combine(Future, Future, Future, Future, Future, Future)
+     * @see #combine(Future, Future, Future, Future, Future, Future, Future)
      */
     public static <T1, T2, T3, T4> ContinuableFuture<Tuple4<T1, T2, T3, T4>> combine(final Future<? extends T1> cf1, final Future<? extends T2> cf2,
             final Future<? extends T3> cf3, final Future<? extends T4> cf4) {
@@ -805,6 +819,11 @@ public final class Futures {
      * @param cf4 the fourth future
      * @param cf5 the fifth future
      * @return a ContinuableFuture containing a Tuple5 with all five results
+     * @see #combine(Future, Future)
+     * @see #combine(Future, Future, Future)
+     * @see #combine(Future, Future, Future, Future)
+     * @see #combine(Future, Future, Future, Future, Future, Future)
+     * @see #combine(Future, Future, Future, Future, Future, Future, Future)
      */
     public static <T1, T2, T3, T4, T5> ContinuableFuture<Tuple5<T1, T2, T3, T4, T5>> combine(final Future<? extends T1> cf1, final Future<? extends T2> cf2,
             final Future<? extends T3> cf3, final Future<? extends T4> cf4, final Future<? extends T5> cf5) {
@@ -846,6 +865,11 @@ public final class Futures {
      * @param cf5 the fifth future
      * @param cf6 the sixth future
      * @return a ContinuableFuture containing a Tuple6 with all six results
+     * @see #combine(Future, Future)
+     * @see #combine(Future, Future, Future)
+     * @see #combine(Future, Future, Future, Future)
+     * @see #combine(Future, Future, Future, Future, Future)
+     * @see #combine(Future, Future, Future, Future, Future, Future, Future)
      */
     public static <T1, T2, T3, T4, T5, T6> ContinuableFuture<Tuple6<T1, T2, T3, T4, T5, T6>> combine(final Future<? extends T1> cf1,
             final Future<? extends T2> cf2, final Future<? extends T3> cf3, final Future<? extends T4> cf4, final Future<? extends T5> cf5,
@@ -896,6 +920,11 @@ public final class Futures {
      * @param cf6 the sixth future
      * @param cf7 the seventh future
      * @return a ContinuableFuture containing a Tuple7 with all seven results
+     * @see #combine(Future, Future)
+     * @see #combine(Future, Future, Future)
+     * @see #combine(Future, Future, Future, Future)
+     * @see #combine(Future, Future, Future, Future, Future)
+     * @see #combine(Future, Future, Future, Future, Future, Future)
      */
     public static <T1, T2, T3, T4, T5, T6, T7> ContinuableFuture<Tuple7<T1, T2, T3, T4, T5, T6, T7>> combine(final Future<? extends T1> cf1,
             final Future<? extends T2> cf2, final Future<? extends T3> cf3, final Future<? extends T4> cf4, final Future<? extends T5> cf5,
@@ -1347,7 +1376,7 @@ public final class Futures {
      *
      * @param <T> the result type of the futures
      * @param cfs the array of futures to iterate over
-     * @return an iterator that yields results in completion order
+     * @return an iterator that yields results in completion order (first-finished, first-out)
      */
     @SafeVarargs
     public static <T> ObjIterator<T> iterate(final Future<? extends T>... cfs) {
@@ -1381,7 +1410,7 @@ public final class Futures {
      *
      * @param <T> the result type of the futures
      * @param cfs the collection of futures to iterate over
-     * @return an iterator that yields results in completion order
+     * @return an iterator that yields results in completion order (first-finished, first-out)
      */
     public static <T> ObjIterator<T> iterate(final Collection<? extends Future<? extends T>> cfs) {
         return iterate02(cfs);
@@ -1422,7 +1451,7 @@ public final class Futures {
      * @param cfs the collection of futures to iterate over
      * @param totalTimeoutForAll the maximum time to wait for all results
      * @param unit the time unit of the timeout
-     * @return an iterator that yields results in completion order with timeout enforcement
+     * @return an iterator that yields results in completion order (first-finished, first-out) with timeout enforcement
      */
     public static <T> ObjIterator<T> iterate(final Collection<? extends Future<? extends T>> cfs, final long totalTimeoutForAll, final TimeUnit unit) {
         return iterate02(cfs, totalTimeoutForAll, unit);
@@ -1481,7 +1510,7 @@ public final class Futures {
      * @param <R> the result type after transformation
      * @param cfs the collection of futures to iterate over
      * @param resultHandler the function to transform Result objects into desired output type
-     * @return an iterator that yields transformed results in completion order
+     * @return an iterator that yields transformed results in completion order (first-finished, first-out)
      */
     public static <T, R> ObjIterator<R> iterate(final Collection<? extends Future<? extends T>> cfs,
             final Function<? super Result<T, Exception>, ? extends R> resultHandler) {
@@ -1528,7 +1557,7 @@ public final class Futures {
      * @param totalTimeoutForAll the maximum time to wait for all results
      * @param unit the time unit of the timeout
      * @param resultHandler the function to transform Result objects, including timeout handling
-     * @return an iterator that yields transformed results with timeout enforcement
+     * @return an iterator that yields transformed results in completion order (first-finished, first-out) with timeout enforcement
      */
     public static <T, R> ObjIterator<R> iterate(final Collection<? extends Future<? extends T>> cfs, final long totalTimeoutForAll, final TimeUnit unit,
             final Function<? super Result<T, Exception>, ? extends R> resultHandler) {

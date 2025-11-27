@@ -554,7 +554,7 @@ public final class Beans {
      * Refreshes the cached bean property information for the specified class.
      *
      * <p>This method removes the cached BeanInfo for the specified class, forcing
-     * it to be recreated on the next call to {@link #getBeanInfo(Class)}.</p>
+     * it to be recreated on the next call to {@link #getBeanInfo(java.lang.reflect.Type)}.</p>
      *
      * <p>This method is marked as deprecated and is for internal use only.</p>
      *
@@ -565,7 +565,7 @@ public final class Beans {
      * }</pre>
      *
      * @param cls the class whose bean property information should be refreshed
-     * @see ParserUtil#refreshBeanPropInfo(Class)
+     * @see ParserUtil#refreshBeanPropInfo(java.lang.reflect.Type)
      * @deprecated internal use only
      */
     @Deprecated
@@ -938,7 +938,7 @@ public final class Beans {
                     propName = field.getName();
                 }
 
-                if (Strings.isEmpty(propName) && newName.charAt(0) != '_') {
+                if (Strings.isEmpty(propName) && Strings.isNotEmpty(newName) && newName.charAt(0) != '_') {
                     field = getDeclaredField(getSetMethod.getDeclaringClass(), "_" + Strings.uncapitalize(newName));
 
                     if (field != null && field.getType().isAssignableFrom(targetType)) {
@@ -954,7 +954,7 @@ public final class Beans {
                     }
                 }
 
-                if (Strings.isEmpty(propName) && newName.charAt(0) != '_') {
+                if (Strings.isEmpty(propName) && Strings.isNotEmpty(newName) && newName.charAt(0) != '_') {
                     field = getDeclaredField(getSetMethod.getDeclaringClass(), "_" + Beans.formalizePropName(newName));
 
                     if (field != null && field.getType().isAssignableFrom(targetType)) {
@@ -1259,7 +1259,8 @@ public final class Beans {
         final String propName = methodName
                 .substring(methodName.startsWith(IS) ? 2 : ((methodName.startsWith(HAS) || methodName.startsWith(GET) || methodName.startsWith(SET)) ? 3 : 0));
 
-        return propName.equalsIgnoreCase(fieldName) || (fieldName.charAt(0) == '_' && propName.equalsIgnoreCase(fieldName.substring(1)));
+        return propName.equalsIgnoreCase(fieldName)
+                || (fieldName.length() > 0 && fieldName.charAt(0) == '_' && propName.equalsIgnoreCase(fieldName.substring(1)));
     }
 
     private static boolean isGetMethod(final Method method) {

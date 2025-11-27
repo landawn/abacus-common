@@ -54,6 +54,18 @@ public interface LongBinaryOperator extends Throwables.LongBinaryOperator<Runtim
      * <p>This operator is particularly useful in stream reduction operations and
      * parallel computations where associative operations are required.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * LongBinaryOperator adder = (a, b) -> a + b;
+     * long sum = adder.applyAsLong(5L, 3L); // Returns 8L
+     *
+     * LongBinaryOperator multiplier = (a, b) -> a * b;
+     * long product = multiplier.applyAsLong(4L, 7L); // Returns 28L
+     *
+     * LongBinaryOperator max = Math::max;
+     * long maximum = max.applyAsLong(10L, 20L); // Returns 20L
+     * }</pre>
+     *
      * @param left the first operand, typically the accumulator in reduction operations
      * @param right the second operand, typically the next element in reduction operations
      * @return the operator result, a long value computed from the two operands

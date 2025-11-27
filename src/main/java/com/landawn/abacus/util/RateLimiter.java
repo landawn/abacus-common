@@ -96,6 +96,11 @@ public abstract class RateLimiter {
      * {@code permitsPerSecond} permits will be allowed, with subsequent requests being smoothly
      * limited at the stable rate of {@code permitsPerSecond}.
      *
+     * <p><b>Thread Safety:</b> This method is thread-safe. The returned {@code RateLimiter} instance
+     * is also thread-safe and can be safely shared across multiple threads. All permit acquisition
+     * methods ({@link #acquire}, {@link #tryAcquire}, etc.) are synchronized internally to ensure
+     * consistent behavior when accessed concurrently.
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * RateLimiter limiter = RateLimiter.create(5.0); // 5 permits per second
@@ -155,6 +160,11 @@ public abstract class RateLimiter {
      *
      * <p>The returned {@code RateLimiter} starts in a "cold" state (i.e., the warmup period will
      * follow), and if it is left unused for long enough, it will return to that state.
+     *
+     * <p><b>Thread Safety:</b> This method is thread-safe. The returned {@code RateLimiter} instance
+     * is also thread-safe and can be safely shared across multiple threads. All permit acquisition
+     * methods ({@link #acquire}, {@link #tryAcquire}, etc.) are synchronized internally to ensure
+     * consistent behavior when accessed concurrently.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -258,10 +268,23 @@ public abstract class RateLimiter {
     }
 
     /**
-     * Internal method to set the rate. Subclasses implement this to update internal state.
+     * Internal method to set the rate. Subclasses must implement this to update internal state
+     * when the rate is changed via {@link #setRate(double)}.
      *
-     * @param permitsPerSecond the rate of permits per second
-     * @param nowMicros the current time in microseconds
+     * <p><b>Implementation Requirements:</b>
+     * <ul>
+     * <li>This method is called while holding the internal mutex lock, so implementations do not
+     *     need to provide additional synchronization.</li>
+     * <li>Implementations must update their internal state to reflect the new {@code permitsPerSecond}
+     *     rate, including recalculating any derived values such as stable interval or stored permits.</li>
+     * <li>Implementations should use {@code nowMicros} to properly adjust any time-based state to
+     *     ensure correct permit calculations after the rate change.</li>
+     * <li>The implementation should not block or perform I/O operations as this would hold the lock
+     *     for an extended period.</li>
+     * </ul>
+     *
+     * @param permitsPerSecond the new rate of permits per second, guaranteed to be positive and not NaN
+     * @param nowMicros the current time in microseconds, used for state synchronization
      */
     abstract void doSetRate(double permitsPerSecond, long nowMicros);
 
@@ -289,9 +312,20 @@ public abstract class RateLimiter {
     }
 
     /**
-     * Internal method to get the rate. Subclasses implement this to return the current rate.
+     * Internal method to get the rate. Subclasses must implement this to return the current
+     * rate configuration.
      *
-     * @return the current stable rate in permits per second
+     * <p><b>Implementation Requirements:</b>
+     * <ul>
+     * <li>This method is called while holding the internal mutex lock, ensuring thread-safe
+     *     access to the rate value.</li>
+     * <li>Implementations must return the current stable rate in permits per second, which
+     *     should be the same value that was most recently set via {@link #doSetRate(double, long)}.</li>
+     * <li>The returned value must be positive and not NaN.</li>
+     * <li>This method should be lightweight and non-blocking, as it is called while holding a lock.</li>
+     * </ul>
+     *
+     * @return the current stable rate in permits per second, guaranteed to be positive
      */
     abstract double doGetRate();
 
@@ -315,6 +349,9 @@ public abstract class RateLimiter {
      * @return time spent sleeping to enforce rate, in seconds; 0.0 if not rate-limited
      * @see #acquire(int)
      * @see #tryAcquire()
+     * @see #tryAcquire(int)
+     * @see #tryAcquire(long, TimeUnit)
+     * @see #tryAcquire(int, long, TimeUnit)
      */
     public double acquire() {
         return acquire(1);
@@ -340,7 +377,10 @@ public abstract class RateLimiter {
      * @return time spent sleeping to enforce rate, in seconds; 0.0 if not rate-limited
      * @throws IllegalArgumentException if the requested number of permits is negative or zero
      * @see #acquire()
+     * @see #tryAcquire()
      * @see #tryAcquire(int)
+     * @see #tryAcquire(long, TimeUnit)
+     * @see #tryAcquire(int, long, TimeUnit)
      */
     public double acquire(final int permits) {
         final long microsToWait = reserve(permits);
@@ -383,6 +423,11 @@ public abstract class RateLimiter {
      * @param unit the time unit of the timeout argument, must not be null
      * @return {@code true} if the permit was acquired, {@code false} otherwise
      * @throws IllegalArgumentException if the requested number of permits is negative or zero
+     * @see #tryAcquire()
+     * @see #tryAcquire(int)
+     * @see #tryAcquire(int, long, TimeUnit)
+     * @see #acquire()
+     * @see #acquire(int)
      */
     public boolean tryAcquire(final long timeout, final TimeUnit unit) {
         return tryAcquire(1, timeout, unit);
@@ -407,6 +452,11 @@ public abstract class RateLimiter {
      * @param permits the number of permits to acquire, must be positive
      * @return {@code true} if the permits were acquired, {@code false} otherwise
      * @throws IllegalArgumentException if the requested number of permits is negative or zero
+     * @see #tryAcquire()
+     * @see #tryAcquire(long, TimeUnit)
+     * @see #tryAcquire(int, long, TimeUnit)
+     * @see #acquire()
+     * @see #acquire(int)
      */
     public boolean tryAcquire(final int permits) {
         return tryAcquire(permits, 0, MICROSECONDS);
@@ -434,7 +484,10 @@ public abstract class RateLimiter {
      *
      * @return {@code true} if the permit was acquired, {@code false} otherwise
      * @see #tryAcquire(int)
+     * @see #tryAcquire(long, TimeUnit)
+     * @see #tryAcquire(int, long, TimeUnit)
      * @see #acquire()
+     * @see #acquire(int)
      */
     public boolean tryAcquire() {
         return tryAcquire(1, 0, MICROSECONDS);
@@ -466,6 +519,11 @@ public abstract class RateLimiter {
      * @param unit the time unit of the timeout argument, must not be null
      * @return {@code true} if the permits were acquired, {@code false} otherwise
      * @throws IllegalArgumentException if the requested number of permits is negative or zero
+     * @see #tryAcquire()
+     * @see #tryAcquire(int)
+     * @see #tryAcquire(long, TimeUnit)
+     * @see #acquire()
+     * @see #acquire(int)
      */
     public boolean tryAcquire(final int permits, final long timeout, final TimeUnit unit) {
         final long timeoutMicros = max(unit.toMicros(timeout), 0);
@@ -509,8 +567,24 @@ public abstract class RateLimiter {
     /**
      * Returns the earliest time that permits are available (with one caveat).
      *
-     * @param nowMicros the current time in microseconds
-     * @return the earliest time when permits are available, which may be an arbitrary past or present time
+     * <p><b>Implementation Requirements:</b>
+     * <ul>
+     * <li>This method is called while holding the internal mutex lock, so implementations do not
+     *     need to provide additional synchronization.</li>
+     * <li>Implementations must return the timestamp (in microseconds) representing the earliest
+     *     moment at which permits will be available for acquisition.</li>
+     * <li>If permits are currently available, this may return a time in the past or equal to
+     *     {@code nowMicros}.</li>
+     * <li>If no permits are available, this should return a future timestamp indicating when
+     *     the next permit will become available.</li>
+     * <li>This method should not modify any internal state; it is purely a query operation.</li>
+     * <li>The implementation must account for stored permits, stable interval, and any other
+     *     rate limiter-specific state (e.g., warmup period).</li>
+     * </ul>
+     *
+     * @param nowMicros the current time in microseconds, used as a reference point
+     * @return the earliest time (in microseconds) when permits are available, which may be an
+     *         arbitrary past, present, or future time
      */
     abstract long queryEarliestAvailable(long nowMicros);
 
@@ -518,9 +592,27 @@ public abstract class RateLimiter {
      * Reserves the requested number of permits and returns the time that those permits can be used
      * (with one caveat).
      *
-     * @param permits the number of permits to acquire
-     * @param nowMicros the current time in microseconds
-     * @return the time when the reserved permits can be used, which may be an arbitrary past or present time
+     * <p><b>Implementation Requirements:</b>
+     * <ul>
+     * <li>This method is called while holding the internal mutex lock, so implementations do not
+     *     need to provide additional synchronization.</li>
+     * <li>Implementations must reserve the specified number of {@code permits} and update internal
+     *     state accordingly (e.g., decrement stored permits, advance next free ticket time).</li>
+     * <li>The returned timestamp represents when these permits can actually be used. For an idle
+     *     rate limiter, this is typically {@code nowMicros} or earlier, meaning the permits can
+     *     be used immediately.</li>
+     * <li>For a saturated rate limiter, this returns a future timestamp. The current request does
+     *     not wait; instead, <i>future</i> requests will be delayed to account for these permits.</li>
+     * <li>Implementations must update state such that subsequent calls to {@link #queryEarliestAvailable(long)}
+     *     and {@link #reserveEarliestAvailable(int, long)} reflect the consumption of these permits.</li>
+     * <li>The number of permits requested affects throttling of <i>subsequent</i> requests, not the
+     *     current one. This implements the rate limiter's "pay for the past" behavior.</li>
+     * </ul>
+     *
+     * @param permits the number of permits to reserve and acquire, guaranteed to be positive
+     * @param nowMicros the current time in microseconds, used for state updates
+     * @return the time (in microseconds) when the reserved permits can be used, which may be an
+     *         arbitrary past, present, or future time
      */
     abstract long reserveEarliestAvailable(int permits, long nowMicros);
 
@@ -537,7 +629,32 @@ public abstract class RateLimiter {
         return String.format(Locale.ROOT, "RateLimiter[stableRate=%3.1fqps]", getRate());
     }
 
+    /**
+     * Abstract base class for a stopwatch that provides both time measurement and sleeping capabilities.
+     * This class is used internally by {@code RateLimiter} to handle timing operations in a testable way.
+     *
+     * <p>The primary purpose of this abstraction is to separate time measurement and thread sleeping
+     * from the core rate limiting logic, making it possible to test {@code RateLimiter} with simulated
+     * or accelerated time without actual thread sleep delays.
+     *
+     * <p><b>Thread Safety:</b> Implementations of this class do not need to be thread-safe themselves,
+     * as the {@code RateLimiter} ensures synchronized access to stopwatch methods through its internal
+     * mutex locking mechanism.
+     *
+     * <p>Concrete implementations must provide:
+     * <ul>
+     * <li>{@link #readMicros()} - Returns the elapsed time in microseconds since the stopwatch started</li>
+     * <li>{@link #sleepMicrosUninterruptibly(long)} - Sleeps for a specified duration without being interrupted</li>
+     * </ul>
+     *
+     * @see #createFromSystemTimer()
+     * @see RateLimiter
+     */
     abstract static class SleepingStopwatch {
+        /**
+         * Protected constructor to prevent external instantiation.
+         * Only subclasses within this package can extend this class.
+         */
         protected SleepingStopwatch() {
         }
 

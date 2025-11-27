@@ -73,6 +73,11 @@ public abstract class AbstractTemporalType<T extends Temporal> extends AbstractT
      */
     protected static final DateTimeFormatter iso8601TimestampDTF = DateTimeFormatter.ISO_OFFSET_DATE_TIME;
 
+    /**
+     * Constructs an AbstractTemporalType with the specified type name.
+     *
+     * @param typeName the name of the temporal type (e.g., "LocalDate", "LocalDateTime", "Instant")
+     */
     protected AbstractTemporalType(final String typeName) {
         super(typeName);
     }

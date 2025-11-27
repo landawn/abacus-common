@@ -33,6 +33,13 @@ public class OptionalIntType extends AbstractOptionalType<OptionalInt> {
     /**
      * Returns the Java class type that this type handler manages.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Type<OptionalInt> type = TypeFactory.getType(OptionalInt.class);
+     * Class<OptionalInt> clazz = type.clazz();
+     * // Returns: OptionalInt.class
+     * }</pre>
+     *
      * @return the {@link OptionalInt} class object
      */
     @Override
@@ -75,6 +82,23 @@ public class OptionalIntType extends AbstractOptionalType<OptionalInt> {
     /**
      * Converts an {@link OptionalInt} object to its string representation.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Type<OptionalInt> type = TypeFactory.getType(OptionalInt.class);
+     *
+     * OptionalInt opt = OptionalInt.of(42);
+     * String result = type.stringOf(opt);
+     * // Returns: "42"
+     *
+     * opt = OptionalInt.of(0);
+     * result = type.stringOf(opt);
+     * // Returns: "0"
+     *
+     * opt = OptionalInt.empty();
+     * result = type.stringOf(opt);
+     * // Returns: null
+     * }</pre>
+     *
      * @param x the OptionalInt object to convert
      * @return the string representation of the integer value, or {@code null} if empty or null
      */
@@ -85,6 +109,23 @@ public class OptionalIntType extends AbstractOptionalType<OptionalInt> {
 
     /**
      * Converts a string representation to an {@link OptionalInt} object.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Type<OptionalInt> type = TypeFactory.getType(OptionalInt.class);
+     *
+     * OptionalInt result = type.valueOf("42");
+     * // Returns: OptionalInt.of(42)
+     *
+     * result = type.valueOf("0");
+     * // Returns: OptionalInt.of(0)
+     *
+     * result = type.valueOf(null);
+     * // Returns: OptionalInt.empty()
+     *
+     * result = type.valueOf("");
+     * // Returns: OptionalInt.empty()
+     * }</pre>
      *
      * @param str the string to convert
      * @return an OptionalInt containing the parsed integer value, or empty if the input is empty or null
@@ -98,6 +139,20 @@ public class OptionalIntType extends AbstractOptionalType<OptionalInt> {
     /**
      * Retrieves an integer value from a ResultSet at the specified column index and wraps it in an {@link OptionalInt}.
      * Handles type conversion if the database column is not an integer type.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Type<OptionalInt> type = TypeFactory.getType(OptionalInt.class);
+     * ResultSet rs = ...; // obtained from database query
+     *
+     * // Column contains integer value 42
+     * OptionalInt opt = type.get(rs, 1);
+     * // Returns: OptionalInt.of(42)
+     *
+     * // Column contains SQL NULL
+     * opt = type.get(rs, 2);
+     * // Returns: OptionalInt.empty()
+     * }</pre>
      *
      * @param rs the ResultSet to read from
      * @param columnIndex the column index (1-based) to retrieve the value from
@@ -115,6 +170,20 @@ public class OptionalIntType extends AbstractOptionalType<OptionalInt> {
      * Retrieves an integer value from a ResultSet using the specified column label and wraps it in an {@link OptionalInt}.
      * Handles type conversion if the database column is not an integer type.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Type<OptionalInt> type = TypeFactory.getType(OptionalInt.class);
+     * ResultSet rs = ...; // obtained from database query
+     *
+     * // Column "age" contains integer value 25
+     * OptionalInt opt = type.get(rs, "age");
+     * // Returns: OptionalInt.of(25)
+     *
+     * // Column "rank" contains SQL NULL
+     * opt = type.get(rs, "rank");
+     * // Returns: OptionalInt.empty()
+     * }</pre>
+     *
      * @param rs the ResultSet to read from
      * @param columnLabel the label for the column specified with the SQL AS clause
      * @return an OptionalInt containing the integer value, or empty if the column value is SQL NULL
@@ -130,6 +199,21 @@ public class OptionalIntType extends AbstractOptionalType<OptionalInt> {
     /**
      * Sets a parameter in a PreparedStatement to the value contained in an {@link OptionalInt}.
      * If the OptionalInt is {@code null} or empty, sets the parameter to SQL NULL.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Type<OptionalInt> type = TypeFactory.getType(OptionalInt.class);
+     * PreparedStatement stmt = connection.prepareStatement(
+     *     "INSERT INTO users (id, age) VALUES (?, ?)");
+     *
+     * OptionalInt opt = OptionalInt.of(25);
+     * type.set(stmt, 2, opt);
+     * // Sets parameter to 25
+     *
+     * opt = OptionalInt.empty();
+     * type.set(stmt, 2, opt);
+     * // Sets parameter to SQL NULL
+     * }</pre>
      *
      * @param stmt the PreparedStatement to set the parameter on
      * @param columnIndex the parameter index (1-based) to set
@@ -148,6 +232,20 @@ public class OptionalIntType extends AbstractOptionalType<OptionalInt> {
     /**
      * Sets a named parameter in a CallableStatement to the value contained in an {@link OptionalInt}.
      * If the OptionalInt is {@code null} or empty, sets the parameter to SQL NULL.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Type<OptionalInt> type = TypeFactory.getType(OptionalInt.class);
+     * CallableStatement stmt = connection.prepareCall("{call update_age(?, ?)}");
+     *
+     * OptionalInt opt = OptionalInt.of(30);
+     * type.set(stmt, "p_age", opt);
+     * // Sets parameter to 30
+     *
+     * opt = OptionalInt.empty();
+     * type.set(stmt, "p_rank", opt);
+     * // Sets parameter to SQL NULL
+     * }</pre>
      *
      * @param stmt the CallableStatement to set the parameter on
      * @param parameterName the name of the parameter to set

@@ -179,7 +179,7 @@ import com.landawn.abacus.util.function.ToFloatFunction;
  * String trimmed = N.trim(text);
  * 
  * // Type conversions
- * Optional<Integer> parsed = N.tryParseInt(value);
+ * int parsed = Numbers.toInt(value);  // Throws NumberFormatException if invalid
  * List<String> converted = N.map(list, converter);
  * }</pre>
  *
@@ -1337,6 +1337,19 @@ sealed class CommonUtil permits N {
     /**
      * Checks if the specified Iterable argument is not {@code null} or empty, and throws {@code IllegalArgumentException} if it is.
      *
+     * <p>An Iterable is considered empty if it has no elements when its iterator is queried.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * // Valid - no exception thrown
+     * Iterable<String> iterable = Arrays.asList("a", "b");
+     * checkArgNotEmpty(iterable, "iterable");  // Returns iterable
+     *
+     * // Invalid - throws IllegalArgumentException
+     * checkArgNotEmpty(Collections.emptyList(), "iterable");  // Empty iterable
+     * checkArgNotEmpty(null, "iterable");                      // Null
+     * }</pre>
+     *
      * @param <T> the type of the Iterable
      * @param arg the Iterable argument to check
      * @param argNameOrErrorMsg the name of the argument or an error message to be used in the exception
@@ -1356,6 +1369,19 @@ sealed class CommonUtil permits N {
 
     /**
      * Checks if the specified Iterator argument is not {@code null} or empty, and throws {@code IllegalArgumentException} if it is.
+     *
+     * <p>An Iterator is considered empty if it has no more elements ({@code hasNext()} returns {@code false}).
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * // Valid - no exception thrown
+     * Iterator<String> iterator = Arrays.asList("a", "b").iterator();
+     * checkArgNotEmpty(iterator, "iterator");  // Returns iterator
+     *
+     * // Invalid - throws IllegalArgumentException
+     * checkArgNotEmpty(Collections.emptyIterator(), "iterator");  // Empty iterator
+     * checkArgNotEmpty(null, "iterator");                          // Null
+     * }</pre>
      *
      * @param <T> the type of the Iterator
      * @param arg the Iterator argument to check
@@ -1396,6 +1422,19 @@ sealed class CommonUtil permits N {
     /**
      * Checks if the specified PrimitiveList argument is not {@code null} or empty, and throws {@code IllegalArgumentException} if it is.
      *
+     * <p>A PrimitiveList is considered empty if its size is 0.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * // Valid - no exception thrown
+     * IntList intList = IntList.of(1, 2, 3);
+     * checkArgNotEmpty(intList, "intList");  // Returns intList
+     *
+     * // Invalid - throws IllegalArgumentException
+     * checkArgNotEmpty(IntList.empty(), "intList");  // Empty list
+     * checkArgNotEmpty(null, "intList");              // Null
+     * }</pre>
+     *
      * @param <T> the type of the PrimitiveList
      * @param arg the PrimitiveList argument to check
      * @param argNameOrErrorMsg the name of the argument or an error message to be used in the exception
@@ -1413,6 +1452,19 @@ sealed class CommonUtil permits N {
 
     /**
      * Checks if the specified Multiset argument is not {@code null} or empty, and throws {@code IllegalArgumentException} if it is.
+     *
+     * <p>A Multiset is considered empty if it contains no elements (all element counts are 0).
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * // Valid - no exception thrown
+     * Multiset<String> multiset = Multiset.of("a", "b", "a");
+     * checkArgNotEmpty(multiset, "multiset");  // Returns multiset
+     *
+     * // Invalid - throws IllegalArgumentException
+     * checkArgNotEmpty(Multiset.of(), "multiset");  // Empty multiset
+     * checkArgNotEmpty(null, "multiset");            // Null
+     * }</pre>
      *
      * @param <T> the type of elements in the Multiset
      * @param arg the Multiset argument to check
@@ -1432,6 +1484,19 @@ sealed class CommonUtil permits N {
     /**
      * Checks if the specified Multimap argument is not {@code null} or empty, and throws {@code IllegalArgumentException} if it is.
      *
+     * <p>A Multimap is considered empty if it contains no key-value pairs.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * // Valid - no exception thrown
+     * ListMultimap<String, Integer> multimap = ListMultimap.of("a", 1, "b", 2);
+     * checkArgNotEmpty(multimap, "multimap");  // Returns multimap
+     *
+     * // Invalid - throws IllegalArgumentException
+     * checkArgNotEmpty(ListMultimap.of(), "multimap");  // Empty multimap
+     * checkArgNotEmpty(null, "multimap");                // Null
+     * }</pre>
+     *
      * @param <T> the type of the Multimap
      * @param arg the Multimap argument to check
      * @param argNameOrErrorMsg the name of the argument or an error message to be used in the exception
@@ -1449,6 +1514,20 @@ sealed class CommonUtil permits N {
 
     /**
      * Checks if the specified Dataset argument is not {@code null} or empty, and throws {@code IllegalArgumentException} if it is.
+     *
+     * <p>A Dataset is considered empty if it has no rows.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * // Valid - no exception thrown
+     * Dataset dataset = Dataset.builder().column("name", String.class).build();
+     * dataset.addRow("Alice");
+     * checkArgNotEmpty(dataset, "dataset");  // Returns dataset
+     *
+     * // Invalid - throws IllegalArgumentException
+     * checkArgNotEmpty(Dataset.builder().build(), "dataset");  // Empty dataset
+     * checkArgNotEmpty(null, "dataset");                        // Null
+     * }</pre>
      *
      * @param <T> the type of the Dataset
      * @param arg the Dataset argument to check
@@ -2308,6 +2387,11 @@ sealed class CommonUtil permits N {
     /**
      * Checks if the specified {@code expression} involving one or more parameters of the calling method is {@code true}, and throws {@code IllegalArgumentException} if it is not.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * checkArgument(c != d, "Char %s must not equal double %s", c, d);
+     * }</pre>
+     *
      * @param b a boolean expression
      * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
      * @param p1 the parameter to be used in the exception message
@@ -3082,6 +3166,11 @@ sealed class CommonUtil permits N {
 
     /**
      * Checks if the specified {@code expression} involving the state check of the calling instance is {@code true}, and throws {@code IllegalStateException} if it is not.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * checkState(c1 != c2, "Characters must be different: %s and %s", c1, c2);
+     * }</pre>
      *
      * @param b a boolean expression
      * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
@@ -6348,6 +6437,13 @@ sealed class CommonUtil permits N {
     /**
      * Returns the length/size of the specified {@code Array/Collection/Map}, or {@code 0} if it's empty or {@code null}.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * len((boolean[]) null); // returns 0
+     * len(new boolean[0]); // returns 0
+     * len(new boolean[] {true, false}); // returns 2
+     * }</pre>
+     *
      * @param a the array to check
      * @return the length of the array, or 0 if the array is null
      */
@@ -6357,6 +6453,13 @@ sealed class CommonUtil permits N {
 
     /**
      * Returns the length/size of the specified {@code Array/Collection/Map}, or {@code 0} if it's empty or {@code null}.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * len((char[]) null); // returns 0
+     * len(new char[0]); // returns 0
+     * len(new char[] {'a', 'b'}); // returns 2
+     * }</pre>
      *
      * @param a the array to check
      * @return the length of the array, or 0 if the array is null
@@ -6368,6 +6471,13 @@ sealed class CommonUtil permits N {
     /**
      * Returns the length/size of the specified {@code Array/Collection/Map}, or {@code 0} if it's empty or {@code null}.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * len((byte[]) null); // returns 0
+     * len(new byte[0]); // returns 0
+     * len(new byte[] {1, 2, 3}); // returns 3
+     * }</pre>
+     *
      * @param a the array to check
      * @return the length of the array, or 0 if the array is null
      */
@@ -6377,6 +6487,13 @@ sealed class CommonUtil permits N {
 
     /**
      * Returns the length/size of the specified {@code Array/Collection/Map}, or {@code 0} if it's empty or {@code null}.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * len((short[]) null); // returns 0
+     * len(new short[0]); // returns 0
+     * len(new short[] {1, 2, 3}); // returns 3
+     * }</pre>
      *
      * @param a the array to check
      * @return the length of the array, or 0 if the array is null
@@ -6388,6 +6505,13 @@ sealed class CommonUtil permits N {
     /**
      * Returns the length/size of the specified {@code Array/Collection/Map}, or {@code 0} if it's empty or {@code null}.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * len((int[]) null); // returns 0
+     * len(new int[0]); // returns 0
+     * len(new int[] {1, 2, 3}); // returns 3
+     * }</pre>
+     *
      * @param a the array to check
      * @return the length of the array, or 0 if the array is null
      */
@@ -6397,6 +6521,13 @@ sealed class CommonUtil permits N {
 
     /**
      * Returns the length/size of the specified {@code Array/Collection/Map}, or {@code 0} if it's empty or {@code null}.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * len((long[]) null); // returns 0
+     * len(new long[0]); // returns 0
+     * len(new long[] {1L, 2L, 3L}); // returns 3
+     * }</pre>
      *
      * @param a the array to check
      * @return the length of the array, or 0 if the array is null
@@ -6408,6 +6539,13 @@ sealed class CommonUtil permits N {
     /**
      * Returns the length/size of the specified {@code Array/Collection/Map}, or {@code 0} if it's empty or {@code null}.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * len((float[]) null); // returns 0
+     * len(new float[0]); // returns 0
+     * len(new float[] {1.0f, 2.0f}); // returns 2
+     * }</pre>
+     *
      * @param a the array to check
      * @return the length of the array, or 0 if the array is null
      */
@@ -6417,6 +6555,13 @@ sealed class CommonUtil permits N {
 
     /**
      * Returns the length/size of the specified {@code Array/Collection/Map}, or {@code 0} if it's empty or {@code null}.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * len((double[]) null); // returns 0
+     * len(new double[0]); // returns 0
+     * len(new double[] {1.0, 2.0}); // returns 2
+     * }</pre>
      *
      * @param a the array to check
      * @return the length of the array, or 0 if the array is null
@@ -9886,6 +10031,13 @@ sealed class CommonUtil permits N {
     /**
      * Negates all elements in the specified boolean array.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * boolean[] arr = {true, false, true};
+     * N.negate(arr);
+     * // arr is now {false, true, false}
+     * }</pre>
+     *
      * @param a the boolean array to negate
      */
     @Beta
@@ -9899,6 +10051,13 @@ sealed class CommonUtil permits N {
 
     /**
      * Negates all elements in the specified range of the boolean array.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * boolean[] arr = {true, false, true, false, true};
+     * N.negate(arr, 1, 4);
+     * // arr is now {true, true, false, true, true}
+     * }</pre>
      *
      * @param a the boolean array to negate
      * @param fromIndex the starting index (inclusive) of the range to negate
@@ -9924,6 +10083,12 @@ sealed class CommonUtil permits N {
      * This method retrieves all the enum constants defined in the given enum class and returns them as an ImmutableList.
      * The order of the constants in the list is the order in which they're declared in the enum class.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * ImmutableList<DayOfWeek> days = N.enumListOf(DayOfWeek.class);
+     * // returns [MONDAY, TUESDAY, WEDNESDAY, THURSDAY, FRIDAY, SATURDAY, SUNDAY]
+     * }</pre>
+     *
      * @param <E> the type of the enum constants. This should be an enum type.
      * @param enumClass the class object of the enum type whose constants are to be listed. Must not be {@code null}.
      * @return an ImmutableList containing all the enum constants in the order they're declared in the enum class.
@@ -9948,6 +10113,12 @@ sealed class CommonUtil permits N {
      * This method retrieves all the enum constants defined in the given enum class and returns them as an ImmutableSet.
      * The order of the constants in the set is the order in which they're declared in the enum class.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * ImmutableSet<DayOfWeek> days = N.enumSetOf(DayOfWeek.class);
+     * // returns an ImmutableSet containing all DayOfWeek values
+     * }</pre>
+     *
      * @param <E> the type of the enum constants. This should be an enum type.
      * @param enumClass the class object of the enum type whose constants are to be listed. Must not be {@code null}.
      * @return an ImmutableSet containing all the enum constants in the order they're declared in the enum class.
@@ -9971,6 +10142,13 @@ sealed class CommonUtil permits N {
      *
      * This method retrieves all the enum constants defined in the given enum class and maps them to their names as an ImmutableBiMap.
      * The order of the constants in the map is the order in which they're declared in the enum class.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * ImmutableBiMap<DayOfWeek, String> dayMap = N.enumMapOf(DayOfWeek.class);
+     * // dayMap.get(DayOfWeek.MONDAY) returns "MONDAY"
+     * // dayMap.inversed().get("MONDAY") returns DayOfWeek.MONDAY
+     * }</pre>
      *
      * @param <E> the type of the enum constants. This should be an enum type.
      * @param enumClass the class object of the enum type whose constants are to be listed. Must not be {@code null}.
@@ -10001,6 +10179,14 @@ sealed class CommonUtil permits N {
     /**
      * Returns an unmodifiable view of the specified collection, or an immutable empty collection if the specified collection is {@code null}.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Collection<String> original = Arrays.asList("a", "b", "c");
+     * Collection<String> unmodifiable = N.unmodifiableCollection(original);
+     * // unmodifiable.add("d"); // throws UnsupportedOperationException
+     * N.unmodifiableCollection(null); // returns an empty immutable collection
+     * }</pre>
+     *
      * @param <T> the type of elements in the collection
      * @param c the collection for which an unmodifiable view is to be returned
      * @return an unmodifiable view of the specified collection, or an immutable empty collection if the specified collection is null
@@ -10016,6 +10202,14 @@ sealed class CommonUtil permits N {
     /**
      * Returns an unmodifiable view of the specified list, or an immutable empty list if the specified list is {@code null}.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * List<String> original = new ArrayList<>(Arrays.asList("a", "b", "c"));
+     * List<String> unmodifiable = N.unmodifiableList(original);
+     * // unmodifiable.add("d"); // throws UnsupportedOperationException
+     * N.unmodifiableList(null); // returns an empty immutable list
+     * }</pre>
+     *
      * @param <T> the type of elements in the list
      * @param list the list for which an unmodifiable view is to be returned
      * @return an unmodifiable view of the specified list, or an immutable empty list if the specified list is null
@@ -10030,6 +10224,14 @@ sealed class CommonUtil permits N {
 
     /**
      * Returns an unmodifiable view of the specified set, or an immutable empty set if the specified set is {@code null}.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Set<String> original = new HashSet<>(Arrays.asList("a", "b", "c"));
+     * Set<String> unmodifiable = N.unmodifiableSet(original);
+     * // unmodifiable.add("d"); // throws UnsupportedOperationException
+     * N.unmodifiableSet(null); // returns an empty immutable set
+     * }</pre>
      *
      * @param <T> the type of elements in the set
      * @param s the set for which an unmodifiable view is to be returned
@@ -10075,6 +10277,16 @@ sealed class CommonUtil permits N {
 
     /**
      * Returns an unmodifiable view of the specified map, or an immutable empty map if the specified map is {@code null}.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Map<String, Integer> original = new HashMap<>();
+     * original.put("a", 1);
+     * original.put("b", 2);
+     * Map<String, Integer> unmodifiable = N.unmodifiableMap(original);
+     * // unmodifiable.put("c", 3); // throws UnsupportedOperationException
+     * N.unmodifiableMap(null); // returns an empty immutable map
+     * }</pre>
      *
      * @param <K> the type of keys in the map
      * @param <V> the type of values in the map
@@ -10149,6 +10361,15 @@ sealed class CommonUtil permits N {
      * This method is a utility for creating dynamic proxies. A dynamic proxy class is a class that implements a list of interfaces specified at runtime such that a method invocation through one of the interfaces on an instance of the class will be encoded and dispatched to another object through a uniform interface.
      * Thus, a dynamic proxy class can be used to create an object that can implement an arbitrary set of interfaces specified at runtime.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * MyInterface proxy = N.newProxyInstance(MyInterface.class, (proxy, method, args) -> {
+     *     System.out.println("Method called: " + method.getName());
+     *     return null;
+     * });
+     * proxy.someMethod(); // prints "Method called: someMethod"
+     * }</pre>
+     *
      * @param <T> the type of the interface for the proxy class to implement.
      * @param interfaceClass the Class object of the interface for the proxy class to implement. Must not be {@code null}.
      * @param h the invocation handler to dispatch method invocations to. It's an object that implements the InvocationHandler interface.
@@ -10177,6 +10398,18 @@ sealed class CommonUtil permits N {
 
     /**
      * Creates a new instance of the specified class.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * // Create a new instance of a simple class
+     * MyClass obj = N.newInstance(MyClass.class);
+     *
+     * // Create a new instance of a collection type
+     * List<String> list = N.newInstance(ArrayList.class);
+     *
+     * // Create a new instance of a map type
+     * Map<String, Integer> map = N.newInstance(HashMap.class);
+     * }</pre>
      *
      * @param <T> the type of the object to be created
      * @param cls the class of the object to be created
@@ -10250,6 +10483,13 @@ sealed class CommonUtil permits N {
     /**
      * Creates a new collection of the specified type.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Collection<String> list = N.newCollection(ArrayList.class);
+     * Collection<String> set = N.newCollection(HashSet.class);
+     * Collection<String> linkedList = N.newCollection(LinkedList.class);
+     * }</pre>
+     *
      * @param <T> the type of elements in the collection
      * @param targetType the class of the collection to be created
      * @return a new collection of the specified type
@@ -10278,6 +10518,13 @@ sealed class CommonUtil permits N {
 
     /**
      * Creates a new map of the specified type.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Map<String, Integer> hashMap = N.newMap(HashMap.class);
+     * Map<String, Integer> linkedMap = N.newMap(LinkedHashMap.class);
+     * Map<String, Integer> treeMap = N.newMap(TreeMap.class);
+     * }</pre>
      *
      * @param <K> the type of keys maintained by the map
      * @param <V> the type of mapped values
@@ -10309,6 +10556,15 @@ sealed class CommonUtil permits N {
 
     /**
      * Creates a new array of the specified component type and length.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * String[] strArr = N.newArray(String.class, 5);
+     * // strArr is a String array of length 5
+     *
+     * int[] intArr = N.newArray(int.class, 10);
+     * // intArr is an int array of length 10
+     * }</pre>
      *
      * @param <T> the type of the array elements
      * @param componentType the class of the component type of the array
@@ -10353,6 +10609,12 @@ sealed class CommonUtil permits N {
 
     /**
      * Creates a new instance of an ArrayList.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * ArrayList<String> list = N.newArrayList();
+     * list.add("element");
+     * }</pre>
      *
      * @param <T> the type of elements in the list
      * @return a new instance of an ArrayList
@@ -10410,6 +10672,12 @@ sealed class CommonUtil permits N {
     /**
      * Creates a new instance of a HashSet.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Set<String> set = N.newHashSet();
+     * set.add("element");
+     * }</pre>
+     *
      * @param <T> the type of elements in the set
      * @return a new instance of a HashSet
      */
@@ -10442,7 +10710,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Creates a new instance of  HashSet.
+     * Creates a new instance of a LinkedHashSet.
      *
      * @param <T> the type of elements in the set
      * @return a new instance of a HashSet
@@ -10476,7 +10744,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Creates a new instance of  TreeSet.
+     * Creates a new instance of a TreeSet.
      *
      * @param <T> the type of elements in the set
      * @return a new instance of a TreeSet
@@ -10511,6 +10779,14 @@ sealed class CommonUtil permits N {
 
     /**
      * Creates a new instance of a concurrent hash set by {@code ConcurrentHashMap}.
+     * This set is thread-safe and suitable for concurrent access.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Set<String> concurrentSet = N.newConcurrentHashSet();
+     * concurrentSet.add("element");
+     * // Safe to use from multiple threads
+     * }</pre>
      *
      * @param <T> the type of elements in the set
      * @return a new instance of a concurrent hash set
@@ -10568,6 +10844,16 @@ sealed class CommonUtil permits N {
 
     /**
      * Creates a new instance of a Multiset.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Multiset<String> multiset = N.newMultiset();
+     * multiset.add("apple");
+     * multiset.add("apple");
+     * multiset.add("banana");
+     * multiset.occurrencesOf("apple"); // returns 2
+     * multiset.occurrencesOf("banana"); // returns 1
+     * }</pre>
      *
      * @param <T> the type of elements in the multiset
      * @return a new instance of a Multiset
@@ -10656,6 +10942,14 @@ sealed class CommonUtil permits N {
     /**
      * Creates a new entry with the specified key and value.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Map.Entry<String, Integer> entry = N.newEntry("key", 1);
+     * entry.getKey();   // returns "key"
+     * entry.getValue(); // returns 1
+     * entry.setValue(2); // modifies the value to 2
+     * }</pre>
+     *
      * @param <K> the type of keys maintained by this entry
      * @param <V> the type of mapped values
      * @param key the key to be associated with the entry
@@ -10669,6 +10963,14 @@ sealed class CommonUtil permits N {
     /**
      * Creates a new immutable entry with the specified key and value.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * ImmutableEntry<String, Integer> entry = N.newImmutableEntry("key", 1);
+     * entry.getKey();   // returns "key"
+     * entry.getValue(); // returns 1
+     * // entry.setValue(2); // throws UnsupportedOperationException
+     * }</pre>
+     *
      * @param <K> the type of keys maintained by this entry
      * @param <V> the type of mapped values
      * @param key the key to be associated with the entry
@@ -10681,6 +10983,12 @@ sealed class CommonUtil permits N {
 
     /**
      * Creates a new instance of a HashMap.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Map<String, Integer> map = N.newHashMap();
+     * map.put("key", 1);
+     * }</pre>
      *
      * @param <K> the type of keys maintained by this map
      * @param <V> the type of mapped values
@@ -10880,6 +11188,14 @@ sealed class CommonUtil permits N {
 
     /**
      * Creates a new instance of a ConcurrentHashMap.
+     * This map is thread-safe and suitable for concurrent access.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * ConcurrentHashMap<String, Integer> map = N.newConcurrentHashMap();
+     * map.put("key", 1);
+     * // Safe to use from multiple threads
+     * }</pre>
      *
      * @param <K> the type of keys maintained by this map
      * @param <V> the type of mapped values
@@ -10915,6 +11231,16 @@ sealed class CommonUtil permits N {
 
     /**
      * Creates a new instance of a BiMap.
+     * A BiMap is a bidirectional map that maintains the uniqueness of both keys and values.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * BiMap<String, Integer> biMap = N.newBiMap();
+     * biMap.put("one", 1);
+     * biMap.put("two", 2);
+     * biMap.get("one");           // returns 1
+     * biMap.inversed().get(1);    // returns "one"
+     * }</pre>
      *
      * @param <K> the type of keys maintained by this map
      * @param <V> the type of mapped values
@@ -10993,6 +11319,16 @@ sealed class CommonUtil permits N {
 
     /**
      * Creates a new instance of a ListMultimap.
+     * A ListMultimap is a multimap that can store multiple values for a single key, with values stored in a List.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * ListMultimap<String, Integer> multimap = N.newListMultimap();
+     * multimap.put("key", 1);
+     * multimap.put("key", 2);
+     * multimap.put("key", 1);  // duplicates allowed
+     * multimap.get("key");     // returns [1, 2, 1]
+     * }</pre>
      *
      * @param <K> the type of keys maintained by this map
      * @param <E> the type of elements in the collection
@@ -11170,6 +11506,16 @@ sealed class CommonUtil permits N {
 
     /**
      * Creates a new instance of a SetMultimap.
+     * A SetMultimap is a multimap that can store multiple values for a single key, with values stored in a Set (no duplicates).
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * SetMultimap<String, Integer> multimap = N.newSetMultimap();
+     * multimap.put("key", 1);
+     * multimap.put("key", 2);
+     * multimap.put("key", 1);  // duplicate ignored
+     * multimap.get("key");     // returns Set containing [1, 2]
+     * }</pre>
      *
      * @param <K> the type of keys maintained by this map
      * @param <E> the type of elements in the collection
@@ -11355,6 +11701,13 @@ sealed class CommonUtil permits N {
      * The Dataset is a data structure that stores data in a tabular format, similar to a table in a database.
      * This method creates a Dataset with no rows or columns.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Dataset ds = N.newEmptyDataset();
+     * // ds.columnNameList() returns empty list
+     * // ds.size() returns 0
+     * }</pre>
+     *
      * @return a new empty Dataset.
      * @see Dataset#empty()
      */
@@ -11420,6 +11773,20 @@ sealed class CommonUtil permits N {
      *
      * The Dataset is a data structure that stores data in a tabular format, similar to a table in a database.
      * The <i>rows</i> parameter is a collection where each item represents a row in the Dataset.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * // Using Maps as rows
+     * List<Map<String, Object>> rows = new ArrayList<>();
+     * rows.add(N.asMap("name", "John", "age", 25));
+     * rows.add(N.asMap("name", "Jane", "age", 30));
+     * Dataset ds = N.newDataset(rows);
+     * // ds.columnNameList() returns ["name", "age"]
+     *
+     * // Using Beans as rows
+     * List<Person> people = Arrays.asList(new Person("John", 25), new Person("Jane", 30));
+     * Dataset ds2 = N.newDataset(people);
+     * }</pre>
      *
      * @param rows a collection of objects representing the data in the Dataset. Each object is a row which can be: Map/Bean.
      * @return a new Dataset with the specified rows.
@@ -11748,6 +12115,16 @@ sealed class CommonUtil permits N {
 
     /**
      * Merges two given Datasets into a new single Dataset.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Dataset ds1 = N.newDataset(Arrays.asList("name", "age"),
+     *                 Arrays.asList(new Object[]{"John", 25}));
+     * Dataset ds2 = N.newDataset(Arrays.asList("name", "age"),
+     *                 Arrays.asList(new Object[]{"Jane", 30}));
+     * Dataset merged = N.merge(ds1, ds2);
+     * // merged contains both rows: [John, 25] and [Jane, 30]
+     * }</pre>
      *
      * @param a the first Dataset to be merged.
      * @param b the second Dataset to be merged.
@@ -13771,7 +14148,7 @@ sealed class CommonUtil permits N {
      * @param <C> the type of Collection to be returned
      * @param a the short array to be converted
      * @param supplier a function that provides a new instance of the desired Collection type
-     * @return a Collection of Short objects containing the values from the short
+     * @return a Collection of Short objects containing the values from the short array
      * @see IntFunctions#ofList()
      * @see IntFunctions#ofSet()
      */
@@ -13788,7 +14165,7 @@ sealed class CommonUtil permits N {
      * @param toIndex the ending (exclusive) index of the range to be converted
      * @param supplier a function that provides a new instance of the desired Collection type
      * @return a Collection of Short objects containing the values from the specified range of the short array
-     * @throws IndexOutOfBoundsException if the specified indices are out of the array's
+     * @throws IndexOutOfBoundsException if the specified indices are out of the array's range
      * @see IntFunctions#ofList()
      * @see IntFunctions#ofSet()
      */
@@ -13876,7 +14253,7 @@ sealed class CommonUtil permits N {
      * @param toIndex the ending (exclusive) index of the range to be converted
      * @param supplier a function that provides a new instance of the desired Collection type
      * @return a Collection of Long objects containing the values from the specified range of the long array
-     * @throws IndexOutOfBoundsException if the specified indices are out of the array's
+     * @throws IndexOutOfBoundsException if the specified indices are out of the array's range
      * @see IntFunctions#ofList()
      * @see IntFunctions#ofSet()
      */
@@ -14987,6 +15364,13 @@ sealed class CommonUtil permits N {
 
     /**
      * Returns a modifiable {@code List} with specified elements.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * List<String> list = N.asList("a", "b", "c", "d", "e", "f");
+     * list.add("g"); // modifiable
+     * // list is ["a", "b", "c", "d", "e", "f", "g"]
+     * }</pre>
      *
      * @param <T> the type of elements in the list
      * @param e1 the first element to be placed in the List
@@ -17207,12 +17591,24 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Compares two arrays lexicographically. ({@code null} is considered as the smallest value in nature order).
+     * Compares two arrays lexicographically. ({@code null} is considered as the smallest value in natural order).
+     *
+     * <p>If both arrays are {@code null} or empty, returns 0. If only the first array is {@code null} or empty, returns -1.
+     * If only the second array is {@code null} or empty, returns 1. Otherwise, compares elements lexicographically using their natural ordering.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * String[] a = {"a", "b", "c"};
+     * String[] b = {"a", "b", "d"};
+     * N.compare(a, b); // returns negative value (c < d)
+     * N.compare(a, a); // returns 0
+     * N.compare(null, b); // returns -1
+     * }</pre>
      *
      * @param <T> the type of the comparable array elements
-     * @param a the first array to compare
-     * @param b the second array to compare
-     * @return a negative integer, zero, or a positive integer as the first array is less than, equal to, or greater than the second
+     * @param a the first array to compare, may be {@code null}
+     * @param b the second array to compare, may be {@code null}
+     * @return a negative integer, zero, or a positive integer as the first array is less than, equal to, or greater than the second array
      */
     public static <T extends Comparable<? super T>> int compare(final T[] a, final T[] b) {
         final Comparator<T> cmp = NATURAL_COMPARATOR;
@@ -17221,17 +17617,25 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Compares two arrays lexicographically over the specified range. ({@code null} is considered as the smallest value in nature order).
+     * Compares two arrays lexicographically over the specified range. ({@code null} is considered as the smallest value in natural order).
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * String[] a = {"a", "b", "c", "d"};
+     * String[] b = {"a", "b", "x", "y"};
+     * N.compare(a, 0, b, 0, 2); // returns 0 (first 2 elements are same)
+     * N.compare(a, 2, b, 2, 2); // returns negative value (c < x)
+     * }</pre>
      *
      * @param <T> the type of the comparable array elements
-     * @param a the first array to compare
-     * @param fromIndexA the starting index in the first array
-     * @param b the second array to compare
-     * @param fromIndexB the starting index in the second array
+     * @param a the first array to compare, may be {@code null}
+     * @param fromIndexA the starting index (inclusive) in the first array
+     * @param b the second array to compare, may be {@code null}
+     * @param fromIndexB the starting index (inclusive) in the second array
      * @param len the number of elements to compare
      * @return a negative integer, zero, or a positive integer as the first array is less than, equal to, or greater than the second array
-     * @throws IllegalArgumentException if the length is negative
-     * @throws IndexOutOfBoundsException if the specified ranges are out of bounds
+     * @throws IllegalArgumentException if {@code len} is negative
+     * @throws IndexOutOfBoundsException if the specified indices or length result in out of bounds access
      */
     public static <T extends Comparable<? super T>> int compare(final T[] a, final int fromIndexA, final T[] b, final int fromIndexB, final int len)
             throws IllegalArgumentException, IndexOutOfBoundsException {
@@ -17242,10 +17646,21 @@ sealed class CommonUtil permits N {
     /**
      * Compares two arrays using the specified comparator.
      *
+     * <p>If both arrays are {@code null} or empty, returns 0. If only the first array is {@code null} or empty, returns -1.
+     * If only the second array is {@code null} or empty, returns 1. If the comparator is {@code null}, uses natural ordering.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * String[] a = {"apple", "banana"};
+     * String[] b = {"APPLE", "BANANA"};
+     * N.compare(a, b, String.CASE_INSENSITIVE_ORDER); // returns 0
+     * N.compare(a, b, null); // uses natural ordering
+     * }</pre>
+     *
      * @param <T> the type of elements in the arrays
-     * @param a the first array to compare
-     * @param b the second array to compare
-     * @param cmp the comparator to compare array elements
+     * @param a the first array to compare, may be {@code null}
+     * @param b the second array to compare, may be {@code null}
+     * @param cmp the comparator to compare array elements, may be {@code null}
      * @return a negative integer, zero, or a positive integer as the first array is less than, equal to, or greater than the second array
      */
     public static <T> int compare(final T[] a, final T[] b, Comparator<? super T> cmp) {
@@ -17271,16 +17686,24 @@ sealed class CommonUtil permits N {
     /**
      * Compares two arrays lexicographically over the specified range using the specified comparator.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * String[] a = {"apple", "BANANA", "cherry"};
+     * String[] b = {"APPLE", "banana", "CHERRY"};
+     * N.compare(a, 0, b, 0, 3, String.CASE_INSENSITIVE_ORDER); // returns 0
+     * N.compare(a, 0, b, 0, 1, null); // uses natural ordering for first element
+     * }</pre>
+     *
      * @param <T> the type of the array elements
-     * @param a the first array to compare
-     * @param fromIndexA the starting index in the first array
-     * @param b the second array to compare
-     * @param fromIndexB the starting index in the second array
+     * @param a the first array to compare, may be {@code null}
+     * @param fromIndexA the starting index (inclusive) in the first array
+     * @param b the second array to compare, may be {@code null}
+     * @param fromIndexB the starting index (inclusive) in the second array
      * @param len the number of elements to compare
-     * @param cmp the comparator to compare array elements
+     * @param cmp the comparator to compare array elements, may be {@code null} (uses natural ordering)
      * @return a negative integer, zero, or a positive integer as the first array is less than, equal to, or greater than the second array
-     * @throws IllegalArgumentException if the length is negative
-     * @throws IndexOutOfBoundsException if the specified ranges are out of bounds
+     * @throws IllegalArgumentException if {@code len} is negative
+     * @throws IndexOutOfBoundsException if the specified indices or length result in out of bounds access
      */
     public static <T> int compare(final T[] a, final int fromIndexA, final T[] b, final int fromIndexB, final int len, Comparator<? super T> cmp)
             throws IllegalArgumentException, IndexOutOfBoundsException {
@@ -17792,6 +18215,14 @@ sealed class CommonUtil permits N {
     /**
      * Retrieves the element at the specified position in the given Iterable.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * List<String> list = Arrays.asList("a", "b", "c");
+     * N.getElement(list, 0); // returns "a"
+     * N.getElement(list, 2); // returns "c"
+     * // N.getElement(list, 5); // throws IndexOutOfBoundsException
+     * }</pre>
+     *
      * @param <T> the type of elements in the iterable
      * @param c the iterable from which to retrieve the element
      * @param index the position of the element to retrieve
@@ -17817,6 +18248,12 @@ sealed class CommonUtil permits N {
     /**
      * Retrieves the element at the specified position in the given Iterator.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Iterator<String> iter = Arrays.asList("a", "b", "c").iterator();
+     * N.getElement(iter, 1); // returns "b"
+     * }</pre>
+     *
      * @param <T> the type of elements in the Iterator
      * @param iter the Iterator to retrieve the element from. Must not be {@code null}.
      * @param index the index of the element to retrieve. Must be a non-negative integer.
@@ -17841,6 +18278,18 @@ sealed class CommonUtil permits N {
 
     /**
      * Returns the only element in the given Iterable.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * List<String> singleElement = Arrays.asList("only");
+     * N.getOnlyElement(singleElement);  // returns Nullable.of("only")
+     *
+     * List<String> empty = Arrays.asList();
+     * N.getOnlyElement(empty);          // returns Nullable.empty()
+     *
+     * List<String> multiple = Arrays.asList("a", "b");
+     * // N.getOnlyElement(multiple);    // throws TooManyElementsException
+     * }</pre>
      *
      * @param <T> the type of elements in the Iterable
      * @param c the Iterable to get the element from
@@ -17887,6 +18336,15 @@ sealed class CommonUtil permits N {
      * Returns the first element in the given Iterable wrapped in a {@code Nullable}.
      * If the Iterable is empty, an empty {@code Nullable} is returned.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * List<String> list = Arrays.asList("a", "b", "c");
+     * N.firstElement(list);  // returns Nullable.of("a")
+     *
+     * List<String> empty = Arrays.asList();
+     * N.firstElement(empty); // returns Nullable.empty()
+     * }</pre>
+     *
      * @param <T> the type of elements in the Iterable
      * @param c the Iterable to get the first element from
      * @return a {@code Nullable} containing the first element in the Iterable if it exists, otherwise an empty Nullable
@@ -17918,6 +18376,15 @@ sealed class CommonUtil permits N {
     /**
      * Returns the last element in the given Iterable wrapped in a {@code Nullable}.
      * If the Iterable is empty, an empty {@code Nullable} is returned.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * List<String> list = Arrays.asList("a", "b", "c");
+     * N.lastElement(list);  // returns Nullable.of("c")
+     *
+     * List<String> empty = Arrays.asList();
+     * N.lastElement(empty); // returns Nullable.empty()
+     * }</pre>
      *
      * @param <T> the type of elements in the Iterable
      * @param c the Iterable to get the last element from
@@ -17968,6 +18435,14 @@ sealed class CommonUtil permits N {
     /**
      * Returns a list containing the first <i>n</i> elements from the given array.
      * If the array has less than <i>n</i> elements, it returns a list with all the elements in the array.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * String[] arr = {"a", "b", "c", "d", "e"};
+     * N.firstElements(arr, 3); // returns ["a", "b", "c"]
+     * N.firstElements(arr, 10); // returns ["a", "b", "c", "d", "e"]
+     * N.firstElements(arr, 0); // returns []
+     * }</pre>
      *
      * @param <T> the type of elements in the array
      * @param a the array to get the elements from
@@ -18061,6 +18536,14 @@ sealed class CommonUtil permits N {
      * Returns a list containing the last <i>n</i> elements from the given array.
      * If the array has less than <i>n</i> elements, it returns a list with all the elements in the array.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * String[] arr = {"a", "b", "c", "d", "e"};
+     * N.lastElements(arr, 3); // returns ["c", "d", "e"]
+     * N.lastElements(arr, 10); // returns ["a", "b", "c", "d", "e"]
+     * N.lastElements(arr, 0); // returns []
+     * }</pre>
+     *
      * @param <T> the type of elements in the array
      * @param a the array to get the elements from
      * @param n the number of elements to retrieve from the end of the array
@@ -18151,6 +18634,13 @@ sealed class CommonUtil permits N {
      * Returns the first {@code non-null} value among the two provided values.
      * If both values are {@code null}, it returns an empty Optional.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.firstNonNull("value", null); // returns Optional.of("value")
+     * N.firstNonNull(null, "value"); // returns Optional.of("value")
+     * N.firstNonNull(null, null); // returns Optional.empty()
+     * }</pre>
+     *
      * @param <T> the type of the values
      * @param a the first value to check
      * @param b the second value to check
@@ -18165,6 +18655,14 @@ sealed class CommonUtil permits N {
      * Returns the first {@code non-null} value among the three provided values.
      * If all values are {@code null}, it returns an empty Optional.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.firstNonNull("first", null, null); // returns Optional.of("first")
+     * N.firstNonNull(null, "second", null); // returns Optional.of("second")
+     * N.firstNonNull(null, null, "third"); // returns Optional.of("third")
+     * N.firstNonNull(null, null, null); // returns Optional.empty()
+     * }</pre>
+     *
      * @param <T> the type of the values
      * @param a the first value to check
      * @param b the second value to check
@@ -18178,10 +18676,17 @@ sealed class CommonUtil permits N {
 
     /**
      * Returns the first {@code non-null} value among the provided values.
-     * If all values are {@code null}, it returns an empty Optional.
+     * If all values are {@code null} or the array is empty, it returns an empty Optional.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.firstNonNull(null, null, "value", "other"); // returns Optional.of("value")
+     * N.firstNonNull(new String[]{null, null, null}); // returns Optional.empty()
+     * N.firstNonNull(); // returns Optional.empty()
+     * }</pre>
      *
      * @param <T> the type of the values
-     * @param a the array of values to check
+     * @param a the array of values to check, may be {@code null} or empty
      * @return an Optional containing the first {@code non-null} value if it exists, otherwise an empty Optional
      * @see Iterables#firstNonNull(Object[])
      */
@@ -18202,10 +18707,17 @@ sealed class CommonUtil permits N {
 
     /**
      * Returns the first {@code non-null} value from the provided iterable.
-     * If all values are {@code null}, it returns an empty Optional.
+     * If all values are {@code null} or the iterable is empty, it returns an empty Optional.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * List<String> list = Arrays.asList(null, null, "value", "other");
+     * N.firstNonNull(list); // returns Optional.of("value")
+     * N.firstNonNull(Arrays.asList(null, null)); // returns Optional.empty()
+     * }</pre>
      *
      * @param <T> the type of the values
-     * @param c the iterable of values to check
+     * @param c the iterable of values to check, may be {@code null} or empty
      * @return an Optional containing the first {@code non-null} value if it exists, otherwise an empty Optional
      * @see Iterables#firstNonNull(Iterable)
      * @see Iterables#firstNonNullOrDefault(Iterable, Object)
@@ -18226,10 +18738,17 @@ sealed class CommonUtil permits N {
 
     /**
      * Returns the first {@code non-null} value from the provided iterator.
-     * If all values are {@code null}, it returns an empty Optional.
+     * If all values are {@code null} or the iterator is empty, it returns an empty Optional.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Iterator<String> iter = Arrays.asList(null, null, "value").iterator();
+     * N.firstNonNull(iter); // returns Optional.of("value")
+     * N.firstNonNull(Collections.emptyIterator()); // returns Optional.empty()
+     * }</pre>
      *
      * @param <T> the type of the values
-     * @param iter the iterator of values to check
+     * @param iter the iterator of values to check, may be {@code null}
      * @return an Optional containing the first {@code non-null} value if it exists, otherwise an empty Optional
      * @see Iterables#firstNonNull(Iterator)
      * @see Iterables#firstNonNullOrDefault(Iterator, Object)
@@ -18254,6 +18773,13 @@ sealed class CommonUtil permits N {
      * Returns the last {@code non-null} value from the provided values.
      * If both values are {@code null}, it returns an empty Optional.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.lastNonNull("first", "second"); // returns Optional.of("second")
+     * N.lastNonNull("value", null); // returns Optional.of("value")
+     * N.lastNonNull(null, null); // returns Optional.empty()
+     * }</pre>
+     *
      * @param <T> the type of the values
      * @param a the first value to check
      * @param b the second value to check
@@ -18267,6 +18793,13 @@ sealed class CommonUtil permits N {
      * Returns the last {@code non-null} value from the provided values.
      * If all values are {@code null}, it returns an empty Optional.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.lastNonNull("first", "second", "third"); // returns Optional.of("third")
+     * N.lastNonNull("first", null, "third"); // returns Optional.of("third")
+     * N.lastNonNull(null, null, null); // returns Optional.empty()
+     * }</pre>
+     *
      * @param <T> the type of the values
      * @param a the first value to check
      * @param b the second value to check
@@ -18279,10 +18812,17 @@ sealed class CommonUtil permits N {
 
     /**
      * Returns the last {@code non-null} value from the provided array of values.
-     * If all values are {@code null}, it returns an empty Optional.
+     * If all values are {@code null} or the array is empty, it returns an empty Optional.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.lastNonNull("first", null, "last", null); // returns Optional.of("last")
+     * N.lastNonNull(new String[]{null, null, null}); // returns Optional.empty()
+     * N.lastNonNull(); // returns Optional.empty()
+     * }</pre>
      *
      * @param <T> the type of the values
-     * @param a the array of values to check
+     * @param a the array of values to check, may be {@code null} or empty
      * @return an Optional containing the last {@code non-null} value if it exists, otherwise an empty Optional
      */
     @SafeVarargs
@@ -18302,10 +18842,17 @@ sealed class CommonUtil permits N {
 
     /**
      * Returns the last {@code non-null} value from the provided iterable.
-     * If all values are {@code null}, it returns an empty Optional.
+     * If all values are {@code null} or the iterable is empty, it returns an empty Optional.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * List<String> list = Arrays.asList("first", null, "last", null);
+     * N.lastNonNull(list); // returns Optional.of("last")
+     * N.lastNonNull(Arrays.asList(null, null)); // returns Optional.empty()
+     * }</pre>
      *
      * @param <T> the type of the values
-     * @param c the iterable to check
+     * @param c the iterable to check, may be {@code null} or empty
      * @return an Optional containing the last {@code non-null} value if it exists, otherwise an empty Optional
      */
     public static <T> Optional<T> lastNonNull(final Iterable<? extends T> c) {
@@ -18344,10 +18891,17 @@ sealed class CommonUtil permits N {
 
     /**
      * Returns the last {@code non-null} value from the provided iterator.
-     * If all values are {@code null}, it returns an empty Optional.
+     * If all values are {@code null} or the iterator is empty, it returns an empty Optional.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Iterator<String> iter = Arrays.asList("first", null, "last").iterator();
+     * N.lastNonNull(iter); // returns Optional.of("last")
+     * N.lastNonNull(Collections.emptyIterator()); // returns Optional.empty()
+     * }</pre>
      *
      * @param <T> the type of the values
-     * @param iter the iterator to check
+     * @param iter the iterator to check, may be {@code null}
      * @return an Optional containing the last {@code non-null} value if it exists, otherwise an empty Optional
      */
     public static <T> Optional<T> lastNonNull(final Iterator<? extends T> iter) {
@@ -18370,6 +18924,15 @@ sealed class CommonUtil permits N {
     /**
      * Returns the first non-empty array from the given arrays.
      * If both arrays are empty or {@code null}, it returns an empty Optional.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * String[] arr1 = {"a", "b"};
+     * String[] arr2 = {"c", "d"};
+     * N.firstNonEmpty(arr1, arr2); // returns Optional.of(arr1)
+     * N.firstNonEmpty(new String[0], arr2); // returns Optional.of(arr2)
+     * N.firstNonEmpty(null, null); // returns Optional.empty()
+     * }</pre>
      *
      * @param <T> the type of elements in the arrays
      * @param a the first array to check
@@ -18399,6 +18962,15 @@ sealed class CommonUtil permits N {
      * Returns the first non-empty collection from the given collections.
      * If both collections are empty or {@code null}, it returns an empty Optional.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * List<String> list1 = Arrays.asList("a", "b");
+     * List<String> list2 = Arrays.asList("c", "d");
+     * N.firstNonEmpty(list1, list2); // returns Optional.of(list1)
+     * N.firstNonEmpty(Collections.emptyList(), list2); // returns Optional.of(list2)
+     * N.firstNonEmpty(null, null); // returns Optional.empty()
+     * }</pre>
+     *
      * @param <T> the type of the collections
      * @param a the first collection to check
      * @param b the second collection to check
@@ -18427,6 +18999,15 @@ sealed class CommonUtil permits N {
      * Returns the first non-empty map from the given maps.
      * If both maps are empty or {@code null}, it returns an empty Optional.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Map<String, Integer> map1 = N.asMap("a", 1, "b", 2);
+     * Map<String, Integer> map2 = N.asMap("c", 3);
+     * N.firstNonEmpty(map1, map2); // returns Optional.of(map1)
+     * N.firstNonEmpty(Collections.emptyMap(), map2); // returns Optional.of(map2)
+     * N.firstNonEmpty(null, null); // returns Optional.empty()
+     * }</pre>
+     *
      * @param <T> the type of the maps
      * @param a the first map to check
      * @param b the second map to check
@@ -18454,6 +19035,13 @@ sealed class CommonUtil permits N {
     /**
      * Returns the first non-empty CharSequence from the given CharSequences.
      * If both CharSequences are empty or {@code null}, it returns an empty Optional.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.firstNonEmpty("", "value");   // returns Optional.of("value")
+     * N.firstNonEmpty("first", null); // returns Optional.of("first")
+     * N.firstNonEmpty("", null);      // returns Optional.empty()
+     * }</pre>
      *
      * @param <T> the type of the CharSequences
      * @param a the first CharSequence to check
@@ -18531,6 +19119,13 @@ sealed class CommonUtil permits N {
      * Returns the first non-blank CharSequence from the given CharSequences.
      * If both CharSequences are blank or {@code null}, it returns an empty Optional.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.firstNonBlank("  ", "value");   // returns Optional.of("value")
+     * N.firstNonBlank("first", "   ");  // returns Optional.of("first")
+     * N.firstNonBlank("  ", null);      // returns Optional.empty()
+     * }</pre>
+     *
      * @param <T> the type of the CharSequences
      * @param a the first CharSequence to check
      * @param b the second CharSequence to check
@@ -18606,10 +19201,20 @@ sealed class CommonUtil permits N {
     /**
      * Returns the first entry from the given map.
      * If the map is {@code null} or empty, it returns an empty Optional.
+     * The definition of "first" depends on the map's iteration order.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Map<String, Integer> map = new LinkedHashMap<>();
+     * map.put("a", 1);
+     * map.put("b", 2);
+     * N.firstEntry(map); // returns Optional.of(entry("a", 1))
+     * N.firstEntry(Collections.emptyMap()); // returns Optional.empty()
+     * }</pre>
      *
      * @param <K> the type of keys maintained by the map
      * @param <V> the type of mapped values
-     * @param map the map from which to retrieve the first entry
+     * @param map the map from which to retrieve the first entry, may be {@code null} or empty
      * @return an Optional containing the first entry of the map, or an empty Optional if the map is {@code null} or empty
      */
     public static <K, V> Optional<Map.Entry<K, V>> firstEntry(final Map<K, V> map) {
@@ -18623,10 +19228,20 @@ sealed class CommonUtil permits N {
     /**
      * Returns the last entry from the given map.
      * If the map is {@code null} or empty, it returns an empty Optional.
+     * The definition of "last" depends on the map's iteration order.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Map<String, Integer> map = new LinkedHashMap<>();
+     * map.put("a", 1);
+     * map.put("b", 2);
+     * N.lastEntry(map); // returns Optional.of(entry("b", 2))
+     * N.lastEntry(Collections.emptyMap()); // returns Optional.empty()
+     * }</pre>
      *
      * @param <K> the type of keys maintained by the map
      * @param <V> the type of mapped values
-     * @param map the map from which to retrieve the last entry
+     * @param map the map from which to retrieve the last entry, may be {@code null} or empty
      * @return an Optional containing the last entry of the map, or an empty Optional if the map is {@code null} or empty
      */
     public static <K, V> Optional<Map.Entry<K, V>> lastEntry(final Map<K, V> map) {
@@ -18640,9 +19255,17 @@ sealed class CommonUtil permits N {
     /**
      * Returns the first element of the given array if it is not empty, otherwise returns {@code null}.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * String[] arr = {"a", "b", "c"};
+     * N.firstOrNullIfEmpty(arr); // returns "a"
+     * N.firstOrNullIfEmpty(new String[0]); // returns null
+     * N.firstOrNullIfEmpty(null); // returns null
+     * }</pre>
+     *
      * @param <T> the type of the elements in the array
-     * @param a the array to check
-     * @return the first element of the array if it is not empty, otherwise null
+     * @param a the array to check, may be {@code null} or empty
+     * @return the first element of the array if it is not empty, otherwise {@code null}
      */
     public static <T> T firstOrNullIfEmpty(final T[] a) {
         return a == null || a.length == 0 ? null : a[0];
@@ -18650,6 +19273,15 @@ sealed class CommonUtil permits N {
 
     /**
      * Returns the first element of the given iterable if it is not empty, otherwise returns {@code null}.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * List<String> list = Arrays.asList("a", "b", "c");
+     * N.firstOrNullIfEmpty(list); // returns "a"
+     *
+     * List<String> empty = Arrays.asList();
+     * N.firstOrNullIfEmpty(empty); // returns null
+     * }</pre>
      *
      * @param <T> the type of the elements in the iterable
      * @param c the iterable to check
@@ -18673,9 +19305,17 @@ sealed class CommonUtil permits N {
     /**
      * Returns the first element of the given array if it is not empty, otherwise returns the specified default value.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * String[] arr = {"a", "b", "c"};
+     * N.firstOrDefaultIfEmpty(arr, "default"); // returns "a"
+     * N.firstOrDefaultIfEmpty(new String[0], "default"); // returns "default"
+     * N.firstOrDefaultIfEmpty(null, "default"); // returns "default"
+     * }</pre>
+     *
      * @param <T> the type of the elements in the array
-     * @param a the array to check
-     * @param defaultValueForEmpty the default value to return if the array is empty
+     * @param a the array to check, may be {@code null} or empty
+     * @param defaultValueForEmpty the default value to return if the array is empty or {@code null}
      * @return the first element of the array if it is not empty, otherwise the specified default value
      */
     public static <T> T firstOrDefaultIfEmpty(final T[] a, final T defaultValueForEmpty) {
@@ -18684,6 +19324,15 @@ sealed class CommonUtil permits N {
 
     /**
      * Returns the first element of the given iterable if it is not empty, otherwise returns the specified default value.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * List<String> list = Arrays.asList("a", "b", "c");
+     * N.firstOrDefaultIfEmpty(list, "default"); // returns "a"
+     *
+     * List<String> empty = Arrays.asList();
+     * N.firstOrDefaultIfEmpty(empty, "default"); // returns "default"
+     * }</pre>
      *
      * @param <T> the type of the elements in the iterable
      * @param c the iterable to check
@@ -18721,9 +19370,17 @@ sealed class CommonUtil permits N {
     /**
      * Returns the last element of the given array if it is not empty, otherwise returns {@code null}.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * String[] arr = {"a", "b", "c"};
+     * N.lastOrNullIfEmpty(arr); // returns "c"
+     * N.lastOrNullIfEmpty(new String[0]); // returns null
+     * N.lastOrNullIfEmpty(null); // returns null
+     * }</pre>
+     *
      * @param <T> the type of the elements in the array
-     * @param a the array to check
-     * @return the last element of the array if it is not empty, otherwise null
+     * @param a the array to check, may be {@code null} or empty
+     * @return the last element of the array if it is not empty, otherwise {@code null}
      */
     public static <T> T lastOrNullIfEmpty(final T[] a) {
         return a == null || a.length == 0 ? null : a[a.length - 1];
@@ -18731,6 +19388,15 @@ sealed class CommonUtil permits N {
 
     /**
      * Returns the last element of the given iterable if it is not empty, otherwise returns {@code null}.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * List<String> list = Arrays.asList("a", "b", "c");
+     * N.lastOrNullIfEmpty(list); // returns "c"
+     *
+     * List<String> empty = Arrays.asList();
+     * N.lastOrNullIfEmpty(empty); // returns null
+     * }</pre>
      *
      * @param <T> the type of the elements in the iterable
      * @param c the iterable to check
@@ -18765,6 +19431,15 @@ sealed class CommonUtil permits N {
 
     /**
      * Returns the last element of the given iterable if it is not empty, otherwise returns the specified default value.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * List<String> list = Arrays.asList("a", "b", "c");
+     * N.lastOrDefaultIfEmpty(list, "default"); // returns "c"
+     *
+     * List<String> empty = Arrays.asList();
+     * N.lastOrDefaultIfEmpty(empty, "default"); // returns "default"
+     * }</pre>
      *
      * @param <T> the type of the elements in the iterable
      * @param c the iterable to check
@@ -18816,6 +19491,13 @@ sealed class CommonUtil permits N {
     /**
      * Returns the first element in the given array that matches the specified predicate.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * String[] arr = {"apple", "banana", "cherry"};
+     * N.findFirst(arr, s -> s.startsWith("b")); // returns Nullable.of("banana")
+     * N.findFirst(arr, s -> s.startsWith("z")); // returns Nullable.empty()
+     * }</pre>
+     *
      * @param <T> the type of the elements in the array
      * @param a the array to search
      * @param predicate the predicate to apply to elements of the array
@@ -18837,6 +19519,13 @@ sealed class CommonUtil permits N {
 
     /**
      * Returns the first element in the given iterable that matches the specified predicate.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * List<String> list = Arrays.asList("apple", "banana", "cherry");
+     * N.findFirst(list, s -> s.startsWith("b")); // returns Nullable.of("banana")
+     * N.findFirst(list, s -> s.startsWith("z")); // returns Nullable.empty()
+     * }</pre>
      *
      * @param <T> the type of the elements in the iterable
      * @param c the iterable to search
@@ -18885,6 +19574,13 @@ sealed class CommonUtil permits N {
 
     /**
      * Returns the last element in the given array that matches the specified predicate.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * String[] arr = {"apple", "banana", "blueberry"};
+     * N.findLast(arr, s -> s.startsWith("b")); // returns Nullable.of("blueberry")
+     * N.findLast(arr, s -> s.startsWith("z")); // returns Nullable.empty()
+     * }</pre>
      *
      * @param <T> the type of the elements in the array
      * @param a the array to search
@@ -18985,6 +19681,13 @@ sealed class CommonUtil permits N {
 
     /**
      * Returns the first {@code non-null} element in the given array that matches the specified predicate.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * String[] arr = {null, "apple", "banana", null, "cherry"};
+     * N.findFirstNonNull(arr, s -> s.startsWith("b")); // returns Optional.of("banana")
+     * N.findFirstNonNull(arr, s -> s.startsWith("z")); // returns Optional.empty()
+     * }</pre>
      *
      * @param <T> the type of the elements in the array
      * @param a the array to search
@@ -19475,6 +20178,17 @@ sealed class CommonUtil permits N {
      * The method is agnostic to the actual implementation of the collections and focuses only
      * on their content. Order of elements is not considered in the comparison.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * List<String> a = Arrays.asList("a", "b", "c");
+     * List<String> b = Arrays.asList("c", "a", "b");
+     * List<String> c = Arrays.asList("a", "b", "b");
+     *
+     * N.haveSameElements(a, b); // returns true (same elements, different order)
+     * N.haveSameElements(a, c); // returns false (different frequencies)
+     * N.haveSameElements(null, null); // returns true
+     * }</pre>
+     *
      * @param a the first collection to compare, may be {@code null}
      * @param b the second collection to compare, may be {@code null}
      * @return {@code true} if both collections contain the same elements with the same frequencies,
@@ -19506,12 +20220,22 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Finds and returns the index of the first mismatch between two arrays.
+     * Finds and returns the index of the first mismatch between two boolean arrays.
      * If the arrays are identical or both are {@code null} or empty, returns -1.
+     * If the arrays have different lengths but all common elements match, returns the length of the shorter array.
      *
-     * @param a the first boolean array
-     * @param b the second boolean array
-     * @return the index of the first mismatch, or -1 if the arrays are identical or both are {@code null} or empty.
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * boolean[] a = {true, false, true};
+     * boolean[] b = {true, false, false};
+     * N.mismatch(a, b); // returns 2
+     * N.mismatch(a, a); // returns -1
+     * N.mismatch(null, null); // returns -1
+     * }</pre>
+     *
+     * @param a the first boolean array, may be {@code null}
+     * @param b the second boolean array, may be {@code null}
+     * @return the index of the first mismatch, or -1 if the arrays are identical or both are {@code null} or empty
      * @see Arrays#mismatch(boolean[], boolean[])
      */
     public static int mismatch(final boolean[] a, final boolean[] b) {
@@ -19541,17 +20265,26 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Finds and returns the index of the first mismatch between two boolean arrays starting from specified indices.
+     * Finds and returns the relative index of the first mismatch between two boolean arrays starting from specified indices.
      * If the arrays are identical in the specified range, returns -1.
+     * The returned index is relative to {@code fromIndexA}, not an absolute array index.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * boolean[] a = {true, false, true, false};
+     * boolean[] b = {true, true, true, true};
+     * N.mismatch(a, 0, b, 0, 4); // returns 1 (relative index)
+     * N.mismatch(a, 2, b, 2, 2); // returns -1 (identical in range)
+     * }</pre>
      *
      * @param a the first boolean array
-     * @param fromIndexA the starting index in the first array
+     * @param fromIndexA the starting index (inclusive) in the first array
      * @param b the second boolean array
-     * @param fromIndexB the starting index in the second array
+     * @param fromIndexB the starting index (inclusive) in the second array
      * @param len the number of elements to compare
-     * @return the index of the first mismatch, or -1 if the arrays are identical in the specified range
-     * @throws IllegalArgumentException if the length is negative
-     * @throws IndexOutOfBoundsException if the starting indices or length are out of bounds
+     * @return the relative index of the first mismatch from {@code fromIndexA}, or -1 if the arrays are identical in the specified range
+     * @throws IllegalArgumentException if {@code len} is negative
+     * @throws IndexOutOfBoundsException if the specified indices or length result in out of bounds access
      * @see Arrays#mismatch(boolean[], int, int, boolean[], int, int)
      */
     public static int mismatch(final boolean[] a, final int fromIndexA, final boolean[] b, final int fromIndexB, final int len)
@@ -21284,21 +22017,18 @@ sealed class CommonUtil permits N {
         }
 
         for (int i = fromIndex, count = 0; count < len; i++) {
-            N.println("Rotating index: " + i + " with count: " + count);
             final int tmp = a[i];
             int curr = i;
             int next = curr - fromIndex < distance ? curr - distance + len : curr - distance;
 
             while (next != i) {
                 a[curr] = a[next];
-                N.println("curr: " + curr + " <- next: " + next);
                 curr = next;
                 next = curr - fromIndex < distance ? curr - distance + len : curr - distance;
                 count++;
             }
 
             a[curr] = tmp;
-            N.println("curr: " + curr + " <- next: " + i);
             count++;
         }
     }
@@ -25260,7 +25990,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Checks if the specified byte short is sorted in ascending order.
+     * Checks if the specified short array is sorted in ascending order.
      *
      * @param a the short array to be checked
      * @return {@code true} if the array is sorted in ascending order, {@code false} otherwise
@@ -25312,6 +26042,18 @@ sealed class CommonUtil permits N {
 
     /**
      * Checks if the specified integer array is sorted in ascending order.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * int[] sorted = {1, 2, 3, 4, 5};
+     * boolean result1 = isSorted(sorted);     // Returns true
+     *
+     * int[] unsorted = {1, 3, 2, 4, 5};
+     * boolean result2 = isSorted(unsorted);   // Returns false
+     *
+     * int[] empty = {};
+     * boolean result3 = isSorted(empty);      // Returns true
+     * }</pre>
      *
      * @param a the integer array to be checked
      * @return {@code true} if the array is sorted in ascending order, {@code false} otherwise
@@ -25578,6 +26320,18 @@ sealed class CommonUtil permits N {
     /**
      * Checks if the array is sorted according to the order induced by the specified comparator.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * String[] array = {"apple", "banana", "cherry", "date"};
+     * boolean result1 = isSorted(array, Comparator.naturalOrder());  // Returns true
+     *
+     * String[] array2 = {"apple", "cherry", "banana"};
+     * boolean result2 = isSorted(array2, Comparator.naturalOrder()); // Returns false
+     *
+     * String[] byLength = {"a", "bb", "ccc", "dddd"};
+     * boolean result3 = isSorted(byLength, Comparator.comparing(String::length));  // Returns true
+     * }</pre>
+     *
      * @param <T> the type of elements in the array
      * @param a the array to be checked
      * @param cmp the comparator to determine the order of the array
@@ -25815,6 +26569,13 @@ sealed class CommonUtil permits N {
      * <p>This method modifies the original array in-place.
      * <p><b>Implementation Note:</b> This operation runs in O(n) time where n is the array length.</p>
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * boolean[] array = {true, false, true, false, false};
+     * sort(array);
+     * // Result: array = {false, false, false, true, true}
+     * }</pre>
+     *
      * @param a the array to be sorted
      */
     public static void sort(final boolean[] a) {
@@ -25853,7 +26614,17 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Sorts the specified array into ascending order.
+     * Sorts the specified array of characters into ascending order.
+     * <p>This method modifies the original array in-place.
+     * <p><b>Implementation Note:</b> This method uses a dual-pivot Quicksort via {@link Arrays#sort(char[])},
+     * which offers O(n log n) performance on most data sets.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * char[] array = {'d', 'a', 'c', 'b'};
+     * sort(array);
+     * // Result: array = {'a', 'b', 'c', 'd'}
+     * }</pre>
      *
      * @param a the array to be sorted
      */
@@ -25918,7 +26689,17 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Sorts the specified array into ascending numerical order.
+     * Sorts the specified array of shorts into ascending numerical order.
+     * <p>This method modifies the original array in-place.
+     * <p><b>Implementation Note:</b> This method uses a dual-pivot Quicksort via {@link Arrays#sort(short[])},
+     * which offers O(n log n) performance on most data sets.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * short[] array = {30, 10, 50, 20, 40};
+     * sort(array);
+     * // Result: array = {10, 20, 30, 40, 50}
+     * }</pre>
      *
      * @param a the array to be sorted
      */
@@ -25983,7 +26764,17 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Sorts the specified array into ascending numerical order.
+     * Sorts the specified array of longs into ascending numerical order.
+     * <p>This method modifies the original array in-place.
+     * <p><b>Implementation Note:</b> This method uses a dual-pivot Quicksort via {@link Arrays#sort(long[])},
+     * which offers O(n log n) performance on most data sets.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * long[] array = {300L, 100L, 500L, 200L, 400L};
+     * sort(array);
+     * // Result: array = {100L, 200L, 300L, 400L, 500L}
+     * }</pre>
      *
      * @param a the array to be sorted
      */
@@ -26014,7 +26805,17 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Sorts the specified array into ascending numerical order.
+     * Sorts the specified array of floats into ascending numerical order.
+     * <p>This method modifies the original array in-place.
+     * <p><b>Implementation Note:</b> This method uses a dual-pivot Quicksort via {@link Arrays#sort(float[])},
+     * which offers O(n log n) performance on most data sets.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * float[] array = {3.5f, 1.2f, 5.8f, 2.1f, 4.3f};
+     * sort(array);
+     * // Result: array = {1.2f, 2.1f, 3.5f, 4.3f, 5.8f}
+     * }</pre>
      *
      * @param a the array to be sorted
      */
@@ -26282,6 +27083,17 @@ sealed class CommonUtil permits N {
 
     /**
      * Sorts the specified array based on the keys extracted by the provided {@code Function}.
+     * <p>This method modifies the original array in-place using the natural ordering of the extracted keys.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Person[] people = {new Person("Bob", 30), new Person("Alice", 25), new Person("Charlie", 35)};
+     * sortBy(people, Person::getName);
+     * // Result: sorted by name - Alice, Bob, Charlie
+     *
+     * sortBy(people, Person::getAge);
+     * // Result: sorted by age - 25, 30, 35
+     * }</pre>
      *
      * @param <T> the type of elements in the array
      * @param <U> the type of the key values, which must be comparable
@@ -26562,7 +27374,19 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Sorts the specified array into ascending numerical order by multiple threads.
+     * Sorts the specified array into ascending numerical order using multiple threads.
+     * <p>This method modifies the original array in-place.
+     * <p><b>Implementation Note:</b> For arrays smaller than {@code PARALLEL_SORT_PRIMITIVE_THRESHOLD} (3000 elements),
+     * or when only one CPU core is available, this method falls back to single-threaded sorting.
+     * Otherwise, it uses {@link Arrays#parallelSort(int[])} for parallel execution.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * int[] largeArray = new int[10000];
+     * // ... populate array ...
+     * parallelSort(largeArray);  // Uses multiple threads for better performance
+     * // Result: array sorted in ascending order using parallel processing
+     * }</pre>
      *
      * @param a the array to be sorted
      * @see Arrays#parallelSort(int[])
@@ -27175,7 +27999,16 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Sorts the specified array of ints in reverse order.
+     * Sorts the specified array of ints in reverse (descending) order.
+     * <p>This method modifies the original array in-place.
+     * <p><b>Implementation Note:</b> This method first sorts the array in ascending order and then reverses it.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * int[] array = {30, 10, 50, 20, 40};
+     * reverseSort(array);
+     * // Result: array = {50, 40, 30, 20, 10}
+     * }</pre>
      *
      * @param a the array to be sorted
      */
@@ -27454,6 +28287,7 @@ sealed class CommonUtil permits N {
      * @param <T> the type of elements in the list
      * @param list the list to be sorted
      * @param keyExtractor the function to extract the double key from the elements
+     * @throws IndexOutOfBoundsException if the list indices are out of bounds during sorting
      */
     public static <T> void reverseSortByDouble(final List<? extends T> list, final ToDoubleFunction<? super T> keyExtractor) throws IndexOutOfBoundsException {
         sort(list, Comparators.reversedComparingDouble(keyExtractor));
@@ -27500,6 +28334,13 @@ sealed class CommonUtil permits N {
      * The array must be sorted (as by the {@link #sort(char[])} method) before making this call.
      * If it is not sorted, the results are undefined.
      * If the array contains multiple elements with the specified value, there is no guarantee which one will be found.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * char[] sortedArray = {'a', 'b', 'c', 'd', 'e'};
+     * int index1 = binarySearch(sortedArray, 'c');  // Returns 2
+     * int index2 = binarySearch(sortedArray, 'f');  // Returns negative insertion point
+     * }</pre>
      *
      * @param a the array to be searched. It must be sorted in ascending order
      * @param valueToFind the value to be searched for
@@ -28017,6 +28858,13 @@ sealed class CommonUtil permits N {
     /**
      * Returns the index of the first occurrence of the specified value in the array.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * boolean[] array = {false, true, false, true, false};
+     * int index1 = indexOf(array, true);   // Returns 1
+     * int index2 = indexOf(array, false);  // Returns 0
+     * }</pre>
+     *
      * @param a the array to be searched
      * @param valueToFind the value to be searched for
      * @return the index of the first occurrence of the specified value in the array,
@@ -28364,6 +29212,14 @@ sealed class CommonUtil permits N {
 
     /**
      * Returns the index of the first occurrence of the specified value in the array.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * String[] array = {"apple", "banana", "cherry", "banana"};
+     * int index1 = indexOf(array, "banana");  // Returns 1
+     * int index2 = indexOf(array, "grape");   // Returns -1 (not found)
+     * int index3 = indexOf(array, null);      // Returns -1 (or index if array contains null)
+     * }</pre>
      *
      * @param a the array to be searched
      * @param valueToFind the value to be searched for
@@ -28929,6 +29785,14 @@ sealed class CommonUtil permits N {
     /**
      * Returns the index of the last occurrence of the specified value in the array.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * String[] array = {"apple", "banana", "cherry", "banana", "date"};
+     * int index1 = lastIndexOf(array, "banana");  // Returns 3
+     * int index2 = lastIndexOf(array, "apple");   // Returns 0
+     * int index3 = lastIndexOf(array, "grape");   // Returns -1 (not found)
+     * }</pre>
+     *
      * @param a the array to search within
      * @param valueToFind the value to search for
      * @return the index of the last occurrence of the specified value, or -1 if there is no such occurrence
@@ -29099,6 +29963,14 @@ sealed class CommonUtil permits N {
 
     /**
      * Finds the index of the first element in the array that matches the given predicate.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * String[] array = {"apple", "banana", "cherry", "date"};
+     * OptionalInt index1 = findFirstIndex(array, s -> s.startsWith("b"));     // Returns OptionalInt[1]
+     * OptionalInt index2 = findFirstIndex(array, s -> s.length() > 5);        // Returns OptionalInt[1] ("banana")
+     * OptionalInt index3 = findFirstIndex(array, s -> s.startsWith("z"));     // Returns OptionalInt.empty()
+     * }</pre>
      *
      * @param <T> the type of elements in the array
      * @param a the array to search within
@@ -29446,6 +30318,21 @@ sealed class CommonUtil permits N {
 
     /**
      * Returns the indices of all maximum elements in the specified array.
+     * <p>This method finds all elements in the array that are equal to the maximum value
+     * and returns their indices. The comparison is performed using the natural ordering
+     * of the elements (their {@code compareTo} method).
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Integer[] array1 = {3, 5, 4, 5, 2};
+     * int[] maxIndices1 = indicesOfAllMax(array1);  // Returns [1, 3] (both 5's)
+     *
+     * String[] array2 = {"cat", "dog", "dog", "ant"};
+     * int[] maxIndices2 = indicesOfAllMax(array2);  // Returns [1, 2] (both "dog"s)
+     *
+     * Integer[] array3 = {5, 5, 5};
+     * int[] maxIndices3 = indicesOfAllMax(array3);  // Returns [0, 1, 2] (all equal)
+     * }</pre>
      *
      * @param <T> the type of elements in the array
      * @param a the array to search within
@@ -29641,6 +30528,14 @@ sealed class CommonUtil permits N {
     /**
      * Returns the indices of all elements in the specified array that match the given predicate.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * String[] array = {"apple", "banana", "cherry", "date", "apricot"};
+     * int[] indices1 = indicesOfAll(array, s -> s.startsWith("a"));  // Returns [0, 4] ("apple", "apricot")
+     * int[] indices2 = indicesOfAll(array, s -> s.length() > 5);     // Returns [1, 2] ("banana", "cherry")
+     * int[] indices3 = indicesOfAll(array, s -> s.contains("z"));    // Returns [] (empty)
+     * }</pre>
+     *
      * @param <T> the type of elements in the array
      * @param a the array to search within
      * @param predicate the predicate to apply to elements of the array
@@ -29727,7 +30622,6 @@ sealed class CommonUtil permits N {
      * @param fromIndex the index to start the search from (inclusive); negative values are treated as {@code 0}
      * @return an array of indices where elements satisfy the predicate. Returns an empty array if no matches are found,
      *         the collection is {@code null}/empty, or {@code fromIndex} is beyond the collection size. The indices are in ascending order.
-     * @throws NullPointerException if {@code predicate} is {@code null}
      * @see #indicesOfAll(Collection, Predicate)
      * @see #indicesOfAll(Object[], Predicate, int)
      * @see #findFirstIndex(Collection, Predicate)

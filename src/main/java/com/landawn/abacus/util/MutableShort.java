@@ -362,26 +362,86 @@ public final class MutableShort extends Number implements Comparable<MutableShor
     //-----------------------------------------------------------------------
     // byteValue relies on Number implementation
 
+    /**
+     * Returns the value of this MutableShort as a short.
+     * This is equivalent to calling {@link #value()}.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * MutableShort num = MutableShort.of((short)42);
+     * short val = num.shortValue(); // returns 42
+     * }</pre>
+     *
+     * @return the short value represented by this object
+     */
     @Override
     public short shortValue() {
         return value;
     }
 
+    /**
+     * Returns the value of this MutableShort as an int after a widening primitive conversion.
+     * The short value is sign-extended to create the int value.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * MutableShort num = MutableShort.of((short)100);
+     * int val = num.intValue(); // returns 100
+     * }</pre>
+     *
+     * @return the numeric value represented by this object after conversion to type int
+     */
     @Override
     public int intValue() {
         return value;
     }
 
+    /**
+     * Returns the value of this MutableShort as a long after a widening primitive conversion.
+     * The short value is sign-extended to create the long value.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * MutableShort num = MutableShort.of((short)50);
+     * long val = num.longValue(); // returns 50L
+     * }</pre>
+     *
+     * @return the numeric value represented by this object after conversion to type long
+     */
     @Override
     public long longValue() {
         return value;
     }
 
+    /**
+     * Returns the value of this MutableShort as a float after a widening primitive conversion.
+     * The conversion is exact (no loss of precision).
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * MutableShort num = MutableShort.of((short)75);
+     * float val = num.floatValue(); // returns 75.0f
+     * }</pre>
+     *
+     * @return the numeric value represented by this object after conversion to type float
+     */
     @Override
     public float floatValue() {
         return value;
     }
 
+    /**
+     * Returns the value of this MutableShort as a double after a widening primitive conversion.
+     * The conversion is exact (no loss of precision).
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * MutableShort num = MutableShort.of((short)-128);
+     * double val = num.doubleValue(); // returns -128.0
+     * }</pre>
+     *
+     * @return the numeric value represented by this object after conversion to type double
+     */
     @Override
     public double doubleValue() {
         return value;

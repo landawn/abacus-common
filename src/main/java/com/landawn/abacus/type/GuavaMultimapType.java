@@ -130,6 +130,20 @@ public class GuavaMultimapType<K, V, T extends Multimap<K, V>> extends AbstractT
      * The multimap is serialized as a JSON object where each key maps to a collection of values.
      * Uses the multimap's asMap() view for serialization.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Type<Multimap<String, Integer>> type = TypeFactory.getType("Multimap<String, Integer>");
+     * Multimap<String, Integer> multimap = ArrayListMultimap.create();
+     * multimap.put("colors", 1);
+     * multimap.put("colors", 2);
+     * multimap.put("sizes", 10);
+     * String result = type.stringOf(multimap);
+     * // Returns: {"colors":[1,2],"sizes":[10]}
+     *
+     * result = type.stringOf(null);
+     * // Returns: null
+     * }</pre>
+     *
      * @param x the multimap to convert to string
      * @return the JSON string representation of the multimap, or {@code null} if the input is null
      */
@@ -149,6 +163,19 @@ public class GuavaMultimapType<K, V, T extends Multimap<K, V>> extends AbstractT
      * The string should be in JSON format representing a Map&lt;K, Collection&lt;V&gt;&gt;.
      * Creates the appropriate multimap implementation based on the type class.
      * For immutable types, returns an immutable copy of the constructed multimap.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Type<Multimap<String, Integer>> type = TypeFactory.getType("Multimap<String, Integer>");
+     * Multimap<String, Integer> result = type.valueOf("{\"colors\":[1,2],\"sizes\":[10]}");
+     * // Returns: Multimap with colors -> [1, 2], sizes -> [10]
+     *
+     * result = type.valueOf(null);
+     * // Returns: null
+     *
+     * result = type.valueOf("");
+     * // Returns: null
+     * }</pre>
      *
      * @param str the JSON string to parse
      * @return a new multimap instance containing the parsed data, or {@code null} if the input is {@code null} or empty

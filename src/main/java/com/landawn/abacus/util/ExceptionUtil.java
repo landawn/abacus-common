@@ -155,7 +155,8 @@ public final class ExceptionUtil {
      * @param exceptionClass the class of the exception to map
      * @param runtimeExceptionMapper the function that converts the exception to RuntimeException
      * @param force if {@code true}, overwrites existing mapper; if {@code false}, throws exception if mapper exists
-     * @throws IllegalArgumentException if trying to register built-in classes or if mapper already exists and force is false
+     * @throws IllegalArgumentException if trying to register built-in classes (classes with package starting with "java.", "javax.", or "com.landawn.abacus"),
+     *         or if a mapper for the specified exception class already exists and force is {@code false}
      */
     @SuppressWarnings("rawtypes")
     public static <E extends Throwable> void registerRuntimeExceptionMapper(final Class<E> exceptionClass,

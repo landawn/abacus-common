@@ -46,6 +46,15 @@ public interface DoubleUnaryOperator extends Throwables.DoubleUnaryOperator<Runt
      *   <li>Trigonometric functions</li>
      * </ul>
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * DoubleUnaryOperator square = x -> x * x;
+     * double result = square.applyAsDouble(5.0); // Returns 25.0
+     *
+     * DoubleUnaryOperator toRadians = Math::toRadians;
+     * double radians = toRadians.applyAsDouble(180.0); // Returns Math.PI
+     * }</pre>
+     *
      * @param operand the operand to which the operation is applied
      * @return the result of applying this operator to the operand
      */

@@ -29,6 +29,11 @@ import com.landawn.abacus.util.WD;
  */
 public abstract class AbstractArrayType<T> extends AbstractType<T> {
 
+    /**
+     * Constructs an AbstractArrayType with the specified type name.
+     *
+     * @param typeName the name of the array type (e.g., "int[]", "String[]", "Object[]")
+     */
     protected AbstractArrayType(final String typeName) {
         super(typeName);
     }

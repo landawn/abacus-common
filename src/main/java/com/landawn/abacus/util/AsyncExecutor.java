@@ -115,7 +115,7 @@ public class AsyncExecutor {
 
     /**
      * Constructs an AsyncExecutor with specified thread pool configuration.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Create executor with 10 core threads, 20 max threads, 60 second keep-alive
@@ -126,7 +126,8 @@ public class AsyncExecutor {
      * @param maxThreadPoolSize the maximum number of threads to allow in the pool
      * @param keepAliveTime when the number of threads is greater than the core, this is the maximum time that excess idle threads will wait for new tasks before terminating
      * @param unit the time unit for the keepAliveTime argument
-     * @throws IllegalArgumentException if any of the arguments are negative, or if the maximum pool size is less than the core pool size
+     * @throws IllegalArgumentException if {@code coreThreadPoolSize} is negative, if {@code maxThreadPoolSize} is negative,
+     *         if {@code keepAliveTime} is negative, or if {@code unit} is {@code null}
      */
     public AsyncExecutor(final int coreThreadPoolSize, final int maxThreadPoolSize, final long keepAliveTime, final TimeUnit unit)
             throws IllegalArgumentException {
@@ -347,9 +348,7 @@ public class AsyncExecutor {
      * List<ContinuableFuture<Integer>> futures = executor.execute(tasks);
      *
      * // Get all results
-     * List<Integer> results = futures.stream()
-     *     .map(ContinuableFuture::get)
-     *     .collect(Collectors.toList());
+     * List<Integer> results = Futures.allOf(futures).get();
      * }</pre>
      *
      * @param <R> the type of the result returned by the Callables
@@ -448,7 +447,7 @@ public class AsyncExecutor {
      *
      * @param <R> the type of the result produced by the FutureTask
      * @param futureTask the FutureTask to be executed asynchronously
-     * @return a ContinuableFuture&lt;R&gt; wrapping the FutureTask, allowing for chaining and composition
+     * @return a ContinuableFuture representing the pending result of this computation
      */
     protected <R> ContinuableFuture<R> execute(final FutureTask<R> futureTask) {
         final Executor executor = getExecutor(); //NOSONAR
@@ -470,6 +469,14 @@ public class AsyncExecutor {
      * of the executor.</p>
      *
      * <p>This method is marked as @Internal and is primarily for framework use.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * AsyncExecutor asyncExecutor = new AsyncExecutor();
+     * Executor executor = asyncExecutor.getExecutor();
+     * // Use the executor directly if needed
+     * executor.execute(() -> System.out.println("Direct execution"));
+     * }</pre>
      *
      * @return the Executor instance used by this AsyncExecutor for executing tasks
      */
@@ -611,6 +618,13 @@ public class AsyncExecutor {
      * underlying executor instance details.</p>
      *
      * <p>This method is useful for debugging and monitoring the executor's state.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * AsyncExecutor executor = new AsyncExecutor(10, 20, 60L, TimeUnit.SECONDS);
+     * System.out.println(executor.toString());
+     * // Output: {coreThreadPoolSize: 10, maxThreadPoolSize: 20, activeCount: 0, keepAliveTime: 60000ms, Executor: ...}
+     * }</pre>
      *
      * @return a string representation containing the configuration and state of this AsyncExecutor
      */

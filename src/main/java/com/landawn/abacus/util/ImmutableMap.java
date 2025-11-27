@@ -428,14 +428,14 @@ public class ImmutableMap<K, V> extends AbstractMap<K, V> implements Immutable {
 
     /**
      * Wraps the provided map into an ImmutableMap without copying the entries.
-     * The returned ImmutableMap is backed by the provided map, so changes to the original map
-     * will be reflected in the ImmutableMap. However, the ImmutableMap itself cannot be modified.
      * If the provided map is already an ImmutableMap, it is returned directly.
      * If the map is {@code null}, an empty ImmutableMap is returned.
-     * 
-     * <p><b>Warning:</b> Use this method with caution as the immutability guarantee depends on not modifying
-     * the original map after wrapping. For a {@code true} immutable copy, use {@link #copyOf(Map)} instead.</p>
-     * 
+     *
+     * <p><b>Warning:</b> This method does not create a defensive copy. Changes to the
+     * underlying Map will be reflected in the returned ImmutableMap, which
+     * violates the immutability contract. For a {@code true} immutable copy, use
+     * {@link #copyOf(Map)} instead.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Map<String, Integer> mutable = new HashMap<>();
@@ -448,7 +448,7 @@ public class ImmutableMap<K, V> extends AbstractMap<K, V> implements Immutable {
      * @param <K> the type of keys in the map
      * @param <V> the type of values in the map
      * @param map the map to be wrapped into an ImmutableMap
-     * @return an ImmutableMap view of the provided map
+     * @return an ImmutableMap view of the provided map, or the same instance if already an ImmutableMap
      */
     @Beta
     public static <K, V> ImmutableMap<K, V> wrap(final Map<? extends K, ? extends V> map) {

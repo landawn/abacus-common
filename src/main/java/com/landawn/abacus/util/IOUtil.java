@@ -5187,7 +5187,7 @@ public final class IOUtil {
         // put it back together
         String result = Strings.join(path, "/");
 
-        if (pathname.charAt(0) == '/') {
+        if (pathname.length() > 0 && pathname.charAt(0) == '/') {
             result = "/" + result;
         }
 
@@ -7642,9 +7642,9 @@ public final class IOUtil {
 
                 // Fix for Zip Slip
                 File newFile = new File(targetDir, ze.getName());
-                
+
                 if (!newFile.getCanonicalPath().startsWith(targetDir.getCanonicalPath())) {
-                     throw new IOException("Zip entry is outside of the target dir: " + ze.getName());
+                    throw new IOException("Zip entry is outside of the target dir: " + ze.getName());
                 }
 
                 if (ze.isDirectory()) {

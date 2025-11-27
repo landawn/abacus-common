@@ -24,6 +24,11 @@ package com.landawn.abacus.type;
  */
 public abstract class AbstractPrimitiveArrayType<T> extends AbstractArrayType<T> {
 
+    /**
+     * Constructs an AbstractPrimitiveArrayType with the specified type name.
+     *
+     * @param typeName the name of the primitive array type (e.g., "int[]", "double[]")
+     */
     protected AbstractPrimitiveArrayType(final String typeName) {
         super(typeName);
     }

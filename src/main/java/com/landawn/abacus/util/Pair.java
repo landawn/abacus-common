@@ -198,8 +198,14 @@ public final class Pair<L, R> implements Map.Entry<L, R>, Mutable {
 
     /**
      * Gets the left element of this pair.
-     * 
-     * @return the left element of the pair
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Pair<String, Integer> pair = Pair.of("Hello", 42);
+     * String left = pair.getLeft(); // Returns "Hello"
+     * }</pre>
+     *
+     * @return the left element of the pair, may be {@code null}
      * @deprecated This method is deprecated in favor of the more concise {@link #left()} method.
      * @see #left()
      */
@@ -228,8 +234,14 @@ public final class Pair<L, R> implements Map.Entry<L, R>, Mutable {
 
     /**
      * Gets the right element of this pair.
-     * 
-     * @return the right element of the pair
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Pair<String, Integer> pair = Pair.of("Hello", 42);
+     * Integer right = pair.getRight(); // Returns 42
+     * }</pre>
+     *
+     * @return the right element of the pair, may be {@code null}
      * @deprecated This method is deprecated in favor of the more concise {@link #right()} method.
      * @see #right()
      */
@@ -367,22 +379,22 @@ public final class Pair<L, R> implements Map.Entry<L, R>, Mutable {
      * Sets the left element to the specified value if and only if the given predicate
      * evaluates to {@code true}. The predicate receives both the current pair and the new value
      * as parameters for evaluation.
-     * 
+     *
      * <p>This method is useful for conditional updates where you want to change
      * the left value only when certain conditions are met.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Pair<String, Integer> pair = Pair.of("Hello", 10);
-     * boolean updated = pair.setLeftIf("World", (p, newVal) -> p.right > 5);
-     * // updated is true, pair.left returns "World" because 10 > 5
-     * 
-     * updated = pair.setLeftIf("Test", (p, newVal) -> p.right > 20);
-     * // updated is false, pair.left still returns "World" because 10 is not > 20
+     * boolean updated = pair.setLeftIf("World", (p, newVal) -> p.right() > 5);
+     * // updated is true, pair.left() returns "World" because 10 > 5
+     *
+     * updated = pair.setLeftIf("Test", (p, newVal) -> p.right() > 20);
+     * // updated is false, pair.left() still returns "World" because 10 is not > 20
      * }</pre>
      *
      * @param <E> the type of exception that the predicate may throw
-     * @param newLeft the new value to potentially set for the left element (can be null)
+     * @param newLeft the new value to potentially set for the left element, may be {@code null}
      * @param predicate the condition to test; receives the current pair as the first parameter
      *                  and the new left value as the second parameter
      * @return {@code true} if the value was updated (predicate returned true), {@code false} otherwise
@@ -401,22 +413,22 @@ public final class Pair<L, R> implements Map.Entry<L, R>, Mutable {
      * Sets the right element to the specified value if and only if the given predicate
      * evaluates to {@code true}. The predicate receives both the current pair and the new value
      * as parameters for evaluation.
-     * 
+     *
      * <p>This method is useful for conditional updates where you want to change
      * the right value only when certain conditions are met.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Pair<String, Integer> pair = Pair.of("Hello", 10);
-     * boolean updated = pair.setRightIf(20, (p, newVal) -> p.left.length() > 3);
-     * // updated is true, pair.right returns 20 because "Hello".length() > 3
-     * 
-     * updated = pair.setRightIf(30, (p, newVal) -> newVal < p.right);
-     * // updated is false, pair.right still returns 20 because 30 is not < 20
+     * boolean updated = pair.setRightIf(20, (p, newVal) -> p.left().length() > 3);
+     * // updated is true, pair.right() returns 20 because "Hello".length() > 3
+     *
+     * updated = pair.setRightIf(30, (p, newVal) -> newVal < p.right());
+     * // updated is false, pair.right() still returns 20 because 30 is not < 20
      * }</pre>
      *
      * @param <E> the type of exception that the predicate may throw
-     * @param newRight the new value to potentially set for the right element (can be null)
+     * @param newRight the new value to potentially set for the right element, may be {@code null}
      * @param predicate the condition to test; receives the current pair as the first parameter
      *                  and the new right value as the second parameter
      * @return {@code true} if the value was updated (predicate returned true), {@code false} otherwise
@@ -435,26 +447,26 @@ public final class Pair<L, R> implements Map.Entry<L, R>, Mutable {
      * Sets both the left and right elements to the specified values if and only if
      * the given predicate evaluates to {@code true}. The predicate receives the current pair,
      * the new left value, and the new right value as parameters for evaluation.
-     * 
+     *
      * <p>This method is useful for conditional updates where you want to change
      * both values atomically only when certain conditions are met. If the predicate
      * returns {@code false}, neither value is changed.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Pair<String, Integer> pair = Pair.of("Hello", 10);
-     * boolean updated = pair.setIf("World", 20, 
-     *     (p, newL, newR) -> p.left.length() + p.right < 20);
+     * boolean updated = pair.setIf("World", 20,
+     *     (p, newL, newR) -> p.left().length() + p.right() < 20);
      * // updated is true, pair is now ("World", 20) because 5 + 10 < 20
-     * 
+     *
      * updated = pair.setIf("Test", 5,
      *     (p, newL, newR) -> newL.length() > newR);
      * // updated is false, pair remains ("World", 20) because 4 is not > 5
      * }</pre>
      *
      * @param <E> the type of exception that the predicate may throw
-     * @param newLeft the new value to potentially set for the left element (can be null)
-     * @param newRight the new value to potentially set for the right element (can be null)
+     * @param newLeft the new value to potentially set for the left element, may be {@code null}
+     * @param newRight the new value to potentially set for the right element, may be {@code null}
      * @param predicate the condition to test; receives the current pair as the first parameter,
      *                  the new left value as the second parameter, and the new right value as
      *                  the third parameter
@@ -501,14 +513,14 @@ public final class Pair<L, R> implements Map.Entry<L, R>, Mutable {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Pair<String, List<Integer>> original = Pair.of("Numbers", new ArrayList<>());
-     * original.right.add(1);
-     * 
+     * original.right().add(1);
+     *
      * Pair<String, List<Integer>> copy = original.copy();
-     * copy.right.add(2);
+     * copy.right().add(2);
      * // Both original and copy will have [1, 2] in their right element
-     * 
+     *
      * copy.setLeft("NewNumbers");
-     * // original.left still returns "Numbers", copy.left returns "NewNumbers"
+     * // original.left() still returns "Numbers", copy.left() returns "NewNumbers"
      * }</pre>
      *
      * @return a new Pair containing the same left and right elements as this pair
@@ -645,10 +657,10 @@ public final class Pair<L, R> implements Map.Entry<L, R>, Mutable {
      * List<Pair<String, Integer>> pairs = new ArrayList<>();
      * pair.accept(pairs::add);
      * // pairs now contains the pair
-     * 
+     *
      * pair.accept(p -> {
-     *     if (p.right > 50) {
-     *         System.out.println(p.left + " is high");
+     *     if (p.right() > 50) {
+     *         System.out.println(p.left() + " is high");
      *     }
      * });
      * // Prints "Score is high"
@@ -696,10 +708,10 @@ public final class Pair<L, R> implements Map.Entry<L, R>, Mutable {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Pair<String, Integer> entry = Pair.of("Temperature", 25);
-     * String formatted = entry.map(p -> p.left + ": " + p.right + "°C");
+     * String formatted = entry.map(p -> p.left() + ": " + p.right() + "°C");
      * // formatted equals "Temperature: 25°C"
-     * 
-     * Boolean isValid = entry.map(p -> p.left != null && p.right != null);
+     *
+     * Boolean isValid = entry.map(p -> p.left() != null && p.right() != null);
      * // isValid equals true
      * }</pre>
      *
@@ -754,14 +766,14 @@ public final class Pair<L, R> implements Map.Entry<L, R>, Mutable {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Pair<String, Integer> pair = Pair.of("Test", 10);
-     * 
+     *
      * Optional<Pair<String, Integer>> filtered = pair.filter(
-     *     p -> p.left.startsWith("T") && p.right % 2 == 0
+     *     p -> p.left().startsWith("T") && p.right() % 2 == 0
      * );
      * // filtered.isPresent() is true
-     * 
+     *
      * Optional<Pair<String, Integer>> filtered2 = pair.filter(
-     *     p -> p.left.length() + p.right > 20
+     *     p -> p.left().length() + p.right() > 20
      * );
      * // filtered2.isPresent() is false because 4 + 10 = 14, which is not > 20
      * }</pre>
@@ -831,7 +843,7 @@ public final class Pair<L, R> implements Map.Entry<L, R>, Mutable {
      * String key = entry.getKey(); // Returns "key"
      * }</pre>
      *
-     * @return the left element of this pair (can be null)
+     * @return the left element of this pair, may be {@code null}
      * @deprecated Use {@link #left()} instead for cleaner code
      */
     @Deprecated
@@ -855,7 +867,7 @@ public final class Pair<L, R> implements Map.Entry<L, R>, Mutable {
      * Integer value = entry.getValue(); // Returns 100
      * }</pre>
      *
-     * @return the right element of this pair (can be null)
+     * @return the right element of this pair, may be {@code null}
      * @deprecated Use {@link #right()} instead for cleaner code
      */
     @Deprecated
@@ -882,8 +894,8 @@ public final class Pair<L, R> implements Map.Entry<L, R>, Mutable {
      * // oldValue equals 100, pair.right() now returns 200
      * }</pre>
      *
-     * @param value the new value to set for the right element (can be null)
-     * @return the previous value of the right element (can be null)
+     * @param value the new value to set for the right element, may be {@code null}
+     * @return the previous value of the right element, may be {@code null}
      * @deprecated Use {@link #setRight(Object)} or {@link #getAndSetRight(Object)} instead
      */
     @Deprecated
@@ -895,10 +907,22 @@ public final class Pair<L, R> implements Map.Entry<L, R>, Mutable {
     /**
      * Returns a hash code value for this pair.
      * The hash code is computed using both the left and right elements.
-     * 
+     *
      * <p>This implementation ensures that pairs with the same elements
      * in the same order will have the same hash code, making them suitable
      * for use as keys in hash-based collections.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Pair<String, Integer> pair1 = Pair.of("Hello", 42);
+     * Pair<String, Integer> pair2 = Pair.of("Hello", 42);
+     * // pair1.hashCode() == pair2.hashCode()
+     *
+     * Map<Pair<String, Integer>, String> map = new HashMap<>();
+     * map.put(pair1, "value");
+     * // Can retrieve using pair2 because they have the same hash code and are equal
+     * String value = map.get(pair2); // Returns "value"
+     * }</pre>
      *
      * @return a hash code value for this pair
      */

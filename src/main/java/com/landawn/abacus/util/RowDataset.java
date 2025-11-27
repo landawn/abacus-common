@@ -162,18 +162,35 @@ public final class RowDataset implements Dataset, Cloneable {
 
     /**
      * Constructs a new RowDataset with the specified column names and column data.
-     * 
+     *
      * <p>This constructor creates a row-oriented dataset where data is organized in columns.
      * Each column is represented as a List of Objects, and all columns must have the same size
      * to maintain data integrity across rows.</p>
-     * 
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * // Creating a simple dataset with 3 columns and 2 rows
+     * List<String> columnNames = Arrays.asList("id", "name", "age");
+     * List<List<Object>> columns = Arrays.asList(
+     *     Arrays.asList(1, 2),           // id column
+     *     Arrays.asList("Alice", "Bob"),  // name column
+     *     Arrays.asList(25, 30)           // age column
+     * );
+     * RowDataset dataset = new RowDataset(columnNames, columns);
+     *
+     * // Accessing data
+     * System.out.println(dataset.size());         // prints: 2
+     * System.out.println(dataset.columnCount());  // prints: 3
+     * System.out.println(dataset.get(0, 1));      // prints: "Alice"
+     * }</pre>
+     *
      * @param columnNameList the list of column names for the dataset. Must not be {@code null},
      *                      must not contain empty/null names, and must not contain duplicates.
      *                      The order of names corresponds to the order of columns in columnList.
      * @param columnList the list of columns, where each column is a List of Objects containing
      *                  the data for that column. Must not be {@code null}, and each column must not be {@code null}.
      *                  All columns must have the same size to ensure consistent row structure.
-     * 
+     *
      * @throws IllegalArgumentException if any of the following conditions are met:
      *         <ul>
      *         <li>columnNameList is null</li>
@@ -184,7 +201,7 @@ public final class RowDataset implements Dataset, Cloneable {
      *         <li>any column in columnList is null</li>
      *         <li>columns in columnList have different sizes</li>
      *         </ul>
-     * 
+     *
      * @see #RowDataset(List, List, Map)
      */
     public RowDataset(final List<String> columnNameList, final List<List<Object>> columnList) {
@@ -193,11 +210,34 @@ public final class RowDataset implements Dataset, Cloneable {
 
     /**
      * Constructs a new RowDataset with the specified column names, column data, and properties.
-     * 
+     *
      * <p>This constructor creates a row-oriented dataset where data is organized in columns.
      * Each column is represented as a List of Objects, and all columns must have the same size
      * to maintain data integrity across rows.</p>
-     * 
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * // Creating a dataset with properties/metadata
+     * List<String> columnNames = Arrays.asList("id", "name", "score");
+     * List<List<Object>> columns = Arrays.asList(
+     *     Arrays.asList(1, 2, 3),              // id column
+     *     Arrays.asList("Alice", "Bob", "Charlie"),  // name column
+     *     Arrays.asList(95, 87, 92)            // score column
+     * );
+     *
+     * Map<String, Object> properties = new HashMap<>();
+     * properties.put("source", "test_data");
+     * properties.put("created", LocalDateTime.now());
+     * properties.put("description", "Student scores dataset");
+     *
+     * RowDataset dataset = new RowDataset(columnNames, columns, properties);
+     *
+     * // Accessing dataset and properties
+     * System.out.println(dataset.size());                    // prints: 3
+     * System.out.println(dataset.getProperty("source"));     // prints: "test_data"
+     * System.out.println(dataset.get(0, "name"));            // prints: "Alice"
+     * }</pre>
+     *
      * @param columnNameList the list of column names for the dataset. Must not be {@code null},
      *                      must not contain empty/null names, and must not contain duplicates.
      *                      The order of names corresponds to the order of columns in columnList.
@@ -206,7 +246,7 @@ public final class RowDataset implements Dataset, Cloneable {
      *                  All columns must have the same size to ensure consistent row structure.
      * @param properties optional properties map for storing metadata associated with this dataset.
      *                  Can be {@code null}. A defensive copy is made of the provided properties.
-     * 
+     *
      * @throws IllegalArgumentException if any of the following conditions are met:
      *         <ul>
      *         <li>columnNameList is null</li>
@@ -217,7 +257,7 @@ public final class RowDataset implements Dataset, Cloneable {
      *         <li>any column in columnList is null</li>
      *         <li>columns in columnList have different sizes</li>
      *         </ul>
-     * 
+     *
      * @see #RowDataset(List, List)
      * @see #copyProperties(Map)
      */

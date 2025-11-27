@@ -155,6 +155,12 @@ public interface Logger {
     /**
      * Logs a message at the TRACE level with four parameters.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * logger.trace("Request {} from {} processed in {}ms with status {}",
+     *              requestId, clientIp, duration, statusCode);
+     * }</pre>
+     *
      * @param template the message template containing four placeholders
      * @param arg1 the first argument
      * @param arg2 the second argument
@@ -165,6 +171,12 @@ public interface Logger {
 
     /**
      * Logs a message at the TRACE level with five parameters.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * logger.trace("User {} accessed {} at {} from {} with session {}",
+     *              userId, resource, timestamp, ipAddress, sessionId);
+     * }</pre>
      *
      * @param template the message template containing five placeholders
      * @param arg1 the first argument
@@ -178,6 +190,12 @@ public interface Logger {
     /**
      * Logs a message at the TRACE level with six parameters.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * logger.trace("Transaction {} for user {} amount {} currency {} status {} timestamp {}",
+     *              txnId, userId, amount, currency, status, timestamp);
+     * }</pre>
+     *
      * @param template the message template containing six placeholders
      * @param arg1 the first argument
      * @param arg2 the second argument
@@ -190,6 +208,12 @@ public interface Logger {
 
     /**
      * Logs a message at the TRACE level with seven parameters.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * logger.trace("Request {} method {} path {} headers {} body {} status {} duration {}",
+     *              requestId, method, path, headers, body, status, duration);
+     * }</pre>
      *
      * @param template the message template containing seven placeholders
      * @param arg1 the first argument
@@ -238,6 +262,11 @@ public interface Logger {
     /**
      * Logs an exception at the TRACE level with a formatted message and one parameter.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * logger.trace(exception, "Failed to process item {}", itemId);
+     * }</pre>
+     *
      * @param t the exception or error to log
      * @param template the message template
      * @param arg the argument to be substituted in the template
@@ -246,6 +275,11 @@ public interface Logger {
 
     /**
      * Logs an exception at the TRACE level with a formatted message and two parameters.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * logger.trace(exception, "Error in {} operation for user {}", operation, userId);
+     * }</pre>
      *
      * @param t the exception or error to log
      * @param template the message template
@@ -256,6 +290,11 @@ public interface Logger {
 
     /**
      * Logs an exception at the TRACE level with a formatted message and three parameters.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * logger.trace(exception, "Failed to load {} from {} at {}", resource, location, timestamp);
+     * }</pre>
      *
      * @param t the exception or error to log
      * @param template the message template
@@ -316,6 +355,11 @@ public interface Logger {
     /**
      * Logs a message at the DEBUG level with one parameter.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * logger.debug("Cache hit for key: {}", cacheKey);
+     * }</pre>
+     *
      * @param template the message template
      * @param arg the argument to be substituted in the template
      */
@@ -353,6 +397,12 @@ public interface Logger {
     /**
      * Logs a message at the DEBUG level with four parameters.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * logger.debug("Connection {} to {} established with timeout {}ms and pool size {}",
+     *              connId, host, timeout, poolSize);
+     * }</pre>
+     *
      * @param template the message template containing four placeholders
      * @param arg1 the first argument
      * @param arg2 the second argument
@@ -363,6 +413,12 @@ public interface Logger {
 
     /**
      * Logs a message at the DEBUG level with five parameters.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * logger.debug("Query {} executed on {} with params {} in {}ms returning {} rows",
+     *              queryId, database, params, duration, rowCount);
+     * }</pre>
      *
      * @param template the message template containing five placeholders
      * @param arg1 the first argument
@@ -376,6 +432,12 @@ public interface Logger {
     /**
      * Logs a message at the DEBUG level with six parameters.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * logger.debug("HTTP {} {} from {} returned {} in {}ms with size {} bytes",
+     *              method, path, clientIp, statusCode, duration, responseSize);
+     * }</pre>
+     *
      * @param template the message template containing six placeholders
      * @param arg1 the first argument
      * @param arg2 the second argument
@@ -388,6 +450,12 @@ public interface Logger {
 
     /**
      * Logs a message at the DEBUG level with seven parameters.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * logger.debug("API call {} to {} with params {} auth {} returned {} in {}ms status {}",
+     *              callId, endpoint, params, authType, response, duration, status);
+     * }</pre>
      *
      * @param template the message template containing seven placeholders
      * @param arg1 the first argument
@@ -435,6 +503,11 @@ public interface Logger {
     /**
      * Logs an exception at the DEBUG level with a formatted message and one parameter.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * logger.debug(exception, "Failed to parse config file: {}", filename);
+     * }</pre>
+     *
      * @param t the exception or error to log
      * @param template the message template
      * @param arg the argument to be substituted in the template
@@ -443,6 +516,11 @@ public interface Logger {
 
     /**
      * Logs an exception at the DEBUG level with a formatted message and two parameters.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * logger.debug(exception, "Connection to {} failed on port {}", host, port);
+     * }</pre>
      *
      * @param t the exception or error to log
      * @param template the message template
@@ -453,6 +531,11 @@ public interface Logger {
 
     /**
      * Logs an exception at the DEBUG level with a formatted message and three parameters.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * logger.debug(exception, "Failed to execute {} on {} with params {}", operation, target, params);
+     * }</pre>
      *
      * @param t the exception or error to log
      * @param template the message template
@@ -556,6 +639,12 @@ public interface Logger {
     /**
      * Logs a message at the INFO level with four parameters.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * logger.info("Service {} started on {} with {} threads and {} MB memory",
+     *             serviceName, host, threadCount, memoryMB);
+     * }</pre>
+     *
      * @param template the message template containing four placeholders
      * @param arg1 the first argument
      * @param arg2 the second argument
@@ -566,6 +655,12 @@ public interface Logger {
 
     /**
      * Logs a message at the INFO level with five parameters.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * logger.info("Batch {} completed: {} items processed, {} succeeded, {} failed in {}ms",
+     *             batchId, totalItems, successCount, failCount, duration);
+     * }</pre>
      *
      * @param template the message template containing five placeholders
      * @param arg1 the first argument
@@ -579,6 +674,12 @@ public interface Logger {
     /**
      * Logs a message at the INFO level with six parameters.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * logger.info("Deploy {} to {} environment: {} instances, {} version, status {} at {}",
+     *             appName, envName, instanceCount, version, status, timestamp);
+     * }</pre>
+     *
      * @param template the message template containing six placeholders
      * @param arg1 the first argument
      * @param arg2 the second argument
@@ -591,6 +692,12 @@ public interface Logger {
 
     /**
      * Logs a message at the INFO level with seven parameters.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * logger.info("Migration {} from {} to {}: {} tables, {} rows, {} errors, completed in {}s",
+     *             migrationId, sourceDb, targetDb, tableCount, rowCount, errorCount, duration);
+     * }</pre>
      *
      * @param template the message template containing seven placeholders
      * @param arg1 the first argument
@@ -638,6 +745,11 @@ public interface Logger {
     /**
      * Logs an exception at the INFO level with a formatted message and one parameter.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * logger.info(exception, "Using fallback configuration for {}", componentName);
+     * }</pre>
+     *
      * @param t the exception or error to log
      * @param template the message template
      * @param arg the argument to be substituted in the template
@@ -646,6 +758,11 @@ public interface Logger {
 
     /**
      * Logs an exception at the INFO level with a formatted message and two parameters.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * logger.info(exception, "Retrying operation {} after {} seconds", operationName, retryDelay);
+     * }</pre>
      *
      * @param t the exception or error to log
      * @param template the message template
@@ -656,6 +773,11 @@ public interface Logger {
 
     /**
      * Logs an exception at the INFO level with a formatted message and three parameters.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * logger.info(exception, "Switched to backup {} from {} with latency {}ms", backup, primary, latency);
+     * }</pre>
      *
      * @param t the exception or error to log
      * @param template the message template
@@ -759,6 +881,12 @@ public interface Logger {
     /**
      * Logs a message at the WARN level with four parameters.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * logger.warn("Resource {} usage at {}% exceeds threshold of {}% for {}",
+     *             resourceName, currentUsage, threshold, duration);
+     * }</pre>
+     *
      * @param template the message template containing four placeholders
      * @param arg1 the first argument
      * @param arg2 the second argument
@@ -769,6 +897,12 @@ public interface Logger {
 
     /**
      * Logs a message at the WARN level with five parameters.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * logger.warn("Queue {} size {} exceeds limit {}, {} messages dropped in {}s",
+     *             queueName, currentSize, maxSize, droppedCount, duration);
+     * }</pre>
      *
      * @param template the message template containing five placeholders
      * @param arg1 the first argument
@@ -782,6 +916,12 @@ public interface Logger {
     /**
      * Logs a message at the WARN level with six parameters.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * logger.warn("Session {} for user {} on {} idle for {}min, will timeout in {}min, limit {}",
+     *             sessionId, userId, host, idleTime, timeoutRemaining, maxIdleTime);
+     * }</pre>
+     *
      * @param template the message template containing six placeholders
      * @param arg1 the first argument
      * @param arg2 the second argument
@@ -794,6 +934,12 @@ public interface Logger {
 
     /**
      * Logs a message at the WARN level with seven parameters.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * logger.warn("Cache {} on {} hit ratio {}% below {}%, size {}, evictions {}, age {}min",
+     *             cacheName, node, hitRatio, threshold, size, evictions, age);
+     * }</pre>
      *
      * @param template the message template containing seven placeholders
      * @param arg1 the first argument
@@ -841,6 +987,11 @@ public interface Logger {
     /**
      * Logs an exception at the WARN level with a formatted message and one parameter.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * logger.warn(exception, "Deprecated API used: {}", apiName);
+     * }</pre>
+     *
      * @param t the exception or error to log
      * @param template the message template
      * @param arg the argument to be substituted in the template
@@ -849,6 +1000,11 @@ public interface Logger {
 
     /**
      * Logs an exception at the WARN level with a formatted message and two parameters.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * logger.warn(exception, "Retry attempt {} failed for {}", attemptNumber, operationName);
+     * }</pre>
      *
      * @param t the exception or error to log
      * @param template the message template
@@ -859,6 +1015,11 @@ public interface Logger {
 
     /**
      * Logs an exception at the WARN level with a formatted message and three parameters.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * logger.warn(exception, "Timeout accessing {} on {} after {}ms", resource, server, timeout);
+     * }</pre>
      *
      * @param t the exception or error to log
      * @param template the message template
@@ -962,6 +1123,12 @@ public interface Logger {
     /**
      * Logs a message at the ERROR level with four parameters.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * logger.error("Critical failure in {} module: {} errors in {} records after {}s",
+     *              moduleName, errorCount, recordCount, duration);
+     * }</pre>
+     *
      * @param template the message template containing four placeholders
      * @param arg1 the first argument
      * @param arg2 the second argument
@@ -972,6 +1139,12 @@ public interface Logger {
 
     /**
      * Logs a message at the ERROR level with five parameters.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * logger.error("Database {} on {} unavailable: {} connections failed, {} transactions lost in {}s",
+     *              dbName, hostname, failedConns, lostTransactions, duration);
+     * }</pre>
      *
      * @param template the message template containing five placeholders
      * @param arg1 the first argument
@@ -985,6 +1158,12 @@ public interface Logger {
     /**
      * Logs a message at the ERROR level with six parameters.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * logger.error("Payment {} for user {} failed: amount {}, currency {}, gateway {}, code {}",
+     *              paymentId, userId, amount, currency, gateway, errorCode);
+     * }</pre>
+     *
      * @param template the message template containing six placeholders
      * @param arg1 the first argument
      * @param arg2 the second argument
@@ -997,6 +1176,12 @@ public interface Logger {
 
     /**
      * Logs a message at the ERROR level with seven parameters.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * logger.error("System failure: component {}, host {}, error {}, affected {}, started {}, duration {}s, impact {}",
+     *              component, host, errorType, affectedUsers, startTime, duration, impactLevel);
+     * }</pre>
      *
      * @param template the message template containing seven placeholders
      * @param arg1 the first argument
@@ -1053,6 +1238,11 @@ public interface Logger {
     /**
      * Logs an exception at the ERROR level with a formatted message and one parameter.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * logger.error(exception, "Fatal error processing transaction {}", transactionId);
+     * }</pre>
+     *
      * @param t the exception or error to log
      * @param template the message template
      * @param arg the argument to be substituted in the template
@@ -1061,6 +1251,11 @@ public interface Logger {
 
     /**
      * Logs an exception at the ERROR level with a formatted message and two parameters.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * logger.error(exception, "Service {} crashed after {} requests", serviceName, requestCount);
+     * }</pre>
      *
      * @param t the exception or error to log
      * @param template the message template
@@ -1071,6 +1266,11 @@ public interface Logger {
 
     /**
      * Logs an exception at the ERROR level with a formatted message and three parameters.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * logger.error(exception, "Data corruption in {} table: {} records affected at {}", tableName, count, timestamp);
+     * }</pre>
      *
      * @param t the exception or error to log
      * @param template the message template

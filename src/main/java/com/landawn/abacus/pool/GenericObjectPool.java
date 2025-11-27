@@ -296,6 +296,8 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
      * @param e the object to add, must not be null
      * @param autoDestroyOnFailedToAdd if {@code true}, calls e.destroy(PUT_ADD_FAILURE) if add fails
      * @return {@code true} if the object was successfully added, {@code false} otherwise
+     * @throws IllegalArgumentException if the object is null
+     * @throws IllegalStateException if the pool has been closed
      */
     @Override
     public boolean add(final E e, final boolean autoDestroyOnFailedToAdd) {

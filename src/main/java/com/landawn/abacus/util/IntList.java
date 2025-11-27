@@ -601,7 +601,7 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
      *
      * @param index the index of the element to return
      * @return the element at the specified position in this list
-     * @throws IndexOutOfBoundsException if {@code index < 0 || index >= size()}
+     * @throws IndexOutOfBoundsException if the index is out of range ({@code index < 0 || index >= size()})
      */
     public int get(final int index) {
         rangeCheck(index);
@@ -615,7 +615,7 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
      * @param index the index of the element to replace
      * @param e the element to be stored at the specified position
      * @return the element previously at the specified position
-     * @throws IndexOutOfBoundsException if {@code index < 0 || index >= size()}
+     * @throws IndexOutOfBoundsException if the index is out of range ({@code index < 0 || index >= size()})
      */
     public int set(final int index, final int e) {
         rangeCheck(index);
@@ -653,8 +653,7 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
      *
      * @param index the index at which the specified element is to be inserted
      * @param e the element to be inserted
-     * @throws IndexOutOfBoundsException if the index is out of range
-     *         ({@code index < 0 || index > size()})
+     * @throws IndexOutOfBoundsException if the index is out of range ({@code index < 0 || index > size()})
      */
     public void add(final int index, final int e) {
         rangeCheckForAdd(index);
@@ -676,7 +675,7 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
      * Appends all elements from the specified IntList to the end of this list,
      * in the order they appear in the specified list.
      *
-     * @param c the IntList containing elements to be added to this list
+     * @param c the IntList containing elements to be added to this list. If {@code null} or empty, this list remains unchanged.
      * @return {@code true} if this list changed as a result of the call (i.e., if c was not empty)
      */
     @Override
@@ -703,9 +702,9 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
      * order they appear in the specified list.
      *
      * @param index the index at which to insert the first element from the specified list
-     * @param c the IntList containing elements to be inserted into this list
+     * @param c the IntList containing elements to be inserted into this list. If {@code null} or empty, this list remains unchanged.
      * @return {@code true} if this list changed as a result of the call (i.e., if c was not empty)
-     * @throws IndexOutOfBoundsException if the index is out of range (index &lt; 0 || index &gt; size())
+     * @throws IndexOutOfBoundsException if the index is out of range ({@code index < 0 || index > size()})
      */
     @Override
     public boolean addAll(final int index, final IntList c) {
@@ -736,7 +735,7 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
      * Appends all elements from the specified array to the end of this list,
      * in the order they appear in the array.
      *
-     * @param a the array containing elements to be added to this list
+     * @param a the array containing elements to be added to this list. If {@code null} or empty, this list remains unchanged.
      * @return {@code true} if this list changed as a result of the call (i.e., if the array was not empty)
      */
     @Override
@@ -751,9 +750,9 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
      * order they appear in the array.
      *
      * @param index the index at which to insert the first element from the specified array
-     * @param a the array containing elements to be inserted into this list
+     * @param a the array containing elements to be inserted into this list. If {@code null} or empty, this list remains unchanged.
      * @return {@code true} if this list changed as a result of the call (i.e., if the array was not empty)
-     * @throws IndexOutOfBoundsException if the index is out of range (index &lt; 0 || index &gt; size())
+     * @throws IndexOutOfBoundsException if the index is out of range ({@code index < 0 || index > size()})
      */
     @Override
     public boolean addAll(final int index, final int[] a) {
@@ -784,7 +783,7 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
      * Checks if the specified index is valid for an add operation.
      *
      * @param index the index to check
-     * @throws IndexOutOfBoundsException if the index is out of range (index &lt; 0 || index &gt; size())
+     * @throws IndexOutOfBoundsException if the index is out of range ({@code index < 0 || index > size()})
      */
     private void rangeCheckForAdd(final int index) {
         if (index > size || index < 0) {
@@ -878,7 +877,7 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
      * Removes from this list all of its elements that are contained in the specified IntList.
      * This method compares elements by value, removing all occurrences found in the specified list.
      *
-     * @param c the IntList containing elements to be removed from this list
+     * @param c the IntList containing elements to be removed from this list. If {@code null} or empty, this list remains unchanged.
      * @return {@code true} if this list was modified as a result of the call
      */
     @Override
@@ -894,7 +893,7 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
      * Removes from this list all of its elements that are contained in the specified array.
      * This method compares elements by value, removing all occurrences found in the array.
      *
-     * @param a the array containing elements to be removed from this list
+     * @param a the array containing elements to be removed from this list. If {@code null} or empty, this list remains unchanged.
      * @return {@code true} if this list was modified as a result of the call
      */
     @Override
@@ -995,7 +994,7 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
      * In other words, removes from this list all of its elements that are not contained
      * in the specified list. Elements are compared by value.
      *
-     * @param c the IntList containing elements to be retained in this list
+     * @param c the IntList containing elements to be retained in this list. If {@code null} or empty, this list remains unchanged.
      * @return {@code true} if this list was modified as a result of the call
      */
     @Override
@@ -1014,7 +1013,7 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
      * In other words, removes from this list all of its elements that are not contained
      * in the specified array. Elements are compared by value.
      *
-     * @param a the array containing elements to be retained in this list
+     * @param a the array containing elements to be retained in this list. If {@code null} or empty, this list remains unchanged.
      * @return {@code true} if this list was modified as a result of the call
      */
     @Override
@@ -1066,7 +1065,7 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
      *
      * @param index the index of the element to be removed
      * @return the element that was removed from the list
-     * @throws IndexOutOfBoundsException if the index is out of range (index &lt; 0 || index &gt;= size())
+     * @throws IndexOutOfBoundsException if the index is out of range ({@code index < 0 || index >= size()})
      */
     public int delete(final int index) {
         rangeCheck(index);
@@ -1083,7 +1082,7 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
      * The indices array is processed to remove elements efficiently, handling
      * duplicate indices and maintaining the correct element positions during removal.
      *
-     * @param indices the indices of elements to be removed. Null or empty array results in no change.
+     * @param indices the indices of elements to be removed. If {@code null} or empty, this list remains unchanged.
      */
     @Override
     public void deleteAllByIndices(final int... indices) {
@@ -1108,8 +1107,7 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
      *
      * @param fromIndex the index of the first element to be removed (inclusive)
      * @param toIndex the index after the last element to be removed (exclusive)
-     * @throws IndexOutOfBoundsException if fromIndex or toIndex is out of range
-     *         (fromIndex &lt; 0 || toIndex &gt; size() || fromIndex &gt; toIndex)
+     * @throws IndexOutOfBoundsException if the index is out of range ({@code fromIndex < 0 || toIndex > size() || fromIndex > toIndex})
      */
     @Override
     public void deleteRange(final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
@@ -1160,15 +1158,14 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
      * Replaces each element in the specified range of this list with elements from
      * the replacement IntList. The range from fromIndex (inclusive) to toIndex (exclusive)
      * is removed and replaced with all elements from the replacement list.
-     * 
+     *
      * <p>If the replacement list has a different size than the range being replaced,
      * the list will grow or shrink accordingly.
      *
      * @param fromIndex the starting index (inclusive) of the range to replace
      * @param toIndex the ending index (exclusive) of the range to replace
-     * @param replacement the IntList whose elements will replace the specified range
-     * @throws IndexOutOfBoundsException if fromIndex or toIndex is out of range
-     *         (fromIndex &lt; 0 || toIndex &gt; size() || fromIndex &gt; toIndex)
+     * @param replacement the IntList whose elements will replace the specified range. If {@code null} or empty, this list remains unchanged.
+     * @throws IndexOutOfBoundsException if fromIndex or toIndex is out of range ({@code fromIndex < 0 || toIndex > size() || fromIndex > toIndex})
      */
     @Override
     public void replaceRange(final int fromIndex, final int toIndex, final IntList replacement) throws IndexOutOfBoundsException {
@@ -1203,15 +1200,14 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
      * Replaces each element in the specified range of this list with elements from
      * the replacement array. The range from fromIndex (inclusive) to toIndex (exclusive)
      * is removed and replaced with all elements from the replacement array.
-     * 
+     *
      * <p>If the replacement array has a different length than the range being replaced,
      * the list will grow or shrink accordingly.
      *
      * @param fromIndex the starting index (inclusive) of the range to replace
      * @param toIndex the ending index (exclusive) of the range to replace
-     * @param replacement the array whose elements will replace the specified range
-     * @throws IndexOutOfBoundsException if fromIndex or toIndex is out of range
-     *         (fromIndex &lt; 0 || toIndex &gt; size() || fromIndex &gt; toIndex)
+     * @param replacement the array whose elements will replace the specified range. If {@code null} or empty, this list remains unchanged.
+     * @throws IndexOutOfBoundsException if fromIndex or toIndex is out of range ({@code fromIndex < 0 || toIndex > size() || fromIndex > toIndex})
      */
     @Override
     public void replaceRange(final int fromIndex, final int toIndex, final int[] replacement) throws IndexOutOfBoundsException {
@@ -1319,8 +1315,7 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
      * @param fromIndex the index of the first element (inclusive) to be filled with the specified value
      * @param toIndex the index after the last element (exclusive) to be filled with the specified value
      * @param val the value to be stored in the specified range of the list
-     * @throws IndexOutOfBoundsException if fromIndex or toIndex is out of range
-     *         (fromIndex &lt; 0 || toIndex &gt; size() || fromIndex &gt; toIndex)
+     * @throws IndexOutOfBoundsException if the index is out of range ({@code fromIndex < 0 || toIndex > size() || fromIndex > toIndex})
      */
     public void fill(final int fromIndex, final int toIndex, final int val) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex);
@@ -1347,6 +1342,16 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
      * specified IntList. This method returns {@code true} if the two lists share at least
      * one common element.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * IntList list1 = IntList.of(1, 2, 3, 4, 5);
+     * IntList list2 = IntList.of(5, 6, 7);
+     * IntList list3 = IntList.of(8, 9, 10);
+     *
+     * boolean hasCommon = list1.containsAny(list2);  // Returns true (both contain 5)
+     * boolean noCommon = list1.containsAny(list3);   // Returns false (no common elements)
+     * }</pre>
+     *
      * @param c the IntList to be checked for containment in this list
      * @return {@code true} if this list contains any element from the specified list
      */
@@ -1364,6 +1369,16 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
      * specified array. This method returns {@code true} if this list and the array share
      * at least one common element.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * IntList list = IntList.of(1, 2, 3, 4, 5);
+     * int[] array1 = {5, 6, 7};
+     * int[] array2 = {8, 9, 10};
+     *
+     * boolean hasCommon = list.containsAny(array1);  // Returns true (both contain 5)
+     * boolean noCommon = list.containsAny(array2);   // Returns false (no common elements)
+     * }</pre>
+     *
      * @param a the array to be checked for containment in this list
      * @return {@code true} if this list contains any element from the specified array
      */
@@ -1380,6 +1395,16 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
      * Returns {@code true} if this list contains all elements in the specified IntList.
      * This method returns {@code true} if the specified list is a subset of this list
      * (ignoring element order but considering duplicates).
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * IntList list1 = IntList.of(1, 2, 3, 4, 5);
+     * IntList list2 = IntList.of(2, 3, 4);
+     * IntList list3 = IntList.of(2, 6, 7);
+     *
+     * boolean containsAll = list1.containsAll(list2);  // Returns true (list1 contains all elements from list2)
+     * boolean notAll = list1.containsAll(list3);       // Returns false (list1 doesn't contain 6 or 7)
+     * }</pre>
      *
      * @param c the IntList to be checked for containment in this list
      * @return {@code true} if this list contains all elements in the specified list
@@ -1415,6 +1440,16 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
      * Returns {@code true} if this list contains all elements in the specified array.
      * This method returns {@code true} if all elements in the array are present in this list
      * (ignoring element order but considering duplicates).
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * IntList list = IntList.of(1, 2, 3, 4, 5);
+     * int[] array1 = {2, 3, 4};
+     * int[] array2 = {2, 6, 7};
+     *
+     * boolean containsAll = list.containsAll(array1);  // Returns true (list contains all elements from array1)
+     * boolean notAll = list.containsAll(array2);       // Returns false (list doesn't contain 6 or 7)
+     * }</pre>
      *
      * @param a the array to be checked for containment in this list
      * @return {@code true} if this list contains all elements in the specified array
@@ -1811,8 +1846,7 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
      * @param fromIndex the index of the first element (inclusive) in the range
      * @param toIndex the index after the last element (exclusive) in the range
      * @return an OptionalInt containing the minimum element in the range, or an empty OptionalInt if the range is empty
-     * @throws IndexOutOfBoundsException if fromIndex or toIndex is out of range
-     *         (fromIndex &lt; 0 || toIndex &gt; size() || fromIndex &gt; toIndex)
+     * @throws IndexOutOfBoundsException if the index is out of range ({@code fromIndex < 0 || toIndex > size() || fromIndex > toIndex})
      */
     public OptionalInt min(final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex);
@@ -1837,8 +1871,7 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
      * @param fromIndex the index of the first element (inclusive) in the range
      * @param toIndex the index after the last element (exclusive) in the range
      * @return an OptionalInt containing the maximum element in the range, or an empty OptionalInt if the range is empty
-     * @throws IndexOutOfBoundsException if fromIndex or toIndex is out of range
-     *         (fromIndex &lt; 0 || toIndex &gt; size() || fromIndex &gt; toIndex)
+     * @throws IndexOutOfBoundsException if the index is out of range ({@code fromIndex < 0 || toIndex > size() || fromIndex > toIndex})
      */
     public OptionalInt max(final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex);
@@ -1861,7 +1894,7 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
 
     /**
      * Returns the median value of elements within the specified range of this list.
-     * 
+     *
      * <p>The median is computed for elements from {@code fromIndex} (inclusive) to {@code toIndex} (exclusive).
      * For ranges with an odd number of elements, this returns the exact middle element when sorted.
      * For ranges with an even number of elements, this returns the lower of the two middle elements.</p>
@@ -1869,7 +1902,7 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
      * @param fromIndex the starting index (inclusive) of the range to calculate median for
      * @param toIndex the ending index (exclusive) of the range to calculate median for
      * @return an OptionalInt containing the median value if the range is non-empty, or an empty OptionalInt if the range is empty
-     * @throws IndexOutOfBoundsException if {@code fromIndex < 0} or {@code toIndex > size()} or {@code fromIndex > toIndex}
+     * @throws IndexOutOfBoundsException if the index is out of range ({@code fromIndex < 0 || toIndex > size() || fromIndex > toIndex})
      */
     public OptionalInt median(final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex);
@@ -1911,7 +1944,7 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
      * @param fromIndex the starting index (inclusive)
      * @param toIndex the ending index (exclusive), or -1 for backward iteration to the start
      * @param action the action to be performed for each element
-     * @throws IndexOutOfBoundsException if the indices are out of range
+     * @throws IndexOutOfBoundsException if the index is out of range ({@code index < 0 || index >= size()})
      */
     public void forEach(final int fromIndex, final int toIndex, final IntConsumer action) throws IndexOutOfBoundsException {
         N.checkFromToIndex(fromIndex < toIndex ? fromIndex : (toIndex == -1 ? 0 : toIndex), Math.max(fromIndex, toIndex), size);
@@ -1953,14 +1986,14 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
      * Returns a new IntList containing only the distinct elements from the specified range
      * of this list. The order of elements is preserved, with the first occurrence of each
      * distinct value being retained.
-     * 
+     *
      * <p>This method uses an efficient algorithm to identify distinct elements without
      * modifying the original list.</p>
      *
      * @param fromIndex the starting index (inclusive) of the range to process
      * @param toIndex the ending index (exclusive) of the range to process
      * @return a new IntList containing only distinct elements from the specified range
-     * @throws IndexOutOfBoundsException if fromIndex &lt; 0, toIndex &gt; size(), or fromIndex &gt; toIndex
+     * @throws IndexOutOfBoundsException if the index is out of range ({@code fromIndex < 0 || toIndex > size() || fromIndex > toIndex})
      */
     @Override
     public IntList distinct(final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {

@@ -55,6 +55,15 @@ public interface LongUnaryOperator extends Throwables.LongUnaryOperator<RuntimeE
      *   <li>Custom transformations</li>
      * </ul>
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * LongUnaryOperator increment = x -> x + 1;
+     * long result = increment.applyAsLong(5L); // Returns 6L
+     *
+     * LongUnaryOperator negate = x -> -x;
+     * long negated = negate.applyAsLong(10L); // Returns -10L
+     * }</pre>
+     *
      * @param operand the operand
      * @return the operator result
      */

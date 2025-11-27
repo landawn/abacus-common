@@ -32,6 +32,13 @@ public class OptionalCharType extends AbstractOptionalType<OptionalChar> {
     /**
      * Returns the Java class type that this type handler manages.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Type<OptionalChar> type = TypeFactory.getType(OptionalChar.class);
+     * Class<OptionalChar> clazz = type.clazz();
+     * // Returns: OptionalChar.class
+     * }</pre>
+     *
      * @return the {@link OptionalChar} class object
      */
     @Override
@@ -63,6 +70,23 @@ public class OptionalCharType extends AbstractOptionalType<OptionalChar> {
     /**
      * Converts an {@link OptionalChar} object to its string representation.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Type<OptionalChar> type = TypeFactory.getType(OptionalChar.class);
+     *
+     * OptionalChar opt = OptionalChar.of('A');
+     * String result = type.stringOf(opt);
+     * // Returns: "A"
+     *
+     * opt = OptionalChar.of('z');
+     * result = type.stringOf(opt);
+     * // Returns: "z"
+     *
+     * opt = OptionalChar.empty();
+     * result = type.stringOf(opt);
+     * // Returns: null
+     * }</pre>
+     *
      * @param x the OptionalChar object to convert
      * @return a single-character string, or {@code null} if empty or null
      */
@@ -74,6 +98,23 @@ public class OptionalCharType extends AbstractOptionalType<OptionalChar> {
     /**
      * Converts a string representation to an {@link OptionalChar} object.
      * The string should contain exactly one character or be convertible to a character.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Type<OptionalChar> type = TypeFactory.getType(OptionalChar.class);
+     *
+     * OptionalChar result = type.valueOf("A");
+     * // Returns: OptionalChar.of('A')
+     *
+     * result = type.valueOf("x");
+     * // Returns: OptionalChar.of('x')
+     *
+     * result = type.valueOf(null);
+     * // Returns: OptionalChar.empty()
+     *
+     * result = type.valueOf("");
+     * // Returns: OptionalChar.empty()
+     * }</pre>
      *
      * @param str the string to convert
      * @return an OptionalChar containing the parsed character value, or empty if the input is empty or null
@@ -87,6 +128,20 @@ public class OptionalCharType extends AbstractOptionalType<OptionalChar> {
     /**
      * Retrieves a character value from a ResultSet at the specified column index and wraps it in an {@link OptionalChar}.
      * Handles multiple data types: Character objects, Integer values (converted to char), and strings.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Type<OptionalChar> type = TypeFactory.getType(OptionalChar.class);
+     * ResultSet rs = ...; // obtained from database query
+     *
+     * // Column contains character 'A'
+     * OptionalChar opt = type.get(rs, 1);
+     * // Returns: OptionalChar.of('A')
+     *
+     * // Column contains SQL NULL
+     * opt = type.get(rs, 2);
+     * // Returns: OptionalChar.empty()
+     * }</pre>
      *
      * @param rs the ResultSet to read from
      * @param columnIndex the column index (1-based) to retrieve the value from
@@ -109,6 +164,20 @@ public class OptionalCharType extends AbstractOptionalType<OptionalChar> {
     /**
      * Retrieves a character value from a ResultSet using the specified column label and wraps it in an {@link OptionalChar}.
      * Handles multiple data types: Character objects, Integer values (converted to char), and strings.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Type<OptionalChar> type = TypeFactory.getType(OptionalChar.class);
+     * ResultSet rs = ...; // obtained from database query
+     *
+     * // Column "grade" contains character 'A'
+     * OptionalChar opt = type.get(rs, "grade");
+     * // Returns: OptionalChar.of('A')
+     *
+     * // Column "middle_initial" contains SQL NULL
+     * opt = type.get(rs, "middle_initial");
+     * // Returns: OptionalChar.empty()
+     * }</pre>
      *
      * @param rs the ResultSet to read from
      * @param columnLabel the label for the column specified with the SQL AS clause
@@ -133,6 +202,21 @@ public class OptionalCharType extends AbstractOptionalType<OptionalChar> {
      * Characters are stored as integers in the database. If the OptionalChar is {@code null} or empty,
      * sets the parameter to SQL NULL.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Type<OptionalChar> type = TypeFactory.getType(OptionalChar.class);
+     * PreparedStatement stmt = connection.prepareStatement(
+     *     "INSERT INTO students (id, grade) VALUES (?, ?)");
+     *
+     * OptionalChar opt = OptionalChar.of('A');
+     * type.set(stmt, 2, opt);
+     * // Sets parameter to 'A' (stored as integer)
+     *
+     * opt = OptionalChar.empty();
+     * type.set(stmt, 2, opt);
+     * // Sets parameter to SQL NULL
+     * }</pre>
+     *
      * @param stmt the PreparedStatement to set the parameter on
      * @param columnIndex the parameter index (1-based) to set
      * @param x the OptionalChar value to set
@@ -151,6 +235,20 @@ public class OptionalCharType extends AbstractOptionalType<OptionalChar> {
      * Sets a named parameter in a CallableStatement to the value contained in an {@link OptionalChar}.
      * Characters are stored as integers in the database. If the OptionalChar is {@code null} or empty,
      * sets the parameter to SQL NULL.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Type<OptionalChar> type = TypeFactory.getType(OptionalChar.class);
+     * CallableStatement stmt = connection.prepareCall("{call update_grade(?, ?)}");
+     *
+     * OptionalChar opt = OptionalChar.of('B');
+     * type.set(stmt, "p_grade", opt);
+     * // Sets parameter to 'B' (stored as integer)
+     *
+     * opt = OptionalChar.empty();
+     * type.set(stmt, "p_middle_initial", opt);
+     * // Sets parameter to SQL NULL
+     * }</pre>
      *
      * @param stmt the CallableStatement to set the parameter on
      * @param parameterName the name of the parameter to set

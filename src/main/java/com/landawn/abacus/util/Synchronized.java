@@ -88,7 +88,7 @@ public final class Synchronized<T> {
 
     /**
      * Executes the provided runnable command in a synchronized block on the specified mutex.
-     * This static method is useful for one-time synchronized operations where creating
+     * This method is useful for one-time synchronized operations where creating
      * a Synchronized instance would be unnecessary overhead.
      * 
      * <p>The command is executed while holding the monitor lock on the mutex object,
@@ -123,7 +123,7 @@ public final class Synchronized<T> {
 
     /**
      * Executes the provided callable command in a synchronized block on the specified mutex and returns its result.
-     * This static method is useful for one-time synchronized operations that need to return a value.
+     * This method is useful for one-time synchronized operations that need to return a value.
      * 
      * <p>The callable is executed while holding the monitor lock on the mutex object,
      * ensuring thread-safe execution. The result of the callable is returned to the caller,
@@ -362,7 +362,7 @@ public final class Synchronized<T> {
 
     /**
      * Executes the provided runnable command in a synchronized block on this instance's mutex.
-     * This instance method is useful for repeated synchronized operations on the same object.
+     * This method is useful for repeated synchronized operations on the same object.
      * 
      * <p>The command is executed while holding the monitor lock on the mutex object,
      * ensuring thread-safe execution.
@@ -392,7 +392,7 @@ public final class Synchronized<T> {
 
     /**
      * Executes the provided callable command in a synchronized block on this instance's mutex and returns its result.
-     * This instance method is useful for repeated synchronized operations on the same object that return values.
+     * This method is useful for repeated synchronized operations on the same object that return values.
      * 
      * <p>The callable is executed while holding the monitor lock on the mutex object,
      * ensuring thread-safe execution.
@@ -423,7 +423,7 @@ public final class Synchronized<T> {
      * Tests the provided predicate in a synchronized block on this instance's mutex.
      * The predicate receives the mutex as its argument and returns a boolean result.
      *
-     * <p>This instance method is useful for repeated synchronized conditional checks
+     * <p>This method is useful for repeated synchronized conditional checks
      * on the same object where the predicate needs access to the mutex.
      *
      * <p><b>Usage Examples:</b></p>
@@ -450,8 +450,8 @@ public final class Synchronized<T> {
     /**
      * Executes the provided consumer in a synchronized block on this instance's mutex.
      * The consumer receives the mutex as its argument.
-     * 
-     * <p>This instance method is useful for repeated synchronized operations on the same object
+     *
+     * <p>This method is useful for repeated synchronized operations on the same object
      * where the consumer needs access to the mutex.
      * 
      * <p><b>Usage Examples:</b></p>
@@ -477,8 +477,8 @@ public final class Synchronized<T> {
     /**
      * Applies the provided function in a synchronized block on this instance's mutex and returns its result.
      * The function receives the mutex as its argument and transforms it to a result.
-     * 
-     * <p>This instance method is useful for repeated synchronized transformations on the same object.
+     *
+     * <p>This method is useful for repeated synchronized transformations on the same object.
      * 
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code

@@ -26,6 +26,8 @@ import com.landawn.abacus.util.Throwables;
  *
  * @see java.util.function.Predicate
  * @see java.util.function.DoublePredicate
+ * @see DoubleBiPredicate
+ * @see DoubleTriPredicate
  */
 @FunctionalInterface
 public interface DoublePredicate extends Throwables.DoublePredicate<RuntimeException>, java.util.function.DoublePredicate { //NOSONAR
@@ -97,6 +99,8 @@ public interface DoublePredicate extends Throwables.DoublePredicate<RuntimeExcep
      * Returns a composed predicate that represents a short-circuiting logical AND of this predicate and another.
      * When evaluating the composed predicate, if this predicate is {@code false}, then the {@code other} predicate is not evaluated.
      *
+     * <p>If evaluation of either operation throws an exception, it is relayed to the caller of the composed operation.
+     *
      * @param other a predicate that will be logically-ANDed with this predicate
      * @return a composed predicate that represents the short-circuiting logical AND of this predicate and the {@code other} predicate
      */
@@ -108,6 +112,8 @@ public interface DoublePredicate extends Throwables.DoublePredicate<RuntimeExcep
     /**
      * Returns a composed predicate that represents a short-circuiting logical OR of this predicate and another.
      * When evaluating the composed predicate, if this predicate is {@code true}, then the {@code other} predicate is not evaluated.
+     *
+     * <p>If evaluation of either operation throws an exception, it is relayed to the caller of the composed operation.
      *
      * @param other a predicate that will be logically-ORed with this predicate
      * @return a composed predicate that represents the short-circuiting logical OR of this predicate and the {@code other} predicate

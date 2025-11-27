@@ -438,9 +438,9 @@ public class ImmutableSortedMap<K, V> extends ImmutableMap<K, V> implements Sort
      * If the provided Map is already an instance of ImmutableSortedMap, it is directly returned.
      * If the provided Map is {@code null} or empty, an empty ImmutableSortedMap is returned.
      * Otherwise, a new ImmutableSortedMap is created with the elements of the provided Map.
-     * 
+     *
      * <p>The returned map will maintain the same ordering as the source map.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Map<String, Integer> mutable = new HashMap<>();
@@ -454,7 +454,7 @@ public class ImmutableSortedMap<K, V> extends ImmutableMap<K, V> implements Sort
      * @param <K> the type of keys in the Map
      * @param <V> the type of values in the Map
      * @param map the Map whose mappings are to be placed in the ImmutableSortedMap
-     * @return an ImmutableSortedMap containing the same mappings as the provided Map
+     * @return an ImmutableSortedMap containing the same mappings as the provided Map, or the same instance if already an ImmutableSortedMap
      */
     public static <K, V> ImmutableSortedMap<K, V> copyOf(final Map<? extends K, ? extends V> map) throws UnsupportedOperationException {
         if (map instanceof ImmutableSortedMap) {

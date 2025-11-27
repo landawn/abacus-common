@@ -126,6 +126,11 @@ public abstract class AbstractLogger implements Logger {
      *
      * <p>The message template can use {} or %s as placeholders.</p>
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * logger.trace("Processing {} items from {} with priority {} at {}", count, source, priority, timestamp);
+     * }</pre>
+     *
      * @param template the message template containing four placeholders
      * @param arg1 the first argument
      * @param arg2 the second argument
@@ -143,6 +148,11 @@ public abstract class AbstractLogger implements Logger {
      * Logs a message at TRACE level with five parameters.
      *
      * <p>The message template can use {} or %s as placeholders.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * logger.trace("Request {} method {} path {} params {} headers {}", id, method, path, params, headers);
+     * }</pre>
      *
      * @param template the message template containing five placeholders
      * @param arg1 the first argument
@@ -163,6 +173,11 @@ public abstract class AbstractLogger implements Logger {
      *
      * <p>The message template can use {} or %s as placeholders.</p>
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * logger.trace("Event {} type {} user {} timestamp {} source {} data {}", id, type, user, ts, src, data);
+     * }</pre>
+     *
      * @param template the message template containing six placeholders
      * @param arg1 the first argument
      * @param arg2 the second argument
@@ -182,6 +197,11 @@ public abstract class AbstractLogger implements Logger {
      * Logs a message at TRACE level with seven parameters.
      *
      * <p>The message template can use {} or %s as placeholders.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * logger.trace("Detailed trace: {} {} {} {} {} {} {}", p1, p2, p3, p4, p5, p6, p7);
+     * }</pre>
      *
      * @param template the message template containing seven placeholders
      * @param arg1 the first argument
@@ -222,7 +242,7 @@ public abstract class AbstractLogger implements Logger {
     /**
      * Logs an exception at the TRACE level with an accompanying message.
      *
-     * <p>This method is a convenience wrapper that delegates to trace(String, Throwable).</p>
+     * <p>This method provides an alternative parameter order for consistency with other exception-handling patterns.</p>
      *
      * @param t the exception or error to log
      * @param msg the message to log
@@ -236,6 +256,11 @@ public abstract class AbstractLogger implements Logger {
      * Logs a formatted message at TRACE level with an exception and one parameter.
      *
      * <p>The message template can use {} or %s as placeholder.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * logger.trace(exception, "Failed to load resource: {}", resourceName);
+     * }</pre>
      *
      * @param t the exception or error to log
      * @param template the message template
@@ -253,6 +278,11 @@ public abstract class AbstractLogger implements Logger {
      *
      * <p>The message template can use {} or %s as placeholders.</p>
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * logger.trace(exception, "Operation {} failed for item {}", operation, itemId);
+     * }</pre>
+     *
      * @param t the exception or error to log
      * @param template the message template
      * @param arg1 the first argument
@@ -269,6 +299,11 @@ public abstract class AbstractLogger implements Logger {
      * Logs a formatted message at TRACE level with an exception and three parameters.
      *
      * <p>The message template can use {} or %s as placeholders.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * logger.trace(exception, "Error in {} at position {} for value {}", method, position, value);
+     * }</pre>
      *
      * @param t the exception or error to log
      * @param template the message template
@@ -478,8 +513,7 @@ public abstract class AbstractLogger implements Logger {
     /**
      * Logs an exception at the DEBUG level with an accompanying message.
      *
-     * <p>This method provides an alternative parameter order for consistency
-     * with other APIs.</p>
+     * <p>This method provides an alternative parameter order for consistency with other exception-handling patterns.</p>
      *
      * @param t the exception (throwable) to log
      * @param msg the message accompanying the exception
@@ -728,8 +762,7 @@ public abstract class AbstractLogger implements Logger {
     /**
      * Logs an exception at the INFO level with an accompanying message.
      *
-     * <p>This method provides an alternative parameter order for consistency
-     * with other APIs.</p>
+     * <p>This method provides an alternative parameter order for consistency with other exception-handling patterns.</p>
      *
      * @param t the exception (throwable) to log
      * @param msg the message accompanying the exception
@@ -978,8 +1011,7 @@ public abstract class AbstractLogger implements Logger {
     /**
      * Logs an exception at the WARN level with an accompanying message.
      *
-     * <p>This method provides an alternative parameter order for consistency
-     * with other APIs.</p>
+     * <p>This method provides an alternative parameter order for consistency with other exception-handling patterns.</p>
      *
      * @param t the exception (throwable) to log
      * @param msg the message accompanying the exception
@@ -1228,8 +1260,7 @@ public abstract class AbstractLogger implements Logger {
     /**
      * Logs an exception at the ERROR level with an accompanying message.
      *
-     * <p>This method provides an alternative parameter order for consistency
-     * with other APIs.</p>
+     * <p>This method provides an alternative parameter order for consistency with other exception-handling patterns.</p>
      *
      * @param t the exception (throwable) to log
      * @param msg the message accompanying the exception

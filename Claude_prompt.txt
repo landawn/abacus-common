@@ -20,7 +20,7 @@ Step 2 - Use multiple agents to generate comprehensive Javadoc for all public me
      * Sample codes
      * }</pre>
 
-Step 3 - Use multiple agents to verify each sample/example in all javadoc in all classes and interfaces under folder: ./src/main/java/ by implementation and make sure all the samples/examples pass tests.
+Step 3 - Use multiple agents to verify every sample/example in all Javadoc across all classes and interfaces under ./src/main/java/ by actually running the implementations, ensuring that all samples/examples pass. If a class import is required during verification, add the import only in the test class, do not add the import to the original Javadoc.
 
 Step 4 - Run mvn javadoc:javadoc to verify all changes are valid
 
@@ -38,7 +38,7 @@ Step 2 - Use multiple agents to generate comprehensive Javadoc for all public me
      * Sample codes
      * }</pre>
 
-Step 3 - Use multiple agents to verify each sample/example in all javadoc in all classes and interfaces in package: com.landawn.abacus under folder: ./src/main/java/ by implementation and make sure all the samples/examples pass tests.
+Step 3 - Use multiple agents to verify every sample/example in all Javadoc across all classes and interfaces in package: com.landawn.abacus under ./src/main/java/ by actually running the implementations, ensuring that all samples/examples pass. If a class import is required during verification, add the import only in the test class, do not add the import to the original Javadoc.
 
 Step 4 - Run mvn javadoc:javadoc to verify all changes are valid
 
@@ -47,7 +47,7 @@ Step 4 - Run mvn javadoc:javadoc to verify all changes are valid
 
 Follow the steps below strictly and execute them in order.
 
-Step 1 - Use multiple agents to verify each sample/example in all javadoc in all classes and interfaces under folder: ./src/main/java/ by implementation and make sure all the samples/examples pass tests.
+Step 1 - Use multiple agents to verify every sample/example in all Javadoc across all classes and interfaces under ./src/main/java/ by actually running the implementations, ensuring that all samples/examples pass. If a class import is required during verification, add the import only in the test class, do not add the import to the original Javadoc.
 
 Step 2 - Use multiple agents to review Javadoc against the actual implementation and update it for accuracy and clarity. Finally, merge the new or revised Javadoc directly into source file, replacing any existing documentation. DON'T skip any class. For methods annotated with @Override, just review, improve and verify existing javadoc for them. Don't add or generate new javadoc for methods annotated with @Override. Use below template for usage example in Javadoc:
      * <p><b>Usage Examples:</b></p>

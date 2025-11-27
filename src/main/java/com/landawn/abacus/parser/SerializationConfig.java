@@ -136,7 +136,6 @@ public abstract class SerializationConfig<C extends SerializationConfig<C>> exte
         int h = 17;
         h = 31 * h + N.hashCode(getIgnoredPropNames());
         h = 31 * h + N.hashCode(exclusion);
-        h = 31 * h + N.hashCode(skipTransientField);
         return 31 * h + N.hashCode(skipTransientField);
     }
 

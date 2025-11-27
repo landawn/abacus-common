@@ -31,6 +31,11 @@ import com.landawn.abacus.util.Dates;
  */
 public abstract class AbstractDateType<T extends Date> extends AbstractType<T> {
 
+    /**
+     * Constructs an AbstractDateType with the specified type name.
+     *
+     * @param typeName the name of the date type (e.g., "Date", "Time", "Timestamp")
+     */
     protected AbstractDateType(final String typeName) {
         super(typeName);
     }

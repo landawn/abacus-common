@@ -536,6 +536,14 @@ public final class TypeFactory {
         return clsName;
     }
 
+    static String getJavaTypeName(final java.lang.reflect.Type javaType) {
+        if (javaType instanceof Class) {
+            return getClassName((Class<?>) javaType);
+        }
+
+        return ClassUtil.getTypeName(javaType);
+    }
+
     @SuppressWarnings({ "rawtypes", "unchecked" })
     private static <T> Type<T> getType(String typeName, Class cls, java.lang.reflect.Type javaType) {
         if (Strings.isEmpty(typeName)) {
@@ -1159,6 +1167,14 @@ public final class TypeFactory {
         return type;
     }
 
+    /**
+     * Retrieves a list of Type objects corresponding to the specified array of Class objects.
+     *
+     * @param <T> the type parameter
+     * @param classes the array of Class objects
+     * @return a list of Type objects corresponding to the specified classes
+     * @deprecated Use individual {@link #getType(Class)} calls instead
+     */
     @Deprecated
     @SafeVarargs
     static <T> List<Type<T>> getType(final Class<? extends T>... classes) {
@@ -1222,6 +1238,14 @@ public final class TypeFactory {
         return type;
     }
 
+    /**
+     * Retrieves a list of Type objects corresponding to the specified collection of Class objects.
+     *
+     * @param <T> the type parameter
+     * @param classes the collection of Class objects
+     * @return a list of Type objects corresponding to the specified classes
+     * @deprecated Use individual {@link #getType(Class)} calls instead
+     */
     @Deprecated
     static <T> List<Type<T>> getType(final Collection<Class<? extends T>> classes) {
         final List<Type<T>> result = new ArrayList<>(classes.size());

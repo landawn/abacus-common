@@ -389,19 +389,19 @@ public class ImmutableSet<E> extends ImmutableCollection<E> implements Set<E> {
 
     /**
      * Wraps the provided set into an ImmutableSet without copying the elements.
-     * The returned ImmutableSet is backed by the provided set, so changes to the original set
-     * will be reflected in the ImmutableSet. However, the ImmutableSet itself cannot be modified.
      * If the provided set is already an ImmutableSet, it is returned directly.
      * If the set is {@code null}, an empty ImmutableSet is returned.
-     * 
-     * <p><b>Warning:</b> Use this method with caution as the immutability guarantee depends on not modifying
-     * the original set after wrapping. This method is marked as @Beta.
-     * 
+     *
+     * <p><b>Warning:</b> This method does not create a defensive copy. Changes to the
+     * underlying Set will be reflected in the returned ImmutableSet, which
+     * violates the immutability contract. For a {@code true} immutable copy, use
+     * {@link #copyOf(Collection)} instead.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Set<String> mutableSet = new HashSet<>();
      * mutableSet.add("initial");
-     * 
+     *
      * ImmutableSet<String> wrapped = ImmutableSet.wrap(mutableSet);
      * mutableSet.add("added later"); // This WILL be visible in wrapped!
      * System.out.println(wrapped.contains("added later")); // prints: true
@@ -409,7 +409,7 @@ public class ImmutableSet<E> extends ImmutableCollection<E> implements Set<E> {
      *
      * @param <E> the type of elements in the set
      * @param set the set to be wrapped into an ImmutableSet
-     * @return an ImmutableSet view of the provided set
+     * @return an ImmutableSet view of the provided set, or the same instance if already an ImmutableSet
      */
     @Beta
     public static <E> ImmutableSet<E> wrap(final Set<? extends E> set) {

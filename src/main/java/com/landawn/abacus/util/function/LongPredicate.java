@@ -26,6 +26,8 @@ import com.landawn.abacus.util.Throwables;
  *
  * @see java.util.function.LongPredicate
  * @see java.util.function.Predicate
+ * @see LongBiPredicate
+ * @see LongTriPredicate
  *
  * <p>Refer to JDK API documentation at: <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html">https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a></p>
  */
@@ -125,6 +127,8 @@ public interface LongPredicate extends Throwables.LongPredicate<RuntimeException
      * <p>When evaluating the composed predicate, if this predicate is {@code false},
      * then the {@code other} predicate is not evaluated.
      *
+     * <p>If evaluation of either operation throws an exception, it is relayed to the caller of the composed operation.
+     *
      * @param other a predicate that will be logically-ANDed with this predicate
      * @return a composed predicate that represents the short-circuiting logical
      *         AND of this predicate and the {@code other} predicate
@@ -140,6 +144,8 @@ public interface LongPredicate extends Throwables.LongPredicate<RuntimeException
      *
      * <p>When evaluating the composed predicate, if this predicate is {@code true},
      * then the {@code other} predicate is not evaluated.
+     *
+     * <p>If evaluation of either operation throws an exception, it is relayed to the caller of the composed operation.
      *
      * @param other a predicate that will be logically-ORed with this predicate
      * @return a composed predicate that represents the short-circuiting logical
@@ -275,8 +281,8 @@ public interface LongPredicate extends Throwables.LongPredicate<RuntimeException
      * <pre>{@code
      * LongPredicate inRange = LongPredicate.between(10L, 20L);
      * inRange.test(15L); // returns true
-     * inRange.test(10L); // returns {@code false} (not greater than min)
-     * inRange.test(20L); // returns {@code false} (not less than max)
+     * inRange.test(10L); // returns false (not greater than min)
+     * inRange.test(20L); // returns false (not less than max)
      * }</pre>
      *
      * @param minValue the exclusive lower bound

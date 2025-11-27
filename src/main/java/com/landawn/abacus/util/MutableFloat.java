@@ -506,11 +506,21 @@ public final class MutableFloat extends Number implements Comparable<MutableFloa
         return (long) value;
     }
 
+    /**
+     * Returns the value of this MutableFloat as a float.
+     *
+     * @return the value as a float
+     */
     @Override
     public float floatValue() {
         return value;
     }
 
+    /**
+     * Returns the value of this MutableFloat as a double.
+     *
+     * @return the value as a double
+     */
     @Override
     public double doubleValue() {
         return value;

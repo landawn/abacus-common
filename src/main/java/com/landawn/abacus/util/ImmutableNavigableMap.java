@@ -433,7 +433,7 @@ public class ImmutableNavigableMap<K, V> extends ImmutableSortedMap<K, V> implem
      * If the provided Map is already an instance of ImmutableNavigableMap, it is directly returned.
      * If the provided Map is {@code null} or empty, an empty ImmutableNavigableMap is returned.
      * Otherwise, a new ImmutableNavigableMap is created with the elements of the provided Map.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Map<String, Integer> map = new HashMap<>();
@@ -446,7 +446,7 @@ public class ImmutableNavigableMap<K, V> extends ImmutableSortedMap<K, V> implem
      * @param <K> the type of keys in the Map
      * @param <V> the type of values in the Map
      * @param map the Map whose mappings are to be placed in the ImmutableNavigableMap
-     * @return an ImmutableNavigableMap containing the same mappings as the provided Map
+     * @return an ImmutableNavigableMap containing the same mappings as the provided Map, or the same instance if already an ImmutableNavigableMap
      */
     public static <K, V> ImmutableNavigableMap<K, V> copyOf(final Map<? extends K, ? extends V> map) throws UnsupportedOperationException {
         if (map instanceof ImmutableNavigableMap) {

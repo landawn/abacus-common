@@ -146,7 +146,7 @@ import com.landawn.abacus.util.function.TriFunction;
  * <p><b>Usage Examples:</b>
  * <pre>{@code
  * // Primitive list collection (avoiding boxing)
- * IntList numbers = stream.of(1, 2, 3, 4, 5)
+ * IntList numbers = Stream.of(1, 2, 3, 4, 5)
  *     .collect(Collectors.toIntList());
  *
  * // Immutable collection creation
@@ -1019,6 +1019,19 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
     /**
      * Creates a new {@code Collector} with the specified supplier, accumulator, and combiner.
      *
+     * <p>This is a factory method for creating custom collectors. The type parameter indicates
+     * that the intermediate accumulation type is the same as the final result type.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * // Create a custom collector that concatenates strings
+     * Collector<String, StringBuilder, StringBuilder> collector = Collectors.create(
+     *     StringBuilder::new,
+     *     (sb, s) -> sb.append(s).append(","),
+     *     (sb1, sb2) -> sb1.append(sb2)
+     * );
+     * }</pre>
+     *
      * @param <T> the type of input elements to the collector
      * @param <R> the type of the mutable result container and the final result
      * @param supplier the supplier function that provides a new mutable result container
@@ -1035,6 +1048,22 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
 
     /**
      * Creates a new {@code Collector} with the specified supplier, accumulator, and combiner.
+     *
+     * <p>This is a factory method for creating custom collectors. The type parameter indicates
+     * that the intermediate accumulation type is the same as the final result type. This variant
+     * accepts characteristics as a Collection rather than varargs.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * // Create a custom collector with characteristics collection
+     * Set<Collector.Characteristics> chars = EnumSet.of(Collector.Characteristics.CONCURRENT);
+     * Collector<String, StringBuilder, StringBuilder> collector = Collectors.create(
+     *     StringBuilder::new,
+     *     (sb, s) -> sb.append(s),
+     *     (sb1, sb2) -> sb1.append(sb2),
+     *     chars
+     * );
+     * }</pre>
      *
      * @param <T> the type of input elements to the collector
      * @param <R> the type of the mutable result container and the final result
@@ -1054,6 +1083,21 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
     /**
      * Creates a new {@code Collector} with the specified supplier, accumulator, combiner, and finisher.
      *
+     * <p>This factory method creates custom collectors where the intermediate accumulation type
+     * differs from the final result type. The finisher function transforms the accumulated result
+     * into the desired output type.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * // Create a collector that builds a string from integers
+     * Collector<Integer, StringBuilder, String> collector = Collectors.create(
+     *     StringBuilder::new,
+     *     (sb, i) -> sb.append(i).append(" "),
+     *     (sb1, sb2) -> sb1.append(sb2),
+     *     StringBuilder::toString
+     * );
+     * }</pre>
+     *
      * @param <T> the type of input elements to the collector
      * @param <A> the type of the intermediate accumulation result
      * @param <R> the type of the final result of the collector
@@ -1072,6 +1116,24 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
 
     /**
      * Creates a new {@code Collector} with the specified supplier, accumulator, combiner, and finisher.
+     *
+     * <p>This factory method creates custom collectors where the intermediate accumulation type
+     * differs from the final result type. The finisher function transforms the accumulated result
+     * into the desired output type. This variant accepts characteristics as a Collection rather
+     * than varargs.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * // Create a collector with finisher and characteristics collection
+     * Set<Collector.Characteristics> chars = EnumSet.of(Collector.Characteristics.UNORDERED);
+     * Collector<Integer, List<Integer>, Integer> collector = Collectors.create(
+     *     ArrayList::new,
+     *     List::add,
+     *     (l1, l2) -> { l1.addAll(l2); return l1; },
+     *     list -> list.stream().mapToInt(Integer::intValue).sum(),
+     *     chars
+     * );
+     * }</pre>
      *
      * @param <T> the type of input elements to the collector
      * @param <A> the type of the intermediate accumulation result
@@ -1093,15 +1155,20 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
     /**
      * Returns a {@code Collector} that accumulates the input elements into a new collection,
      * created by the provided factory function.
-     * 
+     *
      * <p>This collector is useful when you need to collect elements into a specific type of
-     * collection that is not covered by the standard collectors (like {@code toList()}, 
+     * collection that is not covered by the standard collectors (like {@code toList()},
      * {@code toSet()}, etc.). The collection factory should return a new, empty collection
      * instance each time it's called.</p>
-     * 
-     * <p>The returned collector is not concurrent, and the collection returned is determined
-     * by the factory function provided.</p>
-     * 
+     *
+     * <p><b>Null Handling:</b> The collector allows null elements if the underlying collection
+     * supports null values. The behavior depends on the collection implementation provided
+     * by the factory.</p>
+     *
+     * <p><b>Parallel Stream Support:</b> This collector supports parallel streams. When used
+     * with parallel streams, partial results are combined using the larger collection as the
+     * target for better performance.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Collect to a LinkedList
@@ -1111,10 +1178,14 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      *
      * @param <T> the type of input elements
      * @param <C> the type of the resulting collection
-     * @param collectionFactory a supplier providing a new empty collection into which 
+     * @param collectionFactory a supplier providing a new empty collection into which
      *                         the results will be inserted
      * @return a {@code Collector} which collects all input elements into a collection,
      *         in encounter order
+     * @see #toCollection(int, Supplier)
+     * @see #toCollection(Supplier, BiConsumer)
+     * @see #toList()
+     * @see #toSet()
      */
     public static <T, C extends Collection<T>> Collector<T, ?, C> toCollection(final Supplier<? extends C> collectionFactory) {
         final BiConsumer<C, T> accumulator = BiConsumers.ofAdd();
@@ -1127,33 +1198,42 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * Returns a {@code Collector} that accumulates the input elements into a new collection,
      * created by the provided factory function, limiting the collection to at most the
      * specified number of elements.
-     * 
+     *
      * <p>This collector is particularly useful when you want to collect only a limited number
      * of elements from a potentially large stream. Once the collection reaches the specified
      * size limit, subsequent elements are ignored. For parallel streams, the combiner ensures
      * that the final collection size does not exceed the limit.</p>
-     * 
+     *
      * <p>When combining collections in parallel processing, if the target collection is a
      * {@code List}, the combiner uses {@code subList} for efficiency. For other collection
      * types, it iterates through elements until the size limit is reached.</p>
-     * 
+     *
+     * <p><b>Null Handling:</b> The collector allows null elements if the underlying collection
+     * supports null values. Null elements count toward the size limit.</p>
+     *
+     * <p><b>Parallel Stream Support:</b> This collector supports parallel streams with
+     * appropriate combining logic to maintain the size limit.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Collect first 10 elements from a large stream
      * List<Integer> firstTen = Stream.iterate(1, n -> n + 1)
      *     .limit(1000)
-     *     .collect(Collectors.toCollection(ArrayList::new, 10));
+     *     .collect(Collectors.toCollection(10, ArrayList::new));
      * // Result will contain only [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
      * }</pre>
-     * @param atMostSize the maximum number of elements to collect
-     * @param collectionFactory a supplier providing a new empty collection into which 
-     *                         the results will be inserted
      *
      * @param <T> the type of input elements
      * @param <C> the type of the resulting collection
-     * @return a {@code Collector} which collects at most the specified number of input 
+     * @param atMostSize the maximum number of elements to collect
+     * @param collectionFactory a supplier providing a new empty collection into which
+     *                         the results will be inserted
+     * @return a {@code Collector} which collects at most the specified number of input
      *         elements into a collection, in encounter order
      * @throws IllegalArgumentException if {@code atMostSize} is negative
+     * @see #toCollection(Supplier)
+     * @see #first(int)
+     * @see #toList(int)
      */
     public static <T, C extends Collection<T>> Collector<T, ?, C> toCollection(final int atMostSize, final Supplier<? extends C> collectionFactory) {
         final BiConsumer<C, T> accumulator = (c, t) -> {
@@ -1190,30 +1270,38 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
     /**
      * Returns a {@code Collector} that accumulates the input elements into a new collection,
      * created by the provided factory function, using a custom accumulator.
-     * 
+     *
      * <p>This collector allows you to specify custom logic for how elements are added to
      * the collection. The accumulator function receives the collection and an element,
      * and is responsible for updating the collection.</p>
-     * 
+     *
      * <p>The combiner uses the default behavior of adding all elements from one collection
      * to another, with the larger collection being used as the target.</p>
-     * 
+     *
+     * <p><b>Null Handling:</b> Null handling depends on the custom accumulator implementation.
+     * The accumulator function is responsible for handling null elements appropriately.</p>
+     *
+     * <p><b>Parallel Stream Support:</b> This collector supports parallel streams with
+     * a default combiner that merges collections by adding elements to the larger one.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Collect only even numbers
      * List<Integer> evens = Stream.of(1, 2, 3, 4, 5, 6)
-     *     .collect(Collectors.toCollection(ArrayList::new, 
+     *     .collect(Collectors.toCollection(ArrayList::new,
      *         (list, n) -> { if (n % 2 == 0) list.add(n); }));
      * // Result: [2, 4, 6]
      * }</pre>
      *
      * @param <T> the type of input elements
      * @param <C> the type of the resulting collection
-     * @param supplier a supplier providing a new empty collection into which 
+     * @param supplier a supplier providing a new empty collection into which
      *                 the results will be inserted
      * @param accumulator a function for incorporating a new element into a collection
      * @return a {@code Collector} which collects input elements into a collection
      *         using the specified accumulator
+     * @see #toCollection(Supplier, BiConsumer, BinaryOperator)
+     * @see #toCollection(Supplier)
      */
     public static <T, C extends Collection<T>> Collector<T, ?, C> toCollection(final Supplier<? extends C> supplier, final BiConsumer<C, T> accumulator) {
         final BinaryOperator<C> combiner = BinaryOperators.ofAddAllToBigger();
@@ -1224,15 +1312,22 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
     /**
      * Returns a {@code Collector} that accumulates the input elements into a new collection,
      * created by the provided factory function, using custom accumulator and combiner functions.
-     * 
+     *
      * <p>This collector provides full control over how elements are accumulated into the
      * collection and how partial collections are combined in parallel processing. This is
      * the most flexible form of collection collector.</p>
-     * 
+     *
      * <p>The accumulator function defines how individual elements are added to the collection.
      * The combiner function defines how two collections are merged together, which is
      * essential for parallel stream processing.</p>
-     * 
+     *
+     * <p><b>Null Handling:</b> Null handling depends on the custom accumulator and combiner
+     * implementations. These functions are responsible for handling null elements and null
+     * collections appropriately.</p>
+     *
+     * <p><b>Parallel Stream Support:</b> This collector supports parallel streams with
+     * the provided custom combiner function for merging partial results.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Custom collector that adds elements in reverse order
@@ -1247,12 +1342,15 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      *
      * @param <T> the type of input elements
      * @param <C> the type of the resulting collection
-     * @param supplier a supplier providing a new empty collection into which 
+     * @param supplier a supplier providing a new empty collection into which
      *                 the results will be inserted
      * @param accumulator a function for incorporating a new element into a collection
      * @param combiner a function for combining two collections into one
      * @return a {@code Collector} which collects input elements into a collection
      *         using the specified accumulator and combiner
+     * @see #toCollection(Supplier, BiConsumer)
+     * @see #toCollection(Supplier)
+     * @see #create(Supplier, BiConsumer, BinaryOperator, Characteristics...)
      */
     public static <T, C extends Collection<T>> Collector<T, ?, C> toCollection(final Supplier<? extends C> supplier, final BiConsumer<C, T> accumulator,
             final BinaryOperator<C> combiner) {
@@ -1284,14 +1382,20 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
 
     /**
      * Returns a {@code Collector} that accumulates the input elements into a new {@code List}.
-     * 
+     *
      * <p>This is one of the most commonly used collectors. It collects all stream elements
      * into a {@code List} in encounter order. There are no guarantees on the type,
      * mutability, serializability, or thread-safety of the {@code List} returned.</p>
-     * 
+     *
      * <p>For streams with defined encounter order, the elements will appear in the
      * resulting list in the same order. For unordered streams, no order is guaranteed.</p>
-     * 
+     *
+     * <p><b>Null Handling:</b> This collector accepts null elements. The resulting list
+     * will contain null values in the positions where they were encountered in the stream.</p>
+     *
+     * <p><b>Parallel Stream Support:</b> This collector supports parallel streams and
+     * efficiently combines partial results.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Collect stream elements to a list
@@ -1303,6 +1407,10 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * @param <T> the type of input elements
      * @return a {@code Collector} which collects all input elements into a {@code List},
      *         in encounter order
+     * @see #toLinkedList()
+     * @see #toImmutableList()
+     * @see #toUnmodifiableList()
+     * @see #toList(int)
      */
     public static <T> Collector<T, ?, List<T>> toList() {
         final Supplier<List<T>> supplier = Suppliers.ofList();
@@ -1312,14 +1420,20 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
 
     /**
      * Returns a {@code Collector} that accumulates the input elements into a new {@code LinkedList}.
-     * 
+     *
      * <p>This collector is useful when you specifically need a {@code LinkedList} implementation,
      * for example when you need efficient insertion and removal at both ends of the list.
      * Elements are collected in encounter order.</p>
-     * 
+     *
      * <p>Unlike the generic {@code toList()} collector, this method guarantees that the
      * returned collection will be a {@code LinkedList}.</p>
-     * 
+     *
+     * <p><b>Null Handling:</b> This collector accepts null elements as {@code LinkedList}
+     * supports null values.</p>
+     *
+     * <p><b>Parallel Stream Support:</b> This collector supports parallel streams and
+     * efficiently combines partial results.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Collect to a LinkedList for efficient head/tail operations
@@ -1331,6 +1445,8 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * @param <T> the type of input elements
      * @return a {@code Collector} which collects all input elements into a {@code LinkedList},
      *         in encounter order
+     * @see #toList()
+     * @see #toDeque()
      */
     public static <T> Collector<T, ?, LinkedList<T>> toLinkedList() {
         final Supplier<LinkedList<T>> supplier = Suppliers.ofLinkedList();
@@ -1340,14 +1456,20 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
 
     /**
      * Returns a {@code Collector} that accumulates the input elements into an {@code ImmutableList}.
-     * 
+     *
      * <p>This collector first collects all elements into a regular list, then converts it
      * to an immutable list. The returned list cannot be modified after creation - any
      * attempt to modify it will result in an {@code UnsupportedOperationException}.</p>
-     * 
+     *
      * <p>This is useful when you need to ensure that the collected data cannot be
      * accidentally modified after collection. Elements are preserved in encounter order.</p>
-     * 
+     *
+     * <p><b>Null Handling:</b> This collector accepts null elements if they are present
+     * in the stream. The resulting immutable list will contain null values.</p>
+     *
+     * <p><b>Parallel Stream Support:</b> This collector supports parallel streams and
+     * efficiently combines partial results.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Create an immutable list from stream elements
@@ -1359,6 +1481,9 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * @param <T> the type of input elements
      * @return a {@code Collector} which collects all input elements into an {@code ImmutableList},
      *         in encounter order
+     * @see #toList()
+     * @see #toUnmodifiableList()
+     * @see #toImmutableSet()
      */
     public static <T> Collector<T, ?, ImmutableList<T>> toImmutableList() {
         final Collector<T, ?, List<T>> downstream = toList();
@@ -1396,16 +1521,22 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
 
     /**
      * Returns a {@code Collector} that accumulates the input elements into a new {@code Set}.
-     * 
+     *
      * <p>This collector accumulates elements into a {@code Set}, automatically removing
      * duplicates. The elements are compared using their {@code equals} method. There are
      * no guarantees on the type, mutability, serializability, or thread-safety of the
      * {@code Set} returned.</p>
-     * 
+     *
      * <p>For ordered streams, no order is preserved in the resulting set, as sets
      * are inherently unordered collections (unless a specific ordered set implementation
      * is used).</p>
-     * 
+     *
+     * <p><b>Null Handling:</b> This collector accepts null elements if the underlying
+     * set implementation supports null values.</p>
+     *
+     * <p><b>Parallel Stream Support:</b> This collector supports parallel streams and
+     * has the UNORDERED characteristic for optimal performance.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Collect unique elements to a set
@@ -1416,6 +1547,10 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      *
      * @param <T> the type of input elements
      * @return a {@code Collector} which collects all input elements into a {@code Set}
+     * @see #toLinkedHashSet()
+     * @see #toImmutableSet()
+     * @see #toUnmodifiableSet()
+     * @see #toSet(int)
      */
     public static <T> Collector<T, ?, Set<T>> toSet() {
         final Supplier<Set<T>> supplier = Suppliers.ofSet();
@@ -4118,6 +4253,19 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * to each other and smaller than any other element according to the natural
      * order. The found elements are collected to {@link List}.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * // Find all minimum integers
+     * List<Integer> mins = Stream.of(3, 1, 4, 1, 5, 1)
+     *     .collect(Collectors.minAll());
+     * // Result: [1, 1, 1]
+     *
+     * // Find all shortest strings
+     * List<String> shortest = Stream.of("apple", "pie", "cat", "dog")
+     *     .collect(Collectors.minAll());
+     * // Result: ["pie", "cat", "dog"]
+     * }</pre>
+     *
      * @param <T> the type of the input elements
      * @return a {@code Collector} which finds all the minimal elements and
      *         collects them to the {@code List}.
@@ -4136,6 +4284,18 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * to each other and smaller than any other element according to the
      * specified {@link Comparator}. The found elements are collected to
      * {@link List}.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * // Find all people with the minimum age
+     * List<Person> youngest = people.stream()
+     *     .collect(Collectors.minAll(Comparator.comparingInt(Person::getAge)));
+     *
+     * // Find all strings with minimum length (case-insensitive)
+     * List<String> shortest = Stream.of("Apple", "pie", "CAT", "dog")
+     *     .collect(Collectors.minAll(Comparator.comparingInt(String::length)));
+     * // Result: ["pie", "CAT", "dog"]
+     * }</pre>
      *
      * @param <T> the type of the input elements
      * @param comparator a {@code Comparator} to compare the elements
@@ -4182,6 +4342,19 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * order. The found elements are reduced using the specified downstream
      * {@code Collector}.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * // Count how many minimum values exist
+     * Long minCount = Stream.of(3, 1, 4, 1, 5, 1)
+     *     .collect(Collectors.minAll(Collectors.counting()));
+     * // Result: 3
+     *
+     * // Join all minimum strings
+     * String joined = Stream.of("apple", "pie", "cat", "dog")
+     *     .collect(Collectors.minAll(Collectors.joining(", ")));
+     * // Result: "pie, cat, dog"
+     * }</pre>
+     *
      * @param <T> the type of the input elements
      * @param <A> the intermediate accumulation type of the downstream collector
      * @param <R> the result type of the downstream reduction
@@ -4205,6 +4378,21 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * to each other and smaller than any other element according to the
      * specified {@link Comparator}. The found elements are reduced using the
      * specified downstream {@code Collector}.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * // Find all people with minimum age and collect to a set
+     * Set<Person> youngest = people.stream()
+     *     .collect(Collectors.minAll(
+     *         Comparator.comparingInt(Person::getAge),
+     *         Collectors.toSet()));
+     *
+     * // Sum all products with minimum price
+     * double totalMinPrice = products.stream()
+     *     .collect(Collectors.minAll(
+     *         Comparator.comparingDouble(Product::getPrice),
+     *         Collectors.summingDouble(Product::getPrice)));
+     * }</pre>
      *
      * @param <T> the type of the input elements
      * @param <A> the intermediate accumulation type of the downstream collector
@@ -4293,7 +4481,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      *     .collect(Collectors.minAlll(
      *         Comparator.naturalOrder(),
      *         Collectors.counting(),
-     *         opt -> opt.map(p -> "Min: " + p.left + ", Count: " + p.right)
+     *         opt -> opt.map(p -> "Min: " + p.left() + ", Count: " + p.right())
      *                   .orElse("No elements")));
      * // Result: "Min: 1, Count: 3"
      * }</pre>
@@ -4319,6 +4507,19 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * to each other and bigger than any other element according to the natural
      * order. The found elements are collected to {@link List}.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * // Find all maximum integers
+     * List<Integer> maxs = Stream.of(3, 5, 4, 5, 1, 5)
+     *     .collect(Collectors.maxAll());
+     * // Result: [5, 5, 5]
+     *
+     * // Find all longest strings
+     * List<String> longest = Stream.of("apple", "pie", "banana", "cherry")
+     *     .collect(Collectors.maxAll());
+     * // Result: ["apple", "banana", "cherry"]
+     * }</pre>
+     *
      * @param <T> the type of the input elements
      * @return a {@code Collector} which finds all the maximal elements and
      *         collects them to the {@code List}.
@@ -4337,6 +4538,18 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * to each other and bigger than any other element according to the
      * specified {@link Comparator}. The found elements are collected to
      * {@link List}.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * // Find all people with the maximum age
+     * List<Person> oldest = people.stream()
+     *     .collect(Collectors.maxAll(Comparator.comparingInt(Person::getAge)));
+     *
+     * // Find all strings with maximum length
+     * List<String> longest = Stream.of("Apple", "pie", "banana", "cherry")
+     *     .collect(Collectors.maxAll(Comparator.comparingInt(String::length)));
+     * // Result: ["Apple", "banana", "cherry"]
+     * }</pre>
      *
      * @param <T> the type of the input elements
      * @param comparator a {@code Comparator} to compare the elements
@@ -4437,6 +4650,19 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * order. The found elements are reduced using the specified downstream
      * {@code Collector}.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * // Count how many maximum values exist
+     * Long maxCount = Stream.of(3, 5, 4, 5, 1, 5)
+     *     .collect(Collectors.maxAll(Collectors.counting()));
+     * // Result: 3
+     *
+     * // Join all maximum strings with a delimiter
+     * String joined = Stream.of("apple", "pie", "banana", "cherry")
+     *     .collect(Collectors.maxAll(Collectors.joining(" & ")));
+     * // Result: "apple & banana & cherry"
+     * }</pre>
+     *
      * @param <T> the type of the input elements
      * @param <R> the result type of the downstream reduction
      * @param downstream a {@code Collector} implementing the downstream
@@ -4459,6 +4685,21 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * to each other and bigger than any other element according to the
      * specified {@link Comparator}. The found elements are reduced using the
      * specified downstream {@code Collector}.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * // Find all people with maximum age and collect to a set
+     * Set<Person> oldest = people.stream()
+     *     .collect(Collectors.maxAll(
+     *         Comparator.comparingInt(Person::getAge),
+     *         Collectors.toSet()));
+     *
+     * // Calculate average price of all products with maximum price
+     * double avgMaxPrice = products.stream()
+     *     .collect(Collectors.maxAll(
+     *         Comparator.comparingDouble(Product::getPrice),
+     *         Collectors.averagingDouble(Product::getPrice)));
+     * }</pre>
      *
      * @param <T> the type of the input elements
      * @param <R> the result type of the downstream reduction
@@ -4627,7 +4868,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      *     .collect(Collectors.maxAlll(
      *         Comparator.naturalOrder(),
      *         Collectors.toList(),
-     *         opt -> opt.isPresent() && opt.get().right.size() > 1));
+     *         opt -> opt.isPresent() && opt.get().right().size() > 1));
      * // Result: true (multiple elements with max value 5)
      * }</pre>
      *
@@ -4745,7 +4986,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * // Find min and max from a stream of integers
      * Optional<Pair<Integer, Integer>> result = Stream.of(5, 2, 8, 1, 9)
      *     .collect(Collectors.minMax());
-     * // Result: Optional[Pair[1, 9]]
+     * // Result: Optional[Pair(1, 9)]
      * }</pre>
      *
      * @param <T> the type of input elements, must be Comparable
@@ -4774,7 +5015,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * // Find shortest and longest strings
      * Optional<Pair<String, String>> result = Stream.of("a", "abc", "ab", "abcd")
      *     .collect(Collectors.minMax(Comparator.comparing(String::length)));
-     * // Result: Optional[Pair["a", "abcd"]]
+     * // Result: Optional[Pair(a, abcd)]
      * }</pre>
      *
      * @param <T> the type of input elements
@@ -4897,7 +5138,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * // Find min and max with default values
      * Pair<Integer, Integer> result = Stream.<Integer>empty()
      *     .collect(Collectors.minMaxOrElseGet(() -> Pair.of(0, 100)));
-     * // Result: Pair[0, 100]
+     * // Result: Pair(0, 100)
      * }</pre>
      *
      * @param <T> the type of input elements, must be Comparable
@@ -4924,7 +5165,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      *     .collect(Collectors.minMaxOrElseGet(
      *         Comparator.comparing(String::length),
      *         () -> Pair.of("", "default")));
-     * // Result: Pair["", "default"]
+     * // Result: Pair(, default)
      * }</pre>
      *
      * @param <T> the type of input elements
@@ -4957,7 +5198,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * // This will throw NoSuchElementException if stream is empty
      * Pair<Integer, Integer> result = Stream.of(5, 2, 8, 1, 9)
      *     .collect(Collectors.minMaxOrElseThrow());
-     * // Result: Pair[1, 9]
+     * // Result: Pair(1, 9)
      * }</pre>
      *
      * @param <T> the type of input elements, must be Comparable
@@ -4981,7 +5222,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * Pair<String, String> result = Stream.of("a", "abc", "ab")
      *     .collect(Collectors.minMaxOrElseThrow(
      *         Comparator.comparing(String::length)));
-     * // Result: Pair["a", "abc"]
+     * // Result: Pair(a, abc)
      * }</pre>
      *
      * @param <T> the type of input elements
@@ -5375,7 +5616,10 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
     /**
      * Returns a {@code Collector} that produces the arithmetic mean of a double-valued
      * function applied to the input elements, throwing an exception if no elements are present.
-     * 
+     *
+     * <p>This collector is useful when an empty stream represents an error condition.
+     * The average is calculated as a double to preserve precision.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Calculate average score (throws if no scores)
@@ -5460,10 +5704,10 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
     /**
      * Returns a {@code Collector} that produces the arithmetic mean of {@code BigInteger}
      * values extracted from the input elements, throwing an exception if no elements are present.
-     * 
+     *
      * <p>The average is calculated as a {@code BigDecimal} to preserve precision.
      * This collector is useful when an empty stream represents an error condition.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Calculate average balance (throws if no accounts)
@@ -5474,7 +5718,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * @param <T> the type of input elements
      * @param mapper function to extract a {@code BigInteger} value from an element
      * @return a {@code Collector} that produces the average as a {@code BigDecimal}
-     * @throws ArithmeticException if no elements are present
+     * @throws NoSuchElementException if no elements are present
      * @see #averagingBigInteger(Function)
      * @see #averagingBigIntegerOrEmpty(Function)
      */
@@ -5550,10 +5794,10 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
     /**
      * Returns a {@code Collector} that produces the arithmetic mean of {@code BigDecimal}
      * values extracted from the input elements, throwing an exception if no elements are present.
-     * 
+     *
      * <p>This collector is useful for precise decimal arithmetic when an empty stream
      * represents an error condition.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Calculate average price (throws if no items)
@@ -5564,7 +5808,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * @param <T> the type of input elements
      * @param mapper function to extract a {@code BigDecimal} value from an element
      * @return a {@code Collector} that produces the average as a {@code BigDecimal}
-     * @throws ArithmeticException if no elements are present
+     * @throws NoSuchElementException if no elements are present
      * @see #averagingBigDecimal(Function)
      * @see #averagingBigDecimalOrEmpty(Function)
      */
@@ -6910,13 +7154,16 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
 
     /**
      * Returns a {@code Collector} that accumulates {@code Map.Entry} elements into a {@code Map}.
-     * 
+     *
      * <p>This collector extracts keys and values from {@code Map.Entry} objects and
      * accumulates them into a new map. If duplicate keys are encountered, an
      * {@code IllegalStateException} is thrown.</p>
-     * 
-     * <p>The returned collector produces an unordered map.</p>
-     * 
+     *
+     * <p><b>Null Handling:</b> Both null keys and null values are supported if the
+     * underlying map implementation allows them.</p>
+     *
+     * <p><b>Parallel Stream Support:</b> This collector supports parallel streams.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Convert a list of entries to a map
@@ -6928,6 +7175,9 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * @param <V> the type of values
      * @return a {@code Collector} which collects {@code Map.Entry} elements into a {@code Map}
      * @throws IllegalStateException if duplicate keys are encountered
+     * @see #toMap(BinaryOperator)
+     * @see #toMap(Supplier)
+     * @see #toMap(Function, Function)
      */
     public static <K, V> Collector<Map.Entry<K, V>, ?, Map<K, V>> toMap() {
         final Function<Map.Entry<K, V>, ? extends K> keyMapper = Fn.key();
@@ -6940,13 +7190,17 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * Returns a {@code Collector} that accumulates {@code Map.Entry} elements into a {@code Map},
      * using the provided merge function to resolve collisions between values associated with
      * the same key.
-     * 
+     *
      * <p>This collector extracts keys and values from {@code Map.Entry} objects and
      * accumulates them into a new map. When duplicate keys are encountered, the merge
      * function is used to combine the values.</p>
-     * 
-     * <p>The returned collector produces an unordered map.</p>
-     * 
+     *
+     * <p><b>Null Handling:</b> Both null keys and null values are supported if the
+     * underlying map implementation allows them. The merge function must handle null values
+     * if they may be present.</p>
+     *
+     * <p><b>Parallel Stream Support:</b> This collector supports parallel streams.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Merge entries, keeping the maximum value for duplicate keys
@@ -6958,6 +7212,9 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * @param <V> the type of values
      * @param mergeFunction a merge function used to resolve collisions between values associated with the same key
      * @return a {@code Collector} which collects {@code Map.Entry} elements into a {@code Map}
+     * @see #toMap()
+     * @see #toMap(BinaryOperator, Supplier)
+     * @see #toMap(Function, Function, BinaryOperator)
      */
     public static <K, V> Collector<Map.Entry<K, V>, ?, Map<K, V>> toMap(final BinaryOperator<V> mergeFunction) {
         final Function<Map.Entry<K, V>, ? extends K> keyMapper = Fn.key();
@@ -7033,13 +7290,17 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
     /**
      * Returns a {@code Collector} that accumulates elements into a {@code Map} whose keys
      * and values are the result of applying the provided mapping functions to the input elements.
-     * 
+     *
      * <p>If the mapped keys contain duplicates, an {@code IllegalStateException} is thrown
      * when the collection operation is performed. To handle duplicate keys, use
      * {@link #toMap(Function, Function, BinaryOperator)} instead.</p>
-     * 
-     * <p>The returned collector produces an unordered map.</p>
-     * 
+     *
+     * <p><b>Null Handling:</b> Both null keys and null values are supported if the
+     * underlying map implementation allows them. The key and value mapper functions must
+     * handle null input elements appropriately.</p>
+     *
+     * <p><b>Parallel Stream Support:</b> This collector supports parallel streams.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Create a map from student ID to student name
@@ -7054,6 +7315,9 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * @param valueMapper a mapping function to produce values
      * @return a {@code Collector} which collects elements into a {@code Map}
      * @throws IllegalStateException if duplicate keys are encountered
+     * @see #toMap(Function, Function, BinaryOperator)
+     * @see #toMap(Function, Function, Supplier)
+     * @see #toMap(Function, Function, BinaryOperator, Supplier)
      */
     public static <T, K, V> Collector<T, ?, Map<K, V>> toMap(final Function<? super T, ? extends K> keyMapper,
             final Function<? super T, ? extends V> valueMapper) {
@@ -7065,14 +7329,20 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
     /**
      * Returns a {@code Collector} that accumulates elements into a {@code Map} whose keys
      * and values are the result of applying the provided mapping functions to the input elements.
-     * 
+     *
      * <p>This collector uses the provided merge function to handle collisions between values
      * associated with the same key. The merge function is used to combine the existing value
      * with the new value when duplicate keys are encountered.</p>
-     * 
+     *
      * <p>The returned map is a general-purpose {@code Map} implementation. The map is created
      * using the default map factory which typically returns a {@code HashMap}.</p>
-     * 
+     *
+     * <p><b>Null Handling:</b> Both null keys and null values are supported if the
+     * underlying map implementation allows them. The key and value mapper functions as well
+     * as the merge function must handle null values if they may be present.</p>
+     *
+     * <p><b>Parallel Stream Support:</b> This collector supports parallel streams.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Sum values for duplicate keys
@@ -7094,6 +7364,9 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * @return a {@code Collector} which collects elements into a {@code Map}
      *         whose keys and values are the result of applying mapping functions to
      *         the input elements
+     * @see #toMap(Function, Function)
+     * @see #toMap(Function, Function, Supplier)
+     * @see #toMap(Function, Function, BinaryOperator, Supplier)
      */
     public static <T, K, V> Collector<T, ?, Map<K, V>> toMap(final Function<? super T, ? extends K> keyMapper,
             final Function<? super T, ? extends V> valueMapper, final BinaryOperator<V> mergeFunction) {
@@ -7105,13 +7378,18 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
     /**
      * Returns a {@code Collector} that accumulates elements into a {@code Map} whose keys
      * and values are the result of applying the provided mapping functions to the input elements.
-     * 
+     *
      * <p>If the mapped keys contain duplicates, an {@code IllegalStateException} is thrown
-     * when the collection operation is performed. This collector does not accept {@code null} values.</p>
-     * 
+     * when the collection operation is performed.</p>
+     *
      * <p>The Map is created by the provided supplier function. This allows you to specify
      * the exact type of Map to be created (e.g., {@code HashMap}, {@code TreeMap}, etc.).</p>
-     * 
+     *
+     * <p><b>Null Handling:</b> Null keys and values are supported if the map implementation
+     * created by the factory allows them.</p>
+     *
+     * <p><b>Parallel Stream Support:</b> This collector supports parallel streams.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Collect to a TreeMap
@@ -7134,6 +7412,9 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * @return a {@code Collector} which collects elements into a {@code Map}
      *         whose keys and values are the result of applying mapping functions to
      *         the input elements
+     * @throws IllegalStateException if duplicate keys are encountered
+     * @see #toMap(Function, Function)
+     * @see #toMap(Function, Function, BinaryOperator, Supplier)
      */
     public static <T, K, V, M extends Map<K, V>> Collector<T, ?, M> toMap(final Function<? super T, ? extends K> keyMapper,
             final Function<? super T, ? extends V> valueMapper, final Supplier<? extends M> mapFactory) {
@@ -7145,14 +7426,21 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
     /**
      * Returns a {@code Collector} that accumulates elements into a {@code Map} whose keys
      * and values are the result of applying the provided mapping functions to the input elements.
-     * 
+     *
      * <p>This is the most general form of map collector, allowing you to specify the key mapper,
      * value mapper, merge function for handling duplicate keys, and the map factory for creating
      * the result map.</p>
-     * 
+     *
      * <p>The merge function is used to resolve collisions between values associated with the same key.
      * The map is created by the provided supplier function.</p>
-     * 
+     *
+     * <p><b>Null Handling:</b> Null keys and values are supported if the map implementation
+     * created by the factory allows them. The key mapper, value mapper, and merge function must
+     * handle null values appropriately if they may be present.</p>
+     *
+     * <p><b>Parallel Stream Support:</b> This collector supports parallel streams with
+     * the UNORDERED characteristic for optimal performance.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Collect to a LinkedHashMap, concatenating values for duplicate keys
@@ -7178,6 +7466,11 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * @return a {@code Collector} which collects elements into a {@code Map}
      *         whose keys and values are the result of applying mapping functions to
      *         the input elements
+     * @see #toMap(Function, Function)
+     * @see #toMap(Function, Function, BinaryOperator)
+     * @see #toMap(Function, Function, Supplier)
+     * @see #toLinkedHashMap(Function, Function, BinaryOperator)
+     * @see #toConcurrentMap(Function, Function, BinaryOperator, Supplier)
      */
     public static <T, K, V, M extends Map<K, V>> Collector<T, ?, M> toMap(final Function<? super T, ? extends K> keyMapper,
             final Function<? super T, ? extends V> valueMapper, final BinaryOperator<V> mergeFunction, final Supplier<? extends M> mapFactory) {

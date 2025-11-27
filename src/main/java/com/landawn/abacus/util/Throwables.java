@@ -262,6 +262,22 @@ public final class Throwables {
      * Executes the specified runnable command that may throw a checked exception.
      * If the command throws an exception, it will be wrapped in a RuntimeException and rethrown.
      *
+     * <p>This method is useful for executing exception-throwing code in contexts where
+     * checked exceptions are not allowed, such as within lambda expressions passed to
+     * standard functional interfaces.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * // Execute code that throws IOException
+     * Throwables.run(() -> {
+     *     Files.delete(tempFile);
+     *     Files.createDirectory(newDir);
+     * });
+     *
+     * // Use in stream operations
+     * filePaths.forEach(path -> Throwables.run(() -> Files.delete(path)));
+     * }</pre>
+     *
      * @param cmd the runnable command to execute that may throw a checked exception
      * @throws RuntimeException if the command throws any exception, the original exception will be wrapped in a RuntimeException
      * @throws IllegalArgumentException if cmd is null
@@ -281,6 +297,25 @@ public final class Throwables {
     /**
      * Executes the specified runnable command that may throw a checked exception.
      * If the command throws an exception, the specified error handler will be invoked with the exception.
+     *
+     * <p>This method allows custom exception handling logic instead of propagating exceptions.
+     * It's useful for logging, recovery, or graceful degradation scenarios.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * // Log errors instead of throwing
+     * Throwables.run(
+     *     () -> riskyOperation(),
+     *     ex -> logger.error("Operation failed", ex)
+     * );
+     *
+     * // Collect errors for batch processing
+     * List<Throwable> errors = new ArrayList<>();
+     * files.forEach(file -> Throwables.run(
+     *     () -> processFile(file),
+     *     errors::add
+     * ));
+     * }</pre>
      *
      * @param cmd the runnable command to execute that may throw a checked exception
      * @param actionOnError the consumer that will handle any exception thrown by the command
@@ -302,6 +337,23 @@ public final class Throwables {
     /**
      * Executes the specified callable command that may throw a checked exception and returns its result.
      * If the command throws an exception, it will be wrapped in a RuntimeException and rethrown.
+     *
+     * <p>This method allows using exception-throwing code in functional contexts that require
+     * a return value, such as map operations in streams or Optional transformations.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * // Read file content
+     * String content = Throwables.call(() -> Files.readString(path));
+     *
+     * // Use in stream map operation
+     * List<String> contents = paths.stream()
+     *     .map(p -> Throwables.call(() -> Files.readString(p)))
+     *     .collect(Collectors.toList());
+     *
+     * // Parse with exceptions
+     * Config config = Throwables.call(() -> objectMapper.readValue(json, Config.class));
+     * }</pre>
      *
      * @param <R> the type of the result returned by the callable
      * @param cmd the callable command to execute that may throw a checked exception
@@ -325,6 +377,24 @@ public final class Throwables {
      * Executes the specified callable command that may throw a checked exception and returns its result.
      * If the command throws an exception, the specified error handler function will be invoked with the exception
      * and its result will be returned instead.
+     *
+     * <p>This method enables transforming exceptions into valid return values, useful for
+     * error recovery and functional error handling patterns.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * // Return empty list on error
+     * List<String> lines = Throwables.call(
+     *     () -> Files.readAllLines(path),
+     *     ex -> Collections.emptyList()
+     * );
+     *
+     * // Transform exception to error response
+     * Response response = Throwables.call(
+     *     () -> apiClient.fetchData(),
+     *     ex -> Response.error(ex.getMessage())
+     * );
+     * }</pre>
      *
      * @param <R> the type of the result returned by the callable or the error handler
      * @param cmd the callable command to execute that may throw a checked exception
@@ -382,6 +452,20 @@ public final class Throwables {
      * Executes the specified callable command that may throw a checked exception and returns its result.
      * If the command throws an exception, the specified default value will be returned instead.
      *
+     * <p>This is the simplest form of error handling with a known fallback value.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * // Parse with default
+     * int value = Throwables.call(() -> Integer.parseInt(userInput), 0);
+     *
+     * // Load configuration with fallback
+     * String setting = Throwables.call(
+     *     () -> loadFromFile("config.properties"),
+     *     "default-config"
+     * );
+     * }</pre>
+     *
      * @param <R> the type of the result returned by the callable or the default value
      * @param cmd the callable command to execute that may throw a checked exception
      * @param defaultValue the default value to return if the command throws an exception
@@ -406,6 +490,25 @@ public final class Throwables {
      * If the command throws an exception and the predicate returns {@code true} for that exception,
      * the result from the supplier will be returned. If the predicate returns {@code false},
      * the exception will be wrapped in a RuntimeException and rethrown.
+     *
+     * <p>This method enables selective exception handling based on exception type or properties.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * // Handle only IOException
+     * String content = Throwables.call(
+     *     () -> Files.readString(path),
+     *     ex -> ex instanceof IOException,
+     *     () -> "default content"
+     * );
+     *
+     * // Retry on specific errors
+     * Data result = Throwables.call(
+     *     () -> fetchFromRemote(),
+     *     ex -> ex.getMessage().contains("timeout"),
+     *     () -> fetchFromCache()
+     * );
+     * }</pre>
      *
      * @param <R> the type of the result returned by the callable or the supplier
      * @param cmd the callable command to execute that may throw a checked exception
@@ -439,6 +542,25 @@ public final class Throwables {
      * If the command throws an exception and the predicate returns {@code true} for that exception,
      * the specified default value will be returned. If the predicate returns {@code false},
      * the exception will be wrapped in a RuntimeException and rethrown.
+     *
+     * <p>Combines predicate-based exception filtering with a simple default value.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * // Return -1 only for NumberFormatException
+     * int value = Throwables.call(
+     *     () -> Integer.parseInt(input),
+     *     ex -> ex instanceof NumberFormatException,
+     *     -1
+     * );
+     *
+     * // Return null only for FileNotFoundException
+     * String content = Throwables.call(
+     *     () -> Files.readString(path),
+     *     ex -> ex instanceof FileNotFoundException,
+     *     null
+     * );
+     * }</pre>
      *
      * @param <R> the type of the result returned by the callable or the default value
      * @param cmd the callable command to execute that may throw a checked exception

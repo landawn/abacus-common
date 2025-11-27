@@ -1023,7 +1023,7 @@ public final class Numbers {
      *
      * // Convert with overflow checking
      * try {
-     *     Byte byteValue = Numbers.convert(new Numbers.BigInteger("1000"), Byte.class, (byte)0);
+     *     Byte byteValue = Numbers.convert(new BigInteger("1000"), Byte.class, (byte)0);
      * } catch (ArithmeticException e) {
      *     // Handle overflow exception
      * }
@@ -1061,7 +1061,7 @@ public final class Numbers {
      *
      * // Convert a BigInteger to a long (throws ArithmeticException if too large)
      * Type<Long> longType = Type.of(Long.class);
-     * Long longValue = Numbers.convert(new Numbers.BigInteger("9223372036854775807"), longType);
+     * Long longValue = Numbers.convert(new BigInteger("9223372036854775807"), longType);
      *
      * // Null values return the default value for the target type
      * Type<Byte> byteType = Type.of(Byte.class);
@@ -1112,7 +1112,7 @@ public final class Numbers {
      * // Convert with overflow checking
      * try {
      *     Type<Byte> byteType = Type.of(Byte.class);
-     *     Byte byteValue = Numbers.convert(new Numbers.BigInteger("1000"), byteType, (byte)0);
+     *     Byte byteValue = Numbers.convert(new BigInteger("1000"), byteType, (byte)0);
      * } catch (ArithmeticException e) {
      *     // Handle overflow exception
      * }

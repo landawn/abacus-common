@@ -1136,21 +1136,29 @@ public class ContinuableFuture<T> implements Future<T> {
      * Transforms the result of this future by applying the provided function when the future completes.
      * This method returns immediately with a new {@code ContinuableFuture} that will complete
      * with the transformed result when this future completes and the function is applied.
-     * 
+     *
+     * <p><b>⚠️ BETA API - Subject to Change:</b></p>
      * <p>This method is marked as {@code @Beta} and may be subject to change in future versions.
-     * 
+     * Potential changes include:
+     * <ul>
+     *   <li>The exception wrapping behavior (currently wraps in RuntimeException) may change to preserve the original exception type</li>
+     *   <li>The execution timing (lazy vs eager) may be configurable in future versions</li>
+     *   <li>Additional overloads with executor parameters may be introduced</li>
+     *   <li>Method signature or name may be refined based on usage patterns and feedback</li>
+     * </ul>
+     *
      * <p>If the function throws an exception, the returned future will complete exceptionally
      * with that exception wrapped in a {@code RuntimeException}.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ContinuableFuture<Integer> future = ContinuableFuture.call(() -> 21);
-     * 
+     *
      * // Transform the result asynchronously
      * ContinuableFuture<String> stringFuture = future.map(num -> {
      *     return "The result is: " + (num * 2);
      * });
-     * 
+     *
      * // The transformation happens when the original completes
      * System.out.println(stringFuture.get()); // "The result is: 42"
      * }</pre>
@@ -1996,15 +2004,25 @@ public class ContinuableFuture<T> implements Future<T> {
     /**
      * Executes the provided BiConsumer action after the first successful completion between this ContinuableFuture
      * and the other ContinuableFuture. The BiConsumer receives the result and exception, where at least one will be {@code non-null}.
-     * 
+     *
+     * <p><b>⚠️ BETA API - Subject to Change:</b></p>
+     * <p>This method is marked as {@code @Beta} and may be subject to change in future versions.
+     * Potential changes include:
+     * <ul>
+     *   <li>The behavior when both futures fail may be refined to provide better exception aggregation</li>
+     *   <li>Additional overloads with timeout parameters may be introduced</li>
+     *   <li>The method may be renamed for better clarity (e.g., runAfterAnySucceed)</li>
+     *   <li>Support for more than two futures may be added</li>
+     * </ul>
+     *
      * <p>If the first future to complete succeeds, the BiConsumer receives (result, null).
      * If both futures fail, the BiConsumer receives (null, firstException).
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ContinuableFuture<Config> primaryConfig = ContinuableFuture.call(() -> loadPrimaryConfig());
      * ContinuableFuture<Config> fallbackConfig = ContinuableFuture.call(() -> loadFallbackConfig());
-     * 
+     *
      * primaryConfig.runAfterFirstSucceed(fallbackConfig, (config, error) -> {
      *     if (config != null) {
      *         applyConfig(config);

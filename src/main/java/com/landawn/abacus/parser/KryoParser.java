@@ -178,24 +178,24 @@ import com.landawn.abacus.util.u.OptionalShort;
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * KryoParser parser = new KryoParser();
- * 
+ *
  * // Serialize to Base64 string
  * MyObject obj = new MyObject();
- * String serialized = parser.serialize(obj);
- * 
+ * String serialized = parser.serialize(obj, null);
+ *
  * // Deserialize from Base64 string
- * MyObject restored = parser.deserialize(serialized, MyObject.class);
- * 
+ * MyObject restored = parser.deserialize(serialized, null, MyObject.class);
+ *
  * // Binary serialization to file (not Base64 encoded)
- * parser.serialize(obj, new File("data.kryo"));
- * 
+ * parser.serialize(obj, null, new File("data.kryo"));
+ *
  * // Register custom types for better performance
  * parser.register(MyCustomType.class);
  * parser.register(MyCustomType.class, 100); // with ID
- * 
+ *
  * // Deep copy
  * MyObject copy = parser.clone(obj);
- * 
+ *
  * // Shallow copy
  * MyObject shallowCopy = parser.copy(obj);
  * }</pre>
@@ -359,10 +359,13 @@ public final class KryoParser extends AbstractParser<KryoSerializationConfig, Kr
      * This is the core serialization method that handles binary output.
      * The method creates and manages a Kryo Output instance from the pool.
      *
-     * <p><b>Usage Examples:</b></p>
+     * <p><b>Note:</b> This is a protected method intended for internal use and subclass extension.
+     * External callers should use the public {@link #serialize} methods instead.</p>
+     *
+     * <p><b>Usage Examples (for subclasses):</b></p>
      * <pre>{@code
      * ByteArrayOutputStream baos = new ByteArrayOutputStream();
-     * parser.write(myObject, null, baos);
+     * write(myObject, null, baos);
      * byte[] serialized = baos.toByteArray();
      * }</pre>
      *
@@ -387,11 +390,14 @@ public final class KryoParser extends AbstractParser<KryoSerializationConfig, Kr
      * This method performs the actual Kryo serialization, either writing just the object
      * or both the class information and the object, depending on the configuration.
      *
-     * <p><b>Usage Examples:</b></p>
+     * <p><b>Note:</b> This is a protected method intended for internal use and subclass extension.
+     * External callers should use the public {@link #serialize} methods instead.</p>
+     *
+     * <p><b>Usage Examples (for subclasses):</b></p>
      * <pre>{@code
      * Output out = new Output(new ByteArrayOutputStream());
      * KryoSerializationConfig config = KryoSerializationConfig.create().writeClass(true);
-     * parser.write(myObject, config, out);
+     * write(myObject, config, out);
      * }</pre>
      *
      * @param obj the object to write (may be null)
@@ -1280,9 +1286,12 @@ public final class KryoParser extends AbstractParser<KryoSerializationConfig, Kr
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Output out = KryoParser.createOutput();
-     * out.setOutputStream(myOutputStream);
-     * // ... use output ...
-     * KryoParser.recycle(out);
+     * try {
+     *     out.setOutputStream(myOutputStream);
+     *     // ... use output ...
+     * } finally {
+     *     KryoParser.recycle(out);
+     * }
      * }</pre>
      *
      * @return a Kryo Output instance ready for use
@@ -1342,9 +1351,12 @@ public final class KryoParser extends AbstractParser<KryoSerializationConfig, Kr
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Input in = KryoParser.createInput();
-     * in.setInputStream(myInputStream);
-     * // ... use input ...
-     * KryoParser.recycle(in);
+     * try {
+     *     in.setInputStream(myInputStream);
+     *     // ... use input ...
+     * } finally {
+     *     KryoParser.recycle(in);
+     * }
      * }</pre>
      *
      * @return a Kryo Input instance ready for use

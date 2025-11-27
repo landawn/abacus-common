@@ -33,6 +33,13 @@ public class OptionalShortType extends AbstractOptionalType<OptionalShort> {
     /**
      * Returns the Java class type that this type handler manages.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Type<OptionalShort> type = TypeFactory.getType(OptionalShort.class);
+     * Class<OptionalShort> clazz = type.clazz();
+     * // Returns: OptionalShort.class
+     * }</pre>
+     *
      * @return the {@link OptionalShort} class object
      */
     @Override
@@ -75,6 +82,23 @@ public class OptionalShortType extends AbstractOptionalType<OptionalShort> {
     /**
      * Converts an {@link OptionalShort} object to its string representation.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Type<OptionalShort> type = TypeFactory.getType(OptionalShort.class);
+     *
+     * OptionalShort opt = OptionalShort.of((short) 100);
+     * String result = type.stringOf(opt);
+     * // Returns: "100"
+     *
+     * opt = OptionalShort.of((short) 0);
+     * result = type.stringOf(opt);
+     * // Returns: "0"
+     *
+     * opt = OptionalShort.empty();
+     * result = type.stringOf(opt);
+     * // Returns: null
+     * }</pre>
+     *
      * @param x the OptionalShort object to convert
      * @return the string representation of the short value, or {@code null} if empty or null
      */
@@ -85,6 +109,23 @@ public class OptionalShortType extends AbstractOptionalType<OptionalShort> {
 
     /**
      * Converts a string representation to an {@link OptionalShort} object.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Type<OptionalShort> type = TypeFactory.getType(OptionalShort.class);
+     *
+     * OptionalShort result = type.valueOf("100");
+     * // Returns: OptionalShort.of((short) 100)
+     *
+     * result = type.valueOf("0");
+     * // Returns: OptionalShort.of((short) 0)
+     *
+     * result = type.valueOf(null);
+     * // Returns: OptionalShort.empty()
+     *
+     * result = type.valueOf("");
+     * // Returns: OptionalShort.empty()
+     * }</pre>
      *
      * @param str the string to convert
      * @return an OptionalShort containing the parsed short value, or empty if the input is empty or null
@@ -98,6 +139,20 @@ public class OptionalShortType extends AbstractOptionalType<OptionalShort> {
     /**
      * Retrieves a short value from a ResultSet at the specified column index and wraps it in an {@link OptionalShort}.
      * Handles type conversion if the database column is not a short type.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Type<OptionalShort> type = TypeFactory.getType(OptionalShort.class);
+     * ResultSet rs = ...; // obtained from database query
+     *
+     * // Column contains short value 100
+     * OptionalShort opt = type.get(rs, 1);
+     * // Returns: OptionalShort.of((short) 100)
+     *
+     * // Column contains SQL NULL
+     * opt = type.get(rs, 2);
+     * // Returns: OptionalShort.empty()
+     * }</pre>
      *
      * @param rs the ResultSet to read from
      * @param columnIndex the column index (1-based) to retrieve the value from
@@ -115,6 +170,20 @@ public class OptionalShortType extends AbstractOptionalType<OptionalShort> {
      * Retrieves a short value from a ResultSet using the specified column label and wraps it in an {@link OptionalShort}.
      * Handles type conversion if the database column is not a short type.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Type<OptionalShort> type = TypeFactory.getType(OptionalShort.class);
+     * ResultSet rs = ...; // obtained from database query
+     *
+     * // Column "quantity" contains short value 50
+     * OptionalShort opt = type.get(rs, "quantity");
+     * // Returns: OptionalShort.of((short) 50)
+     *
+     * // Column "level" contains SQL NULL
+     * opt = type.get(rs, "level");
+     * // Returns: OptionalShort.empty()
+     * }</pre>
+     *
      * @param rs the ResultSet to read from
      * @param columnLabel the label for the column specified with the SQL AS clause
      * @return an OptionalShort containing the short value, or empty if the column value is SQL NULL
@@ -130,6 +199,21 @@ public class OptionalShortType extends AbstractOptionalType<OptionalShort> {
     /**
      * Sets a parameter in a PreparedStatement to the value contained in an {@link OptionalShort}.
      * If the OptionalShort is {@code null} or empty, sets the parameter to SQL NULL.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Type<OptionalShort> type = TypeFactory.getType(OptionalShort.class);
+     * PreparedStatement stmt = connection.prepareStatement(
+     *     "INSERT INTO inventory (id, quantity) VALUES (?, ?)");
+     *
+     * OptionalShort opt = OptionalShort.of((short) 50);
+     * type.set(stmt, 2, opt);
+     * // Sets parameter to 50
+     *
+     * opt = OptionalShort.empty();
+     * type.set(stmt, 2, opt);
+     * // Sets parameter to SQL NULL
+     * }</pre>
      *
      * @param stmt the PreparedStatement to set the parameter on
      * @param columnIndex the parameter index (1-based) to set
@@ -148,6 +232,20 @@ public class OptionalShortType extends AbstractOptionalType<OptionalShort> {
     /**
      * Sets a named parameter in a CallableStatement to the value contained in an {@link OptionalShort}.
      * If the OptionalShort is {@code null} or empty, sets the parameter to SQL NULL.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Type<OptionalShort> type = TypeFactory.getType(OptionalShort.class);
+     * CallableStatement stmt = connection.prepareCall("{call update_quantity(?, ?)}");
+     *
+     * OptionalShort opt = OptionalShort.of((short) 75);
+     * type.set(stmt, "p_quantity", opt);
+     * // Sets parameter to 75
+     *
+     * opt = OptionalShort.empty();
+     * type.set(stmt, "p_level", opt);
+     * // Sets parameter to SQL NULL
+     * }</pre>
      *
      * @param stmt the CallableStatement to set the parameter on
      * @param parameterName the name of the parameter to set

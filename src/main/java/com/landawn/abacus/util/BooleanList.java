@@ -449,16 +449,19 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
 
     /**
      * Returns the internal array backing this list without creating a copy.
-     * 
+     *
      * <p><b>WARNING:</b> This method returns a direct reference to the internal array.
      * Any modifications to the returned array will affect this list and vice versa.
      * The returned array may be larger than the list size; only elements from index 0
      * to {@code size()-1} are valid list elements.</p>
-     * 
+     *
      * <p>This method is marked as {@code @Beta} and should be used with caution.</p>
      *
      * @return the internal boolean array backing this list
-     * @deprecated should call {@code toArray()}
+     * @deprecated This method exposes the internal array representation and breaks encapsulation.
+     *             Use {@code toArray()} instead to get a safe copy of the elements. Direct access to
+     *             the internal array can lead to unintended modifications and inconsistent state.
+     *             This method will be removed in a future version.
      */
     @Beta
     @Deprecated
@@ -472,7 +475,7 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
      *
      * @param index the index of the element to return
      * @return the element at the specified position in this list
-     * @throws IndexOutOfBoundsException if {@code index < 0 || index >= size()}
+     * @throws IndexOutOfBoundsException if the index is out of range ({@code index < 0 || index >= size()})
      */
     public boolean get(final int index) { // NOSONAR
         rangeCheck(index);
@@ -486,7 +489,7 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
      * @param index the index of the element to replace
      * @param e the element to be stored at the specified position
      * @return the element previously at the specified position
-     * @throws IndexOutOfBoundsException if {@code index < 0 || index >= size()}
+     * @throws IndexOutOfBoundsException if the index is out of range ({@code index < 0 || index >= size()})
      */
     public boolean set(final int index, final boolean e) {
         rangeCheck(index);
@@ -517,14 +520,13 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
      * Inserts the specified element at the specified position in this list.
      * Shifts the element currently at that position (if any) and any subsequent
      * elements to the right (adds one to their indices).
-     * 
+     *
      * <p>This method runs in linear time in the worst case (when inserting at the beginning
      * of the list), as it may need to shift all existing elements.</p>
      *
      * @param index the index at which the specified element is to be inserted
      * @param e the element to be inserted
-     * @throws IndexOutOfBoundsException if the index is out of range
-     *         ({@code index < 0 || index > size()})
+     * @throws IndexOutOfBoundsException if the index is out of range ({@code index < 0 || index > size()})
      */
     public void add(final int index, final boolean e) {
         rangeCheckForAdd(index);
@@ -545,10 +547,11 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
     /**
      * Appends all elements from the specified BooleanList to the end of this list,
      * in the order that they appear in the specified list.
-     * 
+     *
      * <p>This method runs in linear time with respect to the size of the specified list.</p>
      *
-     * @param c the BooleanList containing elements to be added to this list
+     * @param c the BooleanList containing elements to be added to this list.
+     *          If {@code null} or empty, this list remains unchanged
      * @return {@code true} if this list changed as a result of the call (i.e., if the
      *         specified list was not empty); {@code false} otherwise
      */
@@ -573,15 +576,15 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
      * Inserts all elements from the specified BooleanList into this list, starting at
      * the specified position. Shifts the element currently at that position (if any)
      * and any subsequent elements to the right (increases their indices).
-     * 
+     *
      * <p>The behavior is undefined if the specified list is modified during the operation.</p>
      *
      * @param index the index at which to insert the first element from the specified list
-     * @param c the BooleanList containing elements to be added to this list
+     * @param c the BooleanList containing elements to be added to this list.
+     *          If {@code null} or empty, this list remains unchanged
      * @return {@code true} if this list changed as a result of the call (i.e., if the
      *         specified list was not empty); {@code false} otherwise
-     * @throws IndexOutOfBoundsException if the index is out of range
-     *         ({@code index < 0 || index > size()})
+     * @throws IndexOutOfBoundsException if the index is out of range ({@code index < 0 || index > size()})
      */
     @Override
     public boolean addAll(final int index, final BooleanList c) {
@@ -611,10 +614,11 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
     /**
      * Appends all elements from the specified array to the end of this list,
      * in the order that they appear in the array.
-     * 
+     *
      * <p>This method is equivalent to {@code addAll(size(), a)}.</p>
      *
-     * @param a the array containing elements to be added to this list
+     * @param a the array containing elements to be added to this list.
+     *          If {@code null} or empty, this list remains unchanged
      * @return {@code true} if this list changed as a result of the call (i.e., if the
      *         array was not empty); {@code false} otherwise
      */
@@ -629,11 +633,11 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
      * and any subsequent elements to the right (increases their indices).
      *
      * @param index the index at which to insert the first element from the specified array
-     * @param a the array containing elements to be added to this list
+     * @param a the array containing elements to be added to this list.
+     *          If {@code null} or empty, this list remains unchanged
      * @return {@code true} if this list changed as a result of the call (i.e., if the
      *         array was not empty); {@code false} otherwise
-     * @throws IndexOutOfBoundsException if the index is out of range
-     *         ({@code index < 0 || index > size()})
+     * @throws IndexOutOfBoundsException if the index is out of range ({@code index < 0 || index > size()})
      */
     @Override
     public boolean addAll(final int index, final boolean[] a) {
@@ -750,11 +754,12 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
 
     /**
      * Removes from this list all of its elements that are contained in the specified BooleanList.
-     * 
+     *
      * <p>This method runs in quadratic time in the worst case, but uses a more efficient
      * set-based algorithm when the size conditions make it beneficial.</p>
      *
-     * @param c the BooleanList containing elements to be removed from this list
+     * @param c the BooleanList containing elements to be removed from this list.
+     *          If {@code null} or empty, this list remains unchanged
      * @return {@code true} if this list was modified as a result of the call;
      *         {@code false} otherwise
      */
@@ -769,10 +774,11 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
 
     /**
      * Removes from this list all of its elements that are contained in the specified array.
-     * 
+     *
      * <p>This method is equivalent to {@code removeAll(BooleanList.of(a))}.</p>
      *
-     * @param a the array containing elements to be removed from this list
+     * @param a the array containing elements to be removed from this list.
+     *          If {@code null} or empty, this list remains unchanged
      * @return {@code true} if this list was modified as a result of the call;
      *         {@code false} otherwise
      */
@@ -868,11 +874,12 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
      * Retains only the elements in this list that are contained in the specified BooleanList.
      * In other words, removes from this list all of its elements that are not contained
      * in the specified list.
-     * 
+     *
      * <p>This method runs in quadratic time in the worst case, but uses a more efficient
      * set-based algorithm when the size conditions make it beneficial.</p>
      *
-     * @param c the BooleanList containing elements to be retained in this list
+     * @param c the BooleanList containing elements to be retained in this list.
+     *          If {@code null} or empty, this list remains unchanged
      * @return {@code true} if this list was modified as a result of the call;
      *         {@code false} otherwise
      */
@@ -891,10 +898,11 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
      * Retains only the elements in this list that are contained in the specified array.
      * In other words, removes from this list all of its elements that are not contained
      * in the specified array.
-     * 
+     *
      * <p>This method is equivalent to {@code retainAll(BooleanList.of(a))}.</p>
      *
-     * @param a the array containing elements to be retained in this list
+     * @param a the array containing elements to be retained in this list.
+     *          If {@code null} or empty, this list remains unchanged
      * @return {@code true} if this list was modified as a result of the call;
      *         {@code false} otherwise
      */
@@ -951,14 +959,13 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
     /**
      * Removes the element at the specified position in this list.
      * Shifts any subsequent elements to the left (subtracts one from their indices).
-     * 
+     *
      * <p>This method runs in linear time in the worst case, as it may need to shift
      * all elements after the removed element.</p>
      *
      * @param index the index of the element to be removed
      * @return the element that was removed from the list
-     * @throws IndexOutOfBoundsException if the index is out of range
-     *         ({@code index < 0 || index >= size()})
+     * @throws IndexOutOfBoundsException if the index is out of range ({@code index < 0 || index >= size()})
      */
     public boolean delete(final int index) {
         rangeCheck(index);
@@ -974,10 +981,10 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
      * Removes the elements at the specified positions from this list.
      * The indices array will be sorted internally, and elements are removed in descending
      * order to maintain consistency.
-     * 
+     *
      * <p>This method is more efficient than removing elements one by one when multiple
      * elements need to be removed.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * BooleanList list = BooleanList.of(true, false, true, false, true);
@@ -987,8 +994,8 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
      *
      * @param indices the indices of elements to be removed. Duplicate indices are allowed
      *                and will be handled appropriately.
-     * @throws IndexOutOfBoundsException if any index is out of range
-     *         ({@code index < 0 || index >= size()})
+     *                If {@code null} or empty, this list remains unchanged
+     * @throws IndexOutOfBoundsException if any index is out of range ({@code index < 0 || index >= size()})
      */
     @Override
     public void deleteAllByIndices(final int... indices) {

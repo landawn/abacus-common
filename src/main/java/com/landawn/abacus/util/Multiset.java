@@ -106,14 +106,14 @@ import com.landawn.abacus.util.stream.Stream;
  * // Statistical operations
  * Multiset<Integer> scores = Multiset.of(85, 90, 85, 92, 88, 85);
  * Optional<Pair<Integer, Integer>> mode = scores.maxOccurrences();
- * System.out.println("Most frequent score: " + mode.get().right); // 85
- * System.out.println("Frequency: " + mode.get().left);           // 3
+ * System.out.println("Most frequent score: " + mode.get().right()); // 85
+ * System.out.println("Frequency: " + mode.get().left());            // 3
  *
  * // Stream operations
  * Map<String, Integer> filtered = Multiset.of("apple", "banana", "apple", "cherry")
  *     .entries()
  *     .filter(entry -> entry.count() > 1)
- *     .collect(Collectors.toMap(Entry::element, Entry::count));
+ *     .toMap(Multiset.Entry::element, Multiset.Entry::count);
  *
  * // Custom backing map for sorted elements
  * Multiset<String> sorted = new Multiset<>(TreeMap::new);
@@ -586,9 +586,19 @@ public final class Multiset<E> implements Collection<E> {
      * <p>This method gives the same result as {@link Collections#frequency} for an
      * {@link Object#equals}-based multiset, but with better performance.</p>
      *
+     * <p><b>Migration Guidance:</b></p>
+     * <p>This method is deprecated. Use {@link #getCount(Object)} instead for clearer semantics.</p>
+     * <pre>{@code
+     * // Old code:
+     * int count = multiset.count(element);
+     *
+     * // New code:
+     * int count = multiset.getCount(element);
+     * }</pre>
+     *
      * @param element the element to count occurrences of
      * @return the number of occurrences of the element; zero if not present
-     * @deprecated Use {@link #getCount(Object)} instead
+     * @deprecated Use {@link #getCount(Object)} instead for better clarity
      * @see #getCount(Object)
      */
     @Deprecated
@@ -602,9 +612,19 @@ public final class Multiset<E> implements Collection<E> {
      * <p>This method gives the same result as {@link Collections#frequency} for an
      * {@link Object#equals}-based multiset, but with better performance.</p>
      *
+     * <p><b>Migration Guidance:</b></p>
+     * <p>This method is deprecated. Use {@link #getCount(Object)} instead for clearer semantics.</p>
+     * <pre>{@code
+     * // Old code:
+     * int count = multiset.get(element);
+     *
+     * // New code:
+     * int count = multiset.getCount(element);
+     * }</pre>
+     *
      * @param element the element to count occurrences of
      * @return the number of occurrences of the element; zero if not present
-     * @deprecated Use {@link #getCount(Object)} instead
+     * @deprecated Use {@link #getCount(Object)} instead for better clarity
      * @see #getCount(Object)
      */
     @Deprecated
@@ -983,10 +1003,10 @@ public final class Multiset<E> implements Collection<E> {
 
     /**
      * Removes all occurrences of all elements in the specified collection from this multiset.
-     * 
+     *
      * <p><b>Note:</b> This method ignores the occurrence count in the collection and removes
      * ALL occurrences of each element present in the collection.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Multiset<String> multiset = Multiset.of("a", "a", "b", "b", "c");
@@ -994,9 +1014,19 @@ public final class Multiset<E> implements Collection<E> {
      * System.out.println(multiset); // Only contains "c"
      * }</pre>
      *
+     * <p><b>Migration Guidance:</b></p>
+     * <p>This method is deprecated. Use {@link #removeAllOccurrences(Collection)} instead for clearer semantics.</p>
+     * <pre>{@code
+     * // Old code:
+     * multiset.removeAll(collection);
+     *
+     * // New code:
+     * multiset.removeAllOccurrences(collection);
+     * }</pre>
+     *
      * @param c the collection containing elements to be removed
      * @return {@code true} if this multiset changed as a result of the call
-     * @deprecated replaced by {@link #removeAllOccurrences(Collection)}
+     * @deprecated replaced by {@link #removeAllOccurrences(Collection)} for better clarity
      */
     @Deprecated
     @Override
@@ -2206,6 +2236,15 @@ public final class Multiset<E> implements Collection<E> {
          * Returns the multiset element corresponding to this entry. Multiple calls to this method
          * always return the same instance.
          *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * Multiset<String> multiset = Multiset.of("a", "a", "b");
+         * for (Multiset.Entry<String> entry : multiset.entrySet()) {
+         *     String element = entry.element();
+         *     System.out.println("Element: " + element);
+         * }
+         * }</pre>
+         *
          * @return the element corresponding to this entry
          */
         E element();
@@ -2217,25 +2256,38 @@ public final class Multiset<E> implements Collection<E> {
          * in the former case, this method can never return zero, while in the latter, it will return
          * zero if all occurrences of the element were since removed from the multiset.
          *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * Multiset<String> multiset = Multiset.of("a", "a", "b");
+         * for (Multiset.Entry<String> entry : multiset.entrySet()) {
+         *     int count = entry.count();
+         *     System.out.println("Count: " + count);
+         * }
+         * }</pre>
+         *
          * @return the count of the element; never negative
          */
         int count();
 
         /**
          * Compares the specified object with this entry for equality.
-         * 
+         *
          * <p>Returns {@code true} if the given object is also a multiset entry and the two entries
          * represent the same element and count. That is, two entries {@code a} and {@code b} are equal
          * if:</p>
          *
-         * 
-         * 
+         * <pre>{@code
+         * N.equals(a.element(), b.element())
+         *     && a.count() == b.count()
+         * }</pre>
+         *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * Objects.equal(a.getElement(), b.getElement())
-         *     && a.getCount() == b.getCount()
+         * Multiset.Entry<String> entry1 = ...;
+         * Multiset.Entry<String> entry2 = ...;
+         * boolean same = entry1.equals(entry2);
          * }</pre>
-         * 
+         *
          * @param o object to be compared for equality with this multiset entry
          * @return {@code true} if the specified object is equal to this entry
          */
@@ -2249,13 +2301,16 @@ public final class Multiset<E> implements Collection<E> {
          * <p>The hash code of a multiset entry for element {@code element} and count {@code count} is
          * defined as:</p>
          *
-         * 
-         * 
-         * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * ((element == null) ? 0 : element.hashCode()) ^ count
          * }</pre>
-         * 
+         *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * Multiset.Entry<String> entry = ...;
+         * int hash = entry.hashCode();
+         * }</pre>
+         *
          * @return the hash code value for this multiset entry
          */
         @Override

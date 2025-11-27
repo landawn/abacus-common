@@ -37,6 +37,11 @@ import com.landawn.abacus.util.Strings;
  */
 public abstract class AbstractStringType extends AbstractCharSequenceType<String> {
 
+    /**
+     * Constructs an AbstractStringType with the specified type name.
+     *
+     * @param typeName the name of the string type (e.g., "String")
+     */
     protected AbstractStringType(final String typeName) {
         super(typeName);
     }

@@ -286,6 +286,8 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
      * @param e the element to be associated with the specified key
      * @param autoDestroyOnFailedToPut if {@code true}, calls e.destroy(PUT_ADD_FAILURE) if put fails
      * @return {@code true} if the mapping was successfully added, {@code false} otherwise
+     * @throws IllegalArgumentException if the key or element is null
+     * @throws IllegalStateException if the pool has been closed
      */
     @Override
     public boolean put(final K key, final E e, final boolean autoDestroyOnFailedToPut) {
@@ -676,7 +678,7 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
     /**
      * Removes the specified number of entries from the pool based on the eviction policy.
      * This method is called internally during vacate operations.
-     * 
+     *
      * @param vacationNumber the number of entries to remove
      */
     protected void vacate(final int vacationNumber) {

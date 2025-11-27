@@ -107,6 +107,13 @@ public abstract class AbstractType<T> implements Type<T> {
     /** The XML-safe name of this type (with angle brackets escaped) */
     private final String xmlName;
 
+    /**
+     * Constructs an AbstractType with the specified type name.
+     * The constructor normalizes the type name by extracting the simple class name
+     * for common Java packages (java.lang, java.util, java.time, com.landawn.abacus).
+     *
+     * @param typeName the fully qualified or simple type name
+     */
     protected AbstractType(final String typeName) {
         String simpleName = typeName;
 

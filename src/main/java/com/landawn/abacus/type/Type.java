@@ -103,8 +103,8 @@ import com.landawn.abacus.util.TypeReference;
  *
  * // Collection/Array conversions
  * Type<int[]> arrayType = Type.of(int[].class);
- * int[] array = arrayType.collection2Array(List.of(1, 2, 3)); // Collection to array
- * List<Integer> list = arrayType.array2Collection(array, ArrayList.class); // Array to collection
+ * int[] array = arrayType.collection2Array(Arrays.asList(1, 2, 3)); // Collection to array
+ * Collection<Integer> list = arrayType.array2Collection(array, ArrayList.class); // Array to collection
  *
  * // Type checking and metadata
  * if (type.isNumber()) {
@@ -680,10 +680,20 @@ public interface Type<T> {
         return false; // Default implementation, can be overridden by specific types
     }
 
+    /**
+     * Checks if this type represents a boolean or Boolean type.
+     *
+     * @return {@code true} if this is a boolean type, {@code false} otherwise
+     */
     default boolean isBoolean() {
         return false; // Default implementation, can be overridden by specific types
     }
 
+    /**
+     * Checks if this type represents a char or Character type.
+     *
+     * @return {@code true} if this is a character type, {@code false} otherwise
+     */
     default boolean isCharacter() {
         return false; // Default implementation, can be overridden by specific types
     }
@@ -697,50 +707,110 @@ public interface Type<T> {
         return false; // Default implementation, can be overridden by specific types
     }
 
+    /**
+     * Checks if this type represents a byte or Byte type.
+     *
+     * @return {@code true} if this is a byte type, {@code false} otherwise
+     */
     default boolean isByte() {
         return false; // Default implementation, can be overridden by specific types
     }
 
+    /**
+     * Checks if this type represents a short or Short type.
+     *
+     * @return {@code true} if this is a short type, {@code false} otherwise
+     */
     default boolean isShort() {
         return false; // Default implementation, can be overridden by specific types
     }
 
+    /**
+     * Checks if this type represents an int or Integer type.
+     *
+     * @return {@code true} if this is an integer type, {@code false} otherwise
+     */
     default boolean isInteger() {
         return false; // Default implementation, can be overridden by specific types
     }
 
+    /**
+     * Checks if this type represents a long or Long type.
+     *
+     * @return {@code true} if this is a long type, {@code false} otherwise
+     */
     default boolean isLong() {
         return false; // Default implementation, can be overridden by specific types
     }
 
+    /**
+     * Checks if this type represents a float or Float type.
+     *
+     * @return {@code true} if this is a float type, {@code false} otherwise
+     */
     default boolean isFloat() {
         return false; // Default implementation, can be overridden by specific types
     }
 
+    /**
+     * Checks if this type represents a double or Double type.
+     *
+     * @return {@code true} if this is a double type, {@code false} otherwise
+     */
     default boolean isDouble() {
         return false; // Default implementation, can be overridden by specific types
     }
 
+    /**
+     * Checks if this type represents a String type.
+     *
+     * @return {@code true} if this is a String type, {@code false} otherwise
+     */
     default boolean isString() {
         return false; // Default implementation, can be overridden by specific types
     }
 
+    /**
+     * Checks if this type represents a CharSequence type (String, StringBuilder, etc.).
+     *
+     * @return {@code true} if this is a CharSequence type, {@code false} otherwise
+     */
     default boolean isCharSequence() {
         return false; // Default implementation, can be overridden by specific types
     }
 
+    /**
+     * Checks if this type represents a date-related type (java.util.Date, java.sql.Date, etc.).
+     *
+     * @return {@code true} if this is a date type, {@code false} otherwise
+     */
     default boolean isDate() {
         return false; // Default implementation, can be overridden by specific types
     }
 
+    /**
+     * Checks if this type represents a Calendar type.
+     *
+     * @return {@code true} if this is a Calendar type, {@code false} otherwise
+     */
     default boolean isCalendar() {
         return false; // Default implementation, can be overridden by specific types
     }
 
+    /**
+     * Checks if this type represents a Joda-Time DateTime type.
+     *
+     * @return {@code true} if this is a Joda DateTime type, {@code false} otherwise
+     */
     default boolean isJodaDateTime() {
         return false; // Default implementation, can be overridden by specific types
     }
 
+    /**
+     * Checks if this type represents a primitive array (int[], byte[], etc.).
+     *
+     * @return {@code true} if this is a primitive array type, {@code false} otherwise
+     */
     default boolean isPrimitiveArray() {
         return false; // Default implementation, can be overridden by specific types
     }
@@ -754,26 +824,56 @@ public interface Type<T> {
         return false; // Default implementation, can be overridden by specific types
     }
 
+    /**
+     * Checks if this type represents an object array (String[], Object[], etc.).
+     *
+     * @return {@code true} if this is an object array type, {@code false} otherwise
+     */
     default boolean isObjectArray() {
         return false; // Default implementation, can be overridden by specific types
     }
 
+    /**
+     * Checks if this type represents any array type (primitive or object).
+     *
+     * @return {@code true} if this is an array type, {@code false} otherwise
+     */
     default boolean isArray() {
         return isPrimitiveArray() || isObjectArray(); // Default implementation, can be overridden by specific types
     }
 
+    /**
+     * Checks if this type represents a List type.
+     *
+     * @return {@code true} if this is a List type, {@code false} otherwise
+     */
     default boolean isList() {
         return false; // Default implementation, can be overridden by specific types
     }
 
+    /**
+     * Checks if this type represents a Set type.
+     *
+     * @return {@code true} if this is a Set type, {@code false} otherwise
+     */
     default boolean isSet() {
         return false; // Default implementation, can be overridden by specific types
     }
 
+    /**
+     * Checks if this type represents a Collection type (List, Set, Queue, etc.).
+     *
+     * @return {@code true} if this is a Collection type, {@code false} otherwise
+     */
     default boolean isCollection() {
         return false; // Default implementation, can be overridden by specific types
     }
 
+    /**
+     * Checks if this type represents a Map type.
+     *
+     * @return {@code true} if this is a Map type, {@code false} otherwise
+     */
     default boolean isMap() {
         return false; // Default implementation, can be overridden by specific types
     }
@@ -787,38 +887,83 @@ public interface Type<T> {
         return false; // Default implementation, can be overridden by specific types
     }
 
+    /**
+     * Checks if this type represents a MapEntity type.
+     *
+     * @return {@code true} if this is a MapEntity type, {@code false} otherwise
+     */
     default boolean isMapEntity() {
         return false; // Default implementation, can be overridden by specific types
     }
 
+    /**
+     * Checks if this type represents an EntityId type.
+     *
+     * @return {@code true} if this is an EntityId type, {@code false} otherwise
+     */
     default boolean isEntityId() {
         return false; // Default implementation, can be overridden by specific types
     }
 
+    /**
+     * Checks if this type represents a DataSet type.
+     *
+     * @return {@code true} if this is a DataSet type, {@code false} otherwise
+     */
     default boolean isDataset() {
         return false; // Default implementation, can be overridden by specific types
     }
 
+    /**
+     * Checks if this type represents an InputStream type.
+     *
+     * @return {@code true} if this is an InputStream type, {@code false} otherwise
+     */
     default boolean isInputStream() {
         return false; // Default implementation, can be overridden by specific types
     }
 
+    /**
+     * Checks if this type represents a Reader type.
+     *
+     * @return {@code true} if this is a Reader type, {@code false} otherwise
+     */
     default boolean isReader() {
         return false; // Default implementation, can be overridden by specific types
     }
 
+    /**
+     * Checks if this type represents a ByteBuffer type.
+     *
+     * @return {@code true} if this is a ByteBuffer type, {@code false} otherwise
+     */
     default boolean isByteBuffer() {
         return false; // Default implementation, can be overridden by specific types
     }
 
+    /**
+     * Checks if this type is a generic type with type parameters.
+     *
+     * @return {@code true} if this is a generic type, {@code false} otherwise
+     */
     default boolean isGenericType() {
         return false; // Default implementation, can be overridden by specific types
     }
 
+    /**
+     * Checks if this type represents an immutable type.
+     *
+     * @return {@code true} if this is an immutable type, {@code false} otherwise
+     */
     default boolean isImmutable() {
         return false; // Default implementation, can be overridden by specific types
     }
 
+    /**
+     * Checks if this type implements Comparable.
+     *
+     * @return {@code true} if this type is comparable, {@code false} otherwise
+     */
     default boolean isComparable() {
         return false; // Default implementation, can be overridden by specific types
     }
@@ -853,6 +998,11 @@ public interface Type<T> {
         return false; // Default implementation, can be overridden by specific types
     }
 
+    /**
+     * Checks if this type represents the generic Object type.
+     *
+     * @return {@code true} if this is the Object type, {@code false} otherwise
+     */
     default boolean isObjectType() {
         return false; // Default implementation, can be overridden by specific types
     }

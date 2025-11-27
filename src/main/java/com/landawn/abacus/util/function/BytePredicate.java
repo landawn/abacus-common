@@ -12,6 +12,8 @@ import com.landawn.abacus.util.Throwables;
  * <p>This is a functional interface whose functional method is {@link #test(byte)}.
  *
  * @see java.util.function.Predicate
+ * @see ByteBiPredicate
+ * @see ByteTriPredicate
  *
  * <p>Refer to JDK API documentation at: <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html">https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a></p>
  */
@@ -69,6 +71,12 @@ public interface BytePredicate extends Throwables.BytePredicate<RuntimeException
      * Returns the specified BytePredicate instance.
      * This method is useful for type inference or when you need to explicitly cast a lambda expression.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * BytePredicate pred = BytePredicate.of(v -> v > 0);
+     * boolean result = pred.test((byte) 5); // Returns true
+     * }</pre>
+     *
      * @param predicate the predicate to return
      * @return the same predicate instance
      */
@@ -80,6 +88,12 @@ public interface BytePredicate extends Throwables.BytePredicate<RuntimeException
      * Returns a predicate that represents the logical negation of this predicate.
      * The returned predicate will return {@code true} when this predicate returns {@code false}, and vice versa.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * BytePredicate isPositive = value -> value > 0;
+     * BytePredicate isNotPositive = isPositive.negate();
+     * }</pre>
+     *
      * @return a predicate that represents the logical negation of this predicate
      */
     default BytePredicate negate() {
@@ -89,6 +103,15 @@ public interface BytePredicate extends Throwables.BytePredicate<RuntimeException
     /**
      * Returns a composed predicate that represents a short-circuiting logical AND of this predicate and another.
      * When evaluating the composed predicate, if this predicate is {@code false}, then the {@code other} predicate is not evaluated.
+     *
+     * <p>If evaluation of either operation throws an exception, it is relayed to the caller of the composed operation.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * BytePredicate isPositive = value -> value > 0;
+     * BytePredicate isEven = value -> value % 2 == 0;
+     * BytePredicate isPositiveAndEven = isPositive.and(isEven);
+     * }</pre>
      *
      * @param other a predicate that will be logically-ANDed with this predicate
      * @return a composed predicate that represents the short-circuiting logical AND of this predicate and the {@code other} predicate
@@ -101,6 +124,15 @@ public interface BytePredicate extends Throwables.BytePredicate<RuntimeException
      * Returns a composed predicate that represents a short-circuiting logical OR of this predicate and another.
      * When evaluating the composed predicate, if this predicate is {@code true}, then the {@code other} predicate is not evaluated.
      *
+     * <p>If evaluation of either operation throws an exception, it is relayed to the caller of the composed operation.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * BytePredicate isNegative = value -> value < 0;
+     * BytePredicate isZero = value -> value == 0;
+     * BytePredicate isNonPositive = isNegative.or(isZero);
+     * }</pre>
+     *
      * @param other a predicate that will be logically-ORed with this predicate
      * @return a composed predicate that represents the short-circuiting logical OR of this predicate and the {@code other} predicate
      */
@@ -110,6 +142,12 @@ public interface BytePredicate extends Throwables.BytePredicate<RuntimeException
 
     /**
      * Returns a predicate that tests if the byte value is equal to the specified target value.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * BytePredicate isFive = BytePredicate.equal((byte) 5);
+     * boolean result = isFive.test((byte) 5); // Returns true
+     * }</pre>
      *
      * @param targetByte the value to compare against
      * @return a predicate that tests if the input is equal to {@code targetByte}
@@ -121,6 +159,12 @@ public interface BytePredicate extends Throwables.BytePredicate<RuntimeException
     /**
      * Returns a predicate that tests if the byte value is not equal to the specified target value.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * BytePredicate notZero = BytePredicate.notEqual((byte) 0);
+     * boolean result = notZero.test((byte) 5); // Returns true
+     * }</pre>
+     *
      * @param targetByte the value to compare against
      * @return a predicate that tests if the input is not equal to {@code targetByte}
      */
@@ -130,6 +174,12 @@ public interface BytePredicate extends Throwables.BytePredicate<RuntimeException
 
     /**
      * Returns a predicate that tests if the byte value is greater than the specified target value.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * BytePredicate greaterThanTen = BytePredicate.greaterThan((byte) 10);
+     * boolean result = greaterThanTen.test((byte) 15); // Returns true
+     * }</pre>
      *
      * @param targetByte the value to compare against
      * @return a predicate that tests if the input is greater than {@code targetByte}
@@ -141,6 +191,12 @@ public interface BytePredicate extends Throwables.BytePredicate<RuntimeException
     /**
      * Returns a predicate that tests if the byte value is greater than or equal to the specified target value.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * BytePredicate atLeastZero = BytePredicate.greaterEqual((byte) 0);
+     * boolean result = atLeastZero.test((byte) 0); // Returns true
+     * }</pre>
+     *
      * @param targetByte the value to compare against
      * @return a predicate that tests if the input is greater than or equal to {@code targetByte}
      */
@@ -150,6 +206,12 @@ public interface BytePredicate extends Throwables.BytePredicate<RuntimeException
 
     /**
      * Returns a predicate that tests if the byte value is less than the specified target value.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * BytePredicate lessThanHundred = BytePredicate.lessThan((byte) 100);
+     * boolean result = lessThanHundred.test((byte) 50); // Returns true
+     * }</pre>
      *
      * @param targetByte the value to compare against
      * @return a predicate that tests if the input is less than {@code targetByte}
@@ -161,6 +223,12 @@ public interface BytePredicate extends Throwables.BytePredicate<RuntimeException
     /**
      * Returns a predicate that tests if the byte value is less than or equal to the specified target value.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * BytePredicate maxTen = BytePredicate.lessEqual((byte) 10);
+     * boolean result = maxTen.test((byte) 10); // Returns true
+     * }</pre>
+     *
      * @param targetByte the value to compare against
      * @return a predicate that tests if the input is less than or equal to {@code targetByte}
      */
@@ -171,6 +239,12 @@ public interface BytePredicate extends Throwables.BytePredicate<RuntimeException
     /**
      * Returns a predicate that tests if the byte value is between the specified minimum and maximum values (exclusive).
      * The test returns {@code true} if the value is greater than {@code minValue} AND less than {@code maxValue}.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * BytePredicate inRange = BytePredicate.between((byte) 0, (byte) 100);
+     * boolean result = inRange.test((byte) 50); // Returns true
+     * }</pre>
      *
      * @param minValue the exclusive lower bound
      * @param maxValue the exclusive upper bound

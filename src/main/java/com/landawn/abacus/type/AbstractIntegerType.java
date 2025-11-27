@@ -36,6 +36,11 @@ import com.landawn.abacus.util.Strings;
  */
 public abstract class AbstractIntegerType extends NumberType<Number> {
 
+    /**
+     * Constructs an AbstractIntegerType with the specified type name.
+     *
+     * @param typeName the name of the integer type (e.g., "Integer", "int")
+     */
     protected AbstractIntegerType(final String typeName) {
         super(typeName);
     }

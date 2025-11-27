@@ -970,6 +970,14 @@ public final class Splitter {
      * <p>The Type instance provides more fine-grained control over the conversion
      * process compared to using Class objects.</p>
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * // Split and convert to List<Integer> using Type
+     * Type<Integer> intType = N.typeOf(Integer.class);
+     * List<Integer> numbers = Splitter.with(",").split("1,2,3", intType);
+     * // Returns [1, 2, 3]
+     * }</pre>
+     *
      * @param <T> the target type for conversion
      * @param source the CharSequence to split; may be {@code null}
      * @param targetType the Type instance used for converting strings to the target type
@@ -992,6 +1000,15 @@ public final class Splitter {
      * provided Type instance, and returns the results in a Collection created
      * by the provided supplier. This method provides maximum flexibility by
      * allowing control over both the Type-based conversion and the collection type.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * // Split into a TreeSet of Integers using Type
+     * Type<Integer> intType = N.typeOf(Integer.class);
+     * TreeSet<Integer> uniqueNumbers = Splitter.with(",")
+     *     .split("3,1,2,1,3", intType, TreeSet::new);
+     * // Returns sorted unique values: [1, 2, 3]
+     * }</pre>
      *
      * @param <T> the target type for conversion
      * @param <C> the type of Collection to return
@@ -1076,6 +1093,14 @@ public final class Splitter {
      * provided Type instance, and adds the converted values to the provided
      * output collection. This method provides Type-based conversion for appending
      * to existing collections.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * List<Double> results = new ArrayList<>();
+     * Type<Double> doubleType = N.typeOf(Double.class);
+     * Splitter.with(",").split("1.5,2.7,3.9", doubleType, results);
+     * // results now contains [1.5, 2.7, 3.9]
+     * }</pre>
      *
      * @param <T> the target type for conversion
      * @param <C> the type of Collection to populate
@@ -1815,6 +1840,15 @@ public final class Splitter {
          * This method is useful when working with the type system directly or when
          * Class objects are insufficient for conversion needs.
          *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * Type<String> strType = N.typeOf(String.class);
+         * Type<Integer> intType = N.typeOf(Integer.class);
+         * Map<String, Integer> config = MapSplitter.with(",", "=")
+         *     .split("timeout=30,retry=3", strType, intType);
+         * // Returns {"timeout"=30, "retry"=3}
+         * }</pre>
+         *
          * @param <K> the key type
          * @param <V> the value type
          * @param source the CharSequence to split into a map; may be {@code null}
@@ -1870,6 +1904,15 @@ public final class Splitter {
          * using the provided Type instances, and returns the results in a Map created
          * by the provided supplier. This method provides maximum flexibility with
          * Type-based conversion and custom Map implementation.
+         *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * Type<String> strType = N.typeOf(String.class);
+         * Type<Integer> intType = N.typeOf(Integer.class);
+         * TreeMap<String, Integer> sorted = MapSplitter.with(",", "=")
+         *     .split("z=3,a=1,m=2", strType, intType, TreeMap::new);
+         * // Returns a TreeMap sorted by keys: {a=1, m=2, z=3}
+         * }</pre>
          *
          * @param <K> the key type
          * @param <V> the value type
@@ -1983,6 +2026,17 @@ public final class Splitter {
          * Splits the specified CharSequence into key-value pairs, converts them using
          * the provided Type instances, and adds them to the provided output map. This
          * method provides Type-based conversion for appending to existing maps.
+         *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * Map<String, Integer> config = new HashMap<>();
+         * Type<String> strType = N.typeOf(String.class);
+         * Type<Integer> intType = N.typeOf(Integer.class);
+         *
+         * MapSplitter.with(",", "=").split("port=8080,timeout=30", strType, intType, config);
+         * MapSplitter.with(";", ":").split("retry:3;delay:500", strType, intType, config);
+         * // config now contains {port=8080, timeout=30, retry=3, delay=500}
+         * }</pre>
          *
          * @param <K> the key type
          * @param <V> the value type

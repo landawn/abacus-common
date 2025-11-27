@@ -40,14 +40,34 @@ public class NumberType<T extends Number> extends AbstractPrimaryType<T> {
     private final Class<T> typeClass;
     private final Function<String, T> creator;
 
+    /**
+     * Constructs a NumberType with the specified type name.
+     * Uses the generic Number class as the type class.
+     *
+     * @param typeName the name of the number type
+     */
     protected NumberType(final String typeName) {
         this(typeName, Number.class);
     }
 
+    /**
+     * Constructs a NumberType for the specified type class.
+     * The type name is derived from the canonical class name.
+     *
+     * @param typeClass the class of the number type
+     */
     protected NumberType(final Class<?> typeClass) {
         this(ClassUtil.getCanonicalClassName(typeClass), typeClass);
     }
 
+    /**
+     * Constructs a NumberType with the specified type name and type class.
+     * This constructor automatically discovers factory methods or constructors
+     * for creating instances from strings using reflection.
+     *
+     * @param typeName the name of the number type
+     * @param typeClass the class of the number type
+     */
     @SuppressFBWarnings({ "REC_CATCH_EXCEPTION", "DE_MIGHT_IGNORE" })
     protected NumberType(final String typeName, final Class<?> typeClass) {
         super(typeName);

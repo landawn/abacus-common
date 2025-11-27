@@ -49,14 +49,18 @@ import com.landawn.abacus.type.Type;
  * MyBean restored = parser.deserialize(xml, MyBean.class);
  * 
  * // Deserialize from DOM Node
- * Document doc = DocumentBuilderFactory.newInstance()
- *     .newDocumentBuilder().parse(xmlFile);
- * MyBean fromNode = parser.deserialize(doc.getFirstChild(), MyBean.class);
+ * try {
+ *     Document doc = DocumentBuilderFactory.newInstance()
+ *         .newDocumentBuilder().parse(xmlFile);
+ *     MyBean fromNode = parser.deserialize(doc.getFirstChild(), MyBean.class);
+ * } catch (Exception e) {
+ *     // Handle parsing exception
+ * }
  * 
- * // Deserialize with node class mappings
- * Map<String, Class<?>> nodeTypes = new HashMap<>();
- * nodeTypes.put("person", Person.class);
- * nodeTypes.put("company", Company.class);
+ * // Deserialize with node type mappings
+ * Map<String, Type<?>> nodeTypes = new HashMap<>();
+ * nodeTypes.put("person", Type.of(Person.class));
+ * nodeTypes.put("company", Type.of(Company.class));
  * Object result = parser.deserialize(xmlStream, config, nodeTypes);
  * }</pre>
  * 
@@ -75,10 +79,14 @@ public interface XMLParser extends Parser<XMLSerializationConfig, XMLDeserializa
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Document doc = DocumentBuilderFactory.newInstance()
-     *     .newDocumentBuilder().parse(xmlFile);
-     * Type<MyBean> type = Type.of(MyBean.class);
-     * MyBean bean = parser.deserialize(doc.getFirstChild(), type);
+     * try {
+     *     Document doc = DocumentBuilderFactory.newInstance()
+     *         .newDocumentBuilder().parse(xmlFile);
+     *     Type<MyBean> type = Type.of(MyBean.class);
+     *     MyBean bean = parser.deserialize(doc.getFirstChild(), type);
+     * } catch (Exception e) {
+     *     // Handle parsing exception
+     * }
      * }</pre>
      *
      * @param <T> the type of the target object
@@ -99,9 +107,13 @@ public interface XMLParser extends Parser<XMLSerializationConfig, XMLDeserializa
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Document doc = DocumentBuilderFactory.newInstance()
-     *     .newDocumentBuilder().parse(xmlFile);
-     * MyBean bean = parser.deserialize(doc.getFirstChild(), MyBean.class);
+     * try {
+     *     Document doc = DocumentBuilderFactory.newInstance()
+     *         .newDocumentBuilder().parse(xmlFile);
+     *     MyBean bean = parser.deserialize(doc.getFirstChild(), MyBean.class);
+     * } catch (Exception e) {
+     *     // Handle parsing exception
+     * }
      * }</pre>
      *
      * @param <T> the type of the target object
@@ -125,10 +137,14 @@ public interface XMLParser extends Parser<XMLSerializationConfig, XMLDeserializa
      * XMLDeserializationConfig config = new XMLDeserializationConfig()
      *     .ignoreUnmatchedProperty(true);
      *
-     * Document doc = DocumentBuilderFactory.newInstance()
-     *     .newDocumentBuilder().parse(xmlFile);
-     * Type<MyBean> type = Type.of(MyBean.class);
-     * MyBean bean = parser.deserialize(doc.getFirstChild(), config, type);
+     * try {
+     *     Document doc = DocumentBuilderFactory.newInstance()
+     *         .newDocumentBuilder().parse(xmlFile);
+     *     Type<MyBean> type = Type.of(MyBean.class);
+     *     MyBean bean = parser.deserialize(doc.getFirstChild(), config, type);
+     * } catch (Exception e) {
+     *     // Handle parsing exception
+     * }
      * }</pre>
      *
      * @param <T> the type of the target object
@@ -153,9 +169,13 @@ public interface XMLParser extends Parser<XMLSerializationConfig, XMLDeserializa
      * XMLDeserializationConfig config = new XMLDeserializationConfig()
      *     .ignoreUnmatchedProperty(true);
      *
-     * Document doc = DocumentBuilderFactory.newInstance()
-     *     .newDocumentBuilder().parse(xmlFile);
-     * MyBean bean = parser.deserialize(doc.getFirstChild(), config, MyBean.class);
+     * try {
+     *     Document doc = DocumentBuilderFactory.newInstance()
+     *         .newDocumentBuilder().parse(xmlFile);
+     *     MyBean bean = parser.deserialize(doc.getFirstChild(), config, MyBean.class);
+     * } catch (Exception e) {
+     *     // Handle parsing exception
+     * }
      * }</pre>
      *
      * @param <T> the type of the target object
@@ -273,9 +293,13 @@ public interface XMLParser extends Parser<XMLSerializationConfig, XMLDeserializa
      * nodeTypes.put("product", Type.of(Product.class));
      * nodeTypes.put("category", Type.of(Category.class));
      *
-     * Document doc = DocumentBuilderFactory.newInstance()
-     *     .newDocumentBuilder().parse(xmlFile);
-     * Object result = parser.deserialize(doc.getFirstChild(), config, nodeTypes);
+     * try {
+     *     Document doc = DocumentBuilderFactory.newInstance()
+     *         .newDocumentBuilder().parse(xmlFile);
+     *     Object result = parser.deserialize(doc.getFirstChild(), config, nodeTypes);
+     * } catch (Exception e) {
+     *     // Handle parsing exception
+     * }
      * }</pre>
      *
      * @param <T> the type of the target object

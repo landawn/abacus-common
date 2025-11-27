@@ -58,10 +58,20 @@ final class GuavaHashFunction implements HashFunction {
      * Guava hash function. This method provides a more convenient way to create
      * instances compared to using the constructor directly.
      *
+     * <p>This method is used internally by the {@link Hashing} utility class to adapt
+     * Guava's hash functions to the abacus-common API. It ensures proper wrapping and
+     * validation of the provided hash function.
+     *
      * <p><b>Note:</b> This is an internal method. Client code should obtain HashFunction
      * instances through the factory methods in {@link Hashing} instead.
      *
-     * @param gHashFunction the Guava hash function to wrap
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * com.google.common.hash.HashFunction guavaHash = com.google.common.hash.Hashing.sha256();
+     * HashFunction wrapped = GuavaHashFunction.wrap(guavaHash);
+     * }</pre>
+     *
+     * @param gHashFunction the Guava hash function to wrap (must not be null)
      * @return a new GuavaHashFunction instance wrapping the given function
      */
     static GuavaHashFunction wrap(final com.google.common.hash.HashFunction gHashFunction) {

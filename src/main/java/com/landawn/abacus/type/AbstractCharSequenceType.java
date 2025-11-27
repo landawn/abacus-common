@@ -25,6 +25,11 @@ package com.landawn.abacus.type;
  */
 public abstract class AbstractCharSequenceType<T extends CharSequence> extends AbstractPrimaryType<T> {
 
+    /**
+     * Constructs an AbstractCharSequenceType with the specified type name.
+     *
+     * @param typeName the name of the CharSequence type (e.g., "String", "StringBuilder")
+     */
     protected AbstractCharSequenceType(String typeName) {
         super(typeName);
     }

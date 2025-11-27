@@ -49,6 +49,15 @@ public interface IntUnaryOperator extends Throwables.IntUnaryOperator<RuntimeExc
      *   <li>Applying business rules or constraints to integer values</li>
      * </ul>
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * IntUnaryOperator increment = x -> x + 1;
+     * int result = increment.applyAsInt(5); // Returns 6
+     *
+     * IntUnaryOperator negate = x -> -x;
+     * int negated = negate.applyAsInt(10); // Returns -10
+     * }</pre>
+     *
      * @param operand the operand to which the operation is applied
      * @return the operator result
      */

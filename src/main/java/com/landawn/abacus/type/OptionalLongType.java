@@ -33,6 +33,13 @@ public class OptionalLongType extends AbstractOptionalType<OptionalLong> {
     /**
      * Returns the Java class type that this type handler manages.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Type<OptionalLong> type = TypeFactory.getType(OptionalLong.class);
+     * Class<OptionalLong> clazz = type.clazz();
+     * // Returns: OptionalLong.class
+     * }</pre>
+     *
      * @return the {@link OptionalLong} class object
      */
     @Override
@@ -75,6 +82,23 @@ public class OptionalLongType extends AbstractOptionalType<OptionalLong> {
     /**
      * Converts an {@link OptionalLong} object to its string representation.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Type<OptionalLong> type = TypeFactory.getType(OptionalLong.class);
+     *
+     * OptionalLong opt = OptionalLong.of(123456789L);
+     * String result = type.stringOf(opt);
+     * // Returns: "123456789"
+     *
+     * opt = OptionalLong.of(0L);
+     * result = type.stringOf(opt);
+     * // Returns: "0"
+     *
+     * opt = OptionalLong.empty();
+     * result = type.stringOf(opt);
+     * // Returns: null
+     * }</pre>
+     *
      * @param x the OptionalLong object to convert
      * @return the string representation of the long value, or {@code null} if empty or null
      */
@@ -85,6 +109,23 @@ public class OptionalLongType extends AbstractOptionalType<OptionalLong> {
 
     /**
      * Converts a string representation to an {@link OptionalLong} object.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Type<OptionalLong> type = TypeFactory.getType(OptionalLong.class);
+     *
+     * OptionalLong result = type.valueOf("123456789");
+     * // Returns: OptionalLong.of(123456789L)
+     *
+     * result = type.valueOf("0");
+     * // Returns: OptionalLong.of(0L)
+     *
+     * result = type.valueOf(null);
+     * // Returns: OptionalLong.empty()
+     *
+     * result = type.valueOf("");
+     * // Returns: OptionalLong.empty()
+     * }</pre>
      *
      * @param str the string to convert
      * @return an OptionalLong containing the parsed long value, or empty if the input is empty or null
@@ -98,6 +139,20 @@ public class OptionalLongType extends AbstractOptionalType<OptionalLong> {
     /**
      * Retrieves a long value from a ResultSet at the specified column index and wraps it in an {@link OptionalLong}.
      * Handles type conversion if the database column is not a long type.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Type<OptionalLong> type = TypeFactory.getType(OptionalLong.class);
+     * ResultSet rs = ...; // obtained from database query
+     *
+     * // Column contains long value 123456789
+     * OptionalLong opt = type.get(rs, 1);
+     * // Returns: OptionalLong.of(123456789L)
+     *
+     * // Column contains SQL NULL
+     * opt = type.get(rs, 2);
+     * // Returns: OptionalLong.empty()
+     * }</pre>
      *
      * @param rs the ResultSet to read from
      * @param columnIndex the column index (1-based) to retrieve the value from
@@ -115,6 +170,20 @@ public class OptionalLongType extends AbstractOptionalType<OptionalLong> {
      * Retrieves a long value from a ResultSet using the specified column label and wraps it in an {@link OptionalLong}.
      * Handles type conversion if the database column is not a long type.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Type<OptionalLong> type = TypeFactory.getType(OptionalLong.class);
+     * ResultSet rs = ...; // obtained from database query
+     *
+     * // Column "user_id" contains long value 987654321
+     * OptionalLong opt = type.get(rs, "user_id");
+     * // Returns: OptionalLong.of(987654321L)
+     *
+     * // Column "last_login" contains SQL NULL
+     * opt = type.get(rs, "last_login");
+     * // Returns: OptionalLong.empty()
+     * }</pre>
+     *
      * @param rs the ResultSet to read from
      * @param columnLabel the label for the column specified with the SQL AS clause
      * @return an OptionalLong containing the long value, or empty if the column value is SQL NULL
@@ -130,6 +199,21 @@ public class OptionalLongType extends AbstractOptionalType<OptionalLong> {
     /**
      * Sets a parameter in a PreparedStatement to the value contained in an {@link OptionalLong}.
      * If the OptionalLong is {@code null} or empty, sets the parameter to SQL NULL.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Type<OptionalLong> type = TypeFactory.getType(OptionalLong.class);
+     * PreparedStatement stmt = connection.prepareStatement(
+     *     "INSERT INTO transactions (id, user_id) VALUES (?, ?)");
+     *
+     * OptionalLong opt = OptionalLong.of(123456789L);
+     * type.set(stmt, 2, opt);
+     * // Sets parameter to 123456789
+     *
+     * opt = OptionalLong.empty();
+     * type.set(stmt, 2, opt);
+     * // Sets parameter to SQL NULL
+     * }</pre>
      *
      * @param stmt the PreparedStatement to set the parameter on
      * @param columnIndex the parameter index (1-based) to set
@@ -148,6 +232,20 @@ public class OptionalLongType extends AbstractOptionalType<OptionalLong> {
     /**
      * Sets a named parameter in a CallableStatement to the value contained in an {@link OptionalLong}.
      * If the OptionalLong is {@code null} or empty, sets the parameter to SQL NULL.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Type<OptionalLong> type = TypeFactory.getType(OptionalLong.class);
+     * CallableStatement stmt = connection.prepareCall("{call update_user_id(?, ?)}");
+     *
+     * OptionalLong opt = OptionalLong.of(987654321L);
+     * type.set(stmt, "p_user_id", opt);
+     * // Sets parameter to 987654321
+     *
+     * opt = OptionalLong.empty();
+     * type.set(stmt, "p_last_login", opt);
+     * // Sets parameter to SQL NULL
+     * }</pre>
      *
      * @param stmt the CallableStatement to set the parameter on
      * @param parameterName the name of the parameter to set

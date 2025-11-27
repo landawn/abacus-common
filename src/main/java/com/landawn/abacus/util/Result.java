@@ -94,44 +94,41 @@ import com.landawn.abacus.util.u.Optional;
  * }
  *
  * // Conditional execution based on state
- * result.ifSuccess(value -> processValue(value))
- *       .ifFailure(error -> logError(error));
+ * result.ifSuccess(value -> processValue(value));
+ * result.ifFailure(error -> logError(error));
  *
  * // Safe value extraction with defaults
  * String safeValue = result.orElseIfFailure("default value");
  * String computedDefault = result.orElseGetIfFailure(() -> computeDefault());
  *
  * // Exception transformation and re-throwing
- * String value = result.orElseThrow(IOException::new);
+ * String value = result.orElseThrow(ex -> new RuntimeException("Operation failed", ex));
  * String value2 = result.orElseThrow(() -> new CustomException("Operation failed"));
  * }</pre>
  *
  * <p><b>Advanced Error Handling Patterns:</b>
  * <pre>{@code
- * // Chain operations with automatic failure propagation
- * public Result<String, IOException> processFile(String filename) {
- *     return readFile(filename)
- *         .flatMap(content -> validateContent(content))
- *         .flatMap(validContent -> transformContent(validContent));
+ * // Conditional execution with both success and failure handlers
+ * public void processFile(Result<String, IOException> fileResult) {
+ *     fileResult.ifSuccessOrElse(
+ *         content -> processContent(content),
+ *         error -> logError("Failed to read file", error)
+ *     );
  * }
  *
- * // Convert between different exception types
- * Result<Data, SQLException> dbResult = fetchFromDatabase();
- * Result<Data, ServiceException> serviceResult = dbResult.mapFailure(
- *     sqlEx -> new ServiceException("Database operation failed", sqlEx)
- * );
+ * // Convert exception to different type and re-throw
+ * public String fetchData(Result<String, SQLException> dbResult) throws ServiceException {
+ *     return dbResult.orElseThrow(
+ *         sqlEx -> new ServiceException("Database operation failed", sqlEx)
+ *     );
+ * }
  *
- * // Combine multiple results
- * Result<String, Exception> combined = combineResults(
- *     result1.ifFailureOrElse(
- *         error -> handleFirstError(error),
- *         value -> processFirstValue(value)
- *     ),
- *     result2.ifSuccessOrElse(
- *         value -> processSecondValue(value),
- *         error -> handleSecondError(error)
- *     )
- * );
+ * // Handle multiple results with fallback values
+ * Result<String, IOException> result1 = readFile("file1.txt");
+ * Result<String, IOException> result2 = readFile("file2.txt");
+ *
+ * String data1 = result1.orElseIfFailure("default1");
+ * String data2 = result2.orElseGetIfFailure(() -> computeDefault());
  * }</pre>
  *
  * <p><b>Integration with Existing Code:</b>
@@ -149,8 +146,8 @@ import com.landawn.abacus.util.u.Optional;
  * // Converting to other container types
  * Pair<String, IOException> pair = result.toPair();
  * Tuple2<String, IOException> tuple = result.toTuple();
- * Optional<String> optional = result.isSuccess() 
- *     ? Optional.of(result.orElseThrow()) 
+ * Optional<String> optional = result.isSuccess()
+ *     ? Optional.ofNullable(result.orElseIfFailure(null))
  *     : Optional.empty();
  * }</pre>
  *
@@ -236,15 +233,7 @@ import com.landawn.abacus.util.u.Optional;
  * <p><b>Example: File Processing Pipeline</b>
  * <pre>{@code
  * public class FileProcessor {
- *     public Result<ProcessedData, IOException> processFile(String filename) {
- *         return readFile(filename)
- *             .flatMap(this::validateFileContent)
- *             .flatMap(this::parseContent)
- *             .flatMap(this::transformData)
- *             .ifFailure(error -> logProcessingError(filename, error));
- *     }
- *
- *     private Result<String, IOException> readFile(String filename) {
+ *     public Result<String, IOException> readFile(String filename) {
  *         try {
  *             String content = Files.readString(Paths.get(filename));
  *             return Result.of(content, null);
@@ -253,11 +242,26 @@ import com.landawn.abacus.util.u.Optional;
  *         }
  *     }
  *
- *     public void handleProcessingResult(Result<ProcessedData, IOException> result) {
+ *     public void processFile(String filename) {
+ *         Result<String, IOException> result = readFile(filename);
+ *
  *         result.ifSuccessOrElse(
- *             data -> saveProcessedData(data),
- *             error -> notifyProcessingFailure(error)
+ *             content -> {
+ *                 // Process the file content
+ *                 ProcessedData data = parseAndTransform(content);
+ *                 saveProcessedData(data);
+ *             },
+ *             error -> {
+ *                 logProcessingError(filename, error);
+ *                 notifyProcessingFailure(error);
+ *             }
  *         );
+ *     }
+ *
+ *     public String getFileContentOrDefault(String filename) throws IOException {
+ *         Result<String, IOException> result = readFile(filename);
+ *         // Extract value or throw the IOException
+ *         return result.orElseThrow();
  *     }
  * }
  * }</pre>
@@ -281,6 +285,16 @@ public class Result<T, E extends Throwable> implements Immutable {
 
     private final E exception;
 
+    /**
+     * Constructs a new Result instance with the specified value and exception.
+     * This constructor is package-private and should be accessed via the {@link #of(Object, Throwable)} factory method.
+     * Either value or exception can be present, but typically only one should be {@code non-null}.
+     * If both are {@code null}, it represents a successful operation with a {@code null} result.
+     * If both are {@code non-null}, the Result is considered to be in failure state (exception takes precedence).
+     *
+     * @param value the successful result value, may be {@code null}
+     * @param exception the exception that occurred during the operation, may be {@code null} if operation was successful
+     */
     Result(final T value, final E exception) {
         this.value = value;
         this.exception = exception;
@@ -300,8 +314,8 @@ public class Result<T, E extends Throwable> implements Immutable {
      *
      * @param <T> the type of the result value
      * @param <E> the type of the exception, must extend Throwable
-     * @param value the successful result value, can be null
-     * @param exception the exception that occurred during the operation, {@code null} if operation was successful
+     * @param value the successful result value, may be {@code null}
+     * @param exception the exception that occurred during the operation, may be {@code null} if operation was successful
      * @return a new Result instance containing either the value or the exception
      */
     public static <T, E extends Throwable> Result<T, E> of(final T value, final E exception) {
@@ -354,7 +368,7 @@ public class Result<T, E extends Throwable> implements Immutable {
      * }</pre>
      *
      * @param <E2> the type of exception that the action might throw
-     * @param actionOnFailure the action to execute if this Result contains an exception, must not be null
+     * @param actionOnFailure the action to execute if this Result contains an exception, must not be {@code null}
      * @throws E2 if the actionOnFailure throws an exception of type E2
      */
     public <E2 extends Throwable> void ifFailure(final Throwables.Consumer<? super E, E2> actionOnFailure) throws E2 {
@@ -377,9 +391,9 @@ public class Result<T, E extends Throwable> implements Immutable {
      *
      * @param <E2> the type of exception that actionOnFailure might throw
      * @param <E3> the type of exception that actionOnSuccess might throw
-     * @param actionOnFailure the action to execute if this Result contains an exception, must not be null
-     * @param actionOnSuccess the action to execute if this Result is successful, must not be null
-     * @throws IllegalArgumentException if either actionOnFailure or actionOnSuccess is null
+     * @param actionOnFailure the action to execute if this Result contains an exception, must not be {@code null}
+     * @param actionOnSuccess the action to execute if this Result is successful, must not be {@code null}
+     * @throws IllegalArgumentException if either actionOnFailure or actionOnSuccess is {@code null}
      * @throws E2 if the actionOnFailure is executed and throws an exception
      * @throws E3 if the actionOnSuccess is executed and throws an exception
      */
@@ -406,7 +420,7 @@ public class Result<T, E extends Throwable> implements Immutable {
      * }</pre>
      *
      * @param <E2> the type of exception that the action might throw
-     * @param actionOnSuccess the action to execute if this Result is successful, must not be null
+     * @param actionOnSuccess the action to execute if this Result is successful, must not be {@code null}
      * @throws E2 if the actionOnSuccess throws an exception of type E2
      */
     public <E2 extends Throwable> void ifSuccess(final Throwables.Consumer<? super T, E2> actionOnSuccess) throws E2 {
@@ -429,9 +443,9 @@ public class Result<T, E extends Throwable> implements Immutable {
      *
      * @param <E2> the type of exception that actionOnSuccess might throw
      * @param <E3> the type of exception that actionOnFailure might throw
-     * @param actionOnSuccess the action to execute if this Result is successful, must not be null
-     * @param actionOnFailure the action to execute if this Result contains an exception, must not be null
-     * @throws IllegalArgumentException if either actionOnSuccess or actionOnFailure is null
+     * @param actionOnSuccess the action to execute if this Result is successful, must not be {@code null}
+     * @param actionOnFailure the action to execute if this Result contains an exception, must not be {@code null}
+     * @throws IllegalArgumentException if either actionOnSuccess or actionOnFailure is {@code null}
      * @throws E2 if the actionOnSuccess is executed and throws an exception
      * @throws E3 if the actionOnFailure is executed and throws an exception
      */
@@ -477,9 +491,9 @@ public class Result<T, E extends Throwable> implements Immutable {
      * String value = result.orElseGetIfFailure(() -> computeDefault());
      * }</pre>
      *
-     * @param otherIfErrorOccurred a supplier that provides the value to return if this Result contains an exception, must not be null
+     * @param otherIfErrorOccurred a supplier that provides the value to return if this Result contains an exception, must not be {@code null}
      * @return the value contained in this Result if successful, otherwise the value provided by the supplier
-     * @throws IllegalArgumentException if otherIfErrorOccurred is null
+     * @throws IllegalArgumentException if otherIfErrorOccurred is {@code null}
      */
     public T orElseGetIfFailure(final Supplier<? extends T> otherIfErrorOccurred) throws IllegalArgumentException {
         N.checkArgNotNull(otherIfErrorOccurred, cs.otherIfErrorOccurred);
@@ -522,9 +536,9 @@ public class Result<T, E extends Throwable> implements Immutable {
      * }</pre>
      *
      * @param <E2> the type of exception to be thrown
-     * @param exceptionSupplierIfErrorOccurred a function that creates a new exception based on the contained exception, must not be null
+     * @param exceptionSupplierIfErrorOccurred a function that creates a new exception based on the contained exception, must not be {@code null}
      * @return the value contained in this Result if successful
-     * @throws IllegalArgumentException if exceptionSupplierIfErrorOccurred is null
+     * @throws IllegalArgumentException if exceptionSupplierIfErrorOccurred is {@code null}
      * @throws E2 the exception created by the exceptionSupplierIfErrorOccurred function if this Result contains an exception
      */
     public <E2 extends Throwable> T orElseThrow(final Function<? super E, E2> exceptionSupplierIfErrorOccurred) throws IllegalArgumentException, E2 {
@@ -548,9 +562,9 @@ public class Result<T, E extends Throwable> implements Immutable {
      * }</pre>
      *
      * @param <E2> the type of exception to be thrown
-     * @param exceptionSupplier a supplier that provides the exception to throw if this Result contains an exception, must not be null
+     * @param exceptionSupplier a supplier that provides the exception to throw if this Result contains an exception, must not be {@code null}
      * @return the value contained in this Result if successful
-     * @throws IllegalArgumentException if exceptionSupplier is null
+     * @throws IllegalArgumentException if exceptionSupplier is {@code null}
      * @throws E2 the exception provided by the exceptionSupplier if this Result contains an exception
      */
     public <E2 extends Throwable> T orElseThrow(final Supplier<? extends E2> exceptionSupplier) throws IllegalArgumentException, E2 {
@@ -571,8 +585,13 @@ public class Result<T, E extends Throwable> implements Immutable {
      * eagerly even if the Result is successful. Use {@link #orElseThrow(Supplier)} instead for
      * better performance.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * String value = result.orElseThrow(new IllegalStateException("Failed"));
+     * }</pre>
+     *
      * @param <E2> the type of exception to be thrown
-     * @param exception the exception to throw if this Result contains an exception
+     * @param exception the exception to throw if this Result contains an exception, may be {@code null}
      * @return the value contained in this Result if successful
      * @throws E2 the provided exception if this Result contains an exception
      * @deprecated Use {@link #orElseThrow(Supplier)} instead for better performance (avoids creating exception if not needed)
@@ -630,8 +649,8 @@ public class Result<T, E extends Throwable> implements Immutable {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Pair<String, Exception> pair = result.toPair();
-     * String value = pair._1;
-     * Exception ex = pair._2;
+     * String value = pair.left();
+     * Exception ex = pair.right();
      * }</pre>
      *
      * @return a Pair where the first element is the value and the second element is the exception
@@ -730,6 +749,13 @@ public class Result<T, E extends Throwable> implements Immutable {
      */
     @Beta
     public static class RR<T> extends Result<T, RuntimeException> {
+        /**
+         * Constructs a new RR instance with the specified value and RuntimeException.
+         * This constructor is package-private and should be accessed via the {@link #of(Object, RuntimeException)} factory method.
+         *
+         * @param value the successful result value, may be {@code null}
+         * @param exception the RuntimeException that occurred during the operation, may be {@code null} if operation was successful
+         */
         RR(final T value, final RuntimeException exception) {
             super(value, exception);
         }
@@ -747,8 +773,8 @@ public class Result<T, E extends Throwable> implements Immutable {
          * }</pre>
          *
          * @param <T> the type of the result value
-         * @param value the successful result value, can be null
-         * @param exception the RuntimeException that occurred during the operation, {@code null} if operation was successful
+         * @param value the successful result value, may be {@code null}
+         * @param exception the RuntimeException that occurred during the operation, may be {@code null} if operation was successful
          * @return a new RR instance containing either the value or the RuntimeException
          */
         public static <T> Result.RR<T> of(final T value, final RuntimeException exception) {

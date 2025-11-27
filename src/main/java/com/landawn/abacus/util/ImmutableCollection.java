@@ -208,9 +208,7 @@ public class ImmutableCollection<E> extends AbstractCollection<E> implements Imm
      *
      * @param valueToFind element whose presence in this collection is to be tested
      * @return {@code true} if this collection contains the specified element
-     * @throws ClassCastException if the type of the specified element
-     *         is incompatible with this collection (optional)
-     *         collection does not permit {@code null} elements (optional)
+     * @throws ClassCastException if the type of the specified element is incompatible with this collection (optional)
      */
     @Override
     public boolean contains(final Object valueToFind) {

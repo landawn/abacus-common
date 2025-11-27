@@ -293,6 +293,13 @@ public abstract class BooleanIterator extends ImmutableIterator<Boolean> {
         };
     }
 
+    /**
+     * Returns the next boolean value in the iteration as a boxed Boolean.
+     *
+     * @return the next boolean value as a Boolean object
+     * @throws NoSuchElementException if the iteration has no more elements
+     * @deprecated use {@link #nextBoolean()} instead to avoid boxing overhead
+     */
     @Deprecated
     @Override
     public Boolean next() {

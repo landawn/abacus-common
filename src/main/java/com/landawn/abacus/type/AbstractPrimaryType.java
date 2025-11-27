@@ -24,6 +24,11 @@ package com.landawn.abacus.type;
  */
 public abstract class AbstractPrimaryType<T> extends AbstractType<T> {
 
+    /**
+     * Constructs an AbstractPrimaryType with the specified type name.
+     *
+     * @param typeName the name of the primary type (e.g., "Integer", "String", "Boolean")
+     */
     protected AbstractPrimaryType(final String typeName) {
         super(typeName);
     }

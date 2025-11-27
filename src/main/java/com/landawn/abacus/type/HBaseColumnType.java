@@ -107,6 +107,22 @@ public class HBaseColumnType<T> extends AbstractType<HBaseColumn<T>> {
      * The format is "version:value" where version is the timestamp/version number
      * and value is the string representation of the stored value.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Type<HBaseColumn<String>> type = TypeFactory.getType("HBaseColumn<String>");
+     * HBaseColumn<String> column = new HBaseColumn<>("value1", 1234567890L);
+     * String result = type.stringOf(column);
+     * // Returns: "1234567890:value1"
+     *
+     * HBaseColumn<Integer> intColumn = new HBaseColumn<>(42, 9999999L);
+     * Type<HBaseColumn<Integer>> intType = TypeFactory.getType("HBaseColumn<Integer>");
+     * result = intType.stringOf(intColumn);
+     * // Returns: "9999999:42"
+     *
+     * result = type.stringOf(null);
+     * // Returns: null
+     * }</pre>
+     *
      * @param x the HBaseColumn to convert to string
      * @return the string representation in format "version:value", or {@code null} if the input is null
      */
@@ -119,6 +135,23 @@ public class HBaseColumnType<T> extends AbstractType<HBaseColumn<T>> {
      * Parses a string representation into an HBaseColumn instance.
      * The string should be in the format "version:value" where version is a long number
      * representing the timestamp/version, and value is parsed according to the element type.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Type<HBaseColumn<String>> type = TypeFactory.getType("HBaseColumn<String>");
+     * HBaseColumn<String> result = type.valueOf("1234567890:value1");
+     * // Returns: HBaseColumn with version=1234567890, value="value1"
+     *
+     * Type<HBaseColumn<Integer>> intType = TypeFactory.getType("HBaseColumn<Integer>");
+     * HBaseColumn<Integer> intResult = intType.valueOf("9999999:42");
+     * // Returns: HBaseColumn with version=9999999, value=42
+     *
+     * result = type.valueOf(null);
+     * // Returns: null
+     *
+     * result = type.valueOf("");
+     * // Returns: null
+     * }</pre>
      *
      * @param str the string to parse in format "version:value"
      * @return a new HBaseColumn instance with the parsed version and value, or {@code null} if the input is {@code null} or empty

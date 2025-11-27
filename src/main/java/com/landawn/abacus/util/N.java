@@ -198,16 +198,16 @@ import com.landawn.abacus.util.stream.Stream;
  * List<Integer> lengths = N.map(items, String::length); // Transform with mapping
  *
  * // Mathematical operations
- * OptionalDouble avg = N.average(numbers);           // Calculate average
- * OptionalInt max = N.maxInt(numbers);               // Find maximum
- * double median = N.median(numbers);                 // Calculate median
+ * double avg = N.average(numbers);                   // Calculate average
+ * int max = N.max(numbers);                          // Find maximum
+ * int median = N.median(numbers);                    // Calculate median
  *
  * // Async operations with built-in executor
  * N.sleep(1000);                                     // Thread sleep utility
  * N.asyncRun(() -> doBackgroundTask());              // Async execution
  *
  * // Type conversions and parsing
- * OptionalInt parsed = N.tryParseInt("123");         // Safe parsing
+ * int parsed = Numbers.toInt("123");                 // Parse integer (throws NumberFormatException if invalid)
  * List<Integer> converted = N.toList(numbers);       // Array to list conversion
  *
  * // String operations
@@ -299,15 +299,17 @@ import com.landawn.abacus.util.stream.Stream;
  * List<Integer> processedNumbers = N.filter(rawData, N::isNotBlank)    // Remove nulls and blanks
  *     .stream()
  *     .map(String::trim)                                                // Trim whitespace
- *     .map(N::tryParseInt)                                              // Safe parsing
- *     .filter(Optional::isPresent)                                      // Keep valid numbers
- *     .map(Optional::get)                                               // Extract values
+ *     .map(s -> {                                                       // Safe parsing with try-catch
+ *         try { return Numbers.toInt(s); }
+ *         catch (NumberFormatException e) { return null; }
+ *     })
+ *     .filter(Objects::nonNull)                                         // Keep valid numbers
  *     .collect(N.toList());                                             // Collect to list
  *
  * // Mathematical analysis
- * OptionalDouble average = N.average(processedNumbers);                 // Calculate average
- * OptionalInt maximum = N.maxInt(processedNumbers);                     // Find maximum
- * Map<Integer, Long> frequencies = N.occurrencesMap(processedNumbers);  // Count frequencies
+ * double average = N.averageInt(processedNumbers);                      // Calculate average
+ * Integer maximum = N.max(processedNumbers);                            // Find maximum
+ * Map<Integer, Integer> frequencies = N.occurrencesMap(processedNumbers);  // Count frequencies
  *
  * // Async processing
  * N.asyncRun(() -> {
@@ -2559,6 +2561,13 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * <br />
      * The size of returned List may be less than the specified {@code maxChunkCount} if the input {@code totalSize} is less than {@code maxChunkCount}.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * int[] array = {1, 2, 3, 4, 5, 6, 7};
+     * List<int[]> chunks = N.splitByChunkCount(7, 3, (from, to) -> N.copyOfRange(array, from, to));
+     * // Returns [[1, 2, 3], [4, 5, 6], [7]]
+     * }</pre>
+     *
      * @param <T> the type of the elements in the resulting stream
      * @param totalSize the total size to be split. It could be the size of an array, list, etc.
      * @param maxChunkCount the maximum number of chunks to split into
@@ -2611,6 +2620,13 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * The size of the chunks is larger first.
      * <br />
      * The size of returned List may be less than the specified {@code maxChunkCount} if the input Collection size is less than {@code maxChunkCount}.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * List<Integer> numbers = Arrays.asList(1, 2, 3, 4, 5, 6, 7);
+     * List<List<Integer>> chunks = N.splitByChunkCount(numbers, 3);
+     * // Returns [[1, 2, 3], [4, 5, 6], [7]]
+     * }</pre>
      *
      * @param <T> the type of elements in the input collection
      * @param c the input collection to be split
@@ -3625,6 +3641,14 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
     /**
      * Concatenates two iterators into a new ObjIterator.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Iterator<String> iter1 = Arrays.asList("a", "b").iterator();
+     * Iterator<String> iter2 = Arrays.asList("c", "d").iterator();
+     * ObjIterator<String> result = N.concat(iter1, iter2);
+     * // Returns iterator over ["a", "b", "c", "d"]
+     * }</pre>
      *
      * @param <T> the type of the elements in the iterators.
      * @param a the first iterator.
@@ -6839,6 +6863,13 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * Sets all elements in the given array using the provided generator function.
      * If the specified array is {@code null} or empty, does nothing.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * boolean[] flags = new boolean[5];
+     * N.setAll(flags, i -> i % 2 == 0);
+     * // flags is now {true, false, true, false, true}
+     * }</pre>
+     *
      * @param array the array to be modified
      * @param generator the function used to generate new values for the array elements
      * @see #replaceAll(boolean[], BooleanUnaryOperator)
@@ -6858,6 +6889,13 @@ public final class N extends CommonUtil { // public final class N extends π imp
     /**
      * Sets all elements in the given array using the provided generator function.
      * If the specified array is {@code null} or empty, does nothing.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * char[] letters = new char[5];
+     * N.setAll(letters, i -> (char) ('a' + i));
+     * // letters is now {'a', 'b', 'c', 'd', 'e'}
+     * }</pre>
      *
      * @param array the array to be modified
      * @param generator the function used to generate new values for the array elements
@@ -6879,6 +6917,13 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * Sets all elements in the given array using the provided generator function.
      * If the specified array is {@code null} or empty, does nothing.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * byte[] data = new byte[5];
+     * N.setAll(data, i -> (byte) (i * 10));
+     * // data is now {0, 10, 20, 30, 40}
+     * }</pre>
+     *
      * @param array the array to be modified
      * @param generator the function used to generate new values for the array elements
      * @see #replaceAll(byte[], ByteUnaryOperator)
@@ -6898,6 +6943,13 @@ public final class N extends CommonUtil { // public final class N extends π imp
     /**
      * Sets all elements in the given array using the provided generator function.
      * If the specified array is {@code null} or empty, does nothing.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * short[] values = new short[5];
+     * N.setAll(values, i -> (short) (i * 100));
+     * // values is now {0, 100, 200, 300, 400}
+     * }</pre>
      *
      * @param array the array to be modified
      * @param generator the function used to generate new values for the array elements
@@ -6919,6 +6971,13 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * Sets all elements in the given array using the provided generator function.
      * If the specified array is {@code null} or empty, does nothing.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * int[] numbers = new int[5];
+     * N.setAll(numbers, i -> i * i);
+     * // numbers is now {0, 1, 4, 9, 16}
+     * }</pre>
+     *
      * @param array the array to be modified
      * @param generator the function used to generate new values for the array elements
      * @see #replaceAll(int[], IntUnaryOperator)
@@ -6937,6 +6996,13 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * Sets all elements in the given array using the provided generator function.
      * If the specified array is {@code null} or empty, does nothing.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * long[] numbers = new long[5];
+     * N.setAll(numbers, i -> (long) i * 1000);
+     * // numbers is now {0L, 1000L, 2000L, 3000L, 4000L}
+     * }</pre>
+     *
      * @param array the array to be modified
      * @param generator the function used to generate new values for the array elements
      * @see #replaceAll(long[], LongUnaryOperator)
@@ -6954,6 +7020,13 @@ public final class N extends CommonUtil { // public final class N extends π imp
     /**
      * Sets all elements in the given array using the provided generator function.
      * If the specified array is {@code null} or empty, does nothing.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * float[] values = new float[5];
+     * N.setAll(values, i -> i * 1.5f);
+     * // values is now {0.0f, 1.5f, 3.0f, 4.5f, 6.0f}
+     * }</pre>
      *
      * @param array the array to be modified
      * @param generator the function used to generate new values for the array elements
@@ -6974,6 +7047,13 @@ public final class N extends CommonUtil { // public final class N extends π imp
     /**
      * Sets all elements in the given array using the provided generator function.
      * If the specified array is {@code null} or empty, does nothing.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * double[] values = new double[5];
+     * N.setAll(values, i -> i * 2.5);
+     * // values is now {0.0, 2.5, 5.0, 7.5, 10.0}
+     * }</pre>
      *
      * @param array the array to be modified
      * @param generator the function used to generate new values for the array elements
@@ -7542,9 +7622,18 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * <br />
      * The original array remains unchanged.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * boolean[] flags = {true, false};
+     * boolean[] result = N.addAll(flags, true, true, false);
+     * // Returns {true, false, true, true, false}
+     * }</pre>
+     *
      * @param a the first array whose elements are added to the new array.
      * @param elementsToAdd the additional elements to be added to the new array.
      * @return a new boolean array containing the elements from <i>a</i> and <i>elementsToAdd</i>.
+     * @see #add(boolean[], boolean)
+     * @see #insert(boolean[], int, boolean)
      */
     public static boolean[] addAll(final boolean[] a, final boolean... elementsToAdd) {
         if (isEmpty(a)) {
@@ -7566,9 +7655,18 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * <br />
      * The original array remains unchanged.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * char[] letters = {'a', 'b'};
+     * char[] result = N.addAll(letters, 'c', 'd', 'e');
+     * // Returns {'a', 'b', 'c', 'd', 'e'}
+     * }</pre>
+     *
      * @param a the first array whose elements are added to the new array.
      * @param elementsToAdd the additional elements to be added to the new array.
      * @return a new char array containing the elements from <i>a</i> and <i>elementsToAdd</i>.
+     * @see #add(char[], char)
+     * @see #insert(char[], int, char)
      */
     public static char[] addAll(final char[] a, final char... elementsToAdd) {
         if (isEmpty(a)) {
@@ -7638,9 +7736,18 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * <br />
      * The original array remains unchanged.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * int[] numbers = {1, 2, 3};
+     * int[] result = N.addAll(numbers, 4, 5, 6);
+     * // Returns {1, 2, 3, 4, 5, 6}
+     * }</pre>
+     *
      * @param a the first array whose elements are added to the new array.
      * @param elementsToAdd the additional elements to be added to the new array.
      * @return a new int array containing the elements from <i>a</i> and <i>elementsToAdd</i>.
+     * @see #add(int[], int)
+     * @see #insert(int[], int, int)
      */
     public static int[] addAll(final int[] a, final int... elementsToAdd) {
         if (isEmpty(a)) {
@@ -7734,9 +7841,18 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * <br />
      * The original array remains unchanged.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * String[] words = {"apple", "banana"};
+     * String[] result = N.addAll(words, "cherry", "date"};
+     * // Returns {"apple", "banana", "cherry", "date"}
+     * }</pre>
+     *
      * @param a the first array whose elements are added to the new array.
      * @param elementsToAdd the additional elements to be added to the new array.
      * @return a new String array containing the elements from <i>a</i> and <i>elementsToAdd</i>.
+     * @see #add(String[], String)
+     * @see #insert(String[], int, String)
      */
     public static String[] addAll(final String[] a, final String... elementsToAdd) {
         if (isEmpty(a)) {
@@ -7855,11 +7971,20 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * <br />
      * The original array remains unchanged.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * boolean[] flags = {true, false, false};
+     * boolean[] result = N.insert(flags, 1, true);
+     * // Returns {true, true, false, false}
+     * }</pre>
+     *
      * @param a the original boolean array
      * @param index the position in the array where the new element should be inserted
      * @param elementToInsert the boolean value to be inserted into the array
      * @return a new boolean array with the original elements and the inserted element
      * @throws IndexOutOfBoundsException if the specified index is out of range
+     * @see #add(boolean[], boolean)
+     * @see #insertAll(boolean[], int, boolean...)
      */
     public static boolean[] insert(final boolean[] a, final int index, final boolean elementToInsert) throws IndexOutOfBoundsException {
         checkPositionIndex(index, len(a));
@@ -7987,11 +8112,20 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * <br />
      * The original array remains unchanged.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * int[] numbers = {1, 2, 4, 5};
+     * int[] result = N.insert(numbers, 2, 3);
+     * // Returns {1, 2, 3, 4, 5}
+     * }</pre>
+     *
      * @param a the original int array
      * @param index the position in the array where the new element should be inserted
      * @param elementToInsert the int value to be inserted into the array
      * @return a new int array with the original elements and the inserted element
      * @throws IndexOutOfBoundsException if the specified index is out of range
+     * @see #add(int[], int)
+     * @see #insertAll(int[], int, int...)
      */
     public static int[] insert(final int[] a, final int index, final int elementToInsert) throws IndexOutOfBoundsException {
         checkPositionIndex(index, len(a));
@@ -8126,11 +8260,20 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * <br />
      * The original array remains unchanged.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * String[] names = {"Alice", "Charlie", "David"};
+     * String[] result = N.insert(names, 1, "Bob");
+     * // Returns {"Alice", "Bob", "Charlie", "David"}
+     * }</pre>
+     *
      * @param a the original String array
      * @param index the position in the array where the new element should be inserted
      * @param elementToInsert the String value to be inserted into the array
      * @return a new String array with the original elements and the inserted element
      * @throws IndexOutOfBoundsException if the specified index is out of range
+     * @see #add(String[], String)
+     * @see #insertAll(String[], int, String...)
      */
     public static String[] insert(final String[] a, final int index, final String elementToInsert) throws IndexOutOfBoundsException {
         checkPositionIndex(index, len(a));
@@ -8643,10 +8786,19 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * <br />
      * The original array remains unchanged.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * boolean[] flags = {true, false, true, false};
+     * boolean[] result = N.deleteByIndex(flags, 1);
+     * // Returns {true, true, false}
+     * }</pre>
+     *
      * @param a the original boolean array
      * @param index the position of the element to be removed
      * @return a new boolean array containing the existing elements except the element at the specified index
      * @throws IndexOutOfBoundsException if the specified index is out of range
+     * @see #remove(boolean[], boolean)
+     * @see #deleteAllByIndices(boolean[], int...)
      */
     public static boolean[] deleteByIndex(@NotNull final boolean[] a, final int index) throws IllegalArgumentException, IndexOutOfBoundsException {
         // checkArgNotNull(a, cs.a);
@@ -8767,10 +8919,19 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * <br />
      * The original array remains unchanged.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * int[] numbers = {10, 20, 30, 40};
+     * int[] result = N.deleteByIndex(numbers, 2);
+     * // Returns {10, 20, 40}
+     * }</pre>
+     *
      * @param a the original int array
      * @param index the position of the element to be removed
      * @return a new int array containing the existing elements except the element at the specified index
      * @throws IndexOutOfBoundsException if the specified index is out of range
+     * @see #remove(int[], int)
+     * @see #deleteAllByIndices(int[], int...)
      */
     public static int[] deleteByIndex(@NotNull final int[] a, final int index) throws IllegalArgumentException, IndexOutOfBoundsException {
         // checkArgNotNull(a, cs.a);
@@ -8923,10 +9084,19 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * <br />
      * The original array remains unchanged.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * boolean[] flags = {true, false, true, false, true};
+     * boolean[] result = N.deleteAllByIndices(flags, 1, 3);
+     * // Returns {true, true, true} - removed indices 1 and 3
+     * }</pre>
+     *
      * @param a the input boolean array from which elements are to be removed
      * @param indices the positions of the elements to be removed
      * @return a new boolean array containing the remaining elements after removal
      * @throws IndexOutOfBoundsException if any index is out of the array's range
+     * @see #deleteByIndex(boolean[], int)
+     * @see #deleteRange(boolean[], int, int)
      */
     public static boolean[] deleteAllByIndices(final boolean[] a, final int... indices) throws IndexOutOfBoundsException {
         final int countOfIndex = indices.length;
@@ -9151,10 +9321,19 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * <br />
      * The original array remains unchanged.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * int[] numbers = {10, 20, 30, 40, 50};
+     * int[] result = N.deleteAllByIndices(numbers, 0, 2, 4);
+     * // Returns {20, 40} - removed indices 0, 2, and 4
+     * }</pre>
+     *
      * @param a the input int array from which elements are to be removed
      * @param indices the positions of the elements to be removed
      * @return a new int array containing the remaining elements after removal
      * @throws IndexOutOfBoundsException if any index is out of the array's range
+     * @see #deleteByIndex(int[], int)
+     * @see #deleteRange(int[], int, int)
      */
     public static int[] deleteAllByIndices(final int[] a, final int... indices) throws IndexOutOfBoundsException {
         final int countOfIndex = indices.length;
@@ -9845,10 +10024,19 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * <br />
      * The original array remains unchanged.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * boolean[] flags = {true, false, true, false, true};
+     * boolean[] result = N.removeAll(flags, false);
+     * // Returns {true, true, true}
+     * }</pre>
+     *
      * @param a the array from which the values should be removed.
      * @param valuesToRemove the values to be removed from the array.
      * @return a new array with all occurrences of the specified values removed. An empty array is returned if the specified array is {@code null} or empty.
      * @see N#difference(int[], int[])
+     * @see #removeAllOccurrences(boolean[], boolean)
+     * @see #remove(boolean[], boolean)
      */
     @SuppressWarnings("deprecation")
     public static boolean[] removeAll(final boolean[] a, final boolean... valuesToRemove) {
@@ -9949,10 +10137,19 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * <br />
      * The original array remains unchanged.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * int[] numbers = {1, 2, 3, 2, 4, 3, 5};
+     * int[] result = N.removeAll(numbers, 2, 3);
+     * // Returns {1, 4, 5}
+     * }</pre>
+     *
      * @param a the array from which the values should be removed.
      * @param valuesToRemove the values to be removed from the array.
      * @return a new array with all occurrences of the specified values removed. An empty array is returned if the specified array is {@code null} or empty.
      * @see N#difference(int[], int[])
+     * @see #removeAllOccurrences(int[], int)
+     * @see #remove(int[], int)
      */
     @SuppressWarnings("deprecation")
     public static int[] removeAll(final int[] a, final int... valuesToRemove) {
@@ -10200,9 +10397,18 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * <br />
      * The original array remains unchanged.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * boolean[] flags = {true, false, true, false, true};
+     * boolean[] result = N.removeAllOccurrences(flags, false);
+     * // Returns {true, true, true}
+     * }</pre>
+     *
      * @param a the array from which the value should be removed.
      * @param valueToRemove the value to be removed from the array.
      * @return a new array with all occurrences of the specified value removed. An empty array is returned if the specified array is {@code null} or empty.
+     * @see #removeAll(boolean[], boolean...)
+     * @see #remove(boolean[], boolean)
      */
     public static boolean[] removeAllOccurrences(final boolean[] a, final boolean valueToRemove) {
         if (isEmpty(a)) {
@@ -10316,9 +10522,18 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * <br />
      * The original array remains unchanged.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * int[] numbers = {1, 2, 3, 2, 4, 2, 5};
+     * int[] result = N.removeAllOccurrences(numbers, 2);
+     * // Returns {1, 3, 4, 5}
+     * }</pre>
+     *
      * @param a the array from which the value should be removed.
      * @param valueToRemove the value to be removed from the array.
      * @return a new array with all occurrences of the specified value removed. An empty array is returned if the specified array is {@code null} or empty.
+     * @see #removeAll(int[], int...)
+     * @see #remove(int[], int)
      */
     public static int[] removeAllOccurrences(final int[] a, final int valueToRemove) {
         if (isEmpty(a)) {
@@ -10580,9 +10795,22 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * <br />
      * The original array remains unchanged.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * char[] letters = {'a', 'b', 'a', 'c', 'b', 'd'};
+     * char[] result = N.removeDuplicates(letters, false);
+     * // Returns {'a', 'b', 'c', 'd'} - preserves first occurrence order
+     *
+     * char[] sorted = {'a', 'a', 'b', 'b', 'c', 'd'};
+     * char[] result2 = N.removeDuplicates(sorted, true);
+     * // Returns {'a', 'b', 'c', 'd'} - uses faster algorithm for sorted input
+     * }</pre>
+     *
      * @param a the array from which duplicates should be removed.
      * @param isSorted {@code true} if the array is already sorted, {@code false} otherwise. If true, a more efficient algorithm is used.
      * @return a new array with all duplicates removed. An empty array is returned if the specified array is {@code null} or empty.
+     * @see #distinct(char[])
+     * @see #removeDuplicates(char[], int, int, boolean)
      */
     public static char[] removeDuplicates(final char[] a, final boolean isSorted) {
         if (isEmpty(a)) {
@@ -10883,9 +11111,22 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * <br />
      * The original array remains unchanged.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * int[] numbers = {5, 2, 8, 2, 9, 5, 7};
+     * int[] result = N.removeDuplicates(numbers, false);
+     * // Returns {5, 2, 8, 9, 7} - preserves first occurrence order
+     *
+     * int[] sorted = {1, 1, 2, 2, 3, 4, 4, 5};
+     * int[] result2 = N.removeDuplicates(sorted, true);
+     * // Returns {1, 2, 3, 4, 5} - uses faster algorithm for sorted input
+     * }</pre>
+     *
      * @param a the array from which duplicates should be removed.
      * @param isSorted {@code true} if the array is already sorted, {@code false} otherwise. If true, a more efficient algorithm is used.
      * @return a new array with all duplicates removed. An empty array is returned if the specified array is {@code null} or empty.
+     * @see #distinct(int[])
+     * @see #removeDuplicates(int[], int, int, boolean)
      */
     public static int[] removeDuplicates(final int[] a, final boolean isSorted) {
         if (isEmpty(a)) {
@@ -11255,9 +11496,22 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * <br />
      * The original array remains unchanged.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * String[] words = {"apple", "banana", "apple", "cherry", "banana"};
+     * String[] result = N.removeDuplicates(words, false);
+     * // Returns {"apple", "banana", "cherry"} - preserves first occurrence order
+     *
+     * String[] sorted = {"apple", "apple", "banana", "cherry", "cherry"};
+     * String[] result2 = N.removeDuplicates(sorted, true);
+     * // Returns {"apple", "banana", "cherry"} - uses faster algorithm for sorted input
+     * }</pre>
+     *
      * @param a the array from which duplicates should be removed.
      * @param isSorted {@code true} if the array is already sorted, {@code false} otherwise. If true, a more efficient algorithm is used.
      * @return a new array with all duplicates removed. An empty array is returned if the specified array is {@code null} or empty.
+     * @see #distinct(Object[])
+     * @see #removeDuplicates(String[], int, int, boolean)
      */
     public static String[] removeDuplicates(final String[] a, final boolean isSorted) {
         if (isEmpty(a)) {
@@ -11349,10 +11603,23 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * <br />
      * The original array remains unchanged.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Integer[] numbers = {5, 2, 8, 2, 9, 5, 7};
+     * Integer[] result = N.removeDuplicates(numbers, false);
+     * // Returns {5, 2, 8, 9, 7} - preserves first occurrence order
+     *
+     * Integer[] sorted = {1, 1, 2, 2, 3, 4, 4, 5};
+     * Integer[] result2 = N.removeDuplicates(sorted, true);
+     * // Returns {1, 2, 3, 4, 5} - uses faster algorithm for sorted input
+     * }</pre>
+     *
      * @param <T> the type of elements in the array
      * @param a the array from which duplicates should be removed.
      * @param isSorted {@code true} if the array is already sorted, {@code false} otherwise. If true, a more efficient algorithm is used.
      * @return a new array with all duplicates removed. The input array itself is returned if the specified array is {@code null} or empty.
+     * @see #distinct(Object[])
+     * @see #removeDuplicates(Object[], int, int, boolean)
      */
     public static <T> T[] removeDuplicates(final T[] a, final boolean isSorted) {
         if (isEmpty(a)) {
@@ -13885,9 +14152,18 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
     /**
      * Sums all elements in the given array of floats to a double value.
+     * Uses Kahan summation algorithm for improved numerical accuracy.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * float[] values = {0.1f, 0.2f, 0.3f};
+     * double sum = N.sumToDouble(values);  // Returns 0.6 (as double precision)
+     * }</pre>
      *
      * @param a the array of floats to be summed.
-     * @return the sum of all floats in the array. If the array is {@code null} or empty, {@code 0} is returned.
+     * @return the sum of all floats in the array as a double. If the array is {@code null} or empty, {@code 0} is returned.
+     * @see #sumToDouble(float[], int, int)
+     * @see #sum(float...)
      */
     public static double sumToDouble(final float... a) {
         if (isEmpty(a)) {
@@ -13899,12 +14175,21 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
     /**
      * Sums all elements within the specified range in the input array of floats to a double value.
+     * Uses Kahan summation algorithm for improved numerical accuracy.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * float[] values = {1.1f, 2.2f, 3.3f, 4.4f, 5.5f};
+     * double sum = N.sumToDouble(values, 1, 4);  // Returns 9.9 (2.2 + 3.3 + 4.4)
+     * }</pre>
      *
      * @param a the array of floats to be summed.
      * @param fromIndex the starting index (inclusive) of the range to be summed.
      * @param toIndex the ending index (exclusive) of the range to be summed.
-     * @return the sum of all elements within the specified range in the input array. If the array is {@code null} or empty, {@code 0} is returned.
+     * @return the sum of all elements within the specified range in the input array as a double. If the array is {@code null} or empty, {@code 0} is returned.
      * @throws IndexOutOfBoundsException if the specified range is out of bounds for the given array.
+     * @see #sumToDouble(float...)
+     * @see #sum(float[], int, int)
      */
     public static double sumToDouble(final float[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
@@ -18286,8 +18571,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param toIndex the ending index (exclusive) of the range
      * @param cmp the Comparator to compare elements; if {@code null}, natural ordering with nulls first is used
      * @return the largest element within the specified range according to the comparator
-     * @throws IndexOutOfBoundsException if the specified range is out of bounds
      * @throws IllegalArgumentException if the array is {@code null} or empty, or if {@code toIndex - fromIndex < 1}
+     * @throws IndexOutOfBoundsException if the specified range is out of bounds
      * @see #max(Object[], Comparator)
      * @see #min(Object[], int, int, Comparator)
      * @see Iterables#max(Object[], Comparator)
@@ -22217,9 +22502,9 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
-     * Calculates the percentiles of the provided sorted array of characters.
-     * Returns a map containing percentile values from the predefined {@link Percentage} enum
-     * (0.0001%, 0.001%, 0.01%, 0.1%, 1%-99%, 99.9%, 99.99%, 99.999%, 99.9999%).
+     * Returns a map containing the percentile values from the predefined {@link Percentage} enum
+     * (0.0001%, 0.001%, 0.01%, 0.1%, 1%-99%, 99.9%, 99.99%, 99.999%, 99.9999%)
+     * calculated from the provided sorted array of characters.
      *
      * <p><b>Important:</b> The input array must be sorted in ascending order for accurate results.
      * Use {@link java.util.Arrays#sort(char[])} if needed.</p>
@@ -22255,9 +22540,9 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
-     * Calculates the percentiles of the provided sorted array of bytes.
-     * Returns a map containing percentile values from the predefined {@link Percentage} enum
-     * (0.0001%, 0.001%, 0.01%, 0.1%, 1%-99%, 99.9%, 99.99%, 99.999%, 99.9999%).
+     * Returns a map containing the percentile values from the predefined {@link Percentage} enum
+     * (0.0001%, 0.001%, 0.01%, 0.1%, 1%-99%, 99.9%, 99.99%, 99.999%, 99.9999%)
+     * calculated from the provided sorted array of bytes.
      *
      * <p><b>Important:</b> The input array must be sorted in ascending order for accurate results.
      * Use {@link java.util.Arrays#sort(byte[])} if needed.</p>
@@ -37662,7 +37947,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *             The number of arguments is variable and may be zero
      * @throws IllegalFormatException if the format string is invalid or contains illegal format specifiers
      * @see String#format(String, Object...)
-     * @see System#out System.out.printf(String, Object...)
+     * @see java.io.PrintStream#printf(String, Object...)
      * @see #println(Object)
      * @see java.util.Formatter
      */

@@ -33,6 +33,13 @@ public class OptionalDoubleType extends AbstractOptionalType<OptionalDouble> {
     /**
      * Returns the Java class type that this type handler manages.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Type<OptionalDouble> type = TypeFactory.getType(OptionalDouble.class);
+     * Class<OptionalDouble> clazz = type.clazz();
+     * // Returns: OptionalDouble.class
+     * }</pre>
+     *
      * @return the {@link OptionalDouble} class object
      */
     @Override
@@ -75,6 +82,23 @@ public class OptionalDoubleType extends AbstractOptionalType<OptionalDouble> {
     /**
      * Converts an {@link OptionalDouble} object to its string representation.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Type<OptionalDouble> type = TypeFactory.getType(OptionalDouble.class);
+     *
+     * OptionalDouble opt = OptionalDouble.of(3.14159);
+     * String result = type.stringOf(opt);
+     * // Returns: "3.14159"
+     *
+     * opt = OptionalDouble.of(0.0);
+     * result = type.stringOf(opt);
+     * // Returns: "0.0"
+     *
+     * opt = OptionalDouble.empty();
+     * result = type.stringOf(opt);
+     * // Returns: null
+     * }</pre>
+     *
      * @param x the OptionalDouble object to convert
      * @return the string representation of the double value, or {@code null} if empty or null
      */
@@ -85,6 +109,23 @@ public class OptionalDoubleType extends AbstractOptionalType<OptionalDouble> {
 
     /**
      * Converts a string representation to an {@link OptionalDouble} object.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Type<OptionalDouble> type = TypeFactory.getType(OptionalDouble.class);
+     *
+     * OptionalDouble result = type.valueOf("3.14159");
+     * // Returns: OptionalDouble.of(3.14159)
+     *
+     * result = type.valueOf("0.0");
+     * // Returns: OptionalDouble.of(0.0)
+     *
+     * result = type.valueOf(null);
+     * // Returns: OptionalDouble.empty()
+     *
+     * result = type.valueOf("");
+     * // Returns: OptionalDouble.empty()
+     * }</pre>
      *
      * @param str the string to convert
      * @return an OptionalDouble containing the parsed double value, or empty if the input is empty or null
@@ -98,6 +139,20 @@ public class OptionalDoubleType extends AbstractOptionalType<OptionalDouble> {
     /**
      * Retrieves a double value from a ResultSet at the specified column index and wraps it in an {@link OptionalDouble}.
      * Handles type conversion if the database column is not a double type.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Type<OptionalDouble> type = TypeFactory.getType(OptionalDouble.class);
+     * ResultSet rs = ...; // obtained from database query
+     *
+     * // Column contains double value 3.14159
+     * OptionalDouble opt = type.get(rs, 1);
+     * // Returns: OptionalDouble.of(3.14159)
+     *
+     * // Column contains SQL NULL
+     * opt = type.get(rs, 2);
+     * // Returns: OptionalDouble.empty()
+     * }</pre>
      *
      * @param rs the ResultSet to read from
      * @param columnIndex the column index (1-based) to retrieve the value from
@@ -115,6 +170,20 @@ public class OptionalDoubleType extends AbstractOptionalType<OptionalDouble> {
      * Retrieves a double value from a ResultSet using the specified column label and wraps it in an {@link OptionalDouble}.
      * Handles type conversion if the database column is not a double type.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Type<OptionalDouble> type = TypeFactory.getType(OptionalDouble.class);
+     * ResultSet rs = ...; // obtained from database query
+     *
+     * // Column "price" contains double value 99.99
+     * OptionalDouble opt = type.get(rs, "price");
+     * // Returns: OptionalDouble.of(99.99)
+     *
+     * // Column "discount" contains SQL NULL
+     * opt = type.get(rs, "discount");
+     * // Returns: OptionalDouble.empty()
+     * }</pre>
+     *
      * @param rs the ResultSet to read from
      * @param columnLabel the label for the column specified with the SQL AS clause
      * @return an OptionalDouble containing the double value, or empty if the column value is SQL NULL
@@ -130,6 +199,21 @@ public class OptionalDoubleType extends AbstractOptionalType<OptionalDouble> {
     /**
      * Sets a parameter in a PreparedStatement to the value contained in an {@link OptionalDouble}.
      * If the OptionalDouble is {@code null} or empty, sets the parameter to SQL NULL.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Type<OptionalDouble> type = TypeFactory.getType(OptionalDouble.class);
+     * PreparedStatement stmt = connection.prepareStatement(
+     *     "INSERT INTO products (id, price) VALUES (?, ?)");
+     *
+     * OptionalDouble opt = OptionalDouble.of(99.99);
+     * type.set(stmt, 2, opt);
+     * // Sets parameter to 99.99
+     *
+     * opt = OptionalDouble.empty();
+     * type.set(stmt, 2, opt);
+     * // Sets parameter to SQL NULL
+     * }</pre>
      *
      * @param stmt the PreparedStatement to set the parameter on
      * @param columnIndex the parameter index (1-based) to set
@@ -148,6 +232,20 @@ public class OptionalDoubleType extends AbstractOptionalType<OptionalDouble> {
     /**
      * Sets a named parameter in a CallableStatement to the value contained in an {@link OptionalDouble}.
      * If the OptionalDouble is {@code null} or empty, sets the parameter to SQL NULL.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Type<OptionalDouble> type = TypeFactory.getType(OptionalDouble.class);
+     * CallableStatement stmt = connection.prepareCall("{call update_price(?, ?)}");
+     *
+     * OptionalDouble opt = OptionalDouble.of(149.99);
+     * type.set(stmt, "p_price", opt);
+     * // Sets parameter to 149.99
+     *
+     * opt = OptionalDouble.empty();
+     * type.set(stmt, "p_discount", opt);
+     * // Sets parameter to SQL NULL
+     * }</pre>
      *
      * @param stmt the CallableStatement to set the parameter on
      * @param parameterName the name of the parameter to set

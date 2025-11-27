@@ -129,8 +129,11 @@ public final class XmlUtil {
             saxParserFactory.setFeature("http://xml.org/sax/features/external-general-entities", false);
             saxParserFactory.setFeature("http://xml.org/sax/features/external-parameter-entities", false);
             saxParserFactory.setXIncludeAware(false);
-        } catch (Throwable e) {
-            // ignore
+        } catch (Exception e) { // NOSONAR
+            // ignore - these security features may not be supported on all platforms
+            if (logger.isDebugEnabled()) {
+                logger.debug("Failed to set SAX parser security features: " + e.getMessage());
+            }
         }
     }
 
@@ -146,8 +149,11 @@ public final class XmlUtil {
             docBuilderFactory.setFeature("http://xml.org/sax/features/external-parameter-entities", false);
             docBuilderFactory.setXIncludeAware(false);
             docBuilderFactory.setExpandEntityReferences(false);
-        } catch (Throwable e) {
-            // ignore
+        } catch (Exception e) { // NOSONAR
+            // ignore - these security features may not be supported on all platforms
+            if (logger.isDebugEnabled()) {
+                logger.debug("Failed to set DocumentBuilder security features: " + e.getMessage());
+            }
         }
     }
 
@@ -1674,6 +1680,10 @@ public final class XmlUtil {
         try {
             return ClassUtil.forClass(typeAttr);
         } catch (final RuntimeException e) {
+            if (logger.isDebugEnabled()) {
+                logger.debug("Failed to load type attribute class: " + typeAttr, e);
+            }
+
             return null;
         }
     }

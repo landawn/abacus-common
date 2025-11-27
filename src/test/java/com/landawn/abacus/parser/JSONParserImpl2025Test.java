@@ -105,6 +105,9 @@ public class JSONParserImpl2025Test extends TestBase {
 
         assertEquals(String[][].class, ret.getMap4().entrySet().iterator().next().getKey().get(0).getClass());
         assertEquals(Byte.class, ret.getMap4().entrySet().iterator().next().getValue().getClass());
+
+        N.println(type.name());
+        N.println(type.javaType());
     }
 
     @Data

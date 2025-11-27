@@ -275,10 +275,13 @@ import java.time.temporal.TemporalUnit;
  *
  * @see Immutable
  * @see Comparable
- * @see java.time.Duration
  * @see System#currentTimeMillis()
  * @see java.util.concurrent.TimeUnit
+ * @see java.time.Duration
+ * @see java.time.temporal.Temporal
  * @see java.time.temporal.TemporalAmount
+ * @see java.time.temporal.TemporalUnit
+ * @see java.time.temporal.ChronoUnit
  */
 @com.landawn.abacus.annotation.Immutable
 public final class Duration implements Comparable<Duration>, Immutable {

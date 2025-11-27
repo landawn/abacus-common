@@ -46,7 +46,26 @@ final class ThreadMonitor implements Runnable {
     private final long timeout;
 
     /**
-     * Start monitoring the current thread.
+     * Start monitoring the current thread with the specified timeout.
+     *
+     * <p>If the current thread does not complete its work within the specified timeout,
+     * it will be interrupted by the monitor thread. The monitored thread should handle
+     * the interruption appropriately and call {@link #stop(Thread)} to terminate the
+     * monitor thread when the work completes successfully.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * long timeoutInMillis = 5000;
+     * try {
+     *     Thread monitor = ThreadMonitor.start(timeoutInMillis);
+     *     // do some work here
+     *     performLongRunningOperation();
+     *     ThreadMonitor.stop(monitor);
+     * } catch (InterruptedException e) {
+     *     // timeout was reached
+     *     System.err.println("Operation timed out");
+     * }
+     * }</pre>
      *
      * @param timeout The timeout amount in milliseconds
      * or no timeout if the value is zero or less
@@ -58,9 +77,29 @@ final class ThreadMonitor implements Runnable {
     }
 
     /**
-     * Start monitoring the specified thread.
+     * Start monitoring the specified thread with the given timeout.
      *
-     * @param thread The thread to monitor
+     * <p>Creates a daemon monitor thread that will sleep for the specified timeout duration
+     * and then interrupt the target thread if it's still running. If the target thread completes
+     * its work before the timeout, it should call {@link #stop(Thread)} to terminate the monitor.</p>
+     *
+     * <p>The monitor thread is set as a daemon thread, so it won't prevent JVM shutdown.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Thread workerThread = new Thread(() -> {
+     *     Thread monitor = ThreadMonitor.start(Thread.currentThread(), 10000);
+     *     try {
+     *         performWork();
+     *         ThreadMonitor.stop(monitor);
+     *     } catch (InterruptedException e) {
+     *         System.err.println("Work interrupted due to timeout");
+     *     }
+     * });
+     * workerThread.start();
+     * }</pre>
+     *
+     * @param thread The thread to monitor, must not be {@code null}
      * @param timeout The timeout amount in milliseconds
      * or no timeout if the value is zero or less
      * @return The monitor thread or {@code null}
@@ -78,9 +117,30 @@ final class ThreadMonitor implements Runnable {
     }
 
     /**
-     * Stop monitoring the specified thread.
+     * Stop monitoring the specified thread by interrupting the monitor thread.
      *
-     * @param thread The monitor thread, may be {@code null}
+     * <p>This method should be called when the monitored operation completes successfully
+     * before the timeout. It interrupts the monitor thread, causing it to exit its sleep
+     * and terminate, preventing the timeout from occurring.</p>
+     *
+     * <p>It is safe to call this method with a {@code null} parameter; in such cases,
+     * the method does nothing.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Thread monitor = ThreadMonitor.start(5000);
+     * try {
+     *     // Perform work
+     *     processData();
+     *     // Work completed successfully, stop the monitor
+     *     ThreadMonitor.stop(monitor);
+     * } catch (InterruptedException e) {
+     *     // Timeout occurred
+     *     handleTimeout();
+     * }
+     * }</pre>
+     *
+     * @param thread The monitor thread to stop, may be {@code null}
      */
     public static void stop(final Thread thread) {
         if (thread != null) {

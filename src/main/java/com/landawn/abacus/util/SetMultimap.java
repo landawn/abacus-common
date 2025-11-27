@@ -254,6 +254,12 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
      * <p>This is a convenient factory method for creating a SetMultimap with a single entry.
      * The returned SetMultimap is mutable and backed by a HashMap and HashSet.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * SetMultimap<String, Integer> map = SetMultimap.of("key1", 100);
+     * // map contains: {"key1" -> [100]}
+     * }</pre>
+     *
      * @param <K> the type of the key
      * @param <E> the type of the value
      * @param k1 the key of the key-value pair
@@ -277,6 +283,15 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
      * If both keys are the same, only unique values will be added to the set associated with that key.
      * Duplicate values will be ignored due to Set semantics.
      * The returned SetMultimap is mutable and backed by a HashMap and HashSet.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * SetMultimap<String, Integer> map = SetMultimap.of("a", 1, "b", 2);
+     * // map contains: {"a" -> [1], "b" -> [2]}
+     *
+     * SetMultimap<String, Integer> map2 = SetMultimap.of("a", 1, "a", 2);
+     * // map2 contains: {"a" -> [1, 2]}
+     * }</pre>
      *
      * @param <K> the type of the keys
      * @param <E> the type of the values
@@ -304,6 +319,12 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
      * If multiple keys are the same, only unique values will be added to the set associated with that key.
      * Duplicate values will be ignored due to Set semantics.
      * The returned SetMultimap is mutable and backed by a HashMap and HashSet.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * SetMultimap<String, Integer> map = SetMultimap.of("a", 1, "b", 2, "c", 3);
+     * // map contains: {"a" -> [1], "b" -> [2], "c" -> [3]}
+     * }</pre>
      *
      * @param <K> the type of the keys
      * @param <E> the type of the values
@@ -334,6 +355,12 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
      * If multiple keys are the same, only unique values will be added to the set associated with that key.
      * Duplicate values will be ignored due to Set semantics.
      * The returned SetMultimap is mutable and backed by a HashMap and HashSet.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * SetMultimap<String, Integer> map = SetMultimap.of("a", 1, "b", 2, "c", 3, "d", 4);
+     * // map contains: {"a" -> [1], "b" -> [2], "c" -> [3], "d" -> [4]}
+     * }</pre>
      *
      * @param <K> the type of the keys
      * @param <E> the type of the values
@@ -367,6 +394,12 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
      * If multiple keys are the same, only unique values will be added to the set associated with that key.
      * Duplicate values will be ignored due to Set semantics.
      * The returned SetMultimap is mutable and backed by a HashMap and HashSet.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * SetMultimap<String, Integer> map = SetMultimap.of("a", 1, "b", 2, "c", 3, "d", 4, "e", 5);
+     * // map contains: {"a" -> [1], "b" -> [2], "c" -> [3], "d" -> [4], "e" -> [5]}
+     * }</pre>
      *
      * @param <K> the type of the keys
      * @param <E> the type of the values
@@ -404,6 +437,12 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
      * If multiple keys are the same, only unique values will be added to the set associated with that key.
      * Duplicate values will be ignored due to Set semantics.
      * The returned SetMultimap is mutable and backed by a HashMap and HashSet.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * SetMultimap<String, Integer> map = SetMultimap.of("a", 1, "b", 2, "c", 3, "d", 4, "e", 5, "f", 6);
+     * // map contains: {"a" -> [1], "b" -> [2], "c" -> [3], "d" -> [4], "e" -> [5], "f" -> [6]}
+     * }</pre>
      *
      * @param <K> the type of the keys
      * @param <E> the type of the values
@@ -444,6 +483,12 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
      * If multiple keys are the same, only unique values will be added to the set associated with that key.
      * Duplicate values will be ignored due to Set semantics.
      * The returned SetMultimap is mutable and backed by a HashMap and HashSet.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * SetMultimap<String, Integer> map = SetMultimap.of("a", 1, "b", 2, "c", 3, "d", 4, "e", 5, "f", 6, "g", 7);
+     * // map contains: {"a" -> [1], "b" -> [2], "c" -> [3], "d" -> [4], "e" -> [5], "f" -> [6], "g" -> [7]}
+     * }</pre>
      *
      * @param <K> the type of the keys
      * @param <E> the type of the values
@@ -584,6 +629,14 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
     /**
      * Creates a new instance of SetMultimap by concatenating the key-value pairs from two specified maps.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Map<String, Integer> map1 = Map.of("a", 1, "b", 2);
+     * Map<String, Integer> map2 = Map.of("c", 3, "a", 4);
+     * SetMultimap<String, Integer> concatenated = SetMultimap.concat(map1, map2);
+     * // concatenated contains: {"a" -> [1, 4], "b" -> [2], "c" -> [3]}
+     * }</pre>
+     *
      * @param <K> the type of the keys
      * @param <E> the type of the values
      * @param a the first map containing the key-value pairs to be added to the new SetMultimap
@@ -602,6 +655,15 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
 
     /**
      * Creates a new instance of SetMultimap by concatenating the key-value pairs from three specified maps.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Map<String, Integer> map1 = Map.of("a", 1);
+     * Map<String, Integer> map2 = Map.of("b", 2);
+     * Map<String, Integer> map3 = Map.of("c", 3);
+     * SetMultimap<String, Integer> concatenated = SetMultimap.concat(map1, map2, map3);
+     * // concatenated contains: {"a" -> [1], "b" -> [2], "c" -> [3]}
+     * }</pre>
      *
      * @param <K> the type of the keys
      * @param <E> the type of the values
@@ -630,6 +692,17 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
 
     /**
      * Creates a new instance of SetMultimap by concatenating the key-value pairs from a collection of maps.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * List<Map<String, Integer>> maps = List.of(
+     *     Map.of("a", 1, "b", 2),
+     *     Map.of("c", 3),
+     *     Map.of("a", 4)
+     * );
+     * SetMultimap<String, Integer> concatenated = SetMultimap.concat(maps);
+     * // concatenated contains: {"a" -> [1, 4], "b" -> [2], "c" -> [3]}
+     * }</pre>
      *
      * @param <K> the type of the keys
      * @param <E> the type of the values

@@ -391,7 +391,7 @@ public final class BiMap<K, V> implements Map<K, V> {
      * @param k1 The key to be inserted into the BiMap.
      * @param v1 The value to be associated with the key in the BiMap.
      * @return A BiMap containing the specified key-value pair.
-     * @throws IllegalArgumentException if any key or value is null
+     * @throws IllegalArgumentException if the key or value is {@code null}
      */
     public static <K, V> BiMap<K, V> of(final K k1, final V v1) {
         final BiMap<K, V> map = new BiMap<>(1);
@@ -432,6 +432,11 @@ public final class BiMap<K, V> implements Map<K, V> {
      * Creates a new BiMap with three key-value pairs.
      * This method provides a convenient way to create a BiMap with three entries.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * BiMap<String, Integer> map = BiMap.of("one", 1, "two", 2, "three", 3);
+     * }</pre>
+     *
      * @param <K> The type of the keys.
      * @param <V> The type of the values.
      * @param k1 The first key to be inserted into the BiMap.
@@ -456,6 +461,11 @@ public final class BiMap<K, V> implements Map<K, V> {
     /**
      * Creates a new BiMap with four key-value pairs.
      * This method provides a convenient way to create a BiMap with four entries.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * BiMap<String, Integer> map = BiMap.of("one", 1, "two", 2, "three", 3, "four", 4);
+     * }</pre>
      *
      * @param <K> The type of the keys.
      * @param <V> The type of the values.
@@ -484,6 +494,11 @@ public final class BiMap<K, V> implements Map<K, V> {
     /**
      * Creates a new BiMap with five key-value pairs.
      * This method provides a convenient way to create a BiMap with five entries.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * BiMap<String, Integer> map = BiMap.of("one", 1, "two", 2, "three", 3, "four", 4, "five", 5);
+     * }</pre>
      *
      * @param <K> The type of the keys.
      * @param <V> The type of the values.
@@ -516,6 +531,14 @@ public final class BiMap<K, V> implements Map<K, V> {
     /**
      * Creates a new BiMap with six key-value pairs.
      * This method provides a convenient way to create a BiMap with six entries.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * BiMap<String, Integer> map = BiMap.of(
+     *     "one", 1, "two", 2, "three", 3,
+     *     "four", 4, "five", 5, "six", 6
+     * );
+     * }</pre>
      *
      * @param <K> The type of the keys.
      * @param <V> The type of the values.
@@ -551,6 +574,15 @@ public final class BiMap<K, V> implements Map<K, V> {
     /**
      * Creates a new BiMap with seven key-value pairs.
      * This method provides a convenient way to create a BiMap with seven entries.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * BiMap<String, Integer> map = BiMap.of(
+     *     "one", 1, "two", 2, "three", 3,
+     *     "four", 4, "five", 5, "six", 6,
+     *     "seven", 7
+     * );
+     * }</pre>
      *
      * @param <K> The type of the keys.
      * @param <V> The type of the values.
@@ -589,6 +621,14 @@ public final class BiMap<K, V> implements Map<K, V> {
     /**
      * Creates a new BiMap with eight key-value pairs.
      * This method provides a convenient way to create a BiMap with eight entries.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * BiMap<String, Integer> map = BiMap.of(
+     *     "one", 1, "two", 2, "three", 3, "four", 4,
+     *     "five", 5, "six", 6, "seven", 7, "eight", 8
+     * );
+     * }</pre>
      *
      * @param <K> The type of the keys.
      * @param <V> The type of the values.
@@ -630,6 +670,15 @@ public final class BiMap<K, V> implements Map<K, V> {
     /**
      * Creates a new BiMap with nine key-value pairs.
      * This method provides a convenient way to create a BiMap with nine entries.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * BiMap<String, Integer> map = BiMap.of(
+     *     "one", 1, "two", 2, "three", 3, "four", 4,
+     *     "five", 5, "six", 6, "seven", 7, "eight", 8,
+     *     "nine", 9
+     * );
+     * }</pre>
      *
      * @param <K> The type of the keys.
      * @param <V> The type of the values.
@@ -674,6 +723,14 @@ public final class BiMap<K, V> implements Map<K, V> {
     /**
      * Creates a new BiMap with ten key-value pairs.
      * This method provides a convenient way to create a BiMap with ten entries.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * BiMap<String, Integer> map = BiMap.of(
+     *     "one", 1, "two", 2, "three", 3, "four", 4, "five", 5,
+     *     "six", 6, "seven", 7, "eight", 8, "nine", 9, "ten", 10
+     * );
+     * }</pre>
      *
      * @param <K> The type of the keys.
      * @param <V> The type of the values.
@@ -804,14 +861,29 @@ public final class BiMap<K, V> implements Map<K, V> {
     /**
      * Associates the specified value with the specified key in this BiMap.
      * If the BiMap previously contained a mapping for the key, the old value is replaced.
-     * Both keys and values must be unique in a BiMap; attempting to insert a value that already exists
-     * will throw an exception unless {@link #forcePut} is used instead.
+     *
+     * <p><b>Bijective Constraint:</b> Both keys and values must be unique in a BiMap.
+     * If the specified value is already bound to a different key, this method throws
+     * {@code IllegalArgumentException}. Use {@link #forcePut} instead to automatically
+     * remove the conflicting entry.
+     *
+     * <p><b>Behavior Differences:</b>
+     * <ul>
+     *   <li><b>{@code put()}:</b> Throws exception if value already exists (mapped to a different key)</li>
+     *   <li><b>{@code forcePut()}:</b> Silently removes any existing entry with the same value</li>
+     * </ul>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * BiMap<String, Integer> map = new BiMap<>();
-     * map.put("one", 1); // adds mapping
-     * map.put("one", 2); // replaces value for "one"
+     * map.put("one", 1);     // adds mapping: "one" -> 1
+     * map.put("one", 2);     // replaces value for "one": "one" -> 2
+     *
+     * // This throws IllegalArgumentException because 2 is already mapped to "one"
+     * // map.put("two", 2);  // ERROR!
+     *
+     * // Use forcePut to override the conflict
+     * map.forcePut("two", 2); // removes ("one", 2), adds ("two", 2)
      * }</pre>
      *
      * @param key The key with which the specified value is to be associated.
@@ -834,22 +906,47 @@ public final class BiMap<K, V> implements Map<K, V> {
      * <p>This method ensures that the value is unique by removing any existing
      * entry with the same value, even if it's mapped to a different key.
      *
-     * <p>Note that a successful call to this method could cause the size of the
-     * BiMap to increase by one, stay the same, or even decrease by one.
+     * <p><b>Behavior Differences:</b>
+     * <ul>
+     *   <li><b>{@code put()}:</b> Throws exception if value already exists (mapped to a different key)</li>
+     *   <li><b>{@code forcePut()}:</b> Silently removes any existing entry with the same value</li>
+     * </ul>
+     *
+     * <p><b>Size Impact:</b> A successful call to this method could cause the size of the
+     * BiMap to increase by one, stay the same, or even decrease by one, depending on whether
+     * the operation removes existing entries:
+     * <ul>
+     *   <li><b>Increase by one:</b> New key, new value</li>
+     *   <li><b>Stay the same:</b> Existing key, new value OR new key, existing value (removes one, adds one)</li>
+     *   <li><b>Decrease by one:</b> Existing key, existing value mapped to different key (removes two, adds one)</li>
+     * </ul>
      *
      * <p><b>Warning:</b> If an existing entry with this value is removed, the key
      * for that entry is discarded and not returned.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * BiMap<String, Integer> map = BiMap.of("one", 1);
-     * map.forcePut("two", 1); // removes ("one", 1), adds ("two", 1)
+     * BiMap<String, Integer> map = new BiMap<>();
+     * map.put("one", 1);
+     * map.put("two", 2);
+     *
+     * // Using put() would throw IllegalArgumentException here
+     * // map.put("three", 1);  // ERROR: value 1 already exists!
+     *
+     * // forcePut() removes conflicting entry and adds new one
+     * map.forcePut("three", 1);  // removes ("one", 1), adds ("three", 1)
+     * // Result: {"two"=2, "three"=1}
+     *
+     * // Force put with both key and value existing elsewhere
+     * map.put("four", 4);
+     * map.forcePut("three", 4);  // removes ("three", 1) and ("four", 4), adds ("three", 4)
+     * // Result: {"two"=2, "three"=4}
      * }</pre>
      *
      * @param key the key with which the specified value is to be associated
      * @param value the value to be associated with the specified key
      * @return the previous value associated with the key, or {@code null} if there was no mapping for the key.
-     * @throws IllegalArgumentException if the key or value is null
+     * @throws IllegalArgumentException if the key or value is {@code null}
      * @see #put(Object, Object)
      */
     public V forcePut(final K key, final V value) {

@@ -26,6 +26,16 @@ import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Numbers;
 import com.landawn.abacus.util.Strings;
 
+/**
+ * Type handler for {@link java.time.LocalDate} values.
+ * This class provides serialization and deserialization capabilities for LocalDate objects,
+ * including conversion to/from strings and JDBC ResultSet/PreparedStatement operations.
+ *
+ * <p>The string format follows the ISO-8601 standard (yyyy-MM-dd).</p>
+ *
+ * @see java.time.LocalDate
+ * @see AbstractTemporalType
+ */
 public class LocalDateType extends AbstractTemporalType<LocalDate> {
 
     public static final String LOCAL_DATE = LocalDate.class.getSimpleName();

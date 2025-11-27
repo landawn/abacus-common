@@ -60,10 +60,20 @@ final class GuavaHasher implements Hasher {
      * Guava hasher. This method provides a more convenient way to create
      * instances compared to using the constructor directly.
      *
+     * <p>This method is used internally by {@link GuavaHashFunction} to adapt
+     * Guava's hashers to the abacus-common API. Each wrapped hasher maintains
+     * the same state and behavior as the underlying Guava hasher.
+     *
      * <p><b>Note:</b> This is an internal method. Client code should obtain Hasher
      * instances through {@link HashFunction#newHasher()} instead.
      *
-     * @param gHasher the Guava hasher to wrap
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * com.google.common.hash.Hasher guavaHasher = com.google.common.hash.Hashing.sha256().newHasher();
+     * Hasher wrapped = GuavaHasher.wrap(guavaHasher);
+     * }</pre>
+     *
+     * @param gHasher the Guava hasher to wrap (implicitly non-null)
      * @return a new GuavaHasher instance wrapping the given hasher
      */
     static GuavaHasher wrap(final com.google.common.hash.Hasher gHasher) {

@@ -68,7 +68,7 @@ public final class Timed<T> implements Immutable {
      * }</pre>
      *
      * @param <T> the type of the value
-     * @param value the value to associate with the current timestamp; can be null
+     * @param value the value to associate with the current timestamp; can be {@code null}
      * @return a new Timed instance containing the value and current timestamp
      * @see #of(Object, long)
      */
@@ -93,7 +93,7 @@ public final class Timed<T> implements Immutable {
      * }</pre>
      *
      * @param <T> the type of the value
-     * @param value the value to associate with the timestamp; can be null
+     * @param value the value to associate with the timestamp; can be {@code null}
      * @param timeInMillis the timestamp in milliseconds since epoch
      * @return a new Timed instance containing the value and specified timestamp
      * @see #of(Object)
@@ -131,7 +131,7 @@ public final class Timed<T> implements Immutable {
      * processUser(user);
      * }</pre>
      *
-     * @return the value associated with the timestamp; may be null
+     * @return the value associated with the timestamp; can be {@code null}
      * @see #timestamp()
      */
     public T value() {
@@ -198,10 +198,10 @@ public final class Timed<T> implements Immutable {
      * Returns a string representation of this timed instance.
      * The string representation consists of the timestamp followed by a colon,
      * a space, and the string representation of the value.
-     * 
+     *
      * <p>Format: {@code "timestamp: value"}
-     * 
-     * <p><b>Example output:</b></p>
+     *
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Timed<String> t = Timed.of("Hello", 1609459200000L);
      * System.out.println(t); // Prints: "1609459200000: Hello"

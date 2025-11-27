@@ -4584,7 +4584,6 @@ public final class Iterables {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     *
      *   Lists.cartesianProduct(ImmutableList.of(
      *       ImmutableList.of(1, 2),
      *       ImmutableList.of("A", "B", "C")))
@@ -4650,7 +4649,6 @@ public final class Iterables {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     *
      *   Lists.cartesianProduct(ImmutableList.of(
      *       ImmutableList.of(1, 2),
      *       ImmutableList.of("A", "B", "C")))
@@ -4670,7 +4668,6 @@ public final class Iterables {
      * <p>The result is guaranteed to be in the "traditional", lexicographical
      * order for Cartesian products that you would get from nesting for loops:
      * <pre>{@code
-     *
      *   for (B b0 : lists.get(0)) {
      *     for (B b1 : lists.get(1)) {
      *       ...

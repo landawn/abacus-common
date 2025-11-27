@@ -57,6 +57,15 @@ public sealed class Keyed<K, T> implements Immutable permits IndexedKeyed {
      */
     protected final T val;
 
+    /**
+     * Constructs a new {@code Keyed} instance with the specified key and value.
+     *
+     * <p>This constructor is package-private and used internally by the factory method
+     * {@link #of(Object, Object)} and subclasses.</p>
+     *
+     * @param key the key used for hashing and equality comparisons (can be {@code null})
+     * @param val the value associated with the key (can be {@code null})
+     */
     Keyed(final K key, final T val) {
         this.key = key;
         this.val = val;
@@ -93,7 +102,16 @@ public sealed class Keyed<K, T> implements Immutable permits IndexedKeyed {
      * <p>The key is used for hashing and equality comparisons in collections.
      * This value is immutable once the {@code Keyed} instance is created.</p>
      *
-     * @return the key, which may be {@code null}
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Keyed<String, Integer> keyed = Keyed.of("myKey", 42);
+     * String key = keyed.key(); // returns "myKey"
+     *
+     * Keyed<String, Integer> nullKey = Keyed.of(null, 100);
+     * String nullKeyValue = nullKey.key(); // returns null
+     * }</pre>
+     *
+     * @return the key (can be {@code null})
      */
     @MayReturnNull
     public K key() {
@@ -107,7 +125,16 @@ public sealed class Keyed<K, T> implements Immutable permits IndexedKeyed {
      * efficient lookups based solely on the key. This value is immutable once
      * the {@code Keyed} instance is created.</p>
      *
-     * @return the value, which may be {@code null}
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Keyed<String, Integer> keyed = Keyed.of("myKey", 42);
+     * Integer value = keyed.val(); // returns 42
+     *
+     * Keyed<String, Integer> nullVal = Keyed.of("key", null);
+     * Integer nullValue = nullVal.val(); // returns null
+     * }</pre>
+     *
+     * @return the value (can be {@code null})
      */
     @MayReturnNull
     public T val() {

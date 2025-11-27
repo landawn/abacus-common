@@ -197,6 +197,11 @@ public class CollectionType<E, T extends Collection<E>> extends AbstractType<T> 
         return true;
     }
 
+    /**
+     * Always returns {@code true} as collection types are parameterized with an element type.
+     *
+     * @return true
+     */
     @Override
     public boolean isGenericType() {
         return true;

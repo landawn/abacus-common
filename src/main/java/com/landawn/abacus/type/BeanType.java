@@ -49,7 +49,7 @@ public final class BeanType<T> extends AbstractType<T> {
     private final java.lang.reflect.Type javaType;
 
     BeanType(final Class<T> cls, final java.lang.reflect.Type javaType) {
-        super(TypeFactory.getClassName(cls));
+        super(javaType == null ? TypeFactory.getClassName(cls) : TypeFactory.getJavaTypeName(javaType));
         this.typeClass = cls;
         this.javaType = javaType == null ? cls : javaType;
     }

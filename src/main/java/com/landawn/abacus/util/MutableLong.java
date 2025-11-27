@@ -369,6 +369,12 @@ public final class MutableLong extends Number implements Comparable<MutableLong>
         return (int) value;
     }
 
+    /**
+     * Returns the value of this MutableLong as a long.
+     * This is the natural representation since the internal value is already a long.
+     *
+     * @return the value as a long
+     */
     @Override
     public long longValue() {
         return value;
@@ -385,6 +391,12 @@ public final class MutableLong extends Number implements Comparable<MutableLong>
         return value;
     }
 
+    /**
+     * Returns the value of this MutableLong as a double.
+     * Note that this may involve rounding and precision loss for very large long values.
+     *
+     * @return the value as a double
+     */
     @Override
     public double doubleValue() {
         return value;

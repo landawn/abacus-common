@@ -768,20 +768,24 @@ public final class ExcelUtil {
      * @throws UncheckedException if an I/O error occurs while reading the file or if the file is not a valid Excel file
      */
     public static Stream<Row> streamSheet(final File excelFile, final int sheetIndex, final boolean skipFirstRow) {
+        InputStream is = null;
+
         try {
-            final InputStream is = new FileInputStream(excelFile);
+            is = new FileInputStream(excelFile);
             final Workbook workbook = new XSSFWorkbook(is);
             final Sheet sheet = workbook.getSheetAt(sheetIndex);
+            final InputStream inputStreamToClose = is;
 
             return Stream.of(sheet.rowIterator()).skip(skipFirstRow ? 1 : 0).onClose(() -> {
                 try {
                     workbook.close();
-                    is.close();
+                    IOUtil.closeQuietly(inputStreamToClose);
                 } catch (IOException e) {
                     throw new UncheckedException(e);
                 }
             });
         } catch (IOException e) {
+            IOUtil.closeQuietly(is);
             throw new UncheckedException(e);
         }
     }
@@ -817,20 +821,24 @@ public final class ExcelUtil {
      *                            or if the sheet name is not found in the workbook
      */
     public static Stream<Row> streamSheet(final File excelFile, final String sheetName, final boolean skipFirstRow) {
+        InputStream is = null;
+
         try {
-            final InputStream is = new FileInputStream(excelFile);
+            is = new FileInputStream(excelFile);
             final Workbook workbook = new XSSFWorkbook(is);
             final Sheet sheet = workbook.getSheet(sheetName);
+            final InputStream inputStreamToClose = is;
 
             return Stream.of(sheet.rowIterator()).skip(skipFirstRow ? 1 : 0).onClose(() -> {
                 try {
                     workbook.close();
-                    is.close();
+                    IOUtil.closeQuietly(inputStreamToClose);
                 } catch (IOException e) {
                     throw new UncheckedException(e);
                 }
             });
         } catch (IOException e) {
+            IOUtil.closeQuietly(is);
             throw new UncheckedException(e);
         }
     }

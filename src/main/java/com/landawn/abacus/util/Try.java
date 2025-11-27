@@ -200,7 +200,7 @@ public final class Try<T extends AutoCloseable> {
      * });
      * }</pre>
      *
-     * @param cmd The runnable task that might throw an exception. Must not be {@code null}.
+     * @param cmd the runnable task that might throw an exception. Must not be {@code null}.
      * @throws RuntimeException if an exception occurs during the execution of the {@code cmd}.
      * @see Throwables#run(Throwables.Runnable)
      */
@@ -234,8 +234,8 @@ public final class Try<T extends AutoCloseable> {
      * );
      * }</pre>
      *
-     * @param cmd The runnable task that might throw an exception, must not be {@code null}.
-     * @param actionOnError The consumer to handle any exceptions thrown by the {@code cmd}, must not be {@code null}.
+     * @param cmd the runnable task that might throw an exception, must not be {@code null}.
+     * @param actionOnError the consumer to handle any exceptions thrown by the {@code cmd}, must not be {@code null}.
      * @see Throwables#run(Throwables.Runnable, Consumer)
      */
     public static void run(final Throwables.Runnable<? extends Exception> cmd, final Consumer<? super Exception> actionOnError) {
@@ -265,7 +265,7 @@ public final class Try<T extends AutoCloseable> {
      * }</pre>
      *
      * @param <R> The type of the result.
-     * @param cmd The callable task that might throw an exception and returns a result. Must not be {@code null}.
+     * @param cmd the callable task that might throw an exception and returns a result. Must not be {@code null}.
      * @return The result of the {@code cmd}.
      * @throws RuntimeException if an exception occurs during the execution of the {@code cmd}.
      * @see Throwables#call(Throwables.Callable)
@@ -491,7 +491,7 @@ public final class Try<T extends AutoCloseable> {
      * 
      * <p>The resource is automatically closed after the consumer completes, and any final action
      * is executed. Checked exceptions are converted to RuntimeExceptions.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Try.with(new BufferedReader(new FileReader("data.txt")))
@@ -504,7 +504,7 @@ public final class Try<T extends AutoCloseable> {
      * }</pre>
      *
      * @param cmd the consumer that operates on the managed resource
-     * @throws RuntimeException if an exception occurs during execution or resource management
+     * @throws RuntimeException if an exception occurs during execution
      */
     public void run(final Throwables.Consumer<? super T, ? extends Exception> cmd) {
         try (final T closeable = targetResource == null ? (targetResourceSupplier == null ? null : targetResourceSupplier.get()) : targetResource) {
@@ -553,12 +553,12 @@ public final class Try<T extends AutoCloseable> {
      * 
      * <p>The resource is automatically closed after the function completes, and any final action
      * is executed. Checked exceptions are converted to RuntimeExceptions.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String content = Try.with(new FileInputStream("data.txt"))
      *     .call(stream -> new String(stream.readAllBytes()));
-     * 
+     *
      * List<String> lines = Try.with(Files.newBufferedReader(path))
      *     .call(reader -> reader.lines().collect(Collectors.toList()));
      * }</pre>
@@ -566,7 +566,7 @@ public final class Try<T extends AutoCloseable> {
      * @param <R> the type of the result
      * @param cmd the function that operates on the managed resource and returns a result
      * @return the result produced by the function
-     * @throws RuntimeException if an exception occurs during execution or resource management
+     * @throws RuntimeException if an exception occurs during execution
      */
     public <R> R call(final Throwables.Function<? super T, ? extends R, ? extends Exception> cmd) {
         try (final T closeable = targetResource == null ? (targetResourceSupplier == null ? null : targetResourceSupplier.get()) : targetResource) {

@@ -263,12 +263,6 @@ class JDKLogger extends AbstractLogger {
      * <p>This method creates a LogRecord and fills in caller information before
      * delegating to the JDK logger.</p>
      *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * log(Level.INFO, "Application started");
-     * log(Level.WARNING, "Configuration file not found");
-     * }</pre>
-     *
      * @param level the logging level
      * @param msg the message to log
      */
@@ -281,12 +275,6 @@ class JDKLogger extends AbstractLogger {
      *
      * <p>This method creates a LogRecord and fills in caller information before
      * delegating to the JDK logger.</p>
-     *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * Exception e = new IOException("File not found");
-     * log(Level.SEVERE, "Failed to load configuration", e);
-     * }</pre>
      *
      * @param level the logging level
      * @param msg the message to log
@@ -304,13 +292,6 @@ class JDKLogger extends AbstractLogger {
      * the stack trace to find the first frame outside of the logging framework.</p>
      *
      * <p>See bug report #13 for more details about why this approach is necessary.</p>
-     *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * log(SELF, Level.INFO, "Processing started", null);
-     * Exception ex = new RuntimeException("Error");
-     * log(SELF, Level.SEVERE, "Processing failed", ex);
-     * }</pre>
      *
      * @param callerFQCN the fully qualified class name of the caller
      * @param level the logging level

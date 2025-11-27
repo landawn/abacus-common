@@ -39,17 +39,17 @@ import com.landawn.abacus.util.stream.Stream;
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * JSONParser parser = ParserFactory.createJSONParser();
- * 
+ *
  * // Parse JSON string to object
  * Person person = parser.readString("{\"name\":\"John\",\"age\":30}", Person.class);
- * 
+ *
  * // Parse JSON with configuration
  * JSONDeserializationConfig config = new JSONDeserializationConfig()
  *     .ignoreUnmatchedProperty(true);
- * Person person = parser.readString(jsonString, config, Person.class);
- * 
+ * Person person2 = parser.readString(jsonString, config, Person.class);
+ *
  * // Stream parsing for large JSON arrays
- * try (Stream<Person> stream = parser.stream(largeJsonFile, Person.class)) {
+ * try (Stream<Person> stream = parser.stream(largeJsonFile, Type.of(Person.class))) {
  *     stream.filter(p -> p.getAge() > 18)
  *           .forEach(System.out::println);
  * }
@@ -72,7 +72,7 @@ public interface JSONParser extends Parser<JSONSerializationConfig, JSONDeserial
      *
      * // For collections
      * String jsonArray = "[{\"id\":1},{\"id\":2}]";
-     * List<Item> items = parser.readString(jsonArray, Type.of(new TypeReference<List<Item>>() {}.getType()));
+     * List<Item> items = parser.readString(jsonArray, Type.of(new TypeReference<List<Item>>() {}));
      * }</pre>
      *
      * @param <T> the target type parameter
@@ -197,18 +197,18 @@ public interface JSONParser extends Parser<JSONSerializationConfig, JSONDeserial
 
     /**
      * Parses a JSON string into an existing Collection.
-     * The collection is cleared before adding parsed elements from the JSON array.
+     * The parsed elements are added to the collection without clearing existing elements.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String json = "[\"apple\", \"banana\", \"orange\"]";
      * List<String> fruits = new ArrayList<>();
      * parser.readString(json, fruits);
-     * // fruits now contains: ["apple", "banana", "orange"]
+     * // fruits now contains the parsed values added to any existing elements
      * }</pre>
      *
      * @param source the JSON string to parse, must contain a JSON array
-     * @param output the Collection to populate with parsed values, must not be {@code null} and will be cleared first
+     * @param output the Collection to populate with parsed values, must not be {@code null}; existing elements are preserved
      * @throws IllegalArgumentException if the source is {@code null} or invalid JSON
      * @throws UnsupportedOperationException if the collection is unmodifiable
      */
@@ -216,7 +216,7 @@ public interface JSONParser extends Parser<JSONSerializationConfig, JSONDeserial
 
     /**
      * Parses a JSON string into an existing Collection with custom configuration.
-     * The collection is cleared before adding parsed elements from the JSON array.
+     * The parsed elements are added to the collection without clearing existing elements.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -229,7 +229,7 @@ public interface JSONParser extends Parser<JSONSerializationConfig, JSONDeserial
      *
      * @param source the JSON string to parse, must contain a JSON array
      * @param config the deserialization configuration to use (may be {@code null} for default behavior)
-     * @param output the Collection to populate with parsed values, must not be {@code null} and will be cleared first
+     * @param output the Collection to populate with parsed values, must not be {@code null}; existing elements are preserved
      * @throws IllegalArgumentException if the source is {@code null} or invalid JSON
      * @throws UnsupportedOperationException if the collection is unmodifiable
      */
@@ -237,18 +237,18 @@ public interface JSONParser extends Parser<JSONSerializationConfig, JSONDeserial
 
     /**
      * Parses a JSON string into an existing Map.
-     * The map is cleared before adding parsed entries from the JSON object.
+     * The parsed entries are added to the map without clearing existing entries.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String json = "{\"key1\":\"value1\",\"key2\":\"value2\"}";
      * Map<String, String> map = new HashMap<>();
      * parser.readString(json, map);
-     * // map now contains: {key1=value1, key2=value2}
+     * // map now contains the parsed entries added to any existing entries
      * }</pre>
      *
      * @param source the JSON string to parse, must contain a JSON object
-     * @param output the Map to populate with parsed key-value pairs, must not be {@code null} and will be cleared first
+     * @param output the Map to populate with parsed key-value pairs, must not be {@code null}; existing entries are preserved
      * @throws IllegalArgumentException if the source is {@code null} or invalid JSON
      * @throws UnsupportedOperationException if the map is unmodifiable
      */
@@ -256,7 +256,7 @@ public interface JSONParser extends Parser<JSONSerializationConfig, JSONDeserial
 
     /**
      * Parses a JSON string into an existing Map with custom configuration.
-     * The map is cleared before adding parsed entries from the JSON object.
+     * The parsed entries are added to the map without clearing existing entries.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -269,7 +269,7 @@ public interface JSONParser extends Parser<JSONSerializationConfig, JSONDeserial
      *
      * @param source the JSON string to parse, must contain a JSON object
      * @param config the deserialization configuration to use (may be {@code null} for default behavior)
-     * @param output the Map to populate with parsed key-value pairs, must not be {@code null} and will be cleared first
+     * @param output the Map to populate with parsed key-value pairs, must not be {@code null}; existing entries are preserved
      * @throws IllegalArgumentException if the source is {@code null} or invalid JSON
      * @throws UnsupportedOperationException if the map is unmodifiable
      */
@@ -544,7 +544,7 @@ public interface JSONParser extends Parser<JSONSerializationConfig, JSONDeserial
      * JSONDeserializationConfig config = new JSONDeserializationConfig()
      *     .ignoreUnmatchedProperty(true);
      * try (Reader reader = new FileReader("data.json");
-     *      Stream<Product> stream = parser.stream(reader, true, config,Type.of(Product.class))) {
+     *      Stream<Product> stream = parser.stream(reader, true, config, Type.of(Product.class))) {
      *      stream.forEach(product -> process(product));
      * }
      * }</pre>

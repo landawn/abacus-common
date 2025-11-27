@@ -53,18 +53,19 @@ import com.landawn.abacus.annotation.SuppressFBWarnings;
  * <pre>{@code
  * // Create using factory methods
  * ImmutableList<String> list1 = ImmutableList.of("a", "b", "c");
- * 
+ *
  * // Create from existing collection
  * List<Integer> mutable = Arrays.asList(1, 2, 3);
  * ImmutableList<Integer> list2 = ImmutableList.copyOf(mutable);
- * 
+ *
  * // Create using builder
+ * List<String> moreElements = Arrays.asList("fourth", "fifth");
  * ImmutableList<String> list3 = ImmutableList.<String>builder()
  *     .add("first")
  *     .add("second", "third")
- *     .addAll(otherCollection)
+ *     .addAll(moreElements)
  *     .build();
- * 
+ *
  * // Use reverse view
  * ImmutableList<Integer> reversed = ImmutableList.of(1, 2, 3).reverse();
  * // reversed contains [3, 2, 1]
@@ -372,19 +373,19 @@ public sealed class ImmutableList<E> extends ImmutableCollection<E> implements L
 
     /**
      * Wraps the provided list into an ImmutableList without copying the elements.
-     * The returned ImmutableList is backed by the provided list, so changes to the original list
-     * will be reflected in the ImmutableList. However, the ImmutableList itself cannot be modified.
      * If the provided list is already an ImmutableList, it is returned directly.
      * If the list is {@code null}, an empty ImmutableList is returned.
-     * 
-     * <p><b>Warning:</b> Use this method with caution as the immutability guarantee depends on not modifying
-     * the original list after wrapping. This method is marked as @Beta.
-     * 
+     *
+     * <p><b>Warning:</b> This method does not create a defensive copy. Changes to the
+     * underlying List will be reflected in the returned ImmutableList, which
+     * violates the immutability contract. For a {@code true} immutable copy, use
+     * {@link #copyOf(Collection)} instead.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * List<String> mutable = new ArrayList<>();
      * mutable.add("initial");
-     * 
+     *
      * ImmutableList<String> wrapped = ImmutableList.wrap(mutable);
      * mutable.add("added later"); // This WILL be visible in wrapped!
      * System.out.println(wrapped.get(1)); // prints: "added later"
@@ -392,7 +393,7 @@ public sealed class ImmutableList<E> extends ImmutableCollection<E> implements L
      *
      * @param <E> the type of elements in the list
      * @param list the list to be wrapped into an ImmutableList
-     * @return an ImmutableList view of the provided list
+     * @return an ImmutableList view of the provided list, or the same instance if already an ImmutableList
      */
     @Beta
     public static <E> ImmutableList<E> wrap(final List<? extends E> list) {
@@ -788,13 +789,14 @@ public sealed class ImmutableList<E> extends ImmutableCollection<E> implements L
      * A builder for creating ImmutableList instances.
      * The builder pattern allows for flexible construction of immutable lists,
      * especially useful when elements are added conditionally or in loops.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
+     * List<String> moreElements = Arrays.asList("four", "five");
      * ImmutableList<String> list = ImmutableList.<String>builder()
      *     .add("one")
      *     .add("two", "three")
-     *     .addAll(otherCollection)
+     *     .addAll(moreElements)
      *     .build();
      * }</pre>
      *

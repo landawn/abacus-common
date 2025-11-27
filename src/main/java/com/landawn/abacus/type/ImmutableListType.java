@@ -150,6 +150,22 @@ public class ImmutableListType<E> extends AbstractType<ImmutableList<E>> {
      * Converts an immutable list to its string representation.
      * Delegates the serialization to the underlying list type handler.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Type<ImmutableList<String>> type = TypeFactory.getType("ImmutableList<String>");
+     * ImmutableList<String> list = ImmutableList.of("apple", "banana", "cherry");
+     * String result = type.stringOf(list);
+     * // Returns: ["apple","banana","cherry"]
+     *
+     * ImmutableList<Integer> intList = ImmutableList.of(1, 2, 3);
+     * Type<ImmutableList<Integer>> intType = TypeFactory.getType("ImmutableList<Integer>");
+     * result = intType.stringOf(intList);
+     * // Returns: [1,2,3]
+     *
+     * result = type.stringOf(null);
+     * // Returns: null
+     * }</pre>
+     *
      * @param x the immutable list to convert to string
      * @return the string representation of the immutable list, or {@code null} if the input is null
      */
@@ -163,6 +179,20 @@ public class ImmutableListType<E> extends AbstractType<ImmutableList<E>> {
      * First deserializes to a mutable list using the list type handler,
      * then wraps it in an ImmutableList to ensure immutability.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Type<ImmutableList<String>> type = TypeFactory.getType("ImmutableList<String>");
+     * ImmutableList<String> result = type.valueOf("[\"apple\",\"banana\",\"cherry\"]");
+     * // Returns: ImmutableList containing [apple, banana, cherry]
+     *
+     * Type<ImmutableList<Integer>> intType = TypeFactory.getType("ImmutableList<Integer>");
+     * ImmutableList<Integer> intResult = intType.valueOf("[1,2,3]");
+     * // Returns: ImmutableList containing [1, 2, 3]
+     *
+     * result = type.valueOf(null);
+     * // Returns: null (wrapped as ImmutableList)
+     * }</pre>
+     *
      * @param str the string to parse
      * @return a new immutable list instance containing the parsed elements
      */
@@ -174,6 +204,15 @@ public class ImmutableListType<E> extends AbstractType<ImmutableList<E>> {
     /**
      * Appends the string representation of an immutable list to an Appendable.
      * Delegates to the underlying list type handler for the actual appending logic.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Type<ImmutableList<String>> type = TypeFactory.getType("ImmutableList<String>");
+     * StringBuilder sb = new StringBuilder();
+     * ImmutableList<String> list = ImmutableList.of("apple", "banana");
+     * type.appendTo(sb, list);
+     * // sb contains: ["apple","banana"]
+     * }</pre>
      *
      * @param writer the Appendable to write to
      * @param x the immutable list to append
@@ -187,6 +226,17 @@ public class ImmutableListType<E> extends AbstractType<ImmutableList<E>> {
     /**
      * Writes the character representation of an immutable list to a CharacterWriter.
      * Delegates to the underlying list type handler for the actual writing logic.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Type<ImmutableList<String>> type = TypeFactory.getType("ImmutableList<String>");
+     * CharacterWriter writer = new CharacterWriter();
+     * JSONXMLSerializationConfig config = JSONXMLSerializationConfig.of();
+     * ImmutableList<String> list = ImmutableList.of("apple", "banana");
+     * type.writeCharacter(writer, list, config);
+     * String result = writer.toString();
+     * // result: ["apple","banana"]
+     * }</pre>
      *
      * @param writer the CharacterWriter to write to
      * @param x the immutable list to write

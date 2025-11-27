@@ -66,14 +66,8 @@ public interface Supplier<T> extends Throwables.Supplier<T, RuntimeException>, j
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Supplier<String> supplier = () -> "data";
-     * var throwableSupplier = supplier.toThrowable();
-     *
-     * // Can now be used in contexts requiring IOException
-     * try {
-     *     String result = throwableSupplier.get();
-     * } catch (IOException e) {
-     *     // Handle IOException
-     * }
+     * Throwables.Supplier<String, Exception> throwableSupplier = supplier.toThrowable();
+     * // Can now be used in contexts that handle exceptions
      * }</pre>
      *
      * @param <E> the type of exception that the returned supplier may throw
