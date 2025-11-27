@@ -1,21 +1,3 @@
-/*
- * Licensed to the Apache Software Foundation (ASF) under one
- * or more contributor license agreements.  See the NOTICE file
- * distributed with this work for additional information
- * regarding copyright ownership.  The ASF licenses this file
- * to you under the Apache License, Version 2.0 (the
- * "License"); you may not use this file except in compliance
- * with the License.  You may obtain a copy of the License at
- *
- * https://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
- */
 package com.landawn.abacus.util;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -24,15 +6,16 @@ import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.AbstractTest;
 
+@Tag("old-test")
 public class FractionTest extends AbstractTest {
 
-    private static final int SKIP = 500; //53
+    private static final int SKIP = 500;
 
-    //--------------------------------------------------------------------------
     @Test
     public void testConstants() {
         N.println(Fraction.of(1, 2));
@@ -78,7 +61,6 @@ public class FractionTest extends AbstractTest {
     public void testFactory_int_int() {
         Fraction f = null;
 
-        // zero
         f = Fraction.of(0, 1);
         assertEquals(0, f.getNumerator());
         assertEquals(1, f.getDenominator());
@@ -87,7 +69,6 @@ public class FractionTest extends AbstractTest {
         assertEquals(0, f.getNumerator());
         assertEquals(2, f.getDenominator());
 
-        // normal
         f = Fraction.of(1, 1);
         assertEquals(1, f.getNumerator());
         assertEquals(1, f.getDenominator());
@@ -100,12 +81,10 @@ public class FractionTest extends AbstractTest {
         assertEquals(23, f.getNumerator());
         assertEquals(345, f.getDenominator());
 
-        // improper
         f = Fraction.of(22, 7);
         assertEquals(22, f.getNumerator());
         assertEquals(7, f.getDenominator());
 
-        // negatives
         f = Fraction.of(-6, 10);
         assertEquals(-6, f.getNumerator());
         assertEquals(10, f.getDenominator());
@@ -118,7 +97,6 @@ public class FractionTest extends AbstractTest {
         assertEquals(6, f.getNumerator());
         assertEquals(10, f.getDenominator());
 
-        // zero denominator
         try {
             f = Fraction.of(1, 0);
             fail("expecting ArithmeticException");
@@ -137,7 +115,6 @@ public class FractionTest extends AbstractTest {
         } catch (final ArithmeticException ex) {
         }
 
-        // very large: can't represent as unsimplified fraction, although
         try {
             f = Fraction.of(4, Integer.MIN_VALUE);
             fail("expecting ArithmeticException");
@@ -154,7 +131,6 @@ public class FractionTest extends AbstractTest {
     public void testFactory_int_int_int() {
         Fraction f = null;
 
-        // zero
         f = Fraction.of(0, 0, 2);
         assertEquals(0, f.getNumerator());
         assertEquals(2, f.getDenominator());
@@ -167,12 +143,10 @@ public class FractionTest extends AbstractTest {
         assertEquals(1, f.getNumerator());
         assertEquals(2, f.getDenominator());
 
-        // normal
         f = Fraction.of(1, 1, 2);
         assertEquals(3, f.getNumerator());
         assertEquals(2, f.getDenominator());
 
-        // negatives
         try {
             f = Fraction.of(1, -6, -10);
             fail("expecting ArithmeticException");
@@ -191,7 +165,6 @@ public class FractionTest extends AbstractTest {
         } catch (final ArithmeticException ex) {
         }
 
-        // negative whole
         f = Fraction.of(-1, 6, 10);
         assertEquals(-16, f.getNumerator());
         assertEquals(10, f.getDenominator());
@@ -214,7 +187,6 @@ public class FractionTest extends AbstractTest {
         } catch (final ArithmeticException ex) {
         }
 
-        // zero denominator
         try {
             f = Fraction.of(0, 1, 0);
             fail("expecting ArithmeticException");
@@ -245,13 +217,11 @@ public class FractionTest extends AbstractTest {
         } catch (final ArithmeticException ex) {
         }
 
-        // very large
         f = Fraction.of(-1, 0, Integer.MAX_VALUE);
         assertEquals(-Integer.MAX_VALUE, f.getNumerator());
         assertEquals(Integer.MAX_VALUE, f.getDenominator());
 
         try {
-            // negative denominators not allowed in this constructor.
             f = Fraction.of(0, 4, Integer.MIN_VALUE);
             fail("expecting ArithmeticException");
         } catch (final ArithmeticException ex) {
@@ -272,12 +242,10 @@ public class FractionTest extends AbstractTest {
     public void testReducedFactory_int_int() {
         Fraction f = null;
 
-        // zero
         f = Fraction.of(0, 1, true);
         assertEquals(0, f.getNumerator());
         assertEquals(1, f.getDenominator());
 
-        // normal
         f = Fraction.of(1, 1, true);
         assertEquals(1, f.getNumerator());
         assertEquals(1, f.getDenominator());
@@ -286,12 +254,10 @@ public class FractionTest extends AbstractTest {
         assertEquals(2, f.getNumerator());
         assertEquals(1, f.getDenominator());
 
-        // improper
         f = Fraction.of(22, 7, true);
         assertEquals(22, f.getNumerator());
         assertEquals(7, f.getDenominator());
 
-        // negatives
         f = Fraction.of(-6, 10, true);
         assertEquals(-3, f.getNumerator());
         assertEquals(5, f.getDenominator());
@@ -304,7 +270,6 @@ public class FractionTest extends AbstractTest {
         assertEquals(3, f.getNumerator());
         assertEquals(5, f.getDenominator());
 
-        // zero denominator
         try {
             f = Fraction.of(1, 0, true);
             fail("expecting ArithmeticException");
@@ -323,7 +288,6 @@ public class FractionTest extends AbstractTest {
         } catch (final ArithmeticException ex) {
         }
 
-        // reduced
         f = Fraction.of(0, 2, true);
         assertEquals(0, f.getNumerator());
         assertEquals(1, f.getDenominator());
@@ -344,20 +308,16 @@ public class FractionTest extends AbstractTest {
         assertEquals(11, f.getNumerator());
         assertEquals(2, f.getDenominator());
 
-        // Extreme values
-        // OK, can reduce before negating
         f = Fraction.of(-2, Integer.MIN_VALUE, true);
         assertEquals(1, f.getNumerator());
         assertEquals(-(Integer.MIN_VALUE / 2), f.getDenominator());
 
-        // Can't reduce, negation will throw
         try {
             f = Fraction.of(-7, Integer.MIN_VALUE, true);
             fail("Expecting ArithmeticException");
         } catch (final ArithmeticException ex) {
         }
 
-        // LANG-662
         f = Fraction.of(Integer.MIN_VALUE, 2, true);
         assertEquals(Integer.MIN_VALUE / 2, f.getNumerator());
         assertEquals(1, f.getDenominator());
@@ -391,45 +351,37 @@ public class FractionTest extends AbstractTest {
         } catch (final ArithmeticException ex) {
         }
 
-        // zero
         f = Fraction.of(0.0d);
         assertEquals(0, f.getNumerator());
         assertEquals(1, f.getDenominator());
 
-        // one
         f = Fraction.of(1.0d);
         assertEquals(1, f.getNumerator());
         assertEquals(1, f.getDenominator());
 
-        // one half
         f = Fraction.of(0.5d);
         assertEquals(1, f.getNumerator());
         assertEquals(2, f.getDenominator());
 
-        // negative
         f = Fraction.of(-0.875d);
         assertEquals(-7, f.getNumerator());
         assertEquals(8, f.getDenominator());
 
-        // over 1
         f = Fraction.of(1.25d);
         assertEquals(5, f.getNumerator());
         assertEquals(4, f.getDenominator());
 
-        // two thirds
         f = Fraction.of(0.66666d);
         assertEquals(2, f.getNumerator());
         assertEquals(3, f.getDenominator());
 
-        // small
         f = Fraction.of(1.0d / 10001d);
         assertEquals(0, f.getNumerator());
         assertEquals(1, f.getDenominator());
 
-        // normal
         Fraction f2 = null;
-        for (int i = 1; i <= 100; i++) { // denominator
-            for (int j = 1; j <= i; j++) { // numerator
+        for (int i = 1; i <= 100; i++) {
+            for (int j = 1; j <= i; j++) {
                 try {
                     f = Fraction.of((double) j / (double) i);
                 } catch (final ArithmeticException ex) {
@@ -441,9 +393,8 @@ public class FractionTest extends AbstractTest {
                 assertEquals(f2.getDenominator(), f.getDenominator());
             }
         }
-        // save time by skipping some tests!  (
-        for (int i = 1001; i <= 10000; i += SKIP) { // denominator
-            for (int j = 1; j <= i; j++) { // numerator
+        for (int i = 1001; i <= 10000; i += SKIP) {
+            for (int j = 1; j <= i; j++) {
                 try {
                     f = Fraction.of((double) j / (double) i);
                 } catch (final ArithmeticException ex) {
@@ -456,7 +407,6 @@ public class FractionTest extends AbstractTest {
             }
         }
     }
-
 
     @Test
     public void testFactory_String_double() {
@@ -485,7 +435,7 @@ public class FractionTest extends AbstractTest {
         }
 
         try {
-            f = Fraction.of("2147483648"); // too big
+            f = Fraction.of("2147483648");
             fail("Expecting NumberFormatException");
         } catch (final NumberFormatException ex) {
         }
@@ -724,7 +674,6 @@ public class FractionTest extends AbstractTest {
         } catch (final ArithmeticException ex) {
         }
 
-        // large values
         f = Fraction.of(Integer.MIN_VALUE, 1);
         try {
             f = f.invert();
@@ -752,7 +701,6 @@ public class FractionTest extends AbstractTest {
         assertEquals(50, f.getNumerator());
         assertEquals(75, f.getDenominator());
 
-        // large values
         f = Fraction.of(Integer.MAX_VALUE - 1, Integer.MAX_VALUE);
         f = f.negate();
         assertEquals(Integer.MIN_VALUE + 2, f.getNumerator());
@@ -829,7 +777,6 @@ public class FractionTest extends AbstractTest {
         assertEquals(25, f.getNumerator());
         assertEquals(9, f.getDenominator());
 
-        // check unreduced fractions stay that way.
         f = Fraction.of(6, 10);
         assertEquals(Fraction.ONE, f.pow(0));
 
@@ -857,7 +804,6 @@ public class FractionTest extends AbstractTest {
         assertEquals(25, f.getNumerator());
         assertEquals(9, f.getDenominator());
 
-        // zero to any positive power is still zero.
         f = Fraction.of(0, 1231);
         f = f.pow(1);
         assertTrue(0 == f.compareTo(Fraction.ZERO));
@@ -868,7 +814,6 @@ public class FractionTest extends AbstractTest {
         assertEquals(0, f.getNumerator());
         assertEquals(1, f.getDenominator());
 
-        // zero to negative powers should throw an exception
         try {
             f = f.pow(-1);
             fail("expecting ArithmeticException");
@@ -880,7 +825,6 @@ public class FractionTest extends AbstractTest {
         } catch (final ArithmeticException ex) {
         }
 
-        // one to any power is still one.
         f = Fraction.of(1, 1);
         f = f.pow(0);
         assertEquals(f, Fraction.ONE);
@@ -900,7 +844,6 @@ public class FractionTest extends AbstractTest {
         } catch (final ArithmeticException ex) {
         }
 
-        // Numerator growing too negative during the pow operation.
         f = Fraction.of(Integer.MIN_VALUE, 1);
         try {
             f = f.pow(3);
@@ -983,8 +926,6 @@ public class FractionTest extends AbstractTest {
         } catch (final IllegalArgumentException ex) {
         }
 
-        // if this fraction is added naively, it will overflow.
-        // check that it doesn't.
         f1 = Fraction.of(1, 32768 * 3);
         f2 = Fraction.of(1, 59049);
         f = f1.add(f2);
@@ -1004,16 +945,15 @@ public class FractionTest extends AbstractTest {
         assertEquals(1, f.getDenominator());
 
         try {
-            f = f.add(Fraction.ONE); // should overflow
+            f = f.add(Fraction.ONE);
             fail("expecting ArithmeticException but got: " + f.toString());
         } catch (final ArithmeticException ex) {
         }
 
-        // denominator should not be a multiple of 2 or 3 to trigger overflow
         f1 = Fraction.of(Integer.MIN_VALUE, 5);
         f2 = Fraction.of(-1, 5);
         try {
-            f = f1.add(f2); // should overflow
+            f = f1.add(f2);
             fail("expecting ArithmeticException but got: " + f.toString());
         } catch (final ArithmeticException ex) {
         }
@@ -1035,7 +975,7 @@ public class FractionTest extends AbstractTest {
         f1 = Fraction.of(3, 327680);
         f2 = Fraction.of(2, 59049);
         try {
-            f = f1.add(f2); // should overflow
+            f = f1.add(f2);
             fail("expecting ArithmeticException but got: " + f.toString());
         } catch (final ArithmeticException ex) {
         }
@@ -1100,8 +1040,6 @@ public class FractionTest extends AbstractTest {
         } catch (final IllegalArgumentException ex) {
         }
 
-        // if this fraction is subtracted naively, it will overflow.
-        // check that it doesn't.
         f1 = Fraction.of(1, 32768 * 3);
         f2 = Fraction.of(1, 59049);
         f = f1.subtract(f2);
@@ -1124,15 +1062,14 @@ public class FractionTest extends AbstractTest {
             f1 = Fraction.of(1, Integer.MAX_VALUE);
             f2 = Fraction.of(1, Integer.MAX_VALUE - 1);
             f = f1.subtract(f2);
-            fail("expecting ArithmeticException"); //should overflow
+            fail("expecting ArithmeticException");
         } catch (final ArithmeticException ex) {
         }
 
-        // denominator should not be a multiple of 2 or 3 to trigger overflow
         f1 = Fraction.of(Integer.MIN_VALUE, 5);
         f2 = Fraction.of(1, 5);
         try {
-            f = f1.subtract(f2); // should overflow
+            f = f1.subtract(f2);
             fail("expecting ArithmeticException but got: " + f.toString());
         } catch (final ArithmeticException ex) {
         }
@@ -1154,7 +1091,7 @@ public class FractionTest extends AbstractTest {
         f1 = Fraction.of(3, 327680);
         f2 = Fraction.of(2, 59049);
         try {
-            f = f1.subtract(f2); // should overflow
+            f = f1.subtract(f2);
             fail("expecting ArithmeticException but got: " + f.toString());
         } catch (final ArithmeticException ex) {
         }
@@ -1218,14 +1155,14 @@ public class FractionTest extends AbstractTest {
 
         try {
             f1 = Fraction.of(1, Integer.MAX_VALUE);
-            f = f1.multipliedBy(f1); // should overflow
+            f = f1.multipliedBy(f1);
             fail("expecting ArithmeticException");
         } catch (final ArithmeticException ex) {
         }
 
         try {
             f1 = Fraction.of(1, -Integer.MAX_VALUE);
-            f = f1.multipliedBy(f1); // should overflow
+            f = f1.multipliedBy(f1);
             fail("expecting ArithmeticException");
         } catch (final ArithmeticException ex) {
         }
@@ -1281,13 +1218,13 @@ public class FractionTest extends AbstractTest {
 
         try {
             f1 = Fraction.of(1, Integer.MAX_VALUE);
-            f = f1.dividedBy(f1.invert()); // should overflow
+            f = f1.dividedBy(f1.invert());
             fail("expecting ArithmeticException");
         } catch (final ArithmeticException ex) {
         }
         try {
             f1 = Fraction.of(1, -Integer.MAX_VALUE);
-            f = f1.dividedBy(f1.invert()); // should overflow
+            f = f1.dividedBy(f1.invert());
             fail("expecting ArithmeticException");
         } catch (final ArithmeticException ex) {
         }

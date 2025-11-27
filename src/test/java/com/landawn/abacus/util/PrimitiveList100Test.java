@@ -1,7 +1,6 @@
 package com.landawn.abacus.util;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -670,12 +669,6 @@ public class PrimitiveList100Test extends TestBase {
             count++;
         }
         assertEquals(5, count);
-    }
-
-    @Test
-    @DisplayName("Test println() method")
-    public void testPrintln() {
-        assertDoesNotThrow(() -> list.println());
     }
 
     @Test

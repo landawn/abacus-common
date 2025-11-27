@@ -5,12 +5,14 @@ import static org.junit.jupiter.api.Assertions.fail;
 
 import java.util.regex.Pattern;
 
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.AbstractTest;
 import com.landawn.abacus.util.function.IntBiFunction;
 import com.landawn.abacus.util.stream.Stream;
 
+@Tag("old-test")
 public class SplitterTest extends AbstractTest {
 
     @Test

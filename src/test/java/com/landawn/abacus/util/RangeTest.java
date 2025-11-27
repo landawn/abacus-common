@@ -1,20 +1,3 @@
-/*
- * Licensed to the Apache Software Foundation (ASF) under one or more
- * contributor license agreements.  See the NOTICE file distributed with
- * this work for additional information regarding copyright ownership.
- * The ASF licenses this file to You under the Apache License, Version 2.0
- * (the "License"); you may not use this file except in compliance with
- * the License.  You may obtain a copy of the License at
- *
- *      https://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 package com.landawn.abacus.util;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -24,11 +7,13 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.AbstractTest;
 
 @SuppressWarnings("boxing")
+@Tag("old-test")
 public class RangeTest extends AbstractTest {
 
     private Range<Byte> byteRange;
@@ -40,7 +25,6 @@ public class RangeTest extends AbstractTest {
     private Range<Float> floatRange;
     private Range<Double> doubleRange;
 
-    // intRange
     @BeforeEach
     public void setUp() {
         byteRange = Range.closed((byte) 0, (byte) 5);
@@ -53,65 +37,6 @@ public class RangeTest extends AbstractTest {
         doubleRange = Range.closed((double) 10, (double) 20);
     }
 
-    //
-    //    //-----------------------------------------------------------------------
-    //    @SuppressWarnings({ "rawtypes", "unchecked" })
-    //    @Test
-    //    public void testComparableConstructors() {
-    //        final Comparable c = new Comparable() {
-    //            @Override
-    //            public int compareTo(final Object other) {
-    //                return 1;
-    //            }
-    //        };
-    //        final Range r1 = Range.is(c);
-    //        final Range r2 = Range.valueOf(c, c);
-    //        assertEquals(true, r1.isNaturalOrdering());
-    //        assertEquals(true, r2.isNaturalOrdering());
-    //    }
-    //
-    //    @Test
-    //    public void testIsWithCompare() {
-    //        final Comparator<Integer> c = new Comparator<Integer>() {
-    //            @Override
-    //            public int compare(final Integer o1, final Integer o2) {
-    //                return 0; // all integers are equal
-    //            }
-    //        };
-    //        Range<Integer> ri = Range.is(10);
-    //        assertFalse("should not contain null", ri.contains(null));
-    //        assertTrue("should contain 10", ri.contains(10));
-    //        assertFalse("should not contain 11", ri.contains(11));
-    //        ri = Range.is(10, c);
-    //        assertFalse("should not contain null", ri.contains(null));
-    //        assertTrue("should contain 10", ri.contains(10));
-    //        assertTrue("should contain 11", ri.contains(11));
-    //    }
-    //
-    //    @Test
-    //    public void testBetweenWithCompare() {
-    //        // TODO add tests with a better comparator
-    //        final Comparator<Integer> c = new Comparator<Integer>() {
-    //            @Override
-    //            public int compare(final Integer o1, final Integer o2) {
-    //                return 0; // all integers are equal
-    //            }
-    //        };
-    //        Range<Integer> rb = Range.closed(-10, 20);
-    //        assertFalse("should not contain null", rb.contains(null));
-    //        assertTrue("should contain 10", rb.contains(10));
-    //        assertTrue("should contain -10", rb.contains(-10));
-    //        assertFalse("should not contain 21", rb.contains(21));
-    //        assertFalse("should not contain -11", rb.contains(-11));
-    //        rb = Range.closed(-10, 20, c);
-    //        assertFalse("should not contain null", rb.contains(null));
-    //        assertTrue("should contain 10", rb.contains(10));
-    //        assertTrue("should contain -10", rb.contains(-10));
-    //        assertTrue("should contain 21", rb.contains(21));
-    //        assertTrue("should contain -11", rb.contains(-11));
-    //    }
-
-    //-----------------------------------------------------------------------
     @Test
     public void testRangeOfChars() {
         final Range<Character> chars = Range.closed('a', 'z');
@@ -119,7 +44,6 @@ public class RangeTest extends AbstractTest {
         assertFalse(chars.contains('B'));
     }
 
-    //-----------------------------------------------------------------------
     @Test
     public void testEqualsObject() {
         assertEquals(byteRange, byteRange);
@@ -151,7 +75,6 @@ public class RangeTest extends AbstractTest {
         assertEquals("[-20, -10]", Range.closed(-20, -10).toString());
     }
 
-    //-----------------------------------------------------------------------
     @Test
     public void testGetMinimum() {
         assertEquals(10, (int) intRange.lowerEndpoint());
@@ -229,7 +152,6 @@ public class RangeTest extends AbstractTest {
             intRange.compareTo(null);
             fail("NullPointerException should have been thrown");
         } catch (final IllegalArgumentException npe) {
-            // expected
         }
 
         assertEquals(1, intRange.compareTo(5));
@@ -239,37 +161,27 @@ public class RangeTest extends AbstractTest {
         assertEquals(-1, intRange.compareTo(25));
     }
 
-    //-----------------------------------------------------------------------
     @Test
     public void testContainsRange() {
 
-        // null handling
         assertFalse(intRange.containsRange(null));
 
-        // easy inside range
         assertTrue(intRange.containsRange(Range.closed(12, 18)));
 
-        // outside range on each side
         assertFalse(intRange.containsRange(Range.closed(32, 45)));
         assertFalse(intRange.containsRange(Range.closed(2, 8)));
 
-        // equals range
         assertTrue(intRange.containsRange(Range.closed(10, 20)));
 
-        // overlaps
         assertFalse(intRange.containsRange(Range.closed(9, 14)));
         assertFalse(intRange.containsRange(Range.closed(16, 21)));
 
-        // touches lower boundary
         assertTrue(intRange.containsRange(Range.closed(10, 19)));
         assertFalse(intRange.containsRange(Range.closed(10, 21)));
 
-        // touches upper boundary
         assertTrue(intRange.containsRange(Range.closed(11, 20)));
         assertFalse(intRange.containsRange(Range.closed(9, 20)));
 
-        // negative
-        // assertFalse(intRange.containsRange(Range.closed(-11, -18)));
     }
 
     @Test
@@ -291,33 +203,24 @@ public class RangeTest extends AbstractTest {
     @Test
     public void testIsOverlappedBy() {
 
-        // null handling
         assertFalse(intRange.isOverlappedBy(null));
 
-        // easy inside range
         assertTrue(intRange.isOverlappedBy(Range.closed(12, 18)));
 
-        // outside range on each side
         assertFalse(intRange.isOverlappedBy(Range.closed(32, 45)));
         assertFalse(intRange.isOverlappedBy(Range.closed(2, 8)));
 
-        // equals range
         assertTrue(intRange.isOverlappedBy(Range.closed(10, 20)));
 
-        // overlaps
         assertTrue(intRange.isOverlappedBy(Range.closed(9, 14)));
         assertTrue(intRange.isOverlappedBy(Range.closed(16, 21)));
 
-        // touches lower boundary
         assertTrue(intRange.isOverlappedBy(Range.closed(10, 19)));
         assertTrue(intRange.isOverlappedBy(Range.closed(10, 21)));
 
-        // touches upper boundary
         assertTrue(intRange.isOverlappedBy(Range.closed(11, 20)));
         assertTrue(intRange.isOverlappedBy(Range.closed(9, 20)));
 
-        // negative
-        // assertFalse(intRange.isOverlappedBy(Range.closed(-11, -18)));
     }
 
     @Test

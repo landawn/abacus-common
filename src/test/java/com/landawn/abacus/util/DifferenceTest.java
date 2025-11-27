@@ -7,11 +7,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.AbstractTest;
 import com.landawn.abacus.util.Difference.BeanDifference;
 
+@Tag("old-test")
 public class DifferenceTest extends AbstractTest {
 
     @Test

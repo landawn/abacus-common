@@ -93,7 +93,7 @@ public class IOUtilTest extends AbstractTest {
         final char[] chars = "abc124黎".toCharArray();
         final byte[] bytes = IOUtil.chars2Bytes(chars);
         final char[] chars2 = IOUtil.bytes2Chars(bytes);
-        assertTrue(N.equals(chars, chars2));
+        assertTrue(CommonUtil.equals(chars, chars2));
     }
 
     @Test
@@ -194,7 +194,7 @@ public class IOUtilTest extends AbstractTest {
 
         final Writer writer = new FileWriter(file);
         for (int i = 0; i < 1000; i++) {
-            IOUtil.write(i + ": " + Strings.uuid() + IOUtil.LINE_SEPARATOR, writer);
+            IOUtil.write(i + ": " + Strings.uuid() + IOUtil.LINE_SEPARATOR_UNIX, writer);
         }
 
         writer.flush();
@@ -406,46 +406,46 @@ public class IOUtilTest extends AbstractTest {
         final com.landawn.abacus.util.BufferedWriter bw = (com.landawn.abacus.util.BufferedWriter) Objectory.createBufferedWriter();
 
         bw.writeInt(Integer.MIN_VALUE + 1);
-        bw.write(IOUtil.LINE_SEPARATOR);
+        bw.write(IOUtil.LINE_SEPARATOR_UNIX);
         bw.writeInt(Integer.MAX_VALUE - 1);
-        bw.write(IOUtil.LINE_SEPARATOR);
+        bw.write(IOUtil.LINE_SEPARATOR_UNIX);
 
         bw.write(Byte.MAX_VALUE);
-        bw.write(IOUtil.LINE_SEPARATOR);
+        bw.write(IOUtil.LINE_SEPARATOR_UNIX);
         bw.write(Byte.MIN_VALUE);
-        bw.write(IOUtil.LINE_SEPARATOR);
+        bw.write(IOUtil.LINE_SEPARATOR_UNIX);
 
         bw.write(Short.MAX_VALUE);
-        bw.write(IOUtil.LINE_SEPARATOR);
+        bw.write(IOUtil.LINE_SEPARATOR_UNIX);
         bw.write(Short.MIN_VALUE);
-        bw.write(IOUtil.LINE_SEPARATOR);
+        bw.write(IOUtil.LINE_SEPARATOR_UNIX);
 
         bw.writeInt(Integer.MIN_VALUE);
-        bw.write(IOUtil.LINE_SEPARATOR);
+        bw.write(IOUtil.LINE_SEPARATOR_UNIX);
         bw.writeInt(Integer.MAX_VALUE);
-        bw.write(IOUtil.LINE_SEPARATOR);
+        bw.write(IOUtil.LINE_SEPARATOR_UNIX);
 
         bw.writeInt(Integer.MIN_VALUE + 1);
-        bw.write(IOUtil.LINE_SEPARATOR);
+        bw.write(IOUtil.LINE_SEPARATOR_UNIX);
         bw.writeInt(Integer.MAX_VALUE - 1);
-        bw.write(IOUtil.LINE_SEPARATOR);
+        bw.write(IOUtil.LINE_SEPARATOR_UNIX);
 
         bw.write(Long.MAX_VALUE);
-        bw.write(IOUtil.LINE_SEPARATOR);
+        bw.write(IOUtil.LINE_SEPARATOR_UNIX);
         bw.write(Long.MIN_VALUE);
-        bw.write(IOUtil.LINE_SEPARATOR);
+        bw.write(IOUtil.LINE_SEPARATOR_UNIX);
 
         bw.write(Long.MAX_VALUE - 1);
-        bw.write(IOUtil.LINE_SEPARATOR);
+        bw.write(IOUtil.LINE_SEPARATOR_UNIX);
         bw.write(Long.MIN_VALUE + 1);
-        bw.write(IOUtil.LINE_SEPARATOR);
+        bw.write(IOUtil.LINE_SEPARATOR_UNIX);
 
         bw.write(Float.MIN_VALUE);
-        bw.write(IOUtil.LINE_SEPARATOR);
+        bw.write(IOUtil.LINE_SEPARATOR_UNIX);
         bw.write(Float.MAX_VALUE);
-        bw.write(IOUtil.LINE_SEPARATOR);
+        bw.write(IOUtil.LINE_SEPARATOR_UNIX);
         bw.write(Double.MAX_VALUE);
-        bw.write(IOUtil.LINE_SEPARATOR);
+        bw.write(IOUtil.LINE_SEPARATOR_UNIX);
         bw.write(Double.MIN_VALUE);
 
         N.println(bw.toString());

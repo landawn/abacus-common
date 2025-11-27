@@ -1,7 +1,3 @@
-/*
- * Copyright (c) 2015, Haiyang Li. All rights reserved.
- */
-
 package com.landawn.abacus.parser.entity;
 
 import java.util.Date;
@@ -17,35 +13,6 @@ import jakarta.xml.bind.annotation.XmlRootElement;
 import jakarta.xml.bind.annotation.XmlType;
 import jakarta.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
-/**
- * <p>Java class for PersonType complex type.
- *
- * <p>The following schema fragment specifies the expected content contained within this class.
- *
- * <pre>
- * &lt;complexType name="PersonType">
- *   &lt;complexContent>
- *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
- *       &lt;sequence>
- *         &lt;element name="id" type="{http://www.w3.org/2001/XMLSchema}int"/>
- *         &lt;element name="firstName" type="{http://www.w3.org/2001/XMLSchema}string"/>
- *         &lt;element name="lastName" type="{http://www.w3.org/2001/XMLSchema}string"/>
- *         &lt;element name="address1" type="{http://www.w3.org/2001/XMLSchema}string"/>
- *         &lt;element name="postCode" type="{http://www.w3.org/2001/XMLSchema}string"/>
- *         &lt;element name="city" type="{http://www.w3.org/2001/XMLSchema}string"/>
- *         &lt;element name="country" type="{http://www.w3.org/2001/XMLSchema}string"/>
- *         &lt;element name="birthday" type="{http://www.w3.org/2001/XMLSchema}dateTime"/>
- *       &lt;/sequence>
- *       &lt;attribute name="active" use="required" type="{http://www.w3.org/2001/XMLSchema}boolean" />
- *     &lt;/restriction>
- *   &lt;/complexContent>
- * &lt;/complexType>
- * </pre>
- *
- * @since 0.8
- *
- * @author Haiyang Li
- */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "PersonType", propOrder = { "id", "firstName", "lastName", "address1", "postCode", "city", "country", "birthday" })
 @XmlRootElement

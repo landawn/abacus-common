@@ -73,7 +73,6 @@ public class NumbersTest extends TestCase {
             assertEquals(0, Double.compare(0.0d, Double.parseDouble("0.0e-2000")));
             assertTrue(Numbers.isCreatable("0.0e-2000"));
 
-            // assertEquals(Float.valueOf(0.0f), Numbers.createNumber("0.0e-2000"));
             assertEquals(Float.valueOf(0.0f), Numbers.createNumber("0.0e-2000F"));
             assertEquals(Double.valueOf(0.0), Numbers.createNumber("0.0e-2000D"));
         }
@@ -81,7 +80,6 @@ public class NumbersTest extends TestCase {
 
     @Test
     public void testCreatePositiveHexInteger_NumberUtils() {
-        // Hex is only supported for integers so no test for hex floating point formats
         assertTrue(NumberUtils.isCreatable("+0xF"));
         assertTrue(NumberUtils.isCreatable("+0xFFFFFFFF"));
         assertTrue(NumberUtils.isCreatable("+0xFFFFFFFFFFFFFFFFF"));
@@ -109,7 +107,6 @@ public class NumbersTest extends TestCase {
 
     @Test
     public void testCreatePositiveHexInteger() {
-        // Hex is only supported for integers so no test for hex floating point formats
         assertTrue(Numbers.isCreatable("+0xF"));
         assertTrue(Numbers.isCreatable("+0xFFFFFFFF"));
         assertTrue(Numbers.isCreatable("+0xFFFFFFFFFFFFFFFFF"));
@@ -216,18 +213,16 @@ public class NumbersTest extends TestCase {
 
     @Test
     public void test_01() {
-        //LANG-1613
         assertTrue(Numbers.createNumber("4.9e-324D") instanceof Double);
         assertTrue(Numbers.createNumber("4.9e-324F") instanceof Double);
 
         assertTrue(NumberUtils.createNumber("0001.797693134862315759e+308") instanceof BigDecimal);
-        assertTrue(Numbers.createNumber("0001.797693134862315759e+308") instanceof Double); // 1.7976931348623157E308
+        assertTrue(Numbers.createNumber("0001.797693134862315759e+308") instanceof Double);
         assertTrue(Numbers.createNumber("-001.797693134862315759e+308") instanceof Double);
         assertTrue(Numbers.createNumber("+001.797693134862315759e+308") instanceof Double);
 
         final String str = "0x100";
         N.println(Integer.decode(str));
-        // N.println(Integer.parseInt(str));
         assertFalse(Numbers.isParsable(str));
 
         assertEquals(JavaVersion.JAVA_17, JavaVersion.of("17"));

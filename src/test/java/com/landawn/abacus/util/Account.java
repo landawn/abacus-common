@@ -1,7 +1,3 @@
-/*
- * Copyright (c) 2015, Haiyang Li. All rights reserved.
- */
-
 package com.landawn.abacus.util;
 
 import java.sql.Timestamp;
@@ -234,9 +230,10 @@ public class Account implements ExtendDirtyBasicPNL.AccountPNL {
         }
 
         if (obj instanceof Account other) {
-            if (CommonUtil.equals(id, other.id) && CommonUtil.equals(gui, other.gui) && CommonUtil.equals(emailAddress, other.emailAddress) && CommonUtil.equals(firstName, other.firstName)
-                    && CommonUtil.equals(middleName, other.middleName) && CommonUtil.equals(lastName, other.lastName) && CommonUtil.equals(birthDate, other.birthDate)
-                    && CommonUtil.equals(status, other.status) && CommonUtil.equals(lastUpdateTime, other.lastUpdateTime) && CommonUtil.equals(createdTime, other.createdTime)
+            if (CommonUtil.equals(id, other.id) && CommonUtil.equals(gui, other.gui) && CommonUtil.equals(emailAddress, other.emailAddress)
+                    && CommonUtil.equals(firstName, other.firstName) && CommonUtil.equals(middleName, other.middleName)
+                    && CommonUtil.equals(lastName, other.lastName) && CommonUtil.equals(birthDate, other.birthDate) && CommonUtil.equals(status, other.status)
+                    && CommonUtil.equals(lastUpdateTime, other.lastUpdateTime) && CommonUtil.equals(createdTime, other.createdTime)
                     && CommonUtil.equals(contact, other.contact) && CommonUtil.equals(devices, other.devices)) {
 
                 return true;
@@ -248,51 +245,37 @@ public class Account implements ExtendDirtyBasicPNL.AccountPNL {
 
     @Override
     public String toString() {
-        return "{" + "id=" + CommonUtil.toString(id) + ", " + "gui=" + CommonUtil.toString(gui) + ", " + "emailAddress=" + CommonUtil.toString(emailAddress) + ", " + "firstName="
-                + CommonUtil.toString(firstName) + ", " + "middleName=" + CommonUtil.toString(middleName) + ", " + "lastName=" + CommonUtil.toString(lastName) + ", " + "birthDate="
-                + CommonUtil.toString(birthDate) + ", " + "status=" + CommonUtil.toString(status) + ", " + "lastUpdateTime=" + CommonUtil.toString(lastUpdateTime) + ", " + "createdTime="
-                + CommonUtil.toString(createdTime) + ", " + "contact=" + CommonUtil.toString(contact) + ", " + "devices=" + CommonUtil.toString(devices) + "}";
+        return "{" + "id=" + CommonUtil.toString(id) + ", " + "gui=" + CommonUtil.toString(gui) + ", " + "emailAddress=" + CommonUtil.toString(emailAddress)
+                + ", " + "firstName=" + CommonUtil.toString(firstName) + ", " + "middleName=" + CommonUtil.toString(middleName) + ", " + "lastName="
+                + CommonUtil.toString(lastName) + ", " + "birthDate=" + CommonUtil.toString(birthDate) + ", " + "status=" + CommonUtil.toString(status) + ", "
+                + "lastUpdateTime=" + CommonUtil.toString(lastUpdateTime) + ", " + "createdTime=" + CommonUtil.toString(createdTime) + ", " + "contact="
+                + CommonUtil.toString(contact) + ", " + "devices=" + CommonUtil.toString(devices) + "}";
     }
 
-    /*
-     * Auto-generated class for property(field) name table by abacus-jdbc.
-     */
-    public interface x { // NOSONAR
+    public interface x {
 
-        /** Property(field) name {@code "id"} */
         String id = "id";
 
-        /** Property(field) name {@code "gui"} */
         String gui = "gui";
 
-        /** Property(field) name {@code "emailAddress"} */
         String emailAddress = "emailAddress";
 
-        /** Property(field) name {@code "firstName"} */
         String firstName = "firstName";
 
-        /** Property(field) name {@code "middleName"} */
         String middleName = "middleName";
 
-        /** Property(field) name {@code "lastName"} */
         String lastName = "lastName";
 
-        /** Property(field) name {@code "birthDate"} */
         String birthDate = "birthDate";
 
-        /** Property(field) name {@code "status"} */
         String status = "status";
 
-        /** Property(field) name {@code "lastUpdateTime"} */
         String lastUpdateTime = "lastUpdateTime";
 
-        /** Property(field) name {@code "createdTime"} */
         String createdTime = "createdTime";
 
-        /** Property(field) name {@code "contact"} */
         String contact = "contact";
 
-        /** Property(field) name {@code "devices"} */
         String devices = "devices";
 
     }

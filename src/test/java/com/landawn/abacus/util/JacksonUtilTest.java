@@ -2,10 +2,13 @@ package com.landawn.abacus.util;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.AbstractTest;
 import com.landawn.abacus.entity.extendDirty.basic.Account;
+
+@Tag("old-test")
 public class JacksonUtilTest extends AbstractTest {
 
     @Test

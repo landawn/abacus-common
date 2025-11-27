@@ -1,7 +1,3 @@
-/*
- * Copyright (c) 2015, Haiyang Li. All rights reserved.
- */
-
 package com.landawn.abacus.util;
 
 import java.io.StringWriter;
@@ -43,11 +39,8 @@ public class XMLTest extends AbstractParserTest {
 
         println(abacusXMLParser.deserialize(str, Account.class));
 
-        // test unknown property:
         str = "<account><id>100</id><gui>737a45812bad4d5bafbb62428cefe66c</gui><unknownProperty1><list><e>11</e></list></unknownProperty1><emailAddress>fc3283c92282499ea2ba515e840e305a@earth.com</emailAddress><firstName>firstName</firstName><middleName>MN</middleName><lastName>lastName</lastName><birthDate>1399944204713</birthDate><lastUpdateTime>1399944204713</lastUpdateTime><createdTime>1399944204713</createdTime><unknownProperty2>null</unknownProperty2></account>";
         println(abacusXMLParser.deserialize(str, Account.class));
 
-        //        assertEquals(N.stringOf(account),
-        //            N.stringOf(FasterJSON.deserialize(Account.class, FasterJSON.serialize(account))));
     }
 }

@@ -1,7 +1,3 @@
-/*
- * Copyright (c) 2015, Haiyang Li. All rights reserved.
- */
-
 package com.landawn.abacus.util;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -11,10 +7,12 @@ import static org.junit.jupiter.api.Assertions.fail;
 
 import java.util.Set;
 
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.AbstractTest;
 
+@Tag("old-test")
 public class PasswordTest extends AbstractTest {
 
     @Test

@@ -1,7 +1,3 @@
-/*
- * Copyright (c) 2015, Haiyang Li. All rights reserved.
- */
-
 package com.landawn.abacus.util;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -12,6 +8,7 @@ import static org.junit.jupiter.api.Assertions.fail;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.AbstractTest;
@@ -23,6 +20,7 @@ import com.landawn.abacus.pool.ObjectPool;
 import com.landawn.abacus.pool.PoolFactory;
 import com.landawn.abacus.pool.PoolableWrapper;
 
+@Tag("old-test")
 public class PoolTest extends AbstractTest {
 
     @Test
@@ -64,26 +62,12 @@ public class PoolTest extends AbstractTest {
             try {
                 Thread.sleep(10);
             } catch (final InterruptedException e) {
-                // TODO Auto-generated catch block
                 e.printStackTrace();
             }
         }
 
         N.println(System.currentTimeMillis() - startTime);
     }
-
-    //
-    //    public void testFIFO() {
-    //        ObjectPool<Wrapper<String>> pool = PoolFactory.createObjectPool(3, 0);
-    //
-    //        pool.add(Wrapper.valueOf("a"));
-    //        pool.add(Wrapper.valueOf("b"));
-    //        pool.add(Wrapper.valueOf("c"));
-    //
-    //        String st = pool.take().get() + pool.take().get() + pool.take().get();
-    //        N.println(st);
-    //        assertEquals("abc", st);
-    //    }
 
     @Test
     public void test_GenericObjectPool() throws InterruptedException {
@@ -170,7 +154,6 @@ public class PoolTest extends AbstractTest {
         assertFalse(keyedObjectPool.put("abc", value));
 
         assertTrue(keyedObjectPool.containsKey("abc"));
-        // assertTrue(keyedObjectPool.containsValue(PoolableWrapper.of("123")));
 
         N.println(keyedObjectPool.values());
 
@@ -193,19 +176,6 @@ public class PoolTest extends AbstractTest {
         keyedObjectPool.close();
     }
 
-    //    public void testLIFO() {
-    //        ObjectPool<Wrapper<String>> pool = new GenericObjectPool<Wrapper<String>>(3, 0, false, 0.2f,
-    //                VacationScale.ACCESS_COUNT, new ArrayDeque());
-    //
-    //        pool.offer(Wrapper.valueOf("a"));
-    //        pool.offer(Wrapper.valueOf("b"));
-    //        pool.offer(Wrapper.valueOf("c"));
-    //        N.println(pool.peek().get() + pool.peek().get() + pool.peek().get());
-    //
-    //        String st = pool.poll().get() + pool.poll().get() + pool.poll().get();
-    //        N.println(st);
-    //        assertEquals("cba", st);
-    //    }
     @Test
     public void testGenericKeyedObjectPool1() throws Exception {
         final KeyedObjectPool<String, PoolableWrapper<String>> pool = PoolFactory.createKeyedObjectPool(100, 2000);
@@ -339,7 +309,6 @@ public class PoolTest extends AbstractTest {
 
         final ActivityPrint activityPrint2 = new ActivityPrint(100, 100);
 
-        // assertTrue(activityPrint.equals(activityPrint2));
         assertTrue(activityPrint.equals(activityPrint.clone()));
         assertTrue(CommonUtil.asSet(activityPrint).contains(activityPrint.clone()));
 

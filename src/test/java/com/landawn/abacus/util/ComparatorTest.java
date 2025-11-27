@@ -6,11 +6,13 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.AbstractTest;
 import com.landawn.abacus.util.stream.Stream;
 
+@Tag("old-test")
 public class ComparatorTest extends AbstractTest {
 
     @Test

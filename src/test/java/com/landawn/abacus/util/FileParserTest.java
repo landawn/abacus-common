@@ -1,18 +1,16 @@
-/*
- * Copyright (c) 2015, Haiyang Li. All rights reserved.
- */
-
 package com.landawn.abacus.util;
 
 import java.io.File;
 import java.util.List;
 
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.AbstractTest;
 import com.landawn.abacus.util.function.Consumer;
 import com.landawn.abacus.util.stream.Stream;
 
+@Tag("old-test")
 public class FileParserTest extends AbstractTest {
 
     @Test

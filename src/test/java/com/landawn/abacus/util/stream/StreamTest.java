@@ -12,6 +12,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.AbstractTest;
@@ -29,6 +30,7 @@ import com.landawn.abacus.util.function.Consumer;
 import com.landawn.abacus.util.function.Function;
 import com.landawn.abacus.util.function.ToDoubleFunction;
 
+@Tag("old-test")
 public class StreamTest extends AbstractTest {
 
     @Test
@@ -39,7 +41,6 @@ public class StreamTest extends AbstractTest {
             });
             fail("Should throw IOException");
         } catch (IOException e) {
-            // ignore
         }
 
         try {
@@ -48,7 +49,6 @@ public class StreamTest extends AbstractTest {
             }).forEach(Fn.println());
             fail("Should throw UncheckedIOException");
         } catch (UncheckedIOException e) {
-            // ignore
         }
 
         try {
@@ -57,7 +57,6 @@ public class StreamTest extends AbstractTest {
             }).forEach(Fn.println());
             fail("Should throw UncheckedIOException");
         } catch (UncheckedIOException e) {
-            // ignore
         }
 
         try {
@@ -66,7 +65,6 @@ public class StreamTest extends AbstractTest {
             });
             fail("Should throw IOException");
         } catch (IOException e) {
-            // ignore
         }
 
         try {
@@ -75,7 +73,6 @@ public class StreamTest extends AbstractTest {
             }).forEach(Fn.println());
             fail("Should throw UncheckedIOException");
         } catch (UncheckedIOException e) {
-            // ignore
         }
 
         try {
@@ -84,7 +81,6 @@ public class StreamTest extends AbstractTest {
             }).forEach(Fn.println());
             fail("Should throw UncheckedIOException");
         } catch (UncheckedIOException e) {
-            // ignore
         }
 
     }
@@ -139,61 +135,8 @@ public class StreamTest extends AbstractTest {
         Stream.of("a", "ab", "ac", "b", "c", "cb").rangeMap((a, b) -> b.startsWith(a), (a, b) -> a + "<->" + b).println();
     }
 
-    //    @Test
-    //    public void test_sliding_2() {
-    //        IntStream.range(0, 10).slidingToList(3).skip(0).println();
-    //        IntStream.range(0, 10).slidingToList(3).skip(1).println();
-    //        IntStream.range(0, 10).slidingToList(3).skip(2).println();
-    //        IntStream.range(0, 10).slidingToList(3).skip(7).println();
-    //        IntStream.range(0, 10).slidingToList(3).skip(8).println();
-    //        IntStream.range(0, 10).slidingToList(3).skip(9).println();
-    //        IntStream.range(0, 10).slidingToList(3).skip(10).println();
-    //        IntStream.range(0, 10).slidingToList(3).skip(11).println();
-    //
-    //        N.println(Strings.repeat("=", 80));
-    //
-    //        IntStream.range(0, 10).sliding(3, 2).skip(0).println();
-    //        IntStream.range(0, 10).sliding(3, 2).skip(1).println();
-    //        IntStream.range(0, 10).sliding(3, 2).skip(2).println();
-    //        IntStream.range(0, 10).sliding(3, 2).skip(7).println();
-    //        IntStream.range(0, 10).sliding(3, 2).skip(8).println();
-    //        IntStream.range(0, 10).sliding(3, 2).skip(9).println();
-    //        IntStream.range(0, 10).sliding(3, 2).skip(10).println();
-    //        IntStream.range(0, 10).sliding(3, 2).skip(11).println();
-    //
-    //        N.println(Strings.repeat("=", 80));
-    //
-    //        IntStream.range(0, 10).sliding(3, 3).skip(0).println();
-    //        IntStream.range(0, 10).sliding(3, 3).skip(1).println();
-    //        IntStream.range(0, 10).sliding(3, 3).skip(2).println();
-    //        IntStream.range(0, 10).sliding(3, 3).skip(7).println();
-    //        IntStream.range(0, 10).sliding(3, 3).skip(8).println();
-    //        IntStream.range(0, 10).sliding(3, 3).skip(9).println();
-    //        IntStream.range(0, 10).sliding(3, 3).skip(10).println();
-    //        IntStream.range(0, 10).sliding(3, 3).skip(11).println();
-    //
-    //        N.println(Strings.repeat("=", 80));
-    //
-    //        IntStream.range(0, 10).sliding(3, 4).skip(0).println();
-    //        IntStream.range(0, 10).sliding(3, 4).skip(1).println();
-    //        IntStream.range(0, 10).sliding(3, 4).skip(2).println();
-    //        IntStream.range(0, 10).sliding(3, 4).skip(7).println();
-    //        IntStream.range(0, 10).sliding(3, 4).skip(8).println();
-    //        IntStream.range(0, 10).sliding(3, 4).skip(9).println();
-    //        IntStream.range(0, 10).sliding(3, 4).skip(10).println();
-    //        IntStream.range(0, 10).sliding(3, 4).skip(11).println();
-    //    }
-
     @Test
     public void test_sliding_3() {
-        //        IntStream.range(0, 10).boxed().slidingToList(3).skip(0).println();
-        //        IntStream.range(0, 10).boxed().slidingToList(3).skip(1).println();
-        //        IntStream.range(0, 10).boxed().slidingToList(3).skip(2).println();
-        //        IntStream.range(0, 10).boxed().slidingToList(3).skip(7).println();
-        //        IntStream.range(0, 10).boxed().slidingToList(3).skip(8).println();
-        //        IntStream.range(0, 10).boxed().slidingToList(3).skip(9).println();
-        //        IntStream.range(0, 10).boxed().slidingToList(3).skip(10).println();
-        //        IntStream.range(0, 10).boxed().slidingToList(3).skip(11).println();
 
         N.println(Strings.repeat("=", 80));
 
@@ -231,15 +174,6 @@ public class StreamTest extends AbstractTest {
 
     @Test
     public void test_sliding_4() {
-        //        IntStream.range(0, 10).boxed().slidingToList(4).mapFirst(Fn.<List<Integer>> identity()).skip(0).println();
-        //        IntStream.range(0, 10).boxed().slidingToList(4).mapFirst(Fn.<List<Integer>> identity()).skip(1).println();
-        //        IntStream.range(0, 10).boxed().slidingToList(4).mapFirst(Fn.<List<Integer>> identity()).skip(2).println();
-        //        IntStream.range(0, 10).boxed().slidingToList(4).mapFirst(Fn.<List<Integer>> identity()).skip(3).println();
-        //        IntStream.range(0, 10).boxed().slidingToList(3).mapFirst(Fn.<List<Integer>> identity()).skip(7).println();
-        //        IntStream.range(0, 10).boxed().slidingToList(3).mapFirst(Fn.<List<Integer>> identity()).skip(8).println();
-        //        IntStream.range(0, 10).boxed().slidingToList(3).mapFirst(Fn.<List<Integer>> identity()).skip(9).println();
-        //        IntStream.range(0, 10).boxed().slidingToList(3).mapFirst(Fn.<List<Integer>> identity()).skip(10).println();
-        //        IntStream.range(0, 10).boxed().slidingToList(3).mapFirst(Fn.<List<Integer>> identity()).skip(11).println();
 
         N.println(Strings.repeat("=", 80));
 
@@ -349,20 +283,6 @@ public class StreamTest extends AbstractTest {
 
         N.println(Strings.repeat("=", 80));
 
-        //        IntStream.range(0, 20).boxed().cached().skipLast(0).println();
-        //        IntStream.range(0, 20).boxed().cached().skipLast(10).println();
-        //        IntStream.range(0, 20).boxed().cached().skipLast(19).println();
-        //        IntStream.range(0, 20).boxed().cached().skipLast(20).println();
-        //        IntStream.range(0, 20).boxed().cached().skipLast(21).println();
-        //
-        //        N.println(StringUtil.repeat("=", 80));
-        //
-        //        IntStream.range(0, 20).boxed().cached().parallel().skipLast(0).println();
-        //        IntStream.range(0, 20).boxed().cached().parallel().skipLast(10).println();
-        //        IntStream.range(0, 20).boxed().cached().parallel().skipLast(19).println();
-        //        IntStream.range(0, 20).boxed().cached().parallel().skipLast(20).println();
-        //        IntStream.range(0, 20).boxed().cached().parallel().skipLast(21).println();
-
     }
 
     @Test
@@ -414,30 +334,6 @@ public class StreamTest extends AbstractTest {
             assertTrue(N.equals(a1, a2));
         }
     }
-
-    //    public void test_split() {
-    //        assertTrue(IntStream.empty().split(1).count() == 0);
-    //
-    //        assertTrue(Stream.empty().split(1).count() == 0);
-    //        assertTrue(Stream.empty().split(1).count() == 0);
-    //        assertTrue(Stream.empty().splitToSet(1).count() == 0);
-    //
-    //        assertTrue(IntStream.empty().splitAt(0).count() == 2);
-    //        assertTrue(IntStream.empty().splitAt(1).count() == 2);
-    //
-    //        assertTrue(Stream.empty().splitAt(0).count() == 2);
-    //        assertTrue(Stream.empty().splitAt(1).count() == 2);
-    //
-    //        IntPredicate where = value -> true;
-    //
-    //        assertTrue(IntStream.empty().splitAt(where).count() == 2);
-    //
-    //        Predicate<? super Object> where2 = value -> false;
-    //        assertTrue(Stream.empty().splitAt(where2).count() == 2);
-    //
-    //        assertTrue(Stream.empty().slidingToList(1).count() == 0);
-    //        assertTrue(IntStream.empty().slidingToList(1).count() == 0);
-    //    }
 
     @Test
     public void test_perf() {
@@ -593,18 +489,6 @@ public class StreamTest extends AbstractTest {
         final Consumer<? super List<Character>> consumer = N::println;
 
         CharStream.rangeClosed('a', 'e').boxed().permutations().forEach(consumer);
-        //
-        //        iter = Collections2.permutations(N.asList("a", "c", "a")).iterator();
-        //        while (iter.hasNext()) {
-        //            N.println(iter.next());
-        //        }
-        //
-        //        iter = Collections2.orderedPermutations(N.asList("a", "c", "a")).iterator();
-        //        while (iter.hasNext()) {
-        //            N.println(iter.next());
-        //        }
-        //
-        //        assertFalse(Stream.of(N.EMPTY_LIST).permutations().iterator().hasNext());
     }
 
     @Test
@@ -664,83 +548,4 @@ public class StreamTest extends AbstractTest {
         assertTrue(N.equals(Integer.MAX_VALUE, IntStream.repeat(0, Integer.MAX_VALUE).count()));
     }
 
-    //    @Test
-    //    public void test_123() {
-    //        File dir = new File("C:\\Users\\haiyangl\\Landawn\\Abacus\\src\\com\\landawn\\abacus\\util\\stream");
-    //
-    //        List<String> keys = new ArrayList<>();
-    //
-    //        for (Field field : StreamBase.class.getDeclaredFields()) {
-    //            if (Modifier.isPrivate(field.getModifiers())) {
-    //                continue;
-    //            }
-    //
-    //            keys.add("Stream." + field.getName());
-    //        }
-    //
-    //        for (Method method : StreamBase.class.getDeclaredMethods()) {
-    //            if (Modifier.isPrivate(method.getModifiers())) {
-    //                continue;
-    //            }
-    //
-    //            keys.add("Stream." + method.getName());
-    //        }
-    //
-    //        for (File file : IOUtil.listFiles(dir)) {
-    //            List<String> lines = IOUtil.readLines(file);
-    //
-    //            for (int i = 0; i < lines.size(); i++) {
-    //                String line = lines.get(i);
-    //
-    //                for (String key : keys) {
-    //                    line = line.replaceAll(key, key.substring(key.indexOf('.') + 1));
-    //                }
-    //
-    //                lines.set(i, line);
-    //            }
-    //
-    //            IOUtil.writeLines(file, lines);
-    //        }
-    //    }
-
-    //    @Test
-    //    public void test_perf() {
-    //        final String[] strs = new String[1_000_000];
-    //        List.of(strs).forEach((i, e) -> strs[i] = Strings.uuid());
-    //        final List<String> list = N.asLinkedList(strs);
-    //        Function<String, Long> mapper = str -> {
-    //            long result = 0;
-    //            for (int i = 0; i < 100; i++) {
-    //                if (str.indexOf("a") > 0) {
-    //                    result += N.sum(str.toCharArray()) + 1;
-    //                }
-    //            }
-    //            return result;
-    //        };
-    //        Profiler.run(1, 1, 2, "jdk sequential",
-    //                () -> N.println(java.util.stream.Stream.of(strs).filter(str -> str.indexOf("a") > 0).map(mapper).skip(7).mapToLong(e -> e).sum()))
-    //                .printResult();
-    //        //
-    //        Profiler.run(1, 1, 2, "jdk parallel",
-    //                () -> N.println(list.parallelStream().filter(str -> str.indexOf("a") > 0).map(mapper).skip(7).mapToLong(e -> e).sum())).printResult();
-    //        //
-    //
-    //        Profiler.run(1, 1, 2, "abacus parallel - 1",
-    //                () -> Stream.of(list).filter(str -> str.indexOf("a") > 0).parallel().map(mapper).skip(7).mapToLong(e -> e).sum()).printResult();
-    //
-    //        //        Profiler.run(1, 1, 2, "abacus parallel - 2", () -> Stream.of(list).map(mapper).parallel().mapToLong(e -> e).sum()).printResult();
-    //        //
-    //        //        Profiler.run(1, 1, 2, "abacus parallel - 3", () -> Stream.of(list).map(mapper).mapToLong(e -> e).parallel().sum()).printResult();
-    //
-    //        Profiler.run(1, 1, 2, "abacus sequential", () -> Stream.of(list).filter(str -> str.indexOf("a") > 0).map(mapper).skip(7).mapToLong(e -> e).sum())
-    //                .printResult();
-    //
-    //    }
-    //
-    //    @Test
-    //    public void test_02() {
-    //        // Stream.of(1, 3, 3, 5).merge(Stream.of(2, 2, 4, 6), (a, b) -> a <= b ? Nth.FIRST : Nth.SECOND).forEach(N::println);
-    //
-    //        Stream.parallelMerge(N.asArray(Stream.of(1, 3, 3, 5), Stream.of(2, 2, 4, 6)), (a, b) -> a <= b ? Nth.FIRST : Nth.SECOND).forEach(N::println);
-    //    }
 }

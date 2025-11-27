@@ -1,7 +1,3 @@
-/*
- * Copyright (c) 2015, Haiyang Li. All rights reserved.
- */
-
 package com.landawn.abacus.util;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -9,10 +5,12 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.AbstractTest;
 
+@Tag("old-test")
 public class PrimitiveListTest extends AbstractTest {
 
     @Test
@@ -23,7 +21,6 @@ public class PrimitiveListTest extends AbstractTest {
             assertFalse(list.removeDuplicates());
             assertEquals(10, list.size());
 
-            list.println();
         }
 
         {
@@ -31,7 +28,6 @@ public class PrimitiveListTest extends AbstractTest {
 
             assertTrue(list.removeDuplicates());
             assertEquals(4, list.size());
-            list.println();
             N.println(list.array());
         }
 
@@ -40,7 +36,6 @@ public class PrimitiveListTest extends AbstractTest {
 
             assertTrue(list.removeDuplicates());
             assertEquals(2, list.size());
-            list.println();
             N.println(list.array());
         }
 
@@ -49,7 +44,6 @@ public class PrimitiveListTest extends AbstractTest {
 
             assertTrue(list.removeDuplicates());
             assertEquals(2, list.size());
-            list.println();
             N.println(list.array());
         }
 
@@ -58,7 +52,6 @@ public class PrimitiveListTest extends AbstractTest {
 
             assertTrue(list.removeDuplicates());
             assertEquals(1, list.size());
-            list.println();
             N.println(list.array());
         }
 
@@ -67,7 +60,6 @@ public class PrimitiveListTest extends AbstractTest {
 
             assertTrue(list.removeDuplicates());
             assertEquals(1, list.size());
-            list.println();
             N.println(list.array());
         }
     }
@@ -78,17 +70,14 @@ public class PrimitiveListTest extends AbstractTest {
             final ByteList byteList = ByteList.range((byte) 0, (byte) 10);
 
             byteList.deleteRange(1, 4);
-            byteList.println();
 
             N.println(byteList.array());
 
             byteList.deleteRange(1, 4);
-            byteList.println();
 
             N.println(byteList.array());
 
             byteList.deleteRange(1, 4);
-            byteList.println();
 
             N.println(byteList.array());
         }
@@ -100,7 +89,6 @@ public class PrimitiveListTest extends AbstractTest {
             final ByteList byteList = ByteList.range((byte) 0, (byte) 10);
 
             byteList.moveRange(1, 4, 0);
-            byteList.println();
 
             N.println(byteList.array());
         }
@@ -108,7 +96,6 @@ public class PrimitiveListTest extends AbstractTest {
             final ByteList byteList = ByteList.range((byte) 0, (byte) 10);
 
             byteList.moveRange(1, 4, 7);
-            byteList.println();
 
             N.println(byteList.array());
         }
@@ -120,7 +107,6 @@ public class PrimitiveListTest extends AbstractTest {
             final ByteList byteList = ByteList.range((byte) 0, (byte) 10);
 
             byteList.replaceRange(1, 3, new byte[] {});
-            byteList.println();
 
             N.println(byteList.array());
         }
@@ -128,7 +114,6 @@ public class PrimitiveListTest extends AbstractTest {
             final ByteList byteList = ByteList.range((byte) 0, (byte) 10);
 
             byteList.replaceRange(1, 3, new byte[] { 9 });
-            byteList.println();
 
             N.println(byteList.array());
         }
@@ -136,7 +121,6 @@ public class PrimitiveListTest extends AbstractTest {
             final ByteList byteList = ByteList.range((byte) 0, (byte) 10);
 
             byteList.replaceRange(1, 3, new byte[] { 9, 9 });
-            byteList.println();
 
             N.println(byteList.array());
         }
@@ -144,7 +128,6 @@ public class PrimitiveListTest extends AbstractTest {
             final ByteList byteList = ByteList.range((byte) 0, (byte) 10);
 
             byteList.replaceRange(1, 3, new byte[] { 9, 9, 9 });
-            byteList.println();
 
             N.println(byteList.array());
         }
@@ -155,8 +138,6 @@ public class PrimitiveListTest extends AbstractTest {
         final LongList list = LongList.of(1, 2, 3, 4, 5, 6);
 
         list.deleteAllByIndices(1, 3, 5);
-
-        list.println();
 
         assertEquals(3, list.size());
 
@@ -601,16 +582,12 @@ public class PrimitiveListTest extends AbstractTest {
     public void test_delete() {
         IntList list = IntList.range(1, 10);
         list.deleteRange(0, 9);
-        list.println();
         list = IntList.range(1, 10);
         list.deleteRange(0, 8);
-        list.println();
         list = IntList.range(1, 10);
         list.deleteRange(1, 8);
-        list.println();
         list = IntList.range(1, 10);
         list.deleteRange(1, 9);
-        list.println();
     }
 
     @Test
@@ -783,62 +760,6 @@ public class PrimitiveListTest extends AbstractTest {
         } catch (final IndexOutOfBoundsException e) {
 
         }
-
-        //        try {
-        //            N.println(IntList.from(Array.of(Long.MAX_VALUE)));
-        //            fail("Should throw ArithmeticException");
-        //        } catch (ArithmeticException e) {
-        //
-        //        }
-        //
-        //        try {
-        //            N.println(IntList.from(Array.of(Long.MIN_VALUE)));
-        //            fail("Should throw ArithmeticException");
-        //        } catch (ArithmeticException e) {
-        //
-        //        }
-        //
-        //        try {
-        //            N.println(ByteList.from(Array.of(Integer.MAX_VALUE)));
-        //            fail("Should throw ArithmeticException");
-        //        } catch (ArithmeticException e) {
-        //
-        //        }
-        //
-        //        try {
-        //            N.println(ByteList.from(Array.of(Integer.MIN_VALUE)));
-        //            fail("Should throw ArithmeticException");
-        //        } catch (ArithmeticException e) {
-        //
-        //        }
-        //
-        //        try {
-        //            N.println(ShortList.from(Array.of(Integer.MIN_VALUE)));
-        //            fail("Should throw ArithmeticException");
-        //        } catch (ArithmeticException e) {
-        //
-        //        }
-        //
-        //        try {
-        //            N.println(ShortList.from(Array.of(Integer.MIN_VALUE)));
-        //            fail("Should throw ArithmeticException");
-        //        } catch (ArithmeticException e) {
-        //
-        //        }
-        //
-        //        try {
-        //            N.println(CharList.from(Array.of(Integer.MAX_VALUE)));
-        //            fail("Should throw ArithmeticException");
-        //        } catch (ArithmeticException e) {
-        //
-        //        }
-        //
-        //        try {
-        //            N.println(CharList.from(Array.of(Integer.MIN_VALUE)));
-        //            fail("Should throw ArithmeticException");
-        //        } catch (ArithmeticException e) {
-        //
-        //        }
 
         arrayList.remove(1);
 
@@ -1329,7 +1250,6 @@ public class PrimitiveListTest extends AbstractTest {
         assertTrue(CommonUtil.equals(Array.of(true), CommonUtil.copyOfRange(arrayList.array(), 0, arrayList.size())));
 
         arrayList.delete(0);
-        // assertFalse(arrayList.contains(false));
 
         arrayList.addAll(BooleanList.of(Array.of(false, true, false)));
         assertTrue(arrayList.contains(false));

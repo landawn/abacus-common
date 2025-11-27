@@ -2821,7 +2821,10 @@ public class Stream2025Test extends TestBase {
     @Test
     public void testPrintln() {
         Stream.of(1, 2, 3).println();
-        assertTrue(true);
+
+        Stream.range(0, 1000).println();
+
+        Stream.range(0, 1001).println();
     }
 
     @Test

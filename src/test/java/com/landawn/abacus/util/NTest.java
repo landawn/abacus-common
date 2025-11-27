@@ -875,7 +875,8 @@ public class NTest extends AbstractParserTest {
     @Test
     public void test_asyncExecute() throws InterruptedException, ExecutionException {
         {
-            final List<Throwables.Runnable<RuntimeException>> runnableList = CommonUtil.asList((Throwables.Runnable<RuntimeException>) () -> N.println("Runnable"));
+            final List<Throwables.Runnable<RuntimeException>> runnableList = CommonUtil
+                    .asList((Throwables.Runnable<RuntimeException>) () -> N.println("Runnable"));
 
             N.asyncExecute(runnableList).get(0).get();
         }
@@ -1406,7 +1407,8 @@ public class NTest extends AbstractParserTest {
         {
             final boolean[] a = { true, false, true };
             assertTrue(CommonUtil.deepEquals(CommonUtil.asList(Array.of(true, false), Array.of(true)).toArray(new Object[0]), N.split(a, 2).toArray()));
-            assertTrue(CommonUtil.deepEquals(CommonUtil.asList(Array.of(true), Array.of(false), Array.of(true)).toArray(new Object[0]), N.split(a, 1).toArray()));
+            assertTrue(
+                    CommonUtil.deepEquals(CommonUtil.asList(Array.of(true), Array.of(false), Array.of(true)).toArray(new Object[0]), N.split(a, 1).toArray()));
         }
 
         {
@@ -1417,14 +1419,18 @@ public class NTest extends AbstractParserTest {
 
         {
             final byte[] a = { 1, 2, 3 };
-            assertTrue(CommonUtil.deepEquals(CommonUtil.asList(Array.of((byte) 1, (byte) 2), Array.of((byte) 3)).toArray(new Object[0]), N.split(a, 2).toArray()));
-            assertTrue(CommonUtil.deepEquals(CommonUtil.asList(Array.of((byte) 1), Array.of((byte) 2), Array.of((byte) 3)).toArray(new Object[0]), N.split(a, 1).toArray()));
+            assertTrue(
+                    CommonUtil.deepEquals(CommonUtil.asList(Array.of((byte) 1, (byte) 2), Array.of((byte) 3)).toArray(new Object[0]), N.split(a, 2).toArray()));
+            assertTrue(CommonUtil.deepEquals(CommonUtil.asList(Array.of((byte) 1), Array.of((byte) 2), Array.of((byte) 3)).toArray(new Object[0]),
+                    N.split(a, 1).toArray()));
         }
 
         {
             final short[] a = { 1, 2, 3 };
-            assertTrue(CommonUtil.deepEquals(CommonUtil.asList(Array.of((short) 1, (short) 2), Array.of((short) 3)).toArray(new Object[0]), N.split(a, 2).toArray()));
-            assertTrue(CommonUtil.deepEquals(CommonUtil.asList(Array.of((short) 1), Array.of((short) 2), Array.of((short) 3)).toArray(new Object[0]), N.split(a, 1).toArray()));
+            assertTrue(CommonUtil.deepEquals(CommonUtil.asList(Array.of((short) 1, (short) 2), Array.of((short) 3)).toArray(new Object[0]),
+                    N.split(a, 2).toArray()));
+            assertTrue(CommonUtil.deepEquals(CommonUtil.asList(Array.of((short) 1), Array.of((short) 2), Array.of((short) 3)).toArray(new Object[0]),
+                    N.split(a, 1).toArray()));
         }
 
         {
@@ -1435,40 +1441,54 @@ public class NTest extends AbstractParserTest {
 
         {
             final long[] a = { 1, 2, 3 };
-            assertTrue(CommonUtil.deepEquals(CommonUtil.asList(Array.of((long) 1, (long) 2), Array.of((long) 3)).toArray(new Object[0]), N.split(a, 2).toArray()));
-            assertTrue(CommonUtil.deepEquals(CommonUtil.asList(Array.of((long) 1), Array.of((long) 2), Array.of((long) 3)).toArray(new Object[0]), N.split(a, 1).toArray()));
+            assertTrue(
+                    CommonUtil.deepEquals(CommonUtil.asList(Array.of((long) 1, (long) 2), Array.of((long) 3)).toArray(new Object[0]), N.split(a, 2).toArray()));
+            assertTrue(CommonUtil.deepEquals(CommonUtil.asList(Array.of((long) 1), Array.of((long) 2), Array.of((long) 3)).toArray(new Object[0]),
+                    N.split(a, 1).toArray()));
         }
 
         {
             final float[] a = { 1, 2, 3 };
-            assertTrue(CommonUtil.deepEquals(CommonUtil.asList(Array.of((float) 1, (float) 2), Array.of((float) 3)).toArray(new Object[0]), N.split(a, 2).toArray()));
-            assertTrue(CommonUtil.deepEquals(CommonUtil.asList(Array.of((float) 1), Array.of((float) 2), Array.of((float) 3)).toArray(new Object[0]), N.split(a, 1).toArray()));
+            assertTrue(CommonUtil.deepEquals(CommonUtil.asList(Array.of((float) 1, (float) 2), Array.of((float) 3)).toArray(new Object[0]),
+                    N.split(a, 2).toArray()));
+            assertTrue(CommonUtil.deepEquals(CommonUtil.asList(Array.of((float) 1), Array.of((float) 2), Array.of((float) 3)).toArray(new Object[0]),
+                    N.split(a, 1).toArray()));
         }
 
         {
             final double[] a = { 1, 2, 3 };
-            assertTrue(CommonUtil.deepEquals(CommonUtil.asList(Array.of((double) 1, (double) 2), Array.of((double) 3)).toArray(new Object[0]), N.split(a, 2).toArray()));
+            assertTrue(CommonUtil.deepEquals(CommonUtil.asList(Array.of((double) 1, (double) 2), Array.of((double) 3)).toArray(new Object[0]),
+                    N.split(a, 2).toArray()));
+            assertTrue(CommonUtil.deepEquals(CommonUtil.asList(Array.of((double) 1), Array.of((double) 2), Array.of((double) 3)).toArray(new Object[0]),
+                    N.split(a, 1).toArray()));
+        }
+
+        {
+            final String[] a = { "1", "2", "3" };
+            assertTrue(CommonUtil.deepEquals(CommonUtil.asList(CommonUtil.asArray("1", "2"), CommonUtil.asArray("3")).toArray(new Object[0]),
+                    N.split(a, 2).toArray()));
             assertTrue(
-                    CommonUtil.deepEquals(CommonUtil.asList(Array.of((double) 1), Array.of((double) 2), Array.of((double) 3)).toArray(new Object[0]), N.split(a, 1).toArray()));
+                    CommonUtil.deepEquals(CommonUtil.asList(CommonUtil.asArray("1"), CommonUtil.asArray("2"), CommonUtil.asArray("3")).toArray(new Object[0]),
+                            N.split(a, 1).toArray()));
         }
 
         {
             final String[] a = { "1", "2", "3" };
-            assertTrue(CommonUtil.deepEquals(CommonUtil.asList(CommonUtil.asArray("1", "2"), CommonUtil.asArray("3")).toArray(new Object[0]), N.split(a, 2).toArray()));
-            assertTrue(CommonUtil.deepEquals(CommonUtil.asList(CommonUtil.asArray("1"), CommonUtil.asArray("2"), CommonUtil.asArray("3")).toArray(new Object[0]), N.split(a, 1).toArray()));
-        }
-
-        {
-            final String[] a = { "1", "2", "3" };
-            assertTrue(CommonUtil.deepEquals(CommonUtil.asList(CommonUtil.asArray("1", "2"), CommonUtil.asArray("3")).toArray(new Object[0]), N.split(a, 2).toArray()));
-            assertTrue(CommonUtil.deepEquals(CommonUtil.asList(CommonUtil.asArray("1"), CommonUtil.asArray("2"), CommonUtil.asArray("3")).toArray(new Object[0]), N.split(a, 1).toArray()));
+            assertTrue(CommonUtil.deepEquals(CommonUtil.asList(CommonUtil.asArray("1", "2"), CommonUtil.asArray("3")).toArray(new Object[0]),
+                    N.split(a, 2).toArray()));
+            assertTrue(
+                    CommonUtil.deepEquals(CommonUtil.asList(CommonUtil.asArray("1"), CommonUtil.asArray("2"), CommonUtil.asArray("3")).toArray(new Object[0]),
+                            N.split(a, 1).toArray()));
             assertTrue(CommonUtil.deepEquals(CommonUtil.asList((Object) CommonUtil.asArray("1", "2", "3")).toArray(new Object[0]), N.split(a, 3).toArray()));
         }
 
         {
             final String[] a = { "1", "2", "3" };
-            assertTrue(CommonUtil.deepEquals(CommonUtil.asList(CommonUtil.asArray("1", "2"), CommonUtil.asArray("3")).toArray(new Object[0]), N.split(a, 2).toArray()));
-            assertTrue(CommonUtil.deepEquals(CommonUtil.asList(CommonUtil.asArray("1"), CommonUtil.asArray("2"), CommonUtil.asArray("3")).toArray(new Object[0]), N.split(a, 1).toArray()));
+            assertTrue(CommonUtil.deepEquals(CommonUtil.asList(CommonUtil.asArray("1", "2"), CommonUtil.asArray("3")).toArray(new Object[0]),
+                    N.split(a, 2).toArray()));
+            assertTrue(
+                    CommonUtil.deepEquals(CommonUtil.asList(CommonUtil.asArray("1"), CommonUtil.asArray("2"), CommonUtil.asArray("3")).toArray(new Object[0]),
+                            N.split(a, 1).toArray()));
             final Object tmp = CommonUtil.asArray("1", "2", "3");
             assertTrue(CommonUtil.deepEquals(CommonUtil.asList(tmp).toArray(), N.split(a, 3).toArray()));
             assertTrue(CommonUtil.deepEquals(CommonUtil.asList(tmp).toArray(), N.split(a, 4).toArray()));
@@ -1478,7 +1498,8 @@ public class NTest extends AbstractParserTest {
             final List<String> a = CommonUtil.asList("1", "2", "3");
             final List<List<String>> b = N.split(a, 2);
             assertTrue(CommonUtil.deepEquals(CommonUtil.asList(CommonUtil.asList("1", "2"), CommonUtil.asList("3")).toArray(new Object[0]), b.toArray()));
-            assertTrue(CommonUtil.deepEquals(CommonUtil.asList(CommonUtil.asList("1"), CommonUtil.asList("2"), CommonUtil.asList("3")).toArray(new Object[0]), N.split(a, 1).toArray()));
+            assertTrue(CommonUtil.deepEquals(CommonUtil.asList(CommonUtil.asList("1"), CommonUtil.asList("2"), CommonUtil.asList("3")).toArray(new Object[0]),
+                    N.split(a, 1).toArray()));
         }
 
     }

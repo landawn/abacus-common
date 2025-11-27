@@ -1,7 +1,3 @@
-/*
- * Copyright (c) 2015, Haiyang Li. All rights reserved.
- */
-
 package com.landawn.abacus.util;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -27,6 +23,7 @@ import java.util.concurrent.Executors;
 import java.util.stream.Collector;
 import java.util.stream.StreamSupport;
 
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.AbstractTest;
@@ -44,6 +41,7 @@ import com.landawn.abacus.util.stream.Collectors.MoreCollectors;
 import com.landawn.abacus.util.stream.IntStream;
 import com.landawn.abacus.util.stream.Stream;
 
+@Tag("old-test")
 public class StreamTest extends AbstractTest {
 
     @Test
@@ -109,11 +107,11 @@ public class StreamTest extends AbstractTest {
 
     @SuppressWarnings("unused")
     String maybeThrowSQLException() throws SQLException {
-        return "abc"; // Strings.uuid();
+        return "abc";
     }
 
     String notThrowSQLException() {
-        return "abc"; // Strings.uuid();
+        return "abc";
     }
 
     @Test
@@ -184,173 +182,9 @@ public class StreamTest extends AbstractTest {
         IOUtil.deleteIfExists(file);
     }
 
-    //    @Test
-    //    public void test_rateLimited() {
-    //        Stream.range(0, 20).rateLimited(10).onEach(Fn.doNothing()).timed().forEach(Fn.println());
-    //    }
-
-    //    ExecutorService newVirtualThreadPerTaskExecutor = Executors.newVirtualThreadPerTaskExecutor();
-    //    ExecutorService newVirtualThreadPerTaskExecutor2 = Executors.newVirtualThreadPerTaskExecutor();
-    //    ExecutorService executorService = Executors.newCachedThreadPool();
-    //
-    //    @Test
-    //    public void test_virtual_threads() {
-    //        N.println("==================");
-    //        // TODO a bug? dead lock
-    //        Stream.range(1, 1000).parallel(64, newVirtualThreadPerTaskExecutor).onEach(it -> {
-    //            N.println(Thread.currentThread().getName());
-    //            Fn.sleep(10);
-    //            N.println("-----------: " + it);
-    //        }).parallel(128, newVirtualThreadPerTaskExecutor2).onEach(it -> {
-    //            N.println(Thread.currentThread().getName());
-    //            Fn.sleep(32);
-    //            N.println("==================: " + it);
-    //        }).count();
-    //
-    //        N.sleep(3000);
-    //    }
-
-    //    @Test
-    //    public void test_parallel_with_virtual_thread_0() throws Exception {
-    //        {
-    //            long startTime = System.currentTimeMillis();
-    //
-    //            Stream.range(1, 1000).parallel(128, 1).onEach(Fn.sleep(10)).count();
-    //            N.println("====================== 1: " + (System.currentTimeMillis() - startTime));
-    //
-    //            Stream.range(1, 1000).parallel(128, 1).onEach(Fn.sleep(10)).parallel(128, 1).onEach(Fn.sleep(10)).count();
-    //            N.println("====================== 2: " + (System.currentTimeMillis() - startTime));
-    //
-    //            //   // TODO a bug? dead lock
-    //            //    ExecutorService newVirtualThreadPerTaskExecutor = Executors.newVirtualThreadPerTaskExecutor();
-    //            //    ExecutorService newVirtualThreadPerTaskExecutor2 = Executors.newVirtualThreadPerTaskExecutor();
-    //            //    Stream.range(1, 1000)
-    //            //            .parallel(128, newVirtualThreadPerTaskExecutor)
-    //            //            .onEach(Fn.sleep(10))
-    //            //            .parallel(128, newVirtualThreadPerTaskExecutor2)
-    //            //            .onEach(Fn.sleep(10))
-    //            //            .count();
-    //
-    //            N.println("====================== 3: " + (System.currentTimeMillis() - startTime));
-    //
-    //            Stream.range(1, 10000)
-    //                    .parallel(6)
-    //                    .mapToInt(it -> it * 1 - 100 + 100)
-    //                    .parallel(64, 1)
-    //                    .mapToObj(it -> it * 1 - 100 + 100)
-    //                    .parallel(1024, 1)
-    //                    .filter(it -> it > 0)
-    //                    .onEach(Fn.sleep(10))
-    //                    .parallel(1024, 1)
-    //                    .filter(it -> it > 0)
-    //                    .count();
-    //
-    //            N.println("====================== 4: " + (System.currentTimeMillis() - startTime));
-    //        }
-    //
-    //        for (int i = 0; i < 1; i++) {
-    //            int k = i;
-    //            final long startTime = System.currentTimeMillis();
-    //            final Holder<Integer> holder = new Holder<>();
-    //            try {
-    //                long ret = Stream.range(1, 10000)
-    //                        .parallel(6)
-    //                        .mapToInt(it -> it * 1 - 100 + 100)
-    //                        .parallel(64, 1)
-    //                        .mapToObj(it -> it * 1 - 100 + 100)
-    //                        .parallel(1024, 1)
-    //                        .filter(it -> it > 0)
-    //                        .onEach(Fn.sleep(10))
-    //                        .parallel(512, 3)
-    //                        .filter(it -> it > 0)
-    //                        .onEach(Fn.sleep(10))
-    //                        .mapToInt(it -> {
-    //                            if (k > 0 && k % 3 == 0 && it % (k * 7) == 0) {
-    //                                N.println("Error happening at...: " + k + ", it = " + it + ", t = " + (System.currentTimeMillis() - startTime) + "ms");
-    //                                holder.setValue(it);
-    //                                throw new UncheckedException("Error happening", new IOException());
-    //                            }
-    //
-    //                            return it * 1 - 100 + 100;
-    //                        })
-    //                        .sum();
-    //
-    //                N.println(ret);
-    //
-    //                assertEquals(49995000, ret);
-    //            } catch (UncheckedException e) {
-    //                assertTrue(k > 0 && k % 3 == 0 && holder.value() % (k * 7) == 0);
-    //            }
-    //        }
-    //    }
     @Test
     public void test_parallel_with_virtual_thread_1() throws Exception {
 
-        //        for (int i = 0; i < 20; i++) {
-        //            int k = i;
-        //            final long startTime = System.currentTimeMillis();
-        //            final Holder<Integer> holder = new Holder<>();
-        //
-        //            try {
-        //                long ret = Stream.range(1, 10000)
-        //                        .parallel(6)
-        //                        .mapToInt(it -> it * 1 - 100 + 100)
-        //                        .filter(it -> it > 0)
-        //                        .mapToObj(it -> it * 1 - 100 + 100)
-        //                        .parallel(64)
-        //                        .onEach(Fn.sleep(1))
-        //                        .parallel(16)
-        //                        .flattmap(N::asArray)
-        //                        .parallel(32, 1)
-        //                        .mapToInt(it -> it * 1 - 100 + 100)
-        //                        .parallel(16, true)
-        //                        .filter(it -> it > 0)
-        //                        .parallel(64, 1)
-        //                        .mapToObj(it -> it * 1 - 100 + 100)
-        //                        .parallel(128, 1)
-        //                        .filter(it -> it > 0)
-        //                        .onEach(Fn.sleep(3))
-        //                        .flattmap(N::asArray)
-        //                        .parallel(6)
-        //                        .mapToInt(it -> it * 1 - 100 + 100)
-        //                        .sequential()
-        //                        .filter(it -> it > 0)
-        //                        .mapToObj(it -> it * 1 - 100 + 100)
-        //                        .parallel(1000, 1)
-        //                        .filter(it -> it > 0)
-        //                        .onEach(Fn.sleep(10))
-        //                        .parallel(1024, 1)
-        //                        .filter(it -> it > 0)
-        //                        .onEach(Fn.sleep(10))
-        //                        .parallel()
-        //                        .flattmap(N::asArray)
-        //                        .onClose(() -> {
-        //                            if (k % 2 == 0) {
-        //                                closeExecutor("###", k, startTime, null);
-        //                            }
-        //                        })
-        //                        .mapToInt(it -> {
-        //                            if (k > 0 && k % 3 == 0 && it % (k * 7) == 0) {
-        //                                N.println("Error happening at...: " + k + ", it = " + it + ", t = " + (System.currentTimeMillis() - startTime) + "ms");
-        //                                holder.setValue(it);
-        //                                throw new UncheckedException("Error happening", new IOException());
-        //                            }
-        //
-        //                            return it * 1 - 100 + 100;
-        //                        })
-        //                        .sum();
-        //
-        //                N.println(ret);
-        //
-        //                assertEquals(49995000L, ret);
-        //            } catch (UncheckedException e) {
-        //                assertTrue(k > 0 && k % 3 == 0 && holder.value() % (k * 7) == 0);
-        //            } finally {
-        //                if (k % 2 != 0) {
-        //                    closeExecutor("===", k, startTime, null);
-        //                }
-        //            }
-        //        }
     }
 
     @Test
@@ -685,43 +519,6 @@ public class StreamTest extends AbstractTest {
         Stream.of(1, 2);
     }
 
-    //    @Test
-    //    public void test_onError() throws Exception {
-    //        Stream.range(0, 10).map(it -> {
-    //            if (it % 2 == 0) {
-    //                return it;
-    //            } else {
-    //                throw new RuntimeException("" + it);
-    //            }
-    //        }).onErrorContinue(N::println).forEach(Fn.println());
-    //
-    //        N.println(StringUtil.repeat("=", 80));
-    //
-    //        Stream.range(0, 10).map(it -> {
-    //            if (it % 2 == 0) {
-    //                return it;
-    //            } else {
-    //                throw new RuntimeException("" + it);
-    //            }
-    //        }).onErrorReturn(10000).forEach(Fn.println());
-    //
-    //        N.println(StringUtil.repeat("=", 80));
-    //
-    //        try {
-    //
-    //            Stream.range(0, 10).parallel().map(it -> {
-    //                if (it % 2 == 0) {
-    //                    return it;
-    //                } else {
-    //                    throw new RuntimeException("" + it);
-    //                }
-    //            }).onErrorContinue(N::println).forEach(Fn.println());
-    //
-    //            fail("Should throw IllegalStateException");
-    //        } catch (IllegalStateException e) {
-    //            // ignore
-    //        }
-    //    }
     @Test
     public void test_onClose() throws Exception {
         java.util.stream.Stream.of(1, 2, 3).onClose(() -> N.println("Closing1")).forEach(Fn.println());
@@ -735,7 +532,6 @@ public class StreamTest extends AbstractTest {
 
             fail("Should throw RuntimeException");
         } catch (final RuntimeException e) {
-            // ignore
         }
 
     }
@@ -793,8 +589,8 @@ public class StreamTest extends AbstractTest {
 
         {
 
-            final List<Object> list = CommonUtil.asList(CommonUtil.asLinkedHashMap("k1", "v11\"'\"\\\"", "k2", 12, "k3", Dates.currentDate()),
-                    CommonUtil.asMap("k1", "v21", "k2", CommonUtil.asLinkedHashMap("k1", "v11\"'\"\\\"", "k2", 12, "k3", Dates.currentDate()), "k3", Dates.currentDate()));
+            final List<Object> list = CommonUtil.asList(CommonUtil.asLinkedHashMap("k1", "v11\"'\"\\\"", "k2", 12, "k3", Dates.currentDate()), CommonUtil.asMap(
+                    "k1", "v21", "k2", CommonUtil.asLinkedHashMap("k1", "v11\"'\"\\\"", "k2", 12, "k3", Dates.currentDate()), "k3", Dates.currentDate()));
 
             final Dataset dataset = CommonUtil.newDataset(list);
             dataset.println();
@@ -827,8 +623,8 @@ public class StreamTest extends AbstractTest {
         {
             CSVUtil.setEscapeCharToBackSlashForWrite();
 
-            final List<Object> list = CommonUtil.asList(CommonUtil.asLinkedHashMap("k1", "v11\"'\"\\\"", "k2", 12, "k3", Dates.currentDate()),
-                    CommonUtil.asMap("k1", "v21", "k2", CommonUtil.asLinkedHashMap("k1", "v11\"'\"\\\"", "k2", 12, "k3", Dates.currentDate()), "k3", Dates.currentDate()));
+            final List<Object> list = CommonUtil.asList(CommonUtil.asLinkedHashMap("k1", "v11\"'\"\\\"", "k2", 12, "k3", Dates.currentDate()), CommonUtil.asMap(
+                    "k1", "v21", "k2", CommonUtil.asLinkedHashMap("k1", "v11\"'\"\\\"", "k2", 12, "k3", Dates.currentDate()), "k3", Dates.currentDate()));
 
             final Dataset dataset = CommonUtil.newDataset(list);
             dataset.println();
@@ -899,23 +695,6 @@ public class StreamTest extends AbstractTest {
         }
     }
 
-    //    @Test
-    //    public void test_countAnd() throws Exception {
-    //        Stream.of(Array.range(1, 10)).countAnd(s -> s.sumInt(ToIntFunction.UNBOX)).accept(Fn.println());
-    //        Stream.range(1, 10).countAnd(s -> s.sumInt(ToIntFunction.UNBOX)).accept(Fn.println());
-    //
-    //        Stream.of(Array.range(1, 10)).parallel().countAnd(s -> s.sumInt(ToIntFunction.UNBOX)).accept(Fn.println());
-    //        Stream.range(1, 10).parallel().countAnd(s -> s.sumInt(ToIntFunction.UNBOX)).accept(Fn.println());
-    //
-    //        Stream.of(Array.range(1, 1)).countAnd(s -> s.sumInt(ToIntFunction.UNBOX)).accept(Fn.println());
-    //        Stream.range(1, 1).countAnd(s -> s.sumInt(ToIntFunction.UNBOX)).accept(Fn.println());
-    //
-    //        Stream.of(Array.range(1, 1)).parallel().countAnd(s -> s.sumInt(ToIntFunction.UNBOX)).accept(Fn.println());
-    //        Stream.range(1, 1).parallel().countAnd(s -> s.sumInt(ToIntFunction.UNBOX)).accept(Fn.println());
-    //
-    //        Stream.of(Array.range(1, 10)).countAnd(Fn.c2f(s -> s.forEach(Fn.println()))).accept(Fn.println());
-    //        Stream.range(1, 10).countAnd(Fn.c2f(s -> s.forEach(Fn.println()))).accept(Fn.println());
-    //    }
     @Test
     public void test_min_max_all() throws Exception {
         assertEquals(CommonUtil.asList(10, 10), Stream.of(1, 10, 9, 10, 2, 1).maxAll(Comparators.naturalOrder()));
@@ -1070,17 +849,6 @@ public class StreamTest extends AbstractTest {
         Stream.of(CommonUtil.toList(Array.range(1, 1000))).map(Fn.identity()).sps(64, ss -> ss.onEach(Fn.sleep(10))).filter(Fn.alwaysTrue()).count();
         N.println("abacus stream took: " + (System.currentTimeMillis() - startTime));
 
-        //        startTime = System.currentTimeMillis();
-        //        Stream.of(N.toList(Array.range(1, 1000))).map(Fn.identity()).sps(PS.create(64), ss -> ss.onEach(Fn.sleep(10))).filter(Fn.alwaysTrue()).count();
-        //        N.println("abacus stream took: " + (System.currentTimeMillis() - startTime));
-
-        //        startTime = System.currentTimeMillis();
-        //        Stream.of(N.toList(Array.range(1, 1000))).map(Fn.identity()).sps(64, 16, ss -> ss.onEach(Fn.sleep(10))).filter(Fn.alwaysTrue()).count();
-        //        N.println("abacus stream took: " + (System.currentTimeMillis() - startTime));
-        //
-        //        startTime = System.currentTimeMillis();
-        //        Stream.of(N.toList(Array.range(1, 1000))).map(Fn.identity()).sps(64, 8, ss -> ss.onEach(Fn.sleep(10))).filter(Fn.alwaysTrue()).count();
-        //        N.println("abacus stream took: " + (System.currentTimeMillis() - startTime));
     }
 
     @Test
@@ -1149,12 +917,8 @@ public class StreamTest extends AbstractTest {
 
         cmd.run();
 
-        //    for (int i = 0; i < 30; i++) {
-        //        cmd.run();
-        //    }
-
-        // Profiler.run(16, 3, 2, cmd);
     }
+
     @Test
     public void test_maxAll() throws Exception {
         N.println(Stream.of(1, 3, 2, 9, 2, 9, 1, 4).collect(Collectors.maxAll()));
@@ -1273,24 +1037,26 @@ public class StreamTest extends AbstractTest {
 
         IntList a = IntList.of(0, 1, 2, 2, 3);
         IntList b = IntList.of(2, 5, 1);
-        a.retainAll(b); // The elements remained in a will be: [1, 2, 2].
+        a.retainAll(b);
         N.println(a);
 
         a = IntList.of(0, 1, 2, 2, 3);
         b = IntList.of(2, 5, 1);
-        IntList c = a.intersection(b); // The elements c in a will be: [1, 2].
+        IntList c = a.intersection(b);
         N.println(c);
         assertEquals(IntList.of(1, 2), c);
 
         a = IntList.of(0, 1, 2, 2, 3);
         b = IntList.of(2, 5, 1, 2);
-        c = a.intersection(b); // The elements c in a will be: [1, 2, 2].
+        c = a.intersection(b);
         assertEquals(IntList.of(1, 2, 2), c);
 
         N.println(c);
 
-        Dataset ds1 = CommonUtil.newDataset(CommonUtil.asList("c1", "c2"), CommonUtil.asList(CommonUtil.asList(1, 1), CommonUtil.asList(2, 2), CommonUtil.asList(3, 3), CommonUtil.asList(2, 2)));
-        Dataset ds2 = CommonUtil.newDataset(CommonUtil.asList("c1", "c2"), CommonUtil.asList(CommonUtil.asList(2, 2), CommonUtil.asList(3, 3), CommonUtil.asList(2, 2)));
+        Dataset ds1 = CommonUtil.newDataset(CommonUtil.asList("c1", "c2"),
+                CommonUtil.asList(CommonUtil.asList(1, 1), CommonUtil.asList(2, 2), CommonUtil.asList(3, 3), CommonUtil.asList(2, 2)));
+        Dataset ds2 = CommonUtil.newDataset(CommonUtil.asList("c1", "c2"),
+                CommonUtil.asList(CommonUtil.asList(2, 2), CommonUtil.asList(3, 3), CommonUtil.asList(2, 2)));
         Dataset ds3 = ds1.intersectAll(ds2);
         ds3.println();
 
@@ -1300,8 +1066,10 @@ public class StreamTest extends AbstractTest {
 
         N.println(Strings.repeat('=', 80));
 
-        ds1 = CommonUtil.newDataset(CommonUtil.asList("c1", "c2"), CommonUtil.asList(CommonUtil.asList(1, 1), CommonUtil.asList(2, 2), CommonUtil.asList(3, 3), CommonUtil.asList(2, 2)));
-        ds2 = CommonUtil.newDataset(CommonUtil.asList("c1", "c2"), CommonUtil.asList(CommonUtil.asList(2, 2), CommonUtil.asList(3, 3), CommonUtil.asList(2, 2)));
+        ds1 = CommonUtil.newDataset(CommonUtil.asList("c1", "c2"),
+                CommonUtil.asList(CommonUtil.asList(1, 1), CommonUtil.asList(2, 2), CommonUtil.asList(3, 3), CommonUtil.asList(2, 2)));
+        ds2 = CommonUtil.newDataset(CommonUtil.asList("c1", "c2"),
+                CommonUtil.asList(CommonUtil.asList(2, 2), CommonUtil.asList(3, 3), CommonUtil.asList(2, 2)));
         ds3 = ds1.intersection(ds2);
         ds3.println();
 
@@ -1311,8 +1079,10 @@ public class StreamTest extends AbstractTest {
 
         N.println(Strings.repeat('=', 80));
 
-        ds1 = CommonUtil.newDataset(CommonUtil.asList("c1", "c2"), CommonUtil.asList(CommonUtil.asList(1, 1), CommonUtil.asList(2, 2), CommonUtil.asList(3, 3), CommonUtil.asList(2, 2)));
-        ds2 = CommonUtil.newDataset(CommonUtil.asList("c1", "c2"), CommonUtil.asList(CommonUtil.asList(2, 2), CommonUtil.asList(3, 3), CommonUtil.asList(2, 2)));
+        ds1 = CommonUtil.newDataset(CommonUtil.asList("c1", "c2"),
+                CommonUtil.asList(CommonUtil.asList(1, 1), CommonUtil.asList(2, 2), CommonUtil.asList(3, 3), CommonUtil.asList(2, 2)));
+        ds2 = CommonUtil.newDataset(CommonUtil.asList("c1", "c2"),
+                CommonUtil.asList(CommonUtil.asList(2, 2), CommonUtil.asList(3, 3), CommonUtil.asList(2, 2)));
         ds3 = ds1.intersect(ds2);
         ds3.println();
 
@@ -1419,7 +1189,6 @@ public class StreamTest extends AbstractTest {
                 .forEach(N::println);
     }
 
-
     @Test
     public void test_futureGet() {
         Stream.range(0, 10).map(it -> N.asyncExecute(() -> N.println(it))).map(Fn.futureGet()).forEach(Fn.println());
@@ -1430,9 +1199,7 @@ public class StreamTest extends AbstractTest {
 
     @Test
     public void test_parallelConcat() {
-        final List<Iterator<Integer>> iters = IntStream.range(0, 64)//
-                .mapToObj(it -> CommonUtil.asList(it).iterator())
-                .toList();
+        final List<Iterator<Integer>> iters = IntStream.range(0, 64).mapToObj(it -> CommonUtil.asList(it).iterator()).toList();
 
         N.println(Stream.parallelConcatIterators(iters).sumInt(Integer::intValue));
     }
@@ -1636,8 +1403,6 @@ public class StreamTest extends AbstractTest {
                 for (int k = -97; k < 97; k++) {
                     final byte[] tmp = a.clone();
                     CommonUtil.rotate(tmp, k);
-                    // N.println(N.toString(tmp) + " -> " + k);
-                    // N.println(ByteStream.range((byte) j, (byte) i).rotated(k).toArray());
 
                     assertTrue(CommonUtil.equals(tmp, ByteStream.range((byte) j, (byte) i).rotated(k).toArray()));
                 }
@@ -1657,8 +1422,6 @@ public class StreamTest extends AbstractTest {
                 for (int k = -97; k < 97; k++) {
                     final byte[] tmp = a.clone();
                     CommonUtil.rotate(tmp, k);
-                    // N.println(N.toString(tmp) + " -> " + k);
-                    // N.println(ByteStream.range((byte) j, (byte) i).rotated(k).toArray());
 
                     assertTrue(CommonUtil.equals(tmp, ByteStream.range((byte) j, (byte) i).rotated(k).toArray()));
                 }
@@ -1694,7 +1457,8 @@ public class StreamTest extends AbstractTest {
     @Test
     public void test_join() {
         final List<String[]> a = CommonUtil.asList(CommonUtil.asArray("a", "1"), CommonUtil.asArray("b", "2"), CommonUtil.asArray("c", "3"));
-        final List<String[]> b = CommonUtil.asList(CommonUtil.asArray("3", "d"), CommonUtil.asArray("2", "e"), CommonUtil.asArray("2", "f"), CommonUtil.asArray("4", "f"));
+        final List<String[]> b = CommonUtil.asList(CommonUtil.asArray("3", "d"), CommonUtil.asArray("2", "e"), CommonUtil.asArray("2", "f"),
+                CommonUtil.asArray("4", "f"));
 
         Stream.of(a).innerJoin(b, (BiPredicate<String[], String[]>) (t, u) -> CommonUtil.equals(t[1], u[0])).println();
 
@@ -1714,7 +1478,8 @@ public class StreamTest extends AbstractTest {
     @Test
     public void test_join_2() {
         final List<String[]> a = CommonUtil.asList(CommonUtil.asArray("a", "1"), CommonUtil.asArray("b", "2"), CommonUtil.asArray("c", "3"));
-        final List<String[]> b = CommonUtil.asList(CommonUtil.asArray("3", "d"), CommonUtil.asArray("2", "e"), CommonUtil.asArray("2", "f"), CommonUtil.asArray("4", "f"));
+        final List<String[]> b = CommonUtil.asList(CommonUtil.asArray("3", "d"), CommonUtil.asArray("2", "e"), CommonUtil.asArray("2", "f"),
+                CommonUtil.asArray("4", "f"));
 
         Stream.of(a).innerJoin(b, (Function<String[], String>) t -> t[1], (Function<String[], String>) t -> t[0]).println();
 
@@ -1822,16 +1587,10 @@ public class StreamTest extends AbstractTest {
                         StreamSupport.stream(Spliterators.spliteratorUnknownSize(N.iterate(strs), Spliterator.ORDERED), true).mapToLong(mapper).sum()))
                 .printResult();
 
-        //    Profiler.run(threadNum, loopNum, roundNum, "JDK Parallel - 3",
-        //            () -> assertEquals(sum.value(), Stream.of(strs).toJdkStream().parallel().mapToLong(mapper).sum())).printResult();
-
         Profiler.run(threadNum, loopNum, roundNum, "Abacus Sequential", () -> assertEquals(sum.value(), Stream.of(strs).mapToLong(mapper).sum())).printResult();
 
         Profiler.run(threadNum, loopNum, roundNum, "Abacus Parallel", () -> assertEquals(sum.value(), Stream.of(strs).parallel().mapToLong(mapper).sum()))
                 .printResult();
-
-        //    Profiler.run(threadNum, loopNum, roundNum, "Abacus Parallel - 2",
-        //            () -> assertEquals(sum.value(), Stream.of(strs).parallel(Splitor.ARRAY).mapToLong(mapper).sum())).printResult();
 
         Profiler.run(threadNum, loopNum, roundNum, "Abacus Parallel by chunk",
                 () -> assertEquals(sum.value(), Stream.of(strs).split(100).parallel().mapToLong(it -> N.sumLong(it, e -> mapper.applyAsLong(e))).sum()))

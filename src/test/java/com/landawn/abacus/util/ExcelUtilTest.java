@@ -1,7 +1,3 @@
-/*
- * Copyright (c) 2015, Haiyang Li. All rights reserved.
- */
-
 package com.landawn.abacus.util;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -9,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import java.io.File;
 import java.util.List;
 
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.AbstractTest;
@@ -17,6 +14,7 @@ import com.landawn.abacus.poi.ExcelUtil.FreezePane;
 import com.landawn.abacus.poi.ExcelUtil.RowMappers;
 import com.landawn.abacus.poi.ExcelUtil.SheetCreateOptions;
 
+@Tag("old-test")
 public class ExcelUtilTest extends AbstractTest {
     @Test
     public void test_read_sheet() throws Exception {
@@ -52,7 +50,8 @@ public class ExcelUtilTest extends AbstractTest {
 
     @Test
     public void test_loadSheet() {
-        final Dataset dataset = CommonUtil.newDataset(CommonUtil.asList("column1", "column2"), CommonUtil.asList(CommonUtil.asList("ab", "cd"), CommonUtil.asList("ef", "gh")));
+        final Dataset dataset = CommonUtil.newDataset(CommonUtil.asList("column1", "column2"),
+                CommonUtil.asList(CommonUtil.asList("ab", "cd"), CommonUtil.asList("ef", "gh")));
         dataset.println();
 
         File outputExcelFile = new File("./src/test/resources/test_excel_02.xlsx");

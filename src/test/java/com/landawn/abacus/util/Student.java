@@ -1,7 +1,3 @@
-/*
- * Copyright (c) 2015, Haiyang Li. All rights reserved.
- */
-
 package com.landawn.abacus.util;
 
 import java.io.Serializable;
@@ -92,9 +88,10 @@ public class Student extends Person implements Serializable, Cloneable {
         }
 
         if (obj instanceof Student other) {
-            if (CommonUtil.equals(list, other.list) && CommonUtil.equals(map, other.map) && CommonUtil.equals(map1, other.map1) && CommonUtil.equals(map2, other.map2)
-                    && CommonUtil.equals(getFirstName(), other.getFirstName()) && CommonUtil.equals(getMiddleName(), other.getMiddleName())
-                    && CommonUtil.equals(getLastName(), other.getLastName()) && CommonUtil.equals(getBirthDate(), other.getBirthDate())) {
+            if (CommonUtil.equals(list, other.list) && CommonUtil.equals(map, other.map) && CommonUtil.equals(map1, other.map1)
+                    && CommonUtil.equals(map2, other.map2) && CommonUtil.equals(getFirstName(), other.getFirstName())
+                    && CommonUtil.equals(getMiddleName(), other.getMiddleName()) && CommonUtil.equals(getLastName(), other.getLastName())
+                    && CommonUtil.equals(getBirthDate(), other.getBirthDate())) {
 
                 return true;
             }
@@ -106,7 +103,7 @@ public class Student extends Person implements Serializable, Cloneable {
     @Override
     public String toString() {
         return "{" + "firstName=" + CommonUtil.toString(getFirstName()) + ", " + "middleName=" + CommonUtil.toString(getMiddleName()) + ", " + "lastName="
-                + CommonUtil.toString(getLastName()) + ", " + "birthDate=" + CommonUtil.toString(getBirthDate()) + ", " + "map=" + CommonUtil.toString(map) + ", " + "map1="
-                + CommonUtil.toString(map1) + ", " + "map2=" + CommonUtil.toString(map2) + ", " + "}";
+                + CommonUtil.toString(getLastName()) + ", " + "birthDate=" + CommonUtil.toString(getBirthDate()) + ", " + "map=" + CommonUtil.toString(map)
+                + ", " + "map1=" + CommonUtil.toString(map1) + ", " + "map2=" + CommonUtil.toString(map2) + ", " + "}";
     }
 }

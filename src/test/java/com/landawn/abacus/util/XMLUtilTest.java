@@ -1,7 +1,3 @@
-/*
- * Copyright (c) 2015, Haiyang Li. All rights reserved.
- */
-
 package com.landawn.abacus.util;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -128,7 +124,6 @@ public class XMLUtilTest extends AbstractParserTest {
 
         final Account account2 = XmlUtil.xmlDecode(xml);
         N.println(account2);
-        // assertEquals(account, account2); // TODO can't recognize the fluent setter method in bean class
     }
 
     @Test
@@ -148,7 +143,6 @@ public class XMLUtilTest extends AbstractParserTest {
         N.println(str);
         assertEquals(xml, str.substring(54));
 
-        // IOUtil.delete(file);
         final OutputStream os = new FileOutputStream(file);
         XmlUtil.transform(doc, os);
         os.flush();

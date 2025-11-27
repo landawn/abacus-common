@@ -1,7 +1,3 @@
-/*
- * Copyright (c) 2015, Haiyang Li. All rights reserved.
- */
-
 package com.landawn.abacus.util;
 
 import static org.junit.jupiter.api.Assertions.fail;
@@ -9,10 +5,12 @@ import static org.junit.jupiter.api.Assertions.fail;
 import java.net.InetSocketAddress;
 import java.net.URL;
 
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.AbstractTest;
 
+@Tag("old-test")
 public class AddrUtilTest extends AbstractTest {
 
     @Test

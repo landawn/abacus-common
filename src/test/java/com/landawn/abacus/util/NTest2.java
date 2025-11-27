@@ -362,7 +362,8 @@ public class NTest2 extends AbstractParserTest {
         result = N.commonSet(CommonUtil.asSet(CommonUtil.asList(1, 2, 3, 4), CommonUtil.asList(1, 3, 5), CommonUtil.asList(1, 2, 4), CommonUtil.asSet(6)));
         N.println(result);
 
-        result = N.commonSet(CommonUtil.asList(CommonUtil.asSet(6), CommonUtil.asList(1, 2, 3, 4), CommonUtil.asList(1, 3, 5), CommonUtil.asList(1, 2, 4), CommonUtil.asSet(6)));
+        result = N.commonSet(CommonUtil.asList(CommonUtil.asSet(6), CommonUtil.asList(1, 2, 3, 4), CommonUtil.asList(1, 3, 5), CommonUtil.asList(1, 2, 4),
+                CommonUtil.asSet(6)));
         N.println(result);
 
         result = N.commonSet(CommonUtil.repeat(CommonUtil.asSet(6), 2));

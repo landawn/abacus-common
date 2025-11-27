@@ -23,7 +23,6 @@ public class MTest {
 
         N.println("Sorting");
         long startTime = System.currentTimeMillis();
-        // N.sort(a);
         CommonUtil.parallelSort(a);
         N.println("Took: " + (System.currentTimeMillis() - startTime));
 
@@ -41,7 +40,6 @@ public class MTest {
 
         N.println("Sorting");
         long startTime = System.currentTimeMillis();
-        // N.sort(a);
         CommonUtil.parallelSort(a);
         N.println("Took: " + (System.currentTimeMillis() - startTime));
 
@@ -59,7 +57,6 @@ public class MTest {
 
         N.println("Sorting");
         long startTime = System.currentTimeMillis();
-        // N.sort(a);
         CommonUtil.parallelSort(a);
         N.println("Took: " + (System.currentTimeMillis() - startTime));
 
@@ -77,7 +74,6 @@ public class MTest {
 
         N.println("Sorting");
         long startTime = System.currentTimeMillis();
-        // N.sort(a);
         CommonUtil.parallelSort(a);
         N.println("Took: " + (System.currentTimeMillis() - startTime));
 
@@ -95,7 +91,6 @@ public class MTest {
 
         N.println("Sorting");
         long startTime = System.currentTimeMillis();
-        // N.sort(a);
         CommonUtil.parallelSort(a);
         N.println("Took: " + (System.currentTimeMillis() - startTime));
 
@@ -117,7 +112,6 @@ public class MTest {
 
         N.println("Sorting");
         long startTime = System.currentTimeMillis();
-        // N.sort(a);
         CommonUtil.parallelSort(a);
         N.println("Took: " + (System.currentTimeMillis() - startTime));
     }

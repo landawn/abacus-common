@@ -350,6 +350,8 @@ import com.landawn.abacus.util.stream.Stream;
 @SuppressWarnings({ "java:S1192", "java:S6539" })
 public final class N extends CommonUtil { // public final class N extends π implements ℕ, ℂ, ℚ, ℝ, ℤ { //  Error while storing the mojo status in Maven
 
+    static final int MAX_SIZE_FOR_PRINTLN = 1000;
+
     static final AsyncExecutor ASYNC_EXECUTOR = new AsyncExecutor(//
             max(64, InternalUtil.CPU_CORES * 8), // coreThreadPoolSize
             max(128, InternalUtil.CPU_CORES * 16), // maxThreadPoolSize
@@ -4625,7 +4627,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * }</pre>
      *
      * <p>Unlike {@link #removeAll(boolean[], boolean[])} which removes all occurrences of elements found in the second array,
-     * this method considers the count of occurrences, removing only as many as found in the second array.
+     * this method considers the count of occurrences, excluding only as many as found in the second array.
      *
      * @param a the first boolean array, elements from this array will be in the result if they don't appear in b
      * @param b the second boolean array, elements from this array will be removed from a
@@ -4669,7 +4671,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * }</pre>
      *
      * <p>Unlike {@link #removeAll(char[], char[])} which removes all occurrences of elements found in the second array,
-     * this method considers the count of occurrences, removing only as many as found in the second array.
+     * this method considers the count of occurrences, excluding only as many as found in the second array.
      *
      * @param a the first char array, elements from this array will be in the result if they don't appear in b
      * @param b the second char array, elements from this array will be removed from a
@@ -4713,7 +4715,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * }</pre>
      *
      * <p>Unlike {@link #removeAll(byte[], byte[])} which removes all occurrences of elements found in the second array,
-     * this method considers the count of occurrences, removing only as many as found in the second array.
+     * this method considers the count of occurrences, excluding only as many as found in the second array.
      *
      * @param a the first byte array, elements from this array will be in the result if they don't appear in b
      * @param b the second byte array, elements from this array will be removed from a
@@ -4757,7 +4759,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * }</pre>
      *
      * <p>Unlike {@link #removeAll(short[], short[])} which removes all occurrences of elements found in the second array,
-     * this method considers the count of occurrences, removing only as many as found in the second array.
+     * this method considers the count of occurrences, excluding only as many as found in the second array.
      *
      * @param a the first short array, elements from this array will be in the result if they don't appear in b
      * @param b the second short array, elements from this array will be removed from a
@@ -4801,7 +4803,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * }</pre>
      *
      * <p>Unlike {@link #removeAll(int[], int[])} which removes all occurrences of elements found in the second array,
-     * this method considers the count of occurrences, removing only as many as found in the second array.
+     * this method considers the count of occurrences, excluding only as many as found in the second array.
      *
      * @param a the first int array, elements from this array will be in the result if they don't appear in b
      * @param b the second int array, elements from this array will be removed from a
@@ -4844,7 +4846,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * }</pre>
      *
      * <p>Unlike {@link #removeAll(long[], long[])} which removes all occurrences of elements found in the second array,
-     * this method considers the count of occurrences, removing only as many as found in the second array.
+     * this method considers the count of occurrences, excluding only as many as found in the second array.
      *
      * @param a the first long array, elements from this array will be in the result if they don't appear in b
      * @param b the second long array, elements from this array will be removed from a
@@ -4888,7 +4890,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * }</pre>
      *
      * <p>Unlike {@link #removeAll(float[], float[])} which removes all occurrences of elements found in the second array,
-     * this method considers the count of occurrences, removing only as many as found in the second array.
+     * this method considers the count of occurrences, excluding only as many as found in the second array.
      *
      * @param a the first float array, elements from this array will be in the result if they don't appear in b
      * @param b the second float array, elements from this array will be removed from a
@@ -4925,7 +4927,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * double[] result = N.difference(a, b);  // Returns {1.0, 2.0, 3.0, 4.0}
      * }</pre>
      *
-     * <p>Note: Unlike {@link #removeAll(double[], double[])}, this method considers occurrence counts, removing only as many as found in the second array.
+     * <p>Note: Unlike {@link #removeAll(double[], double[])}, this method considers occurrence counts, excluding only as many as found in the second array.
      *
      * @param a the first double array
      * @param b the second double array
@@ -4959,7 +4961,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * List<String> result = N.difference(a, b);  // Returns ["B", "C", "D"]
      * }</pre>
      *
-     * <p>Note: Unlike {@link #removeAll(Object[], Object[])}, this method considers occurrence counts, removing only as many as found in the second array.
+     * <p>Note: Unlike {@link #removeAll(Object[], Object[])}, this method considers occurrence counts, excluding only as many as found in the second array.
      *
      * @param <T> the type of the elements in the first array
      * @param a the first array
@@ -5004,7 +5006,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * List<String> result = N.difference(a, b);  // Returns ["B", "C", "D"]
      * }</pre>
      *
-     * <p>Note: Unlike {@link Collection#removeAll(Collection)}, this method considers occurrence counts, removing only as many as found in the second collection.
+     * <p>Note: Unlike {@link Collection#removeAll(Collection)}, this method considers occurrence counts, excluding only as many as found in the second collection.
      *
      * @param <T> the type of elements in the first collection
      * @param a the first collection

@@ -12371,13 +12371,12 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
     }
 
     /**
-     * Prints all elements of this sequence to the standard output (System.out).
-     * The elements are formatted as a comma-separated list enclosed in square brackets: {@code [element1, element2, ...]}.
-     * This method should be used with caution when the sequence is large, as it will load all elements into memory.
+     * Prints at most the first thousand elements of this sequence to the standard output in a formatted manner.
+     * The output format is {@code [element1, element2, element3, ...]}.
+     * If there are more than a thousand elements, only the first thousand will be printed followed by an ellipsis (...).
+     * If this sequence is empty, it will print {@code []}.
      *
      * <p>This is a terminal operation. This sequence will be automatically closed after this operation completes, whether normally or exceptionally.</p>
-     *
-     * <p><b>Implementation Note:</b> This method is equivalent to {@code System.out.println(seq.join(", ", "[", "]"))}</p> 
      *
      * @throws IllegalStateException if the sequence has already been closed
      * @throws E if an exception occurs during element processing
@@ -12385,7 +12384,14 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
     @Beta
     @TerminalOp
     public void println() throws IllegalStateException, E {
-        N.println(join(", ", "[", "]"));
+        final List<T> list = limit(N.MAX_SIZE_FOR_PRINTLN + 1).toList();
+
+        if (list.size() > N.MAX_SIZE_FOR_PRINTLN) {
+            list.remove(N.MAX_SIZE_FOR_PRINTLN);
+            N.println(Strings.join(list.subList(0, N.MAX_SIZE_FOR_PRINTLN), ", ", "[", ", ...]"));
+        } else {
+            N.println(Strings.join(list, ", ", "[", "]"));
+        }
     }
 
     /**

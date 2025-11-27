@@ -1,7 +1,3 @@
-/*
- * Copyright (c) 2015, Haiyang Li. All rights reserved.
- */
-
 package com.landawn.abacus.util;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -9,12 +5,14 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.AbstractTest;
 import com.landawn.abacus.entity.extendDirty.basic.Account;
 import com.landawn.abacus.entity.extendDirty.basic.AccountContact;
 
+@Tag("old-test")
 public class URLEncodedUtilTest extends AbstractTest {
 
     @Test

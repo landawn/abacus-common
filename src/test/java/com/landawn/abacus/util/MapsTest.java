@@ -1,7 +1,3 @@
-/*
- * Copyright (c) 2015, Haiyang Li. All rights reserved.
- */
-
 package com.landawn.abacus.util;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -12,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.google.common.collect.Lists;
@@ -21,6 +18,7 @@ import com.landawn.abacus.util.u.Nullable;
 import com.landawn.abacus.util.stream.IntStream;
 import com.landawn.abacus.util.stream.Stream;
 
+@Tag("old-test")
 public class MapsTest extends AbstractTest {
 
     @Test
@@ -79,13 +77,16 @@ public class MapsTest extends AbstractTest {
         map = CommonUtil.asMap("key1", CommonUtil.asList(CommonUtil.asLinkedHashSet("val1", CommonUtil.asMap("key2", "val22"))));
         assertEquals("val22", Maps.getByPath(map, "key1[0][1].key2"));
 
-        map = CommonUtil.asMap("key1", CommonUtil.asList(CommonUtil.asLinkedHashSet("val1", CommonUtil.asMap("key2", CommonUtil.asList("val22", CommonUtil.asMap("key3", "val33"))))));
+        map = CommonUtil.asMap("key1",
+                CommonUtil.asList(CommonUtil.asLinkedHashSet("val1", CommonUtil.asMap("key2", CommonUtil.asList("val22", CommonUtil.asMap("key3", "val33"))))));
         assertEquals("val33", Maps.getByPath(map, "key1[0][1].key2[1].key3"));
 
-        map = CommonUtil.asMap("key1", CommonUtil.asList(CommonUtil.asLinkedHashSet("val1", CommonUtil.asMap("key2", CommonUtil.asList("val22", CommonUtil.asMap("key3", "val33"))))));
+        map = CommonUtil.asMap("key1",
+                CommonUtil.asList(CommonUtil.asLinkedHashSet("val1", CommonUtil.asMap("key2", CommonUtil.asList("val22", CommonUtil.asMap("key3", "val33"))))));
         assertNull(Maps.getByPath(map, "key1[0][2].key2[1].key3"));
 
-        map = CommonUtil.asMap("key1", CommonUtil.asList(CommonUtil.asLinkedHashSet("val1", CommonUtil.asMap("key2", CommonUtil.asList("val22", CommonUtil.asMap("key3", "val33"))))));
+        map = CommonUtil.asMap("key1",
+                CommonUtil.asList(CommonUtil.asLinkedHashSet("val1", CommonUtil.asMap("key2", CommonUtil.asList("val22", CommonUtil.asMap("key3", "val33"))))));
         assertNull(Maps.getByPath(map, "key1[0][1].key22[1].key3"));
 
         map = CommonUtil.asMap("key1", CommonUtil.asMap("key2", null));

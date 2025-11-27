@@ -1,7 +1,3 @@
-/*
- * Copyright (c) 2015, Haiyang Li. All rights reserved.
- */
-
 package com.landawn.abacus.entity;
 
 import java.sql.Date;
@@ -209,7 +205,8 @@ public class XBean {
 
         XBean other = (XBean) obj;
 
-        if (!Objects.equals(firstName, other.firstName) || !Objects.equals(lastName, other.lastName) || !Objects.equals(middleName, other.middleName) || (typeBoolean != other.typeBoolean)) {
+        if (!Objects.equals(firstName, other.firstName) || !Objects.equals(lastName, other.lastName) || !Objects.equals(middleName, other.middleName)
+                || (typeBoolean != other.typeBoolean)) {
             return false;
         }
 

@@ -12,11 +12,9 @@ class InvocationHandlerTest {
     public void test() {
         final MyClassInterface original = new MyClass();
 
-        // Create a dynamic proxy
         final MyClassInterface proxy = (MyClassInterface) Proxy.newProxyInstance(MyClass.class.getClassLoader(), new Class[] { MyClassInterface.class },
                 new LoggingInvocationHandler(original));
 
-        // Call methods on the proxy
         proxy.method1();
         proxy.method2();
     }
@@ -30,13 +28,10 @@ class InvocationHandlerTest {
 
         @Override
         public Object invoke(final Object proxy, final Method method, final Object[] args) throws Throwable {
-            // Log the method call
             System.out.println("Calling method: " + method.getName());
 
-            // Invoke the actual method
             final Object result = method.invoke(target, args);
 
-            // Log after the method call
             System.out.println("Method " + method.getName() + " executed");
 
             return result;

@@ -6,17 +6,6 @@ import org.junit.jupiter.api.Test;
 
 public class MathsTest {
 
-    //    @Test
-    //    public void test_001() {
-    //        for (int i = 0; i < 16; i++) {
-    //            assertEquals(i % 2 == 0, Maths.isPowerOfFour(Maths.pow(2, i)));
-    //        }
-    //
-    //        for (int i = 0; i < 32; i++) {
-    //            assertEquals(i % 2 == 0, Maths.isPowerOfFour(Maths.pow(2L, i)));
-    //        }
-    //    }
-
     @Test
     public void test_log() {
         N.println(Numbers.log2(10));

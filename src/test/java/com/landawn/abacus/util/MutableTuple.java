@@ -1,19 +1,3 @@
-/*
- * Copyright (c) 2017, Haiyang Li.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- * https://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 package com.landawn.abacus.util;
 
 import java.util.Collection;
@@ -53,7 +37,6 @@ public abstract class MutableTuple {
         @Override
         public <E extends Exception> void forEach(Throwables.Consumer<?, E> consumer) throws E {
             CommonUtil.checkArgNotNull(consumer);
-            // do nothing.
         }
 
         @Override
@@ -236,7 +219,6 @@ public abstract class MutableTuple {
     public static final class MutableTuple1<T1> extends MutableTuple {
         public volatile T1 _1;
 
-        // For Kryo
         MutableTuple1() {
             this(null);
         }
@@ -336,7 +318,6 @@ public abstract class MutableTuple {
         public volatile T1 _1;
         public volatile T2 _2;
 
-        // For Kryo
         MutableTuple2() {
             this(null, null);
         }
@@ -457,7 +438,6 @@ public abstract class MutableTuple {
         public volatile T2 _2;
         public volatile T3 _3;
 
-        // For Kryo
         MutableTuple3() {
             this(null, null, null);
         }
@@ -585,7 +565,6 @@ public abstract class MutableTuple {
         public volatile T3 _3;
         public volatile T4 _4;
 
-        // For Kryo
         MutableTuple4() {
             this(null, null, null, null);
         }
@@ -682,7 +661,8 @@ public abstract class MutableTuple {
             if (obj != null && obj.getClass().equals(MutableTuple4.class)) {
                 final MutableTuple4<?, ?, ?, ?> other = (MutableTuple4<?, ?, ?, ?>) obj;
 
-                return CommonUtil.equals(this._1, other._1) && CommonUtil.equals(this._2, other._2) && CommonUtil.equals(this._3, other._3) && CommonUtil.equals(this._4, other._4);
+                return CommonUtil.equals(this._1, other._1) && CommonUtil.equals(this._2, other._2) && CommonUtil.equals(this._3, other._3)
+                        && CommonUtil.equals(this._4, other._4);
             }
 
             return false;
@@ -701,7 +681,6 @@ public abstract class MutableTuple {
         public volatile T4 _4;
         public volatile T5 _5;
 
-        // For Kryo
         MutableTuple5() {
             this(null, null, null, null, null);
         }
@@ -802,8 +781,8 @@ public abstract class MutableTuple {
             if (obj != null && obj.getClass().equals(MutableTuple5.class)) {
                 final MutableTuple5<?, ?, ?, ?, ?> other = (MutableTuple5<?, ?, ?, ?, ?>) obj;
 
-                return CommonUtil.equals(this._1, other._1) && CommonUtil.equals(this._2, other._2) && CommonUtil.equals(this._3, other._3) && CommonUtil.equals(this._4, other._4)
-                        && CommonUtil.equals(this._5, other._5);
+                return CommonUtil.equals(this._1, other._1) && CommonUtil.equals(this._2, other._2) && CommonUtil.equals(this._3, other._3)
+                        && CommonUtil.equals(this._4, other._4) && CommonUtil.equals(this._5, other._5);
             }
 
             return false;
@@ -811,7 +790,8 @@ public abstract class MutableTuple {
 
         @Override
         public String toString() {
-            return "[" + CommonUtil.toString(_1) + ", " + CommonUtil.toString(_2) + ", " + CommonUtil.toString(_3) + ", " + CommonUtil.toString(_4) + ", " + CommonUtil.toString(_5) + "]";
+            return "[" + CommonUtil.toString(_1) + ", " + CommonUtil.toString(_2) + ", " + CommonUtil.toString(_3) + ", " + CommonUtil.toString(_4) + ", "
+                    + CommonUtil.toString(_5) + "]";
         }
     }
 
@@ -823,7 +803,6 @@ public abstract class MutableTuple {
         public volatile T5 _5;
         public volatile T6 _6;
 
-        // For Kryo
         MutableTuple6() {
             this(null, null, null, null, null, null);
         }
@@ -928,8 +907,8 @@ public abstract class MutableTuple {
             if (obj != null && obj.getClass().equals(MutableTuple6.class)) {
                 final MutableTuple6<?, ?, ?, ?, ?, ?> other = (MutableTuple6<?, ?, ?, ?, ?, ?>) obj;
 
-                return CommonUtil.equals(this._1, other._1) && CommonUtil.equals(this._2, other._2) && CommonUtil.equals(this._3, other._3) && CommonUtil.equals(this._4, other._4)
-                        && CommonUtil.equals(this._5, other._5) && CommonUtil.equals(this._6, other._6);
+                return CommonUtil.equals(this._1, other._1) && CommonUtil.equals(this._2, other._2) && CommonUtil.equals(this._3, other._3)
+                        && CommonUtil.equals(this._4, other._4) && CommonUtil.equals(this._5, other._5) && CommonUtil.equals(this._6, other._6);
             }
 
             return false;
@@ -937,8 +916,8 @@ public abstract class MutableTuple {
 
         @Override
         public String toString() {
-            return "[" + CommonUtil.toString(_1) + ", " + CommonUtil.toString(_2) + ", " + CommonUtil.toString(_3) + ", " + CommonUtil.toString(_4) + ", " + CommonUtil.toString(_5) + ", " + CommonUtil.toString(_6)
-                    + "]";
+            return "[" + CommonUtil.toString(_1) + ", " + CommonUtil.toString(_2) + ", " + CommonUtil.toString(_3) + ", " + CommonUtil.toString(_4) + ", "
+                    + CommonUtil.toString(_5) + ", " + CommonUtil.toString(_6) + "]";
         }
     }
 
@@ -951,7 +930,6 @@ public abstract class MutableTuple {
         public volatile T6 _6;
         public volatile T7 _7;
 
-        // For Kryo
         MutableTuple7() {
             this(null, null, null, null, null, null, null);
         }
@@ -1060,8 +1038,9 @@ public abstract class MutableTuple {
             if (obj != null && obj.getClass().equals(MutableTuple7.class)) {
                 final MutableTuple7<?, ?, ?, ?, ?, ?, ?> other = (MutableTuple7<?, ?, ?, ?, ?, ?, ?>) obj;
 
-                return CommonUtil.equals(this._1, other._1) && CommonUtil.equals(this._2, other._2) && CommonUtil.equals(this._3, other._3) && CommonUtil.equals(this._4, other._4)
-                        && CommonUtil.equals(this._5, other._5) && CommonUtil.equals(this._6, other._6) && CommonUtil.equals(this._7, other._7);
+                return CommonUtil.equals(this._1, other._1) && CommonUtil.equals(this._2, other._2) && CommonUtil.equals(this._3, other._3)
+                        && CommonUtil.equals(this._4, other._4) && CommonUtil.equals(this._5, other._5) && CommonUtil.equals(this._6, other._6)
+                        && CommonUtil.equals(this._7, other._7);
             }
 
             return false;
@@ -1069,8 +1048,8 @@ public abstract class MutableTuple {
 
         @Override
         public String toString() {
-            return "[" + CommonUtil.toString(_1) + ", " + CommonUtil.toString(_2) + ", " + CommonUtil.toString(_3) + ", " + CommonUtil.toString(_4) + ", " + CommonUtil.toString(_5) + ", " + CommonUtil.toString(_6)
-                    + ", " + CommonUtil.toString(_7) + "]";
+            return "[" + CommonUtil.toString(_1) + ", " + CommonUtil.toString(_2) + ", " + CommonUtil.toString(_3) + ", " + CommonUtil.toString(_4) + ", "
+                    + CommonUtil.toString(_5) + ", " + CommonUtil.toString(_6) + ", " + CommonUtil.toString(_7) + "]";
         }
     }
 
@@ -1084,7 +1063,6 @@ public abstract class MutableTuple {
         public volatile T7 _7;
         public volatile T8 _8;
 
-        // For Kryo
         MutableTuple8() {
             this(null, null, null, null, null, null, null, null);
         }
@@ -1197,8 +1175,9 @@ public abstract class MutableTuple {
             if (obj != null && obj.getClass().equals(MutableTuple8.class)) {
                 final MutableTuple8<?, ?, ?, ?, ?, ?, ?, ?> other = (MutableTuple8<?, ?, ?, ?, ?, ?, ?, ?>) obj;
 
-                return CommonUtil.equals(this._1, other._1) && CommonUtil.equals(this._2, other._2) && CommonUtil.equals(this._3, other._3) && CommonUtil.equals(this._4, other._4)
-                        && CommonUtil.equals(this._5, other._5) && CommonUtil.equals(this._6, other._6) && CommonUtil.equals(this._7, other._7) && CommonUtil.equals(this._8, other._8);
+                return CommonUtil.equals(this._1, other._1) && CommonUtil.equals(this._2, other._2) && CommonUtil.equals(this._3, other._3)
+                        && CommonUtil.equals(this._4, other._4) && CommonUtil.equals(this._5, other._5) && CommonUtil.equals(this._6, other._6)
+                        && CommonUtil.equals(this._7, other._7) && CommonUtil.equals(this._8, other._8);
             }
 
             return false;
@@ -1206,8 +1185,8 @@ public abstract class MutableTuple {
 
         @Override
         public String toString() {
-            return "[" + CommonUtil.toString(_1) + ", " + CommonUtil.toString(_2) + ", " + CommonUtil.toString(_3) + ", " + CommonUtil.toString(_4) + ", " + CommonUtil.toString(_5) + ", " + CommonUtil.toString(_6)
-                    + ", " + CommonUtil.toString(_7) + ", " + CommonUtil.toString(_8) + "]";
+            return "[" + CommonUtil.toString(_1) + ", " + CommonUtil.toString(_2) + ", " + CommonUtil.toString(_3) + ", " + CommonUtil.toString(_4) + ", "
+                    + CommonUtil.toString(_5) + ", " + CommonUtil.toString(_6) + ", " + CommonUtil.toString(_7) + ", " + CommonUtil.toString(_8) + "]";
         }
     }
 
@@ -1222,7 +1201,6 @@ public abstract class MutableTuple {
         public volatile T8 _8;
         public volatile T9 _9;
 
-        // For Kryo
         MutableTuple9() {
             this(null, null, null, null, null, null, null, null, null);
         }
@@ -1339,9 +1317,9 @@ public abstract class MutableTuple {
             if (obj != null && obj.getClass().equals(MutableTuple9.class)) {
                 final MutableTuple9<?, ?, ?, ?, ?, ?, ?, ?, ?> other = (MutableTuple9<?, ?, ?, ?, ?, ?, ?, ?, ?>) obj;
 
-                return CommonUtil.equals(this._1, other._1) && CommonUtil.equals(this._2, other._2) && CommonUtil.equals(this._3, other._3) && CommonUtil.equals(this._4, other._4)
-                        && CommonUtil.equals(this._5, other._5) && CommonUtil.equals(this._6, other._6) && CommonUtil.equals(this._7, other._7) && CommonUtil.equals(this._8, other._8)
-                        && CommonUtil.equals(this._9, other._9);
+                return CommonUtil.equals(this._1, other._1) && CommonUtil.equals(this._2, other._2) && CommonUtil.equals(this._3, other._3)
+                        && CommonUtil.equals(this._4, other._4) && CommonUtil.equals(this._5, other._5) && CommonUtil.equals(this._6, other._6)
+                        && CommonUtil.equals(this._7, other._7) && CommonUtil.equals(this._8, other._8) && CommonUtil.equals(this._9, other._9);
             }
 
             return false;
@@ -1349,8 +1327,9 @@ public abstract class MutableTuple {
 
         @Override
         public String toString() {
-            return "[" + CommonUtil.toString(_1) + ", " + CommonUtil.toString(_2) + ", " + CommonUtil.toString(_3) + ", " + CommonUtil.toString(_4) + ", " + CommonUtil.toString(_5) + ", " + CommonUtil.toString(_6)
-                    + ", " + CommonUtil.toString(_7) + ", " + CommonUtil.toString(_8) + ", " + CommonUtil.toString(_9) + "]";
+            return "[" + CommonUtil.toString(_1) + ", " + CommonUtil.toString(_2) + ", " + CommonUtil.toString(_3) + ", " + CommonUtil.toString(_4) + ", "
+                    + CommonUtil.toString(_5) + ", " + CommonUtil.toString(_6) + ", " + CommonUtil.toString(_7) + ", " + CommonUtil.toString(_8) + ", "
+                    + CommonUtil.toString(_9) + "]";
         }
     }
 }

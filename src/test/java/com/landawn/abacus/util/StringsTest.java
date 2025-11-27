@@ -1,16 +1,3 @@
-/*
- * Copyright (C) 2024 HaiYang Li
- *
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
- * in compliance with the License. You may obtain a copy of the License at
- *
- * https://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software distributed under the License
- * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
- * or implied. See the License for the specific language governing permissions and limitations under
- * the License.
- */
 package com.landawn.abacus.util;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -25,43 +12,37 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.collections4.ListUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.AbstractTest;
 import com.landawn.abacus.util.Strings.ExtractStrategy;
 
+@Tag("old-test")
 public class StringsTest extends AbstractTest {
 
     @Test
     public void test_substringsBetween() {
 
         {
-            // String:   3 [ a 2 [ c ] ] 2 [ a ]
-            // Index:    0 1 2 3 4 5 6 7 8 9 10 11
             assertEquals("[\"a2[c\", \"a\"]", CommonUtil.stringOf(Strings.substringsBetween("3[a2[c]]2[a]", '[', ']', ExtractStrategy.DEFAULT)));
             assertEquals("[\"c\", \"a2[c]\", \"a\"]", CommonUtil.stringOf(Strings.substringsBetween("3[a2[c]]2[a]", '[', ']', ExtractStrategy.STACK_BASED)));
             assertEquals("[\"a2[c]\", \"a\"]", CommonUtil.stringOf(Strings.substringsBetween("3[a2[c]]2[a]", '[', ']', ExtractStrategy.IGNORE_NESTED)));
         }
 
         {
-            // String:   3 [ a 2 c ] ] 2 [ a ]
-            // Index:    0 1 2 3 4 5 6 7 8 9 10
             assertEquals("[\"a2c\", \"a\"]", CommonUtil.stringOf(Strings.substringsBetween("3[a2c]]2[a]", '[', ']', ExtractStrategy.DEFAULT)));
             assertEquals("[\"a2c\", \"a\"]", CommonUtil.stringOf(Strings.substringsBetween("3[a2c]]2[a]", '[', ']', ExtractStrategy.STACK_BASED)));
             assertEquals("[\"a2c\", \"a\"]", CommonUtil.stringOf(Strings.substringsBetween("3[a2c]]2[a]", '[', ']', ExtractStrategy.IGNORE_NESTED)));
         }
 
         {
-            // String:   [ [ b [ a ] ] c ]
-            // Index:    0 1 2 3 4 5 6 7 8
             assertEquals("[\"[b[a\"]", CommonUtil.stringOf(Strings.substringsBetween("[[b[a]]c]", '[', ']', ExtractStrategy.DEFAULT)));
             assertEquals("[\"a\", \"b[a]\", \"[b[a]]c\"]", CommonUtil.stringOf(Strings.substringsBetween("[[b[a]]c]", '[', ']', ExtractStrategy.STACK_BASED)));
             assertEquals("[\"[b[a]]c\"]", CommonUtil.stringOf(Strings.substringsBetween("[[b[a]]c]", '[', ']', ExtractStrategy.IGNORE_NESTED)));
         }
 
         {
-            // String:   [ [ b [ a ] [ c ] d ]
-            // Index:    0 1 2 3 4 5 6 7 8 9 10
             assertEquals("[\"[b[a\", \"c\"]", CommonUtil.stringOf(Strings.substringsBetween("[[b[a][c]d]", '[', ']', ExtractStrategy.DEFAULT)));
             assertEquals("[\"a\", \"c\", \"b[a][c]d\"]", CommonUtil.stringOf(Strings.substringsBetween("[[b[a][c]d]", '[', ']', ExtractStrategy.STACK_BASED)));
             assertEquals("[\"b[a][c]d\"]", CommonUtil.stringOf(Strings.substringsBetween("[[b[a][c]d]", '[', ']', ExtractStrategy.IGNORE_NESTED)));
@@ -73,34 +54,28 @@ public class StringsTest extends AbstractTest {
     public void test_substringIndicesBetween() {
 
         {
-            // String:   3 [ a 2 [ c ] ] 2 [ a ]
-            // Index:    0 1 2 3 4 5 6 7 8 9 10 11
             assertEquals("[[2, 6], [10, 11]]", CommonUtil.stringOf(Strings.substringIndicesBetween("3[a2[c]]2[a]", '[', ']', ExtractStrategy.DEFAULT)));
-            assertEquals("[[5, 6], [2, 7], [10, 11]]", CommonUtil.stringOf(Strings.substringIndicesBetween("3[a2[c]]2[a]", '[', ']', ExtractStrategy.STACK_BASED)));
+            assertEquals("[[5, 6], [2, 7], [10, 11]]",
+                    CommonUtil.stringOf(Strings.substringIndicesBetween("3[a2[c]]2[a]", '[', ']', ExtractStrategy.STACK_BASED)));
             assertEquals("[[2, 7], [10, 11]]", CommonUtil.stringOf(Strings.substringIndicesBetween("3[a2[c]]2[a]", '[', ']', ExtractStrategy.IGNORE_NESTED)));
         }
 
         {
-            // String:   3 [ a 2 c ] ] 2 [ a ]
-            // Index:    0 1 2 3 4 5 6 7 8 9 10
             assertEquals("[[2, 5], [9, 10]]", CommonUtil.stringOf(Strings.substringIndicesBetween("3[a2c]]2[a]", '[', ']', ExtractStrategy.DEFAULT)));
             assertEquals("[[2, 5], [9, 10]]", CommonUtil.stringOf(Strings.substringIndicesBetween("3[a2c]]2[a]", '[', ']', ExtractStrategy.STACK_BASED)));
             assertEquals("[[2, 5], [9, 10]]", CommonUtil.stringOf(Strings.substringIndicesBetween("3[a2c]]2[a]", '[', ']', ExtractStrategy.IGNORE_NESTED)));
         }
 
         {
-            // String:   [ [ b [ a ] ] c ]
-            // Index:    0 1 2 3 4 5 6 7 8
             assertEquals("[[1, 5]]", CommonUtil.stringOf(Strings.substringIndicesBetween("[[b[a]]c]", '[', ']', ExtractStrategy.DEFAULT)));
             assertEquals("[[4, 5], [2, 6], [1, 8]]", CommonUtil.stringOf(Strings.substringIndicesBetween("[[b[a]]c]", '[', ']', ExtractStrategy.STACK_BASED)));
             assertEquals("[[1, 8]]", CommonUtil.stringOf(Strings.substringIndicesBetween("[[b[a]]c]", '[', ']', ExtractStrategy.IGNORE_NESTED)));
         }
 
         {
-            // String:   [ [ b [ a ] [ c ] d ]
-            // Index:    0 1 2 3 4 5 6 7 8 9 10
             assertEquals("[[1, 5], [7, 8]]", CommonUtil.stringOf(Strings.substringIndicesBetween("[[b[a][c]d]", '[', ']', ExtractStrategy.DEFAULT)));
-            assertEquals("[[4, 5], [7, 8], [2, 10]]", CommonUtil.stringOf(Strings.substringIndicesBetween("[[b[a][c]d]", '[', ']', ExtractStrategy.STACK_BASED)));
+            assertEquals("[[4, 5], [7, 8], [2, 10]]",
+                    CommonUtil.stringOf(Strings.substringIndicesBetween("[[b[a][c]d]", '[', ']', ExtractStrategy.STACK_BASED)));
             assertEquals("[[2, 10]]", CommonUtil.stringOf(Strings.substringIndicesBetween("[[b[a][c]d]", '[', ']', ExtractStrategy.IGNORE_NESTED)));
         }
 
@@ -637,13 +612,11 @@ public class StringsTest extends AbstractTest {
             return 0;
         }
 
-        // Variable to store ending point of longest common subString in a.
         int end = 0;
 
         final int lenA = a.length;
         final int lenB = b.length;
 
-        // dp[j] is the length of longest common subarray ending with A[i-1], B[j-1]
         final int[] dp = new int[lenB + 1];
         int maxLen = 0;
 
@@ -666,32 +639,6 @@ public class StringsTest extends AbstractTest {
         }
 
         N.println(new String(CommonUtil.copyOfRange(a, end - maxLen, end)));
-        //
-        //        // Matrix to store result of two consecutive rows at a time.
-        //        int len[][] = new int[2][lenA];
-        //
-        //        // Variable to represent which row of matrix is current row.
-        //        int currRow = 0;
-        //
-        //        for (int i = 0; i < lenA; i++) {
-        //            for (int j = 0; j < lenB; j++) {
-        //                if (i == 0 || j == 0) {
-        //                    len[currRow][j] = 0;
-        //                } else if (a.charAt(i - 1) == b.charAt(j - 1)) {
-        //                    len[currRow][j] = len[1 - currRow][j - 1] + 1;
-        //
-        //                    if (len[currRow][j] > result) {
-        //                        result = len[currRow][j];
-        //                        end = i - 1;
-        //                    }
-        //                } else {
-        //                    len[currRow][j] = 0;
-        //                }
-        //            }
-        //
-        //            // Make current row as previous row and  previous row as new current row.
-        //            currRow = 1 - currRow;
-        //        }
 
         return maxLen;
     }
@@ -722,7 +669,6 @@ public class StringsTest extends AbstractTest {
         assertEquals("", "abc".substring(2, 2));
         assertEquals("", "abc".substring(3, 3));
 
-        // assertEquals("", "abc".substring(3, 2));
     }
 
     @Test
@@ -838,9 +784,6 @@ public class StringsTest extends AbstractTest {
         assertEquals("abc", StringUtils.substringBetween("yabczyabcz", "y", "z"));
     }
 
-    /**
-     * Tests the substringsBetween method that returns a String Array of substrings.
-     */
     @Test
     public void testSubstringsBetween_StringStringString() {
 
@@ -871,8 +814,6 @@ public class StringsTest extends AbstractTest {
         assertEquals(1, results.length);
         assertEquals("three", results[0]);
 
-        // 'ab hello ba' will match, but 'ab non ba' won't
-        // this is because the 'a' is shared between the two and can't be matched twice
         results = StringUtils.substringsBetween("aabhellobabnonba", "ab", "ba");
         assertEquals(1, results.length);
         assertEquals("hello", results[0]);
@@ -941,9 +882,6 @@ public class StringsTest extends AbstractTest {
         assertEquals("abc", Strings.substringBetween("yabczyabcz", "y", "z"));
     }
 
-    /**
-     * Tests the substringsBetween method that returns a String Array of substrings.
-     */
     @Test
     public void testSubstringsBetween_StringStringString_01() {
 
@@ -974,8 +912,6 @@ public class StringsTest extends AbstractTest {
         assertEquals(1, results.size());
         assertEquals("three", results.get(0));
 
-        // 'ab hello ba' will match, but 'ab non ba' won't
-        // this is because the 'a' is shared between the two and can't be matched twice
         results = Strings.substringsBetween("aabhellobabnonba", "ab", "ba");
         assertEquals(1, results.size());
         assertEquals("hello", results.get(0));

@@ -1,26 +1,18 @@
-/*
- * Copyright (c) 2015, Haiyang Li. All rights reserved.
- */
-
 package com.landawn.abacus.util;
 
 import java.util.concurrent.Callable;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.AbstractTest;
 import com.landawn.abacus.util.function.BiConsumer;
 import com.landawn.abacus.util.function.BiFunction;
 
+@Tag("old-test")
 public class ContinuableFutureTest extends AbstractTest {
-
-    //    @Test
-    //    public void test_toCompletableFuture() throws Exception {
-    //        N.asyncExecute(() -> "first call").thenRun(Fn.println()).get();
-    //        N.asyncExecute(() -> "first call").toCompletableFuture().thenAcceptAsync(Fn.println()).get();
-    //    }
 
     @Test
     public void test_02() throws Exception {
@@ -114,7 +106,6 @@ public class ContinuableFutureTest extends AbstractTest {
             System.out.println(Thread.currentThread().getName() + ": CompletableFuture1 : " + System.currentTimeMillis());
             return "Hello";
         }).thenAccept(result -> {
-            // runs in the same thread that completed the future
             System.out.println(Thread.currentThread().getName() + ": " + result);
         });
 
@@ -122,7 +113,6 @@ public class ContinuableFutureTest extends AbstractTest {
             System.out.println(Thread.currentThread().getName() + ": CompletableFuture2 : " + System.currentTimeMillis());
             return "world";
         }).thenAcceptAsync(result -> {
-            // runs in ForkJoinPool.commonPool() by default, or given executor
             System.out.println(Thread.currentThread().getName() + ": " + result);
         });
 

@@ -1,19 +1,3 @@
-/*
- * Licensed to the Apache Software Foundation (ASF) under one or more
- * contributor license agreements.  See the NOTICE file distributed with
- * this work for additional information regarding copyright ownership.
- * The ASF licenses this file to You under the Apache License, Version 2.0
- * (the "License"); you may not use this file except in compliance with
- * the License.  You may obtain a copy of the License at
- *
- *      https://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 package com.landawn.abacus.util;
 
 import java.io.File;
@@ -43,7 +27,6 @@ public class FilenameUtilsTestCase extends FileBasedTestCase {
         testFile2Size = (int) testFile2.length();
     }
 
-    /** @see junit.framework.TestCase#setUp() */
     @Override
     protected void setUp() throws Exception {
         getTestDirectory().mkdirs();
@@ -55,13 +38,11 @@ public class FilenameUtilsTestCase extends FileBasedTestCase {
         createFile(testFile2, testFile2Size);
     }
 
-    /** @see junit.framework.TestCase#tearDown() */
     @Override
     protected void tearDown() throws Exception {
         FileUtils.deleteDirectory(getTestDirectory());
     }
 
-    //-----------------------------------------------------------------------
     @Test
     public void testNormalize() throws Exception {
         assertEquals(null, FilenameUtil.normalize(null));
@@ -215,16 +196,13 @@ public class FilenameUtilsTestCase extends FileBasedTestCase {
     @Test
     public void testNormalizeUnixWin() throws Exception {
 
-        // Normalize (Unix Separator)
         assertEquals("/a/c/", FilenameUtil.normalize("/a/b/../c/", true));
         assertEquals("/a/c/", FilenameUtil.normalize("\\a\\b\\..\\c\\", true));
 
-        // Normalize (Windows Separator)
         assertEquals("\\a\\c\\", FilenameUtil.normalize("/a/b/../c/", false));
         assertEquals("\\a\\c\\", FilenameUtil.normalize("\\a\\b\\..\\c\\", false));
     }
 
-    //-----------------------------------------------------------------------
     @Test
     public void testNormalizeNoEndSeparator() throws Exception {
         assertEquals(null, FilenameUtil.normalizeNoEndSeparator(null));
@@ -378,16 +356,13 @@ public class FilenameUtilsTestCase extends FileBasedTestCase {
     @Test
     public void testNormalizeNoEndSeparatorUnixWin() throws Exception {
 
-        // Normalize (Unix Separator)
         assertEquals("/a/c", FilenameUtil.normalizeNoEndSeparator("/a/b/../c/", true));
         assertEquals("/a/c", FilenameUtil.normalizeNoEndSeparator("\\a\\b\\..\\c\\", true));
 
-        // Normalize (Windows Separator)
         assertEquals("\\a\\c", FilenameUtil.normalizeNoEndSeparator("/a/b/../c/", false));
         assertEquals("\\a\\c", FilenameUtil.normalizeNoEndSeparator("\\a\\b\\..\\c\\", false));
     }
 
-    //-----------------------------------------------------------------------
     @Test
     public void testConcat() {
         assertEquals(null, FilenameUtil.concat("", null));
@@ -396,8 +371,8 @@ public class FilenameUtilsTestCase extends FileBasedTestCase {
         assertEquals(null, FilenameUtil.concat(null, "a"));
         assertEquals(SEP + "a", FilenameUtil.concat(null, "/a"));
 
-        assertEquals(null, FilenameUtil.concat("", ":")); // invalid prefix
-        assertEquals(null, FilenameUtil.concat(":", "")); // invalid prefix
+        assertEquals(null, FilenameUtil.concat("", ":"));
+        assertEquals(null, FilenameUtil.concat(":", ""));
 
         assertEquals("f" + SEP, FilenameUtil.concat("", "f/"));
         assertEquals("f", FilenameUtil.concat("", "f"));
@@ -427,7 +402,6 @@ public class FilenameUtilsTestCase extends FileBasedTestCase {
         assertEquals("~user" + SEP, FilenameUtil.concat("a/b/", "~user"));
     }
 
-    //-----------------------------------------------------------------------
     @Test
     public void testSeparatorsToUnix() {
         assertEquals(null, FilenameUtil.separatorsToUnix(null));
@@ -467,7 +441,6 @@ public class FilenameUtilsTestCase extends FileBasedTestCase {
         }
     }
 
-    //-----------------------------------------------------------------------
     @Test
     public void testGetPrefixLength() {
         assertEquals(-1, FilenameUtil.getPrefixLength(null));
@@ -527,7 +500,6 @@ public class FilenameUtilsTestCase extends FileBasedTestCase {
         assertEquals(-1, FilenameUtil.indexOfExtension("a\\b.notextension\\c"));
     }
 
-    //-----------------------------------------------------------------------
     @Test
     public void testGetPrefix() {
         assertEquals(null, FilenameUtil.getPrefix(null));
@@ -713,15 +685,12 @@ public class FilenameUtilsTestCase extends FileBasedTestCase {
     @Test
     public void testGetFullPathNoEndSeparator_IO_248() {
 
-        // Test single separator
         assertEquals("/", FilenameUtil.getFullPathNoEndSeparator("/"));
         assertEquals("\\", FilenameUtil.getFullPathNoEndSeparator("\\"));
 
-        // Test one level directory
         assertEquals("/", FilenameUtil.getFullPathNoEndSeparator("/abc"));
         assertEquals("\\", FilenameUtil.getFullPathNoEndSeparator("\\abc"));
 
-        // Test one level directory
         assertEquals("/abc", FilenameUtil.getFullPathNoEndSeparator("/abc/xyz"));
         assertEquals("\\abc", FilenameUtil.getFullPathNoEndSeparator("\\abc\\xyz"));
     }
@@ -747,22 +716,6 @@ public class FilenameUtilsTestCase extends FileBasedTestCase {
         assertEquals("file.txt", FilenameUtil.getBaseName("file.txt.bak"));
     }
 
-    //    public void testGetExtension() {
-    //        assertEquals(null, FilenameUtil.getExtension(null));
-    //        assertEquals("ext", FilenameUtil.getExtension("file.ext"));
-    //        assertEquals("", FilenameUtil.getExtension("README"));
-    //        assertEquals("com", FilenameUtil.getExtension("domain.dot.com"));
-    //        assertEquals("jpeg", FilenameUtil.getExtension("image.jpeg"));
-    //        assertEquals("", FilenameUtil.getExtension("a.b/c"));
-    //        assertEquals("txt", FilenameUtil.getExtension("a.b/c.txt"));
-    //        assertEquals("", FilenameUtil.getExtension("a/b/c"));
-    //        assertEquals("", FilenameUtil.getExtension("a.b\\c"));
-    //        assertEquals("txt", FilenameUtil.getExtension("a.b\\c.txt"));
-    //        assertEquals("", FilenameUtil.getExtension("a\\b\\c"));
-    //        assertEquals("", FilenameUtil.getExtension("C:\\temp\\foo.bar\\README"));
-    //        assertEquals("ext", FilenameUtil.getExtension("../filename.ext"));
-    //    }
-
     @Test
     public void testRemoveExtension() {
         assertEquals(null, FilenameUtil.removeExtension(null));
@@ -780,7 +733,6 @@ public class FilenameUtilsTestCase extends FileBasedTestCase {
         assertEquals("../filename", FilenameUtil.removeExtension("../filename.ext"));
     }
 
-    //-----------------------------------------------------------------------
     @Test
     public void testEquals() {
         assertTrue(FilenameUtil.equals(null, null));
@@ -803,7 +755,6 @@ public class FilenameUtilsTestCase extends FileBasedTestCase {
         assertFalse(FilenameUtil.equalsOnSystem("a\\b\\file.txt", "a/b/file.txt"));
     }
 
-    //-----------------------------------------------------------------------
     @Test
     public void testEqualsNormalized() {
         assertTrue(FilenameUtil.equalsNormalized(null, null));
@@ -834,19 +785,16 @@ public class FilenameUtilsTestCase extends FileBasedTestCase {
             FilenameUtil.equalsNormalizedOnSystem("//file.txt", "file.txt");
             fail("Invalid normalized first file");
         } catch (NullPointerException e) {
-            // expected result
         }
         try {
             FilenameUtil.equalsNormalizedOnSystem("file.txt", "//file.txt");
             fail("Invalid normalized second file");
         } catch (NullPointerException e) {
-            // expected result
         }
         try {
             FilenameUtil.equalsNormalizedOnSystem("//file.txt", "//file.txt");
             fail("Invalid normalized both filse");
         } catch (NullPointerException e) {
-            // expected result
         }
     }
 
@@ -858,7 +806,6 @@ public class FilenameUtilsTestCase extends FileBasedTestCase {
         assertFalse(FilenameUtil.equals("file.txt", "FILE.TXT", true, null));
     }
 
-    //-----------------------------------------------------------------------
     @Test
     public void testIsExtension() {
         assertFalse(FilenameUtil.isExtension(null, (String) null));

@@ -1,7 +1,3 @@
-/*
- * Copyright (c) 2015, Haiyang Li. All rights reserved.
- */
-
 package com.landawn.abacus.util;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -12,6 +8,7 @@ import java.io.FileReader;
 import java.io.Reader;
 import java.util.Set;
 
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.AbstractTest;
@@ -20,6 +17,7 @@ import com.landawn.abacus.util.PropertiesUtil.ConfigBean;
 import com.landawn.abacus.util.PropertiesUtil.Resource;
 import com.landawn.abacus.util.PropertiesUtil.ResourceType;
 
+@Tag("old-test")
 public class PropertiesTest extends AbstractTest {
 
     @Test
@@ -28,9 +26,6 @@ public class PropertiesTest extends AbstractTest {
         properties.put("key1", "value1");
         N.println(properties);
 
-        //    assertThrows(NullPointerException.class, () -> properties.put("key2", null));
-        //    assertThrows(NullPointerException.class, () -> properties.put(null, "value1"));
-        //    assertThrows(NullPointerException.class, () -> properties.put(null, null));
     }
 
     @Test
@@ -49,137 +44,6 @@ public class PropertiesTest extends AbstractTest {
 
         N.println(bean);
     }
-
-    //    @Test
-    //    public void test_loadProperties_fromDB() throws Exception {
-    //        File file = PropertiesUtil.findFile("./src/test/resources/jdbc.properties");
-    //
-    //        Properties<String, String> props0 = PropertiesUtil.load(file);
-    //
-    //        N.println(props0);
-    //
-    //        file = new File("./src/test/resources/jdbc2.xml");
-    //        if (file.exists()) {
-    //            file.delete();
-    //        }
-    //
-    //        PropertiesUtil.storeToXml(props0, file, "jdbc", false);
-    //
-    //        N.println(IOUtil.readString(file));
-    //
-    //        ConfigBean bean = new ConfigBean();
-    //        bean.setName("myTestXMLConfig");
-    //        bean.setContent(IOUtil.readString(file));
-    //        bean.setStatus(Status.ACTIVE);
-    //        bean.setLastUpdateTime(DateUtil.currentTimestamp());
-    //        bean.setCreatedTime(DateUtil.currentTimestamp());
-    //
-    //        String sql = "delete from config where name = ?";
-    //        sqlExecutor.update(sql, bean.getName());
-    //
-    //        sql = "insert into config(name, content, last_update_time, create_time) values (#{name}, #{content}, #{lastUpdateTime}, #{createdTime})";
-    //        sqlExecutor.insert(sql, bean);
-    //
-    //        sql = "update config set status = 'ACTIVE' where name = ?";
-    //        sqlExecutor.update(sql, bean.getName());
-    //
-    //        sql = "select * from config where name = 'myTestXMLConfig'";
-    //
-    //        Properties<String, String> xmlProps = PropertiesUtil.loadFromXml(sqlExecutor, sql, true);
-    //
-    //        N.println(xmlProps);
-    //
-    //        String userName = xmlProps.get("user");
-    //        xmlProps.set("user", "root2");
-    //
-    //        N.println(IOUtil.readString(file));
-    //
-    //        PropertiesUtil.storeToXml(xmlProps, file, "jdbc", true);
-    //
-    //        N.println(IOUtil.readString(file));
-    //
-    //        xmlProps.set("user", userName);
-    //
-    //        N.sleep(1000);
-    //        sql = "update config set content = ? where name = ?";
-    //        sqlExecutor.update(sql, IOUtil.readString(file), "myTestXMLConfig");
-    //
-    //        sql = "select * from config where name = ?";
-    //        ConfigBean bean2 = sqlExecutor.findFirst(ConfigBean.class, sql, "myTestXMLConfig").get();
-    //        N.println(bean2);
-    //        N.println(bean2.getContent());
-    //
-    //        N.sleep(3000);
-    //
-    //        assertEquals("root2", xmlProps.get("user"));
-    //    }
-    //
-    //    @Test
-    //    public void test_loadProperties_fromDB_2() throws Exception {
-    //        File file = PropertiesUtil.findFile("./src/test/resources/jdbc.properties");
-    //
-    //        Properties<String, String> props0 = PropertiesUtil.load(file);
-    //
-    //        N.println(props0);
-    //
-    //        file = new File("./src/test/resources/myJdbc.properties");
-    //
-    //        if (file.exists()) {
-    //            file.delete();
-    //        }
-    //
-    //        PropertiesUtil.store(props0, file, "nothing to say");
-    //
-    //        N.println(IOUtil.readString(file));
-    //
-    //        ConfigBean bean = new ConfigBean();
-    //        bean.setName("myTestPropertiesConfig");
-    //        bean.setContent(IOUtil.readString(file));
-    //        bean.setStatus(Status.ACTIVE);
-    //        bean.setLastUpdateTime(DateUtil.currentTimestamp());
-    //        bean.setCreatedTime(DateUtil.currentTimestamp());
-    //
-    //        String sql = "delete from config where name = ?";
-    //        sqlExecutor.update(sql, bean.getName());
-    //
-    //        sql = "insert into config(name, content, last_update_time, create_time) values (#{name}, #{content}, #{lastUpdateTime}, #{createdTime})";
-    //        sqlExecutor.insert(sql, bean);
-    //
-    //        sql = "update config set status = 'ACTIVE' where name = ?";
-    //        sqlExecutor.update(sql, bean.getName());
-    //
-    //        sql = "select * from config where name = 'myTestPropertiesConfig'";
-    //
-    //        Properties<String, String> dbProps = PropertiesUtil.load(sqlExecutor, sql, true);
-    //
-    //        N.println(dbProps);
-    //
-    //        String userName = dbProps.get("user");
-    //        dbProps.set("user", "root2");
-    //
-    //        N.println(IOUtil.readString(file));
-    //
-    //        PropertiesUtil.store(dbProps, file, "nothing to say");
-    //
-    //        N.println(IOUtil.readString(file));
-    //
-    //        dbProps.set("user", userName);
-    //
-    //        N.sleep(1000);
-    //        sql = "update config set content = ? where name = ?";
-    //        sqlExecutor.update(sql, IOUtil.readString(file), "myTestPropertiesConfig");
-    //
-    //        sql = "select * from config where name = ?";
-    //        ConfigBean bean2 = sqlExecutor.findFirst(ConfigBean.class, sql, "myTestPropertiesConfig").get();
-    //        N.println(bean2);
-    //        N.println(bean2.getContent());
-    //
-    //        N.sleep(3000);
-    //
-    //        assertEquals("root2", dbProps.get("user"));
-    //
-    //        file.delete();
-    //    }
 
     @Test
     public void test_loadProperties() throws Exception {
@@ -231,9 +95,6 @@ public class PropertiesTest extends AbstractTest {
             assertEquals(properties, properties2);
         }
 
-        //        if (file.exists()) {
-        //            file.delete();
-        //        }
     }
 
     @Test

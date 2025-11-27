@@ -1,29 +1,15 @@
-/*
- * Licensed to the Apache Software Foundation (ASF) under one or more
- * contributor license agreements.  See the NOTICE file distributed with
- * this work for additional information regarding copyright ownership.
- * The ASF licenses this file to You under the Apache License, Version 2.0
- * (the "License"); you may not use this file except in compliance with
- * the License.  You may obtain a copy of the License at
- *
- *      https://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 package com.landawn.abacus.util;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.AbstractTest;
 
+@Tag("old-test")
 public class IEEE754rUtilTest extends AbstractTest {
 
     @Test
@@ -57,49 +43,49 @@ public class IEEE754rUtilTest extends AbstractTest {
         try {
             IEEE754rUtil.min((float[]) null);
             fail("IllegalArgumentException expected for null input");
-        } catch (final IllegalArgumentException iae) { /* expected */
+        } catch (final IllegalArgumentException iae) {
         }
 
         try {
             IEEE754rUtil.min();
             fail("IllegalArgumentException expected for empty input");
-        } catch (final IllegalArgumentException iae) { /* expected */
+        } catch (final IllegalArgumentException iae) {
         }
 
         try {
             IEEE754rUtil.max((float[]) null);
             fail("IllegalArgumentException expected for null input");
-        } catch (final IllegalArgumentException iae) { /* expected */
+        } catch (final IllegalArgumentException iae) {
         }
 
         try {
             IEEE754rUtil.max();
             fail("IllegalArgumentException expected for empty input");
-        } catch (final IllegalArgumentException iae) { /* expected */
+        } catch (final IllegalArgumentException iae) {
         }
 
         try {
             IEEE754rUtil.min((double[]) null);
             fail("IllegalArgumentException expected for null input");
-        } catch (final IllegalArgumentException iae) { /* expected */
+        } catch (final IllegalArgumentException iae) {
         }
 
         try {
             IEEE754rUtil.min();
             fail("IllegalArgumentException expected for empty input");
-        } catch (final IllegalArgumentException iae) { /* expected */
+        } catch (final IllegalArgumentException iae) {
         }
 
         try {
             IEEE754rUtil.max((double[]) null);
             fail("IllegalArgumentException expected for null input");
-        } catch (final IllegalArgumentException iae) { /* expected */
+        } catch (final IllegalArgumentException iae) {
         }
 
         try {
             IEEE754rUtil.max();
             fail("IllegalArgumentException expected for empty input");
-        } catch (final IllegalArgumentException iae) { /* expected */
+        } catch (final IllegalArgumentException iae) {
         }
 
     }

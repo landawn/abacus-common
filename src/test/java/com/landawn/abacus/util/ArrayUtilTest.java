@@ -1,7 +1,3 @@
-/*
- * Copyright (c) 2015, Haiyang Li. All rights reserved.
- */
-
 package com.landawn.abacus.util;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -9,16 +5,18 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.Arrays;
 
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.AbstractTest;
 
+@Tag("old-test")
 public class ArrayUtilTest extends AbstractTest {
 
     @Test
     public void test_parallel_sort_perf() {
-        final int arrayLength = 1000; //3000;
-        final int loopNum = 1; // 100000;
+        final int arrayLength = 1000;
+        final int loopNum = 1;
         {
             final int[] a = Array.random(arrayLength);
             Profiler.run(1, loopNum, 3, "Arrays.sort(int[])", () -> Arrays.sort(a.clone())).printResult();

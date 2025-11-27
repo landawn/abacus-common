@@ -113,31 +113,27 @@ public class MoreStreamTest {
     @Test
     public void test_index() {
         {
-            // Forwards
             final int[] source = { 1, 2, 3, 1, 5, 1 };
-            IntStreamEx.ofIndices(source, (a, fromIndex) -> N.indexOf(a, 1, fromIndex)).println(); // [0, 3, 5]
-            IntStreamEx.ofIndices(source, 1, (a, fromIndex) -> N.indexOf(a, 1, fromIndex)).println(); // [3, 5]
+            IntStreamEx.ofIndices(source, (a, fromIndex) -> N.indexOf(a, 1, fromIndex)).println();
+            IntStreamEx.ofIndices(source, 1, (a, fromIndex) -> N.indexOf(a, 1, fromIndex)).println();
 
-            // Backwards
-            IntStreamEx.ofIndices(source, 5, -1, (a, fromIndex) -> N.lastIndexOf(a, 1, fromIndex)).println(); // [5, 3, 0]
-            IntStreamEx.ofIndices(source, 4, -1, (a, fromIndex) -> N.lastIndexOf(a, 1, fromIndex)).println(); // [3, 0]
+            IntStreamEx.ofIndices(source, 5, -1, (a, fromIndex) -> N.lastIndexOf(a, 1, fromIndex)).println();
+            IntStreamEx.ofIndices(source, 4, -1, (a, fromIndex) -> N.lastIndexOf(a, 1, fromIndex)).println();
         }
 
         N.println("==================================");
 
         {
-            // Forwards
             final int[] source = { 1, 2, 3, 1, 2, 1 };
             final int[] targetSubArray = { 1, 2 };
 
             N.println(N.lastIndexOfSubList(N.asList(1, 2, 3, 1, 2, 1), N.asList(1, 2)));
             N.println(Collections.lastIndexOfSubList(N.asList(1, 2, 3, 1, 2, 1), N.asList(1, 2)));
             N.println("aabba".lastIndexOf("ab", 5));
-            IntStreamEx.ofIndices(source, (a, fromIndex) -> Index.ofSubArray(a, fromIndex, targetSubArray, 0, targetSubArray.length).orElse(-1)).println(); // [0, 3]
+            IntStreamEx.ofIndices(source, (a, fromIndex) -> Index.ofSubArray(a, fromIndex, targetSubArray, 0, targetSubArray.length).orElse(-1)).println();
 
-            // Backwards
             IntStreamEx.ofIndices(source, 5, -1, (a, fromIndex) -> Index.lastOfSubArray(a, fromIndex, targetSubArray, 0, targetSubArray.length).orElse(-1))
-                    .println(); // [3, 0]
+                    .println();
         }
 
         N.println("==================================");
@@ -178,9 +174,6 @@ public class MoreStreamTest {
 
     @Test
     public void test_sliding_5() {
-        //        IntStream.range(0, 30).boxed().sliding(3, 5).map(s -> s.join(", ")).forEach(Fn.println());
-        //        N.println(Strings.repeat('=', 80));
-        //        IntStream.range(0, 30).boxed().sliding(3, 5).skip(3).map(s -> s.join(", ")).forEach(Fn.println());
 
         N.println(Strings.repeat('=', 80));
         N.println(com.google.common.base.Splitter.on(',').split(" foo,,,  bar ,"));
@@ -201,23 +194,6 @@ public class MoreStreamTest {
                 .last()
                 .ifPresent(N::println);
 
-        //        assertEquals(
-        //                1000, Stream
-        //                        .merge(IntStream.rangeClosed(0, 1000).shuffled().boxed().split(10).toList(),
-        //                                (i, j) -> i <= j ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND)
-        //                        .sorted()
-        //                        .last()
-        //                        .get()
-        //                        .intValue());
-        //
-        //        assertEquals(
-        //                1000, Stream
-        //                        .parallelMerge(IntStream.rangeClosed(0, 1000).shuffled().boxed().split(10).toList(),
-        //                                (i, j) -> i <= j ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND)
-        //                        .sorted()
-        //                        .last()
-        //                        .get()
-        //                        .intValue());
     }
 
     @Test
@@ -231,6 +207,7 @@ public class MoreStreamTest {
 
         Stream.of(1, 2, 3).collect(java.util.stream.Collectors.groupingByConcurrent(Fn.identity())).forEach(Fn.println("="));
     }
+
     @Test
     public void test_flattmapToObj() {
         StreamEx.of(1, 2, 3).println();
@@ -261,24 +238,6 @@ public class MoreStreamTest {
         };
 
         long startTime = System.currentTimeMillis();
-        //        IntList.range(0, 128).toList().stream().parallel().collect(java.util.stream.Collectors.toMap(keyExtractor, keyExtractor));
-        //        System.out.println("=========: " + (System.currentTimeMillis() - startTime));
-        //
-        //        startTime = System.currentTimeMillis();
-        //        IntList.range(0, 128).toList().stream().parallel().collect(java.util.stream.Collectors.toConcurrentMap(keyExtractor, keyExtractor));
-        //        System.out.println("=========: " + (System.currentTimeMillis() - startTime));
-        //
-        //        startTime = System.currentTimeMillis();
-        //        IntList.range(0, 128).stream().boxed().parallel().collect(Collectors.toMap(keyExtractor, keyExtractor));
-        //        System.out.println("=========: " + (System.currentTimeMillis() - startTime));
-        //
-        //        startTime = System.currentTimeMillis();
-        //        IntList.range(0, 128).stream().boxed().parallel(64).collect(Collectors.toMap(keyExtractor, keyExtractor));
-        //        System.out.println("=========: " + (System.currentTimeMillis() - startTime));
-        //
-        //        startTime = System.currentTimeMillis();
-        //        IntList.range(0, 128).stream().boxed().parallel().collect(java.util.stream.Collectors.toConcurrentMap(keyExtractor, keyExtractor));
-        //        System.out.println("=========: " + (System.currentTimeMillis() - startTime));
 
         startTime = System.currentTimeMillis();
         IntList.range(0, 256).stream().boxed().parallel(64).collect(java.util.stream.Collectors.toConcurrentMap(keyExtractor, keyExtractor));
@@ -415,65 +374,8 @@ public class MoreStreamTest {
         IntStream.range(1, 10).boxed().sliding(3, 4, IntFunctions.ofQueue()).forEach(Fn.println());
     }
 
-    //    @Test
-    //    public void test_sliding_2() {
-    //        IntStream.range(0, 10).slidingToList(4).skip(0).println();
-    //        IntStream.range(0, 10).slidingToList(4).skip(1).println();
-    //        IntStream.range(0, 10).slidingToList(4).skip(2).println();
-    //        IntStream.range(0, 10).slidingToList(4).skip(3).println();
-    //        IntStream.range(0, 10).slidingToList(4).skip(7).println();
-    //        IntStream.range(0, 10).slidingToList(4).skip(8).println();
-    //        IntStream.range(0, 10).slidingToList(4).skip(9).println();
-    //        IntStream.range(0, 10).slidingToList(4).skip(10).println();
-    //        IntStream.range(0, 10).slidingToList(4).skip(11).println();
-    //
-    //        N.println(Strings.repeat("=", 80));
-    //
-    //        IntStream.range(0, 10).sliding(4, 2).skip(0).println();
-    //        IntStream.range(0, 10).sliding(4, 2).skip(1).println();
-    //        IntStream.range(0, 10).sliding(4, 2).skip(2).println();
-    //        IntStream.range(0, 10).sliding(4, 2).skip(3).println();
-    //        IntStream.range(0, 10).sliding(4, 2).skip(7).println();
-    //        IntStream.range(0, 10).sliding(4, 2).skip(8).println();
-    //        IntStream.range(0, 10).sliding(4, 2).skip(9).println();
-    //        IntStream.range(0, 10).sliding(4, 2).skip(10).println();
-    //        IntStream.range(0, 10).sliding(4, 2).skip(11).println();
-    //
-    //        N.println(Strings.repeat("=", 80));
-    //
-    //        IntStream.range(0, 10).sliding(4, 3).skip(0).println();
-    //        IntStream.range(0, 10).sliding(4, 3).skip(1).println();
-    //        IntStream.range(0, 10).sliding(4, 3).skip(2).println();
-    //        IntStream.range(0, 10).sliding(4, 3).skip(3).println();
-    //        IntStream.range(0, 10).sliding(4, 3).skip(7).println();
-    //        IntStream.range(0, 10).sliding(4, 3).skip(8).println();
-    //        IntStream.range(0, 10).sliding(4, 3).skip(9).println();
-    //        IntStream.range(0, 10).sliding(4, 3).skip(10).println();
-    //        IntStream.range(0, 10).sliding(4, 3).skip(11).println();
-    //
-    //        N.println(Strings.repeat("=", 80));
-    //
-    //        IntStream.range(0, 10).sliding(4, 4).skip(0).println();
-    //        IntStream.range(0, 10).sliding(4, 4).skip(1).println();
-    //        IntStream.range(0, 10).sliding(4, 4).skip(2).println();
-    //        IntStream.range(0, 10).sliding(4, 4).skip(3).println();
-    //        IntStream.range(0, 10).sliding(4, 4).skip(7).println();
-    //        IntStream.range(0, 10).sliding(4, 4).skip(8).println();
-    //        IntStream.range(0, 10).sliding(4, 4).skip(9).println();
-    //        IntStream.range(0, 10).sliding(4, 4).skip(10).println();
-    //        IntStream.range(0, 10).sliding(4, 4).skip(11).println();
-    //    }
-
     @Test
     public void test_sliding_3() {
-        //        IntStream.range(0, 10).boxed().slidingToList(4).skip(0).println();
-        //        IntStream.range(0, 10).boxed().slidingToList(4).skip(1).println();
-        //        IntStream.range(0, 10).boxed().slidingToList(4).skip(2).println();
-        //        IntStream.range(0, 10).boxed().slidingToList(4).skip(7).println();
-        //        IntStream.range(0, 10).boxed().slidingToList(4).skip(8).println();
-        //        IntStream.range(0, 10).boxed().slidingToList(4).skip(9).println();
-        //        IntStream.range(0, 10).boxed().slidingToList(4).skip(10).println();
-        //        IntStream.range(0, 10).boxed().slidingToList(4).skip(11).println();
 
         N.println(Strings.repeat("=", 80));
 
@@ -561,7 +463,6 @@ public class MoreStreamTest {
 
         Stream.of("a", "b", null, "c", "a").distinct().println();
 
-        // Stream.of("a", "b", null, "c", "a").distinctBy(Fn.identity(), e -> e.getValue() > 0).println();
     }
 
     @Test
@@ -642,12 +543,12 @@ public class MoreStreamTest {
 
     @Test
     public void test_Multimap() {
-        final ListMultimap<String, Integer> listMultimap = ListMultimap.of("a", 1, "b", 2, "a", 2, "a", 2); // -> {a=[1, 2, 2], b=[2]}
-        listMultimap.removeAll(N.asMap("a", 2)); // -> {a=[1, 2], b=[2]}
+        final ListMultimap<String, Integer> listMultimap = ListMultimap.of("a", 1, "b", 2, "a", 2, "a", 2);
+        listMultimap.removeAll(N.asMap("a", 2));
         N.println(listMultimap);
 
-        final SetMultimap<String, Integer> setMultimap = SetMultimap.of("a", 1, "b", 2, "a", 2); // -> {a=[1, 2, 2], b=[2]}
-        setMultimap.removeAll(N.asMap("a", 2)); // -> {a=[1], b=[2]}
+        final SetMultimap<String, Integer> setMultimap = SetMultimap.of("a", 1, "b", 2, "a", 2);
+        setMultimap.removeAll(N.asMap("a", 2));
         N.println(setMultimap);
     }
 
@@ -757,10 +658,6 @@ public class MoreStreamTest {
                     assertEquals(a2.length / 2, b.length);
                     IntStream.of(b).forEach(i -> assertTrue(i < a2[a2.length / 2]));
 
-                    //    b = IntStream.of(a).parallel(Splitor.ARRAY).filter(i -> i < a2[a2.length / 2]).toArray();
-                    //    assertEquals(a2.length / 2, b.length);
-                    //    IntStream.of(b).forEach(i -> assertTrue(i < a2[a2.length / 2]));
-
                     b = IntStream.of(IntIterator.of(a)).filter(i -> i < a2[a2.length / 2]).toArray();
                     assertEquals(a2.length / 2, b.length);
                     IntStream.of(b).forEach(i -> assertTrue(i < a2[a2.length / 2]));
@@ -778,10 +675,6 @@ public class MoreStreamTest {
                     b = Stream.of(a).parallel().filter(i -> i < a2[a2.length / 2]).toArray(Integer[]::new);
                     assertEquals(a2.length / 2, b.length);
                     Stream.of(b).forEach(i -> assertTrue(i < a2[a2.length / 2]));
-
-                    //    b = Stream.of(a).parallel(Splitor.ARRAY).filter(i -> i < a2[a2.length / 2]).toArray(Integer[]::new);
-                    //    assertEquals(a2.length / 2, b.length);
-                    //    Stream.of(b).forEach(i -> assertTrue(i < a2[a2.length / 2]));
 
                     b = Stream.of(IntStream.of(a).iterator()).filter(i -> i < a2[a2.length / 2]).toArray(Integer[]::new);
                     assertEquals(a2.length / 2, b.length);
@@ -1183,12 +1076,6 @@ public class MoreStreamTest {
                                         (i, j) -> i <= j ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND)
                                 .toArray()));
 
-                //    assertTrue(N.equals(a,
-                //            IntStream
-                //                    .parallelMerge(Stream.of(b).map(i -> IntStream.of(i.trimToSize().array())).toList(),
-                //                            (i, j) -> i <= j ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND)
-                //                    .toArray()));
-
                 c = Stream.merge(b[0].trimToSize().toList(), b[1].trimToSize().toList(), (i, j) -> i <= j ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND)
                         .mapToInt(i -> i)
                         .toArray();
@@ -1369,7 +1256,6 @@ public class MoreStreamTest {
             N.println(Stream.of("a", "b", "c", "b").toMap(e -> e, e -> e));
             fail("Should throw IllegalStateException");
         } catch (final IllegalStateException e) {
-            // ignore
         }
 
         N.println(Stream.of("a", "b", "c", "b").toMap(e -> e, e -> e, (a, b) -> a + b));
@@ -1449,38 +1335,8 @@ public class MoreStreamTest {
             IntStream.of(a).findFirst(i -> i >= mid).get();
             IntStream.of(a).findLast(i -> i <= mid).get();
 
-            //            N.println(a);
-            //            N.println(mid);
-            //            N.println(first);
-            //            N.println(last);
-
-            //    assertEquals(first, IntStream.of(IntStream.of(a).iterator()).findFirst(i -> i >= mid).get());
-            //    assertEquals(last, IntStream.of(IntStream.of(a).iterator()).findLast(i -> i <= mid).get());
-            //
-            //    assertEquals(first, IntStream.of(a).parallel().findFirst(i -> i >= mid).get());
-            //    assertEquals(last, IntStream.of(a).parallel().findLast(i -> i <= mid).get());
-            //
-            //    assertEquals(first, IntStream.of(a).parallel(Splitor.ARRAY).findFirst(i -> i >= mid).get());
-            //    assertEquals(last, IntStream.of(a).parallel(Splitor.ARRAY).findLast(i -> i <= mid).get());
-            //
-            //    assertEquals(first, IntStream.of(IntStream.of(a).iterator()).parallel().findFirst(i -> i >= mid).get());
-            //    assertEquals(last, IntStream.of(IntStream.of(a).iterator()).parallel().findLast(i -> i <= mid).get());
-            //
-            //    assertEquals(first, Stream.of(Array.box(a)).parallel(Splitor.ARRAY).findFirst(i -> i >= mid).get().longValue());
-            //    assertEquals(last, Stream.of(Array.box(a)).parallel(Splitor.ARRAY).findLast(i -> i <= mid).get().longValue());
-            //
-            //    assertEquals(first, Stream.of(Array.box(a)).parallel().findFirst(i -> i >= mid).get().longValue());
-            //    assertEquals(last, Stream.of(Array.box(a)).parallel().findLast(i -> i <= mid).get().longValue());
-            //
-            //    assertEquals(first, Stream.of(Stream.of(Array.box(a)).iterator()).parallel().findFirst(i -> i >= mid).get().longValue());
-            //    assertEquals(last, Stream.of(Stream.of(Array.box(a)).iterator()).parallel().findLast(i -> i <= mid).get().longValue());
         }
     }
-
-    //    @Test
-    //    public void test_interval() {
-    //        LongStream.interval(System.currentTimeMillis(), 3).limit(3).println();
-    //    }
 
     @Test
     public void test_parallel_concat() {

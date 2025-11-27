@@ -17,11 +17,6 @@ public class User extends org.apache.avro.specific.SpecificRecordBase implements
     @Deprecated
     public java.lang.CharSequence favorite_color;
 
-    /**
-     * Default constructor.  Note that this does not initialize fields
-     * to their default values from the schema.  If that is desired then
-     * one should use <code>newBuilder()</code>.
-     */
     public User() {
     }
 
@@ -36,7 +31,6 @@ public class User extends org.apache.avro.specific.SpecificRecordBase implements
         return SCHEMA$;
     }
 
-    // Used by DatumWriter.  Applications should not call.
     @Override
     public java.lang.Object get(int field$) {
         switch (field$) {
@@ -51,7 +45,6 @@ public class User extends org.apache.avro.specific.SpecificRecordBase implements
         }
     }
 
-    // Used by DatumReader.  Applications should not call.
     @Override
     @SuppressWarnings(value = "unchecked")
     public void put(int field$, java.lang.Object value$) {
@@ -98,22 +91,10 @@ public class User extends org.apache.avro.specific.SpecificRecordBase implements
         return new com.landawn.abacus.parser.entity.User.Builder();
     }
 
-    /**
-     *  Creates a new User RecordBuilder by copying an existing Builder.
-     *
-     * @param other 
-     * @return 
-     */
     public static com.landawn.abacus.parser.entity.User.Builder newBuilder(com.landawn.abacus.parser.entity.User.Builder other) {
         return new com.landawn.abacus.parser.entity.User.Builder(other);
     }
 
-    /**
-     *  Creates a new User RecordBuilder by copying an existing User instance.
-     *
-     * @param other 
-     * @return 
-     */
     public static com.landawn.abacus.parser.entity.User.Builder newBuilder(com.landawn.abacus.parser.entity.User other) {
         return new com.landawn.abacus.parser.entity.User.Builder(other);
     }
@@ -124,12 +105,10 @@ public class User extends org.apache.avro.specific.SpecificRecordBase implements
         private java.lang.Integer favorite_number;
         private java.lang.CharSequence favorite_color;
 
-        /** Creates a new Builder */
         private Builder() {
             super(com.landawn.abacus.parser.entity.User.SCHEMA$);
         }
 
-        /** Creates a Builder by copying an existing Builder */
         private Builder(com.landawn.abacus.parser.entity.User.Builder other) {
             super(other);
             if (isValidValue(fields()[0], other.name)) {
@@ -146,7 +125,6 @@ public class User extends org.apache.avro.specific.SpecificRecordBase implements
             }
         }
 
-        /** Creates a Builder by copying an existing User instance */
         private Builder(com.landawn.abacus.parser.entity.User other) {
             super(com.landawn.abacus.parser.entity.User.SCHEMA$);
             if (isValidValue(fields()[0], other.name)) {

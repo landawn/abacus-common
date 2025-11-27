@@ -1,7 +1,3 @@
-/*
- * Copyright (c) 2015, Haiyang Li. All rights reserved.
- */
-
 package com.landawn.abacus.util;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
@@ -201,7 +197,8 @@ public class NStringTest extends AbstractParserTest {
     public void test_11() {
         assertTrue(CommonUtil.equals(Array.of('a', 'b', 'c', '1', '2', '3'), N.concat(Array.of('a'), Array.of('b', 'c'), Array.of('1', '2', '3'))));
 
-        assertTrue(CommonUtil.equals(CommonUtil.asArray("a", "b", "c", "1", "2", "3"), N.concat(CommonUtil.asArray("a"), CommonUtil.asArray("b", "c"), CommonUtil.asArray("1", "2", "3"))));
+        assertTrue(CommonUtil.equals(CommonUtil.asArray("a", "b", "c", "1", "2", "3"),
+                N.concat(CommonUtil.asArray("a"), CommonUtil.asArray("b", "c"), CommonUtil.asArray("1", "2", "3"))));
     }
 
     @Test
@@ -209,15 +206,14 @@ public class NStringTest extends AbstractParserTest {
         final Map<Map<Object, Object>, Map<Object, Object>> map = CommonUtil.asMap(CommonUtil.asMap("abc", 123D), CommonUtil.asMap(123D, "abc"));
         String json = N.toJson(map);
         N.println(json);
-        assertEquals(map,
-                N.fromJson(json, JDC.create().setMapKeyType(CommonUtil.typeOf("Map<String, Double>")).setMapValueType(CommonUtil.typeOf("Map<Double, String>")), Map.class));
+        assertEquals(map, N.fromJson(json,
+                JDC.create().setMapKeyType(CommonUtil.typeOf("Map<String, Double>")).setMapValueType(CommonUtil.typeOf("Map<Double, String>")), Map.class));
 
         final List<Map<String, Double>> list = CommonUtil.asList(CommonUtil.asMap("abc", 123D));
         json = N.toJson(list);
         N.println(json);
         assertTrue(CommonUtil.equals(list, N.fromJson(json, JDC.create().setElementType(CommonUtil.typeOf("Map<String, Double>")), List.class)));
         assertFalse(CommonUtil.equals(list, N.fromJson(json, JDC.create().setElementType(CommonUtil.typeOf("Map<String, Float>")), List.class)));
-        // assertTrue(N.equals(list, N.fromJson(List.class, json)));
     }
 
     @Test
@@ -2340,15 +2336,6 @@ public class NStringTest extends AbstractParserTest {
             a = new boolean[] { false, true, true, false, true };
             assertTrue(Arrays.equals(new boolean[] { true, true, true }, N.removeAllOccurrences(a, false)));
 
-            // test false ...
-            //            a = null;
-            //            try {
-            //                assertNull(N.remove(a, true));
-            //                fail("Should throw NullPointerException");
-            //            } catch (NullPointerException e) {
-            //
-            //            }
-
             a = new boolean[0];
             assertTrue(Arrays.equals(CommonUtil.EMPTY_BOOLEAN_ARRAY, N.remove(a, true)));
 
@@ -2368,13 +2355,6 @@ public class NStringTest extends AbstractParserTest {
         {
             char[] a = {};
 
-            //            try {
-            //                assertNull(N.removeAllOccurrences(a, '2'));
-            //                fail("Should throw NullPointerException");
-            //            } catch (NullPointerException e) {
-            //
-            //            }
-
             assertTrue(Arrays.equals(CommonUtil.EMPTY_CHAR_ARRAY, N.removeAllOccurrences(a, '2')));
 
             a = new char[] { '2' };
@@ -2389,15 +2369,7 @@ public class NStringTest extends AbstractParserTest {
             a = new char[] { '1', '2', '2', '3', '2' };
             assertTrue(Arrays.equals(new char[] { '1', '2', '2', '3', '2' }, N.removeAllOccurrences(a, '4')));
 
-            // test false ...
             a = null;
-
-            //            try {
-            //                assertNull(N.remove(a, '2'));
-            //                fail("Should throw NullPointerException");
-            //            } catch (NullPointerException e) {
-            //
-            //            }
 
             a = new char[0];
             assertTrue(Arrays.equals(CommonUtil.EMPTY_CHAR_ARRAY, N.remove(a, '2')));
@@ -2418,13 +2390,6 @@ public class NStringTest extends AbstractParserTest {
         {
             byte[] a = {};
 
-            //            try {
-            //                assertNull(N.removeAllOccurrences(a, (byte) 2));
-            //                fail("Should throw NullPointerException");
-            //            } catch (NullPointerException e) {
-            //
-            //            }
-
             assertTrue(Arrays.equals(CommonUtil.EMPTY_BYTE_ARRAY, N.removeAllOccurrences(a, (byte) 2)));
 
             a = new byte[] { 2 };
@@ -2438,16 +2403,6 @@ public class NStringTest extends AbstractParserTest {
 
             a = new byte[] { 1, 2, 2, 3, 2 };
             assertTrue(Arrays.equals(new byte[] { 1, 2, 2, 3, 2 }, N.removeAllOccurrences(a, (byte) 4)));
-
-            //            // test false ...
-            //            a = null;
-            //
-            //            try {
-            //                assertNull(N.remove(a, (byte) 2));
-            //                fail("Should throw NullPointerException");
-            //            } catch (NullPointerException e) {
-            //
-            //            }
 
             a = new byte[0];
             assertTrue(Arrays.equals(CommonUtil.EMPTY_BYTE_ARRAY, N.remove(a, (byte) 2)));
@@ -2468,13 +2423,6 @@ public class NStringTest extends AbstractParserTest {
         {
             short[] a = {};
 
-            //            try {
-            //                assertNull(N.removeAllOccurrences(a, (short) 2));
-            //                fail("Should throw NullPointerException");
-            //            } catch (NullPointerException e) {
-            //
-            //            }
-
             assertTrue(Arrays.equals(CommonUtil.EMPTY_SHORT_ARRAY, N.removeAllOccurrences(a, (short) 2)));
 
             a = new short[] { 2 };
@@ -2488,16 +2436,6 @@ public class NStringTest extends AbstractParserTest {
 
             a = new short[] { 1, 2, 2, 3, 2 };
             assertTrue(Arrays.equals(new short[] { 1, 2, 2, 3, 2 }, N.removeAllOccurrences(a, (short) 4)));
-            //
-            //            // test false ...
-            //            a = null;
-            //
-            //            try {
-            //                assertNull(N.remove(a, (short) 2));
-            //                fail("Should throw NullPointerException");
-            //            } catch (NullPointerException e) {
-            //
-            //            }
 
             a = new short[0];
             assertTrue(Arrays.equals(CommonUtil.EMPTY_SHORT_ARRAY, N.remove(a, (short) 2)));
@@ -2518,13 +2456,6 @@ public class NStringTest extends AbstractParserTest {
         {
             int[] a = {};
 
-            //            try {
-            //                assertNull(N.removeAllOccurrences(a, 2));
-            //                fail("Should throw NullPointerException");
-            //            } catch (NullPointerException e) {
-            //
-            //            }
-
             assertTrue(Arrays.equals(CommonUtil.EMPTY_INT_ARRAY, N.removeAllOccurrences(a, 2)));
 
             a = new int[] { 2 };
@@ -2538,16 +2469,6 @@ public class NStringTest extends AbstractParserTest {
 
             a = new int[] { 1, 2, 2, 3, 2 };
             assertTrue(Arrays.equals(new int[] { 1, 2, 2, 3, 2 }, N.removeAllOccurrences(a, 4)));
-
-            //            // test false ...
-            //            a = null;
-            //
-            //            try {
-            //                assertNull(N.remove(a, 2));
-            //                fail("Should throw NullPointerException");
-            //            } catch (NullPointerException e) {
-            //
-            //            }
 
             a = new int[0];
             assertTrue(Arrays.equals(CommonUtil.EMPTY_INT_ARRAY, N.remove(a, 2)));
@@ -2568,13 +2489,6 @@ public class NStringTest extends AbstractParserTest {
         {
             long[] a = {};
 
-            //            try {
-            //                assertNull(N.removeAllOccurrences(a, 2));
-            //                fail("Should throw NullPointerException");
-            //            } catch (NullPointerException e) {
-            //
-            //            }
-
             assertTrue(Arrays.equals(CommonUtil.EMPTY_LONG_ARRAY, N.removeAllOccurrences(a, 2)));
 
             a = new long[] { 2 };
@@ -2588,16 +2502,6 @@ public class NStringTest extends AbstractParserTest {
 
             a = new long[] { 1, 2, 2, 3, 2 };
             assertTrue(Arrays.equals(new long[] { 1, 2, 2, 3, 2 }, N.removeAllOccurrences(a, 4)));
-
-            //            // test false ...
-            //            a = null;
-            //
-            //            try {
-            //                assertNull(N.remove(a, 2));
-            //                fail("Should throw NullPointerException");
-            //            } catch (NullPointerException e) {
-            //
-            //            }
 
             a = new long[0];
             assertTrue(Arrays.equals(CommonUtil.EMPTY_LONG_ARRAY, N.remove(a, 2)));
@@ -2618,13 +2522,6 @@ public class NStringTest extends AbstractParserTest {
         {
             float[] a = {};
 
-            //            try {
-            //                assertNull(N.removeAllOccurrences(a, 2));
-            //                fail("Should throw NullPointerException");
-            //            } catch (NullPointerException e) {
-            //
-            //            }
-
             assertTrue(Arrays.equals(CommonUtil.EMPTY_FLOAT_ARRAY, N.removeAllOccurrences(a, 2)));
 
             a = new float[] { 2 };
@@ -2638,16 +2535,6 @@ public class NStringTest extends AbstractParserTest {
 
             a = new float[] { 1, 2, 2, 3, 2 };
             assertTrue(Arrays.equals(new float[] { 1, 2, 2, 3, 2 }, N.removeAllOccurrences(a, 4)));
-
-            //            // test false ...
-            //            a = null;
-            //
-            //            try {
-            //                assertNull(N.remove(a, 2));
-            //                fail("Should throw NullPointerException");
-            //            } catch (NullPointerException e) {
-            //
-            //            }
 
             a = new float[0];
             assertTrue(Arrays.equals(CommonUtil.EMPTY_FLOAT_ARRAY, N.remove(a, 2)));
@@ -2668,13 +2555,6 @@ public class NStringTest extends AbstractParserTest {
         {
             double[] a = {};
 
-            //            try {
-            //                assertNull(N.removeAllOccurrences(a, 2));
-            //                fail("Should throw NullPointerException");
-            //            } catch (NullPointerException e) {
-            //
-            //            }
-
             assertTrue(Arrays.equals(CommonUtil.EMPTY_DOUBLE_ARRAY, N.removeAllOccurrences(a, 2)));
 
             a = new double[] { 2 };
@@ -2688,16 +2568,6 @@ public class NStringTest extends AbstractParserTest {
 
             a = new double[] { 1, 2, 2, 3, 2 };
             assertTrue(Arrays.equals(new double[] { 1, 2, 2, 3, 2 }, N.removeAllOccurrences(a, 4)));
-
-            //            // test false ...
-            //            a = null;
-            //
-            //            try {
-            //                assertNull(N.remove(a, 2));
-            //                fail("Should throw NullPointerException");
-            //            } catch (NullPointerException e) {
-            //
-            //            }
 
             a = new double[0];
             assertTrue(Arrays.equals(CommonUtil.EMPTY_DOUBLE_ARRAY, N.remove(a, 2)));
@@ -2718,13 +2588,6 @@ public class NStringTest extends AbstractParserTest {
         {
             String[] a = {};
 
-            //            try {
-            //                assertNull(N.removeAllOccurrences(a, "2"));
-            //                fail("Should throw NullPointerException");
-            //            } catch (NullPointerException e) {
-            //
-            //            }
-
             assertTrue(Arrays.equals(CommonUtil.EMPTY_STRING_ARRAY, N.removeAllOccurrences(a, "2")));
 
             a = new String[] { "2" };
@@ -2738,16 +2601,6 @@ public class NStringTest extends AbstractParserTest {
 
             a = new String[] { "1", "2", "2", "3", "2" };
             assertTrue(Arrays.equals(new String[] { "1", "2", "2", "3", "2" }, N.removeAllOccurrences(a, "4")));
-
-            //            // test false ...
-            //            a = null;
-            //
-            //            try {
-            //                assertNull(N.remove(a, "2"));
-            //                fail("Should throw NullPointerException");
-            //            } catch (NullPointerException e) {
-            //
-            //            }
 
             a = new String[0];
             assertTrue(Arrays.equals(CommonUtil.EMPTY_STRING_ARRAY, N.remove(a, "2")));
@@ -3608,7 +3461,6 @@ public class NStringTest extends AbstractParserTest {
                 list = CommonUtil.asLinkedList();
                 CommonUtil.fill(list, 0, k, "123");
                 N.replaceAll(list, "123", "abc");
-                // N.println(list);
 
                 for (int j = 0; j < k; j++) {
                     assertEquals("abc", list.get(j));
@@ -3623,7 +3475,6 @@ public class NStringTest extends AbstractParserTest {
                 list = CommonUtil.asLinkedList();
                 CommonUtil.fill(list, 0, k, null);
                 N.replaceAll(list, null, "abc");
-                // N.println(list);
 
                 for (int j = 0; j < k; j++) {
                     assertEquals("abc", list.get(j));
@@ -3885,7 +3736,6 @@ public class NStringTest extends AbstractParserTest {
                 final int fromIndex = 3;
                 final int toIndex = b.size() - 2;
                 CommonUtil.reverse(b, fromIndex, toIndex);
-                // N.println(b);
 
                 for (int k = 0, size = toIndex - fromIndex; k < size; k++) {
                     assertEquals(a.get(k + fromIndex), b.get(toIndex - k - 1));
@@ -3905,7 +3755,6 @@ public class NStringTest extends AbstractParserTest {
                 final int fromIndex = 3;
                 final int toIndex = b.size() - 2;
                 CommonUtil.reverse(b, fromIndex, toIndex);
-                // N.println(b);
 
                 for (int k = 0, size = toIndex - fromIndex; k < size; k++) {
                     assertEquals(a.get(k + fromIndex), b.get(toIndex - k - 1));
@@ -4087,13 +3936,6 @@ public class NStringTest extends AbstractParserTest {
 
     @Test
     public void test_checkNullOrEmpty() {
-        //        try {
-        //            Object parameter = null;
-        //            N.checkNull(parameter, "parameter");
-        //            fail("Should throw IllegalArgumentException");
-        //        } catch (IllegalArgumentException e) {
-        //            assertEquals("The parameter 'parameter' can't be null", e.getMessage());
-        //        }
 
         try {
             final String parameter = null;
@@ -4191,22 +4033,6 @@ public class NStringTest extends AbstractParserTest {
             assertEquals("'parameter' cannot be null or empty", e.getMessage());
         }
 
-        //        try {
-        //            NodeList parameter = null;
-        //            N.checkArgNotEmpty(parameter, "parameter");
-        //            fail("Should throw IllegalArgumentException");
-        //        } catch (IllegalArgumentException e) {
-        //            assertEquals("'parameter' cannot be null or empty", e.getMessage());
-        //        }
-        //
-        //        try {
-        //            NodeList parameter = null;
-        //            N.checkArgNotEmpty(parameter, "NodeList can't be null");
-        //            fail("Should throw IllegalArgumentException");
-        //        } catch (IllegalArgumentException e) {
-        //            assertEquals("NodeList can't be null", e.getMessage());
-        //        }
-
         try {
             final String parameter = null;
             CommonUtil.checkArgNotBlank(parameter, "parameter");
@@ -4214,14 +4040,6 @@ public class NStringTest extends AbstractParserTest {
         } catch (final IllegalArgumentException e) {
             assertEquals("'parameter' cannot be null or empty or blank", e.getMessage());
         }
-
-        //        try {
-        //            Object parameter = null;
-        //            N.checkNull(parameter, "'parameter' cannot be null or empty");
-        //            fail("Should throw IllegalArgumentException");
-        //        } catch (IllegalArgumentException e) {
-        //            assertEquals("'parameter' cannot be null or empty", e.getMessage());
-        //        }
 
         try {
             final String parameter = null;
@@ -4327,75 +4145,6 @@ public class NStringTest extends AbstractParserTest {
             assertEquals("'parameter' cannot be null or empty", e.getMessage());
         }
     }
-    //
-    //    @Test
-    //    public void test_join() {
-    //
-    //        assertEquals("", Strings.join(new ArrayList<>(), WD.COMMA_SPACE));
-    //        assertEquals("true, false, true", Strings.join(N.asList(true, false, true), WD.COMMA_SPACE));
-    //
-    //        assertEquals("", Strings.join(Array.of(), WD.COMMA_SPACE));
-    //        assertEquals("true, false, true", Strings.join(Array.of(true, false, true), WD.COMMA_SPACE));
-    //
-    //        assertEquals("", Strings.join(Array.of(new char[0]), WD.COMMA_SPACE));
-    //        assertEquals("1, 2, 3", Strings.join(Array.of('1', '2', '3'), WD.COMMA_SPACE));
-    //
-    //        assertEquals("", Strings.join(Array.of(new byte[0]), WD.COMMA_SPACE));
-    //        assertEquals("1, 2, 3", Strings.join(Array.of((byte) 1, (byte) 2, (byte) 3), WD.COMMA_SPACE));
-    //
-    //        assertEquals("", Strings.join(Array.of(new short[0]), WD.COMMA_SPACE));
-    //        assertEquals("1, 2, 3", Strings.join(Array.of((short) 1, (short) 2, (short) 3), WD.COMMA_SPACE));
-    //
-    //        assertEquals("", Strings.join(Array.of(), WD.COMMA_SPACE));
-    //        assertEquals("1, 2, 3", Strings.join(Array.of(1, 2, 3), WD.COMMA_SPACE));
-    //
-    //        assertEquals("", Strings.join(Array.of(), WD.COMMA_SPACE));
-    //        assertEquals("1, 2, 3", Strings.join(Array.of(1l, 2l, 3l), WD.COMMA_SPACE));
-    //
-    //        assertEquals("", Strings.join(Array.of(), WD.COMMA_SPACE));
-    //        assertEquals("1.0, 2.0, 3.0", Strings.join(Array.of(1f, 2f, 3f), WD.COMMA_SPACE));
-    //
-    //        assertEquals("", Strings.join(Array.of(), WD.COMMA_SPACE));
-    //        assertEquals("1.0, 2.0, 3.0", Strings.join(Array.of(1d, 2d, 3d), WD.COMMA_SPACE));
-    //
-    //        assertEquals("", Strings.join(Array.of(), WD._COMMA));
-    //        assertEquals("true,false,true", Strings.join(Array.of(true, false, true), WD._COMMA));
-    //
-    //        assertEquals("", Strings.join(Array.of(new char[0]), WD._COMMA));
-    //        assertEquals("1,2,3", Strings.join(Array.of('1', '2', '3'), WD._COMMA));
-    //
-    //        assertEquals("", Strings.join(Array.of(new byte[0]), WD._COMMA));
-    //        assertEquals("1,2,3", Strings.join(Array.of((byte) 1, (byte) 2, (byte) 3), WD._COMMA));
-    //
-    //        assertEquals("", Strings.join(Array.of(new short[0]), WD._COMMA));
-    //        assertEquals("1,2,3", Strings.join(Array.of((short) 1, (short) 2, (short) 3), WD._COMMA));
-    //
-    //        assertEquals("", Strings.join(Array.of(), WD._COMMA));
-    //        assertEquals("1,2,3", Strings.join(Array.of(1, 2, 3), WD._COMMA));
-    //
-    //        assertEquals("", Strings.join(Array.of(), WD._COMMA));
-    //        assertEquals("1,2,3", Strings.join(Array.of(1l, 2l, 3l), WD._COMMA));
-    //
-    //        assertEquals("", Strings.join(Array.of(), WD._COMMA));
-    //        assertEquals("1.0,2.0,3.0", Strings.join(Array.of(1f, 2f, 3f), WD._COMMA));
-    //
-    //        assertEquals("", Strings.join(Array.of(), WD._COMMA));
-    //        assertEquals("1.0,2.0,3.0", Strings.join(Array.of(1d, 2d, 3d), WD._COMMA));
-    //
-    //        assertEquals("abc", Strings.join(N.asArray("abc"), ","));
-    //        assertEquals("null", Strings.join(new Object[] { null }, ","));
-    //        assertEquals("null", Strings.join(new Object[] { "null" }, ","));
-    //
-    //        assertEquals("", Strings.join(new ArrayList<>(), WD._COMMA));
-    //        assertEquals("1, 2, 3", Strings.join(N.asList("1", "2", "3")));
-    //        assertEquals("1,2,3", Strings.join(N.asList("1", "2", "3"), WD._COMMA));
-    //        assertEquals("2", Strings.join(N.asList("1", "2", "3"), 1, 2, WD._COMMA));
-    //
-    //        assertEquals("", Strings.joinEntries(new HashMap<>(), WD._COMMA));
-    //        assertEquals("a=1, b=2, c=3", Strings.joinEntries(N.asLinkedHashMap("a", "1", "b", "2", "c", "3")));
-    //        assertEquals("a=1,b=2,c=3", Strings.joinEntries(N.asLinkedHashMap("a", "1", "b", "2", "c", "3"), WD._COMMA));
-    //        assertEquals("b=2", Strings.joinEntries(N.asLinkedHashMap("a", "1", "b", "2", "c", "3"), 1, 2, WD._COMMA));
-    //    }
 
     @Test
     public void test_createNumber() throws Exception {
@@ -4553,135 +4302,7 @@ public class NStringTest extends AbstractParserTest {
             assertEquals(3, multiSet.getCount("a"));
         }
 
-        //        {
-        //            Multimap<Object, Object, List<Object>> multiMap = N.asListMultimap(createAccount(Account.class));
-        //            N.println(multiMap);
-        //
-        //            multiMap = N.asListMultimap(createAccount(com.landawn.abacus.entity.pjo.basic.Account.class));
-        //            N.println(multiMap);
-        //
-        //            multiMap = N.asListMultimap(Beans.bean2Map(createAccount(Account.class)));
-        //            N.println(multiMap);
-        //
-        //            try {
-        //                N.asListMultimap("abc");
-        //                fail("Shuld throw IllegalArgumentException");
-        //            } catch (IllegalArgumentException e) {
-        //
-        //            }
-        //
-        //            try {
-        //                N.asListMultimap("a", "b", "c");
-        //                fail("Shuld throw IllegalArgumentException");
-        //            } catch (IllegalArgumentException e) {
-        //
-        //            }
-        //        }
-        //
-        //        {
-        //            Multimap<Object, Object, List<Object>> multiMap = N.asListMultimap("a", "1", "b", "2");
-        //            N.println(multiMap);
-        //
-        //            Multimap<String, String, List<String>> multiMap2 = N.newListMultimap(N.asMap("a", "1", "b", "2"));
-        //            N.println(multiMap2);
-        //
-        //            assertEquals(multiMap, multiMap2);
-        //        }
-        //
-        //        {
-        //            Multimap<Object, Object, List<Object>> multiMap = N.asListMultimap("a", "1", "b", "2");
-        //            N.println(multiMap);
-        //
-        //            Multimap<String, String, List<String>> multiMap2 = N.newLinkedListMultimap(N.asMap("a", "1", "b", "2"));
-        //            N.println(multiMap2);
-        //
-        //            assertEquals(multiMap, multiMap2);
-        //        }
-        //
-        //        {
-        //            Multimap<Object, Object, List<Object>> multiMap = N.asListMultimap("a", "1", "b", "2");
-        //            N.println(multiMap);
-        //
-        //            Multimap<String, String, List<String>> multiMap2 = N.newSortedListMultimap(N.asMap("a", "1", "b", "2"));
-        //            N.println(multiMap2);
-        //
-        //            assertEquals(multiMap, multiMap2);
-        //        }
-        //
-        //        {
-        //            Multimap<Object, Object, Set<Object>> multiMap = N.asSetMultimap("a", "1", "b", "2");
-        //            N.println(multiMap);
-        //
-        //            Multimap<String, String, Set<String>> multiMap2 = N.newSetMultimap(N.asMap("a", "1", "b", "2"));
-        //            N.println(multiMap2);
-        //
-        //            assertEquals(multiMap, multiMap2);
-        //        }
-        //
-        //        {
-        //            Multimap<Object, Object, Set<Object>> multiMap = N.asSetMultimap("a", "1", "b", "2");
-        //            N.println(multiMap);
-        //
-        //            Multimap<String, String, Set<String>> multiMap2 = N.newLinkedSetMultimap(N.asMap("a", "1", "b", "2"));
-        //            N.println(multiMap2);
-        //
-        //            assertEquals(multiMap, multiMap2);
-        //        }
-        //
-        //        {
-        //            Multimap<Object, Object, Set<Object>> multiMap = N.asSetMultimap("a", "1", "b", "2");
-        //            N.println(multiMap);
-        //
-        //            Multimap<String, String, Set<String>> multiMap2 = N.newSortedSetMultimap(N.asMap("a", "1", "b", "2"));
-        //            N.println(multiMap2);
-        //
-        //            assertEquals(multiMap, multiMap2);
-        //        }
     }
-
-    //    @Test
-    //    public void test_Multimap() throws Exception {
-    //        Account account = super.createAccount(Account.class);
-    //
-    //        N.println(N.newListMultimap(10));
-    //
-    //        Multimap<Object, Object, List<Object>> multiMap = N.newListMultimap(account);
-    //        N.println(multiMap);
-    //    }
-    //
-    //    @Test
-    //    public void test_asMapEntity() throws Exception {
-    //        Account account = super.createAccount(Account.class);
-    //        MapEntity mapEntity = N.asMapEntity(Account.__, account);
-    //        N.println(mapEntity);
-    //
-    //        com.landawn.abacus.entity.pjo.basic.Account account2 = super.createAccount(com.landawn.abacus.entity.pjo.basic.Account.class);
-    //        mapEntity = N.asMapEntity(Account.__, account2);
-    //        N.println(mapEntity);
-    //
-    //        account = super.createAccount(Account.class);
-    //        mapEntity = N.asMapEntity(Account.__, Beans.bean2Map(account));
-    //        N.println(mapEntity);
-    //
-    //        MapEntity mapEntity2 = new MapEntity(Account.__, Beans.bean2Map(account));
-    //        N.println(mapEntity2);
-    //
-    //        assertTrue(N.equals(mapEntity, mapEntity2));
-    //
-    //        try {
-    //            N.asMapEntity(Account.__, "abc");
-    //            fail("Should throw IllegalArgumentException");
-    //        } catch (IllegalArgumentException e) {
-    //
-    //        }
-    //
-    //        try {
-    //            N.asMapEntity(Account.__, "abc", 1, 2);
-    //            fail("Should throw IllegalArgumentException");
-    //        } catch (IllegalArgumentException e) {
-    //
-    //        }
-    //    }
 
     @Test
     public void test_newMultimap() throws Exception {
@@ -4697,53 +4318,6 @@ public class NStringTest extends AbstractParserTest {
         N.println(CommonUtil.newLinkedSetMultimap(12));
         N.println(CommonUtil.newSortedSetMultimap());
     }
-
-    //    @Test
-    //    public void test_parallelSort_byte() throws Exception {
-    //        final int maxSize = 10000;
-    //
-    //        for (int c = 1; c < 17; c++) {
-    //            changeCPUCoreNum(c);
-    //
-    //            for (int i = 0; i < 13; i++) {
-    //                byte[] array = new byte[rand.nextInt(maxSize)];
-    //
-    //                for (int k = 0, len = array.length; k < len; k++) {
-    //                    array[k] = (byte) (rand.nextInt() % Byte.MAX_VALUE);
-    //                }
-    //
-    //                N.parallelSort(array);
-    //
-    //                for (int k = 1, len = array.length; k < len; k++) {
-    //                    assertTrue(array[k] >= array[k - 1]);
-    //                }
-    //            }
-    //        }
-    //    }
-
-    //    @Test
-    //    public void test_parallelSort_short() throws Exception {
-    //        final int maxSize = 10000;
-    //
-    //        for (int c = 1; c < 17; c++) {
-    //            changeCPUCoreNum(c);
-    //
-    //            for (int i = 0; i < 13; i++) {
-    //                short[] array = new short[rand.nextInt(maxSize)];
-    //
-    //                for (int k = 0, len = array.length; k < len; k++) {
-    //                    array[k] = (short) (rand.nextInt() % Short.MAX_VALUE);
-    //                }
-    //
-    //                N.parallelSort(array);
-    //
-    //                for (int k = 1, len = array.length; k < len; k++) {
-    //                    assertTrue(array[k] >= array[k - 1]);
-    //                }
-    //            }
-    //        }
-    //
-    //    }
 
     @Test
     public void test_parallelSort_int() throws Exception {
@@ -4818,9 +4392,6 @@ public class NStringTest extends AbstractParserTest {
                 CommonUtil.parallelSort(a);
                 Arrays.sort(b);
 
-                //            for (int k = 0, len = a.length; k < len; k++) {
-                //                assertEquals(b[k], a[k]);
-                //            }
             }
         }
     }
@@ -4845,18 +4416,9 @@ public class NStringTest extends AbstractParserTest {
                 }
 
                 final double[] b = a.clone();
-                // N.println(a);
                 CommonUtil.parallelSort(a);
-                // N.println(a);
                 Arrays.sort(b);
-                // N.println(b);
 
-                //            for (int k = 0, len = a.length; k < len; k++) {
-                //                assertEquals(b[k], a[k]);
-                //            }
-
-                // TODO There is a bug in Arrays.parallelSort(double[])?
-                // assertTrue(N.isSorted(a));
             }
         }
     }
@@ -5143,39 +4705,6 @@ public class NStringTest extends AbstractParserTest {
         assertTrue(Strings.indexOfDifference(new String[] { "i am a machine", "i am a robot" }) == 7);
     }
 
-    //    @Test
-    //    public void test_difference() {
-    //        N.println(N.differenceOf(null, null));
-    //
-    //        String diff = N.differenceOf("abc", "123");
-    //        N.println(diff);
-    //        assertEquals(diff, "123");
-    //
-    //        diff = N.differenceOf("abc", "");
-    //        N.println(diff);
-    //        assertEquals(diff, "");
-    //
-    //        diff = N.differenceOf("abc", null);
-    //        N.println(diff);
-    //        assertEquals(diff, "");
-    //
-    //        diff = N.differenceOf("", null);
-    //        N.println(diff);
-    //        assertEquals(diff, "");
-    //
-    //        diff = N.differenceOf("", "");
-    //        N.println(diff);
-    //        assertEquals(diff, "");
-    //
-    //        diff = N.differenceOf("", "123");
-    //        N.println(diff);
-    //        assertEquals(diff, "123");
-    //
-    //        diff = N.differenceOf(null, "123");
-    //        N.println(diff);
-    //        assertEquals(diff, "123");
-    //    }
-
     @Test
     public void test_ordinaryIndex() {
 
@@ -5211,7 +4740,6 @@ public class NStringTest extends AbstractParserTest {
         str = "aaaaaaa";
         assertEquals(3, Strings.lastOrdinalIndexOf(str, "aa", 2));
 
-        // assertEquals(2, StringUtils.ordinalIndexOf("aaaaaaa", "aa", 2));
     }
 
     @Test
@@ -5252,6 +4780,5 @@ public class NStringTest extends AbstractParserTest {
     }
 
     protected void changeCPUCoreNum(final int c) {
-        // Array.CPU_CORES = c;
     }
 }

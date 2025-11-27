@@ -1550,18 +1550,6 @@ public abstract class PrimitiveList<B, A, L extends PrimitiveList<B, A, L>> impl
     public abstract Iterator<B> iterator();
 
     /**
-     * Prints the string representation of this primitive list to the standard output.
-     * This method is marked as @Beta, indicating it is subject to change or removal in future versions.
-     * The output format is determined by the toString() method implementation of the concrete class.
-     * 
-     * @see #toString()
-     */
-    @Beta
-    public void println() {
-        N.println(toString());
-    }
-
-    /**
      * Validates that the specified range indices are within the bounds of this list.
      * This method checks that fromIndex is non-negative, toIndex does not exceed size(),
      * and fromIndex is not greater than toIndex.

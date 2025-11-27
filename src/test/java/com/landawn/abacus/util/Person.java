@@ -1,7 +1,3 @@
-/*
- * Copyright (c) 2015, Haiyang Li. All rights reserved.
- */
-
 package com.landawn.abacus.util;
 
 import java.sql.Timestamp;
@@ -83,7 +79,7 @@ public abstract class Person {
 
     @Override
     public String toString() {
-        return "{" + "firstName=" + CommonUtil.toString(firstName) + ", " + "middleName=" + CommonUtil.toString(middleName) + ", " + "lastName=" + CommonUtil.toString(lastName) + ", "
-                + "birthDate=" + CommonUtil.toString(birthDate) + "}";
+        return "{" + "firstName=" + CommonUtil.toString(firstName) + ", " + "middleName=" + CommonUtil.toString(middleName) + ", " + "lastName="
+                + CommonUtil.toString(lastName) + ", " + "birthDate=" + CommonUtil.toString(birthDate) + "}";
     }
 }

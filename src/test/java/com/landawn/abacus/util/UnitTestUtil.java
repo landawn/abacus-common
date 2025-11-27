@@ -1,7 +1,3 @@
-/*
- * Copyright (c) 2015, Haiyang Li. All rights reserved.
- */
-
 package com.landawn.abacus.util;
 
 import java.lang.reflect.Method;
@@ -54,7 +50,6 @@ public final class UnitTestUtil {
     }
 
     private UnitTestUtil() {
-        // singleton.
     }
 
     public static <T> T createBean(Class<T> beanClass) {
@@ -179,30 +174,30 @@ public final class UnitTestUtil {
         Set<String> importClasses = CommonUtil.asSortedSet();
         Map<String, Integer> methodNameMap = new HashMap<>();
         StringBuilder sb = new StringBuilder();
-        sb.append("import junit.framework.TestCase;" + IOUtil.LINE_SEPARATOR);
-        sb.append("import org.junit.jupiter.api.Test;" + IOUtil.LINE_SEPARATOR);
-        sb.append("import " + canonicalClassName + ";" + IOUtil.LINE_SEPARATOR);
+        sb.append("import junit.framework.TestCase;" + IOUtil.LINE_SEPARATOR_UNIX);
+        sb.append("import org.junit.jupiter.api.Test;" + IOUtil.LINE_SEPARATOR_UNIX);
+        sb.append("import " + canonicalClassName + ";" + IOUtil.LINE_SEPARATOR_UNIX);
 
-        sb.append(IOUtil.LINE_SEPARATOR);
+        sb.append(IOUtil.LINE_SEPARATOR_UNIX);
         sb.append("public class " + cls.getSimpleName() + "Test extends TestCase {");
-        sb.append(IOUtil.LINE_SEPARATOR);
-        sb.append(IOUtil.LINE_SEPARATOR);
-        sb.append(IDEN + simpleClassName + " getInstance() {" + IOUtil.LINE_SEPARATOR);
-        sb.append(IDEN + IDEN + "return null; // TODO" + IOUtil.LINE_SEPARATOR);
-        sb.append(IDEN + "}" + IOUtil.LINE_SEPARATOR);
-        sb.append(IOUtil.LINE_SEPARATOR);
+        sb.append(IOUtil.LINE_SEPARATOR_UNIX);
+        sb.append(IOUtil.LINE_SEPARATOR_UNIX);
+        sb.append(IDEN + simpleClassName + " getInstance() {" + IOUtil.LINE_SEPARATOR_UNIX);
+        sb.append(IDEN + IDEN + "return null; // TODO" + IOUtil.LINE_SEPARATOR_UNIX);
+        sb.append(IDEN + "}" + IOUtil.LINE_SEPARATOR_UNIX);
+        sb.append(IOUtil.LINE_SEPARATOR_UNIX);
 
-        sb.append(IDEN + "@Override" + IOUtil.LINE_SEPARATOR);
-        sb.append(IDEN + "protected void setUp() throws Exception {" + IOUtil.LINE_SEPARATOR);
-        sb.append(IDEN + IDEN + "super.setUp();" + IOUtil.LINE_SEPARATOR);
-        sb.append(IDEN + "}" + IOUtil.LINE_SEPARATOR);
-        sb.append(IOUtil.LINE_SEPARATOR);
+        sb.append(IDEN + "@Override" + IOUtil.LINE_SEPARATOR_UNIX);
+        sb.append(IDEN + "protected void setUp() throws Exception {" + IOUtil.LINE_SEPARATOR_UNIX);
+        sb.append(IDEN + IDEN + "super.setUp();" + IOUtil.LINE_SEPARATOR_UNIX);
+        sb.append(IDEN + "}" + IOUtil.LINE_SEPARATOR_UNIX);
+        sb.append(IOUtil.LINE_SEPARATOR_UNIX);
 
-        sb.append(IDEN + "@Override" + IOUtil.LINE_SEPARATOR);
-        sb.append(IDEN + "protected void tearDown() throws Exception {" + IOUtil.LINE_SEPARATOR);
-        sb.append(IDEN + IDEN + "super.tearDown();" + IOUtil.LINE_SEPARATOR);
-        sb.append(IDEN + "}" + IOUtil.LINE_SEPARATOR);
-        sb.append(IOUtil.LINE_SEPARATOR);
+        sb.append(IDEN + "@Override" + IOUtil.LINE_SEPARATOR_UNIX);
+        sb.append(IDEN + "protected void tearDown() throws Exception {" + IOUtil.LINE_SEPARATOR_UNIX);
+        sb.append(IDEN + IDEN + "super.tearDown();" + IOUtil.LINE_SEPARATOR_UNIX);
+        sb.append(IDEN + "}" + IOUtil.LINE_SEPARATOR_UNIX);
+        sb.append(IOUtil.LINE_SEPARATOR_UNIX);
 
         Method[] methods = cls.getDeclaredMethods();
 
@@ -222,9 +217,9 @@ public final class UnitTestUtil {
 
                 methodNameMap.put(m.getName(), num + 1);
 
-                sb.append(IOUtil.LINE_SEPARATOR);
-                sb.append(IDEN + "@Test" + IOUtil.LINE_SEPARATOR);
-                sb.append(IDEN + "public void test_" + m.getName() + "_" + num + "0() throws Exception {" + IOUtil.LINE_SEPARATOR);
+                sb.append(IOUtil.LINE_SEPARATOR_UNIX);
+                sb.append(IDEN + "@Test" + IOUtil.LINE_SEPARATOR_UNIX);
+                sb.append(IDEN + "public void test_" + m.getName() + "_" + num + "0() throws Exception {" + IOUtil.LINE_SEPARATOR_UNIX);
 
                 String parameterStr = "";
 
@@ -243,7 +238,7 @@ public final class UnitTestUtil {
                     }
 
                     parameterStr += ("param" + i);
-                    sb.append(IDEN + IDEN + pt.getSimpleName() + " param" + i + " = " + defaultValue + ";" + IOUtil.LINE_SEPARATOR);
+                    sb.append(IDEN + IDEN + pt.getSimpleName() + " param" + i + " = " + defaultValue + ";" + IOUtil.LINE_SEPARATOR_UNIX);
                     i++;
                 }
 
@@ -252,7 +247,7 @@ public final class UnitTestUtil {
                 if (Modifier.isStatic(m.getModifiers())) {
                     instanceVarName = simpleClassName;
                 } else {
-                    sb.append(IDEN + IDEN + simpleClassName + " instance = getInstance();" + IOUtil.LINE_SEPARATOR);
+                    sb.append(IDEN + IDEN + simpleClassName + " instance = getInstance();" + IOUtil.LINE_SEPARATOR_UNIX);
                     instanceVarName = "instance";
                 }
 
@@ -260,36 +255,35 @@ public final class UnitTestUtil {
 
                 if (inFail) {
                     iden += IDEN;
-                    sb.append(IOUtil.LINE_SEPARATOR);
-                    sb.append(IDEN + IDEN + "try {" + IOUtil.LINE_SEPARATOR);
+                    sb.append(IOUtil.LINE_SEPARATOR_UNIX);
+                    sb.append(IDEN + IDEN + "try {" + IOUtil.LINE_SEPARATOR_UNIX);
                 }
 
                 if (void.class.equals(m.getReturnType())) {
-                    sb.append(iden + instanceVarName + "." + m.getName() + "(" + parameterStr + ");" + IOUtil.LINE_SEPARATOR);
+                    sb.append(iden + instanceVarName + "." + m.getName() + "(" + parameterStr + ");" + IOUtil.LINE_SEPARATOR_UNIX);
                 } else {
                     sb.append(iden + m.getReturnType().getSimpleName() + " result = " + instanceVarName + "." + m.getName() + "(" + parameterStr + ");"
-                            + IOUtil.LINE_SEPARATOR);
-                    sb.append(iden + "System.out.println(result);" + IOUtil.LINE_SEPARATOR);
+                            + IOUtil.LINE_SEPARATOR_UNIX);
+                    sb.append(iden + "System.out.println(result);" + IOUtil.LINE_SEPARATOR_UNIX);
                 }
 
                 if (inFail) {
-                    sb.append(IDEN + IDEN + "} catch(Exception e) {" + IOUtil.LINE_SEPARATOR);
-                    sb.append(IDEN + IDEN + IDEN + "// ignore" + IOUtil.LINE_SEPARATOR);
-                    sb.append(IDEN + IDEN + "}" + IOUtil.LINE_SEPARATOR);
+                    sb.append(IDEN + IDEN + "} catch(Exception e) {" + IOUtil.LINE_SEPARATOR_UNIX);
+                    sb.append(IDEN + IDEN + IDEN + "// ignore" + IOUtil.LINE_SEPARATOR_UNIX);
+                    sb.append(IDEN + IDEN + "}" + IOUtil.LINE_SEPARATOR_UNIX);
                 }
 
-                sb.append(IDEN + "}" + IOUtil.LINE_SEPARATOR);
+                sb.append(IDEN + "}" + IOUtil.LINE_SEPARATOR_UNIX);
             }
         }
 
         sb.append('}');
 
         N.println("========================================================================================================================");
-        N.println(IOUtil.LINE_SEPARATOR);
+        N.println(IOUtil.LINE_SEPARATOR_UNIX);
 
         for (String className : importClasses) {
             if (className.startsWith("java.lang") || (className.indexOf('.') < 0)) {
-                // skipped
             } else {
                 N.println("import " + className + ";");
             }
@@ -297,7 +291,7 @@ public final class UnitTestUtil {
 
         N.println(sb.toString());
 
-        N.println(IOUtil.LINE_SEPARATOR);
+        N.println(IOUtil.LINE_SEPARATOR_UNIX);
         N.println("========================================================================================================================");
     }
 }

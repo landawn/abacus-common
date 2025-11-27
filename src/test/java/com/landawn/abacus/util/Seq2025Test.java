@@ -1339,6 +1339,9 @@ public class Seq2025Test extends TestBase {
     @Test
     public void testPrintln() throws Exception {
         Seq.of(1, 2, 3).println();
+        Seq.range(0, 1000).println();
+
+        Seq.range(0, 1001).println();
     }
 
     @Test

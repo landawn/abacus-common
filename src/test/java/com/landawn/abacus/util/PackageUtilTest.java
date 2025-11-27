@@ -1,7 +1,3 @@
-/*
- * Copyright (c) 2015, Haiyang Li. All rights reserved.
- */
-
 package com.landawn.abacus.util;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -9,11 +5,13 @@ import static org.junit.jupiter.api.Assertions.fail;
 
 import java.util.List;
 
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.AbstractTest;
 import com.landawn.abacus.type.Type;
 
+@Tag("old-test")
 public class PackageUtilTest extends AbstractTest {
 
     @Test
@@ -56,15 +54,5 @@ public class PackageUtilTest extends AbstractTest {
         } catch (IllegalArgumentException e) {
         }
 
-        // Package pkg = SQLExecutor.class.getPackage();
-
-        // ClassUtil.getClassesByPackage(pkg.getName(), false, false);
-
-        //        try {
-        //            PackageUtil.getClassesForPackage(pkg.getName(), false, false);
-        //
-        //            fail("should throw RuntimeException");
-        //        } catch (RuntimeException e) {
-        //        }
     }
 }

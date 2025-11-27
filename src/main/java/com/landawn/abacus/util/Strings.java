@@ -114,35 +114,35 @@ import com.landawn.abacus.util.stream.Stream;
  * boolean email = Strings.isEmail("user@domain.com"); // Returns true
  *
  * // Safe transformation operations
- * String reversed = Strings.reverse(null);            // Returns null
- * String abbrev = Strings.abbreviate("Hello World", 8); // Returns "Hello..."
+ * String reversed    = Strings.reverse(null);            // Returns null
+ * String abbrev      = Strings.abbreviate("Hello World", 8); // Returns "Hello..."
  * String capitalized = Strings.capitalize("hello");   // Returns "Hello"
- * String camelCase = Strings.toCamelCase("hello_world"); // Returns "helloWorld"
+ * String camelCase   = Strings.toCamelCase("hello_world"); // Returns "helloWorld"
  *
  * // Padding and alignment operations
- * String padded = Strings.leftPad("123", 5, '0');     // Returns "00123"
+ * String padded   = Strings.leftPad("123", 5, '0');     // Returns "00123"
  * String centered = Strings.center("Hi", 6);          // Returns "  Hi  "
- * String trimmed = Strings.trim("  text  ");          // Returns "text"
+ * String trimmed  = Strings.trim("  text  ");          // Returns "text"
  *
  * // Search and replace operations
- * int index = Strings.indexOf("Hello World", "World"); // Returns 6
+ * int index       = Strings.indexOf("Hello World", "World"); // Returns 6
  * String replaced = Strings.replace("Hello World", "World", "Java"); // Returns "Hello Java"
- * int count = Strings.countMatches("abcabc", "abc");   // Returns 2
+ * int count       = Strings.countMatches("abcabc", "abc");   // Returns 2
  *
  * // Encoding and decoding operations
- * String encoded = Strings.base64Encode("Hello");      // Base64 encoding
- * String decoded = Strings.base64Decode(encoded);      // Base64 decoding
+ * String encoded    = Strings.base64Encode("Hello");      // Base64 encoding
+ * String decoded    = Strings.base64Decode(encoded);      // Base64 decoding
  * String urlEncoded = Strings.urlEncode("Hello World"); // URL encoding
  *
  * // Pattern extraction and validation
  * String firstEmail = Strings.findFirstEmailAddress("Contact: user@domain.com or admin@site.org");
  * List<String> allEmails = Strings.findAllEmailAddresses(text);
- * String firstNumber = Strings.extractFirstInteger("Price: $123.45");
- * String firstDouble = Strings.extractFirstDouble("Value: 123.45kg");
+ * String firstNumber     = Strings.extractFirstInteger("Price: $123.45");
+ * String firstDouble     = Strings.extractFirstDouble("Value: 123.45kg");
  *
  * // Advanced string building and manipulation
- * String joined = Strings.join(Arrays.asList("a", "b", "c"), ", "); // Returns "a, b, c"
- * String[] split = Strings.split("a,b,c", ",");        // Returns ["a", "b", "c"]
+ * String joined     = Strings.join(Arrays.asList("a", "b", "c"), ", "); // Returns "a, b, c"
+ * String[] split    = Strings.split("a,b,c", ",");        // Returns ["a", "b", "c"]
  * String normalized = Strings.normalize("café");       // Unicode normalization
  * }</pre>
  *
@@ -233,8 +233,8 @@ import com.landawn.abacus.util.stream.Stream;
  * <p><b>Common Patterns:</b>
  * <ul>
  *   <li><b>Validation:</b> {@code if (Strings.isNotBlank(input)) { ... }}</li>
- *   <li><b>Safe Conversion:</b> {@code String safe = Strings.defaultIfNull(value, "");}</li>
- *   <li><b>Case Conversion:</b> {@code String camel = Strings.toCamelCase(snakeCase);}</li>
+ *   <li><b>Safe Conversion:</b> {@code String safe     = Strings.defaultIfNull(value, "");}</li>
+ *   <li><b>Case Conversion:</b> {@code String camel    = Strings.toCamelCase(snakeCase);}</li>
  *   <li><b>Pattern Extraction:</b> {@code String email = Strings.findFirstEmailAddress(text);}</li>
  * </ul>
  *
@@ -287,7 +287,7 @@ import com.landawn.abacus.util.stream.Stream;
  * }
  *
  * // Base64 encoding example
- * String data = "Sensitive data to encode";
+ * String data    = "Sensitive data to encode";
  * String encoded = Strings.base64Encode(data);
  * String decoded = Strings.base64Decode(encoded);
  * }</pre>
@@ -483,7 +483,7 @@ public final class Strings {
      * 
      * // Common use cases
      * String sessionId = "SESSION_" + guid();        // returns "SESSION_550e8400e29b41d4a716446655440000"
-     * String fileName = "temp_" + guid() + ".txt";   // returns "temp_550e8400e29b41d4a716446655440000.txt"
+     * String fileName  = "temp_" + guid() + ".txt";   // returns "temp_550e8400e29b41d4a716446655440000.txt"
      * }</pre>
      *
      * @return a new UUID string without hyphens, consisting of 32 hexadecimal characters.
@@ -2119,7 +2119,7 @@ public final class Strings {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Strings.abbreviate(null, 0, 4)                  = null
+     * Strings.abbreviate(null, 0, 4)                = null
      * Strings.abbreviate("", 0, 4)                  = ""
      * Strings.abbreviate("abcdefghijklmno", -1, 10) = "abcdefg..."
      * Strings.abbreviate("abcdefghijklmno", 0, 10)  = "abcdefg..."
@@ -2163,20 +2163,20 @@ public final class Strings {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Strings.abbreviate(null, "...", 0, 4)                  = null
-     * Strings.abbreviate("", "...", 0, 4)                  = ""
-     * Strings.abbreviate("abcdefghijklmno", {@code null}, *, *)    = "abcdefghijklmno"
-     * Strings.abbreviate("abcdefghijklmno", "---", -1, 10) = "abcdefg---"
-     * Strings.abbreviate("abcdefghijklmno", ",", 0, 10)    = "abcdefghi,"
-     * Strings.abbreviate("abcdefghijklmno", ",", 1, 10)    = "abcdefghi,"
-     * Strings.abbreviate("abcdefghijklmno", ",", 2, 10)    = "abcdefghi,"
-     * Strings.abbreviate("abcdefghijklmno", "::", 4, 10)   = "::efghij::"
-     * Strings.abbreviate("abcdefghijklmno", "...", 6, 10)  = "...ghij..."
-     * Strings.abbreviate("abcdefghijklmno", "*", 9, 10)    = "*ghijklmno"
-     * Strings.abbreviate("abcdefghijklmno", "'", 10, 10)   = "'ghijklmno"
-     * Strings.abbreviate("abcdefghijklmno", "!", 12, 10)   = "!ghijklmno"
-     * Strings.abbreviate("abcdefghij", "abra", 0, 4)       = IllegalArgumentException
-     * Strings.abbreviate("abcdefghij", "...", 5, 6)        = IllegalArgumentException
+     * Strings.abbreviate(null, "...", 0, 4)                     = null
+     * Strings.abbreviate("", "...", 0, 4)                       = ""
+     * Strings.abbreviate("abcdefghijklmno", {@code null}, *, *) = "abcdefghijklmno"
+     * Strings.abbreviate("abcdefghijklmno", "---", -1, 10)      = "abcdefg---"
+     * Strings.abbreviate("abcdefghijklmno", ",", 0, 10)         = "abcdefghi,"
+     * Strings.abbreviate("abcdefghijklmno", ",", 1, 10)         = "abcdefghi,"
+     * Strings.abbreviate("abcdefghijklmno", ",", 2, 10)         = "abcdefghi,"
+     * Strings.abbreviate("abcdefghijklmno", "::", 4, 10)        = "::efghij::"
+     * Strings.abbreviate("abcdefghijklmno", "...", 6, 10)       = "...ghij..."
+     * Strings.abbreviate("abcdefghijklmno", "*", 9, 10)         = "*ghijklmno"
+     * Strings.abbreviate("abcdefghijklmno", "'", 10, 10)        = "'ghijklmno"
+     * Strings.abbreviate("abcdefghijklmno", "!", 12, 10)        = "!ghijklmno"
+     * Strings.abbreviate("abcdefghij", "abra", 0, 4)            = IllegalArgumentException
+     * Strings.abbreviate("abcdefghij", "...", 5, 6)             = IllegalArgumentException
      * }</pre>
      *
      * @param str the String to check, may be {@code null}
@@ -2249,7 +2249,7 @@ public final class Strings {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Strings.abbreviate(null, 4)        = null
+     * Strings.abbreviate(null, 4)      = null
      * Strings.abbreviate("", 4)        = ""
      * Strings.abbreviate("abcdefg", 6) = "abc..."
      * Strings.abbreviate("abcdefg", 7) = "abcdefg"
@@ -2285,7 +2285,7 @@ public final class Strings {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Strings.abbreviate(null, "...", 4)        = null
+     * Strings.abbreviate(null, "...", 4)      = null
      * Strings.abbreviate("", "...", 4)        = ""
      * Strings.abbreviate("abcdefg", null, *)  = "abcdefg"
      * Strings.abbreviate("abcdefg", ".", 5)   = "abcd."
@@ -2324,11 +2324,11 @@ public final class Strings {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Strings.abbreviateMiddle(null, null, 0)      = null
-     * Strings.abbreviateMiddle("abc", null, 0)      = "abc"
-     * Strings.abbreviateMiddle("abc", ".", 0)      = "abc"
-     * Strings.abbreviateMiddle("abc", ".", 3)      = "abc"
-     * Strings.abbreviateMiddle("abcdef", ".", 4)     = "ab.f"
+     * Strings.abbreviateMiddle(null, null, 0)    = null
+     * Strings.abbreviateMiddle("abc", null, 0)   = "abc"
+     * Strings.abbreviateMiddle("abc", ".", 0)    = "abc"
+     * Strings.abbreviateMiddle("abc", ".", 3)    = "abc"
+     * Strings.abbreviateMiddle("abcdef", ".", 4) = "ab.f"
      * }</pre>
      *
      * @param str the String to abbreviate, may be {@code null}
@@ -2357,7 +2357,7 @@ public final class Strings {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Strings.center(null, 3)     = "   "
+     * Strings.center(null, 3)   = "   "
      * Strings.center("", 3)     = "   "
      * Strings.center("ab", 4)   = " ab "
      * Strings.center("abcd", 2) = "abcd"
@@ -2382,7 +2382,7 @@ public final class Strings {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Strings.center(null, 4, ' ')     = "    "
+     * Strings.center(null, 4, ' ')   = "    "
      * Strings.center("", 4, ' ')     = "    "
      * Strings.center("ab", 4, ' ')   = " ab "
      * Strings.center("abcd", 2, ' ') = "abcd"
@@ -2424,7 +2424,7 @@ public final class Strings {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Strings.center(null, 4, " ")     = "    "
+     * Strings.center(null, 4, " ")   = "    "
      * Strings.center("", 4, " ")     = "    "
      * Strings.center("ab", 4, " ")   = " ab "
      * Strings.center("abcd", 2, " ") = "abcd"
@@ -2976,10 +2976,10 @@ public final class Strings {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Strings.toCodePoints(null)   =  null
-     * Strings.toCodePoints("")     =  []  // empty array
-     * Strings.toCodePoints("ABC")  =  [65, 66, 67]
-     * Strings.toCodePoints("👍")    =  [128077]  // emoji as single code point
+     * Strings.toCodePoints(null)  = null
+     * Strings.toCodePoints("")    = []  // empty array
+     * Strings.toCodePoints("ABC") = [65, 66, 67]
+     * Strings.toCodePoints("👍")  = [128077]  // emoji as single code point
      * }</pre>
      *
      * @param str the character sequence to convert
@@ -6305,7 +6305,7 @@ public final class Strings {
     }
 
     /**
-     * Removes diacritics (~= accents) from a string. The case will not be altered.
+     * Removes diacritics (~ = accents) from a string. The case will not be altered.
      *
      * <p>For instance, 'à' will be replaced by 'a'.
      * Note that ligatures will be left as is.</p>
@@ -6488,17 +6488,17 @@ public final class Strings {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Strings.chop(null)          = null
-     * Strings.chop("")            = ""
-     * Strings.chop("abc \r")      = "abc "
-     * Strings.chop("abc\n")       = "abc"
-     * Strings.chop("abc\r\n")     = "abc"
-     * Strings.chop("abc")         = "ab"
-     * Strings.chop("abc\nabc")    = "abc\nab"
-     * Strings.chop("a")           = ""
-     * Strings.chop("\r")          = ""
-     * Strings.chop("\n")          = ""
-     * Strings.chop("\r\n")        = ""
+     * Strings.chop(null)       = null
+     * Strings.chop("")         = ""
+     * Strings.chop("abc \r")   = "abc "
+     * Strings.chop("abc\n")    = "abc"
+     * Strings.chop("abc\r\n")  = "abc"
+     * Strings.chop("abc")      = "ab"
+     * Strings.chop("abc\nabc") = "abc\nab"
+     * Strings.chop("a")        = ""
+     * Strings.chop("\r")       = ""
+     * Strings.chop("\n")       = ""
+     * Strings.chop("\r\n")     = ""
      * }</pre>
      *
      * @param str the String to chop last character from, may be {@code null}
@@ -6595,16 +6595,16 @@ public final class Strings {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Strings.truncate(null, 0, 0) = null
-     * Strings.truncate(null, 2, 4) = null
-     * Strings.truncate("", 0, 10) = ""
-     * Strings.truncate("", 2, 10) = ""
-     * Strings.truncate("abcdefghij", 0, 3) = "abc"
-     * Strings.truncate("abcdefghij", 5, 6) = "fghij"
+     * Strings.truncate(null, 0, 0)                = null
+     * Strings.truncate(null, 2, 4)                = null
+     * Strings.truncate("", 0, 10)                 = ""
+     * Strings.truncate("", 2, 10)                 = ""
+     * Strings.truncate("abcdefghij", 0, 3)        = "abc"
+     * Strings.truncate("abcdefghij", 5, 6)        = "fghij"
      * Strings.truncate("raspberry peach", 10, 15) = "peach"
-     * Strings.truncate("abcdefghijklmno", 0, 10) = "abcdefghij"
+     * Strings.truncate("abcdefghijklmno", 0, 10)  = "abcdefghij"
      * Strings.truncate("abcdefghijklmno", -1, 10) = throws an IllegalArgumentException
-     * Strings.truncate("abcdefghij", 3, -1) = throws an IllegalArgumentException
+     * Strings.truncate("abcdefghij", 3, -1)       = throws an IllegalArgumentException
      * }</pre>
      *
      * @param str the String to truncate, may be {@code null}
@@ -6787,12 +6787,12 @@ public final class Strings {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Strings.appendIfMissing(null, ".txt")     = ".txt"
-     * Strings.appendIfMissing("", ".txt")       = ".txt"
-     * Strings.appendIfMissing("file", ".txt")   = "file.txt"
+     * Strings.appendIfMissing(null, ".txt")       = ".txt"
+     * Strings.appendIfMissing("", ".txt")         = ".txt"
+     * Strings.appendIfMissing("file", ".txt")     = "file.txt"
      * Strings.appendIfMissing("file.txt", ".txt") = "file.txt"
      * Strings.appendIfMissing("file.doc", ".txt") = "file.doc.txt"
-     * Strings.appendIfMissing("file", "")       = throws IllegalArgumentException
+     * Strings.appendIfMissing("file", "")         = throws IllegalArgumentException
      * }</pre>
      *
      * @param str the string to which the suffix should be appended, may be {@code null} or empty
@@ -6826,12 +6826,12 @@ public final class Strings {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Strings.appendIfMissingIgnoreCase(null, ".TXT")     = ".TXT"
-     * Strings.appendIfMissingIgnoreCase("", ".TXT")       = ".TXT"
-     * Strings.appendIfMissingIgnoreCase("file", ".TXT")   = "file.TXT"
+     * Strings.appendIfMissingIgnoreCase(null, ".TXT")       = ".TXT"
+     * Strings.appendIfMissingIgnoreCase("", ".TXT")         = ".TXT"
+     * Strings.appendIfMissingIgnoreCase("file", ".TXT")     = "file.TXT"
      * Strings.appendIfMissingIgnoreCase("file.txt", ".TXT") = "file.txt"
      * Strings.appendIfMissingIgnoreCase("file.TXT", ".txt") = "file.TXT"
-     * Strings.appendIfMissingIgnoreCase("file", "")       = throws IllegalArgumentException
+     * Strings.appendIfMissingIgnoreCase("file", "")         = throws IllegalArgumentException
      * }</pre>
      *
      * @param str the string to which the suffix should be appended, may be {@code null} or empty
@@ -6869,7 +6869,7 @@ public final class Strings {
      * Strings.prependIfMissing("example.com", "http://") = "http://example.com"
      * Strings.prependIfMissing("http://example.com", "http://") = "http://example.com"
      * Strings.prependIfMissing("ftp://example.com", "http://") = "http://ftp://example.com"
-     * Strings.prependIfMissing("example.com", "")   = throws IllegalArgumentException
+     * Strings.prependIfMissing("example.com", "") = throws IllegalArgumentException
      * }</pre>
      *
      * @param str the string to which the prefix should be prepended, may be {@code null} or empty
@@ -6903,12 +6903,12 @@ public final class Strings {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Strings.prependIfMissingIgnoreCase(null, "HTTP://")     = "HTTP://"
-     * Strings.prependIfMissingIgnoreCase("", "HTTP://")       = "HTTP://"
+     * Strings.prependIfMissingIgnoreCase(null, "HTTP://")          = "HTTP://"
+     * Strings.prependIfMissingIgnoreCase("", "HTTP://")            = "HTTP://"
      * Strings.prependIfMissingIgnoreCase("example.com", "HTTP://") = "HTTP://example.com"
      * Strings.prependIfMissingIgnoreCase("http://example.com", "HTTP://") = "http://example.com"
      * Strings.prependIfMissingIgnoreCase("HTTP://example.com", "http://") = "HTTP://example.com"
-     * Strings.prependIfMissingIgnoreCase("example.com", "")   = throws IllegalArgumentException
+     * Strings.prependIfMissingIgnoreCase("example.com", "") = throws IllegalArgumentException
      * }</pre>
      *
      * @param str the string to which the prefix should be prepended, may be {@code null} or empty
@@ -6946,13 +6946,13 @@ public final class Strings {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Strings.wrapIfMissing(null, "\"")    = "\"\""
-     * Strings.wrapIfMissing("", "\"")      = "\"\""
-     * Strings.wrapIfMissing("abc", "\"")   = "\"abc\""
-     * Strings.wrapIfMissing("\"abc", "\"") = "\"abc\""
-     * Strings.wrapIfMissing("abc\"", "\"") = "\"abc\""
+     * Strings.wrapIfMissing(null, "\"")      = "\"\""
+     * Strings.wrapIfMissing("", "\"")        = "\"\""
+     * Strings.wrapIfMissing("abc", "\"")     = "\"abc\""
+     * Strings.wrapIfMissing("\"abc", "\"")   = "\"abc\""
+     * Strings.wrapIfMissing("abc\"", "\"")   = "\"abc\""
      * Strings.wrapIfMissing("\"abc\"", "\"") = "\"abc\""
-     * Strings.wrapIfMissing("abc", "")     = throws IllegalArgumentException
+     * Strings.wrapIfMissing("abc", "")       = throws IllegalArgumentException
      * }</pre>
      *
      * @param str the string to be wrapped. May be {@code null} or empty.
@@ -6984,17 +6984,17 @@ public final class Strings {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Strings.wrapIfMissing(null, "[", "]") = "[]"
-     * Strings.wrapIfMissing("", "[", "]") = "[]"
-     * Strings.wrapIfMissing("[", "[", "]") = "[]"
-     * Strings.wrapIfMissing("]", "[", "]") = "[]"
-     * Strings.wrapIfMissing("abc", "[", "]") = "[abc]"
-     * Strings.wrapIfMissing("[abc", "[", "]") = "[abc]"
-     * Strings.wrapIfMissing("abc]", "[", "]") = "[abc]"
-     * Strings.wrapIfMissing("[abc]", "[", "]") = "[abc]"
-     * Strings.wrapIfMissing("a", "aa", "aa") = "aaaaa"
-     * Strings.wrapIfMissing("aa", "aa", "aa") = "aaaa"
-     * Strings.wrapIfMissing("aaa", "aa", "aa") = "aaaaa"
+     * Strings.wrapIfMissing(null, "[", "]")     = "[]"
+     * Strings.wrapIfMissing("", "[", "]")       = "[]"
+     * Strings.wrapIfMissing("[", "[", "]")      = "[]"
+     * Strings.wrapIfMissing("]", "[", "]")      = "[]"
+     * Strings.wrapIfMissing("abc", "[", "]")    = "[abc]"
+     * Strings.wrapIfMissing("[abc", "[", "]")   = "[abc]"
+     * Strings.wrapIfMissing("abc]", "[", "]")   = "[abc]"
+     * Strings.wrapIfMissing("[abc]", "[", "]")  = "[abc]"
+     * Strings.wrapIfMissing("a", "aa", "aa")    = "aaaaa"
+     * Strings.wrapIfMissing("aa", "aa", "aa")   = "aaaa"
+     * Strings.wrapIfMissing("aaa", "aa", "aa")  = "aaaaa"
      * Strings.wrapIfMissing("aaaa", "aa", "aa") = "aaaa"
      * }</pre>
      *
@@ -7032,13 +7032,13 @@ public final class Strings {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Strings.wrap(null, "\"")    = "\"\""
-     * Strings.wrap("", "\"")      = "\"\""
-     * Strings.wrap("abc", "\"")   = "\"abc\""
-     * Strings.wrap("\"abc", "\"") = "\"\"abc\""
-     * Strings.wrap("abc\"", "\"") = "\"abc\"\""
+     * Strings.wrap(null, "\"")      = "\"\""
+     * Strings.wrap("", "\"")        = "\"\""
+     * Strings.wrap("abc", "\"")     = "\"abc\""
+     * Strings.wrap("\"abc", "\"")   = "\"\"abc\""
+     * Strings.wrap("abc\"", "\"")   = "\"abc\"\""
      * Strings.wrap("\"abc\"", "\"") = "\"\"abc\"\""
-     * Strings.wrap("abc", "")     = throws IllegalArgumentException
+     * Strings.wrap("abc", "")       = throws IllegalArgumentException
      * }</pre>
      *
      * @param str the string to be wrapped. May be {@code null}.
@@ -7064,14 +7064,14 @@ public final class Strings {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Strings.wrap(null, "[", "]") = "[]"
-     * Strings.wrap("", "[", "]") = "[]"
-     * Strings.wrap("[", "[", "]") = "[[]"
-     * Strings.wrap("]", "[", "]") = "[]]"
-     * Strings.wrap("abc", "[", "]") = "[abc]"
+     * Strings.wrap(null, "[", "]")    = "[]"
+     * Strings.wrap("", "[", "]")      = "[]"
+     * Strings.wrap("[", "[", "]")     = "[[]"
+     * Strings.wrap("]", "[", "]")     = "[]]"
+     * Strings.wrap("abc", "[", "]")   = "[abc]"
      * Strings.wrap("[abc]", "[", "]") = "[[abc]]"
-     * Strings.wrap("a", "aa", "aa") = "aaaaa"
-     * Strings.wrap("aa", "aa", "aa") = "aaaaaa"
+     * Strings.wrap("a", "aa", "aa")   = "aaaaa"
+     * Strings.wrap("aa", "aa", "aa")  = "aaaaaa"
      * Strings.wrap("aaa", "aa", "aa") = "aaaaaaa"
      * }</pre>
      *
@@ -7106,14 +7106,14 @@ public final class Strings {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Strings.unwrap(null, "\"")     = null
-     * Strings.unwrap("", "\"")       = ""
-     * Strings.unwrap("abc", "\"")    = "abc"
-     * Strings.unwrap("\"abc", "\"")  = "\"abc"
-     * Strings.unwrap("abc\"", "\"")  = "abc\""
-     * Strings.unwrap("\"abc\"", "\"") = "abc"
+     * Strings.unwrap(null, "\"")          = null
+     * Strings.unwrap("", "\"")            = ""
+     * Strings.unwrap("abc", "\"")         = "abc"
+     * Strings.unwrap("\"abc", "\"")       = "\"abc"
+     * Strings.unwrap("abc\"", "\"")       = "abc\""
+     * Strings.unwrap("\"abc\"", "\"")     = "abc"
      * Strings.unwrap("\"\"abc\"\"", "\"") = "\"abc\""
-     * Strings.unwrap("abc", "")      = throws IllegalArgumentException
+     * Strings.unwrap("abc", "")           = throws IllegalArgumentException
      * }</pre>
      *
      * @param str the string to be unwrapped. May be {@code null} or empty.
@@ -7140,18 +7140,18 @@ public final class Strings {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Strings.unwrap(null, "[", "]") = null
-     * Strings.unwrap("", "[", "]") = ""
-     * Strings.unwrap("[", "[", "]") = "["
-     * Strings.unwrap("]", "[", "]") = "]"
-     * Strings.unwrap("[abc]", "[", "]") = "abc"
+     * Strings.unwrap(null, "[", "]")      = null
+     * Strings.unwrap("", "[", "]")        = ""
+     * Strings.unwrap("[", "[", "]")       = "["
+     * Strings.unwrap("]", "[", "]")       = "]"
+     * Strings.unwrap("[abc]", "[", "]")   = "abc"
      * Strings.unwrap("[[abc]]", "[", "]") = "[abc]"
-     * Strings.unwrap("[abc", "[", "]") = "[abc"
-     * Strings.unwrap("abc]", "[", "]") = "abc]"
+     * Strings.unwrap("[abc", "[", "]")    = "[abc"
+     * Strings.unwrap("abc]", "[", "]")    = "abc]"
      * Strings.unwrap("aaaaa", "aa", "aa") = "a"
-     * Strings.unwrap("aa", "aa", "aa") = "aa"
-     * Strings.unwrap("aaa", "aa", "aa") = "aaa"
-     * Strings.unwrap("aaaa", "aa", "aa") = ""
+     * Strings.unwrap("aa", "aa", "aa")    = "aa"
+     * Strings.unwrap("aaa", "aa", "aa")   = "aaa"
+     * Strings.unwrap("aaaa", "aa", "aa")  = ""
      * }</pre>
      *
      * @param str the string to be unwrapped. May be {@code null} or empty.
@@ -7556,15 +7556,15 @@ public final class Strings {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Strings.isAsciiControl('\n') = true (newline, value 10)
-     * Strings.isAsciiControl('\r') = true (carriage return, value 13)
-     * Strings.isAsciiControl('\t') = true (tab, value 9)
-     * Strings.isAsciiControl('\0') = true (null, value 0)
+     * Strings.isAsciiControl('\n')     = true (newline, value 10)
+     * Strings.isAsciiControl('\r')     = true (carriage return, value 13)
+     * Strings.isAsciiControl('\t')     = true (tab, value 9)
+     * Strings.isAsciiControl('\0')     = true (null, value 0)
      * Strings.isAsciiControl('\u007F') = true (DEL, value 127)
-     * Strings.isAsciiControl('a')  = false
-     * Strings.isAsciiControl('A')  = false
-     * Strings.isAsciiControl(' ')  = false (space, value 32)
-     * Strings.isAsciiControl('©')  = false
+     * Strings.isAsciiControl('a')      = false
+     * Strings.isAsciiControl('A')      = false
+     * Strings.isAsciiControl(' ')      = false (space, value 32)
+     * Strings.isAsciiControl('©')      = false
      * }</pre>
      *
      * @param ch the character to check
@@ -7734,18 +7734,18 @@ public final class Strings {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Strings.isAsciiPrintable(null)     = false
-     * Strings.isAsciiPrintable("")       = true
-     * Strings.isAsciiPrintable(" ")      = true
-     * Strings.isAsciiPrintable("Ceki")   = true
-     * Strings.isAsciiPrintable("ab2c")   = true
-     * Strings.isAsciiPrintable("!ab-c~") = true
-     * Strings.isAsciiPrintable("\u0020") = true (space)
-     * Strings.isAsciiPrintable("\u0021") = true (!)
-     * Strings.isAsciiPrintable("\u007e") = true (~)
-     * Strings.isAsciiPrintable("\u007f") = false (DEL)
+     * Strings.isAsciiPrintable(null)         = false
+     * Strings.isAsciiPrintable("")           = true
+     * Strings.isAsciiPrintable(" ")          = true
+     * Strings.isAsciiPrintable("Ceki")       = true
+     * Strings.isAsciiPrintable("ab2c")       = true
+     * Strings.isAsciiPrintable("!ab-c~")     = true
+     * Strings.isAsciiPrintable("\u0020")     = true (space)
+     * Strings.isAsciiPrintable("\u0021")     = true (!)
+     * Strings.isAsciiPrintable("\u007e")     = true (~)
+     * Strings.isAsciiPrintable("\u007f")     = false (DEL)
      * Strings.isAsciiPrintable("Ceki Gülcü") = false (contains non-ASCII)
-     * Strings.isAsciiPrintable("abc\n")  = false (contains newline)
+     * Strings.isAsciiPrintable("abc\n")      = false (contains newline)
      * }</pre>
      *
      * @param cs the CharSequence to check, may be null
@@ -19403,11 +19403,11 @@ public final class Strings {
      * <pre>{@code
      * // UTF-8 decoding
      * Strings.urlDecode("name=Jos%C3%A9&city=S%C3%A3o+Paulo", StandardCharsets.UTF_8);
-     * // returns {name=José, city=São Paulo}
+     * // returns {name = José, city=São Paulo}
      * 
      * // Different charset
      * Strings.urlDecode("data=test%20data", StandardCharsets.ISO_8859_1);
-     * // returns {data=test data}
+     * // returns {data = test data}
      * }</pre>
      *
      * @param urlQuery the URL query string to be decoded.
@@ -19730,11 +19730,11 @@ public final class Strings {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Trimming strings
-     * String[] input = {"  hello  ", " world ", "test"};
+     * String[] input  = {"  hello  ", " world ", "test"};
      * String[] result = copyThenTrim(input);         // returns ["hello", "world", "test"]
      * 
      * // Handling null and empty strings
-     * String[] mixed = {"  ", "text", null, " value "};
+     * String[] mixed   = {"  ", "text", null, " value "};
      * String[] trimmed = copyThenTrim(mixed);        // returns ["", "text", null, "value"]
      * 
      * // Edge cases
@@ -19767,11 +19767,11 @@ public final class Strings {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Stripping strings
-     * String[] input = {"  hello  ", " world ", "test"};
+     * String[] input  = {"  hello  ", " world ", "test"};
      * String[] result = copyThenStrip(input);        // returns ["hello", "world", "test"]
      * 
      * // Unicode whitespace handling
-     * String[] unicode = {"\u2000text\u2000", " normal "};
+     * String[] unicode  = {"\u2000text\u2000", " normal "};
      * String[] stripped = copyThenStrip(unicode);    // strips Unicode whitespace too
      * 
      * // Edge cases

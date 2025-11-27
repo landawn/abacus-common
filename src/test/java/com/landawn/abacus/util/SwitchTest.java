@@ -1,7 +1,3 @@
-/*
- * Copyright (c) 2015, Haiyang Li. All rights reserved.
- */
-
 package com.landawn.abacus.util;
 
 import org.junit.jupiter.api.Test;
@@ -117,7 +113,7 @@ public class SwitchTest {
             ch = jsonString.charAt(i);
 
             switch (ch) {
-                case 1: // no char equals 1 in the json string.
+                case 1:
                     break;
 
                 case '"':

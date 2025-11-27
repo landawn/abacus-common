@@ -15,7 +15,6 @@ import okhttp3.RequestBody;
 
 class WebUtilTest {
 
-    // https://reqbin.com/req/c-d2nzjn3z/curl-post-body
     @Test
     public void test_curl2HttpRequeset() throws IOException {
 
@@ -24,7 +23,7 @@ class WebUtilTest {
         N.println(resp0.substring(0, 1000));
 
         String curl = """
-                curl -X POST https://reqbin.com/echo/post/json
+                curl -X POST https:
                    -H "Content-Type: application/json;charset=utf-8"
                    -d '{"productId": "abd\\\'123", "quantity": 100}'
                                                     """;

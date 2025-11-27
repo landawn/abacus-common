@@ -1,16 +1,14 @@
-/*
- * Copyright (c) 2015, Haiyang Li. All rights reserved.
- */
-
 package com.landawn.abacus.util;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.AbstractTest;
 import com.landawn.abacus.entity.extendDirty.basic.ExtendDirtyBasicPNL.AccountPNL;
 
+@Tag("old-test")
 public class EntityIdTest extends AbstractTest {
 
     @Test
@@ -22,9 +20,6 @@ public class EntityIdTest extends AbstractTest {
         entityId.set(AccountPNL.LAST_NAME, "lastName");
         entityId.set(AccountPNL.BIRTH_DATE, Dates.currentDate());
         N.println(entityId);
-
-        //    entityId.remove(Account.FIRST_NAME);
-        //    entityId.remove(Account.LAST_NAME);
 
         entityId.set(CommonUtil.asProps(AccountPNL.ID, 2));
 

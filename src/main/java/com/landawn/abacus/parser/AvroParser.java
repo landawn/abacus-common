@@ -603,6 +603,7 @@ public final class AvroParser extends AbstractParser<AvroSerializationConfig, Av
      * @throws UnsupportedOperationException always thrown as this operation is not supported
      * @deprecated This method is deprecated and will always throw UnsupportedOperationException.
      */
+    @Deprecated
     @Override
     public <T> T deserialize(Reader source, AvroDeserializationConfig config, Type<? extends T> targetType) throws UnsupportedOperationException {
         throw new UnsupportedOperationException();

@@ -26,22 +26,6 @@ public class StreamPerformanceTest {
 
     @Test
     public void test_01() {
-        //        Profiler.run(1, 10, 3, "abacus sequential", new Throwables.Runnable() {
-        //            @Override
-        //            public void run() {
-        //                assertEquals(sum, Stream.of(a).map(new Function<String, String>() {
-        //                    @Override
-        //                    public String apply(String t) {
-        //                        return t.toUpperCase();
-        //                    }
-        //                }).flatMapToInt(new Function<String, IntStream>() {
-        //                    @Override
-        //                    public IntStream apply(String t) {
-        //                        return CharStream.from(t).asIntStream();
-        //                    }
-        //                }).sum());
-        //            }
-        //        });
 
         Profiler.run(1, 10, 3, "abacus parallel",
                 () -> assertEquals(sum, Stream.of(a).parallel(10).map(t -> t.toUpperCase()).flatMapToInt(t -> CharStream.of(t).asIntStream()).sum()));

@@ -1,7 +1,3 @@
-/*
- * Copyright (c) 2015, Haiyang Li. All rights reserved.
- */
-
 package com.landawn.abacus.util;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -97,11 +93,7 @@ public class KryoParserTest extends AbstractParserTest {
         N.println(kryoParser.serialize(xmlBean));
         N.println(CommonUtil.stringOf(bean));
         N.println(CommonUtil.stringOf(xmlBean));
-        // assertEquals(bean, xmlBean);
-        // assertEquals(N.deserialize(Bean.class, N.serialize(bean)),
-        // N.deserialize(Bean.class, N.serialize(xmlBean)));
         assertEquals(kryoParser.serialize(bean), kryoParser.serialize(xmlBean));
-        // assertEquals(N.stringOf(bean), N.stringOf(xmlBean));
         N.println(kryoParser.serialize(bean));
         N.println(kryoParser.serialize(xmlBean));
 
@@ -161,11 +153,8 @@ public class KryoParserTest extends AbstractParserTest {
         N.println(kryoParser.serialize(xmlBean));
         N.println(CommonUtil.stringOf(xBean));
         N.println(CommonUtil.stringOf(xmlBean));
-        // assertEquals(N.stringOf(xBean), N.stringOf(xmlBean));
         assertEquals(kryoParser.deserialize(kryoParser.serialize(xBean), XBean.class), kryoParser.deserialize(kryoParser.serialize(xmlBean), XBean.class));
 
-        // assertEquals(KRYO.serialize(xBean), KRYO.serialize(xmlBean));
-        // assertEquals(N.stringOf(xBean), N.stringOf(xmlBean));
         N.println(kryoParser.serialize(xBean));
         N.println(kryoParser.serialize(xmlBean));
 
@@ -188,9 +177,7 @@ public class KryoParserTest extends AbstractParserTest {
         println(jsonStr);
         println(kryoParser.serialize(kryoParser.deserialize(jsonStr, XBean.class)));
 
-        // assertEquals(xBean, FasterJSON.deserialize(XBean.class, jsonStr));
     }
-
 
     @Test
     @Tag("slow-test")
@@ -360,9 +347,6 @@ public class KryoParserTest extends AbstractParserTest {
 
         kryoParser.deserialize(xml, XBean.class);
 
-        //        XBean xmlBean = FasterJSON.deserialize(XBean.class, xml);
-        //
-        //        assertEquals(N.stringOf(xBean), N.stringOf(xmlBean));
     }
 
     @Test
@@ -376,21 +360,7 @@ public class KryoParserTest extends AbstractParserTest {
         N.println(CommonUtil.stringOf(accounts));
         N.println(CommonUtil.stringOf(xmlAccounts));
 
-        //        assertEquals(38080, N.stringOf(accounts).length());
-        //        assertEquals(39380, N.stringOf(xmlAccounts).length());
     }
-
-    //    public void testSerialize6() {
-    //        Account account = createAccountWithContact(Account.class);
-    //        String xml = kryoParser.serialize(account);
-    //        println(xml);
-    //
-    //        kryoParser.deserialize(com.landawn.abacus.entity.implDirty.basic.Account.class, xml);
-    //
-    //        //        com.landawn.abacus.entity.implDirty.basic.Account xmlBean = FasterJSON.deserialize(com.landawn.abacus.entity.implDirty.basic.Account.class,
-    //        //                xml);
-    //        //         assertEquals(N.stringOf(account), N.stringOf(xmlBean));
-    //    }
 
     @Test
     public void testXBean() {
@@ -415,8 +385,6 @@ public class KryoParserTest extends AbstractParserTest {
         assertEquals(bean, xmlBean);
         assertEquals(kryoParser.deserialize(kryoParser.serialize(bean), XBean.class), kryoParser.deserialize(kryoParser.serialize(xmlBean), XBean.class));
 
-        // assertEquals(N.serialize(bean), N.serialize(xmlBean));
-        // assertEquals(N.asString(bean), N.asString(xmlBean));
     }
 
     public static class Bean_1 {
@@ -474,7 +442,8 @@ public class KryoParserTest extends AbstractParserTest {
 
             Bean_1 other = (Bean_1) obj;
 
-            if (!Objects.equals(intList, other.intList) || !Objects.equals(shortList, other.shortList) || !Objects.equals(strList, other.strList) || !Objects.equals(xmlGregorianCalendar, other.xmlGregorianCalendar)) {
+            if (!Objects.equals(intList, other.intList) || !Objects.equals(shortList, other.shortList) || !Objects.equals(strList, other.strList)
+                    || !Objects.equals(xmlGregorianCalendar, other.xmlGregorianCalendar)) {
                 return false;
             }
 
@@ -624,7 +593,8 @@ public class KryoParserTest extends AbstractParserTest {
 
             Bean other = (Bean) obj;
 
-            if (!Arrays.equals(bytes, other.bytes) || !Arrays.equals(chars, other.chars) || !Arrays.equals(strings, other.strings) || !Objects.equals(typeList, other.typeList)) {
+            if (!Arrays.equals(bytes, other.bytes) || !Arrays.equals(chars, other.chars) || !Arrays.equals(strings, other.strings)
+                    || !Objects.equals(typeList, other.typeList)) {
                 return false;
             }
 
@@ -906,7 +876,8 @@ public class KryoParserTest extends AbstractParserTest {
 
             XBean other = (XBean) obj;
 
-            if ((typeBoolean != other.typeBoolean) || !Objects.equals(typeBoolean2, other.typeBoolean2) || (typeByte != other.typeByte) || !Objects.equals(typeCalendar, other.typeCalendar)) {
+            if ((typeBoolean != other.typeBoolean) || !Objects.equals(typeBoolean2, other.typeBoolean2) || (typeByte != other.typeByte)
+                    || !Objects.equals(typeCalendar, other.typeCalendar)) {
                 return false;
             }
 

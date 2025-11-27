@@ -5,11 +5,13 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import java.util.Collection;
 import java.util.List;
 
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.google.common.collect.Lists;
 import com.landawn.abacus.AbstractTest;
 
+@Tag("old-test")
 public class IterablesTest extends AbstractTest {
 
     @Test

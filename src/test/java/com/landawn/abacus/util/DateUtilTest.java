@@ -115,12 +115,6 @@ public class DateUtilTest extends AbstractTest {
         str = Dates.format(Dates.currentJUDate(), format);
         N.println(format + " -> " + format.length() + ", " + str + " -> " + str.length());
 
-        //    Stream.of(DateTimeFormatter.class.getDeclaredFields())
-        //            .filterE(it -> Modifier.isStatic(it.getModifiers()) && DateTimeFormatter.class.isAssignableFrom(it.get(null).getClass()))
-        //            .mapE(it -> it.get(null))
-        //            .map(Object::toString)
-        //            .forEach(Fn.println());
-
         N.println(Dates.parseDate("2024-07-31T23:42:38-07:00"));
         N.println(Dates.parseTime("2024-07-31T23:42:38-07:00"));
         N.println(Dates.parseTimestamp("2024-07-31T23:42:38-07:00"));

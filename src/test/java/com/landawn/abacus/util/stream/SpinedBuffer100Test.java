@@ -6,14 +6,15 @@ import java.util.List;
 import java.util.NoSuchElementException;
 
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.util.DoubleIterator;
 import com.landawn.abacus.util.DoubleList;
 import com.landawn.abacus.util.IntIterator;
 import com.landawn.abacus.util.LongIterator;
+import com.landawn.abacus.util.N;
 
 @Tag("new-test")
 public class SpinedBuffer100Test extends TestBase {
@@ -366,7 +367,7 @@ public class SpinedBuffer100Test extends TestBase {
             Assertions.assertEquals(100, buffer.size());
 
             DoubleList list = buffer.iterator().toList();
-            list.println();
+            N.println(list);
         }
 
         {

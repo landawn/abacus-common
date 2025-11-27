@@ -94,11 +94,6 @@ public class IteratorsTest {
             N.println("==========================================================================");
         }
 
-        //    {
-        //        final List<String> list = N.asList("a", "b", "c");
-        //        N.flatmap(list, it -> N.asArray(it + "1", it + "2")).forEach(Fn.println());
-        //        N.println("==========================================================================");
-        //    }
     }
 
     @Test

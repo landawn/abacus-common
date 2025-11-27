@@ -239,7 +239,7 @@ public final class Indexed<T> extends AbstractIndexed {
      * @param value the value to be associated with the index (may be {@code null})
      * @param index the index position (must be non-negative, 0 to Integer.MAX_VALUE)
      * @return a new immutable Indexed instance containing the specified value and index
-     * @throws IllegalArgumentException if index is negative (index < 0)
+     * @throws IllegalArgumentException if index is negative (index &lt; 0)
      */
     public static <T> Indexed<T> of(final T value, final int index) throws IllegalArgumentException {
         N.checkArgNotNegative(index, cs.index);
@@ -285,7 +285,7 @@ public final class Indexed<T> extends AbstractIndexed {
      * @param value the value to be associated with the index (may be {@code null})
      * @param index the index position (must be non-negative, 0 to Long.MAX_VALUE)
      * @return a new immutable Indexed instance containing the specified value and index
-     * @throws IllegalArgumentException if index is negative (index < 0)
+     * @throws IllegalArgumentException if index is negative (index &lt; 0)
      */
     public static <T> Indexed<T> of(final T value, final long index) throws IllegalArgumentException {
         N.checkArgNotNegative(index, cs.index);

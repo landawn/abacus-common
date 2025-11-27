@@ -25,7 +25,8 @@ import lombok.experimental.Accessors;
 @NoArgsConstructor
 @AllArgsConstructor
 @Accessors(chain = true)
-@JsonXmlConfig(namingPolicy = NamingPolicy.UPPER_CASE_WITH_UNDERSCORE, ignoredFields = { "id", "create_time" }, dateFormat = "yyyy-MM-dd'T'HH:mm:ss'Z'", timeZone = "PDT", numberFormat = "#.###", enumerated = EnumBy.ORDINAL)
+@JsonXmlConfig(namingPolicy = NamingPolicy.UPPER_CASE_WITH_UNDERSCORE, ignoredFields = { "id",
+        "create_time" }, dateFormat = "yyyy-MM-dd'T'HH:mm:ss'Z'", timeZone = "PDT", numberFormat = "#.###", enumerated = EnumBy.ORDINAL)
 @Table("UserQueryAllResult")
 public class UserQueryAllResult {
 
@@ -51,10 +52,9 @@ public class UserQueryAllResult {
     @Type(name = "List<String>")
     private java.util.Date create_time;
 
-    // test
     private List<User> users;
 
-    private Set<User> userSet; // test
+    private Set<User> userSet;
 
     public UserQueryAllResult copy() {
         final UserQueryAllResult copy = new UserQueryAllResult();
@@ -69,27 +69,18 @@ public class UserQueryAllResult {
         return copy;
     }
 
-    /*
-     * Auto-generated class for property(field) name table by abacus-jdbc.
-     */
-    public interface x { // NOSONAR
+    public interface x {
 
-        /** Property(field) name {@code "id"} */
         String id = "id";
 
-        /** Property(field) name {@code "firstName"} */
         String firstName = "firstName";
 
-        /** Property(field) name {@code "lastName"} */
         String lastName = "lastName";
 
-        /** Property(field) name {@code "prop1"} */
         String prop1 = "prop1";
 
-        /** Property(field) name {@code "email"} */
         String email = "email";
 
-        /** Property(field) name {@code "create_time"} */
         String create_time = "create_time";
 
     }
