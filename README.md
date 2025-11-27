@@ -28,7 +28,7 @@
 
 ##### Why abacus-common?
 
-abacus-common is a *mega-library* unlike most others. It contains thousands of public methods across tens of classes, covering nearly all common programming use cases. You no longer need to search multiple libraries or maintain your own `StringUtils` or `CollectionUtils` — everything is conveniently available in one place with clean, consistent, and easy-to-use APIs. The ultimate goal is to make code that uses this library easy to read and maintain by simplifying the implementation and enhancing readability through concise APIs and data structures.
+abacus-common is a *mega-library* unlike most others. It contains thousands of public methods across tens of classes, covering nearly all common programming use cases. You no longer need to search multiple libraries or maintain your own `StringUtils` or `CollectionUtils` — everything is conveniently available in one place with clean, consistent, and easy-to-use APIs. The ultimate goal is to make code that uses this library easy to read and maintain by simplifying the implementation and enhancing readability through concise APIs and data structures. Well-designed APIs and data structures steady your mind and set your keyboard alight.
 
 ## Features:
 
